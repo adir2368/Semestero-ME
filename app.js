@@ -2165,7 +2165,7 @@ const SAMPLE_CS_DEGREE_DISABLED = {
     }
 };
 
-const SAMPLE_ME_DEGREE = {
+var SAMPLE_ME_DEGREE = (typeof window !== 'undefined' && window.SAMPLE_ME_DEGREE) || {
     // Semester 1
     "104041": {
         code: "104041",
@@ -5233,39 +5233,52 @@ const PRELOADED_USER_STATE = {
 const AUGUST_2026_SCHEDULE = [];
 const AUGUST_2026_PERSONAL_EVENTS = [];
 
-// Load state from local storage
+// Load state from local storage or AuthSync
 function loadSavedState() {
+    let loadedFromAuthSync = false;
 
-    const saved = localStorage.getItem("academic_skill_tree_save");
-    let needsRestoreFromPreload = false;
-
-    if (saved) {
-        try {
-            gameState = JSON.parse(saved);
-            if (!gameState.courses || Object.keys(gameState.courses).length === 0 || (gameState.credits === 0 && gameState.completedCourses === 0)) {
-                needsRestoreFromPreload = true;
-            } else {
-                Object.values(gameState.courses).forEach(course => {
-                    if (course.status === 'mastered' && course.tasks) {
-                        course.tasks.forEach(task => {
-                            task.completed = true;
-                            task.status = 'done';
-                        });
-                    }
-                });
-            }
-        } catch (e) {
-            console.error("Error loading save file, loading user preloaded progress", e);
-            needsRestoreFromPreload = true;
+    if (window.AuthSync && typeof window.AuthSync.init === 'function') {
+        window.AuthSync.init();
+        const userState = window.AuthSync.loadActiveUserState();
+        if (userState && userState.courses && Object.keys(userState.courses).length > 0) {
+            gameState = userState;
+            loadedFromAuthSync = true;
+            console.log("[AuthSync] Loaded active user state successfully for:", window.AuthSync.getActiveUser().name);
         }
-    } else {
-        needsRestoreFromPreload = true;
     }
 
-    if (needsRestoreFromPreload) {
-        console.log("Restoring user's website progress into local storage...");
-        gameState = JSON.parse(JSON.stringify(PRELOADED_USER_STATE));
-        recalculateCourseStates();
+    if (!loadedFromAuthSync) {
+        const saved = localStorage.getItem("academic_skill_tree_save");
+        let needsRestoreFromPreload = false;
+
+        if (saved) {
+            try {
+                gameState = JSON.parse(saved);
+                if (!gameState.courses || Object.keys(gameState.courses).length === 0 || (gameState.credits === 0 && gameState.completedCourses === 0)) {
+                    needsRestoreFromPreload = true;
+                } else {
+                    Object.values(gameState.courses).forEach(course => {
+                        if (course.status === 'mastered' && course.tasks) {
+                            course.tasks.forEach(task => {
+                                task.completed = true;
+                                task.status = 'done';
+                            });
+                        }
+                    });
+                }
+            } catch (e) {
+                console.error("Error loading save file, loading user preloaded progress", e);
+                needsRestoreFromPreload = true;
+            }
+        } else {
+            needsRestoreFromPreload = true;
+        }
+
+        if (needsRestoreFromPreload) {
+            console.log("Restoring user's website progress into local storage...");
+            gameState = JSON.parse(JSON.stringify(PRELOADED_USER_STATE));
+            recalculateCourseStates();
+        }
     }
 
     // Finals mode is put to sleep (dormant) per user request - always keep normal semester mode active
@@ -5602,7 +5615,11 @@ function markInactiveViewsDirty(activeView) {
 // Save state to local storage safely
 function saveState() {
     try {
-        localStorage.setItem("academic_skill_tree_save", JSON.stringify(gameState));
+        if (window.AuthSync && typeof window.AuthSync.saveActiveUserState === 'function') {
+            window.AuthSync.saveActiveUserState(gameState);
+        } else {
+            localStorage.setItem("academic_skill_tree_save", JSON.stringify(gameState));
+        }
     } catch (err) {
         console.error("Failed to save state to localStorage:", err);
     }

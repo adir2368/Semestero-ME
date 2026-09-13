@@ -7242,3 +7242,223 @@ label[for="new-task-xp-input"],
         font-size: 0.68rem;
     }
 }
+
+/* Multi-Account & Cloud Sync Styles */
+.btn-hud-user {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(15, 23, 42, 0.85);
+    border: 1px solid rgba(56, 189, 248, 0.35);
+    border-radius: 20px;
+    padding: 4px 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: #f8fafc;
+    font-size: 0.84rem;
+    font-weight: 600;
+    margin-right: 8px;
+    flex-shrink: 0;
+    direction: rtl;
+}
+
+.btn-hud-user:hover {
+    border-color: #38bdf8;
+    background: rgba(56, 189, 248, 0.15);
+    box-shadow: 0 0 10px rgba(56, 189, 248, 0.3);
+}
+
+.user-avatar-pill {
+    font-size: 1rem;
+    line-height: 1;
+}
+
+.user-name-text {
+    max-width: 120px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    direction: rtl;
+    unicode-bidi: isolate;
+}
+
+.user-caret-icon {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+}
+
+.cloud-status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.72rem;
+    font-weight: 500;
+}
+
+.cloud-status-pill.offline {
+    background: rgba(100, 116, 139, 0.2);
+    color: #94a3b8;
+    border: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+.cloud-status-pill.connected {
+    background: rgba(16, 185, 129, 0.15);
+    color: #34d399;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.account-item-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 14px;
+    background: rgba(15, 23, 42, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.account-item-card.active {
+    border-color: #38bdf8;
+    background: rgba(14, 165, 233, 0.08);
+    box-shadow: 0 0 10px rgba(56, 189, 248, 0.15);
+}
+
+.account-item-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.account-avatar {
+    font-size: 1.4rem;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 50%;
+}
+
+.account-name-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.account-badge-dev {
+    background: rgba(56, 189, 248, 0.2);
+    color: #38bdf8;
+    font-size: 0.68rem;
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-weight: 600;
+}
+
+.account-badge-active {
+    background: rgba(16, 185, 129, 0.2);
+    color: #34d399;
+    font-size: 0.68rem;
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-weight: 600;
+}
+
+.account-email {
+    display: block;
+    font-size: 0.74rem;
+    color: var(--text-muted);
+}
+
+.account-item-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.active-indicator-text {
+    font-size: 0.78rem;
+    color: #34d399;
+    font-weight: 600;
+}
+
+.add-account-form-wrapper.active,
+.supabase-config-wrapper.active {
+    display: block !important;
+}
+
+/* Onboarding Wizard Chips */
+.onboarding-sem-header {
+    font-size: 0.84rem;
+    font-weight: 700;
+    color: #38bdf8;
+    margin-bottom: 6px;
+    padding-bottom: 3px;
+    border-bottom: 1px solid rgba(56, 189, 248, 0.15);
+}
+
+.onboarding-chips-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.onboarding-course-chip {
+    display: flex;
+    flex-direction: column;
+    padding: 6px 10px;
+    background: rgba(15, 23, 42, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+    user-select: none;
+}
+
+.onboarding-course-chip input[type="checkbox"] {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    cursor: pointer;
+}
+
+.onboarding-course-chip.selected {
+    border-color: #34d399;
+    background: rgba(16, 185, 129, 0.12);
+}
+
+.onboarding-course-chip .chip-code {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    font-weight: 600;
+}
+
+.onboarding-course-chip .chip-name {
+    font-size: 0.82rem;
+    color: #f8fafc;
+    font-weight: 600;
+    margin: 2px 0;
+}
+
+.onboarding-course-chip .chip-credits {
+    font-size: 0.7rem;
+    color: #94a3b8;
+}
+
+@media (max-width: 768px) {
+    .btn-hud-user {
+        padding: 2px 8px;
+        font-size: 0.76rem;
+    }
+    .user-name-text {
+        max-width: 75px;
+    }
+    .onboarding-chips-grid {
+        grid-template-columns: 1fr;
+    }
+}

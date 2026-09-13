@@ -16,7 +16,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Rubik:wght@300;400;500;700;900&display=swap" rel="stylesheet">
     <link rel="icon" type="image/png" href="icon.png">
-    <link rel="stylesheet" href="styles.css?v=1.4.4">
+    <link rel="stylesheet" href="styles.css?v=1.5.0">
 </head>
 <body>
     <div class="hud-container">
@@ -42,6 +42,11 @@
                 <button type="button" class="btn-hud-bell" id="btn-notification-bell" title="מרכז התראות יומיות ומשימות (לחץ לפתיחה)" aria-label="התראות">
                     <span class="bell-icon">🔔</span>
                     <span class="bell-badge" id="bell-badge-count" style="display: none;">0</span>
+                </button>
+                <button type="button" class="btn-hud-user" id="btn-hud-user-account" onclick="AuthSync.openAccountsModal()" title="ניהול חשבונות והחלפת פרופילים" aria-label="חשבון משתמש">
+                    <span class="user-avatar-pill" id="hud-active-user-avatar">🎓</span>
+                    <span class="user-name-text" id="hud-active-user-name">אדיר משה</span>
+                    <span class="user-caret-icon">▾</span>
                 </button>
             </div>
 
@@ -1611,8 +1616,157 @@
         </div>
     </div>
 
+    <!-- Multi-Account & Cloud Sync Modal -->
+    <div class="modal-overlay" id="accounts-modal">
+        <div class="modal-content" style="max-width: 580px;">
+            <button class="modal-close" onclick="document.getElementById('accounts-modal').classList.remove('active')">&times;</button>
+            <div class="modal-header">
+                <h2 style="display: flex; align-items: center; gap: 10px; margin: 0; font-size: 1.25rem;">
+                    <span>👥</span> <span>ניהול חשבונות וסנכרון ענן (Closed Alpha)</span>
+                </h2>
+                <div id="hud-cloud-sync-status" class="cloud-status-pill offline" style="margin-top: 6px;">
+                    📱 <span>מקומי (אופליין)</span>
+                </div>
+            </div>
+            
+            <div class="modal-body" style="padding-top: 15px;">
+                <!-- Accounts List -->
+                <div class="accounts-section-title" style="font-weight: 600; color: #f8fafc; font-size: 0.92rem; margin-bottom: 8px;">
+                    חשבונות שמורים במכשיר זה:
+                </div>
+                <div id="accounts-list-container" class="accounts-list-grid" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 15px;"></div>
+
+                <!-- Add Account Toggle / Form -->
+                <div class="add-account-box" style="background: rgba(15, 23, 42, 0.6); border: 1px dashed rgba(56, 189, 248, 0.4); border-radius: 8px; padding: 10px 14px;">
+                    <div class="add-account-toggle" style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;" onclick="document.getElementById('add-account-form-wrapper').classList.toggle('active')">
+                        <span style="font-weight: 600; color: #38bdf8; font-size: 0.9rem;">➕ הוסף חשבון / חבר חדש (בדיקת אלפא)</span>
+                        <span class="toggle-arrow" style="color: #38bdf8;">▾</span>
+                    </div>
+                    <div id="add-account-form-wrapper" class="add-account-form-wrapper" style="display: none; padding-top: 12px;">
+                        <div class="form-group" style="margin-bottom: 10px;">
+                            <label style="display: block; font-size: 0.82rem; color: var(--text-muted); margin-bottom: 4px;">שם מלא / כינוי:</label>
+                            <input type="text" id="new-account-name-input" class="form-input" style="width: 100%; padding: 7px 10px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff;" placeholder="למשל: דניאל כהן">
+                        </div>
+                        <div class="form-group" style="margin-bottom: 10px;">
+                            <label style="display: block; font-size: 0.82rem; color: var(--text-muted); margin-bottom: 4px;">אימייל (אופציונלי):</label>
+                            <input type="email" id="new-account-email-input" class="form-input" style="width: 100%; padding: 7px 10px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff;" placeholder="student@campus.technion.ac.il">
+                        </div>
+                        <div class="form-group" style="margin-bottom: 12px;">
+                            <label style="display: block; font-size: 0.82rem; color: var(--text-muted); margin-bottom: 4px;">איזה סמסטר אתה מתחיל עכשיו?</label>
+                            <select id="new-account-sem-input" class="form-select" style="width: 100%; padding: 7px 10px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff;">
+                                <option value="1">סמסטר א׳ (שנה א׳ - מתחיל מאפס)</option>
+                                <option value="2">סמסטר ב׳ (שנה א׳)</option>
+                                <option value="3">סמסטר ג׳ (שנה ב׳)</option>
+                                <option value="4">סמסטר ד׳ (שנה ב׳)</option>
+                                <option value="5">סמסטר ה׳ (שנה ג׳)</option>
+                                <option value="6">סמסטר ו׳ (שנה ג׳)</option>
+                            </select>
+                        </div>
+                        <button class="btn btn-primary btn-block" style="width: 100%; padding: 9px; font-weight: 600;" onclick="
+                            const name = document.getElementById('new-account-name-input').value;
+                            const email = document.getElementById('new-account-email-input').value;
+                            const sem = document.getElementById('new-account-sem-input').value;
+                            if (!name.trim()) { alert('נא להזין שם עבור החשבון החדש'); return; }
+                            AuthSync.createAccount({ name, email, startingSemester: sem });
+                            document.getElementById('accounts-modal').classList.remove('active');
+                        ">
+                            🚀 צור חשבון והתחל
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Supabase Cloud Sync Configuration -->
+                <div class="cloud-config-box" style="margin-top: 18px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 14px;">
+                    <div class="cloud-config-toggle" style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;" onclick="document.getElementById('supabase-config-wrapper').classList.toggle('active')">
+                        <span style="font-size: 0.88rem; color: #94a3b8;">☁️ הגדרות סנכרון ענן (Supabase Cloud Sync)</span>
+                        <span class="toggle-arrow" style="color: #94a3b8;">▾</span>
+                    </div>
+                    <div id="supabase-config-wrapper" class="supabase-config-wrapper" style="display: none; padding-top: 10px;">
+                        <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px;">
+                            חיבור ל-Supabase מאפשר לחשבונות להסתנכרן אוטומטית בין המחשב והטלפון.
+                        </p>
+                        <div class="form-group" style="margin-bottom: 8px;">
+                            <label style="display: block; font-size: 0.78rem; color: var(--text-muted); margin-bottom: 3px;">Supabase URL:</label>
+                            <input type="text" id="supabase-url-input" class="form-input" style="width: 100%; padding: 6px 10px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff; font-size: 0.82rem;" placeholder="https://xyzcompany.supabase.co">
+                        </div>
+                        <div class="form-group" style="margin-bottom: 10px;">
+                            <label style="display: block; font-size: 0.78rem; color: var(--text-muted); margin-bottom: 3px;">Supabase Anon Key:</label>
+                            <input type="password" id="supabase-key-input" class="form-input" style="width: 100%; padding: 6px 10px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff; font-size: 0.82rem;" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6...">
+                        </div>
+                        <div style="display: flex; gap: 8px;">
+                            <button class="btn btn-secondary btn-sm" style="flex: 1;" onclick="
+                                const url = document.getElementById('supabase-url-input').value;
+                                const key = document.getElementById('supabase-key-input').value;
+                                AuthSync.setSupabaseConfig(url, key);
+                                alert('הגדרות סנכרון ענן נשמרו!');
+                            ">
+                                שמור הגדרות ענן
+                            </button>
+                            <button class="btn btn-primary btn-sm" style="flex: 1;" onclick="AuthSync.syncToCloud()">
+                                🔄 סנכרן עכשיו
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Onboarding Wizard Modal for New Students -->
+    <div class="modal-overlay" id="onboarding-wizard-modal">
+        <div class="modal-content" style="max-width: 640px; max-height: 88vh; display: flex; flex-direction: column;">
+            <div class="modal-header">
+                <h2 style="display: flex; align-items: center; gap: 10px; margin: 0; font-size: 1.25rem;">
+                    <span>🎓</span> <span>ברוך הבא לתכנון התואר בהנדסת מכונות!</span>
+                </h2>
+                <p style="margin: 6px 0 0 0; font-size: 0.84rem; color: var(--text-muted);">
+                    בוא נגדיר את מסלול הלימודים שלך בטכניון בשני שלבים מהירים:
+                </p>
+            </div>
+            <div class="modal-body" style="overflow-y: auto; flex: 1; padding: 15px 10px;">
+                <div class="onboarding-step-card" style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(56, 189, 248, 0.2); border-radius: 8px; padding: 14px; margin-bottom: 14px;">
+                    <label style="font-weight: 700; font-size: 0.95rem; color: #f8fafc; display: block; margin-bottom: 6px;">
+                        1. באיזה סמסטר אתה מתחיל עכשיו?
+                    </label>
+                    <select id="onboarding-current-sem-select" class="form-select" style="width: 100%; padding: 8px 12px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff;">
+                        <option value="1">סמסטר א׳ (שנה א׳ - מתחיל מאפס)</option>
+                        <option value="2">סמסטר ב׳ (שנה א׳)</option>
+                        <option value="3">סמסטר ג׳ (שנה ב׳)</option>
+                        <option value="4">סמסטר ד׳ (שנה ב׳)</option>
+                        <option value="5">סמסטר ה׳ (שנה ג׳)</option>
+                        <option value="6">סמסטר ו׳ (שנה ג׳)</option>
+                    </select>
+                </div>
+
+                <div class="onboarding-step-card" style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(56, 189, 248, 0.2); border-radius: 8px; padding: 14px;">
+                    <label style="font-weight: 700; font-size: 0.95rem; color: #f8fafc; display: block; margin-bottom: 4px;">
+                        2. סמן קורסים שכבר השלמת בהצלחה (אופציונלי):
+                    </label>
+                    <p style="font-size: 0.8rem; color: var(--text-muted); margin: 0 0 10px 0;">
+                        קורסים שתסמן יקבלו סטטוס "הושלם" ויפתחו אוטומטית את הקורסים הבאים בעץ הדרישות הקדומות.
+                    </p>
+                    <div id="onboarding-courses-checklist" style="display: flex; flex-direction: column; gap: 12px;"></div>
+                </div>
+            </div>
+            <div class="modal-footer" style="padding: 12px 14px; border-top: 1px solid rgba(255,255,255,0.08); display: flex; justify-content: flex-end; gap: 10px;">
+                <button class="btn btn-secondary" onclick="document.getElementById('onboarding-wizard-modal').classList.remove('active')">
+                    דלג והתחל
+                </button>
+                <button class="btn btn-primary" onclick="AuthSync.finishOnboarding()">
+                    סיום והתחלת שימוש 🚀
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Supabase JS Client for Cloud Sync -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Clean Curriculum Template -->
+    <script src="curriculum_template.js?v=1.5.0"></script>
+    <!-- Multi-User Identity & Sync Engine -->
+    <script src="auth_sync.js?v=1.5.0"></script>
     <!-- Core Application Logic -->
-    <script src="app.js?v=1.4.4"></script>
+    <script src="app.js?v=1.5.0"></script>
     <!-- PWA Service Worker Registration -->
     <script>
         if ('serviceWorker' in navigator && window.location.protocol.startsWith('http')) {
