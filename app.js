@@ -906,6 +906,468 @@ const NOTION_ICON_LIBRARY = {
         hebrew: 'שכבות וארכיטקטורה 🥞',
         keywords: 'layers stack architecture שכבות מבנה רב שכבתי',
         svg: `<polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/>`
+    },
+    'curly-brackets': {
+        category: 'tech',
+        title: 'Curly Brackets / Code & Algorithms',
+        hebrew: 'סוגריים מסולסלים {...} (קוד ואלגוריתמים)',
+        keywords: 'curly brackets code algorithm syntax סוגריים מסולסלים אלגוריתמים קוד תכנות פיתוח',
+        svg: `<path d="M8 3c-1.5 0-2.5 1-2.5 2.5v4c0 1-.5 1.8-1.5 2.2 1 .4 1.5 1.2 1.5 2.2v4c0 1.5 1 2.5 2.5 2.5M16 3c1.5 0 2.5 1 2.5 2.5v4c0 1 .5 1.8 1.5 2.2-1 .4-1.5 1.2-1.5 2.2v4c0 1.5-1 2.5-2.5 2.5"/><circle cx="9.5" cy="12" r="1" fill="currentColor"/><circle cx="12" cy="12" r="1" fill="currentColor"/><circle cx="14.5" cy="12" r="1" fill="currentColor"/>`
+    },
+    'network-nodes': {
+        category: 'tech',
+        title: 'Network Nodes / Graph Theory',
+        hebrew: 'רשת צמתים ותורת הגרפים 🕸️',
+        keywords: 'network nodes graph topology רשת גרפים צמתים תקשורת מבני נתונים',
+        svg: `<circle cx="5" cy="6" r="2.5"/><circle cx="19" cy="6" r="2.5"/><circle cx="12" cy="18" r="2.5"/><line x1="7.2" y1="7.2" x2="10.8" y2="15.8"/><line x1="16.8" y1="7.2" x2="13.2" y2="15.8"/><line x1="7.5" y1="6" x2="16.5" y2="6"/>`
+    },
+    'tree-diagram': {
+        category: 'tech',
+        title: 'Hierarchy / Tree Diagram & AST',
+        hebrew: 'תרשים עץ ומבנה היררכי 🌲',
+        keywords: 'tree hierarchy ast flowchart עץ היררכיה תרשים מבני נתונים',
+        svg: `<rect x="9" y="3" width="6" height="4" rx="1"/><rect x="3" y="17" width="5" height="4" rx="1"/><rect x="10" y="17" width="5" height="4" rx="1"/><rect x="17" y="17" width="5" height="4" rx="1"/><line x1="12" y1="7" x2="12" y2="12"/><line x1="5.5" y1="12" x2="19.5" y2="12"/><line x1="5.5" y1="12" x2="5.5" y2="17"/><line x1="12.5" y1="12" x2="12.5" y2="17"/><line x1="19.5" y1="12" x2="19.5" y2="17"/>`
+    },
+    'sliders-eq': {
+        category: 'tech',
+        title: 'Control Sliders / Signals & Tuning',
+        hebrew: 'סליידרים ובקרה (אותות ומערכות 🎚️)',
+        keywords: 'sliders equalizer tuning control signals בקרה אותות כיוונון אלקטרוניקה',
+        svg: `<line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><circle cx="4" cy="12" r="2"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><circle cx="12" cy="10" r="2"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><circle cx="20" cy="14" r="2"/>`
+    },
+    'git-branch': {
+        category: 'tech',
+        title: 'Git Version Control Branch',
+        hebrew: 'ענף גיט ובקרת גרסאות (Git 🌿)',
+        keywords: 'git branch commit version control גיט ענף גרסאות פיתוח תוכנה',
+        svg: `<line x1="6" y1="3" x2="6" y2="21"/><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="9" r="3"/><path d="M6 18a9 9 0 0 1 9-9h3"/>`
+    },
+    'qr-code': {
+        category: 'tech',
+        title: 'QR Code / Digital Systems',
+        hebrew: 'קוד QR ומערכות דיגיטליות 📱',
+        keywords: 'qr code barcode digital vision קוד דיגיטלי סריקה',
+        svg: `<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="5.5" y="5.5" width="2" height="2" fill="currentColor"/><rect x="16.5" y="5.5" width="2" height="2" fill="currentColor"/><rect x="5.5" y="16.5" width="2" height="2" fill="currentColor"/><line x1="14" y1="14" x2="14" y2="21"/><line x1="14" y1="17.5" x2="21" y2="17.5"/><line x1="17.5" y1="14" x2="21" y2="14"/><line x1="17.5" y1="21" x2="21" y2="21"/>`
+    },
+    'terminal-prompt': {
+        category: 'tech',
+        title: 'Command Line Prompt (>_)',
+        hebrew: 'שורת פקודה ולינוקס (>_)',
+        keywords: 'terminal prompt bash linux command line טרמינל לינוקס שורת פקודה פיתוח',
+        svg: `<rect x="3" y="4" width="18" height="16" rx="2"/><polyline points="7 9 10 12 7 15"/><line x1="13" y1="15" x2="17" y2="15"/>`
+    },
+    'incognito': {
+        category: 'tech',
+        title: 'Incognito / Cyber Security',
+        hebrew: 'אבטחת מידע וסייבר 🕵️',
+        keywords: 'incognito security cyber crypto privacy סייבר אבטחת מידע פרטיות קריפטוגרפיה',
+        svg: `<path d="M3 11h18M5 11l2-6h10l2 6"/><circle cx="8" cy="16" r="2.5"/><circle cx="16" cy="16" r="2.5"/><path d="M10.5 16h3"/>`
+    },
+    'balance-scale': {
+        category: 'mechanical',
+        title: 'Balance Scale / Statics & Ethics',
+        hebrew: 'מאזניים (שיווי משקל, סטטיקה ואתיקה ⚖️)',
+        keywords: 'scale balance equilibrium statics ethics law מאזניים שיווי משקל סטטיקה אתיקה',
+        svg: `<line x1="12" y1="3" x2="12" y2="21"/><path d="M5 21h14M3 7l9-2 9 2"/><path d="M3 7l-2 7a5 5 0 0 0 8 0L7 7M17 7l-2 7a5 5 0 0 0 8 0L21 7"/>`
+    },
+    'ruler': {
+        category: 'mechanical',
+        title: 'Measurement Ruler & Drafting',
+        hebrew: 'סרגל מדידה ושרטוט 📏',
+        keywords: 'ruler measure draft scale סרגל מדידה שרטוט הנדסי גיאומטריה',
+        svg: `<path d="M21.3 8.7L15.3 2.7a2 2 0 0 0-2.8 0L2.7 12.5a2 2 0 0 0 0 2.8l6 6a2 2 0 0 0 2.8 0l9.8-9.8a2 2 0 0 0 0-2.8z"/><line x1="8.5" y1="8.5" x2="10" y2="10"/><line x1="11.5" y1="11.5" x2="14" y2="14"/><line x1="14.5" y1="14.5" x2="16" y2="16"/><line x1="17.5" y1="17.5" x2="20" y2="20"/>`
+    },
+    'screwdriver': {
+        category: 'mechanical',
+        title: 'Screwdriver / Workshop Assembly',
+        hebrew: 'מברג והרכבה מכנית 🪛',
+        keywords: 'screwdriver tool repair assembly מברג כלי עבודה הרכבה מעבדה בית מלאכה',
+        svg: `<path d="M19 5l-2-2a2 2 0 0 0-2.8 0L8.5 8.7l4.8 4.8L19 7.8a2 2 0 0 0 0-2.8z"/><path d="M8.5 8.7L3 14.2V17h2.8l5.5-5.5"/><line x1="2" y1="22" x2="4.5" y2="19.5"/>`
+    },
+    'crane': {
+        category: 'mechanical',
+        title: 'Tower Crane / Heavy Machinery',
+        hebrew: 'עגורן ומכונות הרמה 🏗️',
+        keywords: 'crane construction lifting mechanics machinery עגורן מנוף הרמה מכונות מבנים',
+        svg: `<line x1="7" y1="22" x2="7" y2="4"/><polygon points="7 4 3 6 7 2 21 6 7 4"/><line x1="18" y1="6" x2="18" y2="14"/><rect x="16" y="14" width="4" height="3" rx="0.5"/><line x1="4" y1="22" x2="10" y2="22"/>`
+    },
+    'wind-gust': {
+        category: 'mechanical',
+        title: 'Wind & Airflow / Aerodynamics',
+        hebrew: 'משב רוח ואווירודינמיקה 💨',
+        keywords: 'wind air flow aerodynamics רוח זרימה אווירודינמיקה מכונות זורמים',
+        svg: `<path d="M9.6 4.5A2.6 2.6 0 1 0 7 7h10a2.5 2.5 0 1 1-2.2 3.7"/><path d="M4 12h14a2.5 2.5 0 1 0-2.2-3.7"/><path d="M8 17h8a2.5 2.5 0 1 1-2.2 3.7"/>`
+    },
+    'brick-wall': {
+        category: 'mechanical',
+        title: 'Brick Wall / Structural Mechanics',
+        hebrew: 'חומת לבנים וחוזק מבנים 🧱',
+        keywords: 'wall brick structure materials civil קיר לבנים חוזק חומרים מבנים בטון',
+        svg: `<rect x="3" y="4" width="18" height="16" rx="1"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="4" x2="9" y2="9"/><line x1="15" y1="4" x2="15" y2="9"/><line x1="12" y1="9" x2="12" y2="15"/><line x1="8" y1="15" x2="8" y2="20"/><line x1="16" y1="15" x2="16" y2="20"/>`
+    },
+    'train': {
+        category: 'mechanical',
+        title: 'High-Speed Rail / Transit Systems',
+        hebrew: 'רכבת מהירה ותחבורה 🚆',
+        keywords: 'train transit rail vehicle רכבת תחבורה מהירה מסילות',
+        svg: `<rect x="4" y="3" width="16" height="15" rx="3"/><line x1="4" y1="11" x2="20" y2="11"/><circle cx="8.5" cy="15" r="1.5"/><circle cx="15.5" cy="15" r="1.5"/><line x1="7" y1="21" x2="5" y2="18"/><line x1="17" y1="21" x2="19" y2="18"/><line x1="4" y1="7" x2="20" y2="7"/>`
+    },
+    'motorcycle': {
+        category: 'mechanical',
+        title: 'Motorcycle Dynamics',
+        hebrew: 'אופנוע ודינמיקה דו-גלגלית 🏍️',
+        keywords: 'motorcycle bike dynamics vehicle אופנוע דינמיקה תחבורה',
+        svg: `<circle cx="5" cy="16" r="3"/><circle cx="19" cy="16" r="3"/><path d="M5 16l4-7h5l3 7M9 9l3 7h4M13 6h3"/>`
+    },
+    'helicopter': {
+        category: 'mechanical',
+        title: 'Helicopter / Rotorcraft Aerodynamics',
+        hebrew: 'מסוק ואווירונאוטיקה 🚁',
+        keywords: 'helicopter aero rotor flight flight mechanics מסוק אווירונאוטיקה תעופה',
+        svg: `<line x1="4" y1="4" x2="20" y2="4"/><line x1="12" y1="4" x2="12" y2="8"/><path d="M6 13a5 5 0 0 0 10 0v-4H6v4zM16 11l6-2v4l-6-2M21 7v6M5 19h12M8 17v2M14 17v2"/>`
+    },
+    'gas-pump': {
+        category: 'mechanical',
+        title: 'Fuel Pump / Combustion & Engines',
+        hebrew: 'משאבת דלק ומנועי בעירה ⛽',
+        keywords: 'fuel gas pump combustion engine דלק משאבה מנועי בעירה אנרגיה',
+        svg: `<path d="M3 21h10M4 21V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v16M4 11h8M13 8l3-2a2 2 0 0 1 3 2v9a2 2 0 0 1-2 2h-1"/>`
+    },
+    'fire-extinguisher': {
+        category: 'mechanical',
+        title: 'Fire Extinguisher / Plant Safety',
+        hebrew: 'מטף כיבוי ובטיחות מעבדות 🧯',
+        keywords: 'fire extinguisher safety lab plant מטף כיבוי בטיחות מפעל מעבדה',
+        svg: `<rect x="7" y="8" width="10" height="13" rx="4"/><line x1="12" y1="4" x2="12" y2="8"/><path d="M9 4h6M9 4l-4 2M12 4l3 1 3-1"/>`
+    },
+    'ship-helm': {
+        category: 'mechanical',
+        title: 'Ship Helm / Marine Control',
+        hebrew: 'הגה ספינה והנדסה ימית ☸️',
+        keywords: 'helm ship rudder marine control הגה ספינה הנדסה ימית שליטה',
+        svg: `<circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="8"/><line x1="12" y1="2" x2="12" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="4.9" y1="4.9" x2="19.1" y2="19.1"/><line x1="4.9" y1="19.1" x2="19.1" y2="4.9"/>`
+    },
+    'anchor': {
+        category: 'mechanical',
+        title: 'Naval Anchor / Ocean Engineering',
+        hebrew: 'עוגן ימי והנדסת אוקיינוסים ⚓',
+        keywords: 'anchor ocean naval marine civil עוגן ימי ספנות הנדסה ימית',
+        svg: `<circle cx="12" cy="5" r="2"/><line x1="12" y1="7" x2="12" y2="21"/><line x1="8" y1="11" x2="16" y2="11"/><path d="M4 13a8 8 0 0 0 16 0M3 13l2-1M21 13l-2-1"/>`
+    },
+    'inclined-plane': {
+        category: 'physics',
+        title: 'Inclined Plane / Classical Mechanics',
+        hebrew: 'מישור משופע (מכניקה קלאסית 📐)',
+        keywords: 'inclined plane ramp friction gravity newton מישור משופע חיכוך מכניקה פיזיקה 1 114051',
+        svg: `<polygon points="3 20 21 20 21 7 3 20"/><rect x="12" y="9.5" width="4" height="3" rx="0.5" transform="rotate(-33 14 11)" fill="currentColor" fill-opacity="0.25"/>`
+    },
+    'horseshoe-magnet': {
+        category: 'physics',
+        title: 'Horseshoe Magnet / Electromagnetism',
+        hebrew: 'מגנט פרסה (אלקטרומגנטיות 🧲)',
+        keywords: 'magnet magnetism physics electromagnet מגנט שדה מגנטי פיזיקה 2 114075',
+        svg: `<path d="M5 10V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v5a1 1 0 0 0 2 0V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v5c0 5-3.5 9-8.5 9S5 15 5 10z"/><line x1="5" y1="8" x2="9" y2="8"/><line x1="15" y1="8" x2="19" y2="8"/>`
+    },
+    'snowflake': {
+        category: 'physics',
+        title: 'Snowflake / Cryogenics & Heat Transfer',
+        hebrew: 'פתית שלג וקירור ❄️',
+        keywords: 'snowflake cold ice crypto freeze שלג קור מעבר חום קירור',
+        svg: `<line x1="12" y1="2" x2="12" y2="22"/><line x1="3.3" y1="7" x2="20.7" y2="17"/><line x1="3.3" y1="17" x2="20.7" y2="7"/><path d="M9.5 4.5L12 7l2.5-2.5M9.5 19.5L12 17l2.5 2.5M5.5 10.5L8 12l-.5 3.5M18.5 13.5L16 12l.5-3.5"/>`
+    },
+    'planet-ring': {
+        category: 'physics',
+        title: 'Saturn Planet / Astrodynamics',
+        hebrew: 'כוכב שבתאי עם טבעות 🪐',
+        keywords: 'planet saturn rings space orbit כוכב שבתאי חלל מסלולים אסטרונומיה',
+        svg: `<circle cx="12" cy="12" r="6"/><path d="M2.5 15.5c4-4 15-4 19 0-4 4-15 4-19 0z"/>`
+    },
+    'sound-speaker': {
+        category: 'physics',
+        title: 'Acoustics & Sound Speaker',
+        hebrew: 'רמקול ואקוסטיקה (גלי קול 🔊)',
+        keywords: 'sound speaker wave audio acoustics רמקול קול אקוסטיקה גלים',
+        svg: `<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a9 9 0 0 1 0 14"/>`
+    },
+    'telescope-tripod': {
+        category: 'physics',
+        title: 'Telescope on Tripod / Space & Optics',
+        hebrew: 'טלסקופ חלל ואופטיקה 🔭',
+        keywords: 'telescope optics astronomy space טלסקופ אופטיקה חלל אסטרונומיה',
+        svg: `<line x1="6" y1="14" x2="19" y2="5"/><polygon points="4 15 7 13 21 6 18 8 4 15"/><circle cx="13" cy="10" r="1.5"/><line x1="13" y1="11.5" x2="7" y2="21"/><line x1="13" y1="11.5" x2="19" y2="21"/><line x1="13" y1="11.5" x2="13" y2="21"/>`
+    },
+    'apple-gravity': {
+        category: 'physics',
+        title: 'Newton\'s Apple / Gravitation',
+        hebrew: 'תפוח ניוטון וכבידה 🍏',
+        keywords: 'apple newton gravity force physics 1 תפוח ניוטון כבידה כוחות פיזיקה 1',
+        svg: `<path d="M12 4c1-2 2-2 3-2 0 1-1 2-2 3M12 21c-3.5 0-7-3-7-7.5C5 9 8.5 7 12 7c3.5 0 7 2 7 6.5 0 4.5-3.5 7.5-7 7.5z"/>`
+    },
+    'antenna': {
+        category: 'physics',
+        title: 'Radio Antenna / RF & Wireless',
+        hebrew: 'אנטנת רדיו ותקשורת אלחוטית 📡',
+        keywords: 'antenna radio rf wireless telecomm אנטנה שידור קליטה אלחוטי גלים',
+        svg: `<line x1="12" y1="2" x2="12" y2="22"/><line x1="7" y1="5" x2="17" y2="5"/><line x1="5" y1="9" x2="19" y2="9"/><line x1="8" y1="13" x2="16" y2="13"/><circle cx="12" cy="2" r="1" fill="currentColor"/>`
+    },
+    'plug': {
+        category: 'physics',
+        title: 'Electric Plug & Circuits',
+        hebrew: 'תקע חשמלי ומעגלים 🔌',
+        keywords: 'plug electric circuit power electronics תקע חשמל מעגלים אלקטרוניקה',
+        svg: `<rect x="6" y="8" width="12" height="8" rx="2"/><line x1="9" y1="4" x2="9" y2="8"/><line x1="15" y1="4" x2="15" y2="8"/><path d="M12 16v5a1 1 0 0 1-1 1H8"/>`
+    },
+    'pill': {
+        category: 'chemistry',
+        title: 'Medicine Pill / Pharmacology & Bio',
+        hebrew: 'גלולה ופרמקולוגיה 💊',
+        keywords: 'pill capsule medicine bio pharma גלולה תרופה ביו כימיה פרמקולוגיה',
+        svg: `<line x1="6.5" y1="17.5" x2="17.5" y2="6.5"/><path d="M9.5 4.5l-5 5a5 5 0 1 0 7 7l5-5a5 5 0 0 0-7-7z"/>`
+    },
+    'syringe': {
+        category: 'chemistry',
+        title: 'Syringe / Biomedical Engineering',
+        hebrew: 'מזרק והנדסה ביו-רפואית 💉',
+        keywords: 'syringe medical bio injection biomedical מזרק הנדסה ביו רפואית רפואה',
+        svg: `<line x1="18" y1="2" x2="22" y2="6"/><line x1="14" y1="6" x2="18" y2="10"/><path d="M15 9l-8.5 8.5H4v-2.5L12.5 6.5M10 14l3-3M2 22l3.5-3.5"/>`
+    },
+    'lungs': {
+        category: 'chemistry',
+        title: 'Lungs / Biomechanics & Physiology',
+        hebrew: 'ריאות וביומכניקה של הנשימה 🫁',
+        keywords: 'lungs anatomy biomechanics physiology ריאות ביומכניקה פיזיולוגיה',
+        svg: `<path d="M12 4v8M12 7c-2 0-4 1-5 3v5a4 4 0 0 0 6 3.5M12 7c2 0 4 1 5 3v5a4 4 0 0 1-6 3.5"/>`
+    },
+    'soccer-ball': {
+        category: 'sports',
+        title: 'Soccer Ball / Team Sports',
+        hebrew: 'כדורגל וספורט קבוצתי ⚽',
+        keywords: 'soccer football ball sport game כדורגל ספורט משחקי כדור',
+        svg: `<circle cx="12" cy="12" r="9"/><polygon points="12 8 15 10.5 14 14 10 14 9 10.5 12 8" fill="currentColor" fill-opacity="0.25"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="15" y1="10.5" x2="19.5" y2="8.5"/><line x1="14" y1="14" x2="17.5" y2="17.5"/><line x1="10" y1="14" x2="6.5" y2="17.5"/><line x1="9" y1="10.5" x2="4.5" y2="8.5"/>`
+    },
+    'tennis-ball': {
+        category: 'sports',
+        title: 'Tennis & Racquet Sports',
+        hebrew: 'טניס ומשחקי מחבט 🎾',
+        keywords: 'tennis ball racquet sport טניס מחבט כדור ספורט',
+        svg: `<circle cx="12" cy="12" r="9"/><path d="M6 4.5a10 10 0 0 1 0 15M18 4.5a10 10 0 0 0 0 15"/>`
+    },
+    'basketball': {
+        category: 'sports',
+        title: 'Basketball / Court Sports',
+        hebrew: 'כדורסל וספורט אולמות 🏀',
+        keywords: 'basketball ball court sport כדורסל משחקי כדור ספורט',
+        svg: `<circle cx="12" cy="12" r="9"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="12" y1="3" x2="12" y2="21"/><path d="M5.5 5.5a10.5 10.5 0 0 1 0 13M18.5 5.5a10.5 10.5 0 0 0 0 13"/>`
+    },
+    'snorkel': {
+        category: 'sports',
+        title: 'Snorkel & Diving Mask',
+        hebrew: 'שנורקל ומסכת צלילה 🤿',
+        keywords: 'snorkel diving mask water swim צלילה שנורקל מים בריכה ספורט',
+        svg: `<path d="M19 3v13a4 4 0 0 1-8 0v-2"/><path d="M4 8h10a3 3 0 0 1 3 3v2a3 3 0 0 1-3 3H4a3 3 0 0 1-3-3v-2a3 3 0 0 1 3-3z"/><circle cx="6.5" cy="11.5" r="1.5"/><circle cx="11.5" cy="11.5" r="1.5"/>`
+    },
+    'sailboat': {
+        category: 'sports',
+        title: 'Sailboat & Maritime Navigation',
+        hebrew: 'מפרשית ושיט ימי ⛵',
+        keywords: 'sailboat sail boat yacht navigation שיט מפרשית ימאות ספורט',
+        svg: `<path d="M3 18l2 3h14l2-3H3z"/><line x1="12" y1="3" x2="12" y2="18"/><polygon points="12 4 19 14 12 14 12 4" fill="currentColor" fill-opacity="0.2"/><polygon points="11 6 5 15 11 15 11 6"/>`
+    },
+    'mountain': {
+        category: 'sports',
+        title: 'Mountain Peak & Outdoor Navigation',
+        hebrew: 'פסגת הר וניווט שטח ⛰️',
+        keywords: 'mountain peak hike trail navigation הר פסגה טיולים ניווט שטח',
+        svg: `<polygon points="8 3 1 18 15 18 8 3"/><polygon points="16 7 11 18 21 18 16 7"/><polyline points="5.5 13 8 11 10.5 13"/><polyline points="14 13 16 11 18 13"/>`
+    },
+    'whistle': {
+        category: 'sports',
+        title: 'Referee Whistle & Coaching',
+        hebrew: 'משרוקית אימון ושיפוט',
+        keywords: 'whistle coach referee training משרוקית מאמן אימון ספורט',
+        svg: `<circle cx="8" cy="14" r="5"/><path d="M13 14h8v-4h-9.5"/><circle cx="8" cy="14" r="2" fill="currentColor"/><path d="M5 10.5L3 8"/>`
+    },
+    'yin-yang': {
+        category: 'sports',
+        title: 'Yin Yang / Balance & Mind-Body',
+        hebrew: 'יין ויאנג (איזון גוף ונפש ☯️)',
+        keywords: 'yin yang balance tao meditation יין יאנג איזון מדיטציה גוף ונפש',
+        svg: `<circle cx="12" cy="12" r="9"/><path d="M12 3a4.5 4.5 0 0 0 0 9 4.5 4.5 0 0 1 0 9" fill="currentColor" fill-opacity="0.3"/><circle cx="12" cy="7.5" r="1.5" fill="currentColor"/><circle cx="12" cy="16.5" r="1.5" fill="currentColor"/>`
+    },
+    'university-hall': {
+        category: 'academic',
+        title: 'Classical Academy / Faculty Hall',
+        hebrew: 'בניין הפקולטה והאקדמיה 🏛️',
+        keywords: 'academy university campus hall columns בניין פקולטה אקדמיה טכניון קמפוס',
+        svg: `<polygon points="12 3 2 8 22 8 12 3"/><line x1="4" y1="8" x2="4" y2="18"/><line x1="9" y1="8" x2="9" y2="18"/><line x1="15" y1="8" x2="15" y2="18"/><line x1="20" y1="8" x2="20" y2="18"/><line x1="2" y1="18" x2="22" y2="18"/><line x1="1" y1="21" x2="23" y2="21"/>`
+    },
+    'chalkboard-easel': {
+        category: 'academic',
+        title: 'Lecture Whiteboard / Presentation',
+        hebrew: 'לוח הרצאות ומצגת 🖼️',
+        keywords: 'board easel presentation lecture class לוח הרצאה מצגת כיתה שיעור',
+        svg: `<rect x="4" y="4" width="16" height="11" rx="1"/><line x1="4" y1="15" x2="20" y2="15"/><line x1="7" y1="15" x2="4" y2="21"/><line x1="17" y1="15" x2="20" y2="21"/><line x1="12" y1="15" x2="12" y2="21"/><line x1="8" y1="8" x2="13" y2="8"/><line x1="8" y1="11" x2="16" y2="11"/>`
+    },
+    'laptop': {
+        category: 'academic',
+        title: 'Laptop Computer / Digital Study',
+        hebrew: 'מחשב נייד ולמידה 💻',
+        keywords: 'laptop computer study code work מחשב נייד למידה עבודה',
+        svg: `<rect x="4" y="4" width="16" height="11" rx="2"/><path d="M2 19h20a1 1 0 0 0 1-1v-1a1 1 0 0 0-1-1H2a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1z"/>`
+    },
+    'keyboard': {
+        category: 'academic',
+        title: 'Computer Keyboard / Typing',
+        hebrew: 'מקלדת מחשב ⌨️',
+        keywords: 'keyboard typing input computer מקלדת הקלדה מחשב',
+        svg: `<rect x="2" y="5" width="20" height="14" rx="2"/><line x1="6" y1="9" x2="6" y2="9.01"/><line x1="10" y1="9" x2="10" y2="9.01"/><line x1="14" y1="9" x2="14" y2="9.01"/><line x1="18" y1="9" x2="18" y2="9.01"/><line x1="6" y1="12" x2="6" y2="12.01"/><line x1="10" y1="12" x2="10" y2="12.01"/><line x1="14" y1="12" x2="14" y2="12.01"/><line x1="18" y1="12" x2="18" y2="12.01"/><line x1="8" y1="15" x2="16" y2="15"/>`
+    },
+    'paper-plane': {
+        category: 'academic',
+        title: 'Paper Airplane / Project Launch',
+        hebrew: 'מטוס נייר והגשת פרויקט ✈️',
+        keywords: 'paper plane send aero fly aeronautics מטוס נייר שיגור הגשה פרויקט',
+        svg: `<polygon points="22 2 11 13 22 2"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>`
+    },
+    'languages': {
+        category: 'academic',
+        title: 'Languages & Technical English',
+        hebrew: 'שפות וכתיבה טכנית (עברית ואנגלית 文/A)',
+        keywords: 'language translate english hebrew שפות תרגום אנגלית טכנית הומניסטי עברית',
+        svg: `<path d="M5 8h8M9 5v3c0 4-2 7-5 9M7 13c1.5-1.5 2.5-3.5 3-5M15 19l4-9 4 9M16.5 16h5"/>`
+    },
+    'pushpin': {
+        category: 'academic',
+        title: 'Pushpin / Notice & Priority',
+        hebrew: 'נעץ ותזכורת חשובה 📌',
+        keywords: 'pushpin pin notice reminder priority נעץ לוח מודעות תזכורת',
+        svg: `<path d="M16 3l5 5-2.5 2.5-1-1L13 14l1 3-2 2-4-4-4 4-2-2 4-4-4-4 2-2 3 1 4.5-4.5-1-1L16 3z"/>`
+    },
+    'menorah': {
+        category: 'academic',
+        title: 'Menorah / Heritage & Culture Elective',
+        hebrew: 'מנורת שבעת הקנים (מורשת ותרבות 🕎)',
+        keywords: 'menorah israel culture heritage menorah מנורה מורשת תרבות הומניסטי שבעת הקנים',
+        svg: `<line x1="12" y1="3" x2="12" y2="21"/><path d="M9 6v3a3 3 0 0 0 6 0V6M6 8v2a6 6 0 0 0 12 0V8M3 10v1a9 9 0 0 0 18 0v-1"/><line x1="8" y1="21" x2="16" y2="21"/><circle cx="12" cy="2.5" r="0.8" fill="currentColor"/><circle cx="9" cy="5.5" r="0.8" fill="currentColor"/><circle cx="15" cy="5.5" r="0.8" fill="currentColor"/><circle cx="6" cy="7.5" r="0.8" fill="currentColor"/><circle cx="18" cy="7.5" r="0.8" fill="currentColor"/><circle cx="3" cy="9.5" r="0.8" fill="currentColor"/><circle cx="21" cy="9.5" r="0.8" fill="currentColor"/>`
+    },
+    'stopwatch': {
+        category: 'academic',
+        title: 'Stopwatch / Exam Time Management',
+        hebrew: 'סטופר וניהול זמנים במבחן ⏱️',
+        keywords: 'stopwatch timer countdown exam זמן שעון עצר מבחן טיימר',
+        svg: `<circle cx="12" cy="13" r="8"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="13" x2="15" y2="15"/><line x1="12" y1="2" x2="12" y2="5"/><line x1="10" y1="2" x2="14" y2="2"/>`
+    },
+    'gamepad': {
+        category: 'academic',
+        title: 'Gamepad Controller / Graphics & Gaming',
+        hebrew: 'שלט משחק וגרפיקה ממוחשבת 🎮',
+        keywords: 'gamepad game controller graphics משחקים גרפיקה שלט פנאי',
+        svg: `<path d="M6 11h4M8 9v4M15 11h.01M18 11h.01"/><rect x="2" y="6" width="20" height="12" rx="6"/>`
+    },
+    'music-notes': {
+        category: 'academic',
+        title: 'Music Notes / Acoustics & Arts',
+        hebrew: 'תווי מוזיקה ואמנות 🎵',
+        keywords: 'music note sound tune art מוזיקה תווים שיר אקוסטיקה הומניסטי',
+        svg: `<circle cx="6" cy="18" r="3"/><circle cx="18" cy="15" r="3"/><line x1="9" y1="18" x2="9" y2="6"/><line x1="21" y1="15" x2="21" y2="3"/><polygon points="9 6 21 3 21 6 9 9" fill="currentColor"/>`
+    },
+    'theater-masks': {
+        category: 'academic',
+        title: 'Theater Masks / Humanities & Arts',
+        hebrew: 'מסכות תיאטרון ומדעי הרוח 🎭',
+        keywords: 'theater masks drama culture arts drama תיאטרון דרמה אמנות קורס הומניסטי',
+        svg: `<path d="M3 10a5 5 0 0 1 10 0v2a5 5 0 0 1-10 0v-2z"/><circle cx="6" cy="10" r="0.8" fill="currentColor"/><circle cx="10" cy="10" r="0.8" fill="currentColor"/><path d="M6 13c.7.7 1.3.7 2 0"/><path d="M13 6a5 5 0 0 1 8 0v2a5 5 0 0 1-8 0V6z"/><circle cx="15.5" cy="7.5" r="0.8" fill="currentColor"/><circle cx="18.5" cy="7.5" r="0.8" fill="currentColor"/><path d="M16 10c.5-.5 1-.5 1.5 0"/>`
+    },
+    'gavel': {
+        category: 'academic',
+        title: 'Gavel / Engineering Ethics & Law',
+        hebrew: 'פטיש שופטים (אתיקה ומשפט ⚖️)',
+        keywords: 'gavel law justice ethics judge פטיש שופט אתיקה משפט הנדסי',
+        svg: `<path d="M14 13l5-5-2-2-5 5M7 16l4-4M3 20l4-4M16 6l2-2a2 2 0 0 1 2.8 0l1.4 1.4a2 2 0 0 1 0 2.8l-2 2"/>`
+    },
+    'grade-a': {
+        category: 'academic',
+        title: 'Grade A+ / Academic Excellence',
+        hebrew: 'ציון A+ והצטיינות במבחנים 📄',
+        keywords: 'grade a plus exam test gpa 100 ציון פקטור הצטיינות מבחן מאה',
+        svg: `<rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 15l3-7 3 7M9 13h4M17 9v4M15 11h4"/>`
+    },
+    'alarm-clock': {
+        category: 'academic',
+        title: 'Alarm Clock / Morning Deadlines',
+        hebrew: 'שעון מעורר ודד-ליין ⏰',
+        keywords: 'alarm clock deadline time wakeup שעון מעורר זמן השכמה הגשה',
+        svg: `<circle cx="12" cy="13" r="7"/><polyline points="12 9 12 13 14 15"/><path d="M5 3L2 6M19 3l3 3M7 20l-2 2M17 20l2 2"/>`
+    },
+    'backpack': {
+        category: 'academic',
+        title: 'Student Backpack / Campus Gear',
+        hebrew: 'תיק גב סטודנטיאלי 🎒',
+        keywords: 'backpack bag campus study school תיק גב לימודים קמפוס',
+        svg: `<rect x="5" y="8" width="14" height="13" rx="3"/><path d="M9 8V5a3 3 0 0 1 6 0v3M9 13h6v4H9z"/>`
+    },
+    'bar-chart': {
+        category: 'academic',
+        title: 'Bar Chart / Statistics & Analytics',
+        hebrew: 'גרף עמודות וסטטיסטיקה 📊',
+        keywords: 'bar chart stats analytics data גרף עמודות סטטיסטיקה ניתוח נתונים',
+        svg: `<line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><line x1="3" y1="20" x2="21" y2="20"/>`
+    },
+    'line-chart': {
+        category: 'academic',
+        title: 'Trend Line Graph / Performance',
+        hebrew: 'גרף מגמה ושיפור ביצועים 📈',
+        keywords: 'line chart trend graph performance growth גרף מגמה עלייה שיפור ביצועים',
+        svg: `<path d="M3 3v18h18"/><polyline points="18 9 13 14 9 10 5 14"/><polyline points="14 9 18 9 18 13"/>`
+    },
+    'pie-chart': {
+        category: 'academic',
+        title: 'Pie Chart / Distributions',
+        hebrew: 'דיאגרמת עוגה והתפלגות 🥧',
+        keywords: 'pie chart share distribution stats דיאגרמת עוגה התפלגות נתונים',
+        svg: `<path d="M21.2 15.8A10 10 0 1 1 11 2.8V12h9.2a9.9 9.9 0 0 1 1 3.8z"/><path d="M14 2.2A10 10 0 0 1 21.8 10H14V2.2z"/>`
+    },
+    'chess-knight': {
+        category: 'academic',
+        title: 'Chess Knight / Strategy & Logic',
+        hebrew: 'פרש שחמט ואסטרטגיה ♞',
+        keywords: 'chess knight strategy game logic שחמט פרש אסטרטגיה היגיון משחקים',
+        svg: `<path d="M8 20h8M9 20v-3c0-1-1-2-2-3-1.5-1.5-1-4 1-5l1-1V5c0-1 1-2 2-2 2 0 4 2 4 5 0 2-1 3-1 5 1 1 1 2 1 4v3"/>`
+    },
+    'paperclip': {
+        category: 'academic',
+        title: 'Paperclip / File Attachments',
+        hebrew: 'מהדק ניירות וקבצים מצורפים 📎',
+        keywords: 'paperclip clip attach file מהדק נייר קובץ מצורף הגשה',
+        svg: `<path d="M21.4 11.1l-9.2 9.2a6 6 0 0 1-8.5-8.5l9.2-9.2a4 4 0 0 1 5.7 5.7L9.4 17.5a2 2 0 0 1-2.8-2.8l8.5-8.5"/>`
+    },
+    'feather-quill': {
+        category: 'academic',
+        title: 'Feather Quill / Scientific Writing',
+        hebrew: 'נוצת כתיבה אקדמית 🪶',
+        keywords: 'feather quill pen write essay נוצה כתיבה חיבור אקדמי מאמר',
+        svg: `<path d="M20.2 3.8C15 4 10 8 7 13l-4 8 8-4c5-3 9-8 9.2-13.2z"/><line x1="7" y1="17" x2="13" y2="11"/>`
+    },
+    'clover': {
+        category: 'academic',
+        title: 'Four-Leaf Clover / Exam Luck',
+        hebrew: 'תלתן 4 עלים והצלחה במבחנים 🍀',
+        keywords: 'clover luck success exam תלתן מזל הצלחה מבחן',
+        svg: `<path d="M12 12c-2-3-5-3-7-1s-2 5 1 7c2 1 5 1 6-2m0-4c3-2 3-5 1-7s-5-2-7 1c-1 2-1 5 2 6m4 0c2 3 5 3 7 1s2-5-1-7c-2-1-5-1-6 2m0 4c-3 2-3 5-1 7s5 2 7-1c1-2 1-5-2-6M12 14v8"/>`
+    },
+    'camera': {
+        category: 'academic',
+        title: 'Camera / Vision & Photography Lab',
+        hebrew: 'מצלמה ומעבדת ראייה ממוחשבת 📷',
+        keywords: 'camera photo vision lab מצלמה צילום מעבדה ראייה ממוחשבת',
+        svg: `<path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/>`
+    },
+    'headphones': {
+        category: 'academic',
+        title: 'Headphones / Focus & Study Flow',
+        hebrew: 'אוזניות וריכוז בלמידה 🎧',
+        keywords: 'headphones audio sound focus music אוזניות מוזיקה ריכוז למידה',
+        svg: `<path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/>`
     }
 };
 
