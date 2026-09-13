@@ -8803,11 +8803,17 @@ function renderFinalsCalendar() {
     }
 
     // Days of week header
-    const daysOfWeek = ["ראשון (Sun)", "שני (Mon)", "שלישי (Tue)", "רביעי (Wed)", "חמישי (Thu)", "שישי (Fri)", "שבת (Sat)"];
-    daysOfWeek.forEach(dName => {
+    const isMobile = window.innerWidth <= 768;
+    const daysOfWeek = isMobile
+        ? ["א'", "ב'", "ג'", "ד'", "ה'", "ו'", "ש'"]
+        : ["ראשון (Sun)", "שני (Mon)", "שלישי (Tue)", "רביעי (Wed)", "חמישי (Thu)", "שישי (Fri)", "שבת (Sat)"];
+    daysOfWeek.forEach((dName, idx) => {
         const h = document.createElement("div");
         h.className = "cal-day-header";
         h.innerText = dName;
+        if (isMobile) {
+            h.title = ["יום ראשון", "יום שני", "יום שלישי", "יום רביעי", "יום חמישי", "יום שישי", "יום שבת"][idx];
+        }
         grid.appendChild(h);
     });
 
@@ -8831,9 +8837,26 @@ function renderFinalsCalendar() {
             if (!itemsByDate[task.dueDate]) itemsByDate[task.dueDate] = [];
 
             if (task.type === 'exam') {
-                const titleStr = task.title.startsWith('🔴') ? task.title : `🔴 ${task.title}`;
+                const isExamDone = task.completed || task.status === 'done' || task.status === 'submitted';
+                const todayObj = new Date();
+                todayObj.setHours(0, 0, 0, 0);
+                const taskDateObj = new Date(task.dueDate);
+                taskDateObj.setHours(0, 0, 0, 0);
+                const isPassed = isExamDone || (taskDateObj < todayObj);
+
+                let titleStr = task.title;
+                if (isPassed) {
+                    titleStr = titleStr.replace(/^🔴\s*/, '');
+                    if (!titleStr.startsWith('🟢') && !titleStr.startsWith('✓')) {
+                        titleStr = `🟢 ${titleStr}`;
+                    }
+                } else {
+                    titleStr = titleStr.startsWith('🔴') ? titleStr : `🔴 ${task.title}`;
+                }
+
                 itemsByDate[task.dueDate].push({
                     isExamEvent: true,
+                    isPassed: isPassed,
                     title: titleStr,
                     courseCode: course.code,
                     courseName: course.name,
@@ -8903,10 +8926,14 @@ function renderFinalsCalendar() {
     for (let day = 1; day <= daysInMonth; day++) {
         const dateStr = `${currentCalendarYear}-${String(currentCalendarMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
         const dayItems = itemsByDate[dateStr] || [];
-        const hasExamEvent = dayItems.some(it => it.isExamEvent);
+        const hasActiveExam = dayItems.some(it => it.isExamEvent && !it.isPassed);
+        const hasPassedExam = dayItems.some(it => it.isExamEvent && it.isPassed);
 
         const cell = document.createElement("div");
-        cell.className = `cal-day-cell ${hasExamEvent ? 'has-exam' : ''}`;
+        let cellClasses = ["cal-day-cell"];
+        if (hasPassedExam) cellClasses.push("has-past-exam");
+        if (hasActiveExam) cellClasses.push("has-exam");
+        cell.className = cellClasses.join(" ");
         cell.dataset.date = dateStr;
 
         let cellHtml = `
@@ -8919,8 +8946,9 @@ function renderFinalsCalendar() {
 
         dayItems.forEach(item => {
             if (item.isExamEvent) {
+                const passedClass = item.isPassed ? "passed" : "";
                 cellHtml += `
-                    <div class="cal-event-pill exam-event" data-course-code="${item.courseCode}" title="מבחן סוף רשמי! לחץ לפתיחת פרטי ${item.courseName || ''}">
+                    <div class="cal-event-pill exam-event ${passedClass}" data-course-code="${item.courseCode}" title="מבחן סוף רשמי! לחץ לפתיחת פרטי ${item.courseName || ''}">
                         ${item.title}
                     </div>
                 `;

@@ -616,15 +616,20 @@
                                 <span class="cal-subtitle">תצוגה חודשית של כל מועדי הבחינות, הגשות שיעורי בית, WebWork, מעבדות ומבחנים לתרגול</span>
                             </div>
                             <div class="cal-nav-group">
-                                <button type="button" class="btn btn-sm btn-outline" id="cal-nav-prev">◀</button>
-                                <span class="cal-current-month" id="cal-current-month-title">August 2026</span>
-                                <button type="button" class="btn btn-sm btn-outline" id="cal-nav-next">▶</button>
-                                <button type="button" class="btn btn-sm btn-primary" id="btn-open-past-exams-mgr">⚙️ ניהול ושיבוץ מבחנים לתרגול</button>
-                                <button type="button" class="btn btn-sm btn-outline" id="btn-export-google-tasks">📤 ייצוא ל-Google</button>
+                                <div class="cal-month-nav-row">
+                                    <button type="button" class="btn btn-sm btn-outline" id="cal-nav-prev">◀</button>
+                                    <span class="cal-current-month" id="cal-current-month-title">August 2026</span>
+                                    <button type="button" class="btn btn-sm btn-outline" id="cal-nav-next">▶</button>
+                                </div>
+                                <div class="cal-actions-row">
+                                    <button type="button" class="btn btn-sm btn-primary" id="btn-open-past-exams-mgr">⚙️ שיבוץ מבחנים</button>
+                                    <button type="button" class="btn btn-sm btn-outline" id="btn-export-google-tasks">📤 ייצוא ליומן</button>
+                                </div>
                             </div>
                         </div>
                         <div class="cal-legend-bar">
                             <span class="cal-legend-item"><span class="dot dot-exam"></span> יום מבחן סמסטר רשמי</span>
+                            <span class="cal-legend-item"><span class="dot" style="background: #10b981;"></span> מבחן שעבר</span>
                             <span class="cal-legend-item"><span class="dot" style="background: #38bdf8;"></span> משימות (גיליון / WebWork / מעבדה)</span>
                             <span class="cal-legend-item"><span class="dot dot-pe-active"></span> מבחן לתרגול</span>
                             <span class="cal-legend-item"><span class="dot dot-pe-done"></span> מבחן לתרגול שהושלם</span>
