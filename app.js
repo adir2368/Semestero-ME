@@ -135,15 +135,15 @@ const COURSE_NOTION_ICONS = {
         color: '#3b82f6',
         svg: `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#3b82f6" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>`
     },
-    // 034056 Scientific Computing / חישוב מדעי והנדסי -> Indigo computational terminal
+    // 034056 Scientific & Engineering Computing / חישוב מדעי והנדסי -> Engineering calculator with display & math operators (+, -, ×, =)
     '034056': {
         color: '#6366f1',
-        svg: `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#6366f1" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>`
+        svg: `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#6366f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2.5"/><rect x="7" y="5" width="10" height="3.5" rx="1" fill="rgba(99,102,241,0.25)"/><path d="M8 12h2m-1-1v2m4-1h3m-7 4l2 2m-2 0l2-2m3 0h3m-3 2h3"/></svg>`
     },
-    // 034035 Thermodynamics 1 / תרמודינמיקה 1 -> Thermal orange flame
+    // 034035 Thermodynamics 1 / תרמודינמיקה 1 -> Vibrant thermal flame 🔥
     '034035': {
-        color: '#ea580c',
-        svg: `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#ea580c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A4.5 4.5 0 0 0 16 12c0-3.5-3-5.5-3-9-3 3-5 6.5-5 9a3.5 3.5 0 0 0 .5 2.5z" fill="rgba(234,88,12,0.25)"/></svg>`
+        color: '#f97316',
+        svg: `<svg viewBox="0 0 24 24" width="18" height="18" fill="rgba(249, 115, 22, 0.25)" stroke="#f97316" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>`
     },
     // 104065 Linear Algebra / אלגברה ליניארית -> Indigo matrix brackets
     '104065': {
