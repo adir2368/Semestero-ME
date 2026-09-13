@@ -1732,23 +1732,23 @@ function getTaskTypeBadgeHtml(task) {
     
     // 1. WebWork: dedicated "planet with lines" WWW globe icon
     if (title.includes("webwork") || type === "webwork") {
-        return `<span class="notion-task-badge webwork" title="WebWork"><svg class="badge-globe-svg" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg><span class="badge-text">WebWork</span></span>`;
+        return `<span class="notion-task-badge webwork" title="WebWork"><span class="badge-icon">🌐</span><span class="badge-text">WebWork</span></span>`;
     }
     
     // 2. Exam: official exam indicator
     if (type === "exam" || title.includes("מועד") || title.includes("מבחן")) {
         const isDone = task.completed || task.status === 'done' || task.status === 'submitted';
-        return `<span class="notion-task-badge exam ${isDone ? 'done' : ''}" title="מבחן סמסטר"><span class="badge-icon">${isDone ? '🟢' : '🔴'}</span><span class="badge-text">${isDone ? 'הושלם' : 'מבחן'}</span></span>`;
+        return `<span class="notion-task-badge exam ${isDone ? 'done' : ''}" title="מבחן סמסטר"><span class="badge-icon">🎓</span><span class="badge-text">${isDone ? 'הושלם' : 'מבחן'}</span></span>`;
     }
     
     // 3. Lab: Microscope / Flask
     if (type === "lab" || title.includes("מעבדה") || title.includes("דוח") || title.includes("דו\"ח")) {
-        return `<span class="notion-task-badge lab" title="מעבדה / דו&quot;ח"><span class="badge-icon">🔬</span><span class="badge-text">מעבדה</span></span>`;
+        return `<span class="notion-task-badge lab" title="מעבדה / דו&quot;ח"><span class="badge-icon">🧪</span><span class="badge-text">מעבדה</span></span>`;
     }
     
     // 4. Project: Shield / Engineering Project
     if (type === "project" || title.includes("פרויקט") || title.includes("פרוייקט")) {
-        return `<span class="notion-task-badge project" title="פרויקט"><span class="badge-icon">🛡️</span><span class="badge-text">פרויקט</span></span>`;
+        return `<span class="notion-task-badge project" title="פרויקט"><span class="badge-icon">🚀</span><span class="badge-text">פרויקט</span></span>`;
     }
     
     // 5. Homework / Sheet (גיליון / תרגיל בית)
@@ -1756,7 +1756,7 @@ function getTaskTypeBadgeHtml(task) {
         return `<span class="notion-task-badge hw" title="שיעורי בית / גיליון"><span class="badge-icon">📝</span><span class="badge-text">גיליון</span></span>`;
     }
     
-    return `<span class="notion-task-badge general" title="משימה"><span class="badge-icon">📌</span><span class="badge-text">משימה</span></span>`;
+    return `<span class="notion-task-badge general" title="משימה"><span class="badge-icon">📋</span><span class="badge-text">משימה</span></span>`;
 }
 
 // Academic Skill Tree - Core JS logic
@@ -5757,9 +5757,10 @@ function renderActiveQuestsSidebar() {
             const qEl = document.createElement("div");
             qEl.className = "quest-item-sidebar";
             
-            let questTypeLabel = "📜 שיעורי בית";
-            if (task.type === 'project') questTypeLabel = "🛡️ עבודה/פרויקט";
-            if (task.type === 'exam') questTypeLabel = "📝 מבחן סוף";
+            let questTypeLabel = "📝 שיעורי בית / גיליון";
+            if (task.type === 'project') questTypeLabel = "🚀 עבודה / פרויקט";
+            if (task.type === 'exam') questTypeLabel = "🎓 מבחן";
+            if (task.type === 'lab') questTypeLabel = "🧪 מעבדה";
 
             qEl.innerHTML = `
                 <div class="quest-sidebar-title">${task.title}</div>
@@ -6296,8 +6297,10 @@ function renderModalTaskList(course) {
 
         // Select task icon based on type
         let icon = "📝";
-        if (task.type === 'project') icon = "🛡️";
-        if (task.type === 'exam') icon = "📝";
+        if (task.type === 'project') icon = "🚀";
+        if (task.type === 'exam') icon = "🎓";
+        if (task.type === 'lab') icon = "🧪";
+        if (task.title && task.title.toLowerCase().includes('webwork')) icon = "🌐";
 
         // Generate status select options
         const statuses = [
@@ -7589,9 +7592,11 @@ function openTaskSidePeek(courseCode, taskId) {
     document.getElementById("peek-task-title").value = task.title;
     document.getElementById("peek-property-course").innerText = `${course.name} (${course.code.toUpperCase()})`;
     
-    let typeLabel = "📝 משימה רגילה";
-    if (task.type === 'project') typeLabel = "🛡️ עבודה / פרויקט";
-    if (task.type === 'exam') typeLabel = "📝 מבחן סוף";
+    let typeLabel = "📝 שיעורי בית / גיליון";
+    if (task.type === 'project') typeLabel = "🚀 עבודה / פרויקט";
+    if (task.type === 'exam') typeLabel = "🎓 מבחן";
+    if (task.type === 'lab') typeLabel = "🧪 מעבדה";
+    if (task.title && task.title.toLowerCase().includes('webwork')) typeLabel = "🌐 WebWork";
     document.getElementById("peek-property-type").innerText = typeLabel;
     
     document.getElementById("peek-property-xp").innerText = `+${task.xp} XP`;
@@ -10609,19 +10614,19 @@ function renderFinalsCalendar() {
 
                 if (task.type === 'lab' || lowerTitle.includes('מעבדה') || lowerTitle.includes('lab')) {
                     typeClass = "lab";
-                    icon = "🔬";
+                    icon = "🧪";
                 } else if (lowerTitle.includes('webwork')) {
                     typeClass = "webwork";
-                    icon = "💻";
+                    icon = "🌐";
                 } else if (task.type === 'project' || lowerTitle.includes('פרויקט') || lowerTitle.includes('project')) {
                     typeClass = "project";
-                    icon = "🛡️";
+                    icon = "🚀";
                 } else if (lowerTitle.includes('גיליון') || lowerTitle.includes('מטלה') || task.type === 'hw') {
                     typeClass = "sheet";
                     icon = "📝";
                 } else {
                     typeClass = "sheet";
-                    icon = "📌";
+                    icon = "📋";
                 }
 
                 const isDone = task.completed || task.status === 'completed' || task.status === 'done';

@@ -1591,6 +1591,13 @@ body {
     flex-shrink: 0;
     transition: all 0.15s ease;
 }
+.notion-task-badge .badge-icon {
+    font-size: 0.84rem;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
 .notion-task-badge.webwork {
     background: rgba(56, 189, 248, 0.14);
     color: #38bdf8;
@@ -5019,7 +5026,7 @@ body {
         flex-direction: column !important;
         align-items: stretch !important;
         gap: 4px !important;
-        padding: 6px 10px 4px !important;
+        padding: max(8px, env(safe-area-inset-top)) max(10px, env(safe-area-inset-right)) 4px max(10px, env(safe-area-inset-left)) !important;
         height: auto !important;
         min-height: auto !important;
         flex-shrink: 0 !important;
