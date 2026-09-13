@@ -4902,53 +4902,147 @@ body {
    Mobile Responsive Styles (Smartphone & PWA Optimization)
    ========================================================================== */
 @media (max-width: 768px) {
-    /* Container & Header layout */
-    .hud-container {
-        height: auto !important;
-        min-height: 100vh !important;
-        overflow-x: hidden !important;
+    /* Base Body & Container for Mobile */
+    body {
+        overflow: hidden !important;
+        height: 100vh !important;
+        width: 100vw !important;
+        padding-bottom: 0 !important;
     }
 
+    .hud-container {
+        height: 100vh !important;
+        max-height: 100vh !important;
+        width: 100vw !important;
+        display: flex !important;
+        flex-direction: column !important;
+        overflow: hidden !important;
+    }
+
+    /* Ultra-Sleek Compact Mobile Header */
     .hud-header {
         flex-direction: column !important;
         align-items: stretch !important;
-        gap: 8px !important;
-        padding: 10px 12px !important;
+        gap: 4px !important;
+        padding: 6px 10px 4px !important;
         height: auto !important;
         min-height: auto !important;
+        flex-shrink: 0 !important;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4) !important;
     }
 
     .hud-logo {
-        justify-content: center !important;
+        display: none !important; /* Save vertical space on mobile */
     }
 
     .character-card {
-        padding: 8px 10px !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
         width: 100% !important;
+        padding: 4px 8px !important;
+        gap: 6px !important;
+        box-sizing: border-box !important;
+        border-radius: 8px !important;
     }
 
+    .char-avatar {
+        font-size: 1.1rem !important;
+        width: 32px !important;
+        height: 32px !important;
+        margin-left: 6px !important;
+        border-radius: 6px !important;
+    }
+
+    .char-name-row {
+        margin-bottom: 2px !important;
+    }
+
+    .char-title {
+        font-size: 0.8rem !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+    }
+
+    .char-level {
+        font-size: 0.68rem !important;
+        padding: 1px 6px !important;
+        white-space: nowrap !important;
+        border-radius: 4px !important;
+    }
+
+    .xp-bar-container {
+        height: 15px !important;
+        border-radius: 8px !important;
+    }
+
+    .xp-text {
+        font-size: 0.68rem !important;
+        font-weight: 700 !important;
+    }
+
+    /* Compact 4-Grid HUD Stats */
     .hud-stats {
         display: grid !important;
-        grid-template-columns: 1fr 1fr !important;
-        gap: 8px !important;
+        grid-template-columns: repeat(4, 1fr) !important;
+        gap: 4px !important;
         width: 100% !important;
     }
 
     .stat-item {
-        padding: 6px 10px !important;
+        padding: 3px 4px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+        text-align: center !important;
+        min-height: 38px !important;
+        min-width: 0 !important;
+        border-radius: 6px !important;
     }
 
-    /* Fixed Thumb-Friendly Bottom Navigation Bar */
+    .stat-label {
+        font-size: 0.58rem !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        max-width: 100% !important;
+        line-height: 1.1 !important;
+    }
+
+    .stat-value {
+        font-size: 0.82rem !important;
+        line-height: 1.1 !important;
+        font-weight: 800 !important;
+    }
+
+    .stat-gpa-sub {
+        display: none !important;
+    }
+
+    .finals-switch-control {
+        margin: 2px 4px 4px !important;
+        padding: 3px 8px !important;
+        min-height: 28px !important;
+        justify-content: space-between !important;
+        background: rgba(15, 23, 42, 0.6) !important;
+        border-radius: 6px !important;
+    }
+
+    .finals-switch-title {
+        font-size: 0.72rem !important;
+    }
+
+    .finals-switch-desc {
+        font-size: 0.62rem !important;
+    }
+
+    /* Fixed Native-Style Bottom Navigation Bar */
     .hud-nav-tabs {
         margin: 0 !important;
         padding: 0 !important;
         border-bottom: none !important;
         width: 100% !important;
-    }
-
-    .finals-switch-control {
-        margin: 4px 10px 8px !important;
-        justify-content: center !important;
     }
 
     .nav-tabs-left {
@@ -4957,16 +5051,17 @@ body {
         left: 0 !important;
         right: 0 !important;
         z-index: 1000 !important;
-        background: rgba(10, 15, 29, 0.96) !important;
+        background: rgba(10, 15, 29, 0.98) !important;
         backdrop-filter: blur(16px) !important;
         -webkit-backdrop-filter: blur(16px) !important;
         border-top: 1px solid rgba(56, 189, 248, 0.25) !important;
-        box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.7) !important;
+        box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.8) !important;
         display: flex !important;
         justify-content: space-around !important;
         align-items: center !important;
-        padding: 6px 4px calc(6px + env(safe-area-inset-bottom)) !important;
+        padding: 4px 4px calc(6px + env(safe-area-inset-bottom)) !important;
         gap: 2px !important;
+        height: calc(56px + env(safe-area-inset-bottom)) !important;
     }
 
     .nav-tab {
@@ -4975,12 +5070,20 @@ body {
         flex-direction: column !important;
         align-items: center !important;
         justify-content: center !important;
-        padding: 5px 2px !important;
-        font-size: 0.7rem !important;
+        padding: 4px 2px !important;
+        font-size: 0.68rem !important;
         border-radius: 8px !important;
         min-width: 0 !important;
         white-space: nowrap !important;
-        gap: 2px !important;
+        gap: 1px !important;
+        border: none !important;
+        background: transparent !important;
+    }
+
+    .nav-tab.active {
+        background: rgba(56, 189, 248, 0.15) !important;
+        color: #38bdf8 !important;
+        border: 1px solid rgba(56, 189, 248, 0.3) !important;
     }
 
     .nav-tab-sublabel {
@@ -4993,40 +5096,111 @@ body {
     }
 
     .nav-tab-label {
-        font-size: 0.7rem !important;
+        font-size: 0.68rem !important;
         font-weight: 700 !important;
         white-space: nowrap !important;
     }
 
-    body {
-        padding-bottom: calc(75px + env(safe-area-inset-bottom)) !important;
-    }
-
-    /* Workspace & Sidebar on mobile */
+    /* Workspaces on Mobile */
     .hud-workspace {
-        flex-direction: column !important;
-        padding: 6px !important;
+        flex: 1;
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+        padding: 4px 4px calc(58px + env(safe-area-inset-bottom)) 4px !important;
+        overflow: hidden !important;
+        position: relative !important;
     }
 
+    /* Strictly honor hidden workspaces */
+    .hud-workspace[style*="display: none"],
+    .hud-workspace[style*="display:none"],
+    .hud-workspace.hidden {
+        display: none !important;
+    }
+
+    /* On Mobile Course Map: Hide duplicate sidebar so Flowchart gets full screen */
     .hud-sidebar {
-        width: 100% !important;
-        max-height: 280px !important;
-        overflow-y: auto !important;
-        margin-bottom: 12px !important;
+        display: none !important;
     }
 
     .tree-canvas-container {
+        flex: 1 !important;
+        min-height: 0 !important;
+        height: 100% !important;
         width: 100% !important;
-        min-height: 60vh !important;
+        display: flex !important;
+        flex-direction: column !important;
+        padding: 0 !important;
+        overflow: hidden !important;
+    }
+
+    .tree-controls {
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        padding: 3px 6px !important;
+        min-height: auto !important;
+        gap: 4px !important;
+    }
+
+    .view-mode-toggles {
+        display: none !important;
+    }
+
+    .tree-legend {
+        font-size: 0.64rem !important;
+        gap: 6px !important;
+        flex-wrap: nowrap !important;
+        overflow-x: auto !important;
     }
 
     .flowchart-viewport {
-        min-height: 480px !important;
+        flex: 1 !important;
+        min-height: 0 !important;
+        height: 100% !important;
+        display: flex !important;
+        flex-direction: column !important;
+        position: relative !important;
+        overflow: hidden !important;
+        border-radius: 8px !important;
     }
 
-    /* Notion Tasks Workspace on mobile */
+    .flowchart-toolbar {
+        padding: 3px 6px !important;
+        min-height: auto !important;
+        gap: 4px !important;
+    }
+
+    .flowchart-hint {
+        display: none !important;
+    }
+
+    .flowchart-actions {
+        width: 100% !important;
+        justify-content: space-between !important;
+    }
+
+    .flowchart-scroll-wrapper {
+        flex: 1 !important;
+        min-height: 0 !important;
+        height: 100% !important;
+        overflow: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        touch-action: pan-x pan-y pinch-zoom !important;
+    }
+
+    /* Scrollable Workspaces for Tasks, Calendar & Settings */
+    #notion-tasks-workspace,
+    #calendar-workspace,
+    #settings-workspace {
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        padding: 8px 8px calc(65px + env(safe-area-inset-bottom)) 8px !important;
+    }
+
     .notion-tasks-container {
-        padding: 8px !important;
+        padding: 4px !important;
     }
 
     .runway-header {
@@ -5039,15 +5213,14 @@ body {
         justify-content: center !important;
     }
 
-    /* Settings on mobile */
     .settings-container {
-        padding: 10px !important;
+        padding: 6px !important;
     }
 
     .settings-header-banner {
         flex-direction: column !important;
         align-items: stretch !important;
-        gap: 12px !important;
+        gap: 8px !important;
     }
 
     .settings-header-actions {

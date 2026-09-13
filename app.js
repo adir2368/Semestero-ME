@@ -7257,11 +7257,15 @@ function setupFlowchartViewMode() {
 }
 
 function initFlowchartZoom() {
-    // User instruction: Default zoom on opening is strictly 100%
-    setFlowchartZoom(1.0);
-    isFlowchartFitWidth = false;
-    const toggleFitBtn = document.getElementById("btn-fc-toggle-fit");
-    if (toggleFitBtn) toggleFitBtn.classList.remove("active");
+    if (window.innerWidth <= 768) {
+        fitFlowchartToWidth();
+    } else {
+        // User instruction: Default zoom on opening desktop is strictly 100%
+        setFlowchartZoom(1.0);
+        isFlowchartFitWidth = false;
+        const toggleFitBtn = document.getElementById("btn-fc-toggle-fit");
+        if (toggleFitBtn) toggleFitBtn.classList.remove("active");
+    }
 }
 
 function fitFlowchartToWidth() {
@@ -7269,15 +7273,17 @@ function fitFlowchartToWidth() {
     const toggleFitBtn = document.getElementById("btn-fc-toggle-fit");
     if (!scrollWrap) return;
 
-    const availableWidth = scrollWrap.clientWidth || 1100;
-    const fitFactor = Math.max(0.6, Math.min(1.4, (availableWidth - 18) / BASE_FLOWCHART_WIDTH));
+    const availableWidth = scrollWrap.clientWidth || (window.innerWidth - 20);
+    const minFactor = (window.innerWidth <= 768) ? 0.24 : 0.6;
+    const fitFactor = Math.max(minFactor, Math.min(1.4, (availableWidth - 18) / BASE_FLOWCHART_WIDTH));
     setFlowchartZoom(fitFactor);
     isFlowchartFitWidth = true;
     if (toggleFitBtn) toggleFitBtn.classList.add("active");
 }
 
 function setFlowchartZoom(zoomVal) {
-    flowchartZoom = Math.max(0.55, Math.min(1.8, Math.round(zoomVal * 100) / 100));
+    const minZoom = (window.innerWidth <= 768) ? 0.22 : 0.55;
+    flowchartZoom = Math.max(minZoom, Math.min(2.0, Math.round(zoomVal * 100) / 100));
 
     const svgEl = document.getElementById("flowchart-svg");
     const indicator = document.getElementById("btn-fc-zoom-reset");
