@@ -174,7 +174,48 @@ const COURSE_NOTION_ICONS = {
     '034032': {
         color: '#8b5cf6',
         svg: `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#8b5cf6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h4l3-8 6 16 3-8h4"/></svg>`
-    }
+    },
+    // 034041 Heat Transfer / מעבר חום -> Thermal radiation waves
+    '034041': {
+        color: '#ea580c',
+        svg: `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#ea580c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M8 5a8 8 0 0 0 0 14M16 5a8 8 0 0 1 0 14M4 8a14 14 0 0 0 0 8M20 8a14 14 0 0 1 0 8"/></svg>`
+    },
+    // 034040 Control Theory / מבוא לבקרה -> Feedback control loop
+    '034040': {
+        color: '#06b6d4',
+        svg: `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#06b6d4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/><line x1="12" y1="3" x2="12" y2="9"/><line x1="12" y1="15" x2="12" y2="21"/></svg>`
+    },
+    // 034054 Mechanical Design 1 / תכן מכני 1 מ' -> Caliper / mechanical drafting
+    '034054': {
+        color: '#d97706',
+        svg: `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#d97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a9 9 0 0 0-9 9v9h9a9 9 0 0 0 9-9 9 9 0 0 0-9-9z"/><circle cx="12" cy="12" r="3"/></svg>`
+    },
+    // 034058 Probability & Stats / הסתברות וסטטיסטיקה -> Bell curve distribution
+    '034058': {
+        color: '#8b5cf6',
+        svg: `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#8b5cf6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18M4 18c3 0 4-14 8-14s5 14 8 14"/></svg>`
+    },
+    // 034051 Vibrations & Dynamics / תנודות ודינמיקה -> Harmonic oscillation wave
+    '034051': {
+        color: '#ec4899',
+        svg: `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#ec4899" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12c2.5-8 5.5-8 8 0s5.5 8 8 0 3.5-4 4-4"/></svg>`
+    },
+    // 034060 Mechatronics / מבוא למכטרוניקה והנע חשמלי -> Motor & circuit coil
+    '034060': {
+        color: '#eab308',
+        svg: `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#eab308" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="12" rx="2"/><circle cx="12" cy="12" r="3"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="16" y1="2" x2="16" y2="6"/></svg>`
+    },
+    // 034057 Advanced ME Lab / מעבדה מתקדמת -> Testing probe
+    '034057': {
+        color: '#14b8a6',
+        svg: `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#14b8a6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v14m-5-5l5 5 5-5M5 20h14"/></svg>`
+    },
+    // Senior Projects (034371, 034379, 034382, 034380, 034383) -> Capstone trophy / medal
+    '034371': { color: '#eab308', svg: `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#eab308" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>` },
+    '034379': { color: '#eab308', svg: `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#eab308" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>` },
+    '034382': { color: '#eab308', svg: `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#eab308" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>` },
+    '034380': { color: '#eab308', svg: `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#eab308" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>` },
+    '034383': { color: '#eab308', svg: `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#eab308" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>` }
 };
 
 function getCourseNotionIconHtml(courseCode) {
@@ -182,7 +223,41 @@ function getCourseNotionIconHtml(courseCode) {
     if (iconDef) {
         return `<span class="notion-course-icon" style="color: ${iconDef.color};">${iconDef.svg}</span>`;
     }
-    return `<span class="notion-course-icon">📜</span>`;
+    return `<span class="notion-course-icon">📘</span>`;
+}
+
+// Generates dedicated task type badge (WWW for WebWork, Exam, Lab, Project, Homework)
+function getTaskTypeBadgeHtml(task) {
+    const title = (task.title || "").toLowerCase();
+    const type = task.type || "";
+    
+    // 1. WebWork: dedicated WWW symbol / badge
+    if (title.includes("webwork") || type === "webwork") {
+        return `<span class="notion-task-badge webwork" title="WebWork"><span class="badge-icon">🌐</span><span class="badge-text">WWW</span></span>`;
+    }
+    
+    // 2. Exam: official exam indicator
+    if (type === "exam" || title.includes("מועד") || title.includes("מבחן")) {
+        const isDone = task.completed || task.status === 'done' || task.status === 'submitted';
+        return `<span class="notion-task-badge exam ${isDone ? 'done' : ''}" title="מבחן סמסטר"><span class="badge-icon">${isDone ? '🟢' : '🔴'}</span><span class="badge-text">${isDone ? 'הושלם' : 'מבחן'}</span></span>`;
+    }
+    
+    // 3. Lab: Microscope / Flask
+    if (type === "lab" || title.includes("מעבדה") || title.includes("דוח") || title.includes("דו\"ח")) {
+        return `<span class="notion-task-badge lab" title="מעבדה / דו&quot;ח"><span class="badge-icon">🔬</span><span class="badge-text">מעבדה</span></span>`;
+    }
+    
+    // 4. Project: Shield / Engineering Project
+    if (type === "project" || title.includes("פרויקט") || title.includes("פרוייקט")) {
+        return `<span class="notion-task-badge project" title="פרויקט"><span class="badge-icon">🛡️</span><span class="badge-text">פרויקט</span></span>`;
+    }
+    
+    // 5. Homework / Sheet (גיליון / תרגיל בית)
+    if (title.includes("גיליון") || title.includes("תרגיל בית") || title.includes("מטלת בית") || title.includes("מטלה") || type === "hw") {
+        return `<span class="notion-task-badge hw" title="שיעורי בית / גיליון"><span class="badge-icon">📝</span><span class="badge-text">גיליון</span></span>`;
+    }
+    
+    return `<span class="notion-task-badge general" title="משימה"><span class="badge-icon">📌</span><span class="badge-text">משימה</span></span>`;
 }
 
 // Academic Skill Tree - Core JS logic
@@ -5772,9 +5847,7 @@ function renderNotionTasksTable() {
         const isDone = (t.status === 'done' || t.status === 'submitted');
         const timeInfo = calculateTimeRemaining(t.dueDate, isDone);
         
-        let typeIcon = "📜";
-        if (t.type === 'project') { typeIcon = "🛡️"; }
-        if (t.type === 'exam') { typeIcon = "📝"; }
+        const taskBadgeHtml = getTaskTypeBadgeHtml(t);
         
         let statusClass = t.status || 'not_started';
         let displayLabel = 'not started';
@@ -5791,7 +5864,7 @@ function renderNotionTasksTable() {
                 <td>
                     <div class="notion-title-cell">
                         <span class="notion-course-tag">
-                            <span>${typeIcon}</span>
+                            ${taskBadgeHtml}
                             <span class="notion-title-editable" contenteditable="true" spellcheck="false" title="לחץ לעריכת שם המשימה">${t.title}</span>
                         </span>
                         <button class="notion-open-peek-btn" title="פתח תצוגת צד">🔲 OPEN</button>

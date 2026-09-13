@@ -1,5 +1,5 @@
 // Academic Skill Tree - PWA Service Worker
-const CACHE_NAME = 'ast-cache-v1.0.3';
+const CACHE_NAME = 'ast-cache-v1.0.4';
 
 const STATIC_ASSETS = [
     './',
@@ -15,7 +15,7 @@ const STATIC_ASSETS = [
     './user_saved_state.json'
 ];
 
-// Install: Cache core application assets
+// Install: Cache core application assets and activate immediately
 self.addEventListener('install', (event) => {
     event.waitUntil(
         caches.open(CACHE_NAME).then((cache) => {
@@ -25,7 +25,7 @@ self.addEventListener('install', (event) => {
     );
 });
 
-// Activate: Clean up old cache versions
+// Activate: Clean up old cache versions and claim clients
 self.addEventListener('activate', (event) => {
     event.waitUntil(
         caches.keys().then((keys) => {
@@ -41,7 +41,7 @@ self.addEventListener('activate', (event) => {
     );
 });
 
-// Fetch: Cache-first for local static files, network-first for external APIs
+// Fetch: Network-first for application code (HTML, JS, CSS) to ensure instant updates; Cache-first for images
 self.addEventListener('fetch', (event) => {
     const url = new URL(event.request.url);
 
@@ -50,22 +50,42 @@ self.addEventListener('fetch', (event) => {
         return;
     }
 
+    const isAppCode = event.request.mode === 'navigate' || 
+                      url.pathname.endsWith('.html') || 
+                      url.pathname.endsWith('.js') || 
+                      url.pathname.endsWith('.css') || 
+                      url.pathname.endsWith('user_saved_state.json');
+
+    if (isAppCode) {
+        // Network-First strategy: always fetch freshest version online, fallback to cache offline
+        event.respondWith(
+            fetch(event.request).then((networkResponse) => {
+                if (networkResponse && networkResponse.status === 200) {
+                    const responseToCache = networkResponse.clone();
+                    caches.open(CACHE_NAME).then((cache) => {
+                        cache.put(event.request, responseToCache);
+                    });
+                }
+                return networkResponse;
+            }).catch(() => {
+                return caches.match(event.request).then((cachedResponse) => {
+                    if (cachedResponse) return cachedResponse;
+                    if (event.request.mode === 'navigate') {
+                        return caches.match('./index.html');
+                    }
+                });
+            })
+        );
+        return;
+    }
+
+    // Cache-first for images, fonts, and icons
     event.respondWith(
         caches.match(event.request).then((cachedResponse) => {
-            if (cachedResponse) {
-                // Fetch in background to revalidate cache
-                fetch(event.request).then((networkResponse) => {
-                    if (networkResponse && networkResponse.status === 200) {
-                        caches.open(CACHE_NAME).then((cache) => {
-                            cache.put(event.request, networkResponse);
-                        });
-                    }
-                }).catch(() => {});
-                return cachedResponse;
-            }
+            if (cachedResponse) return cachedResponse;
 
             return fetch(event.request).then((networkResponse) => {
-                if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
+                if (!networkResponse || networkResponse.status !== 200) {
                     return networkResponse;
                 }
                 const responseToCache = networkResponse.clone();
@@ -73,11 +93,6 @@ self.addEventListener('fetch', (event) => {
                     cache.put(event.request, responseToCache);
                 });
                 return networkResponse;
-            }).catch(() => {
-                // Offline fallback for navigation requests
-                if (event.request.mode === 'navigate') {
-                    return caches.match('./index.html');
-                }
             });
         })
     );
