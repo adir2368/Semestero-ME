@@ -1,5 +1,5 @@
 // Academic Skill Tree - PWA Service Worker
-const CACHE_NAME = 'ast-cache-v1.4.3';
+const CACHE_NAME = 'ast-cache-v1.4.4';
 
 const STATIC_ASSETS = [
     './',
