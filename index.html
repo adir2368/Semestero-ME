@@ -16,7 +16,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Rubik:wght@300;400;500;700;900&display=swap" rel="stylesheet">
     <link rel="icon" type="image/png" href="icon.png">
-    <link rel="stylesheet" href="styles.css?v=1.0.7">
+    <link rel="stylesheet" href="styles.css?v=1.0.8">
 </head>
 <body>
     <div class="hud-container">
@@ -1199,7 +1199,7 @@
                     <span class="icon-picker-preview" id="icon-picker-preview-box"></span>
                     <div>
                         <h3 class="icon-picker-title" id="icon-picker-course-title">בחר סמל לקורס</h3>
-                        <span class="icon-picker-subtitle">בחר צבע וסמל וקטורי בסגנון Notion</span>
+                        <span class="icon-picker-subtitle" id="icon-picker-selected-desc">בחר צבע וסמל וקטורי בסגנון Notion</span>
                     </div>
                 </div>
                 <button type="button" class="btn-close-picker" id="btn-close-icon-picker" title="סגור">✕</button>
@@ -1216,7 +1216,7 @@
             <!-- Search Bar -->
             <div class="icon-picker-search-bar">
                 <span class="search-icon">🔍</span>
-                <input type="text" id="icon-picker-search" placeholder="חפש סמל... (gear, flame, math, atom, flask...)" autocomplete="off">
+                <input type="text" id="icon-picker-search" placeholder="חפש סמל... (מד״ר, יוגה, חדו״א, מוצקים, gear, flame, atom...)" autocomplete="off">
                 <button type="button" id="btn-clear-icon-search" class="btn-clear-search" style="display: none;">✕</button>
             </div>
 
@@ -1226,9 +1226,10 @@
                 <button type="button" class="category-pill" data-cat="math">מתמטיקה</button>
                 <button type="button" class="category-pill" data-cat="physics">פיזיקה</button>
                 <button type="button" class="category-pill" data-cat="mechanical">מכונות</button>
-                <button type="button" class="category-pill" data-cat="chemistry">כימיה</button>
-                <button type="button" class="category-pill" data-cat="tech">חישוב</button>
-                <button type="button" class="category-pill" data-cat="academic">כללי</button>
+                <button type="button" class="category-pill" data-cat="chemistry">כימיה וחומרים</button>
+                <button type="button" class="category-pill" data-cat="tech">חישוב ותכנות</button>
+                <button type="button" class="category-pill" data-cat="sports">יוגה וספורט</button>
+                <button type="button" class="category-pill" data-cat="academic">כללי ואקדמי</button>
             </div>
 
             <!-- Icon Grid -->
@@ -1250,7 +1251,7 @@
     </div>
 
     <!-- Core Application Logic -->
-    <script src="app.js?v=1.0.7"></script>
+    <script src="app.js?v=1.0.8"></script>
     <!-- PWA Service Worker Registration -->
     <script>
         if ('serviceWorker' in navigator && window.location.protocol.startsWith('http')) {
