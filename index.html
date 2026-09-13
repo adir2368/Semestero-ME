@@ -16,7 +16,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Rubik:wght@300;400;500;700;900&display=swap" rel="stylesheet">
     <link rel="icon" type="image/png" href="icon.png">
-    <link rel="stylesheet" href="styles.css?v=1.1.0">
+    <link rel="stylesheet" href="styles.css?v=1.2.0">
 </head>
 <body>
     <div class="hud-container">
@@ -79,6 +79,11 @@
                     <span class="nav-tab-icon">📅</span>
                     <span class="nav-tab-label">לוח שנה</span>
                     <span class="nav-tab-sublabel">(Calendar)</span>
+                </button>
+                <button class="nav-tab" id="tab-timetable" title="מערכת שעות שבועית מסונכרנת מ-CheeseFork">
+                    <span class="nav-tab-icon">🕒</span>
+                    <span class="nav-tab-label">מערכת שעות</span>
+                    <span class="nav-tab-sublabel">(Timetable)</span>
                 </button>
                 <button class="nav-tab" id="tab-settings">
                     <span class="nav-tab-icon">⚙️</span>
@@ -645,6 +650,213 @@
             </section>
         </main>
 
+        <!-- Weekly Timetable Workspace -->
+        <main class="hud-workspace" id="timetable-workspace" style="display: none; flex-direction: column; overflow-y: auto; background: var(--bg-deep);">
+            <div class="timetable-container">
+                <!-- Header Card -->
+                <div class="timetable-header-card">
+                    <div class="timetable-title-group">
+                        <h2>🕒 מערכת שעות שבועית - סמסטר חורף 2026/2027</h2>
+                        <p>סנכרון מלא מחשבון CheeseFork | שנה ב׳ סמסטר א׳ (סמסטר 3) | הנדסת מכונות הטכניון</p>
+                    </div>
+                    <div class="timetable-stats-strip">
+                        <div class="timetable-stat-pill">
+                            <span>🎯</span>
+                            <span>נק״ז סמסטר: <strong>20.5</strong></span>
+                        </div>
+                        <div class="timetable-stat-pill">
+                            <span>📚</span>
+                            <span>קורסים: <strong>6</strong></span>
+                        </div>
+                        <div class="timetable-stat-pill">
+                            <span>🏖️</span>
+                            <span>ימים חופשיים: <strong>ראשון ושישי</strong></span>
+                        </div>
+                        <a href="https://cheesefork.netlify.app/?semester=202601&uid=D4bh8oHO0GQI5Gx1iYAbWsouBVx2" target="_blank" rel="noopener" class="btn btn-sm btn-outline" style="border-color: #f59e0b; color: #fbbf24; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+                            🧀 פתח ב-CheeseFork
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Timetable 5-Day Grid -->
+                <div class="timetable-grid">
+                    <!-- Day 1: Sunday -->
+                    <div class="timetable-day-col">
+                        <div class="timetable-day-header">
+                            <span class="timetable-day-title">יום ראשון</span>
+                            <span class="timetable-day-badge free-day">יום חופשי ✨</span>
+                        </div>
+                        <div class="timetable-day-body">
+                            <div class="timetable-free-state">
+                                <span class="emoji">🏖️</span>
+                                <div style="font-weight: 700; color: #f1f5f9; font-size: 0.95rem;">יום חופשי מלימודים פרונטליים</div>
+                                <div style="font-size: 0.78rem; line-height: 1.4;">זמן מומלץ לחזרה ותרגול עצמי, שיעורי בית, WebWork ופרויקטים הנדסיים.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Day 2: Monday -->
+                    <div class="timetable-day-col">
+                        <div class="timetable-day-header">
+                            <span class="timetable-day-title">יום שני</span>
+                            <span class="timetable-day-badge active-day">3 שיעורים</span>
+                        </div>
+                        <div class="timetable-day-body">
+                            <!-- Physics 2 Lecture -->
+                            <div class="timetable-card timetable-card-physics" onclick="openCourseDetails('114052')">
+                                <div class="timetable-card-time">⏰ 08:30 - 10:30 (שעתיים)</div>
+                                <div class="timetable-card-title">פיסיקה 2 (114052)</div>
+                                <div class="timetable-card-meta">
+                                    <span class="timetable-tag">הרצאה (קבוצה 10)</span>
+                                </div>
+                                <div class="timetable-lecturer">מרצה: ד"ר גדעון אלון</div>
+                            </div>
+
+                            <!-- Solid Mechanics 2M Lecture -->
+                            <div class="timetable-card timetable-card-solids" onclick="openCourseDetails('034053')">
+                                <div class="timetable-card-time">⏰ 10:30 - 14:30 (4 שעות)</div>
+                                <div class="timetable-card-title">מכניקת מוצקים 2מ (034053)</div>
+                                <div class="timetable-card-meta">
+                                    <span class="timetable-tag">הרצאה (קבוצה 10)</span>
+                                </div>
+                                <div class="timetable-lecturer">מרצה: פרופ' יוסף גבלי</div>
+                            </div>
+
+                            <!-- Engineering Computation Tutorial -->
+                            <div class="timetable-card timetable-card-computing" onclick="openCourseDetails('034056')">
+                                <div class="timetable-card-time">⏰ 14:30 - 16:30 (שעתיים)</div>
+                                <div class="timetable-card-title">מבוא לחישוב מדעי והנדסי (034056)</div>
+                                <div class="timetable-card-meta">
+                                    <span class="timetable-tag">תרגול (קבוצה 14)</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Day 3: Tuesday -->
+                    <div class="timetable-day-col">
+                        <div class="timetable-day-header">
+                            <span class="timetable-day-title">יום שלישי</span>
+                            <span class="timetable-day-badge active-day">תרמודינמיקה 1</span>
+                        </div>
+                        <div class="timetable-day-body">
+                            <!-- Thermodynamics 1 Lecture -->
+                            <div class="timetable-card timetable-card-thermo" onclick="openCourseDetails('034035')">
+                                <div class="timetable-card-time">⏰ 08:30 - 11:30 (3 שעות)</div>
+                                <div class="timetable-card-title">תרמודינמיקה 1 (034035)</div>
+                                <div class="timetable-card-meta">
+                                    <span class="timetable-tag">הרצאה (קבוצה 10)</span>
+                                </div>
+                                <div class="timetable-lecturer">מרצה: פרופ' לאוניד טרטקובסקי</div>
+                            </div>
+
+                            <!-- Break -->
+                            <div class="timetable-break-gap">☕ הפסקת צהריים (11:30 - 12:30)</div>
+
+                            <!-- Thermodynamics 1 Tutorial -->
+                            <div class="timetable-card timetable-card-thermo" onclick="openCourseDetails('034035')">
+                                <div class="timetable-card-time">⏰ 12:30 - 14:30 (שעתיים)</div>
+                                <div class="timetable-card-title">תרמודינמיקה 1 (034035)</div>
+                                <div class="timetable-card-meta">
+                                    <span class="timetable-tag">תרגול (קבוצה 11)</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Day 4: Wednesday -->
+                    <div class="timetable-day-col">
+                        <div class="timetable-day-header">
+                            <span class="timetable-day-title">יום רביעי</span>
+                            <span class="timetable-day-badge active-day">4 שיעורים</span>
+                        </div>
+                        <div class="timetable-day-body">
+                            <!-- Physics 2 Lecture -->
+                            <div class="timetable-card timetable-card-physics" onclick="openCourseDetails('114052')">
+                                <div class="timetable-card-time">⏰ 08:30 - 09:30 (שעה)</div>
+                                <div class="timetable-card-title">פיסיקה 2 (114052)</div>
+                                <div class="timetable-card-meta">
+                                    <span class="timetable-tag">הרצאה (קבוצה 10)</span>
+                                </div>
+                                <div class="timetable-lecturer">מרצה: ד"ר גדעון אלון</div>
+                            </div>
+
+                            <!-- Physics 2 Tutorial -->
+                            <div class="timetable-card timetable-card-physics" onclick="openCourseDetails('114052')">
+                                <div class="timetable-card-time">⏰ 09:30 - 10:30 (שעה)</div>
+                                <div class="timetable-card-title">פיסיקה 2 (114052)</div>
+                                <div class="timetable-card-meta">
+                                    <span class="timetable-tag">תרגול (קבוצה 13)</span>
+                                </div>
+                            </div>
+
+                            <!-- PDE Tutorial -->
+                            <div class="timetable-card timetable-card-pde" onclick="openCourseDetails('104228')">
+                                <div class="timetable-card-time">⏰ 10:30 - 12:30 (שעתיים)</div>
+                                <div class="timetable-card-title">משוואות דיפרנציאליות חלקיות מ' (104228)</div>
+                                <div class="timetable-card-meta">
+                                    <span class="timetable-tag">תרגול (קבוצה 21)</span>
+                                </div>
+                            </div>
+
+                            <!-- Break -->
+                            <div class="timetable-break-gap">☕ הפסקת צהריים (12:30 - 14:30)</div>
+
+                            <!-- Engineering Computation Lecture -->
+                            <div class="timetable-card timetable-card-computing" onclick="openCourseDetails('034056')">
+                                <div class="timetable-card-time">⏰ 14:30 - 17:30 (3 שעות)</div>
+                                <div class="timetable-card-title">מבוא לחישוב מדעי והנדסי (034056)</div>
+                                <div class="timetable-card-meta">
+                                    <span class="timetable-tag">הרצאה (קבוצה 10)</span>
+                                </div>
+                                <div class="timetable-lecturer">מרצה: ד"ר דניאל הקסנר</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Day 5: Thursday -->
+                    <div class="timetable-day-col">
+                        <div class="timetable-day-header">
+                            <span class="timetable-day-title">יום חמישי</span>
+                            <span class="timetable-day-badge active-day">3 שיעורים</span>
+                        </div>
+                        <div class="timetable-day-body">
+                            <!-- Yoga Sport -->
+                            <div class="timetable-card timetable-card-yoga" onclick="openCourseDetails('03940805')">
+                                <div class="timetable-card-time">⏰ 07:30 - 09:00 (שעה וחצי)</div>
+                                <div class="timetable-card-title">חינוך גופני - יוגה (03940805)</div>
+                                <div class="timetable-card-meta">
+                                    <span class="timetable-tag">יוגה (קבוצה 24)</span>
+                                    <span class="timetable-tag">אולם ספורט</span>
+                                </div>
+                            </div>
+
+                            <!-- Break -->
+                            <div class="timetable-break-gap">☕ התרעננות ומנוחה (09:00 - 10:30)</div>
+
+                            <!-- PDE Lecture -->
+                            <div class="timetable-card timetable-card-pde" onclick="openCourseDetails('104228')">
+                                <div class="timetable-card-time">⏰ 10:30 - 12:30 (שעתיים)</div>
+                                <div class="timetable-card-title">משוואות דיפרנציאליות חלקיות מ' (104228)</div>
+                                <div class="timetable-card-meta">
+                                    <span class="timetable-tag">הרצאה (קבוצה 20)</span>
+                                </div>
+                            </div>
+
+                            <!-- Solid Mechanics 2M Tutorial -->
+                            <div class="timetable-card timetable-card-solids" onclick="openCourseDetails('034053')">
+                                <div class="timetable-card-time">⏰ 12:30 - 14:30 (שעתיים)</div>
+                                <div class="timetable-card-title">מכניקת מוצקים 2מ (034053)</div>
+                                <div class="timetable-card-meta">
+                                    <span class="timetable-tag">תרגול (קבוצה 21)</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
     </div>
 
     <!-- Course Details Modal -->
@@ -676,6 +888,9 @@
                 <div class="register-action-box" id="register-action-box">
                     <!-- Dynamic state based on prerequisites -->
                 </div>
+
+                <!-- CheeseFork Schedule & Exam Info Card -->
+                <div id="modal-cheesefork-container"></div>
 
                 <!-- Semester Planning Selector -->
                 <div class="details-section">
@@ -1251,7 +1466,7 @@
     </div>
 
     <!-- Core Application Logic -->
-    <script src="app.js?v=1.1.0"></script>
+    <script src="app.js?v=1.2.0"></script>
     <!-- PWA Service Worker Registration -->
     <script>
         if ('serviceWorker' in navigator && window.location.protocol.startsWith('http')) {

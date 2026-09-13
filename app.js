@@ -2828,7 +2828,8 @@ const PRELOADED_USER_STATE = {
       "credits": 2.5,
       "semester": 2,
       "prerequisites": [
-        "104041"
+        "104041",
+        "104065"
       ],
       "status": "mastered",
       "tasks": [
@@ -2885,7 +2886,7 @@ const PRELOADED_USER_STATE = {
       "tasks": [
         {
           "id": "104228_h1",
-          "title": "תרגיל בית 1: משוואת הגלים והחום",
+          "title": "תרגיל בית 1: משוואות מסדר ראשון ומאפיינים",
           "type": "hw",
           "xp": 50,
           "completed": false,
@@ -2893,13 +2894,54 @@ const PRELOADED_USER_STATE = {
           "dueDate": ""
         },
         {
+          "id": "104228_ww1",
+          "title": "WebWork 1: משוואת הגלים והפרדת משתנים",
+          "type": "webwork",
+          "xp": 40,
+          "completed": false,
+          "status": "not_started",
+          "dueDate": ""
+        },
+        {
           "id": "104228_ex",
-          "title": "מבחן סוף",
+          "title": "מועד א",
           "type": "exam",
           "xp": 500,
           "completed": false,
           "status": "not_started",
-          "dueDate": ""
+          "dueDate": "2027-02-24"
+        },
+        {
+          "id": "104228_ex_b",
+          "title": "מועד ב'",
+          "type": "exam",
+          "xp": 500,
+          "completed": false,
+          "status": "not_started",
+          "dueDate": "2027-03-26"
+        }
+      ],
+      "faculty": "הפקולטה למתמטיקה",
+      "syllabus": "מבוא למשוואות דיפרנציאליות חלקיות מסדר ראשון ושני. מיון משוואות לינאריות וחצי-לינאריות מסדר שני: היפרבוליות, פרבוליות ואליפטיות. משוואת הגלים בממד אחד ובשלושה ממדים (נוסחת דלאמבר, פתרון פואסון). משוואת החום: פתרון בעיית התחלה על הישר, עקרון המקסימום. שיטת הפרדת משתנים וטורי פורייה. משוואת לפלס ופואסון בתחומים שונים.",
+      "lecturers": "פרופ' מתמטיקה",
+      "moedA": "2027-02-24",
+      "moedB": "2027-03-26",
+      "schedule": [
+        {
+          "type": "תרגול",
+          "group": 21,
+          "day": "רביעי",
+          "hours": "10:30 - 12:30",
+          "lecturer": "",
+          "room": ""
+        },
+        {
+          "type": "הרצאה",
+          "group": 20,
+          "day": "חמישי",
+          "hours": "10:30 - 12:30",
+          "lecturer": "",
+          "room": ""
         }
       ]
     },
@@ -2973,13 +3015,62 @@ const PRELOADED_USER_STATE = {
           "dueDate": ""
         },
         {
+          "id": "114052_ww1",
+          "title": "WebWork 1: חוק קולון ושדה חשמלי",
+          "type": "webwork",
+          "xp": 40,
+          "completed": false,
+          "status": "not_started",
+          "dueDate": ""
+        },
+        {
           "id": "114052_ex",
-          "title": "מבחן סוף",
+          "title": "מועד א",
           "type": "exam",
           "xp": 500,
           "completed": false,
           "status": "not_started",
-          "dueDate": ""
+          "dueDate": "2027-02-01"
+        },
+        {
+          "id": "114052_ex_b",
+          "title": "מועד ב'",
+          "type": "exam",
+          "xp": 500,
+          "completed": false,
+          "status": "not_started",
+          "dueDate": "2027-03-02"
+        }
+      ],
+      "faculty": "הפקולטה לפיסיקה",
+      "syllabus": "חשמל ומגנטיות: חוק קולון, שדה חשמלי, חוק גאוס, פוטנציאל אלקטרוסטטי, קיבול וקבלים, דיאלקטריים, זרם והתנגדות, כוח אלקטרו-מניע ומעגלי זרם ישר. שדה מגנטי, חוק ביו-סבר, חוק אמפר, השראה אלקטרומגנטית, חוק פראדיי, השראות, זרם חילופין, משוואות מקסוול וגלים אלקטרומגנטיים.",
+      "lecturers": "ד\"ר גדעון אלון",
+      "moedA": "2027-02-01",
+      "moedB": "2027-03-02",
+      "schedule": [
+        {
+          "type": "הרצאה",
+          "group": 10,
+          "day": "שני",
+          "hours": "08:30 - 10:30",
+          "lecturer": "ד\"ר גדעון אלון",
+          "room": ""
+        },
+        {
+          "type": "הרצאה",
+          "group": 10,
+          "day": "רביעי",
+          "hours": "08:30 - 09:30",
+          "lecturer": "ד\"ר גדעון אלון",
+          "room": ""
+        },
+        {
+          "type": "תרגול",
+          "group": 13,
+          "day": "רביעי",
+          "hours": "09:30 - 10:30",
+          "lecturer": "",
+          "room": ""
         }
       ]
     },
@@ -3214,7 +3305,7 @@ const PRELOADED_USER_STATE = {
     },
     "034053": {
       "code": "034053",
-      "name": "מכניקת מוצקים 2 מורחב",
+      "name": "מכניקת מוצקים 2מ",
       "credits": 5,
       "semester": 3,
       "prerequisites": [
@@ -3226,7 +3317,7 @@ const PRELOADED_USER_STATE = {
       "tasks": [
         {
           "id": "034053_h1",
-          "title": "תרגיל בית 1: כפיפת קורות מאמצים משולבים",
+          "title": "תרגיל בית 1: כפיפת קורות ומאמצים משולבים",
           "type": "hw",
           "xp": 60,
           "completed": false,
@@ -3235,12 +3326,44 @@ const PRELOADED_USER_STATE = {
         },
         {
           "id": "034053_ex",
-          "title": "מבחן סוף",
+          "title": "מועד א",
           "type": "exam",
           "xp": 550,
           "completed": false,
           "status": "not_started",
-          "dueDate": ""
+          "dueDate": "2027-02-18"
+        },
+        {
+          "id": "034053_ex_b",
+          "title": "מועד ב'",
+          "type": "exam",
+          "xp": 550,
+          "completed": false,
+          "status": "not_started",
+          "dueDate": "2027-03-18"
+        }
+      ],
+      "faculty": "הפקולטה להנדסת מכונות",
+      "syllabus": "מאמצים, עיבורים, קשרי מאמץ-עיבור (חוק הוק המוכלל), קריטריוני כניעה וכשל (פון-מיזס, טרסקה). מבוא לתורת האלסטיות, פונקציית מאמצים של איירי. כפיפת קורות אסימטריות, מרכז גזירה. פיתול של מוטות בעלי חתך לא עגול וחתכים דקי-דופן. קריסת עמודים (אוילר). שיטות אנרגיה: משפט קסטיליאנו, עבודה מדומה.",
+      "lecturers": "פרופ' יוסף גבלי",
+      "moedA": "2027-02-18",
+      "moedB": "2027-03-18",
+      "schedule": [
+        {
+          "type": "הרצאה",
+          "group": 10,
+          "day": "שני",
+          "hours": "10:30 - 14:30",
+          "lecturer": "פרופ' יוסף גבלי",
+          "room": ""
+        },
+        {
+          "type": "תרגול",
+          "group": 21,
+          "day": "חמישי",
+          "hours": "12:30 - 14:30",
+          "lecturer": "",
+          "room": ""
         }
       ]
     },
@@ -3260,21 +3383,59 @@ const PRELOADED_USER_STATE = {
           "title": "תרגיל בית 1: פתרון משוואות לא ליניאריות בפייתון",
           "type": "hw",
           "xp": 50,
-          "completed": false
+          "completed": false,
+          "status": "not_started",
+          "dueDate": ""
         },
         {
           "id": "034056_p1",
-          "title": "פרוייקט חישובי: אנליזה של מערכת מכנית מורכבת",
+          "title": "פרוייקט חישובי: אנליזה נומרית של מערכת מכנית",
           "type": "project",
           "xp": 200,
-          "completed": false
+          "completed": false,
+          "status": "not_started",
+          "dueDate": ""
         },
         {
           "id": "034056_ex",
-          "title": "מבחן סוף",
+          "title": "מועד א",
           "type": "exam",
           "xp": 500,
-          "completed": false
+          "completed": false,
+          "status": "not_started",
+          "dueDate": "2027-02-11"
+        },
+        {
+          "id": "034056_ex_b",
+          "title": "מועד ב'",
+          "type": "exam",
+          "xp": 500,
+          "completed": false,
+          "status": "not_started",
+          "dueDate": "2027-03-10"
+        }
+      ],
+      "faculty": "הפקולטה להנדסת מכונות",
+      "syllabus": "1. הקדמה לחישוב מדעי ואלגוריתמיקה. 2. שיטות פתרון למשוואות לינאריות: שיטת גאוס, פירוק LU, שיטות איטרטיביות (יעקובי, גאוס-זיידל). 3. שורשים של משוואות לא לינאריות: חצייה, ניוטון-רפסון. 4. אינטרפולציה וקירוב פונקציות. 5. גזירה ואינטגרציה נומרית. 6. פתרון נומרי של משוואות דיפרנציאליות רגילות (ODE) - שיטות אוילר ורונגה-קוטה. יישומים מעשיים בפייתון.",
+      "lecturers": "ד\"ר דניאל הקסנר",
+      "moedA": "2027-02-11",
+      "moedB": "2027-03-10",
+      "schedule": [
+        {
+          "type": "תרגול",
+          "group": 14,
+          "day": "שני",
+          "hours": "14:30 - 16:30",
+          "lecturer": "",
+          "room": ""
+        },
+        {
+          "type": "הרצאה",
+          "group": 10,
+          "day": "רביעי",
+          "hours": "14:30 - 17:30",
+          "lecturer": "ד\"ר דניאל הקסנר",
+          "room": ""
         }
       ]
     },
@@ -3300,12 +3461,44 @@ const PRELOADED_USER_STATE = {
         },
         {
           "id": "034035_ex",
-          "title": "מבחן סוף",
+          "title": "מועד א",
           "type": "exam",
           "xp": 500,
           "completed": false,
           "status": "not_started",
-          "dueDate": ""
+          "dueDate": "2027-02-07"
+        },
+        {
+          "id": "034035_ex_b",
+          "title": "מועד ב'",
+          "type": "exam",
+          "xp": 500,
+          "completed": false,
+          "status": "not_started",
+          "dueDate": "2027-03-05"
+        }
+      ],
+      "faculty": "הפקולטה להנדסת מכונות",
+      "syllabus": "מושגי יסוד, מערכת, תכונות, מצב, תהליך, חוק האפס והחוק הראשון. אנרגיה. אנתלפיה. שינויי פאזה וחומר טהור. משוואות מצב, גז אידיאלי וגז אמיתי. ניתוח נפח בקרה: שימור מסה ושימור אנרגיה. החוק השני של התרמודינמיקה: נצילות קרנו, אי-שוויון קלאוזיוס, אנטרופיה ומאזן אנטרופיה. אקסרגיה, מחזורי כוח וקירור.",
+      "lecturers": "פרופ' לאוניד טרטקובסקי",
+      "moedA": "2027-02-07",
+      "moedB": "2027-03-05",
+      "schedule": [
+        {
+          "type": "הרצאה",
+          "group": 10,
+          "day": "שלישי",
+          "hours": "08:30 - 11:30",
+          "lecturer": "פרופ' לאוניד טרטקובסקי",
+          "room": ""
+        },
+        {
+          "type": "תרגול",
+          "group": 11,
+          "day": "שלישי",
+          "hours": "12:30 - 14:30",
+          "lecturer": "",
+          "room": ""
         }
       ]
     },
@@ -3315,6 +3508,7 @@ const PRELOADED_USER_STATE = {
       "credits": 3.5,
       "semester": 4,
       "prerequisites": [
+        "034053",
         "034061",
         "314533"
       ],
@@ -3346,7 +3540,8 @@ const PRELOADED_USER_STATE = {
       "prerequisites": [
         "034028",
         "114051",
-        "104043"
+        "104043",
+        "104131"
       ],
       "status": "locked",
       "tasks": [
@@ -3375,7 +3570,8 @@ const PRELOADED_USER_STATE = {
       "semester": 4,
       "prerequisites": [
         "034035",
-        "104043"
+        "104131",
+        "104228"
       ],
       "status": "locked",
       "tasks": [
@@ -3490,7 +3686,9 @@ const PRELOADED_USER_STATE = {
       "semester": 5,
       "prerequisites": [
         "034053",
-        "034030"
+        "034030",
+        "034061",
+        "314533"
       ],
       "status": "locked",
       "tasks": [
@@ -3555,7 +3753,10 @@ const PRELOADED_USER_STATE = {
       "semester": 5,
       "prerequisites": [
         "034010",
-        "034032"
+        "034032",
+        "034053",
+        "034056",
+        "104228"
       ],
       "status": "locked",
       "tasks": [
@@ -3620,8 +3821,11 @@ const PRELOADED_USER_STATE = {
       "credits": 4,
       "semester": 6,
       "prerequisites": [
-        "034053",
-        "034035"
+        "034041",
+        "034040",
+        "034051",
+        "034058",
+        "114032"
       ],
       "status": "locked",
       "tasks": [
@@ -3657,7 +3861,8 @@ const PRELOADED_USER_STATE = {
       "credits": 2.5,
       "semester": 6,
       "prerequisites": [
-        "034054"
+        "034054",
+        "034030"
       ],
       "status": "locked",
       "tasks": [
@@ -3777,32 +3982,38 @@ const PRELOADED_USER_STATE = {
     },
     "03940805": {
       "code": "03940805",
-      "name": "חינוך גופני - יוגה",
+      "name": "חינוך גופני - אתלטיקה קלה / יוגה",
       "credits": 1,
       "semester": 3,
       "prerequisites": [],
       "status": "active",
       "tasks": [
         {
-          "id": "03940805_h1",
-          "title": "מטלת בית 1",
+          "id": "03940805_att",
+          "title": "נוכחות פעילה בשיעורי יוגה (חובת 80%)",
           "type": "hw",
-          "xp": 50,
-          "completed": false,
-          "status": "not_started",
-          "dueDate": ""
-        },
-        {
-          "id": "03940805_ex",
-          "title": "מבחן סוף",
-          "type": "exam",
-          "xp": 500,
+          "xp": 100,
           "completed": false,
           "status": "not_started",
           "dueDate": ""
         }
       ],
-      "type": "sports"
+      "type": "sports",
+      "faculty": "היחידה ללימודי ספורט",
+      "syllabus": "תרגול יוגה שבועי: נשימה, גמישות, שיווי משקל וחיזוק שרירי ליבה. חובת נוכחות פעילה בלפחות 80% מהשיעורים לאורך הסמסטר.",
+      "lecturers": "היחידה לחינוך גופני",
+      "moedA": null,
+      "moedB": null,
+      "schedule": [
+        {
+          "type": "יוגה",
+          "group": 24,
+          "day": "חמישי",
+          "hours": "07:30 - 09:00",
+          "lecturer": "",
+          "room": "אולם ספורט"
+        }
+      ]
     }
   },
   "gpa": 86.39240506329114,
@@ -4198,6 +4409,149 @@ const PRELOADED_USER_STATE = {
   "customCalendarEvents": [],
   "hasLoadedGoogleCalendarAugust": true,
   "pastExamsBank": {
+    "104043": {
+      "name": "חדו״א 2 (104043)",
+      "earliestYear": 2015,
+      "examDate": "2026-08-05",
+      "studyStartDate": "2026-08-05",
+      "exams": [
+        {
+          "id": "exam_104043_2016_40",
+          "year": "2016",
+          "moed": "אביב מועד א",
+          "solution": "פתרון קיים",
+          "exists": true,
+          "scheduledDate": "2026-08-22",
+          "completed": true
+        },
+        {
+          "id": "exam_104043_2017_41",
+          "year": "2017",
+          "moed": "אביב מועד א",
+          "solution": "פתרון קיים",
+          "exists": true,
+          "scheduledDate": "2026-08-23",
+          "completed": true
+        },
+        {
+          "id": "exam_104043_2017_42",
+          "year": "2017",
+          "moed": "אביב מועד ב",
+          "solution": "פתרון קיים",
+          "exists": true,
+          "scheduledDate": "2026-08-23",
+          "completed": true
+        },
+        {
+          "id": "exam_104043_2018_43",
+          "year": "2018",
+          "moed": "אביב מועד א",
+          "solution": "פתרון קיים",
+          "exists": true,
+          "scheduledDate": "2026-08-24",
+          "completed": true
+        },
+        {
+          "id": "exam_104043_2018_44",
+          "year": "2018",
+          "moed": "אביב מועד ב",
+          "solution": "פתרון קיים",
+          "exists": true,
+          "scheduledDate": "2026-08-24",
+          "completed": true
+        },
+        {
+          "id": "exam_104043_2019_45",
+          "year": "2019",
+          "moed": "אביב מועד א",
+          "solution": "פתרון קיים",
+          "exists": true,
+          "scheduledDate": "2026-08-25",
+          "completed": true
+        },
+        {
+          "id": "exam_104043_2019_46",
+          "year": "2019",
+          "moed": "אביב מועד ב",
+          "solution": "פתרון קיים",
+          "exists": true,
+          "scheduledDate": "2026-08-25",
+          "completed": true
+        },
+        {
+          "id": "exam_104043_2020_47",
+          "year": "2020",
+          "moed": "אביב מועד א",
+          "solution": "פתרון קיים",
+          "exists": true,
+          "scheduledDate": "2026-08-26",
+          "completed": true
+        },
+        {
+          "id": "exam_104043_2020_48",
+          "year": "2020",
+          "moed": "אביב מועד ב",
+          "solution": "פתרון קיים",
+          "exists": true,
+          "scheduledDate": "2026-08-26",
+          "completed": true
+        },
+        {
+          "id": "exam_104043_2022_49",
+          "year": "2022",
+          "moed": "אביב מועד א",
+          "solution": "פתרון קיים",
+          "exists": true,
+          "scheduledDate": "2026-08-27",
+          "completed": true
+        },
+        {
+          "id": "exam_104043_2022_50",
+          "year": "2022",
+          "moed": "אביב מועד ב",
+          "solution": "פתרון קיים",
+          "exists": true,
+          "scheduledDate": "2026-08-27",
+          "completed": true
+        },
+        {
+          "id": "exam_104043_2024_51",
+          "year": "2024",
+          "moed": "אביב מועד א",
+          "solution": "פתרון קיים",
+          "exists": true,
+          "scheduledDate": "2026-08-28",
+          "completed": true
+        },
+        {
+          "id": "exam_104043_2024_52",
+          "year": "2024",
+          "moed": "אביב מועד ב",
+          "solution": "פתרון קיים",
+          "exists": true,
+          "scheduledDate": "2026-08-28",
+          "completed": true
+        },
+        {
+          "id": "exam_104043_2025_53",
+          "year": "2025",
+          "moed": "אביב מועד א",
+          "solution": "פתרון קיים",
+          "exists": true,
+          "scheduledDate": "2026-08-29",
+          "completed": true
+        },
+        {
+          "id": "exam_104043_2025_54",
+          "year": "2025",
+          "moed": "אביב מועד ב",
+          "solution": "פתרון קיים",
+          "exists": true,
+          "scheduledDate": "2026-08-29",
+          "completed": true
+        }
+      ]
+    },
     "104131": {
       "name": "מד״ר (104131)",
       "earliestYear": 2015,
@@ -4329,6 +4683,96 @@ const PRELOADED_USER_STATE = {
           "exists": true,
           "scheduledDate": "2026-08-12",
           "completed": true
+        }
+      ]
+    },
+    "104228": {
+      "name": "משוואות דיפרנציאליות חלקיות מ' (104228)",
+      "examDate": "2027-02-24",
+      "moedBDate": "2027-03-26",
+      "studyStartDate": "2027-02-24",
+      "earliestYear": 2018,
+      "exams": [
+        {
+          "id": "exam_104228_2024_1",
+          "year": "2024",
+          "moed": "חורף מועד א",
+          "solution": "פתרון קיים",
+          "exists": true,
+          "scheduledDate": "",
+          "completed": false
+        },
+        {
+          "id": "exam_104228_2024_2",
+          "year": "2024",
+          "moed": "חורף מועד ב",
+          "solution": "פתרון קיים",
+          "exists": true,
+          "scheduledDate": "",
+          "completed": false
+        },
+        {
+          "id": "exam_104228_2023_1",
+          "year": "2023",
+          "moed": "חורף מועד א",
+          "solution": "פתרון קיים",
+          "exists": true,
+          "scheduledDate": "",
+          "completed": false
+        },
+        {
+          "id": "exam_104228_2023_2",
+          "year": "2023",
+          "moed": "חורף מועד ב",
+          "solution": "פתרון קיים",
+          "exists": true,
+          "scheduledDate": "",
+          "completed": false
+        }
+      ]
+    },
+    "114052": {
+      "name": "פיסיקה 2 (114052)",
+      "examDate": "2027-02-01",
+      "moedBDate": "2027-03-02",
+      "studyStartDate": "2027-02-01",
+      "earliestYear": 2018,
+      "exams": [
+        {
+          "id": "exam_114052_2024_1",
+          "year": "2024",
+          "moed": "חורף מועד א",
+          "solution": "פתרון קיים",
+          "exists": true,
+          "scheduledDate": "",
+          "completed": false
+        },
+        {
+          "id": "exam_114052_2024_2",
+          "year": "2024",
+          "moed": "חורף מועד ב",
+          "solution": "פתרון קיים",
+          "exists": true,
+          "scheduledDate": "",
+          "completed": false
+        },
+        {
+          "id": "exam_114052_2023_1",
+          "year": "2023",
+          "moed": "חורף מועד א",
+          "solution": "פתרון קיים",
+          "exists": true,
+          "scheduledDate": "",
+          "completed": false
+        },
+        {
+          "id": "exam_114052_2023_2",
+          "year": "2023",
+          "moed": "חורף מועד ב",
+          "solution": "פתרון קיים",
+          "exists": true,
+          "scheduledDate": "",
+          "completed": false
         }
       ]
     },
@@ -4582,146 +5026,138 @@ const PRELOADED_USER_STATE = {
         }
       ]
     },
-    "104043": {
-      "name": "חדו״א 2 (104043)",
-      "earliestYear": 2015,
-      "examDate": "2026-08-05",
-      "studyStartDate": "2026-08-05",
+    "034035": {
+      "name": "תרמודינמיקה 1 (034035)",
+      "examDate": "2027-02-07",
+      "moedBDate": "2027-03-05",
+      "studyStartDate": "2027-02-07",
+      "earliestYear": 2018,
       "exams": [
         {
-          "id": "exam_104043_2016_40",
-          "year": "2016",
-          "moed": "אביב מועד א",
-          "solution": "פתרון קיים",
-          "exists": true,
-          "scheduledDate": "2026-08-22",
-          "completed": true
-        },
-        {
-          "id": "exam_104043_2017_41",
-          "year": "2017",
-          "moed": "אביב מועד א",
-          "solution": "פתרון קיים",
-          "exists": true,
-          "scheduledDate": "2026-08-23",
-          "completed": true
-        },
-        {
-          "id": "exam_104043_2017_42",
-          "year": "2017",
-          "moed": "אביב מועד ב",
-          "solution": "פתרון קיים",
-          "exists": true,
-          "scheduledDate": "2026-08-23",
-          "completed": true
-        },
-        {
-          "id": "exam_104043_2018_43",
-          "year": "2018",
-          "moed": "אביב מועד א",
-          "solution": "פתרון קיים",
-          "exists": true,
-          "scheduledDate": "2026-08-24",
-          "completed": true
-        },
-        {
-          "id": "exam_104043_2018_44",
-          "year": "2018",
-          "moed": "אביב מועד ב",
-          "solution": "פתרון קיים",
-          "exists": true,
-          "scheduledDate": "2026-08-24",
-          "completed": true
-        },
-        {
-          "id": "exam_104043_2019_45",
-          "year": "2019",
-          "moed": "אביב מועד א",
-          "solution": "פתרון קיים",
-          "exists": true,
-          "scheduledDate": "2026-08-25",
-          "completed": true
-        },
-        {
-          "id": "exam_104043_2019_46",
-          "year": "2019",
-          "moed": "אביב מועד ב",
-          "solution": "פתרון קיים",
-          "exists": true,
-          "scheduledDate": "2026-08-25",
-          "completed": true
-        },
-        {
-          "id": "exam_104043_2020_47",
-          "year": "2020",
-          "moed": "אביב מועד א",
-          "solution": "פתרון קיים",
-          "exists": true,
-          "scheduledDate": "2026-08-26",
-          "completed": true
-        },
-        {
-          "id": "exam_104043_2020_48",
-          "year": "2020",
-          "moed": "אביב מועד ב",
-          "solution": "פתרון קיים",
-          "exists": true,
-          "scheduledDate": "2026-08-26",
-          "completed": true
-        },
-        {
-          "id": "exam_104043_2022_49",
-          "year": "2022",
-          "moed": "אביב מועד א",
-          "solution": "פתרון קיים",
-          "exists": true,
-          "scheduledDate": "2026-08-27",
-          "completed": true
-        },
-        {
-          "id": "exam_104043_2022_50",
-          "year": "2022",
-          "moed": "אביב מועד ב",
-          "solution": "פתרון קיים",
-          "exists": true,
-          "scheduledDate": "2026-08-27",
-          "completed": true
-        },
-        {
-          "id": "exam_104043_2024_51",
+          "id": "exam_034035_2024_1",
           "year": "2024",
-          "moed": "אביב מועד א",
+          "moed": "חורף מועד א",
           "solution": "פתרון קיים",
           "exists": true,
-          "scheduledDate": "2026-08-28",
-          "completed": true
+          "scheduledDate": "",
+          "completed": false
         },
         {
-          "id": "exam_104043_2024_52",
+          "id": "exam_034035_2024_2",
           "year": "2024",
-          "moed": "אביב מועד ב",
+          "moed": "חורף מועד ב",
           "solution": "פתרון קיים",
           "exists": true,
-          "scheduledDate": "2026-08-28",
-          "completed": true
+          "scheduledDate": "",
+          "completed": false
         },
         {
-          "id": "exam_104043_2025_53",
-          "year": "2025",
-          "moed": "אביב מועד א",
+          "id": "exam_034035_2023_1",
+          "year": "2023",
+          "moed": "חורף מועד א",
           "solution": "פתרון קיים",
           "exists": true,
-          "scheduledDate": "2026-08-29",
-          "completed": true
+          "scheduledDate": "",
+          "completed": false
         },
         {
-          "id": "exam_104043_2025_54",
-          "year": "2025",
-          "moed": "אביב מועד ב",
+          "id": "exam_034035_2023_2",
+          "year": "2023",
+          "moed": "חורף מועד ב",
           "solution": "פתרון קיים",
           "exists": true,
-          "scheduledDate": "2026-08-29",
-          "completed": true
+          "scheduledDate": "",
+          "completed": false
+        }
+      ]
+    },
+    "034056": {
+      "name": "מבוא לחישוב מדעי והנדסי (034056)",
+      "examDate": "2027-02-11",
+      "moedBDate": "2027-03-10",
+      "studyStartDate": "2027-02-11",
+      "earliestYear": 2018,
+      "exams": [
+        {
+          "id": "exam_034056_2024_1",
+          "year": "2024",
+          "moed": "חורף מועד א",
+          "solution": "פתרון קיים",
+          "exists": true,
+          "scheduledDate": "",
+          "completed": false
+        },
+        {
+          "id": "exam_034056_2024_2",
+          "year": "2024",
+          "moed": "חורף מועד ב",
+          "solution": "פתרון קיים",
+          "exists": true,
+          "scheduledDate": "",
+          "completed": false
+        },
+        {
+          "id": "exam_034056_2023_1",
+          "year": "2023",
+          "moed": "חורף מועד א",
+          "solution": "פתרון קיים",
+          "exists": true,
+          "scheduledDate": "",
+          "completed": false
+        },
+        {
+          "id": "exam_034056_2023_2",
+          "year": "2023",
+          "moed": "חורף מועד ב",
+          "solution": "פתרון קיים",
+          "exists": true,
+          "scheduledDate": "",
+          "completed": false
+        }
+      ]
+    },
+    "034053": {
+      "name": "מכניקת מוצקים 2מ (034053)",
+      "examDate": "2027-02-18",
+      "moedBDate": "2027-03-18",
+      "studyStartDate": "2027-02-18",
+      "earliestYear": 2018,
+      "exams": [
+        {
+          "id": "exam_034053_2024_1",
+          "year": "2024",
+          "moed": "חורף מועד א",
+          "solution": "פתרון קיים",
+          "exists": true,
+          "scheduledDate": "",
+          "completed": false
+        },
+        {
+          "id": "exam_034053_2024_2",
+          "year": "2024",
+          "moed": "חורף מועד ב",
+          "solution": "פתרון קיים",
+          "exists": true,
+          "scheduledDate": "",
+          "completed": false
+        },
+        {
+          "id": "exam_034053_2023_1",
+          "year": "2023",
+          "moed": "חורף מועד א",
+          "solution": "פתרון קיים",
+          "exists": true,
+          "scheduledDate": "",
+          "completed": false
+        },
+        {
+          "id": "exam_034053_2023_2",
+          "year": "2023",
+          "moed": "חורף מועד ב",
+          "solution": "פתרון קיים",
+          "exists": true,
+          "scheduledDate": "",
+          "completed": false
         }
       ]
     }
@@ -4802,6 +5238,79 @@ function loadSavedState() {
             });
         });
         saveState();
+
+        // Ensure official Winter 2026/2027 (Semester 3) exam dates & CheeseFork schedules are strictly synchronized
+        if (gameState.courses['114052']) {
+            const c = gameState.courses['114052'];
+            if (!c.tasks) c.tasks = [];
+            let exA = c.tasks.find(t => t.id === '114052_ex' || t.title === 'מועד א');
+            if (exA) { exA.dueDate = '2027-02-01'; exA.title = 'מועד א'; }
+            let exB = c.tasks.find(t => t.id === '114052_ex_b' || t.title === "מועד ב'");
+            if (exB) { exB.dueDate = '2027-03-02'; exB.title = "מועד ב'"; }
+            else { c.tasks.push({ id: '114052_ex_b', title: "מועד ב'", type: 'exam', xp: 500, completed: false, status: 'not_started', dueDate: '2027-03-02' }); }
+        }
+        if (gameState.courses['034035']) {
+            const c = gameState.courses['034035'];
+            if (!c.tasks) c.tasks = [];
+            let exA = c.tasks.find(t => t.id === '034035_ex' || t.title === 'מועד א');
+            if (exA) { exA.dueDate = '2027-02-07'; exA.title = 'מועד א'; }
+            let exB = c.tasks.find(t => t.id === '034035_ex_b' || t.title === "מועד ב'");
+            if (exB) { exB.dueDate = '2027-03-05'; exB.title = "מועד ב'"; }
+            else { c.tasks.push({ id: '034035_ex_b', title: "מועד ב'", type: 'exam', xp: 500, completed: false, status: 'not_started', dueDate: '2027-03-05' }); }
+        }
+        if (gameState.courses['034056']) {
+            const c = gameState.courses['034056'];
+            if (!c.tasks) c.tasks = [];
+            let exA = c.tasks.find(t => t.id === '034056_ex' || t.title === 'מועד א');
+            if (exA) { exA.dueDate = '2027-02-11'; exA.title = 'מועד א'; }
+            let exB = c.tasks.find(t => t.id === '034056_ex_b' || t.title === "מועד ב'");
+            if (exB) { exB.dueDate = '2027-03-10'; exB.title = "מועד ב'"; }
+            else { c.tasks.push({ id: '034056_ex_b', title: "מועד ב'", type: 'exam', xp: 500, completed: false, status: 'not_started', dueDate: '2027-03-10' }); }
+        }
+        if (gameState.courses['034053']) {
+            const c = gameState.courses['034053'];
+            if (!c.tasks) c.tasks = [];
+            let exA = c.tasks.find(t => t.id === '034053_ex' || t.title === 'מועד א');
+            if (exA) { exA.dueDate = '2027-02-18'; exA.title = 'מועד א'; }
+            let exB = c.tasks.find(t => t.id === '034053_ex_b' || t.title === "מועד ב'");
+            if (exB) { exB.dueDate = '2027-03-18'; exB.title = "מועד ב'"; }
+            else { c.tasks.push({ id: '034053_ex_b', title: "מועד ב'", type: 'exam', xp: 550, completed: false, status: 'not_started', dueDate: '2027-03-18' }); }
+        }
+        if (gameState.courses['104228']) {
+            const c = gameState.courses['104228'];
+            if (!c.tasks) c.tasks = [];
+            let exA = c.tasks.find(t => t.id === '104228_ex' || t.title === 'מועד א');
+            if (exA) { exA.dueDate = '2027-02-24'; exA.title = 'מועד א'; }
+            let exB = c.tasks.find(t => t.id === '104228_ex_b' || t.title === "מועד ב'");
+            if (exB) { exB.dueDate = '2027-03-26'; exB.title = "מועד ב'"; }
+            else { c.tasks.push({ id: '104228_ex_b', title: "מועד ב'", type: 'exam', xp: 500, completed: false, status: 'not_started', dueDate: '2027-03-26' }); }
+        }
+        if (gameState.courses['03940805']) {
+            const c = gameState.courses['03940805'];
+            c.name = 'חינוך גופני - אתלטיקה קלה / יוגה';
+            if (c.tasks) c.tasks = c.tasks.filter(t => t.type !== 'exam');
+            if (!c.tasks || c.tasks.length === 0) {
+                c.tasks = [{ id: '03940805_att', title: 'נוכחות פעילה בשיעורי יוגה (חובת 80%)', type: 'hw', completed: false, status: 'not_started', xp: 100, dueDate: '' }];
+            }
+        }
+
+        // Synchronize pastExamsBank for Semester 3
+        if (!gameState.pastExamsBank) gameState.pastExamsBank = {};
+        const sem3ExamInfo = {
+            '114052': { name: 'פיסיקה 2 (114052)', examDate: '2027-02-01', moedBDate: '2027-03-02' },
+            '034035': { name: 'תרמודינמיקה 1 (034035)', examDate: '2027-02-07', moedBDate: '2027-03-05' },
+            '034056': { name: 'מבוא לחישוב מדעי והנדסי (034056)', examDate: '2027-02-11', moedBDate: '2027-03-10' },
+            '034053': { name: 'מכניקת מוצקים 2 מורחב (034053)', examDate: '2027-02-18', moedBDate: '2027-03-18' },
+            '104228': { name: "משוואות דיפרנציאליות חלקיות מ' (104228)", examDate: '2027-02-24', moedBDate: '2027-03-26' }
+        };
+        for (const [cd, inf] of Object.entries(sem3ExamInfo)) {
+            if (!gameState.pastExamsBank[cd]) {
+                gameState.pastExamsBank[cd] = { name: inf.name, examDate: inf.examDate, moedBDate: inf.moedBDate, studyStartDate: inf.examDate };
+            } else {
+                gameState.pastExamsBank[cd].examDate = inf.examDate;
+                gameState.pastExamsBank[cd].moedBDate = inf.moedBDate;
+            }
+        }
 
         // Ensure official exam dates are strictly synchronized to the August 2026 calendar
         if (gameState.courses['104043']) {
@@ -6255,6 +6764,62 @@ function openCourseDetails(code) {
     document.getElementById("input-quest-title").value = "";
     document.getElementById("input-quest-date").value = "";
 
+    // CheeseFork Schedule & Exam Information Section
+    const cfContainer = document.getElementById("modal-cheesefork-container");
+    if (cfContainer) {
+        cfContainer.innerHTML = "";
+        const hasSchedule = Array.isArray(course.schedule) && course.schedule.length > 0;
+        const hasExams = Boolean(course.moedA || course.moedB);
+        const hasSyllabus = Boolean(course.syllabus);
+
+        if (hasSchedule || hasExams || hasSyllabus) {
+            let scheduleItemsHtml = "";
+            if (hasSchedule) {
+                scheduleItemsHtml = course.schedule.map(s => `
+                    <div class="modal-schedule-item">
+                        <div class="modal-schedule-item-time">⏰ יום ${s.day} | ${s.hours}</div>
+                        <div class="modal-schedule-item-desc">${s.type} ${s.group ? `(קבוצה ${s.group})` : ''} ${s.room ? `• ${s.room}` : ''}</div>
+                        ${s.lecturer ? `<div class="modal-schedule-item-lecturer">מרצה: ${s.lecturer}</div>` : ''}
+                    </div>
+                `).join("");
+            }
+
+            let examsHtml = "";
+            if (hasExams) {
+                examsHtml = `
+                    <div class="modal-exam-dates-strip">
+                        ${course.moedA ? `<span class="modal-exam-date-badge">🎓 מועד א': ${course.moedA}</span>` : ''}
+                        ${course.moedB ? `<span class="modal-exam-date-badge">🎓 מועד ב': ${course.moedB}</span>` : ''}
+                    </div>
+                `;
+            }
+
+            let syllabusHtml = "";
+            if (hasSyllabus) {
+                syllabusHtml = `
+                    <div style="margin-top: 10px; font-size: 0.78rem; color: #94a3b8; line-height: 1.45; max-height: 85px; overflow-y: auto; background: rgba(0,0,0,0.2); padding: 8px 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.05);">
+                        <strong style="color: #cbd5e1; display: block; margin-bottom: 2px;">📖 תקציר סילבוס (ספר הקורסים):</strong>
+                        ${course.syllabus}
+                    </div>
+                `;
+            }
+
+            cfContainer.innerHTML = `
+                <div class="modal-cheesefork-section">
+                    <div class="modal-cheesefork-header">
+                        <div class="modal-cheesefork-title">
+                            <span>🧀 מערכת שעות ופרטי קורס (CheeseFork)</span>
+                        </div>
+                        ${course.faculty ? `<span style="font-size: 0.75rem; color: var(--text-muted);">${course.faculty}</span>` : ''}
+                    </div>
+                    ${hasSchedule ? `<div class="modal-cheesefork-grid">${scheduleItemsHtml}</div>` : ''}
+                    ${examsHtml}
+                    ${syllabusHtml}
+                </div>
+            `;
+        }
+    }
+
     // Render task items
     renderModalTaskList(course);
 
@@ -6988,14 +7553,16 @@ function setupNotionDashboard() {
         closeBtn.addEventListener("click", closeTaskSidePeek);
     }
     
-    // 2. Unified Tab Navigation Listeners (Curriculum / Tasks / Calendar)
+    // 2. Unified Tab Navigation Listeners (Curriculum / Tasks / Calendar / Timetable / Settings)
     const tabCurriculum = document.getElementById("tab-curriculum");
     const tabTasks = document.getElementById("tab-tasks");
     const tabCalendar = document.getElementById("tab-calendar");
+    const tabTimetable = document.getElementById("tab-timetable");
     const tabSettings = document.getElementById("tab-settings");
     
     const curriculumWorkspace = document.getElementById("curriculum-tree-workspace");
     const tasksWorkspace = document.getElementById("notion-tasks-workspace");
+    const timetableWorkspace = document.getElementById("timetable-workspace");
     const settingsWorkspace = document.getElementById("settings-workspace");
     const tablePane = document.getElementById("tasks-table-view-pane");
     const calPane = document.getElementById("tasks-calendar-view-pane");
@@ -7005,11 +7572,13 @@ function setupNotionDashboard() {
         if (tabCurriculum) tabCurriculum.classList.toggle("active", activeTabId === 'curriculum');
         if (tabTasks) tabTasks.classList.toggle("active", activeTabId === 'tasks');
         if (tabCalendar) tabCalendar.classList.toggle("active", activeTabId === 'calendar');
+        if (tabTimetable) tabTimetable.classList.toggle("active", activeTabId === 'timetable');
         if (tabSettings) tabSettings.classList.toggle("active", activeTabId === 'settings');
 
         if (activeTabId === 'curriculum') {
             if (curriculumWorkspace) curriculumWorkspace.style.display = "flex";
             if (tasksWorkspace) tasksWorkspace.style.display = "none";
+            if (timetableWorkspace) timetableWorkspace.style.display = "none";
             if (settingsWorkspace) settingsWorkspace.style.display = "none";
             if (viewsDirtyState.curriculum) {
                 renderFlowchartTree();
@@ -7019,6 +7588,7 @@ function setupNotionDashboard() {
         } else if (activeTabId === 'tasks') {
             if (curriculumWorkspace) curriculumWorkspace.style.display = "none";
             if (tasksWorkspace) tasksWorkspace.style.display = "flex";
+            if (timetableWorkspace) timetableWorkspace.style.display = "none";
             if (settingsWorkspace) settingsWorkspace.style.display = "none";
             if (tablePane) tablePane.style.display = "block";
             if (calPane) calPane.style.display = "none";
@@ -7033,6 +7603,7 @@ function setupNotionDashboard() {
         } else if (activeTabId === 'calendar') {
             if (curriculumWorkspace) curriculumWorkspace.style.display = "none";
             if (tasksWorkspace) tasksWorkspace.style.display = "flex";
+            if (timetableWorkspace) timetableWorkspace.style.display = "none";
             if (settingsWorkspace) settingsWorkspace.style.display = "none";
             if (tablePane) tablePane.style.display = "none";
             if (calPane) calPane.style.display = "block";
@@ -7041,9 +7612,15 @@ function setupNotionDashboard() {
                 renderExamGapRunway();
                 viewsDirtyState.calendar = false;
             }
+        } else if (activeTabId === 'timetable') {
+            if (curriculumWorkspace) curriculumWorkspace.style.display = "none";
+            if (tasksWorkspace) tasksWorkspace.style.display = "none";
+            if (timetableWorkspace) timetableWorkspace.style.display = "flex";
+            if (settingsWorkspace) settingsWorkspace.style.display = "none";
         } else if (activeTabId === 'settings') {
             if (curriculumWorkspace) curriculumWorkspace.style.display = "none";
             if (tasksWorkspace) tasksWorkspace.style.display = "none";
+            if (timetableWorkspace) timetableWorkspace.style.display = "none";
             if (settingsWorkspace) settingsWorkspace.style.display = "flex";
             if (viewsDirtyState.settings) {
                 renderSettingsPage();
@@ -7053,11 +7630,12 @@ function setupNotionDashboard() {
     }
 
     window.setActiveMainTab = setActiveMainTab;
-    window.setTasksSubview = (view) => setActiveMainTab(view === 'calendar' ? 'calendar' : 'tasks');
+    window.setTasksSubview = (view) => setActiveMainTab(view === 'calendar' ? 'calendar' : (view === 'timetable' ? 'timetable' : 'tasks'));
 
     if (tabCurriculum) tabCurriculum.addEventListener("click", () => setActiveMainTab('curriculum'));
     if (tabTasks) tabTasks.addEventListener("click", () => setActiveMainTab('tasks'));
     if (tabCalendar) tabCalendar.addEventListener("click", () => setActiveMainTab('calendar'));
+    if (tabTimetable) tabTimetable.addEventListener("click", () => setActiveMainTab('timetable'));
     if (tabSettings) tabSettings.addEventListener("click", () => setActiveMainTab('settings'));
     
     // 3. Filter Change Listeners & Popover Setup

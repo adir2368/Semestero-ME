@@ -176,7 +176,7 @@
       "tasks": [
         {
           "id": "104228_h1",
-          "title": "תרגיל בית 1: משוואת הגלים והחום",
+          "title": "תרגיל בית 1: משוואות מסדר ראשון ומאפיינים",
           "type": "hw",
           "xp": 50,
           "completed": false,
@@ -185,7 +185,7 @@
         },
         {
           "id": "104228_ww1",
-          "title": "WebWork 1: משוואת הגלים",
+          "title": "WebWork 1: משוואת הגלים והפרדת משתנים",
           "type": "webwork",
           "xp": 40,
           "completed": false,
@@ -194,12 +194,44 @@
         },
         {
           "id": "104228_ex",
-          "title": "מבחן סוף",
+          "title": "מועד א",
           "type": "exam",
           "xp": 500,
           "completed": false,
           "status": "not_started",
-          "dueDate": ""
+          "dueDate": "2027-02-24"
+        },
+        {
+          "id": "104228_ex_b",
+          "title": "מועד ב'",
+          "type": "exam",
+          "xp": 500,
+          "completed": false,
+          "status": "not_started",
+          "dueDate": "2027-03-26"
+        }
+      ],
+      "faculty": "הפקולטה למתמטיקה",
+      "syllabus": "מבוא למשוואות דיפרנציאליות חלקיות מסדר ראשון ושני. מיון משוואות לינאריות וחצי-לינאריות מסדר שני: היפרבוליות, פרבוליות ואליפטיות. משוואת הגלים בממד אחד ובשלושה ממדים (נוסחת דלאמבר, פתרון פואסון). משוואת החום: פתרון בעיית התחלה על הישר, עקרון המקסימום. שיטת הפרדת משתנים וטורי פורייה. משוואת לפלס ופואסון בתחומים שונים.",
+      "lecturers": "פרופ' מתמטיקה",
+      "moedA": "2027-02-24",
+      "moedB": "2027-03-26",
+      "schedule": [
+        {
+          "type": "תרגול",
+          "group": 21,
+          "day": "רביעי",
+          "hours": "10:30 - 12:30",
+          "lecturer": "",
+          "room": ""
+        },
+        {
+          "type": "הרצאה",
+          "group": 20,
+          "day": "חמישי",
+          "hours": "10:30 - 12:30",
+          "lecturer": "",
+          "room": ""
         }
       ]
     },
@@ -283,12 +315,52 @@
         },
         {
           "id": "114052_ex",
-          "title": "מבחן סוף",
+          "title": "מועד א",
           "type": "exam",
           "xp": 500,
           "completed": false,
           "status": "not_started",
-          "dueDate": ""
+          "dueDate": "2027-02-01"
+        },
+        {
+          "id": "114052_ex_b",
+          "title": "מועד ב'",
+          "type": "exam",
+          "xp": 500,
+          "completed": false,
+          "status": "not_started",
+          "dueDate": "2027-03-02"
+        }
+      ],
+      "faculty": "הפקולטה לפיסיקה",
+      "syllabus": "חשמל ומגנטיות: חוק קולון, שדה חשמלי, חוק גאוס, פוטנציאל אלקטרוסטטי, קיבול וקבלים, דיאלקטריים, זרם והתנגדות, כוח אלקטרו-מניע ומעגלי זרם ישר. שדה מגנטי, חוק ביו-סבר, חוק אמפר, השראה אלקטרומגנטית, חוק פראדיי, השראות, זרם חילופין, משוואות מקסוול וגלים אלקטרומגנטיים.",
+      "lecturers": "ד\"ר גדעון אלון",
+      "moedA": "2027-02-01",
+      "moedB": "2027-03-02",
+      "schedule": [
+        {
+          "type": "הרצאה",
+          "group": 10,
+          "day": "שני",
+          "hours": "08:30 - 10:30",
+          "lecturer": "ד\"ר גדעון אלון",
+          "room": ""
+        },
+        {
+          "type": "הרצאה",
+          "group": 10,
+          "day": "רביעי",
+          "hours": "08:30 - 09:30",
+          "lecturer": "ד\"ר גדעון אלון",
+          "room": ""
+        },
+        {
+          "type": "תרגול",
+          "group": 13,
+          "day": "רביעי",
+          "hours": "09:30 - 10:30",
+          "lecturer": "",
+          "room": ""
         }
       ]
     },
@@ -523,7 +595,7 @@
     },
     "034053": {
       "code": "034053",
-      "name": "מכניקת מוצקים 2 מורחב",
+      "name": "מכניקת מוצקים 2מ",
       "credits": 5,
       "semester": 3,
       "prerequisites": [
@@ -535,7 +607,7 @@
       "tasks": [
         {
           "id": "034053_h1",
-          "title": "תרגיל בית 1: כפיפת קורות מאמצים משולבים",
+          "title": "תרגיל בית 1: כפיפת קורות ומאמצים משולבים",
           "type": "hw",
           "xp": 60,
           "completed": false,
@@ -544,12 +616,44 @@
         },
         {
           "id": "034053_ex",
-          "title": "מבחן סוף",
+          "title": "מועד א",
           "type": "exam",
           "xp": 550,
           "completed": false,
           "status": "not_started",
-          "dueDate": ""
+          "dueDate": "2027-02-18"
+        },
+        {
+          "id": "034053_ex_b",
+          "title": "מועד ב'",
+          "type": "exam",
+          "xp": 550,
+          "completed": false,
+          "status": "not_started",
+          "dueDate": "2027-03-18"
+        }
+      ],
+      "faculty": "הפקולטה להנדסת מכונות",
+      "syllabus": "מאמצים, עיבורים, קשרי מאמץ-עיבור (חוק הוק המוכלל), קריטריוני כניעה וכשל (פון-מיזס, טרסקה). מבוא לתורת האלסטיות, פונקציית מאמצים של איירי. כפיפת קורות אסימטריות, מרכז גזירה. פיתול של מוטות בעלי חתך לא עגול וחתכים דקי-דופן. קריסת עמודים (אוילר). שיטות אנרגיה: משפט קסטיליאנו, עבודה מדומה.",
+      "lecturers": "פרופ' יוסף גבלי",
+      "moedA": "2027-02-18",
+      "moedB": "2027-03-18",
+      "schedule": [
+        {
+          "type": "הרצאה",
+          "group": 10,
+          "day": "שני",
+          "hours": "10:30 - 14:30",
+          "lecturer": "פרופ' יוסף גבלי",
+          "room": ""
+        },
+        {
+          "type": "תרגול",
+          "group": 21,
+          "day": "חמישי",
+          "hours": "12:30 - 14:30",
+          "lecturer": "",
+          "room": ""
         }
       ]
     },
@@ -569,21 +673,59 @@
           "title": "תרגיל בית 1: פתרון משוואות לא ליניאריות בפייתון",
           "type": "hw",
           "xp": 50,
-          "completed": false
+          "completed": false,
+          "status": "not_started",
+          "dueDate": ""
         },
         {
           "id": "034056_p1",
-          "title": "פרוייקט חישובי: אנליזה של מערכת מכנית מורכבת",
+          "title": "פרוייקט חישובי: אנליזה נומרית של מערכת מכנית",
           "type": "project",
           "xp": 200,
-          "completed": false
+          "completed": false,
+          "status": "not_started",
+          "dueDate": ""
         },
         {
           "id": "034056_ex",
-          "title": "מבחן סוף",
+          "title": "מועד א",
           "type": "exam",
           "xp": 500,
-          "completed": false
+          "completed": false,
+          "status": "not_started",
+          "dueDate": "2027-02-11"
+        },
+        {
+          "id": "034056_ex_b",
+          "title": "מועד ב'",
+          "type": "exam",
+          "xp": 500,
+          "completed": false,
+          "status": "not_started",
+          "dueDate": "2027-03-10"
+        }
+      ],
+      "faculty": "הפקולטה להנדסת מכונות",
+      "syllabus": "1. הקדמה לחישוב מדעי ואלגוריתמיקה. 2. שיטות פתרון למשוואות לינאריות: שיטת גאוס, פירוק LU, שיטות איטרטיביות (יעקובי, גאוס-זיידל). 3. שורשים של משוואות לא לינאריות: חצייה, ניוטון-רפסון. 4. אינטרפולציה וקירוב פונקציות. 5. גזירה ואינטגרציה נומרית. 6. פתרון נומרי של משוואות דיפרנציאליות רגילות (ODE) - שיטות אוילר ורונגה-קוטה. יישומים מעשיים בפייתון.",
+      "lecturers": "ד\"ר דניאל הקסנר",
+      "moedA": "2027-02-11",
+      "moedB": "2027-03-10",
+      "schedule": [
+        {
+          "type": "תרגול",
+          "group": 14,
+          "day": "שני",
+          "hours": "14:30 - 16:30",
+          "lecturer": "",
+          "room": ""
+        },
+        {
+          "type": "הרצאה",
+          "group": 10,
+          "day": "רביעי",
+          "hours": "14:30 - 17:30",
+          "lecturer": "ד\"ר דניאל הקסנר",
+          "room": ""
         }
       ]
     },
@@ -609,12 +751,44 @@
         },
         {
           "id": "034035_ex",
-          "title": "מבחן סוף",
+          "title": "מועד א",
           "type": "exam",
           "xp": 500,
           "completed": false,
           "status": "not_started",
-          "dueDate": ""
+          "dueDate": "2027-02-07"
+        },
+        {
+          "id": "034035_ex_b",
+          "title": "מועד ב'",
+          "type": "exam",
+          "xp": 500,
+          "completed": false,
+          "status": "not_started",
+          "dueDate": "2027-03-05"
+        }
+      ],
+      "faculty": "הפקולטה להנדסת מכונות",
+      "syllabus": "מושגי יסוד, מערכת, תכונות, מצב, תהליך, חוק האפס והחוק הראשון. אנרגיה. אנתלפיה. שינויי פאזה וחומר טהור. משוואות מצב, גז אידיאלי וגז אמיתי. ניתוח נפח בקרה: שימור מסה ושימור אנרגיה. החוק השני של התרמודינמיקה: נצילות קרנו, אי-שוויון קלאוזיוס, אנטרופיה ומאזן אנטרופיה. אקסרגיה, מחזורי כוח וקירור.",
+      "lecturers": "פרופ' לאוניד טרטקובסקי",
+      "moedA": "2027-02-07",
+      "moedB": "2027-03-05",
+      "schedule": [
+        {
+          "type": "הרצאה",
+          "group": 10,
+          "day": "שלישי",
+          "hours": "08:30 - 11:30",
+          "lecturer": "פרופ' לאוניד טרטקובסקי",
+          "room": ""
+        },
+        {
+          "type": "תרגול",
+          "group": 11,
+          "day": "שלישי",
+          "hours": "12:30 - 14:30",
+          "lecturer": "",
+          "room": ""
         }
       ]
     },
@@ -1098,32 +1272,38 @@
     },
     "03940805": {
       "code": "03940805",
-      "name": "חינוך גופני - יוגה",
+      "name": "חינוך גופני - אתלטיקה קלה / יוגה",
       "credits": 1,
       "semester": 3,
       "prerequisites": [],
       "status": "active",
       "tasks": [
         {
-          "id": "03940805_h1",
-          "title": "מטלת בית 1",
+          "id": "03940805_att",
+          "title": "נוכחות פעילה בשיעורי יוגה (חובת 80%)",
           "type": "hw",
-          "xp": 50,
-          "completed": false,
-          "status": "not_started",
-          "dueDate": ""
-        },
-        {
-          "id": "03940805_ex",
-          "title": "מבחן סוף",
-          "type": "exam",
-          "xp": 500,
+          "xp": 100,
           "completed": false,
           "status": "not_started",
           "dueDate": ""
         }
       ],
-      "type": "sports"
+      "type": "sports",
+      "faculty": "היחידה ללימודי ספורט",
+      "syllabus": "תרגול יוגה שבועי: נשימה, גמישות, שיווי משקל וחיזוק שרירי ליבה. חובת נוכחות פעילה בלפחות 80% מהשיעורים לאורך הסמסטר.",
+      "lecturers": "היחידה לחינוך גופני",
+      "moedA": null,
+      "moedB": null,
+      "schedule": [
+        {
+          "type": "יוגה",
+          "group": 24,
+          "day": "חמישי",
+          "hours": "07:30 - 09:00",
+          "lecturer": "",
+          "room": "אולם ספורט"
+        }
+      ]
     }
   },
   "gpa": 86.39240506329114,
@@ -1796,6 +1976,96 @@
         }
       ]
     },
+    "104228": {
+      "name": "משוואות דיפרנציאליות חלקיות מ' (104228)",
+      "examDate": "2027-02-24",
+      "moedBDate": "2027-03-26",
+      "studyStartDate": "2027-02-24",
+      "earliestYear": 2018,
+      "exams": [
+        {
+          "id": "exam_104228_2024_1",
+          "year": "2024",
+          "moed": "חורף מועד א",
+          "solution": "פתרון קיים",
+          "exists": true,
+          "scheduledDate": "",
+          "completed": false
+        },
+        {
+          "id": "exam_104228_2024_2",
+          "year": "2024",
+          "moed": "חורף מועד ב",
+          "solution": "פתרון קיים",
+          "exists": true,
+          "scheduledDate": "",
+          "completed": false
+        },
+        {
+          "id": "exam_104228_2023_1",
+          "year": "2023",
+          "moed": "חורף מועד א",
+          "solution": "פתרון קיים",
+          "exists": true,
+          "scheduledDate": "",
+          "completed": false
+        },
+        {
+          "id": "exam_104228_2023_2",
+          "year": "2023",
+          "moed": "חורף מועד ב",
+          "solution": "פתרון קיים",
+          "exists": true,
+          "scheduledDate": "",
+          "completed": false
+        }
+      ]
+    },
+    "114052": {
+      "name": "פיסיקה 2 (114052)",
+      "examDate": "2027-02-01",
+      "moedBDate": "2027-03-02",
+      "studyStartDate": "2027-02-01",
+      "earliestYear": 2018,
+      "exams": [
+        {
+          "id": "exam_114052_2024_1",
+          "year": "2024",
+          "moed": "חורף מועד א",
+          "solution": "פתרון קיים",
+          "exists": true,
+          "scheduledDate": "",
+          "completed": false
+        },
+        {
+          "id": "exam_114052_2024_2",
+          "year": "2024",
+          "moed": "חורף מועד ב",
+          "solution": "פתרון קיים",
+          "exists": true,
+          "scheduledDate": "",
+          "completed": false
+        },
+        {
+          "id": "exam_114052_2023_1",
+          "year": "2023",
+          "moed": "חורף מועד א",
+          "solution": "פתרון קיים",
+          "exists": true,
+          "scheduledDate": "",
+          "completed": false
+        },
+        {
+          "id": "exam_114052_2023_2",
+          "year": "2023",
+          "moed": "חורף מועד ב",
+          "solution": "פתרון קיים",
+          "exists": true,
+          "scheduledDate": "",
+          "completed": false
+        }
+      ]
+    },
     "314533": {
       "name": "הנדסת חומרים (314533)",
       "earliestYear": 2015,
@@ -2043,6 +2313,141 @@
           "exists": true,
           "scheduledDate": "2026-08-18",
           "completed": true
+        }
+      ]
+    },
+    "034035": {
+      "name": "תרמודינמיקה 1 (034035)",
+      "examDate": "2027-02-07",
+      "moedBDate": "2027-03-05",
+      "studyStartDate": "2027-02-07",
+      "earliestYear": 2018,
+      "exams": [
+        {
+          "id": "exam_034035_2024_1",
+          "year": "2024",
+          "moed": "חורף מועד א",
+          "solution": "פתרון קיים",
+          "exists": true,
+          "scheduledDate": "",
+          "completed": false
+        },
+        {
+          "id": "exam_034035_2024_2",
+          "year": "2024",
+          "moed": "חורף מועד ב",
+          "solution": "פתרון קיים",
+          "exists": true,
+          "scheduledDate": "",
+          "completed": false
+        },
+        {
+          "id": "exam_034035_2023_1",
+          "year": "2023",
+          "moed": "חורף מועד א",
+          "solution": "פתרון קיים",
+          "exists": true,
+          "scheduledDate": "",
+          "completed": false
+        },
+        {
+          "id": "exam_034035_2023_2",
+          "year": "2023",
+          "moed": "חורף מועד ב",
+          "solution": "פתרון קיים",
+          "exists": true,
+          "scheduledDate": "",
+          "completed": false
+        }
+      ]
+    },
+    "034056": {
+      "name": "מבוא לחישוב מדעי והנדסי (034056)",
+      "examDate": "2027-02-11",
+      "moedBDate": "2027-03-10",
+      "studyStartDate": "2027-02-11",
+      "earliestYear": 2018,
+      "exams": [
+        {
+          "id": "exam_034056_2024_1",
+          "year": "2024",
+          "moed": "חורף מועד א",
+          "solution": "פתרון קיים",
+          "exists": true,
+          "scheduledDate": "",
+          "completed": false
+        },
+        {
+          "id": "exam_034056_2024_2",
+          "year": "2024",
+          "moed": "חורף מועד ב",
+          "solution": "פתרון קיים",
+          "exists": true,
+          "scheduledDate": "",
+          "completed": false
+        },
+        {
+          "id": "exam_034056_2023_1",
+          "year": "2023",
+          "moed": "חורף מועד א",
+          "solution": "פתרון קיים",
+          "exists": true,
+          "scheduledDate": "",
+          "completed": false
+        },
+        {
+          "id": "exam_034056_2023_2",
+          "year": "2023",
+          "moed": "חורף מועד ב",
+          "solution": "פתרון קיים",
+          "exists": true,
+          "scheduledDate": "",
+          "completed": false
+        }
+      ]
+    },
+    "034053": {
+      "name": "מכניקת מוצקים 2מ (034053)",
+      "examDate": "2027-02-18",
+      "moedBDate": "2027-03-18",
+      "studyStartDate": "2027-02-18",
+      "earliestYear": 2018,
+      "exams": [
+        {
+          "id": "exam_034053_2024_1",
+          "year": "2024",
+          "moed": "חורף מועד א",
+          "solution": "פתרון קיים",
+          "exists": true,
+          "scheduledDate": "",
+          "completed": false
+        },
+        {
+          "id": "exam_034053_2024_2",
+          "year": "2024",
+          "moed": "חורף מועד ב",
+          "solution": "פתרון קיים",
+          "exists": true,
+          "scheduledDate": "",
+          "completed": false
+        },
+        {
+          "id": "exam_034053_2023_1",
+          "year": "2023",
+          "moed": "חורף מועד א",
+          "solution": "פתרון קיים",
+          "exists": true,
+          "scheduledDate": "",
+          "completed": false
+        },
+        {
+          "id": "exam_034053_2023_2",
+          "year": "2023",
+          "moed": "חורף מועד ב",
+          "solution": "פתרון קיים",
+          "exists": true,
+          "scheduledDate": "",
+          "completed": false
         }
       ]
     }
