@@ -1,0 +1,1200 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#0f172a">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Skill Tree">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    <link rel="manifest" href="manifest.json">
+    <title>לוח תכנון ומעקב אקדמי - הנדסת מכונות הטכניון</title>
+    <!-- Fonts for Sci-Fi / Game HUD aesthetic -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Rubik:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="icon.png">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="hud-container">
+        <!-- Top HUD Panel -->
+        <header class="hud-header">
+            <div class="hud-logo" style="display: flex; align-items: center; gap: 10px;">
+                <img src="icon.png" alt="לוגו הפקולטה להנדסת מכונות" style="width: 34px; height: 34px; object-fit: contain; filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.6));">
+                <span class="degree-title-text" style="font-size: 1.08rem; font-weight: 800; letter-spacing: 0.5px; color: #f8fafc;">הנדסת מכונות | הטכניון</span>
+            </div>
+            
+            <div class="character-card">
+                <div class="char-avatar">🎓</div>
+                <div class="char-info">
+                    <div class="char-name-row">
+                        <span class="char-title" id="char-title">תואר ראשון B.Sc.</span>
+                        <span class="char-level" id="char-level">התקדמות בתואר</span>
+                    </div>
+                    <div class="xp-bar-container">
+                        <div class="xp-bar-fill" id="xp-bar-fill" style="width: 0%;"></div>
+                        <span class="xp-text" id="xp-text" style="direction: ltr; unicode-bidi: isolate;"><bdi dir="ltr">39.5 / 157.5</bdi> נק״ז</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="hud-stats">
+                <div class="stat-item">
+                    <span class="stat-label">נקודות זכות (נק״ז):</span>
+                    <span class="stat-value" id="stat-credits" style="direction: ltr; unicode-bidi: isolate;"><bdi dir="ltr">39.5 / 157.5</bdi></span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">קורסים שהושלמו:</span>
+                    <span class="stat-value" id="stat-completed-courses">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">משימות פתוחות:</span>
+                    <span class="stat-value" id="stat-open-tasks">0</span>
+                </div>
+                <div class="stat-item" id="stat-item-gpa" title="ממוצע תואר וממוצעי סמסטרים שהושלמו">
+                    <span class="stat-label">ממוצע תואר:</span>
+                    <span class="stat-value" id="stat-gpa">0.00</span>
+                    <div class="stat-gpa-sub" id="stat-gpa-semesters-hint" style="font-size: 0.62rem; color: #38bdf8; margin-top: 2px; direction: rtl; font-weight: 600;"></div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Navigation Tabs & Finals Switch -->
+        <nav class="hud-nav-tabs">
+            <div class="nav-tabs-left">
+                <button class="nav-tab active" id="tab-curriculum">
+                    <span class="nav-tab-icon">🌳</span>
+                    <span class="nav-tab-label">מפת קורסים</span>
+                    <span class="nav-tab-sublabel">(Curriculum Tree)</span>
+                </button>
+                <button class="nav-tab" id="tab-tasks">
+                    <span class="nav-tab-icon">📋</span>
+                    <span class="nav-tab-label">לוח משימות</span>
+                    <span class="nav-tab-sublabel">(Tasks)</span>
+                </button>
+                <button class="nav-tab" id="tab-calendar">
+                    <span class="nav-tab-icon">📅</span>
+                    <span class="nav-tab-label">לוח שנה</span>
+                    <span class="nav-tab-sublabel">(Calendar)</span>
+                </button>
+                <button class="nav-tab" id="tab-settings">
+                    <span class="nav-tab-icon">⚙️</span>
+                    <span class="nav-tab-label">הגדרות</span>
+                    <span class="nav-tab-sublabel">(Settings)</span>
+                </button>
+            </div>
+            <div class="finals-switch-control" id="finals-switch-control">
+                <div class="finals-switch-info">
+                    <span class="finals-switch-icon">🔥</span>
+                    <div class="finals-switch-text-group">
+                        <span class="finals-switch-title">מצב תקופת מבחנים</span>
+                        <span class="finals-switch-desc" id="finals-switch-desc">כבוי (סמסטר רגיל)</span>
+                    </div>
+                </div>
+                <label class="finals-toggle-switch" title="הפעל/כבה מצב תקופת מבחנים">
+                    <input type="checkbox" id="toggle-finals-mode">
+                    <span class="finals-toggle-slider"></span>
+                </label>
+            </div>
+        </nav>
+
+        <!-- Main Workspace -->
+        <main class="hud-workspace" id="curriculum-tree-workspace">
+            <!-- Sidebar: Active Quests & Controls -->
+            <aside class="hud-sidebar">
+                <div class="sidebar-section">
+                    <h3>🎯 משימות פעילות</h3>
+                    <div class="active-quests-list" id="active-quests-list">
+                        <!-- Dynamically populated -->
+                        <div class="empty-quests">אין משימות פעילות כרגע.</div>
+                    </div>
+                </div>
+
+                <div class="sidebar-section moodle-sync">
+                    <h3>🎓 סנכרון עם מודל (Moodle)</h3>
+                    <div class="form-group">
+                        <label for="moodle-url">כתובת מודל:</label>
+                        <input type="text" id="moodle-url" value="https://moodle25.technion.ac.il" placeholder="https://moodle25.technion.ac.il">
+                    </div>
+                    <div class="form-group">
+                        <label for="moodle-token">מפתח אבטחה (Token):</label>
+                        <input type="password" id="moodle-token" placeholder="הזן את הטוקן ממודל...">
+                        <small style="color: var(--text-muted); font-size: 0.65rem; margin-top: 3px; display: block;">ניתן להנפיק במודל תחת: פרופיל ➔ הגדרות ➔ מפתחות אבטחה.</small>
+                    </div>
+                    <button class="btn btn-primary w-full" id="btn-moodle-sync">🔄 סנכרן התקדמות ומטלות</button>
+                    <div id="moodle-sync-status" style="font-size: 0.75rem; text-align: center; margin-top: 8px; color: var(--text-muted);">
+                        אין טוקן? לחץ על הכפתור כדי להפעיל סנכרון הדמיה (Mock)
+                    </div>
+                </div>
+
+                <div class="sidebar-section cheesefork-import">
+                    <h3>🧀 סנכרון עם CheeseFork</h3>
+                    <div class="form-group">
+                        <label for="cheesefork-url">קישור שיתוף של CheeseFork:</label>
+                        <input type="text" id="cheesefork-url" placeholder="הדבק קישור שיתוף (לדוגמה: https://cheesefork...)">
+                    </div>
+                    <button class="btn btn-primary w-full" id="btn-cheesefork-import">📥 ייבא מערכת שעות</button>
+                    <div id="cheesefork-import-status" style="font-size: 0.75rem; text-align: center; margin-top: 8px; color: var(--text-muted);">
+                        הזן קישור שיתוף ולחץ על הכפתור כדי לסנכרן
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Skill Tree Area -->
+            <section class="tree-canvas-container">
+                <div class="tree-controls">
+                    <div class="view-mode-toggles">
+                        <span class="btn btn-sm btn-mode active" id="btn-mode-flowchart" style="cursor: default; pointer-events: none;">📊 תרשים זרימה (Flowchart)</span>
+                    </div>
+                    <div class="tree-legend">
+                        <span class="legend-item"><span class="dot dot-locked"></span> נעול</span>
+                        <span class="legend-item"><span class="dot dot-available"></span> פתוח לרישום</span>
+                        <span class="legend-item"><span class="dot dot-active"></span> פעיל</span>
+                        <span class="legend-item"><span class="dot dot-mastered"></span> הושלם</span>
+                    </div>
+                </div>
+
+                <!-- 0. Mermaid Flowchart DAG Viewport (Clean Course Flow) -->
+                <div class="flowchart-viewport" id="flowchart-viewport">
+                    <div class="flowchart-toolbar">
+                        <span class="flowchart-hint">💡 לחץ על קורס לפתיחת המשימות והציונים. רחף עם העכבר להארת נתיבי דרישות הקדם.</span>
+                        <div class="flowchart-actions" style="display: flex; gap: 8px; align-items: center;">
+                            <div class="fc-zoom-control-pill" style="display: flex; align-items: center; background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 8px; padding: 2px 6px; gap: 4px;">
+                                <button type="button" class="btn-fc-zoom-step" id="btn-fc-zoom-out" title="הקטן תצוגה (Zoom Out)" style="background: none; border: none; color: #cbd5e1; cursor: pointer; font-size: 13px; font-weight: 700; padding: 4px 8px; border-radius: 4px; transition: all 0.15s ease;">➖</button>
+                                <button type="button" id="btn-fc-zoom-reset" title="לחץ לאיפוס זום ל-100%" style="background: none; border: none; font-size: 0.82rem; font-weight: 700; color: #38bdf8; cursor: pointer; padding: 2px 6px; min-width: 46px; text-align: center;">100%</button>
+                                <button type="button" class="btn-fc-zoom-step" id="btn-fc-zoom-in" title="הגדל תצוגה (Zoom In)" style="background: none; border: none; color: #cbd5e1; cursor: pointer; font-size: 13px; font-weight: 700; padding: 4px 8px; border-radius: 4px; transition: all 0.15s ease;">➕</button>
+                            </div>
+                            <button type="button" class="btn btn-sm btn-outline" id="btn-fc-toggle-fit" title="התאם לרוחב המסך">📐 התאם רוחב</button>
+                            <button type="button" class="btn btn-sm btn-outline" id="btn-fc-reset-zoom" style="display:none;" title="מרכז את התרשים">🔍 מרכז תרשים</button>
+                        </div>
+                    </div>
+                    <div class="flowchart-scroll-wrapper" id="flowchart-scroll-wrapper">
+                        <svg class="flowchart-svg" id="flowchart-svg" viewBox="0 0 1560 1380" preserveAspectRatio="xMidYMid meet">
+                            <defs>
+                                <filter id="fc-glow" x="-20%" y="-20%" width="140%" height="140%">
+                                    <feGaussianBlur stdDeviation="5" result="blur" />
+                                    <feMerge>
+                                        <feMergeNode in="blur" />
+                                        <feMergeNode in="SourceGraphic" />
+                                    </feMerge>
+                                </filter>
+                            </defs>
+                            <g id="flowchart-bg-guides"></g>
+                            <g id="flowchart-connections"></g>
+                            <g id="flowchart-nodes"></g>
+                        </svg>
+                    </div>
+                </div>
+
+                </section>
+        </main>
+
+                <!-- Settings & Revisions Workspace -->
+        <main class="hud-workspace" id="settings-workspace" style="display: none;">
+            <div class="settings-container">
+                <!-- Page Header with Master Save -->
+                <div class="settings-header-banner">
+                    <div>
+                        <h1 class="settings-page-title">⚙️ מרכז הגדרות וניהול רוויזיות (Settings & Revisions)</h1>
+                        <p class="settings-page-subtitle">עריכה וניהול של רוויזיות, סנכרון יומני Google, מדדים אקדמיים ומבנה הסמסטרים</p>
+                    </div>
+                    <div class="settings-header-actions">
+                        <button type="button" class="btn btn-primary btn-sm" id="btn-save-all-settings" style="background: #10b981; border-color: #10b981; font-weight: bold; box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);">
+                            💾 שמור את כל השינויים
+                        </button>
+                        <button type="button" class="btn btn-outline btn-sm" id="btn-create-revision">
+                            ➕ צור רוויזיה חדשה
+                        </button>
+                        <button type="button" class="btn btn-outline btn-sm" id="btn-export-revision-json">
+                            📤 ייצא לקובץ
+                        </button>
+                        <button type="button" class="btn btn-outline btn-sm" id="btn-import-revision-json">
+                            📥 ייבא מקובץ
+                        </button>
+                        <input type="file" id="input-import-revision-file" accept=".json" style="display: none;">
+                    </div>
+                </div>
+
+                <!-- Section 1: Editable System Revision & Semester Guard -->
+                <div class="settings-card">
+                    <div class="settings-card-header">
+                        <div class="settings-card-title">
+                            <span>🏷️ עריכת רוויזיית מערכת וסטטוס סמסטר (System Revision & Semester Control)</span>
+                        </div>
+                        <button type="button" class="btn btn-xs btn-outline" id="btn-save-section-revision" style="border-color: #38bdf8; color: #38bdf8;">
+                            💾 שמור שינויי רוויזיה
+                        </button>
+                    </div>
+
+                    <div class="settings-form-grid">
+                        <div class="form-group">
+                            <label class="setting-label">קוד רוויזיה / גרסה (Revision Tag):</label>
+                            <input type="text" id="setting-revision-code" class="modal-input" value="REV-2026.09.12-v3.5" style="width: 100%; font-family: monospace;">
+                            <span class="setting-hint">תגית זיהוי הרוויזיה הנוכחית של העץ</span>
+                        </div>
+                        <div class="form-group">
+                            <label class="setting-label">סמסטר נוכחי פעיל בלימודים:</label>
+                            <select id="setting-active-semester" class="modal-select" style="width: 100%;">
+                                <option value="1">שנה א׳ - סמסטר א׳</option>
+                                <option value="2">שנה א׳ - סמסטר ב׳</option>
+                                <option value="3" selected>שנה ב׳ - סמסטר ג׳ (נוכחי)</option>
+                                <option value="4">שנה ב׳ - סמסטר ד׳</option>
+                                <option value="5">שנה ג׳ - סמסטר ה׳</option>
+                                <option value="6">שנה ג׳ - סמסטר ו׳</option>
+                                <option value="7">שנה ד׳ - סמסטר ז׳</option>
+                                <option value="8">שנה ד׳ - סמסטר ח׳</option>
+                            </select>
+                            <span class="setting-hint">קובע איזה סמסטר נחשב "סמסטר נוכחי" במערכת</span>
+                        </div>
+                        <div class="form-group">
+                            <label class="setting-label">חסימת רישום לקורסי סמסטרים עתידיים:</label>
+                            <select id="setting-semester-guard-mode" class="modal-select" style="width: 100%;">
+                                <option value="locked" selected>🔒 נעול (לא ניתן להירשם עד סיום הסמסטר הקודם)</option>
+                                <option value="warn">⚠️ אזהרה בלבד (אפשרות הרשמה ידנית)</option>
+                                <option value="open">🔓 פתוח חופשי (לפי דרישות קדם בלבד)</option>
+                            </select>
+                            <span class="setting-hint">מונע הרשמה בטעות לקורסי סמסטר ד' ומעלה</span>
+                        </div>
+                        <div class="form-group">
+                            <label class="setting-label">כינוי אקדמי / כותרת הסטודנט:</label>
+                            <input type="text" id="setting-character-class" class="modal-input" value="סטודנט להנדסת מכונות - הטכניון" style="width: 100%;">
+                            <span class="setting-hint">מוצג בראש המסך הראשי</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 2: Revisions & Snapshots History (Editable & Manageable) -->
+                <div class="settings-card">
+                    <div class="settings-card-header">
+                        <div class="settings-card-title">
+                            <span>🕒 היסטוריית רוויזיות ונקודות שחזור (Snapshots & Restore Points)</span>
+                        </div>
+                        <div style="display: flex; gap: 8px; align-items: center;">
+                            <span style="font-size: 0.8rem; color: #94a3b8;" id="revisions-count-indicator">0 רוויזיות</span>
+                            <button type="button" class="btn btn-xs btn-primary" id="btn-quick-new-rev">➕ רוויזיה חדשה</button>
+                        </div>
+                    </div>
+                    <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 14px;">
+                        ניתן לערוך שמות והערות של רוויזיות, לשחזר מצב לימודים קודם בכל עת, או לייצא גיבוי לקובץ.
+                    </p>
+                    <div class="revisions-list" id="revisions-list-container">
+                        <!-- Populated dynamically via JS -->
+                    </div>
+                </div>
+
+                <!-- Section 3: Editable Google Calendar 2-Way Sync -->
+                <div class="settings-card">
+                    <div class="settings-card-header">
+                        <div class="settings-card-title">
+                            <span>📅 הגדרות סנכרון יומני Google (Editable Calendar IDs & Webhook)</span>
+                        </div>
+                        <button type="button" class="btn btn-xs btn-outline" id="btn-save-section-calendars" style="border-color: #38bdf8; color: #38bdf8;">
+                            💾 שמור הגדרות יומנים
+                        </button>
+                    </div>
+                    <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 14px;">
+                        כל מזהה יומן (Calendar ID) ניתן לעריכה. האפליקציה תסנכרן את האירועים ליומנים המתאימים:
+                    </p>
+
+                    <div class="sync-calendars-grid">
+                        <div class="sync-cal-box">
+                            <label class="setting-label">
+                                <span class="sync-cal-box-icon">📝</span>
+                                מזהה יומן מבחנים (Exams Calendar ID):
+                            </label>
+                            <input type="text" id="setting-cal-id-exams" class="modal-input setting-cal-input" value="f04b545847cb46d2694500ffc3ac3378bd9005e125ae4a59c2caea5a5f32725c@group.calendar.google.com">
+                        </div>
+                        <div class="sync-cal-box">
+                            <label class="setting-label">
+                                <span class="sync-cal-box-icon">📚</span>
+                                מזהה יומן שיעורי בית (Homework Calendar ID):
+                            </label>
+                            <input type="text" id="setting-cal-id-hw" class="modal-input setting-cal-input" value="a887c830cc1a7b0ca4f97d1751bcf02477d837dd4ca9cf5de8385871f44a6c4d@group.calendar.google.com">
+                        </div>
+                        <div class="sync-cal-box">
+                            <label class="setting-label">
+                                <span class="sync-cal-box-icon">🎯</span>
+                                מזהה יומן תרגול למבחנים (Practice Exams Calendar ID):
+                            </label>
+                            <input type="text" id="setting-cal-id-practice" class="modal-input setting-cal-input" value="d707cbfa99ea0f68a0a31ebc42cb4cd35eae834770a5a118051727eb0c1afdd5@group.calendar.google.com">
+                        </div>
+                    </div>
+
+                    <!-- Webhook & Two-Way Controls -->
+                    <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid #334155; border-radius: 8px; padding: 14px; margin-top: 16px;">
+                        <label class="setting-label" style="margin-bottom: 6px;">
+                            🚀 כתובת Google Apps Script Webhook (לסנכרון מיידי מהאפליקציה ליומנים):
+                        </label>
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                            <input type="text" id="input-apps-script-webhook" class="modal-input" placeholder="https://script.google.com/macros/s/.../exec" style="flex: 1; min-width: 320px; font-family: monospace; font-size: 0.8rem;">
+                            <button type="button" class="btn btn-outline btn-sm" id="btn-trigger-manual-calendar-pull">🔄 משוך מיומנים עכשיו</button>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+                            <div class="form-group" style="margin: 0; display: flex; align-items: center; gap: 8px;">
+                                <label class="setting-label" style="margin: 0;">תדירות משיכה שעתית:</label>
+                                <select id="setting-sync-frequency" class="modal-select" style="padding: 4px 8px; font-size: 0.8rem;">
+                                    <option value="1" selected>כל שעה (ברירת מחדל)</option>
+                                    <option value="2">כל שעתיים</option>
+                                    <option value="6">כל 6 שעות</option>
+                                    <option value="24">פעם ביום (בחצות)</option>
+                                </select>
+                            </div>
+                            <div id="webhook-save-status" style="font-size: 0.78rem; color: #38bdf8;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 4: Editable Academic Goals & Reminders -->
+                <div class="settings-card">
+                    <div class="settings-card-header">
+                        <div class="settings-card-title">
+                            <span>🎯 יעדים אקדמיים והתראות משימות (Academic Goals & Reminders)</span>
+                        </div>
+                        <button type="button" class="btn btn-xs btn-outline" id="btn-save-section-goals" style="border-color: #38bdf8; color: #38bdf8;">
+                            💾 שמור יעדים והתראות
+                        </button>
+                    </div>
+                    <div class="academic-goals-grid">
+                        <div class="form-group">
+                            <label class="setting-label">סך נקודות זכות לתואר:</label>
+                            <input type="number" id="setting-degree-credits" class="modal-input" value="157.5" step="0.5" style="width: 100%;">
+                            <span class="setting-hint">לתואר B.Sc בהנדסת מכונות</span>
+                        </div>
+                        <div class="form-group">
+                            <label class="setting-label">סף הצטיינות דיקן (GPA):</label>
+                            <input type="number" id="setting-deans-honor" class="modal-input" value="85.0" step="0.1" style="width: 100%;">
+                            <span class="setting-hint">ציון ממוצע לתעודת הצטיינות</span>
+                        </div>
+                        <div class="form-group">
+                            <label class="setting-label">סף הצטיינות נשיא (GPA):</label>
+                            <input type="number" id="setting-presidents-honor" class="modal-input" value="90.0" step="0.1" style="width: 100%;">
+                            <span class="setting-hint">ציון ממוצע להצטיינות נשיא</span>
+                        </div>
+                        <div class="form-group">
+                            <label class="setting-label">תזכורת מקדימה למשימות (ימים לפני):</label>
+                            <select id="setting-reminder-days-advance" class="modal-select" style="width: 100%;">
+                                <option value="1" selected>יום אחד לפני ההגשה</option>
+                                <option value="2">יומיים לפני ההגשה</option>
+                                <option value="3">3 ימים לפני ההגשה</option>
+                            </select>
+                            <span class="setting-hint">מייצר התראת יומן (VALARM) מקדימה</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 5: Course & Degree Control Panel (Moved from Main Sidebar) -->
+                <div class="settings-card">
+                    <div class="settings-card-header">
+                        <div class="settings-card-title">
+                            <span>🛠️ לוח בקרה וניהול תואר (Degree & Data Management)</span>
+                        </div>
+                    </div>
+                    <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 14px;">
+                        פעולות ניהול מתקדמות לעץ הקורסים: הוספת קורסים חדשים, טעינת תוכנית הלימודים, ייצוא וייבוא גיבויים, ואיפוס נתונים.
+                    </p>
+
+                    <div class="settings-controls-grid">
+                        <div class="settings-control-box">
+                            <div class="settings-control-header">
+                                <span class="settings-control-icon">➕</span>
+                                <div class="settings-control-info">
+                                    <strong>הוספת קורס חדש</strong>
+                                    <span>הוספת קורס בחירה או קורס מותאם אישית לעץ תוכנית הלימודים.</span>
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-primary btn-sm w-full" id="btn-add-course">➕ הוסף קורס חדש</button>
+                        </div>
+
+                        <div class="settings-control-box">
+                            <div class="settings-control-header">
+                                <span class="settings-control-icon">⚙️</span>
+                                <div class="settings-control-info">
+                                    <strong>טעינת תואר בהנדסת מכונות</strong>
+                                    <span>טעינה מחדש של תוכנית הלימודים המלאה (דורס שינויים מקומיים).</span>
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-secondary btn-sm w-full" id="btn-load-me">⚙️ טען תואר בהנדסת מכונות</button>
+                        </div>
+
+                        <div class="settings-control-box">
+                            <div class="settings-control-header">
+                                <span class="settings-control-icon">💾</span>
+                                <div class="settings-control-info">
+                                    <strong>ייצוא וייבוא שמירה מלאה</strong>
+                                    <span>שמירת קובץ JSON של כל המצב הנוכחי או שחזור מקובץ שמירה קיים.</span>
+                                </div>
+                            </div>
+                            <div class="db-actions" style="display: flex; gap: 8px; width: 100%;">
+                                <button type="button" class="btn btn-outline btn-sm" id="btn-export" style="flex: 1;">📤 ייצוא שמירה</button>
+                                <button type="button" class="btn btn-outline btn-sm" id="btn-import" style="flex: 1;">📥 ייבוא שמירה</button>
+                            </div>
+                        </div>
+
+                        <div class="settings-control-box danger-zone">
+                            <div class="settings-control-header">
+                                <span class="settings-control-icon">⚠️</span>
+                                <div class="settings-control-info">
+                                    <strong style="color: #f87171;">איפוס נתוני התקדמות</strong>
+                                    <span>מחיקת כל הנתונים, הציונים והמשימות והחזרת המערכת למצב התחלתי נקי.</span>
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-danger btn-sm w-full" id="btn-reset">⚠️ איפוס נתונים</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Notion Tasks Workspace -->
+        <main class="hud-workspace" id="notion-tasks-workspace" style="display: none;">
+            <!-- Main Content: Notion Tasks List -->
+            <section class="notion-tasks-container">
+
+
+                <!-- Exam Gap Runway Card (מרווחי ימים בין המבחנים) -->
+                <div class="exam-gap-runway-card" id="exam-gap-runway-card">
+                    <div class="runway-header">
+                        <div class="runway-title">
+                            <span>📊 מרווחי ימים בין המבחנים</span>
+                        </div>
+                        <div class="runway-subtitle">זמן למידה נטו בין מועדי הבחינות של הסמסטר</div>
+                    </div>
+                    <div class="runway-track" id="exam-gap-runway-track">
+                        <!-- Populated dynamically via JS -->
+                    </div>
+                </div>
+
+                                <!-- PANE 1: Notion Tasks Table View -->
+                <div id="tasks-table-view-pane">
+                    <!-- Open Incomplete Tasks Reminder Banner -->
+                    <div id="tasks-reminders-banner" class="tasks-reminders-banner">
+                        <div class="reminders-banner-header">
+                            <div class="reminders-banner-title">
+                                <span class="reminders-pulse-icon">🔔</span>
+                                <span class="reminders-text-title">תזכורות למשימות ושיעורי בית פתוחים</span>
+                                <span class="reminders-count-badge" id="reminders-total-count">0</span>
+                            </div>
+                            <div class="reminders-banner-controls">
+                                <button type="button" class="btn btn-xs btn-outline" id="btn-sync-tasks-ics" title="סנכרון יומן אוטומטי בענן ל-Google Calendar / Apple Calendar" style="border-color: #10b981; color: #34d399; display: inline-flex; align-items: center; gap: 5px;">
+                                    <span style="display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #10b981; box-shadow: 0 0 6px #10b981;"></span>
+                                    📅 סנכרון יומן אוטומטי (חי)
+                                </button>
+                                <button type="button" class="btn btn-xs btn-outline" id="btn-copy-gtasks-top" title="העתק משימות מעוצבות ל-Google Tasks לפי קורסים">
+                                    📋 העתק ל-Google Tasks
+                                </button>
+                                <button type="button" class="btn-toggle-reminders-collapse" id="btn-toggle-reminders-collapse" title="מזער / הרחב תזכורות">
+                                    ▲
+                                </button>
+                            </div>
+                        </div>
+                        <div class="reminders-banner-body" id="reminders-banner-body">
+                            <!-- Populated dynamically via JS -->
+                        </div>
+                    </div>
+                    <div class="notion-tasks-header">
+                        <h2>📋 לוח משימות ומבחנים (Tasks & Exams)</h2>
+                        
+                        <!-- Filters Toolbar -->
+                        <div class="notion-filters-toolbar">
+                            <div class="filter-group">
+                                <label for="filter-course">קבוצה (קורס):</label>
+                                <select id="filter-course">
+                                    <option value="all">הכל (All Courses)</option>
+                                </select>
+                            </div>
+                            <div class="filter-group notion-filter-pill-wrapper">
+                                <label>סטטוס:</label>
+                                <button type="button" class="notion-filter-btn" id="notion-status-filter-btn">
+                                    <span id="notion-status-filter-summary">הכל (4)</span>
+                                    <span class="dropdown-arrow">▾</span>
+                                </button>
+                                <!-- Notion Filter Popover -->
+                                <div class="notion-filter-popover" id="notion-status-filter-popover">
+                                    <div class="notion-filter-popover-header">
+                                        <span>Status <strong>is</strong> ▾</span>
+                                        <span style="color: #666; font-size: 1rem; cursor: pointer;">···</span>
+                                    </div>
+                                    <div class="notion-filter-popover-body">
+                                        <!-- To-do Group -->
+                                        <div class="notion-filter-group-header" data-group="todo">
+                                            <input type="checkbox" id="filter-grp-todo" class="notion-filter-cb notion-filter-grp-cb" data-group="todo" checked>
+                                            <label for="filter-grp-todo" style="cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                                                <span style="font-size: 0.9rem; opacity: 0.7;">◌</span> To-do
+                                            </label>
+                                        </div>
+                                        <div class="notion-filter-item-row" data-status="not_started">
+                                            <input type="checkbox" id="filter-opt-not_started" class="notion-filter-cb notion-filter-opt-cb" data-group="todo" data-status="not_started" checked>
+                                            <label for="filter-opt-not_started" style="cursor: pointer;">
+                                                <span class="notion-status-pill not_started" style="pointer-events: none;">not started</span>
+                                            </label>
+                                        </div>
+
+                                        <!-- In progress Group -->
+                                        <div class="notion-filter-group-header" data-group="inprogress">
+                                            <input type="checkbox" id="filter-grp-inprogress" class="notion-filter-cb notion-filter-grp-cb" data-group="inprogress" checked>
+                                            <label for="filter-grp-inprogress" style="cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                                                <span style="font-size: 0.9rem; color: #38bdf8;">▷</span> In progress
+                                            </label>
+                                        </div>
+                                        <div class="notion-filter-item-row" data-status="in_progress">
+                                            <input type="checkbox" id="filter-opt-in_progress" class="notion-filter-cb notion-filter-opt-cb" data-group="inprogress" data-status="in_progress" checked>
+                                            <label for="filter-opt-in_progress" style="cursor: pointer;">
+                                                <span class="notion-status-pill in_progress" style="pointer-events: none;">In progress</span>
+                                            </label>
+                                        </div>
+
+                                        <!-- Complete Group -->
+                                        <div class="notion-filter-group-header" data-group="complete">
+                                            <input type="checkbox" id="filter-grp-complete" class="notion-filter-cb notion-filter-grp-cb" data-group="complete" checked>
+                                            <label for="filter-grp-complete" style="cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                                                <span style="font-size: 0.9rem; color: #34d399;">✓</span> Complete
+                                            </label>
+                                        </div>
+                                        <div class="notion-filter-item-row" data-status="done">
+                                            <input type="checkbox" id="filter-opt-done" class="notion-filter-cb notion-filter-opt-cb" data-group="complete" data-status="done" checked>
+                                            <label for="filter-opt-done" style="cursor: pointer;">
+                                                <span class="notion-status-pill done" style="pointer-events: none;">done</span>
+                                            </label>
+                                        </div>
+                                        <div class="notion-filter-item-row" data-status="submitted">
+                                            <input type="checkbox" id="filter-opt-submitted" class="notion-filter-cb notion-filter-opt-cb" data-group="complete" data-status="submitted" checked>
+                                            <label for="filter-opt-submitted" style="cursor: pointer;">
+                                                <span class="notion-status-pill submitted" style="pointer-events: none;">Submitted</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="notion-filter-popover-footer">
+                                        <button type="button" class="notion-filter-clear-btn" id="notion-filter-clear-btn">Clear selection</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="filter-group">
+                                <label for="filter-type">סוג:</label>
+                                <select id="filter-type">
+                                    <option value="all">הכל (All)</option>
+                                    <option value="hw">📜 שיעורי בית / גיליונות</option>
+                                    <option value="project">🛡️ עבודה / פרויקט</option>
+                                    <option value="exam">📝 מבחן סוף</option>
+                                </select>
+                            </div>
+                            <div class="filter-group search">
+                                <input type="text" id="search-tasks" placeholder="חיפוש משימה...">
+                            </div>
+                            <button type="button" class="btn btn-primary" id="btn-add-custom-task">➕ משימה חדשה</button>
+                        </div>
+                    </div>
+
+                    <!-- Notion Table -->
+                    <div class="notion-table-wrapper">
+                        <table class="notion-tasks-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 40px;"><input type="checkbox" id="select-all-tasks-checkbox"></th>
+                                    <th>משימה (Task)</th>
+                                    <th>קורס (Course)</th>
+                                    <th style="width: 150px;">תאריך הגשה (Due Date)</th>
+                                    <th style="width: 150px;">זמן נותר (Time Left)</th>
+                                    <th style="width: 150px;">סטטוס (Status)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="notion-tasks-table-body">
+                                <!-- Populated dynamically via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- PANE 2: Integrated Calendar View (משימות ומבחנים) -->
+                <div id="tasks-calendar-view-pane" style="display: none;">
+                    <div class="finals-calendar-card" id="finals-calendar-card" style="display: block;">
+                        <div class="finals-calendar-header-bar">
+                            <div class="cal-title-group">
+                                <h3 class="finals-calendar-title">📅 לוח שנה משולב: משימות ומבחנים</h3>
+                                <span class="cal-subtitle">תצוגה חודשית של כל מועדי הבחינות, הגשות שיעורי בית, WebWork, מעבדות ומבחנים לתרגול</span>
+                            </div>
+                            <div class="cal-nav-group">
+                                <button type="button" class="btn btn-sm btn-outline" id="cal-nav-prev">◀</button>
+                                <span class="cal-current-month" id="cal-current-month-title">August 2026</span>
+                                <button type="button" class="btn btn-sm btn-outline" id="cal-nav-next">▶</button>
+                                <button type="button" class="btn btn-sm btn-primary" id="btn-open-past-exams-mgr">⚙️ ניהול ושיבוץ מבחנים לתרגול</button>
+                                <button type="button" class="btn btn-sm btn-outline" id="btn-export-google-tasks">📤 ייצוא ל-Google</button>
+                            </div>
+                        </div>
+                        <div class="cal-legend-bar">
+                            <span class="cal-legend-item"><span class="dot dot-exam"></span> יום מבחן סמסטר רשמי</span>
+                            <span class="cal-legend-item"><span class="dot" style="background: #38bdf8;"></span> משימות (גיליון / WebWork / מעבדה)</span>
+                            <span class="cal-legend-item"><span class="dot dot-pe-active"></span> מבחן לתרגול</span>
+                            <span class="cal-legend-item"><span class="dot dot-pe-done"></span> מבחן לתרגול שהושלם</span>
+                            <span class="cal-hint-text">💡 לחץ על משימה לצפייה בפרטים, או על ➕ להוספת משימה ליום ספציפי.</span>
+                        </div>
+                        <div class="finals-calendar-container" id="finals-calendar-container" style="display: block;">
+                            <div class="finals-calendar-grid" id="finals-calendar-grid">
+                                <!-- Dynamically populated 7-column calendar -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+    </div>
+
+    <!-- Course Details Modal -->
+    <div class="modal-overlay" id="course-modal">
+        <div class="modal-content">
+            <button class="modal-close" id="course-modal-close">&times;</button>
+            
+            <!-- Three Dots Settings Menu -->
+            <div class="course-settings-container" style="position: absolute; top: 15px; left: 60px; z-index: 100;">
+                <button class="settings-trigger" id="modal-settings-trigger" style="background: transparent; border: none; color: var(--text-muted); font-size: 1.2rem; cursor: pointer; padding: 5px; line-height: 1;">⋮</button>
+                <div class="settings-dropdown" id="modal-settings-dropdown" style="display: none; position: absolute; top: 30px; left: 0; background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.5); min-width: 150px;">
+                    <button class="dropdown-item" id="modal-btn-complete-course" style="width: 100%; text-align: right; background: none; border: none; color: var(--text-light); padding: 8px 12px; cursor: pointer; font-size: 0.85rem; font-family: inherit;">🏆 סמן כהושלם</button>
+                    <button class="dropdown-item" id="modal-btn-edit-course" style="width: 100%; text-align: right; background: none; border: none; color: var(--text-light); padding: 8px 12px; cursor: pointer; font-size: 0.85rem; font-family: inherit;">✏️ ערוך קורס</button>
+                    <button class="dropdown-item" id="modal-btn-delete-course" style="width: 100%; text-align: right; background: none; border: none; color: #ef4444; padding: 8px 12px; cursor: pointer; font-size: 0.85rem; font-family: inherit;">🗑️ מחק קורס</button>
+                </div>
+            </div>
+
+            <div class="modal-header">
+                <span class="course-status-badge" id="modal-course-status">נעול</span>
+                <h2 id="modal-course-name">שם הקורס</h2>
+                <div class="modal-course-meta">
+                    <span id="modal-course-code">קוד קורס</span> &bull; 
+                    <span id="modal-course-credits">0 נק״ז</span>
+                </div>
+            </div>
+
+            <div class="modal-body">
+                <!-- Registration trigger -->
+                <div class="register-action-box" id="register-action-box">
+                    <!-- Dynamic state based on prerequisites -->
+                </div>
+
+                <!-- Semester Planning Selector -->
+                <div class="details-section">
+                    <label for="modal-course-semester-select" style="font-weight: bold; font-size: 0.85rem; color: var(--text-light); display: block; margin-bottom: 8px;">📅 סמסטר מתוכנן (שינוי מיקום בעץ):</label>
+                    <select id="modal-course-semester-select" style="background: var(--bg-panel); border: 1px solid var(--border-color); color: var(--text-light); border-radius: 4px; padding: 6px 12px; font-family: var(--font-body); font-size: 0.85rem; width: 100%;">
+                        <option value="1">שנה א' - סמסטר א'</option>
+                        <option value="2">שנה א' - סמסטר ב'</option>
+                        <option value="3">שנה ב' - סמסטר ג'</option>
+                        <option value="4">שנה ב' - סמסטר ד'</option>
+                        <option value="5">שנה ג' - סמסטר ה'</option>
+                        <option value="6">שנה ג' - סמסטר ו'</option>
+                        <option value="7">שנה ד' - סמסטר ז'</option>
+                        <option value="8">שנה ד' - סמסטר ח'</option>
+                    </select>
+                </div>
+
+                <!-- Grade Breakdown & Final Course Grade Section -->
+                <div class="details-section" id="modal-grade-section" style="display: none; background: rgba(14, 165, 233, 0.05); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 8px; padding: 14px; margin-bottom: 15px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <h4 style="margin: 0; color: var(--accent-blue); font-size: 0.92rem; display: flex; align-items: center; gap: 6px;">
+                            🎓 ציונים והרכב הציון הסופי
+                        </h4>
+                        <span style="font-size: 0.72rem; color: var(--text-muted);">ציון המבחן והציון הסופי הם נפרדים</span>
+                    </div>
+
+                    <!-- Grade Calculator Grid -->
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(115px, 1fr)); gap: 8px; margin-bottom: 12px; background: rgba(0,0,0,0.25); padding: 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.05);">
+                        <div>
+                            <label style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-bottom: 4px;">📝 ציון מבחן סוף:</label>
+                            <input type="number" id="calc-exam-grade" min="0" max="100" placeholder="--" style="width: 100%; box-sizing: border-box; background: var(--bg-deep); border: 1px solid var(--border-color); color: var(--text-light); border-radius: 4px; padding: 5px 8px; font-size: 0.85rem; text-align: center; font-family: inherit;">
+                        </div>
+                        <div>
+                            <label style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-bottom: 4px;">⚖️ משקל מבחן (%):</label>
+                            <input type="number" id="calc-exam-weight" min="0" max="100" value="70" style="width: 100%; box-sizing: border-box; background: var(--bg-deep); border: 1px solid var(--border-color); color: var(--text-light); border-radius: 4px; padding: 5px 8px; font-size: 0.85rem; text-align: center; font-family: inherit;">
+                        </div>
+                        <div>
+                            <label style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-bottom: 4px;">📚 ציון שאר מטלות/מגן:</label>
+                            <input type="number" id="calc-hw-grade" min="0" max="100" placeholder="100" style="width: 100%; box-sizing: border-box; background: var(--bg-deep); border: 1px solid var(--border-color); color: var(--text-light); border-radius: 4px; padding: 5px 8px; font-size: 0.85rem; text-align: center; font-family: inherit;">
+                        </div>
+                        <div>
+                            <label style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-bottom: 4px;">⚡ ציון מחושב:</label>
+                            <div id="calc-preview-grade" style="font-size: 0.95rem; font-weight: bold; color: #38bdf8; padding: 5px 0; text-align: center;">--</div>
+                        </div>
+                    </div>
+
+                    <!-- Official Final Grade Input (Counts toward GPA) -->
+                    <div style="display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap;">
+                        <div style="flex: 1; min-width: 180px;">
+                            <label for="modal-course-grade-input" style="font-weight: bold; font-size: 0.82rem; color: #fbbf24; display: block; margin-bottom: 4px;">
+                                🏆 ציון סופי בקורס (לתעתיק ולממוצע):
+                            </label>
+                            <input type="number" id="modal-course-grade-input" min="0" max="100" placeholder="הזן ציון סופי..." style="width: 100%; box-sizing: border-box; background: var(--bg-deep); border: 1px solid #fbbf24; color: #fff; font-weight: bold; border-radius: 4px; padding: 6px 10px; font-size: 0.9rem; font-family: inherit;">
+                        </div>
+                        <button type="button" class="btn btn-sm btn-outline" id="btn-apply-calculated-grade" style="font-size: 0.75rem; padding: 7px 12px; height: 35px; white-space: nowrap;">
+                            החל ציון מחושב ➔
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Prerequisites list -->
+                <div class="details-section">
+                    <h3>🔗 דרישות קדם (Prerequisites)</h3>
+                    <div class="prereqs-tags" id="modal-prereqs-list">
+                        <!-- Dynamic list of pre-req course codes -->
+                    </div>
+                </div>
+
+                <!-- Syllabus & Moodle Import Box -->
+                <div class="details-section" id="modal-import-section" style="background: rgba(14, 165, 233, 0.03); border: 1px dashed var(--accent-blue); padding: 15px; border-radius: 8px; margin: 15px 0;">
+                    <h4 style="margin-top: 0; margin-bottom: 8px; color: var(--accent-blue); display: flex; align-items: center; gap: 6px; font-size: 0.9rem;">📖 ייבוא משימות וסילבוס</h4>
+                    <p style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 10px; line-height: 1.4;">טען משימות ושלבים למסע ישירות ממודל או על ידי הדבקת טקסט של סילבוס:</p>
+                    
+                    <div style="display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap;">
+                        <button class="btn btn-sm" id="btn-fetch-moodle-course" style="flex: 1; font-size: 0.75rem; background-color: var(--accent-blue); color: #fff; cursor: pointer; border: none; border-radius: 4px; padding: 6px 12px; font-weight: bold; font-family: inherit;">🔄 משוך ממודל (Moodle)</button>
+                        <button class="btn btn-sm" id="btn-show-syllabus-paste" style="flex: 1; font-size: 0.75rem; background: var(--bg-deep); border: 1px solid var(--border-color); color: var(--text-light); cursor: pointer; border-radius: 4px; padding: 6px 12px; font-family: inherit;">📝 הדבק סילבוס ידנית</button>
+                    </div>
+                    
+                    <!-- Syllabus Paste Area -->
+                    <div id="syllabus-paste-area" style="display: none; flex-direction: column; gap: 8px; margin-top: 10px; border-top: 1px solid var(--border-color); padding-top: 10px;">
+                        <textarea id="input-syllabus-text" rows="4" placeholder="הדבק כאן את הטקסט של הסילבוס (לדוגמה: תרגיל בית 1 בנושא קינמטיקה, מעבדה 2, פרויקט מסכם, מבחן סוף...)" style="background: var(--bg-deep); border: 1px solid var(--border-color); color: var(--text-light); border-radius: 4px; padding: 8px; font-family: inherit; font-size: 0.8rem; resize: vertical; width: 100%; box-sizing: border-box;"></textarea>
+                        <button class="btn btn-sm" id="btn-import-syllabus-submit" style="background-color: var(--color-mastered); color: #fff; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; padding: 6px 12px; font-family: inherit; align-self: flex-start;">נתח וייבא משימות</button>
+                    </div>
+                </div>
+
+                <!-- Course Questline Journey (Notion Style Timeline) -->
+                <div class="details-section">
+                    <h3>📋 סילבוס ומטלות הקורס</h3>
+                    <div class="questline-container" id="modal-questline-container">
+                        <!-- Timeline of course assignments and exams -->
+                    </div>
+                    
+                    <!-- Unified Add Quest Input Form -->
+                    <div class="add-task-form" id="form-add-quest" style="display: none; margin-top: 15px; border-top: 1px solid var(--border-color); padding-top: 15px; gap: 8px; flex-wrap: wrap; align-items: center;">
+                        <input type="text" placeholder="שם המשימה / שלב..." id="input-quest-title" style="flex: 1; min-width: 150px; background: var(--bg-deep); border: 1px solid var(--border-color); color: var(--text-light); border-radius: 4px; padding: 6px 10px; font-family: inherit;">
+                        <select id="input-quest-type" style="background: var(--bg-deep); border: 1px solid var(--border-color); color: var(--text-light); border-radius: 4px; padding: 6px 10px; font-family: inherit; font-size: 0.85rem;">
+                            <option value="hw">📜 שיעורי בית</option>
+                            <option value="project">🛡️ פרויקט</option>
+                            <option value="exam">📝 מבחן מסכם</option>
+                        </select>
+                        <input type="date" id="input-quest-date" style="background: var(--bg-deep); border: 1px solid var(--border-color); color: var(--text-light); border-radius: 4px; padding: 6px 10px; font-family: inherit; font-size: 0.85rem;">
+                        <input type="number" value="0" id="input-quest-xp" style="display: none;" style="width: 70px; background: var(--bg-deep); border: 1px solid var(--border-color); color: var(--text-light); border-radius: 4px; padding: 6px 10px; font-family: inherit; font-size: 0.85rem;">
+                        <button class="btn btn-sm" id="btn-save-quest" style="padding: 6px 12px; background-color: var(--accent-blue); color: #fff; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">הוסף למסע</button>
+                    </div>
+                    <button class="btn btn-sm btn-icon" id="btn-add-quest-trigger" style="margin-top: 10px; display: inline-flex; align-items: center; gap: 5px; background: none; border: 1px dashed var(--border-color); color: var(--text-muted); cursor: pointer; padding: 6px 12px; border-radius: 4px; font-size: 0.8rem;">
+                        ➕ הוסף שלב חדש למסע
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Course Modal -->
+    <div class="modal-overlay" id="add-course-modal">
+        <div class="modal-content small">
+            <button class="modal-close" id="add-course-close">&times;</button>
+            <div class="modal-header">
+                <h2 id="add-course-modal-title">הוספת קורס חדש</h2>
+            </div>
+            <div class="modal-body">
+                <form id="form-course">
+                    <div class="form-group">
+                        <label for="course-name">שם הקורס:</label>
+                        <input type="text" id="course-name" required placeholder="למשל: מבוא למדעי המחשב">
+                    </div>
+                    <div class="form-group">
+                        <label for="course-code">קוד קורס (מזהה ייחודי):</label>
+                        <input type="text" id="course-code" required placeholder="למשל: cs101">
+                    </div>
+                    <div class="form-group">
+                        <label for="course-credits">נקודות זכות (נק״ז):</label>
+                        <input type="number" id="course-credits" required min="0.5" max="10" step="0.5" value="4">
+                    </div>
+                    <div class="form-group">
+                        <label for="course-semester">סמסטר (מספר סידורי):</label>
+                        <select id="course-semester">
+                            <option value="1">שנה א' - סמסטר א'</option>
+                            <option value="2">שנה א' - סמסטר ב'</option>
+                            <option value="3">שנה ב' - סמסטר ג'</option>
+                            <option value="4">שנה ב' - סמסטר ד'</option>
+                            <option value="5">שנה ג' - סמסטר ה'</option>
+                            <option value="6">שנה ג' - סמסטר ו'</option>
+                            <option value="7">שנה ד' - סמסטר ז'</option>
+                            <option value="8">שנה ד' - סמסטר ח'</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="course-type">סוג קורס:</label>
+                        <select id="course-type">
+                            <option value="core">חובה (Core)</option>
+                            <option value="elective">בחירה (Elective)</option>
+                            <option value="humanities">מל״ג / הומניסטי (Humanities)</option>
+                            <option value="sports">ספורט (Sports)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="course-prereqs">קורסי קדם (בחר קודים פסיק מפריד):</label>
+                        <input type="text" id="course-prereqs" placeholder="למשל: cs101, math101">
+                        <small>הזן קודים של קורסים קיימים מופרדים בפסיקים.</small>
+                    </div>
+                    <button type="submit" id="add-course-submit-btn" class="btn btn-primary w-full">הוסף קורס לעץ</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Level Up Splash Removed -->
+
+    <!-- Import Modal -->
+    <div class="modal-overlay" id="import-modal">
+        <div class="modal-content small">
+            <button class="modal-close" id="import-modal-close">&times;</button>
+            <div class="modal-header">
+                <h2>ייבוא שמירה (JSON)</h2>
+            </div>
+            <div class="modal-body">
+                <textarea id="import-text" placeholder="הדבק כאן את תוכן השמירה המיוצא..." rows="10" style="width: 100%; background: var(--bg-dark); color: var(--text-light); font-family: monospace; padding: 10px; border: 1px solid var(--border-color); border-radius: 4px; resize: none;"></textarea>
+                <button class="btn btn-primary w-full mt-10" id="btn-import-submit">ייבא נתונים</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide-in Side Peek Panel (Notion style) -->
+    <div class="task-side-peek" id="task-side-peek">
+        <!-- Cover Art Banner -->
+        <div class="peek-cover" id="peek-cover-area" style="background-image: url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=600');">
+            <button class="peek-close-btn" id="peek-close-btn">&times;</button>
+        </div>
+        
+        <div class="peek-content">
+            <!-- Icon and Editable Title -->
+            <div class="peek-header">
+                <div class="peek-icon">📋</div>
+                <input type="text" id="peek-task-title" class="peek-title-input" placeholder="שם המשימה...">
+            </div>
+
+            <!-- Properties List -->
+            <div class="peek-properties">
+                <div class="peek-property-row">
+                    <span class="peek-property-label">📖 קורס (Domain)</span>
+                    <span class="peek-property-value" id="peek-property-course">קורס כלשהו</span>
+                </div>
+                <div class="peek-property-row">
+                    <span class="peek-property-label">🏷️ סוג (Type)</span>
+                    <span class="peek-property-value" id="peek-property-type">מטלה</span>
+                </div>
+                <div class="peek-property-row">
+                    <span class="peek-property-label" style="display: none;">✨ XP</span>
+                    <span class="peek-property-value" id="peek-property-xp" style="display: none;"></span>
+                </div>
+                <div class="peek-property-row">
+                    <span class="peek-property-label">📅 תאריך הגשה (Date)</span>
+                    <span class="peek-property-value">
+                        <input type="date" id="peek-property-date" class="peek-date-input">
+                    </span>
+                </div>
+                <div class="peek-property-row">
+                    <span class="peek-property-label">🟢 סטטוס (Status)</span>
+                    <span class="peek-property-value">
+                        <select id="peek-property-status" class="peek-status-select">
+                            <!-- Populated dynamically via JS -->
+                        </select>
+                    </span>
+                </div>
+                <!-- Optional Grade Box for Exams -->
+                <div class="peek-property-row" id="peek-property-grade-row" style="display: none;">
+                    <span class="peek-property-label">📝 ציון מבחן סוף (Exam Grade)</span>
+                    <span class="peek-property-value">
+                        <input type="number" id="peek-property-grade" class="peek-grade-input" min="0" max="100" placeholder="הזן ציון מבחן...">
+                        <div style="font-size: 0.68rem; color: var(--text-muted); margin-top: 2px;">ציון המבחן בלבד — הציון הסופי בקורס מורכב מחלקו</div>
+                    </span>
+                </div>
+            </div>
+
+            <!-- Separator -->
+            <hr class="peek-separator">
+
+            <!-- Comments Section -->
+            <div class="peek-comments-section">
+                <h3>💬 הערות (Comments)</h3>
+                <div class="peek-comments-list" id="peek-comments-list">
+                    <!-- Populated dynamically via JS -->
+                </div>
+                <div class="peek-comment-input-row">
+                    <textarea id="peek-new-comment-text" placeholder="הוסף הערה או תזכורת... (Shift+Enter לשורה חדשה)"></textarea>
+                    <button class="btn btn-sm btn-primary" id="peek-btn-add-comment">שלח</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Past Exams Manager & Study Scheduler Modal -->
+    <div class="modal-overlay" id="past-exams-modal">
+        <div class="modal-content medium-large">
+            <button class="modal-close" id="past-exams-modal-close">&times;</button>
+            <div class="modal-header">
+                <span class="course-status-badge" style="background: rgba(245, 158, 11, 0.2); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.4);">
+                    📅 סידור מבחני עבר
+                </span>
+                <h2>ניהול ושיבוץ מבחנים לתרגול לקראת הבחינה</h2>
+                <p style="color: var(--text-muted); font-size: 0.82rem; margin: 4px 0 0 0;">
+                    בחר אילו מבחנים לתרגול קיימים עבורך, קבע תאריכי למידה או שבץ אוטומטית לימים שלפני המבחן.
+                </p>
+            </div>
+            
+            <div class="modal-body">
+                <!-- Course Tabs -->
+                <div class="pem-course-tabs" id="pem-course-tabs">
+                    <!-- Populated dynamically -->
+                </div>
+
+                <!-- Study Window Setup & Auto-Distribution Bar -->
+                <div class="pem-scheduler-bar">
+                    <div class="pem-sched-inputs">
+                        <div class="pem-input-group">
+                            <label for="pem-earliest-year">⏳ שנה הכי מוקדמת:</label>
+                            <select id="pem-earliest-year" class="pem-select-year" title="קבע מהי השנה הכי מוקדמת שקיימת עבור מבחנים לתרגול בקורס זה">
+                                <option value="2025">2025</option>
+                                <option value="2024">2024</option>
+                                <option value="2023">2023</option>
+                                <option value="2022">2022</option>
+                                <option value="2021">2021</option>
+                                <option value="2020">2020</option>
+                                <option value="2019">2019</option>
+                                <option value="2018" selected>2018</option>
+                                <option value="2017">2017</option>
+                                <option value="2016">2016</option>
+                                <option value="2015">2015</option>
+                                <option value="2014">2014</option>
+                                <option value="2012">2012</option>
+                                <option value="2010">2010</option>
+                            </select>
+                        </div>
+                        <div class="pem-input-group">
+                            <label for="pem-study-start">📅 תחילת מרתון:</label>
+                            <input type="date" id="pem-study-start" value="2026-08-05">
+                        </div>
+                        <div class="pem-input-group">
+                            <label for="pem-exam-date">🎯 מועד המבחן:</label>
+                            <input type="date" id="pem-exam-date" value="2026-08-13">
+                        </div>
+                        <div class="pem-input-group">
+                            <label for="pem-exams-per-day">מבחנים ליום:</label>
+                            <input type="number" id="pem-exams-per-day" min="1" max="5" value="2" style="width: 55px;">
+                        </div>
+                    </div>
+                    <div class="pem-sched-actions">
+                        <button type="button" class="btn btn-sm btn-primary" id="btn-pem-auto-schedule">
+                            ⚡ שבץ אוטומטית לימי הלמידה
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline" id="btn-pem-clear-dates">
+                            🧹 אפס שיבוצים
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Selection Toolbar & Quick Actions -->
+                <div class="pem-selection-toolbar">
+                    <div class="pem-selection-stats">
+                        <span id="pem-selection-count">סומנו: 0 מתוך 0 מועדים</span>
+                        <span class="pem-selection-hint">💡 סמן בתיבת הסימון (☑️) את המבחנים שקיימים עבורך, ולאחר מכן לחץ על "שבץ אוטומטית"</span>
+                    </div>
+                    <div class="pem-selection-btns">
+                        <button type="button" class="btn btn-xs btn-outline" id="btn-pem-select-moed-a" title="סמן את כל מועדי א׳ בלבד">🎯 רק מועדי א׳</button>
+                        <button type="button" class="btn btn-xs btn-outline" id="btn-pem-select-all-btn" title="סמן את כל המועדים ברשימה">☑️ סמן הכל</button>
+                        <button type="button" class="btn btn-xs btn-outline" id="btn-pem-deselect-all-btn" title="בטל את כל הסימונים">⬜ נקה סימונים</button>
+                    </div>
+                </div>
+
+                <!-- Past Exams Matrix Table -->
+                <div class="pem-table-wrapper">
+                    <table class="pem-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 44px; text-align: center;">
+                                    <input type="checkbox" id="pem-select-all" class="pem-exam-check" title="בחר / בטל הכל">
+                                </th>
+                                <th style="width: 90px;">שנת מבחן</th>
+                                <th>מועד / סמסטר</th>
+                                <th>פתרון קיים</th>
+                                <th style="width: 150px;">תאריך שיבוץ ללמידה</th>
+                                <th style="width: 100px;">סטטוס</th>
+                                <th style="width: 50px; text-align: center;">מחק</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pem-table-body">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Add New Exam Row -->
+                <div class="pem-add-custom-row">
+                    <div style="font-weight: 700; font-size: 0.8rem; color: #f8fafc; margin-bottom: 8px;">
+                        ➕ הוסף מבחן לתרגול / מועד חדש למאגר הקורס
+                    </div>
+                    <div class="pem-add-grid">
+                        <input type="text" id="pem-new-year" placeholder="שנה (למשל: 2026)" style="width: 100px;">
+                        <input type="text" id="pem-new-moed" placeholder="מועד (למשל: מועד א חורף)" style="flex: 1;">
+                        <input type="text" id="pem-new-solution" placeholder="קישור / הערת פתרון (אופציונלי)" style="flex: 1;">
+                        <input type="date" id="pem-new-date" title="תאריך שיבוץ (אופציונלי)">
+                        <button type="button" class="btn btn-sm btn-primary" id="btn-pem-add-custom">הוסף למאגר</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer pem-footer">
+                <div class="pem-export-buttons">
+                    <button type="button" class="btn btn-sm btn-outline" id="btn-pem-export-ics" title="ייצא קובץ .ics תואם ל-Google Calendar">
+                        📅 ייצא לוח שנה (Google .ics)
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline" id="btn-pem-copy-google-tasks" title="העתק רשימת משימות מעוצבת להדבקה ב-Google Tasks">
+                        📋 העתק ל-Google Tasks
+                    </button>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <button type="button" class="btn btn-secondary" id="btn-pem-close">ביטול</button>
+                    <button type="button" class="btn btn-primary" id="btn-pem-save">💾 שמור שינויים ועדכן לוח</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Custom Task Modal (With Type Selector & Auto-Numbering) -->
+    <div class="modal-overlay" id="modal-add-custom-task">
+        <div class="modal-content medium" style="max-width: 520px;">
+            <button class="modal-close" id="modal-add-custom-task-close">&times;</button>
+            <div class="modal-header">
+                <span class="course-status-badge" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.4);">
+                    ➕ משימה חדשה
+                </span>
+                <h2>הוספת משימה ללוח המשימות</h2>
+                <p style="color: var(--text-muted); font-size: 0.82rem; margin: 4px 0 0 0;">
+                    בחר קורס וסוג משימה. המערכת תמספר את המשימה אוטומטית לפי היסטוריית המטלות בקורס.
+                </p>
+            </div>
+            
+            <div class="modal-body" style="padding-top: 14px;">
+                <div class="form-group" style="margin-bottom: 14px;">
+                    <label for="new-task-course-select" style="display: block; font-weight: 600; font-size: 0.82rem; margin-bottom: 6px; color: #cbd5e1;">קורס (Course):</label>
+                    <select id="new-task-course-select" class="modal-select" style="width: 100%;">
+                        <!-- Populated with active courses -->
+                    </select>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 14px;">
+                    <label style="display: block; font-weight: 600; font-size: 0.82rem; margin-bottom: 6px; color: #cbd5e1;">סוג המשימה (Task Type):</label>
+                    <div class="task-type-pills-row" id="new-task-type-pills">
+                        <button type="button" class="task-type-pill active" data-type="hw" data-prefix="גיליון">📝 גיליון</button>
+                        <button type="button" class="task-type-pill" data-type="hw" data-prefix="WebWork">💻 WebWork</button>
+                        <button type="button" class="task-type-pill" data-type="lab" data-prefix="מעבדה">🔬 מעבדה</button>
+                        <button type="button" class="task-type-pill" data-type="project" data-prefix="פרויקט">🛡️ פרויקט</button>
+                        <button type="button" class="task-type-pill" data-type="hw" data-prefix="משימה">✨ מותאם אישית</button>
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 14px;">
+                    <label for="new-task-title-input" style="display: block; font-weight: 600; font-size: 0.82rem; margin-bottom: 6px; color: #cbd5e1;">שם המשימה (Task Title):</label>
+                    <input type="text" id="new-task-title-input" class="modal-input" placeholder="לדוגמה: גיליון 3 או WebWork 1" style="width: 100%;">
+                    <div id="new-task-autonum-hint" style="font-size: 0.76rem; color: #38bdf8; margin-top: 5px;"></div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 12px; margin-bottom: 14px;">
+                    <div class="form-group">
+                        <label for="new-task-due-date" style="display: block; font-weight: 600; font-size: 0.82rem; margin-bottom: 6px; color: #cbd5e1;">תאריך הגשה (Due Date):</label>
+                        <input type="date" id="new-task-due-date" class="modal-input" style="width: 100%;">
+                    </div>
+                    <div class="form-group">
+                        <label for="new-task-xp-input" style="display: none;" style="display: block; font-weight: 600; font-size: 0.82rem; margin-bottom: 6px; color: #cbd5e1;">ניקוד (XP):</label>
+                        <input type="number" id="new-task-xp-input" class="modal-input" value="0" style="display: none;" min="10" max="500" style="width: 100%;">
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 15px;">
+                <button type="button" class="btn btn-secondary" id="btn-cancel-add-task">ביטול</button>
+                <button type="button" class="btn btn-primary" id="btn-submit-add-task">➕ צור משימה</button>
+            </div>
+        </div>
+    </div>
+
+        <!-- Calendar Cloud Auto-Sync Modal (Google Calendar Webcal) -->
+    <div class="modal-overlay" id="calendar-sync-modal" style="display: none; align-items: center; justify-content: center; z-index: 10000;">
+        <div class="modal-content" style="max-width: 580px; border: 1px solid rgba(16, 185, 129, 0.4); box-shadow: 0 20px 45px rgba(0,0,0,0.6); border-radius: 12px; background: #0f172a;">
+            <div class="modal-header" style="border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 14px;">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span style="font-size: 1.4rem;">🔄</span>
+                        <h2 style="font-size: 1.15rem; margin: 0; color: #f8fafc;">סנכרון יומן אוטומטי (Google Calendar)</h2>
+                    </div>
+                    <span class="course-status-badge" style="background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); font-size: 0.76rem; padding: 3px 8px;">
+                        🟢 מחובר ומסונכרן לענן
+                    </span>
+                </div>
+                <p style="color: var(--text-muted); font-size: 0.82rem; margin: 6px 0 0 0;">
+                    היומן שלך מחובר ל-GitHub Gist ומתעדכן אוטומטית בכל שינוי ובכל לילה בחצות (00:00) ללא צורך בהעברת קבצים!
+                </p>
+            </div>
+
+            <div class="modal-body" style="padding-top: 16px;">
+                <!-- Step 1: Subscription URL -->
+                <div style="background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 14px; margin-bottom: 16px;">
+                    <label style="display: block; font-weight: 600; font-size: 0.82rem; margin-bottom: 6px; color: #94a3b8;">
+                        🔗 כתובת המנוי האישית שלך ליומן (Webcal Feed URL):
+                    </label>
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <input type="text" id="sync-webcal-url-input" readonly value="https://gist.githubusercontent.com/adir2368/71ec3efb9e46b0abafa44532f0e2aab1/raw/technion_schedule.ics" 
+                               style="flex: 1; background: #020617; border: 1px solid #334155; border-radius: 6px; color: #38bdf8; font-family: monospace; font-size: 0.8rem; padding: 8px 10px;" />
+                        <button type="button" class="btn btn-primary btn-sm" id="btn-copy-webcal-url" style="white-space: nowrap;">
+                            📋 העתק קישור
+                        </button>
+                    </div>
+                    <div style="font-size: 0.74rem; color: #10b981; margin-top: 6px;" id="copy-webcal-url-hint">
+                        💡 קישור זה מזין ישירות את Google Calendar במחשב ובסמארטפון.
+                    </div>
+                </div>
+
+                <!-- Step 2: Google Calendar Instructions -->
+                <div style="border-left: 3px solid #38bdf8; padding-right: 12px; margin-bottom: 16px;">
+                    <h4 style="margin: 0 0 6px 0; font-size: 0.88rem; color: #f1f5f9;">איך להוסיף ל-Google Calendar בפעם אחת ולתמיד:</h4>
+                    <ol style="margin: 0; padding-right: 20px; font-size: 0.82rem; color: #cbd5e1; line-height: 1.6;">
+                        <li>פתח את <strong>Google Calendar</strong> בדפדפן (לחץ על הכפתור למטה).</li>
+                        <li>בתפריט הצדדי ליד <strong>"יומנים אחרים" (Other calendars)</strong>, לחץ על <strong>➕</strong>.</li>
+                        <li>בחר <strong>"מכתובת URL" (From URL)</strong> והדבק את הקישור שהעתקת.</li>
+                        <li>זהו! היומן יציג את כל המשימות, המבחנים וההתראות, ויתעדכן אוטומטית מדי יום.</li>
+                    </ol>
+                </div>
+
+                <!-- Status Info -->
+                <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(16, 185, 129, 0.07); border: 1px dashed rgba(16, 185, 129, 0.3); border-radius: 6px; padding: 10px 12px; font-size: 0.8rem; color: #6ee7b7;">
+                    <span>🌙 סנכרון רקע יומי מתוזמן ב-Windows לכל לילה ב-<strong>00:00 (חצות)</strong></span>
+                    <span id="sync-status-indicator" style="font-weight: bold;">🟢 פעיל</span>
+                </div>
+            </div>
+
+            <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center; margin-top: 18px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.08);">
+                <div style="display: flex; gap: 8px;">
+                    <a href="https://calendar.google.com" target="_blank" class="btn btn-outline btn-sm" style="text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
+                        🌐 פתח את Google Calendar
+                    </a>
+                    <button type="button" class="btn btn-outline btn-sm" id="btn-manual-download-ics" title="הורד קובץ .ics ידני למחשב">
+                        📥 הורד .ics ידנית
+                    </button>
+                </div>
+                <div style="display: flex; gap: 8px;">
+                    <button type="button" class="btn btn-primary btn-sm" id="btn-trigger-cloud-sync" style="background: #059669; border-color: #059669;">
+                        🔄 סנכרן עכשיו לענן
+                    </button>
+                    <button type="button" class="btn btn-secondary btn-sm" id="btn-close-sync-modal">סגור</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Core Application Logic -->
+    <script src="app.js"></script>
+    <!-- PWA Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator && window.location.protocol.startsWith('http')) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(reg => console.log('[PWA] Service Worker registered with scope:', reg.scope))
+                    .catch(err => console.warn('[PWA] Service Worker registration failed:', err));
+            });
+        }
+    </script>
+</body>
+</html>
