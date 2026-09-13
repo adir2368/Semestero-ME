@@ -184,6 +184,15 @@
           "dueDate": ""
         },
         {
+          "id": "104228_ww1",
+          "title": "WebWork 1: משוואת הגלים",
+          "type": "webwork",
+          "xp": 40,
+          "completed": false,
+          "status": "not_started",
+          "dueDate": ""
+        },
+        {
           "id": "104228_ex",
           "title": "מבחן סוף",
           "type": "exam",
@@ -259,6 +268,15 @@
           "title": "תרגיל בית 1: שדה חשמלי וחוק גאוס",
           "type": "hw",
           "xp": 50,
+          "completed": false,
+          "status": "not_started",
+          "dueDate": ""
+        },
+        {
+          "id": "114052_ww1",
+          "title": "WebWork 1: חוק קולון ושדה חשמלי",
+          "type": "webwork",
+          "xp": 40,
           "completed": false,
           "status": "not_started",
           "dueDate": ""
