@@ -16,7 +16,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Rubik:wght@300;400;500;700;900&display=swap" rel="stylesheet">
     <link rel="icon" type="image/png" href="icon.png">
-    <link rel="stylesheet" href="styles.css?v=1.3.0">
+    <link rel="stylesheet" href="styles.css?v=1.3.1">
 </head>
 <body>
     <div class="hud-container">
@@ -651,7 +651,7 @@
         </main>
 
         <!-- Weekly Timetable Workspace -->
-        <main class="hud-workspace" id="timetable-workspace" style="display: none; flex-direction: column; overflow-y: auto; background: var(--bg-deep);">
+        <main class="hud-workspace" id="timetable-workspace" style="display: none; flex-direction: column; overflow-y: auto !important; overflow-x: hidden !important; -webkit-overflow-scrolling: touch !important; touch-action: pan-y !important; flex: 1; min-height: 0; background: var(--bg-deep);">
             <div class="timetable-container">
                 <!-- Header Card -->
                 <div class="timetable-header-card">
@@ -1499,7 +1499,7 @@
     </div>
 
     <!-- Core Application Logic -->
-    <script src="app.js?v=1.3.0"></script>
+    <script src="app.js?v=1.3.1"></script>
     <!-- PWA Service Worker Registration -->
     <script>
         if ('serviceWorker' in navigator && window.location.protocol.startsWith('http')) {
@@ -1520,6 +1520,18 @@
                 });
             });
         }
+
+        window.forceAppUpdate = async function() {
+            if ('caches' in window) {
+                const keys = await caches.keys();
+                await Promise.all(keys.map(k => caches.delete(k)));
+            }
+            if ('serviceWorker' in navigator) {
+                const regs = await navigator.serviceWorker.getRegistrations();
+                await Promise.all(regs.map(r => r.unregister()));
+            }
+            window.location.reload(true);
+        };
     </script>
 </body>
 </html>
