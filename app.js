@@ -63,6 +63,128 @@ const COURSE_SHORT_NAMES = {
     '034032': 'מערכות ליניאריות'
 };
 
+// Dedicated Notion-style course icons matching user's custom Notion workspace
+const COURSE_NOTION_ICONS = {
+    // 104131 ODEs / מד"ר -> Blue mathematical Sigma Σ (exact match to user Notion screenshot)
+    '104131': {
+        color: '#2563eb',
+        svg: `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#2563eb" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M19 4H5l7 8-7 8h14"/></svg>`
+    },
+    // 104043 Calculus 2 / חדו"א 2 -> Purple area curve / graph (exact match to user Notion screenshot)
+    '104043': {
+        color: '#a855f7',
+        svg: `<svg viewBox="0 0 24 24" width="18" height="18" fill="none"><path d="M3 4v16a1 1 0 0 0 1 1h17" stroke="#a855f7" stroke-width="2" stroke-linecap="round"/><path d="M5 17c3-1 5-9 8-9s4 6 6 6v3H5v-0z" fill="rgba(168, 85, 247, 0.35)" stroke="#a855f7" stroke-width="2" stroke-linejoin="round"/></svg>`
+    },
+    // 104041 Calculus 1M1 / חדו"א 1מ1 -> Purple area curve / graph (Calculus family)
+    '104041': {
+        color: '#a855f7',
+        svg: `<svg viewBox="0 0 24 24" width="18" height="18" fill="none"><path d="M3 4v16a1 1 0 0 0 1 1h17" stroke="#a855f7" stroke-width="2" stroke-linecap="round"/><path d="M5 17c3-1 5-9 8-9s4 6 6 6v3H5v-0z" fill="rgba(168, 85, 247, 0.35)" stroke="#a855f7" stroke-width="2" stroke-linejoin="round"/></svg>`
+    },
+    // 034061 Engineering Graphics & CAD / תכנון הנדסי -> Red double gears (exact match to user Notion screenshot)
+    '034061': {
+        color: '#ef4444',
+        svg: `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#ef4444" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="9" r="2.5"/><path d="M9 4.5v1.2m0 6.6v1.2m4.5-4.5h-1.2m-6.6 0H4.5m1.3-3.2l.9.9m4.2 4.2l.9.9m0-6l-.9.9m-4.2 4.2l-.9.9"/><circle cx="16.5" cy="16.5" r="2"/><path d="M16.5 13.5v.8m0 4.4v.8m3-3h-.8m-4.4 0h-.8m1-2l.6.6m3 3l.6.6m0-4.2l-.6.6m-3 3l-.6.6"/></svg>`
+    },
+    // 034028 Solid Mechanics 1 / מכניקת מוצקים 1 -> Warm brown portal bridge / truss arch (exact match to user Notion screenshot)
+    '034028': {
+        color: '#b45309',
+        svg: `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#b45309" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12"/><path d="M4 10h16"/><path d="M4 15c4-3 12-3 16 0"/><line x1="8" y1="6" x2="8" y2="10"/><line x1="16" y1="6" x2="16" y2="10"/></svg>`
+    },
+    // 034053 Solid Mechanics 2 / מכניקת מוצקים 2 מורחב -> Warm brown portal bridge / truss arch (Solid Mechanics family)
+    '034053': {
+        color: '#b45309',
+        svg: `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#b45309" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12"/><path d="M4 10h16"/><path d="M4 15c4-3 12-3 16 0"/><line x1="8" y1="6" x2="8" y2="10"/><line x1="16" y1="6" x2="16" y2="10"/></svg>`
+    },
+    // 314533 Materials Science / מבוא להנדסת חומרים -> Amber yellow crystal lattice atom (exact match to user Notion screenshot)
+    '314533': {
+        color: '#eab308',
+        svg: `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#eab308" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="2.5" fill="#eab308"/><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="19" r="1.5"/><circle cx="6" cy="8.5" r="1.5"/><circle cx="18" cy="15.5" r="1.5"/><circle cx="6" cy="15.5" r="1.5"/><circle cx="18" cy="8.5" r="1.5"/><line x1="12" y1="9.5" x2="12" y2="6.5"/><line x1="12" y1="14.5" x2="12" y2="17.5"/><line x1="9.8" y1="10.7" x2="7.5" y2="9.4"/><line x1="14.2" y1="13.3" x2="16.5" y2="14.6"/><line x1="9.8" y1="13.3" x2="7.5" y2="14.6"/><line x1="14.2" y1="10.7" x2="16.5" y2="9.4"/></svg>`
+    },
+    // 125001 General Chemistry / כימיה כללית -> Emerald green Erlenmeyer flask (exact match to user Notion screenshot)
+    '125001': {
+        color: '#10b981',
+        svg: `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3h4m-2 0v6l5.5 10a1.5 1.5 0 0 1-1.3 2H7.8a1.5 1.5 0 0 1-1.3-2L12 9V3"/><path d="M8.5 16h7" stroke-dasharray="1 2"/></svg>`
+    },
+    // 125013 Chemistry Lab / מעבדה בכימיה -> Emerald green Erlenmeyer flask
+    '125013': {
+        color: '#10b981',
+        svg: `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3h4m-2 0v6l5.5 10a1.5 1.5 0 0 1-1.3 2H7.8a1.5 1.5 0 0 1-1.3-2L12 9V3"/><path d="M8.5 16h7" stroke-dasharray="1 2"/></svg>`
+    },
+    // 104228 PDEs / מד"ח -> Sky blue Nabla operator ∇
+    '104228': {
+        color: '#0284c7',
+        svg: `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#0284c7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="4 6 20 6 12 20 4 6"/><line x1="10" y1="12" x2="14" y2="12" stroke-width="1.8"/></svg>`
+    },
+    // 114051 Physics 1 / פיסיקה 1 -> Amber orbital mechanics
+    '114051': {
+        color: '#f59e0b',
+        svg: `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round"><ellipse cx="12" cy="12" rx="9" ry="4" transform="rotate(-25 12 12)"/><circle cx="12" cy="12" r="3" fill="#f59e0b"/></svg>`
+    },
+    // 114052 Physics 2 / פיסיקה 2 -> Cyan electric lightning bolt
+    '114052': {
+        color: '#06b6d4',
+        svg: `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#06b6d4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" fill="rgba(6,182,212,0.25)"/></svg>`
+    },
+    // 114032 Physics Lab 1H / מעבדה לפיזיקה 1ח -> Teal laser optics / microscope
+    '114032': {
+        color: '#14b8a6',
+        svg: `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#14b8a6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 18h12M9 14h6m-4-10v8m-2-6l4 4"/><circle cx="12" cy="7" r="2"/></svg>`
+    },
+    // 234128 Python / פייתון -> Python blue code brackets
+    '234128': {
+        color: '#3b82f6',
+        svg: `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#3b82f6" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>`
+    },
+    // 034056 Scientific Computing / חישוב מדעי והנדסי -> Indigo computational terminal
+    '034056': {
+        color: '#6366f1',
+        svg: `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#6366f1" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>`
+    },
+    // 034035 Thermodynamics 1 / תרמודינמיקה 1 -> Thermal orange flame
+    '034035': {
+        color: '#ea580c',
+        svg: `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#ea580c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A4.5 4.5 0 0 0 16 12c0-3.5-3-5.5-3-9-3 3-5 6.5-5 9a3.5 3.5 0 0 0 .5 2.5z" fill="rgba(234,88,12,0.25)"/></svg>`
+    },
+    // 104065 Linear Algebra / אלגברה ליניארית -> Indigo matrix brackets
+    '104065': {
+        color: '#6366f1',
+        svg: `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#6366f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4H4v16h3m10-16h3v16h-3"/><circle cx="9" cy="9" r="1.2" fill="#6366f1"/><circle cx="15" cy="9" r="1.2" fill="#6366f1"/><circle cx="9" cy="15" r="1.2" fill="#6366f1"/><circle cx="15" cy="15" r="1.2" fill="#6366f1"/></svg>`
+    },
+    // 03940805 Physical Ed / יוגה -> Rose wellness lotus
+    '03940805': {
+        color: '#ec4899',
+        svg: `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#ec4899" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4c2 4 6 6 8 8-2 3-5 5-8 5s-6-2-8-5c2-2 6-4 8-8z" fill="rgba(236,72,153,0.2)"/><circle cx="12" cy="12" r="2" fill="#ec4899"/></svg>`
+    },
+    // 034030 Manufacturing Processes / תהליכי ייצור -> Steel tooling / factory
+    '034030': {
+        color: '#78716c',
+        svg: `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#78716c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>`
+    },
+    // 034010 Dynamics / דינמיקה -> Amber kinetic rotation
+    '034010': {
+        color: '#d97706',
+        svg: `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#d97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>`
+    },
+    // 034055 Fluid Mechanics / תורת הזרימה 1 -> Ocean blue streamline
+    '034055': {
+        color: '#0284c7',
+        svg: `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#0284c7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12c3-4 6-4 10 0s7 4 10 0M2 17c3-4 6-4 10 0s7 4 10 0"/></svg>`
+    },
+    // 034032 Linear Systems / מערכות ליניאריות -> Violet signal waveform
+    '034032': {
+        color: '#8b5cf6',
+        svg: `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#8b5cf6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h4l3-8 6 16 3-8h4"/></svg>`
+    }
+};
+
+function getCourseNotionIconHtml(courseCode) {
+    const iconDef = COURSE_NOTION_ICONS[courseCode];
+    if (iconDef) {
+        return `<span class="notion-course-icon" style="color: ${iconDef.color};">${iconDef.svg}</span>`;
+    }
+    return `<span class="notion-course-icon">📜</span>`;
+}
+
 // Academic Skill Tree - Core JS logic
 
 // Initial state structure
@@ -5065,6 +5187,17 @@ function showToastNotification(msg, type = 'info') {
 }
 
 
+function getTaskCategoryKey(task) {
+    const title = (task.title || "").toLowerCase();
+    if (title.includes("webwork")) return "webwork";
+    if (title.includes("גיליון") || title.includes("תרגיל בית") || title.includes("מטלת בית") || title.includes("מטלה") || task.type === "hw") return "hw";
+    if (title.includes("מעבדה") || title.includes("דוח") || task.type === "lab") return "lab";
+    if (title.includes("פרויקט") || title.includes("פרוייקט") || task.type === "project") return "project";
+    if (task.type === "exam" || title.includes("מועד") || title.includes("מבחן")) return "exam";
+    return task.type || "other";
+}
+
+
 // Renders the Reminder Banner for Incomplete Tasks
 function renderTasksReminderBanner() {
     const banner = document.getElementById("tasks-reminders-banner");
@@ -5074,9 +5207,11 @@ function renderTasksReminderBanner() {
 
     container.innerHTML = "";
 
-    const openItems = [];
     const today = new Date();
     today.setHours(0, 0, 0, 0);
+
+    // 1. Group active, incomplete tasks by (course.code + "_" + category)
+    const tasksByCategory = {};
 
     Object.values(gameState.courses).forEach(course => {
         if (course.status !== 'active') return;
@@ -5084,54 +5219,85 @@ function renderTasksReminderBanner() {
             const isDone = task.completed || task.status === 'done' || task.status === 'submitted';
             if (isDone) return;
 
-            let urgency = 'no-date';
-            let diffDays = null;
-            let urgencyText = "ללא תאריך יעד";
-
-            if (task.dueDate) {
-                const due = new Date(task.dueDate);
-                due.setHours(0, 0, 0, 0);
-                diffDays = Math.ceil((due - today) / (1000 * 60 * 60 * 24));
-
-                if (diffDays < 0) {
-                    urgency = 'overdue';
-                    urgencyText = `🔴 באיחור של ${Math.abs(diffDays)} ימים`;
-                } else if (diffDays === 0) {
-                    urgency = 'today';
-                    urgencyText = `🟠 להגשה היום!`;
-                } else if (diffDays === 1) {
-                    urgency = 'tomorrow';
-                    urgencyText = `🟡 להגשה מחר!`;
-                } else if (diffDays <= 7) {
-                    urgency = 'upcoming';
-                    urgencyText = `🔵 עוד ${diffDays} ימים`;
-                } else {
-                    urgency = 'upcoming';
-                    urgencyText = `עוד ${diffDays} ימים`;
-                }
+            const category = getTaskCategoryKey(task);
+            const groupKey = `${course.code}_${category}`;
+            if (!tasksByCategory[groupKey]) {
+                tasksByCategory[groupKey] = [];
             }
-
-            openItems.push({
-                course,
-                task,
-                urgency,
-                diffDays,
-                urgencyText
-            });
+            tasksByCategory[groupKey].push({ course, task });
         });
     });
 
-    const urgencyOrder = { overdue: 0, today: 1, tomorrow: 2, upcoming: 3, 'no-date': 4 };
+    // 2. Pick ONLY the first incomplete task from each category group
+    // Sort group tasks: if dueDate is set, earlier date first; otherwise keep syllabus order
+    const candidateItems = [];
+    Object.values(tasksByCategory).forEach(groupList => {
+        if (groupList.length === 0) return;
+        groupList.sort((a, b) => {
+            if (a.task.dueDate && b.task.dueDate) {
+                return new Date(a.task.dueDate) - new Date(b.task.dueDate);
+            }
+            if (a.task.dueDate) return -1;
+            if (b.task.dueDate) return 1;
+            return 0;
+        });
+        candidateItems.push(groupList[0]);
+    });
+
+    // 3. Filter candidates: ONLY tasks due in less than 2 weeks (diffDays <= 14 or overdue diffDays < 0)
+    const openItems = [];
+    candidateItems.forEach(({ course, task }) => {
+        if (!task.dueDate) {
+            // No due date set: do not clutter urgent reminders banner; accessible in table below
+            return;
+        }
+
+        const due = new Date(task.dueDate);
+        due.setHours(0, 0, 0, 0);
+        const diffDays = Math.ceil((due - today) / (1000 * 60 * 60 * 24));
+
+        if (diffDays > 14) {
+            // Due in more than 2 weeks -> excluded from reminders
+            return;
+        }
+
+        let urgency = 'upcoming';
+        let urgencyText = `עוד ${diffDays} ימים`;
+
+        if (diffDays < 0) {
+            urgency = 'overdue';
+            urgencyText = `🔴 באיחור של ${Math.abs(diffDays)} ימים`;
+        } else if (diffDays === 0) {
+            urgency = 'today';
+            urgencyText = `🟠 להגשה היום!`;
+        } else if (diffDays === 1) {
+            urgency = 'tomorrow';
+            urgencyText = `🟡 להגשה מחר!`;
+        } else if (diffDays <= 7) {
+            urgency = 'upcoming';
+            urgencyText = `🔵 עוד ${diffDays} ימים`;
+        }
+
+        openItems.push({
+            course,
+            task,
+            urgency,
+            diffDays,
+            urgencyText
+        });
+    });
+
+    // 4. Sort openItems by urgency: overdue -> today -> tomorrow -> upcoming
+    const urgencyOrder = { overdue: 0, today: 1, tomorrow: 2, upcoming: 3 };
     openItems.sort((a, b) => {
         const oA = urgencyOrder[a.urgency];
         const oB = urgencyOrder[b.urgency];
         if (oA !== oB) return oA - oB;
-        if (a.diffDays !== null && b.diffDays !== null) return a.diffDays - b.diffDays;
-        return 0;
+        return a.diffDays - b.diffDays;
     });
 
     if (countBadge) {
-        countBadge.innerText = `${openItems.length} משימות`;
+        countBadge.innerText = `${openItems.length} דחופות`;
     }
     if (gameState.remindersCollapsed) {
         container.classList.add("collapsed");
@@ -5141,8 +5307,8 @@ function renderTasksReminderBanner() {
 
     if (openItems.length === 0) {
         container.innerHTML = `
-            <div style="font-size: 0.82rem; color: #10b981; padding: 4px 0; display: flex; align-items: center; gap: 6px;">
-                <span>🎉</span> <strong>כל המשימות הושלמו! אין משימות פתוחות כרגע.</strong>
+            <div style="font-size: 0.82rem; color: #10b981; padding: 6px 0; display: flex; align-items: center; gap: 8px;">
+                <span>🎉</span> <strong>אין משימות דחופות לשבועיים הקרובים! כל המשימות מוצגות בטבלה למטה.</strong>
             </div>
         `;
         return;
@@ -5633,7 +5799,7 @@ function renderNotionTasksTable() {
                 </td>
                 <td>
                     <span class="notion-course-tag">
-                        <span class="notion-course-icon">${c.type === 'core' ? '🏗️' : c.type === 'elective' ? '⚡' : c.type === 'sports' ? '⚽' : '📜'}</span>
+                        ${getCourseNotionIconHtml(c.code)}
                         <span>${c.name}</span>
                     </span>
                 </td>

@@ -1555,7 +1555,18 @@ body {
     font-weight: 500;
 }
 .notion-course-icon {
-    font-size: 1rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    line-height: 1;
+}
+.notion-course-icon svg {
+    width: 17px;
+    height: 17px;
+    display: block;
 }
 .notion-type-tag {
     font-size: 0.75rem;
