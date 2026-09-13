@@ -1,65 +1,11 @@
 {
-  "lastUpdated": "2026-09-13T17:43:07.558650",
+  "lastUpdated": "2026-09-13T18:43:03.503362",
   "practiceExams": [
     {
-      "summary": "חדו\"א 2: אביב 2020 מועד א",
-      "description": "קובץ: 104022 2020s final A open questions sol.pdf",
-      "date": "2026-07-31",
-      "uid": "9pv4sgrp7aoqhahn2kcuje2tgk@google.com"
-    },
-    {
-      "summary": "חומרים: אביב 2024 מועד ב",
-      "description": "קובץ: פתרון מועד ב - אביב תשפד (טור 2).pdf",
+      "summary": "חומרים: אביב 2024 מועד א",
+      "description": "קובץ: פתרון מועד א - אביב תשפד (טור 1).pdf",
       "date": "2026-08-09",
-      "uid": "2hjbkevhsufho1bscq3c1r79ks@google.com"
-    },
-    {
-      "summary": "מוצקים: אביב 2016 מועד א",
-      "description": "קובץ: Moed A Spring 19.pdf",
-      "date": "2026-08-14",
-      "uid": "0j4kus58b5h76dl6dm5ur5dgt2@google.com"
-    },
-    {
-      "summary": "חומרים: אביב 2015 מועד א",
-      "description": "",
-      "date": "2026-07-25",
-      "uid": "191sblg37lnfsiopk1v25ah0m7@google.com"
-    },
-    {
-      "summary": "חומרים: 2019 קיץ א",
-      "description": "קובץ: 2019-קיץ א.docx",
-      "date": "2026-07-29",
-      "uid": "n8omslch5stki8kumjgqr0bhi8@google.com"
-    },
-    {
-      "summary": "חומרים: 2017 א",
-      "description": "",
-      "date": "2026-07-27",
-      "uid": "i7rapavfu2vdo0d8nu6mc7u24k@google.com"
-    },
-    {
-      "summary": "מד\"ר: אביב 2023 מועד ב",
-      "description": "קובץ: tofes_g_sol.pdf",
-      "date": "2026-08-06",
-      "uid": "0ejb671l14cva9ps2f2jnf59hc@google.com"
-    },
-    {
-      "summary": "מד\"ר: חורף 2024 מועד א",
-      "description": "קובץ: Exam_A_solution.pdf",
-      "date": "2026-08-07",
-      "uid": "p48gkgdopquctv5bur0uq7h9fc@google.com"
-    },
-    {
-      "summary": "מוצקים: אביב 2019 מועד א",
-      "description": "קובץ: Moed A Spring 2020 - with full solution.pdf",
-      "date": "2026-08-15",
-      "uid": "1cjelub05tdgudkt8tvo74p3fq@google.com"
-    },
-    {
-      "summary": "חדו\"א 2: אביב 2024 מועד ב",
-      "description": "קובץ: 104043 2024s final B sol.pdf",
-      "date": "2026-08-03",
-      "uid": "04a4kfn64al912892pdvi0uffc@google.com"
+      "uid": "ccc6kvmacbdtv5trvdqvhb1k68@google.com"
     },
     {
       "summary": "חומרים: אביב 2022 מועד א",
@@ -68,232 +14,10 @@
       "uid": "87arb8qrkjenldkdvhp13m608o@google.com"
     },
     {
-      "summary": "מדר: חורף 2020 מועד ב",
-      "description": "קובץ: Exam_B_solution.pdf",
-      "date": "2026-07-28",
-      "uid": "59hrtgkrgbmko5bvc68ibve8tp@google.com"
-    },
-    {
-      "summary": "חומרים: אביב 2015 מועד ב",
-      "description": "",
-      "date": "2026-07-25",
-      "uid": "1tt87m9mk63ngvvjshnrpfcdud@google.com"
-    },
-    {
-      "summary": "חומרים: אביב 2016 מועד א",
-      "description": "",
-      "date": "2026-07-26",
-      "uid": "7d88oavdthi1d4fcsq71sanoo8@google.com"
-    },
-    {
       "summary": "חומרים: מאגר שאלות 2021",
       "description": "",
       "date": "2026-07-29",
       "uid": "pcq3a52usievkfe2l0mjlsf2os@google.com"
-    },
-    {
-      "summary": "מוצקים: אביב 2020 מועד א",
-      "description": "קובץ: Moed A Spring 2020 - with full solution.pdf",
-      "date": "2026-08-15",
-      "uid": "d192bq8cajdfup96mr6cuo13vk@google.com"
-    },
-    {
-      "summary": "מדר: חורף 2021 מועד א",
-      "description": "קובץ: Exam_B_solution.pdf",
-      "date": "2026-07-29",
-      "uid": "3m0juvlvsmhu1ga1n1bkojqva3@google.com"
-    },
-    {
-      "summary": "מוצקים: אביב 2015 מועד א",
-      "description": "קובץ: Moed A Spring 19.pdf",
-      "date": "2026-08-13",
-      "uid": "1h7aepd6nmre1pe0etv1iofov9@google.com"
-    },
-    {
-      "summary": "מד\"ר: חורף 2025",
-      "description": "קובץ: tofes_g_sol.pdf",
-      "date": "2026-08-11",
-      "uid": "6uq3hk16jbuj9cj2fdbpslbhgk@google.com"
-    },
-    {
-      "summary": "מד\"ר: חורף 2022 מועד א",
-      "description": "קובץ: tofes_g_sol.pdf",
-      "date": "2026-08-06",
-      "uid": "4hc8lfkdn973ctadqkl2a5d236@google.com"
-    },
-    {
-      "summary": "חדו\"א 2: אביב 2022 מועד א",
-      "description": "קובץ: 104022 2022s final A sol.pdf",
-      "date": "2026-08-01",
-      "uid": "09p9nd4pnousu1b8u0036lh7tc@google.com"
-    },
-    {
-      "summary": "מד\"ר: חורף 2026 מועד ב",
-      "description": "מעבר על טעויות ודגשים במד\"ר",
-      "date": "2026-08-12",
-      "uid": "5b5mbpfq951f5qipvep3v9npo8@google.com"
-    },
-    {
-      "summary": "חומרים: סימולציה מסכמת",
-      "description": "קובץ: דף נוסחאות 2023.pdf",
-      "date": "2026-08-10",
-      "uid": "pseu4oi7j0pnckb9b82c3ul5go@google.com"
-    },
-    {
-      "summary": "מוצקים: אביב 2025 מועד א",
-      "description": "קובץ: אביב 2024 - מועד א.pdf",
-      "date": "2026-08-18",
-      "uid": "02fjabvddvfom9kgo96pen3k29@google.com"
-    },
-    {
-      "summary": "חדו\"א 2: אביב 2025 מועד ב",
-      "description": "קובץ: 104043 2025s final B1 sol.pdf",
-      "date": "2026-08-04",
-      "uid": "vs54ucf82kfnlj6o3tsdhhdhsg@google.com"
-    },
-    {
-      "summary": "מדר: חורף 2019 מועד ב",
-      "description": "",
-      "date": "2026-07-26",
-      "uid": "31s0vdhn4s9cku49596gpbmhds@google.com"
-    },
-    {
-      "summary": "חומרים: מאגר שאלות 2022",
-      "description": "קובץ: פתרון מועד א - אביב תשפד (טור 1).pdf",
-      "date": "2026-08-09",
-      "uid": "dec8jk2a35h1vaqpc6mklpdtd0@google.com"
-    },
-    {
-      "summary": "חומרים: אביב 2024 מועד א",
-      "description": "קובץ: פתרון מועד א - אביב תשפד (טור 1).pdf",
-      "date": "2026-08-09",
-      "uid": "ccc6kvmacbdtv5trvdqvhb1k68@google.com"
-    },
-    {
-      "summary": "מוצקים: אביב 2023 מועד א",
-      "description": "קובץ: אביב 2023 - מועד א.pdf",
-      "date": "2026-08-17",
-      "uid": "aecjn0unb961l9rhcdqvp096ts@google.com"
-    },
-    {
-      "summary": "מד\"ר: אביב 2023 מועד א",
-      "description": "קובץ: tofes_b_sol.pdf",
-      "date": "2026-08-06",
-      "uid": "vgd1q3fsej52gr42ph4gsgn1tg@google.com"
-    },
-    {
-      "summary": "חדו\"א 2: אביב 2020 מועד ב",
-      "description": "קובץ: 104022 2020s final B open questions sol.pdf",
-      "date": "2026-07-31",
-      "uid": "4dfpp6fvq32ucl8s86upotoqms@google.com"
-    },
-    {
-      "summary": "חדו\"א 2: אביב 2024 מועד א",
-      "description": "קובץ: 104043 2024s final A sol.pdf",
-      "date": "2026-08-03",
-      "uid": "job9crdmja93i0m74nhrdmrors@google.com"
-    },
-    {
-      "summary": "חומרים: אביב 2017 מועד ב",
-      "description": "קובץ: פתרון מועד ב - אביב תשפד (טור 2).pdf",
-      "date": "2026-07-28",
-      "uid": "qfj7ugld03ub4jcfd36f97mkkg@google.com"
-    },
-    {
-      "summary": "חומרים: אביב 2025 מועד ב",
-      "description": "קובץ: פתרון בחינה - מועד ב - אביב 2025 (טור 1).pdf",
-      "date": "2026-08-10",
-      "uid": "sq904963l949qjjv1qoi57lulc@google.com"
-    },
-    {
-      "summary": "מדר: חורף 2020 מועד א",
-      "description": "קובץ: Exam_B_solution.pdf",
-      "date": "2026-07-27",
-      "uid": "pdd6jivpn078gvk549rh7jfka0@google.com"
-    },
-    {
-      "summary": "מוצקים: אביב 2022 מועד ב",
-      "description": "קובץ: Moed B spring 2022.pdf",
-      "date": "2026-08-17",
-      "uid": "0nlsggcse84a8e09gctq261iqs@google.com"
-    },
-    {
-      "summary": "חומרים: אביב 2025 מועד א",
-      "description": "קובץ: פתרון בחינה - מועד א - אביב 2025 (טור 1).pdf",
-      "date": "2026-08-10",
-      "uid": "o4om49plrt6mam7c583385kl24@google.com"
-    },
-    {
-      "summary": "חומרים: אביב 2017 מועד א",
-      "description": "קובץ: פתרון מועד ב - אביב תשפד (טור 2).pdf",
-      "date": "2026-07-28",
-      "uid": "634cjvj70pn75skbg7gq4pagp4@google.com"
-    },
-    {
-      "summary": "מדר: אביב 2024 מועד א",
-      "description": "קובץ: Exam_A_solution.pdf",
-      "date": "2026-08-08",
-      "uid": "i3tn3l0slf0ffidkvmbrge6ml8@google.com"
-    },
-    {
-      "summary": "מוצקים: אביב 2022 מועד א",
-      "description": "קובץ: Moed A spring 2022.pdf",
-      "date": "2026-08-17",
-      "uid": "fbm3gqm4l1307jjvb4o27jeeq8@google.com"
-    },
-    {
-      "summary": "מוצקים: אביב 2021 מועד א",
-      "description": "קובץ: Moed A spring 20202021.pdf",
-      "date": "2026-08-16",
-      "uid": "uq1cljip27umti2fbco20npuv0@google.com"
-    },
-    {
-      "summary": "מד\"ר: חורף 2024 מועד ב",
-      "description": "קובץ: tofes_b_sol.pdf",
-      "date": "2026-08-07",
-      "uid": "neofan2koqjhjgmdb8n2dk9df4@google.com"
-    },
-    {
-      "summary": "מוצקים: אביב 2018 מועד א",
-      "description": "קובץ: Moed A Spring 19.pdf",
-      "date": "2026-08-14",
-      "uid": "nm5q27kkf8e8se5qglelthk7q8@google.com"
-    },
-    {
-      "summary": "מוצקים: אביב 2021 מועד ב",
-      "description": "קובץ: Moed B spring 20202021.pdf",
-      "date": "2026-08-16",
-      "uid": "egsn6id316bf0pdqme19sca43k@google.com"
-    },
-    {
-      "summary": "חדו\"א 2: אביב 2025 מועד א",
-      "description": "קובץ: 104043 2025s final A sol open questions.pdf",
-      "date": "2026-08-04",
-      "uid": "i0tr47rm2ttdnjgpugpk9faefs@google.com"
-    },
-    {
-      "summary": "מד\"ר: חורף 2026 מועד א",
-      "description": "קובץ: 131-2019W-moedA-S.pdf",
-      "date": "2026-08-12",
-      "uid": "obb007rn93ksukc0sqf054k31k@google.com"
-    },
-    {
-      "summary": "מד\"ר: אביב 2024 מועד ב",
-      "description": "קובץ: Exam_B_solution.pdf",
-      "date": "2026-08-08",
-      "uid": "o63g01d8fi3ai9fhf8ph8iklok@google.com"
-    },
-    {
-      "summary": "מוצקים: אביב 2024 מועד א",
-      "description": "קובץ: אביב 2024 - מועד א.pdf",
-      "date": "2026-08-18",
-      "uid": "2a7ls5rvnj5d5j9kj4brpbdcp0@google.com"
-    },
-    {
-      "summary": "חדו\"א 2: אביב 2022 מועד ב",
-      "description": "קובץ: 104022 2022s final B sol.pdf",
-      "date": "2026-08-02",
-      "uid": "e5vvkqkqhsdi5j8jjavpcvbulo@google.com"
     },
     {
       "summary": "חדו\"א 2: אביב 2021 מועד א",
@@ -308,10 +32,274 @@
       "uid": "ts360gb3hril4pd446bjl0fue0@google.com"
     },
     {
+      "summary": "מד\"ר: חורף 2026 מועד א",
+      "description": "קובץ: 131-2019W-moedA-S.pdf",
+      "date": "2026-08-12",
+      "uid": "obb007rn93ksukc0sqf054k31k@google.com"
+    },
+    {
+      "summary": "מוצקים: אביב 2021 מועד ב",
+      "description": "קובץ: Moed B spring 20202021.pdf",
+      "date": "2026-08-16",
+      "uid": "egsn6id316bf0pdqme19sca43k@google.com"
+    },
+    {
+      "summary": "מד\"ר: חורף 2025",
+      "description": "קובץ: tofes_g_sol.pdf",
+      "date": "2026-08-11",
+      "uid": "6uq3hk16jbuj9cj2fdbpslbhgk@google.com"
+    },
+    {
+      "summary": "חדו\"א 2: אביב 2025 מועד א",
+      "description": "קובץ: 104043 2025s final A sol open questions.pdf",
+      "date": "2026-08-04",
+      "uid": "i0tr47rm2ttdnjgpugpk9faefs@google.com"
+    },
+    {
+      "summary": "חומרים: אביב 2025 מועד ב",
+      "description": "קובץ: פתרון בחינה - מועד ב - אביב 2025 (טור 1).pdf",
+      "date": "2026-08-10",
+      "uid": "sq904963l949qjjv1qoi57lulc@google.com"
+    },
+    {
+      "summary": "מד\"ר: אביב 2023 מועד ב",
+      "description": "קובץ: tofes_g_sol.pdf",
+      "date": "2026-08-06",
+      "uid": "0ejb671l14cva9ps2f2jnf59hc@google.com"
+    },
+    {
+      "summary": "מד\"ר: חורף 2026 מועד ב",
+      "description": "מעבר על טעויות ודגשים במד\"ר",
+      "date": "2026-08-12",
+      "uid": "5b5mbpfq951f5qipvep3v9npo8@google.com"
+    },
+    {
+      "summary": "מוצקים: אביב 2022 מועד א",
+      "description": "קובץ: Moed A spring 2022.pdf",
+      "date": "2026-08-17",
+      "uid": "fbm3gqm4l1307jjvb4o27jeeq8@google.com"
+    },
+    {
+      "summary": "חומרים: אביב 2016 מועד א",
+      "description": "",
+      "date": "2026-07-26",
+      "uid": "7d88oavdthi1d4fcsq71sanoo8@google.com"
+    },
+    {
+      "summary": "חדו\"א 2: אביב 2022 מועד א",
+      "description": "קובץ: 104022 2022s final A sol.pdf",
+      "date": "2026-08-01",
+      "uid": "09p9nd4pnousu1b8u0036lh7tc@google.com"
+    },
+    {
+      "summary": "מדר: חורף 2020 מועד ב",
+      "description": "קובץ: Exam_B_solution.pdf",
+      "date": "2026-07-28",
+      "uid": "59hrtgkrgbmko5bvc68ibve8tp@google.com"
+    },
+    {
+      "summary": "מד\"ר: חורף 2022 מועד ג",
+      "description": "קובץ: tofes_g_sol.pdf",
+      "date": "2026-08-05",
+      "uid": "19j94sf05cf0gbnqs73vhld2c4@google.com"
+    },
+    {
+      "summary": "מוצקים: אביב 2016 מועד א",
+      "description": "קובץ: Moed A Spring 19.pdf",
+      "date": "2026-08-14",
+      "uid": "0j4kus58b5h76dl6dm5ur5dgt2@google.com"
+    },
+    {
+      "summary": "מוצקים: אביב 2020 מועד א",
+      "description": "קובץ: Moed A Spring 2020 - with full solution.pdf",
+      "date": "2026-08-15",
+      "uid": "d192bq8cajdfup96mr6cuo13vk@google.com"
+    },
+    {
+      "summary": "חדו\"א 2: אביב 2022 מועד ב",
+      "description": "קובץ: 104022 2022s final B sol.pdf",
+      "date": "2026-08-02",
+      "uid": "e5vvkqkqhsdi5j8jjavpcvbulo@google.com"
+    },
+    {
+      "summary": "מוצקים: אביב 2021 מועד א",
+      "description": "קובץ: Moed A spring 20202021.pdf",
+      "date": "2026-08-16",
+      "uid": "uq1cljip27umti2fbco20npuv0@google.com"
+    },
+    {
+      "summary": "חומרים: מאגר שאלות 2022",
+      "description": "קובץ: פתרון מועד א - אביב תשפד (טור 1).pdf",
+      "date": "2026-08-09",
+      "uid": "dec8jk2a35h1vaqpc6mklpdtd0@google.com"
+    },
+    {
+      "summary": "חדו\"א 2: אביב 2025 מועד ב",
+      "description": "קובץ: 104043 2025s final B1 sol.pdf",
+      "date": "2026-08-04",
+      "uid": "vs54ucf82kfnlj6o3tsdhhdhsg@google.com"
+    },
+    {
+      "summary": "מוצקים: אביב 2022 מועד ב",
+      "description": "קובץ: Moed B spring 2022.pdf",
+      "date": "2026-08-17",
+      "uid": "0nlsggcse84a8e09gctq261iqs@google.com"
+    },
+    {
+      "summary": "מד\"ר: חורף 2024 מועד ב",
+      "description": "קובץ: tofes_b_sol.pdf",
+      "date": "2026-08-07",
+      "uid": "neofan2koqjhjgmdb8n2dk9df4@google.com"
+    },
+    {
+      "summary": "מדר: חורף 2019 מועד ב",
+      "description": "",
+      "date": "2026-07-26",
+      "uid": "31s0vdhn4s9cku49596gpbmhds@google.com"
+    },
+    {
+      "summary": "מדר: חורף 2020 מועד א",
+      "description": "קובץ: Exam_B_solution.pdf",
+      "date": "2026-07-27",
+      "uid": "pdd6jivpn078gvk549rh7jfka0@google.com"
+    },
+    {
       "summary": "חומרים: אביב 2021 מועד ג",
       "description": "קובץ: פתרון בחינה - מועד ב - אביב 2025 (טור 1).pdf",
       "date": "2026-08-07",
       "uid": "2bie2m8re8uo1co0c97ptdce5g@google.com"
+    },
+    {
+      "summary": "מדר: אביב 2024 מועד א",
+      "description": "קובץ: Exam_A_solution.pdf",
+      "date": "2026-08-08",
+      "uid": "i3tn3l0slf0ffidkvmbrge6ml8@google.com"
+    },
+    {
+      "summary": "מד\"ר: חורף 2022 מועד א",
+      "description": "קובץ: tofes_g_sol.pdf",
+      "date": "2026-08-06",
+      "uid": "4hc8lfkdn973ctadqkl2a5d236@google.com"
+    },
+    {
+      "summary": "מוצקים: אביב 2018 מועד א",
+      "description": "קובץ: Moed A Spring 19.pdf",
+      "date": "2026-08-14",
+      "uid": "nm5q27kkf8e8se5qglelthk7q8@google.com"
+    },
+    {
+      "summary": "חומרים: אביב 2015 מועד ב",
+      "description": "",
+      "date": "2026-07-25",
+      "uid": "1tt87m9mk63ngvvjshnrpfcdud@google.com"
+    },
+    {
+      "summary": "מוצקים: אביב 2015 מועד א",
+      "description": "קובץ: Moed A Spring 19.pdf",
+      "date": "2026-08-13",
+      "uid": "1h7aepd6nmre1pe0etv1iofov9@google.com"
+    },
+    {
+      "summary": "מדר: חורף 2021 מועד א",
+      "description": "קובץ: Exam_B_solution.pdf",
+      "date": "2026-07-29",
+      "uid": "3m0juvlvsmhu1ga1n1bkojqva3@google.com"
+    },
+    {
+      "summary": "מד\"ר: חורף 2024 מועד א",
+      "description": "קובץ: Exam_A_solution.pdf",
+      "date": "2026-08-07",
+      "uid": "p48gkgdopquctv5bur0uq7h9fc@google.com"
+    },
+    {
+      "summary": "חדו\"א 2: אביב 2024 מועד ב",
+      "description": "קובץ: 104043 2024s final B sol.pdf",
+      "date": "2026-08-03",
+      "uid": "04a4kfn64al912892pdvi0uffc@google.com"
+    },
+    {
+      "summary": "חומרים: אביב 2017 מועד א",
+      "description": "קובץ: פתרון מועד ב - אביב תשפד (טור 2).pdf",
+      "date": "2026-07-28",
+      "uid": "634cjvj70pn75skbg7gq4pagp4@google.com"
+    },
+    {
+      "summary": "חומרים: אביב 2017 מועד ב",
+      "description": "קובץ: פתרון מועד ב - אביב תשפד (טור 2).pdf",
+      "date": "2026-07-28",
+      "uid": "qfj7ugld03ub4jcfd36f97mkkg@google.com"
+    },
+    {
+      "summary": "מוצקים: אביב 2023 מועד א",
+      "description": "קובץ: אביב 2023 - מועד א.pdf",
+      "date": "2026-08-17",
+      "uid": "aecjn0unb961l9rhcdqvp096ts@google.com"
+    },
+    {
+      "summary": "חומרים: אביב 2024 מועד ב",
+      "description": "קובץ: פתרון מועד ב - אביב תשפד (טור 2).pdf",
+      "date": "2026-08-09",
+      "uid": "2hjbkevhsufho1bscq3c1r79ks@google.com"
+    },
+    {
+      "summary": "מוצקים: אביב 2024 מועד א",
+      "description": "קובץ: אביב 2024 - מועד א.pdf",
+      "date": "2026-08-18",
+      "uid": "2a7ls5rvnj5d5j9kj4brpbdcp0@google.com"
+    },
+    {
+      "summary": "מוצקים: אביב 2025 מועד א",
+      "description": "קובץ: אביב 2024 - מועד א.pdf",
+      "date": "2026-08-18",
+      "uid": "02fjabvddvfom9kgo96pen3k29@google.com"
+    },
+    {
+      "summary": "חומרים: סימולציה מסכמת",
+      "description": "קובץ: דף נוסחאות 2023.pdf",
+      "date": "2026-08-10",
+      "uid": "pseu4oi7j0pnckb9b82c3ul5go@google.com"
+    },
+    {
+      "summary": "חדו\"א 2: אביב 2020 מועד א",
+      "description": "קובץ: 104022 2020s final A open questions sol.pdf",
+      "date": "2026-07-31",
+      "uid": "9pv4sgrp7aoqhahn2kcuje2tgk@google.com"
+    },
+    {
+      "summary": "חדו\"א 2: אביב 2024 מועד א",
+      "description": "קובץ: 104043 2024s final A sol.pdf",
+      "date": "2026-08-03",
+      "uid": "job9crdmja93i0m74nhrdmrors@google.com"
+    },
+    {
+      "summary": "חדו\"א 2: אביב 2020 מועד ב",
+      "description": "קובץ: 104022 2020s final B open questions sol.pdf",
+      "date": "2026-07-31",
+      "uid": "4dfpp6fvq32ucl8s86upotoqms@google.com"
+    },
+    {
+      "summary": "חומרים: אביב 2015 מועד א",
+      "description": "",
+      "date": "2026-07-25",
+      "uid": "191sblg37lnfsiopk1v25ah0m7@google.com"
+    },
+    {
+      "summary": "חומרים: אביב 2025 מועד א",
+      "description": "קובץ: פתרון בחינה - מועד א - אביב 2025 (טור 1).pdf",
+      "date": "2026-08-10",
+      "uid": "o4om49plrt6mam7c583385kl24@google.com"
+    },
+    {
+      "summary": "מד\"ר: אביב 2023 מועד א",
+      "description": "קובץ: tofes_b_sol.pdf",
+      "date": "2026-08-06",
+      "uid": "vgd1q3fsej52gr42ph4gsgn1tg@google.com"
+    },
+    {
+      "summary": "מוצקים: אביב 2019 מועד א",
+      "description": "קובץ: Moed A Spring 2020 - with full solution.pdf",
+      "date": "2026-08-15",
+      "uid": "1cjelub05tdgudkt8tvo74p3fq@google.com"
     },
     {
       "summary": "חומרים: אביב 2016 מועד ב",
@@ -320,10 +308,22 @@
       "uid": "ahcji6b2m72vhk5trvn7mkjd1g@google.com"
     },
     {
-      "summary": "מד\"ר: חורף 2022 מועד ג",
-      "description": "קובץ: tofes_g_sol.pdf",
-      "date": "2026-08-05",
-      "uid": "19j94sf05cf0gbnqs73vhld2c4@google.com"
+      "summary": "חומרים: 2019 קיץ א",
+      "description": "קובץ: 2019-קיץ א.docx",
+      "date": "2026-07-29",
+      "uid": "n8omslch5stki8kumjgqr0bhi8@google.com"
+    },
+    {
+      "summary": "חומרים: 2017 א",
+      "description": "",
+      "date": "2026-07-27",
+      "uid": "i7rapavfu2vdo0d8nu6mc7u24k@google.com"
+    },
+    {
+      "summary": "מד\"ר: אביב 2024 מועד ב",
+      "description": "קובץ: Exam_B_solution.pdf",
+      "date": "2026-08-08",
+      "uid": "o63g01d8fi3ai9fhf8ph8iklok@google.com"
     },
     {
       "summary": "מד\"ר: חורף 2022 מועד ב",

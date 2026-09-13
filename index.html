@@ -16,7 +16,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Rubik:wght@300;400;500;700;900&display=swap" rel="stylesheet">
     <link rel="icon" type="image/png" href="icon.png">
-    <link rel="stylesheet" href="styles.css?v=1.0.6">
+    <link rel="stylesheet" href="styles.css?v=1.0.7">
 </head>
 <body>
     <div class="hud-container">
@@ -1189,8 +1189,68 @@
             </div>
         </div>
     </div>
+
+    <!-- Notion Course Icon & Color Picker Modal -->
+    <div id="notion-icon-picker-modal" class="modal-overlay" style="display: none;">
+        <div class="notion-icon-picker-card">
+            <!-- Header -->
+            <div class="icon-picker-header">
+                <div class="icon-picker-title-group">
+                    <span class="icon-picker-preview" id="icon-picker-preview-box"></span>
+                    <div>
+                        <h3 class="icon-picker-title" id="icon-picker-course-title">בחר סמל לקורס</h3>
+                        <span class="icon-picker-subtitle">בחר צבע וסמל וקטורי בסגנון Notion</span>
+                    </div>
+                </div>
+                <button type="button" class="btn-close-picker" id="btn-close-icon-picker" title="סגור">✕</button>
+            </div>
+
+            <!-- Color Palette -->
+            <div class="icon-picker-section">
+                <label class="icon-picker-label">🎨 בחר צבע:</label>
+                <div class="notion-color-palette" id="notion-color-palette">
+                    <!-- Populated dynamically via JS: 10 Notion Colors -->
+                </div>
+            </div>
+
+            <!-- Search Bar -->
+            <div class="icon-picker-search-bar">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="icon-picker-search" placeholder="חפש סמל... (gear, flame, math, atom, flask...)" autocomplete="off">
+                <button type="button" id="btn-clear-icon-search" class="btn-clear-search" style="display: none;">✕</button>
+            </div>
+
+            <!-- Category Pills -->
+            <div class="icon-picker-categories" id="icon-picker-categories">
+                <button type="button" class="category-pill active" data-cat="all">הכל (All)</button>
+                <button type="button" class="category-pill" data-cat="math">מתמטיקה</button>
+                <button type="button" class="category-pill" data-cat="physics">פיזיקה</button>
+                <button type="button" class="category-pill" data-cat="mechanical">מכונות</button>
+                <button type="button" class="category-pill" data-cat="chemistry">כימיה</button>
+                <button type="button" class="category-pill" data-cat="tech">חישוב</button>
+                <button type="button" class="category-pill" data-cat="academic">כללי</button>
+            </div>
+
+            <!-- Icon Grid -->
+            <div class="icon-picker-grid" id="icon-picker-grid">
+                <!-- Populated dynamically via JS -->
+            </div>
+
+            <!-- Footer -->
+            <div class="icon-picker-footer">
+                <button type="button" class="btn btn-sm btn-outline" id="btn-reset-course-icon" title="שחזר לסמל ברירת המחדל המקורי">
+                    ↩️ אפס לברירת מחדל
+                </button>
+                <div style="display: flex; gap: 8px;">
+                    <button type="button" class="btn btn-sm btn-secondary" id="btn-cancel-icon-picker">ביטול</button>
+                    <button type="button" class="btn btn-sm btn-primary" id="btn-save-course-icon">שמור שינויים</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Core Application Logic -->
-    <script src="app.js?v=1.0.6"></script>
+    <script src="app.js?v=1.0.7"></script>
     <!-- PWA Service Worker Registration -->
     <script>
         if ('serviceWorker' in navigator && window.location.protocol.startsWith('http')) {

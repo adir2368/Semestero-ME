@@ -218,12 +218,807 @@ const COURSE_NOTION_ICONS = {
     '034383': { color: '#eab308', svg: `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#eab308" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>` }
 };
 
-function getCourseNotionIconHtml(courseCode) {
-    const iconDef = COURSE_NOTION_ICONS[courseCode];
-    if (iconDef) {
-        return `<span class="notion-course-icon" style="color: ${iconDef.color};">${iconDef.svg}</span>`;
+// ==========================================================================
+// Notion-Style Course Icon & Color Customizer
+// ==========================================================================
+
+const NOTION_COLORS = [
+    { key: 'blue', label: 'כחול', hex: '#3b82f6' },
+    { key: 'cyan', label: 'טורקיז', hex: '#06b6d4' },
+    { key: 'green', label: 'ירוק', hex: '#10b981' },
+    { key: 'yellow', label: 'צהוב', hex: '#eab308' },
+    { key: 'orange', label: 'כתום', hex: '#f97316' },
+    { key: 'red', label: 'אדום', hex: '#ef4444' },
+    { key: 'purple', label: 'סגול', hex: '#a855f7' },
+    { key: 'pink', label: 'ורוד', hex: '#ec4899' },
+    { key: 'brown', label: 'חום', hex: '#b45309' },
+    { key: 'gray', label: 'אפור', hex: '#94a3b8' }
+];
+
+const NOTION_ICON_LIBRARY = {
+    // --- MATHEMATICS (מתמטיקה) ---
+    'sigma': {
+        category: 'math',
+        title: 'Sigma Summation',
+        hebrew: 'סגמא / מד"ר',
+        keywords: 'sigma sum math ode differential מדר סגמא מתמטיקה',
+        svg: `<path d="M19 4H5l7 8-7 8h14"/>`
+    },
+    'pi': {
+        category: 'math',
+        title: 'Pi Constant',
+        hebrew: 'פאי (π)',
+        keywords: 'pi math constant circle פאי מעגל',
+        svg: `<path d="M4 7h16M7 7v13M17 7c0 4.5 1 9 3 13"/>`
+    },
+    'curve': {
+        category: 'math',
+        title: 'Calculus Area Curve',
+        hebrew: 'גרף אינטגרל / חדו"א',
+        keywords: 'calculus curve integral area hadva חדווא אינטגרל שטח',
+        svg: `<path d="M3 4v16a1 1 0 0 0 1 1h17"/><path d="M5 17c3-1 5-9 8-9s4 6 6 6v3H5z" fill="currentColor" fill-opacity="0.2"/>`
+    },
+    'matrix': {
+        category: 'math',
+        title: 'Matrix / Linear Algebra',
+        hebrew: 'מטריצה / אלגברה ליניארית',
+        keywords: 'matrix linear algebra brackets אלגברה ליניארית מטריצה',
+        svg: `<path d="M5 4H3v16h2M19 4h2v16h-2M8 9h2M14 9h2M8 15h2M14 15h2"/>`
+    },
+    'infinity': {
+        category: 'math',
+        title: 'Infinity / Limits',
+        hebrew: 'אינסוף / גבולות',
+        keywords: 'infinity limit math אינסוף גבול',
+        svg: `<path d="M18.18 8c5.1 0 5.1 8 0 8-5.1 0-7.26-8-12.36-8-5.1 0-5.1 8 0 8 5.1 0 7.26-8 12.36-8z"/>`
+    },
+    'integral': {
+        category: 'math',
+        title: 'Integral Symbol',
+        hebrew: 'סימן אינטגרל',
+        keywords: 'integral calculus math אינטגרל חדווא',
+        svg: `<path d="M16 3c-2 0-4 1.5-4 5v8c0 3.5-2 5-4 5s-4-1.5-4-5"/>`
+    },
+    'delta': {
+        category: 'math',
+        title: 'Delta / Change',
+        hebrew: 'דלתא (Δ)',
+        keywords: 'delta triangle change diff דלתא הפרש שינוי',
+        svg: `<polygon points="12 3 22 21 2 21 12 3"/>`
+    },
+    'sqrt': {
+        category: 'math',
+        title: 'Square Root',
+        hebrew: 'שורש ריבועי (√)',
+        keywords: 'sqrt root radical שורש חזקה',
+        svg: `<path d="M3 14l3 3 5-13h10"/>`
+    },
+    'function': {
+        category: 'math',
+        title: 'Function f(x)',
+        hebrew: 'פונקציה f(x)',
+        keywords: 'function fx math פונקציה פונקציות',
+        svg: `<path d="M9 18c2 0 3-1 3-3V6c0-2 1-3 3-3"/><line x1="7" y1="11" x2="15" y2="11"/>`
+    },
+    'percent': {
+        category: 'math',
+        title: 'Percent / Probability',
+        hebrew: 'אחוז / הסתברות',
+        keywords: 'percent probability statistics אחוז הסתברות סטטיסטיקה',
+        svg: `<line x1="19" y1="5" x2="5" y2="19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/>`
+    },
+    'divide': {
+        category: 'math',
+        title: 'Division / Arithmetic',
+        hebrew: 'חילוק / פעולות חשבון',
+        keywords: 'divide division math חילוק חשבון',
+        svg: `<circle cx="12" cy="6" r="2" fill="currentColor"/><line x1="4" y1="12" x2="20" y2="12"/><circle cx="12" cy="18" r="2" fill="currentColor"/>`
+    },
+    'angle': {
+        category: 'math',
+        title: 'Angle / Geometry',
+        hebrew: 'זווית / גיאומטריה',
+        keywords: 'angle geometry trig זווית טריגו גיאומטריה',
+        svg: `<path d="M3 20h18M3 20L17 4"/><path d="M9 20a6 6 0 0 1-2-4.2"/>`
+    },
+
+    // --- PHYSICS (פיזיקה) ---
+    'atom': {
+        category: 'physics',
+        title: 'Atom / Quantum',
+        hebrew: 'אטום / פיזיקה 2 / מודרנית',
+        keywords: 'atom physics quantum nuclear פיזיקה אטום קוונטים',
+        svg: `<circle cx="12" cy="12" r="2.5" fill="currentColor"/><ellipse cx="12" cy="12" rx="10" ry="4.5" transform="rotate(30 12 12)"/><ellipse cx="12" cy="12" rx="10" ry="4.5" transform="rotate(-30 12 12)"/>`
+    },
+    'magnet': {
+        category: 'physics',
+        title: 'Magnet / Electromagnetism',
+        hebrew: 'מגנט / אלקטרומגנטיות',
+        keywords: 'magnet magnetic electricity em פיזיקה 2 מגנטיות חשמל',
+        svg: `<path d="M4 4v7a8 8 0 0 0 16 0V4M4 9h4M16 9h4"/>`
+    },
+    'wave': {
+        category: 'physics',
+        title: 'Sine Wave / Oscillations',
+        hebrew: 'גל / תנודות וגלים',
+        keywords: 'wave sine frequency oscillation גל תנודות תדר',
+        svg: `<path d="M2 12c2.5-5 5.5-5 8 0s5.5 5 8 0 4-5 4-5"/>`
+    },
+    'lightning': {
+        category: 'physics',
+        title: 'Electricity / Circuit',
+        hebrew: 'ברק / זרם חשמלי',
+        keywords: 'lightning electric current circuit מתח זרם ברק חשמל',
+        svg: `<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>`
+    },
+    'sun': {
+        category: 'physics',
+        title: 'Optics / Radiation',
+        hebrew: 'קרינה / אופטיקה / שמש',
+        keywords: 'sun light optics radiation אור אופטיקה קרינה',
+        svg: `<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>`
+    },
+    'prism': {
+        category: 'physics',
+        title: 'Prism / Refraction',
+        hebrew: 'מנסרה / שבירת אור',
+        keywords: 'prism optics refraction spectrum מנסרה אופטיקה ספקטרום',
+        svg: `<polygon points="12 3 22 20 2 20 12 3"/><line x1="2" y1="14" x2="9" y2="10"/><line x1="15" y1="10" x2="22" y2="7"/><line x1="15" y1="12" x2="22" y2="14"/>`
+    },
+    'orbit': {
+        category: 'physics',
+        title: 'Orbital Mechanics / Gravity',
+        hebrew: 'מסלול כבידה / חלל',
+        keywords: 'orbit gravity space planet גרביטציה כבידה מסלול',
+        svg: `<ellipse cx="12" cy="12" rx="10" ry="5"/><circle cx="12" cy="12" r="3" fill="currentColor"/><circle cx="21" cy="10" r="1.5" fill="currentColor"/>`
+    },
+    'compass': {
+        category: 'physics',
+        title: 'Compass / Vectors',
+        hebrew: 'מצפן / שדה וקטורי',
+        keywords: 'compass direction vector מצפן כיוון וקטור',
+        svg: `<circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/>`
+    },
+    'satellite': {
+        category: 'physics',
+        title: 'Satellite / Communication',
+        hebrew: 'לוויין / תקשורת',
+        keywords: 'satellite space astro לוויין חלל',
+        svg: `<path d="M13 2L3 12l3 3 10-10z"/><path d="M14.5 9.5l4 4"/><path d="M6 18l-3 3"/><path d="M17 3l4 4"/>`
+    },
+    'telescope': {
+        category: 'physics',
+        title: 'Telescope / Astro',
+        hebrew: 'טלסקופ / אסטרופיזיקה',
+        keywords: 'telescope stars astronomy טלסקופ כוכבים אסטרונומיה',
+        svg: `<circle cx="12" cy="12" r="3"/><path d="M3 21l6-6M21 3l-6 6M10.5 4.5l9 9"/>`
+    },
+
+    // --- MECHANICAL (הנדסת מכונות) ---
+    'gear': {
+        category: 'mechanical',
+        title: 'Gear / Machine Elements',
+        hebrew: 'גלגל שיניים / תכן מכני',
+        keywords: 'gear cog mechanical machine תכן גלגל שיניים מכונות',
+        svg: `<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>`
+    },
+    'flame': {
+        category: 'mechanical',
+        title: 'Thermal Flame / Thermodynamics',
+        hebrew: 'להבה / תרמודינמיקה',
+        keywords: 'flame heat fire thermal thermo תרמודינמיקה חום להבה תרמו',
+        svg: `<path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 3z"/>`
+    },
+    'wrench': {
+        category: 'mechanical',
+        title: 'Wrench / Mechanics',
+        hebrew: 'מפתח ברגים / מכניקה',
+        keywords: 'wrench tool repair maintenance מפתח ברגים כלים תיקון',
+        svg: `<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>`
+    },
+    'thermometer': {
+        category: 'mechanical',
+        title: 'Thermometer / Heat Transfer',
+        hebrew: 'מדחום / מעבר חום',
+        keywords: 'thermometer temperature heat transfer מדחום טמפרטורה מעבר חום',
+        svg: `<path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/><circle cx="11.5" cy="17.5" r="2" fill="currentColor"/>`
+    },
+    'wind': {
+        category: 'mechanical',
+        title: 'Fluid Flow / Aerodynamics',
+        hebrew: 'זרימה / אווירודינמיקה',
+        keywords: 'wind air flow fluid aero זרימה אווירודינמיקה אוויר',
+        svg: `<path d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 14 16H2m15.73-8.27A2.5 2.5 0 1 1 19.5 12H2"/>`
+    },
+    'droplet': {
+        category: 'mechanical',
+        title: 'Droplet / Hydraulics',
+        hebrew: 'טיפה / הידראוליקה ונוזלים',
+        keywords: 'droplet water liquid fluid hydro הידראוליקה נוזלים טיפה',
+        svg: `<path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>`
+    },
+    'gauge': {
+        category: 'mechanical',
+        title: 'Pressure Gauge / Sensors',
+        hebrew: 'מד לחץ / מכשור ובקרה',
+        keywords: 'gauge pressure meter sensor לחץ מד חיישנים',
+        svg: `<circle cx="12" cy="12" r="9"/><path d="M12 12l4-4"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/><path d="M6 12a6 6 0 0 1 12 0"/>`
+    },
+    'spring': {
+        category: 'mechanical',
+        title: 'Spring / Vibrations',
+        hebrew: 'קפיץ / תורת הרטט',
+        keywords: 'spring vibration resonance coil קפיץ רטט תנודות',
+        svg: `<path d="M6 3v2l12 3-12 3 12 3-12 3 12 3v2"/>`
+    },
+    'nut': {
+        category: 'mechanical',
+        title: 'Hex Nut / Fasteners',
+        hebrew: 'אום משושה / מחברים',
+        keywords: 'nut bolt fastener hardware אום בורג מחברים',
+        svg: `<polygon points="12 2 21 7 21 17 12 22 3 17 3 7 12 2"/><circle cx="12" cy="12" r="4"/>`
+    },
+    'robot': {
+        category: 'mechanical',
+        title: 'Robotics / Automation',
+        hebrew: 'רובוטיקה / אוטומציה',
+        keywords: 'robot robotics automation mechatronics רובוט רובוטיקה אוטומציה',
+        svg: `<rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="8.5" cy="16" r="1.5" fill="currentColor"/><circle cx="15.5" cy="16" r="1.5" fill="currentColor"/><line x1="12" y1="2" x2="12" y2="7"/><line x1="8" y1="2" x2="16" y2="2"/>`
+    },
+    'anvil': {
+        category: 'mechanical',
+        title: 'Anvil / Manufacturing',
+        hebrew: 'סדן / תהליכי ייצור',
+        keywords: 'anvil metallurgy materials manufacturing סדן ייצור חומרים מתכות',
+        svg: `<path d="M3 8h18l-3 4H8L4 18h16v2H2l2-8H2V8h1z"/>`
+    },
+    'hammer': {
+        category: 'mechanical',
+        title: 'Hammer / Workshop',
+        hebrew: 'פטיש / סדנא מכנית',
+        keywords: 'hammer tool build workshop פטיש סדנא עבודה',
+        svg: `<path d="M14 4l6 6-3 3-6-6zM8 10l6 6-9 7-2-2z"/>`
+    },
+    'fan': {
+        category: 'mechanical',
+        title: 'Fan / Turbomachinery',
+        hebrew: 'מאוורר / טורבו-מכונות',
+        keywords: 'fan blower turbo ventilation מאוורר טורבינה זרימה',
+        svg: `<circle cx="12" cy="12" r="2"/><path d="M12 10V3a3 3 0 0 1 3 3v4M14 12h7a3 3 0 0 1-3 3h-4M12 14v7a3 3 0 0 1-3-3v-4M10 12H3a3 3 0 0 1 3-3h4"/>`
+    },
+
+    // --- CHEMISTRY & MATERIALS (כימיה וחומרים) ---
+    'flask': {
+        category: 'chemistry',
+        title: 'Erlenmeyer Flask / Chemistry',
+        hebrew: 'ארלנמייר / כימיה כללית',
+        keywords: 'flask beaker chemistry chem lab כימיה מעבדה ארלנמייר',
+        svg: `<path d="M10 2v7.31L4.35 19.5A2 2 0 0 0 6.09 22h11.82a2 2 0 0 0 1.74-2.5L14 9.31V2M8.5 2h7M7 16h10"/>`
+    },
+    'beaker': {
+        category: 'chemistry',
+        title: 'Beaker / Solutions',
+        hebrew: 'כוס כימית / תמיסות',
+        keywords: 'beaker cup chemistry solution כוס כימית תמיסה',
+        svg: `<path d="M4.5 3h15M6 3v16a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V3M6 14h12"/>`
+    },
+    'test-tube': {
+        category: 'chemistry',
+        title: 'Test Tube / Organic Chem',
+        hebrew: 'מבחנה / כימיה אורגנית',
+        keywords: 'test tube lab chemistry מבחנה מעבדה',
+        svg: `<path d="M14.5 2v17.5c0 1.4-1.1 2.5-2.5 2.5s-2.5-1.1-2.5-2.5V2M8.5 2h7M9.5 12h5"/>`
+    },
+    'molecule': {
+        category: 'chemistry',
+        title: 'Molecule / Bonds',
+        hebrew: 'מולקולה / קשרים כימיים',
+        keywords: 'molecule chemical bond atom מולקולה קשרים כימיה',
+        svg: `<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>`
+    },
+    'microscope': {
+        category: 'chemistry',
+        title: 'Microscope / Materials Lab',
+        hebrew: 'מיקרוסקופ / מעבדת חומרים',
+        keywords: 'microscope materials lab optics מיקרוסקופ חומרים מעבדה',
+        svg: `<path d="M6 18h8M3 22h18M14 22a7 7 0 1 0 0-14h-1M9 14h2M9 12a2 2 0 0 1 2-2h1V3H8v7a2 2 0 0 1 1 2z"/>`
+    },
+    'dna': {
+        category: 'chemistry',
+        title: 'DNA Helix / Biotechnology',
+        hebrew: 'סליל DNA / הנדסה ביו-רפואית',
+        keywords: 'dna helix bio genetic די אן איי ביוטכנולוגיה',
+        svg: `<path d="M2 15c6.667-6 13.333 0 20-6M2 9c6.667 6 13.333 0 20 6M9 11.5v3M15 9.5v3"/>`
+    },
+    'scale': {
+        category: 'chemistry',
+        title: 'Precision Scale / Measurement',
+        hebrew: 'מאזניים / שקילה ואנליזה',
+        keywords: 'scale weight balance balance מאזניים משקל דיוק',
+        svg: `<path d="M12 3v18M6 8l-4 6h8l-4-6zm12 0l-4 6h8l-4-6zM3 21h18"/>`
+    },
+
+    // --- TECH & COMPUTING (חישוב ותכנות) ---
+    'calculator': {
+        category: 'tech',
+        title: 'Scientific Calculator / Numerical',
+        hebrew: 'מחשבון מדעי / חישוב הנדסי',
+        keywords: 'calculator computing numerical חישוב הנדסי נומרי מחשבון',
+        svg: `<rect x="4" y="2" width="16" height="20" rx="2"/><rect x="7" y="5" width="10" height="3" rx="0.5"/><circle cx="8" cy="12" r="1" fill="currentColor"/><circle cx="12" cy="12" r="1" fill="currentColor"/><circle cx="16" cy="12" r="1" fill="currentColor"/><circle cx="8" cy="16" r="1" fill="currentColor"/><circle cx="12" cy="16" r="1" fill="currentColor"/><circle cx="16" cy="16" r="1" fill="currentColor"/>`
+    },
+    'code': {
+        category: 'tech',
+        title: 'Code Brackets / Python / C++',
+        hebrew: 'קוד / תכנות C++ / Python',
+        keywords: 'code brackets programming dev python תכנות קוד שפות',
+        svg: `<polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>`
+    },
+    'terminal': {
+        category: 'tech',
+        title: 'Terminal / CLI',
+        hebrew: 'טרמינל / שורת פקודה',
+        keywords: 'terminal cli console bash שורת פקודה טרמינל',
+        svg: `<polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/>`
+    },
+    'cpu': {
+        category: 'tech',
+        title: 'CPU / Microprocessor',
+        hebrew: 'מעבד / חומרת מחשב',
+        keywords: 'cpu processor chip hardware מעבד צ\'יפ חומרה',
+        svg: `<rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/>`
+    },
+    'database': {
+        category: 'tech',
+        title: 'Database / SQL',
+        hebrew: 'בסיס נתונים / SQL',
+        keywords: 'database sql data storage מסד נתונים מאגר',
+        svg: `<ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>`
+    },
+    'server': {
+        category: 'tech',
+        title: 'Server / Cloud Stack',
+        hebrew: 'שרת / תשתיות ענן',
+        keywords: 'server host cloud ענן שרת רשת',
+        svg: `<rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/>`
+    },
+    'chip': {
+        category: 'tech',
+        title: 'Integrated Circuit / VLSI',
+        hebrew: 'שבב משולב / אלקטרוניקה ספרתית',
+        keywords: 'chip ic microchip vlsi מעגל משולב שבב',
+        svg: `<rect x="5" y="5" width="14" height="14" rx="2"/><path d="M9 9h6v6H9z"/><path d="M9 1v4M15 1v4M9 19v4M15 19v4M1 9h4M1 15h4M19 9h4M19 15h4"/>`
+    },
+    'cloud': {
+        category: 'tech',
+        title: 'Cloud Network',
+        hebrew: 'ענן / תקשורת מחשבים',
+        keywords: 'cloud network web storage ענן רשת',
+        svg: `<path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/>`
+    },
+
+    // --- ACADEMIC & GENERAL (אקדמי וכללי) ---
+    'book': {
+        category: 'academic',
+        title: 'Textbook / Course Book',
+        hebrew: 'ספר לימוד / קורס',
+        keywords: 'book reading study course ספר לימוד חומר קריאה',
+        svg: `<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>`
+    },
+    'library': {
+        category: 'academic',
+        title: 'Bookshelf / Library',
+        hebrew: 'ספרייה / מאגר מקורות',
+        keywords: 'library bookshelf books ספרייה ספרים מאגר',
+        svg: `<path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H10v20H6.5A2.5 2.5 0 0 1 4 19.5zM10 2h4v20h-4zM14 2h3.5A2.5 2.5 0 0 1 20 4.5v15a2.5 2.5 0 0 1-2.5 2.5H14z"/>`
+    },
+    'grad-cap': {
+        category: 'academic',
+        title: 'Graduation Cap / Degree',
+        hebrew: 'כובע סיום תואר',
+        keywords: 'graduation degree cap academic תואר סיום בוגר',
+        svg: `<polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="6 9.5 6 16 12 19 18 16 18 9.5"/><path d="M22 10v6"/>`
+    },
+    'pencil': {
+        category: 'academic',
+        title: 'Pencil / Notes',
+        hebrew: 'עיפרון / סיכומים ומחברת',
+        keywords: 'pencil write notes draw עיפרון כתיבה סיכום',
+        svg: `<path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/>`
+    },
+    'pen-tool': {
+        category: 'academic',
+        title: 'Pen Tool / CAD / Drafting',
+        hebrew: 'עט שרטוט / CAD / גרפיקה',
+        keywords: 'pen tool cad drawing draft שרטוט גרפיקה הנדסית',
+        svg: `<path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><circle cx="11" cy="11" r="2"/>`
+    },
+    'award': {
+        category: 'academic',
+        title: 'Medal / Excellence',
+        hebrew: 'מדליה / הצטיינות',
+        keywords: 'award medal ribbon prize הצטיינות פרס מדליה',
+        svg: `<circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/>`
+    },
+    'calendar': {
+        category: 'academic',
+        title: 'Calendar / Schedule',
+        hebrew: 'לוח שנה / מועדים',
+        keywords: 'calendar date schedule exam יומן לוח שנה מועד',
+        svg: `<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>`
+    },
+    'clock': {
+        category: 'academic',
+        title: 'Clock / Time Management',
+        hebrew: 'שעון / ניהול זמנים',
+        keywords: 'clock time timer hour שעון זמן שעות',
+        svg: `<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>`
+    },
+    'check-circle': {
+        category: 'academic',
+        title: 'Check Circle / Complete',
+        hebrew: 'וי ירוק / הושלם בהצלחה',
+        keywords: 'check mark done complete וי הצלחה הושלם',
+        svg: `<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>`
+    },
+    'star': {
+        category: 'academic',
+        title: 'Star / Favorite',
+        hebrew: 'כוכב / מועדף ועדיפות גבוהה',
+        keywords: 'star favorite rating כוכב מועדף חשוב',
+        svg: `<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>`
+    },
+    'target': {
+        category: 'academic',
+        title: 'Target / Goal',
+        hebrew: 'מטרה / יעד סמסטר',
+        keywords: 'target goal aim bullseye מטרה יעד פגיעה',
+        svg: `<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2" fill="currentColor"/>`
+    },
+    'globe': {
+        category: 'academic',
+        title: 'Globe / Web / International',
+        hebrew: 'גלובוס / רשת עולמית',
+        keywords: 'globe world webwork planet גלובוס עולם אינטרנט',
+        svg: `<circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>`
+    },
+    'flag': {
+        category: 'academic',
+        title: 'Milestone Flag',
+        hebrew: 'דגל / ציון דרך',
+        keywords: 'flag milestone achievement דגל אבן דרך יעד',
+        svg: `<path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1zM4 22v-7"/>`
+    },
+    'layers': {
+        category: 'academic',
+        title: 'Layers / Architecture',
+        hebrew: 'שכבות / ארכיטקטורה',
+        keywords: 'layers stack architecture שכבות מבנה רב שכבתי',
+        svg: `<polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/>`
     }
-    return `<span class="notion-course-icon">📘</span>`;
+};
+
+// State variables for active icon customizer modal
+let activeIconPickerCourseCode = null;
+let activeIconPickerKey = 'book';
+let activeIconPickerColor = '#3b82f6';
+let activeIconPickerCategory = 'all';
+let activeIconPickerSearch = '';
+
+function getCourseNotionIconHtml(courseCode) {
+    if (!courseCode) return `<span class="notion-course-icon">📘</span>`;
+    
+    // 1. Check custom user icon in gameState
+    if (window.gameState && gameState.courseCustomIcons && gameState.courseCustomIcons[courseCode]) {
+        const custom = gameState.courseCustomIcons[courseCode];
+        const iconDef = NOTION_ICON_LIBRARY[custom.iconKey];
+        if (iconDef) {
+            return `<span class="notion-course-icon" data-course-code="${courseCode}" title="לחץ לשינוי סמל וצבע הקורס" style="color: ${custom.color};"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="${custom.color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${iconDef.svg}</svg></span>`;
+        }
+    }
+    
+    // 2. Predefined default in COURSE_NOTION_ICONS
+    const defaultDef = COURSE_NOTION_ICONS[courseCode];
+    if (defaultDef) {
+        return `<span class="notion-course-icon" data-course-code="${courseCode}" title="לחץ לשינוי סמל וצבע הקורס" style="color: ${defaultDef.color};">${defaultDef.svg}</span>`;
+    }
+    
+    // 3. Fallback generic academic book
+    return `<span class="notion-course-icon" data-course-code="${courseCode}" title="לחץ לשינוי סמל וצבע הקורס" style="color: #3b82f6;"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#3b82f6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></span>`;
+}
+
+// Find default icon key for existing course
+function getDefaultCourseIconKey(courseCode) {
+    if (courseCode === '104131') return 'sigma';
+    if (['104043', '104041', '104013'].includes(courseCode)) return 'curve';
+    if (['104166', '104016'].includes(courseCode)) return 'matrix';
+    if (courseCode === '114052') return 'atom';
+    if (courseCode === '114051') return 'sun';
+    if (courseCode === '125001') return 'flask';
+    if (courseCode === '034056') return 'flame';
+    if (courseCode === '034010') return 'spring';
+    if (courseCode === '034055') return 'wind';
+    if (courseCode === '034032') return 'wave';
+    if (courseCode === '034030') return 'anvil';
+    if (courseCode === '034042') return 'calculator';
+    if (courseCode === '034044') return 'pen-tool';
+    if (['034013', '034015', '034029'].includes(courseCode)) return 'gear';
+    return 'book';
+}
+
+function openCourseIconPicker(courseCode) {
+    if (!courseCode) return;
+    activeIconPickerCourseCode = courseCode;
+    activeIconPickerCategory = 'all';
+    activeIconPickerSearch = '';
+    
+    // Determine active icon key and color
+    if (window.gameState && gameState.courseCustomIcons && gameState.courseCustomIcons[courseCode]) {
+        activeIconPickerKey = gameState.courseCustomIcons[courseCode].iconKey || getDefaultCourseIconKey(courseCode);
+        activeIconPickerColor = gameState.courseCustomIcons[courseCode].color || '#3b82f6';
+    } else if (COURSE_NOTION_ICONS[courseCode]) {
+        activeIconPickerKey = getDefaultCourseIconKey(courseCode);
+        activeIconPickerColor = COURSE_NOTION_ICONS[courseCode].color || '#3b82f6';
+    } else {
+        activeIconPickerKey = 'book';
+        activeIconPickerColor = '#3b82f6';
+    }
+    
+    // Set course name / title
+    const courseObj = (window.gameState && gameState.courses && gameState.courses[courseCode]) || null;
+    const courseName = courseObj ? courseObj.name : (HEBREW_COURSE_NAMES[courseCode] || courseCode);
+    const titleEl = document.getElementById('icon-picker-course-title');
+    if (titleEl) {
+        titleEl.innerText = `${courseName} (${courseCode})`;
+    }
+    
+    // Clear search input
+    const searchInput = document.getElementById('icon-picker-search');
+    const clearBtn = document.getElementById('btn-clear-icon-search');
+    if (searchInput) searchInput.value = '';
+    if (clearBtn) clearBtn.style.display = 'none';
+    
+    // Reset category pills
+    const pills = document.querySelectorAll('.category-pill');
+    pills.forEach(p => {
+        if (p.dataset.cat === 'all') {
+            p.classList.add('active');
+        } else {
+            p.classList.remove('active');
+        }
+    });
+    
+    renderIconPickerPalette();
+    renderIconPickerGrid();
+    updateIconPickerPreview();
+    
+    const modal = document.getElementById('notion-icon-picker-modal');
+    if (modal) {
+        modal.style.display = 'flex';
+    }
+}
+
+function closeCourseIconPicker() {
+    const modal = document.getElementById('notion-icon-picker-modal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+    activeIconPickerCourseCode = null;
+}
+
+function renderIconPickerPalette() {
+    const paletteContainer = document.getElementById('notion-color-palette');
+    if (!paletteContainer) return;
+    
+    paletteContainer.innerHTML = NOTION_COLORS.map(c => `
+        <div class="color-circle ${c.hex.toLowerCase() === activeIconPickerColor.toLowerCase() ? 'active' : ''}" 
+             data-hex="${c.hex}" 
+             title="${c.label}" 
+             style="background: ${c.hex};"></div>
+    `).join('');
+}
+
+function renderIconPickerGrid() {
+    const gridContainer = document.getElementById('icon-picker-grid');
+    if (!gridContainer) return;
+    
+    const query = activeIconPickerSearch.trim().toLowerCase();
+    const cat = activeIconPickerCategory;
+    
+    const matchingKeys = Object.keys(NOTION_ICON_LIBRARY).filter(key => {
+        const item = NOTION_ICON_LIBRARY[key];
+        if (cat !== 'all' && item.category !== cat) return false;
+        if (!query) return true;
+        const haystack = `${key} ${item.title} ${item.hebrew} ${item.keywords}`.toLowerCase();
+        return haystack.includes(query);
+    });
+    
+    if (matchingKeys.length === 0) {
+        gridContainer.innerHTML = `<div class="icon-picker-empty">לא נמצאו סמלים תואמים לחיפוש "${query}"</div>`;
+        return;
+    }
+    
+    gridContainer.innerHTML = matchingKeys.map(key => {
+        const item = NOTION_ICON_LIBRARY[key];
+        const isSelected = key === activeIconPickerKey;
+        return `
+            <div class="icon-grid-item ${isSelected ? 'selected' : ''}" data-icon-key="${key}" title="${item.hebrew} (${item.title})" style="color: ${activeIconPickerColor};">
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="${activeIconPickerColor}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    ${item.svg}
+                </svg>
+            </div>
+        `;
+    }).join('');
+}
+
+function updateIconPickerPreview() {
+    const previewBox = document.getElementById('icon-picker-preview-box');
+    if (!previewBox) return;
+    
+    const iconDef = NOTION_ICON_LIBRARY[activeIconPickerKey] || NOTION_ICON_LIBRARY['book'];
+    previewBox.style.color = activeIconPickerColor;
+    previewBox.style.borderColor = activeIconPickerColor;
+    previewBox.style.boxShadow = `0 0 12px ${activeIconPickerColor}33`;
+    previewBox.innerHTML = `
+        <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="${activeIconPickerColor}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            ${iconDef.svg}
+        </svg>
+    `;
+}
+
+function saveCourseIcon() {
+    if (!activeIconPickerCourseCode || !activeIconPickerKey || !activeIconPickerColor) return;
+    if (!window.gameState) return;
+    if (!gameState.courseCustomIcons) {
+        gameState.courseCustomIcons = {};
+    }
+    
+    gameState.courseCustomIcons[activeIconPickerCourseCode] = {
+        iconKey: activeIconPickerKey,
+        color: activeIconPickerColor
+    };
+    
+    saveState();
+    
+    // Refresh views that display course icons
+    if (typeof renderNotionTasksTable === 'function') {
+        renderNotionTasksTable();
+    }
+    if (typeof renderNotionCalendarMonthView === 'function') {
+        renderNotionCalendarMonthView();
+    }
+    if (typeof updateDashboardStats === 'function') {
+        updateDashboardStats();
+    }
+    
+    closeCourseIconPicker();
+}
+
+function resetCourseIcon() {
+    if (!activeIconPickerCourseCode || !window.gameState) return;
+    if (gameState.courseCustomIcons && gameState.courseCustomIcons[activeIconPickerCourseCode]) {
+        delete gameState.courseCustomIcons[activeIconPickerCourseCode];
+        saveState();
+        if (typeof renderNotionTasksTable === 'function') {
+            renderNotionTasksTable();
+        }
+        if (typeof renderNotionCalendarMonthView === 'function') {
+            renderNotionCalendarMonthView();
+        }
+        if (typeof updateDashboardStats === 'function') {
+            updateDashboardStats();
+        }
+    }
+    closeCourseIconPicker();
+}
+
+function setupNotionIconPickerEvents() {
+    // 1. Close & Cancel buttons
+    const closeBtn = document.getElementById('btn-close-icon-picker');
+    const cancelBtn = document.getElementById('btn-cancel-icon-picker');
+    const modal = document.getElementById('notion-icon-picker-modal');
+    
+    if (closeBtn) closeBtn.addEventListener('click', closeCourseIconPicker);
+    if (cancelBtn) cancelBtn.addEventListener('click', closeCourseIconPicker);
+    
+    if (modal) {
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                closeCourseIconPicker();
+            }
+        });
+    }
+    
+    // 2. Save & Reset buttons
+    const saveBtn = document.getElementById('btn-save-course-icon');
+    const resetBtn = document.getElementById('btn-reset-course-icon');
+    if (saveBtn) saveBtn.addEventListener('click', saveCourseIcon);
+    if (resetBtn) resetBtn.addEventListener('click', resetCourseIcon);
+    
+    // 3. Color palette selection
+    const palette = document.getElementById('notion-color-palette');
+    if (palette) {
+        palette.addEventListener('click', (e) => {
+            const circle = e.target.closest('.color-circle');
+            if (circle && circle.dataset.hex) {
+                activeIconPickerColor = circle.dataset.hex;
+                renderIconPickerPalette();
+                renderIconPickerGrid();
+                updateIconPickerPreview();
+            }
+        });
+    }
+    
+    // 4. Icon grid selection
+    const grid = document.getElementById('icon-picker-grid');
+    if (grid) {
+        grid.addEventListener('click', (e) => {
+            const item = e.target.closest('.icon-grid-item');
+            if (item && item.dataset.iconKey) {
+                activeIconPickerKey = item.dataset.iconKey;
+                renderIconPickerGrid();
+                updateIconPickerPreview();
+            }
+        });
+    }
+    
+    // 5. Category pills
+    const categoriesContainer = document.getElementById('icon-picker-categories');
+    if (categoriesContainer) {
+        categoriesContainer.addEventListener('click', (e) => {
+            const pill = e.target.closest('.category-pill');
+            if (pill && pill.dataset.cat) {
+                document.querySelectorAll('.category-pill').forEach(p => p.classList.remove('active'));
+                pill.classList.add('active');
+                activeIconPickerCategory = pill.dataset.cat;
+                renderIconPickerGrid();
+            }
+        });
+    }
+    
+    // 6. Search filtering
+    const searchInput = document.getElementById('icon-picker-search');
+    const clearBtn = document.getElementById('btn-clear-icon-search');
+    if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+            activeIconPickerSearch = e.target.value;
+            if (clearBtn) {
+                clearBtn.style.display = activeIconPickerSearch ? 'block' : 'none';
+            }
+            renderIconPickerGrid();
+        });
+    }
+    if (clearBtn) {
+        clearBtn.addEventListener('click', () => {
+            if (searchInput) {
+                searchInput.value = '';
+                activeIconPickerSearch = '';
+                clearBtn.style.display = 'none';
+                renderIconPickerGrid();
+                searchInput.focus();
+            }
+        });
+    }
+    
+    // 7. Click delegation for course icons & course tags across workspace
+    document.addEventListener('click', (e) => {
+        const trigger = e.target.closest('.notion-course-icon') || e.target.closest('.notion-course-tag');
+        if (trigger) {
+            // Avoid triggering when user clicks contenteditable, input, button, or task badge
+            if (e.target.tagName === 'INPUT' || 
+                e.target.tagName === 'BUTTON' || 
+                e.target.isContentEditable || 
+                e.target.closest('.notion-title-editable') || 
+                e.target.closest('.notion-task-badge') ||
+                e.target.closest('.notion-status-pill')) {
+                return;
+            }
+            const courseCode = trigger.dataset.courseCode || trigger.getAttribute('data-course-code');
+            if (courseCode) {
+                e.stopPropagation();
+                openCourseIconPicker(courseCode);
+            }
+        }
+    });
 }
 
 // Generates dedicated task type badge (WWW for WebWork, Exam, Lab, Project, Homework)
@@ -1049,6 +1844,7 @@ document.addEventListener("DOMContentLoaded", () => {
     setupNotionDashboard();
     setupStudyRunway();
     setupFinalsMode();
+    setupNotionIconPickerEvents();
     renderUI();
     
     // Periodically update paths on window resize
@@ -5871,7 +6667,7 @@ function renderNotionTasksTable() {
                     </div>
                 </td>
                 <td>
-                    <span class="notion-course-tag">
+                    <span class="notion-course-tag" data-course-code="${c.code}" style="cursor: pointer;" title="לחץ לשינוי סמל וצבע הקורס">
                         ${getCourseNotionIconHtml(c.code)}
                         <span>${c.name}</span>
                     </span>
