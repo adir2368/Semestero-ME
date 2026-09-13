@@ -1,5 +1,5 @@
 // Academic Skill Tree - PWA Service Worker
-const CACHE_NAME = 'ast-cache-v1.3.1';
+const CACHE_NAME = 'ast-cache-v1.4.0';
 
 const STATIC_ASSETS = [
     './',
@@ -79,7 +79,7 @@ self.addEventListener('fetch', (event) => {
         return;
     }
 
-    // Cache-first for images, fonts, and icons
+// Cache-first for images, fonts, and icons
     event.respondWith(
         caches.match(event.request).then((cachedResponse) => {
             if (cachedResponse) return cachedResponse;
@@ -94,6 +94,35 @@ self.addEventListener('fetch', (event) => {
                 });
                 return networkResponse;
             });
+        })
+    );
+});
+
+// Notification Click Handler: Deep-link to Timetable or Tasks view
+self.addEventListener('notificationclick', (event) => {
+    event.notification.close();
+
+    const tag = event.notification.tag;
+    const action = event.action;
+    let targetTab = 'curriculum';
+
+    if (tag === 'ast-today-lectures' || action === 'open-timetable') {
+        targetTab = 'timetable';
+    } else if (tag === 'ast-upcoming-tasks' || action === 'open-tasks') {
+        targetTab = 'tasks';
+    }
+
+    event.waitUntil(
+        self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+            for (const client of clientList) {
+                if (client.url && 'focus' in client) {
+                    client.postMessage({ type: 'NAVIGATE_TAB', tab: targetTab });
+                    return client.focus();
+                }
+            }
+            if (self.clients.openWindow) {
+                return self.clients.openWindow('./?tab=' + targetTab);
+            }
         })
     );
 });

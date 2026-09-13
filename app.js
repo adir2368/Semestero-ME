@@ -2551,6 +2551,7 @@ document.addEventListener("DOMContentLoaded", () => {
     setupNotionIconPickerEvents();
     renderUI();
     setupDailyTimetable();
+    setupMobileNotifications();
     
     // Periodically update paths on window resize
     window.addEventListener("resize", drawConnections);
@@ -5560,6 +5561,11 @@ function notifyStateChanged(options = {}) {
         // 2. Instant Reminders Banner update
         if (typeof renderTasksReminderBanner === 'function') {
             renderTasksReminderBanner();
+        }
+
+        // 2b. Notification Bell badge update
+        if (typeof updateNotificationBadge === 'function') {
+            updateNotificationBadge();
         }
 
         // 3. Instant update for currently active tab
@@ -12210,4 +12216,565 @@ function setupDailyTimetable() {
         }
     }, 300000);
 }
+
+// =======================================================
+// Mobile Notifications & Notification Hub System (v1.4.0)
+// =======================================================
+
+// 1. Calculates remaining lectures/tutorials scheduled for today
+function getRemainingClassesToday() {
+    const now = new Date();
+    const dayOfWeek = now.getDay();
+    const curMin = now.getHours() * 60 + now.getMinutes();
+    
+    const dayConfig = (typeof CHEESEFORK_SEMESTER_SCHEDULE !== 'undefined' && CHEESEFORK_SEMESTER_SCHEDULE.days)
+        ? CHEESEFORK_SEMESTER_SCHEDULE.days.find(d => d.dayIndex === dayOfWeek)
+        : null;
+        
+    const isWeekend = (dayOfWeek === 5 || dayOfWeek === 6);
+    const isFree = isWeekend || (dayConfig && dayConfig.isFree) || (!dayConfig);
+    const allClasses = (dayConfig && dayConfig.classes) ? dayConfig.classes : [];
+
+    if (isFree || allClasses.length === 0) {
+        return {
+            count: 0,
+            classes: [],
+            nextClass: null,
+            isFree: true,
+            totalToday: 0
+        };
+    }
+
+    // Filter classes whose endTime is strictly in the future or currently running
+    const remaining = allClasses.filter(c => {
+        if (!c.endTime) return true;
+        const parts = c.endTime.split(':');
+        const endMin = parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
+        return endMin > curMin;
+    });
+
+    const nextClass = remaining.length > 0 ? remaining[0] : null;
+
+    return {
+        count: remaining.length,
+        classes: remaining,
+        nextClass,
+        isFree: false,
+        totalToday: allClasses.length
+    };
+}
+
+// 2. Calculates upcoming prioritized tasks from active courses
+function getUpcomingPriorityTasks(limit = 8) {
+    if (!gameState || !gameState.courses) {
+        return { totalDueSoon: 0, totalOpen: 0, tasks: [] };
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const allTasks = [];
+
+    Object.values(gameState.courses).forEach(course => {
+        if (course.status === 'locked') return;
+
+        (course.tasks || []).forEach(task => {
+            const isDone = task.completed || task.status === 'done' || task.status === 'submitted';
+            if (isDone) return;
+
+            let diffDays = 999;
+            let timingText = 'ללא תאריך יעד';
+            let timingCode = 'none';
+            let urgencyRank = 5;
+
+            if (task.dueDate) {
+                const due = new Date(task.dueDate);
+                due.setHours(0, 0, 0, 0);
+                diffDays = Math.ceil((due - today) / (1000 * 60 * 60 * 24));
+
+                if (diffDays < 0) {
+                    urgencyRank = 1;
+                    timingCode = 'overdue';
+                    timingText = `באיחור של ${Math.abs(diffDays)} ימים`;
+                } else if (diffDays === 0) {
+                    urgencyRank = 2;
+                    timingCode = 'today';
+                    timingText = 'להגשה היום!';
+                } else if (diffDays === 1) {
+                    urgencyRank = 3;
+                    timingCode = 'today';
+                    timingText = 'להגשה מחר!';
+                } else if (diffDays <= 7) {
+                    urgencyRank = 4;
+                    timingCode = 'upcoming';
+                    timingText = `בעוד ${diffDays} ימים`;
+                } else {
+                    urgencyRank = 5;
+                    timingCode = 'upcoming';
+                    timingText = `בעוד ${diffDays} ימים`;
+                }
+            }
+
+            const courseShortName = (typeof COURSE_SHORT_NAMES !== 'undefined' && COURSE_SHORT_NAMES[course.code])
+                ? COURSE_SHORT_NAMES[course.code]
+                : course.name;
+
+            allTasks.push({
+                id: task.id,
+                courseCode: course.code,
+                courseName: course.name,
+                courseShortName,
+                title: task.title,
+                type: task.type,
+                xp: task.xp || 50,
+                dueDate: task.dueDate,
+                diffDays,
+                urgencyRank,
+                timingCode,
+                timingText
+            });
+        });
+    });
+
+    // Sort: urgencyRank asc, then diffDays asc, then XP desc
+    allTasks.sort((a, b) => {
+        if (a.urgencyRank !== b.urgencyRank) return a.urgencyRank - b.urgencyRank;
+        if (a.diffDays !== b.diffDays) return a.diffDays - b.diffDays;
+        return (b.xp || 0) - (a.xp || 0);
+    });
+
+    const urgentCount = allTasks.filter(t => t.diffDays <= 7).length;
+
+    return {
+        totalDueSoon: urgentCount,
+        totalOpen: allTasks.length,
+        tasks: allTasks.slice(0, limit)
+    };
+}
+
+// 3. Update the Bell Badge counter
+function updateNotificationBadge() {
+    const badge = document.getElementById('bell-badge-count');
+    if (!badge) return;
+
+    const remainingLectures = getRemainingClassesToday();
+    const priorityTasks = getUpcomingPriorityTasks();
+
+    const totalUrgent = remainingLectures.count + priorityTasks.totalDueSoon;
+
+    if (totalUrgent > 0) {
+        badge.innerText = totalUrgent > 99 ? '99+' : String(totalUrgent);
+        badge.style.display = 'flex';
+    } else {
+        badge.style.display = 'none';
+    }
+}
+
+// 4. Toggle Expand / Collapse for individual cards
+function toggleNotificationCard(cardType) {
+    const card = document.getElementById(`notif-card-${cardType}`);
+    const body = document.getElementById(`notif-body-${cardType}`);
+    const header = document.getElementById(`notif-header-${cardType}`);
+    if (!card || !body) return;
+
+    const isExpanded = card.classList.toggle('is-expanded');
+    body.style.display = isExpanded ? 'block' : 'none';
+    if (header) {
+        header.setAttribute('aria-expanded', isExpanded ? 'true' : 'false');
+    }
+}
+
+// 5. Render dynamic contents into In-App Notification Hub
+function renderInAppNotificationHub() {
+    updateNotificationBadge();
+
+    const remainingLectures = getRemainingClassesToday();
+    const priorityTasks = getUpcomingPriorityTasks();
+
+    // -------------------------------------------------------------
+    // Card 1: Today's Remaining Lectures / Tutorials
+    // -------------------------------------------------------------
+    const summaryLectures = document.getElementById('notif-summary-lectures');
+    const countLectures = document.getElementById('notif-count-lectures');
+    const listLectures = document.getElementById('notif-list-lectures');
+
+    if (countLectures) {
+        countLectures.innerText = String(remainingLectures.count);
+    }
+
+    if (remainingLectures.isFree || remainingLectures.totalToday === 0) {
+        if (summaryLectures) {
+            summaryLectures.innerText = 'יום חופשי מלימודים פרונטליים! 🏖️';
+        }
+        if (listLectures) {
+            listLectures.innerHTML = `
+                <div class="notif-card-empty-msg">
+                    🏖️ אין שיעורים מתוכננים להיום. זמן מצוין לעבודה על משימות, חזרה על החומר ומנוחה.
+                </div>
+            `;
+        }
+    } else if (remainingLectures.count === 0) {
+        if (summaryLectures) {
+            summaryLectures.innerText = `כל ${remainingLectures.totalToday} השיעורים להיום הסתיימו ✔️`;
+        }
+        if (listLectures) {
+            listLectures.innerHTML = `
+                <div class="notif-card-empty-msg">
+                    🎉 סיימת את כל השיעורים להיום! כל הכבוד.
+                </div>
+            `;
+        }
+    } else {
+        const next = remainingLectures.nextClass;
+        if (summaryLectures && next) {
+            summaryLectures.innerText = `שיעור קרוב: ${next.type} ב-${next.startTime} • ${next.courseName}`;
+        }
+
+        if (listLectures) {
+            let html = '';
+            remainingLectures.classes.forEach(c => {
+                const status = (typeof getLiveClassStatus === 'function')
+                    ? getLiveClassStatus(c.startTime, c.endTime)
+                    : { code: 'upcoming', text: `⏰ ${c.startTime}` };
+
+                const isLive = status.code === 'live';
+
+                html += `
+                    <div class="notif-lecture-item ${isLive ? 'is-live' : ''}" onclick="if (typeof setActiveMainTab === 'function') setActiveMainTab('timetable'); closeNotificationDrawer();">
+                        <div class="notif-lecture-item-top">
+                            <span class="notif-lecture-item-time">${c.startTime} - ${c.endTime}</span>
+                            <span class="notif-lecture-item-status ${status.code}">${status.text}</span>
+                        </div>
+                        <div class="notif-lecture-item-title">${c.courseName} (${c.courseId})</div>
+                        <div class="notif-lecture-item-sub">
+                            <span>${c.type}</span>
+                            ${c.room ? `<span>📍 ${c.room}</span>` : ''}
+                            ${c.lecturer ? `<span>👨‍🏫 ${c.lecturer}</span>` : ''}
+                        </div>
+                    </div>
+                `;
+            });
+            listLectures.innerHTML = html;
+        }
+    }
+
+    // -------------------------------------------------------------
+    // Card 2: Upcoming Priority Tasks
+    // -------------------------------------------------------------
+    const summaryTasks = document.getElementById('notif-summary-tasks');
+    const countTasks = document.getElementById('notif-count-tasks');
+    const listTasks = document.getElementById('notif-list-tasks');
+
+    if (countTasks) {
+        countTasks.innerText = String(priorityTasks.tasks.length);
+    }
+
+    if (priorityTasks.tasks.length === 0) {
+        if (summaryTasks) {
+            summaryTasks.innerText = 'אין משימות פתוחות להגשה! כל הכבוד 🎉';
+        }
+        if (listTasks) {
+            listTasks.innerHTML = `
+                <div class="notif-card-empty-msg">
+                    ✨ אין משימות ממתינות. כל המשימות שלך מעודכנות והושלמו!
+                </div>
+            `;
+        }
+    } else {
+        const topTask = priorityTasks.tasks[0];
+        if (summaryTasks) {
+            summaryTasks.innerText = `[${topTask.courseShortName}] ${topTask.title} (${topTask.timingText})`;
+        }
+
+        if (listTasks) {
+            let html = '';
+            priorityTasks.tasks.forEach(task => {
+                const isOverdue = task.diffDays < 0;
+                html += `
+                    <div class="notif-task-item ${isOverdue ? 'is-overdue' : ''}">
+                        <input type="checkbox" class="notif-task-checkbox" data-course-code="${task.courseCode}" data-task-id="${task.id}" title="סמן כהושלם">
+                        <div class="notif-task-info" onclick="if (typeof openCourseDetails === 'function') openCourseDetails('${task.courseCode}'); closeNotificationDrawer();">
+                            <div class="notif-task-title">${task.title}</div>
+                            <div class="notif-task-sub">
+                                <span class="notif-task-course-tag">[${task.courseShortName}]</span>
+                                <span class="notif-task-timing-badge ${task.timingCode}">${task.timingText}</span>
+                                <span style="color: #94a3b8; font-size: 0.68rem;">+${task.xp} XP</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            listTasks.innerHTML = html;
+
+            // Bind checkbox listeners
+            listTasks.querySelectorAll('.notif-task-checkbox').forEach(chk => {
+                chk.addEventListener('change', (e) => {
+                    e.stopPropagation();
+                    const courseCode = chk.getAttribute('data-course-code');
+                    const taskId = chk.getAttribute('data-task-id');
+                    completeTaskFromNotification(courseCode, taskId);
+                });
+            });
+        }
+    }
+}
+
+// 6. Complete a task directly from notification hub
+function completeTaskFromNotification(courseCode, taskId) {
+    if (!gameState || !gameState.courses || !gameState.courses[courseCode]) return;
+    const course = gameState.courses[courseCode];
+    const task = (course.tasks || []).find(t => t.id === taskId);
+    if (!task) return;
+
+    task.completed = true;
+    task.status = 'done';
+    const xpGained = task.xp || 50;
+
+    if (typeof addXp === 'function') {
+        addXp(xpGained);
+    }
+
+    if (typeof showToastNotification === 'function') {
+        showToastNotification(`משימה הושלמה! +${xpGained} XP עבור [${course.name}]`, 'success');
+    }
+
+    notifyStateChanged();
+    renderInAppNotificationHub();
+}
+
+// 7. Open and close Drawer helpers
+function openNotificationDrawer() {
+    const overlay = document.getElementById('notif-drawer-overlay');
+    if (!overlay) return;
+    renderInAppNotificationHub();
+    overlay.style.display = 'flex';
+}
+
+function closeNotificationDrawer() {
+    const overlay = document.getElementById('notif-drawer-overlay');
+    if (overlay) {
+        overlay.style.display = 'none';
+    }
+}
+
+// 8. Dispatch Native Mobile System Notifications (Dual Notification)
+async function dispatchNativeMobileNotifications() {
+    if (!('Notification' in window)) {
+        if (typeof showToastNotification === 'function') {
+            showToastNotification('הדפדפן אינו תומך בהתראות Push', 'warning');
+        }
+        return;
+    }
+
+    let permission = Notification.permission;
+    if (permission !== 'granted') {
+        permission = await Notification.requestPermission();
+    }
+
+    if (permission !== 'granted') {
+        if (typeof showToastNotification === 'function') {
+            showToastNotification('יש לאשר הרשאות התראה כדי לקבל עדכונים בנייד', 'warning');
+        }
+        return;
+    }
+
+    const remainingLectures = getRemainingClassesToday();
+    const priorityTasks = getUpcomingPriorityTasks();
+
+    // -------------------------------------------------------------
+    // Notification 1: Today's Remaining Lectures / Tutorials
+    // -------------------------------------------------------------
+    let lectureTitle = '';
+    let lectureBody = '';
+
+    if (remainingLectures.isFree || remainingLectures.totalToday === 0) {
+        lectureTitle = '🎓 מערכת שעות: יום חופשי מלימודים פרונטליים';
+        lectureBody = 'אין עוד שיעורים מתוכננים להיום. יום נעים ופורה!';
+    } else if (remainingLectures.count === 0) {
+        lectureTitle = '🎓 מערכת שעות: כל השיעורים להיום הסתיימו';
+        lectureBody = `כל ${remainingLectures.totalToday} השיעורים להיום הושלמו. כל הכבוד!`;
+    } else {
+        const next = remainingLectures.nextClass;
+        lectureTitle = `🎓 שיעורים להיום: ${remainingLectures.count} נותרו (הבא: ${next.startTime})`;
+        const lines = remainingLectures.classes.map(c => 
+            `• [${c.startTime}-${c.endTime}] ${c.courseName} (${c.type}${c.room ? ' - ' + c.room : ''})`
+        );
+        lectureBody = lines.join('\n');
+    }
+
+    // -------------------------------------------------------------
+    // Notification 2: Upcoming Priority Tasks
+    // -------------------------------------------------------------
+    let taskTitle = '';
+    let taskBody = '';
+
+    if (priorityTasks.tasks.length === 0) {
+        taskTitle = '📋 משימות אקדמיות: אין משימות ממתינות';
+        taskBody = 'כל המשימות הושלמו בהצלחה! המשך כך!';
+    } else {
+        const topTask = priorityTasks.tasks[0];
+        taskTitle = `📋 משימות קרובות: ${priorityTasks.tasks.length} פתוחות (דחוף: ${topTask.courseShortName})`;
+        const lines = priorityTasks.tasks.slice(0, 5).map(t => 
+            `• [${t.courseShortName}] ${t.title} (${t.timingText})`
+        );
+        if (priorityTasks.tasks.length > 5) {
+            lines.push(`ועוד ${priorityTasks.tasks.length - 5} משימות בלוח המשימות...`);
+        }
+        taskBody = lines.join('\n');
+    }
+
+    // Show via Service Worker (required for mobile background & deep links)
+    const showViaSw = async (title, options) => {
+        if ('serviceWorker' in navigator) {
+            try {
+                const reg = await navigator.serviceWorker.ready;
+                if (reg && reg.showNotification) {
+                    await reg.showNotification(title, options);
+                    return true;
+                }
+            } catch (err) {
+                console.warn('[Notifications] ServiceWorker showNotification fallback:', err);
+            }
+        }
+        try {
+            new Notification(title, options);
+            return true;
+        } catch (e) {
+            console.warn('[Notifications] Fallback failed:', e);
+            return false;
+        }
+    };
+
+    // Dispatch Notification 1: Lectures
+    await showViaSw(lectureTitle, {
+        body: lectureBody,
+        icon: 'icon.png',
+        badge: 'icon.png',
+        tag: 'ast-today-lectures',
+        renotify: true,
+        data: { tab: 'timetable' },
+        actions: [
+            { action: 'open-timetable', title: '📅 פתח מערכת שעות' }
+        ]
+    });
+
+    // Small delay to ensure separate notifications on Android/iOS
+    setTimeout(async () => {
+        // Dispatch Notification 2: Tasks
+        await showViaSw(taskTitle, {
+            body: taskBody,
+            icon: 'icon.png',
+            badge: 'icon.png',
+            tag: 'ast-upcoming-tasks',
+            renotify: true,
+            data: { tab: 'tasks' },
+            actions: [
+                { action: 'open-tasks', title: '📋 פתח משימות' }
+            ]
+        });
+
+        if (typeof showToastNotification === 'function') {
+            showToastNotification('2 התראות נשלחו בהצלחה למכשיר הנייד!', 'success');
+        }
+    }, 300);
+}
+
+// 9. Main Setup function for mobile notification hub
+function setupMobileNotifications() {
+    // A. Bell button
+    const bellBtn = document.getElementById('btn-notification-bell');
+    if (bellBtn) {
+        bellBtn.addEventListener('click', () => {
+            openNotificationDrawer();
+        });
+    }
+
+    // B. Close button & overlay click
+    const closeBtn = document.getElementById('btn-close-notif-drawer');
+    if (closeBtn) {
+        closeBtn.addEventListener('click', closeNotificationDrawer);
+    }
+
+    const overlay = document.getElementById('notif-drawer-overlay');
+    if (overlay) {
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) {
+                closeNotificationDrawer();
+            }
+        });
+    }
+
+    // C. Expand/Collapse toggles for cards
+    const headerLectures = document.getElementById('notif-header-lectures');
+    if (headerLectures) {
+        headerLectures.addEventListener('click', () => toggleNotificationCard('lectures'));
+    }
+
+    const headerTasks = document.getElementById('notif-header-tasks');
+    if (headerTasks) {
+        headerTasks.addEventListener('click', () => toggleNotificationCard('tasks'));
+    }
+
+    // D. Dispatch native mobile notifications button
+    const dispatchBtn = document.getElementById('btn-dispatch-native-notifs');
+    if (dispatchBtn) {
+        dispatchBtn.addEventListener('click', () => {
+            dispatchNativeMobileNotifications();
+        });
+    }
+
+    // E. Navigation buttons inside cards
+    const btnGoTimetable = document.getElementById('btn-notif-go-timetable');
+    if (btnGoTimetable) {
+        btnGoTimetable.addEventListener('click', () => {
+            if (typeof setActiveMainTab === 'function') {
+                setActiveMainTab('timetable');
+            }
+            closeNotificationDrawer();
+        });
+    }
+
+    const btnGoTasks = document.getElementById('btn-notif-go-tasks');
+    if (btnGoTasks) {
+        btnGoTasks.addEventListener('click', () => {
+            if (typeof setActiveMainTab === 'function') {
+                setActiveMainTab('tasks');
+            }
+            closeNotificationDrawer();
+        });
+    }
+
+    // F. Listen to Service Worker messages (e.g. NAVIGATE_TAB when notification is tapped)
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.addEventListener('message', (event) => {
+            if (event.data && event.data.type === 'NAVIGATE_TAB') {
+                const target = event.data.tab || 'timetable';
+                if (typeof setActiveMainTab === 'function') {
+                    setActiveMainTab(target);
+                }
+                closeNotificationDrawer();
+            }
+        });
+    }
+
+    // G. Deep linking from URL query params (e.g. ./?tab=timetable or ./?tab=tasks)
+    try {
+        const params = new URLSearchParams(window.location.search);
+        const requestedTab = params.get('tab');
+        if (requestedTab && ['curriculum', 'tasks', 'calendar', 'timetable', 'settings'].includes(requestedTab)) {
+            setTimeout(() => {
+                if (typeof setActiveMainTab === 'function') {
+                    setActiveMainTab(requestedTab);
+                }
+            }, 100);
+        }
+    } catch (e) {}
+
+    // H. Initial badge update
+    updateNotificationBadge();
+
+    // I. Periodic badge update every 60 seconds
+    setInterval(updateNotificationBadge, 60000);
+}
+
 

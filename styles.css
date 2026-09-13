@@ -6679,3 +6679,490 @@ body {
     gap: 6px;
 }
 
+/* ==========================================================================
+   Mobile Notification Hub & Drawer (v1.4.0)
+   ========================================================================== */
+
+.btn-hud-bell {
+    background: rgba(56, 189, 248, 0.12);
+    border: 1px solid rgba(56, 189, 248, 0.35);
+    border-radius: 10px;
+    width: 38px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    position: relative;
+    color: #f8fafc;
+    flex-shrink: 0;
+    margin-right: 10px;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.btn-hud-bell:hover {
+    background: rgba(56, 189, 248, 0.25);
+    border-color: #38bdf8;
+    box-shadow: 0 0 14px rgba(56, 189, 248, 0.45);
+    transform: translateY(-1px);
+}
+
+.btn-hud-bell:active {
+    transform: scale(0.95);
+}
+
+.bell-icon {
+    font-size: 1.15rem;
+    line-height: 1;
+    display: inline-block;
+}
+
+.bell-badge {
+    position: absolute;
+    top: -4px;
+    left: -4px;
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: #ffffff;
+    font-size: 0.65rem;
+    font-weight: 800;
+    min-width: 18px;
+    height: 18px;
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 4px;
+    border: 1.5px solid #0b0f19;
+    box-shadow: 0 0 8px rgba(239, 68, 68, 0.8);
+    animation: notif-pulse-badge 2s infinite;
+}
+
+@keyframes notif-pulse-badge {
+    0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 0 6px rgba(239, 68, 68, 0.7);
+    }
+    50% {
+        transform: scale(1.1);
+        box-shadow: 0 0 12px rgba(239, 68, 68, 1);
+    }
+}
+
+/* Notification Drawer Modal */
+.notif-drawer-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 10050;
+    background: rgba(5, 9, 18, 0.88);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 16px;
+    opacity: 1 !important;
+}
+
+.notif-drawer-panel {
+    background: #0f172a;
+    background: linear-gradient(180deg, #111827 0%, #0b0f19 100%);
+    border: 1px solid rgba(56, 189, 248, 0.35);
+    border-radius: 16px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.95), 0 0 30px rgba(56, 189, 248, 0.15);
+    width: 100%;
+    max-width: 540px;
+    max-height: 88vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    opacity: 1 !important;
+}
+
+.notif-drawer-header {
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(15, 23, 42, 0.85);
+}
+
+.notif-drawer-title-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.notif-drawer-icon {
+    font-size: 1.4rem;
+}
+
+.notif-drawer-title {
+    font-size: 0.96rem;
+    font-weight: 800;
+    color: #f8fafc;
+    letter-spacing: 0.3px;
+}
+
+.notif-drawer-subtitle {
+    font-size: 0.72rem;
+    color: #94a3b8;
+    margin-top: 1px;
+}
+
+.notif-drawer-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.notif-dispatch-btn {
+    font-size: 0.76rem !important;
+    padding: 4px 10px !important;
+    border-radius: 6px !important;
+    font-weight: 700 !important;
+    box-shadow: 0 0 10px rgba(56, 189, 248, 0.3);
+}
+
+.notif-close-btn {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #94a3b8;
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 0.95rem;
+    transition: all 0.15s;
+}
+
+.notif-close-btn:hover {
+    background: rgba(239, 68, 68, 0.2);
+    border-color: rgba(239, 68, 68, 0.4);
+    color: #f87171;
+}
+
+.notif-cards-container {
+    padding: 14px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
+}
+
+.notif-card {
+    background: rgba(17, 24, 39, 0.7);
+    border: 1px solid rgba(56, 189, 248, 0.2);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.notif-card:hover {
+    border-color: rgba(56, 189, 248, 0.35);
+}
+
+.notif-card.is-expanded {
+    border-color: rgba(56, 189, 248, 0.55);
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.4);
+}
+
+.notif-card-header {
+    padding: 12px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    background: rgba(15, 23, 42, 0.6);
+    user-select: none;
+    transition: background 0.15s;
+    gap: 10px;
+}
+
+.notif-card-header:hover {
+    background: rgba(30, 41, 59, 0.7);
+}
+
+.notif-card-header-left {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+    min-width: 0;
+}
+
+.notif-card-badge {
+    font-size: 0.68rem;
+    font-weight: 800;
+    padding: 2px 8px;
+    border-radius: 4px;
+    width: fit-content;
+}
+
+.notif-badge-lectures {
+    background: rgba(56, 189, 248, 0.14);
+    color: #38bdf8;
+    border: 1px solid rgba(56, 189, 248, 0.35);
+}
+
+.notif-badge-tasks {
+    background: rgba(245, 158, 11, 0.14);
+    color: #fbbf24;
+    border: 1px solid rgba(245, 158, 11, 0.35);
+}
+
+.notif-card-summary {
+    font-size: 0.84rem;
+    color: #e2e8f0;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.3;
+}
+
+.notif-card-header-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.notif-count-pill {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 10px;
+    font-size: 0.7rem;
+    font-weight: 800;
+    padding: 1px 7px;
+    color: #94a3b8;
+}
+
+.notif-toggle-arrow {
+    font-size: 0.75rem;
+    color: #94a3b8;
+    display: inline-block;
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.notif-card.is-expanded .notif-toggle-arrow {
+    transform: rotate(180deg);
+    color: #38bdf8;
+}
+
+.notif-card-body {
+    padding: 12px 14px;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    background: rgba(10, 14, 26, 0.6);
+}
+
+.notif-card-items-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.notif-card-empty-msg {
+    text-align: center;
+    padding: 14px 10px;
+    color: #94a3b8;
+    font-size: 0.84rem;
+    background: rgba(15, 23, 42, 0.4);
+    border-radius: 8px;
+    border: 1px dashed rgba(255, 255, 255, 0.1);
+}
+
+/* Individual Lecture Item inside Notification Hub */
+.notif-lecture-item {
+    background: rgba(15, 23, 42, 0.7);
+    border: 1px solid rgba(56, 189, 248, 0.2);
+    border-right: 3px solid #38bdf8;
+    border-radius: 8px;
+    padding: 8px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.notif-lecture-item:hover {
+    background: rgba(30, 41, 59, 0.75);
+}
+
+.notif-lecture-item.is-live {
+    border-right-color: #10b981;
+    background: rgba(16, 185, 129, 0.1);
+    box-shadow: 0 0 10px rgba(16, 185, 129, 0.2);
+}
+
+.notif-lecture-item-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.notif-lecture-item-time {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #38bdf8;
+    direction: ltr;
+    display: inline-block;
+}
+
+.notif-lecture-item-status {
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 4px;
+}
+
+.notif-lecture-item-status.live {
+    background: rgba(16, 185, 129, 0.2);
+    color: #34d399;
+}
+
+.notif-lecture-item-status.next {
+    background: rgba(245, 158, 11, 0.2);
+    color: #fbbf24;
+}
+
+.notif-lecture-item-status.upcoming {
+    background: rgba(148, 163, 184, 0.15);
+    color: #cbd5e1;
+}
+
+.notif-lecture-item-title {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: #f1f5f9;
+}
+
+.notif-lecture-item-sub {
+    font-size: 0.74rem;
+    color: #94a3b8;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+/* Individual Task Item inside Notification Hub */
+.notif-task-item {
+    background: rgba(15, 23, 42, 0.7);
+    border: 1px solid rgba(245, 158, 11, 0.2);
+    border-right: 3px solid #f59e0b;
+    border-radius: 8px;
+    padding: 8px 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: background 0.15s;
+}
+
+.notif-task-item:hover {
+    background: rgba(30, 41, 59, 0.75);
+}
+
+.notif-task-item.is-overdue {
+    border-right-color: #ef4444;
+    background: rgba(239, 68, 68, 0.08);
+}
+
+.notif-task-checkbox {
+    width: 18px;
+    height: 18px;
+    accent-color: #38bdf8;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.notif-task-info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    cursor: pointer;
+}
+
+.notif-task-title {
+    font-size: 0.84rem;
+    font-weight: 600;
+    color: #f1f5f9;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.notif-task-sub {
+    font-size: 0.72rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.notif-task-course-tag {
+    color: #38bdf8;
+    font-weight: 700;
+}
+
+.notif-task-timing-badge {
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 0.68rem;
+    font-weight: 700;
+}
+
+.notif-task-timing-badge.overdue {
+    background: rgba(239, 68, 68, 0.2);
+    color: #fca5a5;
+}
+
+.notif-task-timing-badge.today {
+    background: rgba(245, 158, 11, 0.2);
+    color: #fcd34d;
+}
+
+.notif-task-timing-badge.upcoming {
+    background: rgba(56, 189, 248, 0.15);
+    color: #7dd3fc;
+}
+
+.notif-card-footer {
+    display: flex;
+    justify-content: flex-end;
+    padding-top: 6px;
+}
+
+.notif-card-footer button {
+    font-size: 0.76rem !important;
+}
+
+@media (max-width: 768px) {
+    .btn-hud-bell {
+        width: 32px;
+        height: 32px;
+        margin-right: 6px;
+    }
+    
+    .bell-icon {
+        font-size: 1.0rem;
+    }
+    
+    .notif-drawer-overlay {
+        padding: 8px 6px calc(65px + env(safe-area-inset-bottom)) 6px;
+    }
+    
+    .notif-drawer-panel {
+        max-height: calc(100vh - 85px - env(safe-area-inset-bottom));
+        border-radius: 12px;
+    }
+}
+
