@@ -12557,7 +12557,164 @@ function closeNotificationDrawer() {
     }
 }
 
-// 8. Dispatch Native Mobile System Notifications (Dual Notification)
+// Helper: Show native notification via Service Worker (with fallback)
+async function showNativeNotification(title, options) {
+    if (!('Notification' in window)) return false;
+    
+    let permission = Notification.permission;
+    if (permission !== 'granted') {
+        permission = await Notification.requestPermission();
+    }
+    if (permission !== 'granted') return false;
+
+    if ('serviceWorker' in navigator) {
+        try {
+            const reg = await navigator.serviceWorker.ready;
+            if (reg && reg.showNotification) {
+                await reg.showNotification(title, options);
+                return true;
+            }
+        } catch (err) {
+            console.warn('[Notifications] ServiceWorker showNotification fallback:', err);
+        }
+    }
+
+    try {
+        new Notification(title, options);
+        return true;
+    } catch (e) {
+        console.warn('[Notifications] Fallback failed:', e);
+        return false;
+    }
+}
+
+// 8. Trigger high-priority 10-Minute Lecture / Tutorial Reminder
+async function trigger10MinClassAlert(classItem, isTest = false) {
+    if (!classItem) return;
+
+    const courseName = classItem.courseName || 'שיעור אקדמי';
+    const type = classItem.type || 'הרצאה / תרגול';
+    const startTime = classItem.startTime || '';
+    const endTime = classItem.endTime || '';
+    const room = classItem.room ? `📍 כיתה: ${classItem.room}` : '📍 מיקום: כיתת טכניון';
+    const lecturer = classItem.lecturer ? `👨‍🏫 מרצה: ${classItem.lecturer}` : '';
+
+    const title = isTest 
+        ? `⏰ [בדיקה] בעוד 10 דק׳: ${courseName}`
+        : `⏰ בעוד 10 דק׳: ${courseName} (${classItem.type.split(' ')[0]})`;
+
+    const bodyLines = [
+        `📚 ${type}`,
+        `⏰ שעות: ${startTime} - ${endTime} (${classItem.duration || 'שיעור'})`,
+        room
+    ];
+    if (lecturer) bodyLines.push(lecturer);
+
+    // Check if there are remaining classes today after this one
+    const remaining = getRemainingClassesToday();
+    const afterThis = remaining.classes.filter(c => c.startTime > startTime);
+    if (afterThis.length > 0) {
+        bodyLines.push('────────────────────');
+        bodyLines.push(`בהמשך היום: עוד ${afterThis.length} שיעורים (הבא ב-${afterThis[0].startTime})`);
+    }
+
+    const body = bodyLines.join('\n');
+    const tag = `ast-reminder-${classItem.courseId || 'c'}-${(startTime || '0000').replace(':', '')}`;
+
+    const sent = await showNativeNotification(title, {
+        body,
+        icon: 'icon.png',
+        badge: 'icon.png',
+        tag,
+        renotify: true,
+        vibrate: [250, 100, 250, 100, 250],
+        data: { tab: 'timetable' },
+        actions: [
+            { action: 'open-timetable', title: '📍 פתח מערכת שעות' }
+        ]
+    });
+
+    if (sent && isTest && typeof showToastNotification === 'function') {
+        showToastNotification(`התראת 10 דקות עבור [${courseName}] נשלחה בהצלחה!`, 'success');
+    }
+
+    return sent;
+}
+
+// 9. Automated 10-Minute Class Reminder Engine (Runs continuously)
+function checkAndTrigger10MinReminders() {
+    if (typeof Notification === 'undefined' || Notification.permission !== 'granted') {
+        return;
+    }
+
+    const now = new Date();
+    const dayOfWeek = now.getDay();
+    const curHours = now.getHours();
+    const curMinutes = now.getMinutes();
+    const curMin = curHours * 60 + curMinutes;
+    const todayDateStr = now.toISOString().split('T')[0];
+
+    const dayConfig = (typeof CHEESEFORK_SEMESTER_SCHEDULE !== 'undefined' && CHEESEFORK_SEMESTER_SCHEDULE.days)
+        ? CHEESEFORK_SEMESTER_SCHEDULE.days.find(d => d.dayIndex === dayOfWeek)
+        : null;
+
+    if (!dayConfig || dayConfig.isFree || !dayConfig.classes || dayConfig.classes.length === 0) {
+        return;
+    }
+
+    dayConfig.classes.forEach(c => {
+        if (!c.startTime) return;
+        const parts = c.startTime.split(':');
+        const startMin = parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
+        const diffMinutes = startMin - curMin;
+
+        // Target: 8 to 11 minutes prior to class start
+        if (diffMinutes >= 8 && diffMinutes <= 11) {
+            const reminderKey = `ast_reminded_10m_${todayDateStr}_${c.courseId}_${c.startTime}`;
+            if (!localStorage.getItem(reminderKey)) {
+                console.log(`[Notifications] Triggering automated 10-min reminder for ${c.courseName} at ${c.startTime}`);
+                localStorage.setItem(reminderKey, new Date().toISOString());
+                trigger10MinClassAlert(c, false);
+            }
+        }
+    });
+}
+
+// 10. Schedule exact timeouts for today's classes when app is loaded
+function scheduleTodayClassTimeouts() {
+    const now = new Date();
+    const dayOfWeek = now.getDay();
+    const nowMs = now.getTime();
+    const todayDateStr = now.toISOString().split('T')[0];
+
+    const dayConfig = (typeof CHEESEFORK_SEMESTER_SCHEDULE !== 'undefined' && CHEESEFORK_SEMESTER_SCHEDULE.days)
+        ? CHEESEFORK_SEMESTER_SCHEDULE.days.find(d => d.dayIndex === dayOfWeek)
+        : null;
+
+    if (!dayConfig || dayConfig.isFree || !dayConfig.classes) return;
+
+    dayConfig.classes.forEach(c => {
+        if (!c.startTime) return;
+        const parts = c.startTime.split(':');
+        const classDate = new Date();
+        classDate.setHours(parseInt(parts[0], 10), parseInt(parts[1], 10), 0, 0);
+
+        const reminderTimeMs = classDate.getTime() - (10 * 60 * 1000);
+        const delayMs = reminderTimeMs - nowMs;
+
+        const reminderKey = `ast_reminded_10m_${todayDateStr}_${c.courseId}_${c.startTime}`;
+        if (delayMs > 0 && delayMs < 14 * 60 * 60 * 1000 && !localStorage.getItem(reminderKey)) {
+            setTimeout(() => {
+                if (!localStorage.getItem(reminderKey)) {
+                    localStorage.setItem(reminderKey, new Date().toISOString());
+                    trigger10MinClassAlert(c, false);
+                }
+            }, delayMs);
+        }
+    });
+}
+
+// 11. Dispatch Native Mobile System Notifications (Dual Summary Notifications with clear dividers)
 async function dispatchNativeMobileNotifications() {
     if (!('Notification' in window)) {
         if (typeof showToastNotification === 'function') {
@@ -12588,18 +12745,24 @@ async function dispatchNativeMobileNotifications() {
     let lectureBody = '';
 
     if (remainingLectures.isFree || remainingLectures.totalToday === 0) {
-        lectureTitle = '🎓 מערכת שעות: יום חופשי מלימודים פרונטליים';
-        lectureBody = 'אין עוד שיעורים מתוכננים להיום. יום נעים ופורה!';
+        lectureTitle = '🎓 מערכת שעות: יום חופשי מלימודים';
+        lectureBody = '🏖️ אין שיעורים מתוכננים להיום. יום נעים, פורה ומנוחה טובה!';
     } else if (remainingLectures.count === 0) {
-        lectureTitle = '🎓 מערכת שעות: כל השיעורים להיום הסתיימו';
-        lectureBody = `כל ${remainingLectures.totalToday} השיעורים להיום הושלמו. כל הכבוד!`;
+        lectureTitle = '🎓 מערכת שעות: השיעורים הסתיימו';
+        lectureBody = `✔️ כל ${remainingLectures.totalToday} השיעורים להיום הושלמו בהצלחה!`;
     } else {
-        const next = remainingLectures.nextClass;
-        lectureTitle = `🎓 שיעורים להיום: ${remainingLectures.count} נותרו (הבא: ${next.startTime})`;
-        const lines = remainingLectures.classes.map(c => 
-            `• [${c.startTime}-${c.endTime}] ${c.courseName} (${c.type}${c.room ? ' - ' + c.room : ''})`
-        );
-        lectureBody = lines.join('\n');
+        lectureTitle = `🎓 לו״ז היום (${remainingLectures.count} שיעורים נותרו)`;
+
+        const classBlocks = remainingLectures.classes.map((c, idx) => {
+            const isNext = (idx === 0);
+            const header = isNext 
+                ? `⭐ הבא: ${c.startTime} | ${c.courseName}`
+                : `🕒 ${c.startTime} - ${c.endTime} | ${c.courseName}`;
+            const details = `   📍 ${c.room || 'טכניון'} • ${c.type}${c.lecturer ? ' (' + c.lecturer + ')' : ''}`;
+            return `${header}\n${details}`;
+        });
+
+        lectureBody = classBlocks.join('\n\n────────────────────\n\n');
     }
 
     // -------------------------------------------------------------
@@ -12609,44 +12772,27 @@ async function dispatchNativeMobileNotifications() {
     let taskBody = '';
 
     if (priorityTasks.tasks.length === 0) {
-        taskTitle = '📋 משימות אקדמיות: אין משימות ממתינות';
-        taskBody = 'כל המשימות הושלמו בהצלחה! המשך כך!';
+        taskTitle = '📋 משימות אקדמיות: הכל הושלם!';
+        taskBody = '✨ אין משימות ממתינות להגשה. כל הכבוד!';
     } else {
-        const topTask = priorityTasks.tasks[0];
-        taskTitle = `📋 משימות קרובות: ${priorityTasks.tasks.length} פתוחות (דחוף: ${topTask.courseShortName})`;
-        const lines = priorityTasks.tasks.slice(0, 5).map(t => 
-            `• [${t.courseShortName}] ${t.title} (${t.timingText})`
-        );
+        taskTitle = `📋 משימות דחופות (${priorityTasks.tasks.length} פתוחות)`;
+
+        const taskBlocks = priorityTasks.tasks.slice(0, 5).map(t => {
+            const icon = t.diffDays < 0 ? '🚨' : (t.diffDays <= 1 ? '🔥' : '⚡');
+            const line1 = `${icon} [${t.courseShortName}] ${t.title}`;
+            const line2 = `   ⏳ ${t.timingText} • +${t.xp} XP`;
+            return `${line1}\n${line2}`;
+        });
+
         if (priorityTasks.tasks.length > 5) {
-            lines.push(`ועוד ${priorityTasks.tasks.length - 5} משימות בלוח המשימות...`);
+            taskBlocks.push(`...ועוד ${priorityTasks.tasks.length - 5} משימות בלוח המשימות`);
         }
-        taskBody = lines.join('\n');
+
+        taskBody = taskBlocks.join('\n\n────────────────────\n\n');
     }
 
-    // Show via Service Worker (required for mobile background & deep links)
-    const showViaSw = async (title, options) => {
-        if ('serviceWorker' in navigator) {
-            try {
-                const reg = await navigator.serviceWorker.ready;
-                if (reg && reg.showNotification) {
-                    await reg.showNotification(title, options);
-                    return true;
-                }
-            } catch (err) {
-                console.warn('[Notifications] ServiceWorker showNotification fallback:', err);
-            }
-        }
-        try {
-            new Notification(title, options);
-            return true;
-        } catch (e) {
-            console.warn('[Notifications] Fallback failed:', e);
-            return false;
-        }
-    };
-
     // Dispatch Notification 1: Lectures
-    await showViaSw(lectureTitle, {
+    await showNativeNotification(lectureTitle, {
         body: lectureBody,
         icon: 'icon.png',
         badge: 'icon.png',
@@ -12658,10 +12804,10 @@ async function dispatchNativeMobileNotifications() {
         ]
     });
 
-    // Small delay to ensure separate notifications on Android/iOS
+    // Small delay to ensure separate notifications on Android/iOS shade
     setTimeout(async () => {
         // Dispatch Notification 2: Tasks
-        await showViaSw(taskTitle, {
+        await showNativeNotification(taskTitle, {
             body: taskBody,
             icon: 'icon.png',
             badge: 'icon.png',
@@ -12674,12 +12820,12 @@ async function dispatchNativeMobileNotifications() {
         });
 
         if (typeof showToastNotification === 'function') {
-            showToastNotification('2 התראות נשלחו בהצלחה למכשיר הנייד!', 'success');
+            showToastNotification('התראות סקירה נשלחו בהצלחה למכשיר הנייד!', 'success');
         }
-    }, 300);
+    }, 350);
 }
 
-// 9. Main Setup function for mobile notification hub
+// 12. Main Setup function for mobile notification hub
 function setupMobileNotifications() {
     // A. Bell button
     const bellBtn = document.getElementById('btn-notification-bell');
@@ -12715,11 +12861,41 @@ function setupMobileNotifications() {
         headerTasks.addEventListener('click', () => toggleNotificationCard('tasks'));
     }
 
-    // D. Dispatch native mobile notifications button
+    // D. Dispatch native mobile notifications button (Daily Summary)
     const dispatchBtn = document.getElementById('btn-dispatch-native-notifs');
     if (dispatchBtn) {
         dispatchBtn.addEventListener('click', () => {
             dispatchNativeMobileNotifications();
+        });
+    }
+
+    // D2. Test 10-Minute Alert button
+    const test10MinBtn = document.getElementById('btn-test-10min-alert');
+    if (test10MinBtn) {
+        test10MinBtn.addEventListener('click', async () => {
+            const remaining = getRemainingClassesToday();
+            let targetClass = remaining.nextClass;
+            
+            // If free day or no class remaining today, pick Monday's flagship class for testing
+            if (!targetClass && typeof CHEESEFORK_SEMESTER_SCHEDULE !== 'undefined') {
+                const mon = CHEESEFORK_SEMESTER_SCHEDULE.days.find(d => d.dayIndex === 1);
+                if (mon && mon.classes && mon.classes.length > 0) {
+                    targetClass = mon.classes[0];
+                }
+            }
+            if (!targetClass) {
+                targetClass = {
+                    courseName: "פיסיקה 2",
+                    courseId: "114052",
+                    type: "הרצאה (קבוצה 10)",
+                    startTime: "08:30",
+                    endTime: "10:30",
+                    duration: "שעתיים",
+                    room: "כיתת טכניון",
+                    lecturer: "ד\"ר גדעון אלון"
+                };
+            }
+            await trigger10MinClassAlert(targetClass, true);
         });
     }
 
@@ -12773,8 +12949,24 @@ function setupMobileNotifications() {
     // H. Initial badge update
     updateNotificationBadge();
 
-    // I. Periodic badge update every 60 seconds
+    // I. Automated 10-Minute Reminder Scheduling
+    scheduleTodayClassTimeouts();
+    checkAndTrigger10MinReminders();
+
+    // Interval: Run automated reminder check every 30 seconds
+    setInterval(checkAndTrigger10MinReminders, 30000);
+
+    // Also check immediately when app tab is focused or unlocked
+    document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) {
+            checkAndTrigger10MinReminders();
+        }
+    });
+    window.addEventListener('focus', checkAndTrigger10MinReminders);
+
+    // Periodic badge update every 60 seconds
     setInterval(updateNotificationBadge, 60000);
 }
+
 
 

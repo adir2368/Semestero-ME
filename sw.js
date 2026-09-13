@@ -1,5 +1,5 @@
 // Academic Skill Tree - PWA Service Worker
-const CACHE_NAME = 'ast-cache-v1.4.0';
+const CACHE_NAME = 'ast-cache-v1.4.1';
 
 const STATIC_ASSETS = [
     './',
@@ -106,7 +106,7 @@ self.addEventListener('notificationclick', (event) => {
     const action = event.action;
     let targetTab = 'curriculum';
 
-    if (tag === 'ast-today-lectures' || action === 'open-timetable') {
+    if (tag === 'ast-today-lectures' || (tag && tag.startsWith('ast-reminder-')) || action === 'open-timetable') {
         targetTab = 'timetable';
     } else if (tag === 'ast-upcoming-tasks' || action === 'open-tasks') {
         targetTab = 'tasks';

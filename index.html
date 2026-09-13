@@ -16,7 +16,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Rubik:wght@300;400;500;700;900&display=swap" rel="stylesheet">
     <link rel="icon" type="image/png" href="icon.png">
-    <link rel="stylesheet" href="styles.css?v=1.4.0">
+    <link rel="stylesheet" href="styles.css?v=1.4.1">
 </head>
 <body>
     <div class="hud-container">
@@ -1510,12 +1510,15 @@
                     <span class="notif-drawer-icon">🔔</span>
                     <div>
                         <div class="notif-drawer-title">עדכונים והתראות יומיות</div>
-                        <div class="notif-drawer-subtitle" id="notif-drawer-subtitle">מערכת שעות ומשימות דחופות</div>
+                        <div class="notif-drawer-subtitle" id="notif-drawer-subtitle">⏰ תזכורות אוטומטיות: 10 דק׳ לפני כל שיעור</div>
                     </div>
                 </div>
                 <div class="notif-drawer-actions">
-                    <button type="button" class="btn btn-xs btn-primary notif-dispatch-btn" id="btn-dispatch-native-notifs" title="שלח כהתראות מקומיות לנייד">
-                        <span>📲 שלח לנייד</span>
+                    <button type="button" class="btn btn-xs btn-outline notif-test-btn" id="btn-test-10min-alert" title="בדוק כיצד נראית התראת 10 הדקות בנייד שלך">
+                        <span>⏰ בדיקת 10 דק׳</span>
+                    </button>
+                    <button type="button" class="btn btn-xs btn-primary notif-dispatch-btn" id="btn-dispatch-native-notifs" title="שלח סקירת שיעורים ומשימות לנייד">
+                        <span>📲 סקירה לנייד</span>
                     </button>
                     <button type="button" class="notif-close-btn" id="btn-close-notif-drawer" aria-label="סגור חלון התראות">✕</button>
                 </div>
@@ -1570,7 +1573,7 @@
     </div>
 
     <!-- Core Application Logic -->
-    <script src="app.js?v=1.4.0"></script>
+    <script src="app.js?v=1.4.1"></script>
     <!-- PWA Service Worker Registration -->
     <script>
         if ('serviceWorker' in navigator && window.location.protocol.startsWith('http')) {
