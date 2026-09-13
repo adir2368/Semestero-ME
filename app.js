@@ -1725,6 +1725,68 @@ function setupNotionIconPickerEvents() {
     });
 }
 
+// Sanitize Hebrew punctuation flipping: replaces ASCII apostrophe with Hebrew Geresh (׳ U+05F3)
+// and ASCII quotes with Gershayim (״ U+05F4) so BiDi algorithm never flips punctuation to the start of the line.
+function sanitizeHebrewCourseTitle(title) {
+    if (!title) return '';
+    let s = String(title);
+    // Replace ASCII apostrophe after Hebrew letter or number+Hebrew letter with Hebrew Geresh
+    s = s.replace(/([א-ת])['']/g, '$1\u05F3');
+    s = s.replace(/([0-9][א-ת])['']/g, '$1\u05F3');
+    // Replace trailing ASCII apostrophe with Hebrew Geresh
+    s = s.replace(/['']\s*$/g, '\u05F3');
+    // Replace ASCII double quotes inside Hebrew words with Hebrew Gershayim
+    s = s.replace(/([א-ת])["״]([א-ת])/g, '$1\u05F4$2');
+    return s.trim();
+}
+
+// Splits course titles nicely into 1 or 2 lines for flowchart cards without breaking modifiers or dangling hyphens
+function splitCourseTitleForCard(title) {
+    const cleanTitle = sanitizeHebrewCourseTitle(title);
+    
+    // Explicit split on hyphen divider if present (e.g. "חינוך גופני - אתלטיקה קלה / יוגה")
+    if (cleanTitle.includes(' - ')) {
+        const parts = cleanTitle.split(/\s+-\s+/);
+        if (parts.length === 2) {
+            return {
+                isMulti: true,
+                line1: parts[0].trim(),
+                line2: parts[1].trim()
+            };
+        }
+    }
+
+    if (cleanTitle.length <= 15) {
+        return { isMulti: false, line1: cleanTitle, line2: '' };
+    }
+
+    const words = cleanTitle.split(/\s+/);
+    if (words.length <= 1) {
+        return { isMulti: false, line1: cleanTitle, line2: '' };
+    }
+
+    let bestSplit = 1;
+    let bestDiff = 999;
+    for (let i = 1; i < words.length; i++) {
+        const l1 = words.slice(0, i).join(' ');
+        const l2 = words.slice(i).join(' ');
+        const diff = Math.abs(l1.length - l2.length);
+        if (diff < bestDiff) {
+            bestDiff = diff;
+            bestSplit = i;
+        }
+    }
+
+    let line1 = words.slice(0, bestSplit).join(' ').replace(/[\s\-_/]+$/, '').trim();
+    let line2 = words.slice(bestSplit).join(' ').replace(/^[\s\-_/]+/, '').trim();
+
+    return {
+        isMulti: true,
+        line1,
+        line2
+    };
+}
+
 // Generates dedicated task type badge (WWW for WebWork, Exam, Lab, Project, Homework)
 function getTaskTypeBadgeHtml(task) {
     const title = (task.title || "").toLowerCase();
@@ -2700,7 +2762,7 @@ function runMockMoodleSync() {
         statusDiv.style.color = "var(--color-mastered)";
         statusDiv.innerHTML = `Mock Sync Complete! Synced 11 courses from Technion Moodle.`;
 
-        let alertMsg = `Moodle Mock Sync Complete!\n\nImported:\n- ${masteredAdded} Completed Courses (Graded 90-100)\n- ${activeAdded} Active Courses (Registered)\n- Earned +${xpGained} XP!`;
+        let alertMsg = `Moodle Mock Sync Complete!\n\nImported:\n- ${masteredAdded} Completed Courses (Graded 90-100)\n- ${activeAdded} Active Courses (Registered)`;
         if (loadedNew) {
             alertMsg = `Mechanical Engineering (Technion) curriculum loaded automatically!\n\n` + alertMsg;
         }
@@ -5206,9 +5268,12 @@ function loadSavedState() {
         recalculateCourseStates();
     }
 
-    // 1. Sanitize all course tasks: remove any boss battle text and obsolete/erroneous dates
+    // 1. Sanitize all course names (Hebrew Geresh typography) and course tasks
     if (gameState.courses) {
         Object.values(gameState.courses).forEach(c => {
+            if (c.name && typeof sanitizeHebrewCourseTitle === 'function') {
+                c.name = sanitizeHebrewCourseTitle(c.name);
+            }
             if (!c.tasks) return;
             // Remove redundant/duplicate tasks
             c.tasks = c.tasks.filter(t => t.id !== 'task-moed-b-1786656028960');
@@ -8187,7 +8252,8 @@ function openTaskSidePeek(courseCode, taskId) {
     if (task.title && task.title.toLowerCase().includes('webwork')) typeLabel = "🌐 WebWork";
     document.getElementById("peek-property-type").innerText = typeLabel;
     
-    document.getElementById("peek-property-xp").innerText = `+${task.xp} XP`;
+    const peekXpEl = document.getElementById("peek-property-xp");
+    if (peekXpEl) peekXpEl.innerText = "";
     document.getElementById("peek-property-date").value = task.dueDate || "";
     
     const statusSelect = document.getElementById("peek-property-status");
@@ -9974,50 +10040,33 @@ function renderFlowchartTree() {
         else if (course.status === 'active') badgeText = "📘 פעיל";
         else if (course.status === 'mastered') badgeText = course.grade ? `✓ הושלם (${course.grade})` : "✓ הושלם";
 
-        // Balanced title wrapping: never truncate course names
+        // Balanced title wrapping: never truncate course names & sanitize Hebrew BiDi
+        const split = splitCourseTitleForCard(course.name);
         let titleSvg = "";
         let subY = topY + 49;
         let badgeY = topY + 68;
 
-        if (course.name.length <= 15) {
-            titleSvg = `<text x="${pos.x}" y="${topY + 28}" text-anchor="middle" class="fc-node-title single-line">${course.name}</text>`;
+        if (!split.isMulti) {
+            titleSvg = `<text x="${pos.x}" y="${topY + 28}" text-anchor="middle" class="fc-node-title single-line" direction="rtl" xml:lang="he">${split.line1}</text>`;
         } else {
-            const words = course.name.split(" ");
-            if (words.length <= 1) {
-                titleSvg = `<text x="${pos.x}" y="${topY + 28}" text-anchor="middle" class="fc-node-title single-line">${course.name}</text>`;
-            } else {
-                let bestSplit = 1;
-                let bestDiff = 999;
-                for (let i = 1; i < words.length; i++) {
-                    const l1 = words.slice(0, i).join(" ");
-                    const l2 = words.slice(i).join(" ");
-                    const diff = Math.abs(l1.length - l2.length);
-                    if (diff < bestDiff) {
-                        bestDiff = diff;
-                        bestSplit = i;
-                    }
-                }
-                const line1 = words.slice(0, bestSplit).join(" ");
-                const line2 = words.slice(bestSplit).join(" ");
-                titleSvg = `
-                    <text x="${pos.x}" y="${topY + 21}" text-anchor="middle" class="fc-node-title multi-line">
-                        <tspan x="${pos.x}" dy="0">${line1}</tspan>
-                        <tspan x="${pos.x}" dy="15">${line2}</tspan>
-                    </text>
-                `;
-                subY = topY + 53;
-                badgeY = topY + 71;
-            }
+            titleSvg = `
+                <text x="${pos.x}" y="${topY + 21}" text-anchor="middle" class="fc-node-title multi-line" direction="rtl" xml:lang="he">
+                    <tspan x="${pos.x}" dy="0" direction="rtl">${split.line1}</tspan>
+                    <tspan x="${pos.x}" dy="15" direction="rtl">${split.line2}</tspan>
+                </text>
+            `;
+            subY = topY + 53;
+            badgeY = topY + 71;
         }
 
         g.innerHTML = `
             <rect x="${leftX}" y="${topY}" width="${pos.w}" height="${pos.h}" rx="8" class="fc-node-rect" />
-            <!-- Line 1: Course Title (Complete, never truncated) -->
+            <!-- Line 1: Course Title (Complete, never truncated, correct Hebrew BiDi) -->
             ${titleSvg}
             <!-- Line 2: Subtitle: Code + Credits -->
-            <text x="${pos.x}" y="${subY}" text-anchor="middle" class="fc-node-sub">${course.code} • ${course.credits} נק״ז</text>
+            <text x="${pos.x}" y="${subY}" text-anchor="middle" class="fc-node-sub" direction="rtl" xml:lang="he">${course.code} • ${course.credits} נק״ז</text>
             <!-- Line 3: Status Badge -->
-            <text x="${pos.x}" y="${badgeY}" text-anchor="middle" class="fc-node-badge">${badgeText}</text>
+            <text x="${pos.x}" y="${badgeY}" text-anchor="middle" class="fc-node-badge" direction="rtl" xml:lang="he">${badgeText}</text>
         `;
 
         // Hover effect: highlight incoming prerequisites AND outgoing dependents
@@ -12498,7 +12547,6 @@ function renderInAppNotificationHub() {
                             <div class="notif-task-sub">
                                 <span class="notif-task-course-tag">[${task.courseShortName}]</span>
                                 <span class="notif-task-timing-badge ${task.timingCode}">${task.timingText}</span>
-                                <span style="color: #94a3b8; font-size: 0.68rem;">+${task.xp} XP</span>
                             </div>
                         </div>
                     </div>
@@ -12535,7 +12583,7 @@ function completeTaskFromNotification(courseCode, taskId) {
     }
 
     if (typeof showToastNotification === 'function') {
-        showToastNotification(`משימה הושלמה! +${xpGained} XP עבור [${course.name}]`, 'success');
+        showToastNotification(`משימה הושלמה בהצלחה: "${task.title}" [${course.name}]`, 'success');
     }
 
     notifyStateChanged();
@@ -12780,7 +12828,7 @@ async function dispatchNativeMobileNotifications() {
         const taskBlocks = priorityTasks.tasks.slice(0, 5).map(t => {
             const icon = t.diffDays < 0 ? '🚨' : (t.diffDays <= 1 ? '🔥' : '⚡');
             const line1 = `${icon} [${t.courseShortName}] ${t.title}`;
-            const line2 = `   ⏳ ${t.timingText} • +${t.xp} XP`;
+            const line2 = `   ⏳ ${t.timingText}`;
             return `${line1}\n${line2}`;
         });
 

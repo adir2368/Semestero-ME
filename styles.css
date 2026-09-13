@@ -3024,6 +3024,8 @@ body {
     font-family: 'Assistant', 'Rubik', 'Segoe UI', system-ui, sans-serif;
     pointer-events: none;
     letter-spacing: -0.15px;
+    direction: rtl !important;
+    unicode-bidi: isolate !important;
 }
 
 .fc-node-title.multi-line {
@@ -3036,6 +3038,8 @@ body {
     font-weight: 500;
     font-family: 'Assistant', 'Rubik', 'Segoe UI', system-ui, sans-serif;
     pointer-events: none;
+    direction: rtl !important;
+    unicode-bidi: isolate !important;
 }
 
 .fc-node-badge {
@@ -3043,6 +3047,8 @@ body {
     font-weight: 600;
     font-family: 'Assistant', 'Rubik', 'Segoe UI', system-ui, sans-serif;
     pointer-events: none;
+    direction: rtl !important;
+    unicode-bidi: isolate !important;
 }
 .fc-node-group.mastered .fc-node-badge { fill: #34d399; }
 .fc-node-group.active .fc-node-badge { fill: #38bdf8; }
@@ -4249,7 +4255,11 @@ body {
 .quest-xp,
 .constellation-xp-progress,
 .level-up-splash,
-.boss-battle-section {
+.boss-battle-section,
+#peek-property-xp,
+.peek-property-label:has(+ #peek-property-xp),
+label[for="new-task-xp-input"],
+#new-task-xp-input {
     display: none !important;
 }
 
