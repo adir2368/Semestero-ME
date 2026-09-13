@@ -5268,6 +5268,9 @@ function loadSavedState() {
         recalculateCourseStates();
     }
 
+    // Finals mode is put to sleep (dormant) per user request - always keep normal semester mode active
+    gameState.isFinalsMode = false;
+
     // 1. Sanitize all course names (Hebrew Geresh typography) and course tasks
     if (gameState.courses) {
         Object.values(gameState.courses).forEach(c => {
@@ -10455,8 +10458,9 @@ function setupFinalsMode() {
     if (headerExportBtn) headerExportBtn.addEventListener("click", exportScheduleToICS);
     if (copyTasksBtn) copyTasksBtn.addEventListener("click", copyScheduleToGoogleTasks);
 
-    // Initialize state on boot
-    toggleFinalsMode(!!gameState.isFinalsMode);
+    // Initialize state on boot (Finals mode put to sleep per user request)
+    gameState.isFinalsMode = false;
+    toggleFinalsMode(false);
 }
 
 function toggleFinalsMode(enable) {
