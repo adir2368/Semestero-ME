@@ -2550,6 +2550,7 @@ document.addEventListener("DOMContentLoaded", () => {
     setupFinalsMode();
     setupNotionIconPickerEvents();
     renderUI();
+    setupDailyTimetable();
     
     // Periodically update paths on window resize
     window.addEventListener("resize", drawConnections);
@@ -7617,6 +7618,9 @@ function setupNotionDashboard() {
             if (tasksWorkspace) tasksWorkspace.style.display = "none";
             if (timetableWorkspace) timetableWorkspace.style.display = "flex";
             if (settingsWorkspace) settingsWorkspace.style.display = "none";
+            if (typeof updateDailyTimetableFocus === 'function') {
+                updateDailyTimetableFocus();
+            }
         } else if (activeTabId === 'settings') {
             if (curriculumWorkspace) curriculumWorkspace.style.display = "none";
             if (tasksWorkspace) tasksWorkspace.style.display = "none";
@@ -11796,5 +11800,414 @@ function setupSettingsPageButtons() {
             });
         };
     }
+}
+
+// =======================================================
+// Daily Timetable & CheeseFork Auto-Sync System
+// =======================================================
+const CHEESEFORK_SEMESTER_SCHEDULE = {
+    semester: "202601",
+    name: "סמסטר חורף 2026/2027",
+    freeDays: [0, 5, 6], // Sun, Fri, Sat
+    dayNames: ["ראשון", "שני", "שלישי", "רביעי", "חמישי", "שישי", "שבת"],
+    days: [
+        {
+            dayIndex: 0,
+            name: "ראשון",
+            fullName: "יום ראשון",
+            isFree: true,
+            classes: []
+        },
+        {
+            dayIndex: 1,
+            name: "שני",
+            fullName: "יום שני",
+            isFree: false,
+            classes: [
+                {
+                    courseId: "114052",
+                    courseName: "פיסיקה 2",
+                    type: "הרצאה (קבוצה 10)",
+                    lecturer: "ד\"ר גדעון אלון",
+                    room: "כיתת טכניון",
+                    startTime: "08:30",
+                    endTime: "10:30",
+                    duration: "שעתיים",
+                    cardClass: "timetable-card-physics"
+                },
+                {
+                    courseId: "034053",
+                    courseName: "מכניקת מוצקים 2מ",
+                    type: "הרצאה (קבוצה 10)",
+                    lecturer: "פרופ' יוסף גבלי",
+                    room: "הנדסת מכונות",
+                    startTime: "10:30",
+                    endTime: "14:30",
+                    duration: "4 שעות",
+                    cardClass: "timetable-card-solids"
+                },
+                {
+                    courseId: "034056",
+                    courseName: "מבוא לחישוב מדעי והנדסי",
+                    type: "תרגול (קבוצה 14)",
+                    lecturer: "",
+                    room: "חוות מחשבים",
+                    startTime: "14:30",
+                    endTime: "16:30",
+                    duration: "שעתיים",
+                    cardClass: "timetable-card-computing"
+                }
+            ]
+        },
+        {
+            dayIndex: 2,
+            name: "שלישי",
+            fullName: "יום שלישי",
+            isFree: false,
+            classes: [
+                {
+                    courseId: "034035",
+                    courseName: "תרמודינמיקה 1",
+                    type: "הרצאה (קבוצה 10)",
+                    lecturer: "פרופ' לאוניד טרטקובסקי",
+                    room: "אולם הרצאות",
+                    startTime: "08:30",
+                    endTime: "11:30",
+                    duration: "3 שעות",
+                    cardClass: "timetable-card-thermo"
+                },
+                {
+                    courseId: "034035",
+                    courseName: "תרמודינמיקה 1",
+                    type: "תרגול (קבוצה 11)",
+                    lecturer: "",
+                    room: "כיתת תרגול",
+                    startTime: "12:30",
+                    endTime: "14:30",
+                    duration: "שעתיים",
+                    cardClass: "timetable-card-thermo"
+                }
+            ]
+        },
+        {
+            dayIndex: 3,
+            name: "רביעי",
+            fullName: "יום רביעי",
+            isFree: false,
+            classes: [
+                {
+                    courseId: "114052",
+                    courseName: "פיסיקה 2",
+                    type: "הרצאה (קבוצה 10)",
+                    lecturer: "ד\"ר גדעון אלון",
+                    room: "אולם פיסיקה",
+                    startTime: "08:30",
+                    endTime: "09:30",
+                    duration: "שעה",
+                    cardClass: "timetable-card-physics"
+                },
+                {
+                    courseId: "114052",
+                    courseName: "פיסיקה 2",
+                    type: "תרגול (קבוצה 13)",
+                    lecturer: "",
+                    room: "כיתת תרגול",
+                    startTime: "09:30",
+                    endTime: "10:30",
+                    duration: "שעה",
+                    cardClass: "timetable-card-physics"
+                },
+                {
+                    courseId: "104228",
+                    courseName: "משוואות דיפרנציאליות חלקיות מ'",
+                    type: "תרגול (קבוצה 21)",
+                    lecturer: "",
+                    room: "כיתת תרגול",
+                    startTime: "10:30",
+                    endTime: "12:30",
+                    duration: "שעתיים",
+                    cardClass: "timetable-card-pde"
+                },
+                {
+                    courseId: "034056",
+                    courseName: "מבוא לחישוב מדעי והנדסי",
+                    type: "הרצאה (קבוצה 10)",
+                    lecturer: "ד\"ר דניאל הקסנר",
+                    room: "אודיטוריום",
+                    startTime: "14:30",
+                    endTime: "17:30",
+                    duration: "3 שעות",
+                    cardClass: "timetable-card-computing"
+                }
+            ]
+        },
+        {
+            dayIndex: 4,
+            name: "חמישי",
+            fullName: "יום חמישי",
+            isFree: false,
+            classes: [
+                {
+                    courseId: "03940805",
+                    courseName: "חינוך גופני - יוגה",
+                    type: "יוגה (קבוצה 24)",
+                    lecturer: "",
+                    room: "אולם ספורט",
+                    startTime: "07:30",
+                    endTime: "09:00",
+                    duration: "שעה וחצי",
+                    cardClass: "timetable-card-yoga"
+                },
+                {
+                    courseId: "104228",
+                    courseName: "משוואות דיפרנציאליות חלקיות מ'",
+                    type: "הרצאה (קבוצה 20)",
+                    lecturer: "",
+                    room: "אולם מתמטיקה",
+                    startTime: "10:30",
+                    endTime: "12:30",
+                    duration: "שעתיים",
+                    cardClass: "timetable-card-pde"
+                },
+                {
+                    courseId: "034053",
+                    courseName: "מכניקת מוצקים 2מ",
+                    type: "תרגול (קבוצה 21)",
+                    lecturer: "",
+                    room: "כיתת תרגול",
+                    startTime: "12:30",
+                    endTime: "14:30",
+                    duration: "שעתיים",
+                    cardClass: "timetable-card-solids"
+                }
+            ]
+        }
+    ]
+};
+
+let currentMobileDayFilter = 'today';
+
+function getLiveClassStatus(startTime, endTime) {
+    const now = new Date();
+    const curMin = now.getHours() * 60 + now.getMinutes();
+    
+    const [sH, sM] = startTime.split(':').map(Number);
+    const [eH, eM] = endTime.split(':').map(Number);
+    const sMin = sH * 60 + sM;
+    const eMin = eH * 60 + eM;
+    
+    if (curMin >= sMin && curMin < eMin) {
+        return { code: 'live', text: '🟢 מתקיים כעת' };
+    } else if (curMin < sMin) {
+        const diff = sMin - curMin;
+        if (diff <= 90) {
+            return { code: 'next', text: `⏳ בעוד ${diff} דקות` };
+        }
+        return { code: 'upcoming', text: `היום ב-${startTime}` };
+    } else {
+        return { code: 'done', text: '✔️ הסתיים' };
+    }
+}
+
+function renderTodayTimetableBanner() {
+    const banner = document.getElementById('timetable-today-banner');
+    if (!banner) return;
+    
+    const now = new Date();
+    const dayOfWeek = now.getDay();
+    const hebrewDays = ["ראשון", "שני", "שלישי", "רביעי", "חמישי", "שישי", "שבת"];
+    const dayName = hebrewDays[dayOfWeek] || "היום";
+    const dateFormatted = now.toLocaleDateString('he-IL', { day: 'numeric', month: 'long', year: 'numeric' });
+    
+    const dayConfig = CHEESEFORK_SEMESTER_SCHEDULE.days.find(d => d.dayIndex === dayOfWeek);
+    const isWeekend = (dayOfWeek === 5 || dayOfWeek === 6);
+    const isFree = isWeekend || (dayConfig && dayConfig.isFree) || (!dayConfig);
+    const classes = (dayConfig && dayConfig.classes) ? dayConfig.classes : [];
+
+    let headerHtml = `
+        <div class="today-banner-header">
+            <div class="today-banner-title">
+                <span>📅</span>
+                <span>הלו״ז שלך להיום - יום ${dayName} (${dateFormatted})</span>
+            </div>
+            <div class="today-banner-badge ${isFree ? 'free' : ''}">
+                ${isFree ? '✨ יום חופשי מלימודים' : `📚 ${classes.length} שיעורים היום`}
+            </div>
+        </div>
+    `;
+
+    let bodyHtml = '';
+    if (isFree) {
+        let msg = `יום חופשי מלימודים פרונטליים! זמן מומלץ לחזרה, שיעורי בית, פרויקטים ומנוחה.`;
+        if (dayOfWeek === 0) {
+            msg = `יום ראשון חופשי מלימודים פרונטליים! הזדמנות מעולה לסגור מטלות שבועיות, עבודות בית ו-WebWork.`;
+        } else if (dayOfWeek === 5) {
+            msg = `יום שישי חופשי! סוף שבוע נעים, מנוחה והכנה לשבוע הבא.`;
+        } else if (dayOfWeek === 6) {
+            msg = `שבת שלום ומנוחה לקראת השבוע האקדמי החדש.`;
+        }
+
+        bodyHtml = `
+            <div class="today-free-day-msg">
+                <span class="emoji">🏖️</span>
+                <div>
+                    <div style="font-weight: 700; color: #f1f5f9; font-size: 0.92rem;">${msg}</div>
+                    <div style="font-size: 0.78rem; color: #94a3b8; margin-top: 3px;">
+                        מערכת השעות מתעדכנת אוטומטית בכל יום לפי הלו״ז האקדמי שלך.
+                    </div>
+                </div>
+            </div>
+        `;
+    } else {
+        bodyHtml = '<div class="today-classes-list">';
+        classes.forEach(c => {
+            const status = getLiveClassStatus(c.startTime, c.endTime);
+            let itemClass = 'today-class-item';
+            if (status.code === 'live') itemClass += ' current-live';
+            else if (status.code === 'next') itemClass += ' next-upcoming';
+
+            bodyHtml += `
+                <div class="${itemClass}" onclick="openCourseDetails('${c.courseId}')">
+                    <div class="today-class-top">
+                        <span class="today-class-time">⏰ ${c.startTime} - ${c.endTime} (${c.duration})</span>
+                        <span class="today-class-status ${status.code}">${status.text}</span>
+                    </div>
+                    <div class="today-class-name">${c.courseName} (${c.courseId})</div>
+                    <div class="today-class-sub">
+                        <span>${c.type}</span>
+                        ${c.lecturer ? `<span>${c.lecturer}</span>` : ''}
+                    </div>
+                </div>
+            `;
+        });
+        bodyHtml += '</div>';
+    }
+
+    banner.innerHTML = headerHtml + bodyHtml;
+}
+
+function updateDailyTimetableFocus() {
+    const now = new Date();
+    const dayOfWeek = now.getDay();
+    const dateFormatted = now.toLocaleDateString('he-IL', { day: 'numeric', month: 'numeric', year: 'numeric' });
+    
+    // 1. Render Today's dynamic live banner
+    renderTodayTimetableBanner();
+
+    // 2. Mark .is-today column
+    document.querySelectorAll('.timetable-day-col').forEach(col => {
+        const colDay = parseInt(col.getAttribute('data-day-col'), 10);
+        const isToday = (colDay === dayOfWeek);
+        col.classList.toggle('is-today', isToday);
+
+        // Manage ⭐ היום header indicator badge
+        const header = col.querySelector('.timetable-day-header');
+        if (header) {
+            let badge = header.querySelector('.today-star-indicator');
+            if (isToday) {
+                if (!badge) {
+                    badge = document.createElement('span');
+                    badge.className = 'today-star-indicator';
+                    badge.innerHTML = '⭐ היום';
+                    header.insertBefore(badge, header.firstChild);
+                }
+            } else {
+                if (badge) badge.remove();
+            }
+        }
+    });
+
+    // 3. Update sync bar text
+    const syncText = document.getElementById('timetable-sync-text');
+    if (syncText) {
+        syncText.innerText = `מתעדכן אוטומטית כל יום מ-CheeseFork | עודכן להיום (${dateFormatted})`;
+    }
+
+    // 4. Update mobile filter attribute on grid
+    applyTimetableMobileFilter(currentMobileDayFilter);
+}
+
+function applyTimetableMobileFilter(filter) {
+    currentMobileDayFilter = filter;
+    const grid = document.getElementById('timetable-grid-container');
+    if (!grid) return;
+
+    const now = new Date();
+    const dayOfWeek = now.getDay();
+
+    if (filter === 'today') {
+        // If Sunday-Thursday, filter to that day. If Fri/Sat, show Sunday or all.
+        if (dayOfWeek >= 0 && dayOfWeek <= 4) {
+            grid.setAttribute('data-mobile-filter', String(dayOfWeek));
+        } else {
+            grid.setAttribute('data-mobile-filter', '0'); // show Sunday
+        }
+    } else {
+        grid.setAttribute('data-mobile-filter', filter);
+    }
+
+    // Update active state on day pills
+    document.querySelectorAll('.day-tab-pill').forEach(pill => {
+        const pDay = pill.getAttribute('data-day');
+        pill.classList.toggle('active', pDay === filter);
+    });
+}
+
+function setupDailyTimetable() {
+    // 1. Initial focus and render
+    updateDailyTimetableFocus();
+
+    // 2. Mobile Day Selector listeners
+    document.querySelectorAll('.day-tab-pill').forEach(pill => {
+        pill.addEventListener('click', () => {
+            const day = pill.getAttribute('data-day');
+            applyTimetableMobileFilter(day);
+        });
+    });
+
+    // 3. Manual Sync Button
+    const syncBtn = document.getElementById('btn-sync-cheesefork-now');
+    if (syncBtn) {
+        syncBtn.addEventListener('click', () => {
+            syncBtn.disabled = true;
+            const btnText = document.getElementById('btn-sync-text');
+            if (btnText) btnText.innerText = 'מסנכרן...';
+
+            setTimeout(() => {
+                const now = new Date();
+                const dateStr = now.toLocaleDateString('he-IL', { day: 'numeric', month: 'numeric', year: 'numeric' });
+                const timeStr = now.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
+                localStorage.setItem('ast_cheesefork_last_daily_sync', `${dateStr} ${timeStr}`);
+                
+                updateDailyTimetableFocus();
+                
+                syncBtn.disabled = false;
+                if (btnText) btnText.innerText = 'סנכרן להיום';
+
+                if (typeof showToastNotification === 'function') {
+                    showToastNotification(`מערכת השעות סונכרנה ועודכנה להיום (${dateStr})!`, 'success');
+                }
+            }, 600);
+        });
+    }
+
+    // 4. Daily minute-ticker to keep "Happening now" / "Next up" strictly accurate
+    setInterval(() => {
+        const timetableWorkspace = document.getElementById('timetable-workspace');
+        if (timetableWorkspace && timetableWorkspace.style.display !== 'none') {
+            renderTodayTimetableBanner();
+        }
+    }, 60000);
+
+    // 5. Check date change once every 5 minutes to trigger midnight roll-over
+    let lastCheckedDay = new Date().getDay();
+    setInterval(() => {
+        const curDay = new Date().getDay();
+        if (curDay !== lastCheckedDay) {
+            lastCheckedDay = curDay;
+            console.log('[Timetable] Date rolled over, updating daily schedule');
+            updateDailyTimetableFocus();
+        }
+    }, 300000);
 }
 

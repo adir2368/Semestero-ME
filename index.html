@@ -16,7 +16,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Rubik:wght@300;400;500;700;900&display=swap" rel="stylesheet">
     <link rel="icon" type="image/png" href="icon.png">
-    <link rel="stylesheet" href="styles.css?v=1.2.0">
+    <link rel="stylesheet" href="styles.css?v=1.3.0">
 </head>
 <body>
     <div class="hud-container">
@@ -678,10 +678,43 @@
                     </div>
                 </div>
 
+                <!-- Daily Auto-Sync Banner & Status -->
+                <div class="timetable-sync-bar" id="timetable-sync-bar">
+                    <div class="timetable-sync-status">
+                        <span class="sync-dot-live"></span>
+                        <span id="timetable-sync-text">מתעדכן אוטומטית כל יום מ-CheeseFork | סנכרון יומי פעיל</span>
+                    </div>
+                    <div class="timetable-sync-actions">
+                        <button type="button" class="btn-sync-action" id="btn-sync-cheesefork-now" title="סנכרן מחדש ועדכן נתונים">
+                            <span>🔄</span> <span id="btn-sync-text">סנכרן להיום</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Live Daily Schedule Card (Today's Agenda) -->
+                <div class="timetable-today-banner" id="timetable-today-banner">
+                    <!-- Populated dynamically by setupDailyTimetable() -->
+                </div>
+
+                <!-- Mobile & Desktop Day Selector Tabs -->
+                <div class="timetable-day-selector" id="timetable-day-selector">
+                    <button type="button" class="day-tab-pill active" data-day="today" id="tab-pill-today">
+                        <span>⭐</span> היום
+                    </button>
+                    <button type="button" class="day-tab-pill" data-day="0">א׳ ראשון</button>
+                    <button type="button" class="day-tab-pill" data-day="1">ב׳ שני</button>
+                    <button type="button" class="day-tab-pill" data-day="2">ג׳ שלישי</button>
+                    <button type="button" class="day-tab-pill" data-day="3">ד׳ רביעי</button>
+                    <button type="button" class="day-tab-pill" data-day="4">ה׳ חמישי</button>
+                    <button type="button" class="day-tab-pill" data-day="all">
+                        <span>📅</span> כל השבוע
+                    </button>
+                </div>
+
                 <!-- Timetable 5-Day Grid -->
-                <div class="timetable-grid">
+                <div class="timetable-grid" id="timetable-grid-container">
                     <!-- Day 1: Sunday -->
-                    <div class="timetable-day-col">
+                    <div class="timetable-day-col" data-day-col="0">
                         <div class="timetable-day-header">
                             <span class="timetable-day-title">יום ראשון</span>
                             <span class="timetable-day-badge free-day">יום חופשי ✨</span>
@@ -696,7 +729,7 @@
                     </div>
 
                     <!-- Day 2: Monday -->
-                    <div class="timetable-day-col">
+                    <div class="timetable-day-col" data-day-col="1">
                         <div class="timetable-day-header">
                             <span class="timetable-day-title">יום שני</span>
                             <span class="timetable-day-badge active-day">3 שיעורים</span>
@@ -734,7 +767,7 @@
                     </div>
 
                     <!-- Day 3: Tuesday -->
-                    <div class="timetable-day-col">
+                    <div class="timetable-day-col" data-day-col="2">
                         <div class="timetable-day-header">
                             <span class="timetable-day-title">יום שלישי</span>
                             <span class="timetable-day-badge active-day">תרמודינמיקה 1</span>
@@ -765,7 +798,7 @@
                     </div>
 
                     <!-- Day 4: Wednesday -->
-                    <div class="timetable-day-col">
+                    <div class="timetable-day-col" data-day-col="3">
                         <div class="timetable-day-header">
                             <span class="timetable-day-title">יום רביעי</span>
                             <span class="timetable-day-badge active-day">4 שיעורים</span>
@@ -815,7 +848,7 @@
                     </div>
 
                     <!-- Day 5: Thursday -->
-                    <div class="timetable-day-col">
+                    <div class="timetable-day-col" data-day-col="4">
                         <div class="timetable-day-header">
                             <span class="timetable-day-title">יום חמישי</span>
                             <span class="timetable-day-badge active-day">3 שיעורים</span>
@@ -1466,7 +1499,7 @@
     </div>
 
     <!-- Core Application Logic -->
-    <script src="app.js?v=1.2.0"></script>
+    <script src="app.js?v=1.3.0"></script>
     <!-- PWA Service Worker Registration -->
     <script>
         if ('serviceWorker' in navigator && window.location.protocol.startsWith('http')) {
