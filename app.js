@@ -4062,10 +4062,10 @@ const PRELOADED_USER_STATE = {
       "status": "active",
       "tasks": [
         {
-          "id": "03940805_att",
-          "title": "נוכחות פעילה בשיעורי יוגה (חובת 80%)",
-          "type": "hw",
-          "xp": 100,
+          "id": "03940805_ex",
+          "title": "בחינת סוף",
+          "type": "exam",
+          "xp": 200,
           "completed": false,
           "status": "not_started",
           "dueDate": ""
@@ -4087,6 +4087,45 @@ const PRELOADED_USER_STATE = {
           "room": "אולם ספורט"
         }
       ]
+    },
+    "035044": {
+      "code": "035044",
+      "name": "תכן בעזרת מחשב CAD",
+      "credits": 3,
+      "semester": 3,
+      "prerequisites": ["034061"],
+      "status": "active",
+      "tasks": [
+        {
+          "id": "035044_h1",
+          "title": "מטלת בית 1: מידול חלקים ב-CAD",
+          "type": "hw",
+          "xp": 50,
+          "completed": false,
+          "status": "not_started",
+          "dueDate": ""
+        },
+        {
+          "id": "035044_p1",
+          "title": "פרויקט תכן והרכבה ב-CAD",
+          "type": "project",
+          "xp": 200,
+          "completed": false,
+          "status": "not_started",
+          "dueDate": ""
+        },
+        {
+          "id": "035044_ex",
+          "title": "מועד א",
+          "type": "exam",
+          "xp": 500,
+          "completed": false,
+          "status": "not_started",
+          "dueDate": ""
+        }
+      ],
+      "type": "elective",
+      "faculty": "הפקולטה להנדסת מכונות"
     }
   },
   "gpa": 86.39240506329114,
@@ -5418,10 +5457,27 @@ function loadSavedState() {
             if (gameState.courses['03940805']) {
                 const c = gameState.courses['03940805'];
                 c.name = 'חינוך גופני - אתלטיקה קלה / יוגה';
-                if (c.tasks) c.tasks = c.tasks.filter(t => t.type !== 'exam');
-                if (!c.tasks || c.tasks.length === 0) {
-                    c.tasks = [{ id: '03940805_att', title: 'נוכחות פעילה בשיעורי יוגה (חובת 80%)', type: 'hw', completed: false, status: 'not_started', xp: 100, dueDate: '' }];
+                c.type = 'sports';
+                // Sports courses have no assignments, but do have a final exam
+                if (c.tasks) {
+                    c.tasks = c.tasks.filter(t => t.type !== 'hw');
                 }
+                const hasExam = (c.tasks || []).some(t => t.type === 'exam');
+                if (!hasExam) {
+                    if (!c.tasks) c.tasks = [];
+                    c.tasks.push({
+                        id: '03940805_ex',
+                        title: 'בחינת סוף',
+                        type: 'exam',
+                        completed: false,
+                        status: 'not_started',
+                        xp: 200,
+                        dueDate: ''
+                    });
+                }
+            }
+            if (!gameState.courses['035044'] && PRELOADED_USER_STATE.courses['035044']) {
+                gameState.courses['035044'] = JSON.parse(JSON.stringify(PRELOADED_USER_STATE.courses['035044']));
             }
 
             // Synchronize pastExamsBank for Semester 3
@@ -6741,12 +6797,15 @@ function handleAddCourseSubmit(e) {
         const examDateA = cfData ? parseDateToIso(cfData.moedA) : null;
         const examDateB = cfData ? parseDateToIso(cfData.moedB) : null;
 
-        const tasks = [
+        const isSportCourse = (type === 'sports' || type === 'sport' || name.includes('חינוך גופני') || name.includes('ספורט'));
+        const tasks = isSportCourse ? [
+            { id: `${code}_ex`, title: "בחינת סוף", type: "exam", xp: 200, completed: isMastered, status: isMastered ? 'done' : 'not_started', grade: finalGrade, date: examDateA || undefined }
+        ] : [
             { id: `${code}_h1`, title: "מטלת בית 1", type: "hw", xp: 50, completed: isMastered, status: isMastered ? 'done' : 'not_started' },
             { id: `${code}_ex`, title: "מועד א", type: "exam", xp: 500, completed: isMastered, status: isMastered ? 'done' : 'not_started', grade: finalGrade, date: examDateA || undefined }
         ];
 
-        if (examDateB) {
+        if (examDateB && !isSportCourse) {
             tasks.push({
                 id: `${code}_ex_b`,
                 title: "מועד ב",
