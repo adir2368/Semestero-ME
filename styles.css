@@ -3090,6 +3090,38 @@ body {
     letter-spacing: 0.5px;
 }
 
+/* Semester Row Add Course Button in Flowchart */
+.fc-sem-add-btn {
+    cursor: pointer;
+    transition: transform 0.15s ease;
+}
+.fc-sem-add-btn:hover {
+    transform: scale(1.03);
+}
+.fc-sem-add-rect {
+    fill: rgba(2, 132, 199, 0.12);
+    stroke: rgba(56, 189, 248, 0.35);
+    stroke-width: 1.2;
+    rx: 6;
+    ry: 6;
+    transition: all 0.2s ease;
+}
+.fc-sem-add-btn:hover .fc-sem-add-rect {
+    fill: rgba(2, 132, 199, 0.32);
+    stroke: #38bdf8;
+    filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.5));
+}
+.fc-sem-add-text {
+    fill: #38bdf8;
+    font-size: 11.5px;
+    font-weight: 700;
+    pointer-events: none;
+    font-family: 'Assistant', 'Rubik', 'Segoe UI', system-ui, sans-serif;
+}
+.fc-sem-add-btn:hover .fc-sem-add-text {
+    fill: #ffffff;
+}
+
 /* Flowchart Nodes (Rectangles like Mermaid) */
 .fc-node-group {
     cursor: pointer;

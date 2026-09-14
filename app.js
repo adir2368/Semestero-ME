@@ -5978,20 +5978,67 @@ function updateHud() {
 
 // Setup interface event listeners
 function setupEventListeners() {
-    // Controls Panel
-    document.getElementById("btn-add-course").addEventListener("click", () => {
+    // Global helper function to open add course modal
+    window.openAddCourseModal = function(defaultSemester = null) {
         editingCourseCode = null;
-        document.getElementById("add-course-modal-title").innerText = "הוספת קורס חדש";
-        document.getElementById("add-course-submit-btn").innerText = "הוסף קורס לעץ";
-        document.getElementById("form-course").reset();
-        document.getElementById("add-course-modal").classList.add("active");
-    });
-    
-    document.getElementById("add-course-close").addEventListener("click", () => {
-        document.getElementById("add-course-modal").classList.remove("active");
-    });
+        const modalTitle = document.getElementById("add-course-modal-title");
+        const submitBtn = document.getElementById("add-course-submit-btn");
+        const form = document.getElementById("form-course");
+        const semSelect = document.getElementById("course-semester");
+        const statusSelect = document.getElementById("course-status-initial");
+        const gradeGroup = document.getElementById("course-initial-grade-group");
+        const gradeInput = document.getElementById("course-initial-grade");
 
-    document.getElementById("form-course").addEventListener("submit", handleAddCourseSubmit);
+        if (modalTitle) modalTitle.innerText = "➕ הוספת קורס חדש למפת הקורסים";
+        if (submitBtn) submitBtn.innerText = "הוסף קורס למפה 🚀";
+        if (form) form.reset();
+
+        const activeSem = (gameState && gameState.currentActiveSemester) ? gameState.currentActiveSemester : 1;
+        const targetSem = defaultSemester !== null ? defaultSemester : activeSem;
+        if (semSelect) semSelect.value = targetSem;
+
+        if (statusSelect) {
+            statusSelect.value = (targetSem === activeSem) ? "active" : "available";
+        }
+        if (gradeGroup) gradeGroup.style.display = "none";
+        if (gradeInput) gradeInput.value = "";
+
+        const modal = document.getElementById("add-course-modal");
+        if (modal) modal.classList.add("active");
+    };
+
+    // Wire add course triggers across all workspaces (Tree, Toolbar, Sidebar, Settings)
+    const btnTreeAdd = document.getElementById("btn-tree-add-course");
+    if (btnTreeAdd) btnTreeAdd.addEventListener("click", () => window.openAddCourseModal());
+
+    const btnFcAdd = document.getElementById("btn-fc-add-course");
+    if (btnFcAdd) btnFcAdd.addEventListener("click", () => window.openAddCourseModal());
+
+    const btnSidebarAdd = document.getElementById("btn-sidebar-add-course");
+    if (btnSidebarAdd) btnSidebarAdd.addEventListener("click", () => window.openAddCourseModal());
+
+    const btnAddCourse = document.getElementById("btn-add-course");
+    if (btnAddCourse) btnAddCourse.addEventListener("click", () => window.openAddCourseModal());
+    
+    const addCourseClose = document.getElementById("add-course-close");
+    if (addCourseClose) {
+        addCourseClose.addEventListener("click", () => {
+            document.getElementById("add-course-modal").classList.remove("active");
+        });
+    }
+
+    const initialStatusSelect = document.getElementById("course-status-initial");
+    if (initialStatusSelect) {
+        initialStatusSelect.addEventListener("change", () => {
+            const gradeGroup = document.getElementById("course-initial-grade-group");
+            if (gradeGroup) {
+                gradeGroup.style.display = (initialStatusSelect.value === 'mastered') ? 'block' : 'none';
+            }
+        });
+    }
+
+    const formCourse = document.getElementById("form-course");
+    if (formCourse) formCourse.addEventListener("submit", handleAddCourseSubmit);
 
     document.getElementById("btn-load-me").addEventListener("click", () => {
         if (confirm("טעינת תואר בהנדסת מכונות תדרוס את השינויים הנוכחיים שלך. האם להמשיך?")) {
@@ -6128,12 +6175,19 @@ function toggleForm(id) {
 // Handle Add Course Form Submission
 function handleAddCourseSubmit(e) {
     e.preventDefault();
-    const name = document.getElementById("course-name").value.trim();
+    let name = document.getElementById("course-name").value.trim();
+    if (typeof sanitizeHebrewCourseTitle === 'function') {
+        name = sanitizeHebrewCourseTitle(name);
+    }
     const code = document.getElementById("course-code").value.trim().toLowerCase();
-    const credits = parseFloat(document.getElementById("course-credits").value);
-    const semester = parseInt(document.getElementById("course-semester").value);
+    const credits = parseFloat(document.getElementById("course-credits").value) || 3;
+    const semester = parseInt(document.getElementById("course-semester").value) || 1;
     const prereqsString = document.getElementById("course-prereqs").value.trim();
-    const type = document.getElementById("course-type").value;
+    const type = document.getElementById("course-type").value || 'elective';
+    const statusSelect = document.getElementById("course-status-initial");
+    const initialStatus = statusSelect ? statusSelect.value : 'available';
+    const gradeInput = document.getElementById("course-initial-grade");
+    const initialGrade = (gradeInput && gradeInput.value) ? parseFloat(gradeInput.value) : null;
     
     const prerequisites = prereqsString ? prereqsString.split(',').map(s => s.trim().toLowerCase()).filter(s => s) : [];
 
@@ -6189,8 +6243,17 @@ function handleAddCourseSubmit(e) {
         courseObj.semester = semester;
         courseObj.type = type;
         courseObj.prerequisites = prerequisites;
+        if (initialStatus) {
+            courseObj.status = initialStatus;
+            if (initialStatus === 'mastered') {
+                courseObj.grade = (!isNaN(initialGrade) && initialGrade >= 55 && initialGrade <= 100) ? initialGrade : courseObj.grade;
+            }
+        }
 
         editingCourseCode = null;
+        if (typeof showToastNotification === 'function') {
+            showToastNotification(`✓ פרטי הקורס "${name}" עודכנו בהצלחה`, 'success');
+        }
     } else {
         // Normal Add logic
         if (gameState.courses[code]) {
@@ -6198,27 +6261,39 @@ function handleAddCourseSubmit(e) {
             return;
         }
 
+        let finalGrade = null;
+        if (initialStatus === 'mastered') {
+            finalGrade = (!isNaN(initialGrade) && initialGrade >= 55 && initialGrade <= 100) ? initialGrade : null;
+        }
+
         // Default tasks for custom course
+        const isMastered = (initialStatus === 'mastered');
         const tasks = [
-            { id: `${code}_h1`, title: "מטלת בית 1", type: "hw", xp: 50, completed: false },
-            { id: `${code}_ex`, title: "מבחן סוף", type: "exam", xp: 500, completed: false }
+            { id: `${code}_h1`, title: "מטלת בית 1", type: "hw", xp: 50, completed: isMastered, status: isMastered ? 'done' : 'not_started' },
+            { id: `${code}_ex`, title: "מועד א", type: "exam", xp: 500, completed: isMastered, status: isMastered ? 'done' : 'not_started', grade: finalGrade }
         ];
 
         gameState.courses[code] = {
+            id: code,
             code,
             name,
             credits,
             semester,
             prerequisites,
-            status: 'locked',
+            status: initialStatus,
+            grade: finalGrade,
             tasks,
             type
         };
+
+        if (typeof showToastNotification === 'function') {
+            showToastNotification(`✨ הקורס "${name}" (${code.toUpperCase()}) נוסף בהצלחה למפת הקורסים!`, 'success');
+        }
     }
 
     recalculateCourseStates();
     saveState();
-    renderUI();
+    notifyStateChanged({ forceAll: true });
     
     // Close modal & reset form
     document.getElementById("add-course-modal").classList.remove("active");
@@ -9982,21 +10057,39 @@ function renderFlowchartTree() {
     connectionsGroup.innerHTML = "";
     nodesGroup.innerHTML = "";
 
-    const TOTAL_WIDTH = BASE_FLOWCHART_WIDTH;
-    const ROW_HEIGHT = 168; // Golden ratio vertical spacing (84px card + 84px gap)
     const TOTAL_SEMESTERS = 8;
-    const TOTAL_HEIGHT = BASE_FLOWCHART_HEIGHT;
+
+    // 1. Group all courses by their ACTUAL semester in gameState.courses
+    const semesterCourses = {};
+    for (let s = 1; s <= TOTAL_SEMESTERS; s++) {
+        semesterCourses[s] = [];
+    }
+
+    Object.values(gameState.courses || {}).forEach(course => {
+        const sem = Math.max(1, Math.min(TOTAL_SEMESTERS, course.semester || 1));
+        semesterCourses[sem].push(course);
+    });
+
+    // Check maximum courses in any single semester to scale width gracefully
+    let maxCoursesInAnySem = 6;
+    for (let s = 1; s <= TOTAL_SEMESTERS; s++) {
+        if ((semesterCourses[s] || []).length > maxCoursesInAnySem) {
+            maxCoursesInAnySem = semesterCourses[s].length;
+        }
+    }
+    const NUM_COLS = Math.max(6, maxCoursesInAnySem);
     const LEFT_MARGIN = 175; // Left margin for row title
     const RIGHT_MARGIN = 35;
-    const USABLE_WIDTH = TOTAL_WIDTH - LEFT_MARGIN - RIGHT_MARGIN; // 1350px
-    const NUM_COLS = 6;
-    const colSpacing = USABLE_WIDTH / NUM_COLS; // 225px
+    const colSpacing = 225; // 225px spacing
+    const TOTAL_WIDTH = Math.max(BASE_FLOWCHART_WIDTH, LEFT_MARGIN + NUM_COLS * colSpacing + RIGHT_MARGIN + 120);
+    const ROW_HEIGHT = 168; // Golden ratio vertical spacing (84px card + 84px gap)
+    const TOTAL_HEIGHT = BASE_FLOWCHART_HEIGHT;
     const nodeWidth = 196; // Generous card width so all Hebrew titles fit completely
     const nodeHeight = 84;
 
     svgEl.setAttribute("viewBox", `0 0 ${TOTAL_WIDTH} ${TOTAL_HEIGHT}`);
 
-    // 1. Draw Semester Background Bands & Labels (Never cut off in RTL or LTR)
+    // 2. Draw Semester Background Bands & Labels (Never cut off in RTL or LTR)
     const SEMESTER_ROWS = [
         { sem: 1, year: "שנה א׳", term: "סמסטר א׳" },
         { sem: 2, year: "שנה א׳", term: "סמסטר ב׳" },
@@ -10023,7 +10116,7 @@ function renderFlowchartTree() {
             <!-- Dynamic Semester Badge: shows GPA if completed, in-progress tag if active -->
             ${(() => {
                 const semStats = getSemesterStats(row.sem);
-                const hasActive = Object.values(gameState.courses).some(c => (c.semester || 1) == row.sem && c.status === 'active');
+                const hasActive = Object.values(gameState.courses || {}).some(c => (c.semester || 1) == row.sem && c.status === 'active');
                 
                 if (semStats.isCompleted && semStats.gpa > 0) {
                     const gpaFormatted = semStats.gpa.toFixed(2);
@@ -10058,22 +10151,29 @@ function renderFlowchartTree() {
                     `;
                 }
             })()}
+
+            <!-- Row Add Course Button -->
+            <g class="fc-sem-add-btn" data-sem="${row.sem}" data-semester="${row.sem}" style="cursor: pointer;" title="הוסף קורס חדש ל${row.term} (${row.year})">
+                <rect x="${TOTAL_WIDTH - 148}" y="${centerY - 15}" width="124" height="30" rx="8" class="fc-sem-add-rect" />
+                <text x="${TOTAL_WIDTH - 86}" y="${centerY + 4}" text-anchor="middle" class="fc-sem-add-text">➕ הוסף לסמסטר</text>
+            </g>
         `;
     });
     bgGuides.innerHTML = bgHtml;
 
-    // 2. Group all courses by their ACTUAL semester in gameState.courses
-    const semesterCourses = {};
-    for (let s = 1; s <= TOTAL_SEMESTERS; s++) {
-        semesterCourses[s] = [];
+    if (!bgGuides.dataset.clickBound) {
+        bgGuides.dataset.clickBound = "true";
+        bgGuides.addEventListener("click", (e) => {
+            const btn = e.target.closest(".fc-sem-add-btn");
+            if (btn) {
+                e.stopPropagation();
+                const sem = parseInt(btn.dataset.sem) || 1;
+                window.openAddCourseModal(sem);
+            }
+        });
     }
 
-    Object.values(gameState.courses).forEach(course => {
-        const sem = Math.max(1, Math.min(TOTAL_SEMESTERS, course.semester || 1));
-        semesterCourses[sem].push(course);
-    });
-
-    // 3. Optimal 6-Column Grid Coordinates
+    // 3. Optimal Multi-Column Grid Coordinates
     // Columns: 0=Chem/Mat/Sport, 1=Math, 2=Mechanics, 3=Thermal/Fluids, 4=Physics/Comp/Controls, 5=Design/Mfg/Projects
     const COURSE_COLUMNS = {
         // Semester 1 (5 courses)
@@ -10110,12 +10210,18 @@ function renderFlowchartTree() {
         list.forEach(course => {
             let col = COURSE_COLUMNS[course.code];
             if (col === undefined || usedColsInSem.has(col)) {
-                // Find first free column 0..5
+                // Find first free column 0..NUM_COLS-1
+                let foundCol = -1;
                 for (let c = 0; c < NUM_COLS; c++) {
                     if (!usedColsInSem.has(c)) {
-                        col = c;
+                        foundCol = c;
                         break;
                     }
+                }
+                if (foundCol !== -1) {
+                    col = foundCol;
+                } else {
+                    col = usedColsInSem.size;
                 }
             }
             usedColsInSem.add(col);
