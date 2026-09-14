@@ -1,5 +1,5 @@
 // Service Worker for Atlas ME - Offline-First Caching & Background Updates
-const CACHE_NAME = 'atlas-me-v1.7.6';
+const CACHE_NAME = 'atlas-me-v1.7.7';
 
 const STATIC_ASSETS = [
     './',
@@ -16,6 +16,7 @@ const STATIC_ASSETS = [
     './icon-512.png',
     './apple-touch-icon.png',
     './faculty_logo_cyan.png',
+    './adir_avatar.png',
     './user_saved_state.json'
 ];
 

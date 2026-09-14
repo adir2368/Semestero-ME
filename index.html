@@ -46,7 +46,9 @@
             </div>
             
             <div class="character-card">
-                <div class="char-avatar">🎓</div>
+                <div class="char-avatar" id="hud-char-avatar">
+                    <img src="adir_avatar.png" alt="Adir Moshe" class="char-avatar-img" style="width: 100%; height: 100%; object-fit: contain; padding: 2px; filter: drop-shadow(0 0 6px rgba(56, 189, 248, 0.45));">
+                </div>
                 <div class="char-info">
                     <div class="char-name-row">
                         <span class="char-title" id="char-title">תואר ראשון B.Sc.</span>
@@ -496,8 +498,8 @@
                     </div>
                     <div class="developer-card-body" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px; padding: 14px 4px 4px 4px;">
                         <div style="display: flex; align-items: center; gap: 14px;">
-                            <div style="width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(135deg, #0284c7, #38bdf8); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; box-shadow: 0 0 12px rgba(56, 189, 248, 0.4); flex-shrink: 0;">
-                                🎓
+                            <div style="width: 52px; height: 52px; border-radius: 50%; background: radial-gradient(circle, rgba(56, 189, 248, 0.22) 0%, rgba(15, 23, 42, 0.95) 100%); border: 2px solid #38bdf8; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 16px rgba(56, 189, 248, 0.45); flex-shrink: 0; overflow: hidden;">
+                                <img src="adir_avatar.png" alt="אדיר משה - סמל אישי" style="width: 100%; height: 100%; object-fit: contain; padding: 4px; filter: drop-shadow(0 0 4px rgba(56, 189, 248, 0.4));">
                             </div>
                             <div>
                                 <h4 style="margin: 0; color: #f8fafc; font-size: 1.05rem; font-weight: 700;">אדיר משה (Adir Moshe)</h4>
@@ -769,10 +771,10 @@
         <!-- App Global Footer (Developer Credit & Version) -->
         <footer class="app-global-footer">
             <div class="footer-left-version">
-                <span class="app-version-badge" id="footer-version-badge" title="Atlas ME v1.7.6">v1.7.6</span>
+                <span class="app-version-badge" id="footer-version-badge" title="Atlas ME v1.7.7">v1.7.7</span>
             </div>
             <div class="footer-credit-content">
-                <span class="credit-text">Developed by <strong>Adir Moshe</strong> • <strong>Atlas ME</strong></span>
+                <span class="credit-text" style="display: inline-flex; align-items: center; gap: 6px;">Developed by <strong>Adir Moshe</strong> <img src="adir_avatar.png" alt="Adir" style="width: 16px; height: 16px; object-fit: contain; vertical-align: middle; filter: drop-shadow(0 0 3px rgba(56, 189, 248, 0.5));"> • <strong>Atlas ME</strong></span>
                 <a href="https://www.linkedin.com/in/adir-moshe?utm_source=share_via&utm_content=profile&utm_medium=member_android" target="_blank" rel="noopener noreferrer" class="footer-linkedin-btn" title="Adir Moshe on LinkedIn" aria-label="Adir Moshe LinkedIn Profile">
                     <svg class="linkedin-svg-icon" viewBox="0 0 24 24" width="13" height="13" fill="currentColor">
                         <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.46 10.9v8.37H9.2V10.9H6.46M7.83 6.25c-.9 0-1.63.73-1.63 1.63s.73 1.63 1.63 1.63 1.63-.73 1.63-1.63c-.01-.9-.74-1.63-1.63-1.63Z"/>

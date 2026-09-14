@@ -75,6 +75,7 @@
                     name: 'אדיר משה',
                     email: 'adir.moshe@campus.technion.ac.il',
                     avatar: '🎓',
+                    avatarImg: 'adir_avatar.png',
                     role: 'developer',
                     startingSemester: (window.gameState && window.gameState.currentActiveSemester) ? window.gameState.currentActiveSemester : 3
                 }, customProfile || {});
@@ -735,13 +736,25 @@
             const isOnline = !!supabaseClient;
             if (this.isLoggedIn()) {
                 const user = this.getActiveUser();
+                const isDev = user.id === 'adir_moshe';
+                const avatarHtml = isDev
+                    ? `<img src="adir_avatar.png" class="hud-user-avatar-img" alt="Adir Moshe">`
+                    : (user.avatarImg ? `<img src="${user.avatarImg}" class="hud-user-avatar-img" alt="${user.name}">` : user.avatar);
                 container.innerHTML = `
                     <button type="button" class="btn-hud-user-chip" id="btn-hud-user-chip" onclick="AuthSync.openAuthModal()" title="לחץ לצפייה בפרטי חשבון והתנתקות" aria-label="פרופיל משתמש">
-                        <span class="user-avatar-pill">${user.avatar}</span>
+                        <span class="user-avatar-pill">${avatarHtml}</span>
                         <span class="user-name-text">${user.name}</span>
                         <span class="login-status-dot ${isOnline ? 'connected' : 'offline'}" id="top-login-status-dot"></span>
                     </button>
                 `;
+                const hudCharAvatar = document.getElementById('hud-char-avatar');
+                if (hudCharAvatar) {
+                    if (isDev) {
+                        hudCharAvatar.innerHTML = `<img src="adir_avatar.png" alt="Adir Moshe" class="char-avatar-img" style="width: 100%; height: 100%; object-fit: contain; padding: 2px; filter: drop-shadow(0 0 6px rgba(56, 189, 248, 0.45));">`;
+                    } else {
+                        hudCharAvatar.innerHTML = user.avatar || '🎓';
+                    }
+                }
             } else {
                 container.innerHTML = `
                     <button type="button" class="btn-hud-login-top" id="btn-hud-login-top" onclick="AuthSync.openAuthModal()" title="התחברות ל-Atlas ME" aria-label="התחברות">
@@ -781,10 +794,13 @@
                 const user = this.getActiveUser();
                 const isDev = user.id === 'adir_moshe';
                 const currentSem = (window.gameState && window.gameState.currentActiveSemester) ? window.gameState.currentActiveSemester : (user.startingSemester || 1);
+                const headerAvatar = isDev 
+                    ? `<img src="adir_avatar.png" alt="Adir Moshe" style="width: 28px; height: 28px; object-fit: contain; vertical-align: middle; filter: drop-shadow(0 0 6px rgba(56, 189, 248, 0.45));">` 
+                    : `<span>${user.avatar}</span>`;
                 container.innerHTML = `
                     <div class="modal-header">
                         <h2 style="display: flex; align-items: center; gap: 10px; margin: 0; font-size: 1.25rem;">
-                            <span>${user.avatar}</span> <span>פרטי חשבון מחובר</span>
+                            ${headerAvatar} <span>פרטי חשבון מחובר</span>
                         </h2>
                         <div class="cloud-status-pill connected" style="margin-top: 6px;">
                             🟢 <span>מסונכרן בזמן אמת לענן Atlas ME</span>
@@ -793,11 +809,22 @@
                     <div class="modal-body" style="padding-top: 14px; max-height: 75vh; overflow-y: auto;">
                         <!-- Overview Card -->
                         <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 8px; padding: 12px 14px; margin-bottom: 14px;">
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                                <strong style="font-size: 1.05rem; color: #f8fafc;">${user.name}</strong>
-                                <span style="font-size: 0.76rem; background: rgba(56, 189, 248, 0.2); color: #38bdf8; padding: 2px 8px; border-radius: 12px;">
-                                    ${isDev ? 'מפתח ראשי 🎓' : 'סטודנט 👤'}
-                                </span>
+                            <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 10px;">
+                                ${isDev 
+                                    ? `<div style="width: 48px; height: 48px; border-radius: 50%; background: radial-gradient(circle, rgba(56, 189, 248, 0.25) 0%, rgba(15, 23, 42, 0.95) 100%); border: 1.5px solid #38bdf8; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 12px rgba(56, 189, 248, 0.45); flex-shrink: 0; overflow: hidden;">
+                                         <img src="adir_avatar.png" alt="Adir Moshe" style="width: 100%; height: 100%; object-fit: contain; padding: 3px;">
+                                       </div>` 
+                                    : `<div style="width: 48px; height: 48px; border-radius: 50%; background: rgba(56, 189, 248, 0.15); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0;">${user.avatar}</div>`
+                                }
+                                <div style="flex: 1;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                                        <strong style="font-size: 1.05rem; color: #f8fafc;">${user.name}</strong>
+                                        <span style="font-size: 0.76rem; background: rgba(56, 189, 248, 0.2); color: #38bdf8; padding: 2px 8px; border-radius: 12px;">
+                                            ${isDev ? 'מפתח ראשי ⚡' : 'סטודנט 👤'}
+                                        </span>
+                                    </div>
+                                    <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 2px;">${isDev ? 'סמל מפתח מאומת • Technion ME' : 'חשבון סטודנט'}</div>
+                                </div>
                             </div>
                             <div style="font-size: 0.82rem; color: #94a3b8; line-height: 1.6;">
                                 <div>מזהה חשבון: <code style="color: #38bdf8; font-family: monospace;">${user.id}</code></div>
