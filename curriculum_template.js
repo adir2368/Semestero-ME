@@ -435,35 +435,72 @@ var SAMPLE_ME_DEGREE = (typeof window !== 'undefined' && window.SAMPLE_ME_DEGREE
     }
 };
 
-function getCleanCurriculumState() {
+function getCleanCurriculumState(startingSemester = 1, priorCompletedCourses = {}) {
     const courses = JSON.parse(JSON.stringify(SAMPLE_ME_DEGREE));
+    const targetSem = Math.max(1, parseInt(startingSemester) || 1);
+    let totalCredits = 0;
+    let completedCount = 0;
+    let totalWeightedPoints = 0;
+    let totalGradedCredits = 0;
     
-    // Ensure all courses in semester 1 are available, later semesters locked
+    // Courses up to targetSem are available, later semesters locked
     Object.values(courses).forEach(c => {
-        if (c.semester === 1) {
-            c.status = 'available';
+        const sem = c.semester || 1;
+        const priorInfo = priorCompletedCourses[c.code];
+        const isPriorCompleted = priorInfo && (priorInfo.completed === true || priorInfo === true);
+
+        if (isPriorCompleted) {
+            c.status = 'mastered';
+            c.completed = true;
+            totalCredits += (c.credits || 0);
+            completedCount++;
+            
+            const gradeVal = priorInfo && priorInfo.grade !== undefined && priorInfo.grade !== null && priorInfo.grade !== '' ? parseFloat(priorInfo.grade) : null;
+            if (gradeVal !== null && !isNaN(gradeVal)) {
+                c.grade = gradeVal;
+                totalWeightedPoints += (gradeVal * (c.credits || 0));
+                totalGradedCredits += (c.credits || 0);
+            } else {
+                c.grade = null;
+            }
+
+            if (c.tasks) {
+                c.tasks.forEach(t => {
+                    t.completed = true;
+                    t.status = 'done';
+                    if (t.type === 'exam' && c.grade !== null) {
+                        t.grade = c.grade;
+                    }
+                });
+            }
         } else {
-            c.status = 'locked';
-        }
-        c.grade = null;
-        c.completed = false;
-        if (c.tasks) {
-            c.tasks.forEach(t => {
-                t.completed = false;
-                t.status = 'todo';
-            });
+            if (sem <= targetSem) {
+                c.status = 'available';
+            } else {
+                c.status = 'locked';
+            }
+            c.grade = null;
+            c.completed = false;
+            if (c.tasks) {
+                c.tasks.forEach(t => {
+                    t.completed = false;
+                    t.status = 'todo';
+                });
+            }
         }
     });
 
+    const initialGpa = totalGradedCredits > 0 ? parseFloat((totalWeightedPoints / totalGradedCredits).toFixed(2)) : 0;
+
     return {
         characterClass: 'סטודנט להנדסת מכונות (הטכניון)',
-        xp: 0,
-        level: 1,
-        credits: 0,
-        completedCourses: 0,
-        bossesSlain: 0,
+        xp: completedCount * 150,
+        level: Math.max(1, Math.floor(completedCount / 3) + 1),
+        credits: totalCredits,
+        completedCourses: completedCount,
+        bossesSlain: completedCount,
         courses: courses,
-        gpa: 0,
+        gpa: initialGpa,
         openTasks: [],
         pastExamSchedule: [],
         hasLoadedSemesterBExcel: true,
@@ -471,7 +508,7 @@ function getCleanCurriculumState() {
         hasLoadedGoogleCalendarAugust: false,
         pastExamsBank: {},
         semesterGuardMode: 'locked',
-        currentActiveSemester: 1,
+        currentActiveSemester: targetSem,
         isFinalsMode: false
     };
 }

@@ -37,8 +37,8 @@
         init() {
             let sessionUser = localStorage.getItem(SESSION_USER_KEY);
 
-            // Auto-login on Adir's existing developer PC if local save is present
-            if (!sessionUser && hasAdirLocalData()) {
+            // Auto-login on Adir's existing developer PC ONLY if no session key exists at all (initial launch)
+            if (sessionUser === null && hasAdirLocalData()) {
                 sessionUser = 'adir_moshe';
                 localStorage.setItem(SESSION_USER_KEY, 'adir_moshe');
             }
@@ -117,7 +117,7 @@
             const user = this.getActiveUser();
             if (!this.isLoggedIn()) {
                 if (typeof window.getCleanCurriculumState === 'function') {
-                    return window.getCleanCurriculumState();
+                    return window.getCleanCurriculumState(1);
                 }
                 return null;
             }
@@ -129,6 +129,20 @@
                 try {
                     const parsed = JSON.parse(saved);
                     if (parsed && parsed.courses && Object.keys(parsed.courses).length > 0) {
+                        // ANTI-POISONING GUARD:
+                        // If this is a student account, but somehow holds Adir Moshe's exact state
+                        // (credits 39.5, or Calculus 1 grade 84 with completedCourses >= 10),
+                        // this is contaminated data. Reset immediately to clean curriculum state!
+                        if (user.id !== 'adir_moshe' && (parsed.credits === 39.5 || (parsed.courses['104041'] && parsed.courses['104041'].grade === 84))) {
+                            console.warn('[AuthSync] Detected poisoned Adir state in student account:', user.id, '- resetting to clean state');
+                            if (typeof window.getCleanCurriculumState === 'function') {
+                                const clean = window.getCleanCurriculumState(user.startingSemester || 1);
+                                if (parsed.account_password) clean.account_password = parsed.account_password;
+                                clean.student_name = user.name;
+                                this.saveActiveUserState(clean);
+                                return clean;
+                            }
+                        }
                         return parsed;
                     }
                 } catch (e) {
@@ -136,15 +150,15 @@
                 }
             }
 
-            // Fallback for Adir Moshe
+            // Fallback for Adir Moshe ONLY
             if (user.id === 'adir_moshe' && typeof PRELOADED_USER_STATE !== 'undefined') {
                 return JSON.parse(JSON.stringify(PRELOADED_USER_STATE));
             }
 
             // Clean syllabus template for fresh student
             if (typeof window.getCleanCurriculumState === 'function') {
-                const cleanState = window.getCleanCurriculumState();
-                cleanState.currentActiveSemester = user.startingSemester || 1;
+                const cleanState = window.getCleanCurriculumState(user.startingSemester || 1);
+                cleanState.student_name = user.name;
                 return cleanState;
             }
             return null;
@@ -156,6 +170,16 @@
             const user = this.getActiveUser();
             const key = this.getUserStorageKey(user.id);
             try {
+                // Ensure student state preserves account_password and student_name
+                if (user.id !== 'adir_moshe' && user.id !== 'guest') {
+                    if (!state.student_name && user.name) state.student_name = user.name;
+                    if (!state.account_password) {
+                        try {
+                            const prof = JSON.parse(localStorage.getItem('ast_profile_' + user.id) || '{}');
+                            if (prof.password) state.account_password = prof.password;
+                        } catch (e) {}
+                    }
+                }
                 localStorage.setItem(key, JSON.stringify(state));
                 if (user.id === 'adir_moshe') {
                     localStorage.setItem(LEGACY_SAVE_KEY, JSON.stringify(state));
@@ -235,8 +259,10 @@
                     id: matched.user_id,
                     name: matched.user_name || 'סטודנט',
                     email: matched.user_email || '',
+                    password: cleanPass,
                     avatar: '👤',
-                    role: 'student'
+                    role: 'student',
+                    startingSemester: matched.state_json && matched.state_json.currentActiveSemester ? matched.state_json.currentActiveSemester : 1
                 }));
 
                 const key = this.getUserStorageKey(matched.user_id);
@@ -269,6 +295,7 @@
             const password = (params.password || '').trim();
             const email = (params.email || '').trim();
             const startingSemester = parseInt(params.startingSemester) || 1;
+            const priorCompleted = params.priorCompleted || {};
 
             if (!name) {
                 alert('נא להזין שם מלא.');
@@ -286,7 +313,7 @@
             const uid = 'student_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 3);
             let cleanState = null;
             if (typeof window.getCleanCurriculumState === 'function') {
-                cleanState = window.getCleanCurriculumState();
+                cleanState = window.getCleanCurriculumState(startingSemester, priorCompleted);
             } else {
                 cleanState = { courses: {}, credits: 0, gpa: 0 };
             }
@@ -315,6 +342,7 @@
                 id: uid,
                 name: name,
                 email: email,
+                password: password,
                 avatar: '👤',
                 role: 'student',
                 startingSemester: startingSemester
@@ -353,12 +381,12 @@
                 realtimeChannel = null;
             }
 
-            // 2. Clear session
-            localStorage.removeItem(SESSION_USER_KEY);
+            // 2. Clear session and set explicit guest state
+            localStorage.setItem(SESSION_USER_KEY, 'guest');
 
             // 3. Reset to clean empty syllabus
             if (typeof window.getCleanCurriculumState === 'function') {
-                const clean = window.getCleanCurriculumState();
+                const clean = window.getCleanCurriculumState(1);
                 if (window.setGlobalGameState) {
                     window.setGlobalGameState(clean);
                 }
@@ -394,24 +422,30 @@
                 return false;
             }
 
-            // Update user profile object
-            const updatedProfile = {
-                id: user.id,
-                name: name,
-                email: email,
-                avatar: user.avatar || '👤',
-                role: user.role || 'student',
-                startingSemester: semester
-            };
-            localStorage.setItem('ast_profile_' + user.id, JSON.stringify(updatedProfile));
-
             // Update in-memory state
             const state = (window.getGlobalGameState ? window.getGlobalGameState() : window.gameState) || {};
             state.student_name = name;
             state.currentActiveSemester = semester;
             if (password) {
                 state.account_password = password;
+            } else if (!state.account_password) {
+                try {
+                    const prof = JSON.parse(localStorage.getItem('ast_profile_' + user.id) || '{}');
+                    if (prof.password) state.account_password = prof.password;
+                } catch (e) {}
             }
+
+            // Update user profile object
+            const updatedProfile = {
+                id: user.id,
+                name: name,
+                email: email,
+                password: state.account_password || '',
+                avatar: user.avatar || '👤',
+                role: user.role || 'student',
+                startingSemester: semester
+            };
+            localStorage.setItem('ast_profile_' + user.id, JSON.stringify(updatedProfile));
 
             // Save state locally
             const key = this.getUserStorageKey(user.id);
@@ -707,7 +741,7 @@
                                 </button>
                             </form>
                         ` : `
-                            <form onsubmit="event.preventDefault(); const n = document.getElementById('reg-name-input').value; const p = document.getElementById('reg-password-input').value; const s = document.getElementById('reg-sem-select').value; const e = document.getElementById('reg-email-input').value; AuthSync.registerStudent({ name: n, password: p, startingSemester: s, email: e });">
+                            <form onsubmit="event.preventDefault(); const n = document.getElementById('reg-name-input').value; const p = document.getElementById('reg-password-input').value; const s = document.getElementById('reg-sem-select').value; const e = document.getElementById('reg-email-input').value; const priorCompleted = {}; document.querySelectorAll('.prior-course-check:checked').forEach(chk => { const code = chk.dataset.code; const g = document.getElementById('prior_grade_' + code); priorCompleted[code] = { completed: true, grade: g && g.value ? parseFloat(g.value) : null }; }); AuthSync.registerStudent({ name: n, password: p, startingSemester: s, email: e, priorCompleted: priorCompleted });">
                                 <div class="form-group" style="margin-bottom: 10px;">
                                     <label style="display: block; font-size: 0.82rem; color: #f8fafc; font-weight: 600; margin-bottom: 4px;">שם מלא / כינוי:</label>
                                     <input type="text" id="reg-name-input" class="form-input" style="width: 100%; padding: 7px 10px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff;" placeholder="למשל: יוסף כהן" required>
@@ -718,15 +752,21 @@
                                 </div>
                                 <div class="form-group" style="margin-bottom: 10px;">
                                     <label style="display: block; font-size: 0.82rem; color: var(--text-muted); margin-bottom: 4px;">איזה סמסטר אתה מתחיל עכשיו?</label>
-                                    <select id="reg-sem-select" class="form-select" style="width: 100%; padding: 7px 10px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff;">
+                                    <select id="reg-sem-select" class="form-select" style="width: 100%; padding: 7px 10px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff;" onchange="AuthSync.onRegisterSemesterChanged(this.value)">
                                         <option value="1">סמסטר א׳ (שנה א׳ - מתחיל מאפס)</option>
                                         <option value="2">סמסטר ב׳ (שנה א׳)</option>
                                         <option value="3">סמסטר ג׳ (שנה ב׳)</option>
                                         <option value="4">סמסטר ד׳ (שנה ב׳)</option>
                                         <option value="5">סמסטר ה׳ (שנה ג׳)</option>
                                         <option value="6">סמסטר ו׳ (שנה ג׳)</option>
+                                        <option value="7">סמסטר ז׳ (שנה ד׳)</option>
+                                        <option value="8">סמסטר ח׳ (שנה ד׳)</option>
                                     </select>
                                 </div>
+
+                                <!-- Dynamic Prior Courses Checklist for Students Starting > Semester 1 -->
+                                <div id="reg-prior-courses-section" style="display: none;"></div>
+
                                 <div class="form-group" style="margin-bottom: 14px;">
                                     <label style="display: block; font-size: 0.82rem; color: #f8fafc; font-weight: 600; margin-bottom: 4px;">אימייל טכניוני (חובה):</label>
                                     <input type="email" id="reg-email-input" class="form-input" style="width: 100%; padding: 7px 10px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff; font-size: 0.82rem;" placeholder="yosef.cohen@campus.technion.ac.il" required>
@@ -739,6 +779,93 @@
                     </div>
                 `;
             }
+        },
+
+        // Dynamic prior courses handler for registration
+        onRegisterSemesterChanged(semVal) {
+            const sem = parseInt(semVal) || 1;
+            const container = document.getElementById('reg-prior-courses-section');
+            if (!container) return;
+            if (sem <= 1) {
+                container.style.display = 'none';
+                container.innerHTML = '';
+                return;
+            }
+
+            // Get curriculum courses from window.SAMPLE_ME_DEGREE
+            const allCourses = window.SAMPLE_ME_DEGREE || {};
+            const priorCourses = Object.values(allCourses)
+                .filter(c => (c.semester || 1) < sem)
+                .sort((a, b) => (a.semester - b.semester) || a.code.localeCompare(b.code));
+
+            if (priorCourses.length === 0) {
+                container.style.display = 'none';
+                container.innerHTML = '';
+                return;
+            }
+
+            let html = `
+                <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 8px; padding: 12px; margin-top: 6px; margin-bottom: 12px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <span style="font-size: 0.82rem; font-weight: bold; color: #38bdf8;">
+                            📚 קורסים שכבר עשית (סמסטרים 1 עד ${sem - 1}):
+                        </span>
+                        <button type="button" class="btn btn-xs btn-outline" style="font-size: 0.72rem; padding: 2px 8px; cursor: pointer;" onclick="AuthSync.toggleSelectAllPriorCourses()">
+                            סמן הכל / נקה
+                        </button>
+                    </div>
+                    <div style="font-size: 0.76rem; color: #94a3b8; margin-bottom: 8px; line-height: 1.4;">
+                        סמן את הקורסים שהשלמת והקלד את ציונם הסופי (0-100). אנו נחשב עבורך ממוצע ונק״ז התחלתיים!
+                    </div>
+                    <div style="max-height: 200px; overflow-y: auto; padding-right: 4px; display: flex; flex-direction: column; gap: 6px;">
+            `;
+
+            priorCourses.forEach(c => {
+                html += `
+                    <div style="display: flex; align-items: center; justify-content: space-between; background: rgba(30, 41, 59, 0.5); padding: 6px 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.05); gap: 8px;">
+                        <label style="display: flex; align-items: center; gap: 8px; margin: 0; cursor: pointer; flex: 1; font-size: 0.8rem; color: #f1f5f9; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                            <input type="checkbox" class="prior-course-check" data-code="${c.code}" id="prior_chk_${c.code}" onchange="AuthSync.togglePriorGradeInput('${c.code}', this.checked)" style="cursor: pointer;">
+                            <span style="color: #fbbf24; font-size: 0.74rem;">[סמ׳ ${c.semester}]</span>
+                            <span style="font-weight: 500;">${c.name}</span>
+                            <span style="color: #64748b; font-size: 0.72rem;">(${c.credits} נק״ז)</span>
+                        </label>
+                        <div style="display: flex; align-items: center; gap: 4px;">
+                            <span style="font-size: 0.72rem; color: #94a3b8;">ציון:</span>
+                            <input type="number" min="0" max="100" id="prior_grade_${c.code}" class="prior-course-grade" data-code="${c.code}" placeholder="—" style="width: 52px; padding: 3px 6px; background: #0f172a; border: 1px solid #334155; border-radius: 4px; color: #fff; font-size: 0.8rem; text-align: center;" disabled>
+                        </div>
+                    </div>
+                `;
+            });
+
+            html += `
+                    </div>
+                </div>
+            `;
+            container.innerHTML = html;
+            container.style.display = 'block';
+        },
+
+        // Toggle disabled state of prior course grade input
+        togglePriorGradeInput(code, isChecked) {
+            const gradeInp = document.getElementById('prior_grade_' + code);
+            if (!gradeInp) return;
+            gradeInp.disabled = !isChecked;
+            if (isChecked) {
+                gradeInp.focus();
+            } else {
+                gradeInp.value = '';
+            }
+        },
+
+        // Toggle select all prior courses in registration form
+        toggleSelectAllPriorCourses() {
+            const checks = document.querySelectorAll('.prior-course-check');
+            if (!checks.length) return;
+            const allChecked = Array.from(checks).every(c => c.checked);
+            checks.forEach(c => {
+                c.checked = !allChecked;
+                this.togglePriorGradeInput(c.dataset.code, c.checked);
+            });
         },
 
         // Initialize Supabase Client
@@ -800,6 +927,11 @@
                             console.log('[AuthSync Realtime] Remote update received:', payload);
                             if (payload && payload.new && payload.new.state_json) {
                                 const remoteState = payload.new.state_json;
+                                // Ignore contaminated Adir state for student accounts
+                                if (user.id !== 'adir_moshe' && (remoteState.credits === 39.5 || (remoteState.courses && remoteState.courses['104041'] && remoteState.courses['104041'].grade === 84))) {
+                                    console.warn('[AuthSync Realtime] Ignored poisoned remote state for student:', user.id);
+                                    return;
+                                }
                                 const key = this.getUserStorageKey(user.id);
                                 const localRaw = localStorage.getItem(key);
                                 if (localRaw !== JSON.stringify(remoteState)) {
@@ -849,6 +981,22 @@
                     const remoteState = data.state_json;
                     const key = this.getUserStorageKey(user.id);
                     const localRaw = localStorage.getItem(key);
+
+                    // Anti-poisoning guard: Never let student account adopt Adir's state
+                    if (user.id !== 'adir_moshe' && (remoteState.credits === 39.5 || (remoteState.courses && remoteState.courses['104041'] && remoteState.courses['104041'].grade === 84))) {
+                        console.warn('[AuthSync] Cloud state for student is poisoned with Adir data. Resetting cloud state for:', user.name);
+                        if (typeof window.getCleanCurriculumState === 'function') {
+                            const clean = window.getCleanCurriculumState(user.startingSemester || 1);
+                            if (remoteState.account_password) clean.account_password = remoteState.account_password;
+                            clean.student_name = user.name;
+                            this.saveActiveUserState(clean);
+                            if (window.setGlobalGameState) {
+                                window.setGlobalGameState(clean);
+                            }
+                            this.refreshAllAppViews();
+                            return clean;
+                        }
+                    }
 
                     if (!localRaw || force) {
                         localStorage.setItem(key, JSON.stringify(remoteState));

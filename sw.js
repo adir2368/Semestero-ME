@@ -1,5 +1,5 @@
-// Atlas ME - PWA Service Worker
-const CACHE_NAME = 'atlas-me-v1.6.4';
+// Service Worker for Atlas ME - Offline-First Caching & Background Updates
+const CACHE_NAME = 'atlas-me-v1.6.5';
 
 const STATIC_ASSETS = [
     './',

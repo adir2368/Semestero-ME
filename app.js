@@ -5255,35 +5255,49 @@ function loadSavedState() {
     }
 
     if (!loadedFromAuthSync) {
-        const saved = localStorage.getItem("academic_skill_tree_save");
-        let needsRestoreFromPreload = false;
+        const isAdir = (window.AuthSync && typeof window.AuthSync.isAdirActive === 'function' && window.AuthSync.isAdirActive());
 
-        if (saved) {
-            try {
-                gameState = JSON.parse(saved);
-                if (!gameState.courses || Object.keys(gameState.courses).length === 0 || (gameState.credits === 0 && gameState.completedCourses === 0)) {
+        if (isAdir) {
+            const saved = localStorage.getItem("academic_skill_tree_save");
+            let needsRestoreFromPreload = false;
+
+            if (saved) {
+                try {
+                    gameState = JSON.parse(saved);
+                    if (!gameState.courses || Object.keys(gameState.courses).length === 0 || (gameState.credits === 0 && gameState.completedCourses === 0)) {
+                        needsRestoreFromPreload = true;
+                    } else {
+                        Object.values(gameState.courses).forEach(course => {
+                            if (course.status === 'mastered' && course.tasks) {
+                                course.tasks.forEach(task => {
+                                    task.completed = true;
+                                    task.status = 'done';
+                                });
+                            }
+                        });
+                    }
+                } catch (e) {
+                    console.error("Error loading save file, loading user preloaded progress", e);
                     needsRestoreFromPreload = true;
-                } else {
-                    Object.values(gameState.courses).forEach(course => {
-                        if (course.status === 'mastered' && course.tasks) {
-                            course.tasks.forEach(task => {
-                                task.completed = true;
-                                task.status = 'done';
-                            });
-                        }
-                    });
                 }
-            } catch (e) {
-                console.error("Error loading save file, loading user preloaded progress", e);
+            } else {
                 needsRestoreFromPreload = true;
             }
-        } else {
-            needsRestoreFromPreload = true;
-        }
 
-        if (needsRestoreFromPreload) {
-            console.log("Restoring user's website progress into local storage...");
-            gameState = JSON.parse(JSON.stringify(PRELOADED_USER_STATE));
+            if (needsRestoreFromPreload) {
+                console.log("Restoring user's website progress into local storage...");
+                gameState = JSON.parse(JSON.stringify(PRELOADED_USER_STATE));
+                recalculateCourseStates();
+            }
+        } else {
+            // Clean student or guest state - NEVER inject Adir's data!
+            const curUser = (window.AuthSync && typeof window.AuthSync.getActiveUser === 'function') ? window.AuthSync.getActiveUser() : null;
+            const targetSem = (curUser && curUser.startingSemester) ? curUser.startingSemester : 1;
+            if (typeof window.getCleanCurriculumState === 'function') {
+                gameState = window.getCleanCurriculumState(targetSem);
+            } else {
+                gameState = JSON.parse(JSON.stringify(INITIAL_STATE));
+            }
             recalculateCourseStates();
         }
     }
@@ -5585,11 +5599,12 @@ function loadSavedState() {
             gameState.currentActiveSemester = (gameState.currentActiveSemester !== undefined && gameState.currentActiveSemester !== null) ? gameState.currentActiveSemester : ((curUser && curUser.startingSemester) ? curUser.startingSemester : 1);
         }
 
-    // Strict Enforcement: Future semester courses CANNOT be active or available if previous semester is not completed
+    // Strict Enforcement: Future semester courses beyond active semester CANNOT be active or available if previous semester is not completed
     if (gameState.courses) {
+        const activeSem = gameState.currentActiveSemester || 1;
         Object.values(gameState.courses).forEach(course => {
             const sem = course.semester || 1;
-            if (sem > 1) {
+            if (sem > activeSem && sem > 1) {
                 const prevStats = getSemesterStats(sem - 1);
                 if (!prevStats.isCompleted) {
                     course.status = 'locked';
