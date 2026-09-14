@@ -5453,10 +5453,30 @@ function loadSavedState() {
                 gameState.customCalendarEvents = [];
             }
         } else {
-            // Clean state for other student accounts
-            if (!gameState.pastExamsBank) gameState.pastExamsBank = {};
-            if (!gameState.pastExamSchedule) gameState.pastExamSchedule = [];
+            // Clean state for other student accounts - strictly personal to the logged in student
+            gameState.pastExamsBank = gameState.pastExamsBank || {};
+            // Remove Adir's hardcoded exam codes from student's pastExamsBank if not active
+            ['114052', '034035', '034056', '034053', '104228', '104043', '104131', '314533', '034028'].forEach(k => {
+                if (gameState.pastExamsBank[k] && (!gameState.courses[k] || gameState.courses[k].status !== 'active')) {
+                    delete gameState.pastExamsBank[k];
+                }
+            });
+            if (gameState.pastExamSchedule && gameState.pastExamSchedule.some(e => e.courseCode === '104043' || e.courseCode === '104131')) {
+                gameState.pastExamSchedule = [];
+            }
             if (!gameState.customCalendarEvents) gameState.customCalendarEvents = [];
+            // Remove unassociated exam dates on locked or non-active courses
+            if (gameState.courses) {
+                Object.values(gameState.courses).forEach(c => {
+                    if (c.status !== 'active' && c.tasks) {
+                        c.tasks.forEach(t => {
+                            if (t.type === 'exam' && t.dueDate) {
+                                delete t.dueDate;
+                            }
+                        });
+                    }
+                });
+            }
         }
     
         // Ensure official Technion Mechanical Engineering prerequisites are synchronized
@@ -6435,6 +6455,7 @@ function renderActiveQuestsSidebar() {
 
 // Open and load details into Course Details Modal
 function openCourseDetails(code) {
+    window.openCourseDetails = openCourseDetails;
     const course = gameState.courses[code];
     if (!course) return;
 
@@ -6545,7 +6566,7 @@ function openCourseDetails(code) {
         }
 
         // Official course grade save helper
-        const saveOfficialGrade = () => {
+        const saveOfficialGrade = (shouldCloseModal = false) => {
             const val = parseFloat(gradeInput.value);
             course.grade = (!isNaN(val) && val >= 0 && val <= 100) ? val : null;
             notifyStateChanged();
@@ -6556,20 +6577,24 @@ function openCourseDetails(code) {
                     showToastNotification('הציון הסופי אופס', 'info');
                 }
             }
+            if (shouldCloseModal) {
+                const modal = document.getElementById("course-modal");
+                if (modal) modal.classList.remove("active");
+            }
         };
 
         // Official course grade input listeners
-        gradeInput.onchange = saveOfficialGrade;
+        gradeInput.onchange = () => saveOfficialGrade(false);
         gradeInput.onkeydown = (e) => {
             if (e.key === 'Enter') {
                 e.preventDefault();
-                saveOfficialGrade();
+                saveOfficialGrade(true);
             }
         };
 
         const saveManualBtn = document.getElementById("btn-save-manual-grade");
         if (saveManualBtn) {
-            saveManualBtn.onclick = saveOfficialGrade;
+            saveManualBtn.onclick = () => saveOfficialGrade(true);
         }
     } else {
         gradeSection.style.display = "none";
@@ -8577,9 +8602,16 @@ function getDegreeExamDates(filterPast = true) {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    // 1. Check pastExamsBank
-    if (gameState.pastExamsBank) {
+    const isAdir = (window.AuthSync && typeof window.AuthSync.isAdirActive === 'function') ? window.AuthSync.isAdirActive() : true;
+
+    // 1. Check pastExamsBank (only for Adir Moshe or active courses)
+    if (gameState.pastExamsBank && isAdir) {
         Object.keys(gameState.pastExamsBank).forEach(cCode => {
+            const course = gameState.courses ? gameState.courses[cCode] : null;
+            // Ignore if course is completed or locked
+            if (course && (course.status === 'mastered' || course.status === 'completed' || course.status === 'locked')) {
+                return;
+            }
             const bank = gameState.pastExamsBank[cCode];
             if (bank && bank.examDate) {
                 const examDate = new Date(bank.examDate);
@@ -8591,7 +8623,6 @@ function getDegreeExamDates(filterPast = true) {
                     return;
                 }
 
-                const course = gameState.courses[cCode];
                 const name = course ? course.name : (bank.name || cCode);
                 exams.push({
                     courseCode: cCode,
@@ -8603,8 +8634,10 @@ function getDegreeExamDates(filterPast = true) {
         });
     }
 
-    // 2. Check course tasks
-    Object.values(gameState.courses).forEach(course => {
+    // 2. Check course tasks - ONLY include courses that are currently active!
+    Object.values(gameState.courses || {}).forEach(course => {
+        // Strict isolation: only courses that the student is actively studying right now
+        if (course.status !== 'active') return;
         if (!course.tasks) return;
         const examTask = course.tasks.find(t => t.type === 'exam' && t.dueDate);
         if (examTask && !exams.some(e => e.courseCode === course.code)) {
@@ -8648,8 +8681,8 @@ function renderExamGapRunway() {
     const subtitleEl = document.querySelector(".runway-subtitle");
 
     if (exams.length === 0) {
-        track.innerHTML = `<div style="color: var(--text-muted); font-size: 0.82rem; padding: 12px; display: flex; align-items: center; gap: 8px;"><span>🎉</span><span>אין מבחנים עתידיים בלוח (כל המבחנים שהוגדרו כבר עברו או שהושלמו בהצלחה).</span></div>`;
-        if (subtitleEl) subtitleEl.innerText = "כל מועדי הבחינות של הסמסטר הסתיימו בהצלחה! 🏆";
+        track.innerHTML = `<div style="color: var(--text-muted); font-size: 0.85rem; padding: 14px 18px; display: flex; align-items: center; gap: 8px;"><span>📅</span><span>אין מבחנים עתידיים בלוח (לא הוגדרו תאריכי בחינות לקורסים הפעילים או שכל הבחינות הושלמו בהצלחה).</span></div>`;
+        if (subtitleEl) subtitleEl.innerText = "אין מועדי בחינות קרובים לקורסים הפעילים בסמסטר.";
         return;
     }
 
@@ -9484,16 +9517,22 @@ function setupStudyRunway() {
         });
     }
 
-    // Auto-seed exam dates from Cheesefork on first load if missing
-    syncCheeseforkExamDates(false);
+    // Auto-seed exam dates from Cheesefork on first load if missing (Adir only)
+    if (window.AuthSync && typeof window.AuthSync.isAdirActive === 'function' && window.AuthSync.isAdirActive()) {
+        syncCheeseforkExamDates(false);
+    }
 }
 
 // Syncs official Technion Cheesefork exam dates into gameState.courses
 function syncCheeseforkExamDates(forceNotify = true) {
+    const isAdir = (window.AuthSync && typeof window.AuthSync.isAdirActive === 'function') ? window.AuthSync.isAdirActive() : true;
+    if (!isAdir && !forceNotify) return;
+
     let syncedCount = 0;
     Object.keys(CHEESEFORK_EXAM_DATES).forEach(code => {
         const course = gameState.courses[code];
-        if (course && course.tasks) {
+        // For non-Adir students, ONLY sync onto courses that are actively enrolled/studied this semester
+        if (course && course.tasks && (isAdir || course.status === 'active')) {
             const data = CHEESEFORK_EXAM_DATES[code];
             
             // Moed A Exam Task
@@ -9555,10 +9594,11 @@ function renderStudyRunway() {
 
     const termEndDateStr = (gameState && gameState.termEndDate) ? gameState.termEndDate : "2027-01-20";
     
-    // 1. Gather all scheduled exam tasks across active/available courses
+    // 1. Gather all scheduled exam tasks across active courses only
     const allExams = [];
 
-    Object.values(gameState.courses).forEach(course => {
+    Object.values(gameState.courses || {}).forEach(course => {
+        if (course.status !== 'active') return; // Strictly active courses only
         if (!course.tasks) return;
 
         course.tasks.forEach(task => {
@@ -11322,13 +11362,17 @@ function renderFinalsCalendar() {
 
     // Map scheduled items by date string (YYYY-MM-DD)
     const itemsByDate = {};
-    (gameState.pastExamSchedule || []).forEach(item => {
-        if (!itemsByDate[item.date]) itemsByDate[item.date] = [];
-        itemsByDate[item.date].push(item);
-    });
+    const isAdir = (window.AuthSync && typeof window.AuthSync.isAdirActive === 'function') ? window.AuthSync.isAdirActive() : true;
+    if (isAdir) {
+        (gameState.pastExamSchedule || []).forEach(item => {
+            if (!itemsByDate[item.date]) itemsByDate[item.date] = [];
+            itemsByDate[item.date].push(item);
+        });
+    }
 
     // Also map real course exams and all active course tasks (גיליון, WebWork, מעבדה, פרויקט, etc.)
-    Object.values(gameState.courses).forEach(course => {
+    Object.values(gameState.courses || {}).forEach(course => {
+        if (course.status !== 'active') return; // Only active courses on the calendar!
         if (!course.tasks) return;
         course.tasks.forEach(task => {
             if (!task.dueDate) return;
