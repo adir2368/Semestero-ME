@@ -19,9 +19,10 @@ function getSemesterStats(semNumber) {
         if (c.status !== 'mastered') {
             allMastered = false;
         }
-        if (c.status === 'mastered' && c.grade !== undefined && c.grade !== null && !isNaN(c.grade) && c.grade >= 55) {
+        const isBinary = (c.isBinaryPass === true || c.grade === 'עובר' || c.grade === 'PASS');
+        if (c.status === 'mastered' && !isBinary && c.grade !== undefined && c.grade !== null && c.grade !== '' && !isNaN(Number(c.grade)) && Number(c.grade) >= 55) {
             gradedCredits += cr;
-            weightedSum += (c.grade * cr);
+            weightedSum += (Number(c.grade) * cr);
         }
     });
 
@@ -4975,7 +4976,7 @@ const PRELOADED_USER_STATE = {
       ]
     },
     "034028": {
-      "name": "מכניקת מוצקים (034028)",
+      "name": "מכניקת מוצקים 1 (034028)",
       "earliestYear": 2015,
       "examDate": "2026-08-19",
       "studyStartDate": "2026-08-05",
@@ -5319,6 +5320,43 @@ function loadSavedState() {
         });
     }
 
+    // Guarantee 034028 (מכניקת מוצקים 1) and all core courses exist in gameState.courses
+    if (gameState.courses) {
+        if (!gameState.courses['034028']) {
+            if (typeof PRELOADED_USER_STATE !== 'undefined' && PRELOADED_USER_STATE.courses && PRELOADED_USER_STATE.courses['034028']) {
+                gameState.courses['034028'] = JSON.parse(JSON.stringify(PRELOADED_USER_STATE.courses['034028']));
+            } else if (typeof SAMPLE_ME_DEGREE !== 'undefined' && SAMPLE_ME_DEGREE['034028']) {
+                gameState.courses['034028'] = JSON.parse(JSON.stringify(SAMPLE_ME_DEGREE['034028']));
+            }
+        }
+        // Always enforce proper title
+        if (gameState.courses['034028']) {
+            gameState.courses['034028'].name = "מכניקת מוצקים 1";
+            // For Adir or if it was marked done previously, ensure it stays mastered with grade 82
+            const isAdir = (window.AuthSync && typeof window.AuthSync.isAdirActive === 'function' && window.AuthSync.isAdirActive());
+            if (isAdir || gameState.courses['034028'].grade === 82 || gameState.courses['034028'].status === 'mastered') {
+                gameState.courses['034028'].status = 'mastered';
+                if (!gameState.courses['034028'].grade) gameState.courses['034028'].grade = 82;
+                if (gameState.courses['034028'].tasks) {
+                    gameState.courses['034028'].tasks.forEach(t => {
+                        t.completed = true;
+                        t.status = 'done';
+                    });
+                }
+            }
+        }
+
+        // Guarantee all other core Technion Mechanical Engineering courses exist
+        if (typeof SAMPLE_ME_DEGREE !== 'undefined') {
+            Object.keys(SAMPLE_ME_DEGREE).forEach(code => {
+                if (code === '035044') return; // purged CAD course
+                if (!gameState.courses[code]) {
+                    gameState.courses[code] = JSON.parse(JSON.stringify(SAMPLE_ME_DEGREE[code]));
+                }
+            });
+        }
+    }
+
     // 2. Sanitize all course names (Hebrew Geresh typography) and course tasks
     if (gameState.courses) {
         Object.values(gameState.courses).forEach(c => {
@@ -5360,7 +5398,8 @@ function loadSavedState() {
     // 2. Automatically ensure all tasks for completed courses or courses with final grades are marked completed
     if (gameState.courses) {
         Object.values(gameState.courses).forEach(c => {
-            const hasPassingGrade = (c.grade !== undefined && c.grade !== null && c.grade !== '' && !isNaN(Number(c.grade)) && Number(c.grade) >= 55);
+            const isBinary = (c.isBinaryPass === true || c.grade === 'עובר' || c.grade === 'PASS');
+            const hasPassingGrade = isBinary || (c.grade !== undefined && c.grade !== null && c.grade !== '' && !isNaN(Number(c.grade)) && Number(c.grade) >= 55);
             if (c.status === 'mastered' || hasPassingGrade) {
                 if (hasPassingGrade && c.status !== 'mastered') {
                     c.status = 'mastered';
@@ -5676,6 +5715,7 @@ function loadSavedState() {
     if (gameState.courses) {
         const activeSem = gameState.currentActiveSemester || 1;
         Object.values(gameState.courses).forEach(course => {
+            if (course.status === 'mastered') return; // Mastered courses must NEVER be locked or have tasks wiped!
             const sem = course.semester || 1;
             if (sem > activeSem && sem > 1) {
                 const prevStats = getSemesterStats(sem - 1);
@@ -5820,7 +5860,8 @@ function autoUpdateTaskStatusesByDueDate() {
 
     Object.values(gameState.courses).forEach(course => {
         if (!course.tasks || !Array.isArray(course.tasks)) return;
-        const hasPassingGrade = (course.grade !== undefined && course.grade !== null && course.grade !== '' && !isNaN(Number(course.grade)) && Number(course.grade) >= 55);
+        const isBinary = (course.isBinaryPass === true || course.grade === 'עובר' || course.grade === 'PASS');
+        const hasPassingGrade = isBinary || (course.grade !== undefined && course.grade !== null && course.grade !== '' && !isNaN(Number(course.grade)) && Number(course.grade) >= 55);
         if (course.status === 'mastered' || course.status === 'active' || hasPassingGrade) return; // Mastered/graded courses have tasks marked as done
 
         course.tasks.forEach(task => {
@@ -5856,12 +5897,18 @@ function recalculateCourseStates() {
     
     Object.keys(gameState.courses).forEach(code => {
         const course = gameState.courses[code];
-        const hasPassingGrade = (course.grade !== undefined && course.grade !== null && course.grade !== '' && !isNaN(Number(course.grade)) && Number(course.grade) >= 55);
+        const isBinary = (course.isBinaryPass === true || course.grade === 'עובר' || course.grade === 'PASS');
+        const hasPassingNumeric = (course.grade !== undefined && course.grade !== null && course.grade !== '' && !isNaN(Number(course.grade)) && Number(course.grade) >= 55);
+        const hasPassingGrade = isBinary || hasPassingNumeric;
         
         // Sum completed stats
         if (course.status === 'mastered' || hasPassingGrade) {
             if (hasPassingGrade && course.status !== 'mastered') {
                 course.status = 'mastered';
+            }
+            if (isBinary) {
+                course.isBinaryPass = true;
+                if (!course.grade || course.grade === '') course.grade = 'עובר';
             }
             totalCredits += (course.credits || 0);
             completedCount++;
@@ -5889,7 +5936,8 @@ function recalculateCourseStates() {
     let openTasksCount = 0;
     Object.keys(gameState.courses).forEach(code => {
         const course = gameState.courses[code];
-        const hasPassingGrade = (course.grade !== undefined && course.grade !== null && course.grade !== '' && !isNaN(Number(course.grade)) && Number(course.grade) >= 55);
+        const isBinary = (course.isBinaryPass === true || course.grade === 'עובר' || course.grade === 'PASS');
+        const hasPassingGrade = isBinary || (course.grade !== undefined && course.grade !== null && course.grade !== '' && !isNaN(Number(course.grade)) && Number(course.grade) >= 55);
         if (course.status !== 'locked' && course.status !== 'mastered' && !hasPassingGrade && course.tasks && Array.isArray(course.tasks)) {
             course.tasks.forEach(task => {
                 if (!task.completed && task.status !== 'done') {
@@ -5904,14 +5952,15 @@ function recalculateCourseStates() {
     gameState.bossesSlain = slayedCount;
     gameState.openTasks = openTasksCount;
 
-    // Calculate general GPA (weighted by credits - ONLY passing grades >= 55)
+    // Calculate general GPA (weighted by credits - ONLY passing numeric grades >= 55, EXCLUDING binary pass)
     let totalWeightedGrades = 0;
     let gradedCreditsSum = 0;
     Object.keys(gameState.courses).forEach(code => {
         const course = gameState.courses[code];
-        if (course.status === 'mastered' && course.grade !== undefined && course.grade !== null && !isNaN(course.grade) && course.grade >= 55) {
-            totalWeightedGrades += (course.grade * course.credits);
-            gradedCreditsSum += course.credits;
+        const isBinary = (course.isBinaryPass === true || course.grade === 'עובר' || course.grade === 'PASS');
+        if (course.status === 'mastered' && !isBinary && course.grade !== undefined && course.grade !== null && course.grade !== '' && !isNaN(Number(course.grade)) && Number(course.grade) >= 55) {
+            totalWeightedGrades += (Number(course.grade) * (course.credits || 0));
+            gradedCreditsSum += (course.credits || 0);
         }
     });
     gameState.gpa = gradedCreditsSum > 0 ? (totalWeightedGrades / gradedCreditsSum) : 0.00;
@@ -6379,7 +6428,12 @@ function setupEventListeners() {
             statusSelect.value = (targetSem === activeSem) ? "active" : "available";
         }
         if (gradeGroup) gradeGroup.style.display = "none";
-        if (gradeInput) gradeInput.value = "";
+        if (gradeInput) {
+            gradeInput.value = "";
+            gradeInput.disabled = false;
+        }
+        const binaryToggle = document.getElementById("add-course-binary-pass");
+        if (binaryToggle) binaryToggle.checked = false;
 
         const modal = document.getElementById("add-course-modal");
         if (modal) modal.classList.add("active");
@@ -6532,6 +6586,23 @@ function setupEventListeners() {
             const gradeGroup = document.getElementById("course-initial-grade-group");
             if (gradeGroup) {
                 gradeGroup.style.display = (initialStatusSelect.value === 'mastered') ? 'block' : 'none';
+            }
+        });
+    }
+
+    const addCourseBinaryToggle = document.getElementById("add-course-binary-pass");
+    if (addCourseBinaryToggle) {
+        addCourseBinaryToggle.addEventListener("change", () => {
+            const gradeInput = document.getElementById("course-initial-grade");
+            if (gradeInput) {
+                if (addCourseBinaryToggle.checked) {
+                    gradeInput.value = "";
+                    gradeInput.disabled = true;
+                    gradeInput.placeholder = "עובר (בינארי)";
+                } else {
+                    gradeInput.disabled = false;
+                    gradeInput.placeholder = "למשל: 88";
+                }
             }
         });
     }
@@ -6697,6 +6768,9 @@ function handleAddCourseSubmit(e) {
         return;
     }
 
+    const isBinaryToggle = document.getElementById("add-course-binary-pass");
+    const isBinaryPass = !!(isBinaryToggle && isBinaryToggle.checked);
+
     if (editingCourseCode) {
         const oldCode = editingCourseCode;
         if (code !== oldCode && gameState.courses[code]) {
@@ -6745,7 +6819,19 @@ function handleAddCourseSubmit(e) {
         if (initialStatus) {
             courseObj.status = initialStatus;
             if (initialStatus === 'mastered') {
-                courseObj.grade = (!isNaN(initialGrade) && initialGrade >= 55 && initialGrade <= 100) ? initialGrade : courseObj.grade;
+                if (isBinaryPass) {
+                    courseObj.isBinaryPass = true;
+                    courseObj.grade = 'עובר';
+                    if (courseObj.tasks) {
+                        courseObj.tasks.forEach(t => {
+                            t.completed = true;
+                            t.status = 'done';
+                        });
+                    }
+                } else {
+                    courseObj.isBinaryPass = false;
+                    courseObj.grade = (!isNaN(initialGrade) && initialGrade >= 55 && initialGrade <= 100) ? initialGrade : courseObj.grade;
+                }
             }
         }
 
@@ -6761,8 +6847,14 @@ function handleAddCourseSubmit(e) {
         }
 
         let finalGrade = null;
+        let isBinaryCourse = false;
         if (initialStatus === 'mastered') {
-            finalGrade = (!isNaN(initialGrade) && initialGrade >= 55 && initialGrade <= 100) ? initialGrade : null;
+            if (isBinaryPass) {
+                isBinaryCourse = true;
+                finalGrade = 'עובר';
+            } else {
+                finalGrade = (!isNaN(initialGrade) && initialGrade >= 55 && initialGrade <= 100) ? initialGrade : null;
+            }
         }
 
         // Default tasks for custom course
@@ -6800,6 +6892,7 @@ function handleAddCourseSubmit(e) {
             prerequisites,
             status: initialStatus,
             grade: finalGrade,
+            isBinaryPass: isBinaryCourse,
             tasks,
             type,
             faculty: cfData ? cfData.faculty : undefined,
@@ -6850,8 +6943,11 @@ function renderSemestersGrid() {
         // Find courses for this semester
         const semCourses = Object.values(gameState.courses).filter(c => c.semester === sem);
         
-        // Calculate semester weighted average (excluding failing grades < 55)
-        const gradedSemCourses = semCourses.filter(c => c.status === 'mastered' && c.grade !== undefined && c.grade !== null && !isNaN(c.grade) && c.grade >= 55);
+        // Calculate semester weighted average (excluding failing grades < 55 and binary pass)
+        const gradedSemCourses = semCourses.filter(c => {
+            const isBinary = (c.isBinaryPass === true || c.grade === 'עובר' || c.grade === 'PASS');
+            return c.status === 'mastered' && !isBinary && c.grade !== undefined && c.grade !== null && c.grade !== '' && !isNaN(Number(c.grade)) && Number(c.grade) >= 55;
+        });
         let semAverageText = "";
         if (gradedSemCourses.length > 0) {
             let weightedSum = 0;
@@ -7098,12 +7194,69 @@ function openCourseDetails(code) {
     if (course.status === 'mastered' || course.status === 'active') {
         gradeSection.style.display = "block";
         
+        // Binary Pass Controls
+        const binaryToggle = document.getElementById("modal-course-binary-pass-toggle");
+        const binaryBadge = document.getElementById("modal-binary-pass-badge");
+        const applyBinaryBtn = document.getElementById("btn-apply-binary-pass");
+
+        const isBinary = (course.isBinaryPass === true || course.grade === 'עובר' || course.grade === 'PASS');
+        if (binaryToggle) binaryToggle.checked = isBinary;
+        if (binaryBadge) binaryBadge.style.display = isBinary ? "inline-block" : "none";
+
         // Populate inputs
         const examGradeVal = (latestExam && latestExam.grade !== undefined && latestExam.grade !== null) ? latestExam.grade : "";
         calcExamInput.value = examGradeVal;
         calcWeightInput.value = (course.examWeight !== undefined && course.examWeight !== null) ? course.examWeight : 70;
         calcHwInput.value = (course.assignmentsGrade !== undefined && course.assignmentsGrade !== null) ? course.assignmentsGrade : 100;
-        gradeInput.value = (course.grade !== undefined && course.grade !== null) ? course.grade : "";
+        if (isBinary) {
+            gradeInput.value = "עובר (בינארי)";
+            gradeInput.style.color = "#38bdf8";
+        } else {
+            gradeInput.value = (course.grade !== undefined && course.grade !== null) ? course.grade : "";
+            gradeInput.style.color = "#fff";
+        }
+
+        // Set binary pass helper
+        const setBinaryPassState = (enableBinary, shouldCloseModal = false) => {
+            if (enableBinary) {
+                course.isBinaryPass = true;
+                course.grade = 'עובר';
+                course.status = 'mastered';
+                completeAllTasks(course);
+                gradeInput.value = 'עובר (בינארי)';
+                gradeInput.style.color = '#38bdf8';
+                if (binaryToggle) binaryToggle.checked = true;
+                if (binaryBadge) binaryBadge.style.display = 'inline-block';
+                recalculateCourseStates();
+                notifyStateChanged();
+                if (typeof showToastNotification === 'function') {
+                    showToastNotification('הקורס נקבע כעובר בינארי ✓ הנק״ז נספרות לתואר, אך הציון לא נכנס לממוצע!', 'success');
+                }
+            } else {
+                course.isBinaryPass = false;
+                course.grade = null;
+                gradeInput.value = '';
+                gradeInput.style.color = '#fff';
+                if (binaryToggle) binaryToggle.checked = false;
+                if (binaryBadge) binaryBadge.style.display = 'none';
+                recalculateCourseStates();
+                notifyStateChanged();
+                if (typeof showToastNotification === 'function') {
+                    showToastNotification('בוטל עובר בינארי. כעת ניתן להזין ציון מספרי רגיל.', 'info');
+                }
+            }
+            if (shouldCloseModal) {
+                const modal = document.getElementById("course-modal");
+                if (modal) modal.classList.remove("active");
+            }
+        };
+
+        if (binaryToggle) {
+            binaryToggle.onchange = (e) => setBinaryPassState(e.target.checked, false);
+        }
+        if (applyBinaryBtn) {
+            applyBinaryBtn.onclick = () => setBinaryPassState(true, false);
+        }
 
         // Function to recalculate live preview
         function updateCalcPreview() {
@@ -7158,6 +7311,10 @@ function openCourseDetails(code) {
             applyCalcBtn.onclick = () => {
                 const previewVal = updateCalcPreview();
                 if (previewVal !== null) {
+                    course.isBinaryPass = false;
+                    if (binaryToggle) binaryToggle.checked = false;
+                    if (binaryBadge) binaryBadge.style.display = 'none';
+                    gradeInput.style.color = '#fff';
                     gradeInput.value = previewVal;
                     course.grade = previewVal;
                     if (previewVal >= 55) {
@@ -7175,7 +7332,17 @@ function openCourseDetails(code) {
 
         // Official course grade save helper
         const saveOfficialGrade = (shouldCloseModal = false) => {
-            const val = parseFloat(gradeInput.value);
+            const raw = String(gradeInput.value).trim();
+            if (raw === 'עובר' || raw === 'עובר (בינארי)' || raw.toUpperCase() === 'PASS') {
+                setBinaryPassState(true, shouldCloseModal);
+                return;
+            }
+            const val = parseFloat(raw);
+            course.isBinaryPass = false;
+            if (binaryToggle) binaryToggle.checked = false;
+            if (binaryBadge) binaryBadge.style.display = 'none';
+            gradeInput.style.color = '#fff';
+
             course.grade = (!isNaN(val) && val >= 0 && val <= 100) ? val : null;
             if (course.grade !== null && course.grade >= 55) {
                 course.status = 'mastered';
@@ -10721,11 +10888,11 @@ function renderFlowchartTree() {
         // Semester 1 (5 courses)
         "125001": 0, "104041": 1, "104065": 2, "114051": 3, "234128": 4,
         // Semester 2 (6 courses)
-        "125013": 0, "104043": 1, "104131": 2, "034028": 3, "314533": 4, "034061": 5,
+        "104131": 0, "104043": 1, "034028": 2, "114051": 3, "314533": 4, "034061": 5,
         // Semester 3 (6 courses)
         "104228": 0, "034035": 1, "034053": 2, "114052": 3, "034056": 4, "03940805": 5,
-        // Semester 4 (4 courses)
-        "034055": 1, "034032": 2, "034010": 3, "034030": 5,
+        // Semester 4 (5 courses)
+        "125013": 0, "034055": 1, "034032": 2, "034010": 3, "034030": 5,
         // Semester 5 (6 courses)
         "034058": 0, "034041": 1, "034051": 2, "114032": 3, "034040": 4, "034054": 5,
         // Semester 6 (3 courses)
@@ -10842,7 +11009,16 @@ function renderFlowchartTree() {
         let badgeText = "🔒 נעול";
         if (course.status === 'available') badgeText = "🔓 פתוח";
         else if (course.status === 'active') badgeText = "📘 פעיל";
-        else if (course.status === 'mastered') badgeText = course.grade ? `✓ הושלם (${course.grade})` : "✓ הושלם";
+        else if (course.status === 'mastered') {
+            const isBinary = (course.isBinaryPass === true || course.grade === 'עובר' || course.grade === 'PASS');
+            if (isBinary) {
+                badgeText = "✓ עובר (בינארי)";
+            } else if (course.grade !== undefined && course.grade !== null && course.grade !== '') {
+                badgeText = `✓ הושלם [${course.grade}]`;
+            } else {
+                badgeText = "✓ הושלם";
+            }
+        }
 
         // Balanced title wrapping: never truncate course names & sanitize Hebrew BiDi
         const split = splitCourseTitleForCard(course.name);
@@ -10851,12 +11027,12 @@ function renderFlowchartTree() {
         let badgeY = topY + 68;
 
         if (!split.isMulti) {
-            titleSvg = `<text x="${pos.x}" y="${topY + 28}" text-anchor="middle" class="fc-node-title single-line" direction="rtl" xml:lang="he">${split.line1}</text>`;
+            titleSvg = `<text x="${pos.x}" y="${topY + 28}" text-anchor="middle" class="fc-node-title single-line">${split.line1}</text>`;
         } else {
             titleSvg = `
-                <text x="${pos.x}" y="${topY + 21}" text-anchor="middle" class="fc-node-title multi-line" direction="rtl" xml:lang="he">
-                    <tspan x="${pos.x}" dy="0" direction="rtl">${split.line1}</tspan>
-                    <tspan x="${pos.x}" dy="15" direction="rtl">${split.line2}</tspan>
+                <text x="${pos.x}" y="${topY + 21}" text-anchor="middle" class="fc-node-title multi-line">
+                    <tspan x="${pos.x}" dy="0">${split.line1}</tspan>
+                    <tspan x="${pos.x}" dy="15">${split.line2}</tspan>
                 </text>
             `;
             subY = topY + 53;
@@ -10868,9 +11044,9 @@ function renderFlowchartTree() {
             <!-- Line 1: Course Title (Complete, never truncated, correct Hebrew BiDi) -->
             ${titleSvg}
             <!-- Line 2: Subtitle: Code + Credits -->
-            <text x="${pos.x}" y="${subY}" text-anchor="middle" class="fc-node-sub" direction="rtl" xml:lang="he">${course.code} • ${course.credits} נק״ז</text>
+            <text x="${pos.x}" y="${subY}" text-anchor="middle" class="fc-node-sub">${course.code} • ${course.credits} נק״ז</text>
             <!-- Line 3: Status Badge -->
-            <text x="${pos.x}" y="${badgeY}" text-anchor="middle" class="fc-node-badge" direction="rtl" xml:lang="he">${badgeText}</text>
+            <text x="${pos.x}" y="${badgeY}" text-anchor="middle" class="fc-node-badge">${badgeText}</text>
         `;
 
         // Hover effect: highlight incoming prerequisites AND outgoing dependents
@@ -11060,7 +11236,7 @@ const INITIAL_PAST_EXAMS_BANK = {
         exams: generateAllTermsList(2018)
     },
     "034028": {
-        name: "מכניקת מוצקים (034028)",
+        name: "מכניקת מוצקים 1 (034028)",
         earliestYear: 2018,
         examDate: "2026-08-19",
         studyStartDate: "2026-08-14",
@@ -13306,7 +13482,8 @@ function getUpcomingPriorityTasks(limit = 8) {
     const allTasks = [];
 
     Object.values(gameState.courses).forEach(course => {
-        const hasPassingGrade = (course.grade !== undefined && course.grade !== null && course.grade !== '' && !isNaN(Number(course.grade)) && Number(course.grade) >= 55);
+        const isBinary = (course.isBinaryPass === true || course.grade === 'עובר' || course.grade === 'PASS');
+        const hasPassingGrade = isBinary || (course.grade !== undefined && course.grade !== null && course.grade !== '' && !isNaN(Number(course.grade)) && Number(course.grade) >= 55);
         if (course.status === 'locked' || course.status === 'mastered' || hasPassingGrade) return;
 
         (course.tasks || []).forEach(task => {

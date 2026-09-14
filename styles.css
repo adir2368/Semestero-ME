@@ -3171,16 +3171,15 @@ body {
     opacity: 0.75;
 }
 
-/* Node Text */
+/* Node Text (Standard Unicode BiDi rendering for iOS Safari, WebKit, and Blink) */
 .fc-node-title {
     fill: #f8fafc;
     font-size: 13px;
     font-weight: 700;
     font-family: 'Assistant', 'Rubik', 'Segoe UI', system-ui, sans-serif;
     pointer-events: none;
-    letter-spacing: -0.15px;
-    direction: rtl !important;
-    unicode-bidi: isolate !important;
+    letter-spacing: 0;
+    text-anchor: middle;
 }
 
 .fc-node-title.multi-line {
@@ -3193,8 +3192,8 @@ body {
     font-weight: 500;
     font-family: 'Assistant', 'Rubik', 'Segoe UI', system-ui, sans-serif;
     pointer-events: none;
-    direction: rtl !important;
-    unicode-bidi: isolate !important;
+    letter-spacing: 0;
+    text-anchor: middle;
 }
 
 .fc-node-badge {
@@ -3202,8 +3201,8 @@ body {
     font-weight: 600;
     font-family: 'Assistant', 'Rubik', 'Segoe UI', system-ui, sans-serif;
     pointer-events: none;
-    direction: rtl !important;
-    unicode-bidi: isolate !important;
+    letter-spacing: 0;
+    text-anchor: middle;
 }
 .fc-node-group.mastered .fc-node-badge { fill: #34d399; }
 .fc-node-group.active .fc-node-badge { fill: #38bdf8; }
