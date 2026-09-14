@@ -5619,6 +5619,7 @@ const viewsDirtyState = {
     curriculum: false,
     tasks: false,
     calendar: false,
+    timetable: false,
     settings: false
 };
 
@@ -5633,7 +5634,7 @@ function markInactiveViewsDirty(activeView) {
 }
 
 // Save state to local storage safely
-function saveState() {
+function saveState(skipNotify = false) {
     try {
         if (window.AuthSync && typeof window.AuthSync.saveActiveUserState === 'function') {
             window.AuthSync.saveActiveUserState(gameState);
@@ -5646,6 +5647,9 @@ function saveState() {
     if (typeof triggerCloudGistSyncDebounced === "function") {
         triggerCloudGistSyncDebounced();
     }
+    if (!skipNotify && !isStateNotifying) {
+        notifyStateChanged({ recalculate: false });
+    }
 }
 
 // Universal zero-latency state change dispatcher
@@ -5657,7 +5661,7 @@ function notifyStateChanged(options = {}) {
             recalculateCourseStates();
         }
 
-        saveState();
+        saveState(true);
         window.gameState = gameState;
 
         // 1. Instant HUD update (<1ms)
@@ -5673,23 +5677,38 @@ function notifyStateChanged(options = {}) {
             updateNotificationBadge();
         }
 
-        // 3. Instant update for currently active tab
-        const currentTab = window.currentActiveTab || 'curriculum';
-        if (currentTab === 'tasks') {
-            if (typeof renderNotionTasksTable === 'function') renderNotionTasksTable();
-            if (typeof populateNotionCourseFilter === 'function') populateNotionCourseFilter();
-            if (typeof renderExamGapRunway === 'function') renderExamGapRunway();
-        } else if (currentTab === 'calendar') {
-            if (typeof renderFinalsCalendar === 'function') renderFinalsCalendar();
-            if (typeof renderExamGapRunway === 'function') renderExamGapRunway();
-        } else if (currentTab === 'curriculum') {
+        // 3. Instant update for active views
+        if (options.forceAll) {
             if (typeof renderFlowchartTree === 'function') renderFlowchartTree();
             if (typeof renderActiveQuestsSidebar === 'function') renderActiveQuestsSidebar();
-        } else if (currentTab === 'settings') {
+            if (typeof renderNotionTasksTable === 'function') renderNotionTasksTable();
+            if (typeof populateNotionCourseFilter === 'function') populateNotionCourseFilter();
+            if (typeof renderFinalsCalendar === 'function') renderFinalsCalendar();
+            if (typeof renderExamGapRunway === 'function') renderExamGapRunway();
+            if (typeof updateDailyTimetableFocus === 'function') updateDailyTimetableFocus();
+            if (typeof renderTodayTimetableBanner === 'function') renderTodayTimetableBanner();
             if (typeof renderSettingsPage === 'function') renderSettingsPage();
+            Object.keys(viewsDirtyState).forEach(k => { viewsDirtyState[k] = false; });
+        } else {
+            const currentTab = window.currentActiveTab || 'curriculum';
+            if (currentTab === 'tasks') {
+                if (typeof renderNotionTasksTable === 'function') renderNotionTasksTable();
+                if (typeof populateNotionCourseFilter === 'function') populateNotionCourseFilter();
+                if (typeof renderExamGapRunway === 'function') renderExamGapRunway();
+            } else if (currentTab === 'calendar') {
+                if (typeof renderFinalsCalendar === 'function') renderFinalsCalendar();
+                if (typeof renderExamGapRunway === 'function') renderExamGapRunway();
+            } else if (currentTab === 'curriculum') {
+                if (typeof renderFlowchartTree === 'function') renderFlowchartTree();
+                if (typeof renderActiveQuestsSidebar === 'function') renderActiveQuestsSidebar();
+            } else if (currentTab === 'timetable') {
+                if (typeof updateDailyTimetableFocus === 'function') updateDailyTimetableFocus();
+                if (typeof renderTodayTimetableBanner === 'function') renderTodayTimetableBanner();
+            } else if (currentTab === 'settings') {
+                if (typeof renderSettingsPage === 'function') renderSettingsPage();
+            }
+            markInactiveViewsDirty(currentTab);
         }
-
-        markInactiveViewsDirty(currentTab);
 
         // 4. Refresh open course modal if visible
         const courseModal = document.getElementById("course-modal");
@@ -7394,7 +7413,6 @@ function toggleCourseCompletion(code) {
     if (course.status === 'mastered') {
         course.status = 'active';
         uncompleteAllTasks(course);
-        recalculateCourseStates();
     } else {
         const exams = course.tasks.filter(t => t.type === 'exam');
         if (exams.length > 0) {
@@ -7412,8 +7430,8 @@ function toggleCourseCompletion(code) {
         }
         course.status = 'mastered';
         completeAllTasks(course);
-        recalculateCourseStates();
     }
+    notifyStateChanged();
 }
 
 /* ==========================================================================
@@ -7729,8 +7747,10 @@ function setupNotionDashboard() {
             if (tasksWorkspace) tasksWorkspace.style.display = "none";
             if (timetableWorkspace) timetableWorkspace.style.display = "flex";
             if (settingsWorkspace) settingsWorkspace.style.display = "none";
-            if (typeof updateDailyTimetableFocus === 'function') {
-                updateDailyTimetableFocus();
+            if (viewsDirtyState.timetable || true) {
+                if (typeof updateDailyTimetableFocus === 'function') updateDailyTimetableFocus();
+                if (typeof renderTodayTimetableBanner === 'function') renderTodayTimetableBanner();
+                viewsDirtyState.timetable = false;
             }
         } else if (activeTabId === 'settings') {
             if (curriculumWorkspace) curriculumWorkspace.style.display = "none";
@@ -7861,11 +7881,10 @@ function setupNotionDashboard() {
                     cb.checked = checked;
                     const courseCode = row.dataset.courseCode;
                     const taskId = row.dataset.taskId;
-                    toggleTaskStatusInState(courseCode, taskId, checked ? 'done' : 'not_started');
+                    toggleTaskStatusInState(courseCode, taskId, checked ? 'done' : 'not_started', true);
                 }
             });
-            renderNotionTasksTable();
-            renderUI();
+            notifyStateChanged({ tab: 'tasks' });
         });
     }
     
@@ -7966,7 +7985,6 @@ function calculateTimeRemaining(dueDateStr, isCompleted) {
 
 // Renders the Notion Tasks Table body dynamically
 function renderNotionTasksTable() {
-    renderTasksReminderBanner();
     const tableBody = document.getElementById("notion-tasks-table-body");
     if (!tableBody) return;
     
@@ -7982,15 +8000,17 @@ function renderNotionTasksTable() {
     
     let allTasks = [];
     
-    // Gather tasks
+    // Gather tasks and pre-compute timestamp for high-performance sorting
     Object.values(gameState.courses).forEach(course => {
         if (course.status !== 'active' && course.status !== 'mastered') return;
         if (courseFilter !== 'all' && course.code !== courseFilter) return;
         
         course.tasks.forEach(task => {
+            const dueTime = task.dueDate ? (Date.parse(task.dueDate) || Infinity) : Infinity;
             allTasks.push({
                 course: course,
-                task: task
+                task: task,
+                dueTime: dueTime
             });
         });
     });
@@ -8018,16 +8038,14 @@ function renderNotionTasksTable() {
         return true;
     });
     
-    // Sort tasks: Incomplete first, then by due date ascending
+    // Sort tasks: Incomplete first, then by pre-computed due date timestamp ascending
     allTasks.sort((a, b) => {
         const aDone = a.task.status === 'done' || a.task.status === 'submitted';
         const bDone = b.task.status === 'done' || b.task.status === 'submitted';
         if (aDone !== bDone) {
             return aDone ? 1 : -1; // Incomplete first
         }
-        if (!a.task.dueDate) return 1;
-        if (!b.task.dueDate) return -1;
-        return new Date(a.task.dueDate) - new Date(b.task.dueDate);
+        return a.dueTime - b.dueTime;
     });
     
     // Render rows
@@ -8036,6 +8054,15 @@ function renderNotionTasksTable() {
         return;
     }
     
+    // Course icon HTML cache
+    const courseIconCache = {};
+    const getCachedIcon = (code) => {
+        if (!courseIconCache[code]) {
+            courseIconCache[code] = getCourseNotionIconHtml(code);
+        }
+        return courseIconCache[code];
+    };
+
     let rowsHtml = "";
     allTasks.forEach(item => {
         const c = item.course;
@@ -8068,7 +8095,7 @@ function renderNotionTasksTable() {
                 </td>
                 <td>
                     <span class="notion-course-tag" data-course-code="${c.code}" style="cursor: pointer;" title="לחץ לשינוי סמל וצבע הקורס">
-                        ${getCourseNotionIconHtml(c.code)}
+                        ${getCachedIcon(c.code)}
                         <span>${c.name}</span>
                     </span>
                 </td>

@@ -364,14 +364,18 @@
 
         // Force UI re-render across all application modules
         refreshAllAppViews() {
-            if (typeof recalculateCourseStates === 'function') recalculateCourseStates();
-            if (typeof updateHud === 'function') updateHud();
-            if (typeof renderUI === 'function') renderUI();
-            if (typeof renderNotionTasksTable === 'function') renderNotionTasksTable();
-            if (typeof updateDailyTimetableFocus === 'function') updateDailyTimetableFocus();
-            if (typeof renderTodayTimetableBanner === 'function') renderTodayTimetableBanner();
-            if (typeof renderStudyRunway === 'function') renderStudyRunway();
-            if (typeof updateNotificationBadge === 'function') updateNotificationBadge();
+            if (typeof notifyStateChanged === 'function') {
+                notifyStateChanged({ forceAll: true });
+            } else {
+                if (typeof recalculateCourseStates === 'function') recalculateCourseStates();
+                if (typeof updateHud === 'function') updateHud();
+                if (typeof renderUI === 'function') renderUI();
+                if (typeof renderNotionTasksTable === 'function') renderNotionTasksTable();
+                if (typeof updateDailyTimetableFocus === 'function') updateDailyTimetableFocus();
+                if (typeof renderTodayTimetableBanner === 'function') renderTodayTimetableBanner();
+                if (typeof renderStudyRunway === 'function') renderStudyRunway();
+                if (typeof updateNotificationBadge === 'function') updateNotificationBadge();
+            }
         },
 
         // Update top-right auth controls (Login button vs User chip)

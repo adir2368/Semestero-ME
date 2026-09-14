@@ -1,5 +1,5 @@
 // Atlas ME - PWA Service Worker
-const CACHE_NAME = 'atlas-me-v1.6.2';
+const CACHE_NAME = 'atlas-me-v1.6.3';
 
 const STATIC_ASSETS = [
     './',
