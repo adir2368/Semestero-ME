@@ -1,17 +1,19 @@
-// Academic Skill Tree - Multi-User Identity & Cloud Sync Engine
-// Complete Account Isolation & Privacy Protection (Zero Cross-Access)
+// Atlas ME - Single-User Authentication & Supabase Cloud Sync Engine
+// Master Password for Adir Moshe: "BenchyTech1"
 
 (function(window) {
     'use strict';
 
-    const ACCOUNTS_REGISTRY_KEY = 'ast_accounts_registry';
-    const ACTIVE_USER_ID_KEY = 'ast_active_user_id';
-    const SUPABASE_CONFIG_KEY = 'ast_supabase_config';
+    const SESSION_USER_KEY = 'ast_logged_in_user';
     const LEGACY_SAVE_KEY = 'academic_skill_tree_save';
+    const SUPABASE_CONFIG_KEY = 'ast_supabase_config';
 
     // Atlas ME Global Supabase Cloud Configuration
     const DEFAULT_SUPABASE_URL = 'https://asxpbepuvhbafsjlogag.supabase.co';
     const DEFAULT_SUPABASE_ANON_KEY = 'sb_publishable_BdrsUJFsNOGssCY7Gv7eNQ_UXkm2zFy';
+
+    // Master Passwords for Developer Adir Moshe
+    const MASTER_PASSWORDS = ['BenchyTech1', 'adir2368'];
 
     let supabaseClient = null;
     let realtimeChannel = null;
@@ -32,89 +34,64 @@
     }
 
     const AuthSync = {
-        // Initialize accounts system
+        // Initialize single-user auth & cloud sync
         init() {
-            let registry = this.getAccounts();
+            let sessionUser = localStorage.getItem(SESSION_USER_KEY);
 
-            if (!registry || registry.length === 0) {
-                // If this is Adir's existing laptop/browser with existing 39.5 credits save:
-                if (hasAdirLocalData()) {
-                    registry = [{
-                        id: 'adir_moshe',
-                        name: 'אדיר משה',
-                        email: 'adir.moshe@campus.technion.ac.il',
-                        avatar: '🎓',
-                        role: 'developer',
-                        startingSemester: 3,
-                        createdAt: 1726265000000,
-                        lastActive: Date.now()
-                    }];
-                    localStorage.setItem(ACTIVE_USER_ID_KEY, 'adir_moshe');
-                } else {
-                    // This is a NEW VISITOR / FRIEND:
-                    // Create an isolated personal student account for THEM.
-                    // Adir Moshe is NOT added to their registry! Zero cross-access.
-                    const newStudent = {
-                        id: 'student_' + Date.now().toString(36),
-                        name: 'סטודנט להנדסת מכונות',
-                        email: '',
-                        avatar: '👤',
-                        role: 'student',
-                        startingSemester: 1,
-                        createdAt: Date.now(),
-                        lastActive: Date.now()
-                    };
-                    registry = [newStudent];
-                    localStorage.setItem(ACTIVE_USER_ID_KEY, newStudent.id);
-                }
-                this.saveAccounts(registry);
-            }
-
-            let activeId = localStorage.getItem(ACTIVE_USER_ID_KEY);
-            if (!activeId || !registry.find(a => a.id === activeId)) {
-                activeId = registry[0].id;
-                localStorage.setItem(ACTIVE_USER_ID_KEY, activeId);
+            // Auto-login on Adir's existing developer PC if local save is present
+            if (!sessionUser && hasAdirLocalData()) {
+                sessionUser = 'adir_moshe';
+                localStorage.setItem(SESSION_USER_KEY, 'adir_moshe');
             }
 
             this.initSupabaseFromStorage();
-            this.updateHudUserBadge();
-            console.log('[AuthSync] Initialized. Active account:', this.getActiveUser().name);
+            this.updateHudAuthControls();
+            console.log('[AuthSync] Initialized. Logged in:', this.isLoggedIn() ? this.getActiveUser().name : 'אורח (Logged Out)');
         },
 
-        // Get list of all accounts registered on this device
-        getAccounts() {
-            try {
-                const data = localStorage.getItem(ACCOUNTS_REGISTRY_KEY);
-                return data ? JSON.parse(data) : [];
-            } catch (e) {
-                console.error('[AuthSync] Error loading accounts registry:', e);
-                return [];
-            }
+        // Check if currently authenticated
+        isLoggedIn() {
+            const uid = localStorage.getItem(SESSION_USER_KEY);
+            return !!(uid && uid !== 'guest');
         },
 
-        // Save accounts registry
-        saveAccounts(registry) {
-            try {
-                localStorage.setItem(ACCOUNTS_REGISTRY_KEY, JSON.stringify(registry));
-            } catch (e) {
-                console.error('[AuthSync] Error saving accounts registry:', e);
-            }
-        },
-
-        // Get currently active user object
+        // Get active user object
         getActiveUser() {
-            const registry = this.getAccounts();
-            const activeId = localStorage.getItem(ACTIVE_USER_ID_KEY);
-            const user = registry.find(a => a.id === activeId);
-            return user || registry[0] || { id: 'guest', name: 'אורח', avatar: '👤', role: 'student', startingSemester: 1 };
+            if (!this.isLoggedIn()) {
+                return { id: 'guest', name: 'אורח', avatar: '👤', role: 'guest', startingSemester: 1 };
+            }
+            const uid = localStorage.getItem(SESSION_USER_KEY);
+            if (uid === 'adir_moshe') {
+                return {
+                    id: 'adir_moshe',
+                    name: 'אדיר משה',
+                    email: 'adir.moshe@campus.technion.ac.il',
+                    avatar: '🎓',
+                    role: 'developer',
+                    startingSemester: 3
+                };
+            }
+            try {
+                const saved = localStorage.getItem('ast_profile_' + uid);
+                if (saved) return JSON.parse(saved);
+            } catch (e) {}
+
+            return {
+                id: uid,
+                name: 'סטודנט להנדסת מכונות',
+                email: '',
+                avatar: '👤',
+                role: 'student',
+                startingSemester: 1
+            };
         },
 
-        // Check if currently active account is Adir Moshe (Primary Account)
+        // Check if active account is Adir Moshe
         isAdirActive() {
-            return this.getActiveUser().id === 'adir_moshe';
+            return this.isLoggedIn() && this.getActiveUser().id === 'adir_moshe';
         },
 
-        // Get storage key for a specific user ID
+        // Get storage key for active user
         getUserStorageKey(userId) {
             if (userId === 'adir_moshe') {
                 return LEGACY_SAVE_KEY;
@@ -125,6 +102,13 @@
         // Load state for active user
         loadActiveUserState() {
             const user = this.getActiveUser();
+            if (!this.isLoggedIn()) {
+                if (typeof window.getCleanCurriculumState === 'function') {
+                    return window.getCleanCurriculumState();
+                }
+                return null;
+            }
+
             const key = this.getUserStorageKey(user.id);
             const saved = localStorage.getItem(key);
 
@@ -135,18 +119,16 @@
                         return parsed;
                     }
                 } catch (e) {
-                    console.error('[AuthSync] Failed to parse saved state for user', user.id, e);
+                    console.error('[AuthSync] Failed to parse local state:', e);
                 }
             }
 
-            // If no save exists:
-            if (user.id === 'adir_moshe') {
-                if (typeof PRELOADED_USER_STATE !== 'undefined') {
-                    return JSON.parse(JSON.stringify(PRELOADED_USER_STATE));
-                }
+            // Fallback for Adir Moshe
+            if (user.id === 'adir_moshe' && typeof PRELOADED_USER_STATE !== 'undefined') {
+                return JSON.parse(JSON.stringify(PRELOADED_USER_STATE));
             }
 
-            // New friend / student account gets clean syllabus template
+            // Clean syllabus template for fresh student
             if (typeof window.getCleanCurriculumState === 'function') {
                 const cleanState = window.getCleanCurriculumState();
                 cleanState.currentActiveSemester = user.startingSemester || 1;
@@ -165,9 +147,209 @@
                 if (user.id === 'adir_moshe') {
                     localStorage.setItem(LEGACY_SAVE_KEY, JSON.stringify(state));
                 }
-                this.triggerDebouncedCloudSync(state);
+                if (this.isLoggedIn()) {
+                    this.triggerDebouncedCloudSync(state);
+                }
             } catch (e) {
                 console.error('[AuthSync] Failed to save state locally:', e);
+            }
+        },
+
+        // Login with Password (Master Password: BenchyTech1)
+        async loginWithPassword(password, username) {
+            const cleanPass = (password || '').trim();
+            const cleanUser = (username || '').trim();
+
+            if (!cleanPass) {
+                alert('נא להזין סיסמה.');
+                return false;
+            }
+
+            // 1. Check Master Password for Adir Moshe
+            if (MASTER_PASSWORDS.includes(cleanPass)) {
+                localStorage.setItem(SESSION_USER_KEY, 'adir_moshe');
+                this.setupRealtimeSubscription();
+                await this.pullLatestStateFromCloud(true);
+                this.refreshAllAppViews();
+                this.updateHudAuthControls();
+                this.closeAuthModal();
+                if (typeof showHudToast === 'function') {
+                    showHudToast('שלום אדיר! התחברת בהצלחה 🎓', 'success');
+                } else {
+                    alert('שלום אדיר! התחברת בהצלחה.');
+                }
+                return true;
+            }
+
+            // 2. Check Other Students via Supabase Cloud
+            if (!supabaseClient) {
+                alert('חיבור הענן אינו זמין כרגע. נסה שוב בעוד מספר שניות.');
+                return false;
+            }
+
+            try {
+                let query = supabaseClient.from('user_states').select('*');
+                if (cleanUser) {
+                    query = query.or(`user_name.eq.${cleanUser},user_email.eq.${cleanUser},user_id.eq.${cleanUser}`);
+                }
+
+                const { data, error } = await query;
+                if (error || !data || data.length === 0) {
+                    alert('לא נמצא משתמש תואם. וודא ששם המשתמש והסיסמה נכונים.');
+                    return false;
+                }
+
+                // Match user with password stored in state_json
+                const matched = data.find(row => {
+                    const s = row.state_json;
+                    return s && (s.account_password === cleanPass || s.password === cleanPass);
+                });
+
+                if (!matched) {
+                    alert('סיסמה שגויה. נסה שוב.');
+                    return false;
+                }
+
+                // Login successful!
+                localStorage.setItem(SESSION_USER_KEY, matched.user_id);
+                localStorage.setItem('ast_profile_' + matched.user_id, JSON.stringify({
+                    id: matched.user_id,
+                    name: matched.user_name || 'סטודנט',
+                    email: matched.user_email || '',
+                    avatar: '👤',
+                    role: 'student'
+                }));
+
+                const key = this.getUserStorageKey(matched.user_id);
+                localStorage.setItem(key, JSON.stringify(matched.state_json));
+                if (window.setGlobalGameState) {
+                    window.setGlobalGameState(matched.state_json);
+                }
+
+                this.setupRealtimeSubscription();
+                this.refreshAllAppViews();
+                this.updateHudAuthControls();
+                this.closeAuthModal();
+
+                if (typeof showHudToast === 'function') {
+                    showHudToast('התחברת בהצלחה! שלום ' + matched.user_name + ' 🚀', 'success');
+                } else {
+                    alert('התחברת בהצלחה!');
+                }
+                return true;
+            } catch (err) {
+                console.error('[AuthSync] Login error:', err);
+                alert('אירעה שגיאה בעת ההתחברות: ' + err.message);
+                return false;
+            }
+        },
+
+        // Register a new student account
+        async registerStudent(params) {
+            const name = (params.name || '').trim();
+            const password = (params.password || '').trim();
+            const email = (params.email || '').trim();
+            const startingSemester = parseInt(params.startingSemester) || 1;
+
+            if (!name) {
+                alert('נא להזין שם מלא.');
+                return false;
+            }
+            if (!password || password.length < 4) {
+                alert('נא להזין סיסמה בת לפחות 4 תווים.');
+                return false;
+            }
+
+            const uid = 'student_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 3);
+            let cleanState = null;
+            if (typeof window.getCleanCurriculumState === 'function') {
+                cleanState = window.getCleanCurriculumState();
+            } else {
+                cleanState = { courses: {}, credits: 0, gpa: 0 };
+            }
+            cleanState.currentActiveSemester = startingSemester;
+            cleanState.account_password = password;
+            cleanState.student_name = name;
+
+            // Push to Supabase Cloud
+            if (supabaseClient) {
+                try {
+                    await supabaseClient.from('user_states').upsert({
+                        user_id: uid,
+                        user_name: name,
+                        user_email: email,
+                        state_json: cleanState,
+                        updated_at: new Date().toISOString()
+                    });
+                } catch (e) {
+                    console.warn('[AuthSync] Cloud register notice:', e);
+                }
+            }
+
+            // Save locally
+            localStorage.setItem(SESSION_USER_KEY, uid);
+            localStorage.setItem('ast_profile_' + uid, JSON.stringify({
+                id: uid,
+                name: name,
+                email: email,
+                avatar: '👤',
+                role: 'student',
+                startingSemester: startingSemester
+            }));
+            const key = this.getUserStorageKey(uid);
+            localStorage.setItem(key, JSON.stringify(cleanState));
+
+            if (window.setGlobalGameState) {
+                window.setGlobalGameState(cleanState);
+            }
+
+            this.setupRealtimeSubscription();
+            this.refreshAllAppViews();
+            this.updateHudAuthControls();
+            this.closeAuthModal();
+
+            if (typeof showHudToast === 'function') {
+                showHudToast('ברוך הבא ל-Atlas ME, ' + name + '! 🎉', 'success');
+            } else {
+                alert('החשבון נוצר בהצלחה!');
+            }
+            return true;
+        },
+
+        // Logout active user
+        logout() {
+            if (!confirm('האם אתה בטוח שברצונך להתנתק מהחשבון?')) {
+                return;
+            }
+
+            // 1. Unsubscribe from real-time channel
+            if (realtimeChannel && supabaseClient) {
+                try {
+                    supabaseClient.removeChannel(realtimeChannel);
+                } catch (e) {}
+                realtimeChannel = null;
+            }
+
+            // 2. Clear session
+            localStorage.removeItem(SESSION_USER_KEY);
+
+            // 3. Reset to clean empty syllabus
+            if (typeof window.getCleanCurriculumState === 'function') {
+                const clean = window.getCleanCurriculumState();
+                if (window.setGlobalGameState) {
+                    window.setGlobalGameState(clean);
+                }
+            }
+
+            // 4. Update UI
+            this.refreshAllAppViews();
+            this.updateHudAuthControls();
+            this.closeAuthModal();
+
+            if (typeof showHudToast === 'function') {
+                showHudToast('התנתקת בהצלחה. להתחברות מחדש לחץ על "התחברות". 👋', 'info');
+            } else {
+                alert('התנתקת בהצלחה.');
             }
         },
 
@@ -181,172 +363,171 @@
             if (typeof renderTodayTimetableBanner === 'function') renderTodayTimetableBanner();
             if (typeof renderStudyRunway === 'function') renderStudyRunway();
             if (typeof updateNotificationBadge === 'function') updateNotificationBadge();
-            this.updateHudUserBadge();
         },
 
-        // Switch active account and force full UI refresh
-        async switchAccount(targetUserId) {
-            const registry = this.getAccounts();
-            const targetUser = registry.find(a => a.id === targetUserId);
-            if (!targetUser) {
-                console.error('[AuthSync] User not found:', targetUserId);
-                return false;
-            }
+        // Update top-right auth controls (Login button vs User chip + Logout button)
+        updateHudAuthControls() {
+            const container = document.getElementById('hud-auth-controls');
+            if (!container) return;
 
-            // 1. Save current state first
-            if (window.getGlobalGameState && window.getGlobalGameState()) {
-                this.saveActiveUserState(window.getGlobalGameState());
-            }
-
-            // 2. Set new active user ID
-            localStorage.setItem(ACTIVE_USER_ID_KEY, targetUserId);
-            targetUser.lastActive = Date.now();
-            this.saveAccounts(registry);
-
-            // 3. Load target user state
-            const newState = this.loadActiveUserState();
-            if (newState && window.setGlobalGameState) {
-                window.setGlobalGameState(newState);
-            }
-
-            // 4. Force full UI re-render across all modules
-            this.refreshAllAppViews();
-
-            if (typeof showHudToast === 'function') {
-                showHudToast('הועברת לחשבון: ' + targetUser.name + ' ' + targetUser.avatar, 'info');
-            }
-
-            // 5. Re-subscribe realtime channel for this account and pull remote updates
-            this.setupRealtimeSubscription();
-            this.pullLatestStateFromCloud();
-
-            // 6. If new account hasn't completed onboarding, prompt onboarding modal
-            if (targetUser.id !== 'adir_moshe' && (!newState || !newState.hasCompletedOnboarding)) {
-                this.openOnboardingModal();
-            }
-
-            return true;
-        },
-
-        // Create a new account
-        createAccount(params) {
-            const name = (params.name || 'סטודנט חדש').trim();
-            const email = (params.email || '').trim();
-            const startingSemester = parseInt(params.startingSemester) || 1;
-            const avatar = params.avatar || '👤';
-
-            const registry = this.getAccounts();
-            const id = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4);
-            const newAccount = {
-                id: id,
-                name: name,
-                email: email,
-                avatar: avatar,
-                role: 'student',
-                startingSemester: startingSemester,
-                createdAt: Date.now(),
-                lastActive: Date.now()
-            };
-
-            registry.push(newAccount);
-            this.saveAccounts(registry);
-
-            // Initialize clean state
-            let cleanState = null;
-            if (typeof window.getCleanCurriculumState === 'function') {
-                cleanState = window.getCleanCurriculumState();
-                cleanState.currentActiveSemester = startingSemester;
-                cleanState.hasCompletedOnboarding = false;
-            }
-
-            const key = this.getUserStorageKey(id);
-            if (cleanState) {
-                localStorage.setItem(key, JSON.stringify(cleanState));
-            }
-
-            // Switch to this new account immediately
-            this.switchAccount(id);
-            return newAccount;
-        },
-
-        // Update active user's details (Name / Avatar)
-        updateActiveUserDetails(name, avatar) {
-            const registry = this.getAccounts();
-            const activeUser = this.getActiveUser();
-            const acc = registry.find(a => a.id === activeUser.id);
-            if (acc) {
-                if (name) acc.name = name.trim();
-                if (avatar) acc.avatar = avatar;
-                this.saveAccounts(registry);
-                this.updateHudUserBadge();
-                this.renderAccountsList();
-            }
-        },
-
-        // Delete an account
-        deleteAccount(userId) {
-            if (userId === 'adir_moshe') {
-                alert('לא ניתן למחוק את החשבון הראשי.');
-                return false;
-            }
-            if (!confirm('האם אתה בטוח שברצונך למחוק חשבון זה ואת כל הנתונים שלו?')) {
-                return false;
-            }
-
-            let registry = this.getAccounts();
-            registry = registry.filter(a => a.id !== userId);
-            this.saveAccounts(registry);
-            localStorage.removeItem('ast_user_state_' + userId);
-
-            const activeId = localStorage.getItem(ACTIVE_USER_ID_KEY);
-            if (activeId === userId) {
-                if (registry.length > 0) {
-                    this.switchAccount(registry[0].id);
-                } else {
-                    // Create fresh student account
-                    this.createAccount({ name: 'סטודנט להנדסת מכונות', startingSemester: 1 });
-                }
+            const isOnline = !!supabaseClient;
+            if (this.isLoggedIn()) {
+                const user = this.getActiveUser();
+                container.innerHTML = `
+                    <button type="button" class="btn-hud-user-chip" id="btn-hud-user-chip" onclick="AuthSync.openAuthModal()" title="לחץ לצפייה בפרטי חשבון" aria-label="פרופיל משתמש">
+                        <span class="user-avatar-pill">${user.avatar}</span>
+                        <span class="user-name-text">${user.name}</span>
+                        <span class="login-status-dot ${isOnline ? 'connected' : 'offline'}" id="top-login-status-dot"></span>
+                    </button>
+                    <button type="button" class="btn-hud-logout" id="btn-hud-logout" onclick="AuthSync.logout()" title="התנתקות מהחשבון" aria-label="התנתקות">
+                        <span class="logout-icon">🚪</span>
+                        <span class="logout-text">התנתקות</span>
+                    </button>
+                `;
             } else {
-                this.renderAccountsList();
+                container.innerHTML = `
+                    <button type="button" class="btn-hud-login-top" id="btn-hud-login-top" onclick="AuthSync.openAuthModal()" title="התחברות ל-Atlas ME" aria-label="התחברות">
+                        <span class="login-icon">🔑</span>
+                        <span class="login-text">התחברות</span>
+                    </button>
+                `;
             }
-            return true;
         },
 
-        // Unlock Adir Moshe's developer profile using secret passphrase
-        unlockDeveloperProfile(passphrase) {
-            if (passphrase === 'adir2368') {
-                let registry = this.getAccounts();
-                if (!registry.find(a => a.id === 'adir_moshe')) {
-                    registry.unshift({
-                        id: 'adir_moshe',
-                        name: 'אדיר משה',
-                        email: 'adir.moshe@campus.technion.ac.il',
-                        avatar: '🎓',
-                        role: 'developer',
-                        startingSemester: 3,
-                        createdAt: 1726265000000,
-                        lastActive: Date.now()
-                    });
-                    this.saveAccounts(registry);
-                }
-                this.switchAccount('adir_moshe');
-                if (typeof showToastNotification === 'function') {
-                    showToastNotification('שלום אדיר! חשבון המפתח שוחזר והופעל בהצלחה.', 'success');
-                } else if (typeof alert !== 'undefined') {
-                    alert('שלום אדיר! חשבון המפתח שלך שוחזר והופעל בהצלחה.');
-                }
-                return true;
+        // Open Auth & Profile Modal
+        openAuthModal(tab) {
+            const modal = document.getElementById('auth-modal');
+            if (!modal) return;
+            this.renderAuthModal(tab);
+            modal.classList.add('active');
+        },
+
+        // Close Auth Modal
+        closeAuthModal() {
+            const modal = document.getElementById('auth-modal');
+            if (modal) modal.classList.remove('active');
+        },
+
+        // Backward compatibility: alias openAccountsModal to openAuthModal
+        openAccountsModal() {
+            this.openAuthModal();
+        },
+
+        // Render Auth Modal Content dynamically based on auth state
+        renderAuthModal(activeTab) {
+            const container = document.getElementById('auth-modal-content-container');
+            if (!container) return;
+
+            if (this.isLoggedIn()) {
+                // Render Logged-In User Profile View
+                const user = this.getActiveUser();
+                const isDev = user.id === 'adir_moshe';
+                container.innerHTML = `
+                    <div class="modal-header">
+                        <h2 style="display: flex; align-items: center; gap: 10px; margin: 0; font-size: 1.25rem;">
+                            <span>${user.avatar}</span> <span>פרטי חשבון מחובר</span>
+                        </h2>
+                        <div class="cloud-status-pill connected" style="margin-top: 6px;">
+                            🟢 <span>מסונכרן בזמן אמת לענן</span>
+                        </div>
+                    </div>
+                    <div class="modal-body" style="padding-top: 15px;">
+                        <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 8px; padding: 14px; margin-bottom: 16px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                <strong style="font-size: 1.05rem; color: #f8fafc;">${user.name}</strong>
+                                <span style="font-size: 0.76rem; background: rgba(56, 189, 248, 0.2); color: #38bdf8; padding: 2px 8px; border-radius: 12px;">
+                                    ${isDev ? 'מפתח ראשי 🎓' : 'סטודנט 👤'}
+                                </span>
+                            </div>
+                            <div style="font-size: 0.82rem; color: #94a3b8; line-height: 1.5;">
+                                <div>מזהה חשבון: <code style="color: #38bdf8; font-family: monospace;">${user.id}</code></div>
+                                ${user.email ? '<div>אימייל: ' + user.email + '</div>' : ''}
+                                <div>סטטוס סנכרון: 🟢 פעיל ומסונכרן אוטומטית בין מכשירים</div>
+                            </div>
+                        </div>
+
+                        <div style="display: flex; gap: 10px;">
+                            <button type="button" class="btn btn-secondary" style="flex: 1;" onclick="AuthSync.syncToCloud(); if (typeof showHudToast==='function') showHudToast('סונכרן לענן ☁️', 'success');">
+                                🔄 סנכרן עכשיו לענן
+                            </button>
+                            <button type="button" class="btn btn-danger" style="flex: 1;" onclick="AuthSync.logout()">
+                                🚪 התנתקות מהחשבון
+                            </button>
+                        </div>
+                    </div>
+                `;
             } else {
-                if (typeof showToastNotification === 'function') {
-                    showToastNotification('סיסמת מפתח שגויה.', 'danger');
-                } else if (typeof alert !== 'undefined') {
-                    alert('סיסמת מפתח שגויה.');
-                }
-                return false;
+                // Render Login / Register View
+                const isRegister = activeTab === 'register';
+                container.innerHTML = `
+                    <div class="modal-header">
+                        <h2 style="display: flex; align-items: center; gap: 10px; margin: 0; font-size: 1.25rem;">
+                            <span>🔑</span> <span>התחברות ל-Atlas ME</span>
+                        </h2>
+                        <p style="margin: 6px 0 0 0; font-size: 0.82rem; color: var(--text-muted);">
+                            ${isRegister ? 'יצירת חשבון סטודנט חדש וחיבור לענן' : 'הזן סיסמה להתחברות לחשבון האישי שלך (למשל: BenchyTech1 לאדיר)'}
+                        </p>
+                    </div>
+                    <div class="modal-body" style="padding-top: 15px;">
+                        <div style="display: flex; gap: 8px; margin-bottom: 14px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px;">
+                            <button type="button" class="btn btn-sm ${!isRegister ? 'btn-primary' : 'btn-outline'}" onclick="AuthSync.renderAuthModal('login')" style="flex: 1;">
+                                🔑 התחברות
+                            </button>
+                            <button type="button" class="btn btn-sm ${isRegister ? 'btn-primary' : 'btn-outline'}" onclick="AuthSync.renderAuthModal('register')" style="flex: 1;">
+                                ✨ הרשמה (סטודנט חדש)
+                            </button>
+                        </div>
+
+                        ${!isRegister ? `
+                            <form onsubmit="event.preventDefault(); const p = document.getElementById('auth-password-input').value; const u = document.getElementById('auth-username-input').value; AuthSync.loginWithPassword(p, u);">
+                                <div class="form-group" style="margin-bottom: 12px;">
+                                    <label style="display: block; font-size: 0.82rem; color: #f8fafc; font-weight: 600; margin-bottom: 4px;">סיסמה (Password):</label>
+                                    <input type="password" id="auth-password-input" class="form-input" style="width: 100%; padding: 8px 12px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff; font-size: 0.9rem;" placeholder="הזן סיסמה (BenchyTech1 לאדיר)" required autofocus>
+                                </div>
+                                <div class="form-group" style="margin-bottom: 16px;">
+                                    <label style="display: block; font-size: 0.78rem; color: var(--text-muted); margin-bottom: 4px;">שם משתמש / אימייל (אופציונלי לאדיר):</label>
+                                    <input type="text" id="auth-username-input" class="form-input" style="width: 100%; padding: 7px 10px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff; font-size: 0.82rem;" placeholder="אדיר משה / אימייל">
+                                </div>
+                                <button type="submit" class="btn btn-primary btn-block" style="width: 100%; padding: 10px; font-weight: 700; font-size: 0.95rem;">
+                                    🚀 התחבר עכשיו
+                                </button>
+                            </form>
+                        ` : `
+                            <form onsubmit="event.preventDefault(); const n = document.getElementById('reg-name-input').value; const p = document.getElementById('reg-password-input').value; const s = document.getElementById('reg-sem-select').value; const e = document.getElementById('reg-email-input').value; AuthSync.registerStudent({ name: n, password: p, startingSemester: s, email: e });">
+                                <div class="form-group" style="margin-bottom: 10px;">
+                                    <label style="display: block; font-size: 0.82rem; color: #f8fafc; font-weight: 600; margin-bottom: 4px;">שם מלא / כינוי:</label>
+                                    <input type="text" id="reg-name-input" class="form-input" style="width: 100%; padding: 7px 10px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff;" placeholder="למשל: דניאל כהן" required>
+                                </div>
+                                <div class="form-group" style="margin-bottom: 10px;">
+                                    <label style="display: block; font-size: 0.82rem; color: #f8fafc; font-weight: 600; margin-bottom: 4px;">סיסמה אישית:</label>
+                                    <input type="password" id="reg-password-input" class="form-input" style="width: 100%; padding: 7px 10px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff;" placeholder="בחר סיסמה" required minlength="4">
+                                </div>
+                                <div class="form-group" style="margin-bottom: 10px;">
+                                    <label style="display: block; font-size: 0.82rem; color: var(--text-muted); margin-bottom: 4px;">איזה סמסטר אתה מתחיל עכשיו?</label>
+                                    <select id="reg-sem-select" class="form-select" style="width: 100%; padding: 7px 10px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff;">
+                                        <option value="1">סמסטר א׳ (שנה א׳ - מתחיל מאפס)</option>
+                                        <option value="2">סמסטר ב׳ (שנה א׳)</option>
+                                        <option value="3">סמסטר ג׳ (שנה ב׳)</option>
+                                        <option value="4">סמסטר ד׳ (שנה ב׳)</option>
+                                        <option value="5">סמסטר ה׳ (שנה ג׳)</option>
+                                        <option value="6">סמסטר ו׳ (שנה ג׳)</option>
+                                    </select>
+                                </div>
+                                <div class="form-group" style="margin-bottom: 14px;">
+                                    <label style="display: block; font-size: 0.78rem; color: var(--text-muted); margin-bottom: 4px;">אימייל (אופציונלי):</label>
+                                    <input type="email" id="reg-email-input" class="form-input" style="width: 100%; padding: 7px 10px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff; font-size: 0.82rem;" placeholder="student@campus.technion.ac.il">
+                                </div>
+                                <button type="submit" class="btn btn-primary btn-block" style="width: 100%; padding: 10px; font-weight: 700; font-size: 0.95rem;">
+                                    ✨ צור חשבון והתחל
+                                </button>
+                            </form>
+                        `}
+                    </div>
+                `;
             }
         },
 
-        // Initialize Supabase if config is present (or use Atlas ME default cloud)
+        // Initialize Supabase Client
         initSupabaseFromStorage() {
             let url = DEFAULT_SUPABASE_URL;
             let anonKey = DEFAULT_SUPABASE_ANON_KEY;
@@ -360,30 +541,28 @@
                         anonKey = conf.anonKey.trim();
                     }
                 }
-            } catch (e) {
-                console.warn('[AuthSync] Error parsing stored Supabase config:', e);
-            }
+            } catch (e) {}
 
             if (url && anonKey && window.supabase) {
                 try {
                     supabaseClient = window.supabase.createClient(url, anonKey);
                     console.log('[AuthSync] Supabase Cloud connected to:', url);
-                    this.updateCloudStatusIndicator(true, 'ענן מחובר');
-                    this.setupRealtimeSubscription();
-                    this.pullLatestStateFromCloud();
+                    if (this.isLoggedIn()) {
+                        this.setupRealtimeSubscription();
+                        this.pullLatestStateFromCloud();
+                    }
                     return;
                 } catch (e) {
                     console.warn('[AuthSync] Supabase client init error:', e);
                 }
             }
-            this.updateCloudStatusIndicator(false, 'אופליין');
         },
 
         // Setup real-time postgres changes listener for active user
         setupRealtimeSubscription() {
-            if (!supabaseClient) return;
+            if (!supabaseClient || !this.isLoggedIn()) return;
             const user = this.getActiveUser();
-            if (!user || !user.id) return;
+            if (!user || !user.id || user.id === 'guest') return;
 
             if (realtimeChannel) {
                 try {
@@ -427,9 +606,7 @@
                     )
                     .subscribe((status) => {
                         console.log('[AuthSync Realtime] Channel status for', user.id, ':', status);
-                        if (status === 'SUBSCRIBED') {
-                            this.updateCloudStatusIndicator(true, 'סנכרון חי');
-                        }
+                        this.updateHudAuthControls();
                     });
             } catch (err) {
                 console.warn('[AuthSync] Realtime subscribe error:', err);
@@ -438,9 +615,9 @@
 
         // Pull latest state for active user from Supabase Cloud
         async pullLatestStateFromCloud(force = false) {
-            if (!supabaseClient) return null;
+            if (!supabaseClient || !this.isLoggedIn()) return null;
             const user = this.getActiveUser();
-            if (!user || !user.id) return null;
+            if (!user || !user.id || user.id === 'guest') return null;
 
             try {
                 const { data, error } = await supabaseClient
@@ -469,12 +646,10 @@
                         }
                         this.refreshAllAppViews();
                         console.log('[AuthSync] Pulled remote state for:', user.name);
-                        this.updateCloudStatusIndicator(true, 'מעודכן מהענן');
                         return remoteState;
                     }
-                } else {
-                    // No cloud record yet for this user: initial upload
-                    console.log('[AuthSync] First-time cloud sync for user:', user.name);
+                } else if (user.id === 'adir_moshe') {
+                    // Upload initial local state to cloud if missing
                     this.syncToCloud();
                 }
             } catch (e) {
@@ -483,94 +658,9 @@
             return null;
         },
 
-        // Pair device with a sync code or developer passphrase
-        async pairAccountWithSyncCode(code) {
-            if (!code || !code.trim()) {
-                alert('נא להזין קוד סנכרון.');
-                return false;
-            }
-            const cleanCode = code.trim();
-
-            // Adir Moshe's developer passphrase
-            if (cleanCode === 'adir2368') {
-                const ok = this.unlockDeveloperProfile('adir2368');
-                if (ok) {
-                    await this.pullLatestStateFromCloud(true);
-                }
-                return ok;
-            }
-
-            if (!supabaseClient) {
-                alert('חיבור הענן אינו זמין כרגע.');
-                return false;
-            }
-
-            try {
-                const { data, error } = await supabaseClient
-                    .from('user_states')
-                    .select('*')
-                    .eq('user_id', cleanCode)
-                    .maybeSingle();
-
-                if (error || !data) {
-                    alert('לא נמצא חשבון בענן עם קוד סנכרון זה. וודא שהקוד תואם בדיוק לקוד המופיע במכשיר המקורי.');
-                    return false;
-                }
-
-                // Account found in cloud! Add to device accounts registry
-                let registry = this.getAccounts();
-                let acc = registry.find(a => a.id === data.user_id);
-                if (!acc) {
-                    acc = {
-                        id: data.user_id,
-                        name: data.user_name || 'סטודנט מסונכרן',
-                        email: data.user_email || '',
-                        avatar: data.user_id === 'adir_moshe' ? '🎓' : '👤',
-                        role: data.user_id === 'adir_moshe' ? 'developer' : 'student',
-                        startingSemester: 1,
-                        createdAt: Date.now(),
-                        lastActive: Date.now()
-                    };
-                    registry.push(acc);
-                    this.saveAccounts(registry);
-                }
-
-                const key = this.getUserStorageKey(data.user_id);
-                localStorage.setItem(key, JSON.stringify(data.state_json));
-                if (data.user_id === 'adir_moshe') {
-                    localStorage.setItem(LEGACY_SAVE_KEY, JSON.stringify(data.state_json));
-                }
-
-                await this.switchAccount(data.user_id);
-                if (typeof showHudToast === 'function') {
-                    showHudToast('החשבון ' + acc.name + ' חובר וסונכרן בהצלחה! ☁️', 'success');
-                } else {
-                    alert('החשבון ' + acc.name + ' חובר וסונכרן בהצלחה!');
-                }
-                const modal = document.getElementById('accounts-modal');
-                if (modal) modal.classList.remove('active');
-                return true;
-            } catch (err) {
-                console.error('[AuthSync] Error pairing account with code:', err);
-                alert('אירעה שגיאה בחיבור לחשבון: ' + err.message);
-                return false;
-            }
-        },
-
-        // Set Supabase configuration
-        setSupabaseConfig(url, anonKey) {
-            if (!url || !anonKey) {
-                localStorage.removeItem(SUPABASE_CONFIG_KEY);
-            } else {
-                localStorage.setItem(SUPABASE_CONFIG_KEY, JSON.stringify({ url: url.trim(), anonKey: anonKey.trim() }));
-            }
-            this.initSupabaseFromStorage();
-            return true;
-        },
-
         // Debounced sync to Supabase Cloud
         triggerDebouncedCloudSync(state) {
-            if (!supabaseClient) return;
+            if (!supabaseClient || !this.isLoggedIn()) return;
             clearTimeout(syncTimeout);
             syncTimeout = setTimeout(() => {
                 this.syncToCloud(state);
@@ -579,11 +669,10 @@
 
         // Force immediate sync to cloud
         async syncToCloud(stateToSync) {
-            if (!supabaseClient) {
-                this.updateCloudStatusIndicator(false);
-                return;
-            }
+            if (!supabaseClient || !this.isLoggedIn()) return;
             const user = this.getActiveUser();
+            if (!user || !user.id || user.id === 'guest') return;
+
             const state = stateToSync || (window.getGlobalGameState ? window.getGlobalGameState() : window.gameState);
             if (!state) return;
 
@@ -592,7 +681,7 @@
                     .from('user_states')
                     .upsert({
                         user_id: user.id,
-                        user_email: user.email,
+                        user_email: user.email || '',
                         user_name: user.name,
                         state_json: state,
                         updated_at: new Date().toISOString()
@@ -600,226 +689,11 @@
 
                 if (error) {
                     console.error('[AuthSync] Cloud sync error:', error);
-                    this.updateCloudStatusIndicator(false, 'שגיאת סנכרון');
                 } else {
                     console.log('[AuthSync] Synced state to cloud for user:', user.name);
-                    this.updateCloudStatusIndicator(true, 'מסונכרן לענן');
                 }
             } catch (err) {
                 console.error('[AuthSync] Network error during cloud sync:', err);
-                this.updateCloudStatusIndicator(false, 'אופליין');
-            }
-        },
-
-        // Update HUD user widget
-        updateHudUserBadge() {
-            const user = this.getActiveUser();
-            const nameEl = document.getElementById('hud-active-user-name');
-            const avatarEl = document.getElementById('hud-active-user-avatar');
-            if (nameEl) nameEl.textContent = user.name;
-            if (avatarEl) avatarEl.textContent = user.avatar;
-
-            // Update top-right dedicated login button
-            const topText = document.getElementById('top-login-text');
-            const topIcon = document.getElementById('top-login-icon');
-            const topBtn = document.getElementById('btn-hud-login-top');
-            if (topText) {
-                if (user.id === 'adir_moshe') {
-                    topText.textContent = 'אדיר משה';
-                    if (topIcon) topIcon.textContent = '🎓';
-                    if (topBtn) topBtn.classList.add('logged-in');
-                } else if (user.name && user.name !== 'סטודנט להנדסת מכונות' && user.name !== 'סטודנט חדש') {
-                    topText.textContent = user.name;
-                    if (topIcon) topIcon.textContent = user.avatar || '👤';
-                    if (topBtn) topBtn.classList.add('logged-in');
-                } else {
-                    topText.textContent = 'התחברות';
-                    if (topIcon) topIcon.textContent = '🔑';
-                    if (topBtn) topBtn.classList.remove('logged-in');
-                }
-            }
-        },
-
-        // Update cloud status pill in HUD/Settings
-        updateCloudStatusIndicator(isConnected, label) {
-            const statusEl = document.getElementById('hud-cloud-sync-status');
-            if (statusEl) {
-                if (isConnected) {
-                    statusEl.className = 'cloud-status-pill connected';
-                    statusEl.innerHTML = '🟢 <span>' + (label || 'ענן מחובר') + '</span>';
-                } else {
-                    statusEl.className = 'cloud-status-pill offline';
-                    statusEl.innerHTML = '📱 <span>' + (label || 'מקומי (אופליין)') + '</span>';
-                }
-            }
-
-            const dotEl = document.getElementById('top-login-status-dot');
-            if (dotEl) {
-                if (isConnected) {
-                    dotEl.className = 'login-status-dot connected';
-                } else {
-                    dotEl.className = 'login-status-dot offline';
-                }
-            }
-        },
-
-        // Render accounts in the Account Modal
-        renderAccountsList() {
-            const container = document.getElementById('accounts-list-container');
-            if (!container) return;
-
-            const registry = this.getAccounts();
-            const activeId = this.getActiveUser().id;
-
-            container.innerHTML = registry.map(acc => {
-                const isActive = acc.id === activeId;
-                const isDev = acc.id === 'adir_moshe';
-                let actionBtn = '';
-                if (!isActive) {
-                    actionBtn = `<button class="btn btn-sm btn-primary" onclick="AuthSync.switchAccount('${acc.id}'); document.getElementById('accounts-modal').classList.remove('active');">עבור לחשבון</button>`;
-                } else {
-                    actionBtn = '<span class="active-indicator-text">בשימוש כעת</span>';
-                }
-                let deleteBtn = '';
-                if (!isDev && registry.length > 1) {
-                    deleteBtn = `<button class="btn btn-sm btn-danger" onclick="AuthSync.deleteAccount('${acc.id}')" title="מחק חשבון">🗑️</button>`;
-                }
-
-                return '<div class="account-item-card ' + (isActive ? 'active' : '') + '">' +
-                    '<div class="account-item-info">' +
-                        '<span class="account-avatar">' + acc.avatar + '</span>' +
-                        '<div class="account-text">' +
-                            '<div class="account-name-row">' +
-                                '<strong>' + acc.name + '</strong>' +
-                                (isDev ? '<span class="account-badge-dev">מפתח ראשי</span>' : '') +
-                                (isActive ? '<span class="account-badge-active">פעיל</span>' : '') +
-                            '</div>' +
-                            '<span class="account-email">' + (acc.email || 'חשבון מקומי') + ' • סמסטר ' + (acc.startingSemester || 1) + '</span>' +
-                        '</div>' +
-                    '</div>' +
-                    '<div class="account-item-actions">' +
-                        actionBtn +
-                        deleteBtn +
-                    '</div>' +
-                '</div>';
-            }).join('');
-        },
-
-        // Open Account Switcher Modal
-        openAccountsModal() {
-            const modal = document.getElementById('accounts-modal');
-            if (modal) {
-                this.renderAccountsList();
-                const activeUser = this.getActiveUser();
-                const codeDisplay = document.getElementById('current-account-code-display');
-                const badgeDisplay = document.getElementById('active-user-sync-code-badge');
-                if (codeDisplay) codeDisplay.textContent = activeUser.id;
-                if (badgeDisplay) badgeDisplay.textContent = 'קוד: ' + activeUser.id;
-
-                const urlInput = document.getElementById('supabase-url-input');
-                const keyInput = document.getElementById('supabase-key-input');
-                if (urlInput && !urlInput.value) {
-                    urlInput.value = DEFAULT_SUPABASE_URL;
-                }
-                if (keyInput && !keyInput.value) {
-                    keyInput.value = DEFAULT_SUPABASE_ANON_KEY;
-                }
-                modal.classList.add('active');
-            }
-        },
-
-        // Open Onboarding Wizard for new students
-        openOnboardingModal() {
-            const modal = document.getElementById('onboarding-wizard-modal');
-            if (modal) {
-                modal.classList.add('active');
-                this.populateOnboardingCourses();
-            }
-        },
-
-        // Populate course checkboxes in onboarding
-        populateOnboardingCourses() {
-            const container = document.getElementById('onboarding-courses-checklist');
-            const currentState = window.getGlobalGameState ? window.getGlobalGameState() : window.gameState;
-            if (!container || !currentState || !currentState.courses) return;
-
-            const coursesBySem = {};
-            Object.values(currentState.courses).forEach(c => {
-                const sem = c.semester || 1;
-                if (!coursesBySem[sem]) coursesBySem[sem] = [];
-                coursesBySem[sem].push(c);
-            });
-
-            let html = '';
-            for (let sem = 1; sem <= 4; sem++) {
-                if (!coursesBySem[sem]) continue;
-                html += '<div class="onboarding-sem-group">' +
-                    '<div class="onboarding-sem-header">סמסטר ' + sem + '</div>' +
-                    '<div class="onboarding-chips-grid">';
-                
-                coursesBySem[sem].forEach(c => {
-                    const isMastered = c.status === 'mastered';
-                    html += '<label class="onboarding-course-chip ' + (isMastered ? 'selected' : '') + '">' +
-                        '<input type="checkbox" value="' + c.code + '" ' + (isMastered ? 'checked' : '') + ' onchange="this.parentElement.classList.toggle(\'selected\', this.checked)">' +
-                        '<span class="chip-code">' + c.code + '</span>' +
-                        '<span class="chip-name">' + c.name + '</span>' +
-                        '<span class="chip-credits">' + c.credits + ' נק״ז</span>' +
-                    '</label>';
-                });
-
-                html += '</div></div>';
-            }
-            container.innerHTML = html;
-        },
-
-        // Finish onboarding
-        finishOnboarding() {
-            const currentState = window.getGlobalGameState ? window.getGlobalGameState() : window.gameState;
-            if (!currentState || !currentState.courses) return;
-
-            const container = document.getElementById('onboarding-courses-checklist');
-            const semSelect = document.getElementById('onboarding-current-sem-select');
-            const nameInput = document.getElementById('onboarding-student-name-input');
-            
-            const currentSem = semSelect ? parseInt(semSelect.value) : 1;
-            currentState.currentActiveSemester = currentSem;
-
-            // Update user name if entered
-            if (nameInput && nameInput.value.trim()) {
-                this.updateActiveUserDetails(nameInput.value.trim(), '🎓');
-            }
-
-            if (container) {
-                const checkedBoxes = container.querySelectorAll('input[type="checkbox"]:checked');
-                checkedBoxes.forEach(cb => {
-                    const code = cb.value;
-                    if (currentState.courses[code]) {
-                        currentState.courses[code].status = 'mastered';
-                        currentState.courses[code].completed = true;
-                        currentState.courses[code].grade = 85;
-                        if (currentState.courses[code].tasks) {
-                            currentState.courses[code].tasks.forEach(t => {
-                                t.completed = true;
-                                t.status = 'done';
-                            });
-                        }
-                    }
-                });
-            }
-
-            currentState.hasCompletedOnboarding = true;
-            if (window.setGlobalGameState) window.setGlobalGameState(currentState);
-            if (typeof recalculateCourseStates === 'function') recalculateCourseStates();
-            if (typeof updateHud === 'function') updateHud();
-            if (typeof renderUI === 'function') renderUI();
-            if (typeof renderNotionTasksTable === 'function') renderNotionTasksTable();
-            this.saveActiveUserState(currentState);
-
-            const modal = document.getElementById('onboarding-wizard-modal');
-            if (modal) modal.classList.remove('active');
-
-            if (typeof showHudToast === 'function') {
-                showHudToast('ברוך הבא! מסלול התואר שלך הוגדר בהצלחה 🎉', 'success');
             }
         }
     };

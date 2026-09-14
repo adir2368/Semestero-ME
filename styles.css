@@ -168,6 +168,65 @@ body {
     box-shadow: none;
 }
 
+/* Auth Controls & Single User Logout */
+.hud-auth-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.btn-hud-user-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(30, 41, 59, 0.85);
+    border: 1px solid rgba(56, 189, 248, 0.35);
+    color: #f1f5f9;
+    padding: 6px 12px;
+    border-radius: 9999px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.btn-hud-user-chip:hover {
+    border-color: #38bdf8;
+    background: rgba(30, 41, 59, 0.98);
+}
+
+.btn-hud-logout {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: rgba(239, 68, 68, 0.12);
+    border: 1px solid rgba(239, 68, 68, 0.35);
+    color: #fca5a5;
+    padding: 6px 12px;
+    border-radius: 9999px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.15);
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.btn-hud-logout:hover {
+    background: rgba(239, 68, 68, 0.28);
+    border-color: #ef4444;
+    color: #ffffff;
+    box-shadow: 0 0 12px rgba(239, 68, 68, 0.4);
+    transform: translateY(-1px);
+}
+
+.btn-hud-logout:active {
+    transform: scale(0.97);
+}
+
 /* Degree Progress Card (Flagship Centerpiece) */
 .character-card {
     display: flex;
@@ -5143,8 +5202,14 @@ label[for="new-task-xp-input"],
         font-size: 0.58rem !important;
     }
 
+    .hud-auth-controls {
+        order: -1 !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 6px !important;
+    }
+
     .btn-hud-login-top {
-        order: -1 !important; /* Positions button strictly on top-right in RTL */
         padding: 5px 12px !important;
         font-size: 0.78rem !important;
         gap: 6px !important;
@@ -5155,6 +5220,25 @@ label[for="new-task-xp-input"],
         overflow: hidden !important;
         text-overflow: ellipsis !important;
         white-space: nowrap !important;
+    }
+
+    .btn-hud-user-chip {
+        padding: 4px 8px !important;
+        font-size: 0.74rem !important;
+        gap: 4px !important;
+    }
+
+    .btn-hud-user-chip .user-name-text {
+        max-width: 70px !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
+    }
+
+    .btn-hud-logout {
+        padding: 4px 8px !important;
+        font-size: 0.72rem !important;
+        gap: 3px !important;
     }
 
     .character-card {
