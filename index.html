@@ -16,14 +16,26 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Rubik:wght@300;400;500;700;900&display=swap" rel="stylesheet">
     <link rel="icon" type="image/png" href="icon.png">
-    <link rel="stylesheet" href="styles.css?v=1.7.6">
+    <link rel="stylesheet" href="styles.css?v=1.7.9">
     <script>
         (function() {
             try {
                 var ua = navigator.userAgent || '';
-                var isIPhone = /iPhone/i.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1 && window.screen.width < 500);
+                var isTouchPhone = /iPhone|iPod|Android/i.test(ua) || 
+                                   (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1 && Math.min(window.screen.width, window.screen.height) < 600) ||
+                                   (window.innerWidth <= 768);
+                if (isTouchPhone) {
+                    document.documentElement.classList.add('is-mobile-device');
+                    if (document.body) document.body.classList.add('is-mobile-device');
+                }
+                var isIPhone = /iPhone/i.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1 && Math.min(window.screen.width, window.screen.height) < 600);
                 if (isIPhone) {
                     document.documentElement.classList.add('is-iphone');
+                    if (document.body) document.body.classList.add('is-iphone');
+                }
+                var vp = document.querySelector('meta[name="viewport"]');
+                if (vp) {
+                    vp.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover');
                 }
             } catch (e) {}
         })();
@@ -771,7 +783,7 @@
         <!-- App Global Footer (Developer Credit & Version) -->
         <footer class="app-global-footer">
             <div class="footer-left-version">
-                <span class="app-version-badge" id="footer-version-badge" title="Atlas ME v1.7.8">v1.7.8</span>
+                <span class="app-version-badge" id="footer-version-badge" title="Atlas ME v1.7.9">v1.7.9</span>
             </div>
             <div class="footer-credit-content">
                 <span class="credit-text" style="display: inline-flex; align-items: center; gap: 6px;">Developed by <strong>Adir Moshe</strong> <img src="adir_avatar.png" alt="Adir" style="width: 16px; height: 16px; object-fit: contain; vertical-align: middle; filter: drop-shadow(0 0 3px rgba(56, 189, 248, 0.5));"> • <strong>Atlas ME</strong></span>

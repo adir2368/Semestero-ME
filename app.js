@@ -1850,6 +1850,13 @@ let currentCalendarMonth = 7; // 0-indexed: 7 = August
 let currentCalendarYear = 2026;
 let currentRunwayView = 'calendar';
 
+// Official Technion Academic Calendar - Winter Semester 2026/2027 starts on 28.10.2026
+const TECHNION_WINTER_START_DATE = new Date(2026, 9, 28, 0, 0, 0); // October 28th, 2026 (month index 9)
+
+function isWinterSemesterStarted() {
+    return new Date() >= TECHNION_WINTER_START_DATE;
+}
+
 // XP needed for next level
 function getXpNeeded(level) {
     if (level === 1) return 300;
@@ -5237,7 +5244,7 @@ const PRELOADED_USER_STATE = {
     }
   },
   "semesterGuardMode": "locked",
-  "currentActiveSemester": 3
+  "currentActiveSemester": 2
 };
 
 const AUGUST_2026_SCHEDULE = [];
@@ -5704,11 +5711,30 @@ function loadSavedState() {
         }
         gameState.hasLoadedGoogleCalendarAugustV3 = true;
         gameState.semesterGuardMode = gameState.semesterGuardMode || 'locked';
+        const winterStarted = isWinterSemesterStarted();
+        const defaultSem = winterStarted ? 3 : 2;
         if (window.AuthSync && window.AuthSync.isAdirActive()) {
-            gameState.currentActiveSemester = gameState.currentActiveSemester || 3;
+            gameState.currentActiveSemester = defaultSem;
         } else {
             const curUser = (window.AuthSync && window.AuthSync.getActiveUser()) ? window.AuthSync.getActiveUser() : null;
-            gameState.currentActiveSemester = (gameState.currentActiveSemester !== undefined && gameState.currentActiveSemester !== null) ? gameState.currentActiveSemester : ((curUser && curUser.startingSemester) ? curUser.startingSemester : 1);
+            if (curUser && curUser.id === 'adir_moshe') {
+                gameState.currentActiveSemester = defaultSem;
+            } else {
+                gameState.currentActiveSemester = (gameState.currentActiveSemester !== undefined && gameState.currentActiveSemester !== null) ? gameState.currentActiveSemester : ((curUser && curUser.startingSemester) ? curUser.startingSemester : defaultSem);
+            }
+        }
+
+        if (!winterStarted && gameState.courses) {
+            Object.values(gameState.courses).forEach(c => {
+                if ((c.semester || 1) === 3 && c.status === 'active') {
+                    c.status = 'available';
+                    if (c.tasks) {
+                        c.tasks.forEach(t => {
+                            if (!t.completed) t.status = 'not_started';
+                        });
+                    }
+                }
+            });
         }
 
     // Strict Enforcement: Future semester courses beyond active semester CANNOT be active or available if previous semester is not completed
@@ -5861,8 +5887,8 @@ function autoUpdateTaskStatusesByDueDate() {
     Object.values(gameState.courses).forEach(course => {
         if (!course.tasks || !Array.isArray(course.tasks)) return;
         const isBinary = (course.isBinaryPass === true || course.grade === 'עובר' || course.grade === 'PASS');
-        const hasPassingGrade = isBinary || (course.grade !== undefined && course.grade !== null && course.grade !== '' && !isNaN(Number(course.grade)) && Number(course.grade) >= 55);
-        if (course.status === 'mastered' || course.status === 'active' || hasPassingGrade) return; // Mastered/graded courses have tasks marked as done
+        if (!isWinterSemesterStarted() && (course.semester || 1) > (gameState.currentActiveSemester || 2)) return;
+        if (course.status === 'mastered' || course.status === 'locked' || hasPassingGrade) return;
 
         course.tasks.forEach(task => {
             if (task.completed || task.status === 'done' || task.status === 'submitted') return;
@@ -5888,6 +5914,34 @@ function autoUpdateTaskStatusesByDueDate() {
 // Recalculate states based on prerequisites
 function recalculateCourseStates() {
     let changed = false;
+
+    // Automatic Technion Semester Transition: Winter semester 2026/2027 starts on 28.10.2026
+    const winterStarted = isWinterSemesterStarted();
+    if (!winterStarted) {
+        // Prior to 28.10.2026: Keep student in Semester 2 (סמסטר ב) and do NOT open next semester's tasks
+        gameState.currentActiveSemester = 2;
+        Object.values(gameState.courses).forEach(c => {
+            if ((c.semester || 1) === 3 && c.status === 'active') {
+                c.status = 'available';
+                if (c.tasks) {
+                    c.tasks.forEach(t => {
+                        if (!t.completed) t.status = 'not_started';
+                    });
+                }
+            }
+        });
+    } else {
+        // From 28.10.2026 onwards: Auto-advance to Semester 3 (סמסטר ג / חורף)
+        if (!gameState.currentActiveSemester || gameState.currentActiveSemester < 3) {
+            gameState.currentActiveSemester = 3;
+            Object.values(gameState.courses).forEach(c => {
+                if ((c.semester || 1) === 3 && c.status === 'available') {
+                    c.status = 'active';
+                }
+            });
+        }
+    }
+
     autoUpdateTaskStatusesByDueDate();
     
     // Clear and recalculate stats
@@ -5932,13 +5986,18 @@ function recalculateCourseStates() {
         }
     });
     
-    // Calculate total open tasks count (across unlocked active/available courses)
+    // Calculate total open tasks count (across unlocked active/available courses of current active semester)
     let openTasksCount = 0;
     Object.keys(gameState.courses).forEach(code => {
         const course = gameState.courses[code];
         const isBinary = (course.isBinaryPass === true || course.grade === 'עובר' || course.grade === 'PASS');
         const hasPassingGrade = isBinary || (course.grade !== undefined && course.grade !== null && course.grade !== '' && !isNaN(Number(course.grade)) && Number(course.grade) >= 55);
         if (course.status !== 'locked' && course.status !== 'mastered' && !hasPassingGrade && course.tasks && Array.isArray(course.tasks)) {
+            // If winter semester has not started yet (before 28.10.2026), exclude semester > activeSem from openTasksCount
+            const sem = course.semester || 1;
+            const activeSem = gameState.currentActiveSemester || 2;
+            if (!winterStarted && sem > activeSem) return;
+
             course.tasks.forEach(task => {
                 if (!task.completed && task.status !== 'done') {
                     openTasksCount++;
@@ -8861,6 +8920,7 @@ function renderNotionTasksTable() {
     // Gather tasks and pre-compute timestamp for high-performance sorting
     Object.values(gameState.courses).forEach(course => {
         if (course.status !== 'active' && course.status !== 'mastered') return;
+        if (!isWinterSemesterStarted() && (course.semester || 1) > (gameState.currentActiveSemester || 2) && courseFilter === 'all') return;
         if (courseFilter !== 'all' && course.code !== courseFilter) return;
         
         course.tasks.forEach(task => {
@@ -10503,6 +10563,17 @@ let isFlowchartFitWidth = false;
 
 const BASE_FLOWCHART_WIDTH = 1560;
 const BASE_FLOWCHART_HEIGHT = 1380;
+const FLOWCHART_ZOOM_MULTIPLIER = 1.30;
+
+function isMobileView() {
+    return (
+        window.innerWidth <= 768 ||
+        (window.screen && Math.min(window.screen.width, window.screen.height) < 600) ||
+        document.documentElement.classList.contains('is-mobile-device') ||
+        document.documentElement.classList.contains('is-iphone') ||
+        (typeof navigator !== 'undefined' && /iPhone|iPod|Android/i.test(navigator.userAgent))
+    );
+}
 
 function setupFlowchartViewMode() {
     const btnFlowchart = document.getElementById("btn-mode-flowchart");
@@ -10595,10 +10666,10 @@ function setupFlowchartViewMode() {
 }
 
 function initFlowchartZoom() {
-    if (window.innerWidth <= 768) {
+    if (isMobileView()) {
         fitFlowchartToWidth();
     } else {
-        // User instruction: Default zoom on opening desktop is strictly 100%
+        // User instruction: Default zoom on opening desktop is strictly 100% (magnified 1.30x by default)
         setFlowchartZoom(1.0);
         isFlowchartFitWidth = false;
         const toggleFitBtn = document.getElementById("btn-fc-toggle-fit");
@@ -10612,15 +10683,16 @@ function fitFlowchartToWidth() {
     if (!scrollWrap) return;
 
     const availableWidth = scrollWrap.clientWidth || (window.innerWidth - 20);
-    const minFactor = (window.innerWidth <= 768) ? 0.24 : 0.6;
-    const fitFactor = Math.max(minFactor, Math.min(1.4, (availableWidth - 18) / BASE_FLOWCHART_WIDTH));
+    const minFactor = isMobileView() ? 0.22 : 0.55;
+    const effectiveBaseW = BASE_FLOWCHART_WIDTH * FLOWCHART_ZOOM_MULTIPLIER;
+    const fitFactor = Math.max(minFactor, Math.min(1.4, (availableWidth - 18) / effectiveBaseW));
     setFlowchartZoom(fitFactor);
     isFlowchartFitWidth = true;
     if (toggleFitBtn) toggleFitBtn.classList.add("active");
 }
 
 function setFlowchartZoom(zoomVal) {
-    const minZoom = (window.innerWidth <= 768) ? 0.22 : 0.55;
+    const minZoom = isMobileView() ? 0.22 : 0.55;
     flowchartZoom = Math.max(minZoom, Math.min(2.0, Math.round(zoomVal * 100) / 100));
 
     const svgEl = document.getElementById("flowchart-svg");
@@ -10631,8 +10703,8 @@ function setFlowchartZoom(zoomVal) {
     }
 
     if (svgEl) {
-        const targetW = Math.round(BASE_FLOWCHART_WIDTH * flowchartZoom);
-        const targetH = Math.round(BASE_FLOWCHART_HEIGHT * flowchartZoom);
+        const targetW = Math.round(BASE_FLOWCHART_WIDTH * FLOWCHART_ZOOM_MULTIPLIER * flowchartZoom);
+        const targetH = Math.round(BASE_FLOWCHART_HEIGHT * FLOWCHART_ZOOM_MULTIPLIER * flowchartZoom);
         svgEl.style.width = `${targetW}px`;
         svgEl.style.minWidth = `${targetW}px`;
         svgEl.style.height = `${targetH}px`;
@@ -13485,6 +13557,7 @@ function getUpcomingPriorityTasks(limit = 8) {
         const isBinary = (course.isBinaryPass === true || course.grade === 'עובר' || course.grade === 'PASS');
         const hasPassingGrade = isBinary || (course.grade !== undefined && course.grade !== null && course.grade !== '' && !isNaN(Number(course.grade)) && Number(course.grade) >= 55);
         if (course.status === 'locked' || course.status === 'mastered' || hasPassingGrade) return;
+        if (!isWinterSemesterStarted() && (course.semester || 1) > (gameState.currentActiveSemester || 2)) return;
 
         (course.tasks || []).forEach(task => {
             const isDone = task.completed || task.status === 'done' || task.status === 'submitted';
