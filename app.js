@@ -5993,12 +5993,21 @@ function parseDateToIso(str) {
 }
 
 function initCheeseForkDatabase() {
-    if (cheeseForkMap) return;
-    cheeseForkMap = new Map();
-    cheeseForkList = [];
+    if (cheeseForkMap && cheeseForkMap.size > 0) return;
+
+    if (typeof courses_from_rishum !== 'undefined' && !window.courses_from_rishum) {
+        window.courses_from_rishum = courses_from_rishum;
+    }
 
     const rawList = window.courses_from_rishum || [];
-    if (!Array.isArray(rawList) || rawList.length === 0) return;
+    if (!Array.isArray(rawList) || rawList.length === 0) {
+        cheeseForkMap = null;
+        cheeseForkList = null;
+        return;
+    }
+
+    cheeseForkMap = new Map();
+    cheeseForkList = [];
 
     rawList.forEach(item => {
         const g = item.general;
@@ -6055,30 +6064,86 @@ function initCheeseForkDatabase() {
     });
 }
 
+async function ensureCheeseForkDatabase() {
+    if (cheeseForkMap && cheeseForkMap.size > 0) return true;
+    initCheeseForkDatabase();
+    if (cheeseForkMap && cheeseForkMap.size > 0) return true;
+
+    // Dynamically inject script tag if not yet loaded
+    if (!window.courses_from_rishum || !Array.isArray(window.courses_from_rishum) || window.courses_from_rishum.length === 0) {
+        try {
+            console.log('[CheeseFork] Dynamically loading cheesefork_courses.min.js...');
+            await new Promise((resolve) => {
+                const s = document.createElement('script');
+                s.src = 'cheesefork_courses.min.js?v=1.7.0';
+                s.onload = () => resolve(true);
+                s.onerror = () => resolve(false);
+                document.head.appendChild(s);
+            });
+            initCheeseForkDatabase();
+        } catch (e) {
+            console.warn('[CheeseFork] Dynamic script load failed:', e);
+        }
+    }
+
+    // Dynamic fetch fallback
+    if (!cheeseForkMap || cheeseForkMap.size === 0) {
+        try {
+            const resp = await fetch('./cheesefork_courses.min.js?v=1.7.0');
+            if (resp.ok) {
+                const codeText = await resp.text();
+                const fn = new Function(codeText);
+                fn();
+                initCheeseForkDatabase();
+            }
+        } catch (err) {
+            console.warn('[CheeseFork] Fetch fallback failed:', err);
+        }
+    }
+
+    return (cheeseForkMap && cheeseForkMap.size > 0);
+}
+
 function findCheeseForkCourse(query) {
     initCheeseForkDatabase();
-    if (!cheeseForkMap) return null;
+    if (!cheeseForkMap || cheeseForkMap.size === 0) return null;
 
     const q = String(query || '').trim().toLowerCase();
     if (!q) return null;
 
+    // 1. Direct Map match
     if (cheeseForkMap.has(q)) return cheeseForkMap.get(q);
 
     const cleanDigits = q.replace(/\D/g, '');
     if (cleanDigits) {
+        if (cheeseForkMap.has(cleanDigits)) return cheeseForkMap.get(cleanDigits);
+        const stripped = cleanDigits.replace(/^0+/, '');
+        if (stripped && cheeseForkMap.has(stripped)) return cheeseForkMap.get(stripped);
+
         if (cleanDigits.length <= 6) {
             const pad6 = cleanDigits.padStart(6, '0');
             if (cheeseForkMap.has(pad6)) return cheeseForkMap.get(pad6);
             const pad8 = '0' + pad6.slice(0, 3) + '0' + pad6.slice(3);
             if (cheeseForkMap.has(pad8)) return cheeseForkMap.get(pad8);
-        } else if (cleanDigits.length === 7 || cleanDigits.length === 8) {
+        } else {
             const pad8 = cleanDigits.padStart(8, '0');
             if (cheeseForkMap.has(pad8)) return cheeseForkMap.get(pad8);
+            if (pad8.length === 8 && pad8.startsWith('0')) {
+                const c6 = pad8.slice(1, 4) + pad8.slice(5);
+                if (cheeseForkMap.has(c6)) return cheeseForkMap.get(c6);
+            }
         }
     }
 
-    const byName = (cheeseForkList || []).find(c => c.name.toLowerCase() === q);
+    // 2. Exact or normalized name match
+    const byName = (cheeseForkList || []).find(c => c.name.toLowerCase() === q || c.name.replace(/["']/g, '') === q.replace(/["']/g, ''));
     if (byName) return byName;
+
+    // 3. Substring match for codes with length >= 5
+    if (cleanDigits.length >= 5) {
+        const byCodeSub = (cheeseForkList || []).find(c => c.rawNum.includes(cleanDigits) || c.code6.includes(cleanDigits));
+        if (byCodeSub) return byCodeSub;
+    }
 
     return null;
 }
@@ -6216,6 +6281,11 @@ function setupEventListeners() {
 
         const modal = document.getElementById("add-course-modal");
         if (modal) modal.classList.add("active");
+
+        // Warm up CheeseFork database in background
+        if (typeof ensureCheeseForkDatabase === 'function') {
+            ensureCheeseForkDatabase();
+        }
     };
 
     // Wire CheeseFork auto-completion and search
@@ -6239,7 +6309,9 @@ function setupEventListeners() {
                 return;
             }
 
-            cfDebounceTimer = setTimeout(() => {
+            cfDebounceTimer = setTimeout(async () => {
+                await ensureCheeseForkDatabase();
+
                 // First check exact match
                 const exact = findCheeseForkCourse(val);
                 if (exact && (val === exact.code6 || val === exact.rawNum || val === exact.name)) {
@@ -6269,7 +6341,7 @@ function setupEventListeners() {
                         cfSuggestions.innerHTML = "";
                     }
                 }
-            }, 180);
+            }, 160);
         });
 
         courseCodeInput.addEventListener("keydown", (e) => {
@@ -6281,9 +6353,10 @@ function setupEventListeners() {
     }
 
     if (cfSuggestions) {
-        cfSuggestions.addEventListener("click", (e) => {
+        cfSuggestions.addEventListener("click", async (e) => {
             const item = e.target.closest(".cf-suggestion-item");
             if (item) {
+                await ensureCheeseForkDatabase();
                 const code = item.dataset.code;
                 const found = findCheeseForkCourse(code);
                 if (found) applyCheeseForkCourse(found);
@@ -6292,16 +6365,34 @@ function setupEventListeners() {
     }
 
     if (cfSearchBtn) {
-        cfSearchBtn.addEventListener("click", () => {
+        cfSearchBtn.addEventListener("click", async () => {
             const val = courseCodeInput ? courseCodeInput.value.trim() : "";
             if (!val) return;
-            const found = findCheeseForkCourse(val);
-            if (found) {
-                applyCheeseForkCourse(found);
-            } else {
-                if (typeof showToastNotification === 'function') {
-                    showToastNotification(`ℹ️ לא נמצא קורס מתאים ב-CheeseFork עבור "${val}" - באפשרותך למלא ידנית.`, 'info');
+
+            const oldText = cfSearchBtn.innerHTML;
+            cfSearchBtn.innerHTML = "⏳ מחפש...";
+            cfSearchBtn.disabled = true;
+
+            try {
+                await ensureCheeseForkDatabase();
+                let found = findCheeseForkCourse(val);
+                if (!found) {
+                    const fallbackMatches = searchCheeseForkCourses(val, 1);
+                    if (fallbackMatches.length > 0) {
+                        found = fallbackMatches[0];
+                    }
                 }
+
+                if (found) {
+                    applyCheeseForkCourse(found);
+                } else {
+                    if (typeof showToastNotification === 'function') {
+                        showToastNotification(`ℹ️ לא נמצא קורס מתאים ב-CheeseFork עבור "${val}" - באפשרותך למלא ידנית.`, 'info');
+                    }
+                }
+            } finally {
+                cfSearchBtn.innerHTML = oldText;
+                cfSearchBtn.disabled = false;
             }
         });
     }
