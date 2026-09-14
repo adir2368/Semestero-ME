@@ -16,9 +16,20 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Rubik:wght@300;400;500;700;900&display=swap" rel="stylesheet">
     <link rel="icon" type="image/png" href="icon.png">
-    <link rel="stylesheet" href="styles.css?v=1.7.1">
+    <link rel="stylesheet" href="styles.css?v=1.7.6">
+    <script>
+        (function() {
+            try {
+                var ua = navigator.userAgent || '';
+                var isIPhone = /iPhone/i.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1 && window.screen.width < 500);
+                if (isIPhone) {
+                    document.documentElement.classList.add('is-iphone');
+                }
+            } catch (e) {}
+        })();
+    </script>
 </head>
-<body>
+<body class="">
     <div class="hud-container">
         <!-- Top HUD Panel -->
         <header class="hud-header">
@@ -758,7 +769,7 @@
         <!-- App Global Footer (Developer Credit & Version) -->
         <footer class="app-global-footer">
             <div class="footer-left-version">
-                <span class="app-version-badge" id="footer-version-badge" title="Atlas ME v1.7.5">v1.7.5</span>
+                <span class="app-version-badge" id="footer-version-badge" title="Atlas ME v1.7.6">v1.7.6</span>
             </div>
             <div class="footer-credit-content">
                 <span class="credit-text">Developed by <strong>Adir Moshe</strong> • <strong>Atlas ME</strong></span>
