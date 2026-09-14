@@ -7,24 +7,27 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Skill Tree">
+    <meta name="apple-mobile-web-app-title" content="Atlas ME">
     <link rel="apple-touch-icon" href="apple-touch-icon.png">
     <link rel="manifest" href="manifest.json">
-    <title>לוח תכנון ומעקב אקדמי - הנדסת מכונות הטכניון</title>
+    <title>Atlas ME | מערכת הניווט והניהול האקדמי - הטכניון</title>
     <!-- Fonts for Sci-Fi / Game HUD aesthetic -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Rubik:wght@300;400;500;700;900&display=swap" rel="stylesheet">
     <link rel="icon" type="image/png" href="icon.png">
-    <link rel="stylesheet" href="styles.css?v=1.5.1">
+    <link rel="stylesheet" href="styles.css?v=1.6.0">
 </head>
 <body>
     <div class="hud-container">
         <!-- Top HUD Panel -->
         <header class="hud-header">
             <div class="hud-logo" style="display: flex; align-items: center; gap: 10px;">
-                <img src="icon.png" alt="לוגו הפקולטה להנדסת מכונות" style="width: 34px; height: 34px; object-fit: contain; filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.6));">
-                <span class="degree-title-text" style="font-size: 1.08rem; font-weight: 800; letter-spacing: 0.5px; color: #f8fafc;">הנדסת מכונות | הטכניון</span>
+                <img src="icon.png" alt="Atlas ME - לוגו הפקולטה להנדסת מכונות" style="width: 34px; height: 34px; object-fit: contain; filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.6));">
+                <div style="display: flex; flex-direction: column; justify-content: center;">
+                    <span class="degree-title-text" style="font-size: 1.14rem; font-weight: 900; letter-spacing: 0.8px; color: #f8fafc; font-family: 'Orbitron', sans-serif; line-height: 1.1;">ATLAS ME</span>
+                    <span style="font-size: 0.64rem; color: #38bdf8; font-weight: 600; letter-spacing: 0.5px; line-height: 1;">הנדסת מכונות | הטכניון</span>
+                </div>
             </div>
             
             <div class="character-card">
@@ -743,7 +746,7 @@
         <!-- App Global Footer (Developer Credit) -->
         <footer class="app-global-footer">
             <div class="footer-credit-content">
-                <span class="credit-text">Developed by <strong>Adir Moshe</strong></span>
+                <span class="credit-text">Developed by <strong>Adir Moshe</strong> • <strong>Atlas ME</strong></span>
                 <a href="https://www.linkedin.com/in/adir-moshe?utm_source=share_via&utm_content=profile&utm_medium=member_android" target="_blank" rel="noopener noreferrer" class="footer-linkedin-btn" title="Adir Moshe on LinkedIn" aria-label="Adir Moshe LinkedIn Profile">
                     <svg class="linkedin-svg-icon" viewBox="0 0 24 24" width="13" height="13" fill="currentColor">
                         <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.46 10.9v8.37H9.2V10.9H6.46M7.83 6.25c-.9 0-1.63.73-1.63 1.63s.73 1.63 1.63 1.63 1.63-.73 1.63-1.63c-.01-.9-.74-1.63-1.63-1.63Z"/>
@@ -1489,8 +1492,40 @@
                     </div>
                 </div>
 
+                <!-- Device Pairing & Cloud Sync Section -->
+                <div class="device-pairing-box" style="margin-top: 14px; background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 8px; padding: 12px 14px;">
+                    <div style="font-weight: 600; color: #38bdf8; font-size: 0.88rem; margin-bottom: 6px; display: flex; align-items: center; justify-content: space-between;">
+                        <span>🔗 חיבור וסנכרון בין מכשירים (טלפון / מחשב)</span>
+                        <span id="active-user-sync-code-badge" style="font-size: 0.72rem; background: rgba(56, 189, 248, 0.15); color: #38bdf8; padding: 2px 8px; border-radius: 12px; font-family: monospace;"></span>
+                    </div>
+                    <p style="font-size: 0.78rem; color: var(--text-muted); margin: 0 0 10px 0;">
+                        רוצה לפתוח את החשבון שלך במכשיר אחר? הזן כאן את קוד הסנכרון שלך (או את סיסמת המפתח של אדיר):
+                    </p>
+                    <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+                        <input type="text" id="sync-pair-code-input" class="form-input" style="flex: 1; padding: 7px 10px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff; font-size: 0.82rem; font-family: monospace;" placeholder="הזן קוד סנכרון / adir2368">
+                        <button class="btn btn-primary btn-sm" onclick="
+                            const code = document.getElementById('sync-pair-code-input').value;
+                            AuthSync.pairAccountWithSyncCode(code);
+                        " style="white-space: nowrap;">
+                            חבר וסנכרן ☁️
+                        </button>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.74rem; color: #94a3b8;">
+                        <span>קוד החשבון הפעיל: <strong id="current-account-code-display" style="color: #f1f5f9; font-family: monospace;">-</strong></span>
+                        <button class="btn btn-xs btn-outline" style="font-size: 0.7rem; padding: 2px 6px;" onclick="
+                            const code = AuthSync.getActiveUser().id;
+                            navigator.clipboard.writeText(code);
+                            if (typeof showHudToast === 'function') {
+                                showHudToast('קוד הסנכרון הועתק: ' + code, 'info');
+                            } else {
+                                alert('קוד הסנכרון הועתק: ' + code);
+                            }
+                        ">העתק קוד 📋</button>
+                    </div>
+                </div>
+
                 <!-- Supabase Cloud Sync Configuration -->
-                <div class="cloud-config-box" style="margin-top: 18px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 14px;">
+                <div class="cloud-config-box" style="margin-top: 14px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 12px;">
                     <div class="cloud-config-toggle" style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;" onclick="document.getElementById('supabase-config-wrapper').classList.toggle('active')">
                         <span style="font-size: 0.88rem; color: #94a3b8;">☁️ הגדרות סנכרון ענן (Supabase Cloud Sync)</span>
                         <span class="toggle-arrow" style="color: #94a3b8;">▾</span>

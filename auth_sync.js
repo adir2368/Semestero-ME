@@ -9,7 +9,12 @@
     const SUPABASE_CONFIG_KEY = 'ast_supabase_config';
     const LEGACY_SAVE_KEY = 'academic_skill_tree_save';
 
+    // Atlas ME Global Supabase Cloud Configuration
+    const DEFAULT_SUPABASE_URL = 'https://asxpbepuvhbafsjlogag.supabase.co';
+    const DEFAULT_SUPABASE_ANON_KEY = 'sb_publishable_BdrsUJFsNOGssCY7Gv7eNQ_UXkm2zFy';
+
     let supabaseClient = null;
+    let realtimeChannel = null;
     let syncTimeout = null;
 
     // Check if this device already has Adir's personal save file
@@ -166,6 +171,19 @@
             }
         },
 
+        // Force UI re-render across all application modules
+        refreshAllAppViews() {
+            if (typeof recalculateCourseStates === 'function') recalculateCourseStates();
+            if (typeof updateHud === 'function') updateHud();
+            if (typeof renderUI === 'function') renderUI();
+            if (typeof renderNotionTasksTable === 'function') renderNotionTasksTable();
+            if (typeof updateDailyTimetableFocus === 'function') updateDailyTimetableFocus();
+            if (typeof renderTodayTimetableBanner === 'function') renderTodayTimetableBanner();
+            if (typeof renderStudyRunway === 'function') renderStudyRunway();
+            if (typeof updateNotificationBadge === 'function') updateNotificationBadge();
+            this.updateHudUserBadge();
+        },
+
         // Switch active account and force full UI refresh
         async switchAccount(targetUserId) {
             const registry = this.getAccounts();
@@ -192,21 +210,17 @@
             }
 
             // 4. Force full UI re-render across all modules
-            if (typeof recalculateCourseStates === 'function') recalculateCourseStates();
-            if (typeof updateHud === 'function') updateHud();
-            if (typeof renderUI === 'function') renderUI();
-            if (typeof renderNotionTasksTable === 'function') renderNotionTasksTable();
-            if (typeof updateDailyTimetableFocus === 'function') updateDailyTimetableFocus();
-            if (typeof renderTodayTimetableBanner === 'function') renderTodayTimetableBanner();
-            if (typeof renderStudyRunway === 'function') renderStudyRunway();
-            if (typeof updateNotificationBadge === 'function') updateNotificationBadge();
-            this.updateHudUserBadge();
+            this.refreshAllAppViews();
 
             if (typeof showHudToast === 'function') {
                 showHudToast('הועברת לחשבון: ' + targetUser.name + ' ' + targetUser.avatar, 'info');
             }
 
-            // 5. If new account hasn't completed onboarding, prompt onboarding modal
+            // 5. Re-subscribe realtime channel for this account and pull remote updates
+            this.setupRealtimeSubscription();
+            this.pullLatestStateFromCloud();
+
+            // 6. If new account hasn't completed onboarding, prompt onboarding modal
             if (targetUser.id !== 'adir_moshe' && (!newState || !newState.hasCompletedOnboarding)) {
                 this.openOnboardingModal();
             }
@@ -332,34 +346,224 @@
             }
         },
 
-        // Initialize Supabase if config is present
+        // Initialize Supabase if config is present (or use Atlas ME default cloud)
         initSupabaseFromStorage() {
+            let url = DEFAULT_SUPABASE_URL;
+            let anonKey = DEFAULT_SUPABASE_ANON_KEY;
+
             try {
                 const confStr = localStorage.getItem(SUPABASE_CONFIG_KEY);
                 if (confStr) {
                     const conf = JSON.parse(confStr);
-                    if (conf.url && conf.anonKey && window.supabase) {
-                        supabaseClient = window.supabase.createClient(conf.url, conf.anonKey);
-                        console.log('[AuthSync] Supabase Cloud connected successfully!');
-                        this.updateCloudStatusIndicator(true);
-                        return;
+                    if (conf.url && conf.anonKey) {
+                        url = conf.url.trim();
+                        anonKey = conf.anonKey.trim();
                     }
                 }
             } catch (e) {
-                console.warn('[AuthSync] Supabase not connected:', e);
+                console.warn('[AuthSync] Error parsing stored Supabase config:', e);
             }
-            this.updateCloudStatusIndicator(false);
+
+            if (url && anonKey && window.supabase) {
+                try {
+                    supabaseClient = window.supabase.createClient(url, anonKey);
+                    console.log('[AuthSync] Supabase Cloud connected to:', url);
+                    this.updateCloudStatusIndicator(true, 'ענן מחובר');
+                    this.setupRealtimeSubscription();
+                    this.pullLatestStateFromCloud();
+                    return;
+                } catch (e) {
+                    console.warn('[AuthSync] Supabase client init error:', e);
+                }
+            }
+            this.updateCloudStatusIndicator(false, 'אופליין');
+        },
+
+        // Setup real-time postgres changes listener for active user
+        setupRealtimeSubscription() {
+            if (!supabaseClient) return;
+            const user = this.getActiveUser();
+            if (!user || !user.id) return;
+
+            if (realtimeChannel) {
+                try {
+                    supabaseClient.removeChannel(realtimeChannel);
+                } catch (e) {}
+                realtimeChannel = null;
+            }
+
+            try {
+                realtimeChannel = supabaseClient
+                    .channel('public:user_states:' + user.id)
+                    .on(
+                        'postgres_changes',
+                        {
+                            event: '*',
+                            schema: 'public',
+                            table: 'user_states',
+                            filter: 'user_id=eq.' + user.id
+                        },
+                        (payload) => {
+                            console.log('[AuthSync Realtime] Remote update received:', payload);
+                            if (payload && payload.new && payload.new.state_json) {
+                                const remoteState = payload.new.state_json;
+                                const key = this.getUserStorageKey(user.id);
+                                const localRaw = localStorage.getItem(key);
+                                if (localRaw !== JSON.stringify(remoteState)) {
+                                    localStorage.setItem(key, JSON.stringify(remoteState));
+                                    if (user.id === 'adir_moshe') {
+                                        localStorage.setItem(LEGACY_SAVE_KEY, JSON.stringify(remoteState));
+                                    }
+                                    if (window.setGlobalGameState) {
+                                        window.setGlobalGameState(remoteState);
+                                    }
+                                    this.refreshAllAppViews();
+                                    if (typeof showHudToast === 'function') {
+                                        showHudToast('סונכרן בזמן אמת מענן Atlas ME ☁️', 'info');
+                                    }
+                                }
+                            }
+                        }
+                    )
+                    .subscribe((status) => {
+                        console.log('[AuthSync Realtime] Channel status for', user.id, ':', status);
+                        if (status === 'SUBSCRIBED') {
+                            this.updateCloudStatusIndicator(true, 'סנכרון חי');
+                        }
+                    });
+            } catch (err) {
+                console.warn('[AuthSync] Realtime subscribe error:', err);
+            }
+        },
+
+        // Pull latest state for active user from Supabase Cloud
+        async pullLatestStateFromCloud(force = false) {
+            if (!supabaseClient) return null;
+            const user = this.getActiveUser();
+            if (!user || !user.id) return null;
+
+            try {
+                const { data, error } = await supabaseClient
+                    .from('user_states')
+                    .select('*')
+                    .eq('user_id', user.id)
+                    .maybeSingle();
+
+                if (error) {
+                    console.warn('[AuthSync] Cloud query notice:', error.message);
+                    return null;
+                }
+
+                if (data && data.state_json) {
+                    const remoteState = data.state_json;
+                    const key = this.getUserStorageKey(user.id);
+                    const localRaw = localStorage.getItem(key);
+
+                    if (!localRaw || force) {
+                        localStorage.setItem(key, JSON.stringify(remoteState));
+                        if (user.id === 'adir_moshe') {
+                            localStorage.setItem(LEGACY_SAVE_KEY, JSON.stringify(remoteState));
+                        }
+                        if (window.setGlobalGameState) {
+                            window.setGlobalGameState(remoteState);
+                        }
+                        this.refreshAllAppViews();
+                        console.log('[AuthSync] Pulled remote state for:', user.name);
+                        this.updateCloudStatusIndicator(true, 'מעודכן מהענן');
+                        return remoteState;
+                    }
+                } else {
+                    // No cloud record yet for this user: initial upload
+                    console.log('[AuthSync] First-time cloud sync for user:', user.name);
+                    this.syncToCloud();
+                }
+            } catch (e) {
+                console.warn('[AuthSync] Exception in pullLatestStateFromCloud:', e);
+            }
+            return null;
+        },
+
+        // Pair device with a sync code or developer passphrase
+        async pairAccountWithSyncCode(code) {
+            if (!code || !code.trim()) {
+                alert('נא להזין קוד סנכרון.');
+                return false;
+            }
+            const cleanCode = code.trim();
+
+            // Adir Moshe's developer passphrase
+            if (cleanCode === 'adir2368') {
+                const ok = this.unlockDeveloperProfile('adir2368');
+                if (ok) {
+                    await this.pullLatestStateFromCloud(true);
+                }
+                return ok;
+            }
+
+            if (!supabaseClient) {
+                alert('חיבור הענן אינו זמין כרגע.');
+                return false;
+            }
+
+            try {
+                const { data, error } = await supabaseClient
+                    .from('user_states')
+                    .select('*')
+                    .eq('user_id', cleanCode)
+                    .maybeSingle();
+
+                if (error || !data) {
+                    alert('לא נמצא חשבון בענן עם קוד סנכרון זה. וודא שהקוד תואם בדיוק לקוד המופיע במכשיר המקורי.');
+                    return false;
+                }
+
+                // Account found in cloud! Add to device accounts registry
+                let registry = this.getAccounts();
+                let acc = registry.find(a => a.id === data.user_id);
+                if (!acc) {
+                    acc = {
+                        id: data.user_id,
+                        name: data.user_name || 'סטודנט מסונכרן',
+                        email: data.user_email || '',
+                        avatar: data.user_id === 'adir_moshe' ? '🎓' : '👤',
+                        role: data.user_id === 'adir_moshe' ? 'developer' : 'student',
+                        startingSemester: 1,
+                        createdAt: Date.now(),
+                        lastActive: Date.now()
+                    };
+                    registry.push(acc);
+                    this.saveAccounts(registry);
+                }
+
+                const key = this.getUserStorageKey(data.user_id);
+                localStorage.setItem(key, JSON.stringify(data.state_json));
+                if (data.user_id === 'adir_moshe') {
+                    localStorage.setItem(LEGACY_SAVE_KEY, JSON.stringify(data.state_json));
+                }
+
+                await this.switchAccount(data.user_id);
+                if (typeof showHudToast === 'function') {
+                    showHudToast('החשבון ' + acc.name + ' חובר וסונכרן בהצלחה! ☁️', 'success');
+                } else {
+                    alert('החשבון ' + acc.name + ' חובר וסונכרן בהצלחה!');
+                }
+                const modal = document.getElementById('accounts-modal');
+                if (modal) modal.classList.remove('active');
+                return true;
+            } catch (err) {
+                console.error('[AuthSync] Error pairing account with code:', err);
+                alert('אירעה שגיאה בחיבור לחשבון: ' + err.message);
+                return false;
+            }
         },
 
         // Set Supabase configuration
         setSupabaseConfig(url, anonKey) {
             if (!url || !anonKey) {
                 localStorage.removeItem(SUPABASE_CONFIG_KEY);
-                supabaseClient = null;
-                this.updateCloudStatusIndicator(false);
-                return false;
+            } else {
+                localStorage.setItem(SUPABASE_CONFIG_KEY, JSON.stringify({ url: url.trim(), anonKey: anonKey.trim() }));
             }
-            localStorage.setItem(SUPABASE_CONFIG_KEY, JSON.stringify({ url: url.trim(), anonKey: anonKey.trim() }));
             this.initSupabaseFromStorage();
             return true;
         },
@@ -476,6 +680,20 @@
             const modal = document.getElementById('accounts-modal');
             if (modal) {
                 this.renderAccountsList();
+                const activeUser = this.getActiveUser();
+                const codeDisplay = document.getElementById('current-account-code-display');
+                const badgeDisplay = document.getElementById('active-user-sync-code-badge');
+                if (codeDisplay) codeDisplay.textContent = activeUser.id;
+                if (badgeDisplay) badgeDisplay.textContent = 'קוד: ' + activeUser.id;
+
+                const urlInput = document.getElementById('supabase-url-input');
+                const keyInput = document.getElementById('supabase-key-input');
+                if (urlInput && !urlInput.value) {
+                    urlInput.value = DEFAULT_SUPABASE_URL;
+                }
+                if (keyInput && !keyInput.value) {
+                    keyInput.value = DEFAULT_SUPABASE_ANON_KEY;
+                }
                 modal.classList.add('active');
             }
         },
