@@ -1,5 +1,4 @@
 // Atlas ME - Single-User Authentication & Supabase Cloud Sync Engine
-// Master Password for Adir Moshe: "BenchyTech1"
 
 (function(window) {
     'use strict';
@@ -155,10 +154,16 @@
             }
         },
 
-        // Login with Password (Master Password: BenchyTech1)
-        async loginWithPassword(password, username) {
-            const cleanPass = (password || '').trim();
-            const cleanUser = (username || '').trim();
+        // Login with Identifier (username/email) and Password
+        async loginWithPassword(identifier, password) {
+            let cleanUser = (identifier || '').trim();
+            let cleanPass = (password || '').trim();
+
+            // Support either parameter ordering
+            if (!cleanPass && MASTER_PASSWORDS.includes(cleanUser)) {
+                cleanPass = cleanUser;
+                cleanUser = '';
+            }
 
             if (!cleanPass) {
                 alert('נא להזין סיסמה.');
@@ -253,6 +258,10 @@
 
             if (!name) {
                 alert('נא להזין שם מלא.');
+                return false;
+            }
+            if (!email || !email.includes('@')) {
+                alert('נא להזין כתובת אימייל תקינה (חובה בהרשמה).');
                 return false;
             }
             if (!password || password.length < 4) {
@@ -365,7 +374,7 @@
             if (typeof updateNotificationBadge === 'function') updateNotificationBadge();
         },
 
-        // Update top-right auth controls (Login button vs User chip + Logout button)
+        // Update top-right auth controls (Login button vs User chip)
         updateHudAuthControls() {
             const container = document.getElementById('hud-auth-controls');
             if (!container) return;
@@ -374,14 +383,10 @@
             if (this.isLoggedIn()) {
                 const user = this.getActiveUser();
                 container.innerHTML = `
-                    <button type="button" class="btn-hud-user-chip" id="btn-hud-user-chip" onclick="AuthSync.openAuthModal()" title="לחץ לצפייה בפרטי חשבון" aria-label="פרופיל משתמש">
+                    <button type="button" class="btn-hud-user-chip" id="btn-hud-user-chip" onclick="AuthSync.openAuthModal()" title="לחץ לצפייה בפרטי חשבון והתנתקות" aria-label="פרופיל משתמש">
                         <span class="user-avatar-pill">${user.avatar}</span>
                         <span class="user-name-text">${user.name}</span>
                         <span class="login-status-dot ${isOnline ? 'connected' : 'offline'}" id="top-login-status-dot"></span>
-                    </button>
-                    <button type="button" class="btn-hud-logout" id="btn-hud-logout" onclick="AuthSync.logout()" title="התנתקות מהחשבון" aria-label="התנתקות">
-                        <span class="logout-icon">🚪</span>
-                        <span class="logout-text">התנתקות</span>
                     </button>
                 `;
             } else {
@@ -465,7 +470,7 @@
                             <span>🔑</span> <span>התחברות ל-Atlas ME</span>
                         </h2>
                         <p style="margin: 6px 0 0 0; font-size: 0.82rem; color: var(--text-muted);">
-                            ${isRegister ? 'יצירת חשבון סטודנט חדש וחיבור לענן' : 'הזן סיסמה להתחברות לחשבון האישי שלך (למשל: BenchyTech1 לאדיר)'}
+                            ${isRegister ? 'יצירת חשבון סטודנט חדש וחיבור לענן' : 'התחבר לחשבון האישי שלך ב-Atlas ME'}
                         </p>
                     </div>
                     <div class="modal-body" style="padding-top: 15px;">
@@ -479,14 +484,14 @@
                         </div>
 
                         ${!isRegister ? `
-                            <form onsubmit="event.preventDefault(); const p = document.getElementById('auth-password-input').value; const u = document.getElementById('auth-username-input').value; AuthSync.loginWithPassword(p, u);">
+                            <form onsubmit="event.preventDefault(); const u = document.getElementById('auth-username-input').value; const p = document.getElementById('auth-password-input').value; AuthSync.loginWithPassword(u, p);">
                                 <div class="form-group" style="margin-bottom: 12px;">
-                                    <label style="display: block; font-size: 0.82rem; color: #f8fafc; font-weight: 600; margin-bottom: 4px;">סיסמה (Password):</label>
-                                    <input type="password" id="auth-password-input" class="form-input" style="width: 100%; padding: 8px 12px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff; font-size: 0.9rem;" placeholder="הזן סיסמה (BenchyTech1 לאדיר)" required autofocus>
+                                    <label style="display: block; font-size: 0.82rem; color: #f8fafc; font-weight: 600; margin-bottom: 4px;">שם משתמש או אימייל:</label>
+                                    <input type="text" id="auth-username-input" class="form-input" style="width: 100%; padding: 8px 12px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff; font-size: 0.9rem;" placeholder="שם משתמש או אימייל (למשל: יוסף כהן)" autofocus>
                                 </div>
                                 <div class="form-group" style="margin-bottom: 16px;">
-                                    <label style="display: block; font-size: 0.78rem; color: var(--text-muted); margin-bottom: 4px;">שם משתמש / אימייל (אופציונלי לאדיר):</label>
-                                    <input type="text" id="auth-username-input" class="form-input" style="width: 100%; padding: 7px 10px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff; font-size: 0.82rem;" placeholder="אדיר משה / אימייל">
+                                    <label style="display: block; font-size: 0.82rem; color: #f8fafc; font-weight: 600; margin-bottom: 4px;">סיסמה:</label>
+                                    <input type="password" id="auth-password-input" class="form-input" style="width: 100%; padding: 8px 12px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff; font-size: 0.9rem;" placeholder="הזן סיסמה" required>
                                 </div>
                                 <button type="submit" class="btn btn-primary btn-block" style="width: 100%; padding: 10px; font-weight: 700; font-size: 0.95rem;">
                                     🚀 התחבר עכשיו
@@ -496,7 +501,7 @@
                             <form onsubmit="event.preventDefault(); const n = document.getElementById('reg-name-input').value; const p = document.getElementById('reg-password-input').value; const s = document.getElementById('reg-sem-select').value; const e = document.getElementById('reg-email-input').value; AuthSync.registerStudent({ name: n, password: p, startingSemester: s, email: e });">
                                 <div class="form-group" style="margin-bottom: 10px;">
                                     <label style="display: block; font-size: 0.82rem; color: #f8fafc; font-weight: 600; margin-bottom: 4px;">שם מלא / כינוי:</label>
-                                    <input type="text" id="reg-name-input" class="form-input" style="width: 100%; padding: 7px 10px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff;" placeholder="למשל: דניאל כהן" required>
+                                    <input type="text" id="reg-name-input" class="form-input" style="width: 100%; padding: 7px 10px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff;" placeholder="למשל: יוסף כהן" required>
                                 </div>
                                 <div class="form-group" style="margin-bottom: 10px;">
                                     <label style="display: block; font-size: 0.82rem; color: #f8fafc; font-weight: 600; margin-bottom: 4px;">סיסמה אישית:</label>
@@ -514,8 +519,8 @@
                                     </select>
                                 </div>
                                 <div class="form-group" style="margin-bottom: 14px;">
-                                    <label style="display: block; font-size: 0.78rem; color: var(--text-muted); margin-bottom: 4px;">אימייל (אופציונלי):</label>
-                                    <input type="email" id="reg-email-input" class="form-input" style="width: 100%; padding: 7px 10px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff; font-size: 0.82rem;" placeholder="student@campus.technion.ac.il">
+                                    <label style="display: block; font-size: 0.82rem; color: #f8fafc; font-weight: 600; margin-bottom: 4px;">אימייל טכניוני (חובה):</label>
+                                    <input type="email" id="reg-email-input" class="form-input" style="width: 100%; padding: 7px 10px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff; font-size: 0.82rem;" placeholder="yosef.cohen@campus.technion.ac.il" required>
                                 </div>
                                 <button type="submit" class="btn btn-primary btn-block" style="width: 100%; padding: 10px; font-weight: 700; font-size: 0.95rem;">
                                     ✨ צור חשבון והתחל
