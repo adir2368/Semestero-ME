@@ -60,28 +60,42 @@
                 return { id: 'guest', name: 'אורח', avatar: '👤', role: 'guest', startingSemester: 1 };
             }
             const uid = localStorage.getItem(SESSION_USER_KEY);
+            const currentSem = (window.gameState && window.gameState.currentActiveSemester) ? window.gameState.currentActiveSemester : 1;
+
             if (uid === 'adir_moshe') {
-                return {
+                let customProfile = null;
+                try {
+                    const saved = localStorage.getItem('ast_profile_' + uid);
+                    if (saved) customProfile = JSON.parse(saved);
+                } catch (e) {}
+
+                return Object.assign({
                     id: 'adir_moshe',
                     name: 'אדיר משה',
                     email: 'adir.moshe@campus.technion.ac.il',
                     avatar: '🎓',
                     role: 'developer',
-                    startingSemester: 3
-                };
+                    startingSemester: (window.gameState && window.gameState.currentActiveSemester) ? window.gameState.currentActiveSemester : 3
+                }, customProfile || {});
             }
             try {
                 const saved = localStorage.getItem('ast_profile_' + uid);
-                if (saved) return JSON.parse(saved);
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    if (window.gameState && window.gameState.currentActiveSemester) {
+                        parsed.startingSemester = window.gameState.currentActiveSemester;
+                    }
+                    return parsed;
+                }
             } catch (e) {}
 
             return {
                 id: uid,
-                name: 'סטודנט להנדסת מכונות',
+                name: (window.gameState && window.gameState.student_name) ? window.gameState.student_name : 'סטודנט להנדסת מכונות',
                 email: '',
                 avatar: '👤',
                 role: 'student',
-                startingSemester: 1
+                startingSemester: currentSem
             };
         },
 
@@ -362,6 +376,149 @@
             }
         },
 
+        // Update profile details (Name, Email, Semester, and optional Password)
+        async updateUserProfile(params) {
+            if (!this.isLoggedIn()) return false;
+            const user = this.getActiveUser();
+            const name = (params.name || '').trim();
+            const email = (params.email || '').trim();
+            const semester = parseInt(params.semester) || 1;
+            const password = (params.password || '').trim();
+
+            if (!name) {
+                alert('נא להזין שם מלא.');
+                return false;
+            }
+            if (email && !email.includes('@')) {
+                alert('נא להזין כתובת אימייל תקינה.');
+                return false;
+            }
+
+            // Update user profile object
+            const updatedProfile = {
+                id: user.id,
+                name: name,
+                email: email,
+                avatar: user.avatar || '👤',
+                role: user.role || 'student',
+                startingSemester: semester
+            };
+            localStorage.setItem('ast_profile_' + user.id, JSON.stringify(updatedProfile));
+
+            // Update in-memory state
+            const state = (window.getGlobalGameState ? window.getGlobalGameState() : window.gameState) || {};
+            state.student_name = name;
+            state.currentActiveSemester = semester;
+            if (password) {
+                state.account_password = password;
+            }
+
+            // Save state locally
+            const key = this.getUserStorageKey(user.id);
+            localStorage.setItem(key, JSON.stringify(state));
+            if (user.id === 'adir_moshe') {
+                localStorage.setItem(LEGACY_SAVE_KEY, JSON.stringify(state));
+            }
+
+            // Update Supabase Cloud
+            if (supabaseClient && user.id !== 'guest') {
+                try {
+                    await supabaseClient.from('user_states').update({
+                        user_name: name,
+                        user_email: email,
+                        state_json: state,
+                        updated_at: new Date().toISOString()
+                    }).eq('user_id', user.id);
+                    console.log('[AuthSync] Updated user profile in Supabase Cloud');
+                } catch (err) {
+                    console.warn('[AuthSync] Error updating user in Supabase:', err);
+                }
+            }
+
+            // Refresh UI
+            this.updateHudAuthControls();
+            this.refreshAllAppViews();
+            this.renderAuthModal();
+
+            if (typeof showHudToast === 'function') {
+                showHudToast('פרטי החשבון עודכנו בהצלחה! ✨', 'success');
+            } else if (typeof showToastNotification === 'function') {
+                showToastNotification('פרטי החשבון עודכנו בהצלחה! ✨', 'success');
+            } else {
+                alert('פרטי החשבון עודכנו בהצלחה!');
+            }
+            return true;
+        },
+
+        // Permanently delete user account and cloud data
+        async deleteAccount() {
+            if (!this.isLoggedIn()) return false;
+            const user = this.getActiveUser();
+
+            const confirmed = confirm(`⚠️ אזהרה: האם אתה בטוח שברצונך למחוק לצמיתות את החשבון "${user.name}"?\n\nפעולה זו תמחק את כל נתוני הקורסים, הציונים והסנכרון שלך מענן Atlas ME ולא ניתנת לשחזור!`);
+            if (!confirmed) return false;
+
+            const finalConfirm = confirm(`אישור סופי: למחוק לצמיתות את כל הנתונים של "${user.name}" ולאפס את המערכת?`);
+            if (!finalConfirm) return false;
+
+            // 1. Delete from Supabase Cloud
+            if (supabaseClient && user.id && user.id !== 'guest') {
+                try {
+                    const { error } = await supabaseClient
+                        .from('user_states')
+                        .delete()
+                        .eq('user_id', user.id);
+                    if (error) {
+                        console.error('[AuthSync] Error deleting account from Supabase:', error);
+                    } else {
+                        console.log('[AuthSync] Successfully deleted account from Supabase:', user.id);
+                    }
+                } catch (e) {
+                    console.error('[AuthSync] Cloud deletion exception:', e);
+                }
+            }
+
+            // 2. Unsubscribe real-time channel
+            if (realtimeChannel && supabaseClient) {
+                try {
+                    supabaseClient.removeChannel(realtimeChannel);
+                } catch (e) {}
+                realtimeChannel = null;
+            }
+
+            // 3. Clear local storage keys
+            localStorage.removeItem(SESSION_USER_KEY);
+            localStorage.removeItem('ast_profile_' + user.id);
+            localStorage.removeItem(this.getUserStorageKey(user.id));
+            if (user.id === 'adir_moshe') {
+                localStorage.removeItem(LEGACY_SAVE_KEY);
+            }
+
+            // 4. Reset gameState to clean template
+            if (typeof window.getCleanCurriculumState === 'function') {
+                const clean = window.getCleanCurriculumState();
+                if (window.setGlobalGameState) {
+                    window.setGlobalGameState(clean);
+                } else if (window.gameState) {
+                    window.gameState = clean;
+                }
+            }
+
+            // 5. Update UI
+            this.refreshAllAppViews();
+            this.updateHudAuthControls();
+            this.closeAuthModal();
+
+            if (typeof showHudToast === 'function') {
+                showHudToast('החשבון נמחק לצמיתות. המערכת אופסה 🗑️', 'info');
+            } else if (typeof showToastNotification === 'function') {
+                showToastNotification('החשבון נמחק לצמיתות. המערכת אופסה 🗑️', 'info');
+            } else {
+                alert('החשבון נמחק לצמיתות.');
+            }
+            return true;
+        },
+
         // Force UI re-render across all application modules
         refreshAllAppViews() {
             if (typeof notifyStateChanged === 'function') {
@@ -431,36 +588,84 @@
                 // Render Logged-In User Profile View
                 const user = this.getActiveUser();
                 const isDev = user.id === 'adir_moshe';
+                const currentSem = (window.gameState && window.gameState.currentActiveSemester) ? window.gameState.currentActiveSemester : (user.startingSemester || 1);
                 container.innerHTML = `
                     <div class="modal-header">
                         <h2 style="display: flex; align-items: center; gap: 10px; margin: 0; font-size: 1.25rem;">
                             <span>${user.avatar}</span> <span>פרטי חשבון מחובר</span>
                         </h2>
                         <div class="cloud-status-pill connected" style="margin-top: 6px;">
-                            🟢 <span>מסונכרן בזמן אמת לענן</span>
+                            🟢 <span>מסונכרן בזמן אמת לענן Atlas ME</span>
                         </div>
                     </div>
-                    <div class="modal-body" style="padding-top: 15px;">
-                        <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 8px; padding: 14px; margin-bottom: 16px;">
+                    <div class="modal-body" style="padding-top: 14px; max-height: 75vh; overflow-y: auto;">
+                        <!-- Overview Card -->
+                        <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 8px; padding: 12px 14px; margin-bottom: 14px;">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                                 <strong style="font-size: 1.05rem; color: #f8fafc;">${user.name}</strong>
                                 <span style="font-size: 0.76rem; background: rgba(56, 189, 248, 0.2); color: #38bdf8; padding: 2px 8px; border-radius: 12px;">
                                     ${isDev ? 'מפתח ראשי 🎓' : 'סטודנט 👤'}
                                 </span>
                             </div>
-                            <div style="font-size: 0.82rem; color: #94a3b8; line-height: 1.5;">
+                            <div style="font-size: 0.82rem; color: #94a3b8; line-height: 1.6;">
                                 <div>מזהה חשבון: <code style="color: #38bdf8; font-family: monospace;">${user.id}</code></div>
-                                ${user.email ? '<div>אימייל: ' + user.email + '</div>' : ''}
+                                <div>אימייל: <span style="color: #e2e8f0;">${user.email || 'לא הוגדר'}</span></div>
+                                <div>סמסטר נוכחי פעיל: <span style="color: #fbbf24; font-weight: bold;">סמסטר ${currentSem}</span></div>
                                 <div>סטטוס סנכרון: 🟢 פעיל ומסונכרן אוטומטית בין מכשירים</div>
                             </div>
                         </div>
 
-                        <div style="display: flex; gap: 10px;">
-                            <button type="button" class="btn btn-secondary" style="flex: 1;" onclick="AuthSync.syncToCloud(); if (typeof showHudToast==='function') showHudToast('סונכרן לענן ☁️', 'success');">
+                        <!-- Edit Account Form -->
+                        <div style="background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px; padding: 12px 14px; margin-bottom: 14px;">
+                            <h3 style="font-size: 0.9rem; color: #38bdf8; margin: 0 0 10px 0; display: flex; align-items: center; gap: 6px;">
+                                ✏️ עריכת פרטי חשבון
+                            </h3>
+                            <form onsubmit="event.preventDefault(); const n = document.getElementById('edit-profile-name').value; const e = document.getElementById('edit-profile-email').value; const s = document.getElementById('edit-profile-sem').value; const p = document.getElementById('edit-profile-pass').value; AuthSync.updateUserProfile({ name: n, email: e, semester: s, password: p });">
+                                <div class="form-group" style="margin-bottom: 8px;">
+                                    <label style="display: block; font-size: 0.78rem; color: #94a3b8; margin-bottom: 3px;">שם מלא / כינוי:</label>
+                                    <input type="text" id="edit-profile-name" class="form-input" style="width: 100%; padding: 6px 10px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff; font-size: 0.86rem;" value="${user.name}" required>
+                                </div>
+                                <div class="form-group" style="margin-bottom: 8px;">
+                                    <label style="display: block; font-size: 0.78rem; color: #94a3b8; margin-bottom: 3px;">אימייל טכניוני:</label>
+                                    <input type="email" id="edit-profile-email" class="form-input" style="width: 100%; padding: 6px 10px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff; font-size: 0.86rem;" value="${user.email || ''}">
+                                </div>
+                                <div class="form-group" style="margin-bottom: 8px;">
+                                    <label style="display: block; font-size: 0.78rem; color: #94a3b8; margin-bottom: 3px;">איזה סמסטר אתה לומד עכשיו?</label>
+                                    <select id="edit-profile-sem" class="form-select" style="width: 100%; padding: 6px 10px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff; font-size: 0.86rem;">
+                                        <option value="1" ${currentSem === 1 ? 'selected' : ''}>סמסטר א׳ (שנה א׳)</option>
+                                        <option value="2" ${currentSem === 2 ? 'selected' : ''}>סמסטר ב׳ (שנה א׳)</option>
+                                        <option value="3" ${currentSem === 3 ? 'selected' : ''}>סמסטר ג׳ (שנה ב׳)</option>
+                                        <option value="4" ${currentSem === 4 ? 'selected' : ''}>סמסטר ד׳ (שנה ב׳)</option>
+                                        <option value="5" ${currentSem === 5 ? 'selected' : ''}>סמסטר ה׳ (שנה ג׳)</option>
+                                        <option value="6" ${currentSem === 6 ? 'selected' : ''}>סמסטר ו׳ (שנה ג׳)</option>
+                                        <option value="7" ${currentSem === 7 ? 'selected' : ''}>סמסטר ז׳ (שנה ד׳)</option>
+                                        <option value="8" ${currentSem === 8 ? 'selected' : ''}>סמסטר ח׳ (שנה ד׳)</option>
+                                    </select>
+                                </div>
+                                <div class="form-group" style="margin-bottom: 10px;">
+                                    <label style="display: block; font-size: 0.78rem; color: #94a3b8; margin-bottom: 3px;">שינוי סיסמה (אופציונלי):</label>
+                                    <input type="password" id="edit-profile-pass" class="form-input" style="width: 100%; padding: 6px 10px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff; font-size: 0.86rem;" placeholder="סיסמה חדשה (השאר ריק אם אין שינוי)">
+                                </div>
+                                <button type="submit" class="btn btn-sm btn-primary" id="btn-save-profile-details" style="width: 100%; padding: 8px; font-weight: 600; font-size: 0.86rem; background: #0284c7; border: none; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                                    💾 שמור פרטי חשבון
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- Sync & Logout Actions -->
+                        <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+                            <button type="button" class="btn btn-secondary" style="flex: 1; padding: 8px; font-size: 0.84rem;" onclick="AuthSync.syncToCloud(); if (typeof showHudToast==='function') showHudToast('סונכרן לענן ☁️', 'success');">
                                 🔄 סנכרן עכשיו לענן
                             </button>
-                            <button type="button" class="btn btn-danger" style="flex: 1;" onclick="AuthSync.logout()">
-                                🚪 התנתקות מהחשבון
+                            <button type="button" class="btn btn-outline" style="flex: 1; padding: 8px; font-size: 0.84rem;" onclick="AuthSync.logout()">
+                                🚪 התנתקות
+                            </button>
+                        </div>
+
+                        <!-- Delete Account Danger Zone -->
+                        <div style="border-top: 1px solid rgba(239, 68, 68, 0.2); padding-top: 10px; margin-top: 6px;">
+                            <button type="button" class="btn btn-danger" id="btn-delete-account" style="width: 100%; padding: 7px; font-size: 0.8rem; background: rgba(239, 68, 68, 0.15); border: 1px solid #ef4444; color: #f87171; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;" onclick="AuthSync.deleteAccount()">
+                                🗑️ מחיקת חשבון לצמיתות
                             </button>
                         </div>
                     </div>

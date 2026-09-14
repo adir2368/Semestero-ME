@@ -6456,7 +6456,7 @@ function openCourseDetails(code) {
     const courseExams = (course.tasks || []).filter(t => t.type === 'exam');
     const latestExam = courseExams.length > 0 ? (courseExams.find(t => t.grade !== undefined && t.grade !== null) || courseExams[0]) : null;
 
-    if (course.status === 'mastered' || (course.status === 'active' && latestExam && latestExam.grade !== undefined && latestExam.grade !== null)) {
+    if (course.status === 'mastered' || course.status === 'active') {
         gradeSection.style.display = "block";
         
         // Populate inputs
@@ -6488,6 +6488,7 @@ function openCourseDetails(code) {
         updateCalcPreview();
 
         // Listeners for calculator inputs
+        calcExamInput.oninput = () => { updateCalcPreview(); };
         calcExamInput.onchange = (e) => {
             const val = parseFloat(e.target.value);
             if (latestExam) {
@@ -6497,6 +6498,7 @@ function openCourseDetails(code) {
             saveState();
         };
 
+        calcWeightInput.oninput = () => { updateCalcPreview(); };
         calcWeightInput.onchange = (e) => {
             const val = parseFloat(e.target.value);
             course.examWeight = (!isNaN(val) && val >= 0 && val <= 100) ? val : 70;
@@ -6504,6 +6506,7 @@ function openCourseDetails(code) {
             saveState();
         };
 
+        calcHwInput.oninput = () => { updateCalcPreview(); };
         calcHwInput.onchange = (e) => {
             const val = parseFloat(e.target.value);
             course.assignmentsGrade = (!isNaN(val) && val >= 0 && val <= 100) ? val : 100;
@@ -6512,25 +6515,54 @@ function openCourseDetails(code) {
         };
 
         // Apply calculated grade button
-        applyCalcBtn.onclick = () => {
-            const previewVal = updateCalcPreview();
-            if (previewVal !== null) {
-                gradeInput.value = previewVal;
-                course.grade = previewVal;
-                notifyStateChanged();
+        if (applyCalcBtn) {
+            applyCalcBtn.onclick = () => {
+                const previewVal = updateCalcPreview();
+                if (previewVal !== null) {
+                    gradeInput.value = previewVal;
+                    course.grade = previewVal;
+                    notifyStateChanged();
+                    if (typeof showToastNotification === 'function') {
+                        showToastNotification(`ציון ${previewVal} הוחל בהצלחה כציון סופי! ⚡`, 'success');
+                    }
+                }
+            };
+        }
+
+        // Official course grade save helper
+        const saveOfficialGrade = () => {
+            const val = parseFloat(gradeInput.value);
+            course.grade = (!isNaN(val) && val >= 0 && val <= 100) ? val : null;
+            notifyStateChanged();
+            if (typeof showToastNotification === 'function') {
+                if (course.grade !== null) {
+                    showToastNotification(`ציון סופי (${course.grade}) נשמר בהצלחה! ✓`, 'success');
+                } else {
+                    showToastNotification('הציון הסופי אופס', 'info');
+                }
             }
         };
 
-        // Official course grade input listener (Independent from exam grade)
-        gradeInput.onchange = (e) => {
-            const val = parseFloat(e.target.value);
-            course.grade = (!isNaN(val) && val >= 0 && val <= 100) ? val : null;
-            notifyStateChanged();
+        // Official course grade input listeners
+        gradeInput.onchange = saveOfficialGrade;
+        gradeInput.onkeydown = (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                saveOfficialGrade();
+            }
         };
+
+        const saveManualBtn = document.getElementById("btn-save-manual-grade");
+        if (saveManualBtn) {
+            saveManualBtn.onclick = saveOfficialGrade;
+        }
     } else {
         gradeSection.style.display = "none";
         gradeInput.value = "";
         gradeInput.onchange = null;
+        gradeInput.onkeydown = null;
+        const saveManualBtn = document.getElementById("btn-save-manual-grade");
+        if (saveManualBtn) saveManualBtn.onclick = null;
     }
 
     // Syllabus & Moodle Import Box controller
@@ -7413,16 +7445,15 @@ function toggleCourseCompletion(code) {
     if (course.status === 'mastered') {
         course.status = 'active';
         uncompleteAllTasks(course);
+        if (typeof showToastNotification === 'function') {
+            showToastNotification(`הקורס ${course.name} הוחזר לסטטוס פעיל`, 'info');
+        }
     } else {
-        const exams = course.tasks.filter(t => t.type === 'exam');
+        const exams = (course.tasks || []).filter(t => t.type === 'exam');
         if (exams.length > 0) {
             const passingExam = exams.find(t => t.grade !== undefined && t.grade !== null && t.grade >= 55);
-            if (!passingExam) {
-                alert(`⚠️ לא ניתן לסמן את הקורס כהושלם! נדרש להזין ציון מעבר (55 ומעלה) במבחן הסופי תחילה.`);
-                return;
-            }
-            // If official final course grade is not set yet, calculate it from exam weight + homework rather than overwriting with exam grade alone
-            if (course.grade === undefined || course.grade === null) {
+            // If official final course grade is not set yet and a passing exam exists, auto-calculate it
+            if (passingExam && (course.grade === undefined || course.grade === null)) {
                 const weight = (course.examWeight !== undefined && course.examWeight !== null) ? course.examWeight : 70;
                 const hwGrade = (course.assignmentsGrade !== undefined && course.assignmentsGrade !== null) ? course.assignmentsGrade : 100;
                 course.grade = Math.round((passingExam.grade * (weight / 100)) + (hwGrade * ((100 - weight) / 100)));
@@ -7430,6 +7461,9 @@ function toggleCourseCompletion(code) {
         }
         course.status = 'mastered';
         completeAllTasks(course);
+        if (typeof showToastNotification === 'function') {
+            showToastNotification(`🏆 הקורס ${course.name} סומן כהושלם בהצלחה!`, 'success');
+        }
     }
     notifyStateChanged();
 }

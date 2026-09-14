@@ -814,7 +814,7 @@
                     </div>
 
                     <!-- Grade Calculator Grid -->
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(115px, 1fr)); gap: 8px; margin-bottom: 12px; background: rgba(0,0,0,0.25); padding: 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.05);">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; margin-bottom: 12px; background: rgba(0,0,0,0.25); padding: 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.05);">
                         <div>
                             <label style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-bottom: 4px;">📝 ציון מבחן סוף:</label>
                             <input type="number" id="calc-exam-grade" min="0" max="100" placeholder="--" style="width: 100%; box-sizing: border-box; background: var(--bg-deep); border: 1px solid var(--border-color); color: var(--text-light); border-radius: 4px; padding: 5px 8px; font-size: 0.85rem; text-align: center; font-family: inherit;">
@@ -829,20 +829,25 @@
                         </div>
                         <div>
                             <label style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-bottom: 4px;">⚡ ציון מחושב:</label>
-                            <div id="calc-preview-grade" style="font-size: 0.95rem; font-weight: bold; color: #38bdf8; padding: 5px 0; text-align: center;">--</div>
+                            <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px;">
+                                <div id="calc-preview-grade" style="font-size: 1.1rem; font-weight: bold; color: #38bdf8; min-width: 32px; text-align: center;">--</div>
+                                <button type="button" class="btn btn-sm btn-outline" id="btn-apply-calculated-grade" title="החל ציון מחושב כציון סופי" style="font-size: 0.72rem; padding: 4px 8px; height: 30px; white-space: nowrap; border-color: #38bdf8; color: #38bdf8; display: flex; align-items: center; gap: 4px;">
+                                    החל ציון ⚡
+                                </button>
+                            </div>
                         </div>
                     </div>
 
                     <!-- Official Final Grade Input (Counts toward GPA) -->
-                    <div style="display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap;">
+                    <div style="display: flex; gap: 8px; align-items: flex-end; flex-wrap: wrap;">
                         <div style="flex: 1; min-width: 180px;">
                             <label for="modal-course-grade-input" style="font-weight: bold; font-size: 0.82rem; color: #fbbf24; display: block; margin-bottom: 4px;">
                                 🏆 ציון סופי בקורס (לתעתיק ולממוצע):
                             </label>
                             <input type="number" id="modal-course-grade-input" min="0" max="100" placeholder="הזן ציון סופי..." style="width: 100%; box-sizing: border-box; background: var(--bg-deep); border: 1px solid #fbbf24; color: #fff; font-weight: bold; border-radius: 4px; padding: 6px 10px; font-size: 0.9rem; font-family: inherit;">
                         </div>
-                        <button type="button" class="btn btn-sm btn-outline" id="btn-apply-calculated-grade" style="font-size: 0.75rem; padding: 7px 12px; height: 35px; white-space: nowrap;">
-                            החל ציון מחושב ➔
+                        <button type="button" class="btn btn-sm btn-primary" id="btn-save-manual-grade" title="אישור ושמירת הציון הסופי" style="font-size: 0.8rem; padding: 6px 14px; height: 35px; background: #fbbf24; color: #0f172a; font-weight: bold; border: none; border-radius: 4px; cursor: pointer; white-space: nowrap; display: flex; align-items: center; gap: 4px;">
+                            ✓ אישור
                         </button>
                     </div>
                 </div>
@@ -1434,7 +1439,7 @@
 
     <!-- Single-User Authentication & Profile Modal -->
     <div class="modal-overlay" id="auth-modal">
-        <div class="modal-content" style="max-width: 480px;">
+        <div class="modal-content" style="max-width: 480px; background: #0f172a;">
             <button class="modal-close" onclick="AuthSync.closeAuthModal()">&times;</button>
             <div id="auth-modal-content-container"></div>
         </div>
@@ -1497,11 +1502,11 @@
     <!-- Supabase JS Client for Cloud Sync -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <!-- Clean Curriculum Template -->
-    <script src="curriculum_template.js?v=1.6.3"></script>
+    <script src="curriculum_template.js?v=1.6.4"></script>
     <!-- Multi-User Identity & Sync Engine -->
-    <script src="auth_sync.js?v=1.6.3"></script>
+    <script src="auth_sync.js?v=1.6.4"></script>
     <!-- Core Application Logic -->
-    <script src="app.js?v=1.6.3"></script>
+    <script src="app.js?v=1.6.4"></script>
     <!-- PWA Service Worker Registration -->
     <script>
         if ('serviceWorker' in navigator && window.location.protocol.startsWith('http')) {
