@@ -7702,3 +7702,91 @@ label[for="new-task-xp-input"],
         grid-template-columns: 1fr;
     }
 }
+
+/* CheeseFork Auto-Fill & Autocomplete in Add Course Modal */
+.cf-autocomplete-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 1050;
+    background: #0f172a;
+    border: 1px solid rgba(56, 189, 248, 0.4);
+    border-radius: 8px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.65);
+    max-height: 220px;
+    overflow-y: auto;
+    margin-top: 4px;
+}
+
+.cf-suggestion-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    cursor: pointer;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    transition: background 0.15s ease;
+}
+
+.cf-suggestion-item:last-child {
+    border-bottom: none;
+}
+
+.cf-suggestion-item:hover, .cf-suggestion-item.active {
+    background: rgba(56, 189, 248, 0.18);
+}
+
+.cf-sugg-title {
+    font-size: 0.84rem;
+    font-weight: 600;
+    color: #f8fafc;
+}
+
+.cf-sugg-meta {
+    font-size: 0.72rem;
+    color: #94a3b8;
+    display: flex;
+    gap: 8px;
+}
+
+.cf-sugg-code {
+    color: #38bdf8;
+    font-family: monospace;
+    font-weight: 700;
+}
+
+.cf-match-banner {
+    margin-top: 8px;
+    padding: 10px 12px;
+    background: linear-gradient(135deg, rgba(14, 165, 233, 0.14), rgba(16, 185, 129, 0.1));
+    border: 1px solid rgba(56, 189, 248, 0.35);
+    border-radius: 8px;
+    font-size: 0.78rem;
+    color: #e2e8f0;
+}
+
+.cf-match-banner-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-weight: 700;
+    color: #38bdf8;
+    margin-bottom: 4px;
+}
+
+.cf-match-banner-details {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    color: #94a3b8;
+    font-size: 0.74rem;
+}
+
+.cf-match-pill {
+    background: rgba(255, 255, 255, 0.08);
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: #f1f5f9;
+}
+

@@ -5976,11 +5976,212 @@ function updateHud() {
     }
 }
 
+/* ==========================================================================
+   CheeseFork Offline Technion Course Database Index & Smart Auto-Lookup
+   ========================================================================== */
+let cheeseForkMap = null;
+let cheeseForkList = null;
+window._currentCheeseForkData = null;
+
+function parseDateToIso(str) {
+    if (!str) return null;
+    const match = str.match(/(\d{2})-(\d{2})-(\d{4})/);
+    if (match) {
+        return `${match[3]}-${match[2]}-${match[1]}`;
+    }
+    return null;
+}
+
+function initCheeseForkDatabase() {
+    if (cheeseForkMap) return;
+    cheeseForkMap = new Map();
+    cheeseForkList = [];
+
+    const rawList = window.courses_from_rishum || [];
+    if (!Array.isArray(rawList) || rawList.length === 0) return;
+
+    rawList.forEach(item => {
+        const g = item.general;
+        if (!g || !g['מספר מקצוע']) return;
+
+        const rawNum = String(g['מספר מקצוע']).trim();
+        let code6 = rawNum;
+        if (rawNum.length === 8 && rawNum.startsWith('0')) {
+            code6 = rawNum.slice(1, 4) + rawNum.slice(5);
+        }
+        const stripped = rawNum.replace(/^0+/, '');
+
+        const entry = {
+            rawNum,
+            code6,
+            name: (g['שם מקצוע'] || '').trim(),
+            credits: parseFloat(g['נקודות']) || 3,
+            faculty: (g['פקולטה'] || '').trim(),
+            prereqsRaw: g['מקצועות קדם'] || '',
+            syllabus: (g['סילבוס'] || '').trim(),
+            moedA: (g['מועד א'] || '').trim(),
+            moedB: (g['מועד ב'] || '').trim(),
+            schedule: item.schedule || []
+        };
+
+        // Determine course type based on faculty/name
+        let detectedType = 'elective';
+        const fac = entry.faculty;
+        const name = entry.name;
+        if (fac.includes('חינוך גופני') || fac.includes('ספורט') || name.includes('ספורט') || rawNum.startsWith('039')) {
+            detectedType = 'sports';
+        } else if (fac.includes('הומניסטיים') || fac.includes('אמנות') || code6.startsWith('32')) {
+            detectedType = 'humanities';
+        } else if (name.includes('פרויקט') || name.includes('סדנה')) {
+            detectedType = 'project';
+        }
+        entry.detectedType = detectedType;
+
+        // Parse clean 6-digit prerequisite candidates
+        const prereqMatches = entry.prereqsRaw.match(/\d{6,8}/g) || [];
+        entry.parsedPrereqs = [...new Set(prereqMatches.map(m => {
+            if (m.length === 8 && m.startsWith('0')) return m.slice(1, 4) + m.slice(5);
+            return m;
+        }))];
+
+        cheeseForkList.push(entry);
+        cheeseForkMap.set(rawNum.toLowerCase(), entry);
+        if (code6 && !cheeseForkMap.has(code6.toLowerCase())) {
+            cheeseForkMap.set(code6.toLowerCase(), entry);
+        }
+        if (stripped && !cheeseForkMap.has(stripped.toLowerCase())) {
+            cheeseForkMap.set(stripped.toLowerCase(), entry);
+        }
+    });
+}
+
+function findCheeseForkCourse(query) {
+    initCheeseForkDatabase();
+    if (!cheeseForkMap) return null;
+
+    const q = String(query || '').trim().toLowerCase();
+    if (!q) return null;
+
+    if (cheeseForkMap.has(q)) return cheeseForkMap.get(q);
+
+    const cleanDigits = q.replace(/\D/g, '');
+    if (cleanDigits) {
+        if (cleanDigits.length <= 6) {
+            const pad6 = cleanDigits.padStart(6, '0');
+            if (cheeseForkMap.has(pad6)) return cheeseForkMap.get(pad6);
+            const pad8 = '0' + pad6.slice(0, 3) + '0' + pad6.slice(3);
+            if (cheeseForkMap.has(pad8)) return cheeseForkMap.get(pad8);
+        } else if (cleanDigits.length === 7 || cleanDigits.length === 8) {
+            const pad8 = cleanDigits.padStart(8, '0');
+            if (cheeseForkMap.has(pad8)) return cheeseForkMap.get(pad8);
+        }
+    }
+
+    const byName = (cheeseForkList || []).find(c => c.name.toLowerCase() === q);
+    if (byName) return byName;
+
+    return null;
+}
+
+function searchCheeseForkCourses(query, maxResults = 8) {
+    initCheeseForkDatabase();
+    if (!cheeseForkList) return [];
+
+    const q = String(query || '').trim().toLowerCase();
+    if (!q || q.length < 2) return [];
+
+    const isDigitSearch = /^\d+$/.test(q);
+    const results = [];
+
+    for (const c of cheeseForkList) {
+        let matched = false;
+        if (isDigitSearch) {
+            matched = c.code6.includes(q) || c.rawNum.includes(q);
+        } else {
+            matched = c.name.toLowerCase().includes(q) || c.code6.includes(q) || c.faculty.toLowerCase().includes(q);
+        }
+
+        if (matched) {
+            results.push(c);
+            if (results.length >= maxResults) break;
+        }
+    }
+    return results;
+}
+
+function applyCheeseForkCourse(entry) {
+    if (!entry) return;
+    window._currentCheeseForkData = entry;
+
+    const codeInput = document.getElementById("course-code");
+    const nameInput = document.getElementById("course-name");
+    const creditsInput = document.getElementById("course-credits");
+    const typeSelect = document.getElementById("course-type");
+    const prereqsInput = document.getElementById("course-prereqs");
+    const banner = document.getElementById("cheesefork-match-banner");
+    const suggContainer = document.getElementById("cheesefork-suggestions");
+
+    if (codeInput) codeInput.value = entry.code6 || entry.rawNum;
+    if (nameInput) nameInput.value = entry.name;
+    if (creditsInput) creditsInput.value = entry.credits;
+    if (typeSelect) typeSelect.value = entry.detectedType || 'elective';
+
+    // Prerequisite matching: prioritize prereqs that already exist in the degree
+    if (prereqsInput) {
+        let relevantPrereqs = [];
+        if (entry.parsedPrereqs && entry.parsedPrereqs.length > 0) {
+            if (window.gameState && window.gameState.courses) {
+                const degreePrereqs = entry.parsedPrereqs.filter(p => !!window.gameState.courses[p]);
+                relevantPrereqs = degreePrereqs.length > 0 ? degreePrereqs : entry.parsedPrereqs.slice(0, 3);
+            } else {
+                relevantPrereqs = entry.parsedPrereqs.slice(0, 3);
+            }
+        }
+        prereqsInput.value = relevantPrereqs.join(', ');
+    }
+
+    // Register exam dates in CHEESEFORK_EXAM_DATES
+    const isoA = parseDateToIso(entry.moedA);
+    const isoB = parseDateToIso(entry.moedB);
+    const effectiveCode = entry.code6 || entry.rawNum;
+    if (typeof CHEESEFORK_EXAM_DATES !== 'undefined' && effectiveCode) {
+        CHEESEFORK_EXAM_DATES[effectiveCode] = {
+            moedA: isoA,
+            moedB: isoB,
+            name: entry.name
+        };
+    }
+
+    if (banner) {
+        banner.style.display = "block";
+        banner.innerHTML = `
+            <div class="cf-match-banner-header">
+                <span>✨ זוהה ב-CheeseFork: ${entry.name}</span>
+                <span class="cf-match-pill">${entry.code6}</span>
+            </div>
+            <div class="cf-match-banner-details">
+                <span>🏛️ ${entry.faculty || 'הטכניון'}</span>
+                <span>⚖️ ${entry.credits} נק״ז</span>
+                ${entry.moedA ? `<span>📅 מועד א׳: ${entry.moedA}</span>` : ''}
+                ${entry.moedB ? `<span>📅 מועד ב׳: ${entry.moedB}</span>` : ''}
+            </div>
+            ${entry.syllabus ? `<div style="font-size: 0.72rem; color: #94a3b8; margin-top: 5px; line-height: 1.3;">${entry.syllabus.slice(0, 160)}...</div>` : ''}
+        `;
+    }
+
+    if (suggContainer) {
+        suggContainer.style.display = "none";
+        suggContainer.innerHTML = "";
+    }
+}
+
 // Setup interface event listeners
 function setupEventListeners() {
     // Global helper function to open add course modal
     window.openAddCourseModal = function(defaultSemester = null) {
         editingCourseCode = null;
+        window._currentCheeseForkData = null;
+
         const modalTitle = document.getElementById("add-course-modal-title");
         const submitBtn = document.getElementById("add-course-submit-btn");
         const form = document.getElementById("form-course");
@@ -5988,10 +6189,20 @@ function setupEventListeners() {
         const statusSelect = document.getElementById("course-status-initial");
         const gradeGroup = document.getElementById("course-initial-grade-group");
         const gradeInput = document.getElementById("course-initial-grade");
+        const banner = document.getElementById("cheesefork-match-banner");
+        const suggContainer = document.getElementById("cheesefork-suggestions");
 
         if (modalTitle) modalTitle.innerText = "➕ הוספת קורס חדש למפת הקורסים";
         if (submitBtn) submitBtn.innerText = "הוסף קורס למפה 🚀";
         if (form) form.reset();
+        if (banner) {
+            banner.style.display = "none";
+            banner.innerHTML = "";
+        }
+        if (suggContainer) {
+            suggContainer.style.display = "none";
+            suggContainer.innerHTML = "";
+        }
 
         const activeSem = (gameState && gameState.currentActiveSemester) ? gameState.currentActiveSemester : 1;
         const targetSem = defaultSemester !== null ? defaultSemester : activeSem;
@@ -6006,6 +6217,101 @@ function setupEventListeners() {
         const modal = document.getElementById("add-course-modal");
         if (modal) modal.classList.add("active");
     };
+
+    // Wire CheeseFork auto-completion and search
+    const courseCodeInput = document.getElementById("course-code");
+    const cfSearchBtn = document.getElementById("btn-cheesefork-search");
+    const cfSuggestions = document.getElementById("cheesefork-suggestions");
+
+    let cfDebounceTimer = null;
+    if (courseCodeInput) {
+        courseCodeInput.addEventListener("input", (e) => {
+            clearTimeout(cfDebounceTimer);
+            const val = e.target.value.trim();
+
+            if (!val || val.length < 2) {
+                if (cfSuggestions) {
+                    cfSuggestions.style.display = "none";
+                    cfSuggestions.innerHTML = "";
+                }
+                const banner = document.getElementById("cheesefork-match-banner");
+                if (banner) banner.style.display = "none";
+                return;
+            }
+
+            cfDebounceTimer = setTimeout(() => {
+                // First check exact match
+                const exact = findCheeseForkCourse(val);
+                if (exact && (val === exact.code6 || val === exact.rawNum || val === exact.name)) {
+                    applyCheeseForkCourse(exact);
+                    return;
+                }
+
+                // Show suggestion dropdown
+                const matches = searchCheeseForkCourses(val, 8);
+                if (cfSuggestions) {
+                    if (matches.length > 0) {
+                        cfSuggestions.innerHTML = matches.map(m => `
+                            <div class="cf-suggestion-item" data-code="${m.code6 || m.rawNum}">
+                                <div class="cf-sugg-title">${m.name}</div>
+                                <div class="cf-sugg-meta">
+                                    <span class="cf-sugg-code">${m.code6}</span>
+                                    <span>•</span>
+                                    <span>${m.credits} נק״ז</span>
+                                    <span>•</span>
+                                    <span>${m.faculty || 'הטכניון'}</span>
+                                </div>
+                            </div>
+                        `).join('');
+                        cfSuggestions.style.display = "block";
+                    } else {
+                        cfSuggestions.style.display = "none";
+                        cfSuggestions.innerHTML = "";
+                    }
+                }
+            }, 180);
+        });
+
+        courseCodeInput.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") {
+                e.preventDefault();
+                if (cfSearchBtn) cfSearchBtn.click();
+            }
+        });
+    }
+
+    if (cfSuggestions) {
+        cfSuggestions.addEventListener("click", (e) => {
+            const item = e.target.closest(".cf-suggestion-item");
+            if (item) {
+                const code = item.dataset.code;
+                const found = findCheeseForkCourse(code);
+                if (found) applyCheeseForkCourse(found);
+            }
+        });
+    }
+
+    if (cfSearchBtn) {
+        cfSearchBtn.addEventListener("click", () => {
+            const val = courseCodeInput ? courseCodeInput.value.trim() : "";
+            if (!val) return;
+            const found = findCheeseForkCourse(val);
+            if (found) {
+                applyCheeseForkCourse(found);
+            } else {
+                if (typeof showToastNotification === 'function') {
+                    showToastNotification(`ℹ️ לא נמצא קורס מתאים ב-CheeseFork עבור "${val}" - באפשרותך למלא ידנית.`, 'info');
+                }
+            }
+        });
+    }
+
+    // Close suggestions when clicking outside
+    document.addEventListener("click", (e) => {
+        if (cfSuggestions && !e.target.closest(".cheesefork-lookup-group")) {
+            cfSuggestions.style.display = "none";
+        }
+    });
 
     // Wire add course triggers across all workspaces (Tree, Toolbar, Sidebar, Settings)
     const btnTreeAdd = document.getElementById("btn-tree-add-course");
@@ -6268,10 +6574,26 @@ function handleAddCourseSubmit(e) {
 
         // Default tasks for custom course
         const isMastered = (initialStatus === 'mastered');
+        const cfData = window._currentCheeseForkData;
+        const examDateA = cfData ? parseDateToIso(cfData.moedA) : null;
+        const examDateB = cfData ? parseDateToIso(cfData.moedB) : null;
+
         const tasks = [
             { id: `${code}_h1`, title: "מטלת בית 1", type: "hw", xp: 50, completed: isMastered, status: isMastered ? 'done' : 'not_started' },
-            { id: `${code}_ex`, title: "מועד א", type: "exam", xp: 500, completed: isMastered, status: isMastered ? 'done' : 'not_started', grade: finalGrade }
+            { id: `${code}_ex`, title: "מועד א", type: "exam", xp: 500, completed: isMastered, status: isMastered ? 'done' : 'not_started', grade: finalGrade, date: examDateA || undefined }
         ];
+
+        if (examDateB) {
+            tasks.push({
+                id: `${code}_ex_b`,
+                title: "מועד ב",
+                type: "exam",
+                xp: 500,
+                completed: false,
+                status: 'not_started',
+                date: examDateB
+            });
+        }
 
         gameState.courses[code] = {
             id: code,
@@ -6283,8 +6605,18 @@ function handleAddCourseSubmit(e) {
             status: initialStatus,
             grade: finalGrade,
             tasks,
-            type
+            type,
+            faculty: cfData ? cfData.faculty : undefined,
+            syllabus: cfData ? cfData.syllabus : undefined
         };
+
+        if (typeof CHEESEFORK_EXAM_DATES !== 'undefined' && (examDateA || examDateB)) {
+            CHEESEFORK_EXAM_DATES[code] = {
+                moedA: examDateA,
+                moedB: examDateB,
+                name: name
+            };
+        }
 
         if (typeof showToastNotification === 'function') {
             showToastNotification(`✨ הקורס "${name}" (${code.toUpperCase()}) נוסף בהצלחה למפת הקורסים!`, 'success');

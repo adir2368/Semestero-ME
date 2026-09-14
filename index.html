@@ -16,7 +16,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Rubik:wght@300;400;500;700;900&display=swap" rel="stylesheet">
     <link rel="icon" type="image/png" href="icon.png">
-    <link rel="stylesheet" href="styles.css?v=1.6.8">
+    <link rel="stylesheet" href="styles.css?v=1.6.9">
 </head>
 <body>
     <div class="hud-container">
@@ -175,9 +175,6 @@
                 <div class="tree-controls">
                     <div class="view-mode-toggles" style="display: flex; align-items: center; gap: 10px;">
                         <span class="btn btn-sm btn-mode active" id="btn-mode-flowchart" style="cursor: default; pointer-events: none;">📊 תרשים זרימה (Flowchart)</span>
-                        <button type="button" class="btn btn-sm btn-primary" id="btn-tree-add-course" title="הוסף קורס בחירה או קורס מותאם אישית לעץ" style="background: linear-gradient(135deg, #0284c7, #2563eb); border-color: #38bdf8; display: inline-flex; align-items: center; gap: 6px; font-weight: 600; box-shadow: 0 0 10px rgba(56, 189, 248, 0.35);">
-                            <span>➕</span><span>הוסף קורס לעץ</span>
-                        </button>
                     </div>
                     <div class="tree-legend">
                         <span class="legend-item"><span class="dot dot-locked"></span> נעול</span>
@@ -929,13 +926,23 @@
             </div>
             <div class="modal-body">
                 <form id="form-course">
+                    <div class="form-group cheesefork-lookup-group" style="position: relative;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                            <label for="course-code" style="margin-bottom: 0;">קוד קורס (טכניון):</label>
+                            <span class="cf-auto-tag" style="font-size: 0.72rem; color: #38bdf8; background: rgba(56, 189, 248, 0.12); border: 1px solid rgba(56, 189, 248, 0.3); padding: 2px 8px; border-radius: 12px; display: inline-flex; align-items: center; gap: 4px;">
+                                🧀 מילוי אוטומטי מ-CheeseFork
+                            </span>
+                        </div>
+                        <div class="cf-input-wrapper" style="display: flex; gap: 8px;">
+                            <input type="text" id="course-code" required placeholder="הזן מספר קורס (למשל: 034028 או 234128) או חפש לפי שם" autocomplete="off" style="flex: 1;">
+                            <button type="button" id="btn-cheesefork-search" class="btn btn-secondary" style="padding: 0 14px; font-size: 0.85rem; border-color: rgba(56, 189, 248, 0.4); color: #38bdf8; white-space: nowrap; font-weight: 600;">🔍 מצא</button>
+                        </div>
+                        <div id="cheesefork-suggestions" class="cf-autocomplete-dropdown" style="display: none;"></div>
+                        <div id="cheesefork-match-banner" class="cf-match-banner" style="display: none;"></div>
+                    </div>
                     <div class="form-group">
                         <label for="course-name">שם הקורס:</label>
                         <input type="text" id="course-name" required placeholder="למשל: מבוא למדעי המחשב">
-                    </div>
-                    <div class="form-group">
-                        <label for="course-code">קוד קורס (מזהה ייחודי):</label>
-                        <input type="text" id="course-code" required placeholder="למשל: cs101">
                     </div>
                     <div class="form-group">
                         <label for="course-credits">נקודות זכות (נק״ז):</label>
@@ -1532,12 +1539,14 @@
 
     <!-- Supabase JS Client for Cloud Sync -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- CheeseFork Technion Courses Database -->
+    <script src="cheesefork_courses.min.js?v=1.6.9"></script>
     <!-- Clean Curriculum Template -->
-    <script src="curriculum_template.js?v=1.6.7"></script>
+    <script src="curriculum_template.js?v=1.6.9"></script>
     <!-- Multi-User Identity & Sync Engine -->
-    <script src="auth_sync.js?v=1.6.7"></script>
+    <script src="auth_sync.js?v=1.6.9"></script>
     <!-- Core Application Logic -->
-    <script src="app.js?v=1.6.8"></script>
+    <script src="app.js?v=1.6.9"></script>
     <!-- PWA Service Worker Registration -->
     <script>
         if ('serviceWorker' in navigator && window.location.protocol.startsWith('http')) {
