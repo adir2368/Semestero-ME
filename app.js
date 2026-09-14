@@ -2858,7 +2858,8 @@ const PRELOADED_USER_STATE = {
           "title": "לצפות בכל ההרצאות של חדו״א",
           "dueDate": "2026-08-22",
           "type": "hw",
-          "completed": true
+          "completed": true,
+          "status": "done"
         }
       ],
       "grade": 70
@@ -3325,7 +3326,8 @@ const PRELOADED_USER_STATE = {
           "title": "הגנה על פרויקט סוף גרפיקה",
           "dueDate": "2026-08-27",
           "type": "project",
-          "completed": true
+          "completed": true,
+          "status": "done"
         }
       ],
       "grade": 99,
@@ -5342,6 +5344,27 @@ function loadSavedState() {
             });
         });
     }
+
+    // 2. Automatically ensure all tasks for completed courses or courses with final grades are marked completed
+    if (gameState.courses) {
+        Object.values(gameState.courses).forEach(c => {
+            const hasPassingGrade = (c.grade !== undefined && c.grade !== null && c.grade !== '' && !isNaN(Number(c.grade)) && Number(c.grade) >= 55);
+            if (c.status === 'mastered' || hasPassingGrade) {
+                if (hasPassingGrade && c.status !== 'mastered') {
+                    c.status = 'mastered';
+                }
+                if (c.tasks && Array.isArray(c.tasks)) {
+                    c.tasks.forEach(t => {
+                        t.completed = true;
+                        t.status = 'done';
+                        if (t.type === 'exam' && (t.grade === undefined || t.grade === null) && c.grade !== undefined && c.grade !== null) {
+                            t.grade = c.grade;
+                        }
+                    });
+                }
+            }
+        });
+    }
     saveState();
 
         // Personal Winter 2026/2027 (Semester 3) exam dates & CheeseFork schedules for Adir Moshe only
@@ -5767,7 +5790,8 @@ function autoUpdateTaskStatusesByDueDate() {
 
     Object.values(gameState.courses).forEach(course => {
         if (!course.tasks || !Array.isArray(course.tasks)) return;
-        if (course.status === 'mastered' || course.status === 'active') return; // Mastered courses have tasks marked as done
+        const hasPassingGrade = (course.grade !== undefined && course.grade !== null && course.grade !== '' && !isNaN(Number(course.grade)) && Number(course.grade) >= 55);
+        if (course.status === 'mastered' || course.status === 'active' || hasPassingGrade) return; // Mastered/graded courses have tasks marked as done
 
         course.tasks.forEach(task => {
             if (task.completed || task.status === 'done' || task.status === 'submitted') return;
@@ -5802,22 +5826,29 @@ function recalculateCourseStates() {
     
     Object.keys(gameState.courses).forEach(code => {
         const course = gameState.courses[code];
+        const hasPassingGrade = (course.grade !== undefined && course.grade !== null && course.grade !== '' && !isNaN(Number(course.grade)) && Number(course.grade) >= 55);
         
         // Sum completed stats
-        if (course.status === 'mastered') {
-            totalCredits += course.credits;
+        if (course.status === 'mastered' || hasPassingGrade) {
+            if (hasPassingGrade && course.status !== 'mastered') {
+                course.status = 'mastered';
+            }
+            totalCredits += (course.credits || 0);
             completedCount++;
             
-            // Automatically mark all tasks under mastered courses as completed
+            // Automatically mark all tasks under mastered/graded courses as completed
             if (course.tasks && Array.isArray(course.tasks)) {
                 course.tasks.forEach(task => {
                     task.completed = true;
                     task.status = 'done';
+                    if (task.type === 'exam' && (task.grade === undefined || task.grade === null) && course.grade !== undefined && course.grade !== null) {
+                        task.grade = course.grade;
+                    }
                 });
             }
             
             // Count completed exams
-            const exam = course.tasks.find(t => t.type === 'exam');
+            const exam = course.tasks ? course.tasks.find(t => t.type === 'exam') : null;
             if (exam && exam.completed) {
                 slayedCount++;
             }
@@ -5828,7 +5859,8 @@ function recalculateCourseStates() {
     let openTasksCount = 0;
     Object.keys(gameState.courses).forEach(code => {
         const course = gameState.courses[code];
-        if (course.status !== 'locked' && course.status !== 'mastered' && course.tasks && Array.isArray(course.tasks)) {
+        const hasPassingGrade = (course.grade !== undefined && course.grade !== null && course.grade !== '' && !isNaN(Number(course.grade)) && Number(course.grade) >= 55);
+        if (course.status !== 'locked' && course.status !== 'mastered' && !hasPassingGrade && course.tasks && Array.isArray(course.tasks)) {
             course.tasks.forEach(task => {
                 if (!task.completed && task.status !== 'done') {
                     openTasksCount++;
@@ -7095,9 +7127,14 @@ function openCourseDetails(code) {
                 if (previewVal !== null) {
                     gradeInput.value = previewVal;
                     course.grade = previewVal;
+                    if (previewVal >= 55) {
+                        course.status = 'mastered';
+                        completeAllTasks(course);
+                    }
+                    recalculateCourseStates();
                     notifyStateChanged();
                     if (typeof showToastNotification === 'function') {
-                        showToastNotification(`ציון ${previewVal} הוחל בהצלחה כציון סופי! ⚡`, 'success');
+                        showToastNotification(`ציון ${previewVal} הוחל כציון סופי וכל המשימות הושלמו! ⚡`, 'success');
                     }
                 }
             };
@@ -7107,10 +7144,15 @@ function openCourseDetails(code) {
         const saveOfficialGrade = (shouldCloseModal = false) => {
             const val = parseFloat(gradeInput.value);
             course.grade = (!isNaN(val) && val >= 0 && val <= 100) ? val : null;
+            if (course.grade !== null && course.grade >= 55) {
+                course.status = 'mastered';
+                completeAllTasks(course);
+            }
+            recalculateCourseStates();
             notifyStateChanged();
             if (typeof showToastNotification === 'function') {
                 if (course.grade !== null) {
-                    showToastNotification(`ציון סופי (${course.grade}) נשמר בהצלחה! ✓`, 'success');
+                    showToastNotification(`ציון סופי (${course.grade}) נשמר בהצלחה! כל המשימות הושלמו ✓`, 'success');
                 } else {
                     showToastNotification('הציון הסופי אופס', 'info');
                 }
@@ -7989,12 +8031,16 @@ function deleteCourse(code) {
 }
 
 function completeAllTasks(course) {
+    if (!course || !course.tasks || !Array.isArray(course.tasks)) return;
     let xpGained = 0;
     course.tasks.forEach(task => {
-        if (task.status !== 'done') {
+        if (task.status !== 'done' || !task.completed) {
             task.status = 'done';
             task.completed = true;
-            xpGained += task.xp;
+            if (task.type === 'exam' && (task.grade === undefined || task.grade === null) && course.grade !== undefined && course.grade !== null) {
+                task.grade = course.grade;
+            }
+            if (task.xp) xpGained += task.xp;
         }
     });
     if (xpGained > 0) {
@@ -13227,7 +13273,8 @@ function getUpcomingPriorityTasks(limit = 8) {
     const allTasks = [];
 
     Object.values(gameState.courses).forEach(course => {
-        if (course.status === 'locked') return;
+        const hasPassingGrade = (course.grade !== undefined && course.grade !== null && course.grade !== '' && !isNaN(Number(course.grade)) && Number(course.grade) >= 55);
+        if (course.status === 'locked' || course.status === 'mastered' || hasPassingGrade) return;
 
         (course.tasks || []).forEach(task => {
             const isDone = task.completed || task.status === 'done' || task.status === 'submitted';
