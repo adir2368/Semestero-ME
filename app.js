@@ -1836,6 +1836,13 @@ const INITIAL_STATE = {
 
 let gameState = JSON.parse(JSON.stringify(INITIAL_STATE));
 window.gameState = gameState;
+window.setGlobalGameState = function(newState) {
+    gameState = newState;
+    window.gameState = gameState;
+};
+window.getGlobalGameState = function() {
+    return gameState;
+};
 let currentViewMode = 'flowchart'; // 'flowchart' | 'constellation' | 'grid'
 let currentHoveredCourseCode = null;
 let currentCalendarMonth = 7; // 0-indexed: 7 = August
@@ -5320,115 +5327,123 @@ function loadSavedState() {
                 }
             });
         });
-        saveState();
+    }
+    saveState();
 
-        // Ensure official Winter 2026/2027 (Semester 3) exam dates & CheeseFork schedules are strictly synchronized
-        if (gameState.courses['114052']) {
-            const c = gameState.courses['114052'];
-            if (!c.tasks) c.tasks = [];
-            let exA = c.tasks.find(t => t.id === '114052_ex' || t.title === 'מועד א');
-            if (exA) { exA.dueDate = '2027-02-01'; exA.title = 'מועד א'; }
-            let exB = c.tasks.find(t => t.id === '114052_ex_b' || t.title === "מועד ב'");
-            if (exB) { exB.dueDate = '2027-03-02'; exB.title = "מועד ב'"; }
-            else { c.tasks.push({ id: '114052_ex_b', title: "מועד ב'", type: 'exam', xp: 500, completed: false, status: 'not_started', dueDate: '2027-03-02' }); }
-        }
-        if (gameState.courses['034035']) {
-            const c = gameState.courses['034035'];
-            if (!c.tasks) c.tasks = [];
-            let exA = c.tasks.find(t => t.id === '034035_ex' || t.title === 'מועד א');
-            if (exA) { exA.dueDate = '2027-02-07'; exA.title = 'מועד א'; }
-            let exB = c.tasks.find(t => t.id === '034035_ex_b' || t.title === "מועד ב'");
-            if (exB) { exB.dueDate = '2027-03-05'; exB.title = "מועד ב'"; }
-            else { c.tasks.push({ id: '034035_ex_b', title: "מועד ב'", type: 'exam', xp: 500, completed: false, status: 'not_started', dueDate: '2027-03-05' }); }
-        }
-        if (gameState.courses['034056']) {
-            const c = gameState.courses['034056'];
-            if (!c.tasks) c.tasks = [];
-            let exA = c.tasks.find(t => t.id === '034056_ex' || t.title === 'מועד א');
-            if (exA) { exA.dueDate = '2027-02-11'; exA.title = 'מועד א'; }
-            let exB = c.tasks.find(t => t.id === '034056_ex_b' || t.title === "מועד ב'");
-            if (exB) { exB.dueDate = '2027-03-10'; exB.title = "מועד ב'"; }
-            else { c.tasks.push({ id: '034056_ex_b', title: "מועד ב'", type: 'exam', xp: 500, completed: false, status: 'not_started', dueDate: '2027-03-10' }); }
-        }
-        if (gameState.courses['034053']) {
-            const c = gameState.courses['034053'];
-            if (!c.tasks) c.tasks = [];
-            let exA = c.tasks.find(t => t.id === '034053_ex' || t.title === 'מועד א');
-            if (exA) { exA.dueDate = '2027-02-18'; exA.title = 'מועד א'; }
-            let exB = c.tasks.find(t => t.id === '034053_ex_b' || t.title === "מועד ב'");
-            if (exB) { exB.dueDate = '2027-03-18'; exB.title = "מועד ב'"; }
-            else { c.tasks.push({ id: '034053_ex_b', title: "מועד ב'", type: 'exam', xp: 550, completed: false, status: 'not_started', dueDate: '2027-03-18' }); }
-        }
-        if (gameState.courses['104228']) {
-            const c = gameState.courses['104228'];
-            if (!c.tasks) c.tasks = [];
-            let exA = c.tasks.find(t => t.id === '104228_ex' || t.title === 'מועד א');
-            if (exA) { exA.dueDate = '2027-02-24'; exA.title = 'מועד א'; }
-            let exB = c.tasks.find(t => t.id === '104228_ex_b' || t.title === "מועד ב'");
-            if (exB) { exB.dueDate = '2027-03-26'; exB.title = "מועד ב'"; }
-            else { c.tasks.push({ id: '104228_ex_b', title: "מועד ב'", type: 'exam', xp: 500, completed: false, status: 'not_started', dueDate: '2027-03-26' }); }
-        }
-        if (gameState.courses['03940805']) {
-            const c = gameState.courses['03940805'];
-            c.name = 'חינוך גופני - אתלטיקה קלה / יוגה';
-            if (c.tasks) c.tasks = c.tasks.filter(t => t.type !== 'exam');
-            if (!c.tasks || c.tasks.length === 0) {
-                c.tasks = [{ id: '03940805_att', title: 'נוכחות פעילה בשיעורי יוגה (חובת 80%)', type: 'hw', completed: false, status: 'not_started', xp: 100, dueDate: '' }];
+        // Personal Winter 2026/2027 (Semester 3) exam dates & CheeseFork schedules for Adir Moshe only
+        const isAdirAccount = (window.AuthSync && typeof window.AuthSync.isAdirActive === 'function' && window.AuthSync.isAdirActive());
+        if (isAdirAccount) {
+            if (gameState.courses['114052']) {
+                const c = gameState.courses['114052'];
+                if (!c.tasks) c.tasks = [];
+                let exA = c.tasks.find(t => t.id === '114052_ex' || t.title === 'מועד א');
+                if (exA) { exA.dueDate = '2027-02-01'; exA.title = 'מועד א'; }
+                let exB = c.tasks.find(t => t.id === '114052_ex_b' || t.title === "מועד ב'");
+                if (exB) { exB.dueDate = '2027-03-02'; exB.title = "מועד ב'"; }
+                else { c.tasks.push({ id: '114052_ex_b', title: "מועד ב'", type: 'exam', xp: 500, completed: false, status: 'not_started', dueDate: '2027-03-02' }); }
             }
-        }
-
-        // Synchronize pastExamsBank for Semester 3
-        if (!gameState.pastExamsBank) gameState.pastExamsBank = {};
-        const sem3ExamInfo = {
-            '114052': { name: 'פיסיקה 2 (114052)', examDate: '2027-02-01', moedBDate: '2027-03-02' },
-            '034035': { name: 'תרמודינמיקה 1 (034035)', examDate: '2027-02-07', moedBDate: '2027-03-05' },
-            '034056': { name: 'מבוא לחישוב מדעי והנדסי (034056)', examDate: '2027-02-11', moedBDate: '2027-03-10' },
-            '034053': { name: 'מכניקת מוצקים 2 מורחב (034053)', examDate: '2027-02-18', moedBDate: '2027-03-18' },
-            '104228': { name: "משוואות דיפרנציאליות חלקיות מ' (104228)", examDate: '2027-02-24', moedBDate: '2027-03-26' }
-        };
-        for (const [cd, inf] of Object.entries(sem3ExamInfo)) {
-            if (!gameState.pastExamsBank[cd]) {
-                gameState.pastExamsBank[cd] = { name: inf.name, examDate: inf.examDate, moedBDate: inf.moedBDate, studyStartDate: inf.examDate };
-            } else {
-                gameState.pastExamsBank[cd].examDate = inf.examDate;
-                gameState.pastExamsBank[cd].moedBDate = inf.moedBDate;
+            if (gameState.courses['034035']) {
+                const c = gameState.courses['034035'];
+                if (!c.tasks) c.tasks = [];
+                let exA = c.tasks.find(t => t.id === '034035_ex' || t.title === 'מועד א');
+                if (exA) { exA.dueDate = '2027-02-07'; exA.title = 'מועד א'; }
+                let exB = c.tasks.find(t => t.id === '034035_ex_b' || t.title === "מועד ב'");
+                if (exB) { exB.dueDate = '2027-03-05'; exB.title = "מועד ב'"; }
+                else { c.tasks.push({ id: '034035_ex_b', title: "מועד ב'", type: 'exam', xp: 500, completed: false, status: 'not_started', dueDate: '2027-03-05' }); }
             }
-        }
+            if (gameState.courses['034056']) {
+                const c = gameState.courses['034056'];
+                if (!c.tasks) c.tasks = [];
+                let exA = c.tasks.find(t => t.id === '034056_ex' || t.title === 'מועד א');
+                if (exA) { exA.dueDate = '2027-02-11'; exA.title = 'מועד א'; }
+                let exB = c.tasks.find(t => t.id === '034056_ex_b' || t.title === "מועד ב'");
+                if (exB) { exB.dueDate = '2027-03-10'; exB.title = "מועד ב'"; }
+                else { c.tasks.push({ id: '034056_ex_b', title: "מועד ב'", type: 'exam', xp: 500, completed: false, status: 'not_started', dueDate: '2027-03-10' }); }
+            }
+            if (gameState.courses['034053']) {
+                const c = gameState.courses['034053'];
+                if (!c.tasks) c.tasks = [];
+                let exA = c.tasks.find(t => t.id === '034053_ex' || t.title === 'מועד א');
+                if (exA) { exA.dueDate = '2027-02-18'; exA.title = 'מועד א'; }
+                let exB = c.tasks.find(t => t.id === '034053_ex_b' || t.title === "מועד ב'");
+                if (exB) { exB.dueDate = '2027-03-18'; exB.title = "מועד ב'"; }
+                else { c.tasks.push({ id: '034053_ex_b', title: "מועד ב'", type: 'exam', xp: 550, completed: false, status: 'not_started', dueDate: '2027-03-18' }); }
+            }
+            if (gameState.courses['104228']) {
+                const c = gameState.courses['104228'];
+                if (!c.tasks) c.tasks = [];
+                let exA = c.tasks.find(t => t.id === '104228_ex' || t.title === 'מועד א');
+                if (exA) { exA.dueDate = '2027-02-24'; exA.title = 'מועד א'; }
+                let exB = c.tasks.find(t => t.id === '104228_ex_b' || t.title === "מועד ב'");
+                if (exB) { exB.dueDate = '2027-03-26'; exB.title = "מועד ב'"; }
+                else { c.tasks.push({ id: '104228_ex_b', title: "מועד ב'", type: 'exam', xp: 500, completed: false, status: 'not_started', dueDate: '2027-03-26' }); }
+            }
+            if (gameState.courses['03940805']) {
+                const c = gameState.courses['03940805'];
+                c.name = 'חינוך גופני - אתלטיקה קלה / יוגה';
+                if (c.tasks) c.tasks = c.tasks.filter(t => t.type !== 'exam');
+                if (!c.tasks || c.tasks.length === 0) {
+                    c.tasks = [{ id: '03940805_att', title: 'נוכחות פעילה בשיעורי יוגה (חובת 80%)', type: 'hw', completed: false, status: 'not_started', xp: 100, dueDate: '' }];
+                }
+            }
 
-        // Ensure official exam dates are strictly synchronized to the August 2026 calendar
-        if (gameState.courses['104043']) {
-            const ex = gameState.courses['104043'].tasks.find(t => t.type === 'exam');
-            if (ex) { ex.dueDate = '2026-08-05'; ex.title = 'מועד א חדו״א 1pm'; }
-        }
-        if (gameState.courses['314533']) {
-            const ex = gameState.courses['314533'].tasks.find(t => t.type === 'exam');
-            if (ex) { ex.dueDate = '2026-08-11'; ex.title = 'מועד א הנדסת חומרים 9am'; }
-        }
-        if (gameState.courses['104131']) {
-            const ex = gameState.courses['104131'].tasks.find(t => t.type === 'exam');
-            if (ex) { ex.dueDate = '2026-08-13'; ex.title = 'מועד א מד״ר 9am'; }
-        }
-        if (gameState.courses['034028']) {
-            const ex = gameState.courses['034028'].tasks.find(t => t.type === 'exam');
-            if (ex) { ex.dueDate = '2026-08-19'; ex.title = 'מועד א מכניקת מוצקים 9am'; }
-        }
-        if (gameState.courses['034061']) {
-            const proj = gameState.courses['034061'].tasks.find(t => t.title && t.title.includes('הגנה'));
-            if (proj) { proj.dueDate = '2026-08-27'; }
-        }
-    }
+            // Synchronize pastExamsBank for Semester 3
+            if (!gameState.pastExamsBank) gameState.pastExamsBank = {};
+            const sem3ExamInfo = {
+                '114052': { name: 'פיסיקה 2 (114052)', examDate: '2027-02-01', moedBDate: '2027-03-02' },
+                '034035': { name: 'תרמודינמיקה 1 (034035)', examDate: '2027-02-07', moedBDate: '2027-03-05' },
+                '034056': { name: 'מבוא לחישוב מדעי והנדסי (034056)', examDate: '2027-02-11', moedBDate: '2027-03-10' },
+                '034053': { name: 'מכניקת מוצקים 2 מורחב (034053)', examDate: '2027-02-18', moedBDate: '2027-03-18' },
+                '104228': { name: "משוואות דיפרנציאליות חלקיות מ' (104228)", examDate: '2027-02-24', moedBDate: '2027-03-26' }
+            };
+            for (const [cd, inf] of Object.entries(sem3ExamInfo)) {
+                if (!gameState.pastExamsBank[cd]) {
+                    gameState.pastExamsBank[cd] = { name: inf.name, examDate: inf.examDate, moedBDate: inf.moedBDate, studyStartDate: inf.examDate };
+                } else {
+                    gameState.pastExamsBank[cd].examDate = inf.examDate;
+                    gameState.pastExamsBank[cd].moedBDate = inf.moedBDate;
+                }
+            }
 
-    // 2. Synchronize August 2026 schedule from Google Calendar if available
-    if (typeof AUGUST_2026_SCHEDULE !== 'undefined' && Array.isArray(AUGUST_2026_SCHEDULE) && AUGUST_2026_SCHEDULE.length > 0) {
-        gameState.pastExamSchedule = JSON.parse(JSON.stringify(AUGUST_2026_SCHEDULE));
-    } else if (!gameState.pastExamSchedule) {
-        gameState.pastExamSchedule = [];
-    }
-    if (typeof AUGUST_2026_PERSONAL_EVENTS !== 'undefined' && Array.isArray(AUGUST_2026_PERSONAL_EVENTS) && AUGUST_2026_PERSONAL_EVENTS.length > 0) {
-        gameState.customCalendarEvents = JSON.parse(JSON.stringify(AUGUST_2026_PERSONAL_EVENTS));
-    } else if (!gameState.customCalendarEvents) {
-        gameState.customCalendarEvents = [];
-    }
+            // Ensure official exam dates are strictly synchronized to the August 2026 calendar
+            if (gameState.courses['104043']) {
+                const ex = gameState.courses['104043'].tasks.find(t => t.type === 'exam');
+                if (ex) { ex.dueDate = '2026-08-05'; ex.title = 'מועד א חדו״א 1pm'; }
+            }
+            if (gameState.courses['314533']) {
+                const ex = gameState.courses['314533'].tasks.find(t => t.type === 'exam');
+                if (ex) { ex.dueDate = '2026-08-11'; ex.title = 'מועד א הנדסת חומרים 9am'; }
+            }
+            if (gameState.courses['104131']) {
+                const ex = gameState.courses['104131'].tasks.find(t => t.type === 'exam');
+                if (ex) { ex.dueDate = '2026-08-13'; ex.title = 'מועד א מד״ר 9am'; }
+            }
+            if (gameState.courses['034028']) {
+                const ex = gameState.courses['034028'].tasks.find(t => t.type === 'exam');
+                if (ex) { ex.dueDate = '2026-08-19'; ex.title = 'מועד א מכניקת מוצקים 9am'; }
+            }
+            if (gameState.courses['034061']) {
+                const proj = gameState.courses['034061'].tasks.find(t => t.title && t.title.includes('הגנה'));
+                if (proj) { proj.dueDate = '2026-08-27'; }
+            }
+
+            // Synchronize August 2026 schedule from Google Calendar if available
+            if (typeof AUGUST_2026_SCHEDULE !== 'undefined' && Array.isArray(AUGUST_2026_SCHEDULE) && AUGUST_2026_SCHEDULE.length > 0) {
+                gameState.pastExamSchedule = JSON.parse(JSON.stringify(AUGUST_2026_SCHEDULE));
+            } else if (!gameState.pastExamSchedule) {
+                gameState.pastExamSchedule = [];
+            }
+            if (typeof AUGUST_2026_PERSONAL_EVENTS !== 'undefined' && Array.isArray(AUGUST_2026_PERSONAL_EVENTS) && AUGUST_2026_PERSONAL_EVENTS.length > 0) {
+                gameState.customCalendarEvents = JSON.parse(JSON.stringify(AUGUST_2026_PERSONAL_EVENTS));
+            } else if (!gameState.customCalendarEvents) {
+                gameState.customCalendarEvents = [];
+            }
+        } else {
+            // Clean state for other student accounts
+            if (!gameState.pastExamsBank) gameState.pastExamsBank = {};
+            if (!gameState.pastExamSchedule) gameState.pastExamSchedule = [];
+            if (!gameState.customCalendarEvents) gameState.customCalendarEvents = [];
+        }
     
         // Ensure official Technion Mechanical Engineering prerequisites are synchronized
         const OFFICIAL_PREREQUISITES = {
@@ -5563,7 +5578,12 @@ function loadSavedState() {
         }
         gameState.hasLoadedGoogleCalendarAugustV3 = true;
         gameState.semesterGuardMode = gameState.semesterGuardMode || 'locked';
-        gameState.currentActiveSemester = gameState.currentActiveSemester || 3;
+        if (window.AuthSync && window.AuthSync.isAdirActive()) {
+            gameState.currentActiveSemester = gameState.currentActiveSemester || 3;
+        } else {
+            const curUser = (window.AuthSync && window.AuthSync.getActiveUser()) ? window.AuthSync.getActiveUser() : null;
+            gameState.currentActiveSemester = (gameState.currentActiveSemester !== undefined && gameState.currentActiveSemester !== null) ? gameState.currentActiveSemester : ((curUser && curUser.startingSemester) ? curUser.startingSemester : 1);
+        }
 
     // Strict Enforcement: Future semester courses CANNOT be active or available if previous semester is not completed
     if (gameState.courses) {
@@ -12085,6 +12105,93 @@ function getLiveClassStatus(startTime, endTime) {
     }
 }
 
+function getActiveTimetableSchedule() {
+    if (window.AuthSync && typeof window.AuthSync.isAdirActive === 'function' && window.AuthSync.isAdirActive()) {
+        return CHEESEFORK_SEMESTER_SCHEDULE;
+    }
+    const curState = (window.getGlobalGameState ? window.getGlobalGameState() : window.gameState);
+    if (curState && curState.timetable && curState.timetable.days && curState.timetable.days.length > 0) {
+        return curState.timetable;
+    }
+    return null;
+}
+
+function renderTimetableGrid() {
+    const container = document.getElementById('timetable-grid-container');
+    if (!container) return;
+
+    const schedule = getActiveTimetableSchedule();
+    if (!schedule || !schedule.days || schedule.days.length === 0) {
+        container.innerHTML = `
+            <div class="timetable-empty-state-box" style="grid-column: 1 / -1; padding: 48px 24px; text-align: center; background: rgba(15, 23, 42, 0.45); border: 1px dashed rgba(148, 163, 184, 0.25); border-radius: 16px; margin: 12px 0;">
+                <div style="font-size: 2.5rem; margin-bottom: 12px;">📅</div>
+                <h3 style="color: #f1f5f9; font-size: 1.15rem; font-weight: 700; margin-bottom: 8px;">טרם הוגדרה מערכת שעות לחשבון זה</h3>
+                <p style="color: #94a3b8; font-size: 0.88rem; max-width: 480px; margin: 0 auto; line-height: 1.5;">
+                    חשבונך מופרד ומבודד לחלוטין. כשתסנכרן או תזין את מערכת השעות שלך מ-CheeseFork, השיעורים והתזכורות יופיעו כאן אוטומטית.
+                </p>
+            </div>
+        `;
+        return;
+    }
+
+    let html = '';
+    schedule.days.forEach(day => {
+        const isFree = day.isFree || !day.classes || day.classes.length === 0;
+        const badgeClass = isFree ? 'free-day' : 'active-day';
+        const badgeText = isFree ? 'יום חופשי ✨' : `${day.classes.length} שיעורים`;
+
+        let bodyHtml = '';
+        if (isFree) {
+            bodyHtml = `
+                <div class="timetable-free-state">
+                    <span class="emoji">🏖️</span>
+                    <div style="font-weight: 700; color: #f1f5f9; font-size: 0.95rem;">יום חופשי מלימודים פרונטליים</div>
+                    <div style="font-size: 0.78rem; line-height: 1.4;">זמן מומלץ לחזרה ותרגול עצמי, שיעורי בית, WebWork ופרויקטים הנדסיים.</div>
+                </div>
+            `;
+        } else {
+            day.classes.forEach((c, idx) => {
+                if (idx > 0) {
+                    const prevClass = day.classes[idx - 1];
+                    if (prevClass.endTime && c.startTime && prevClass.endTime < c.startTime) {
+                        const [ph, pm] = prevClass.endTime.split(':').map(Number);
+                        const [ch, cm] = c.startTime.split(':').map(Number);
+                        const gapMin = (ch * 60 + cm) - (ph * 60 + pm);
+                        if (gapMin >= 30) {
+                            bodyHtml += `<div class="timetable-break-gap">☕ הפסקה (${prevClass.endTime} - ${c.startTime})</div>`;
+                        }
+                    }
+                }
+
+                bodyHtml += `
+                    <div class="timetable-card ${c.cardClass || ''}" onclick="if (typeof openCourseDetails === 'function') openCourseDetails('${c.courseId}')">
+                        <div class="timetable-card-time">⏰ ${c.startTime} - ${c.endTime} (${c.duration || ''})</div>
+                        <div class="timetable-card-title">${c.courseName} (${c.courseId})</div>
+                        <div class="timetable-card-meta">
+                            <span class="timetable-tag">${c.type}</span>
+                        </div>
+                        ${c.lecturer ? `<div class="timetable-lecturer">מרצה: ${c.lecturer}</div>` : ''}
+                    </div>
+                `;
+            });
+        }
+
+        html += `
+            <div class="timetable-day-col" data-day-col="${day.dayIndex}">
+                <div class="timetable-day-header">
+                    <span class="timetable-day-title">${day.fullName || ('יום ' + day.name)}</span>
+                    <span class="timetable-day-badge ${badgeClass}">${badgeText}</span>
+                </div>
+                <div class="timetable-day-body">
+                    ${bodyHtml}
+                </div>
+            </div>
+        `;
+    });
+
+    container.innerHTML = html;
+}
+
 function renderTodayTimetableBanner() {
     const banner = document.getElementById('timetable-today-banner');
     if (!banner) return;
@@ -12095,7 +12202,32 @@ function renderTodayTimetableBanner() {
     const dayName = hebrewDays[dayOfWeek] || "היום";
     const dateFormatted = now.toLocaleDateString('he-IL', { day: 'numeric', month: 'long', year: 'numeric' });
     
-    const dayConfig = CHEESEFORK_SEMESTER_SCHEDULE.days.find(d => d.dayIndex === dayOfWeek);
+    const schedule = getActiveTimetableSchedule();
+    if (!schedule || !schedule.days) {
+        banner.innerHTML = `
+            <div class="today-banner-header">
+                <div class="today-banner-title">
+                    <span>📅</span>
+                    <span>הלו״ז שלך להיום - יום ${dayName} (${dateFormatted})</span>
+                </div>
+                <div class="today-banner-badge free">
+                    ✨ טרם הוגדרה מערכת שעות
+                </div>
+            </div>
+            <div class="today-free-day-msg">
+                <span class="emoji">📅</span>
+                <div>
+                    <div style="font-weight: 700; color: #f1f5f9; font-size: 0.92rem;">מערכת השעות האישית שלך ריקה כרגע.</div>
+                    <div style="font-size: 0.78rem; color: #94a3b8; margin-top: 3px;">
+                        כשתגדיר מערכת שעות או תסנכרן מ-CheeseFork, השיעורים של היום יופיעו כאן אוטומטית.
+                    </div>
+                </div>
+            </div>
+        `;
+        return;
+    }
+
+    const dayConfig = schedule.days.find(d => d.dayIndex === dayOfWeek);
     const isWeekend = (dayOfWeek === 5 || dayOfWeek === 6);
     const isFree = isWeekend || (dayConfig && dayConfig.isFree) || (!dayConfig);
     const classes = (dayConfig && dayConfig.classes) ? dayConfig.classes : [];
@@ -12167,6 +12299,9 @@ function updateDailyTimetableFocus() {
     const dayOfWeek = now.getDay();
     const dateFormatted = now.toLocaleDateString('he-IL', { day: 'numeric', month: 'numeric', year: 'numeric' });
     
+    // 0. Render timetable columns dynamically
+    renderTimetableGrid();
+
     // 1. Render Today's dynamic live banner
     renderTodayTimetableBanner();
 
@@ -12196,7 +12331,63 @@ function updateDailyTimetableFocus() {
     // 3. Update sync bar text
     const syncText = document.getElementById('timetable-sync-text');
     if (syncText) {
-        syncText.innerText = `מתעדכן אוטומטית כל יום מ-CheeseFork | עודכן להיום (${dateFormatted})`;
+        const isAdir = (window.AuthSync && typeof window.AuthSync.isAdirActive === 'function' && window.AuthSync.isAdirActive());
+        syncText.innerText = isAdir
+            ? `מתעדכן אוטומטית כל יום מ-CheeseFork | עודכן להיום (${dateFormatted})`
+            : `מערכת שעות אישית | עודכן להיום (${dateFormatted})`;
+    }
+
+    // 3.5. Update Timetable Header Card dynamically
+    const headerTitle = document.getElementById('timetable-header-title');
+    const headerSub = document.getElementById('timetable-header-subtitle');
+    const statsStrip = document.getElementById('timetable-stats-strip');
+    const isAdirAcc = (window.AuthSync && typeof window.AuthSync.isAdirActive === 'function' && window.AuthSync.isAdirActive());
+
+    if (headerTitle) {
+        headerTitle.innerText = isAdirAcc 
+            ? '🕒 מערכת שעות שבועית - סמסטר חורף 2026/2027' 
+            : '🕒 מערכת שעות שבועית אישית';
+    }
+    if (headerSub) {
+        headerSub.innerText = isAdirAcc
+            ? 'סנכרון מלא מחשבון CheeseFork | שנה ב׳ סמסטר א׳ (סמסטר 3) | הנדסת מכונות הטכניון'
+            : 'לו״ז שבועי מותאם אישית | הנדסת מכונות הטכניון';
+    }
+    if (statsStrip) {
+        if (isAdirAcc) {
+            statsStrip.innerHTML = `
+                <div class="timetable-stat-pill">
+                    <span>🎯</span>
+                    <span>נק״ז סמסטר: <strong>20.5</strong></span>
+                </div>
+                <div class="timetable-stat-pill">
+                    <span>📚</span>
+                    <span>קורסים: <strong>6</strong></span>
+                </div>
+                <div class="timetable-stat-pill">
+                    <span>🏖️</span>
+                    <span>ימים חופשיים: <strong>ראשון ושישי</strong></span>
+                </div>
+                <a href="https://cheesefork.netlify.app/?semester=202601&uid=D4bh8oHO0GQI5Gx1iYAbWsouBVx2" target="_blank" rel="noopener" class="btn btn-sm btn-outline" style="border-color: #f59e0b; color: #fbbf24; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+                    🧀 פתח ב-CheeseFork
+                </a>
+            `;
+        } else {
+            const activeSem = (gameState && gameState.currentActiveSemester) ? gameState.currentActiveSemester : 1;
+            statsStrip.innerHTML = `
+                <div class="timetable-stat-pill">
+                    <span>🎯</span>
+                    <span>סמסטר פעיל: <strong>סמסטר ${activeSem}</strong></span>
+                </div>
+                <div class="timetable-stat-pill">
+                    <span>📚</span>
+                    <span>מערכת אישית נקייה</span>
+                </div>
+                <a href="https://cheesefork.netlify.app" target="_blank" rel="noopener" class="btn btn-sm btn-outline" style="border-color: #f59e0b; color: #fbbf24; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+                    🧀 CheeseFork מערכת שעות
+                </a>
+            `;
+        }
     }
 
     // 4. Update mobile filter attribute on grid
@@ -12297,8 +12488,9 @@ function getRemainingClassesToday() {
     const dayOfWeek = now.getDay();
     const curMin = now.getHours() * 60 + now.getMinutes();
     
-    const dayConfig = (typeof CHEESEFORK_SEMESTER_SCHEDULE !== 'undefined' && CHEESEFORK_SEMESTER_SCHEDULE.days)
-        ? CHEESEFORK_SEMESTER_SCHEDULE.days.find(d => d.dayIndex === dayOfWeek)
+    const schedule = getActiveTimetableSchedule();
+    const dayConfig = (schedule && schedule.days)
+        ? schedule.days.find(d => d.dayIndex === dayOfWeek)
         : null;
         
     const isWeekend = (dayOfWeek === 5 || dayOfWeek === 6);
@@ -12723,8 +12915,9 @@ function checkAndTrigger10MinReminders() {
     const curMin = curHours * 60 + curMinutes;
     const todayDateStr = now.toISOString().split('T')[0];
 
-    const dayConfig = (typeof CHEESEFORK_SEMESTER_SCHEDULE !== 'undefined' && CHEESEFORK_SEMESTER_SCHEDULE.days)
-        ? CHEESEFORK_SEMESTER_SCHEDULE.days.find(d => d.dayIndex === dayOfWeek)
+    const schedule = getActiveTimetableSchedule();
+    const dayConfig = (schedule && schedule.days)
+        ? schedule.days.find(d => d.dayIndex === dayOfWeek)
         : null;
 
     if (!dayConfig || dayConfig.isFree || !dayConfig.classes || dayConfig.classes.length === 0) {
@@ -12756,8 +12949,9 @@ function scheduleTodayClassTimeouts() {
     const nowMs = now.getTime();
     const todayDateStr = now.toISOString().split('T')[0];
 
-    const dayConfig = (typeof CHEESEFORK_SEMESTER_SCHEDULE !== 'undefined' && CHEESEFORK_SEMESTER_SCHEDULE.days)
-        ? CHEESEFORK_SEMESTER_SCHEDULE.days.find(d => d.dayIndex === dayOfWeek)
+    const schedule = getActiveTimetableSchedule();
+    const dayConfig = (schedule && schedule.days)
+        ? schedule.days.find(d => d.dayIndex === dayOfWeek)
         : null;
 
     if (!dayConfig || dayConfig.isFree || !dayConfig.classes) return;

@@ -1,5 +1,5 @@
 // Academic Skill Tree - Multi-User Identity & Cloud Sync Engine
-// Supports Local-First Multi-Accounts & Supabase Cloud Synchronization
+// Complete Account Isolation & Privacy Protection (Zero Cross-Access)
 
 (function(window) {
     'use strict';
@@ -9,33 +9,65 @@
     const SUPABASE_CONFIG_KEY = 'ast_supabase_config';
     const LEGACY_SAVE_KEY = 'academic_skill_tree_save';
 
-    // Default primary developer account (Adir Moshe)
-    const DEFAULT_ADIR_ACCOUNT = {
-        id: 'adir_moshe',
-        name: 'אדיר משה',
-        email: 'adir.moshe@campus.technion.ac.il',
-        avatar: '🎓',
-        role: 'developer',
-        startingSemester: 3,
-        createdAt: 1726265000000,
-        lastActive: Date.now()
-    };
-
     let supabaseClient = null;
     let syncTimeout = null;
+
+    // Check if this device already has Adir's personal save file
+    function hasAdirLocalData() {
+        try {
+            const saved = localStorage.getItem(LEGACY_SAVE_KEY);
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                if (parsed && (parsed.credits === 39.5 || (parsed.courses && parsed.courses['104041'] && parsed.courses['104041'].status === 'mastered'))) {
+                    return true;
+                }
+            }
+        } catch (e) {}
+        return false;
+    }
 
     const AuthSync = {
         // Initialize accounts system
         init() {
             let registry = this.getAccounts();
+
             if (!registry || registry.length === 0) {
-                registry = [DEFAULT_ADIR_ACCOUNT];
+                // If this is Adir's existing laptop/browser with existing 39.5 credits save:
+                if (hasAdirLocalData()) {
+                    registry = [{
+                        id: 'adir_moshe',
+                        name: 'אדיר משה',
+                        email: 'adir.moshe@campus.technion.ac.il',
+                        avatar: '🎓',
+                        role: 'developer',
+                        startingSemester: 3,
+                        createdAt: 1726265000000,
+                        lastActive: Date.now()
+                    }];
+                    localStorage.setItem(ACTIVE_USER_ID_KEY, 'adir_moshe');
+                } else {
+                    // This is a NEW VISITOR / FRIEND:
+                    // Create an isolated personal student account for THEM.
+                    // Adir Moshe is NOT added to their registry! Zero cross-access.
+                    const newStudent = {
+                        id: 'student_' + Date.now().toString(36),
+                        name: 'סטודנט להנדסת מכונות',
+                        email: '',
+                        avatar: '👤',
+                        role: 'student',
+                        startingSemester: 1,
+                        createdAt: Date.now(),
+                        lastActive: Date.now()
+                    };
+                    registry = [newStudent];
+                    localStorage.setItem(ACTIVE_USER_ID_KEY, newStudent.id);
+                }
                 this.saveAccounts(registry);
             }
 
             let activeId = localStorage.getItem(ACTIVE_USER_ID_KEY);
             if (!activeId || !registry.find(a => a.id === activeId)) {
-                activeId = 'adir_moshe';
+                activeId = registry[0].id;
                 localStorage.setItem(ACTIVE_USER_ID_KEY, activeId);
             }
 
@@ -67,9 +99,9 @@
         // Get currently active user object
         getActiveUser() {
             const registry = this.getAccounts();
-            const activeId = localStorage.getItem(ACTIVE_USER_ID_KEY) || 'adir_moshe';
+            const activeId = localStorage.getItem(ACTIVE_USER_ID_KEY);
             const user = registry.find(a => a.id === activeId);
-            return user || registry[0] || DEFAULT_ADIR_ACCOUNT;
+            return user || registry[0] || { id: 'guest', name: 'אורח', avatar: '👤', role: 'student', startingSemester: 1 };
         },
 
         // Check if currently active account is Adir Moshe (Primary Account)
@@ -104,7 +136,6 @@
 
             // If no save exists:
             if (user.id === 'adir_moshe') {
-                // Adir gets preloaded state
                 if (typeof PRELOADED_USER_STATE !== 'undefined') {
                     return JSON.parse(JSON.stringify(PRELOADED_USER_STATE));
                 }
@@ -112,7 +143,9 @@
 
             // New friend / student account gets clean syllabus template
             if (typeof window.getCleanCurriculumState === 'function') {
-                return window.getCleanCurriculumState();
+                const cleanState = window.getCleanCurriculumState();
+                cleanState.currentActiveSemester = user.startingSemester || 1;
+                return cleanState;
             }
             return null;
         },
@@ -124,7 +157,6 @@
             const key = this.getUserStorageKey(user.id);
             try {
                 localStorage.setItem(key, JSON.stringify(state));
-                // If Adir, also maintain legacy key for complete backwards compatibility
                 if (user.id === 'adir_moshe') {
                     localStorage.setItem(LEGACY_SAVE_KEY, JSON.stringify(state));
                 }
@@ -134,7 +166,7 @@
             }
         },
 
-        // Switch active account
+        // Switch active account and force full UI refresh
         async switchAccount(targetUserId) {
             const registry = this.getAccounts();
             const targetUser = registry.find(a => a.id === targetUserId);
@@ -144,8 +176,8 @@
             }
 
             // 1. Save current state first
-            if (window.gameState) {
-                this.saveActiveUserState(window.gameState);
+            if (window.getGlobalGameState && window.getGlobalGameState()) {
+                this.saveActiveUserState(window.getGlobalGameState());
             }
 
             // 2. Set new active user ID
@@ -155,15 +187,19 @@
 
             // 3. Load target user state
             const newState = this.loadActiveUserState();
-            if (newState) {
-                window.gameState = newState;
+            if (newState && window.setGlobalGameState) {
+                window.setGlobalGameState(newState);
             }
 
-            // 4. Update UI
+            // 4. Force full UI re-render across all modules
             if (typeof recalculateCourseStates === 'function') recalculateCourseStates();
+            if (typeof updateHud === 'function') updateHud();
             if (typeof renderUI === 'function') renderUI();
-            if (typeof setupDailyTimetable === 'function') setupDailyTimetable();
+            if (typeof renderNotionTasksTable === 'function') renderNotionTasksTable();
+            if (typeof updateDailyTimetableFocus === 'function') updateDailyTimetableFocus();
+            if (typeof renderTodayTimetableBanner === 'function') renderTodayTimetableBanner();
             if (typeof renderStudyRunway === 'function') renderStudyRunway();
+            if (typeof updateNotificationBadge === 'function') updateNotificationBadge();
             this.updateHudUserBadge();
 
             if (typeof showHudToast === 'function') {
@@ -178,10 +214,10 @@
             return true;
         },
 
-        // Create a new friend account
+        // Create a new account
         createAccount(params) {
-            const name = params.name || 'סטודנט חדש';
-            const email = params.email || '';
+            const name = (params.name || 'סטודנט חדש').trim();
+            const email = (params.email || '').trim();
             const startingSemester = parseInt(params.startingSemester) || 1;
             const avatar = params.avatar || '👤';
 
@@ -189,8 +225,8 @@
             const id = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4);
             const newAccount = {
                 id: id,
-                name: name.trim(),
-                email: email.trim(),
+                name: name,
+                email: email,
                 avatar: avatar,
                 role: 'student',
                 startingSemester: startingSemester,
@@ -219,10 +255,24 @@
             return newAccount;
         },
 
-        // Delete an account (Adir cannot be deleted)
+        // Update active user's details (Name / Avatar)
+        updateActiveUserDetails(name, avatar) {
+            const registry = this.getAccounts();
+            const activeUser = this.getActiveUser();
+            const acc = registry.find(a => a.id === activeUser.id);
+            if (acc) {
+                if (name) acc.name = name.trim();
+                if (avatar) acc.avatar = avatar;
+                this.saveAccounts(registry);
+                this.updateHudUserBadge();
+                this.renderAccountsList();
+            }
+        },
+
+        // Delete an account
         deleteAccount(userId) {
             if (userId === 'adir_moshe') {
-                alert('לא ניתן למחוק את החשבון הראשי של מפתח המערכת (אדיר משה).');
+                alert('לא ניתן למחוק את החשבון הראשי.');
                 return false;
             }
             if (!confirm('האם אתה בטוח שברצונך למחוק חשבון זה ואת כל הנתונים שלו?')) {
@@ -234,14 +284,52 @@
             this.saveAccounts(registry);
             localStorage.removeItem('ast_user_state_' + userId);
 
-            // If active was deleted, fall back to Adir
             const activeId = localStorage.getItem(ACTIVE_USER_ID_KEY);
             if (activeId === userId) {
-                this.switchAccount('adir_moshe');
+                if (registry.length > 0) {
+                    this.switchAccount(registry[0].id);
+                } else {
+                    // Create fresh student account
+                    this.createAccount({ name: 'סטודנט להנדסת מכונות', startingSemester: 1 });
+                }
             } else {
                 this.renderAccountsList();
             }
             return true;
+        },
+
+        // Unlock Adir Moshe's developer profile using secret passphrase
+        unlockDeveloperProfile(passphrase) {
+            if (passphrase === 'adir2368') {
+                let registry = this.getAccounts();
+                if (!registry.find(a => a.id === 'adir_moshe')) {
+                    registry.unshift({
+                        id: 'adir_moshe',
+                        name: 'אדיר משה',
+                        email: 'adir.moshe@campus.technion.ac.il',
+                        avatar: '🎓',
+                        role: 'developer',
+                        startingSemester: 3,
+                        createdAt: 1726265000000,
+                        lastActive: Date.now()
+                    });
+                    this.saveAccounts(registry);
+                }
+                this.switchAccount('adir_moshe');
+                if (typeof showToastNotification === 'function') {
+                    showToastNotification('שלום אדיר! חשבון המפתח שוחזר והופעל בהצלחה.', 'success');
+                } else if (typeof alert !== 'undefined') {
+                    alert('שלום אדיר! חשבון המפתח שלך שוחזר והופעל בהצלחה.');
+                }
+                return true;
+            } else {
+                if (typeof showToastNotification === 'function') {
+                    showToastNotification('סיסמת מפתח שגויה.', 'danger');
+                } else if (typeof alert !== 'undefined') {
+                    alert('סיסמת מפתח שגויה.');
+                }
+                return false;
+            }
         },
 
         // Initialize Supabase if config is present
@@ -292,7 +380,7 @@
                 return;
             }
             const user = this.getActiveUser();
-            const state = stateToSync || window.gameState;
+            const state = stateToSync || (window.getGlobalGameState ? window.getGlobalGameState() : window.gameState);
             if (!state) return;
 
             try {
@@ -359,7 +447,7 @@
                     actionBtn = '<span class="active-indicator-text">בשימוש כעת</span>';
                 }
                 let deleteBtn = '';
-                if (!isDev) {
+                if (!isDev && registry.length > 1) {
                     deleteBtn = `<button class="btn btn-sm btn-danger" onclick="AuthSync.deleteAccount('${acc.id}')" title="מחק חשבון">🗑️</button>`;
                 }
 
@@ -404,10 +492,11 @@
         // Populate course checkboxes in onboarding
         populateOnboardingCourses() {
             const container = document.getElementById('onboarding-courses-checklist');
-            if (!container || !window.gameState || !window.gameState.courses) return;
+            const currentState = window.getGlobalGameState ? window.getGlobalGameState() : window.gameState;
+            if (!container || !currentState || !currentState.courses) return;
 
             const coursesBySem = {};
-            Object.values(window.gameState.courses).forEach(c => {
+            Object.values(currentState.courses).forEach(c => {
                 const sem = c.semester || 1;
                 if (!coursesBySem[sem]) coursesBySem[sem] = [];
                 coursesBySem[sem].push(c);
@@ -437,23 +526,31 @@
 
         // Finish onboarding
         finishOnboarding() {
-            if (!window.gameState || !window.gameState.courses) return;
+            const currentState = window.getGlobalGameState ? window.getGlobalGameState() : window.gameState;
+            if (!currentState || !currentState.courses) return;
+
             const container = document.getElementById('onboarding-courses-checklist');
             const semSelect = document.getElementById('onboarding-current-sem-select');
+            const nameInput = document.getElementById('onboarding-student-name-input');
             
             const currentSem = semSelect ? parseInt(semSelect.value) : 1;
-            window.gameState.currentActiveSemester = currentSem;
+            currentState.currentActiveSemester = currentSem;
+
+            // Update user name if entered
+            if (nameInput && nameInput.value.trim()) {
+                this.updateActiveUserDetails(nameInput.value.trim(), '🎓');
+            }
 
             if (container) {
                 const checkedBoxes = container.querySelectorAll('input[type="checkbox"]:checked');
                 checkedBoxes.forEach(cb => {
                     const code = cb.value;
-                    if (window.gameState.courses[code]) {
-                        window.gameState.courses[code].status = 'mastered';
-                        window.gameState.courses[code].completed = true;
-                        window.gameState.courses[code].grade = 85;
-                        if (window.gameState.courses[code].tasks) {
-                            window.gameState.courses[code].tasks.forEach(t => {
+                    if (currentState.courses[code]) {
+                        currentState.courses[code].status = 'mastered';
+                        currentState.courses[code].completed = true;
+                        currentState.courses[code].grade = 85;
+                        if (currentState.courses[code].tasks) {
+                            currentState.courses[code].tasks.forEach(t => {
                                 t.completed = true;
                                 t.status = 'done';
                             });
@@ -462,10 +559,13 @@
                 });
             }
 
-            window.gameState.hasCompletedOnboarding = true;
+            currentState.hasCompletedOnboarding = true;
+            if (window.setGlobalGameState) window.setGlobalGameState(currentState);
             if (typeof recalculateCourseStates === 'function') recalculateCourseStates();
+            if (typeof updateHud === 'function') updateHud();
             if (typeof renderUI === 'function') renderUI();
-            this.saveActiveUserState(window.gameState);
+            if (typeof renderNotionTasksTable === 'function') renderNotionTasksTable();
+            this.saveActiveUserState(currentState);
 
             const modal = document.getElementById('onboarding-wizard-modal');
             if (modal) modal.classList.remove('active');
