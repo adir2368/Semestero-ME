@@ -22,12 +22,20 @@
     <div class="hud-container">
         <!-- Top HUD Panel -->
         <header class="hud-header">
-            <div class="hud-logo" style="display: flex; align-items: center; gap: 10px;">
-                <img src="icon.png" alt="Atlas ME - לוגו הפקולטה להנדסת מכונות" style="width: 34px; height: 34px; object-fit: contain; filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.6));">
-                <div style="display: flex; flex-direction: column; justify-content: center;">
-                    <span class="degree-title-text" style="font-size: 1.14rem; font-weight: 900; letter-spacing: 0.8px; color: #f8fafc; font-family: 'Orbitron', sans-serif; line-height: 1.1;">ATLAS ME</span>
-                    <span style="font-size: 0.64rem; color: #38bdf8; font-weight: 600; letter-spacing: 0.5px; line-height: 1;">הנדסת מכונות | הטכניון</span>
+            <!-- Top Right Section: Brand & Dedicated Login Button -->
+            <div class="hud-top-right-bar" id="hud-top-right-bar">
+                <div class="hud-logo" style="display: flex; align-items: center; gap: 10px;">
+                    <img src="icon.png" alt="Atlas ME - לוגו הפקולטה להנדסת מכונות" style="width: 32px; height: 32px; object-fit: contain; filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.6));">
+                    <div class="hud-logo-text-col" style="display: flex; flex-direction: column; justify-content: center;">
+                        <span class="degree-title-text" style="font-size: 1.14rem; font-weight: 900; letter-spacing: 0.8px; color: #f8fafc; font-family: 'Orbitron', sans-serif; line-height: 1.1;">ATLAS ME</span>
+                        <span class="hud-sub-faculty" style="font-size: 0.64rem; color: #38bdf8; font-weight: 600; letter-spacing: 0.5px; line-height: 1;">הנדסת מכונות | הטכניון</span>
+                    </div>
                 </div>
+                <button type="button" class="btn-hud-login-top" id="btn-hud-login-top" onclick="AuthSync.openAccountsModal()" title="התחברות, סנכרון וניהול חשבונות" aria-label="התחברות לחשבון">
+                    <span class="login-icon" id="top-login-icon">🔑</span>
+                    <span class="login-text" id="top-login-text">התחברות</span>
+                    <span class="login-status-dot" id="top-login-status-dot"></span>
+                </button>
             </div>
             
             <div class="character-card">

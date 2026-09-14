@@ -618,18 +618,48 @@
             const avatarEl = document.getElementById('hud-active-user-avatar');
             if (nameEl) nameEl.textContent = user.name;
             if (avatarEl) avatarEl.textContent = user.avatar;
+
+            // Update top-right dedicated login button
+            const topText = document.getElementById('top-login-text');
+            const topIcon = document.getElementById('top-login-icon');
+            const topBtn = document.getElementById('btn-hud-login-top');
+            if (topText) {
+                if (user.id === 'adir_moshe') {
+                    topText.textContent = 'אדיר משה';
+                    if (topIcon) topIcon.textContent = '🎓';
+                    if (topBtn) topBtn.classList.add('logged-in');
+                } else if (user.name && user.name !== 'סטודנט להנדסת מכונות' && user.name !== 'סטודנט חדש') {
+                    topText.textContent = user.name;
+                    if (topIcon) topIcon.textContent = user.avatar || '👤';
+                    if (topBtn) topBtn.classList.add('logged-in');
+                } else {
+                    topText.textContent = 'התחברות';
+                    if (topIcon) topIcon.textContent = '🔑';
+                    if (topBtn) topBtn.classList.remove('logged-in');
+                }
+            }
         },
 
         // Update cloud status pill in HUD/Settings
         updateCloudStatusIndicator(isConnected, label) {
             const statusEl = document.getElementById('hud-cloud-sync-status');
-            if (!statusEl) return;
-            if (isConnected) {
-                statusEl.className = 'cloud-status-pill connected';
-                statusEl.innerHTML = '🟢 <span>' + (label || 'ענן מחובר') + '</span>';
-            } else {
-                statusEl.className = 'cloud-status-pill offline';
-                statusEl.innerHTML = '📱 <span>' + (label || 'מקומי (אופליין)') + '</span>';
+            if (statusEl) {
+                if (isConnected) {
+                    statusEl.className = 'cloud-status-pill connected';
+                    statusEl.innerHTML = '🟢 <span>' + (label || 'ענן מחובר') + '</span>';
+                } else {
+                    statusEl.className = 'cloud-status-pill offline';
+                    statusEl.innerHTML = '📱 <span>' + (label || 'מקומי (אופליין)') + '</span>';
+                }
+            }
+
+            const dotEl = document.getElementById('top-login-status-dot');
+            if (dotEl) {
+                if (isConnected) {
+                    dotEl.className = 'login-status-dot connected';
+                } else {
+                    dotEl.className = 'login-status-dot offline';
+                }
             }
         },
 
