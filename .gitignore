@@ -3,7 +3,6 @@ dist/
 __pycache__/
 *.log
 *.txt
-cheesefork_courses*.min.js
 raw_cheesefork.json
 accurate_cheesefork_mapping.json
 courses_prereq_audit.json

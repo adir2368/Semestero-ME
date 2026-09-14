@@ -5995,6 +5995,49 @@ function parseDateToIso(str) {
 function initCheeseForkDatabase() {
     if (cheeseForkMap && cheeseForkMap.size > 0) return;
 
+    cheeseForkMap = new Map();
+    cheeseForkList = [];
+
+    // 1. Primary: Use consolidated window.CHEESEFORK_DB (2,055 courses)
+    if (Array.isArray(window.CHEESEFORK_DB) && window.CHEESEFORK_DB.length > 0) {
+        window.CHEESEFORK_DB.forEach(item => {
+            const rawNum = String(item.rawNum || '').trim();
+            const code6 = String(item.code6 || '').trim();
+            const stripped = rawNum.replace(/^0+/, '');
+
+            const prereqMatches = (item.prereqs || '').match(/\d{6,8}/g) || [];
+            const parsedPrereqs = [...new Set(prereqMatches.map(m => {
+                if (m.length === 8 && m.startsWith('0')) return m.slice(1, 4) + m.slice(5);
+                return m;
+            }))];
+
+            const entry = {
+                rawNum,
+                code6,
+                name: item.name,
+                credits: item.credits || 3,
+                faculty: item.faculty || '',
+                prereqsRaw: item.prereqs || '',
+                parsedPrereqs,
+                syllabus: item.syllabus || '',
+                moedA: item.moedA || '',
+                moedB: item.moedB || '',
+                detectedType: item.type || 'elective'
+            };
+
+            cheeseForkList.push(entry);
+            cheeseForkMap.set(rawNum.toLowerCase(), entry);
+            if (code6 && !cheeseForkMap.has(code6.toLowerCase())) {
+                cheeseForkMap.set(code6.toLowerCase(), entry);
+            }
+            if (stripped && !cheeseForkMap.has(stripped.toLowerCase())) {
+                cheeseForkMap.set(stripped.toLowerCase(), entry);
+            }
+        });
+        return;
+    }
+
+    // 2. Fallback: Use window.courses_from_rishum
     if (typeof courses_from_rishum !== 'undefined' && !window.courses_from_rishum) {
         window.courses_from_rishum = courses_from_rishum;
     }
@@ -6005,9 +6048,6 @@ function initCheeseForkDatabase() {
         cheeseForkList = null;
         return;
     }
-
-    cheeseForkMap = new Map();
-    cheeseForkList = [];
 
     rawList.forEach(item => {
         const g = item.general;
@@ -6069,13 +6109,13 @@ async function ensureCheeseForkDatabase() {
     initCheeseForkDatabase();
     if (cheeseForkMap && cheeseForkMap.size > 0) return true;
 
-    // Dynamically inject script tag if not yet loaded
-    if (!window.courses_from_rishum || !Array.isArray(window.courses_from_rishum) || window.courses_from_rishum.length === 0) {
+    // Dynamically inject cheesefork_database.js if not yet loaded
+    if (!window.CHEESEFORK_DB && (!window.courses_from_rishum || window.courses_from_rishum.length === 0)) {
         try {
-            console.log('[CheeseFork] Dynamically loading cheesefork_courses.min.js...');
+            console.log('[CheeseFork] Dynamically loading cheesefork_database.js...');
             await new Promise((resolve) => {
                 const s = document.createElement('script');
-                s.src = 'cheesefork_courses.min.js?v=1.7.0';
+                s.src = 'cheesefork_database.js?v=1.7.1';
                 s.onload = () => resolve(true);
                 s.onerror = () => resolve(false);
                 document.head.appendChild(s);
@@ -6089,7 +6129,7 @@ async function ensureCheeseForkDatabase() {
     // Dynamic fetch fallback
     if (!cheeseForkMap || cheeseForkMap.size === 0) {
         try {
-            const resp = await fetch('./cheesefork_courses.min.js?v=1.7.0');
+            const resp = await fetch('./cheesefork_database.js?v=1.7.1');
             if (resp.ok) {
                 const codeText = await resp.text();
                 const fn = new Function(codeText);
