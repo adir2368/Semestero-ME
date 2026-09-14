@@ -213,19 +213,6 @@ var SAMPLE_ME_DEGREE = (typeof window !== 'undefined' && window.SAMPLE_ME_DEGREE
             { id: "104228_ex", title: "מבחן סוף", type: "exam", xp: 500, completed: false }
         ]
     },
-    "035044": {
-        code: "035044",
-        name: "תכן בעזרת מחשב CAD",
-        credits: 3,
-        semester: 3,
-        prerequisites: ["034061"],
-        status: "available",
-        tasks: [
-            { id: "035044_h1", title: "מטלת בית 1: מידול חלקים ב-CAD", type: "hw", xp: 50, completed: false },
-            { id: "035044_p1", title: "פרויקט תכן והרכבה ב-CAD", type: "project", xp: 200, completed: false },
-            { id: "035044_ex", title: "מועד א", type: "exam", xp: 500, completed: false }
-        ]
-    },
     // Semester 4
     "034030": {
         code: "034030",

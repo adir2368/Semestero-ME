@@ -4087,45 +4087,6 @@ const PRELOADED_USER_STATE = {
           "room": "אולם ספורט"
         }
       ]
-    },
-    "035044": {
-      "code": "035044",
-      "name": "תכן בעזרת מחשב CAD",
-      "credits": 3,
-      "semester": 3,
-      "prerequisites": ["034061"],
-      "status": "active",
-      "tasks": [
-        {
-          "id": "035044_h1",
-          "title": "מטלת בית 1: מידול חלקים ב-CAD",
-          "type": "hw",
-          "xp": 50,
-          "completed": false,
-          "status": "not_started",
-          "dueDate": ""
-        },
-        {
-          "id": "035044_p1",
-          "title": "פרויקט תכן והרכבה ב-CAD",
-          "type": "project",
-          "xp": 200,
-          "completed": false,
-          "status": "not_started",
-          "dueDate": ""
-        },
-        {
-          "id": "035044_ex",
-          "title": "מועד א",
-          "type": "exam",
-          "xp": 500,
-          "completed": false,
-          "status": "not_started",
-          "dueDate": ""
-        }
-      ],
-      "type": "elective",
-      "faculty": "הפקולטה להנדסת מכונות"
     }
   },
   "gpa": 86.39240506329114,
@@ -5346,7 +5307,19 @@ function loadSavedState() {
     // Finals mode is put to sleep (dormant) per user request - always keep normal semester mode active
     gameState.isFinalsMode = false;
 
-    // 1. Sanitize all course names (Hebrew Geresh typography) and course tasks
+    // 1. Purge canceled courses: 035044 (תכן בעזרת מחשב CAD) is no longer in the curriculum
+    if (gameState.courses) {
+        if (gameState.courses['035044']) {
+            delete gameState.courses['035044'];
+        }
+        Object.values(gameState.courses).forEach(c => {
+            if (c.prerequisites) {
+                c.prerequisites = c.prerequisites.filter(p => p !== '035044');
+            }
+        });
+    }
+
+    // 2. Sanitize all course names (Hebrew Geresh typography) and course tasks
     if (gameState.courses) {
         Object.values(gameState.courses).forEach(c => {
             if (c.name && typeof sanitizeHebrewCourseTitle === 'function') {
@@ -5476,8 +5449,9 @@ function loadSavedState() {
                     });
                 }
             }
-            if (!gameState.courses['035044'] && PRELOADED_USER_STATE.courses['035044']) {
-                gameState.courses['035044'] = JSON.parse(JSON.stringify(PRELOADED_USER_STATE.courses['035044']));
+            // 035044 CAD course was removed from curriculum and no longer exists - purge it
+            if (gameState.courses && gameState.courses['035044']) {
+                delete gameState.courses['035044'];
             }
 
             // Synchronize pastExamsBank for Semester 3
