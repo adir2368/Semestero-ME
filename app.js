@@ -5887,6 +5887,7 @@ function autoUpdateTaskStatusesByDueDate() {
     Object.values(gameState.courses).forEach(course => {
         if (!course.tasks || !Array.isArray(course.tasks)) return;
         const isBinary = (course.isBinaryPass === true || course.grade === 'עובר' || course.grade === 'PASS');
+        const hasPassingGrade = isBinary || (course.grade !== undefined && course.grade !== null && course.grade !== '' && !isNaN(Number(course.grade)) && Number(course.grade) >= 55);
         if (!isWinterSemesterStarted() && (course.semester || 1) > (gameState.currentActiveSemester || 2)) return;
         if (course.status === 'mastered' || course.status === 'locked' || hasPassingGrade) return;
 
@@ -5972,7 +5973,7 @@ function recalculateCourseStates() {
                 course.tasks.forEach(task => {
                     task.completed = true;
                     task.status = 'done';
-                    if (task.type === 'exam' && (task.grade === undefined || task.grade === null) && course.grade !== undefined && course.grade !== null) {
+                    if (task.type === 'exam' && (task.grade === undefined || task.grade === null) && course.grade !== undefined && course.grade !== null && !isBinary && !isNaN(Number(course.grade))) {
                         task.grade = course.grade;
                     }
                 });
@@ -7250,7 +7251,7 @@ function openCourseDetails(code) {
     const courseExams = (course.tasks || []).filter(t => t.type === 'exam');
     const latestExam = courseExams.length > 0 ? (courseExams.find(t => t.grade !== undefined && t.grade !== null) || courseExams[0]) : null;
 
-    if (course.status === 'mastered' || course.status === 'active') {
+    if (course.status === 'mastered' || course.status === 'active' || course.status === 'available') {
         gradeSection.style.display = "block";
         
         // Binary Pass Controls
@@ -7263,7 +7264,7 @@ function openCourseDetails(code) {
         if (binaryBadge) binaryBadge.style.display = isBinary ? "inline-block" : "none";
 
         // Populate inputs
-        const examGradeVal = (latestExam && latestExam.grade !== undefined && latestExam.grade !== null) ? latestExam.grade : "";
+        const examGradeVal = (latestExam && latestExam.grade !== undefined && latestExam.grade !== null && !isNaN(Number(latestExam.grade))) ? latestExam.grade : "";
         calcExamInput.value = examGradeVal;
         calcWeightInput.value = (course.examWeight !== undefined && course.examWeight !== null) ? course.examWeight : 70;
         calcHwInput.value = (course.assignmentsGrade !== undefined && course.assignmentsGrade !== null) ? course.assignmentsGrade : 100;
@@ -9286,7 +9287,7 @@ function openTaskSidePeek(courseCode, taskId) {
     const gradeInput = document.getElementById("peek-property-grade");
     if (task.type === 'exam') {
         gradeRow.style.display = "grid";
-        gradeInput.value = (task.grade !== undefined && task.grade !== null) ? task.grade : "";
+        gradeInput.value = (task.grade !== undefined && task.grade !== null && !isNaN(Number(task.grade))) ? task.grade : "";
         
         gradeInput.onchange = (e) => {
             const val = parseInt(e.target.value);
@@ -10688,12 +10689,14 @@ function fitFlowchartToWidth() {
     const fitFactor = Math.max(minFactor, Math.min(1.4, (availableWidth - 18) / effectiveBaseW));
     setFlowchartZoom(fitFactor);
     isFlowchartFitWidth = true;
+    window.isFlowchartFitWidth = true;
     if (toggleFitBtn) toggleFitBtn.classList.add("active");
 }
 
 function setFlowchartZoom(zoomVal) {
     const minZoom = isMobileView() ? 0.22 : 0.55;
     flowchartZoom = Math.max(minZoom, Math.min(2.0, Math.round(zoomVal * 100) / 100));
+    window.flowchartZoom = flowchartZoom;
 
     const svgEl = document.getElementById("flowchart-svg");
     const indicator = document.getElementById("btn-fc-zoom-reset");
