@@ -18,14 +18,15 @@
     let realtimeChannel = null;
     let syncTimeout = null;
 
-    // Check if this device already has Adir's personal save file
+    // Check if this device already has Adir's personal save file (developer PC only)
     function hasAdirLocalData() {
         try {
             const saved = localStorage.getItem(LEGACY_SAVE_KEY);
             if (saved) {
                 const parsed = JSON.parse(saved);
-                if (parsed && (parsed.credits === 39.5 || (parsed.courses && parsed.courses['104041'] && parsed.courses['104041'].status === 'mastered'))) {
-                    return true;
+                if (parsed && parsed.credits === 39.5 && parsed.completedCourses === 11 && parsed.gpa === 86.39) {
+                    const devProfile = localStorage.getItem('ast_profile_adir_moshe');
+                    return devProfile !== null;
                 }
             }
         } catch (e) {}
@@ -133,7 +134,7 @@
                         // If this is a student account, but somehow holds Adir Moshe's exact state
                         // (credits 39.5, or Calculus 1 grade 84 with completedCourses >= 10),
                         // this is contaminated data. Reset immediately to clean curriculum state!
-                        if (user.id !== 'adir_moshe' && (parsed.credits === 39.5 || (parsed.courses['104041'] && parsed.courses['104041'].grade === 84))) {
+                        if (user.id !== 'adir_moshe' && (parsed.credits === 39.5 && parsed.completedCourses === 11 && (parsed.gpa === 86.39 || (parsed.courses && parsed.courses['104041'] && parsed.courses['104041'].grade === 84)))) {
                             console.warn('[AuthSync] Detected poisoned Adir state in student account:', user.id, '- resetting to clean state');
                             if (typeof window.getCleanCurriculumState === 'function') {
                                 const clean = window.getCleanCurriculumState(user.startingSemester || 1);
@@ -208,8 +209,15 @@
                 return false;
             }
 
-            // 1. Check Master Password for Adir Moshe
-            if (MASTER_PASSWORDS.includes(cleanPass)) {
+            const cleanUserLower = cleanUser.toLowerCase();
+            const isAdirIdentifier = !cleanUser || 
+                cleanUserLower === 'adir_moshe' || 
+                cleanUserLower === 'adir' || 
+                cleanUser.includes('אדיר') || 
+                cleanUserLower === 'adir.moshe@campus.technion.ac.il';
+
+            // 1. Check Master Password for Developer Adir Moshe ONLY if identifier is Adir
+            if (MASTER_PASSWORDS.includes(cleanPass) && isAdirIdentifier) {
                 localStorage.setItem(SESSION_USER_KEY, 'adir_moshe');
                 this.setupRealtimeSubscription();
                 await this.pullLatestStateFromCloud(true);
@@ -224,6 +232,12 @@
                 return true;
             }
 
+            // Reject developer passwords for student accounts
+            if (MASTER_PASSWORDS.includes(cleanPass) && !isAdirIdentifier) {
+                alert('סיסמה שגויה לחשבון זה.');
+                return false;
+            }
+
             // 2. Check Other Students via Supabase Cloud
             if (!supabaseClient) {
                 alert('חיבור הענן אינו זמין כרגע. נסה שוב בעוד מספר שניות.');
@@ -231,25 +245,71 @@
             }
 
             try {
-                let query = supabaseClient.from('user_states').select('*');
-                if (cleanUser) {
-                    query = query.or(`user_name.eq.${cleanUser},user_email.eq.${cleanUser},user_id.eq.${cleanUser}`);
-                }
-
-                const { data, error } = await query;
+                // Query all user records for resilient matching (handles Hebrew strings & casing)
+                const { data, error } = await supabaseClient.from('user_states').select('*');
                 if (error || !data || data.length === 0) {
-                    alert('לא נמצא משתמש תואם. וודא ששם המשתמש והסיסמה נכונים.');
+                    alert('לא נמצאו משתמשים בענן. וודא שהפרטים נכונים או הירשם כסטודנט חדש.');
                     return false;
                 }
 
-                // Match user with password stored in state_json
-                const matched = data.find(row => {
+                // Filter matching student candidates
+                let matchedRows = [];
+                if (cleanUser) {
+                    matchedRows = data.filter(row => {
+                        const rName = (row.user_name || '').trim().toLowerCase();
+                        const rEmail = (row.user_email || '').trim().toLowerCase();
+                        const rId = (row.user_id || '').trim().toLowerCase();
+                        return rName === cleanUserLower ||
+                               rEmail === cleanUserLower ||
+                               rId === cleanUserLower ||
+                               rName.includes(cleanUserLower) ||
+                               cleanUserLower.includes(rName);
+                    });
+                } else {
+                    matchedRows = data.filter(r => r.user_id !== 'adir_moshe');
+                }
+
+                if (matchedRows.length === 0) {
+                    alert('לא נמצא משתמש תואם לשם או אימייל זה. וודא שהפרטים נכונים או הירשם כסטודנט חדש.');
+                    return false;
+                }
+
+                // Sort candidates by most recently updated
+                matchedRows.sort((a, b) => new Date(b.updated_at || 0) - new Date(a.updated_at || 0));
+
+                // 2a. Check for exact password match
+                let matched = matchedRows.find(row => {
                     const s = row.state_json;
                     return s && (s.account_password === cleanPass || s.password === cleanPass);
                 });
 
+                // 2b. Auto-claim password on legacy/uninitialized accounts (e.g. Yehonatan)
                 if (!matched) {
-                    alert('סיסמה שגויה. נסה שוב.');
+                    const uninitialized = matchedRows.find(row => {
+                        const s = row.state_json;
+                        return s && !s.account_password && !s.password;
+                    });
+
+                    if (uninitialized) {
+                        uninitialized.state_json = uninitialized.state_json || {};
+                        uninitialized.state_json.account_password = cleanPass;
+                        uninitialized.state_json.student_name = uninitialized.user_name;
+
+                        try {
+                            await supabaseClient.from('user_states').update({
+                                state_json: uninitialized.state_json,
+                                updated_at: new Date().toISOString()
+                            }).eq('user_id', uninitialized.user_id);
+                            console.log('[AuthSync] Set initial password for legacy user account:', uninitialized.user_name);
+                        } catch (e) {
+                            console.warn('[AuthSync] Notice updating initial password:', e);
+                        }
+                        matched = uninitialized;
+                    }
+                }
+
+                if (!matched) {
+                    alert('סיסמה שגויה. נסה שוב, או לחץ על "שכחת סיסמה?" להגדרה מחדש.');
                     return false;
                 }
 
@@ -289,6 +349,92 @@
             }
         },
 
+        // Reset or set password for existing student account by email or username
+        async resetPassword(identifier, newPassword) {
+            const cleanId = (identifier || '').trim().toLowerCase();
+            const cleanPass = (newPassword || '').trim();
+
+            if (!cleanId) {
+                alert('נא להזין אימייל או שם משתמש.');
+                return false;
+            }
+            if (!cleanPass || cleanPass.length < 4) {
+                alert('נא להזין סיסמה חדשה בת 4 תווים לפחות.');
+                return false;
+            }
+            if (!supabaseClient) {
+                alert('חיבור הענן אינו זמין כרגע. נסה שוב בעוד מספר שניות.');
+                return false;
+            }
+
+            try {
+                const { data, error } = await supabaseClient.from('user_states').select('*');
+                if (error || !data || data.length === 0) {
+                    alert('לא נמצאו משתמשים בענן.');
+                    return false;
+                }
+
+                const userRows = data.filter(row => {
+                    const rName = (row.user_name || '').trim().toLowerCase();
+                    const rEmail = (row.user_email || '').trim().toLowerCase();
+                    const rId = (row.user_id || '').trim().toLowerCase();
+                    return rName === cleanId || rEmail === cleanId || rId === cleanId || rName.includes(cleanId) || cleanId.includes(rName);
+                });
+
+                if (userRows.length === 0) {
+                    alert('לא נמצא חשבון המשויך ל: ' + identifier);
+                    return false;
+                }
+
+                // Pick the most recently updated candidate
+                userRows.sort((a, b) => new Date(b.updated_at || 0) - new Date(a.updated_at || 0));
+                const target = userRows[0];
+
+                target.state_json = target.state_json || {};
+                target.state_json.account_password = cleanPass;
+                target.state_json.student_name = target.user_name;
+
+                await supabaseClient.from('user_states').update({
+                    state_json: target.state_json,
+                    updated_at: new Date().toISOString()
+                }).eq('user_id', target.user_id);
+
+                // Auto-login into this account
+                localStorage.setItem(SESSION_USER_KEY, target.user_id);
+                localStorage.setItem('ast_profile_' + target.user_id, JSON.stringify({
+                    id: target.user_id,
+                    name: target.user_name || 'סטודנט',
+                    email: target.user_email,
+                    password: cleanPass,
+                    avatar: '👤',
+                    role: 'student',
+                    startingSemester: target.state_json.currentActiveSemester || 1
+                }));
+
+                const key = this.getUserStorageKey(target.user_id);
+                localStorage.setItem(key, JSON.stringify(target.state_json));
+                if (window.setGlobalGameState) {
+                    window.setGlobalGameState(target.state_json);
+                }
+
+                this.setupRealtimeSubscription();
+                this.refreshAllAppViews();
+                this.updateHudAuthControls();
+                this.closeAuthModal();
+
+                if (typeof showHudToast === 'function') {
+                    showHudToast('הסיסמה עודכנה בהצלחה! שלום ' + target.user_name + ' 🚀', 'success');
+                } else {
+                    alert('הסיסמה עודכנה בהצלחה!');
+                }
+                return true;
+            } catch (e) {
+                console.error('[AuthSync] Reset password error:', e);
+                alert('שגיאה בעדכון הסיסמה: ' + e.message);
+                return false;
+            }
+        },
+
         // Register a new student account
         async registerStudent(params) {
             const name = (params.name || '').trim();
@@ -310,7 +456,19 @@
                 return false;
             }
 
-            const uid = 'student_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 3);
+            let uid = 'student_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 3);
+            if (supabaseClient) {
+                try {
+                    const { data: existingRows } = await supabaseClient
+                        .from('user_states')
+                        .select('user_id')
+                        .ilike('user_email', email);
+                    if (existingRows && existingRows.length > 0) {
+                        uid = existingRows[0].user_id;
+                    }
+                } catch (e) {}
+            }
+
             let cleanState = null;
             if (typeof window.getCleanCurriculumState === 'function') {
                 cleanState = window.getCleanCurriculumState(startingSemester, priorCompleted);
@@ -705,20 +863,32 @@
                     </div>
                 `;
             } else {
-                // Render Login / Register View
+                // Render Login / Register / Reset Password View
                 const isRegister = activeTab === 'register';
+                const isReset = activeTab === 'reset_password';
+                
+                let titleText = 'התחברות ל-Atlas ME';
+                let subText = 'התחבר לחשבון האישי שלך ב-Atlas ME';
+                if (isRegister) {
+                    titleText = 'יצירת חשבון סטודנט חדש';
+                    subText = 'חיבור לענן וסנכרון ההתקדמות שלך';
+                } else if (isReset) {
+                    titleText = 'איפוס / הגדרת סיסמה';
+                    subText = 'הזן את פרטי החשבון ובחר סיסמה חדשה';
+                }
+
                 container.innerHTML = `
                     <div class="modal-header">
                         <h2 style="display: flex; align-items: center; gap: 10px; margin: 0; font-size: 1.25rem;">
-                            <span>🔑</span> <span>התחברות ל-Atlas ME</span>
+                            <span>${isReset ? '🔄' : (isRegister ? '✨' : '🔑')}</span> <span>${titleText}</span>
                         </h2>
                         <p style="margin: 6px 0 0 0; font-size: 0.82rem; color: var(--text-muted);">
-                            ${isRegister ? 'יצירת חשבון סטודנט חדש וחיבור לענן' : 'התחבר לחשבון האישי שלך ב-Atlas ME'}
+                            ${subText}
                         </p>
                     </div>
                     <div class="modal-body" style="padding-top: 15px;">
                         <div style="display: flex; gap: 8px; margin-bottom: 14px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px;">
-                            <button type="button" class="btn btn-sm ${!isRegister ? 'btn-primary' : 'btn-outline'}" onclick="AuthSync.renderAuthModal('login')" style="flex: 1;">
+                            <button type="button" class="btn btn-sm ${(!isRegister && !isReset) ? 'btn-primary' : 'btn-outline'}" onclick="AuthSync.renderAuthModal('login')" style="flex: 1;">
                                 🔑 התחברות
                             </button>
                             <button type="button" class="btn btn-sm ${isRegister ? 'btn-primary' : 'btn-outline'}" onclick="AuthSync.renderAuthModal('register')" style="flex: 1;">
@@ -726,7 +896,29 @@
                             </button>
                         </div>
 
-                        ${!isRegister ? `
+                        ${isReset ? `
+                            <form onsubmit="event.preventDefault(); const id = document.getElementById('reset-ident-input').value; const p = document.getElementById('reset-pass-input').value; AuthSync.resetPassword(id, p);">
+                                <div style="margin-bottom: 12px; font-size: 0.82rem; color: #94a3b8; line-height: 1.4;">
+                                    הזן את האימייל הטכניוני או שם המשתמש שלך, והגדר סיסמה חדשה להתחברות.
+                                </div>
+                                <div class="form-group" style="margin-bottom: 12px;">
+                                    <label style="display: block; font-size: 0.82rem; color: #f8fafc; font-weight: 600; margin-bottom: 4px;">אימייל טכניוני או שם משתמש:</label>
+                                    <input type="text" id="reset-ident-input" class="form-input" style="width: 100%; padding: 8px 12px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff; font-size: 0.9rem;" placeholder="למשל: yonathan.p@campus.technion.ac.il" required autofocus>
+                                </div>
+                                <div class="form-group" style="margin-bottom: 16px;">
+                                    <label style="display: block; font-size: 0.82rem; color: #f8fafc; font-weight: 600; margin-bottom: 4px;">סיסמה חדשה:</label>
+                                    <input type="password" id="reset-pass-input" class="form-input" style="width: 100%; padding: 8px 12px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff; font-size: 0.9rem;" placeholder="הזן סיסמה חדשה (לפחות 4 תווים)" required minlength="4">
+                                </div>
+                                <button type="submit" class="btn btn-primary btn-block" style="width: 100%; padding: 10px; font-weight: 700; font-size: 0.95rem; margin-bottom: 10px;">
+                                    🔄 עדכן סיסמה והתחבר
+                                </button>
+                                <div style="text-align: center;">
+                                    <a href="javascript:void(0)" onclick="AuthSync.renderAuthModal('login')" style="color: #94a3b8; font-size: 0.82rem;">
+                                        ← חזרה למסך התחברות
+                                    </a>
+                                </div>
+                            </form>
+                        ` : (!isRegister ? `
                             <form onsubmit="event.preventDefault(); const u = document.getElementById('auth-username-input').value; const p = document.getElementById('auth-password-input').value; AuthSync.loginWithPassword(u, p);">
                                 <div class="form-group" style="margin-bottom: 12px;">
                                     <label style="display: block; font-size: 0.82rem; color: #f8fafc; font-weight: 600; margin-bottom: 4px;">שם משתמש או אימייל:</label>
@@ -739,6 +931,11 @@
                                 <button type="submit" class="btn btn-primary btn-block" style="width: 100%; padding: 10px; font-weight: 700; font-size: 0.95rem;">
                                     🚀 התחבר עכשיו
                                 </button>
+                                <div style="text-align: center; margin-top: 12px;">
+                                    <a href="javascript:void(0)" onclick="AuthSync.renderAuthModal('reset_password')" style="color: #38bdf8; font-size: 0.82rem; text-decoration: underline; cursor: pointer;">
+                                        שכחת סיסמה? / אפס סיסמה
+                                    </a>
+                                </div>
                             </form>
                         ` : `
                             <form onsubmit="event.preventDefault(); const n = document.getElementById('reg-name-input').value; const p = document.getElementById('reg-password-input').value; const s = document.getElementById('reg-sem-select').value; const e = document.getElementById('reg-email-input').value; const priorCompleted = {}; document.querySelectorAll('.prior-course-check:checked').forEach(chk => { const code = chk.dataset.code; const g = document.getElementById('prior_grade_' + code); priorCompleted[code] = { completed: true, grade: g && g.value ? parseFloat(g.value) : null }; }); AuthSync.registerStudent({ name: n, password: p, startingSemester: s, email: e, priorCompleted: priorCompleted });">
@@ -775,7 +972,7 @@
                                     ✨ צור חשבון והתחל
                                 </button>
                             </form>
-                        `}
+                        `)}
                     </div>
                 `;
             }
@@ -983,7 +1180,7 @@
                     const localRaw = localStorage.getItem(key);
 
                     // Anti-poisoning guard: Never let student account adopt Adir's state
-                    if (user.id !== 'adir_moshe' && (remoteState.credits === 39.5 || (remoteState.courses && remoteState.courses['104041'] && remoteState.courses['104041'].grade === 84))) {
+                    if (user.id !== 'adir_moshe' && (remoteState.credits === 39.5 && remoteState.completedCourses === 11 && (remoteState.gpa === 86.39 || (remoteState.courses && remoteState.courses['104041'] && remoteState.courses['104041'].grade === 84)))) {
                         console.warn('[AuthSync] Cloud state for student is poisoned with Adir data. Resetting cloud state for:', user.name);
                         if (typeof window.getCleanCurriculumState === 'function') {
                             const clean = window.getCleanCurriculumState(user.startingSemester || 1);

@@ -1,5 +1,5 @@
 // Service Worker for Atlas ME - Offline-First Caching & Background Updates
-const CACHE_NAME = 'atlas-me-v1.6.5';
+const CACHE_NAME = 'atlas-me-v1.6.6';
 
 const STATIC_ASSETS = [
     './',
@@ -47,8 +47,8 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
     const url = new URL(event.request.url);
 
-    // Skip caching for Google Scripts, Moodle API, or chrome extensions
-    if (url.hostname.includes('google.com') || url.hostname.includes('technion.ac.il') || url.protocol.startsWith('chrome-extension')) {
+    // Never intercept or cache external APIs (Supabase, Google, Technion, etc.)
+    if (url.origin !== self.location.origin || url.hostname.includes('supabase.co') || url.hostname.includes('google.com') || url.hostname.includes('technion.ac.il') || url.protocol.startsWith('chrome-extension')) {
         return;
     }
 
