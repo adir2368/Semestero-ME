@@ -9,4 +9,4 @@ courses_prereq_audit.json
 *.secret
 github_token.secret
 .env*
-
+cheesefork_courses_2025_200.min.js

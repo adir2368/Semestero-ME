@@ -7418,11 +7418,12 @@ label[for="new-task-xp-input"],
     }
 }
 
-/* App Global Footer (Developer Credit) */
+/* App Global Footer (Developer Credit & Version) */
 .app-global-footer {
+    position: relative;
     background: transparent;
     border-top: 1px solid rgba(255, 255, 255, 0.05);
-    padding: 4px 16px;
+    padding: 5px 16px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -7430,6 +7431,42 @@ label[for="new-task-xp-input"],
     z-index: 50;
     font-size: 0.72rem;
     color: #64748b;
+    min-height: 28px;
+}
+
+.footer-left-version {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    direction: ltr;
+}
+
+.app-version-badge {
+    display: inline-flex;
+    align-items: center;
+    font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 0.68rem;
+    font-weight: 500;
+    letter-spacing: 0.4px;
+    color: #64748b;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    padding: 2px 7px;
+    border-radius: 5px;
+    user-select: none;
+    transition: all 0.2s ease;
+    cursor: default;
+    line-height: 1.2;
+}
+
+.app-version-badge:hover {
+    color: #94a3b8;
+    background: rgba(255, 255, 255, 0.07);
+    border-color: rgba(56, 189, 248, 0.25);
+    box-shadow: 0 0 8px rgba(56, 189, 248, 0.1);
 }
 
 .footer-credit-content {
@@ -7480,6 +7517,13 @@ label[for="new-task-xp-input"],
         padding: 4px 8px;
         margin-bottom: 58px; /* Lift above mobile bottom nav bar */
         font-size: 0.68rem;
+    }
+    .footer-left-version {
+        left: 10px;
+    }
+    .app-version-badge {
+        font-size: 0.62rem;
+        padding: 1px 5px;
     }
 }
 
