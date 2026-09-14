@@ -6081,13 +6081,22 @@ html.is-iphone .nav-tab-sublabel {
 
 html.is-mobile-device .hud-workspace,
 html.is-iphone .hud-workspace {
-    flex: 1 !important;
-    min-height: 0 !important;
-    display: flex !important;
-    flex-direction: column !important;
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
     padding: 4px 4px calc(58px + env(safe-area-inset-bottom)) 4px !important;
     overflow: hidden !important;
     position: relative !important;
+}
+
+html.is-mobile-device .hud-workspace[style*="display: none"],
+html.is-mobile-device .hud-workspace[style*="display:none"],
+html.is-mobile-device .hud-workspace.hidden,
+html.is-iphone .hud-workspace[style*="display: none"],
+html.is-iphone .hud-workspace[style*="display:none"],
+html.is-iphone .hud-workspace.hidden {
+    display: none !important;
 }
 
 html.is-mobile-device .tree-canvas-container,

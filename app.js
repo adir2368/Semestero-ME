@@ -10667,15 +10667,11 @@ function setupFlowchartViewMode() {
 }
 
 function initFlowchartZoom() {
-    if (isMobileView()) {
-        fitFlowchartToWidth();
-    } else {
-        // User instruction: Default zoom on opening desktop is strictly 100% (magnified 1.30x by default)
-        setFlowchartZoom(1.0);
-        isFlowchartFitWidth = false;
-        const toggleFitBtn = document.getElementById("btn-fc-toggle-fit");
-        if (toggleFitBtn) toggleFitBtn.classList.remove("active");
-    }
+    // User directive: Default zoom on opening is strictly 100% (magnified 1.30x baseline)
+    setFlowchartZoom(1.0);
+    isFlowchartFitWidth = false;
+    const toggleFitBtn = document.getElementById("btn-fc-toggle-fit");
+    if (toggleFitBtn) toggleFitBtn.classList.remove("active");
 }
 
 function fitFlowchartToWidth() {
