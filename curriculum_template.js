@@ -53,29 +53,6 @@ var SAMPLE_ME_DEGREE = (typeof window !== 'undefined' && window.SAMPLE_ME_DEGREE
             { id: "234128_ex", title: "מבחן סוף", type: "exam", xp: 500, completed: false }
         ]
     },
-    "324033": {
-        code: "324033",
-        name: "אנגלית טכנית מתקדמים ב'",
-        credits: 3,
-        semester: 1,
-        prerequisites: [],
-        status: "available",
-        tasks: [
-            { id: "324033_h1", title: "קריאת מאמרים מדעיים והרחבת אוצר מילים", type: "hw", xp: 50, completed: false },
-            { id: "324033_ex", title: "מבחן סוף", type: "exam", xp: 500, completed: false }
-        ]
-    },
-    "035026": {
-        code: "035026",
-        name: "מבוא יצירתי להנדסת מכונות (רשות)",
-        credits: 2.5,
-        semester: 1,
-        prerequisites: [],
-        status: "available",
-        tasks: [
-            { id: "035026_ex", title: "מבחן סוף / הגשה סופית", type: "exam", xp: 200, completed: false }
-        ]
-    },
     // Semester 2
     "034061": {
         code: "034061",

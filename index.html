@@ -16,7 +16,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Rubik:wght@300;400;500;700;900&display=swap" rel="stylesheet">
     <link rel="icon" type="image/png" href="icon.png">
-    <link rel="stylesheet" href="styles.css?v=1.8.2">
+    <link rel="stylesheet" href="styles.css?v=1.8.3">
     <script>
         (function() {
             try {
@@ -302,44 +302,50 @@
                     <!-- Right: Elective Rules & Add Electives Sidebar -->
                     <aside class="planner-sidebar">
                         <!-- Card 1: Elective Rules Engine -->
-                        <div class="planner-rules-card">
-                            <div class="planner-rules-header">
-                                <span class="rules-title">⚖️ חוקי בחירה לתואר (Elective Rules)</span>
+                        <div class="planner-rules-card" id="planner-rules-card">
+                            <div class="planner-rules-header" id="planner-rules-toggle" style="cursor: pointer; user-select: none;" title="לחץ כדי לקפל/להציג את פירוט החוקים">
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <span class="rules-title">⚖️ חוקי בחירה לתואר</span>
+                                    <span class="planner-rules-badge" id="planner-rules-summary-badge" style="font-size: 0.72rem; color: #38bdf8; background: rgba(56, 189, 248, 0.15); padding: 2px 7px; border-radius: 4px; font-weight: 700;">0 / 32.5 נק״ז</span>
+                                </div>
+                                <span id="planner-rules-toggle-icon" style="font-size: 0.75rem; color: #94a3b8; transition: transform 0.2s;">▼</span>
                             </div>
-                            <div class="planner-rules-list">
-                                <div class="planner-rule-row" id="rule-row-A">
-                                    <span class="rule-name">קורסים חישוביים (רשימה א׳):</span>
-                                    <span class="rule-score" id="rule-val-A">0 / 1</span>
-                                    <span class="rule-status" id="rule-status-A">⏳</span>
+                            <div class="planner-rules-body" id="planner-rules-body">
+                                <div class="planner-rules-list">
+                                    <div class="planner-rule-row" id="rule-row-A">
+                                        <span class="rule-name">קורסים חישוביים (רשימה א׳):</span>
+                                        <span class="rule-score" id="rule-val-A">0 / 1</span>
+                                        <span class="rule-status" id="rule-status-A">⏳</span>
+                                    </div>
+                                    <div class="planner-rule-row" id="rule-row-B">
+                                        <span class="rule-name">נושאי ליבה (רשימה ב׳):</span>
+                                        <span class="rule-score" id="rule-val-B">0 / 2</span>
+                                        <span class="rule-status" id="rule-status-B">⏳</span>
+                                    </div>
+                                    <div class="planner-rule-row" id="rule-row-D">
+                                        <span class="rule-name">מדעיים כלליים (רשימה ד׳):</span>
+                                        <span class="rule-score" id="rule-val-D">0 / 1</span>
+                                        <span class="rule-status" id="rule-status-D">⏳</span>
+                                    </div>
+                                    <div class="planner-rule-row" id="rule-row-C">
+                                        <span class="rule-name">יישומיים ושילוביים (רשימה ג׳):</span>
+                                        <span class="rule-score" id="rule-val-C">0 / 2</span>
+                                        <span class="rule-status" id="rule-status-C">⏳</span>
+                                    </div>
+                                    <div class="planner-rule-row rule-row-highlight" id="rule-row-BCD">
+                                        <span class="rule-name">שילוב רשימות ב׳+ג׳+ד׳:</span>
+                                        <span class="rule-score" id="rule-val-BCD">0 / 14.0 נק״ז</span>
+                                        <span class="rule-status" id="rule-status-BCD">⏳</span>
+                                    </div>
+                                    <div class="planner-rule-row rule-row-total" id="rule-row-total">
+                                        <span class="rule-name">סה״כ נקודות בחירה:</span>
+                                        <span class="rule-score" id="rule-val-total">0 / 32.5 נק״ז</span>
+                                        <span class="rule-status" id="rule-status-total">⏳</span>
+                                    </div>
                                 </div>
-                                <div class="planner-rule-row" id="rule-row-B">
-                                    <span class="rule-name">נושאי ליבה (רשימה ב׳):</span>
-                                    <span class="rule-score" id="rule-val-B">0 / 2</span>
-                                    <span class="rule-status" id="rule-status-B">⏳</span>
+                                <div class="planner-rules-note">
+                                    💡 בדיקת דרישות קדם מאומתת לפי הקטלוג הרשמי של הטכניון לקורסי חובה ורשימות א׳-ד׳.
                                 </div>
-                                <div class="planner-rule-row" id="rule-row-D">
-                                    <span class="rule-name">מדעיים כלליים (רשימה ד׳):</span>
-                                    <span class="rule-score" id="rule-val-D">0 / 1</span>
-                                    <span class="rule-status" id="rule-status-D">⏳</span>
-                                </div>
-                                <div class="planner-rule-row" id="rule-row-C">
-                                    <span class="rule-name">יישומיים ושילוביים (רשימה ג׳):</span>
-                                    <span class="rule-score" id="rule-val-C">0 / 2</span>
-                                    <span class="rule-status" id="rule-status-C">⏳</span>
-                                </div>
-                                <div class="planner-rule-row rule-row-highlight" id="rule-row-BCD">
-                                    <span class="rule-name">שילוב רשימות ב׳+ג׳+ד׳:</span>
-                                    <span class="rule-score" id="rule-val-BCD">0 / 14.0 נק״ז</span>
-                                    <span class="rule-status" id="rule-status-BCD">⏳</span>
-                                </div>
-                                <div class="planner-rule-row rule-row-total" id="rule-row-total">
-                                    <span class="rule-name">סה״כ נקודות בחירה:</span>
-                                    <span class="rule-score" id="rule-val-total">0 / 32.5 נק״ז</span>
-                                    <span class="rule-status" id="rule-status-total">⏳</span>
-                                </div>
-                            </div>
-                            <div class="planner-rules-note">
-                                💡 בדיקת דרישות קדם מאומתת לפי הקטלוג הרשמי של הטכניון לקורסי חובה ורשימות א׳-ד׳.
                             </div>
                         </div>
 
@@ -926,7 +932,7 @@
         <!-- App Global Footer (Developer Credit & Version) -->
         <footer class="app-global-footer">
             <div class="footer-left-version">
-                <span class="app-version-badge" id="footer-version-badge" title="Atlas ME v1.8.2">v1.8.2</span>
+                <span class="app-version-badge" id="footer-version-badge" title="Atlas ME v1.8.3">v1.8.3</span>
             </div>
             <div class="footer-credit-content">
                 <span class="credit-text" style="display: inline-flex; align-items: center; gap: 6px;">Developed by <strong>Adir Moshe</strong> <img src="adir_avatar.png" alt="Adir" style="width: 16px; height: 16px; object-fit: contain; vertical-align: middle; filter: drop-shadow(0 0 3px rgba(56, 189, 248, 0.5));"> • <strong>Atlas ME</strong></span>
@@ -1740,11 +1746,11 @@
     <!-- Multi-User Identity & Sync Engine -->
     <script src="auth_sync.js?v=1.7.1"></script>
     <!-- Technion ME 2025/2026 Catalog & Electives Database -->
-    <script src="planner_catalog.js?v=1.8.2"></script>
+    <script src="planner_catalog.js?v=1.8.3"></script>
     <!-- Degree Planner Drag & Drop Engine -->
-    <script src="planner_module.js?v=1.8.2"></script>
+    <script src="planner_module.js?v=1.8.3"></script>
     <!-- Core Application Logic -->
-    <script src="app.js?v=1.8.2"></script>
+    <script src="app.js?v=1.8.3"></script>
     <!-- PWA Service Worker Registration -->
     <script>
         if ('serviceWorker' in navigator && window.location.protocol.startsWith('http')) {

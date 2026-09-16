@@ -1,5 +1,5 @@
 // Service Worker for Atlas ME - Offline-First Caching & Background Updates
-const CACHE_NAME = 'atlas-me-v1.8.2';
+const CACHE_NAME = 'atlas-me-v1.8.3';
 
 const STATIC_ASSETS = [
     './',

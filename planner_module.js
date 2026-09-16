@@ -59,7 +59,18 @@
             resetPlanToSuggested();
         }
 
-        // Clean user exemptions / removed courses:
+        // 1. Purge courses explicitly removed/exempt by user: English B (03240033/324033) & Creative Intro (00350026/035026)
+        const PURGED_CODES = new Set(['03240033', '324033', '00350026', '035026', '35026', '035044']);
+        if (customPlan) {
+            customPlan.forEach(sem => {
+                sem.courses = (sem.courses || []).filter(c => !PURGED_CODES.has(c.code) && !PURGED_CODES.has(c.altCode));
+            });
+        }
+        if (unassignedCourses) {
+            unassignedCourses = unassignedCourses.filter(c => !PURGED_CODES.has(c.code) && !PURGED_CODES.has(c.altCode));
+        }
+
+        // 2. Clean user exemptions / removed courses:
         // Ensure courses in unassignedCourses do not appear inside semester columns
         if (unassignedCourses && unassignedCourses.length > 0) {
             const unassignedCodes = new Set();
@@ -71,6 +82,34 @@
                 sem.courses = (sem.courses || []).filter(c => !unassignedCodes.has(c.code) && !(c.altCode && unassignedCodes.has(c.altCode)));
             });
         }
+
+        // 3. Automatically synchronize completed courses to their actual completed semester in gameState
+        if (global.gameState && global.gameState.courses && customPlan) {
+            Object.values(global.gameState.courses).forEach(c => {
+                if (c.status === 'mastered' || (c.grade !== undefined && c.grade !== null && c.grade !== '' && Number(c.grade) >= 55) || c.isBinaryPass) {
+                    const actualSem = Number(c.semester);
+                    if (actualSem >= 1 && actualSem <= 8) {
+                        // Find where this completed course is currently placed in customPlan
+                        let foundCourse = null;
+                        customPlan.forEach(sem => {
+                            const idx = (sem.courses || []).findIndex(x => x.code === c.code || x.altCode === c.code || (c.code && (x.code.endsWith(c.code) || c.code.endsWith(x.code))));
+                            if (idx !== -1) {
+                                foundCourse = sem.courses.splice(idx, 1)[0];
+                            }
+                        });
+                        if (foundCourse) {
+                            const targetSemObj = customPlan.find(s => s.semester === actualSem);
+                            if (targetSemObj) {
+                                targetSemObj.courses = targetSemObj.courses || [];
+                                targetSemObj.courses.push(foundCourse);
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        saveCustomPlan();
     }
 
     function resetPlanToSuggested() {
@@ -189,12 +228,26 @@
         };
     }
 
-    function highlightMissingPrerequisites(missingCodes, reasonMsg) {
-        showPlannerToast(reasonMsg);
+    function highlightMissingPrerequisites(missingCodes, reasonMsg, targetSemester) {
+        showPlannerToast(reasonMsg, true);
+
+        // Shake the target semester column to immediately indicate rejection
+        if (targetSemester) {
+            const semCol = document.querySelector(`.planner-semester-col[data-semester="${targetSemester}"]`);
+            if (semCol) {
+                semCol.classList.remove('semester-col-shake');
+                void semCol.offsetWidth; // force reflow
+                semCol.classList.add('semester-col-shake');
+                setTimeout(() => {
+                    if (semCol) semCol.classList.remove('semester-col-shake');
+                }, 1200);
+            }
+        }
 
         const highlightedEls = [];
-        missingCodes.forEach(code => {
-            const els = document.querySelectorAll(`[data-code="${code}"]`);
+        (missingCodes || []).forEach(code => {
+            const selector = `[data-code="${code}"], [data-alt-code="${code}"]`;
+            const els = document.querySelectorAll(selector);
             els.forEach(el => {
                 el.classList.add('prereq-pulse-beacon');
                 highlightedEls.push(el);
@@ -207,10 +260,10 @@
 
         setTimeout(() => {
             highlightedEls.forEach(el => el.classList.remove('prereq-pulse-beacon'));
-        }, 3500);
+        }, 4000);
     }
 
-    function showPlannerToast(message) {
+    function showPlannerToast(message, isError = true) {
         let toast = document.getElementById('planner-active-toast');
         if (!toast) {
             toast = document.createElement('div');
@@ -218,13 +271,34 @@
             toast.className = 'planner-toast-alert';
             document.body.appendChild(toast);
         }
-        toast.innerHTML = `<span>⚠️ ${message}</span>`;
+
+        if (navigator.vibrate) {
+            try { navigator.vibrate([80, 50, 80]); } catch (e) {}
+        }
+
+        toast.innerHTML = `
+            <span style="font-size: 1.4rem; line-height: 1;">${isError ? '⛔' : 'ℹ️'}</span>
+            <div style="display: flex; flex-direction: column; gap: 2px;">
+                <strong style="font-size: 0.92rem; color: ${isError ? '#f87171' : '#38bdf8'};">${isError ? 'חסימת דרישות קדם' : 'הודעת מערכת'}</strong>
+                <span style="font-size: 0.82rem; color: #f1f5f9; line-height: 1.35;">${message}</span>
+            </div>
+        `;
         toast.style.display = 'flex';
+        toast.classList.remove('toast-active');
+        void toast.offsetWidth;
+        toast.classList.add('toast-active');
 
         if (toast._timer) clearTimeout(toast._timer);
         toast._timer = setTimeout(() => {
-            if (toast) toast.style.display = 'none';
-        }, 4500);
+            if (toast) {
+                toast.classList.remove('toast-active');
+                setTimeout(() => {
+                    if (toast && !toast.classList.contains('toast-active')) {
+                        toast.style.display = 'none';
+                    }
+                }, 300);
+            }
+        }, 5000);
     }
 
     // Evaluate degree rules
@@ -351,6 +425,7 @@
                     <div class="planner-course-card ${completed ? 'course-card-completed' : ''}" 
                          draggable="${canDrag ? 'true' : 'false'}" 
                          data-code="${course.code}" 
+                         data-alt-code="${course.altCode || ''}" 
                          data-semester="${semNum}">
                         <div class="course-card-top">
                             <span class="course-card-code">${course.code}</span>
@@ -402,6 +477,26 @@
         updateRuleRow('C', `${rulesEval.countC} / 2`, rulesEval.ruleC_met);
         updateRuleRow('BCD', `${rulesEval.creditsBCD.toFixed(1)} / 14.0 נק״ז`, rulesEval.ruleBCD_met);
         updateRuleRow('total', `${rulesEval.totalElectiveCredits.toFixed(1)} / 32.5 נק״ז`, rulesEval.ruleTotalElectives_met);
+
+        const summaryBadge = document.getElementById('planner-rules-summary-badge');
+        if (summaryBadge) {
+            summaryBadge.innerText = `${rulesEval.totalElectiveCredits.toFixed(1)} / 32.5 נק״ז ${rulesEval.ruleTotalElectives_met ? '✅' : '⏳'}`;
+            summaryBadge.style.color = rulesEval.ruleTotalElectives_met ? '#10b981' : '#38bdf8';
+        }
+
+        const rulesToggle = document.getElementById('planner-rules-toggle');
+        if (rulesToggle && !rulesToggle._bound) {
+            rulesToggle._bound = true;
+            rulesToggle.addEventListener('click', () => {
+                const body = document.getElementById('planner-rules-body');
+                const icon = document.getElementById('planner-rules-toggle-icon');
+                if (body) {
+                    const isCollapsed = body.classList.toggle('collapsed');
+                    body.style.display = isCollapsed ? 'none' : 'flex';
+                    if (icon) icon.style.transform = isCollapsed ? 'rotate(-90deg)' : 'rotate(0deg)';
+                }
+            });
+        }
     }
 
     function renderAddElectivesSection(plan, courseSemMap) {
@@ -441,7 +536,7 @@
                 readyContainer.innerHTML = '<div style="font-size: 0.72rem; color: #94a3b8; padding: 4px;">קורסי החובה המשובצים עדיין אינם פותחים קורסי בחירה מתקדמים.</div>';
             } else {
                 readyContainer.innerHTML = readyCourses.slice(0, 6).map(course => `
-                    <div class="planner-pool-item" draggable="true" data-code="${course.code}">
+                    <div class="planner-pool-item" draggable="true" data-code="${course.code}" data-alt-code="${course.altCode || ''}">
                         <div class="pool-item-info">
                             <span class="pool-item-title">${course.name}</span>
                             <div class="pool-item-meta">
@@ -521,7 +616,7 @@
                     : (course.list ? `רשימה ${course.list}׳` : 'חובה');
 
                 return `
-                    <div class="planner-pool-item" draggable="true" data-code="${course.code}">
+                    <div class="planner-pool-item" draggable="true" data-code="${course.code}" data-alt-code="${course.altCode || ''}">
                         <div class="pool-item-info">
                             <span class="pool-item-title">${course.name}</span>
                             <div class="pool-item-meta">
@@ -696,7 +791,8 @@
         if (!prereqStatus.valid) {
             highlightMissingPrerequisites(
                 prereqStatus.missingCodes,
-                `לא ניתן לשבץ את "${courseObj.name}" בסמסטר ${targetSemester}: חסרים קדמים בסמסטרים קודמים! (${prereqStatus.missing.join(', ')})`
+                `לא ניתן לשבץ את "${courseObj.name}" בסמסטר ${targetSemester}: חסרים קדמים בסמסטרים קודמים! (${prereqStatus.missing.join(', ')})`,
+                targetSemester
             );
             return; // REJECT PLACEMENT!
         }
@@ -902,7 +998,8 @@
                 if (!prereqStatus.valid) {
                     highlightMissingPrerequisites(
                         prereqStatus.missingCodes,
-                        `לא ניתן לשבץ את "${course.name}" בסמסטר ${targetSem}: חסרים קדמים בסמסטרים קודמים! (${prereqStatus.missing.join(', ')})`
+                        `לא ניתן לשבץ את "${course.name}" בסמסטר ${targetSem}: חסרים קדמים בסמסטרים קודמים! (${prereqStatus.missing.join(', ')})`,
+                        targetSem
                     );
                     return;
                 }

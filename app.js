@@ -2232,29 +2232,6 @@ var SAMPLE_ME_DEGREE = (typeof window !== 'undefined' && window.SAMPLE_ME_DEGREE
             { id: "234128_ex", title: "מבחן סוף", type: "exam", xp: 500, completed: false }
         ]
     },
-    "324033": {
-        code: "324033",
-        name: "אנגלית טכנית מתקדמים ב'",
-        credits: 3,
-        semester: 1,
-        prerequisites: [],
-        status: "available",
-        tasks: [
-            { id: "324033_h1", title: "קריאת מאמרים מדעיים והרחבת אוצר מילים", type: "hw", xp: 50, completed: false },
-            { id: "324033_ex", title: "מבחן סוף", type: "exam", xp: 500, completed: false }
-        ]
-    },
-    "035026": {
-        code: "035026",
-        name: "מבוא יצירתי להנדסת מכונות (רשות)",
-        credits: 2.5,
-        semester: 1,
-        prerequisites: [],
-        status: "available",
-        tasks: [
-            { id: "035026_ex", title: "מבחן סוף / הגשה סופית", type: "exam", xp: 200, completed: false }
-        ]
-    },
     // Semester 2
     "034061": {
         code: "034061",
@@ -5315,17 +5292,25 @@ function loadSavedState() {
     // Finals mode is put to sleep (dormant) per user request - always keep normal semester mode active
     gameState.isFinalsMode = false;
 
-    // 1. Purge canceled courses: 035044 (תכן בעזרת מחשב CAD) is no longer in the curriculum
+    // 1. Purge canceled / user-removed courses:
+    // 035044 (CAD), 324033 / 03240033 (English B), 035026 (Creative Intro)
+    const PURGED_APP_CODES = ['035044', '324033', '03240033', '035026', '35026'];
     if (gameState.courses) {
-        if (gameState.courses['035044']) {
-            delete gameState.courses['035044'];
-        }
+        PURGED_APP_CODES.forEach(code => {
+            if (gameState.courses[code]) {
+                delete gameState.courses[code];
+            }
+        });
         Object.values(gameState.courses).forEach(c => {
             if (c.prerequisites) {
-                c.prerequisites = c.prerequisites.filter(p => p !== '035044');
+                c.prerequisites = c.prerequisites.filter(p => !PURGED_APP_CODES.includes(p));
             }
         });
     }
+    if (!gameState.removedCourses) gameState.removedCourses = [];
+    PURGED_APP_CODES.forEach(code => {
+        if (!gameState.removedCourses.includes(code)) gameState.removedCourses.push(code);
+    });
 
     // Guarantee 034028 (מכניקת מוצקים 1) and all core courses exist in gameState.courses
     if (gameState.courses) {
@@ -5355,15 +5340,8 @@ function loadSavedState() {
 
         // Guarantee all other core Technion Mechanical Engineering courses exist
         if (typeof SAMPLE_ME_DEGREE !== 'undefined') {
-            const isAdir = (window.AuthSync && typeof window.AuthSync.isAdirActive === 'function' && window.AuthSync.isAdirActive());
             Object.keys(SAMPLE_ME_DEGREE).forEach(code => {
-                if (code === '035044') return; // purged CAD course
-                // Do not auto-resurrect optional Creative Intro (035026) or English (324033) if removed by user / Adir
-                if (code === '035026' || code === '324033') {
-                    if (isAdir || (gameState.removedCourses && gameState.removedCourses.includes(code))) {
-                        return;
-                    }
-                }
+                if (PURGED_APP_CODES.includes(code)) return;
                 if (!gameState.courses[code]) {
                     gameState.courses[code] = JSON.parse(JSON.stringify(SAMPLE_ME_DEGREE[code]));
                 }
@@ -9972,11 +9950,10 @@ const DEGREE_CONSTELLATION_ANGLES = {
     "104043": { sem: 2, angle: 115, branch: "math" }, // חדו״א 2מ'
     "114052": { sem: 3, angle: 160, branch: "math" }, // פיזיקה 2
     "104228": { sem: 3, angle: 130, branch: "math" }, // שיטות נומריות
-    "125013": { sem: 4, angle: 150, branch: "math" }, // כימיה פיזיקלית
+    "125013": { sem: 2, angle: 180, branch: "math" }, // מעבדה בכימיה
     "114032": { sem: 5, angle: 150, branch: "math" }, // מעבדה בפיזיקה
 
     // === CENTER PILLAR: Mechanics, Design & Materials (75° - 105°) ===
-    "035026": { sem: 1, angle: 90,  branch: "mechanics" }, // מבוא יצירתי
     "034061": { sem: 2, angle: 105, branch: "mechanics" }, // גרפיקה ותכן
     "034028": { sem: 2, angle: 90,  branch: "mechanics" }, // מוצקים 1
     "314533": { sem: 2, angle: 75,  branch: "mechanics" }, // מבוא לחומרים
@@ -9994,7 +9971,6 @@ const DEGREE_CONSTELLATION_ANGLES = {
 
     // === RIGHT PILLAR: Thermo-Fluids, Energy & Electives (25° - 65°) ===
     "234128": { sem: 1, angle: 60,  branch: "thermo" }, // פייתון
-    "324033": { sem: 1, angle: 25,  branch: "thermo" }, // אנגלית
     "034035": { sem: 3, angle: 45,  branch: "thermo" }, // תרמודינמיקה 1
     "034055": { sem: 4, angle: 50,  branch: "thermo" }, // תורת הזרימה 1
     "034032": { sem: 4, angle: 25,  branch: "thermo" }, // מערכות תרמיות
@@ -10870,7 +10846,10 @@ function renderFlowchartTree() {
         semesterCourses[s] = [];
     }
 
+    const PURGED_FLOWCHART_CODES = new Set(['324033', '03240033', '035026', '35026', '035044']);
     Object.values(gameState.courses || {}).forEach(course => {
+        if (!course || !course.code) return;
+        if (PURGED_FLOWCHART_CODES.has(course.code)) return;
         const sem = Math.max(1, Math.min(TOTAL_SEMESTERS, course.semester || 1));
         semesterCourses[sem].push(course);
     });
@@ -10983,12 +10962,12 @@ function renderFlowchartTree() {
     const COURSE_COLUMNS = {
         // Semester 1 (5 courses)
         "125001": 0, "104041": 1, "104065": 2, "114051": 3, "234128": 4,
-        // Semester 2 (6 courses)
-        "104131": 0, "104043": 1, "034028": 2, "114051": 3, "314533": 4, "034061": 5,
+        // Semester 2 (7 courses)
+        "104131": 0, "104043": 1, "034028": 2, "114051": 3, "314533": 4, "034061": 5, "125013": 6,
         // Semester 3 (6 courses)
         "104228": 0, "034035": 1, "034053": 2, "114052": 3, "034056": 4, "03940805": 5,
-        // Semester 4 (5 courses)
-        "125013": 0, "034055": 1, "034032": 2, "034010": 3, "034030": 5,
+        // Semester 4 (4 courses)
+        "034055": 1, "034032": 2, "034010": 3, "034030": 5,
         // Semester 5 (6 courses)
         "034058": 0, "034041": 1, "034051": 2, "114032": 3, "034040": 4, "034054": 5,
         // Semester 6 (3 courses)

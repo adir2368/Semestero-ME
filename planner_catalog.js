@@ -24,26 +24,26 @@
         {
             semester: 1,
             title: "שנה א׳ - סמסטר א׳",
-            targetCredits: 20.0,
+            targetCredits: 17.0,
             courses: [
                 { code: "01040041", altCode: "104041", name: "חדו\"א 1מ' 1", credits: 5.0, type: "mandatory", prereqs: [] },
                 { code: "01040065", altCode: "104065", name: "אלגברה 1 מ'", credits: 5.0, type: "mandatory", prereqs: [] },
                 { code: "01250001", altCode: "125001", name: "כימיה כללית", credits: 3.0, type: "mandatory", prereqs: [] },
-                { code: "02340128", altCode: "234128", name: "שפת פייתון", credits: 4.0, type: "mandatory", prereqs: [] },
-                { code: "03240033", altCode: "324033", name: "אנגלית טכנית מתקדמים ב'", credits: 3.0, type: "mandatory", prereqs: [] }
+                { code: "02340128", altCode: "234128", name: "שפת פייתון", credits: 4.0, type: "mandatory", prereqs: [] }
             ]
         },
         {
             semester: 2,
             title: "שנה א׳ - סמסטר ב׳",
-            targetCredits: 21.0,
+            targetCredits: 21.5,
             courses: [
                 { code: "00340061", altCode: "034061", name: "מבוא לגרפיקה ותכנון הנדסי", credits: 3.5, type: "mandatory", prereqs: [] },
                 { code: "00340028", altCode: "034028", name: "מכניקת מוצקים 1", credits: 4.0, type: "mandatory", prereqs: ["01040041"] },
                 { code: "01040043", altCode: "104043", name: "חדו\"א 2מ' 1", credits: 5.0, type: "mandatory", prereqs: ["01040041"] },
                 { code: "01140051", altCode: "114051", name: "פיזיקה 1", credits: 2.5, type: "mandatory", prereqs: [] },
                 { code: "01040131", altCode: "104131", name: "משוואות דיפרנציאליות רגילות/ח", credits: 2.5, type: "mandatory", prereqs: ["01040041", "01040065"] },
-                { code: "03140533", altCode: "314533", name: "מבוא להנדסת חומרים מ'", credits: 3.5, type: "mandatory", prereqs: ["01250001"] }
+                { code: "03140533", altCode: "314533", name: "מבוא להנדסת חומרים מ'", credits: 3.5, type: "mandatory", prereqs: ["01250001"] },
+                { code: "01250013", altCode: "125013", name: "מעבדה בכימיה", credits: 0.5, type: "mandatory", prereqs: ["01250001"] }
             ]
         },
         {
@@ -61,13 +61,12 @@
         {
             semester: 4,
             title: "שנה ב׳ - סמסטר ד׳ (אביב)",
-            targetCredits: 18.0,
+            targetCredits: 17.5,
             courses: [
                 { code: "00340030", altCode: "034030", name: "תהליכי ייצור", credits: 3.5, type: "mandatory", prereqs: ["00340053", "00340061", "03140533"] },
                 { code: "00340010", altCode: "034010", name: "דינמיקה", credits: 5.0, type: "mandatory", prereqs: ["00340028", "01140051", "01040043", "01040131"] },
                 { code: "00340055", altCode: "034055", name: "תורת הזרימה 1 מורחב", credits: 5.0, type: "mandatory", prereqs: ["00340035", "01040131", "01040228"] },
-                { code: "00340032", altCode: "034032", name: "מערכות ליניאריות", credits: 4.0, type: "mandatory", prereqs: ["01040065", "01040131"] },
-                { code: "01250013", altCode: "125013", name: "מעבדה בכימיה", credits: 0.5, type: "mandatory", prereqs: ["01250001"] }
+                { code: "00340032", altCode: "034032", name: "מערכות ליניאריות", credits: 4.0, type: "mandatory", prereqs: ["01040065", "01040131"] }
             ]
         },
         {
@@ -239,7 +238,9 @@
             { code: "00350046", altCode: "035046", name: "ניהול פרויקטים", credits: 2.5, list: "E", prereqs: [] },
             { code: "00360045", altCode: "036045", name: "גיאומטריה חישובית ומודלים בתיב\"ם 2", credits: 3.0, list: "E", prereqs: ["00350003"] },
             { code: "0940202", altCode: "094202", name: "מבוא לניתוח נתונים", credits: 3.5, list: "E", prereqs: ["02340128"] },
-            { code: "2340268", altCode: "234268", name: "מבני נתונים ואלגוריתמים", credits: 3.0, list: "E", prereqs: ["02340128"] }
+            { code: "2340268", altCode: "234268", name: "מבני נתונים ואלגוריתמים", credits: 3.0, list: "E", prereqs: ["02340128"] },
+            { code: "03240033", altCode: "324033", name: "אנגלית טכנית מתקדמים ב'", credits: 3.0, list: "E", prereqs: [] },
+            { code: "00350026", altCode: "035026", name: "מבוא יצירתי להנדסת מכונות (רשות)", credits: 2.5, list: "E", prereqs: [] }
         ]
     };
 
