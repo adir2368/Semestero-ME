@@ -3250,7 +3250,7 @@ body {
     stroke: #38bdf8 !important;
     stroke-width: 3.5 !important;
     stroke-dasharray: none !important;
-    filter: url(#fc-glow);
+    filter: drop-shadow(0 0 6px rgba(56, 189, 248, 0.85));
     opacity: 1 !important;
 }
 
@@ -4554,7 +4554,7 @@ label[for="new-task-xp-input"],
     stroke: #38bdf8 !important;
     stroke-width: 3.8 !important;
     stroke-dasharray: none !important;
-    filter: url(#fc-glow);
+    filter: drop-shadow(0 0 6px rgba(56, 189, 248, 0.85));
     opacity: 1 !important;
 }
 
@@ -8689,6 +8689,112 @@ html.is-iphone .app-global-footer {
 .btn-add-to-plan:hover {
     background: #0284c7;
     color: #ffffff;
+}
+
+/* Completed Course Lock Styling */
+.planner-course-card.course-card-completed {
+    border-color: rgba(16, 185, 129, 0.45) !important;
+    background: rgba(16, 185, 129, 0.08) !important;
+    cursor: default !important;
+}
+
+.planner-course-card.course-card-completed:hover {
+    transform: none !important;
+    border-color: rgba(16, 185, 129, 0.6) !important;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2) !important;
+}
+
+.tag-completed {
+    background: rgba(16, 185, 129, 0.22) !important;
+    color: #34d399 !important;
+    border: 1px solid rgba(16, 185, 129, 0.45) !important;
+}
+
+/* Sidebar Drop Zone for Removing Courses */
+.planner-sidebar.drag-over,
+.planner-electives-pool.drag-over,
+.planner-unassigned-dropzone.drag-over {
+    border-color: #f59e0b !important;
+    background: rgba(245, 158, 11, 0.1) !important;
+    box-shadow: 0 0 20px rgba(245, 158, 11, 0.35) !important;
+}
+
+.planner-unassigned-banner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: rgba(30, 41, 59, 0.6);
+    border: 1.5px dashed rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 0.78rem;
+    color: #94a3b8;
+    text-align: center;
+    transition: all 0.2s ease;
+    user-select: none;
+    margin-bottom: 6px;
+}
+
+.planner-unassigned-banner.drag-over {
+    border-color: #f59e0b !important;
+    color: #fef08a !important;
+    background: rgba(245, 158, 11, 0.18) !important;
+    transform: scale(1.02);
+}
+
+/* Prerequisite Warning Beacon Animation */
+@keyframes prereqBeaconPulse {
+    0% {
+        border-color: #ef4444;
+        box-shadow: 0 0 10px #ef4444, 0 0 20px rgba(239, 68, 68, 0.6);
+        transform: scale(1);
+    }
+    50% {
+        border-color: #f59e0b;
+        box-shadow: 0 0 25px #f59e0b, 0 0 35px rgba(245, 158, 11, 0.8);
+        transform: scale(1.05);
+    }
+    100% {
+        border-color: #ef4444;
+        box-shadow: 0 0 10px #ef4444, 0 0 20px rgba(239, 68, 68, 0.6);
+        transform: scale(1);
+    }
+}
+
+.prereq-pulse-beacon {
+    animation: prereqBeaconPulse 0.75s ease-in-out infinite alternate !important;
+    z-index: 100 !important;
+    position: relative !important;
+}
+
+/* Prerequisite Block Toast Alert */
+.planner-toast-alert {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #0f172a;
+    border: 2px solid #ef4444;
+    color: #f8fafc;
+    padding: 12px 22px;
+    border-radius: 12px;
+    font-size: 0.88rem;
+    font-weight: 700;
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.8), 0 0 24px rgba(239, 68, 68, 0.5);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    animation: toastSlideUp 0.3s ease-out;
+    max-width: 90vw;
+    text-align: right;
+    direction: rtl;
+}
+
+@keyframes toastSlideUp {
+    from { opacity: 0; transform: translate(-50%, 20px); }
+    to { opacity: 1; transform: translate(-50%, 0); }
 }
 
 /* Mobile Responsiveness */

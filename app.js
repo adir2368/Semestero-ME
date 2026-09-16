@@ -5355,8 +5355,15 @@ function loadSavedState() {
 
         // Guarantee all other core Technion Mechanical Engineering courses exist
         if (typeof SAMPLE_ME_DEGREE !== 'undefined') {
+            const isAdir = (window.AuthSync && typeof window.AuthSync.isAdirActive === 'function' && window.AuthSync.isAdirActive());
             Object.keys(SAMPLE_ME_DEGREE).forEach(code => {
                 if (code === '035044') return; // purged CAD course
+                // Do not auto-resurrect optional Creative Intro (035026) or English (324033) if removed by user / Adir
+                if (code === '035026' || code === '324033') {
+                    if (isAdir || (gameState.removedCourses && gameState.removedCourses.includes(code))) {
+                        return;
+                    }
+                }
                 if (!gameState.courses[code]) {
                     gameState.courses[code] = JSON.parse(JSON.stringify(SAMPLE_ME_DEGREE[code]));
                 }
@@ -11065,7 +11072,8 @@ function renderFlowchartTree() {
                 let d = "";
 
                 if (Math.abs(x1 - x2) < 4) {
-                    d = `M ${x1} ${y1} L ${x2} ${y2}`;
+                    // Small micro-offset (0.1px) guarantees non-zero bounding box width in SVG
+                    d = `M ${x1} ${y1} L ${x2 + 0.1} ${y2}`;
                 } else {
                     const cpOffset = Math.min(Math.max(dy * 0.45, 30), 90);
                     d = `M ${x1} ${y1} C ${x1} ${y1 + cpOffset}, ${x2} ${y2 - cpOffset}, ${x2} ${y2}`;

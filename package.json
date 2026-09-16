@@ -1,6 +1,6 @@
 {
   "name": "academic-skill-tree",
-  "version": "1.8.1",
+  "version": "1.8.2",
   "description": "Academic Skill Tree - RPG Tracker for Students",
   "main": "main.js",
   "scripts": {
