@@ -96,7 +96,7 @@ var SAMPLE_ME_DEGREE = (typeof window !== 'undefined' && window.SAMPLE_ME_DEGREE
         code: "114051",
         name: "פיסיקה 1",
         credits: 3.5,
-        semester: 2,
+        semester: 1,
         prerequisites: [],
         status: "available",
         tasks: [

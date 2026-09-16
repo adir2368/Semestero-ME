@@ -2275,7 +2275,7 @@ var SAMPLE_ME_DEGREE = (typeof window !== 'undefined' && window.SAMPLE_ME_DEGREE
         code: "114051",
         name: "פיסיקה 1",
         credits: 3.5,
-        semester: 2,
+        semester: 1,
         prerequisites: [],
         status: "available",
         tasks: [
@@ -10962,8 +10962,8 @@ function renderFlowchartTree() {
     const COURSE_COLUMNS = {
         // Semester 1 (5 courses)
         "125001": 0, "104041": 1, "104065": 2, "114051": 3, "234128": 4,
-        // Semester 2 (7 courses)
-        "104131": 0, "104043": 1, "034028": 2, "114051": 3, "314533": 4, "034061": 5, "125013": 6,
+        // Semester 2 (6 courses: columns 0-5)
+        "125013": 0, "104043": 1, "034028": 2, "104131": 3, "314533": 4, "034061": 5,
         // Semester 3 (6 courses)
         "104228": 0, "034035": 1, "034053": 2, "114052": 3, "034056": 4, "03940805": 5,
         // Semester 4 (4 courses)
