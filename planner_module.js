@@ -1,7 +1,7 @@
 // ==========================================================================
 // Degree Planner Module (תכנון תואר אקדמי - גרור ושחרר קורסים וחוקי בחירה)
 // Atlas ME - Technion Faculty of Mechanical Engineering
-// Multi-Pass Audited & Refactored Engine (v1.8.4)
+// Multi-Pass Audited & Refactored Engine (v1.8.6)
 // ==========================================================================
 
 (function(global) {
@@ -15,6 +15,9 @@
     let searchQuery = '';
     let customPlan = null;
     let unassignedCourses = [];
+    let isWhatIfMode = false;
+    let whatIfGrades = {};
+    let defaultWhatIfGrade = 85;
 
     // Local Storage Keys
     const PLANNER_STORAGE_KEY_V2 = 'atlas_me_custom_degree_plan_v2';
@@ -66,11 +69,16 @@
         for (let i = 0; i < candidateCodes.length; i++) {
             const c = global.gameState.courses[candidateCodes[i]];
             if (c) {
-                if (c.status === 'mastered') return true;
-                if (c.isBinaryPass === true || c.grade === 'עובר' || c.grade === 'PASS') return true;
+                // Priority 1: Numeric passing grade
                 if (c.grade !== undefined && c.grade !== null && c.grade !== '') {
                     const num = Number(c.grade);
                     if (!isNaN(num) && num >= 55) return true;
+                }
+                // Priority 2: Mastered status
+                if (c.status === 'mastered') return true;
+                // Priority 3: Explicit binary pass only if not locked or available
+                if (c.status !== 'locked' && c.status !== 'available' && (c.isBinaryPass === true || c.grade === 'עובר' || c.grade === 'PASS')) {
+                    return true;
                 }
             }
         }
@@ -84,8 +92,13 @@
         for (let i = 0; i < candidateCodes.length; i++) {
             const c = global.gameState.courses[candidateCodes[i]];
             if (c) {
-                if (c.isBinaryPass === true || c.grade === 'עובר' || c.grade === 'PASS') return 'עובר';
-                if (c.grade !== undefined && c.grade !== null && c.grade !== '') return String(c.grade);
+                // Numeric grade always takes precedence!
+                if (c.grade !== undefined && c.grade !== null && c.grade !== '' && !isNaN(Number(c.grade))) {
+                    return String(c.grade);
+                }
+                if (c.status === 'mastered' && (c.isBinaryPass === true || c.grade === 'עובר' || c.grade === 'PASS')) {
+                    return 'עובר';
+                }
             }
         }
         return null;
@@ -172,11 +185,9 @@
             if (!c || !c.code) return;
             if (PURGED_CODES.has(c.code)) return;
 
-            const isDone = c.status === 'mastered' ||
-                           c.isBinaryPass === true ||
-                           c.grade === 'עובר' ||
-                           c.grade === 'PASS' ||
-                           (c.grade !== undefined && c.grade !== null && c.grade !== '' && Number(c.grade) >= 55);
+            const hasNumeric = (c.grade !== undefined && c.grade !== null && c.grade !== '' && !isNaN(Number(c.grade)) && Number(c.grade) >= 55);
+            const isBinary = (c.status === 'mastered') && (c.isBinaryPass === true || c.grade === 'עובר' || c.grade === 'PASS');
+            const isDone = (c.status === 'mastered') || hasNumeric || isBinary;
 
             if (isDone) {
                 const actualSem = Number(c.semester);
@@ -492,11 +503,104 @@
             const rulesEval = evaluateDegreeRules(plan);
 
             renderHeaderStats(rulesEval);
+            renderWhatIfBanner();
             renderSemesterColumns(plan, courseSemMap);
             renderRulesCard(rulesEval);
             renderAddElectivesSection(plan, courseSemMap);
             bindDelegatedPlannerEvents();
         });
+    }
+
+    
+    // --------------------------------------------------------------------------
+    // What-If Degree GPA Simulator Engine
+    // --------------------------------------------------------------------------
+    function calculateWhatIfGPA() {
+        let realWeightedSum = 0;
+        let realGradedCredits = 0;
+
+        if (global.gameState && global.gameState.courses) {
+            Object.values(global.gameState.courses).forEach(c => {
+                if (!c) return;
+                const cr = Number(c.credits) || 0;
+                const hasNumeric = (c.grade !== undefined && c.grade !== null && c.grade !== '' && !isNaN(Number(c.grade)) && Number(c.grade) >= 55);
+                const isBinary = !hasNumeric && (c.isBinaryPass === true || c.grade === 'עובר' || c.grade === 'PASS');
+                if (c.status === 'mastered' && hasNumeric && !isBinary) {
+                    realWeightedSum += Number(c.grade) * cr;
+                    realGradedCredits += cr;
+                }
+            });
+        }
+
+        const realGpa = realGradedCredits > 0 ? (realWeightedSum / realGradedCredits) : 0;
+
+        let whatIfWeightedSum = 0;
+        let whatIfCredits = 0;
+
+        const plan = getActivePlan();
+        plan.forEach(sem => {
+            (sem.courses || []).forEach(c => {
+                if (isCourseCompleted(c.code, c.altCode)) return;
+                if (c.type === 'sports' || (c.name && c.name.includes('חינוך גופני')) || c.isBinaryPass) return;
+
+                const cr = Number(c.credits) || 0;
+                const grade = (whatIfGrades[c.code] !== undefined) ? Number(whatIfGrades[c.code]) : defaultWhatIfGrade;
+                whatIfWeightedSum += grade * cr;
+                whatIfCredits += cr;
+            });
+        });
+
+        const totalGraded = realGradedCredits + whatIfCredits;
+        const projectedGpa = totalGraded > 0 ? ((realWeightedSum + whatIfWeightedSum) / totalGraded) : realGpa;
+
+        return {
+            realGpa,
+            realGradedCredits,
+            whatIfCredits,
+            projectedGpa
+        };
+    }
+
+    function renderWhatIfBanner() {
+        const bannerEl = document.getElementById('planner-whatif-container');
+        if (!bannerEl) return;
+        if (!isWhatIfMode) {
+            bannerEl.style.display = 'none';
+            bannerEl.innerHTML = '';
+            return;
+        }
+
+        const stats = calculateWhatIfGPA();
+        bannerEl.style.display = 'flex';
+        bannerEl.className = 'planner-whatif-banner';
+        bannerEl.innerHTML = `
+            <div class="whatif-stats-cluster">
+                <div class="whatif-stat-box">
+                    <span class="whatif-stat-label">ממוצע קיים (הושלם)</span>
+                    <span class="whatif-stat-val">${stats.realGpa.toFixed(2)}</span>
+                </div>
+                <div class="whatif-stat-box">
+                    <span class="whatif-stat-label">נק״ז מדורג קיים</span>
+                    <span class="whatif-stat-val">${stats.realGradedCredits.toFixed(1)}</span>
+                </div>
+                <div class="whatif-stat-box">
+                    <span class="whatif-stat-label">נק״ז מתוכנן בסימולציה</span>
+                    <span class="whatif-stat-val">${stats.whatIfCredits.toFixed(1)}</span>
+                </div>
+                <div class="whatif-stat-box" style="border-right: 2px solid rgba(234, 179, 8, 0.4); padding-right: 14px;">
+                    <span class="whatif-stat-label" style="color: #fde047;">🎯 ממוצע סיום תואר צפוי</span>
+                    <span class="whatif-stat-val highlight">${stats.projectedGpa.toFixed(2)}</span>
+                </div>
+            </div>
+            <div class="whatif-controls">
+                <span style="font-size: 0.72rem; color: #94a3b8;">הגדרה גורפת:</span>
+                <button type="button" class="btn-whatif-preset" data-preset="80">80</button>
+                <button type="button" class="btn-whatif-preset" data-preset="85">85</button>
+                <button type="button" class="btn-whatif-preset" data-preset="90">90</button>
+                <button type="button" class="btn-whatif-preset" data-preset="95">95</button>
+                <button type="button" class="btn-whatif-preset" data-preset="reset" style="background: rgba(239, 68, 68, 0.15); border-color: rgba(239, 68, 68, 0.4); color: #f87171;">איפוס</button>
+            </div>
+        `;
     }
 
     function renderHeaderStats(rulesEval) {
@@ -561,6 +665,14 @@
                         <div class="course-card-title">${escapeHtml(course.name)}</div>
                         <div class="course-card-bottom">
                             <span class="course-card-credits">${course.credits} נק״ז</span>
+                            ${isWhatIfMode && !completed ? `
+                                <div class="course-card-whatif-wrap" title="ציון משוער בסימולטור">
+                                    <span style="font-size: 0.68rem; color: #fde047;">ציון:</span>
+                                    <input type="number" min="0" max="100" class="course-card-whatif-input" 
+                                           data-code="${escapeHtml(course.code)}" 
+                                           value="${whatIfGrades[course.code] !== undefined ? whatIfGrades[course.code] : defaultWhatIfGrade}">
+                                </div>
+                            ` : ''}
                             <div class="course-card-actions">
                                 ${!completed && !prereqStatus.valid ? `
                                     <span class="prereq-warning-pill" title="דרישות קדם חסרות: ${escapeHtml(prereqStatus.missing.join(', '))}">
@@ -928,6 +1040,78 @@
                 promptAddCourseToSemester(code);
                 return;
             }
+
+            // What-If GPA Simulator Toggle
+            const whatIfBtn = e.target.closest('#btn-planner-what-if');
+            if (whatIfBtn) {
+                isWhatIfMode = !isWhatIfMode;
+                whatIfBtn.classList.toggle('active', isWhatIfMode);
+                whatIfBtn.style.background = isWhatIfMode ? '#ca8a04' : '';
+                whatIfBtn.style.color = isWhatIfMode ? '#ffffff' : '#fde047';
+                renderWhatIfBanner();
+                renderSemesterColumns(getActivePlan(), buildCourseSemesterMap(getActivePlan()));
+                return;
+            }
+
+            // What-If Presets
+            const presetBtn = e.target.closest('.btn-whatif-preset');
+            if (presetBtn) {
+                const preset = presetBtn.getAttribute('data-preset');
+                if (preset === 'reset') {
+                    whatIfGrades = {};
+                    defaultWhatIfGrade = 85;
+                } else {
+                    const num = parseInt(preset, 10);
+                    if (!isNaN(num)) {
+                        defaultWhatIfGrade = num;
+                        whatIfGrades = {};
+                    }
+                }
+                renderWhatIfBanner();
+                renderSemesterColumns(getActivePlan(), buildCourseSemesterMap(getActivePlan()));
+                return;
+            }
+
+            // Export Plan Button
+            const exportBtn = e.target.closest('#btn-planner-export');
+            if (exportBtn) {
+                promptExportPlan();
+                return;
+            }
+
+            // Course card tap -> Mobile tap-to-move action sheet
+            const card = e.target.closest('.planner-course-card, .planner-pool-item');
+            if (card) {
+                if (e.target.closest('.course-card-whatif-input, .btn-card-remove, .btn-add-to-plan')) return;
+
+                const code = card.getAttribute('data-code');
+                const altCode = card.getAttribute('data-alt-code');
+                const semAttr = card.getAttribute('data-semester');
+                const semNum = semAttr ? parseInt(semAttr, 10) : null;
+
+                if (isCourseCompleted(code, altCode)) {
+                    showPlannerToast('✓ קורס זה הושלם כבר בהצלחה - אינו ניתן להזזה.', false);
+                    return;
+                }
+
+                openCourseActionSheet(code, semNum);
+                return;
+            }
+        });
+
+        // 6. What-If input live updates
+        plannerTab.addEventListener('input', (e) => {
+            const whatIfInput = e.target.closest('.course-card-whatif-input');
+            if (whatIfInput) {
+                const code = whatIfInput.getAttribute('data-code');
+                const val = parseFloat(whatIfInput.value);
+                if (!isNaN(val) && val >= 0 && val <= 100) {
+                    whatIfGrades[code] = val;
+                } else if (whatIfInput.value === '') {
+                    delete whatIfGrades[code];
+                }
+                renderWhatIfBanner();
+            }
         });
 
         // 6. Search Input Delegation (Debounced 150ms)
@@ -946,6 +1130,218 @@
     // --------------------------------------------------------------------------
     // Course Placement & Rejection Engine
     // --------------------------------------------------------------------------
+    
+    // --------------------------------------------------------------------------
+    // Mobile Tap-to-Move Action Sheet (Touch Ergonomics)
+    // --------------------------------------------------------------------------
+    function openCourseActionSheet(courseCode, currentSemester) {
+        const overlay = document.getElementById('planner-action-sheet-overlay');
+        const sheet = document.getElementById('planner-action-sheet');
+        if (!overlay || !sheet) return;
+
+        let course = null;
+        const plan = getActivePlan();
+        if (currentSemester) {
+            const sem = plan.find(s => s.semester === currentSemester);
+            if (sem) course = (sem.courses || []).find(c => c.code === courseCode);
+        }
+        if (!course) {
+            course = unassignedCourses.find(c => c.code === courseCode) ||
+                     (global.PLANNER_CATALOG ? global.PLANNER_CATALOG.ALL_COURSES_MAP[courseCode] : null);
+        }
+        if (!course) return;
+
+        const currentLocText = currentSemester ? `משובץ בסמסטר ${currentSemester}` : `במאגר (לא משובץ)`;
+
+        let semButtonsHtml = '';
+        plan.forEach(s => {
+            const semNum = s.semester;
+            const isCurrent = semNum === currentSemester;
+            semButtonsHtml += `
+                <button type="button" class="sheet-sem-btn ${isCurrent ? 'current' : ''}" data-target-sem="${semNum}">
+                    סמסטר ${semNum} ${isCurrent ? '📍' : ''}
+                </button>
+            `;
+        });
+
+        sheet.innerHTML = `
+            <div class="sheet-handle-bar"></div>
+            <div class="sheet-header-title">${escapeHtml(course.name)}</div>
+            <div class="sheet-header-sub">
+                <span>קוד: ${escapeHtml(course.code)}</span>
+                <span>•</span>
+                <span>${course.credits} נק״ז</span>
+                <span>•</span>
+                <span style="color: #38bdf8;">${currentLocText}</span>
+            </div>
+            <div style="font-size: 0.82rem; font-weight: 700; color: #94a3b8; margin-bottom: 8px;">העבר לסמסטר:</div>
+            <div class="sheet-semesters-grid">
+                ${semButtonsHtml}
+            </div>
+            <div class="sheet-actions-row">
+                ${currentSemester ? `
+                    <button type="button" class="sheet-btn-remove" id="sheet-btn-remove-course">
+                        🗑️ הסר מהתכנון (העבר למאגר)
+                    </button>
+                ` : ''}
+                <button type="button" class="sheet-btn-cancel" id="sheet-btn-cancel">ביטול</button>
+            </div>
+        `;
+
+        overlay.classList.add('active');
+
+        const closeSheet = () => {
+            overlay.classList.remove('active');
+        };
+
+        const cancelBtn = sheet.querySelector('#sheet-btn-cancel');
+        if (cancelBtn) cancelBtn.onclick = closeSheet;
+
+        overlay.onclick = (e) => {
+            if (e.target === overlay) closeSheet();
+        };
+
+        const semBtns = sheet.querySelectorAll('.sheet-sem-btn');
+        semBtns.forEach(btn => {
+            btn.onclick = () => {
+                const targetSem = parseInt(btn.getAttribute('data-target-sem'));
+                closeSheet();
+                if (targetSem === currentSemester) return;
+                handleCourseDrop({
+                    type: currentSemester ? 'semester-course' : 'pool-course',
+                    code: courseCode,
+                    sourceSemester: currentSemester
+                }, targetSem);
+            };
+        });
+
+        const removeBtn = sheet.querySelector('#sheet-btn-remove-course');
+        if (removeBtn) {
+            removeBtn.onclick = () => {
+                closeSheet();
+                handleSidebarDrop({
+                    type: 'semester-course',
+                    code: courseCode,
+                    sourceSemester: currentSemester
+                });
+            };
+        }
+    }
+
+    // --------------------------------------------------------------------------
+    // Plan Export Engine (Image PNG & Clean Print)
+    // --------------------------------------------------------------------------
+    function promptExportPlan() {
+        const choice = confirm("ייצוא תכנון תואר אקדמי:\n\nלחץ 'אישור' (OK) להדפסה או שמירה כ-PDF נקי.\nלחץ 'ביטול' (Cancel) להורדת תמונה איכותית (PNG).");
+        if (choice) {
+            window.print();
+        } else {
+            exportPlanToCanvasPNG();
+        }
+    }
+
+    function exportPlanToCanvasPNG() {
+        const plan = getActivePlan();
+        if (!plan || plan.length === 0) return;
+
+        const canvas = document.createElement('canvas');
+        canvas.width = 1920;
+        canvas.height = 1080;
+        const ctx = canvas.getContext('2d');
+
+        // Dark RPG Canvas Background
+        ctx.fillStyle = '#0b0f19';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Header Banner
+        const grad = ctx.createLinearGradient(0, 0, 1920, 0);
+        grad.addColorStop(0, '#0284c7');
+        grad.addColorStop(1, '#1e3a8a');
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, 1920, 80);
+
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 26px Arial, sans-serif';
+        ctx.textAlign = 'right';
+        ctx.fillText('🎓 טכניון - הפקולטה להנדסת מכונות | תוכנית לימודים לתואר ראשון', 1880, 50);
+
+        ctx.font = '16px Arial, sans-serif';
+        ctx.textAlign = 'left';
+        ctx.fillText(new Date().toLocaleDateString('he-IL'), 40, 50);
+
+        // 8 Semesters Grid (2 rows x 4 cols)
+        const colWidth = 430;
+        const colGap = 35;
+        const startX = 40;
+        const rowHeight = 440;
+        const startY = 110;
+
+        plan.slice(0, 8).forEach((sem, idx) => {
+            const colIdx = idx % 4;
+            const rowIdx = Math.floor(idx / 4);
+            const x = startX + colIdx * (colWidth + colGap);
+            const y = startY + rowIdx * (rowHeight + 40);
+
+            ctx.fillStyle = '#111827';
+            ctx.strokeStyle = '#1e293b';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.roundRect(x, y, colWidth, rowHeight, 10);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.fillStyle = '#38bdf8';
+            ctx.font = 'bold 18px Arial, sans-serif';
+            ctx.textAlign = 'right';
+            ctx.fillText(`סמסטר ${sem.semester || (idx + 1)}`, x + colWidth - 15, y + 30);
+
+            let semCr = 0;
+            (sem.courses || []).forEach(c => semCr += Number(c.credits) || 0);
+            ctx.fillStyle = '#94a3b8';
+            ctx.font = '14px Arial, sans-serif';
+            ctx.textAlign = 'left';
+            ctx.fillText(`${semCr.toFixed(1)} נק״ז`, x + 15, y + 30);
+
+            let curY = y + 45;
+            (sem.courses || []).slice(0, 7).forEach(c => {
+                const completed = isCourseCompleted(c.code, c.altCode);
+                ctx.fillStyle = completed ? 'rgba(16, 185, 129, 0.15)' : '#1e293b';
+                ctx.strokeStyle = completed ? '#10b981' : '#334155';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.roundRect(x + 10, curY, colWidth - 20, 48, 6);
+                ctx.fill();
+                ctx.stroke();
+
+                ctx.fillStyle = completed ? '#34d399' : '#f8fafc';
+                ctx.font = 'bold 13px Arial, sans-serif';
+                ctx.textAlign = 'right';
+                const courseName = c.name.length > 28 ? c.name.substring(0, 26) + '...' : c.name;
+                ctx.fillText(courseName, x + colWidth - 20, curY + 22);
+
+                ctx.fillStyle = '#94a3b8';
+                ctx.font = '12px Arial, sans-serif';
+                ctx.textAlign = 'right';
+                ctx.fillText(`${c.code} • ${c.credits} נק״ז`, x + colWidth - 20, curY + 40);
+
+                if (completed) {
+                    ctx.fillStyle = '#10b981';
+                    ctx.font = 'bold 12px Arial, sans-serif';
+                    ctx.textAlign = 'left';
+                    ctx.fillText('✓ הושלם', x + 20, curY + 30);
+                }
+
+                curY += 54;
+            });
+        });
+
+        const link = document.createElement('a');
+        link.download = `Technion_ME_Degree_Plan_${new Date().toISOString().split('T')[0]}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+        showPlannerToast('✓ תמונת התוכנית נוצרה והורדה בהצלחה!', false);
+    }
+
     function handleCourseDrop(data, targetSemester) {
         if (!customPlan) return;
 
@@ -1167,5 +1563,18 @@
             renderDegreePlanner();
         }
     };
+
+    // Auto initialize events on DOM load
+    if (typeof document !== 'undefined') {
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => {
+                initPlannerState();
+                bindDelegatedPlannerEvents();
+            });
+        } else {
+            initPlannerState();
+            bindDelegatedPlannerEvents();
+        }
+    }
 
 })(typeof window !== 'undefined' ? window : global);

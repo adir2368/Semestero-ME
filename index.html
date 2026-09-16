@@ -16,7 +16,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Rubik:wght@300;400;500;700;900&display=swap" rel="stylesheet">
     <link rel="icon" type="image/png" href="icon.png">
-    <link rel="stylesheet" href="styles.css?v=1.8.5">
+    <link rel="stylesheet" href="styles.css?v=1.8.6">
     <script>
         (function() {
             try {
@@ -278,6 +278,12 @@
                         </div>
                     </div>
                     <div class="planner-header-right">
+                        <button type="button" class="btn btn-sm btn-outline" id="btn-planner-what-if" title="סימולטור ממוצע לתואר (What-If GPA Simulator)" style="border-color: #eab308; color: #fde047;">
+                            <span>🎓 סימולטור ממוצע</span>
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline" id="btn-planner-export" title="ייצוא תכנון התואר לתמונה או הדפסה">
+                            <span>📤 ייצוא תכנון</span>
+                        </button>
                         <button type="button" class="btn btn-sm btn-outline" id="btn-planner-add-semester" title="הוסף סמסטר נוסף לתוכנית (למשל סמסטר 9 או סמסטר קיץ)">
                             <span>➕ הוסף סמסטר</span>
                         </button>
@@ -289,6 +295,9 @@
                         </button>
                     </div>
                 </div>
+
+                <!-- What-If Degree GPA Simulator Banner -->
+                <div id="planner-whatif-container" style="display: none;"></div>
 
                 <!-- Main Split Area: Semesters Board + Electives Sidebar -->
                 <div class="planner-main-container">
@@ -932,7 +941,7 @@
         <!-- App Global Footer (Developer Credit & Version) -->
         <footer class="app-global-footer">
             <div class="footer-left-version">
-                <span class="app-version-badge" id="footer-version-badge" title="Atlas ME v1.8.5">v1.8.5</span>
+                <span class="app-version-badge" id="footer-version-badge" title="Atlas ME v1.8.6">v1.8.6</span>
             </div>
             <div class="footer-credit-content">
                 <span class="credit-text" style="display: inline-flex; align-items: center; gap: 6px;">Developed by <strong>Adir Moshe</strong> <img src="adir_avatar.png" alt="Adir" style="width: 16px; height: 16px; object-fit: contain; vertical-align: middle; filter: drop-shadow(0 0 3px rgba(56, 189, 248, 0.5));"> • <strong>Atlas ME</strong></span>
@@ -1736,6 +1745,17 @@
         </div>
     </div>
 
+    <!-- Quick-Add Task Floating Action Button (FAB) -->
+    <button type="button" class="fab-quick-add-task" id="fab-quick-add-task" title="הוספת משימה מהירה (Quick Add Task)">
+        <span style="font-size: 1.1rem; line-height: 1;">➕</span>
+        <span>משימה חדשה</span>
+    </button>
+
+    <!-- Degree Planner Touch/Mobile Action Sheet Overlay -->
+    <div class="planner-action-sheet-overlay" id="planner-action-sheet-overlay">
+        <div class="planner-action-sheet" id="planner-action-sheet"></div>
+    </div>
+
     <!-- Supabase JS Client for Cloud Sync -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <!-- CheeseFork Technion Courses Database (2,055 courses) -->
@@ -1746,11 +1766,11 @@
     <!-- Multi-User Identity & Sync Engine -->
     <script src="auth_sync.js?v=1.7.1"></script>
     <!-- Technion ME 2025/2026 Catalog & Electives Database -->
-    <script src="planner_catalog.js?v=1.8.5"></script>
+    <script src="planner_catalog.js?v=1.8.6"></script>
     <!-- Degree Planner Drag & Drop Engine -->
-    <script src="planner_module.js?v=1.8.5"></script>
+    <script src="planner_module.js?v=1.8.6"></script>
     <!-- Core Application Logic -->
-    <script src="app.js?v=1.8.5"></script>
+    <script src="app.js?v=1.8.6"></script>
     <!-- PWA Service Worker Registration -->
     <script>
         if ('serviceWorker' in navigator && window.location.protocol.startsWith('http')) {

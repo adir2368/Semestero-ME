@@ -5338,6 +5338,28 @@ function loadSavedState() {
             }
         }
 
+        // Strict course grade & binary pass normalization: real grades strictly take precedence!
+        if (gameState.courses) {
+            Object.values(gameState.courses).forEach(c => {
+                if (!c) return;
+                const hasNumeric = (c.grade !== undefined && c.grade !== null && c.grade !== '' && !isNaN(Number(c.grade)));
+                if (hasNumeric) {
+                    c.isBinaryPass = false;
+                    c.grade = Number(c.grade);
+                } else if (c.grade === 'עובר' || c.grade === 'PASS' || c.isBinaryPass === true) {
+                    if (c.status === 'mastered') {
+                        c.isBinaryPass = true;
+                        c.grade = 'עובר';
+                    } else {
+                        c.isBinaryPass = false;
+                        if (c.grade === 'עובר' || c.grade === 'PASS') c.grade = null;
+                    }
+                } else if (c.status !== 'mastered') {
+                    c.isBinaryPass = false;
+                }
+            });
+        }
+
         // Guarantee all other core Technion Mechanical Engineering courses exist
         if (typeof SAMPLE_ME_DEGREE !== 'undefined') {
             Object.keys(SAMPLE_ME_DEGREE).forEach(code => {
@@ -8607,6 +8629,14 @@ function setupNotionDashboard() {
         if (tabCurriculum) tabCurriculum.classList.toggle("active", activeTabId === 'curriculum');
         if (tabPlanner) tabPlanner.classList.toggle("active", activeTabId === 'planner');
         if (tabTasks) tabTasks.classList.toggle("active", activeTabId === 'tasks');
+    const fabQuickBtn = document.getElementById("fab-quick-add-task");
+    if (fabQuickBtn) {
+        if (activeTabId === 'tasks' || activeTabId === 'timetable') {
+            fabQuickBtn.classList.add("fab-visible");
+        } else {
+            fabQuickBtn.classList.remove("fab-visible");
+        }
+    }
         if (tabCalendar) tabCalendar.classList.toggle("active", activeTabId === 'calendar');
         if (tabTimetable) tabTimetable.classList.toggle("active", activeTabId === 'timetable');
         if (tabSettings) tabSettings.classList.toggle("active", activeTabId === 'settings');
@@ -9717,10 +9747,16 @@ function openAddCustomTaskModal(prefilledDate = "") {
     const dateInput = document.getElementById("new-task-due-date");
     if (!modal || !courseSelect) return;
 
-        courseSelect.innerHTML = "";
-    const activeCourses = Object.values(gameState.courses).filter(c => c.status === 'active');
+    courseSelect.innerHTML = "";
+    let activeCourses = Object.values(gameState.courses).filter(c => c.status === 'active');
     if (activeCourses.length === 0) {
-        alert("על מנת להוסיף משימה, עליך להפעיל קורס אחד לפחות בעץ!");
+        activeCourses = Object.values(gameState.courses).filter(c => c.status === 'available');
+    }
+    if (activeCourses.length === 0) {
+        activeCourses = Object.values(gameState.courses).filter(c => c.status !== 'mastered');
+    }
+    if (activeCourses.length === 0) {
+        alert("לא נמצאו קורסים פעילים או פתוחים להוספת משימה.");
         return;
     }
 
@@ -12904,6 +12940,25 @@ function setupSettingsPageButtons() {
             reader.readAsText(file, "UTF-8");
         };
     }
+
+async function triggerManualCalendarPull() {
+    try {
+        if (typeof showToastNotification === 'function') {
+            showToastNotification('🔄 מרענן יומן ומערכת שעות...', 'info');
+        }
+        if (typeof renderFinalsCalendar === 'function') {
+            renderFinalsCalendar();
+        }
+        if (typeof renderTimetableGrid === 'function') {
+            renderTimetableGrid();
+        }
+        if (typeof showToastNotification === 'function') {
+            showToastNotification('✓ לוח השנה ומערכת השעות רועננו בהצלחה', 'success');
+        }
+    } catch (e) {
+        console.warn("[CalendarPull] Error during calendar refresh:", e);
+    }
+}
 
     const pullBtn = document.getElementById("btn-trigger-manual-calendar-pull");
     if (pullBtn) {
