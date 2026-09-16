@@ -24,26 +24,26 @@
         {
             semester: 1,
             title: "שנה א׳ - סמסטר א׳",
-            targetCredits: 17.0,
+            targetCredits: 20.5,
             courses: [
                 { code: "01040041", altCode: "104041", name: "חדו\"א 1מ' 1", credits: 5.0, type: "mandatory", prereqs: [] },
                 { code: "01040065", altCode: "104065", name: "אלגברה 1 מ'", credits: 5.0, type: "mandatory", prereqs: [] },
                 { code: "01250001", altCode: "125001", name: "כימיה כללית", credits: 3.0, type: "mandatory", prereqs: [] },
-                { code: "02340128", altCode: "234128", name: "שפת פייתון", credits: 4.0, type: "mandatory", prereqs: [] }
+                { code: "02340128", altCode: "234128", name: "שפת פייתון", credits: 4.0, type: "mandatory", prereqs: [] },
+                { code: "01140051", altCode: "114051", name: "פיזיקה 1", credits: 3.5, type: "mandatory", prereqs: [] }
             ]
         },
         {
             semester: 2,
             title: "שנה א׳ - סמסטר ב׳",
-            targetCredits: 21.5,
+            targetCredits: 19.0,
             courses: [
-                { code: "00340061", altCode: "034061", name: "מבוא לגרפיקה ותכנון הנדסי", credits: 3.5, type: "mandatory", prereqs: [] },
-                { code: "00340028", altCode: "034028", name: "מכניקת מוצקים 1", credits: 4.0, type: "mandatory", prereqs: ["01040041"] },
+                { code: "01250013", altCode: "125013", name: "מעבדה בכימיה", credits: 0.5, type: "mandatory", prereqs: ["01250001"] },
                 { code: "01040043", altCode: "104043", name: "חדו\"א 2מ' 1", credits: 5.0, type: "mandatory", prereqs: ["01040041"] },
-                { code: "01140051", altCode: "114051", name: "פיזיקה 1", credits: 2.5, type: "mandatory", prereqs: [] },
+                { code: "00340028", altCode: "034028", name: "מכניקת מוצקים 1", credits: 4.0, type: "mandatory", prereqs: ["01040041", "01040065", "01140051"] },
                 { code: "01040131", altCode: "104131", name: "משוואות דיפרנציאליות רגילות/ח", credits: 2.5, type: "mandatory", prereqs: ["01040041", "01040065"] },
                 { code: "03140533", altCode: "314533", name: "מבוא להנדסת חומרים מ'", credits: 3.5, type: "mandatory", prereqs: ["01250001"] },
-                { code: "01250013", altCode: "125013", name: "מעבדה בכימיה", credits: 0.5, type: "mandatory", prereqs: ["01250001"] }
+                { code: "00340061", altCode: "034061", name: "מבוא לגרפיקה ותכנון הנדסי", credits: 3.5, type: "mandatory", prereqs: [] }
             ]
         },
         {
@@ -244,19 +244,24 @@
         ]
     };
 
-    // Helper: Build course lookup index by code and altCode
+    // Helper: Build course lookup index by code and altCode (including normalized formats)
     const ALL_COURSES_MAP = {};
+    function indexCourse(c) {
+        if (!c || !c.code) return;
+        ALL_COURSES_MAP[c.code] = c;
+        if (c.altCode) ALL_COURSES_MAP[c.altCode] = c;
+        const norm1 = c.code.replace(/^0+/, '');
+        if (norm1) ALL_COURSES_MAP[norm1] = c;
+        if (c.altCode) {
+            const norm2 = c.altCode.replace(/^0+/, '');
+            if (norm2) ALL_COURSES_MAP[norm2] = c;
+        }
+    }
     SUGGESTED_MANDATORY_SYLLABUS.forEach(sem => {
-        sem.courses.forEach(c => {
-            ALL_COURSES_MAP[c.code] = c;
-            if (c.altCode) ALL_COURSES_MAP[c.altCode] = c;
-        });
+        (sem.courses || []).forEach(indexCourse);
     });
     Object.keys(ELECTIVE_CATALOG).forEach(catKey => {
-        ELECTIVE_CATALOG[catKey].forEach(c => {
-            ALL_COURSES_MAP[c.code] = c;
-            if (c.altCode) ALL_COURSES_MAP[c.altCode] = c;
-        });
+        (ELECTIVE_CATALOG[catKey] || []).forEach(indexCourse);
     });
 
     // Expose to window / global

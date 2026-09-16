@@ -1,11 +1,15 @@
 // ==========================================================================
 // Degree Planner Module (תכנון תואר אקדמי - גרור ושחרר קורסים וחוקי בחירה)
 // Atlas ME - Technion Faculty of Mechanical Engineering
+// Multi-Pass Audited & Refactored Engine (v1.8.4)
 // ==========================================================================
 
 (function(global) {
     'use strict';
 
+    // --------------------------------------------------------------------------
+    // Module State & Configuration
+    // --------------------------------------------------------------------------
     let currentMode = 'custom'; // 'custom' | 'suggested'
     let selectedCategory = 'ALL'; // 'ALL' | 'A' | 'B' | 'C' | 'D' | 'E' | 'UNASSIGNED'
     let searchQuery = '';
@@ -15,6 +19,77 @@
     // Local Storage Keys
     const PLANNER_STORAGE_KEY_V2 = 'atlas_me_custom_degree_plan_v2';
     const PLANNER_STORAGE_KEY_V1 = 'atlas_me_custom_degree_plan_v1';
+
+    // Purged Courses List (Removed/Exempt for user: English B & Creative Intro)
+    const PURGED_CODES = new Set([
+        '03240033', '324033',
+        '00350026', '035026', '35026',
+        '035044'
+    ]);
+
+    // Active drag tracking object
+    let activeDragPayload = null;
+
+    // Debounce timer for saving state
+    let saveDebounceTimer = null;
+
+    // Search input debounce timer
+    let searchDebounceTimer = null;
+
+    // --------------------------------------------------------------------------
+    // Helper: Code Normalization
+    // --------------------------------------------------------------------------
+    function getNormalizedCodes(code, altCode) {
+        const codes = [];
+        if (code) {
+            const cStr = String(code).trim();
+            codes.push(cStr);
+            const stripped = cStr.replace(/^0+/, '');
+            if (stripped && stripped !== cStr) codes.push(stripped);
+        }
+        if (altCode) {
+            const aStr = String(altCode).trim();
+            codes.push(aStr);
+            const strippedAlt = aStr.replace(/^0+/, '');
+            if (strippedAlt && strippedAlt !== aStr) codes.push(strippedAlt);
+        }
+        return codes;
+    }
+
+    // --------------------------------------------------------------------------
+    // Helpers: Course Completion & Grade Lookup
+    // --------------------------------------------------------------------------
+    function isCourseCompleted(code, altCode) {
+        if (!global.gameState || !global.gameState.courses) return false;
+        const candidateCodes = getNormalizedCodes(code, altCode);
+
+        for (let i = 0; i < candidateCodes.length; i++) {
+            const c = global.gameState.courses[candidateCodes[i]];
+            if (c) {
+                if (c.status === 'mastered') return true;
+                if (c.isBinaryPass === true || c.grade === 'עובר' || c.grade === 'PASS') return true;
+                if (c.grade !== undefined && c.grade !== null && c.grade !== '') {
+                    const num = Number(c.grade);
+                    if (!isNaN(num) && num >= 55) return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    function getCourseGrade(code, altCode) {
+        if (!global.gameState || !global.gameState.courses) return null;
+        const candidateCodes = getNormalizedCodes(code, altCode);
+
+        for (let i = 0; i < candidateCodes.length; i++) {
+            const c = global.gameState.courses[candidateCodes[i]];
+            if (c) {
+                if (c.isBinaryPass === true || c.grade === 'עובר' || c.grade === 'PASS') return 'עובר';
+                if (c.grade !== undefined && c.grade !== null && c.grade !== '') return String(c.grade);
+            }
+        }
+        return null;
+    }
 
     // --------------------------------------------------------------------------
     // State Initialization & Persistence
@@ -54,13 +129,12 @@
             console.error('[Planner] Error parsing saved plan:', e);
         }
 
-        // If still no saved plan, initialize with suggested syllabus
+        // Initialize from official suggested syllabus if empty
         if (!customPlan || !Array.isArray(customPlan) || customPlan.length === 0) {
             resetPlanToSuggested();
         }
 
-        // 1. Purge courses explicitly removed/exempt by user: English B (03240033/324033) & Creative Intro (00350026/035026)
-        const PURGED_CODES = new Set(['03240033', '324033', '00350026', '035026', '35026', '035044']);
+        // 1. Purge removed/exempt courses (English B & Creative Intro)
         if (customPlan) {
             customPlan.forEach(sem => {
                 sem.courses = (sem.courses || []).filter(c => !PURGED_CODES.has(c.code) && !PURGED_CODES.has(c.altCode));
@@ -70,72 +144,133 @@
             unassignedCourses = unassignedCourses.filter(c => !PURGED_CODES.has(c.code) && !PURGED_CODES.has(c.altCode));
         }
 
-        // 2. Clean user exemptions / removed courses:
-        // Ensure courses in unassignedCourses do not appear inside semester columns
+        // 2. Ensure unassigned courses do not appear inside semesters
         if (unassignedCourses && unassignedCourses.length > 0) {
             const unassignedCodes = new Set();
             unassignedCourses.forEach(c => {
-                unassignedCodes.add(c.code);
-                if (c.altCode) unassignedCodes.add(c.altCode);
+                getNormalizedCodes(c.code, c.altCode).forEach(k => unassignedCodes.add(k));
             });
             customPlan.forEach(sem => {
-                sem.courses = (sem.courses || []).filter(c => !unassignedCodes.has(c.code) && !(c.altCode && unassignedCodes.has(c.altCode)));
+                sem.courses = (sem.courses || []).filter(c => {
+                    const cKeys = getNormalizedCodes(c.code, c.altCode);
+                    return !cKeys.some(k => unassignedCodes.has(k));
+                });
             });
         }
 
-        // 3. Automatically synchronize completed courses to their actual completed semester in gameState
-        if (global.gameState && global.gameState.courses && customPlan) {
-            Object.values(global.gameState.courses).forEach(c => {
-                if (c.status === 'mastered' || (c.grade !== undefined && c.grade !== null && c.grade !== '' && Number(c.grade) >= 55) || c.isBinaryPass) {
-                    const actualSem = Number(c.semester);
-                    if (actualSem >= 1 && actualSem <= 8) {
-                        // Find where this completed course is currently placed in customPlan
-                        let foundCourse = null;
-                        customPlan.forEach(sem => {
-                            const idx = (sem.courses || []).findIndex(x => x.code === c.code || x.altCode === c.code || (c.code && (x.code.endsWith(c.code) || c.code.endsWith(x.code))));
-                            if (idx !== -1) {
-                                foundCourse = sem.courses.splice(idx, 1)[0];
-                            }
+        // 3. Synchronize completed courses from gameState into their exact completed semester
+        syncCompletedCoursesFromGameState();
+
+        // 4. Persist clean state
+        saveCustomPlan(true);
+    }
+
+    function syncCompletedCoursesFromGameState() {
+        if (!global.gameState || !global.gameState.courses || !customPlan) return;
+
+        Object.values(global.gameState.courses).forEach(c => {
+            if (!c || !c.code) return;
+            if (PURGED_CODES.has(c.code)) return;
+
+            const isDone = c.status === 'mastered' ||
+                           c.isBinaryPass === true ||
+                           c.grade === 'עובר' ||
+                           c.grade === 'PASS' ||
+                           (c.grade !== undefined && c.grade !== null && c.grade !== '' && Number(c.grade) >= 55);
+
+            if (isDone) {
+                const actualSem = Number(c.semester);
+                if (actualSem >= 1 && actualSem <= 8) {
+                    const cKeys = new Set(getNormalizedCodes(c.code, c.altCode));
+
+                    // Remove from unassigned if present
+                    unassignedCourses = unassignedCourses.filter(u => {
+                        const uKeys = getNormalizedCodes(u.code, u.altCode);
+                        return !uKeys.some(k => cKeys.has(k));
+                    });
+
+                    // Check if already in customPlan
+                    let foundCourse = null;
+                    customPlan.forEach(sem => {
+                        const idx = (sem.courses || []).findIndex(x => {
+                            const xKeys = getNormalizedCodes(x.code, x.altCode);
+                            return xKeys.some(k => cKeys.has(k));
                         });
-                        if (foundCourse) {
-                            const targetSemObj = customPlan.find(s => s.semester === actualSem);
-                            if (targetSemObj) {
-                                targetSemObj.courses = targetSemObj.courses || [];
-                                targetSemObj.courses.push(foundCourse);
-                            }
+                        if (idx !== -1) {
+                            foundCourse = sem.courses.splice(idx, 1)[0];
+                        }
+                    });
+
+                    // If not found in customPlan, reconstruct from catalog or gameState
+                    if (!foundCourse) {
+                        const catCourse = global.PLANNER_CATALOG.ALL_COURSES_MAP[c.code] ||
+                                          (c.altCode && global.PLANNER_CATALOG.ALL_COURSES_MAP[c.altCode]);
+                        if (catCourse) {
+                            foundCourse = { ...catCourse };
+                        } else {
+                            foundCourse = {
+                                code: c.code,
+                                altCode: c.altCode || '',
+                                name: c.name || c.title || c.code,
+                                credits: Number(c.credits) || 3.0,
+                                type: c.type || 'elective',
+                                prereqs: c.prerequisites || []
+                            };
                         }
                     }
-                }
-            });
-        }
 
-        saveCustomPlan();
+                    // Place in correct semester
+                    const targetSemObj = customPlan.find(s => s.semester === actualSem);
+                    if (targetSemObj) {
+                        targetSemObj.courses = targetSemObj.courses || [];
+                        targetSemObj.courses.push(foundCourse);
+                    }
+                }
+            }
+        });
     }
 
     function resetPlanToSuggested() {
         if (!global.PLANNER_CATALOG) return;
         customPlan = JSON.parse(JSON.stringify(global.PLANNER_CATALOG.SUGGESTED_MANDATORY_SYLLABUS));
         unassignedCourses = [];
-        saveCustomPlan();
+        syncCompletedCoursesFromGameState();
+        saveCustomPlan(true);
     }
 
-    function saveCustomPlan() {
+    function saveCustomPlan(immediate = false) {
         if (!customPlan) return;
-        try {
-            const dataToSave = {
-                semesters: customPlan,
-                unassigned: unassignedCourses
-            };
-            localStorage.setItem(PLANNER_STORAGE_KEY_V2, JSON.stringify(dataToSave));
-            // Backwards-compatible legacy key
-            localStorage.setItem(PLANNER_STORAGE_KEY_V1, JSON.stringify(customPlan));
 
-            if (global.gameState) {
-                global.gameState.degreePlan = customPlan;
-                global.gameState.degreePlanUnassigned = unassignedCourses;
+        const performSave = () => {
+            try {
+                const dataToSave = {
+                    semesters: customPlan,
+                    unassigned: unassignedCourses
+                };
+                const jsonStr = JSON.stringify(dataToSave);
+                localStorage.setItem(PLANNER_STORAGE_KEY_V2, jsonStr);
+                localStorage.setItem(PLANNER_STORAGE_KEY_V1, JSON.stringify(customPlan));
+
+                if (global.gameState) {
+                    global.gameState.degreePlan = customPlan;
+                    global.gameState.degreePlanUnassigned = unassignedCourses;
+                }
+
+                // Notify other components (HUD, Timetable, Flowchart) of state change
+                if (typeof global.notifyStateChanged === 'function') {
+                    global.notifyStateChanged({ source: 'planner' });
+                }
+            } catch (e) {
+                console.error('[Planner] Failed to save plan:', e);
             }
-        } catch (e) {
-            console.error('[Planner] Failed to save plan:', e);
+        };
+
+        if (immediate) {
+            if (saveDebounceTimer) clearTimeout(saveDebounceTimer);
+            performSave();
+        } else {
+            if (saveDebounceTimer) clearTimeout(saveDebounceTimer);
+            saveDebounceTimer = setTimeout(performSave, 200);
         }
     }
 
@@ -146,47 +281,19 @@
         return customPlan || global.PLANNER_CATALOG.SUGGESTED_MANDATORY_SYLLABUS;
     }
 
-    // --------------------------------------------------------------------------
-    // Helpers: Course Completion & Semester Mapping
-    // --------------------------------------------------------------------------
-    function isCourseCompleted(code, altCode) {
-        if (!global.gameState || !global.gameState.courses) return false;
-        const c1 = global.gameState.courses[code];
-        const c2 = altCode ? global.gameState.courses[altCode] : null;
-        const check = (c) => {
-            if (!c) return false;
-            if (c.status === 'mastered') return true;
-            if (c.isBinaryPass === true || c.grade === 'עובר' || c.grade === 'PASS') return true;
-            if (c.grade !== undefined && c.grade !== null && c.grade !== '' && Number(c.grade) >= 55) return true;
-            return false;
-        };
-        return check(c1) || check(c2);
-    }
-
-    function getCourseGrade(code, altCode) {
-        if (!global.gameState || !global.gameState.courses) return null;
-        const c1 = global.gameState.courses[code];
-        const c2 = altCode ? global.gameState.courses[altCode] : null;
-        const c = c1 || c2;
-        if (!c) return null;
-        if (c.isBinaryPass === true || c.grade === 'עובר' || c.grade === 'PASS') return 'עובר';
-        if (c.grade !== undefined && c.grade !== null && c.grade !== '') return String(c.grade);
-        return null;
-    }
-
     function buildCourseSemesterMap(plan) {
         const map = {};
         plan.forEach(sem => {
             (sem.courses || []).forEach(c => {
-                map[c.code] = sem.semester;
-                if (c.altCode) map[c.altCode] = sem.semester;
+                const keys = getNormalizedCodes(c.code, c.altCode);
+                keys.forEach(k => { map[k] = sem.semester; });
             });
         });
         return map;
     }
 
     // --------------------------------------------------------------------------
-    // Prerequisite Engine & Visual Highlighting
+    // Prerequisite Engine & Visual Feedback
     // --------------------------------------------------------------------------
     function checkPrerequisites(course, semesterNum, courseSemMap) {
         if (!course.prereqs || course.prereqs.length === 0) {
@@ -200,14 +307,18 @@
             const prereqCourse = global.PLANNER_CATALOG.ALL_COURSES_MAP[prereqCode];
             const alt = prereqCourse ? prereqCourse.altCode : null;
 
-            // Check 1: Already completed in gameState
+            // Check 1: Already completed in student transcript
             if (isCourseCompleted(prereqCode, alt)) {
-                return; // Prereq satisfied!
+                return;
             }
 
-            // Check 2: Planned in a semester strictly earlier than semesterNum
+            // Check 2: Scheduled in a semester strictly prior to semesterNum
             let pSem = courseSemMap[prereqCode];
             if (pSem === undefined && alt) pSem = courseSemMap[alt];
+            if (pSem === undefined) {
+                const stripped = prereqCode.replace(/^0+/, '');
+                if (stripped) pSem = courseSemMap[stripped];
+            }
 
             const name = prereqCourse ? prereqCourse.name : prereqCode;
             if (pSem === undefined) {
@@ -231,12 +342,12 @@
     function highlightMissingPrerequisites(missingCodes, reasonMsg, targetSemester) {
         showPlannerToast(reasonMsg, true);
 
-        // Shake the target semester column to immediately indicate rejection
+        // Shake the target semester column to provide immediate visceral feedback
         if (targetSemester) {
             const semCol = document.querySelector(`.planner-semester-col[data-semester="${targetSemester}"]`);
             if (semCol) {
                 semCol.classList.remove('semester-col-shake');
-                void semCol.offsetWidth; // force reflow
+                void semCol.offsetWidth; // Force CSS reflow
                 semCol.classList.add('semester-col-shake');
                 setTimeout(() => {
                     if (semCol) semCol.classList.remove('semester-col-shake');
@@ -244,6 +355,7 @@
             }
         }
 
+        // Pulse prerequisite beacon cards
         const highlightedEls = [];
         (missingCodes || []).forEach(code => {
             const selector = `[data-code="${code}"], [data-alt-code="${code}"]`;
@@ -277,10 +389,10 @@
         }
 
         toast.innerHTML = `
-            <span style="font-size: 1.4rem; line-height: 1;">${isError ? '⛔' : 'ℹ️'}</span>
+            <span style="font-size: 1.35rem; line-height: 1;">${isError ? '⛔' : 'ℹ️'}</span>
             <div style="display: flex; flex-direction: column; gap: 2px;">
-                <strong style="font-size: 0.92rem; color: ${isError ? '#f87171' : '#38bdf8'};">${isError ? 'חסימת דרישות קדם' : 'הודעת מערכת'}</strong>
-                <span style="font-size: 0.82rem; color: #f1f5f9; line-height: 1.35;">${message}</span>
+                <strong style="font-size: 0.90rem; color: ${isError ? '#f87171' : '#38bdf8'};">${isError ? 'חסימת דרישות קדם' : 'הודעת מערכת'}</strong>
+                <span style="font-size: 0.80rem; color: #f1f5f9; line-height: 1.35;">${escapeHtml(message)}</span>
             </div>
         `;
         toast.style.display = 'flex';
@@ -301,7 +413,19 @@
         }, 5000);
     }
 
-    // Evaluate degree rules
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
+    // --------------------------------------------------------------------------
+    // Degree Rules Engine
+    // --------------------------------------------------------------------------
     function evaluateDegreeRules(plan) {
         let countA = 0;
         let countB = 0;
@@ -355,20 +479,24 @@
         };
     }
 
-    // Render the complete Degree Planner view
+    // --------------------------------------------------------------------------
+    // Rendering Sub-systems
+    // --------------------------------------------------------------------------
     function renderDegreePlanner() {
         initPlannerState();
         if (!global.PLANNER_CATALOG) return;
 
-        const plan = getActivePlan();
-        const courseSemMap = buildCourseSemesterMap(plan);
-        const rulesEval = evaluateDegreeRules(plan);
+        requestAnimationFrame(() => {
+            const plan = getActivePlan();
+            const courseSemMap = buildCourseSemesterMap(plan);
+            const rulesEval = evaluateDegreeRules(plan);
 
-        renderHeaderStats(rulesEval);
-        renderSemesterColumns(plan, courseSemMap);
-        renderRulesCard(rulesEval);
-        renderAddElectivesSection(plan, courseSemMap);
-        bindPlannerEvents();
+            renderHeaderStats(rulesEval);
+            renderSemesterColumns(plan, courseSemMap);
+            renderRulesCard(rulesEval);
+            renderAddElectivesSection(plan, courseSemMap);
+            bindDelegatedPlannerEvents();
+        });
     }
 
     function renderHeaderStats(rulesEval) {
@@ -384,7 +512,6 @@
             electivesCredsEl.style.color = rulesEval.ruleTotalElectives_met ? '#10b981' : '#38bdf8';
         }
 
-        // Update active mode buttons
         const btnCustom = document.getElementById('btn-planner-mode-custom');
         const btnSuggested = document.getElementById('btn-planner-mode-suggested');
         if (btnCustom) btnCustom.classList.toggle('active', currentMode === 'custom');
@@ -395,20 +522,20 @@
         const container = document.getElementById('planner-semesters-container');
         if (!container) return;
 
-        let html = '';
+        const chunks = [];
         plan.forEach((sem, idx) => {
             const semNum = sem.semester || (idx + 1);
             let semCredits = 0;
             (sem.courses || []).forEach(c => { semCredits += Number(c.credits) || 0; });
 
-            html += `
+            chunks.push(`
                 <div class="planner-semester-col" data-semester="${semNum}">
                     <div class="semester-col-header">
                         <span class="semester-col-title">סמסטר ${semNum}</span>
                         <span class="semester-col-credits">${semCredits.toFixed(1)} נק״ז</span>
                     </div>
                     <div class="planner-course-list" data-semester="${semNum}">
-            `;
+            `);
 
             (sem.courses || []).forEach(course => {
                 const completed = isCourseCompleted(course.code, course.altCode);
@@ -421,44 +548,43 @@
                 const canDrag = currentMode === 'custom' && !completed;
                 const canRemove = currentMode === 'custom' && !completed;
 
-                html += `
+                chunks.push(`
                     <div class="planner-course-card ${completed ? 'course-card-completed' : ''}" 
                          draggable="${canDrag ? 'true' : 'false'}" 
-                         data-code="${course.code}" 
-                         data-alt-code="${course.altCode || ''}" 
+                         data-code="${escapeHtml(course.code)}" 
+                         data-alt-code="${escapeHtml(course.altCode || '')}" 
                          data-semester="${semNum}">
                         <div class="course-card-top">
-                            <span class="course-card-code">${course.code}</span>
+                            <span class="course-card-code">${escapeHtml(course.code)}</span>
                             <span class="course-card-tag ${tagClass}">${tagLabel}</span>
                         </div>
-                        <div class="course-card-title">${course.name}</div>
+                        <div class="course-card-title">${escapeHtml(course.name)}</div>
                         <div class="course-card-bottom">
                             <span class="course-card-credits">${course.credits} נק״ז</span>
                             <div class="course-card-actions">
                                 ${!completed && !prereqStatus.valid ? `
-                                    <span class="prereq-warning-pill" title="דרישות קדם חסרות: ${prereqStatus.missing.join(', ')}">
+                                    <span class="prereq-warning-pill" title="דרישות קדם חסרות: ${escapeHtml(prereqStatus.missing.join(', '))}">
                                         ⚠️ קדם
                                     </span>
                                 ` : ''}
                                 ${canRemove ? `
-                                    <button type="button" class="btn-card-remove" data-code="${course.code}" data-semester="${semNum}" title="הסר קורס זה מהתכנון והעבר לרשימת הקורסים שלא שובצו">
+                                    <button type="button" class="btn-card-remove" data-code="${escapeHtml(course.code)}" data-semester="${semNum}" title="הסר קורס זה מהתכנון והעבר לרשימת הקורסים שלא שובצו">
                                         ✕
                                     </button>
                                 ` : ''}
                             </div>
                         </div>
                     </div>
-                `;
+                `);
             });
 
-            html += `
+            chunks.push(`
                     </div>
                 </div>
-            `;
+            `);
         });
 
-        container.innerHTML = html;
-        setupDragAndDrop();
+        container.innerHTML = chunks.join('');
     }
 
     function renderRulesCard(rulesEval) {
@@ -483,20 +609,6 @@
             summaryBadge.innerText = `${rulesEval.totalElectiveCredits.toFixed(1)} / 32.5 נק״ז ${rulesEval.ruleTotalElectives_met ? '✅' : '⏳'}`;
             summaryBadge.style.color = rulesEval.ruleTotalElectives_met ? '#10b981' : '#38bdf8';
         }
-
-        const rulesToggle = document.getElementById('planner-rules-toggle');
-        if (rulesToggle && !rulesToggle._bound) {
-            rulesToggle._bound = true;
-            rulesToggle.addEventListener('click', () => {
-                const body = document.getElementById('planner-rules-body');
-                const icon = document.getElementById('planner-rules-toggle-icon');
-                if (body) {
-                    const isCollapsed = body.classList.toggle('collapsed');
-                    body.style.display = isCollapsed ? 'none' : 'flex';
-                    if (icon) icon.style.transform = isCollapsed ? 'rotate(-90deg)' : 'rotate(0deg)';
-                }
-            });
-        }
     }
 
     function renderAddElectivesSection(plan, courseSemMap) {
@@ -504,25 +616,26 @@
         const placedCodes = new Set();
         plan.forEach(sem => {
             (sem.courses || []).forEach(c => {
-                placedCodes.add(c.code);
-                if (c.altCode) placedCodes.add(c.altCode);
+                getNormalizedCodes(c.code, c.altCode).forEach(k => placedCodes.add(k));
             });
         });
 
-        // 2. Compute "Ready For You" (electives whose prereqs are satisfied, and not yet placed or completed)
+        // 2. Compute "Ready For You" electives
         const readyContainer = document.getElementById('planner-ready-electives-list');
         const readyCourses = [];
 
         ['A', 'B', 'C', 'D', 'E'].forEach(cat => {
             (global.PLANNER_CATALOG.ELECTIVE_CATALOG[cat] || []).forEach(course => {
-                if (placedCodes.has(course.code) || (course.altCode && placedCodes.has(course.altCode))) return;
+                const keys = getNormalizedCodes(course.code, course.altCode);
+                if (keys.some(k => placedCodes.has(k))) return;
                 if (isCourseCompleted(course.code, course.altCode)) return;
 
                 const reqs = course.prereqs || [];
                 const satisfied = reqs.every(req => {
                     const prereqCourse = global.PLANNER_CATALOG.ALL_COURSES_MAP[req];
                     const alt = prereqCourse ? prereqCourse.altCode : null;
-                    return isCourseCompleted(req, alt) || courseSemMap[req] !== undefined || (alt && courseSemMap[alt] !== undefined);
+                    const rKeys = getNormalizedCodes(req, alt);
+                    return isCourseCompleted(req, alt) || rKeys.some(k => courseSemMap[k] !== undefined);
                 });
 
                 if (satisfied && reqs.length > 0) {
@@ -536,66 +649,60 @@
                 readyContainer.innerHTML = '<div style="font-size: 0.72rem; color: #94a3b8; padding: 4px;">קורסי החובה המשובצים עדיין אינם פותחים קורסי בחירה מתקדמים.</div>';
             } else {
                 readyContainer.innerHTML = readyCourses.slice(0, 6).map(course => `
-                    <div class="planner-pool-item" draggable="true" data-code="${course.code}" data-alt-code="${course.altCode || ''}">
+                    <div class="planner-pool-item" draggable="true" data-code="${escapeHtml(course.code)}" data-alt-code="${escapeHtml(course.altCode || '')}">
                         <div class="pool-item-info">
-                            <span class="pool-item-title">${course.name}</span>
+                            <span class="pool-item-title">${escapeHtml(course.name)}</span>
                             <div class="pool-item-meta">
                                 <span class="course-card-tag tag-list-${course.list}">רשימה ${course.list}׳</span>
                                 <span>${course.credits} נק״ז</span>
                             </div>
                         </div>
-                        <button type="button" class="btn-add-to-plan" data-code="${course.code}" title="הוסף קורס זה לסמסטר">+</button>
+                        <button type="button" class="btn-add-to-plan" data-code="${escapeHtml(course.code)}" title="הוסף קורס זה לסמסטר">+</button>
                     </div>
                 `).join('');
             }
         }
 
-        // 3. Render Available Pool based on filter & search
+        // 3. Render Filtered Pool
         const poolContainer = document.getElementById('planner-available-electives-list');
         if (!poolContainer) return;
 
-        let coursesToShow = [];
+        const coursesToShow = [];
+        const q = searchQuery.toLowerCase();
+
+        const matchesSearch = (course) => {
+            if (!q) return true;
+            const matchName = (course.name || '').toLowerCase().includes(q);
+            const matchCode = (course.code || '').includes(q) || (course.altCode && course.altCode.includes(q));
+            return matchName || matchCode;
+        };
 
         if (selectedCategory === 'UNASSIGNED') {
-            // Show only unassigned courses that are not placed in plan
             (unassignedCourses || []).forEach(course => {
-                if (placedCodes.has(course.code) || (course.altCode && placedCodes.has(course.altCode))) return;
+                const keys = getNormalizedCodes(course.code, course.altCode);
+                if (keys.some(k => placedCodes.has(k))) return;
                 if (isCourseCompleted(course.code, course.altCode)) return;
-                if (searchQuery) {
-                    const q = searchQuery.toLowerCase();
-                    const matchName = (course.name || '').toLowerCase().includes(q);
-                    const matchCode = (course.code || '').includes(q) || (course.altCode && course.altCode.includes(q));
-                    if (!matchName && !matchCode) return;
-                }
-                coursesToShow.push(Object.assign({}, course, { isUnassignedItem: true }));
+                if (!matchesSearch(course)) return;
+                coursesToShow.push({ ...course, isUnassignedItem: true });
             });
         } else {
-            // First, if ALL, include any unassigned courses
             if (selectedCategory === 'ALL') {
                 (unassignedCourses || []).forEach(course => {
-                    if (placedCodes.has(course.code) || (course.altCode && placedCodes.has(course.altCode))) return;
+                    const keys = getNormalizedCodes(course.code, course.altCode);
+                    if (keys.some(k => placedCodes.has(k))) return;
                     if (isCourseCompleted(course.code, course.altCode)) return;
-                    if (searchQuery) {
-                        const q = searchQuery.toLowerCase();
-                        const matchName = (course.name || '').toLowerCase().includes(q);
-                        const matchCode = (course.code || '').includes(q) || (course.altCode && course.altCode.includes(q));
-                        if (!matchName && !matchCode) return;
-                    }
-                    coursesToShow.push(Object.assign({}, course, { isUnassignedItem: true }));
+                    if (!matchesSearch(course)) return;
+                    coursesToShow.push({ ...course, isUnassignedItem: true });
                 });
             }
 
             const cats = selectedCategory === 'ALL' ? ['A', 'B', 'C', 'D', 'E'] : [selectedCategory];
             cats.forEach(cat => {
                 (global.PLANNER_CATALOG.ELECTIVE_CATALOG[cat] || []).forEach(course => {
-                    if (placedCodes.has(course.code) || (course.altCode && placedCodes.has(course.altCode))) return;
+                    const keys = getNormalizedCodes(course.code, course.altCode);
+                    if (keys.some(k => placedCodes.has(k))) return;
                     if (isCourseCompleted(course.code, course.altCode)) return;
-                    if (searchQuery) {
-                        const q = searchQuery.toLowerCase();
-                        const matchName = (course.name || '').toLowerCase().includes(q);
-                        const matchCode = (course.code || '').includes(q) || (course.altCode && course.altCode.includes(q));
-                        if (!matchName && !matchCode) return;
-                    }
+                    if (!matchesSearch(course)) return;
                     coursesToShow.push(course);
                 });
             });
@@ -616,16 +723,16 @@
                     : (course.list ? `רשימה ${course.list}׳` : 'חובה');
 
                 return `
-                    <div class="planner-pool-item" draggable="true" data-code="${course.code}" data-alt-code="${course.altCode || ''}">
+                    <div class="planner-pool-item" draggable="true" data-code="${escapeHtml(course.code)}" data-alt-code="${escapeHtml(course.altCode || '')}">
                         <div class="pool-item-info">
-                            <span class="pool-item-title">${course.name}</span>
+                            <span class="pool-item-title">${escapeHtml(course.name)}</span>
                             <div class="pool-item-meta">
                                 <span class="course-card-tag ${tagClass}">${tagLabel}</span>
-                                <span>${course.code}</span>
+                                <span>${escapeHtml(course.code)}</span>
                                 <span>• ${course.credits} נק״ז</span>
                             </div>
                         </div>
-                        <button type="button" class="btn-add-to-plan" data-code="${course.code}" title="הוסף קורס זה לסמסטר">+</button>
+                        <button type="button" class="btn-add-to-plan" data-code="${escapeHtml(course.code)}" title="הוסף קורס זה לסמסטר">+</button>
                     </div>
                 `;
             }).join('');
@@ -633,246 +740,122 @@
     }
 
     // --------------------------------------------------------------------------
-    // Drag & Drop Engine (With Prerequisite Blocking & Sidebar Drop Zone)
+    // Event Delegation Architecture (Zero memory leaks, robust lifecycle)
     // --------------------------------------------------------------------------
-    function setupDragAndDrop() {
-        if (currentMode !== 'custom') return;
+    let isEventsBound = false;
 
-        // 1. Draggable cards inside semesters (only non-completed!)
-        const semesterCards = document.querySelectorAll('.planner-course-card[draggable="true"]');
-        semesterCards.forEach(card => {
-            card.addEventListener('dragstart', (e) => {
+    function bindDelegatedPlannerEvents() {
+        if (isEventsBound) return;
+        isEventsBound = true;
+
+        const plannerTab = document.getElementById('planner-workspace');
+        if (!plannerTab) return;
+
+        // 1. Drag Start Delegation
+        plannerTab.addEventListener('dragstart', (e) => {
+            const card = e.target.closest('[draggable="true"]');
+            if (!card) return;
+
+            if (card.classList.contains('planner-course-card')) {
                 const code = card.getAttribute('data-code');
-                const sem = card.getAttribute('data-semester');
-                e.dataTransfer.setData('text/plain', JSON.stringify({
+                const sem = parseInt(card.getAttribute('data-semester'));
+                activeDragPayload = {
                     type: 'semester-course',
                     code: code,
-                    sourceSemester: parseInt(sem)
-                }));
-                card.classList.add('dragging');
-            });
-
-            card.addEventListener('dragend', () => {
-                card.classList.remove('dragging');
-            });
-        });
-
-        // 2. Draggable cards in electives & unassigned pool
-        const poolItems = document.querySelectorAll('.planner-pool-item[draggable="true"]');
-        poolItems.forEach(item => {
-            item.addEventListener('dragstart', (e) => {
-                const code = item.getAttribute('data-code');
-                e.dataTransfer.setData('text/plain', JSON.stringify({
+                    sourceSemester: sem
+                };
+            } else if (card.classList.contains('planner-pool-item')) {
+                const code = card.getAttribute('data-code');
+                activeDragPayload = {
                     type: 'pool-elective',
                     code: code
-                }));
-                item.classList.add('dragging');
-            });
+                };
+            }
 
-            item.addEventListener('dragend', () => {
-                item.classList.remove('dragging');
-            });
+            e.dataTransfer.setData('text/plain', JSON.stringify(activeDragPayload));
+            card.classList.add('dragging');
         });
 
-        // 3. Drop zones on semester lists (Adds / Moves course)
-        const semesterDropZones = document.querySelectorAll('.planner-course-list');
-        semesterDropZones.forEach(zone => {
-            zone.addEventListener('dragover', (e) => {
-                e.preventDefault();
-                zone.classList.add('drag-over');
-            });
-
-            zone.addEventListener('dragleave', () => {
-                zone.classList.remove('drag-over');
-            });
-
-            zone.addEventListener('drop', (e) => {
-                e.preventDefault();
-                zone.classList.remove('drag-over');
-
-                const rawData = e.dataTransfer.getData('text/plain');
-                if (!rawData) return;
-
-                let data;
-                try { data = JSON.parse(rawData); } catch (err) { return; }
-
-                const targetSemester = parseInt(zone.getAttribute('data-semester'));
-                handleCourseDrop(data, targetSemester);
-            });
+        // 2. Drag End Delegation
+        plannerTab.addEventListener('dragend', (e) => {
+            const card = e.target.closest('[draggable="true"]');
+            if (card) card.classList.remove('dragging');
+            activeDragPayload = null;
+            document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
         });
 
-        // 4. Drop zones on Sidebar / Unassigned Banner (Removes course to pool)
-        const sidebarDropTargets = [
-            document.getElementById('planner-unassigned-dropzone'),
-            document.getElementById('planner-available-electives-list'),
-            document.querySelector('.planner-sidebar')
-        ].filter(Boolean);
-
-        sidebarDropTargets.forEach(target => {
-            if (target._boundDrop) return;
-            target._boundDrop = true;
-
-            target.addEventListener('dragover', (e) => {
+        // 3. Drag Over & Drag Leave Delegation
+        plannerTab.addEventListener('dragover', (e) => {
+            const dropZone = e.target.closest('.planner-course-list, .planner-sidebar, #planner-unassigned-dropzone');
+            if (dropZone) {
                 e.preventDefault();
-                target.classList.add('drag-over');
-            });
-
-            target.addEventListener('dragleave', () => {
-                target.classList.remove('drag-over');
-            });
-
-            target.addEventListener('drop', (e) => {
-                e.preventDefault();
-                target.classList.remove('drag-over');
-
-                const rawData = e.dataTransfer.getData('text/plain');
-                if (!rawData) return;
-
-                let data;
-                try { data = JSON.parse(rawData); } catch (err) { return; }
-
-                handleSidebarDrop(data);
-            });
+                dropZone.classList.add('drag-over');
+            }
         });
-    }
 
-    // Handle course placement into a semester (Strict prerequisite enforcement!)
-    function handleCourseDrop(data, targetSemester) {
-        if (!customPlan) return;
+        plannerTab.addEventListener('dragleave', (e) => {
+            const dropZone = e.target.closest('.planner-course-list, .planner-sidebar, #planner-unassigned-dropzone');
+            if (dropZone && !dropZone.contains(e.relatedTarget)) {
+                dropZone.classList.remove('drag-over');
+            }
+        });
 
-        const targetSemObj = customPlan.find(s => s.semester === targetSemester);
-        if (!targetSemObj) return;
+        // 4. Drop Delegation
+        plannerTab.addEventListener('drop', (e) => {
+            const semZone = e.target.closest('.planner-course-list');
+            const sidebarZone = e.target.closest('.planner-sidebar, #planner-unassigned-dropzone');
 
-        let courseObj = null;
-        let sourceSemester = null;
+            let payload = activeDragPayload;
+            if (!payload) {
+                try {
+                    const raw = e.dataTransfer.getData('text/plain');
+                    if (raw) payload = JSON.parse(raw);
+                } catch (err) {
+                    return;
+                }
+            }
+            if (!payload) return;
 
-        if (data.type === 'semester-course') {
-            sourceSemester = data.sourceSemester;
-            if (sourceSemester === targetSemester) return; // Same semester
+            if (semZone) {
+                e.preventDefault();
+                e.stopPropagation();
+                semZone.classList.remove('drag-over');
+                const targetSemester = parseInt(semZone.getAttribute('data-semester'));
+                handleCourseDrop(payload, targetSemester);
+            } else if (sidebarZone && payload.type === 'semester-course') {
+                e.preventDefault();
+                e.stopPropagation();
+                sidebarZone.classList.remove('drag-over');
+                handleSidebarDrop(payload);
+            }
+        });
 
-            const sourceSemObj = customPlan.find(s => s.semester === sourceSemester);
-            if (!sourceSemObj) return;
-
-            const courseIdx = (sourceSemObj.courses || []).findIndex(c => c.code === data.code || c.altCode === data.code);
-            if (courseIdx === -1) return;
-            courseObj = sourceSemObj.courses[courseIdx];
-
-            if (isCourseCompleted(courseObj.code, courseObj.altCode)) {
-                showPlannerToast(`הקורס "${courseObj.name}" כבר הושלם ואינו ניתן להזזה.`);
+        // 5. Global Click Delegation inside Planner
+        plannerTab.addEventListener('click', (e) => {
+            // Mode buttons
+            const modeBtn = e.target.closest('#btn-planner-mode-custom, #btn-planner-mode-suggested');
+            if (modeBtn) {
+                currentMode = modeBtn.id === 'btn-planner-mode-custom' ? 'custom' : 'suggested';
+                renderDegreePlanner();
                 return;
             }
 
-        } else if (data.type === 'pool-elective' || data.type === 'unassigned-course') {
-            courseObj = (unassignedCourses || []).find(c => c.code === data.code || c.altCode === data.code)
-                        || (global.PLANNER_CATALOG.ALL_COURSES_MAP && global.PLANNER_CATALOG.ALL_COURSES_MAP[data.code]);
-            if (!courseObj) return;
-
-            if (isCourseCompleted(courseObj.code, courseObj.altCode)) {
-                showPlannerToast(`הקורס "${courseObj.name}" כבר הושלם ואינו ניתן לשיבוץ חוזר.`);
+            // Rules toggle collapse
+            const rulesToggle = e.target.closest('#planner-rules-toggle');
+            if (rulesToggle) {
+                const body = document.getElementById('planner-rules-body');
+                const icon = document.getElementById('planner-rules-toggle-icon');
+                if (body) {
+                    const isCollapsed = body.classList.toggle('collapsed');
+                    body.style.display = isCollapsed ? 'none' : 'flex';
+                    if (icon) icon.style.transform = isCollapsed ? 'rotate(-90deg)' : 'rotate(0deg)';
+                }
                 return;
             }
 
-            // Check if already placed
-            const alreadyInPlan = customPlan.some(s => (s.courses || []).some(c => c.code === data.code || c.altCode === data.code));
-            if (alreadyInPlan) return;
-        }
-
-        if (!courseObj) return;
-
-        // Build temporary course-to-semester map without the moving course
-        const activeCourseMap = buildCourseSemesterMap(customPlan);
-        if (sourceSemester !== null) {
-            delete activeCourseMap[courseObj.code];
-            if (courseObj.altCode) delete activeCourseMap[courseObj.altCode];
-        }
-
-        // === STRICT PREREQUISITE VALIDATION ===
-        const prereqStatus = checkPrerequisites(courseObj, targetSemester, activeCourseMap);
-        if (!prereqStatus.valid) {
-            highlightMissingPrerequisites(
-                prereqStatus.missingCodes,
-                `לא ניתן לשבץ את "${courseObj.name}" בסמסטר ${targetSemester}: חסרים קדמים בסמסטרים קודמים! (${prereqStatus.missing.join(', ')})`,
-                targetSemester
-            );
-            return; // REJECT PLACEMENT!
-        }
-
-        // Prerequisite passed: proceed with placement
-        if (data.type === 'semester-course') {
-            const sourceSemObj = customPlan.find(s => s.semester === sourceSemester);
-            const courseIdx = (sourceSemObj.courses || []).findIndex(c => c.code === data.code || c.altCode === data.code);
-            if (courseIdx !== -1) {
-                const [moved] = sourceSemObj.courses.splice(courseIdx, 1);
-                if (!targetSemObj.courses) targetSemObj.courses = [];
-                targetSemObj.courses.push(moved);
-            }
-        } else {
-            if (!targetSemObj.courses) targetSemObj.courses = [];
-            targetSemObj.courses.push(JSON.parse(JSON.stringify(courseObj)));
-            unassignedCourses = unassignedCourses.filter(c => c.code !== data.code && c.altCode !== data.code);
-        }
-
-        saveCustomPlan();
-        renderDegreePlanner();
-    }
-
-    // Handle course removal to the sidebar / unassigned pool
-    function handleSidebarDrop(data) {
-        if (!customPlan) return;
-        if (data.type !== 'semester-course') return;
-
-        const sourceSemester = data.sourceSemester;
-        const sourceSemObj = customPlan.find(s => s.semester === sourceSemester);
-        if (!sourceSemObj) return;
-
-        const courseIdx = (sourceSemObj.courses || []).findIndex(c => c.code === data.code || c.altCode === data.code);
-        if (courseIdx === -1) return;
-
-        const course = sourceSemObj.courses[courseIdx];
-        if (isCourseCompleted(course.code, course.altCode)) {
-            showPlannerToast(`הקורס "${course.name}" כבר הושלם ואינו ניתן להסרה.`);
-            return;
-        }
-
-        const [removedCourse] = sourceSemObj.courses.splice(courseIdx, 1);
-        if (!unassignedCourses.some(c => c.code === removedCourse.code || (removedCourse.altCode && c.code === removedCourse.altCode))) {
-            unassignedCourses.push(removedCourse);
-        }
-
-        saveCustomPlan();
-        renderDegreePlanner();
-        showPlannerToast(`הקורס "${removedCourse.name}" הוסר מהתכנון והועבר לרשימת הקורסים שלא שובצו.`);
-    }
-
-    // --------------------------------------------------------------------------
-    // Event Listeners for Controls
-    // --------------------------------------------------------------------------
-    function bindPlannerEvents() {
-        // Mode Switchers
-        const btnCustom = document.getElementById('btn-planner-mode-custom');
-        const btnSuggested = document.getElementById('btn-planner-mode-suggested');
-
-        if (btnCustom && !btnCustom._bound) {
-            btnCustom._bound = true;
-            btnCustom.addEventListener('click', () => {
-                currentMode = 'custom';
-                renderDegreePlanner();
-            });
-        }
-
-        if (btnSuggested && !btnSuggested._bound) {
-            btnSuggested._bound = true;
-            btnSuggested.addEventListener('click', () => {
-                currentMode = 'suggested';
-                renderDegreePlanner();
-            });
-        }
-
-        // Add Semester Button
-        const btnAddSemester = document.getElementById('btn-planner-add-semester');
-        if (btnAddSemester && !btnAddSemester._bound) {
-            btnAddSemester._bound = true;
-            btnAddSemester.addEventListener('click', () => {
+            // Add Semester Button
+            const addSemBtn = e.target.closest('#btn-planner-add-semester');
+            if (addSemBtn) {
                 if (!customPlan) initPlannerState();
                 const nextSemNum = customPlan.length + 1;
                 customPlan.push({
@@ -884,147 +867,305 @@
                 currentMode = 'custom';
                 saveCustomPlan();
                 renderDegreePlanner();
-            });
-        }
+                return;
+            }
 
-        // Reset to Suggested Button
-        const btnReset = document.getElementById('btn-planner-reset-suggested');
-        if (btnReset && !btnReset._bound) {
-            btnReset._bound = true;
-            btnReset.addEventListener('click', () => {
+            // Reset to Suggested Button
+            const resetBtn = e.target.closest('#btn-planner-reset-suggested');
+            if (resetBtn) {
                 if (confirm('האם אתה בטוח שברצונך לאפס את התוכנית לשיבוץ המומלץ הרשמי של הפקולטה?')) {
                     resetPlanToSuggested();
                     currentMode = 'custom';
                     renderDegreePlanner();
                 }
-            });
-        }
+                return;
+            }
 
-        // Master Save Button
-        const btnSave = document.getElementById('btn-planner-save');
-        if (btnSave && !btnSave._bound) {
-            btnSave._bound = true;
-            btnSave.addEventListener('click', () => {
-                saveCustomPlan();
-                const oldHtml = btnSave.innerHTML;
-                btnSave.innerHTML = '<span>✅ נשמר בהצלחה!</span>';
-                btnSave.style.background = '#059669';
+            // Manual Save Button
+            const saveBtn = e.target.closest('#btn-planner-save');
+            if (saveBtn) {
+                saveCustomPlan(true);
+                const oldHtml = saveBtn.innerHTML;
+                saveBtn.innerHTML = '<span>✅ נשמר בהצלחה!</span>';
+                saveBtn.style.background = '#059669';
                 setTimeout(() => {
-                    btnSave.innerHTML = oldHtml;
-                    btnSave.style.background = '#10b981';
+                    saveBtn.innerHTML = oldHtml;
+                    saveBtn.style.background = '#10b981';
                 }, 1500);
-            });
-        }
+                return;
+            }
 
-        // Filter Pills (ALL, A, B, C, D, E, UNASSIGNED)
-        const filterPills = document.querySelectorAll('.planner-elective-filters .filter-pill');
-        filterPills.forEach(pill => {
-            if (!pill._bound) {
-                pill._bound = true;
-                pill.addEventListener('click', () => {
-                    filterPills.forEach(p => p.classList.remove('active'));
-                    pill.classList.add('active');
-                    selectedCategory = pill.getAttribute('data-category');
-                    renderAddElectivesSection(getActivePlan(), buildCourseSemesterMap(getActivePlan()));
-                    setupDragAndDrop();
+            // Filter Pills
+            const pill = e.target.closest('.planner-elective-filters .filter-pill');
+            if (pill) {
+                const filterPills = document.querySelectorAll('.planner-elective-filters .filter-pill');
+                filterPills.forEach(p => p.classList.remove('active'));
+                pill.classList.add('active');
+                selectedCategory = pill.getAttribute('data-category');
+                renderAddElectivesSection(getActivePlan(), buildCourseSemesterMap(getActivePlan()));
+                return;
+            }
+
+            // Remove Course Click (✕ button)
+            const removeBtn = e.target.closest('.btn-card-remove');
+            if (removeBtn) {
+                e.stopPropagation();
+                const code = removeBtn.getAttribute('data-code');
+                const semNum = parseInt(removeBtn.getAttribute('data-semester'));
+                handleSidebarDrop({
+                    type: 'semester-course',
+                    code: code,
+                    sourceSemester: semNum
                 });
+                return;
+            }
+
+            // Add to Plan Click (+ button)
+            const addBtn = e.target.closest('.btn-add-to-plan');
+            if (addBtn) {
+                e.stopPropagation();
+                const code = addBtn.getAttribute('data-code');
+                promptAddCourseToSemester(code);
+                return;
             }
         });
 
-        // Search Input
+        // 6. Search Input Delegation (Debounced 150ms)
         const searchInput = document.getElementById('planner-elective-search-input');
-        if (searchInput && !searchInput._bound) {
-            searchInput._bound = true;
+        if (searchInput) {
             searchInput.addEventListener('input', (e) => {
-                searchQuery = e.target.value.trim();
-                renderAddElectivesSection(getActivePlan(), buildCourseSemesterMap(getActivePlan()));
-                setupDragAndDrop();
+                if (searchDebounceTimer) clearTimeout(searchDebounceTimer);
+                searchDebounceTimer = setTimeout(() => {
+                    searchQuery = e.target.value.trim();
+                    renderAddElectivesSection(getActivePlan(), buildCourseSemesterMap(getActivePlan()));
+                }, 150);
+            });
+        }
+    }
+
+    // --------------------------------------------------------------------------
+    // Course Placement & Rejection Engine
+    // --------------------------------------------------------------------------
+    function handleCourseDrop(data, targetSemester) {
+        if (!customPlan) return;
+
+        const targetSemObj = customPlan.find(s => s.semester === targetSemester);
+        if (!targetSemObj) return;
+
+        let courseObj = null;
+        let sourceSemester = null;
+
+        if (data.type === 'semester-course') {
+            sourceSemester = data.sourceSemester;
+            if (sourceSemester === targetSemester) return; // Same column, no-op
+
+            const sourceSemObj = customPlan.find(s => s.semester === sourceSemester);
+            if (!sourceSemObj) return;
+
+            const courseIdx = (sourceSemObj.courses || []).findIndex(c => {
+                const keys = getNormalizedCodes(c.code, c.altCode);
+                return keys.includes(data.code);
+            });
+            if (courseIdx === -1) return;
+            courseObj = sourceSemObj.courses[courseIdx];
+
+            if (isCourseCompleted(courseObj.code, courseObj.altCode)) {
+                showPlannerToast(`הקורס "${courseObj.name}" כבר הושלם ואינו ניתן להזזה.`);
+                return;
+            }
+        } else {
+            const cKeys = new Set(getNormalizedCodes(data.code, data.code));
+            courseObj = (unassignedCourses || []).find(c => {
+                const uKeys = getNormalizedCodes(c.code, c.altCode);
+                return uKeys.some(k => cKeys.has(k));
+            }) || (global.PLANNER_CATALOG.ALL_COURSES_MAP && (global.PLANNER_CATALOG.ALL_COURSES_MAP[data.code] || global.PLANNER_CATALOG.ALL_COURSES_MAP[data.code.replace(/^0+/, '')]));
+
+            if (!courseObj) return;
+
+            if (isCourseCompleted(courseObj.code, courseObj.altCode)) {
+                showPlannerToast(`הקורס "${courseObj.name}" כבר הושלם ואינו ניתן לשיבוץ חוזר.`);
+                return;
+            }
+
+            // Check if already placed in plan
+            const alreadyInPlan = customPlan.some(s => (s.courses || []).some(c => {
+                const placedKeys = getNormalizedCodes(c.code, c.altCode);
+                return placedKeys.some(k => cKeys.has(k));
+            }));
+            if (alreadyInPlan) return;
+        }
+
+        if (!courseObj) return;
+
+        // Build temporary map excluding moving course
+        const activeCourseMap = buildCourseSemesterMap(customPlan);
+        if (sourceSemester !== null) {
+            getNormalizedCodes(courseObj.code, courseObj.altCode).forEach(k => {
+                delete activeCourseMap[k];
             });
         }
 
-        // Remove Course Click (✕ button on cards)
-        const container = document.getElementById('planner-semesters-container');
-        if (container && !container._boundRemove) {
-            container._boundRemove = true;
-            container.addEventListener('click', (e) => {
-                const removeBtn = e.target.closest('.btn-card-remove');
-                if (!removeBtn) return;
-                const code = removeBtn.getAttribute('data-code');
-                const semNum = parseInt(removeBtn.getAttribute('data-semester'));
+        // === STRICT PREREQUISITE VALIDATION ===
+        const prereqStatus = checkPrerequisites(courseObj, targetSemester, activeCourseMap);
+        if (!prereqStatus.valid) {
+            highlightMissingPrerequisites(
+                prereqStatus.missingCodes,
+                `לא ניתן לשבץ את "${courseObj.name}" בסמסטר ${targetSemester}: חסרים קדמים בסמסטרים קודמים! (${prereqStatus.missing.join(', ')})`,
+                targetSemester
+            );
+            return; // REJECT DROP!
+        }
 
-                if (!customPlan) return;
-                const semObj = customPlan.find(s => s.semester === semNum);
-                if (!semObj) return;
-
-                const idx = (semObj.courses || []).findIndex(c => c.code === code || c.altCode === code);
-                if (idx !== -1) {
-                    const [removed] = semObj.courses.splice(idx, 1);
-                    if (!unassignedCourses.some(c => c.code === removed.code || (removed.altCode && c.code === removed.altCode))) {
-                        unassignedCourses.push(removed);
-                    }
-                    saveCustomPlan();
-                    renderDegreePlanner();
-                    showPlannerToast(`הקורס "${removed.name}" הוסר מהתכנון והועבר לרשימת הקורסים שלא שובצו.`);
-                }
+        // Apply placement
+        if (data.type === 'semester-course') {
+            const sourceSemObj = customPlan.find(s => s.semester === sourceSemester);
+            const courseIdx = (sourceSemObj.courses || []).findIndex(c => {
+                const keys = getNormalizedCodes(c.code, c.altCode);
+                return keys.includes(data.code);
+            });
+            if (courseIdx !== -1) {
+                const [moved] = sourceSemObj.courses.splice(courseIdx, 1);
+                if (!targetSemObj.courses) targetSemObj.courses = [];
+                targetSemObj.courses.push(moved);
+            }
+        } else {
+            if (!targetSemObj.courses) targetSemObj.courses = [];
+            targetSemObj.courses.push({ ...courseObj });
+            const cKeys = new Set(getNormalizedCodes(data.code, data.code));
+            unassignedCourses = unassignedCourses.filter(c => {
+                const uKeys = getNormalizedCodes(c.code, c.altCode);
+                return !uKeys.some(k => cKeys.has(k));
             });
         }
 
-        // Add from sidebar click (+)
-        const sidebar = document.querySelector('.planner-sidebar');
-        if (sidebar && !sidebar._boundAdd) {
-            sidebar._boundAdd = true;
-            sidebar.addEventListener('click', (e) => {
-                const addBtn = e.target.closest('.btn-add-to-plan');
-                if (!addBtn) return;
-                const code = addBtn.getAttribute('data-code');
-                const course = (unassignedCourses || []).find(c => c.code === code || c.altCode === code)
-                               || (global.PLANNER_CATALOG.ALL_COURSES_MAP && global.PLANNER_CATALOG.ALL_COURSES_MAP[code]);
-                if (!course || !customPlan) return;
+        saveCustomPlan();
+        renderDegreePlanner();
+    }
 
-                const semChoices = customPlan.map(s => s.semester).join(', ');
-                const chosen = prompt(`לאיזה סמסטר תרצה להוסיף את "${course.name}"?\n(סמסטרים קיימים: ${semChoices})`, '6');
-                if (!chosen) return;
+    function handleSidebarDrop(data) {
+        if (!customPlan) return;
+        if (data.type !== 'semester-course') return;
 
-                const targetSem = parseInt(chosen);
-                const targetObj = customPlan.find(s => s.semester === targetSem);
-                if (!targetObj) {
-                    alert('סמסטר לא נמצא');
-                    return;
-                }
+        const sourceSemester = data.sourceSemester;
+        const sourceSemObj = customPlan.find(s => s.semester === sourceSemester);
+        if (!sourceSemObj) return;
 
-                // Check prerequisites
-                const courseSemMap = buildCourseSemesterMap(customPlan);
-                const prereqStatus = checkPrerequisites(course, targetSem, courseSemMap);
-                if (!prereqStatus.valid) {
-                    highlightMissingPrerequisites(
-                        prereqStatus.missingCodes,
-                        `לא ניתן לשבץ את "${course.name}" בסמסטר ${targetSem}: חסרים קדמים בסמסטרים קודמים! (${prereqStatus.missing.join(', ')})`,
-                        targetSem
-                    );
-                    return;
-                }
+        const courseIdx = (sourceSemObj.courses || []).findIndex(c => {
+            const keys = getNormalizedCodes(c.code, c.altCode);
+            return keys.includes(data.code);
+        });
+        if (courseIdx === -1) return;
 
-                if (!targetObj.courses) targetObj.courses = [];
-                targetObj.courses.push(JSON.parse(JSON.stringify(course)));
-                unassignedCourses = unassignedCourses.filter(c => c.code !== code && c.altCode !== code);
-
-                saveCustomPlan();
-                renderDegreePlanner();
-            });
+        const course = sourceSemObj.courses[courseIdx];
+        if (isCourseCompleted(course.code, course.altCode)) {
+            showPlannerToast(`הקורס "${course.name}" כבר הושלם ואינו ניתן להסרה.`);
+            return;
         }
+
+        const [removedCourse] = sourceSemObj.courses.splice(courseIdx, 1);
+        const remKeys = new Set(getNormalizedCodes(removedCourse.code, removedCourse.altCode));
+        if (!unassignedCourses.some(c => {
+            const uKeys = getNormalizedCodes(c.code, c.altCode);
+            return uKeys.some(k => remKeys.has(k));
+        })) {
+            unassignedCourses.push(removedCourse);
+        }
+
+        saveCustomPlan();
+        renderDegreePlanner();
+        showPlannerToast(`הקורס "${removedCourse.name}" הוסר מהתכנון והועבר לרשימת הקורסים שלא שובצו.`);
+    }
+
+    // Interactive Non-Blocking Semester Selector Modal
+    function promptAddCourseToSemester(code) {
+        const cKeys = new Set(getNormalizedCodes(code, code));
+        const course = (unassignedCourses || []).find(c => {
+            const uKeys = getNormalizedCodes(c.code, c.altCode);
+            return uKeys.some(k => cKeys.has(k));
+        }) || (global.PLANNER_CATALOG.ALL_COURSES_MAP && (global.PLANNER_CATALOG.ALL_COURSES_MAP[code] || global.PLANNER_CATALOG.ALL_COURSES_MAP[code.replace(/^0+/, '')]));
+
+        if (!course || !customPlan) return;
+
+        // Check completion
+        if (isCourseCompleted(course.code, course.altCode)) {
+            showPlannerToast(`הקורס "${course.name}" כבר הושלם ואינו ניתן לשיבוץ חוזר.`);
+            return;
+        }
+
+        const existingModal = document.getElementById('planner-sem-picker-modal');
+        if (existingModal) existingModal.remove();
+
+        const activeMap = buildCourseSemesterMap(customPlan);
+
+        const modal = document.createElement('div');
+        modal.id = 'planner-sem-picker-modal';
+        modal.className = 'modal-backdrop active';
+        modal.style.zIndex = '999999';
+
+        const semButtons = customPlan.map(s => {
+            const semNum = s.semester;
+            const prereqCheck = checkPrerequisites(course, semNum, activeMap);
+            const isValid = prereqCheck.valid;
+            return `
+                <button type="button" class="btn btn-outline sem-choice-btn" data-semester="${semNum}" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 12px; border-radius: 8px; border: 1px solid ${isValid ? 'rgba(56, 189, 248, 0.35)' : 'rgba(239, 68, 68, 0.35)'}; background: ${isValid ? 'rgba(15, 23, 42, 0.7)' : 'rgba(239, 68, 68, 0.08)'}; cursor: pointer; transition: all 0.15s ease;">
+                    <span style="font-weight: 700; color: #f8fafc; font-size: 0.95rem;">סמסטר ${semNum}</span>
+                    <span style="font-size: 0.72rem; color: ${isValid ? '#34d399' : '#f87171'}; margin-top: 4px;">${isValid ? '✓ זמין לשיבוץ' : '⚠️ קדמים חסרים'}</span>
+                </button>
+            `;
+        }).join('');
+
+        modal.innerHTML = `
+            <div class="modal-card" style="max-width: 480px; width: 90%; background: #0f172a; border: 1px solid rgba(56, 189, 248, 0.4); border-radius: 14px; padding: 22px; box-shadow: 0 10px 30px rgba(0,0,0,0.8);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px;">
+                    <h3 style="font-size: 1.05rem; color: #f8fafc; margin: 0;">שיבוץ קורס: ${escapeHtml(course.name)}</h3>
+                    <button type="button" class="btn-close-picker" style="background: none; border: none; color: #94a3b8; font-size: 1.2rem; cursor: pointer;">✕</button>
+                </div>
+                <p style="font-size: 0.80rem; color: #cbd5e1; margin-bottom: 14px; line-height: 1.4;">
+                    בחר את הסמסטר הרצוי לשיבוץ הקורס (${course.credits} נק״ז):
+                </p>
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 16px;">
+                    ${semButtons}
+                </div>
+                <div style="display: flex; justify-content: flex-end;">
+                    <button type="button" class="btn btn-secondary btn-close-picker">ביטול</button>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        const closeModal = () => modal.remove();
+        modal.querySelectorAll('.btn-close-picker').forEach(b => b.addEventListener('click', closeModal));
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) closeModal();
+        });
+
+        modal.querySelectorAll('.sem-choice-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const chosenSem = parseInt(btn.getAttribute('data-semester'));
+                closeModal();
+                handleCourseDrop({ type: 'pool-elective', code: course.code }, chosenSem);
+            });
+        });
     }
 
     // --------------------------------------------------------------------------
     // Public API
     // --------------------------------------------------------------------------
     global.DegreePlanner = {
+        init: initPlannerState,
         renderDegreePlanner: renderDegreePlanner,
         evaluateDegreeRules: evaluateDegreeRules,
         getCustomPlan: () => customPlan,
         getUnassignedCourses: () => unassignedCourses,
         resetPlanToSuggested: resetPlanToSuggested,
         checkPrerequisites: checkPrerequisites,
-        isCourseCompleted: isCourseCompleted
+        isCourseCompleted: isCourseCompleted,
+        getCourseGrade: getCourseGrade,
+        syncFromGameState: () => {
+            syncCompletedCoursesFromGameState();
+            renderDegreePlanner();
+        }
     };
 
 })(typeof window !== 'undefined' ? window : global);
