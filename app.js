@@ -8603,12 +8603,14 @@ function setupNotionDashboard() {
     
     // 2. Unified Tab Navigation Listeners (Curriculum / Tasks / Calendar / Timetable / Settings)
     const tabCurriculum = document.getElementById("tab-curriculum");
+    const tabPlanner = document.getElementById("tab-planner");
     const tabTasks = document.getElementById("tab-tasks");
     const tabCalendar = document.getElementById("tab-calendar");
     const tabTimetable = document.getElementById("tab-timetable");
     const tabSettings = document.getElementById("tab-settings");
     
     const curriculumWorkspace = document.getElementById("curriculum-tree-workspace");
+    const plannerWorkspace = document.getElementById("planner-workspace");
     const tasksWorkspace = document.getElementById("notion-tasks-workspace");
     const timetableWorkspace = document.getElementById("timetable-workspace");
     const settingsWorkspace = document.getElementById("settings-workspace");
@@ -8618,6 +8620,7 @@ function setupNotionDashboard() {
     function setActiveMainTab(activeTabId) {
         window.currentActiveTab = activeTabId;
         if (tabCurriculum) tabCurriculum.classList.toggle("active", activeTabId === 'curriculum');
+        if (tabPlanner) tabPlanner.classList.toggle("active", activeTabId === 'planner');
         if (tabTasks) tabTasks.classList.toggle("active", activeTabId === 'tasks');
         if (tabCalendar) tabCalendar.classList.toggle("active", activeTabId === 'calendar');
         if (tabTimetable) tabTimetable.classList.toggle("active", activeTabId === 'timetable');
@@ -8625,6 +8628,7 @@ function setupNotionDashboard() {
 
         if (activeTabId === 'curriculum') {
             if (curriculumWorkspace) curriculumWorkspace.style.display = "flex";
+            if (plannerWorkspace) plannerWorkspace.style.display = "none";
             if (tasksWorkspace) tasksWorkspace.style.display = "none";
             if (timetableWorkspace) timetableWorkspace.style.display = "none";
             if (settingsWorkspace) settingsWorkspace.style.display = "none";
@@ -8633,8 +8637,18 @@ function setupNotionDashboard() {
                 renderActiveQuestsSidebar();
                 viewsDirtyState.curriculum = false;
             }
+        } else if (activeTabId === 'planner') {
+            if (curriculumWorkspace) curriculumWorkspace.style.display = "none";
+            if (plannerWorkspace) plannerWorkspace.style.display = "flex";
+            if (tasksWorkspace) tasksWorkspace.style.display = "none";
+            if (timetableWorkspace) timetableWorkspace.style.display = "none";
+            if (settingsWorkspace) settingsWorkspace.style.display = "none";
+            if (typeof DegreePlanner !== 'undefined' && DegreePlanner.renderDegreePlanner) {
+                DegreePlanner.renderDegreePlanner();
+            }
         } else if (activeTabId === 'tasks') {
             if (curriculumWorkspace) curriculumWorkspace.style.display = "none";
+            if (plannerWorkspace) plannerWorkspace.style.display = "none";
             if (tasksWorkspace) tasksWorkspace.style.display = "flex";
             if (timetableWorkspace) timetableWorkspace.style.display = "none";
             if (settingsWorkspace) settingsWorkspace.style.display = "none";
@@ -8650,6 +8664,7 @@ function setupNotionDashboard() {
             }
         } else if (activeTabId === 'calendar') {
             if (curriculumWorkspace) curriculumWorkspace.style.display = "none";
+            if (plannerWorkspace) plannerWorkspace.style.display = "none";
             if (tasksWorkspace) tasksWorkspace.style.display = "flex";
             if (timetableWorkspace) timetableWorkspace.style.display = "none";
             if (settingsWorkspace) settingsWorkspace.style.display = "none";
@@ -8662,6 +8677,7 @@ function setupNotionDashboard() {
             }
         } else if (activeTabId === 'timetable') {
             if (curriculumWorkspace) curriculumWorkspace.style.display = "none";
+            if (plannerWorkspace) plannerWorkspace.style.display = "none";
             if (tasksWorkspace) tasksWorkspace.style.display = "none";
             if (timetableWorkspace) timetableWorkspace.style.display = "flex";
             if (settingsWorkspace) settingsWorkspace.style.display = "none";
@@ -8672,6 +8688,7 @@ function setupNotionDashboard() {
             }
         } else if (activeTabId === 'settings') {
             if (curriculumWorkspace) curriculumWorkspace.style.display = "none";
+            if (plannerWorkspace) plannerWorkspace.style.display = "none";
             if (tasksWorkspace) tasksWorkspace.style.display = "none";
             if (timetableWorkspace) timetableWorkspace.style.display = "none";
             if (settingsWorkspace) settingsWorkspace.style.display = "flex";
@@ -8686,6 +8703,7 @@ function setupNotionDashboard() {
     window.setTasksSubview = (view) => setActiveMainTab(view === 'calendar' ? 'calendar' : (view === 'timetable' ? 'timetable' : 'tasks'));
 
     if (tabCurriculum) tabCurriculum.addEventListener("click", () => setActiveMainTab('curriculum'));
+    if (tabPlanner) tabPlanner.addEventListener("click", () => setActiveMainTab('planner'));
     if (tabTasks) tabTasks.addEventListener("click", () => setActiveMainTab('tasks'));
     if (tabCalendar) tabCalendar.addEventListener("click", () => setActiveMainTab('calendar'));
     if (tabTimetable) tabTimetable.addEventListener("click", () => setActiveMainTab('timetable'));
@@ -14218,7 +14236,7 @@ function setupMobileNotifications() {
     try {
         const params = new URLSearchParams(window.location.search);
         const requestedTab = params.get('tab');
-        if (requestedTab && ['curriculum', 'tasks', 'calendar', 'timetable', 'settings'].includes(requestedTab)) {
+        if (requestedTab && ['curriculum', 'planner', 'tasks', 'calendar', 'timetable', 'settings'].includes(requestedTab)) {
             setTimeout(() => {
                 if (typeof setActiveMainTab === 'function') {
                     setActiveMainTab(requestedTab);

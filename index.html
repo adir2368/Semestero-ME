@@ -16,7 +16,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Rubik:wght@300;400;500;700;900&display=swap" rel="stylesheet">
     <link rel="icon" type="image/png" href="icon.png">
-    <link rel="stylesheet" href="styles.css?v=1.8.0">
+    <link rel="stylesheet" href="styles.css?v=1.8.1">
     <script>
         (function() {
             try {
@@ -105,6 +105,11 @@
                     <span class="nav-tab-icon">🌳</span>
                     <span class="nav-tab-label">מפת קורסים</span>
                     <span class="nav-tab-sublabel">(Curriculum Tree)</span>
+                </button>
+                <button class="nav-tab" id="tab-planner" title="תכנון תואר אקדמי ובחירת קורסים (Degree Planner)">
+                    <span class="nav-tab-icon">🎯</span>
+                    <span class="nav-tab-label">תכנון תואר</span>
+                    <span class="nav-tab-sublabel">(Planner)</span>
                 </button>
                 <button class="nav-tab" id="tab-tasks">
                     <span class="nav-tab-icon">📋</span>
@@ -247,7 +252,139 @@
                 </section>
         </main>
 
-                <!-- Settings & Revisions Workspace -->
+        <!-- Planner (תכנון תואר אקדמי) Workspace -->
+        <main class="hud-workspace" id="planner-workspace" style="display: none;">
+            <div class="planner-wrapper">
+                <!-- Top Toolbar Banner -->
+                <div class="planner-header-banner">
+                    <div class="planner-header-left">
+                        <div class="planner-mode-switch">
+                            <button type="button" class="btn-planner-mode active" id="btn-planner-mode-custom">
+                                <span>📋 התוכנית שלי (Your Plan)</span>
+                            </button>
+                            <button type="button" class="btn-planner-mode" id="btn-planner-mode-suggested">
+                                <span>🏛️ שיבוץ מומלץ (Suggested Syllabus)</span>
+                            </button>
+                        </div>
+                        <div class="planner-summary-stats">
+                            <div class="planner-stat-pill" id="planner-stat-total-credits" title="סה״כ נקודות זכות מתוכננות מתוך 157.5">
+                                <span class="pill-label">סה״כ נק״ז מתוכנן:</span>
+                                <span class="pill-value" id="planner-total-credits-val">0 / 157.5</span>
+                            </div>
+                            <div class="planner-stat-pill" id="planner-stat-electives-credits" title="נקודות זכות מקורסי בחירה מתוך 32.5">
+                                <span class="pill-label">בחירה מתקדמת:</span>
+                                <span class="pill-value" id="planner-electives-credits-val">0 / 32.5</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="planner-header-right">
+                        <button type="button" class="btn btn-sm btn-outline" id="btn-planner-add-semester" title="הוסף סמסטר נוסף לתוכנית (למשל סמסטר 9 או סמסטר קיץ)">
+                            <span>➕ הוסף סמסטר</span>
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline" id="btn-planner-reset-suggested" title="אפס את התוכנית למבנה המומלץ של הפקולטה">
+                            <span>🔄 אפס לשיבוץ מומלץ</span>
+                        </button>
+                        <button type="button" class="btn btn-sm btn-primary" id="btn-planner-save" style="background: #10b981; border-color: #10b981;">
+                            <span>💾 שמור שינויים</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Main Split Area: Semesters Board + Electives Sidebar -->
+                <div class="planner-main-container">
+                    <!-- Left/Center: Semesters Columns Board -->
+                    <div class="planner-board-area">
+                        <div class="planner-semesters-scroll" id="planner-semesters-container">
+                            <!-- Populated dynamically via JS: Semesters 1 to 8+ -->
+                        </div>
+                    </div>
+
+                    <!-- Right: Elective Rules & Add Electives Sidebar -->
+                    <aside class="planner-sidebar">
+                        <!-- Card 1: Elective Rules Engine -->
+                        <div class="planner-rules-card">
+                            <div class="planner-rules-header">
+                                <span class="rules-title">⚖️ חוקי בחירה לתואר (Elective Rules)</span>
+                            </div>
+                            <div class="planner-rules-list">
+                                <div class="planner-rule-row" id="rule-row-A">
+                                    <span class="rule-name">קורסים חישוביים (רשימה א׳):</span>
+                                    <span class="rule-score" id="rule-val-A">0 / 1</span>
+                                    <span class="rule-status" id="rule-status-A">⏳</span>
+                                </div>
+                                <div class="planner-rule-row" id="rule-row-B">
+                                    <span class="rule-name">נושאי ליבה (רשימה ב׳):</span>
+                                    <span class="rule-score" id="rule-val-B">0 / 2</span>
+                                    <span class="rule-status" id="rule-status-B">⏳</span>
+                                </div>
+                                <div class="planner-rule-row" id="rule-row-D">
+                                    <span class="rule-name">מדעיים כלליים (רשימה ד׳):</span>
+                                    <span class="rule-score" id="rule-val-D">0 / 1</span>
+                                    <span class="rule-status" id="rule-status-D">⏳</span>
+                                </div>
+                                <div class="planner-rule-row" id="rule-row-C">
+                                    <span class="rule-name">יישומיים ושילוביים (רשימה ג׳):</span>
+                                    <span class="rule-score" id="rule-val-C">0 / 2</span>
+                                    <span class="rule-status" id="rule-status-C">⏳</span>
+                                </div>
+                                <div class="planner-rule-row rule-row-highlight" id="rule-row-BCD">
+                                    <span class="rule-name">שילוב רשימות ב׳+ג׳+ד׳:</span>
+                                    <span class="rule-score" id="rule-val-BCD">0 / 14.0 נק״ז</span>
+                                    <span class="rule-status" id="rule-status-BCD">⏳</span>
+                                </div>
+                                <div class="planner-rule-row rule-row-total" id="rule-row-total">
+                                    <span class="rule-name">סה״כ נקודות בחירה:</span>
+                                    <span class="rule-score" id="rule-val-total">0 / 32.5 נק״ז</span>
+                                    <span class="rule-status" id="rule-status-total">⏳</span>
+                                </div>
+                            </div>
+                            <div class="planner-rules-note">
+                                💡 בדיקת דרישות קדם מאומתת לפי הקטלוג הרשמי של הטכניון לקורסי חובה ורשימות א׳-ד׳.
+                            </div>
+                        </div>
+
+                        <!-- Card 2: Add Electives Catalog -->
+                        <div class="planner-add-electives-card">
+                            <div class="add-electives-header">
+                                <span class="add-electives-title">➕ הוספת קורסי בחירה (Add Electives)</span>
+                            </div>
+
+                            <!-- "Ready for you" subsection -->
+                            <div class="planner-ready-section" id="planner-ready-section">
+                                <div class="ready-badge-title">
+                                    <span>✨ מוכנים עבורך - דרישות קדם הושלמו בתוכנית</span>
+                                </div>
+                                <div class="planner-ready-list" id="planner-ready-electives-list">
+                                    <!-- Populated dynamically: electives whose prereqs are met -->
+                                </div>
+                            </div>
+
+                            <!-- Filter Pills (All, A, B, C, D, E) -->
+                            <div class="planner-elective-filters" id="planner-elective-filters">
+                                <button type="button" class="filter-pill active" data-category="ALL">הכל</button>
+                                <button type="button" class="filter-pill" data-category="A">א׳ (חישובי)</button>
+                                <button type="button" class="filter-pill" data-category="B">ב׳ (ליבה)</button>
+                                <button type="button" class="filter-pill" data-category="C">ג׳ (יישומי)</button>
+                                <button type="button" class="filter-pill" data-category="D">ד׳ (מדעי)</button>
+                                <button type="button" class="filter-pill" data-category="E">ה׳ (כללי)</button>
+                            </div>
+
+                            <!-- Search Input -->
+                            <div class="planner-search-wrap">
+                                <input type="text" id="planner-elective-search-input" class="planner-search-input" placeholder="🔍 חיפוש קורס לפי שם או מספר...">
+                            </div>
+
+                            <!-- Available Electives Draggable Pool -->
+                            <div class="planner-electives-pool" id="planner-available-electives-list">
+                                <!-- Populated dynamically -->
+                            </div>
+                        </div>
+                    </aside>
+                </div>
+            </div>
+        </main>
+
+        <!-- Settings & Revisions Workspace -->
         <main class="hud-workspace" id="settings-workspace" style="display: none;">
             <div class="settings-container">
                 <!-- Page Header with Master Save -->
@@ -783,7 +920,7 @@
         <!-- App Global Footer (Developer Credit & Version) -->
         <footer class="app-global-footer">
             <div class="footer-left-version">
-                <span class="app-version-badge" id="footer-version-badge" title="Atlas ME v1.8.0">v1.8.0</span>
+                <span class="app-version-badge" id="footer-version-badge" title="Atlas ME v1.8.1">v1.8.1</span>
             </div>
             <div class="footer-credit-content">
                 <span class="credit-text" style="display: inline-flex; align-items: center; gap: 6px;">Developed by <strong>Adir Moshe</strong> <img src="adir_avatar.png" alt="Adir" style="width: 16px; height: 16px; object-fit: contain; vertical-align: middle; filter: drop-shadow(0 0 3px rgba(56, 189, 248, 0.5));"> • <strong>Atlas ME</strong></span>
@@ -1596,6 +1733,10 @@
     <script src="curriculum_template.js?v=1.7.1"></script>
     <!-- Multi-User Identity & Sync Engine -->
     <script src="auth_sync.js?v=1.7.1"></script>
+    <!-- Technion ME 2025/2026 Catalog & Electives Database -->
+    <script src="planner_catalog.js?v=1.8.0"></script>
+    <!-- Degree Planner Drag & Drop Engine -->
+    <script src="planner_module.js?v=1.8.0"></script>
     <!-- Core Application Logic -->
     <script src="app.js?v=1.7.1"></script>
     <!-- PWA Service Worker Registration -->
