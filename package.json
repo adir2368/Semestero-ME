@@ -1,7 +1,7 @@
 {
   "name": "academic-skill-tree",
-  "version": "1.8.16",
-  "description": "Academic Skill Tree - RPG Tracker for Students",
+  "version": "1.8.17",
+  "description": "Semestero ME - Academic Skill Tree and Degree Orchestration System",
   "main": "main.js",
   "scripts": {
     "start": "electron .",

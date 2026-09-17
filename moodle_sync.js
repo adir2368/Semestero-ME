@@ -372,7 +372,7 @@
 
                 // If new tasks were found, trigger an NTFY notification
                 if (result.newCount > 0 && typeof sendNotification === 'function') {
-                    sendNotification(`Atlas ME: נוספו ${result.newCount} מטלות חדשות מהמודל!`, {
+                    sendNotification(`Semestero ME: נוספו ${result.newCount} מטלות חדשות מהמודל!`, {
                         tag: 'moodle-sync',
                         body: `המטלות עודכנו בעץ הקורסים ומוכנות לביצוע.`
                     });

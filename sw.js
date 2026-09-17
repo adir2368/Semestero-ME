@@ -1,5 +1,5 @@
-// Service Worker for Academic Skill Tree (Atlas ME) - v1.8.14
-const CACHE_NAME = 'atlas-me-v1.8.14';
+// Service Worker for Academic Skill Tree (Semestero ME) - v1.8.17
+const CACHE_NAME = 'semestero-me-v1.8.17';
 
 const STATIC_ASSETS = [
     './',
@@ -10,6 +10,7 @@ const STATIC_ASSETS = [
     './curriculum_template.js',
     './planner_catalog.js',
     './planner_module.js',
+    './technion_academic_calendar.js',
     './auth_sync.js',
     './moodle_sync.js',
     './app.js',
@@ -142,7 +143,7 @@ self.addEventListener('push', (event) => {
         try {
             data = event.data.json();
         } catch (e) {
-            data = { title: 'Atlas ME', body: event.data.text() };
+            data = { title: 'Semestero ME', body: event.data.text() };
         }
     }
     const title = data.title || '🔔 תזכורת שיעור אקדמי';

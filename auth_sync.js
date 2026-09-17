@@ -560,7 +560,7 @@
             this.closeAuthModal();
 
             if (typeof showHudToast === 'function') {
-                showHudToast('ברוך הבא ל-Atlas ME, ' + name + '! 🎉', 'success');
+                showHudToast('ברוך הבא ל-Semestero ME, ' + name + '! 🎉', 'success');
             } else {
                 alert('החשבון נוצר בהצלחה!');
             }
@@ -720,7 +720,7 @@
             if (!this.isLoggedIn()) return false;
             const user = this.getActiveUser();
 
-            const confirmed = confirm(`⚠️ אזהרה: האם אתה בטוח שברצונך למחוק לצמיתות את החשבון "${user.name}"?\n\nפעולה זו תמחק את כל נתוני הקורסים, הציונים והסנכרון שלך מענן Atlas ME ולא ניתנת לשחזור!`);
+            const confirmed = confirm(`⚠️ אזהרה: האם אתה בטוח שברצונך למחוק לצמיתות את החשבון "${user.name}"?\n\nפעולה זו תמחק את כל נתוני הקורסים, הציונים והסנכרון שלך מענן Semestero ME ולא ניתנת לשחזור!`);
             if (!confirmed) return false;
 
             const finalConfirm = confirm(`אישור סופי: למחוק לצמיתות את כל הנתונים של "${user.name}" ולאפס את המערכת?`);
@@ -832,7 +832,7 @@
                 }
             } else {
                 container.innerHTML = `
-                    <button type="button" class="btn-hud-login-top" id="btn-hud-login-top" onclick="AuthSync.openAuthModal()" title="התחברות ל-Atlas ME" aria-label="התחברות">
+                    <button type="button" class="btn-hud-login-top" id="btn-hud-login-top" onclick="AuthSync.openAuthModal()" title="התחברות ל-Semestero ME" aria-label="התחברות">
                         <span class="login-icon">🔑</span>
                         <span class="login-text">התחברות</span>
                     </button>
@@ -881,7 +881,7 @@
                             ${headerAvatar} <span>פרטי חשבון מחובר</span>
                         </h2>
                         <div class="cloud-status-pill connected" style="margin-top: 6px;">
-                            🟢 <span>מסונכרן בזמן אמת לענן Atlas ME</span>
+                            🟢 <span>מסונכרן בזמן אמת לענן Semestero ME</span>
                         </div>
                     </div>
                     <div class="modal-body" style="padding-top: 14px; max-height: 75vh; overflow-y: auto;">
@@ -999,8 +999,8 @@
                 const isRegister = activeTab === 'register';
                 const isReset = activeTab === 'reset_password';
                 
-                let titleText = 'התחברות ל-Atlas ME';
-                let subText = 'התחבר לחשבון האישי שלך ב-Atlas ME';
+                let titleText = 'התחברות ל-Semestero ME';
+                let subText = 'התחבר לחשבון האישי שלך ב-Semestero ME';
                 if (isRegister) {
                     titleText = 'יצירת חשבון סטודנט חדש';
                     subText = 'חיבור לענן וסנכרון ההתקדמות שלך';
@@ -1323,7 +1323,7 @@
                                         }
                                         this.refreshAllAppViews();
                                         if (typeof showHudToast === 'function') {
-                                            showHudToast('סונכרן בזמן אמת מענן Atlas ME ☁️', 'info');
+                                            showHudToast('סונכרן בזמן אמת מענן Semestero ME ☁️', 'info');
                                         }
                                     } finally {
                                         setTimeout(() => {
