@@ -8818,47 +8818,47 @@ function loadSavedState() {
             if (gameState.courses['114052']) {
                 const c = gameState.courses['114052'];
                 if (!c.tasks) c.tasks = [];
-                let exA = c.tasks.find(t => t.id === '114052_ex' || t.title === 'מועד א');
-                if (exA) { exA.dueDate = '2027-02-01'; exA.title = 'מועד א'; }
-                let exB = c.tasks.find(t => t.id === '114052_ex_b' || t.title === "מועד ב'");
-                if (exB) { exB.dueDate = '2027-03-02'; exB.title = "מועד ב'"; }
-                else { c.tasks.push({ id: '114052_ex_b', title: "מועד ב'", type: 'exam', xp: 500, completed: false, status: 'not_started', dueDate: '2027-03-02' }); }
+                let exA = c.tasks.find(t => t.id === '114052_ex' || t.title.includes('מועד א'));
+                if (exA) { exA.dueDate = '2027-02-01'; exA.title = "פיסיקה 2 - מועד א'"; }
+                let exB = c.tasks.find(t => t.id === '114052_ex_b' || t.title.includes("מועד ב"));
+                if (exB) { exB.dueDate = '2027-03-02'; exB.title = "פיסיקה 2 - מועד ב'"; }
+                else { c.tasks.push({ id: '114052_ex_b', title: "פיסיקה 2 - מועד ב'", type: 'exam', xp: 500, completed: false, status: 'not_started', dueDate: '2027-03-02' }); }
             }
             if (gameState.courses['034035']) {
                 const c = gameState.courses['034035'];
                 if (!c.tasks) c.tasks = [];
-                let exA = c.tasks.find(t => t.id === '034035_ex' || t.title === 'מועד א');
-                if (exA) { exA.dueDate = '2027-02-07'; exA.title = 'מועד א'; }
-                let exB = c.tasks.find(t => t.id === '034035_ex_b' || t.title === "מועד ב'");
-                if (exB) { exB.dueDate = '2027-03-05'; exB.title = "מועד ב'"; }
-                else { c.tasks.push({ id: '034035_ex_b', title: "מועד ב'", type: 'exam', xp: 500, completed: false, status: 'not_started', dueDate: '2027-03-05' }); }
+                let exA = c.tasks.find(t => t.id === '034035_ex' || t.title.includes('מועד א'));
+                if (exA) { exA.dueDate = '2027-02-07'; exA.title = "תרמודינמיקה 1 - מועד א'"; }
+                let exB = c.tasks.find(t => t.id === '034035_ex_b' || t.title.includes("מועד ב"));
+                if (exB) { exB.dueDate = '2027-03-05'; exB.title = "תרמודינמיקה 1 - מועד ב'"; }
+                else { c.tasks.push({ id: '034035_ex_b', title: "תרמודינמיקה 1 - מועד ב'", type: 'exam', xp: 500, completed: false, status: 'not_started', dueDate: '2027-03-05' }); }
             }
             if (gameState.courses['034056']) {
                 const c = gameState.courses['034056'];
                 if (!c.tasks) c.tasks = [];
-                let exA = c.tasks.find(t => t.id === '034056_ex' || t.title === 'מועד א');
-                if (exA) { exA.dueDate = '2027-02-11'; exA.title = 'מועד א'; }
-                let exB = c.tasks.find(t => t.id === '034056_ex_b' || t.title === "מועד ב'");
-                if (exB) { exB.dueDate = '2027-03-10'; exB.title = "מועד ב'"; }
-                else { c.tasks.push({ id: '034056_ex_b', title: "מועד ב'", type: 'exam', xp: 500, completed: false, status: 'not_started', dueDate: '2027-03-10' }); }
+                let exA = c.tasks.find(t => t.id === '034056_ex' || t.title.includes('מועד א'));
+                if (exA) { exA.dueDate = '2027-02-11'; exA.title = "חישוב מדעי והנדסי - מועד א'"; }
+                let exB = c.tasks.find(t => t.id === '034056_ex_b' || t.title.includes("מועד ב"));
+                if (exB) { exB.dueDate = '2027-03-10'; exB.title = "חישוב מדעי והנדסי - מועד ב'"; }
+                else { c.tasks.push({ id: '034056_ex_b', title: "חישוב מדעי והנדסי - מועד ב'", type: 'exam', xp: 500, completed: false, status: 'not_started', dueDate: '2027-03-10' }); }
             }
             if (gameState.courses['034053']) {
                 const c = gameState.courses['034053'];
                 if (!c.tasks) c.tasks = [];
-                let exA = c.tasks.find(t => t.id === '034053_ex' || t.title === 'מועד א');
-                if (exA) { exA.dueDate = '2027-02-18'; exA.title = 'מועד א'; }
-                let exB = c.tasks.find(t => t.id === '034053_ex_b' || t.title === "מועד ב'");
-                if (exB) { exB.dueDate = '2027-03-18'; exB.title = "מועד ב'"; }
-                else { c.tasks.push({ id: '034053_ex_b', title: "מועד ב'", type: 'exam', xp: 550, completed: false, status: 'not_started', dueDate: '2027-03-18' }); }
+                let exA = c.tasks.find(t => t.id === '034053_ex' || t.title.includes('מועד א'));
+                if (exA) { exA.dueDate = '2027-02-18'; exA.title = "מוצקים 2 - מועד א'"; }
+                let exB = c.tasks.find(t => t.id === '034053_ex_b' || t.title.includes("מועד ב"));
+                if (exB) { exB.dueDate = '2027-03-18'; exB.title = "מוצקים 2 - מועד ב'"; }
+                else { c.tasks.push({ id: '034053_ex_b', title: "מוצקים 2 - מועד ב'", type: 'exam', xp: 550, completed: false, status: 'not_started', dueDate: '2027-03-18' }); }
             }
             if (gameState.courses['104228']) {
                 const c = gameState.courses['104228'];
                 if (!c.tasks) c.tasks = [];
-                let exA = c.tasks.find(t => t.id === '104228_ex' || t.title === 'מועד א');
-                if (exA) { exA.dueDate = '2027-02-24'; exA.title = 'מועד א'; }
-                let exB = c.tasks.find(t => t.id === '104228_ex_b' || t.title === "מועד ב'");
-                if (exB) { exB.dueDate = '2027-03-26'; exB.title = "מועד ב'"; }
-                else { c.tasks.push({ id: '104228_ex_b', title: "מועד ב'", type: 'exam', xp: 500, completed: false, status: 'not_started', dueDate: '2027-03-26' }); }
+                let exA = c.tasks.find(t => t.id === '104228_ex' || t.title.includes('מועד א'));
+                if (exA) { exA.dueDate = '2027-02-24'; exA.title = "מד\"ח - מועד א'"; }
+                let exB = c.tasks.find(t => t.id === '104228_ex_b' || t.title.includes("מועד ב"));
+                if (exB) { exB.dueDate = '2027-03-26'; exB.title = "מד\"ח - מועד ב'"; }
+                else { c.tasks.push({ id: '104228_ex_b', title: "מד\"ח - מועד ב'", type: 'exam', xp: 500, completed: false, status: 'not_started', dueDate: '2027-03-26' }); }
             }
             if (gameState.courses['03940805']) {
                 const c = gameState.courses['03940805'];
@@ -12169,6 +12169,50 @@ function setupNotionDashboard() {
     
     setupNotionFilterPopover();
     setupFlowchartViewMode();
+
+    // 4. Tasks Collapsible Filters Toggle
+    const toggleTaskFiltersBtn = document.getElementById("btn-toggle-task-filters");
+    const taskFiltersToolbar = document.getElementById("notion-filters-toolbar");
+    const taskFilterArrow = document.getElementById("task-filter-arrow");
+    if (toggleTaskFiltersBtn && taskFiltersToolbar) {
+        toggleTaskFiltersBtn.addEventListener("click", () => {
+            const isOpen = taskFiltersToolbar.classList.toggle("is-open");
+            if (taskFilterArrow) taskFilterArrow.innerText = isOpen ? "▴" : "▾";
+            toggleTaskFiltersBtn.classList.toggle("active", isOpen);
+        });
+    }
+
+    // 5. Exam Gap Runway Collapsible Toggle (Calendar View)
+    const runwayHeader = document.getElementById("runway-header-toggle");
+    const runwayCard = document.getElementById("exam-gap-runway-card");
+    const runwayArrow = document.getElementById("runway-toggle-arrow");
+    if (runwayHeader && runwayCard) {
+        runwayHeader.addEventListener("click", () => {
+            const isCollapsed = runwayCard.classList.toggle("collapsed-mobile");
+            if (runwayArrow) runwayArrow.innerText = isCollapsed ? "▾" : "▴";
+        });
+    }
+
+    // 6. Calendar Legend Collapsible Toggle
+    const toggleCalLegendBtn = document.getElementById("btn-toggle-cal-legend");
+    const calLegendBar = document.getElementById("cal-legend-bar");
+    const calLegendArrow = document.getElementById("cal-legend-arrow");
+    if (toggleCalLegendBtn && calLegendBar) {
+        toggleCalLegendBtn.addEventListener("click", () => {
+            const isOpen = calLegendBar.classList.toggle("is-open");
+            if (calLegendArrow) calLegendArrow.innerText = isOpen ? "▴" : "▾";
+            toggleCalLegendBtn.classList.toggle("active", isOpen);
+        });
+    }
+
+    // 7. Mobile Timetable CheeseFork Sync
+    const mobileSyncBtn = document.getElementById("btn-mobile-sync-cf");
+    const desktopSyncBtn = document.getElementById("btn-sync-cheesefork-now");
+    if (mobileSyncBtn && desktopSyncBtn) {
+        mobileSyncBtn.addEventListener("click", () => {
+            desktopSyncBtn.click();
+        });
+    }
     
     // High-performance Event Delegation for Notion Table (zero-latency interaction)
     const tableBody = document.getElementById("notion-tasks-table-body");
@@ -14148,7 +14192,7 @@ let isFlowchartFitWidth = false;
 
 const BASE_FLOWCHART_WIDTH = 1560;
 const BASE_FLOWCHART_HEIGHT = 1380;
-const FLOWCHART_ZOOM_MULTIPLIER = 1.30;
+const FLOWCHART_ZOOM_MULTIPLIER = 1.15;
 
 function isMobileView() {
     return (
@@ -14251,7 +14295,7 @@ function setupFlowchartViewMode() {
 }
 
 function initFlowchartZoom() {
-    // User directive: Default zoom on opening is strictly 100% (magnified 1.30x baseline)
+    // User directive: Default zoom on opening is comfortable 100%
     setFlowchartZoom(1.0);
     isFlowchartFitWidth = false;
     const toggleFitBtn = document.getElementById("btn-fc-toggle-fit");
@@ -14264,9 +14308,9 @@ function fitFlowchartToWidth() {
     if (!scrollWrap) return;
 
     const availableWidth = scrollWrap.clientWidth || (window.innerWidth - 20);
-    const minFactor = isMobileView() ? 0.22 : 0.55;
-    const effectiveBaseW = BASE_FLOWCHART_WIDTH * FLOWCHART_ZOOM_MULTIPLIER;
-    const fitFactor = Math.max(minFactor, Math.min(1.4, (availableWidth - 18) / effectiveBaseW));
+    const baseW = window.FLOWCHART_TOTAL_WIDTH || BASE_FLOWCHART_WIDTH;
+    const effectiveBaseW = baseW * FLOWCHART_ZOOM_MULTIPLIER;
+    const fitFactor = Math.max(0.12, Math.min(1.3, (availableWidth - 16) / effectiveBaseW));
     setFlowchartZoom(fitFactor);
     isFlowchartFitWidth = true;
     window.isFlowchartFitWidth = true;
@@ -14274,7 +14318,13 @@ function fitFlowchartToWidth() {
 }
 
 function setFlowchartZoom(zoomVal) {
-    const minZoom = isMobileView() ? 0.22 : 0.55;
+    const scrollWrap = document.getElementById("flowchart-scroll-wrapper");
+    const availableWidth = scrollWrap ? scrollWrap.clientWidth : (window.innerWidth - 20);
+    const baseW = window.FLOWCHART_TOTAL_WIDTH || BASE_FLOWCHART_WIDTH;
+    const effectiveBaseW = baseW * FLOWCHART_ZOOM_MULTIPLIER;
+    const widthFitZoom = (availableWidth - 16) / effectiveBaseW;
+    const minZoom = Math.max(0.10, Math.min(isMobileView() ? 0.16 : 0.25, widthFitZoom));
+
     flowchartZoom = Math.max(minZoom, Math.min(2.0, Math.round(zoomVal * 100) / 100));
     window.flowchartZoom = flowchartZoom;
 
@@ -14286,7 +14336,7 @@ function setFlowchartZoom(zoomVal) {
     }
 
     if (svgEl) {
-        const targetW = Math.round(BASE_FLOWCHART_WIDTH * FLOWCHART_ZOOM_MULTIPLIER * flowchartZoom);
+        const targetW = Math.round(baseW * FLOWCHART_ZOOM_MULTIPLIER * flowchartZoom);
         const targetH = Math.round(BASE_FLOWCHART_HEIGHT * FLOWCHART_ZOOM_MULTIPLIER * flowchartZoom);
         svgEl.style.width = `${targetW}px`;
         svgEl.style.minWidth = `${targetW}px`;
@@ -14449,6 +14499,7 @@ function renderFlowchartTree() {
     const RIGHT_MARGIN = 35;
     const colSpacing = 225; // 225px spacing
     const TOTAL_WIDTH = Math.max(BASE_FLOWCHART_WIDTH, LEFT_MARGIN + NUM_COLS * colSpacing + RIGHT_MARGIN + 120);
+    window.FLOWCHART_TOTAL_WIDTH = TOTAL_WIDTH;
     const ROW_HEIGHT = 168; // Golden ratio vertical spacing (84px card + 84px gap)
     const TOTAL_HEIGHT = BASE_FLOWCHART_HEIGHT;
     const nodeWidth = 196; // Generous card width so all Hebrew titles fit completely
@@ -15906,20 +15957,30 @@ function renderFinalsCalendar() {
                 taskDateObj.setHours(0, 0, 0, 0);
                 const isPassed = isExamDone || (taskDateObj < todayObj);
 
-                let titleStr = task.title;
-                if (isPassed) {
-                    titleStr = titleStr.replace(/^🔴\s*/, '');
-                    if (!titleStr.startsWith('🟢') && !titleStr.startsWith('✓')) {
-                        titleStr = `🟢 ${titleStr}`;
-                    }
+                const shortCourse = (typeof COURSE_SHORT_NAMES !== 'undefined' && COURSE_SHORT_NAMES[course.code]) || course.name;
+                let moedTag = "";
+                const rawTitleStr = (task.title || "").trim();
+                const rawLower = rawTitleStr.toLowerCase();
+                if (rawLower.includes("מועד א") || rawLower.includes("א'") || rawLower.includes("moed a")) moedTag = "א'";
+                else if (rawLower.includes("מועד ב") || rawLower.includes("ב'") || rawLower.includes("moed b")) moedTag = "ב'";
+
+                let displayTitle = "";
+                if (moedTag) {
+                    displayTitle = `${shortCourse} (${moedTag})`;
+                } else if (rawTitleStr.includes(shortCourse)) {
+                    displayTitle = rawTitleStr;
                 } else {
-                    titleStr = titleStr.startsWith('🔴') ? titleStr : `🔴 ${task.title}`;
+                    displayTitle = `${shortCourse} - ${rawTitleStr}`;
                 }
+
+                const prefix = isPassed ? "🟢" : "🔴";
+                const titleStr = `${prefix} ${displayTitle}`;
 
                 itemsByDate[task.dueDate].push({
                     isExamEvent: true,
                     isPassed: isPassed,
                     title: titleStr,
+                    rawTitle: rawTitleStr,
                     courseCode: course.code,
                     courseName: course.name,
                     taskId: task.id
@@ -16048,8 +16109,8 @@ function renderFinalsCalendar() {
             } else if (item.isExamEvent) {
                 const passedClass = item.isPassed ? "passed" : "";
                 cellHtml += `
-                    <div class="cal-event-pill exam-event ${passedClass}" data-course-code="${item.courseCode}" title="מבחן סוף רשמי! לחץ לפתיחת פרטי ${item.courseName || ''}">
-                        ${item.title}
+                    <div class="cal-event-pill exam-event ${passedClass}" data-course-code="${item.courseCode}" title="מבחן סוף: ${item.courseName || ''} (${item.courseCode}) | ${item.rawTitle || item.title} - לחץ לפתיחת פרטי קורס">
+                        <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: block;">${item.title}</span>
                     </div>
                 `;
             } else if (item.isTaskEvent) {
@@ -16194,10 +16255,10 @@ function renderFinalsCalendar() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.09.17-v1.8.27",
-    build: "180000",
-    date: "2026-09-17 21:55",
-    description: "גרסה 1.8.22: ניקוי והסרת צבע כחול מהסמל (גלגל שיניים וזרוע רובוטית לבנים וחדים), הגדלת הסמל במחשב ל-54 פיקסלים לקריאות מושלמת, ורענון כל פורמטי האייקון"
+    code: "REV-2026.09.18-v1.8.28",
+    build: "180028",
+    date: "2026-09-18 00:30",
+    description: "גרסה 1.8.28: שמות קורסים ומועדים ברורים בלוח השנה, צמצום שטח מת בלוח שנה ומערכת שעות בנייד, סינון משימות מתקפל, וכיול זום במפת הקורסים"
 };
 
 function ensureBaselineRevisions() {
