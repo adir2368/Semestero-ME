@@ -8,15 +8,15 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Semestero ME">
-    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png?v=1.8.21">
     <link rel="manifest" href="manifest.json">
     <title>Semestero ME</title>
     <!-- Fonts for Sci-Fi / Game HUD aesthetic -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Rubik:wght@300;400;500;700;900&display=swap" rel="stylesheet">
-    <link rel="icon" type="image/png" href="icon.png">
-    <link rel="stylesheet" href="styles.css?v=1.8.20">
+    <link rel="icon" type="image/png" href="icon.png?v=1.8.21">
+    <link rel="stylesheet" href="styles.css?v=1.8.21">
     <script>
         (function() {
             try {
@@ -48,7 +48,7 @@
             <!-- Top Right Section: Brand & Auth Controls -->
             <div class="hud-top-right-bar" id="hud-top-right-bar">
                 <div class="hud-logo" style="display: flex; align-items: center; gap: 10px;">
-                    <img src="icon.png" alt="Semestero ME" style="width: 32px; height: 32px; object-fit: contain; filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.6));">
+                    <img src="icon.png?v=1.8.21" alt="Semestero ME" style="width: 32px; height: 32px; object-fit: contain; filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.6));">
                     <div class="hud-logo-text-col" style="display: flex; flex-direction: column; justify-content: center;">
                         <span class="degree-title-text" style="font-size: 1.2rem; font-weight: 900; letter-spacing: 1px; color: #f8fafc; font-family: 'Orbitron', sans-serif; line-height: 1.1;">Se<span style="color: #38bdf8; text-shadow: 0 0 14px rgba(56, 189, 248, 0.95); font-weight: 900;">ME</span>stero</span>
                         <span class="hud-sub-faculty" style="font-size: 0.64rem; color: #38bdf8; font-weight: 600; letter-spacing: 0.5px; line-height: 1;">הנדסת מכונות</span>
@@ -1070,7 +1070,7 @@
         <!-- App Global Footer (Developer Credit & Version) -->
         <footer class="app-global-footer">
             <div class="footer-left-version">
-                <span class="app-version-badge" id="footer-version-badge" title="לחץ לטעינת הגרסה העדכנית ביותר (v1.8.20)" style="cursor: pointer;" onclick="if (window.forceAppUpdate) window.forceAppUpdate(); else window.location.reload(true);">v1.8.20 🔄</span>
+                <span class="app-version-badge" id="footer-version-badge" title="לחץ לטעינת הגרסה העדכנית ביותר (v1.8.21)" style="cursor: pointer;" onclick="if (window.forceAppUpdate) window.forceAppUpdate(); else window.location.reload(true);">v1.8.21 🔄</span>
             </div>
             <div class="footer-credit-content">
                 <span class="credit-text" style="display: inline-flex; align-items: center; gap: 6px;">Developed by <strong>Adir Moshe</strong> <img src="adir_avatar.png" alt="Adir" style="width: 16px; height: 16px; object-fit: contain; vertical-align: middle; filter: drop-shadow(0 0 3px rgba(56, 189, 248, 0.5));"> • <strong>Semestero ME</strong></span>
@@ -2057,22 +2057,22 @@
     <!-- Supabase JS Client for Cloud Sync -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <!-- CheeseFork Technion Courses Database (2,055 courses) -->
-    <script src="cheesefork_database.js?v=1.8.20"></script>
-    <script src="cheesefork_courses.min.js?v=1.8.20"></script>
+    <script src="cheesefork_database.js?v=1.8.21"></script>
+    <script src="cheesefork_courses.min.js?v=1.8.21"></script>
     <!-- Clean Curriculum Template -->
-    <script src="curriculum_template.js?v=1.8.20"></script>
+    <script src="curriculum_template.js?v=1.8.21"></script>
     <!-- Multi-User Identity & Sync Engine -->
-    <script src="auth_sync.js?v=1.8.20"></script>
+    <script src="auth_sync.js?v=1.8.21"></script>
     <!-- Moodle Live Calendar & Tasks Sync Engine -->
-    <script src="moodle_sync.js?v=1.8.20"></script>
+    <script src="moodle_sync.js?v=1.8.21"></script>
     <!-- Technion ME 2025/2026 Catalog & Electives Database -->
-    <script src="planner_catalog.js?v=1.8.20"></script>
+    <script src="planner_catalog.js?v=1.8.21"></script>
     <!-- Degree Planner Drag & Drop Engine -->
-    <script src="planner_module.js?v=1.8.20"></script>
+    <script src="planner_module.js?v=1.8.21"></script>
     <!-- Technion Official Academic Calendar & Holidays Engine -->
-    <script src="technion_academic_calendar.js?v=1.8.20"></script>
+    <script src="technion_academic_calendar.js?v=1.8.21"></script>
     <!-- Core Application Logic -->
-    <script src="app.js?v=1.8.20"></script>
+    <script src="app.js?v=1.8.21"></script>
     <!-- PWA Service Worker Registration -->
     <script>
         if ('serviceWorker' in navigator && window.location.protocol.startsWith('http')) {
