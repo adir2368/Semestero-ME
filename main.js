@@ -1,4 +1,4 @@
-const { app, BrowserWindow, Menu } = require('electron');
+const { app, BrowserWindow, Menu, ipcMain } = require('electron');
 const path = require('path');
 
 // Explicit Windows AppUserModelID to ensure Taskbar icon displays properly
@@ -21,6 +21,8 @@ function createWindow() {
         webPreferences: {
             nodeIntegration: false,
             contextIsolation: true,
+            webSecurity: false,
+            preload: path.join(__dirname, 'preload.js'),
             sandbox: false
         }
     });
@@ -35,6 +37,25 @@ function createWindow() {
         mainWindow = null;
     });
 }
+
+// Native IPC Handler for Moodle Feed (bypasses browser CORS completely)
+ipcMain.handle('fetch-moodle-feed', async (event, url) => {
+    try {
+        const response = await fetch(url, {
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+                'Accept': 'text/calendar, text/plain, */*'
+            }
+        });
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status} - ${response.statusText}`);
+        }
+        const text = await response.text();
+        return { success: true, data: text };
+    } catch (err) {
+        return { success: false, error: err.message };
+    }
+});
 
 // App lifecycle listeners
 app.whenReady().then(() => {

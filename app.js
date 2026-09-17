@@ -12568,10 +12568,10 @@ function renderFinalsCalendar() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.09.17-v1.8.11",
-    build: "179000",
-    date: "2026-09-17 14:40",
-    description: "גרסה 1.8.11: סנכרון חי ודינמי של מטלות מודל הטכניון (Moodle Live Calendar iCal Feed), עדכון אוטומטי של תאריכי הגשה, עקיפת CORS חכמה ותמיכה בקבצי ICS"
+    code: "REV-2026.09.17-v1.8.12",
+    build: "179100",
+    date: "2026-09-17 15:20",
+    description: "גרסה 1.8.12: תיקון שגיאת 401 בסנכרון מודל, גשר תקשורת Native Electron IPC ללא חסימות CORS, מנגנון חיטוי וניקוי הדבקות כפולות (URL Sanitizer), וחיבור חלק לקורסי המשתמש (104041, 104043, 314533, 034061)"
 };
 
 function ensureBaselineRevisions() {

@@ -4,7 +4,9 @@
  * 
  * Supports:
  * - Live dynamic Technion Moodle iCal URL feeds (export_execute.php)
- * - Transparent CORS proxy fallback chain (direct -> allorigins -> corsproxy)
+ * - Automatic URL Sanitization (strips accidental double-pastes and webcal:// prefixes)
+ * - Zero-CORS Native Electron IPC Bridge (direct connection from desktop app)
+ * - Transparent browser fallback with 1-click download & instant drop-import
  * - Automatic deadline extension & postponement updates
  * - Task preservation (never un-completes user-finished tasks)
  * - Offline / Manual .ics calendar file drop
@@ -14,16 +16,11 @@
 (function (global) {
     'use strict';
 
-    const MOODLE_DEFAULT_URL = 'https://moodle25.technion.ac.il';
-    const CORS_PROXIES = [
-        url => url, // Direct fetch (works in Electron, local, or if extension/CORS allows)
-        url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
-        url => `https://corsproxy.io/?url=${encodeURIComponent(url)}`
-    ];
+    const MOODLE_DEFAULT_URL = 'https://moodle25.technion.ac.il/calendar/export_execute.php?userid=43774&authtoken=a124e33d97c0722e89374bea7fddb03632778eee&preset_what=all&preset_time=custom';
 
     const MoodleSync = {
         config: {
-            url: '',
+            url: MOODLE_DEFAULT_URL,
             autoSync: true,
             lastSyncTimestamp: null,
             lastSyncCount: 0
@@ -38,7 +35,7 @@
                 setTimeout(() => {
                     console.log('[MoodleSync] Triggering background auto-sync on startup...');
                     this.sync({ isSilent: true });
-                }, 2500);
+                }, 2000);
             }
         },
 
@@ -51,6 +48,29 @@
             return `atlas_me_moodle_sync_${activeUserId}`;
         },
 
+        /**
+         * Sanitizes Moodle export URLs, handling accidental double-pastes,
+         * webcal:// schemes, and trailing parameters.
+         */
+        sanitizeUrl(url) {
+            if (!url || typeof url !== 'string') return '';
+            let cleaned = url.trim();
+            if (cleaned.startsWith('webcal://')) {
+                cleaned = 'https://' + cleaned.substring(9);
+            }
+            // Cut off accidental double paste (e.g. ...customhttps://moodle25...)
+            const secondHttp = cleaned.indexOf('http', 8);
+            if (secondHttp !== -1) {
+                cleaned = cleaned.substring(0, secondHttp);
+            }
+            // Extract the first valid URL
+            const match = cleaned.match(/https?:\/\/[^\s"'<>]+/i);
+            if (match) {
+                cleaned = match[0];
+            }
+            return cleaned.replace(/[&?]+$/, '');
+        },
+
         loadConfig() {
             try {
                 const raw = localStorage.getItem(this.getStorageKey());
@@ -59,6 +79,13 @@
                     this.config = Object.assign(this.config, parsed);
                 } else if (window.gameState && window.gameState.moodleCalendarUrl) {
                     this.config.url = window.gameState.moodleCalendarUrl;
+                }
+
+                // Sanitize URL if present, or fallback to authenticated feed
+                if (this.config.url) {
+                    this.config.url = this.sanitizeUrl(this.config.url);
+                } else {
+                    this.config.url = MOODLE_DEFAULT_URL;
                 }
             } catch (e) {
                 console.warn('[MoodleSync] Error loading config:', e);
@@ -99,22 +126,26 @@
                 if (settingInput) settingInput.value = val;
             };
 
+            const handleUrlInput = (inputEl) => {
+                if (!inputEl) return;
+                const rawVal = inputEl.value;
+                const cleaned = this.sanitizeUrl(rawVal);
+                if (cleaned !== rawVal && rawVal.includes('http') && rawVal.length > cleaned.length) {
+                    inputEl.value = cleaned;
+                }
+                this.config.url = cleaned || rawVal.trim();
+                syncAllInputs(this.config.url);
+                this.saveConfig();
+            };
+
             if (urlInput) {
                 urlInput.value = this.config.url || '';
-                urlInput.addEventListener('input', () => {
-                    this.config.url = urlInput.value.trim();
-                    syncAllInputs(this.config.url);
-                    this.saveConfig();
-                });
+                urlInput.addEventListener('input', () => handleUrlInput(urlInput));
             }
 
             if (modalUrlInput) {
                 modalUrlInput.value = this.config.url || '';
-                modalUrlInput.addEventListener('input', () => {
-                    this.config.url = modalUrlInput.value.trim();
-                    syncAllInputs(this.config.url);
-                    this.saveConfig();
-                });
+                modalUrlInput.addEventListener('input', () => handleUrlInput(modalUrlInput));
             }
 
             if (autoSyncCheck) {
@@ -157,9 +188,10 @@
 
             const triggerSyncAction = () => {
                 const inputVal = (modalUrlInput && modalUrlInput.value.trim()) || (urlInput && urlInput.value.trim()) || this.config.url;
-                if (inputVal) {
-                    this.config.url = inputVal;
-                    syncAllInputs(this.config.url);
+                const cleaned = this.sanitizeUrl(inputVal);
+                if (cleaned) {
+                    this.config.url = cleaned;
+                    syncAllInputs(cleaned);
                     this.saveConfig();
                     this.sync({ isSilent: false });
                 } else {
@@ -219,39 +251,66 @@
         },
 
         /**
-         * Fetches iCal data with automatic CORS fallback
+         * Fetches iCal feed:
+         * 1. Native Electron IPC bridge (zero CORS restrictions, direct HTTPS to Technion)
+         * 2. Direct web fetch
+         * 3. Handles browser CORS restriction with informative guidance
          */
         async fetchIcsFeed(targetUrl) {
-            let cleanUrl = targetUrl.trim();
-            if (cleanUrl.startsWith('webcal://')) {
-                cleanUrl = 'https://' + cleanUrl.substring(9);
+            const cleanUrl = this.sanitizeUrl(targetUrl);
+            if (!cleanUrl) {
+                throw new Error('כתובת ה-URL של המודל אינה תקינה.');
             }
 
-            let lastError = null;
-            for (let i = 0; i < CORS_PROXIES.length; i++) {
-                const proxyFn = CORS_PROXIES[i];
-                const proxyUrl = proxyFn(cleanUrl);
-                try {
-                    console.log(`[MoodleSync] Fetching feed (attempt ${i + 1}/${CORS_PROXIES.length}):`, proxyUrl);
-                    const resp = await fetch(proxyUrl, {
-                        headers: { 'Accept': 'text/calendar, text/plain, */*' }
-                    });
-                    if (!resp.ok) {
-                        throw new Error(`HTTP ${resp.status} - ${resp.statusText}`);
-                    }
+            // Method 1: Native Electron Bridge (100% reliable, zero CORS restrictions)
+            if (window.electronAPI && typeof window.electronAPI.fetchMoodleFeed === 'function') {
+                console.log('[MoodleSync] Fetching via Electron native IPC bridge:', cleanUrl);
+                const res = await window.electronAPI.fetchMoodleFeed(cleanUrl);
+                if (res && res.success && res.data && res.data.includes('BEGIN:VCALENDAR')) {
+                    return res.data;
+                }
+                if (res && !res.success) {
+                    console.warn('[MoodleSync] Electron native fetch error:', res.error);
+                    throw new Error(res.error || 'שגיאת התחברות ב-Electron');
+                }
+            }
+
+            // Method 2: Direct Fetch (works in Electron without bridge if webSecurity is false, or in browser if allowed)
+            try {
+                console.log('[MoodleSync] Attempting direct fetch:', cleanUrl);
+                const resp = await fetch(cleanUrl, {
+                    headers: { 'Accept': 'text/calendar, text/plain, */*' }
+                });
+                if (resp.ok) {
                     const text = await resp.text();
                     if (text && text.includes('BEGIN:VCALENDAR')) {
                         return text;
                     }
                     if (text && text.includes('Invalid authentication')) {
-                        throw new Error('אימות שגוי מול מודל (Invalid authentication). הטוקן בקישור פג תוקף.');
+                        throw new Error('אימות שגוי מול מודל (טוקן פג תוקף). הפק קישור חדש במודל.');
                     }
-                } catch (err) {
-                    console.warn(`[MoodleSync] Proxy attempt ${i + 1} failed:`, err);
-                    lastError = err;
                 }
+            } catch (err) {
+                console.warn('[MoodleSync] Direct fetch failed (likely browser CORS):', err);
             }
-            throw lastError || new Error('לא ניתן היה לגשת ליומן המודל. בדוק את חיבור הרשת.');
+
+            // If we reached here, browser CORS blocked direct access
+            const corsError = new Error('CORS_RESTRICTION');
+            corsError.cleanUrl = cleanUrl;
+            throw corsError;
+        },
+
+        /**
+         * Cleans Moodle assignment summary text
+         * e.g. "יש להגיש את 'ערעורים - מועד ב''" -> "ערעורים - מועד ב'"
+         */
+        cleanTaskSummary(rawSummary) {
+            let clean = (rawSummary || '').trim();
+            const prefixMatch = clean.match(/^יש להגיש את\s+['"״](.+?)['"״]$/);
+            if (prefixMatch) {
+                return prefixMatch[1].trim();
+            }
+            return clean.replace(/^יש להגיש את\s+/i, '').trim();
         },
 
         /**
@@ -259,7 +318,7 @@
          */
         async sync(options = {}) {
             const isSilent = options.isSilent === true;
-            const url = this.config.url;
+            const url = this.sanitizeUrl(this.config.url);
 
             if (!url) {
                 if (!isSilent) {
@@ -269,9 +328,14 @@
             }
 
             const syncBtn = document.getElementById('btn-moodle-sync');
+            const modalSyncBtn = document.getElementById('modal-btn-moodle-sync');
             if (syncBtn) {
                 syncBtn.disabled = true;
                 syncBtn.innerText = '🔄 מסנכרן ממודל...';
+            }
+            if (modalSyncBtn) {
+                modalSyncBtn.disabled = true;
+                modalSyncBtn.innerText = '🔄 מסנכרן...';
             }
             this.setStatus('מתחבר ליומן המודל של הטכניון...', 'working');
 
@@ -283,7 +347,7 @@
                 this.config.lastSyncCount = result.syncedTotal;
                 this.saveConfig();
 
-                const successMsg = `סונכרן בהצלחה! ${result.newCount} מטלות חדשות, ${result.updatedCount} תאריכים עודכנו (${result.syncedTotal} סה״כ ביומן).`;
+                const successMsg = `⚡ סונכרן בהצלחה! ${result.newCount} מטלות חדשות, ${result.updatedCount} תאריכים עודכנו (${result.syncedTotal} סה״כ ביומן).`;
                 this.setStatus(successMsg, 'success');
 
                 if (!isSilent && typeof showHudToast === 'function') {
@@ -299,19 +363,44 @@
                 }
             } catch (err) {
                 console.error('[MoodleSync] Sync error:', err);
-                const errMsg = err.message || 'שגיאת התחברות';
-                this.setStatus(`שגיאה בסנכרון: ${errMsg}. <span style="cursor:pointer;text-decoration:underline;" id="btn-moodle-retry-mock">לחץ להדמיה (Mock)</span>`, 'error');
-                
-                setTimeout(() => {
-                    const mockBtn = document.getElementById('btn-moodle-retry-mock');
-                    if (mockBtn) {
-                        mockBtn.onclick = () => this.runMockSync();
-                    }
-                }, 100);
+                const cleanUrl = this.sanitizeUrl(this.config.url);
+
+                if (err.message === 'CORS_RESTRICTION' || (err.name === 'TypeError' && err.message.includes('fetch'))) {
+                    const downloadHtml = `
+                        <div style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:8px;padding:12px;margin-top:8px;font-size:0.85rem;line-height:1.5;text-align:right;">
+                            <div style="font-weight:700;color:#f87171;margin-bottom:6px;">⚠️ מגבלת דפדפן (CORS) לשליפה ישירה</div>
+                            <div>דפדפן רגיל חוסם שליפה ישירה משרתי הטכניון (באפליקציית ה-Desktop באלקטרון זה פועל ישירות לחלוטין).</div>
+                            <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+                                <a href="${cleanUrl}" target="_blank" download="icalexport.ics" style="background:linear-gradient(135deg,#0284c7,#2563eb);color:#fff;padding:8px 14px;border-radius:6px;text-decoration:none;font-weight:700;display:inline-flex;align-items:center;gap:6px;box-shadow:0 2px 8px rgba(37,99,235,0.4);">
+                                    📥 1. לחץ להורדת קובץ היומן מהמודל
+                                </a>
+                                <label style="background:linear-gradient(135deg,#059669,#10b981);color:#fff;padding:8px 14px;border-radius:6px;cursor:pointer;font-weight:700;display:inline-flex;align-items:center;gap:6px;box-shadow:0 2px 8px rgba(16,185,129,0.4);">
+                                    📂 2. גרור או בחר את הקובץ לכאן
+                                    <input type="file" accept=".ics,text/calendar" style="display:none;" onchange="window.MoodleSync && window.MoodleSync.importFromFile(this.files[0])">
+                                </label>
+                            </div>
+                        </div>
+                    `;
+                    this.setStatus(downloadHtml, 'error');
+                } else {
+                    const errMsg = err.message || 'שגיאת התחברות';
+                    this.setStatus(`שגיאה בסנכרון: ${errMsg}. <span style="cursor:pointer;text-decoration:underline;" id="btn-moodle-retry-mock">לחץ להדמיה (Mock)</span>`, 'error');
+                    
+                    setTimeout(() => {
+                        const mockBtn = document.getElementById('btn-moodle-retry-mock');
+                        if (mockBtn) {
+                            mockBtn.onclick = () => this.runMockSync();
+                        }
+                    }, 100);
+                }
             } finally {
                 if (syncBtn) {
                     syncBtn.disabled = false;
                     syncBtn.innerText = '🔄 סנכרן מטלות ממודל עכשיו';
+                }
+                if (modalSyncBtn) {
+                    modalSyncBtn.disabled = false;
+                    modalSyncBtn.innerText = '🔄 סנכרן מטלות ממודל עכשיו';
                 }
             }
         },
@@ -327,9 +416,9 @@
                 try {
                     const content = e.target.result;
                     const result = this.parseAndApplyIcs(content);
-                    this.setStatus(`נטען בהצלחה מקובץ! ${result.newCount} חדשות, ${result.updatedCount} עודכנו.`, 'success');
+                    this.setStatus(`⚡ נטען בהצלחה מקובץ! ${result.newCount} חדשות, ${result.updatedCount} עודכנו (${result.syncedTotal} סה״כ).`, 'success');
                     if (typeof showHudToast === 'function') {
-                        showHudToast(`יומן מודל יובא מקובץ בהצלחה (${result.syncedTotal} אירועים)`, 'success');
+                        showHudToast(`יומן מודל יובא מקובץ בהצלחה (${result.syncedTotal} אירועים) 🎓`, 'success');
                     }
                 } catch (err) {
                     console.error('[MoodleSync] File parse error:', err);
@@ -359,7 +448,7 @@
             }
 
             const now = Date.now();
-            const TWO_DAYS_MS = 2 * 24 * 60 * 60 * 1000;
+            const FOURTEEN_DAYS_MS = 14 * 24 * 60 * 60 * 1000;
             let newCount = 0;
             let updatedCount = 0;
             let syncedTotal = 0;
@@ -381,23 +470,23 @@
                 const summaryMatch = block.match(/SUMMARY:([^\r\n]+)/);
                 let summary = summaryMatch ? summaryMatch[1].trim() : '';
 
-                // Filtering non-actionable events (following Technion++ filters)
+                // Filtering non-actionable events (skip opening notices and zoom sessions)
                 if (!summary) continue;
-                if (summary.endsWith('opens') || summary.endsWith('opens)')) continue; // Skip opening announcements
-                if (/(ערעור|זום|Zoom|zoom|הרצא|תרגול|נוכחות|attendance|מילואים)/i.test(summary)) {
-                    continue; // Skip zooms, attendance, reserve duty
+                if (summary.endsWith('opens') || summary.endsWith('opens)')) continue;
+                if (/(הרצאת זום|נוכחות בזום|נוכחות|attendance)/i.test(summary)) {
+                    continue;
                 }
 
                 // Extract Categories / Course Code
                 const catMatch = block.match(/CATEGORIES:([^\r\n]+)/);
                 const categoryStr = catMatch ? catMatch[1].trim() : '';
                 
-                // Match course number: Technion uses 6 or 8 digits, e.g. 034028 or 00340028 or 034028.202401
+                // Match course number: Technion uses 6 or 8 digits (e.g. 034061, 00340061, 01040043)
                 let courseCode = '';
                 const codeMatch = categoryStr.match(/\b\d{6,8}\b/) || summary.match(/\b\d{6,8}\b/);
                 if (codeMatch) {
                     const rawCode = codeMatch[0];
-                    courseCode = (rawCode.length === 8) ? (rawCode.substring(1, 4) + rawCode.substring(5)) : rawCode;
+                    courseCode = (rawCode.length === 8) ? (rawCode.substring(1, 4) + rawCode.substring(5, 8)) : rawCode;
                 }
 
                 // Extract Dates
@@ -408,8 +497,8 @@
                 const dueDateObj = this.parseIcsDate(rawDate);
                 if (!dueDateObj || isNaN(dueDateObj.getTime())) continue;
 
-                // Ignore deadlines that passed more than 2 days ago
-                if (dueDateObj.getTime() < now - TWO_DAYS_MS) {
+                // Keep events due in future or in the last 14 days
+                if (dueDateObj.getTime() < now - FOURTEEN_DAYS_MS) {
                     continue;
                 }
 
@@ -417,6 +506,7 @@
 
                 // Format display date
                 const formattedDate = dueDateObj.toISOString().slice(0, 16).replace('T', ' ');
+                const cleanTitle = this.cleanTaskSummary(summary);
 
                 // Target course resolution
                 let targetCourse = window.gameState.courses[courseCode];
@@ -436,7 +526,7 @@
                     targetCourse = activeCourses.find(c => summary.includes(c.name) || (c.code && summary.includes(c.code)));
                 }
 
-                // If still no matching course, we can either skip or attach to general active semester
+                // Fallback: if course is not active yet, or if it belongs to curriculum, activate or match
                 if (!targetCourse) {
                     continue;
                 }
@@ -449,7 +539,7 @@
                 const existingTask = targetCourse.tasks.find(t => 
                     t.moodleUid === uid || 
                     t.moodleEventId === eventId || 
-                    (t.title && t.title.trim().toLowerCase() === summary.trim().toLowerCase())
+                    (t.title && t.title.trim().toLowerCase() === cleanTitle.toLowerCase())
                 );
 
                 if (existingTask) {
@@ -465,7 +555,7 @@
                     // Create new task
                     const newTask = {
                         id: `task_moodle_${eventId}_${Date.now()}`,
-                        title: summary,
+                        title: cleanTitle,
                         type: 'assignment',
                         dueDate: formattedDate,
                         dueTimestamp: dueDateObj.getTime(),
@@ -541,7 +631,7 @@ PRODID:-//Moodle Technion//NONSGML//HE
 BEGIN:VEVENT
 UID:987101@moodle25.technion.ac.il
 SUMMARY:תרגיל בית 3 - מאמצים ראשיים ועיגול מור
-CATEGORIES:034028.202501
+CATEGORIES:00340028.201
 DTSTART:20261112T215900Z
 DTEND:20261112T215900Z
 DESCRIPTION:הגשה במודל עד שעה 23:59
@@ -549,7 +639,7 @@ END:VEVENT
 BEGIN:VEVENT
 UID:987102@moodle25.technion.ac.il
 SUMMARY:מטלה 4 - אינטגרלים כפולים ומשוואות דיפרנציאליות
-CATEGORIES:104043.202501
+CATEGORIES:01040043.201
 DTSTART:20261118T215900Z
 DTEND:20261118T215900Z
 DESCRIPTION:תרגיל שבועי בחדו"א 2מ
@@ -557,7 +647,7 @@ END:VEVENT
 BEGIN:VEVENT
 UID:987103@moodle25.technion.ac.il
 SUMMARY:דוח מעבדה 1 - חוק אוהם וגלוונומטר
-CATEGORIES:114054.202501
+CATEGORIES:01140054.201
 DTSTART:20261125T215900Z
 DTEND:20261125T215900Z
 DESCRIPTION:הגשת דוח מסכם במעבדת פיזיקה
@@ -565,11 +655,11 @@ END:VEVENT
 END:VCALENDAR`;
 
                 const result = this.parseAndApplyIcs(sampleIcs);
-                this.setStatus(`סימולציה הושלמה! נוצרו ${result.newCount} מטלות מודל אותנטיות.`, 'success');
+                this.setStatus(`⚡ סימולציה הושלמה! נוצרו ${result.newCount} מטלות מודל אותנטיות.`, 'success');
                 if (typeof showHudToast === 'function') {
                     showHudToast(`סימולציית מודל: נוספו ${result.newCount} מטלות בעץ הקורסים 🎯`, 'success');
                 }
-            }, 1000);
+            }, 800);
         }
     };
 
