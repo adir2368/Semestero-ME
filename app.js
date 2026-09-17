@@ -8105,7 +8105,6 @@ const PRELOADED_USER_STATE = {
   },
   "hasLoadedGoogleCalendarAugust": true,
   "hasLoadedGoogleCalendarAugustV3": true,
-  "lastModified": 1789652751789
 };
 
 const AUGUST_2026_SCHEDULE = [];
@@ -8122,6 +8121,20 @@ function loadSavedState() {
             gameState = userState;
             loadedFromAuthSync = true;
             console.log("[AuthSync] Loaded active user state successfully for:", window.AuthSync.getActiveUser().name);
+
+            // Auto-upgrade if local save is missing courses or removedCourses compared to PRELOADED_USER_STATE
+            if (typeof PRELOADED_USER_STATE !== 'undefined' && PRELOADED_USER_STATE.courses) {
+                const preloadedCount = Object.keys(PRELOADED_USER_STATE.courses).length;
+                const localCount = Object.keys(gameState.courses || {}).length;
+                if (localCount < preloadedCount) {
+                    console.log(`[AuthSync] Upgrading local save from ${localCount} to ${preloadedCount} courses (Adir authentic state)...`);
+                    gameState = JSON.parse(JSON.stringify(PRELOADED_USER_STATE));
+                    saveState();
+                } else if (!gameState.removedCourses && PRELOADED_USER_STATE.removedCourses) {
+                    gameState.removedCourses = JSON.parse(JSON.stringify(PRELOADED_USER_STATE.removedCourses));
+                    saveState();
+                }
+            }
         }
     }
 
