@@ -104,6 +104,21 @@ body {
     letter-spacing: 2px;
 }
 
+.hud-brand-logo-img {
+    width: 54px;
+    height: 54px;
+    object-fit: contain;
+    filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.45));
+    border-radius: 12px;
+    transition: transform 0.25s ease, filter 0.25s ease;
+    flex-shrink: 0;
+}
+
+.hud-brand-logo-img:hover {
+    transform: scale(1.05);
+    filter: drop-shadow(0 0 16px rgba(56, 189, 248, 0.75));
+}
+
 .glitch-text {
     color: var(--text-light);
     position: relative;

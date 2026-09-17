@@ -1,6 +1,6 @@
 {
   "name": "academic-skill-tree",
-  "version": "1.8.21",
+  "version": "1.8.22",
   "description": "Semestero ME - Academic Skill Tree and Degree Orchestration System",
   "main": "main.js",
   "scripts": {
