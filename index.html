@@ -598,6 +598,106 @@
                     </div>
                 </div>
 
+                <!-- Section 4B: Mobile Notifications & Phone Account Configuration -->
+                <div class="settings-card" id="settings-card-phone-notifications">
+                    <div class="settings-card-header">
+                        <div class="settings-card-title">
+                            <span>📱 מספר טלפון והעדפות התראה לנייד (Phone & Mobile Alerts)</span>
+                        </div>
+                        <button type="button" class="btn btn-xs btn-outline" id="btn-save-section-phone-notifs" style="border-color: #38bdf8; color: #38bdf8;">
+                            💾 שמור טלפון והעדפות
+                        </button>
+                    </div>
+                    
+                    <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 14px;">
+                        הגדרת מספר הטלפון האישי לקבלת התראות ועדכונים, ובחירה מותאמת אישית של סוגי ההתראות שברצונך לקבל.
+                    </p>
+
+                    <div class="phone-settings-grid">
+                        <!-- Phone Input Box -->
+                        <div class="form-group" style="grid-column: 1 / -1;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                                <label class="setting-label" for="setting-phone-number" style="margin-bottom: 0;">📱 מספר טלפון לקבלת התראות (SMS / WhatsApp):</label>
+                                <span class="phone-status-badge badge-pending" id="phone-status-indicator">⚠️ לא הוגדר מספר</span>
+                            </div>
+                            <div class="phone-input-wrapper">
+                                <span class="phone-input-flag" title="קידומת ישראל">🇮🇱</span>
+                                <input type="tel" id="setting-phone-number" class="modal-input phone-input-field" placeholder="לדוגמה: 050-1234567" dir="ltr">
+                                <button type="button" class="btn btn-sm btn-outline" id="btn-test-phone-alert" title="שלח התראת בדיקה למספר הטלפון שהוזן">
+                                    <span>📲 שלח בדיקה</span>
+                                </button>
+                            </div>
+                            <span class="setting-hint">המספר נשמר בחשבונך ומאפשר קבלת עדכונים ישירות לנייד.</span>
+                        </div>
+
+                        <!-- Notification Category Selection Grid -->
+                        <div class="notif-preferences-container" style="grid-column: 1 / -1;">
+                            <div class="setting-label" style="margin: 10px 0 8px 0; font-weight: 700; color: #f8fafc;">
+                                🔔 בחר אילו התראות ברצונך לקבל:
+                            </div>
+
+                            <div class="notif-pref-grid">
+                                <label class="notif-pref-card" for="pref-notif-class-10m">
+                                    <div class="notif-pref-checkbox-wrap">
+                                        <input type="checkbox" id="pref-notif-class-10m" class="notif-pref-checkbox" checked>
+                                        <span class="notif-pref-custom-check"></span>
+                                    </div>
+                                    <div class="notif-pref-info">
+                                        <div class="notif-pref-title">⏰ תזכורות שיעורים (10 דקות מראש)</div>
+                                        <div class="notif-pref-desc">התראה מדויקת 10 דקות לפני כל הרצאה או תרגול במערכת</div>
+                                    </div>
+                                </label>
+
+                                <label class="notif-pref-card" for="pref-notif-daily-brief">
+                                    <div class="notif-pref-checkbox-wrap">
+                                        <input type="checkbox" id="pref-notif-daily-brief" class="notif-pref-checkbox" checked>
+                                        <span class="notif-pref-custom-check"></span>
+                                    </div>
+                                    <div class="notif-pref-info">
+                                        <div class="notif-pref-title">🌅 סקירת בוקר יומית (לו״ז ומשימות)</div>
+                                        <div class="notif-pref-desc">תקציר מרוכז של שיעורי היום ומשימות שפתוחות לביצוע</div>
+                                    </div>
+                                </label>
+
+                                <label class="notif-pref-card" for="pref-notif-task-deadlines">
+                                    <div class="notif-pref-checkbox-wrap">
+                                        <input type="checkbox" id="pref-notif-task-deadlines" class="notif-pref-checkbox" checked>
+                                        <span class="notif-pref-custom-check"></span>
+                                    </div>
+                                    <div class="notif-pref-info">
+                                        <div class="notif-pref-title">🚨 דדליינים דחופים למשימות והגשות</div>
+                                        <div class="notif-pref-desc">התראה על משימות אקדמיות שמועד הגשתן מתקרב</div>
+                                    </div>
+                                </label>
+
+                                <label class="notif-pref-card" for="pref-notif-academic-grades">
+                                    <div class="notif-pref-checkbox-wrap">
+                                        <input type="checkbox" id="pref-notif-academic-grades" class="notif-pref-checkbox">
+                                        <span class="notif-pref-custom-check"></span>
+                                    </div>
+                                    <div class="notif-pref-info">
+                                        <div class="notif-pref-title">🎓 עדכוני ציונים ושינויי סטטוס תואר</div>
+                                        <div class="notif-pref-desc">התראה כאשר מועדכן ציון חדש או משתנה סטטוס קורס</div>
+                                    </div>
+                                </label>
+                            </div>
+
+                            <!-- Channel Selection -->
+                            <div class="notif-channels-bar">
+                                <span class="notif-channels-label">ערוצי קבלה פעילים:</span>
+                                <label class="channel-toggle-item" for="pref-channel-push">
+                                    <input type="checkbox" id="pref-channel-push" checked>
+                                    <span>🔔 התראות Push / דפדפן</span>
+                                </label>
+                                <label class="channel-toggle-item" for="pref-channel-phone">
+                                    <input type="checkbox" id="pref-channel-phone" checked>
+                                    <span>📱 הודעות ישירות לנייד</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Section 5: Course & Degree Control Panel (Moved from Main Sidebar) -->
                 <div class="settings-card">
                     <div class="settings-card-header">
@@ -1632,6 +1732,44 @@
                         <span>📲 סקירה לנייד</span>
                     </button>
                     <button type="button" class="notif-close-btn" id="btn-close-notif-drawer" aria-label="סגור חלון התראות">✕</button>
+                </div>
+            </div>
+
+            <!-- Quick Phone & Notification Settings Bar in Drawer -->
+            <div class="drawer-phone-bar" id="drawer-phone-bar">
+                <div class="drawer-phone-bar-top">
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                        <span style="font-size: 1.05rem;">📱</span>
+                        <span style="font-size: 0.82rem; font-weight: 700; color: #f8fafc;">טלפון להתראות:</span>
+                        <span class="drawer-phone-badge" id="drawer-phone-badge">⚠️ לא הוגדר</span>
+                    </div>
+                    <button type="button" class="drawer-toggle-prefs-btn" id="btn-toggle-drawer-prefs" title="פתח/סגור עריכת הגדרות טלפון והעדפות">
+                        <span>⚙️ הגדרות</span>
+                    </button>
+                </div>
+                <div class="drawer-prefs-collapsible" id="drawer-prefs-collapsible" style="display: none;">
+                    <div class="drawer-phone-input-row">
+                        <input type="tel" id="drawer-phone-input" class="modal-input drawer-phone-field" placeholder="הזן טלפון: 050-1234567" dir="ltr">
+                        <button type="button" class="btn btn-xs btn-primary" id="btn-save-drawer-phone">שמור</button>
+                    </div>
+                    <div class="drawer-quick-prefs-list">
+                        <label class="drawer-pref-chip" for="drawer-pref-class-10m">
+                            <input type="checkbox" id="drawer-pref-class-10m" checked>
+                            <span>⏰ 10 דק׳ שיעור</span>
+                        </label>
+                        <label class="drawer-pref-chip" for="drawer-pref-daily-brief">
+                            <input type="checkbox" id="drawer-pref-daily-brief" checked>
+                            <span>🌅 לו״ז בוקר</span>
+                        </label>
+                        <label class="drawer-pref-chip" for="drawer-pref-task-deadlines">
+                            <input type="checkbox" id="drawer-pref-task-deadlines" checked>
+                            <span>🚨 דדליינים</span>
+                        </label>
+                        <label class="drawer-pref-chip" for="drawer-pref-academic-grades">
+                            <input type="checkbox" id="drawer-pref-academic-grades">
+                            <span>🎓 ציונים</span>
+                        </label>
+                    </div>
                 </div>
             </div>
 

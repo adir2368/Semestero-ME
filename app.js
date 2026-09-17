@@ -12691,6 +12691,9 @@ function renderSettingsPage() {
             };
         });
     }
+
+    // Render Phone Number & Granular Notification Preferences
+    renderPhoneAndNotificationPreferences();
 }
 
 // Edit Revision Details (Inline)
@@ -12782,11 +12785,175 @@ function saveGoalsSection() {
     showToastNotification("✅ יעדים אקדמיים והתראות נשמרו בהצלחה!", "success");
 }
 
+// ============================================================================
+// Phone Account & Notification Preferences Management
+// ============================================================================
+
+function ensureNotificationPreferencesDefaults() {
+    if (!gameState.userProfile) {
+        gameState.userProfile = {};
+    }
+    if (!gameState.notificationPreferences) {
+        gameState.notificationPreferences = {
+            class10Min: true,
+            dailyBrief: true,
+            taskDeadlines: true,
+            academicGrades: false,
+            channelPush: true,
+            channelPhone: true
+        };
+    }
+}
+
+function renderPhoneAndNotificationPreferences() {
+    ensureNotificationPreferencesDefaults();
+
+    const phone = (gameState.userProfile && gameState.userProfile.phone) || "";
+    const prefs = gameState.notificationPreferences;
+
+    // 1. Settings page fields
+    const phoneInput = document.getElementById("setting-phone-number");
+    const phoneStatus = document.getElementById("phone-status-indicator");
+    const prefClass = document.getElementById("pref-notif-class-10m");
+    const prefBrief = document.getElementById("pref-notif-daily-brief");
+    const prefTasks = document.getElementById("pref-notif-task-deadlines");
+    const prefGrades = document.getElementById("pref-notif-academic-grades");
+    const chanPush = document.getElementById("pref-channel-push");
+    const chanPhone = document.getElementById("pref-channel-phone");
+
+    if (phoneInput && document.activeElement !== phoneInput) phoneInput.value = phone;
+    if (phoneStatus) {
+        if (phone) {
+            phoneStatus.className = "phone-status-badge badge-verified";
+            phoneStatus.innerText = `✓ מספר מעודכן (${phone})`;
+        } else {
+            phoneStatus.className = "phone-status-badge badge-pending";
+            phoneStatus.innerText = "⚠️ לא הוגדר מספר";
+        }
+    }
+
+    if (prefClass) prefClass.checked = prefs.class10Min !== false;
+    if (prefBrief) prefBrief.checked = prefs.dailyBrief !== false;
+    if (prefTasks) prefTasks.checked = prefs.taskDeadlines !== false;
+    if (prefGrades) prefGrades.checked = prefs.academicGrades === true;
+    if (chanPush) chanPush.checked = prefs.channelPush !== false;
+    if (chanPhone) chanPhone.checked = prefs.channelPhone !== false;
+
+    // 2. Drawer fields
+    const drawerPhoneInput = document.getElementById("drawer-phone-input");
+    const drawerPhoneBadge = document.getElementById("drawer-phone-badge");
+    const drawerClass = document.getElementById("drawer-pref-class-10m");
+    const drawerBrief = document.getElementById("drawer-pref-daily-brief");
+    const drawerTasks = document.getElementById("drawer-pref-task-deadlines");
+    const drawerGrades = document.getElementById("drawer-pref-academic-grades");
+
+    if (drawerPhoneInput && document.activeElement !== drawerPhoneInput) drawerPhoneInput.value = phone;
+    if (drawerPhoneBadge) {
+        if (phone) {
+            drawerPhoneBadge.className = "drawer-phone-badge has-phone";
+            drawerPhoneBadge.innerText = `✓ ${phone}`;
+        } else {
+            drawerPhoneBadge.className = "drawer-phone-badge";
+            drawerPhoneBadge.innerText = "⚠️ לא הוגדר";
+        }
+    }
+
+    if (drawerClass) drawerClass.checked = prefs.class10Min !== false;
+    if (drawerBrief) drawerBrief.checked = prefs.dailyBrief !== false;
+    if (drawerTasks) drawerTasks.checked = prefs.taskDeadlines !== false;
+    if (drawerGrades) drawerGrades.checked = prefs.academicGrades === true;
+}
+
+function savePhoneAndNotificationPreferences(source = 'settings') {
+    ensureNotificationPreferencesDefaults();
+
+    let rawPhone = "";
+    if (source === 'drawer') {
+        const drawerInput = document.getElementById("drawer-phone-input");
+        rawPhone = drawerInput ? drawerInput.value.trim() : "";
+    } else {
+        const settingsInput = document.getElementById("setting-phone-number");
+        rawPhone = settingsInput ? settingsInput.value.trim() : "";
+    }
+
+    // Normalize phone number (Israeli 05X-XXXXXXX format or standard international)
+    let cleanPhone = rawPhone.replace(/[\s\-()]/g, '');
+    if (cleanPhone) {
+        if (/^05\d{8}$/.test(cleanPhone)) {
+            cleanPhone = cleanPhone.slice(0, 3) + '-' + cleanPhone.slice(3);
+        } else if (/^\+9725\d{8}$/.test(cleanPhone)) {
+            cleanPhone = '0' + cleanPhone.slice(4, 6) + '-' + cleanPhone.slice(6);
+        }
+        gameState.userProfile.phone = cleanPhone;
+    } else {
+        gameState.userProfile.phone = "";
+    }
+
+    // Read preferences from whichever controls were active
+    if (source === 'drawer') {
+        const drawerClass = document.getElementById("drawer-pref-class-10m");
+        const drawerBrief = document.getElementById("drawer-pref-daily-brief");
+        const drawerTasks = document.getElementById("drawer-pref-task-deadlines");
+        const drawerGrades = document.getElementById("drawer-pref-academic-grades");
+
+        if (drawerClass) gameState.notificationPreferences.class10Min = drawerClass.checked;
+        if (drawerBrief) gameState.notificationPreferences.dailyBrief = drawerBrief.checked;
+        if (drawerTasks) gameState.notificationPreferences.taskDeadlines = drawerTasks.checked;
+        if (drawerGrades) gameState.notificationPreferences.academicGrades = drawerGrades.checked;
+    } else {
+        const prefClass = document.getElementById("pref-notif-class-10m");
+        const prefBrief = document.getElementById("pref-notif-daily-brief");
+        const prefTasks = document.getElementById("pref-notif-task-deadlines");
+        const prefGrades = document.getElementById("pref-notif-academic-grades");
+        const chanPush = document.getElementById("pref-channel-push");
+        const chanPhone = document.getElementById("pref-channel-phone");
+
+        if (prefClass) gameState.notificationPreferences.class10Min = prefClass.checked;
+        if (prefBrief) gameState.notificationPreferences.dailyBrief = prefBrief.checked;
+        if (prefTasks) gameState.notificationPreferences.taskDeadlines = prefTasks.checked;
+        if (prefGrades) gameState.notificationPreferences.academicGrades = prefGrades.checked;
+        if (chanPush) gameState.notificationPreferences.channelPush = chanPush.checked;
+        if (chanPhone) gameState.notificationPreferences.channelPhone = chanPhone.checked;
+    }
+
+    saveState();
+    renderPhoneAndNotificationPreferences();
+
+    if (cleanPhone) {
+        showToastNotification(`📱 מספר טלפון (${cleanPhone}) והעדפות התראה עודכנו בהצלחה!`, "success");
+    } else {
+        showToastNotification("העדפות ההתראה נשמרו בהצלחה.", "info");
+    }
+}
+
+function testSendPhoneNotification() {
+    ensureNotificationPreferencesDefaults();
+    const phone = (gameState.userProfile && gameState.userProfile.phone) || "";
+    if (!phone) {
+        showToastNotification("אנא הזן ושמור מספר טלפון תחילה כדי לבצע בדיקה.", "warning");
+        const phoneInput = document.getElementById("setting-phone-number");
+        if (phoneInput) phoneInput.focus();
+        return;
+    }
+
+    showToastNotification(`📲 נשלחה התראת בדיקה למספר ${phone}! ערוץ הנייד מחובר בהצלחה.`, "success");
+    if (typeof showNativeNotification === 'function') {
+        showNativeNotification(`📱 התראת בדיקה למספר ${phone}`, {
+            body: `מערכת ההתראות של Atlas ME מחוברת למספרך (${phone}).\nתקבל תזכורות לפי ההעדפות שהגדרת.`,
+            icon: 'icon.png',
+            badge: 'icon.png',
+            tag: 'ast-phone-test',
+            renotify: true
+        });
+    }
+}
+
 // Master Save: Save all settings at once
 function saveAllSettings() {
     saveRevisionSection();
     saveCalendarsSection();
     saveGoalsSection();
+    savePhoneAndNotificationPreferences('settings');
     notifyStateChanged({ tab: 'settings' });
     showToastNotification("🌟 כל ההגדרות נשמרו בהצלחה למערכת!", "success");
 }
@@ -12890,6 +13057,22 @@ function setupSettingsPageButtons() {
 
     const btnSaveGoals = document.getElementById("btn-save-section-goals");
     if (btnSaveGoals) btnSaveGoals.onclick = saveGoalsSection;
+
+    const btnSavePhoneNotifs = document.getElementById("btn-save-section-phone-notifs");
+    if (btnSavePhoneNotifs) btnSavePhoneNotifs.onclick = () => savePhoneAndNotificationPreferences('settings');
+
+    const btnTestPhoneAlert = document.getElementById("btn-test-phone-alert");
+    if (btnTestPhoneAlert) btnTestPhoneAlert.onclick = testSendPhoneNotification;
+
+    // Direct change listeners for Section 4B settings
+    const phoneInput = document.getElementById("setting-phone-number");
+    if (phoneInput) {
+        phoneInput.addEventListener("change", () => savePhoneAndNotificationPreferences('settings'));
+    }
+    ["pref-notif-class-10m", "pref-notif-daily-brief", "pref-notif-task-deadlines", "pref-notif-academic-grades", "pref-channel-push", "pref-channel-phone"].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener("change", () => savePhoneAndNotificationPreferences('settings'));
+    });
 
     const btnCreate = document.getElementById("btn-create-revision");
     if (btnCreate) btnCreate.onclick = createNewRevisionSnapshot;
@@ -13849,6 +14032,9 @@ function renderInAppNotificationHub() {
             });
         }
     }
+
+    // Keep drawer phone bar and notification preferences synchronized
+    renderPhoneAndNotificationPreferences();
 }
 
 // 6. Complete a task directly from notification hub
@@ -13957,6 +14143,11 @@ async function scheduleNativeTimestampTrigger(classItem, timestampMs) {
 // 8. Trigger strict 10-Minute Lecture / Tutorial Reminder (Drops any late delivery)
 async function trigger10MinClassAlert(classItem, isTest = false) {
     if (!classItem) return false;
+    ensureNotificationPreferencesDefaults();
+    if (!isTest && gameState.notificationPreferences && gameState.notificationPreferences.class10Min === false) {
+        console.log(`[Notifications] Skipping 10-min alert: class10Min preference is disabled.`);
+        return false;
+    }
 
     const courseName = classItem.courseName || 'שיעור אקדמי';
     const type = classItem.type || 'הרצאה / תרגול';
@@ -14027,6 +14218,11 @@ async function trigger10MinClassAlert(classItem, isTest = false) {
 
 // 9. Automated 10-Minute Class Reminder Engine (Strict window: 8 to 12 minutes prior)
 function checkAndTrigger10MinReminders() {
+    ensureNotificationPreferencesDefaults();
+    if (gameState.notificationPreferences && gameState.notificationPreferences.class10Min === false) {
+        return;
+    }
+
     if (typeof Notification === 'undefined' || Notification.permission !== 'granted') {
         return;
     }
@@ -14067,6 +14263,11 @@ function checkAndTrigger10MinReminders() {
 
 // 10. Schedule exact timeouts & native alarms for today's classes
 function scheduleTodayClassTimeouts() {
+    ensureNotificationPreferencesDefaults();
+    if (gameState.notificationPreferences && gameState.notificationPreferences.class10Min === false) {
+        return;
+    }
+
     const now = new Date();
     const dayOfWeek = now.getDay();
     const nowMs = now.getTime();
@@ -14141,6 +14342,18 @@ async function dispatchNativeMobileNotifications() {
         return;
     }
 
+    ensureNotificationPreferencesDefaults();
+    const prefs = gameState.notificationPreferences || {};
+    const sendLectures = prefs.dailyBrief !== false;
+    const sendTasks = prefs.taskDeadlines !== false;
+
+    if (!sendLectures && !sendTasks) {
+        if (typeof showToastNotification === 'function') {
+            showToastNotification('ההתראות עבור לו״ז יומי ומשימות כבויות בהגדרות ההתראות', 'warning');
+        }
+        return;
+    }
+
     const remainingLectures = getRemainingClassesToday();
     const priorityTasks = getUpcomingPriorityTasks();
 
@@ -14150,89 +14363,136 @@ async function dispatchNativeMobileNotifications() {
     let lectureTitle = '';
     let lectureBody = '';
 
-    if (remainingLectures.isFree || remainingLectures.totalToday === 0) {
-        lectureTitle = '🎓 מערכת שעות: יום חופשי מלימודים';
-        lectureBody = '🏖️ אין שיעורים מתוכננים להיום. יום נעים, פורה ומנוחה טובה!';
-    } else if (remainingLectures.count === 0) {
-        lectureTitle = '🎓 מערכת שעות: השיעורים הסתיימו';
-        lectureBody = `✔️ כל ${remainingLectures.totalToday} השיעורים להיום הושלמו בהצלחה!`;
-    } else {
-        lectureTitle = `🎓 לו״ז היום (${remainingLectures.count} שיעורים נותרו)`;
+    if (sendLectures) {
+        if (remainingLectures.isFree || remainingLectures.totalToday === 0) {
+            lectureTitle = '🎓 מערכת שעות: יום חופשי מלימודים';
+            lectureBody = '🏖️ אין שיעורים מתוכננים להיום. יום נעים, פורה ומנוחה טובה!';
+        } else if (remainingLectures.count === 0) {
+            lectureTitle = '🎓 מערכת שעות: השיעורים הסתיימו';
+            lectureBody = `✔️ כל ${remainingLectures.totalToday} השיעורים להיום הושלמו בהצלחה!`;
+        } else {
+            lectureTitle = `🎓 לו״ז היום (${remainingLectures.count} שיעורים נותרו)`;
 
-        const classBlocks = remainingLectures.classes.map((c, idx) => {
-            const isNext = (idx === 0);
-            const header = isNext 
-                ? `⭐ הבא: ${c.startTime} | ${c.courseName}`
-                : `🕒 ${c.startTime} - ${c.endTime} | ${c.courseName}`;
-            const details = `   📍 ${c.room || 'טכניון'} • ${c.type}${c.lecturer ? ' (' + c.lecturer + ')' : ''}`;
-            return `${header}\n${details}`;
+            const classBlocks = remainingLectures.classes.map((c, idx) => {
+                const isNext = (idx === 0);
+                const header = isNext 
+                    ? `⭐ הבא: ${c.startTime} | ${c.courseName}`
+                    : `🕒 ${c.startTime} - ${c.endTime} | ${c.courseName}`;
+                const details = `   📍 ${c.room || 'טכניון'} • ${c.type}${c.lecturer ? ' (' + c.lecturer + ')' : ''}`;
+                return `${header}\n${details}`;
+            });
+
+            lectureBody = classBlocks.join('\n\n────────────────────\n\n');
+        }
+
+        // Dispatch Notification 1: Lectures
+        await showNativeNotification(lectureTitle, {
+            body: lectureBody,
+            icon: 'icon.png',
+            badge: 'icon.png',
+            tag: 'ast-today-lectures',
+            renotify: true,
+            data: { tab: 'timetable' },
+            actions: [
+                { action: 'open-timetable', title: '📅 פתח מערכת שעות' }
+            ]
         });
-
-        lectureBody = classBlocks.join('\n\n────────────────────\n\n');
     }
 
     // -------------------------------------------------------------
     // Notification 2: Upcoming Priority Tasks
     // -------------------------------------------------------------
-    let taskTitle = '';
-    let taskBody = '';
+    if (sendTasks) {
+        let taskTitle = '';
+        let taskBody = '';
 
-    if (priorityTasks.tasks.length === 0) {
-        taskTitle = '📋 משימות אקדמיות: הכל הושלם!';
-        taskBody = '✨ אין משימות ממתינות להגשה. כל הכבוד!';
-    } else {
-        taskTitle = `📋 משימות דחופות (${priorityTasks.tasks.length} פתוחות)`;
+        if (priorityTasks.tasks.length === 0) {
+            taskTitle = '📋 משימות אקדמיות: הכל הושלם!';
+            taskBody = '✨ אין משימות ממתינות להגשה. כל הכבוד!';
+        } else {
+            taskTitle = `📋 משימות דחופות (${priorityTasks.tasks.length} פתוחות)`;
 
-        const taskBlocks = priorityTasks.tasks.slice(0, 5).map(t => {
-            const icon = t.diffDays < 0 ? '🚨' : (t.diffDays <= 1 ? '🔥' : '⚡');
-            const line1 = `${icon} [${t.courseShortName}] ${t.title}`;
-            const line2 = `   ⏳ ${t.timingText}`;
-            return `${line1}\n${line2}`;
-        });
+            const taskBlocks = priorityTasks.tasks.slice(0, 5).map(t => {
+                const icon = t.diffDays < 0 ? '🚨' : (t.diffDays <= 1 ? '🔥' : '⚡');
+                const line1 = `${icon} [${t.courseShortName}] ${t.title}`;
+                const line2 = `   ⏳ ${t.timingText}`;
+                return `${line1}\n${line2}`;
+            });
 
-        if (priorityTasks.tasks.length > 5) {
-            taskBlocks.push(`...ועוד ${priorityTasks.tasks.length - 5} משימות בלוח המשימות`);
+            if (priorityTasks.tasks.length > 5) {
+                taskBlocks.push(`...ועוד ${priorityTasks.tasks.length - 5} משימות בלוח המשימות`);
+            }
+
+            taskBody = taskBlocks.join('\n\n────────────────────\n\n');
         }
 
-        taskBody = taskBlocks.join('\n\n────────────────────\n\n');
-    }
+        const delay = sendLectures ? 350 : 0;
+        setTimeout(async () => {
+            // Dispatch Notification 2: Tasks
+            await showNativeNotification(taskTitle, {
+                body: taskBody,
+                icon: 'icon.png',
+                badge: 'icon.png',
+                tag: 'ast-upcoming-tasks',
+                renotify: true,
+                data: { tab: 'tasks' },
+                actions: [
+                    { action: 'open-tasks', title: '📋 פתח משימות' }
+                ]
+            });
 
-    // Dispatch Notification 1: Lectures
-    await showNativeNotification(lectureTitle, {
-        body: lectureBody,
-        icon: 'icon.png',
-        badge: 'icon.png',
-        tag: 'ast-today-lectures',
-        renotify: true,
-        data: { tab: 'timetable' },
-        actions: [
-            { action: 'open-timetable', title: '📅 פתח מערכת שעות' }
-        ]
-    });
-
-    // Small delay to ensure separate notifications on Android/iOS shade
-    setTimeout(async () => {
-        // Dispatch Notification 2: Tasks
-        await showNativeNotification(taskTitle, {
-            body: taskBody,
-            icon: 'icon.png',
-            badge: 'icon.png',
-            tag: 'ast-upcoming-tasks',
-            renotify: true,
-            data: { tab: 'tasks' },
-            actions: [
-                { action: 'open-tasks', title: '📋 פתח משימות' }
-            ]
-        });
-
+            if (typeof showToastNotification === 'function') {
+                showToastNotification('התראות סקירה נשלחו בהצלחה למכשיר הנייד!', 'success');
+            }
+        }, delay);
+    } else if (sendLectures) {
         if (typeof showToastNotification === 'function') {
-            showToastNotification('התראות סקירה נשלחו בהצלחה למכשיר הנייד!', 'success');
+            showToastNotification('התראת לו״ז יומי נשלחה בהצלחה למכשיר הנייד!', 'success');
         }
-    }, 350);
+    }
 }
 
 // 12. Main Setup function for mobile notification hub
 function setupMobileNotifications() {
+    // A0. Quick Drawer Phone & Preferences Toggle Bar
+    const togglePrefsBtn = document.getElementById('btn-toggle-drawer-prefs');
+    const collapsible = document.getElementById('drawer-prefs-collapsible');
+    if (togglePrefsBtn && collapsible) {
+        togglePrefsBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const isHidden = collapsible.style.display === 'none' || !collapsible.style.display;
+            collapsible.style.display = isHidden ? 'block' : 'none';
+            togglePrefsBtn.classList.toggle('active', isHidden);
+        });
+    }
+
+    const btnSaveDrawerPhone = document.getElementById('btn-save-drawer-phone');
+    if (btnSaveDrawerPhone) {
+        btnSaveDrawerPhone.addEventListener('click', (e) => {
+            e.stopPropagation();
+            savePhoneAndNotificationPreferences('drawer');
+        });
+    }
+
+    const drawerPhoneInput = document.getElementById('drawer-phone-input');
+    if (drawerPhoneInput) {
+        drawerPhoneInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                savePhoneAndNotificationPreferences('drawer');
+            }
+        });
+    }
+
+    ['drawer-pref-class-10m', 'drawer-pref-daily-brief', 'drawer-pref-task-deadlines', 'drawer-pref-academic-grades'].forEach(id => {
+        const chk = document.getElementById(id);
+        if (chk) {
+            chk.addEventListener('change', () => {
+                savePhoneAndNotificationPreferences('drawer');
+            });
+        }
+    });
+
     // A. Bell button
     const bellBtn = document.getElementById('btn-notification-bell');
     if (bellBtn) {
