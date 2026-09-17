@@ -13920,20 +13920,78 @@ async function showNativeNotification(title, options) {
     }
 }
 
-// 8. Trigger high-priority 10-Minute Lecture / Tutorial Reminder
+// Helper: Schedule native Android OS-level alarm via NotificationTriggers API (TimestampTrigger)
+async function scheduleNativeTimestampTrigger(classItem, timestampMs) {
+    if (typeof Notification === 'undefined' || Notification.permission !== 'granted') return;
+    if (!('serviceWorker' in navigator) || typeof TimestampTrigger === 'undefined') return;
+
+    try {
+        const reg = await navigator.serviceWorker.ready;
+        if (reg && reg.showNotification && 'showTrigger' in Notification.prototype) {
+            const courseName = classItem.courseName || 'שיעור אקדמי';
+            const type = classItem.type || 'הרצאה / תרגול';
+            const typeShort = type.split(' ')[0] || '';
+            const tag = `ast-trigger-${classItem.courseId || 'c'}-${(classItem.startTime || '0000').replace(':', '')}`;
+
+            await reg.showNotification(`⏰ בעוד כ-10 דק׳: ${courseName} (${typeShort})`, {
+                body: `📚 ${type}\n⏰ שעות: ${classItem.startTime} - ${classItem.endTime}\n📍 ${classItem.room || 'טכניון'}`,
+                icon: 'icon.png',
+                badge: 'icon.png',
+                tag: tag,
+                showTrigger: new TimestampTrigger(timestampMs),
+                vibrate: [250, 100, 250, 100, 250],
+                data: { tab: 'timetable' }
+            });
+            console.log(`[Notifications] Registered OS TimestampTrigger alarm for ${courseName} at ${new Date(timestampMs).toLocaleTimeString()}`);
+        }
+    } catch (err) {
+        // TimestampTrigger may not be supported on this browser version
+    }
+}
+
+// 8. Trigger smart Lecture / Tutorial Reminder with real-time relative calculation & stale check
 async function trigger10MinClassAlert(classItem, isTest = false) {
-    if (!classItem) return;
+    if (!classItem) return false;
 
     const courseName = classItem.courseName || 'שיעור אקדמי';
     const type = classItem.type || 'הרצאה / תרגול';
+    const typeShort = (type.split(' ')[0] || '').replace(/[()]/g, '');
     const startTime = classItem.startTime || '';
     const endTime = classItem.endTime || '';
     const room = classItem.room ? `📍 כיתה: ${classItem.room}` : '📍 מיקום: כיתת טכניון';
     const lecturer = classItem.lecturer ? `👨‍🏫 מרצה: ${classItem.lecturer}` : '';
 
-    const title = isTest 
-        ? `⏰ [בדיקה] בעוד 10 דק׳: ${courseName}`
-        : `⏰ בעוד 10 דק׳: ${courseName} (${classItem.type.split(' ')[0]})`;
+    // Calculate real-time relative difference to actual current clock time
+    const now = new Date();
+    let diffMinutes = 10;
+    if (!isTest && startTime) {
+        const [h, m] = startTime.split(':').map(Number);
+        const classDate = new Date();
+        classDate.setHours(h, m, 0, 0);
+        diffMinutes = Math.round((classDate.getTime() - now.getTime()) / 60000);
+    }
+
+    // Guard: If device woke up long after class started (> 15 minutes past start), discard stale alert!
+    if (!isTest && diffMinutes < -15) {
+        console.log(`[Notifications] Discarding stale notification for [${courseName}] (started ${Math.abs(diffMinutes)} mins ago).`);
+        return false;
+    }
+
+    // Dynamic, accurate title based on REAL time of delivery
+    let title = '';
+    if (isTest) {
+        title = `⏰ [בדיקה] בעוד 10 דק׳: ${courseName}`;
+    } else if (diffMinutes > 12) {
+        title = `⏰ תזכורת שיעור (${startTime}): ${courseName}`;
+    } else if (diffMinutes >= 7) {
+        title = `⏰ בעוד כ-${diffMinutes} דק׳: ${courseName}${typeShort ? ' (' + typeShort + ')' : ''}`;
+    } else if (diffMinutes > 1) {
+        title = `⚡ בעוד ${diffMinutes} דק׳ בלבד: ${courseName}${typeShort ? ' (' + typeShort + ')' : ''}`;
+    } else if (diffMinutes >= -2) {
+        title = `🔔 השיעור מתחיל עכשיו (${startTime}): ${courseName}`;
+    } else {
+        title = `🔔 השיעור החל (${startTime}): ${courseName}`;
+    }
 
     const bodyLines = [
         `📚 ${type}`,
@@ -13941,6 +13999,10 @@ async function trigger10MinClassAlert(classItem, isTest = false) {
         room
     ];
     if (lecturer) bodyLines.push(lecturer);
+
+    if (!isTest && diffMinutes < 0) {
+        bodyLines.push(`⚠️ שים לב: השיעור החל לפני ${Math.abs(diffMinutes)} דק׳!`);
+    }
 
     // Check if there are remaining classes today after this one
     const remaining = getRemainingClassesToday();
@@ -13967,13 +14029,13 @@ async function trigger10MinClassAlert(classItem, isTest = false) {
     });
 
     if (sent && isTest && typeof showToastNotification === 'function') {
-        showToastNotification(`התראת 10 דקות עבור [${courseName}] נשלחה בהצלחה!`, 'success');
+        showToastNotification(`התראת שיעור עבור [${courseName}] נשלחה בהצלחה!`, 'success');
     }
 
     return sent;
 }
 
-// 9. Automated 10-Minute Class Reminder Engine (Runs continuously)
+// 9. Automated Class Reminder Engine (Runs continuously & on app wake)
 function checkAndTrigger10MinReminders() {
     if (typeof Notification === 'undefined' || Notification.permission !== 'granted') {
         return;
@@ -14001,11 +14063,11 @@ function checkAndTrigger10MinReminders() {
         const startMin = parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
         const diffMinutes = startMin - curMin;
 
-        // Target: 8 to 11 minutes prior to class start
-        if (diffMinutes >= 8 && diffMinutes <= 11) {
+        // Target: -2 to 12 minutes prior to class start (handles slight delay when phone screen turns on)
+        if (diffMinutes >= -2 && diffMinutes <= 12) {
             const reminderKey = `ast_reminded_10m_${todayDateStr}_${c.courseId}_${c.startTime}`;
             if (!localStorage.getItem(reminderKey)) {
-                console.log(`[Notifications] Triggering automated 10-min reminder for ${c.courseName} at ${c.startTime}`);
+                console.log(`[Notifications] Triggering reminder for ${c.courseName} at ${c.startTime} (diff: ${diffMinutes}m)`);
                 localStorage.setItem(reminderKey, new Date().toISOString());
                 trigger10MinClassAlert(c, false);
             }
@@ -14013,7 +14075,7 @@ function checkAndTrigger10MinReminders() {
     });
 }
 
-// 10. Schedule exact timeouts for today's classes when app is loaded
+// 10. Schedule exact timeouts & native alarms for today's classes
 function scheduleTodayClassTimeouts() {
     const now = new Date();
     const dayOfWeek = now.getDay();
@@ -14035,10 +14097,26 @@ function scheduleTodayClassTimeouts() {
 
         const reminderTimeMs = classDate.getTime() - (10 * 60 * 1000);
         const delayMs = reminderTimeMs - nowMs;
-
         const reminderKey = `ast_reminded_10m_${todayDateStr}_${c.courseId}_${c.startTime}`;
+
+        // 1. Register modern OS-level NotificationTrigger (TimestampTrigger) for Android Chrome
+        if (delayMs > 0) {
+            scheduleNativeTimestampTrigger(c, reminderTimeMs);
+        }
+
+        // 2. Schedule in-memory timeout (for active desktop/mobile sessions)
         if (delayMs > 0 && delayMs < 14 * 60 * 60 * 1000 && !localStorage.getItem(reminderKey)) {
             setTimeout(() => {
+                // When device unfreezes after sleep, verify how late the timeout is
+                const checkNow = new Date();
+                const minutesLeft = Math.round((classDate.getTime() - checkNow.getTime()) / 60000);
+
+                if (minutesLeft < -15) {
+                    console.log(`[Notifications] Device woke up late; class ${c.courseName} started ${Math.abs(minutesLeft)}m ago. Discarding.`);
+                    localStorage.setItem(reminderKey, 'expired');
+                    return;
+                }
+
                 if (!localStorage.getItem(reminderKey)) {
                     localStorage.setItem(reminderKey, new Date().toISOString());
                     trigger10MinClassAlert(c, false);

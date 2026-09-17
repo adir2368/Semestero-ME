@@ -1,5 +1,5 @@
 // Service Worker for Atlas ME - Offline-First Caching & Background Updates
-const CACHE_NAME = 'atlas-me-v1.8.6';
+const CACHE_NAME = 'atlas-me-v1.8.7';
 
 const STATIC_ASSETS = [
     './',
@@ -133,3 +133,34 @@ self.addEventListener('notificationclick', (event) => {
         })
     );
 });
+
+// Push Notification Handler: Process background web push messages
+self.addEventListener('push', (event) => {
+    let data = {};
+    if (event.data) {
+        try {
+            data = event.data.json();
+        } catch (e) {
+            data = { title: 'Atlas ME', body: event.data.text() };
+        }
+    }
+    const title = data.title || '🔔 תזכורת שיעור אקדמי';
+    const options = {
+        body: data.body || 'יש לך אירוע קרוב במערכת השעות',
+        icon: 'icon.png',
+        badge: 'icon.png',
+        tag: data.tag || 'ast-push-reminder',
+        renotify: true,
+        vibrate: [250, 100, 250, 100, 250],
+        data: data.data || { tab: 'timetable' }
+    };
+    event.waitUntil(self.registration.showNotification(title, options));
+});
+
+// Periodic Background Sync Handler
+self.addEventListener('periodicsync', (event) => {
+    if (event.tag === 'check-class-reminders') {
+        console.log('[SW] Running periodic background sync for class reminders');
+    }
+});
+
