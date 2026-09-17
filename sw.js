@@ -1,5 +1,5 @@
 // Service Worker for Atlas ME - Offline-First Caching & Background Updates
-const CACHE_NAME = 'atlas-me-v1.8.10';
+const CACHE_NAME = 'atlas-me-v1.8.11';
 
 const STATIC_ASSETS = [
     './',
@@ -11,6 +11,7 @@ const STATIC_ASSETS = [
     './planner_catalog.js',
     './planner_module.js',
     './auth_sync.js',
+    './moodle_sync.js',
     './app.js',
     './manifest.json',
     './icon.png',

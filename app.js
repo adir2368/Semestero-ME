@@ -6811,16 +6811,23 @@ function setupEventListeners() {
         }
     });
 
-    // Moodle Sync Button
-    document.getElementById("btn-moodle-sync").addEventListener("click", () => {
-        const url = document.getElementById("moodle-url").value.trim();
-        const token = document.getElementById("moodle-token").value.trim();
-        if (!token) {
-            runMockMoodleSync();
-        } else {
-            performMoodleSync(url, token);
-        }
-    });
+    // Moodle Sync Button Delegator
+    const btnMoodleSync = document.getElementById("btn-moodle-sync");
+    if (btnMoodleSync) {
+        btnMoodleSync.addEventListener("click", () => {
+            if (window.MoodleSync && typeof window.MoodleSync.sync === 'function') {
+                const urlInput = document.getElementById("moodle-calendar-url");
+                const url = urlInput ? urlInput.value.trim() : (window.MoodleSync.config.url || "");
+                if (url) {
+                    window.MoodleSync.config.url = url;
+                    window.MoodleSync.saveConfig();
+                    window.MoodleSync.sync({ isSilent: false });
+                } else {
+                    window.MoodleSync.runMockSync();
+                }
+            }
+        });
+    }
 
     // Cheesefork Import Button
     document.getElementById("btn-cheesefork-import").addEventListener("click", () => {
@@ -12561,10 +12568,10 @@ function renderFinalsCalendar() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.09.17-v1.8.10",
-    build: "178990",
-    date: "2026-09-17 14:20",
-    description: "גרסה 1.8.10: תיקון קריטי לשגיאת hasPassingGrade (חוסר תגובה), מניעת לולאת סנכרון זמן אמת (Supabase Realtime loop), ותמיכה בקורסי פטור במסלולי פיזיקה להשלמת סמסטר"
+    code: "REV-2026.09.17-v1.8.11",
+    build: "179000",
+    date: "2026-09-17 14:40",
+    description: "גרסה 1.8.11: סנכרון חי ודינמי של מטלות מודל הטכניון (Moodle Live Calendar iCal Feed), עדכון אוטומטי של תאריכי הגשה, עקיפת CORS חכמה ותמיכה בקבצי ICS"
 };
 
 function ensureBaselineRevisions() {
@@ -12625,6 +12632,12 @@ function renderSettingsPage() {
     if (calExamsInput) calExamsInput.value = (gameState.calendarIds && gameState.calendarIds.exams) || defaultCals.exams;
     if (calHwInput) calHwInput.value = (gameState.calendarIds && gameState.calendarIds.hw) || defaultCals.hw;
     if (calPracticeInput) calPracticeInput.value = (gameState.calendarIds && gameState.calendarIds.practice) || defaultCals.practice;
+    
+    const moodleCalInput = document.getElementById("setting-moodle-calendar-url");
+    if (moodleCalInput) {
+        moodleCalInput.value = gameState.moodleCalendarUrl || (window.MoodleSync && window.MoodleSync.config.url) || "";
+    }
+
     if (webhookInput) webhookInput.value = gameState.googleAppsScriptWebhookUrl || "";
     if (syncFreqSelect) syncFreqSelect.value = gameState.syncFrequencyHours || 1;
 
@@ -12775,6 +12788,18 @@ function saveCalendarsSection() {
     if (calPracticeInput) gameState.calendarIds.practice = calPracticeInput.value.trim();
     if (webhookInput) gameState.googleAppsScriptWebhookUrl = webhookInput.value.trim();
     if (syncFreqSelect) gameState.syncFrequencyHours = parseInt(syncFreqSelect.value) || 1;
+
+    const moodleCalInput = document.getElementById("setting-moodle-calendar-url");
+    if (moodleCalInput) {
+        const val = moodleCalInput.value.trim();
+        gameState.moodleCalendarUrl = val;
+        if (window.MoodleSync) {
+            window.MoodleSync.config.url = val;
+            window.MoodleSync.saveConfig();
+        }
+        const sidebarMoodleInput = document.getElementById("moodle-calendar-url");
+        if (sidebarMoodleInput) sidebarMoodleInput.value = val;
+    }
 
     notifyStateChanged({ tab: 'settings' });
     const statusDiv = document.getElementById("webhook-save-status");

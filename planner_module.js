@@ -1,7 +1,7 @@
 // ==========================================================================
 // Degree Planner Module (תכנון תואר אקדמי - גרור ושחרר קורסים וחוקי בחירה)
 // Atlas ME - Technion Faculty of Mechanical Engineering
-// Multi-Pass Audited & Refactored Engine (v1.8.10)
+// Multi-Pass Audited & Refactored Engine (v1.8.11)
 // ==========================================================================
 
 (function(global) {
