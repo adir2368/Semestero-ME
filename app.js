@@ -13897,7 +13897,12 @@ async function showNativeNotification(title, options) {
     if (permission !== 'granted') {
         permission = await Notification.requestPermission();
     }
-    if (permission !== 'granted') return false;
+    if (permission !== 'granted') {
+        if (typeof showToastNotification === 'function' && permission === 'denied') {
+            showToastNotification('ההתראות חסומות בדפדפן. לחץ על סמל ההגדרות ⚙️ ליד כתובת האתר -> הרשאות -> אפשר התראות', 'warning');
+        }
+        return false;
+    }
 
     if ('serviceWorker' in navigator) {
         try {
@@ -14127,7 +14132,11 @@ async function dispatchNativeMobileNotifications() {
 
     if (permission !== 'granted') {
         if (typeof showToastNotification === 'function') {
-            showToastNotification('יש לאשר הרשאות התראה כדי לקבל עדכונים בנייד', 'warning');
+            if (permission === 'denied') {
+                showToastNotification('ההתראות חסומות בדפדפן. לחץ על סמל ההגדרות ⚙️ / המנעול ליד כתובת האתר -> הרשאות -> אפשר התראות', 'warning');
+            } else {
+                showToastNotification('יש לאשר הרשאות התראה בחלון הדפדפן כדי לקבל עדכונים בנייד', 'warning');
+            }
         }
         return;
     }
