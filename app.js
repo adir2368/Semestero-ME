@@ -16194,10 +16194,10 @@ function renderFinalsCalendar() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.09.17-v1.8.18",
-    build: "179700",
-    date: "2026-09-17 21:10",
-    description: "גרסה 1.8.18: מיתוג SeMEstero עם הבלטה מרהיבה של ה-ME (הנדסת מכונות) בתוך שם המערכת"
+    code: "REV-2026.09.17-v1.8.19",
+    build: "179800",
+    date: "2026-09-17 21:35",
+    description: "גרסה 1.8.19: יישור מיתוג מדויק - שם האפליקציה בכל המערכת, הטאבים וה-PWA הוא Semestero ME, ורק בכותרת הראשית מוצג הלוגו המעוצב SeMEstero"
 };
 
 function ensureBaselineRevisions() {
@@ -16657,7 +16657,7 @@ function testSendPhoneNotification() {
     showToastNotification(`📲 נשלחה התראת בדיקה למספר ${phone}! ערוץ הנייד מחובר בהצלחה.`, "success");
     if (typeof showNativeNotification === 'function') {
         showNativeNotification(`📱 התראת בדיקה למספר ${phone}`, {
-            body: `מערכת ההתראות של SeMEstero מחוברת למספרך (${phone}).\nתקבל תזכורות לפי ההעדפות שהגדרת.`,
+            body: `מערכת ההתראות של Semestero ME מחוברת למספרך (${phone}).\nתקבל תזכורות לפי ההעדפות שהגדרת.`,
             icon: 'icon.png',
             badge: 'icon.png',
             tag: 'ast-phone-test',
