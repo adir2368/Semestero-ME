@@ -63,6 +63,8 @@
             const uid = localStorage.getItem(SESSION_USER_KEY);
             const currentSem = (window.gameState && window.gameState.currentActiveSemester) ? window.gameState.currentActiveSemester : 1;
 
+            const fallbackPhone = (window.gameState && window.gameState.userProfile && window.gameState.userProfile.phone) || '';
+
             if (uid === 'adir_moshe') {
                 let customProfile = null;
                 try {
@@ -70,15 +72,18 @@
                     if (saved) customProfile = JSON.parse(saved);
                 } catch (e) {}
 
-                return Object.assign({
+                const base = Object.assign({
                     id: 'adir_moshe',
                     name: 'אדיר משה',
                     email: 'adir.moshe@campus.technion.ac.il',
+                    phone: fallbackPhone,
                     avatar: '🎓',
                     avatarImg: 'adir_avatar.png',
                     role: 'developer',
                     startingSemester: (window.gameState && window.gameState.currentActiveSemester) ? window.gameState.currentActiveSemester : 3
                 }, customProfile || {});
+                if (!base.phone && fallbackPhone) base.phone = fallbackPhone;
+                return base;
             }
             try {
                 const saved = localStorage.getItem('ast_profile_' + uid);
@@ -87,6 +92,7 @@
                     if (window.gameState && window.gameState.currentActiveSemester) {
                         parsed.startingSemester = window.gameState.currentActiveSemester;
                     }
+                    if (!parsed.phone && fallbackPhone) parsed.phone = fallbackPhone;
                     return parsed;
                 }
             } catch (e) {}
@@ -95,6 +101,7 @@
                 id: uid,
                 name: (window.gameState && window.gameState.student_name) ? window.gameState.student_name : 'סטודנט להנדסת מכונות',
                 email: '',
+                phone: fallbackPhone,
                 avatar: '👤',
                 role: 'student',
                 startingSemester: currentSem
@@ -563,12 +570,13 @@
             }
         },
 
-        // Update profile details (Name, Email, Semester, and optional Password)
+        // Update profile details (Name, Email, Phone, Semester, and optional Password)
         async updateUserProfile(params) {
             if (!this.isLoggedIn()) return false;
             const user = this.getActiveUser();
             const name = (params.name || '').trim();
             const email = (params.email || '').trim();
+            const rawPhone = (params.phone || '').trim();
             const semester = parseInt(params.semester) || 1;
             const password = (params.password || '').trim();
 
@@ -581,10 +589,25 @@
                 return false;
             }
 
+            // Normalize phone number (Israeli 05X-XXXXXXX or standard international)
+            let cleanPhone = rawPhone.replace(/[\s\-()]/g, '');
+            if (cleanPhone) {
+                if (/^05\d{8}$/.test(cleanPhone)) {
+                    cleanPhone = cleanPhone.slice(0, 3) + '-' + cleanPhone.slice(3);
+                } else if (/^\+9725\d{8}$/.test(cleanPhone)) {
+                    cleanPhone = '0' + cleanPhone.slice(4, 6) + '-' + cleanPhone.slice(6);
+                }
+            } else {
+                cleanPhone = '';
+            }
+
             // Update in-memory state
             const state = (window.getGlobalGameState ? window.getGlobalGameState() : window.gameState) || {};
             state.student_name = name;
             state.currentActiveSemester = semester;
+            if (!state.userProfile) state.userProfile = {};
+            state.userProfile.phone = cleanPhone;
+
             if (password) {
                 state.account_password = password;
             } else if (!state.account_password) {
@@ -599,6 +622,7 @@
                 id: user.id,
                 name: name,
                 email: email,
+                phone: cleanPhone,
                 password: state.account_password || '',
                 avatar: user.avatar || '👤',
                 role: user.role || 'student',
@@ -632,6 +656,9 @@
             this.updateHudAuthControls();
             this.refreshAllAppViews();
             this.renderAuthModal();
+            if (typeof renderPhoneAndNotificationPreferences === 'function') {
+                renderPhoneAndNotificationPreferences();
+            }
 
             if (typeof showHudToast === 'function') {
                 showHudToast('פרטי החשבון עודכנו בהצלחה! ✨', 'success');
@@ -829,6 +856,7 @@
                             <div style="font-size: 0.82rem; color: #94a3b8; line-height: 1.6;">
                                 <div>מזהה חשבון: <code style="color: #38bdf8; font-family: monospace;">${user.id}</code></div>
                                 <div>אימייל: <span style="color: #e2e8f0;">${user.email || 'לא הוגדר'}</span></div>
+                                <div>טלפון להתראות: <span style="color: #38bdf8; font-weight: 600;" dir="ltr">${user.phone || (window.gameState && window.gameState.userProfile && window.gameState.userProfile.phone) || '⚠️ לא הוגדר'}</span></div>
                                 <div>סמסטר נוכחי פעיל: <span style="color: #fbbf24; font-weight: bold;">סמסטר ${currentSem}</span></div>
                                 <div>סטטוס סנכרון: 🟢 פעיל ומסונכרן אוטומטית בין מכשירים</div>
                             </div>
@@ -839,7 +867,7 @@
                             <h3 style="font-size: 0.9rem; color: #38bdf8; margin: 0 0 10px 0; display: flex; align-items: center; gap: 6px;">
                                 ✏️ עריכת פרטי חשבון
                             </h3>
-                            <form onsubmit="event.preventDefault(); const n = document.getElementById('edit-profile-name').value; const e = document.getElementById('edit-profile-email').value; const s = document.getElementById('edit-profile-sem').value; const p = document.getElementById('edit-profile-pass').value; AuthSync.updateUserProfile({ name: n, email: e, semester: s, password: p });">
+                            <form onsubmit="event.preventDefault(); const n = document.getElementById('edit-profile-name').value; const e = document.getElementById('edit-profile-email').value; const ph = document.getElementById('edit-profile-phone').value; const s = document.getElementById('edit-profile-sem').value; const p = document.getElementById('edit-profile-pass').value; AuthSync.updateUserProfile({ name: n, email: e, phone: ph, semester: s, password: p });">
                                 <div class="form-group" style="margin-bottom: 8px;">
                                     <label style="display: block; font-size: 0.78rem; color: #94a3b8; margin-bottom: 3px;">שם מלא / כינוי:</label>
                                     <input type="text" id="edit-profile-name" class="form-input" style="width: 100%; padding: 6px 10px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff; font-size: 0.86rem;" value="${user.name}" required>
@@ -847,6 +875,14 @@
                                 <div class="form-group" style="margin-bottom: 8px;">
                                     <label style="display: block; font-size: 0.78rem; color: #94a3b8; margin-bottom: 3px;">אימייל טכניוני:</label>
                                     <input type="email" id="edit-profile-email" class="form-input" style="width: 100%; padding: 6px 10px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff; font-size: 0.86rem;" value="${user.email || ''}">
+                                </div>
+                                <div class="form-group" style="margin-bottom: 8px;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px;">
+                                        <label style="font-size: 0.78rem; color: #94a3b8; margin: 0;">📱 מספר טלפון להתראות נייד (SMS / WhatsApp):</label>
+                                        <span style="font-size: 0.72rem; color: ${user.phone ? '#10b981' : '#fbbf24'};">${user.phone ? '✓ מוגדר' : '⚠️ לא הוגדר'}</span>
+                                    </div>
+                                    <input type="tel" id="edit-profile-phone" class="form-input" style="width: 100%; padding: 6px 10px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff; font-size: 0.86rem;" placeholder="050-1234567" dir="ltr" value="${user.phone || (window.gameState && window.gameState.userProfile && window.gameState.userProfile.phone) || ''}">
+                                    <span style="display: block; font-size: 0.72rem; color: #64748b; margin-top: 2px;">לקבלת תזכורות לשיעורים (10 דק׳ מראש), סקירה יומית ודדליינים</span>
                                 </div>
                                 <div class="form-group" style="margin-bottom: 8px;">
                                     <label style="display: block; font-size: 0.78rem; color: #94a3b8; margin-bottom: 3px;">איזה סמסטר אתה לומד עכשיו?</label>

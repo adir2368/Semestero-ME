@@ -12808,7 +12808,15 @@ function ensureNotificationPreferencesDefaults() {
 function renderPhoneAndNotificationPreferences() {
     ensureNotificationPreferencesDefaults();
 
-    const phone = (gameState.userProfile && gameState.userProfile.phone) || "";
+    let phone = (gameState.userProfile && gameState.userProfile.phone) || "";
+    if (!phone && window.AuthSync && typeof AuthSync.getActiveUser === 'function') {
+        const u = AuthSync.getActiveUser();
+        if (u && u.phone) {
+            phone = u.phone;
+            if (!gameState.userProfile) gameState.userProfile = {};
+            gameState.userProfile.phone = phone;
+        }
+    }
     const prefs = gameState.notificationPreferences;
 
     // 1. Settings page fields
@@ -12917,6 +12925,18 @@ function savePhoneAndNotificationPreferences(source = 'settings') {
     }
 
     saveState();
+
+    // Synchronize to AuthSync profile if user is logged in
+    if (window.AuthSync && typeof AuthSync.getActiveUser === 'function' && AuthSync.isLoggedIn()) {
+        try {
+            const u = AuthSync.getActiveUser();
+            const saved = localStorage.getItem('ast_profile_' + u.id);
+            const prof = saved ? JSON.parse(saved) : { id: u.id, name: u.name, email: u.email || '' };
+            prof.phone = cleanPhone;
+            localStorage.setItem('ast_profile_' + u.id, JSON.stringify(prof));
+        } catch (e) {}
+    }
+
     renderPhoneAndNotificationPreferences();
 
     if (cleanPhone) {

@@ -614,20 +614,23 @@
                     </p>
 
                     <div class="phone-settings-grid">
-                        <!-- Phone Input Box -->
+                        <!-- Phone Input / Account Profile Box -->
                         <div class="form-group" style="grid-column: 1 / -1;">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                                <label class="setting-label" for="setting-phone-number" style="margin-bottom: 0;">📱 מספר טלפון לקבלת התראות (SMS / WhatsApp):</label>
+                                <label class="setting-label" for="setting-phone-number" style="margin-bottom: 0;">📱 מספר טלפון מקושר לחשבון (Phone in Account Profile):</label>
                                 <span class="phone-status-badge badge-pending" id="phone-status-indicator">⚠️ לא הוגדר מספר</span>
                             </div>
                             <div class="phone-input-wrapper">
                                 <span class="phone-input-flag" title="קידומת ישראל">🇮🇱</span>
-                                <input type="tel" id="setting-phone-number" class="modal-input phone-input-field" placeholder="לדוגמה: 050-1234567" dir="ltr">
-                                <button type="button" class="btn btn-sm btn-outline" id="btn-test-phone-alert" title="שלח התראת בדיקה למספר הטלפון שהוזן">
+                                <input type="tel" id="setting-phone-number" class="modal-input phone-input-field" placeholder="050-1234567 (מוגדר בפרטי החשבון)" dir="ltr">
+                                <button type="button" class="btn btn-sm btn-primary" id="btn-open-account-edit" onclick="if (window.AuthSync && AuthSync.openAuthModal) AuthSync.openAuthModal();" title="פתח עריכת פרטי חשבון להזנת או עדכון מספר טלפון">
+                                    <span>👤 עריכת פרטי חשבון</span>
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline" id="btn-test-phone-alert" title="שלח התראת בדיקה למספר הטלפון שהוגדר">
                                     <span>📲 שלח בדיקה</span>
                                 </button>
                             </div>
-                            <span class="setting-hint">המספר נשמר בחשבונך ומאפשר קבלת עדכונים ישירות לנייד.</span>
+                            <span class="setting-hint">מספר הטלפון מוגדר ומנוהל ישירות מתוך <strong>עריכת פרטי חשבון</strong> 👤 ומסונכרן לענן.</span>
                         </div>
 
                         <!-- Notification Category Selection Grid -->
@@ -1749,8 +1752,9 @@
                 </div>
                 <div class="drawer-prefs-collapsible" id="drawer-prefs-collapsible" style="display: none;">
                     <div class="drawer-phone-input-row">
-                        <input type="tel" id="drawer-phone-input" class="modal-input drawer-phone-field" placeholder="הזן טלפון: 050-1234567" dir="ltr">
+                        <input type="tel" id="drawer-phone-input" class="modal-input drawer-phone-field" placeholder="050-1234567" dir="ltr">
                         <button type="button" class="btn btn-xs btn-primary" id="btn-save-drawer-phone">שמור</button>
+                        <button type="button" class="btn btn-xs btn-outline" id="btn-drawer-open-account" onclick="if (typeof closeNotificationDrawer === 'function') closeNotificationDrawer(); if (window.AuthSync && AuthSync.openAuthModal) AuthSync.openAuthModal();" title="עריכת מספר טלפון בפרטי חשבון">👤 חשבון</button>
                     </div>
                     <div class="drawer-quick-prefs-list">
                         <label class="drawer-pref-chip" for="drawer-pref-class-10m">
