@@ -3547,6 +3547,58 @@ body {
     text-decoration: line-through;
 }
 
+/* Technion Academic Events & Official Holidays */
+.cal-event-pill.technion-event {
+    border-radius: 4px;
+    padding: 3px 6px;
+    font-size: 0.69rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    cursor: default;
+    transition: all 0.15s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    display: block;
+}
+
+.cal-event-pill.technion-event.holiday-event {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.22), rgba(217, 119, 6, 0.18));
+    color: #fcd34d;
+    border: 1px solid rgba(245, 158, 11, 0.45);
+}
+.cal-event-pill.technion-event.holiday-event:hover {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.35), rgba(217, 119, 6, 0.28));
+    border-color: rgba(245, 158, 11, 0.7);
+    color: #fef08a;
+    transform: translateY(-1px);
+}
+
+.cal-event-pill.technion-event.academic-event {
+    background: linear-gradient(135deg, rgba(168, 85, 247, 0.22), rgba(126, 34, 206, 0.18));
+    color: #d8b4fe;
+    border: 1px solid rgba(168, 85, 247, 0.45);
+}
+.cal-event-pill.technion-event.academic-event:hover {
+    background: linear-gradient(135deg, rgba(168, 85, 247, 0.35), rgba(126, 34, 206, 0.28));
+    border-color: rgba(168, 85, 247, 0.7);
+    color: #f3e8ff;
+    transform: translateY(-1px);
+}
+
+.cal-day-cell.has-holiday {
+    background: radial-gradient(circle at top right, rgba(245, 158, 11, 0.08), transparent 70%), #15192c;
+    border-color: rgba(245, 158, 11, 0.25);
+}
+.cal-day-cell.has-academic-milestone {
+    background: radial-gradient(circle at top right, rgba(168, 85, 247, 0.10), transparent 70%), #15192c;
+    border-color: rgba(168, 85, 247, 0.25);
+}
+
+#cal-nav-today:hover {
+    background: rgba(56, 189, 248, 0.2);
+    border-color: #38bdf8;
+    color: #38bdf8;
+}
 
 /* Finals Calendar Card (Direct Calendar without Runway Track) */
 .finals-calendar-card {

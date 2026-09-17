@@ -999,6 +999,7 @@
                             <div class="cal-nav-group">
                                 <div class="cal-month-nav-row">
                                     <button type="button" class="btn btn-sm btn-outline" id="cal-nav-prev">◀</button>
+                                    <button type="button" class="btn btn-sm btn-outline" id="cal-nav-today" title="חזור לחודש הנוכחי" style="font-weight: 600; padding: 2px 8px; font-size: 0.78rem;">היום</button>
                                     <span class="cal-current-month" id="cal-current-month-title">August 2026</span>
                                     <button type="button" class="btn btn-sm btn-outline" id="cal-nav-next">▶</button>
                                 </div>
@@ -1014,6 +1015,8 @@
                             <span class="cal-legend-item"><span class="dot" style="background: #38bdf8;"></span> משימות (גיליון / WebWork / מעבדה)</span>
                             <span class="cal-legend-item"><span class="dot dot-pe-active"></span> מבחן לתרגול</span>
                             <span class="cal-legend-item"><span class="dot dot-pe-done"></span> מבחן לתרגול שהושלם</span>
+                            <span class="cal-legend-item"><span class="dot" style="background: #f59e0b;"></span> חופשות וחגים</span>
+                            <span class="cal-legend-item"><span class="dot" style="background: #a855f7;"></span> תחילת / סיום סמסטר</span>
                             <span class="cal-hint-text">💡 לחץ על משימה לצפייה בפרטים, או על ➕ להוספת משימה ליום ספציפי.</span>
                         </div>
                         <div class="finals-calendar-container" id="finals-calendar-container" style="display: block;">
@@ -2045,9 +2048,11 @@
     <!-- Technion ME 2025/2026 Catalog & Electives Database -->
     <script src="planner_catalog.js?v=1.8.14"></script>
     <!-- Degree Planner Drag & Drop Engine -->
-    <script src="planner_module.js?v=1.8.14"></script>
+    <script src="planner_module.js?v=1.8.15"></script>
+    <!-- Technion Official Academic Calendar & Holidays Engine -->
+    <script src="technion_academic_calendar.js?v=1.8.15"></script>
     <!-- Core Application Logic -->
-    <script src="app.js?v=1.8.14"></script>
+    <script src="app.js?v=1.8.15"></script>
     <!-- PWA Service Worker Registration -->
     <script>
         if ('serviceWorker' in navigator && window.location.protocol.startsWith('http')) {

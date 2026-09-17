@@ -867,9 +867,7 @@
         // Render Auth Modal Content dynamically based on auth state
         renderAuthModal(activeTab) {
             const container = document.getElementById('auth-modal-content-container');
-            if (!container) return;
-
-            if (this.isLoggedIn()) {
+            if (this.isLoggedIn() && activeTab !== 'register' && activeTab !== 'reset_password') {
                 // Render Logged-In User Profile View
                 const user = this.getActiveUser();
                 const isDev = user.id === 'adir_moshe';
@@ -926,8 +924,8 @@
                                     <input type="text" id="edit-profile-name" class="form-input" style="width: 100%; padding: 6px 10px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff; font-size: 0.86rem;" value="${user.name}" required>
                                 </div>
                                 <div class="form-group" style="margin-bottom: 8px;">
-                                    <label style="display: block; font-size: 0.78rem; color: #94a3b8; margin-bottom: 3px;">אימייל טכניוני:</label>
-                                    <input type="email" id="edit-profile-email" class="form-input" style="width: 100%; padding: 6px 10px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff; font-size: 0.86rem;" value="${user.email || ''}">
+                                    <label style="display: block; font-size: 0.78rem; color: #94a3b8; margin-bottom: 3px;">כתובת אימייל (אישי או טכניוני):</label>
+                                    <input type="email" id="edit-profile-email" class="form-input" style="width: 100%; padding: 6px 10px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff; font-size: 0.86rem;" placeholder="your.name@gmail.com" value="${user.email || ''}">
                                 </div>
                                 <div class="form-group" style="margin-bottom: 8px;">
                                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px;">
@@ -1033,11 +1031,11 @@
                         ${isReset ? `
                             <form onsubmit="event.preventDefault(); const id = document.getElementById('reset-ident-input').value; const p = document.getElementById('reset-pass-input').value; AuthSync.resetPassword(id, p);">
                                 <div style="margin-bottom: 12px; font-size: 0.82rem; color: #94a3b8; line-height: 1.4;">
-                                    הזן את האימייל הטכניוני או שם המשתמש שלך, והגדר סיסמה חדשה להתחברות.
+                                    הזן את כתובת האימייל או שם המשתמש שלך, והגדר סיסמה חדשה להתחברות.
                                 </div>
                                 <div class="form-group" style="margin-bottom: 12px;">
-                                    <label style="display: block; font-size: 0.82rem; color: #f8fafc; font-weight: 600; margin-bottom: 4px;">אימייל טכניוני או שם משתמש:</label>
-                                    <input type="text" id="reset-ident-input" class="form-input" style="width: 100%; padding: 8px 12px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff; font-size: 0.9rem;" placeholder="למשל: yonathan.p@campus.technion.ac.il" required autofocus>
+                                    <label style="display: block; font-size: 0.82rem; color: #f8fafc; font-weight: 600; margin-bottom: 4px;">אימייל או שם משתמש:</label>
+                                    <input type="text" id="reset-ident-input" class="form-input" style="width: 100%; padding: 8px 12px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff; font-size: 0.9rem;" placeholder="למשל: student@gmail.com או טכניוני" required autofocus>
                                 </div>
                                 <div class="form-group" style="margin-bottom: 16px;">
                                     <label style="display: block; font-size: 0.82rem; color: #f8fafc; font-weight: 600; margin-bottom: 4px;">סיסמה חדשה:</label>
@@ -1099,8 +1097,8 @@
                                 <div id="reg-prior-courses-section" style="display: none;"></div>
 
                                 <div class="form-group" style="margin-bottom: 14px;">
-                                    <label style="display: block; font-size: 0.82rem; color: #f8fafc; font-weight: 600; margin-bottom: 4px;">אימייל טכניוני (חובה):</label>
-                                    <input type="email" id="reg-email-input" class="form-input" style="width: 100%; padding: 7px 10px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff; font-size: 0.82rem;" placeholder="yosef.cohen@campus.technion.ac.il" required>
+                                    <label style="display: block; font-size: 0.82rem; color: #f8fafc; font-weight: 600; margin-bottom: 4px;">כתובת אימייל (כל אימייל אישי או טכניוני):</label>
+                                    <input type="email" id="reg-email-input" class="form-input" style="width: 100%; padding: 7px 10px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff; font-size: 0.82rem;" placeholder="your.name@gmail.com (או כל אימייל)" required>
                                 </div>
                                 <button type="submit" class="btn btn-primary btn-block" style="width: 100%; padding: 10px; font-weight: 700; font-size: 0.95rem;">
                                     ✨ צור חשבון והתחל

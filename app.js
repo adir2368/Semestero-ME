@@ -1847,8 +1847,8 @@ window.getGlobalGameState = function() {
 };
 let currentViewMode = 'flowchart'; // 'flowchart' | 'constellation' | 'grid'
 let currentHoveredCourseCode = null;
-let currentCalendarMonth = 7; // 0-indexed: 7 = August
-let currentCalendarYear = 2026;
+let currentCalendarMonth = new Date().getMonth(); // 0-indexed current month
+let currentCalendarYear = new Date().getFullYear();
 let currentRunwayView = 'calendar';
 
 // Official Technion Academic Calendar - Winter Semester 2026/2027 starts on 28.10.2026
@@ -14845,6 +14845,7 @@ function setupFinalsMode() {
     // 3. Calendar Month navigation
     const prevBtn = document.getElementById("cal-nav-prev");
     const nextBtn = document.getElementById("cal-nav-next");
+    const todayBtn = document.getElementById("cal-nav-today");
     if (prevBtn) {
         prevBtn.addEventListener("click", () => {
             currentCalendarMonth--;
@@ -14862,6 +14863,14 @@ function setupFinalsMode() {
                 currentCalendarMonth = 0;
                 currentCalendarYear++;
             }
+            renderFinalsCalendar();
+        });
+    }
+    if (todayBtn) {
+        todayBtn.addEventListener("click", () => {
+            const now = new Date();
+            currentCalendarMonth = now.getMonth();
+            currentCalendarYear = now.getFullYear();
             renderFinalsCalendar();
         });
     }
@@ -15744,9 +15753,24 @@ function renderFinalsCalendar() {
         });
     }
 
+    // Technion Academic Calendar & Official Holidays
+    if (window.TechnionAcademicCalendar && window.TechnionAcademicCalendar.DATE_EVENTS_MAP) {
+        Object.entries(window.TechnionAcademicCalendar.DATE_EVENTS_MAP).forEach(([dStr, evList]) => {
+            if (!itemsByDate[dStr]) itemsByDate[dStr] = [];
+            evList.forEach(ev => {
+                itemsByDate[dStr].push({
+                    isTechnionEvent: true,
+                    type: ev.type, // 'holiday' or 'academic'
+                    title: ev.title,
+                    desc: ev.desc
+                });
+            });
+        });
+    }
+
     // Also map real course exams and all active course tasks (גיליון, WebWork, מעבדה, פרויקט, etc.)
     Object.values(gameState.courses || {}).forEach(course => {
-        if (course.status !== 'active') return; // Only active courses on the calendar!
+        if (course.status === 'locked') return; // Only active and enrolled courses on the calendar!
         if (!course.tasks) return;
         course.tasks.forEach(task => {
             if (!task.dueDate) return;
@@ -15844,11 +15868,15 @@ function renderFinalsCalendar() {
         const dayItems = itemsByDate[dateStr] || [];
         const hasActiveExam = dayItems.some(it => it.isExamEvent && !it.isPassed);
         const hasPassedExam = dayItems.some(it => it.isExamEvent && it.isPassed);
+        const hasHoliday = dayItems.some(it => it.isTechnionEvent && it.type === 'holiday');
+        const hasAcademicMilestone = dayItems.some(it => it.isTechnionEvent && it.type === 'academic');
 
         const cell = document.createElement("div");
         let cellClasses = ["cal-day-cell"];
         if (hasPassedExam) cellClasses.push("has-past-exam");
         if (hasActiveExam) cellClasses.push("has-exam");
+        if (hasHoliday) cellClasses.push("has-holiday");
+        if (hasAcademicMilestone) cellClasses.push("has-academic-milestone");
         cell.className = cellClasses.join(" ");
         cell.dataset.date = dateStr;
 
@@ -15860,8 +15888,27 @@ function renderFinalsCalendar() {
             <div class="cal-events-list" style="display: flex; flex-direction: column; gap: 4px;">
         `;
 
-        dayItems.forEach(item => {
-            if (item.isExamEvent) {
+        // Sort items: Technion holidays & milestones first, then exams, then tasks, then personal & past exams
+        const sortedDayItems = [...dayItems].sort((a, b) => {
+            const order = (it) => {
+                if (it.isTechnionEvent) return 1;
+                if (it.isExamEvent) return 2;
+                if (it.isTaskEvent) return 3;
+                if (it.isPersonalEvent) return 4;
+                return 5;
+            };
+            return order(a) - order(b);
+        });
+
+        sortedDayItems.forEach(item => {
+            if (item.isTechnionEvent) {
+                const badgeTypeClass = item.type === 'holiday' ? 'holiday-event' : 'academic-event';
+                cellHtml += `
+                    <div class="cal-event-pill technion-event ${badgeTypeClass}" title="${item.desc || item.title}">
+                        <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${item.title}</span>
+                    </div>
+                `;
+            } else if (item.isExamEvent) {
                 const passedClass = item.isPassed ? "passed" : "";
                 cellHtml += `
                     <div class="cal-event-pill exam-event ${passedClass}" data-course-code="${item.courseCode}" title="מבחן סוף רשמי! לחץ לפתיחת פרטי ${item.courseName || ''}">

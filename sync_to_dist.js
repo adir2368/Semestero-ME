@@ -14,6 +14,7 @@ const filesToCopy = [
     'auth_sync.js',
     'index.html',
     'styles.css',
+    'technion_academic_calendar.js',
     'main.js',
     'preload.js',
     'moodle_sync.js',
