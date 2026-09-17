@@ -17,6 +17,8 @@
     let supabaseClient = null;
     let realtimeChannel = null;
     let syncTimeout = null;
+    let isApplyingRemoteUpdate = false;
+    let lastUploadedStateJson = '';
 
     // Check if this device already has Adir's personal save file (developer PC only)
     function hasAdirLocalData() {
@@ -1220,6 +1222,13 @@
                             console.log('[AuthSync Realtime] Remote update received:', payload);
                             if (payload && payload.new && payload.new.state_json) {
                                 const remoteState = payload.new.state_json;
+                                const remoteJson = JSON.stringify(remoteState);
+
+                                // Avoid echoing our own state that was just uploaded
+                                if (remoteJson === lastUploadedStateJson) {
+                                    return;
+                                }
+
                                 // Ignore contaminated Adir state for student accounts
                                 if (user.id !== 'adir_moshe' && (remoteState.credits === 39.5 || (remoteState.courses && remoteState.courses['104041'] && remoteState.courses['104041'].grade === 84))) {
                                     console.warn('[AuthSync Realtime] Ignored poisoned remote state for student:', user.id);
@@ -1227,17 +1236,25 @@
                                 }
                                 const key = this.getUserStorageKey(user.id);
                                 const localRaw = localStorage.getItem(key);
-                                if (localRaw !== JSON.stringify(remoteState)) {
-                                    localStorage.setItem(key, JSON.stringify(remoteState));
-                                    if (user.id === 'adir_moshe') {
-                                        localStorage.setItem(LEGACY_SAVE_KEY, JSON.stringify(remoteState));
-                                    }
-                                    if (window.setGlobalGameState) {
-                                        window.setGlobalGameState(remoteState);
-                                    }
-                                    this.refreshAllAppViews();
-                                    if (typeof showHudToast === 'function') {
-                                        showHudToast('סונכרן בזמן אמת מענן Atlas ME ☁️', 'info');
+                                if (localRaw !== remoteJson) {
+                                    isApplyingRemoteUpdate = true;
+                                    try {
+                                        lastUploadedStateJson = remoteJson;
+                                        localStorage.setItem(key, remoteJson);
+                                        if (user.id === 'adir_moshe') {
+                                            localStorage.setItem(LEGACY_SAVE_KEY, remoteJson);
+                                        }
+                                        if (window.setGlobalGameState) {
+                                            window.setGlobalGameState(remoteState);
+                                        }
+                                        this.refreshAllAppViews();
+                                        if (typeof showHudToast === 'function') {
+                                            showHudToast('סונכרן בזמן אמת מענן Atlas ME ☁️', 'info');
+                                        }
+                                    } finally {
+                                        setTimeout(() => {
+                                            isApplyingRemoteUpdate = false;
+                                        }, 1000);
                                     }
                                 }
                             }
@@ -1315,7 +1332,7 @@
 
         // Debounced sync to Supabase Cloud
         triggerDebouncedCloudSync(state) {
-            if (!supabaseClient || !this.isLoggedIn()) return;
+            if (!supabaseClient || !this.isLoggedIn() || isApplyingRemoteUpdate) return;
             clearTimeout(syncTimeout);
             syncTimeout = setTimeout(() => {
                 this.syncToCloud(state);
@@ -1324,12 +1341,17 @@
 
         // Force immediate sync to cloud
         async syncToCloud(stateToSync) {
-            if (!supabaseClient || !this.isLoggedIn()) return;
+            if (!supabaseClient || !this.isLoggedIn() || isApplyingRemoteUpdate) return;
             const user = this.getActiveUser();
             if (!user || !user.id || user.id === 'guest') return;
 
             const state = stateToSync || (window.getGlobalGameState ? window.getGlobalGameState() : window.gameState);
             if (!state) return;
+
+            const stateJson = JSON.stringify(state);
+            if (stateJson === lastUploadedStateJson) {
+                return; // State identical to cloud copy, skip upload
+            }
 
             try {
                 const { data, error } = await supabaseClient
@@ -1345,6 +1367,7 @@
                 if (error) {
                     console.error('[AuthSync] Cloud sync error:', error);
                 } else {
+                    lastUploadedStateJson = stateJson;
                     console.log('[AuthSync] Synced state to cloud for user:', user.name);
                 }
             } catch (err) {

@@ -14,6 +14,7 @@ function getSemesterStats(semNumber) {
     let allMastered = true;
 
     list.forEach(c => {
+        if (c.status === 'exempt') return; // Skip alternative track courses (e.g. Physics 1 vs 1M)
         const cr = c.credits || 0;
         totalCredits += cr;
         if (c.status !== 'mastered') {
@@ -12560,10 +12561,10 @@ function renderFinalsCalendar() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.09.17-v1.8.9",
-    build: "178980",
-    date: "2026-09-17 14:00",
-    description: "גרסה 1.8.9: בידוד סמל אישי ואווטר מותאם אישית, בידוד מערכת שעות והתראות 10 דקות, בחירת מסלול פיזיקה (1/1מ -> 2/2ממ), סינון משימות פתוחות לפי קורסים פעילים בלבד"
+    code: "REV-2026.09.17-v1.8.10",
+    build: "178990",
+    date: "2026-09-17 14:20",
+    description: "גרסה 1.8.10: תיקון קריטי לשגיאת hasPassingGrade (חוסר תגובה), מניעת לולאת סנכרון זמן אמת (Supabase Realtime loop), ותמיכה בקורסי פטור במסלולי פיזיקה להשלמת סמסטר"
 };
 
 function ensureBaselineRevisions() {
@@ -13851,6 +13852,7 @@ function getUpcomingPriorityTasks(limit = 8) {
 
     Object.values(gameState.courses).forEach(course => {
         const isBinary = (course.isBinaryPass === true || course.grade === 'עובר' || course.grade === 'PASS');
+        const hasPassingGrade = isBinary || (course.grade !== undefined && course.grade !== null && course.grade !== '' && !isNaN(Number(course.grade)) && Number(course.grade) >= 55);
         if (course.status !== 'active' || hasPassingGrade) return;
         if (!isWinterSemesterStarted() && (course.semester || 1) > (gameState.currentActiveSemester || 2)) return;
 
