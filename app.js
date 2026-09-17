@@ -16194,10 +16194,10 @@ function renderFinalsCalendar() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.09.17-v1.8.19",
-    build: "179800",
-    date: "2026-09-17 21:35",
-    description: "גרסה 1.8.19: יישור מיתוג מדויק - שם האפליקציה בכל המערכת, הטאבים וה-PWA הוא Semestero ME, ורק בכותרת הראשית מוצג הלוגו המעוצב SeMEstero"
+    code: "REV-2026.09.17-v1.8.20",
+    build: "179900",
+    date: "2026-09-17 21:45",
+    description: "גרסה 1.8.20: הסרת ייחוס מוסדי מהכותרות - כותרת המערכת היא Semestero ME בלבד"
 };
 
 function ensureBaselineRevisions() {

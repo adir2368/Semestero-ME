@@ -1,7 +1,7 @@
 {
-  "name": "Semestero ME | מערכת הניווט והניהול האקדמי - הטכניון",
+  "name": "Semestero ME",
   "short_name": "Semestero ME",
-  "description": "סמסטרו ME - מערכת ניווט, ניהול לימודים, תכנון תואר ומעקב משימות - הפקולטה להנדסת מכונות, הטכניון",
+  "description": "סמסטרו ME - מערכת ניווט, ניהול לימודים, תכנון תואר ומעקב משימות להנדסת מכונות",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
