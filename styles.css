@@ -3400,6 +3400,7 @@ body {
     display: inline-flex;
     align-items: center;
     gap: 4px;
+    direction: ltr;
 }
 
 .cal-current-month {
@@ -5775,6 +5776,7 @@ label[for="new-task-xp-input"],
         display: inline-flex !important;
         align-items: center !important;
         gap: 4px !important;
+        direction: ltr !important;
     }
 
     .cal-current-month {
@@ -7843,25 +7845,33 @@ html.is-iphone .app-global-footer {
     position: relative;
     background: transparent;
     border-top: 1px solid rgba(255, 255, 255, 0.05);
-    padding: 5px 16px;
+    padding: 5px 24px;
     display: flex;
-    justify-content: center;
+    justify-content: space-between;
     align-items: center;
+    direction: rtl; /* Right side: Credit, Left side: Version */
     flex-shrink: 0;
     z-index: 50;
     font-size: 0.72rem;
     color: #64748b;
     min-height: 28px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.footer-credit-content {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    direction: ltr; /* Keeps English credit text readable */
+    flex-shrink: 0;
 }
 
 .footer-left-version {
-    position: absolute;
-    left: 16px;
-    top: 50%;
-    transform: translateY(-50%);
     display: flex;
     align-items: center;
     direction: ltr;
+    flex-shrink: 0;
 }
 
 .app-version-badge {
@@ -7941,7 +7951,7 @@ html.is-iphone .app-global-footer {
         justify-content: space-between !important;
         align-items: center !important;
         position: relative !important;
-        direction: ltr !important;
+        direction: rtl !important; /* Right: Credit, Left: Version */
         width: 100% !important;
         box-sizing: border-box !important;
         font-size: 0.68rem;
