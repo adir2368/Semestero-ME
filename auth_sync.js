@@ -20,15 +20,22 @@
     let isApplyingRemoteUpdate = false;
     let lastUploadedStateJson = '';
 
+    window.showHudToast = function(msg, type = 'info') {
+        if (typeof showToastNotification === 'function') {
+            showToastNotification(msg, type);
+        } else {
+            console.log('[HudToast]', msg);
+        }
+    };
+
     // Check if this device already has Adir's personal save file (developer PC only)
     function hasAdirLocalData() {
         try {
             const saved = localStorage.getItem(LEGACY_SAVE_KEY);
             if (saved) {
                 const parsed = JSON.parse(saved);
-                if (parsed && parsed.credits === 39.5 && parsed.completedCourses === 11 && parsed.gpa === 86.39) {
-                    const devProfile = localStorage.getItem('ast_profile_adir_moshe');
-                    return devProfile !== null;
+                if (parsed && (parsed.credits === 39.5 || (parsed.gpa >= 86 && parsed.completedCourses >= 10))) {
+                    return true;
                 }
             }
         } catch (e) {}
@@ -965,7 +972,7 @@
                         </div>
 
                         <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px;">
-                            <button type="button" class="btn btn-primary" id="btn-force-pull-cloud" style="padding: 9px; font-size: 0.86rem; font-weight: bold; background: linear-gradient(135deg, #0284c7, #0369a1); border: 1px solid #38bdf8; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; color: #fff;" onclick="AuthSync.pullLatestStateFromCloud(true).then(() => { if (typeof showHudToast==='function') showHudToast('שוחזר בהצלחה מענן Atlas ME! ☁️', 'success'); });">
+                            <button type="button" class="btn btn-primary" id="btn-force-pull-cloud" style="padding: 10px; font-size: 0.88rem; font-weight: bold; background: linear-gradient(135deg, #0284c7, #0369a1); border: 1px solid #38bdf8; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; color: #fff; transition: all 0.2s;" onclick="AuthSync.handleUserCloudRestore(this);">
                                 📥 שחזר ומשוך עכשיו נתונים מהענן (סנכרון מהטלפון)
                             </button>
                             <div style="display: flex; gap: 8px;">
@@ -1407,6 +1414,58 @@
                 console.warn('[AuthSync] Exception in pullLatestStateFromCloud:', e);
             }
             return null;
+        },
+
+        // User clicked Cloud Restore button in Account modal
+        async handleUserCloudRestore(btnElement) {
+            if (!btnElement) btnElement = document.getElementById('btn-force-pull-cloud');
+            const originalHtml = btnElement ? btnElement.innerHTML : '📥 שחזר ומשוך עכשיו נתונים מהענן (סנכרון מהטלפון)';
+            if (btnElement) {
+                btnElement.disabled = true;
+                btnElement.innerHTML = '⏳ מושך נתונים מהענן של הטלפון...';
+                btnElement.style.opacity = '0.7';
+            }
+
+            try {
+                const res = await this.pullLatestStateFromCloud(true);
+                if (res && res.courses) {
+                    const count = Object.keys(res.courses).length;
+                    if (btnElement) {
+                        btnElement.innerHTML = '✅ שוחזר בהצלחה!';
+                        btnElement.style.background = '#10b981';
+                    }
+                    if (typeof showToastNotification === 'function') {
+                        showToastNotification(`✅ שוחזרו בהצלחה ${count} קורסים והעדפות מהטלפון!`, 'success');
+                    }
+                    setTimeout(() => {
+                        this.closeAuthModal();
+                    }, 800);
+                } else {
+                    if (btnElement) {
+                        btnElement.innerHTML = '⚠️ לא נמצאו נתונים חדשים בענן';
+                    }
+                    if (typeof showToastNotification === 'function') {
+                        showToastNotification('⚠️ לא נמצאו נתונים מעודכנים יותר בענן.', 'warning');
+                    }
+                    setTimeout(() => {
+                        if (btnElement) {
+                            btnElement.disabled = false;
+                            btnElement.innerHTML = originalHtml;
+                            btnElement.style.opacity = '1';
+                        }
+                    }, 2000);
+                }
+            } catch (err) {
+                console.error('[AuthSync] Restore error:', err);
+                if (btnElement) {
+                    btnElement.disabled = false;
+                    btnElement.innerHTML = originalHtml;
+                    btnElement.style.opacity = '1';
+                }
+                if (typeof showToastNotification === 'function') {
+                    showToastNotification('❌ שגיאה במשיכת נתונים: ' + (err.message || err), 'error');
+                }
+            }
         },
 
         // Debounced sync to Supabase Cloud
