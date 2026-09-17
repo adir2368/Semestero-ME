@@ -58,7 +58,17 @@
         // Get active user object
         getActiveUser() {
             if (!this.isLoggedIn()) {
-                return { id: 'guest', name: 'אורח', avatar: '👤', role: 'guest', startingSemester: 1 };
+                let guestProfile = {};
+                try {
+                    guestProfile = JSON.parse(localStorage.getItem('ast_profile_guest') || '{}');
+                } catch (e) {}
+                return { 
+                    id: 'guest', 
+                    name: guestProfile.name || 'אורח', 
+                    avatar: guestProfile.avatar || '🎓', 
+                    role: 'guest', 
+                    startingSemester: 1 
+                };
             }
             const uid = localStorage.getItem(SESSION_USER_KEY);
             const currentSem = (window.gameState && window.gameState.currentActiveSemester) ? window.gameState.currentActiveSemester : 1;
@@ -93,6 +103,7 @@
                         parsed.startingSemester = window.gameState.currentActiveSemester;
                     }
                     if (!parsed.phone && fallbackPhone) parsed.phone = fallbackPhone;
+                    if (!parsed.avatar) parsed.avatar = '🎓';
                     return parsed;
                 }
             } catch (e) {}
@@ -102,7 +113,7 @@
                 name: (window.gameState && window.gameState.student_name) ? window.gameState.student_name : 'סטודנט להנדסת מכונות',
                 email: '',
                 phone: fallbackPhone,
-                avatar: '👤',
+                avatar: '🎓',
                 role: 'student',
                 startingSemester: currentSem
             };
@@ -617,6 +628,9 @@
                 } catch (e) {}
             }
 
+            const chosenAvatar = (params.avatar || user.avatar || '🎓').trim();
+            state.avatar = chosenAvatar;
+
             // Update user profile object
             const updatedProfile = {
                 id: user.id,
@@ -624,7 +638,7 @@
                 email: email,
                 phone: cleanPhone,
                 password: state.account_password || '',
-                avatar: user.avatar || '👤',
+                avatar: chosenAvatar,
                 role: user.role || 'student',
                 startingSemester: semester
             };
@@ -789,6 +803,11 @@
                         <span class="login-text">התחברות</span>
                     </button>
                 `;
+                const hudCharAvatar = document.getElementById('hud-char-avatar');
+                if (hudCharAvatar) {
+                    const guestUser = this.getActiveUser();
+                    hudCharAvatar.innerHTML = guestUser.avatar || '🎓';
+                }
             }
         },
 
@@ -867,7 +886,7 @@
                             <h3 style="font-size: 0.9rem; color: #38bdf8; margin: 0 0 10px 0; display: flex; align-items: center; gap: 6px;">
                                 ✏️ עריכת פרטי חשבון
                             </h3>
-                            <form onsubmit="event.preventDefault(); const n = document.getElementById('edit-profile-name').value; const e = document.getElementById('edit-profile-email').value; const ph = document.getElementById('edit-profile-phone').value; const s = document.getElementById('edit-profile-sem').value; const p = document.getElementById('edit-profile-pass').value; AuthSync.updateUserProfile({ name: n, email: e, phone: ph, semester: s, password: p });">
+                            <form onsubmit="event.preventDefault(); const n = document.getElementById('edit-profile-name').value; const e = document.getElementById('edit-profile-email').value; const ph = document.getElementById('edit-profile-phone').value; const s = document.getElementById('edit-profile-sem').value; const p = document.getElementById('edit-profile-pass').value; const a = (document.getElementById('edit-profile-avatar') ? document.getElementById('edit-profile-avatar').value : ''); AuthSync.updateUserProfile({ name: n, email: e, phone: ph, semester: s, password: p, avatar: a });">
                                 <div class="form-group" style="margin-bottom: 8px;">
                                     <label style="display: block; font-size: 0.78rem; color: #94a3b8; margin-bottom: 3px;">שם מלא / כינוי:</label>
                                     <input type="text" id="edit-profile-name" class="form-input" style="width: 100%; padding: 6px 10px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff; font-size: 0.86rem;" value="${user.name}" required>
@@ -883,6 +902,20 @@
                                     </div>
                                     <input type="tel" id="edit-profile-phone" class="form-input" style="width: 100%; padding: 6px 10px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff; font-size: 0.86rem;" placeholder="050-1234567" dir="ltr" value="${user.phone || (window.gameState && window.gameState.userProfile && window.gameState.userProfile.phone) || ''}">
                                     <span style="display: block; font-size: 0.72rem; color: #64748b; margin-top: 2px;">לקבלת תזכורות לשיעורים (10 דק׳ מראש), סקירה יומית ודדליינים</span>
+                                </div>
+                                <div class="form-group" style="margin-bottom: 8px;">
+                                    <label style="display: block; font-size: 0.78rem; color: #94a3b8; margin-bottom: 3px;">סמל אישי (Avatar Icon):</label>
+                                    <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 6px;">
+                                        ${['🎓', '⚡', '⚙️', '🚀', '🔬', '🤖', '🦁', '🦉', '🦅', '💻', '📐', '🛠️', '🏎️', '🪐', '🎯', '💡'].map(sym => `
+                                            <button type="button" class="btn-avatar-pick-item" onclick="document.getElementById('edit-profile-avatar').value='${sym}'; document.querySelectorAll('.btn-avatar-pick-item').forEach(b => b.style.borderColor='rgba(255,255,255,0.12)'); this.style.borderColor='#38bdf8';" style="width: 34px; height: 34px; border-radius: 6px; border: 1.5px solid ${(user.avatar === sym || (!user.avatar && sym === '🎓')) ? '#38bdf8' : 'rgba(255,255,255,0.12)'}; background: rgba(15,23,42,0.85); font-size: 1.15rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s;">
+                                                ${sym}
+                                            </button>
+                                        `).join('')}
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <input type="text" id="edit-profile-avatar" class="form-input" style="width: 60px; text-align: center; font-size: 1.1rem; padding: 4px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff;" value="${user.avatar || '🎓'}" maxlength="4" placeholder="סמל">
+                                        <span style="font-size: 0.72rem; color: #64748b;">בחר מהרשימה או הזן אימוג'י/אות לבחירתך</span>
+                                    </div>
                                 </div>
                                 <div class="form-group" style="margin-bottom: 8px;">
                                     <label style="display: block; font-size: 0.78rem; color: #94a3b8; margin-bottom: 3px;">איזה סמסטר אתה לומד עכשיו?</label>

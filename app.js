@@ -5994,13 +5994,13 @@ function recalculateCourseStates() {
         }
     });
     
-    // Calculate total open tasks count (across unlocked active/available courses of current active semester)
+    // Calculate total open tasks count (STRICTLY across actively registered/enrolled courses)
     let openTasksCount = 0;
     Object.keys(gameState.courses).forEach(code => {
         const course = gameState.courses[code];
         const isBinary = (course.isBinaryPass === true || course.grade === 'עובר' || course.grade === 'PASS');
         const hasPassingGrade = isBinary || (course.grade !== undefined && course.grade !== null && course.grade !== '' && !isNaN(Number(course.grade)) && Number(course.grade) >= 55);
-        if (course.status !== 'locked' && course.status !== 'mastered' && !hasPassingGrade && course.tasks && Array.isArray(course.tasks)) {
+        if (course.status === 'active' && !hasPassingGrade && course.tasks && Array.isArray(course.tasks)) {
             // If winter semester has not started yet (before 28.10.2026), exclude semester > activeSem from openTasksCount
             const sem = course.semester || 1;
             const activeSem = gameState.currentActiveSemester || 2;
@@ -6032,13 +6032,43 @@ function recalculateCourseStates() {
     });
     gameState.gpa = gradedCreditsSum > 0 ? (totalWeightedGrades / gradedCreditsSum) : 0.00;
 
+    // Physics Tracks Mutual Exclusion & Track Selection
+    const p1 = gameState.courses['114051'];
+    const p1m = gameState.courses['114071'];
+    const p2 = gameState.courses['114052'];
+    const p2mm = gameState.courses['114075'];
+
+    if (p1 && p1.status === 'mastered') {
+        if (p1m && p1m.status !== 'mastered') p1m.status = 'exempt';
+        if (p2mm && p2mm.status !== 'mastered') p2mm.status = 'exempt';
+    } else if (p1m && p1m.status === 'mastered') {
+        if (p1 && p1.status !== 'mastered') p1.status = 'exempt';
+        if (p2 && p2.status !== 'mastered') p2.status = 'exempt';
+    }
+
+    // Helper: Check prerequisite satisfaction supporting Physics track alternatives
+    const isPrereqSatisfied = (preCode) => {
+        const prereq = gameState.courses[preCode];
+        if (prereq && prereq.status === 'mastered') return true;
+
+        // Physics 1 (114051) <-> Physics 1M (114071)
+        if (preCode === '114051' && gameState.courses['114071'] && gameState.courses['114071'].status === 'mastered') return true;
+        if (preCode === '114071' && gameState.courses['114051'] && gameState.courses['114051'].status === 'mastered') return true;
+
+        // Physics 2 (114052) <-> Physics 2MM (114075)
+        if (preCode === '114052' && gameState.courses['114075'] && gameState.courses['114075'].status === 'mastered') return true;
+        if (preCode === '114075' && gameState.courses['114052'] && gameState.courses['114052'].status === 'mastered') return true;
+
+        return false;
+    };
+
     // Check pre-reqs status loop to unlock available courses
     let loopChanged = true;
     while (loopChanged) {
         loopChanged = false;
         Object.keys(gameState.courses).forEach(code => {
             const course = gameState.courses[code];
-            if (course.status === 'mastered') return;
+            if (course.status === 'mastered' || course.status === 'exempt') return;
 
             // Strict Semester Progression Guard:
             const guardMode = gameState.semesterGuardMode || 'locked';
@@ -6048,8 +6078,7 @@ function recalculateCourseStates() {
 
             // Check if all prerequisites are mastered
             const allPrereqsMet = !course.prerequisites || course.prerequisites.length === 0 || course.prerequisites.every(preCode => {
-                const prereq = gameState.courses[preCode];
-                return prereq && prereq.status === 'mastered';
+                return isPrereqSatisfied(preCode);
             });
 
             // If locked mode is on and previous semester is incomplete, course MUST be locked
@@ -12531,10 +12560,10 @@ function renderFinalsCalendar() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.09.17-v1.8.8",
-    build: "178970",
-    date: "2026-09-17 13:25",
-    description: "גרסה 1.8.8: תכנון תואר מלא, סימולטור What-If, התראות קפדניות 10 דקות לפני שיעור, ניהול טלפון בעריכת פרטי חשבון והעדפות התראה"
+    code: "REV-2026.09.17-v1.8.9",
+    build: "178980",
+    date: "2026-09-17 14:00",
+    description: "גרסה 1.8.9: בידוד סמל אישי ואווטר מותאם אישית, בידוד מערכת שעות והתראות 10 דקות, בחירת מסלול פיזיקה (1/1מ -> 2/2ממ), סינון משימות פתוחות לפי קורסים פעילים בלבד"
 };
 
 function ensureBaselineRevisions() {
@@ -12875,27 +12904,39 @@ function renderPhoneAndNotificationPreferences() {
 function savePhoneAndNotificationPreferences(source = 'settings') {
     ensureNotificationPreferencesDefaults();
 
-    let rawPhone = "";
+    let rawPhone = (gameState.userProfile && gameState.userProfile.phone) || "";
+    let hasPhoneInput = false;
     if (source === 'drawer') {
         const drawerInput = document.getElementById("drawer-phone-input");
-        rawPhone = drawerInput ? drawerInput.value.trim() : "";
+        if (drawerInput) {
+            rawPhone = drawerInput.value.trim();
+            hasPhoneInput = true;
+        }
     } else {
         const settingsInput = document.getElementById("setting-phone-number");
-        rawPhone = settingsInput ? settingsInput.value.trim() : "";
+        if (settingsInput) {
+            rawPhone = settingsInput.value.trim();
+            hasPhoneInput = true;
+        }
     }
 
     // Normalize phone number (Israeli 05X-XXXXXXX format or standard international)
-    let cleanPhone = rawPhone.replace(/[\s\-()]/g, '');
-    if (cleanPhone) {
-        if (/^05\d{8}$/.test(cleanPhone)) {
-            cleanPhone = cleanPhone.slice(0, 3) + '-' + cleanPhone.slice(3);
-        } else if (/^\+9725\d{8}$/.test(cleanPhone)) {
-            cleanPhone = '0' + cleanPhone.slice(4, 6) + '-' + cleanPhone.slice(6);
+    if (hasPhoneInput) {
+        let cleanPhone = rawPhone.replace(/[\s\-()]/g, '');
+        if (cleanPhone) {
+            if (/^05\d{8}$/.test(cleanPhone)) {
+                cleanPhone = cleanPhone.slice(0, 3) + '-' + cleanPhone.slice(3);
+            } else if (/^\+9725\d{8}$/.test(cleanPhone)) {
+                cleanPhone = '0' + cleanPhone.slice(4, 6) + '-' + cleanPhone.slice(6);
+            }
+            if (!gameState.userProfile) gameState.userProfile = {};
+            gameState.userProfile.phone = cleanPhone;
+        } else {
+            if (!gameState.userProfile) gameState.userProfile = {};
+            gameState.userProfile.phone = "";
         }
-        gameState.userProfile.phone = cleanPhone;
-    } else {
-        gameState.userProfile.phone = "";
     }
+    const cleanPhone = (gameState.userProfile && gameState.userProfile.phone) || "";
 
     // Read preferences from whichever controls were active
     if (source === 'drawer') {
@@ -13810,8 +13851,7 @@ function getUpcomingPriorityTasks(limit = 8) {
 
     Object.values(gameState.courses).forEach(course => {
         const isBinary = (course.isBinaryPass === true || course.grade === 'עובר' || course.grade === 'PASS');
-        const hasPassingGrade = isBinary || (course.grade !== undefined && course.grade !== null && course.grade !== '' && !isNaN(Number(course.grade)) && Number(course.grade) >= 55);
-        if (course.status === 'locked' || course.status === 'mastered' || hasPassingGrade) return;
+        if (course.status !== 'active' || hasPassingGrade) return;
         if (!isWinterSemesterStarted() && (course.semester || 1) > (gameState.currentActiveSemester || 2)) return;
 
         (course.tasks || []).forEach(task => {
@@ -14562,24 +14602,23 @@ function setupMobileNotifications() {
             const remaining = getRemainingClassesToday();
             let targetClass = remaining.nextClass;
             
-            // If free day or no class remaining today, pick Monday's flagship class for testing
-            if (!targetClass && typeof CHEESEFORK_SEMESTER_SCHEDULE !== 'undefined') {
-                const mon = CHEESEFORK_SEMESTER_SCHEDULE.days.find(d => d.dayIndex === 1);
-                if (mon && mon.classes && mon.classes.length > 0) {
-                    targetClass = mon.classes[0];
+            // If free day or no class remaining today, search for any class in the user's active schedule
+            const schedule = getActiveTimetableSchedule();
+            if (!targetClass && schedule && schedule.days) {
+                for (const d of schedule.days) {
+                    if (d.classes && d.classes.length > 0) {
+                        targetClass = d.classes[0];
+                        break;
+                    }
                 }
             }
             if (!targetClass) {
-                targetClass = {
-                    courseName: "פיסיקה 2",
-                    courseId: "114052",
-                    type: "הרצאה (קבוצה 10)",
-                    startTime: "08:30",
-                    endTime: "10:30",
-                    duration: "שעתיים",
-                    room: "כיתת טכניון",
-                    lecturer: "ד\"ר גדעון אלון"
-                };
+                if (typeof showToastNotification === 'function') {
+                    showToastNotification('טרם הוגדרה מערכת שעות אישית לחשבון זה. ההתראות יפעלו אוטומטית ברגע שתסנכרן את מערכת השעות שלך 📅', 'info');
+                } else if (typeof showHudToast === 'function') {
+                    showHudToast('טרם הוגדרה מערכת שעות אישית לחשבון זה 📅', 'info');
+                }
+                return;
             }
             await trigger10MinClassAlert(targetClass, true);
         });

@@ -30,7 +30,8 @@
                 { code: "01040065", altCode: "104065", name: "אלגברה 1 מ'", credits: 5.0, type: "mandatory", prereqs: [] },
                 { code: "01250001", altCode: "125001", name: "כימיה כללית", credits: 3.0, type: "mandatory", prereqs: [] },
                 { code: "02340128", altCode: "234128", name: "שפת פייתון", credits: 4.0, type: "mandatory", prereqs: [] },
-                { code: "01140051", altCode: "114051", name: "פיזיקה 1", credits: 3.5, type: "mandatory", prereqs: [] }
+                { code: "01140051", altCode: "114051", name: "פיזיקה 1", credits: 3.5, type: "mandatory", trackGroup: "physics_1", mutuallyExclusiveWith: ["01140071"], prereqs: [] },
+                { code: "01140071", altCode: "114071", name: "פיזיקה 1מ'", credits: 3.5, type: "mandatory", trackGroup: "physics_1", mutuallyExclusiveWith: ["01140051"], prereqs: [] }
             ]
         },
         {
@@ -52,7 +53,8 @@
             targetCredits: 19.5,
             courses: [
                 { code: "00340053", altCode: "034053", name: "מכניקת מוצקים 2 מורחב", credits: 5.0, type: "mandatory", prereqs: ["00340028"] },
-                { code: "01140052", altCode: "114052", name: "פיזיקה 2", credits: 3.5, type: "mandatory", prereqs: ["01140051", "01040043"] },
+                { code: "01140052", altCode: "114052", name: "פיזיקה 2", credits: 3.5, type: "mandatory", trackGroup: "physics_2", mutuallyExclusiveWith: ["01140075"], prereqs: ["01140051", "01040043"] },
+                { code: "01140075", altCode: "114075", name: "פיזיקה 2ממ'", credits: 5.0, type: "mandatory", trackGroup: "physics_2", mutuallyExclusiveWith: ["01140052"], prereqs: ["01140071", "01040043"] },
                 { code: "00340056", altCode: "034056", name: "מבוא לחישוב מדעי והנדסי", credits: 4.0, type: "mandatory", prereqs: ["02340128", "01040065", "01040043"] },
                 { code: "00340035", altCode: "034035", name: "תרמודינמיקה 1", credits: 4.0, type: "mandatory", prereqs: ["01040043"] },
                 { code: "01040228", altCode: "104228", name: "מד\"ח מ'", credits: 3.0, type: "mandatory", prereqs: ["01040043", "01040131"] }

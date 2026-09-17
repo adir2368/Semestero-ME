@@ -9713,3 +9713,29 @@ html.is-iphone .app-global-footer {
         font-weight: 600 !important;
     }
 }
+
+/* v1.8.9: Custom Avatar & Settings Status Card Styles */
+.phone-settings-status-card {
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.phone-settings-status-card:hover {
+    border-color: rgba(56, 189, 248, 0.45) !important;
+    box-shadow: 0 0 14px rgba(56, 189, 248, 0.15);
+}
+.btn-avatar-pick-item:hover {
+    transform: scale(1.1);
+    background: rgba(56, 189, 248, 0.2) !important;
+}
+.btn-avatar-pick-item:active {
+    transform: scale(0.95);
+}
+.course-card.exempt {
+    opacity: 0.55;
+    filter: grayscale(0.5);
+    border: 1px dashed rgba(148, 163, 184, 0.35);
+}
+.course-card.exempt:hover {
+    opacity: 0.85;
+    filter: none;
+}
+

@@ -99,9 +99,25 @@ var SAMPLE_ME_DEGREE = (typeof window !== 'undefined' && window.SAMPLE_ME_DEGREE
         semester: 1,
         prerequisites: [],
         status: "available",
+        trackGroup: "physics_1",
+        mutuallyExclusiveWith: ["114071"],
         tasks: [
             { id: "114051_h1", title: "תרגיל בית 1: קינמטיקה וחוקי ניוטון", type: "hw", xp: 50, completed: false },
             { id: "114051_ex", title: "מבחן סוף", type: "exam", xp: 500, completed: false }
+        ]
+    },
+    "114071": {
+        code: "114071",
+        name: "פיסיקה 1מ'",
+        credits: 3.5,
+        semester: 1,
+        prerequisites: [],
+        status: "available",
+        trackGroup: "physics_1",
+        mutuallyExclusiveWith: ["114051"],
+        tasks: [
+            { id: "114071_h1", title: "תרגיל בית 1: מכניקה יחסותית וחוקי שימור", type: "hw", xp: 50, completed: false },
+            { id: "114071_ex", title: "מבחן סוף", type: "exam", xp: 500, completed: false }
         ]
     },
     "104131": {
@@ -148,9 +164,25 @@ var SAMPLE_ME_DEGREE = (typeof window !== 'undefined' && window.SAMPLE_ME_DEGREE
         semester: 3,
         prerequisites: ["114051","104041"],
         status: "locked",
+        trackGroup: "physics_2",
+        mutuallyExclusiveWith: ["114075"],
         tasks: [
             { id: "114052_h1", title: "תרגיל בית 1: שדה חשמלי וחוק גאוס", type: "hw", xp: 50, completed: false },
             { id: "114052_ex", title: "מבחן סוף", type: "exam", xp: 500, completed: false }
+        ]
+    },
+    "114075": {
+        code: "114075",
+        name: "פיסיקה 2ממ'",
+        credits: 5.0,
+        semester: 3,
+        prerequisites: ["114071","104041"],
+        status: "locked",
+        trackGroup: "physics_2",
+        mutuallyExclusiveWith: ["114052"],
+        tasks: [
+            { id: "114075_h1", title: "תרגיל בית 1: שדה חשמלי, מגנטיות וגלי אור", type: "hw", xp: 60, completed: false },
+            { id: "114075_ex", title: "מבחן סוף", type: "exam", xp: 550, completed: false }
         ]
     },
     "034056": {
@@ -467,6 +499,15 @@ function getCleanCurriculumState(startingSemester = 1, priorCompletedCourses = {
         }
     });
 
+    // Physics track mutual exclusion resolution in clean state
+    if (courses["114051"] && courses["114051"].status === 'mastered') {
+        if (courses["114071"]) courses["114071"].status = 'exempt';
+        if (courses["114075"]) courses["114075"].status = 'exempt';
+    } else if (courses["114071"] && courses["114071"].status === 'mastered') {
+        if (courses["114051"]) courses["114051"].status = 'exempt';
+        if (courses["114052"]) courses["114052"].status = 'exempt';
+    }
+
     const initialGpa = totalGradedCredits > 0 ? parseFloat((totalWeightedPoints / totalGradedCredits).toFixed(2)) : 0;
 
     return {
@@ -478,7 +519,7 @@ function getCleanCurriculumState(startingSemester = 1, priorCompletedCourses = {
         bossesSlain: completedCount,
         courses: courses,
         gpa: initialGpa,
-        openTasks: [],
+        openTasks: 0,
         pastExamSchedule: [],
         hasLoadedSemesterBExcel: true,
         customCalendarEvents: [],
