@@ -448,7 +448,8 @@
             }
 
             const now = Date.now();
-            const FOURTEEN_DAYS_MS = 14 * 24 * 60 * 60 * 1000;
+            // Allow events up to 180 days in the past (previous semester) and unlimited future across the whole year
+            const PAST_LOOKBACK_MS = 180 * 24 * 60 * 60 * 1000;
             let newCount = 0;
             let updatedCount = 0;
             let syncedTotal = 0;
@@ -497,8 +498,8 @@
                 const dueDateObj = this.parseIcsDate(rawDate);
                 if (!dueDateObj || isNaN(dueDateObj.getTime())) continue;
 
-                // Keep events due in future or in the last 14 days
-                if (dueDateObj.getTime() < now - FOURTEEN_DAYS_MS) {
+                // Keep all upcoming events across the year, plus recent past events within 180 days
+                if (dueDateObj.getTime() < now - PAST_LOOKBACK_MS) {
                     continue;
                 }
 
