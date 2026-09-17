@@ -987,10 +987,16 @@
                             <div class="cal-nav-group">
                                 <div class="cal-month-nav-row">
                                     <span class="cal-current-month" id="cal-current-month-title">August 2026</span>
-                                    <div class="cal-nav-btns-group">
-                                        <button type="button" class="btn btn-sm btn-outline" id="cal-nav-prev" title="חודש קודם">◀</button>
-                                        <button type="button" class="btn btn-sm btn-outline" id="cal-nav-next" title="חודש הבא">▶</button>
-                                        <button type="button" class="btn btn-sm btn-outline" id="cal-nav-today" title="חזור לחודש הנוכחי" style="font-weight: 600; padding: 2px 8px; font-size: 0.78rem;">היום</button>
+                                    <div class="cal-nav-controls-right">
+                                        <div class="cal-view-mode-toggle" id="cal-view-mode-toggle">
+                                            <button type="button" class="btn btn-sm btn-outline active" data-view="month" id="btn-view-month">📅 חודש</button>
+                                            <button type="button" class="btn btn-sm btn-outline" data-view="week" id="btn-view-week">📆 שבוע</button>
+                                        </div>
+                                        <div class="cal-nav-btns-group">
+                                            <button type="button" class="btn btn-sm btn-outline" id="cal-nav-prev" title="חודש/שבוע קודם">◀</button>
+                                            <button type="button" class="btn btn-sm btn-outline" id="cal-nav-next" title="חודש/שבוע הבא">▶</button>
+                                            <button type="button" class="btn btn-sm btn-outline" id="cal-nav-today" title="חזור להיום" style="font-weight: 600; padding: 2px 8px; font-size: 0.78rem;">היום</button>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="cal-actions-row">
@@ -2065,6 +2071,50 @@
                         <span class="export-choice-desc">מותאם במדויק לדף A4 לרוחב ללא חיתוכים או גלישות</span>
                     </div>
                 </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Calendar Day Details & Hourly Event Creation Modal -->
+    <div class="modal-overlay" id="calendar-day-modal" style="display: none; z-index: 10000;">
+        <div class="modal-content" style="max-width: 490px; width: 92%; padding: 20px; border-radius: 14px; direction: rtl; background: #111728; border: 1px solid rgba(56, 189, 248, 0.25); box-shadow: 0 16px 40px rgba(0,0,0,0.75);">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 10px;">
+                <div>
+                    <h3 id="day-modal-title" style="margin: 0; font-size: 1.15rem; color: #38bdf8; font-weight: 800;">📅 אירועי היום</h3>
+                    <div id="day-modal-date-subtitle" style="font-size: 0.82rem; color: #94a3b8; margin-top: 2px;"></div>
+                </div>
+                <button type="button" class="modal-close" id="btn-close-day-modal" style="background: transparent; border: none; font-size: 1.6rem; color: #94a3b8; cursor: pointer; line-height: 1; padding: 0 6px;">&times;</button>
+            </div>
+
+            <!-- Existing Events List for the Day -->
+            <div style="margin-bottom: 16px;">
+                <div style="font-size: 0.82rem; font-weight: 700; color: #cbd5e1; margin-bottom: 8px;">📋 פעילויות ואירועים בתאריך זה:</div>
+                <div class="day-modal-events-list" id="day-modal-events-list" style="max-height: 230px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; padding-left: 2px;">
+                    <!-- Dynamically populated -->
+                </div>
+            </div>
+
+            <!-- Add Event at Specific Hour Section -->
+            <div class="day-modal-add-section" style="background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 14px;">
+                <div style="font-size: 0.88rem; font-weight: 800; color: #f8fafc; margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">
+                    <span>➕</span>
+                    <span>הוספת אירוע בשעה ספציפית</span>
+                </div>
+                <div style="display: flex; gap: 8px; margin-bottom: 10px;">
+                    <input type="text" id="day-modal-event-title" placeholder="כותרת האירוע / משימה..." class="form-control" style="flex: 1; padding: 8px 10px; font-size: 0.84rem; background: #0b0f19; border: 1px solid #334155; color: #fff; border-radius: 8px;">
+                    <input type="time" id="day-modal-event-time" value="10:00" class="form-control" style="width: 110px; padding: 7px 8px; font-size: 0.84rem; background: #0b0f19; border: 1px solid #334155; color: #fff; border-radius: 8px; direction: ltr; text-align: center;">
+                </div>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <select id="day-modal-event-cat" class="form-control" style="flex: 1; padding: 8px 10px; font-size: 0.82rem; background: #0b0f19; border: 1px solid #334155; color: #cbd5e1; border-radius: 8px;">
+                        <option value="🔵">🔵 אירוע אישי</option>
+                        <option value="📖">📖 הכנה למבחן / חזרות</option>
+                        <option value="📝">📝 שיעורי בית / מעבדה</option>
+                        <option value="🏃">🏃 ספורט / כושר</option>
+                        <option value="💼">💼 עבודה / פגישה</option>
+                        <option value="📌">📌 תזכורת</option>
+                    </select>
+                    <button type="button" class="btn btn-sm btn-primary" id="btn-save-day-event" style="padding: 8px 18px; font-weight: 800; font-size: 0.85rem; border-radius: 8px;">💾 שמור</button>
+                </div>
             </div>
         </div>
     </div>

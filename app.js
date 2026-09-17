@@ -1849,7 +1849,17 @@ let currentViewMode = 'flowchart'; // 'flowchart' | 'constellation' | 'grid'
 let currentHoveredCourseCode = null;
 let currentCalendarMonth = new Date().getMonth(); // 0-indexed current month
 let currentCalendarYear = new Date().getFullYear();
+let currentCalendarViewMode = 'month'; // 'month' | 'week'
+let currentCalendarWeekStart = null;
 let currentRunwayView = 'calendar';
+
+function getSundayOfWeek(d) {
+    const date = new Date(d);
+    const day = date.getDay(); // 0 is Sunday
+    date.setDate(date.getDate() - day);
+    date.setHours(0, 0, 0, 0);
+    return date;
+}
 
 // Official Technion Academic Calendar - Winter Semester 2026/2027 starts on 28.10.2026
 const TECHNION_WINTER_START_DATE = new Date(2026, 9, 28, 0, 0, 0); // October 28th, 2026 (month index 9)
@@ -12064,6 +12074,7 @@ function setupNotionDashboard() {
     const calPane = document.getElementById("tasks-calendar-view-pane");
 
     function setActiveMainTab(activeTabId) {
+        window.setActiveMainTab = setActiveMainTab;
         window.currentActiveTab = activeTabId;
         if (document.body) document.body.setAttribute('data-active-tab', activeTabId);
         if (document.documentElement) document.documentElement.setAttribute('data-active-tab', activeTabId);
@@ -15010,26 +15021,40 @@ function setupFinalsMode() {
         });
     }
 
-    // 3. Calendar Month navigation
+    // 3. Calendar Navigation (Month & Single Week)
     const prevBtn = document.getElementById("cal-nav-prev");
     const nextBtn = document.getElementById("cal-nav-next");
     const todayBtn = document.getElementById("cal-nav-today");
     if (prevBtn) {
         prevBtn.addEventListener("click", () => {
-            currentCalendarMonth--;
-            if (currentCalendarMonth < 0) {
-                currentCalendarMonth = 11;
-                currentCalendarYear--;
+            if (currentCalendarViewMode === 'week') {
+                if (!currentCalendarWeekStart) currentCalendarWeekStart = getSundayOfWeek(new Date(currentCalendarYear, currentCalendarMonth, 1));
+                currentCalendarWeekStart.setDate(currentCalendarWeekStart.getDate() - 7);
+                currentCalendarMonth = currentCalendarWeekStart.getMonth();
+                currentCalendarYear = currentCalendarWeekStart.getFullYear();
+            } else {
+                currentCalendarMonth--;
+                if (currentCalendarMonth < 0) {
+                    currentCalendarMonth = 11;
+                    currentCalendarYear--;
+                }
             }
             renderFinalsCalendar();
         });
     }
     if (nextBtn) {
         nextBtn.addEventListener("click", () => {
-            currentCalendarMonth++;
-            if (currentCalendarMonth > 11) {
-                currentCalendarMonth = 0;
-                currentCalendarYear++;
+            if (currentCalendarViewMode === 'week') {
+                if (!currentCalendarWeekStart) currentCalendarWeekStart = getSundayOfWeek(new Date(currentCalendarYear, currentCalendarMonth, 1));
+                currentCalendarWeekStart.setDate(currentCalendarWeekStart.getDate() + 7);
+                currentCalendarMonth = currentCalendarWeekStart.getMonth();
+                currentCalendarYear = currentCalendarWeekStart.getFullYear();
+            } else {
+                currentCalendarMonth++;
+                if (currentCalendarMonth > 11) {
+                    currentCalendarMonth = 0;
+                    currentCalendarYear++;
+                }
             }
             renderFinalsCalendar();
         });
@@ -15039,6 +15064,32 @@ function setupFinalsMode() {
             const now = new Date();
             currentCalendarMonth = now.getMonth();
             currentCalendarYear = now.getFullYear();
+            currentCalendarWeekStart = getSundayOfWeek(now);
+            renderFinalsCalendar();
+        });
+    }
+
+    const btnViewMonth = document.getElementById("btn-view-month");
+    const btnViewWeek = document.getElementById("btn-view-week");
+    if (btnViewMonth && btnViewWeek) {
+        btnViewMonth.addEventListener("click", () => {
+            currentCalendarViewMode = 'month';
+            btnViewMonth.classList.add("active");
+            btnViewWeek.classList.remove("active");
+            renderFinalsCalendar();
+        });
+        btnViewWeek.addEventListener("click", () => {
+            currentCalendarViewMode = 'week';
+            btnViewWeek.classList.add("active");
+            btnViewMonth.classList.remove("active");
+            if (!currentCalendarWeekStart) {
+                const now = new Date();
+                if (now.getMonth() === currentCalendarMonth && now.getFullYear() === currentCalendarYear) {
+                    currentCalendarWeekStart = getSundayOfWeek(now);
+                } else {
+                    currentCalendarWeekStart = getSundayOfWeek(new Date(currentCalendarYear, currentCalendarMonth, 1));
+                }
+            }
             renderFinalsCalendar();
         });
     }
@@ -15048,9 +15099,12 @@ function setupFinalsMode() {
         addCalEventBtn.addEventListener("click", () => {
             const now = new Date();
             const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-            openAddCustomTaskModal(todayStr, "personal");
+            openCalendarDayModal(todayStr);
         });
     }
+
+    // Initialize Calendar Day Details & Hourly Schedule Modal
+    initCalendarDayModal();
 
     // 4. Hook Past Exams Manager Modal triggers
     const openMgrBtn = document.getElementById("btn-open-past-exams-mgr");
@@ -15877,7 +15931,11 @@ function copyScheduleToGoogleTasks() {
     }
 }
 
-// Renders the Google Calendar-style daily past exams grid
+// // Global map of items by date for quick lookup in modals and agenda
+window.currentCalendarItemsByDate = {};
+let currentSelectedDayModalDate = null;
+
+// Renders the Google Calendar-style daily past exams grid (6 columns: Sun-Fri, with Month & Week views)
 function renderFinalsCalendar() {
     const grid = document.getElementById("finals-calendar-grid");
     const titleEl = document.getElementById("cal-current-month-title");
@@ -15886,9 +15944,7 @@ function renderFinalsCalendar() {
     grid.innerHTML = "";
 
     const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-    if (titleEl) {
-        titleEl.innerText = `${monthNames[currentCalendarMonth]} ${currentCalendarYear}`;
-    }
+    const isMobile = window.innerWidth <= 768;
 
     const subTitleEl = document.querySelector(".finals-calendar-header-bar .cal-subtitle");
     const headerTitleEl = document.querySelector(".finals-calendar-header-bar .finals-calendar-title");
@@ -15896,33 +15952,13 @@ function renderFinalsCalendar() {
 
     if (gameState.isFinalsMode) {
         if (headerTitleEl) headerTitleEl.innerText = "📅 מרתון מבחני עבר ומועדי בחינות";
-        if (subTitleEl) subTitleEl.innerText = "תצוגה חודשית של כל מועדי הבחינות, מרתון מבחני עבר ומבחנים לתרגול";
+        if (subTitleEl) subTitleEl.innerText = "תצוגה שבועית/חודשית של כל מועדי הבחינות, מרתון מבחני עבר ומבחנים לתרגול";
         if (headerExportBtn) headerExportBtn.innerText = "📤 ייצוא מרתון ל-Google";
     } else {
         if (headerTitleEl) headerTitleEl.innerText = "📅 לוח שנה: משימות ושיעורי בית לפי קורסים";
         if (subTitleEl) subTitleEl.innerText = "סנכרון מלא של כל משימות הקורסים, שיעורי בית, WebWork, מעבדות ותאריכי יעד";
         if (headerExportBtn) headerExportBtn.innerText = "📅 סנכרן משימות ליומן / Tasks";
     }
-
-    // Days of week header
-    const isMobile = window.innerWidth <= 768;
-    const daysOfWeek = isMobile
-        ? ["א'", "ב'", "ג'", "ד'", "ה'", "ו'", "ש'"]
-        : ["ראשון (Sun)", "שני (Mon)", "שלישי (Tue)", "רביעי (Wed)", "חמישי (Thu)", "שישי (Fri)", "שבת (Sat)"];
-    daysOfWeek.forEach((dName, idx) => {
-        const h = document.createElement("div");
-        h.className = "cal-day-header";
-        h.innerText = dName;
-        if (isMobile) {
-            h.title = ["יום ראשון", "יום שני", "יום שלישי", "יום רביעי", "יום חמישי", "יום שישי", "יום שבת"][idx];
-        }
-        grid.appendChild(h);
-    });
-
-    // Calendar date calculations
-    const firstDayIndex = new Date(currentCalendarYear, currentCalendarMonth, 1).getDay(); // 0 for Sunday
-    const daysInMonth = new Date(currentCalendarYear, currentCalendarMonth + 1, 0).getDate();
-    const daysInPrevMonth = new Date(currentCalendarYear, currentCalendarMonth, 0).getDate();
 
     // Map scheduled items by date string (YYYY-MM-DD)
     const itemsByDate = {};
@@ -15949,7 +15985,7 @@ function renderFinalsCalendar() {
         });
     }
 
-    // Also map real course exams and all active course tasks (גיליון, WebWork, מעבדה, פרויקט, etc.)
+    // Also map real course exams and all active course tasks
     Object.values(gameState.courses || {}).forEach(course => {
         if (course.status === 'locked') return; // Only active and enrolled courses on the calendar!
         if (!course.tasks) return;
@@ -15994,7 +16030,6 @@ function renderFinalsCalendar() {
                     taskId: task.id
                 });
             } else {
-                // Determine task styling and category icon
                 const lowerTitle = (task.title || "").toLowerCase();
                 let typeClass = "sheet";
                 let icon = "📝";
@@ -16017,7 +16052,7 @@ function renderFinalsCalendar() {
                 }
 
                 const isDone = task.completed || task.status === 'completed' || task.status === 'done';
-                const shortCourse = COURSE_SHORT_NAMES[course.code] || course.name;
+                const shortCourse = (typeof COURSE_SHORT_NAMES !== 'undefined' && COURSE_SHORT_NAMES[course.code]) || course.name;
                 const displayTitle = `${icon} [${shortCourse}] ${task.title}`;
 
                 itemsByDate[task.dueDate].push({
@@ -16034,7 +16069,7 @@ function renderFinalsCalendar() {
         });
     });
 
-    // Also map custom personal calendar events (from Google Calendar or manual user entry)
+    // Also map custom personal calendar events (with hour & category)
     (gameState.customCalendarEvents || []).forEach(ev => {
         if (!ev.date) return;
         if (!itemsByDate[ev.date]) itemsByDate[ev.date] = [];
@@ -16042,218 +16077,505 @@ function renderFinalsCalendar() {
             isPersonalEvent: true,
             id: ev.id,
             title: ev.title,
+            time: ev.time || '',
             icon: ev.icon || '🔵',
             description: ev.description || '',
             completed: !!ev.completed
         });
     });
 
-    // Previous month padding cells
-    for (let i = firstDayIndex - 1; i >= 0; i--) {
-        const cell = document.createElement("div");
-        cell.className = "cal-day-cell other-month";
-        cell.innerHTML = `<div class="cal-day-num">${daysInPrevMonth - i}</div>`;
-        grid.appendChild(cell);
-    }
+    window.currentCalendarItemsByDate = itemsByDate;
 
+    // Toggle grid view-mode class
+    const isWeekView = (currentCalendarViewMode === 'week');
+    grid.classList.toggle("is-week-view", isWeekView);
+
+    // Days of week header: Sunday through Friday (6 columns - SATURDAY EXCLUDED)
+    const daysOfWeek = isMobile
+        ? ["א'", "ב'", "ג'", "ד'", "ה'", "ו'"]
+        : ["ראשון (Sun)", "שני (Mon)", "שלישי (Tue)", "רביעי (Wed)", "חמישי (Thu)", "שישי (Fri)"];
+
+    // Date references
     const now = new Date();
     const todayYear = now.getFullYear();
     const todayMonth = now.getMonth();
     const todayDay = now.getDate();
-    const isCurrentMonthView = (currentCalendarYear === todayYear && currentCalendarMonth === todayMonth);
+    const todayStr = `${todayYear}-${String(todayMonth + 1).padStart(2, '0')}-${String(todayDay).padStart(2, '0')}`;
 
-    // Current month cells
-    for (let day = 1; day <= daysInMonth; day++) {
-        const dateStr = `${currentCalendarYear}-${String(currentCalendarMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-        const dayItems = itemsByDate[dateStr] || [];
-        const hasActiveExam = dayItems.some(it => it.isExamEvent && !it.isPassed);
-        const hasPassedExam = dayItems.some(it => it.isExamEvent && it.isPassed);
-        const hasHoliday = dayItems.some(it => it.isTechnionEvent && it.type === 'holiday');
-        const hasAcademicMilestone = dayItems.some(it => it.isTechnionEvent && it.type === 'academic');
-        const isToday = isCurrentMonthView && (day === todayDay);
-
-        const cell = document.createElement("div");
-        let cellClasses = ["cal-day-cell"];
-        if (isToday) cellClasses.push("is-today");
-        if (hasPassedExam) cellClasses.push("has-past-exam");
-        if (hasActiveExam) cellClasses.push("has-exam");
-        if (hasHoliday) cellClasses.push("has-holiday");
-        if (hasAcademicMilestone) cellClasses.push("has-academic-milestone");
-        cell.className = cellClasses.join(" ");
-        cell.dataset.date = dateStr;
-
-        const todayBadgeHtml = isToday ? `<span class="cal-today-pill-badge">היום</span>` : '';
-        let cellHtml = `
-            <div class="cal-day-num">
-                <span style="display: inline-flex; align-items: center; gap: 4px;">
-                    <span>${day}</span>
-                    ${todayBadgeHtml}
-                </span>
-                <button type="button" class="btn-add-day-item" data-date="${dateStr}" title="הוסף אירוע או משימה ליום זה">➕</button>
-            </div>
-            <div class="cal-events-list" style="display: flex; flex-direction: column; gap: 4px;">
-        `;
-
-        // Sort items: Technion holidays & milestones first, then exams, then tasks, then personal & past exams
-        const sortedDayItems = [...dayItems].sort((a, b) => {
-            const order = (it) => {
-                if (it.isTechnionEvent) return 1;
-                if (it.isExamEvent) return 2;
-                if (it.isTaskEvent) return 3;
-                if (it.isPersonalEvent) return 4;
-                return 5;
-            };
-            return order(a) - order(b);
-        });
-
-        sortedDayItems.forEach(item => {
-            if (item.isTechnionEvent) {
-                const badgeTypeClass = item.type === 'holiday' ? 'holiday-event' : 'academic-event';
-                cellHtml += `
-                    <div class="cal-event-pill technion-event ${badgeTypeClass}" title="${item.desc || item.title}">
-                        <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${item.title}</span>
-                    </div>
-                `;
-            } else if (item.isExamEvent) {
-                const passedClass = item.isPassed ? "passed" : "";
-                cellHtml += `
-                    <div class="cal-event-pill exam-event ${passedClass}" data-course-code="${item.courseCode}" title="מבחן סוף: ${item.courseName || ''} (${item.courseCode}) | ${item.rawTitle || item.title} - לחץ לפתיחת פרטי קורס">
-                        <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: block;">${item.title}</span>
-                    </div>
-                `;
-            } else if (item.isTaskEvent) {
-                const doneClass = item.completed ? "done" : "";
-                const checkIcon = item.completed ? "☑" : "⚪";
-                cellHtml += `
-                    <div class="cal-event-pill task-event ${item.typeClass} ${doneClass}" data-course-code="${item.courseCode}" data-task-id="${item.taskId}" title="משימה (${item.courseName}): לחץ לצפייה בעמוד המשימה">
-                        <span class="cal-task-check" data-course-code="${item.courseCode}" data-task-id="${item.taskId}" title="לחץ לסימון הושלם/לא הושלם">${checkIcon}</span>
-                        <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${item.displayTitle}</span>
-                    </div>
-                `;
-            } else if (item.isPersonalEvent) {
-                const doneClass = item.completed ? "done" : "";
-                const checkIcon = item.completed ? "☑" : "⚪";
-                const evIcon = item.icon || "🔵";
-                cellHtml += `
-                    <div class="cal-event-pill personal-event ${doneClass}" data-pe-id="${item.id || ''}" title="${item.description ? item.description + ' - ' : ''}לחץ לסימון ביצוע או מחיקה">
-                        <span class="cal-personal-check" data-pe-id="${item.id || ''}" title="סמן כהושלם/לא הושלם">${checkIcon}</span>
-                        <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1;">${evIcon} ${item.title}</span>
-                        <button type="button" class="btn-del-cal-event" data-pe-id="${item.id || ''}" title="מחק אירוע מלוח השנה">✕</button>
-                    </div>
-                `;
-            } else {
-                const completedClass = item.completed ? "completed" : "";
-                const checkIcon = item.completed ? "☑" : "⚪";
-                cellHtml += `
-                    <div class="cal-event-pill past-exam ${completedClass}" data-pe-id="${item.id}" title="מבחן לתרגול (לחץ לסימון ביצוע)">
-                        <span class="cal-event-cb">${checkIcon}</span>
-                        <span>${item.title}</span>
-                    </div>
-                `;
-            }
-        });
-
-        cellHtml += `</div>`;
-        cell.innerHTML = cellHtml;
-
-        // Add item button listener -> Opens Add Custom Task Modal prefilled with this cell's date
-        const addBtn = cell.querySelector(".btn-add-day-item");
-        if (addBtn) {
-            addBtn.addEventListener("click", (e) => {
-                e.stopPropagation();
-                openAddCustomTaskModal(dateStr, "personal");
-            });
+    if (isWeekView) {
+        // --- SINGLE WEEK VIEW MODE ---
+        if (!currentCalendarWeekStart) {
+            currentCalendarWeekStart = getSundayOfWeek(now);
         }
 
-        // Personal event delete listener
-        cell.querySelectorAll(".btn-del-cal-event").forEach(delBtn => {
-            delBtn.addEventListener("click", (e) => {
-                e.stopPropagation();
-                const peId = delBtn.dataset.peId;
-                if (!peId) return;
-                gameState.customCalendarEvents = (gameState.customCalendarEvents || []).filter(it => it.id !== peId);
+        // Build 6 days (Sun to Fri)
+        const weekDates = [];
+        for (let i = 0; i < 6; i++) {
+            const d = new Date(currentCalendarWeekStart);
+            d.setDate(d.getDate() + i);
+            weekDates.push(d);
+        }
+
+        const firstDate = weekDates[0];
+        const lastDate = weekDates[5];
+        if (titleEl) {
+            const firstMName = monthNames[firstDate.getMonth()];
+            const lastMName = monthNames[lastDate.getMonth()];
+            if (firstMName === lastMName) {
+                titleEl.innerText = `${firstDate.getDate()} - ${lastDate.getDate()} ${firstMName} ${lastDate.getFullYear()}`;
+            } else {
+                titleEl.innerText = `${firstDate.getDate()} ${firstMName} - ${lastDate.getDate()} ${lastMName} ${lastDate.getFullYear()}`;
+            }
+        }
+
+        // Day Headers with date numbers
+        daysOfWeek.forEach((dName, idx) => {
+            const dObj = weekDates[idx];
+            const h = document.createElement("div");
+            h.className = "cal-day-header";
+            const dateNumStr = `${dObj.getDate()}/${dObj.getMonth() + 1}`;
+            h.innerHTML = `<div>${dName}</div><div style="font-size: 0.68rem; opacity: 0.85; font-weight: 700;">${dateNumStr}</div>`;
+            grid.appendChild(h);
+        });
+
+        // Day Cells for the week
+        weekDates.forEach(dObj => {
+            const dYear = dObj.getFullYear();
+            const dMonth = dObj.getMonth();
+            const dDay = dObj.getDate();
+            const dateStr = `${dYear}-${String(dMonth + 1).padStart(2, '0')}-${String(dDay).padStart(2, '0')}`;
+            const isToday = (dateStr === todayStr);
+
+            const cell = createCalendarDayCell(dateStr, dDay, isToday, itemsByDate, false);
+            grid.appendChild(cell);
+        });
+
+    } else {
+        // --- MONTH VIEW MODE (6 COLUMNS, SUN-FRI) ---
+        if (titleEl) {
+            titleEl.innerText = `${monthNames[currentCalendarMonth]} ${currentCalendarYear}`;
+        }
+
+        // Day Headers
+        daysOfWeek.forEach((dName, idx) => {
+            const h = document.createElement("div");
+            h.className = "cal-day-header";
+            h.innerText = dName;
+            if (isMobile) {
+                h.title = ["יום ראשון", "יום שני", "יום שלישי", "יום רביעי", "יום חמישי", "יום שישי"][idx];
+            }
+            grid.appendChild(h);
+        });
+
+        // Month calculations
+        const firstDayOfWeek = new Date(currentCalendarYear, currentCalendarMonth, 1).getDay(); // 0 for Sun ... 5 for Fri, 6 for Sat
+        const daysInMonth = new Date(currentCalendarYear, currentCalendarMonth + 1, 0).getDate();
+
+        // 6-column padding: if first day is Saturday (6), month starts on Sunday 2nd at column 0 -> 0 padding!
+        const workingPadding = (firstDayOfWeek === 6) ? 0 : firstDayOfWeek;
+
+        // Previous month padding cells (excluding Saturdays)
+        let prevDate = new Date(currentCalendarYear, currentCalendarMonth, 0);
+        const prevPadDays = [];
+        while (prevPadDays.length < workingPadding) {
+            if (prevDate.getDay() !== 6) {
+                prevPadDays.unshift(prevDate.getDate());
+            }
+            prevDate.setDate(prevDate.getDate() - 1);
+        }
+        prevPadDays.forEach(dNum => {
+            const cell = document.createElement("div");
+            cell.className = "cal-day-cell other-month";
+            cell.innerHTML = `<div class="cal-day-num">${dNum}</div>`;
+            grid.appendChild(cell);
+        });
+
+        // Current month cells
+        for (let day = 1; day <= daysInMonth; day++) {
+            const dObj = new Date(currentCalendarYear, currentCalendarMonth, day);
+            if (dObj.getDay() === 6) {
+                // Skip Saturday!
+                continue;
+            }
+
+            const dateStr = `${currentCalendarYear}-${String(currentCalendarMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+            const isToday = (dateStr === todayStr);
+
+            const cell = createCalendarDayCell(dateStr, day, isToday, itemsByDate, false);
+            grid.appendChild(cell);
+        }
+    }
+}
+
+// Builds an interactive calendar day cell with all event pills and listeners
+function createCalendarDayCell(dateStr, dayNum, isToday, itemsByDate, isOtherMonth) {
+    const dayItems = itemsByDate[dateStr] || [];
+    const hasActiveExam = dayItems.some(it => it.isExamEvent && !it.isPassed);
+    const hasPassedExam = dayItems.some(it => it.isExamEvent && it.isPassed);
+    const hasHoliday = dayItems.some(it => it.isTechnionEvent && it.type === 'holiday');
+    const hasAcademicMilestone = dayItems.some(it => it.isTechnionEvent && it.type === 'academic');
+
+    const cell = document.createElement("div");
+    let cellClasses = ["cal-day-cell"];
+    if (isOtherMonth) cellClasses.push("other-month");
+    if (isToday) cellClasses.push("is-today");
+    if (hasPassedExam) cellClasses.push("has-past-exam");
+    if (hasActiveExam) cellClasses.push("has-exam");
+    if (hasHoliday) cellClasses.push("has-holiday");
+    if (hasAcademicMilestone) cellClasses.push("has-academic-milestone");
+    cell.className = cellClasses.join(" ");
+    cell.dataset.date = dateStr;
+
+    const todayBadgeHtml = isToday ? `<span class="cal-today-pill-badge">היום</span>` : '';
+    let cellHtml = `
+        <div class="cal-day-num">
+            <span style="display: inline-flex; align-items: center; gap: 4px;">
+                <span>${dayNum}</span>
+                ${todayBadgeHtml}
+            </span>
+            <button type="button" class="btn-add-day-item" data-date="${dateStr}" title="הוסף אירוע בשעה ספציפית ליום זה">➕</button>
+        </div>
+        <div class="cal-events-list" style="display: flex; flex-direction: column; gap: 4px;">
+    `;
+
+    // Sort items: Technion holidays & milestones first, then exams, then tasks, then personal & past exams
+    const sortedDayItems = [...dayItems].sort((a, b) => {
+        const order = (it) => {
+            if (it.isTechnionEvent) return 1;
+            if (it.isExamEvent) return 2;
+            if (it.isTaskEvent) return 3;
+            if (it.isPersonalEvent) return 4;
+            return 5;
+        };
+        return order(a) - order(b);
+    });
+
+    sortedDayItems.forEach(item => {
+        if (item.isTechnionEvent) {
+            const badgeTypeClass = item.type === 'holiday' ? 'holiday-event' : 'academic-event';
+            cellHtml += `
+                <div class="cal-event-pill technion-event ${badgeTypeClass}" title="${item.desc || item.title}">
+                    <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${item.title}</span>
+                </div>
+            `;
+        } else if (item.isExamEvent) {
+            const passedClass = item.isPassed ? "passed" : "";
+            cellHtml += `
+                <div class="cal-event-pill exam-event ${passedClass}" data-course-code="${item.courseCode}" title="מבחן סוף: ${item.courseName || ''} (${item.courseCode}) | ${item.rawTitle || item.title} - לחץ לפתיחת פרטי קורס">
+                    <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: block;">${item.title}</span>
+                </div>
+            `;
+        } else if (item.isTaskEvent) {
+            const doneClass = item.completed ? "done" : "";
+            const checkIcon = item.completed ? "☑" : "⚪";
+            cellHtml += `
+                <div class="cal-event-pill task-event ${item.typeClass} ${doneClass}" data-course-code="${item.courseCode}" data-task-id="${item.taskId}" title="משימה (${item.courseName}): לחץ לצפייה בעמוד המשימה">
+                    <span class="cal-task-check" data-course-code="${item.courseCode}" data-task-id="${item.taskId}" title="לחץ לסימון הושלם/לא הושלם">${checkIcon}</span>
+                    <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${item.displayTitle}</span>
+                </div>
+            `;
+        } else if (item.isPersonalEvent) {
+            const doneClass = item.completed ? "done" : "";
+            const checkIcon = item.completed ? "☑" : "⚪";
+            const evIcon = item.icon || "🔵";
+            const timeBadge = item.time ? `<span class="cal-event-time-badge">${item.time}</span>` : '';
+            cellHtml += `
+                <div class="cal-event-pill personal-event ${doneClass}" data-pe-id="${item.id || ''}" title="${item.time ? item.time + ' - ' : ''}${item.description ? item.description + ' - ' : ''}${item.title}">
+                    <span class="cal-personal-check" data-pe-id="${item.id || ''}" title="סמן כהושלם/לא הושלם">${checkIcon}</span>
+                    ${timeBadge}
+                    <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1;">${evIcon} ${item.title}</span>
+                    <button type="button" class="btn-del-cal-event" data-pe-id="${item.id || ''}" title="מחק אירוע מלוח השנה">✕</button>
+                </div>
+            `;
+        } else {
+            const completedClass = item.completed ? "completed" : "";
+            const checkIcon = item.completed ? "☑" : "⚪";
+            cellHtml += `
+                <div class="cal-event-pill past-exam ${completedClass}" data-pe-id="${item.id}" title="מבחן לתרגול (לחץ לסימון ביצוע)">
+                    <span class="cal-event-cb">${checkIcon}</span>
+                    <span>${item.title}</span>
+                </div>
+            `;
+        }
+    });
+
+    cellHtml += `</div>`;
+    cell.innerHTML = cellHtml;
+
+    // Clicking anywhere on the day cell opens the Day Details Modal!
+    cell.addEventListener("click", (e) => {
+        if (e.target.closest(".btn-del-cal-event") ||
+            e.target.closest(".cal-personal-check") ||
+            e.target.closest(".cal-task-check") ||
+            e.target.closest(".exam-event") ||
+            e.target.closest(".task-event")) {
+            return;
+        }
+        openCalendarDayModal(dateStr);
+    });
+
+    // Add item button listener -> Open Day Details Modal
+    const addBtn = cell.querySelector(".btn-add-day-item");
+    if (addBtn) {
+        addBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            openCalendarDayModal(dateStr);
+        });
+    }
+
+    // Personal event delete listener
+    cell.querySelectorAll(".btn-del-cal-event").forEach(delBtn => {
+        delBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            const peId = delBtn.dataset.peId;
+            if (!peId) return;
+            gameState.customCalendarEvents = (gameState.customCalendarEvents || []).filter(it => it.id !== peId);
+            saveState();
+            notifyStateChanged();
+            renderFinalsCalendar();
+            if (typeof showHudToast === 'function') showHudToast("האירוע נמחק מלוח השנה 🗑️", "info");
+        });
+    });
+
+    // Personal event checkbox listener
+    cell.querySelectorAll(".cal-personal-check").forEach(checkSpan => {
+        checkSpan.addEventListener("click", (e) => {
+            e.stopPropagation();
+            const peId = checkSpan.dataset.peId;
+            if (!peId) return;
+            const targetEv = (gameState.customCalendarEvents || []).find(it => it.id === peId);
+            if (targetEv) {
+                targetEv.completed = !targetEv.completed;
                 saveState();
                 notifyStateChanged();
                 renderFinalsCalendar();
-                if (typeof showHudToast === 'function') showHudToast("האירוע נמחק מלוח השנה 🗑️", "info");
-            });
+            }
         });
+    });
 
-        // Personal event checkbox listener
-        cell.querySelectorAll(".cal-personal-check").forEach(checkSpan => {
-            checkSpan.addEventListener("click", (e) => {
-                e.stopPropagation();
-                const peId = checkSpan.dataset.peId;
-                if (!peId) return;
-                const targetEv = (gameState.customCalendarEvents || []).find(it => it.id === peId);
-                if (targetEv) {
-                    targetEv.completed = !targetEv.completed;
+    // Exam event click listener -> Open course details modal
+    cell.querySelectorAll(".cal-event-pill.exam-event").forEach(pill => {
+        pill.addEventListener("click", (e) => {
+            e.stopPropagation();
+            const cCode = pill.dataset.courseCode;
+            if (cCode) openCourseDetails(cCode);
+        });
+    });
+
+    // Task event click listener -> Open task side peek
+    cell.querySelectorAll(".cal-event-pill.task-event").forEach(pill => {
+        pill.addEventListener("click", (e) => {
+            e.stopPropagation();
+            const cCode = pill.dataset.courseCode;
+            const tId = pill.dataset.taskId;
+            if (cCode && tId) openTaskSidePeek(cCode, tId);
+        });
+    });
+
+    // Task checkbox listener inside calendar pill -> Toggle done / not_started
+    cell.querySelectorAll(".cal-task-check").forEach(checkSpan => {
+        checkSpan.addEventListener("click", (e) => {
+            e.stopPropagation();
+            const cCode = checkSpan.dataset.courseCode;
+            const tId = checkSpan.dataset.taskId;
+            const course = gameState.courses[cCode];
+            if (!course) return;
+            const task = (course.tasks || []).find(t => t.id === tId);
+            if (!task) return;
+            const isDone = task.completed || task.status === 'completed' || task.status === 'done';
+            toggleTaskStatusInState(cCode, tId, isDone ? 'not_started' : 'done');
+            saveState();
+            renderFinalsCalendar();
+            renderNotionTasksTable();
+            renderExamGapRunway();
+            renderUI();
+        });
+    });
+
+    // Toggle completed listener for past exams
+    cell.querySelectorAll(".cal-event-pill.past-exam").forEach(pill => {
+        pill.addEventListener("click", (e) => {
+            e.stopPropagation();
+            const peId = pill.dataset.peId;
+            const peItem = gameState.pastExamSchedule.find(p => p.id === peId);
+            if (peItem) {
+                peItem.completed = !peItem.completed;
+                if (peItem.completed) {
+                    addXp(40);
+                } else {
+                    addXp(-40);
+                }
+                saveState();
+                renderFinalsCalendar();
+            }
+        });
+    });
+
+    return cell;
+}
+
+// Opens the Day Details & Hourly Schedule Modal
+function openCalendarDayModal(dateStr) {
+    currentSelectedDayModalDate = dateStr;
+    const modal = document.getElementById("calendar-day-modal");
+    if (!modal) return;
+
+    const [y, m, d] = dateStr.split('-').map(Number);
+    const dateObj = new Date(y, m - 1, d);
+    const hebrewDays = ["ראשון", "שני", "שלישי", "רביעי", "חמישי", "שישי", "שבת"];
+    const hebrewMonths = ["ינואר", "פברואר", "מרץ", "אפריל", "מאי", "יוני", "יולי", "אוגוסט", "ספטמבר", "אוקטובר", "נובמבר", "דצמבר"];
+    const dayName = hebrewDays[dateObj.getDay()];
+    const monthName = hebrewMonths[dateObj.getMonth()];
+
+    const titleEl = document.getElementById("day-modal-title");
+    const subTitleEl = document.getElementById("day-modal-date-subtitle");
+    if (titleEl) titleEl.innerText = `📅 יום ${dayName}, ${d} ב${monthName} ${y}`;
+    if (subTitleEl) subTitleEl.innerText = `תאריך: ${dateStr}`;
+
+    renderDayModalEventsList(dateStr);
+
+    const titleInput = document.getElementById("day-modal-event-title");
+    if (titleInput) {
+        titleInput.value = "";
+        setTimeout(() => titleInput.focus(), 120);
+    }
+
+    modal.style.display = "flex";
+    modal.classList.add("active");
+}
+
+function closeCalendarDayModal() {
+    const modal = document.getElementById("calendar-day-modal");
+    if (modal) {
+        modal.style.display = "none";
+        modal.classList.remove("active");
+    }
+}
+
+function renderDayModalEventsList(dateStr) {
+    const listEl = document.getElementById("day-modal-events-list");
+    if (!listEl) return;
+    listEl.innerHTML = "";
+
+    const items = (window.currentCalendarItemsByDate && window.currentCalendarItemsByDate[dateStr]) || [];
+
+    if (items.length === 0) {
+        listEl.innerHTML = `
+            <div style="text-align: center; padding: 18px 10px; color: #94a3b8; font-size: 0.84rem; background: rgba(255,255,255,0.02); border-radius: 8px;">
+                אין אירועים או משימות רשומים ליום זה. ✨<br>
+                <span style="font-size: 0.76rem; color: #64748b;">ניתן להוסיף אירוע חדש בשעה ספציפית בטופס שלמטה.</span>
+            </div>
+        `;
+        return;
+    }
+
+    items.forEach(item => {
+        const itemRow = document.createElement("div");
+        itemRow.className = "day-modal-event-item";
+
+        let timeHtml = item.time ? `<span class="day-modal-event-time-tag">${item.time}</span>` : `<span style="font-size: 0.72rem; color: #64748b; font-family: monospace;">--:--</span>`;
+        let delBtnHtml = item.isPersonalEvent ? `<button type="button" class="btn-del-modal-event" data-pe-id="${item.id}" title="מחק אירוע זה">🗑️</button>` : '';
+
+        let badgeIcon = "📌";
+        let label = item.title;
+        if (item.isTechnionEvent) {
+            badgeIcon = item.type === 'holiday' ? "🎉" : "🎓";
+            label = `${item.title} ${item.desc ? '(' + item.desc + ')' : ''}`;
+        } else if (item.isExamEvent) {
+            badgeIcon = item.isPassed ? "🟢" : "🔴";
+            label = `מבחן: ${item.rawTitle || item.title}`;
+        } else if (item.isTaskEvent) {
+            badgeIcon = item.completed ? "☑️" : "📝";
+            label = `[${item.courseCode || ''}] ${item.title}`;
+        } else if (item.isPersonalEvent) {
+            badgeIcon = item.icon || "🔵";
+            label = item.title;
+        }
+
+        itemRow.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 8px; flex: 1; overflow: hidden;">
+                ${timeHtml}
+                <span style="font-size: 0.95rem;">${badgeIcon}</span>
+                <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500;">${label}</span>
+            </div>
+            ${delBtnHtml}
+        `;
+
+        if (item.isPersonalEvent) {
+            const delBtn = itemRow.querySelector(".btn-del-modal-event");
+            if (delBtn) {
+                delBtn.addEventListener("click", (e) => {
+                    e.stopPropagation();
+                    const peId = delBtn.dataset.peId;
+                    gameState.customCalendarEvents = (gameState.customCalendarEvents || []).filter(it => it.id !== peId);
                     saveState();
                     notifyStateChanged();
                     renderFinalsCalendar();
-                }
-            });
-        });
+                    renderDayModalEventsList(dateStr);
+                    if (typeof showHudToast === 'function') showHudToast("האירוע נמחק 🗑️", "info");
+                });
+            }
+        }
 
-        // Exam event click listener -> Open course details modal
-        cell.querySelectorAll(".cal-event-pill.exam-event").forEach(pill => {
-            pill.addEventListener("click", (e) => {
-                e.stopPropagation();
-                const cCode = pill.dataset.courseCode;
-                if (cCode) openCourseDetails(cCode);
-            });
-        });
+        listEl.appendChild(itemRow);
+    });
+}
 
-        // Task event click listener -> Open task side peek
-        cell.querySelectorAll(".cal-event-pill.task-event").forEach(pill => {
-            pill.addEventListener("click", (e) => {
-                e.stopPropagation();
-                const cCode = pill.dataset.courseCode;
-                const tId = pill.dataset.taskId;
-                if (cCode && tId) openTaskSidePeek(cCode, tId);
-            });
-        });
+function initCalendarDayModal() {
+    const modal = document.getElementById("calendar-day-modal");
+    const closeBtn = document.getElementById("btn-close-day-modal");
+    const saveBtn = document.getElementById("btn-save-day-event");
 
-        // Task checkbox listener inside calendar pill -> Toggle done / not_started
-        cell.querySelectorAll(".cal-task-check").forEach(checkSpan => {
-            checkSpan.addEventListener("click", (e) => {
-                e.stopPropagation();
-                const cCode = checkSpan.dataset.courseCode;
-                const tId = checkSpan.dataset.taskId;
-                const course = gameState.courses[cCode];
-                if (!course) return;
-                const task = (course.tasks || []).find(t => t.id === tId);
-                if (!task) return;
-                const isDone = task.completed || task.status === 'completed' || task.status === 'done';
-                toggleTaskStatusInState(cCode, tId, isDone ? 'not_started' : 'done');
-                saveState();
-                renderFinalsCalendar();
-                renderNotionTasksTable();
-                renderExamGapRunway();
-                renderUI();
-            });
-        });
+    if (closeBtn) {
+        closeBtn.addEventListener("click", closeCalendarDayModal);
+    }
 
-        // Toggle completed listener for past exams
-        cell.querySelectorAll(".cal-event-pill.past-exam").forEach(pill => {
-            pill.addEventListener("click", (e) => {
-                e.stopPropagation();
-                const peId = pill.dataset.peId;
-                const peItem = gameState.pastExamSchedule.find(p => p.id === peId);
-                if (peItem) {
-                    peItem.completed = !peItem.completed;
-                    if (peItem.completed) {
-                        addXp(40); // 40 XP reward for completing a past exam!
-                    } else {
-                        addXp(-40);
-                    }
-                    saveState();
-                    renderFinalsCalendar();
-                }
-            });
+    if (modal) {
+        modal.addEventListener("click", (e) => {
+            if (e.target === modal) closeCalendarDayModal();
         });
+    }
 
-        grid.appendChild(cell);
+    if (saveBtn) {
+        saveBtn.addEventListener("click", () => {
+            const titleInput = document.getElementById("day-modal-event-title");
+            const timeInput = document.getElementById("day-modal-event-time");
+            const catSelect = document.getElementById("day-modal-event-cat");
+
+            const title = (titleInput ? titleInput.value : "").trim();
+            const time = timeInput ? timeInput.value : "10:00";
+            const icon = catSelect ? catSelect.value : "🔵";
+
+            if (!title) {
+                alert("נא להזין כותרת לאירוע!");
+                if (titleInput) titleInput.focus();
+                return;
+            }
+
+            if (!currentSelectedDayModalDate) {
+                const now = new Date();
+                currentSelectedDayModalDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+            }
+
+            const newEv = {
+                id: "pe-" + Date.now(),
+                date: currentSelectedDayModalDate,
+                time: time || "10:00",
+                title: title,
+                icon: icon,
+                completed: false
+            };
+
+            if (!gameState.customCalendarEvents) gameState.customCalendarEvents = [];
+            gameState.customCalendarEvents.push(newEv);
+            saveState();
+            notifyStateChanged();
+            renderFinalsCalendar();
+            renderDayModalEventsList(currentSelectedDayModalDate);
+
+            if (titleInput) titleInput.value = "";
+            if (typeof showHudToast === 'function') showHudToast(`האירוע "${title}" נשמר לשעה ${time}! 💾`, "success");
+        });
     }
 }
 
