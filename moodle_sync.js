@@ -208,6 +208,22 @@
                     if (e.target === modalOverlay) this.closeModal();
                 });
             }
+
+            // Global Drag & Drop for .ics calendar files onto modal or window
+            window.addEventListener('dragover', (e) => {
+                e.preventDefault();
+            });
+
+            window.addEventListener('drop', (e) => {
+                e.preventDefault();
+                if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                    const file = e.dataTransfer.files[0];
+                    if (file.name.toLowerCase().endsWith('.ics') || (file.type && file.type.includes('calendar'))) {
+                        console.log('[MoodleSync] .ics file dropped:', file.name);
+                        this.importFromFile(file);
+                    }
+                }
+            });
         },
 
         openModal() {
