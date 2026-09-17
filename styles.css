@@ -9123,91 +9123,329 @@ html.is-iphone .app-global-footer {
 }
 
 /* =======================================================
-   Quick-Add Task Floating Action Button (FAB)
+   Degree Planner Export Choice Modal
    ======================================================= */
-.fab-quick-add-task {
+.planner-export-modal-overlay {
     position: fixed;
-    bottom: 26px;
-    left: 26px;
-    z-index: 9999;
+    inset: 0;
+    background: rgba(11, 15, 25, 0.75);
+    backdrop-filter: blur(6px);
+    z-index: 99999;
     display: none;
     align-items: center;
-    gap: 8px;
-    padding: 12px 20px;
-    border-radius: 50px;
-    background: linear-gradient(135deg, #0284c7, #2563eb);
-    color: #ffffff;
-    font-weight: 700;
-    font-size: 0.92rem;
-    box-shadow: 0 6px 24px rgba(37, 99, 235, 0.45);
-    border: 1px solid rgba(56, 189, 248, 0.45);
-    cursor: pointer;
-    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.2s ease;
     direction: rtl;
-    user-select: none;
 }
 
-.fab-quick-add-task:hover {
-    transform: translateY(-3px) scale(1.03);
-    box-shadow: 0 10px 28px rgba(56, 189, 248, 0.55);
-    background: linear-gradient(135deg, #0369a1, #1d4ed8);
-}
-
-.fab-quick-add-task:active {
-    transform: translateY(0) scale(0.98);
-}
-
-.fab-quick-add-task.fab-visible {
+.planner-export-modal-overlay.active {
     display: flex;
-    animation: fabPop 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    opacity: 1;
 }
 
-@keyframes fabPop {
-    from { opacity: 0; transform: scale(0.7) translateY(15px); }
-    to { opacity: 1; transform: scale(1) translateY(0); }
+.planner-export-modal {
+    width: 90%;
+    max-width: 500px;
+    background: #0f172a;
+    border: 1px solid rgba(56, 189, 248, 0.35);
+    border-radius: 16px;
+    padding: 22px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.7);
+    transform: scale(0.95);
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.planner-export-modal-overlay.active .planner-export-modal {
+    transform: scale(1);
+}
+
+.export-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    padding-bottom: 12px;
+}
+
+.export-modal-close {
+    background: transparent;
+    border: none;
+    color: #94a3b8;
+    font-size: 1.15rem;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 6px;
+    transition: all 0.15s ease;
+}
+
+.export-modal-close:hover {
+    color: #f87171;
+    background: rgba(239, 68, 68, 0.15);
+}
+
+.export-options-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.export-choice-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    background: #1e293b;
+    border: 1px solid rgba(56, 189, 248, 0.2);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: right;
+    color: #f8fafc;
+}
+
+.export-choice-card:hover {
+    background: rgba(56, 189, 248, 0.12);
+    border-color: #38bdf8;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(56, 189, 248, 0.2);
+}
+
+.export-choice-icon {
+    font-size: 1.8rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    background: rgba(15, 23, 42, 0.6);
+    border-radius: 10px;
+    border: 1px solid rgba(56, 189, 248, 0.25);
+    flex-shrink: 0;
+}
+
+.export-choice-body {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.export-choice-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #38bdf8;
+}
+
+.export-choice-desc {
+    font-size: 0.76rem;
+    color: #94a3b8;
+    line-height: 1.35;
 }
 
 /* =======================================================
-   Print / Export Layout for Degree Planner
+   Print / PDF A4 Landscape Layout - Clean & No Cutoffs
    ======================================================= */
+@page {
+    size: A4 landscape;
+    margin: 6mm 8mm;
+}
+
 @media print {
+    html, body {
+        width: 100% !important;
+        height: auto !important;
+        background: #ffffff !important;
+        color: #0f172a !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        font-family: Arial, "Rubik", sans-serif !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
     body * {
         visibility: hidden !important;
     }
-    #planner-workspace, #planner-workspace * {
+
+    #planner-workspace,
+    #planner-workspace * {
         visibility: visible !important;
     }
+
     #planner-workspace {
         position: absolute !important;
-        left: 0 !important;
         top: 0 !important;
+        left: 0 !important;
         width: 100% !important;
+        height: auto !important;
         display: block !important;
         background: #ffffff !important;
-        color: #000000 !important;
-        padding: 10px !important;
+        color: #0f172a !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        overflow: visible !important;
     }
-    .hud-header, .hud-nav-tabs, .planner-header-banner, .planner-sidebar, 
-    .btn-planner-mode, .btn-card-remove, .btn-add-to-plan, .fab-quick-add-task {
+
+    .hud-header,
+    .hud-nav-tabs,
+    .app-global-footer,
+    .planner-header-banner,
+    .planner-sidebar,
+    .planner-rules-card,
+    .planner-ready-section,
+    #planner-whatif-container,
+    .planner-action-sheet-overlay,
+    .planner-export-modal-overlay,
+    .btn-card-remove,
+    .btn-add-to-plan,
+    .course-card-whatif-wrap,
+    .prereq-warning-pill,
+    button {
         display: none !important;
     }
+
+    .planner-main-container {
+        display: block !important;
+        width: 100% !important;
+        height: auto !important;
+        overflow: visible !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    .planner-board-area {
+        width: 100% !important;
+        height: auto !important;
+        overflow: visible !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    #planner-workspace::before {
+        content: "🎓 הטכניון - מכון טכנולוגי לישראל | הפקולטה להנדסת מכונות — תוכנית לימודים לתואר ראשון";
+        display: block !important;
+        visibility: visible !important;
+        font-size: 13pt !important;
+        font-weight: 800 !important;
+        color: #0f172a !important;
+        text-align: center !important;
+        border-bottom: 2px solid #0284c7 !important;
+        padding-bottom: 4px !important;
+        margin-bottom: 8px !important;
+        direction: rtl !important;
+    }
+
     .planner-semesters-scroll {
         display: grid !important;
         grid-template-columns: repeat(4, 1fr) !important;
-        gap: 12px !important;
+        gap: 6px !important;
+        width: 100% !important;
         overflow: visible !important;
+        padding: 0 !important;
+        margin: 0 !important;
     }
+
     .planner-semester-col {
-        border: 1px solid #cbd5e1 !important;
+        min-width: 0 !important;
+        width: 100% !important;
+        border: 1.5px solid #64748b !important;
+        border-radius: 5px !important;
         background: #f8fafc !important;
         color: #0f172a !important;
+        padding: 4px 6px !important;
         break-inside: avoid !important;
+        page-break-inside: avoid !important;
         box-shadow: none !important;
     }
+
+    .semester-col-header {
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        border-bottom: 1px solid #94a3b8 !important;
+        padding-bottom: 3px !important;
+        margin-bottom: 4px !important;
+        direction: rtl !important;
+    }
+
+    .semester-col-title {
+        font-size: 9.5pt !important;
+        font-weight: 800 !important;
+        color: #0369a1 !important;
+    }
+
+    .semester-col-credits {
+        font-size: 8pt !important;
+        font-weight: 700 !important;
+        color: #475569 !important;
+    }
+
+    .planner-course-list {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 3px !important;
+        min-height: 0 !important;
+    }
+
     .planner-course-card {
-        border: 1px solid #cbd5e1 !important;
+        border: 1px solid #94a3b8 !important;
+        border-radius: 4px !important;
         background: #ffffff !important;
         color: #0f172a !important;
+        padding: 3px 5px !important;
         box-shadow: none !important;
+        break-inside: avoid !important;
+        page-break-inside: avoid !important;
+        direction: rtl !important;
+    }
+
+    .course-card-top {
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        margin-bottom: 1px !important;
+    }
+
+    .course-card-code {
+        font-size: 7.5pt !important;
+        font-weight: 700 !important;
+        color: #475569 !important;
+        font-family: monospace !important;
+    }
+
+    .course-card-tag {
+        font-size: 7pt !important;
+        padding: 1px 4px !important;
+        border-radius: 3px !important;
+        font-weight: 700 !important;
+        border: 1px solid #cbd5e1 !important;
+        background: #f1f5f9 !important;
+        color: #334155 !important;
+    }
+
+    .course-card-tag.tag-completed {
+        background: #dcfce7 !important;
+        border-color: #86efac !important;
+        color: #15803d !important;
+    }
+
+    .course-card-title {
+        font-size: 8pt !important;
+        font-weight: 700 !important;
+        color: #0f172a !important;
+        line-height: 1.15 !important;
+        margin-bottom: 1px !important;
+    }
+
+    .course-card-bottom {
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+    }
+
+    .course-card-credits {
+        font-size: 7pt !important;
+        color: #64748b !important;
+        font-weight: 600 !important;
     }
 }

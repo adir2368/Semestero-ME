@@ -1745,15 +1745,41 @@
         </div>
     </div>
 
-    <!-- Quick-Add Task Floating Action Button (FAB) -->
-    <button type="button" class="fab-quick-add-task" id="fab-quick-add-task" title="הוספת משימה מהירה (Quick Add Task)">
-        <span style="font-size: 1.1rem; line-height: 1;">➕</span>
-        <span>משימה חדשה</span>
-    </button>
-
     <!-- Degree Planner Touch/Mobile Action Sheet Overlay -->
     <div class="planner-action-sheet-overlay" id="planner-action-sheet-overlay">
         <div class="planner-action-sheet" id="planner-action-sheet"></div>
+    </div>
+
+    <!-- Degree Planner Export Choice Modal Overlay -->
+    <div class="planner-export-modal-overlay" id="planner-export-modal-overlay">
+        <div class="planner-export-modal" id="planner-export-modal">
+            <div class="export-modal-header">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="font-size: 1.25rem;">📤</span>
+                    <h3 style="margin: 0; font-size: 1.05rem; color: #f8fafc;">ייצוא תכנון התואר</h3>
+                </div>
+                <button type="button" class="export-modal-close" id="btn-close-export-modal" title="סגור">✕</button>
+            </div>
+            <p style="font-size: 0.82rem; color: #94a3b8; margin: 10px 0 16px 0; line-height: 1.4;">
+                בחר את הפורמט הרצוי לשמירה או הדפסה של מערך התואר המתוכנן:
+            </p>
+            <div class="export-options-grid">
+                <button type="button" class="export-choice-card" id="btn-choice-export-png">
+                    <div class="export-choice-icon">📸</div>
+                    <div class="export-choice-body">
+                        <span class="export-choice-title">שמור כתמונה (PNG)</span>
+                        <span class="export-choice-desc">הורדת תמונה איכותית וברורה של כל 8 הסמסטרים</span>
+                    </div>
+                </button>
+                <button type="button" class="export-choice-card" id="btn-choice-export-pdf">
+                    <div class="export-choice-icon">📄</div>
+                    <div class="export-choice-body">
+                        <span class="export-choice-title">הדפסה ושמירה כ-PDF (A4)</span>
+                        <span class="export-choice-desc">מותאם במדויק לדף A4 לרוחב ללא חיתוכים או גלישות</span>
+                    </div>
+                </button>
+            </div>
+        </div>
     </div>
 
     <!-- Supabase JS Client for Cloud Sync -->

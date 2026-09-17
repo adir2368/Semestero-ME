@@ -1232,11 +1232,41 @@
     // Plan Export Engine (Image PNG & Clean Print)
     // --------------------------------------------------------------------------
     function promptExportPlan() {
-        const choice = confirm("ייצוא תכנון תואר אקדמי:\n\nלחץ 'אישור' (OK) להדפסה או שמירה כ-PDF נקי.\nלחץ 'ביטול' (Cancel) להורדת תמונה איכותית (PNG).");
-        if (choice) {
-            window.print();
-        } else {
-            exportPlanToCanvasPNG();
+        const overlay = document.getElementById('planner-export-modal-overlay');
+        if (!overlay) return;
+        overlay.classList.add('active');
+
+        if (!overlay._isBound) {
+            overlay._isBound = true;
+
+            const btnPng = document.getElementById('btn-choice-export-png');
+            const btnPdf = document.getElementById('btn-choice-export-pdf');
+            const btnClose = document.getElementById('btn-close-export-modal');
+
+            const closeExportModal = () => {
+                overlay.classList.remove('active');
+            };
+
+            if (btnClose) btnClose.onclick = closeExportModal;
+            overlay.onclick = (e) => {
+                if (e.target === overlay) closeExportModal();
+            };
+
+            if (btnPng) {
+                btnPng.onclick = () => {
+                    closeExportModal();
+                    exportPlanToCanvasPNG();
+                };
+            }
+
+            if (btnPdf) {
+                btnPdf.onclick = () => {
+                    closeExportModal();
+                    setTimeout(() => {
+                        window.print();
+                    }, 150);
+                };
+            }
         }
     }
 

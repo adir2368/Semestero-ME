@@ -8629,14 +8629,7 @@ function setupNotionDashboard() {
         if (tabCurriculum) tabCurriculum.classList.toggle("active", activeTabId === 'curriculum');
         if (tabPlanner) tabPlanner.classList.toggle("active", activeTabId === 'planner');
         if (tabTasks) tabTasks.classList.toggle("active", activeTabId === 'tasks');
-    const fabQuickBtn = document.getElementById("fab-quick-add-task");
-    if (fabQuickBtn) {
-        if (activeTabId === 'tasks' || activeTabId === 'timetable') {
-            fabQuickBtn.classList.add("fab-visible");
-        } else {
-            fabQuickBtn.classList.remove("fab-visible");
-        }
-    }
+
         if (tabCalendar) tabCalendar.classList.toggle("active", activeTabId === 'calendar');
         if (tabTimetable) tabTimetable.classList.toggle("active", activeTabId === 'timetable');
         if (tabSettings) tabSettings.classList.toggle("active", activeTabId === 'settings');
