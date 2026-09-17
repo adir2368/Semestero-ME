@@ -9252,6 +9252,9 @@ function notifyStateChanged(options = {}) {
                 if (typeof populateNotionCourseFilter === 'function') populateNotionCourseFilter();
                 if (typeof renderExamGapRunway === 'function') renderExamGapRunway();
             } else if (currentTab === 'calendar') {
+                if (typeof TechnionAcademicCalendar !== 'undefined' && typeof TechnionAcademicCalendar.render === 'function') {
+                    TechnionAcademicCalendar.render();
+                }
                 if (typeof renderFinalsCalendar === 'function') renderFinalsCalendar();
                 if (typeof renderExamGapRunway === 'function') renderExamGapRunway();
             } else if (currentTab === 'curriculum') {
@@ -9315,6 +9318,14 @@ function autoUpdateTaskStatusesByDueDate() {
 }
 
 // Recalculate states based on prerequisites
+
+// Safe ISO Date string converter (strips time component for HTML5 input[type=date])
+function toIsoDateOnly(dateVal) {
+    if (!dateVal) return '';
+    const str = String(dateVal).trim();
+    return str.split('T')[0].split(' ')[0].trim();
+}
+
 function recalculateCourseStates() {
     let changed = false;
 
@@ -11379,7 +11390,7 @@ function renderModalTaskList(course) {
             
             <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
                 <!-- Date Picker -->
-                <input type="date" class="quest-date-picker" value="${task.dueDate}" ${isInteractive ? '' : 'disabled'} title="תאריך הגשה">
+                <input type="date" class="quest-date-picker" value="${toIsoDateOnly(task.dueDate)}" ${isInteractive ? '' : 'disabled'} title="תאריך הגשה">
                 
                 <!-- Exam Grade Input -->
                 ${gradeInputHtml}
@@ -12490,7 +12501,7 @@ function renderNotionTasksTable() {
                     </span>
                 </td>
                 <td class="notion-table-date-cell">
-                    <input type="date" class="notion-inline-date-input" value="${t.dueDate || ''}" title="לחץ לעריכת תאריך הגשה">
+                    <input type="date" class="notion-inline-date-input" value="${toIsoDateOnly(t.dueDate)}" title="לחץ לעריכת תאריך הגשה">
                 </td>
                 <td><span class="time-remaining ${timeInfo.className}">${timeInfo.text}</span></td>
                 <td style="position: relative;">
@@ -15254,7 +15265,7 @@ function renderPastExamsTable(courseCode) {
             <td>${exam.moed}</td>
             <td>${solutionHtml}</td>
             <td>
-                <input type="date" class="pem-date-picker" data-idx="${idx}" value="${exam.scheduledDate || ''}" ${!exam.exists ? 'disabled' : ''}>
+                <input type="date" class="pem-date-picker" data-idx="${idx}" value="${toIsoDateOnly(exam.scheduledDate)}" ${!exam.exists ? 'disabled' : ''}>
             </td>
             <td class="pem-status-cell">${getExamStatusPill(exam)}</td>
             <td style="text-align: center;">
@@ -15558,6 +15569,10 @@ function generateFullICSString() {
 
 // Asynchronous background update to GitHub Gist
 async function syncScheduleToCloudGist(showToast = true) {
+    if (!CLOUD_GIST_SYNC.token || !CLOUD_GIST_SYNC.token.trim()) {
+        // No personal access token configured - gracefully skip cloud gist update without throwing 401
+        return false;
+    }
     const indicator = document.getElementById("sync-status-indicator");
     if (indicator) indicator.innerText = "🔄 מסנכרן...";
 
@@ -16194,7 +16209,7 @@ function renderFinalsCalendar() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.09.17-v1.8.22",
+    code: "REV-2026.09.17-v1.8.23",
     build: "180000",
     date: "2026-09-17 21:55",
     description: "גרסה 1.8.22: ניקוי והסרת צבע כחול מהסמל (גלגל שיניים וזרוע רובוטית לבנים וחדים), הגדלת הסמל במחשב ל-54 פיקסלים לקריאות מושלמת, ורענון כל פורמטי האייקון"
