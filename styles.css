@@ -7934,16 +7934,39 @@ html.is-iphone .app-global-footer {
 
 @media (max-width: 768px), screen and (max-device-width: 768px) {
     .app-global-footer {
-        padding: 4px 8px;
-        margin-bottom: 58px; /* Lift above mobile bottom nav bar */
+        padding: 3px 12px !important;
+        margin-bottom: 58px !important; /* Lift above mobile bottom nav bar */
+        display: flex !important;
+        flex-direction: row !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        position: relative !important;
+        direction: ltr !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
         font-size: 0.68rem;
     }
     .footer-left-version {
-        left: 10px;
+        position: static !important;
+        transform: none !important;
+        flex-shrink: 0 !important;
+        display: flex !important;
+        align-items: center !important;
+    }
+    .footer-credit-content {
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 6px !important;
+        direction: ltr !important;
+        flex-shrink: 0 !important;
+    }
+    .footer-credit-content .credit-text {
+        font-size: 0.68rem !important;
     }
     .app-version-badge {
-        font-size: 0.62rem;
-        padding: 1px 5px;
+        font-size: 0.62rem !important;
+        padding: 1px 6px !important;
+        white-space: nowrap !important;
     }
 }
 
