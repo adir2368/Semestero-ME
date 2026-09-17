@@ -59,6 +59,19 @@
         return codes;
     }
 
+    function isPurgedCourse(code, altCode) {
+        if (!code && !altCode) return false;
+        const codes = getNormalizedCodes(code, altCode);
+        for (let i = 0; i < codes.length; i++) {
+            const k = codes[i];
+            if (PURGED_CODES.has(k)) return true;
+            if (global.gameState && Array.isArray(global.gameState.removedCourses) && global.gameState.removedCourses.includes(k)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     // --------------------------------------------------------------------------
     // Helpers: Course Completion & Grade Lookup
     // --------------------------------------------------------------------------
@@ -107,8 +120,8 @@
     // --------------------------------------------------------------------------
     // State Initialization & Persistence
     // --------------------------------------------------------------------------
-    function initPlannerState() {
-        if (customPlan && Array.isArray(customPlan) && customPlan.length > 0) {
+    function initPlannerState(force = false) {
+        if (!force && customPlan && Array.isArray(customPlan) && customPlan.length > 0) {
             return;
         }
 
@@ -117,44 +130,72 @@
             return;
         }
 
-        try {
-            const savedV2 = localStorage.getItem(PLANNER_STORAGE_KEY_V2);
-            if (savedV2) {
-                const parsed = JSON.parse(savedV2);
-                if (parsed && Array.isArray(parsed.semesters)) {
-                    customPlan = parsed.semesters;
-                    unassignedCourses = Array.isArray(parsed.unassigned) ? parsed.unassigned : [];
-                } else if (Array.isArray(parsed)) {
-                    customPlan = parsed;
-                    unassignedCourses = [];
+        let loadedPlan = null;
+        let loadedUnassigned = [];
+
+        // 1. First priority: cloud-synced degreePlan from global gameState
+        if (global.gameState && Array.isArray(global.gameState.degreePlan) && global.gameState.degreePlan.length > 0) {
+            try {
+                loadedPlan = JSON.parse(JSON.stringify(global.gameState.degreePlan));
+                loadedUnassigned = Array.isArray(global.gameState.degreePlanUnassigned) ? JSON.parse(JSON.stringify(global.gameState.degreePlanUnassigned)) : [];
+                console.log('[Planner] Initialized plan from gameState.degreePlan');
+            } catch (e) {
+                console.error('[Planner] Error cloning gameState.degreePlan:', e);
+            }
+        }
+
+        // 2. Local Storage V2
+        if (!loadedPlan) {
+            try {
+                const savedV2 = localStorage.getItem(PLANNER_STORAGE_KEY_V2);
+                if (savedV2) {
+                    const parsed = JSON.parse(savedV2);
+                    if (parsed && Array.isArray(parsed.semesters)) {
+                        loadedPlan = parsed.semesters;
+                        loadedUnassigned = Array.isArray(parsed.unassigned) ? parsed.unassigned : [];
+                    } else if (Array.isArray(parsed)) {
+                        loadedPlan = parsed;
+                        loadedUnassigned = [];
+                    }
                 }
-            } else {
+            } catch (e) {
+                console.error('[Planner] Error parsing saved plan V2:', e);
+            }
+        }
+
+        // 3. Local Storage V1
+        if (!loadedPlan) {
+            try {
                 const savedV1 = localStorage.getItem(PLANNER_STORAGE_KEY_V1);
                 if (savedV1) {
                     const parsedV1 = JSON.parse(savedV1);
                     if (Array.isArray(parsedV1)) {
-                        customPlan = parsedV1;
-                        unassignedCourses = [];
+                        loadedPlan = parsedV1;
+                        loadedUnassigned = [];
                     }
                 }
+            } catch (e) {
+                console.error('[Planner] Error parsing saved plan V1:', e);
             }
-        } catch (e) {
-            console.error('[Planner] Error parsing saved plan:', e);
         }
 
-        // Initialize from official suggested syllabus if empty
-        if (!customPlan || !Array.isArray(customPlan) || customPlan.length === 0) {
-            resetPlanToSuggested();
+        // 4. Initialize from official suggested syllabus if empty
+        if (!loadedPlan || !Array.isArray(loadedPlan) || loadedPlan.length === 0) {
+            loadedPlan = JSON.parse(JSON.stringify(global.PLANNER_CATALOG.SUGGESTED_MANDATORY_SYLLABUS));
+            loadedUnassigned = [];
         }
 
-        // 1. Purge removed/exempt courses (English B & Creative Intro)
+        customPlan = loadedPlan;
+        unassignedCourses = loadedUnassigned;
+
+        // 1. Purge removed/exempt courses
         if (customPlan) {
             customPlan.forEach(sem => {
-                sem.courses = (sem.courses || []).filter(c => !PURGED_CODES.has(c.code) && !PURGED_CODES.has(c.altCode));
+                sem.courses = (sem.courses || []).filter(c => !isPurgedCourse(c.code, c.altCode));
             });
         }
         if (unassignedCourses) {
-            unassignedCourses = unassignedCourses.filter(c => !PURGED_CODES.has(c.code) && !PURGED_CODES.has(c.altCode));
+            unassignedCourses = unassignedCourses.filter(c => !isPurgedCourse(c.code, c.altCode));
         }
 
         // 2. Ensure unassigned courses do not appear inside semesters
@@ -171,7 +212,7 @@
             });
         }
 
-        // 3. Synchronize completed courses from gameState into their exact completed semester
+        // 3. Synchronize courses from gameState into their exact semester
         syncCompletedCoursesFromGameState();
 
         // 4. Persist clean state
@@ -183,54 +224,76 @@
 
         Object.values(global.gameState.courses).forEach(c => {
             if (!c || !c.code) return;
-            if (PURGED_CODES.has(c.code)) return;
+            if (isPurgedCourse(c.code, c.altCode)) return;
 
-            const hasNumeric = (c.grade !== undefined && c.grade !== null && c.grade !== '' && !isNaN(Number(c.grade)) && Number(c.grade) >= 55);
-            const isBinary = (c.status === 'mastered') && (c.isBinaryPass === true || c.grade === 'עובר' || c.grade === 'PASS');
-            const isDone = (c.status === 'mastered') || hasNumeric || isBinary;
+            const actualSem = Number(c.semester);
+            if (actualSem >= 1 && actualSem <= 8) {
+                const cKeys = new Set(getNormalizedCodes(c.code, c.altCode));
 
-            if (isDone) {
-                const actualSem = Number(c.semester);
-                if (actualSem >= 1 && actualSem <= 8) {
-                    const cKeys = new Set(getNormalizedCodes(c.code, c.altCode));
+                const hasNumeric = (c.grade !== undefined && c.grade !== null && c.grade !== '' && !isNaN(Number(c.grade)) && Number(c.grade) >= 55);
+                const isBinary = (c.status === 'mastered') && (c.isBinaryPass === true || c.grade === 'עובר' || c.grade === 'PASS');
+                const isDone = (c.status === 'mastered') || hasNumeric || isBinary;
 
-                    // Remove from unassigned if present
+                // Remove from unassigned if completed
+                if (isDone) {
                     unassignedCourses = unassignedCourses.filter(u => {
                         const uKeys = getNormalizedCodes(u.code, u.altCode);
                         return !uKeys.some(k => cKeys.has(k));
                     });
+                }
 
-                    // Check if already in customPlan
-                    let foundCourse = null;
-                    customPlan.forEach(sem => {
-                        const idx = (sem.courses || []).findIndex(x => {
-                            const xKeys = getNormalizedCodes(x.code, x.altCode);
-                            return xKeys.some(k => cKeys.has(k));
-                        });
-                        if (idx !== -1) {
-                            foundCourse = sem.courses.splice(idx, 1)[0];
-                        }
+                // Check if already in customPlan
+                let foundCourse = null;
+                let foundInSemester = -1;
+                customPlan.forEach(sem => {
+                    const idx = (sem.courses || []).findIndex(x => {
+                        const xKeys = getNormalizedCodes(x.code, x.altCode);
+                        return xKeys.some(k => cKeys.has(k));
                     });
+                    if (idx !== -1) {
+                        foundCourse = sem.courses[idx];
+                        foundInSemester = sem.semester;
+                    }
+                });
 
-                    // If not found in customPlan, reconstruct from catalog or gameState
-                    if (!foundCourse) {
-                        const catCourse = global.PLANNER_CATALOG.ALL_COURSES_MAP[c.code] ||
-                                          (c.altCode && global.PLANNER_CATALOG.ALL_COURSES_MAP[c.altCode]);
-                        if (catCourse) {
-                            foundCourse = { ...catCourse };
-                        } else {
-                            foundCourse = {
-                                code: c.code,
-                                altCode: c.altCode || '',
-                                name: c.name || c.title || c.code,
-                                credits: Number(c.credits) || 3.0,
-                                type: c.type || 'elective',
-                                prereqs: c.prerequisites || []
-                            };
-                        }
+                // Check if already in unassigned
+                const isUnassigned = unassignedCourses.some(u => {
+                    const uKeys = getNormalizedCodes(u.code, u.altCode);
+                    return uKeys.some(k => cKeys.has(k));
+                });
+
+                // If completed and in wrong semester, move to actual completed semester
+                if (isDone && foundCourse && foundInSemester !== actualSem) {
+                    customPlan.forEach(sem => {
+                        sem.courses = (sem.courses || []).filter(x => {
+                            const xKeys = getNormalizedCodes(x.code, x.altCode);
+                            return !xKeys.some(k => cKeys.has(k));
+                        });
+                    });
+                    const targetSemObj = customPlan.find(s => s.semester === actualSem);
+                    if (targetSemObj) {
+                        targetSemObj.courses = targetSemObj.courses || [];
+                        targetSemObj.courses.push(foundCourse);
+                    }
+                }
+
+                // If NOT found in customPlan and NOT unassigned, add it
+                if (!foundCourse && !isUnassigned) {
+                    const catCourse = global.PLANNER_CATALOG.ALL_COURSES_MAP[c.code] ||
+                                      (c.altCode && global.PLANNER_CATALOG.ALL_COURSES_MAP[c.altCode]);
+                    if (catCourse) {
+                        foundCourse = { ...catCourse };
+                    } else {
+                        foundCourse = {
+                            code: c.code,
+                            altCode: c.altCode || '',
+                            name: c.name || c.title || c.code,
+                            credits: Number(c.credits) || 3.0,
+                            type: c.type || (c.code.startsWith('0394') ? 'sports' : 'elective'),
+                            prereqs: c.prerequisites || []
+                        };
                     }
 
-                    // Place in correct semester
                     const targetSemObj = customPlan.find(s => s.semester === actualSem);
                     if (targetSemObj) {
                         targetSemObj.courses = targetSemObj.courses || [];
@@ -265,6 +328,9 @@
                 if (global.gameState) {
                     global.gameState.degreePlan = customPlan;
                     global.gameState.degreePlanUnassigned = unassignedCourses;
+                    if (typeof global.saveState === 'function') {
+                        global.saveState(true);
+                    }
                 }
 
                 // Notify other components (HUD, Timetable, Flowchart) of state change
@@ -1588,8 +1654,25 @@
         checkPrerequisites: checkPrerequisites,
         isCourseCompleted: isCourseCompleted,
         getCourseGrade: getCourseGrade,
+        adoptPlanFromState: function(plan, unassigned) {
+            if (Array.isArray(plan) && plan.length > 0) {
+                customPlan = JSON.parse(JSON.stringify(plan));
+                unassignedCourses = Array.isArray(unassigned) ? JSON.parse(JSON.stringify(unassigned)) : [];
+                if (customPlan) {
+                    customPlan.forEach(sem => {
+                        sem.courses = (sem.courses || []).filter(c => !isPurgedCourse(c.code, c.altCode));
+                    });
+                }
+                if (unassignedCourses) {
+                    unassignedCourses = unassignedCourses.filter(c => !isPurgedCourse(c.code, c.altCode));
+                }
+                syncCompletedCoursesFromGameState();
+                saveCustomPlan(true);
+                renderDegreePlanner();
+            }
+        },
         syncFromGameState: () => {
-            syncCompletedCoursesFromGameState();
+            initPlannerState(true);
             renderDegreePlanner();
         }
     };

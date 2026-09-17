@@ -798,6 +798,9 @@
                 if (typeof renderStudyRunway === 'function') renderStudyRunway();
                 if (typeof updateNotificationBadge === 'function') updateNotificationBadge();
             }
+            if (typeof DegreePlanner !== 'undefined' && DegreePlanner.renderDegreePlanner) {
+                DegreePlanner.renderDegreePlanner();
+            }
         },
 
         // Update top-right auth controls (Login button vs User chip)
@@ -1308,6 +1311,18 @@
                                         if (window.setGlobalGameState) {
                                             window.setGlobalGameState(remoteState);
                                         }
+                                        if (remoteState.degreePlan && Array.isArray(remoteState.degreePlan)) {
+                                            try {
+                                                localStorage.setItem('atlas_me_custom_degree_plan_v2', JSON.stringify({
+                                                    semesters: remoteState.degreePlan,
+                                                    unassigned: remoteState.degreePlanUnassigned || []
+                                                }));
+                                                localStorage.setItem('atlas_me_custom_degree_plan_v1', JSON.stringify(remoteState.degreePlan));
+                                                if (window.DegreePlanner && typeof window.DegreePlanner.adoptPlanFromState === 'function') {
+                                                    window.DegreePlanner.adoptPlanFromState(remoteState.degreePlan, remoteState.degreePlanUnassigned);
+                                                }
+                                            } catch (e) {}
+                                        }
                                         this.refreshAllAppViews();
                                         if (typeof showHudToast === 'function') {
                                             showHudToast('סונכרן בזמן אמת מענן Atlas ME ☁️', 'info');
@@ -1402,6 +1417,18 @@
                     }
                     if (window.setGlobalGameState) {
                         window.setGlobalGameState(remoteState);
+                    }
+                    if (remoteState.degreePlan && Array.isArray(remoteState.degreePlan)) {
+                        try {
+                            localStorage.setItem('atlas_me_custom_degree_plan_v2', JSON.stringify({
+                                semesters: remoteState.degreePlan,
+                                unassigned: remoteState.degreePlanUnassigned || []
+                            }));
+                            localStorage.setItem('atlas_me_custom_degree_plan_v1', JSON.stringify(remoteState.degreePlan));
+                            if (window.DegreePlanner && typeof window.DegreePlanner.adoptPlanFromState === 'function') {
+                                window.DegreePlanner.adoptPlanFromState(remoteState.degreePlan, remoteState.degreePlanUnassigned);
+                            }
+                        } catch (e) {}
                     }
                     this.refreshAllAppViews();
                     console.log('[AuthSync] Pulled remote state for:', user.name);

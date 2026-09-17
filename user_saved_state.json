@@ -419,65 +419,6 @@
         "104041"
       ]
     },
-    "114071": {
-      "code": "114071",
-      "name": "פיסיקה 1מ׳",
-      "tasks": [
-        {
-          "id": "114071_h1",
-          "xp": 50,
-          "type": "hw",
-          "title": "תרגיל בית 1: מכניקה יחסותית וחוקי שימור",
-          "completed": false
-        },
-        {
-          "id": "114071_ex",
-          "xp": 500,
-          "type": "exam",
-          "title": "מועד א",
-          "completed": false
-        }
-      ],
-      "status": "exempt",
-      "credits": 3.5,
-      "semester": 1,
-      "trackGroup": "physics_1",
-      "prerequisites": [],
-      "mutuallyExclusiveWith": [
-        "114051"
-      ]
-    },
-    "114075": {
-      "code": "114075",
-      "name": "פיסיקה 2ממ׳",
-      "tasks": [
-        {
-          "id": "114075_h1",
-          "xp": 60,
-          "type": "hw",
-          "title": "תרגיל בית 1: שדה חשמלי, מגנטיות וגלי אור",
-          "completed": false
-        },
-        {
-          "id": "114075_ex",
-          "xp": 550,
-          "type": "exam",
-          "title": "מועד א",
-          "completed": false
-        }
-      ],
-      "status": "exempt",
-      "credits": 5,
-      "semester": 3,
-      "trackGroup": "physics_2",
-      "prerequisites": [
-        "114071",
-        "104041"
-      ],
-      "mutuallyExclusiveWith": [
-        "114052"
-      ]
-    },
     "125001": {
       "code": "125001",
       "name": "כימיה כללית",
@@ -4170,9 +4111,532 @@
       "completedCourses": 11
     }
   ],
+  "degreePlan": [
+    {
+      "title": "שנה א׳ - סמסטר א׳",
+      "courses": [
+        {
+          "code": "01040041",
+          "name": "חדו\"א 1מ' 1",
+          "type": "mandatory",
+          "altCode": "104041",
+          "credits": 5,
+          "prereqs": []
+        },
+        {
+          "code": "01040065",
+          "name": "אלגברה 1 מ'",
+          "type": "mandatory",
+          "altCode": "104065",
+          "credits": 5,
+          "prereqs": []
+        },
+        {
+          "code": "01250001",
+          "name": "כימיה כללית",
+          "type": "mandatory",
+          "altCode": "125001",
+          "credits": 3,
+          "prereqs": []
+        },
+        {
+          "code": "02340128",
+          "name": "שפת פייתון",
+          "type": "mandatory",
+          "altCode": "234128",
+          "credits": 4,
+          "prereqs": []
+        }
+      ],
+      "semester": 1,
+      "targetCredits": 20
+    },
+    {
+      "title": "שנה א׳ - סמסטר ב׳",
+      "courses": [
+        {
+          "code": "00340061",
+          "name": "מבוא לגרפיקה ותכנון הנדסי",
+          "type": "mandatory",
+          "altCode": "034061",
+          "credits": 3.5,
+          "prereqs": []
+        },
+        {
+          "code": "00340028",
+          "name": "מכניקת מוצקים 1",
+          "type": "mandatory",
+          "altCode": "034028",
+          "credits": 4,
+          "prereqs": [
+            "01040041"
+          ]
+        },
+        {
+          "code": "01040043",
+          "name": "חדו\"א 2מ' 1",
+          "type": "mandatory",
+          "altCode": "104043",
+          "credits": 5,
+          "prereqs": [
+            "01040041"
+          ]
+        },
+        {
+          "code": "01140051",
+          "name": "פיזיקה 1",
+          "type": "mandatory",
+          "altCode": "114051",
+          "credits": 2.5,
+          "prereqs": []
+        },
+        {
+          "code": "01040131",
+          "name": "משוואות דיפרנציאליות רגילות/ח",
+          "type": "mandatory",
+          "altCode": "104131",
+          "credits": 2.5,
+          "prereqs": [
+            "01040041",
+            "01040065"
+          ]
+        },
+        {
+          "code": "03140533",
+          "name": "מבוא להנדסת חומרים מ'",
+          "type": "mandatory",
+          "altCode": "314533",
+          "credits": 3.5,
+          "prereqs": [
+            "01250001"
+          ]
+        }
+      ],
+      "semester": 2,
+      "targetCredits": 21
+    },
+    {
+      "title": "שנה ב׳ - סמסטר ג׳ (חורף נוכחי)",
+      "courses": [
+        {
+          "code": "00340053",
+          "name": "מכניקת מוצקים 2 מורחב",
+          "type": "mandatory",
+          "altCode": "034053",
+          "credits": 5,
+          "prereqs": [
+            "00340028"
+          ]
+        },
+        {
+          "code": "01140052",
+          "name": "פיזיקה 2",
+          "type": "mandatory",
+          "altCode": "114052",
+          "credits": 3.5,
+          "prereqs": [
+            "01140051",
+            "01040043"
+          ]
+        },
+        {
+          "code": "00340056",
+          "name": "מבוא לחישוב מדעי והנדסי",
+          "type": "mandatory",
+          "altCode": "034056",
+          "credits": 4,
+          "prereqs": [
+            "02340128",
+            "01040065",
+            "01040043"
+          ]
+        },
+        {
+          "code": "00340035",
+          "name": "תרמודינמיקה 1",
+          "type": "mandatory",
+          "altCode": "034035",
+          "credits": 4,
+          "prereqs": [
+            "01040043"
+          ]
+        },
+        {
+          "code": "01040228",
+          "name": "מד\"ח מ'",
+          "type": "mandatory",
+          "altCode": "104228",
+          "credits": 3,
+          "prereqs": [
+            "01040043",
+            "01040131"
+          ]
+        }
+      ],
+      "semester": 3,
+      "targetCredits": 19.5
+    },
+    {
+      "title": "שנה ב׳ - סמסטר ד׳ (אביב)",
+      "courses": [
+        {
+          "code": "00340030",
+          "name": "תהליכי ייצור",
+          "type": "mandatory",
+          "altCode": "034030",
+          "credits": 3.5,
+          "prereqs": [
+            "00340053",
+            "00340061",
+            "03140533"
+          ]
+        },
+        {
+          "code": "00340010",
+          "name": "דינמיקה",
+          "type": "mandatory",
+          "altCode": "034010",
+          "credits": 5,
+          "prereqs": [
+            "00340028",
+            "01140051",
+            "01040043",
+            "01040131"
+          ]
+        },
+        {
+          "code": "00340055",
+          "name": "תורת הזרימה 1 מורחב",
+          "type": "mandatory",
+          "altCode": "034055",
+          "credits": 5,
+          "prereqs": [
+            "00340035",
+            "01040131",
+            "01040228"
+          ]
+        },
+        {
+          "code": "00340032",
+          "name": "מערכות ליניאריות",
+          "type": "mandatory",
+          "altCode": "034032",
+          "credits": 4,
+          "prereqs": [
+            "01040065",
+            "01040131"
+          ]
+        },
+        {
+          "code": "01250013",
+          "name": "מעבדה בכימיה",
+          "type": "mandatory",
+          "altCode": "125013",
+          "credits": 0.5,
+          "prereqs": [
+            "01250001"
+          ]
+        }
+      ],
+      "semester": 4,
+      "targetCredits": 18
+    },
+    {
+      "title": "שנה ג׳ - סמסטר ה׳",
+      "courses": [
+        {
+          "code": "00340041",
+          "name": "מעבר חום",
+          "type": "mandatory",
+          "altCode": "034041",
+          "credits": 4,
+          "prereqs": [
+            "00340035",
+            "00340055",
+            "01040228"
+          ]
+        },
+        {
+          "code": "00340040",
+          "name": "מבוא לבקרה",
+          "type": "mandatory",
+          "altCode": "034040",
+          "credits": 3,
+          "prereqs": [
+            "00340032"
+          ]
+        },
+        {
+          "code": "00340054",
+          "name": "תכן מכני 1 מ'",
+          "type": "mandatory",
+          "altCode": "034054",
+          "credits": 4,
+          "prereqs": [
+            "00340053",
+            "00340061",
+            "03140533"
+          ]
+        },
+        {
+          "code": "00340058",
+          "name": "הסתברות וסטטיסטיקה מה' מכ'",
+          "type": "mandatory",
+          "altCode": "034058",
+          "credits": 3,
+          "prereqs": [
+            "01040043"
+          ]
+        },
+        {
+          "code": "01140032",
+          "name": "מעב' לפיזיקה 1 ח",
+          "type": "mandatory",
+          "altCode": "114032",
+          "credits": 1,
+          "prereqs": [
+            "01140051",
+            "01140052"
+          ]
+        },
+        {
+          "code": "00340051",
+          "name": "דינמיקה ומכניקה של תנודות",
+          "type": "mandatory",
+          "altCode": "034051",
+          "credits": 3,
+          "prereqs": [
+            "00340010",
+            "00340032"
+          ]
+        },
+        {
+          "code": "00350001",
+          "list": "B",
+          "name": "מבוא לרובוטיקה",
+          "altCode": "035001",
+          "credits": 2.5,
+          "prereqs": [
+            "00340010"
+          ]
+        },
+        {
+          "code": "03140309",
+          "list": "E",
+          "name": "תהלכי יצור ועיבוד חומרים",
+          "altCode": "314309",
+          "credits": 2.5,
+          "prereqs": [
+            "03140533"
+          ]
+        }
+      ],
+      "semester": 5,
+      "targetCredits": 18
+    },
+    {
+      "title": "שנה ג׳ - סמסטר ו׳",
+      "courses": [
+        {
+          "code": "00340060",
+          "name": "מבוא למכטרוניקה והנע חשמלי",
+          "type": "mandatory",
+          "altCode": "034060",
+          "credits": 4,
+          "prereqs": [
+            "00340032"
+          ]
+        },
+        {
+          "code": "00340057",
+          "name": "מעבדה מתקדמת הנ. מכונות",
+          "type": "mandatory",
+          "altCode": "034057",
+          "credits": 4,
+          "prereqs": [
+            "00340041",
+            "00340051",
+            "01140032"
+          ]
+        },
+        {
+          "code": "00340371",
+          "name": "פרויקט תכן לייצור",
+          "type": "mandatory",
+          "altCode": "034371",
+          "credits": 2.5,
+          "prereqs": [
+            "00340030",
+            "00340054"
+          ]
+        },
+        {
+          "code": "00340016",
+          "list": "B",
+          "name": "תכן מכני 2",
+          "altCode": "034016",
+          "credits": 3,
+          "prereqs": [
+            "00340054"
+          ]
+        },
+        {
+          "code": "00350188",
+          "list": "B",
+          "name": "תורת הבקרה",
+          "altCode": "035188",
+          "credits": 3.5,
+          "prereqs": [
+            "00340040"
+          ]
+        }
+      ],
+      "semester": 6,
+      "targetCredits": 10.5
+    },
+    {
+      "title": "שנה ד׳ - סמסטר ז׳",
+      "courses": [
+        {
+          "code": "00340379",
+          "name": "פרויקט גמר הנדסי 1",
+          "type": "final_project",
+          "altCode": "034379",
+          "credits": 3,
+          "prereqs": [
+            "00340054",
+            "00340371"
+          ]
+        },
+        {
+          "code": "00340382",
+          "name": "מתודולוגיות פיתוח הנדסי 1",
+          "type": "mandatory",
+          "altCode": "034382",
+          "credits": 0.5,
+          "prereqs": []
+        },
+        {
+          "code": "00340401",
+          "list": "C",
+          "name": "מעבדה מתקדמת לרובוטים",
+          "altCode": "034401",
+          "credits": 2.5,
+          "prereqs": [
+            "00340060"
+          ]
+        },
+        {
+          "code": "00340413",
+          "list": "C",
+          "name": "מעבדה לתכן ייצור",
+          "altCode": "034413",
+          "credits": 2,
+          "prereqs": [
+            "00340371"
+          ]
+        },
+        {
+          "code": "00350022",
+          "list": "A",
+          "name": "אלמנטים סופיים לאנליזה הנדסית",
+          "altCode": "035022",
+          "credits": 3,
+          "prereqs": [
+            "00340053",
+            "00340056"
+          ]
+        },
+        {
+          "code": "00350036",
+          "list": "E",
+          "name": "תכן מערכות בקרה",
+          "altCode": "035036",
+          "credits": 2.5,
+          "prereqs": [
+            "00340040"
+          ]
+        },
+        {
+          "code": "00360093",
+          "list": "E",
+          "name": "מכניקה של חומרים מרוכבים",
+          "altCode": "036093",
+          "credits": 3,
+          "prereqs": [
+            "00340053",
+            "03140533"
+          ]
+        }
+      ],
+      "semester": 7,
+      "targetCredits": 3.5
+    },
+    {
+      "title": "שנה ד׳ - סמסטר ח׳",
+      "courses": [
+        {
+          "code": "00340380",
+          "name": "פרויקט גמר הנדסי 2",
+          "type": "final_project",
+          "altCode": "034380",
+          "credits": 3,
+          "prereqs": [
+            "00340379"
+          ]
+        },
+        {
+          "code": "00340383",
+          "name": "מתודולוגיות פיתוח הנדסי 2",
+          "type": "mandatory",
+          "altCode": "034383",
+          "credits": 0.5,
+          "prereqs": [
+            "00340382"
+          ]
+        },
+        {
+          "code": "00360013",
+          "list": "E",
+          "name": "אופטימיזציה של תהליכים",
+          "altCode": "036013",
+          "credits": 3,
+          "prereqs": [
+            "00340056"
+          ]
+        },
+        {
+          "code": "00360001",
+          "list": "D",
+          "name": "שיטות אנליטיות 1",
+          "altCode": "036001",
+          "credits": 4,
+          "prereqs": [
+            "01040043",
+            "01040131"
+          ]
+        },
+        {
+          "code": "00340406",
+          "list": "C",
+          "name": "מעבדה מתקדמת לבקרה ואוטומציה",
+          "altCode": "034406",
+          "credits": 2.5,
+          "prereqs": [
+            "00340040"
+          ]
+        }
+      ],
+      "semester": 8,
+      "targetCredits": 3.5
+    }
+  ],
   "bossesSlain": 11,
-  "userProfile": {},
+  "userProfile": {
+    "phone": "053-6202662"
+  },
   "isFinalsMode": false,
+  "lastModified": 1789657339323,
   "pastExamsBank": {
     "104043": {
       "name": "חדו״א 2 (104043)",
@@ -4933,7 +5397,9 @@
     "324033",
     "03240033",
     "035026",
-    "35026"
+    "35026",
+    "114071",
+    "114075"
   ],
   "completedCourses": 11,
   "pastExamSchedule": [
@@ -5326,6 +5792,7 @@
   "moodleCalendarUrl": "https://moodle25.technion.ac.il/calendar/export_execute.php?userid=43774&authtoken=a124e33d97c0722e89374bea7fddb03632778eee&preset_what=all&preset_time=custom",
   "semesterGuardMode": "locked",
   "customCalendarEvents": [],
+  "degreePlanUnassigned": [],
   "currentActiveSemester": 2,
   "hasLoadedSemesterBExcel": true,
   "notificationPreferences": {
@@ -5337,6 +5804,5 @@
     "academicGrades": false
   },
   "hasLoadedGoogleCalendarAugust": true,
-  "hasLoadedGoogleCalendarAugustV3": true,
-  "lastModified": 1789652751789
+  "hasLoadedGoogleCalendarAugustV3": true
 }
