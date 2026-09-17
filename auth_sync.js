@@ -964,14 +964,18 @@
                             </form>
                         </div>
 
-                        <!-- Sync & Logout Actions -->
-                        <div style="display: flex; gap: 8px; margin-bottom: 12px;">
-                            <button type="button" class="btn btn-secondary" style="flex: 1; padding: 8px; font-size: 0.84rem;" onclick="AuthSync.syncToCloud(); if (typeof showHudToast==='function') showHudToast('סונכרן לענן ☁️', 'success');">
-                                🔄 סנכרן עכשיו לענן
+                        <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px;">
+                            <button type="button" class="btn btn-primary" id="btn-force-pull-cloud" style="padding: 9px; font-size: 0.86rem; font-weight: bold; background: linear-gradient(135deg, #0284c7, #0369a1); border: 1px solid #38bdf8; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; color: #fff;" onclick="AuthSync.pullLatestStateFromCloud(true).then(() => { if (typeof showHudToast==='function') showHudToast('שוחזר בהצלחה מענן Atlas ME! ☁️', 'success'); });">
+                                📥 שחזר ומשוך עכשיו נתונים מהענן (סנכרון מהטלפון)
                             </button>
-                            <button type="button" class="btn btn-outline" style="flex: 1; padding: 8px; font-size: 0.84rem;" onclick="AuthSync.logout()">
-                                🚪 התנתקות
-                            </button>
+                            <div style="display: flex; gap: 8px;">
+                                <button type="button" class="btn btn-secondary" style="flex: 1; padding: 8px; font-size: 0.84rem;" onclick="AuthSync.syncToCloud(); if (typeof showHudToast==='function') showHudToast('סונכרן לענן ☁️', 'success');">
+                                    📤 גבה מצב נוכחי לענן
+                                </button>
+                                <button type="button" class="btn btn-outline" style="flex: 1; padding: 8px; font-size: 0.84rem;" onclick="AuthSync.logout()">
+                                    🚪 התנתקות
+                                </button>
+                            </div>
                         </div>
 
                         <!-- Delete Account Danger Zone -->
@@ -1264,10 +1268,15 @@
                                 } catch (e) {}
 
                                 const localLastMod = (localState && localState.lastModified) || 0;
-                                const remoteLastMod = (remoteState && remoteState.lastModified) || 0;
+                                const remoteLastMod = (remoteState && remoteState.lastModified) || (payload && payload.new && payload.new.updated_at ? new Date(payload.new.updated_at).getTime() : 0);
 
-                                // Guard against clobbering newer local state
-                                if (localLastMod > 0 && remoteLastMod < localLastMod) {
+                                const localCourses = (localState && localState.courses) ? Object.keys(localState.courses).length : 0;
+                                const remoteCourses = (remoteState && remoteState.courses) ? Object.keys(remoteState.courses).length : 0;
+                                const remoteHasMoreCourses = remoteCourses > localCourses;
+                                const remoteHasRemovedTracking = Array.isArray(remoteState.removedCourses) && remoteState.removedCourses.length > 0 && (!localState || !localState.removedCourses || localState.removedCourses.length === 0);
+
+                                // Guard against clobbering newer local state UNLESS remote has more courses or active tracking
+                                if (!remoteHasMoreCourses && !remoteHasRemovedTracking && localLastMod > 0 && remoteLastMod < localLastMod) {
                                     console.warn('[AuthSync Realtime] Ignored outdated remote update. Local is newer:', { localLastMod, remoteLastMod });
                                     this.triggerDebouncedCloudSync(localState);
                                     return;
@@ -1358,10 +1367,15 @@
                     }
 
                     const localLastMod = (localState && localState.lastModified) || 0;
-                    const remoteLastMod = (remoteState && remoteState.lastModified) || 0;
+                    const remoteLastMod = (remoteState && remoteState.lastModified) || (data && data.updated_at ? new Date(data.updated_at).getTime() : 0);
 
-                    // If local state is newer than remote and not forced, preserve local state!
-                    if (!force && localLastMod > 0 && remoteLastMod < localLastMod) {
+                    const localCourses = (localState && localState.courses) ? Object.keys(localState.courses).length : 0;
+                    const remoteCourses = (remoteState && remoteState.courses) ? Object.keys(remoteState.courses).length : 0;
+                    const remoteHasMoreCourses = remoteCourses > localCourses;
+                    const remoteHasRemovedTracking = Array.isArray(remoteState.removedCourses) && remoteState.removedCourses.length > 0 && (!localState || !localState.removedCourses || localState.removedCourses.length === 0);
+
+                    // If local state is newer than remote AND has equal/more courses AND not forced, preserve local state!
+                    if (!force && !remoteHasMoreCourses && !remoteHasRemovedTracking && localLastMod > 0 && remoteLastMod < localLastMod) {
                         console.log('[AuthSync] Local state is newer than cloud copy. Preserving local state.');
                         this.triggerDebouncedCloudSync(localState);
                         return localState;
@@ -1374,18 +1388,17 @@
                         remoteState.userProfile.phone = persistentPhone;
                     }
 
-                    if (!localRaw || force) {
-                        localStorage.setItem(key, JSON.stringify(remoteState));
-                        if (user.id === 'adir_moshe') {
-                            localStorage.setItem(LEGACY_SAVE_KEY, JSON.stringify(remoteState));
-                        }
-                        if (window.setGlobalGameState) {
-                            window.setGlobalGameState(remoteState);
-                        }
-                        this.refreshAllAppViews();
-                        console.log('[AuthSync] Pulled remote state for:', user.name);
-                        return remoteState;
+                    // Adopt remote state
+                    localStorage.setItem(key, JSON.stringify(remoteState));
+                    if (user.id === 'adir_moshe') {
+                        localStorage.setItem(LEGACY_SAVE_KEY, JSON.stringify(remoteState));
                     }
+                    if (window.setGlobalGameState) {
+                        window.setGlobalGameState(remoteState);
+                    }
+                    this.refreshAllAppViews();
+                    console.log('[AuthSync] Pulled remote state for:', user.name);
+                    return remoteState;
                 } else if (user.id === 'adir_moshe') {
                     // Upload initial local state to cloud if missing
                     this.syncToCloud();

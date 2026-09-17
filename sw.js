@@ -1,5 +1,5 @@
-// Service Worker for Academic Skill Tree (Atlas ME) - v1.8.13
-const CACHE_NAME = 'atlas-me-v1.8.13';
+// Service Worker for Academic Skill Tree (Atlas ME) - v1.8.14
+const CACHE_NAME = 'atlas-me-v1.8.14';
 
 const STATIC_ASSETS = [
     './',
