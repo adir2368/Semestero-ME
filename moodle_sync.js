@@ -84,10 +84,35 @@
             const guideToggle = document.getElementById('moodle-guide-toggle');
             const guideContainer = document.getElementById('moodle-guide-container');
 
+            // Modal elements
+            const modalUrlInput = document.getElementById('modal-moodle-calendar-url');
+            const modalAutoSyncCheck = document.getElementById('modal-moodle-auto-sync-toggle');
+            const modalSyncBtn = document.getElementById('modal-btn-moodle-sync');
+            const modalMockBtn = document.getElementById('modal-btn-moodle-mock');
+            const modalFileInput = document.getElementById('modal-moodle-ics-file-input');
+            const modalOverlay = document.getElementById('moodle-sync-modal');
+
+            const syncAllInputs = (val) => {
+                if (urlInput) urlInput.value = val;
+                if (modalUrlInput) modalUrlInput.value = val;
+                const settingInput = document.getElementById('setting-moodle-calendar-url');
+                if (settingInput) settingInput.value = val;
+            };
+
             if (urlInput) {
                 urlInput.value = this.config.url || '';
-                urlInput.addEventListener('change', () => {
+                urlInput.addEventListener('input', () => {
                     this.config.url = urlInput.value.trim();
+                    syncAllInputs(this.config.url);
+                    this.saveConfig();
+                });
+            }
+
+            if (modalUrlInput) {
+                modalUrlInput.value = this.config.url || '';
+                modalUrlInput.addEventListener('input', () => {
+                    this.config.url = modalUrlInput.value.trim();
+                    syncAllInputs(this.config.url);
                     this.saveConfig();
                 });
             }
@@ -96,6 +121,16 @@
                 autoSyncCheck.checked = this.config.autoSync !== false;
                 autoSyncCheck.addEventListener('change', () => {
                     this.config.autoSync = autoSyncCheck.checked;
+                    if (modalAutoSyncCheck) modalAutoSyncCheck.checked = this.config.autoSync;
+                    this.saveConfig();
+                });
+            }
+
+            if (modalAutoSyncCheck) {
+                modalAutoSyncCheck.checked = this.config.autoSync !== false;
+                modalAutoSyncCheck.addEventListener('change', () => {
+                    this.config.autoSync = modalAutoSyncCheck.checked;
+                    if (autoSyncCheck) autoSyncCheck.checked = this.config.autoSync;
                     this.saveConfig();
                 });
             }
@@ -109,42 +144,78 @@
                 });
             }
 
-            if (fileInput) {
-                fileInput.addEventListener('change', (e) => {
-                    const file = e.target.files && e.target.files[0];
-                    if (file) {
-                        this.importFromFile(file);
-                        fileInput.value = '';
-                    }
+            const handleFile = (e) => {
+                const file = e.target.files && e.target.files[0];
+                if (file) {
+                    this.importFromFile(file);
+                    e.target.value = '';
+                }
+            };
+
+            if (fileInput) fileInput.addEventListener('change', handleFile);
+            if (modalFileInput) modalFileInput.addEventListener('change', handleFile);
+
+            const triggerSyncAction = () => {
+                const inputVal = (modalUrlInput && modalUrlInput.value.trim()) || (urlInput && urlInput.value.trim()) || this.config.url;
+                if (inputVal) {
+                    this.config.url = inputVal;
+                    syncAllInputs(this.config.url);
+                    this.saveConfig();
+                    this.sync({ isSilent: false });
+                } else {
+                    this.runMockSync();
+                }
+            };
+
+            if (syncBtn) syncBtn.addEventListener('click', triggerSyncAction);
+            if (modalSyncBtn) modalSyncBtn.addEventListener('click', triggerSyncAction);
+            if (modalMockBtn) modalMockBtn.addEventListener('click', () => this.runMockSync());
+
+            if (modalOverlay) {
+                modalOverlay.addEventListener('click', (e) => {
+                    if (e.target === modalOverlay) this.closeModal();
                 });
             }
+        },
 
-            if (syncBtn) {
-                syncBtn.addEventListener('click', () => {
-                    const inputVal = urlInput ? urlInput.value.trim() : this.config.url;
-                    if (inputVal) {
-                        this.config.url = inputVal;
-                        this.saveConfig();
-                        this.sync({ isSilent: false });
-                    } else {
-                        // Prompt or run Mock simulation
-                        this.runMockSync();
-                    }
-                });
+        openModal() {
+            const modal = document.getElementById('moodle-sync-modal');
+            if (modal) {
+                modal.classList.add('active');
+                modal.style.display = 'flex';
+                const modalUrlInput = document.getElementById('modal-moodle-calendar-url');
+                if (modalUrlInput) {
+                    modalUrlInput.value = this.config.url || '';
+                    setTimeout(() => modalUrlInput.focus(), 150);
+                }
+            }
+        },
+
+        closeModal() {
+            const modal = document.getElementById('moodle-sync-modal');
+            if (modal) {
+                modal.classList.remove('active');
+                modal.style.display = 'none';
             }
         },
 
         setStatus(message, type = 'info') {
             const statusDiv = document.getElementById('moodle-sync-status');
-            if (!statusDiv) return;
+            const modalStatusDiv = document.getElementById('modal-moodle-sync-status');
 
             let color = 'var(--text-muted)';
             if (type === 'success') color = 'var(--color-mastered, #10b981)';
             if (type === 'error') color = '#ef4444';
             if (type === 'working') color = 'var(--accent-blue, #38bdf8)';
 
-            statusDiv.style.color = color;
-            statusDiv.innerHTML = message;
+            if (statusDiv) {
+                statusDiv.style.color = color;
+                statusDiv.innerHTML = message;
+            }
+            if (modalStatusDiv) {
+                modalStatusDiv.style.color = color;
+                modalStatusDiv.innerHTML = message;
+            }
         },
 
         /**
