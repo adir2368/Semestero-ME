@@ -5252,7 +5252,7 @@ function loadSavedState() {
             if (saved) {
                 try {
                     gameState = JSON.parse(saved);
-                    if (!gameState.courses || Object.keys(gameState.courses).length === 0 || (gameState.credits === 0 && gameState.completedCourses === 0)) {
+                    if (!gameState.courses || Object.keys(gameState.courses).length === 0) {
                         needsRestoreFromPreload = true;
                     } else {
                         Object.values(gameState.courses).forEach(course => {
@@ -5361,16 +5361,27 @@ function loadSavedState() {
             });
         }
 
-        // Guarantee all other core Technion Mechanical Engineering courses exist
+        // Guarantee core courses ONLY if NOT removed by the user
         if (typeof SAMPLE_ME_DEGREE !== 'undefined') {
+            const removedList = Array.isArray(gameState.removedCourses) ? gameState.removedCourses : [];
             Object.keys(SAMPLE_ME_DEGREE).forEach(code => {
                 if (PURGED_APP_CODES.includes(code)) return;
+                if (removedList.includes(code)) return; // Strictly respect user deletions!
                 if (!gameState.courses[code]) {
                     gameState.courses[code] = JSON.parse(JSON.stringify(SAMPLE_ME_DEGREE[code]));
                 }
             });
         }
     }
+
+    // Guarantee persistent user phone is restored if missing
+    try {
+        const persistentPhone = localStorage.getItem('ast_persistent_user_phone') || '';
+        if (persistentPhone) {
+            if (!gameState.userProfile) gameState.userProfile = {};
+            if (!gameState.userProfile.phone) gameState.userProfile.phone = persistentPhone;
+        }
+    } catch (e) {}
 
     // 2. Sanitize all course names (Hebrew Geresh typography) and course tasks
     if (gameState.courses) {
@@ -5798,6 +5809,20 @@ function markInactiveViewsDirty(activeView) {
 // Save state to local storage safely
 function saveState(skipNotify = false) {
     try {
+        if (!gameState.lastModified) {
+            gameState.lastModified = Date.now();
+        } else {
+            gameState.lastModified = Math.max(gameState.lastModified, Date.now());
+        }
+
+        // Keep persistent phone in sync
+        const phone = (gameState.userProfile && gameState.userProfile.phone) || localStorage.getItem('ast_persistent_user_phone') || "";
+        if (phone) {
+            if (!gameState.userProfile) gameState.userProfile = {};
+            gameState.userProfile.phone = phone;
+            localStorage.setItem('ast_persistent_user_phone', phone);
+        }
+
         if (window.AuthSync && typeof window.AuthSync.saveActiveUserState === 'function') {
             window.AuthSync.saveActiveUserState(gameState);
         } else {
@@ -7002,6 +7027,10 @@ function handleAddCourseSubmit(e) {
             faculty: cfData ? cfData.faculty : undefined,
             syllabus: cfData ? cfData.syllabus : undefined
         };
+
+        if (!gameState.removedCourses) gameState.removedCourses = [];
+        gameState.removedCourses = gameState.removedCourses.filter(c => c !== code && c !== code.replace(/[^0-9]/g, ''));
+        gameState.lastModified = Date.now();
 
         if (typeof CHEESEFORK_EXAM_DATES !== 'undefined' && (examDateA || examDateB)) {
             CHEESEFORK_EXAM_DATES[code] = {
@@ -8319,11 +8348,21 @@ function deleteCourse(code) {
     // Delete from tree
     delete gameState.courses[code];
     
+    // Explicitly track in removedCourses so it is NEVER restored by curriculum templates!
+    if (!gameState.removedCourses) gameState.removedCourses = [];
+    if (!gameState.removedCourses.includes(code)) {
+        gameState.removedCourses.push(code);
+    }
+
     // Remove from prerequisites of all other courses
     Object.keys(gameState.courses).forEach(cCode => {
         const c = gameState.courses[cCode];
-        c.prerequisites = c.prerequisites.filter(p => p !== code);
+        if (c.prerequisites) {
+            c.prerequisites = c.prerequisites.filter(p => p !== code);
+        }
     });
+
+    gameState.lastModified = Date.now();
 
     recalculateCourseStates();
     if (xpRefund > 0) {
@@ -12568,10 +12607,10 @@ function renderFinalsCalendar() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.09.17-v1.8.12",
-    build: "179100",
-    date: "2026-09-17 15:20",
-    description: "גרסה 1.8.12: תיקון שגיאת 401 בסנכרון מודל, גשר תקשורת Native Electron IPC ללא חסימות CORS, מנגנון חיטוי וניקוי הדבקות כפולות (URL Sanitizer), וחיבור חלק לקורסי המשתמש (104041, 104043, 314533, 034061)"
+    code: "REV-2026.09.17-v1.8.13",
+    build: "179200",
+    date: "2026-09-17 16:30",
+    description: "גרסה 1.8.13: שדרוג יציבות מוחלט למניעת איפוסים - קורסים שנמחקו לא קמים לתחייה (Removed Tracking), קורסים שנוספו נשמרים תמיד, מספר טלפון נשמר באחסון מבודד וחסין לאיפוסים (Persistent Storage), וסיכול דריסות סנכרון ענן (Anti-Clobbering Realtime Sync)"
 };
 
 function ensureBaselineRevisions() {
@@ -12993,7 +13032,12 @@ function savePhoneAndNotificationPreferences(source = 'settings') {
 
     saveState();
 
-    // Synchronize to AuthSync profile if user is logged in
+    // Synchronize to AuthSync profile and persistent storage
+    if (cleanPhone) {
+        try {
+            localStorage.setItem('ast_persistent_user_phone', cleanPhone);
+        } catch (e) {}
+    }
     if (window.AuthSync && typeof AuthSync.getActiveUser === 'function' && AuthSync.isLoggedIn()) {
         try {
             const u = AuthSync.getActiveUser();

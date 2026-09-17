@@ -1,5 +1,5 @@
-// Service Worker for Atlas ME - Offline-First Caching & Background Updates
-const CACHE_NAME = 'atlas-me-v1.8.12';
+// Service Worker for Academic Skill Tree (Atlas ME) - v1.8.13
+const CACHE_NAME = 'atlas-me-v1.8.13';
 
 const STATIC_ASSETS = [
     './',

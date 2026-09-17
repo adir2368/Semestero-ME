@@ -75,7 +75,11 @@
             const uid = localStorage.getItem(SESSION_USER_KEY);
             const currentSem = (window.gameState && window.gameState.currentActiveSemester) ? window.gameState.currentActiveSemester : 1;
 
-            const fallbackPhone = (window.gameState && window.gameState.userProfile && window.gameState.userProfile.phone) || '';
+            let persistentPhone = '';
+            try {
+                persistentPhone = localStorage.getItem('ast_persistent_user_phone') || '';
+            } catch (e) {}
+            const fallbackPhone = persistentPhone || (window.gameState && window.gameState.userProfile && window.gameState.userProfile.phone) || '';
 
             if (uid === 'adir_moshe') {
                 let customProfile = null;
@@ -88,13 +92,14 @@
                     id: 'adir_moshe',
                     name: 'אדיר משה',
                     email: 'adir.moshe@campus.technion.ac.il',
-                    phone: fallbackPhone,
+                    phone: persistentPhone || fallbackPhone,
                     avatar: '🎓',
                     avatarImg: 'adir_avatar.png',
                     role: 'developer',
                     startingSemester: (window.gameState && window.gameState.currentActiveSemester) ? window.gameState.currentActiveSemester : 3
                 }, customProfile || {});
-                if (!base.phone && fallbackPhone) base.phone = fallbackPhone;
+                if (persistentPhone) base.phone = persistentPhone;
+                else if (!base.phone && fallbackPhone) base.phone = fallbackPhone;
                 return base;
             }
             try {
@@ -104,7 +109,8 @@
                     if (window.gameState && window.gameState.currentActiveSemester) {
                         parsed.startingSemester = window.gameState.currentActiveSemester;
                     }
-                    if (!parsed.phone && fallbackPhone) parsed.phone = fallbackPhone;
+                    if (persistentPhone) parsed.phone = persistentPhone;
+                    else if (!parsed.phone && fallbackPhone) parsed.phone = fallbackPhone;
                     if (!parsed.avatar) parsed.avatar = '🎓';
                     return parsed;
                 }
@@ -192,6 +198,14 @@
             const user = this.getActiveUser();
             const key = this.getUserStorageKey(user.id);
             try {
+                state.lastModified = Math.max(state.lastModified || 0, Date.now());
+
+                const persistentPhone = localStorage.getItem('ast_persistent_user_phone');
+                if (persistentPhone) {
+                    if (!state.userProfile) state.userProfile = {};
+                    if (!state.userProfile.phone) state.userProfile.phone = persistentPhone;
+                }
+
                 // Ensure student state preserves account_password and student_name
                 if (user.id !== 'adir_moshe' && user.id !== 'guest') {
                     if (!state.student_name && user.name) state.student_name = user.name;
@@ -614,10 +628,18 @@
                 cleanPhone = '';
             }
 
+            // Update persistent storage
+            if (cleanPhone) {
+                try {
+                    localStorage.setItem('ast_persistent_user_phone', cleanPhone);
+                } catch (e) {}
+            }
+
             // Update in-memory state
             const state = (window.getGlobalGameState ? window.getGlobalGameState() : window.gameState) || {};
             state.student_name = name;
             state.currentActiveSemester = semester;
+            state.lastModified = Date.now();
             if (!state.userProfile) state.userProfile = {};
             state.userProfile.phone = cleanPhone;
 
@@ -1236,13 +1258,36 @@
                                 }
                                 const key = this.getUserStorageKey(user.id);
                                 const localRaw = localStorage.getItem(key);
-                                if (localRaw !== remoteJson) {
+                                let localState = null;
+                                try {
+                                    localState = localRaw ? JSON.parse(localRaw) : null;
+                                } catch (e) {}
+
+                                const localLastMod = (localState && localState.lastModified) || 0;
+                                const remoteLastMod = (remoteState && remoteState.lastModified) || 0;
+
+                                // Guard against clobbering newer local state
+                                if (localLastMod > 0 && remoteLastMod < localLastMod) {
+                                    console.warn('[AuthSync Realtime] Ignored outdated remote update. Local is newer:', { localLastMod, remoteLastMod });
+                                    this.triggerDebouncedCloudSync(localState);
+                                    return;
+                                }
+
+                                // Always preserve persistent phone number if remote state lacks it
+                                const persistentPhone = localStorage.getItem('ast_persistent_user_phone');
+                                if (persistentPhone && (!remoteState.userProfile || !remoteState.userProfile.phone)) {
+                                    if (!remoteState.userProfile) remoteState.userProfile = {};
+                                    remoteState.userProfile.phone = persistentPhone;
+                                }
+
+                                const mergedRemoteJson = JSON.stringify(remoteState);
+                                if (localRaw !== mergedRemoteJson) {
                                     isApplyingRemoteUpdate = true;
                                     try {
-                                        lastUploadedStateJson = remoteJson;
-                                        localStorage.setItem(key, remoteJson);
+                                        lastUploadedStateJson = mergedRemoteJson;
+                                        localStorage.setItem(key, mergedRemoteJson);
                                         if (user.id === 'adir_moshe') {
-                                            localStorage.setItem(LEGACY_SAVE_KEY, remoteJson);
+                                            localStorage.setItem(LEGACY_SAVE_KEY, mergedRemoteJson);
                                         }
                                         if (window.setGlobalGameState) {
                                             window.setGlobalGameState(remoteState);
@@ -1291,6 +1336,10 @@
                     const remoteState = data.state_json;
                     const key = this.getUserStorageKey(user.id);
                     const localRaw = localStorage.getItem(key);
+                    let localState = null;
+                    try {
+                        localState = localRaw ? JSON.parse(localRaw) : null;
+                    } catch (e) {}
 
                     // Anti-poisoning guard: Never let student account adopt Adir's state
                     if (user.id !== 'adir_moshe' && (remoteState.credits === 39.5 && remoteState.completedCourses === 11 && (remoteState.gpa === 86.39 || (remoteState.courses && remoteState.courses['104041'] && remoteState.courses['104041'].grade === 84)))) {
@@ -1306,6 +1355,23 @@
                             this.refreshAllAppViews();
                             return clean;
                         }
+                    }
+
+                    const localLastMod = (localState && localState.lastModified) || 0;
+                    const remoteLastMod = (remoteState && remoteState.lastModified) || 0;
+
+                    // If local state is newer than remote and not forced, preserve local state!
+                    if (!force && localLastMod > 0 && remoteLastMod < localLastMod) {
+                        console.log('[AuthSync] Local state is newer than cloud copy. Preserving local state.');
+                        this.triggerDebouncedCloudSync(localState);
+                        return localState;
+                    }
+
+                    // Always preserve persistent phone number if remote state lacks it
+                    const persistentPhone = localStorage.getItem('ast_persistent_user_phone');
+                    if (persistentPhone && (!remoteState.userProfile || !remoteState.userProfile.phone)) {
+                        if (!remoteState.userProfile) remoteState.userProfile = {};
+                        remoteState.userProfile.phone = persistentPhone;
                     }
 
                     if (!localRaw || force) {
