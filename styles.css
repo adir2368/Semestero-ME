@@ -3390,12 +3390,24 @@ body {
     gap: 10px;
 }
 
+.cal-month-nav-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.cal-nav-btns-group {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
 .cal-current-month {
-    font-size: 1rem;
+    font-size: 1.05rem;
     font-weight: 700;
     color: #f8fafc;
-    min-width: 130px;
-    text-align: center;
+    min-width: 135px;
+    text-align: right;
 }
 
 /* 7-Column Calendar Grid (Google Calendar Dark Mode) */
@@ -3666,7 +3678,7 @@ body {
 }
 
 .cal-legend-bar {
-    display: flex;
+    display: none;
     align-items: center;
     gap: 16px;
     flex-wrap: wrap;
@@ -3677,6 +3689,10 @@ body {
     background: rgba(13, 17, 32, 0.6);
     border-radius: 8px;
     border: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.cal-legend-bar.is-open {
+    display: flex !important;
 }
 
 .cal-legend-item {
@@ -4228,6 +4244,25 @@ body {
     margin-bottom: 16px;
     position: relative;
     overflow: hidden;
+    transition: padding 0.2s ease, margin 0.2s ease;
+}
+
+.exam-gap-runway-card.is-collapsed,
+.exam-gap-runway-card.collapsed-mobile {
+    padding: 8px 16px !important;
+    margin-bottom: 8px !important;
+}
+
+.exam-gap-runway-card.is-collapsed .runway-track,
+.exam-gap-runway-card.is-collapsed .runway-subtitle,
+.exam-gap-runway-card.collapsed-mobile .runway-track,
+.exam-gap-runway-card.collapsed-mobile .runway-subtitle {
+    display: none !important;
+}
+
+.exam-gap-runway-card.is-collapsed .runway-header,
+.exam-gap-runway-card.collapsed-mobile .runway-header {
+    margin-bottom: 0 !important;
 }
 
 .runway-header {
@@ -4237,6 +4272,8 @@ body {
     margin-bottom: 12px;
     flex-wrap: wrap;
     gap: 8px;
+    cursor: pointer;
+    user-select: none;
 }
 
 .runway-title {
@@ -5730,14 +5767,20 @@ label[for="new-task-xp-input"],
         display: flex !important;
         justify-content: center !important;
         align-items: center !important;
-        gap: 10px !important;
+        gap: 8px !important;
         width: 100% !important;
+    }
+
+    .cal-nav-btns-group {
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 4px !important;
     }
 
     .cal-current-month {
         font-size: 0.90rem !important;
-        min-width: 110px !important;
-        text-align: center !important;
+        min-width: 115px !important;
+        text-align: right !important;
         font-weight: 700 !important;
     }
 
@@ -6619,17 +6662,12 @@ html.is-iphone .app-global-footer {
     box-sizing: border-box;
 }
 
-.timetable-header-card {
-    background: linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(30, 41, 59, 0.85) 100%);
-    border: 1px solid rgba(56, 189, 248, 0.25);
-    border-radius: 12px;
-    padding: 18px 24px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 16px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+/* Timetable Header Card & Sync Bar globally removed per user directive to eliminate wasted space */
+#timetable-header-card,
+.timetable-header-card,
+#timetable-sync-bar,
+.timetable-sync-bar {
+    display: none !important;
 }
 
 .timetable-title-group h2 {
@@ -6913,6 +6951,18 @@ html.is-iphone .app-global-footer {
     border-color: #38bdf8;
     color: #ffffff;
     box-shadow: 0 0 10px rgba(56, 189, 248, 0.4);
+}
+
+.day-tab-pill.day-tab-sync {
+    margin-right: auto;
+    background: rgba(56, 189, 248, 0.15);
+    border-color: rgba(56, 189, 248, 0.4);
+    color: #38bdf8;
+}
+
+.day-tab-pill.day-tab-sync:hover {
+    background: rgba(56, 189, 248, 0.28);
+    color: #ffffff;
 }
 
 .timetable-grid {

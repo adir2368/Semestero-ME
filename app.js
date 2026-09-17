@@ -12188,7 +12188,8 @@ function setupNotionDashboard() {
     const runwayArrow = document.getElementById("runway-toggle-arrow");
     if (runwayHeader && runwayCard) {
         runwayHeader.addEventListener("click", () => {
-            const isCollapsed = runwayCard.classList.toggle("collapsed-mobile");
+            const isCollapsed = runwayCard.classList.toggle("is-collapsed");
+            runwayCard.classList.toggle("collapsed-mobile", isCollapsed);
             if (runwayArrow) runwayArrow.innerText = isCollapsed ? "▾" : "▴";
         });
     }
@@ -12198,7 +12199,8 @@ function setupNotionDashboard() {
     const calLegendBar = document.getElementById("cal-legend-bar");
     const calLegendArrow = document.getElementById("cal-legend-arrow");
     if (toggleCalLegendBtn && calLegendBar) {
-        toggleCalLegendBtn.addEventListener("click", () => {
+        toggleCalLegendBtn.addEventListener("click", (e) => {
+            if (e) { e.preventDefault(); e.stopPropagation(); }
             const isOpen = calLegendBar.classList.toggle("is-open");
             if (calLegendArrow) calLegendArrow.innerText = isOpen ? "▴" : "▾";
             toggleCalLegendBtn.classList.toggle("active", isOpen);
@@ -16255,10 +16257,10 @@ function renderFinalsCalendar() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.09.18-v1.8.28",
-    build: "180028",
-    date: "2026-09-18 00:30",
-    description: "גרסה 1.8.28: שמות קורסים ומועדים ברורים בלוח השנה, צמצום שטח מת בלוח שנה ומערכת שעות בנייד, סינון משימות מתקפל, וכיול זום במפת הקורסים"
+    code: "REV-2026.09.18-v1.8.29",
+    build: "180029",
+    date: "2026-09-18 00:50",
+    description: "גרסה 1.8.29: כפתורי חודש מיושרים לשמאל, מקרא ומרווחים מתקפלים בכל המסכים, והסרה גלובלית של כותרת מערכת השעות"
 };
 
 function ensureBaselineRevisions() {
