@@ -9243,17 +9243,17 @@ html.is-iphone .app-global-footer {
 }
 
 /* =======================================================
-   Print / PDF A4 Landscape Layout - Clean & No Cutoffs
+   Print / PDF A4 Landscape Layout - Single Page Guarantee
    ======================================================= */
 @page {
     size: A4 landscape;
-    margin: 6mm 8mm;
+    margin: 4mm 5mm;
 }
 
 @media print {
     html, body {
         width: 100% !important;
-        height: auto !important;
+        height: 100% !important;
         background: #ffffff !important;
         color: #0f172a !important;
         margin: 0 !important;
@@ -9261,6 +9261,7 @@ html.is-iphone .app-global-footer {
         font-family: Arial, "Rubik", sans-serif !important;
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
+        overflow: hidden !important;
     }
 
     body * {
@@ -9283,7 +9284,8 @@ html.is-iphone .app-global-footer {
         color: #0f172a !important;
         padding: 0 !important;
         margin: 0 !important;
-        overflow: visible !important;
+        overflow: hidden !important;
+        zoom: 0.84 !important;
     }
 
     .hud-header,
@@ -9325,20 +9327,21 @@ html.is-iphone .app-global-footer {
         content: "🎓 הטכניון - מכון טכנולוגי לישראל | הפקולטה להנדסת מכונות — תוכנית לימודים לתואר ראשון";
         display: block !important;
         visibility: visible !important;
-        font-size: 13pt !important;
+        font-size: 11pt !important;
         font-weight: 800 !important;
         color: #0f172a !important;
         text-align: center !important;
         border-bottom: 2px solid #0284c7 !important;
-        padding-bottom: 4px !important;
-        margin-bottom: 8px !important;
+        padding-bottom: 2px !important;
+        margin-bottom: 5px !important;
         direction: rtl !important;
     }
 
     .planner-semesters-scroll {
         display: grid !important;
         grid-template-columns: repeat(4, 1fr) !important;
-        gap: 6px !important;
+        grid-template-rows: repeat(2, auto) !important;
+        gap: 5px !important;
         width: 100% !important;
         overflow: visible !important;
         padding: 0 !important;
@@ -9348,11 +9351,11 @@ html.is-iphone .app-global-footer {
     .planner-semester-col {
         min-width: 0 !important;
         width: 100% !important;
-        border: 1.5px solid #64748b !important;
-        border-radius: 5px !important;
+        border: 1.2px solid #64748b !important;
+        border-radius: 4px !important;
         background: #f8fafc !important;
         color: #0f172a !important;
-        padding: 4px 6px !important;
+        padding: 3px 5px !important;
         break-inside: avoid !important;
         page-break-inside: avoid !important;
         box-shadow: none !important;
@@ -9363,19 +9366,19 @@ html.is-iphone .app-global-footer {
         justify-content: space-between !important;
         align-items: center !important;
         border-bottom: 1px solid #94a3b8 !important;
-        padding-bottom: 3px !important;
-        margin-bottom: 4px !important;
+        padding-bottom: 2px !important;
+        margin-bottom: 3px !important;
         direction: rtl !important;
     }
 
     .semester-col-title {
-        font-size: 9.5pt !important;
+        font-size: 8.5pt !important;
         font-weight: 800 !important;
         color: #0369a1 !important;
     }
 
     .semester-col-credits {
-        font-size: 8pt !important;
+        font-size: 7.5pt !important;
         font-weight: 700 !important;
         color: #475569 !important;
     }
@@ -9383,16 +9386,16 @@ html.is-iphone .app-global-footer {
     .planner-course-list {
         display: flex !important;
         flex-direction: column !important;
-        gap: 3px !important;
+        gap: 2.5px !important;
         min-height: 0 !important;
     }
 
     .planner-course-card {
         border: 1px solid #94a3b8 !important;
-        border-radius: 4px !important;
+        border-radius: 3px !important;
         background: #ffffff !important;
         color: #0f172a !important;
-        padding: 3px 5px !important;
+        padding: 2px 4px !important;
         box-shadow: none !important;
         break-inside: avoid !important;
         page-break-inside: avoid !important;
@@ -9403,24 +9406,26 @@ html.is-iphone .app-global-footer {
         display: flex !important;
         justify-content: space-between !important;
         align-items: center !important;
-        margin-bottom: 1px !important;
+        margin-bottom: 0 !important;
+        line-height: 1 !important;
     }
 
     .course-card-code {
-        font-size: 7.5pt !important;
+        font-size: 6.8pt !important;
         font-weight: 700 !important;
         color: #475569 !important;
         font-family: monospace !important;
     }
 
     .course-card-tag {
-        font-size: 7pt !important;
-        padding: 1px 4px !important;
-        border-radius: 3px !important;
+        font-size: 6.2pt !important;
+        padding: 0 3px !important;
+        border-radius: 2px !important;
         font-weight: 700 !important;
         border: 1px solid #cbd5e1 !important;
         background: #f1f5f9 !important;
         color: #334155 !important;
+        line-height: 1.1 !important;
     }
 
     .course-card-tag.tag-completed {
@@ -9430,21 +9435,25 @@ html.is-iphone .app-global-footer {
     }
 
     .course-card-title {
-        font-size: 8pt !important;
+        font-size: 7.2pt !important;
         font-weight: 700 !important;
         color: #0f172a !important;
         line-height: 1.15 !important;
-        margin-bottom: 1px !important;
+        margin: 1px 0 !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
     }
 
     .course-card-bottom {
         display: flex !important;
         justify-content: space-between !important;
         align-items: center !important;
+        line-height: 1 !important;
     }
 
     .course-card-credits {
-        font-size: 7pt !important;
+        font-size: 6.4pt !important;
         color: #64748b !important;
         font-weight: 600 !important;
     }
