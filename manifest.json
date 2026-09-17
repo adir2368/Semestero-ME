@@ -1,6 +1,6 @@
 {
-  "name": "Semestero ME",
-  "short_name": "Semestero ME",
+  "name": "Semestero",
+  "short_name": "Semestero",
   "description": "סמסטרו ME - מערכת ניווט, ניהול לימודים, תכנון תואר ומעקב משימות להנדסת מכונות",
   "start_url": "./index.html",
   "scope": "./",

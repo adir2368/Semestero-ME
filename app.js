@@ -12207,12 +12207,18 @@ function setupNotionDashboard() {
         });
     }
 
-    // 7. Mobile Timetable CheeseFork Sync
+    // 7. Timetable CheeseFork Sync (available across all screens from day selector)
     const mobileSyncBtn = document.getElementById("btn-mobile-sync-cf");
     const desktopSyncBtn = document.getElementById("btn-sync-cheesefork-now");
     if (mobileSyncBtn && desktopSyncBtn) {
         mobileSyncBtn.addEventListener("click", () => {
+            mobileSyncBtn.disabled = true;
+            mobileSyncBtn.innerHTML = '<span>⏳</span> מסנכרן...';
             desktopSyncBtn.click();
+            setTimeout(() => {
+                mobileSyncBtn.innerHTML = '<span>🔄</span> סנכרן';
+                mobileSyncBtn.disabled = false;
+            }, 700);
         });
     }
     
@@ -16257,10 +16263,10 @@ function renderFinalsCalendar() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.09.18-v1.8.29",
-    build: "180029",
-    date: "2026-09-18 00:50",
-    description: "גרסה 1.8.29: כפתורי חודש מיושרים לשמאל, מקרא ומרווחים מתקפלים בכל המסכים, והסרה גלובלית של כותרת מערכת השעות"
+    code: "REV-2026.09.18-v1.9.1",
+    build: "190001",
+    date: "2026-09-18 01:10",
+    description: "גרסה 1.9.1: אופטימיזציית ביצועים מקיפה, שם מותאם בנייד (Semestero) למניעת חיתוך, וכיול סנכרון מערכת שעות"
 };
 
 function ensureBaselineRevisions() {
