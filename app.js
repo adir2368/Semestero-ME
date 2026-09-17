@@ -6463,7 +6463,7 @@ const PRELOADED_USER_STATE = {
             "studyStartDate": "2027-02-11"
           }
         },
-        "characterClass": "סטודנט להנדסת מכונות (טכניון)",
+        "characterClass": "סטודנט להנדסת מכונות",
         "removedCourses": [
           "035044",
           "324033",
@@ -8158,7 +8158,7 @@ const PRELOADED_USER_STATE = {
       "studyStartDate": "2027-02-11"
     }
   },
-  "characterClass": "סטודנט להנדסת מכונות (טכניון)",
+  "characterClass": "סטודנט להנדסת מכונות",
   "removedCourses": [
     "035044",
     "324033",
@@ -10115,7 +10115,7 @@ function setupEventListeners() {
     document.getElementById("btn-load-me").addEventListener("click", () => {
         if (confirm("טעינת תואר בהנדסת מכונות תדרוס את השינויים הנוכחיים שלך. האם להמשיך?")) {
             gameState = JSON.parse(JSON.stringify(INITIAL_STATE));
-            gameState.characterClass = "סטודנט להנדסת מכונות (טכניון)";
+            gameState.characterClass = "סטודנט להנדסת מכונות";
             gameState.courses = JSON.parse(JSON.stringify(SAMPLE_ME_DEGREE));
             recalculateCourseStates();
             saveState();
@@ -16209,7 +16209,7 @@ function renderFinalsCalendar() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.09.17-v1.8.23",
+    code: "REV-2026.09.17-v1.8.24",
     build: "180000",
     date: "2026-09-17 21:55",
     description: "גרסה 1.8.22: ניקוי והסרת צבע כחול מהסמל (גלגל שיניים וזרוע רובוטית לבנים וחדים), הגדלת הסמל במחשב ל-54 פיקסלים לקריאות מושלמת, ורענון כל פורמטי האייקון"

@@ -9900,3 +9900,145 @@ html.is-iphone .app-global-footer {
     filter: none;
 }
 
+/* ==============================================================================
+   v1.8.24 Design Fixes: Calendar Sync Inputs, Planner Cards & Header Alignment
+   ============================================================================== */
+
+/* 1. Calendar Sync Settings Inputs (High Contrast & Clear Readability) */
+.setting-cal-input,
+#input-apps-script-webhook,
+.settings-card input[type="text"],
+.settings-card input[type="number"],
+.settings-card .modal-input {
+    background: #090e1a !important;
+    border: 1px solid rgba(56, 189, 248, 0.35) !important;
+    color: #38bdf8 !important;
+    border-radius: 6px !important;
+    padding: 9px 12px !important;
+    font-family: 'Rubik', 'Segoe UI', monospace !important;
+    font-size: 0.84rem !important;
+    direction: ltr !important;
+    text-align: left !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    transition: all 0.2s ease !important;
+}
+
+.setting-cal-input:focus,
+#input-apps-script-webhook:focus,
+.settings-card input[type="text"]:focus,
+.settings-card input[type="number"]:focus,
+.settings-card .modal-input:focus {
+    border-color: #38bdf8 !important;
+    background: #0f172a !important;
+    color: #ffffff !important;
+    box-shadow: 0 0 12px rgba(56, 189, 248, 0.45) !important;
+    outline: none !important;
+}
+
+.setting-cal-input::placeholder,
+#input-apps-script-webhook::placeholder {
+    color: #475569 !important;
+}
+
+/* 2. Degree Planner Course Cards & Column Header Fixes */
+.semester-col-header {
+    background: rgba(22, 30, 46, 0.98) !important;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5) !important;
+    z-index: 5 !important;
+    position: relative !important;
+}
+
+.planner-course-list {
+    padding: 10px 8px 20px 8px !important;
+    gap: 8px !important;
+    scroll-padding-top: 10px !important;
+}
+
+.planner-course-card {
+    padding: 9px 11px !important;
+    overflow: visible !important;
+}
+
+.course-card-top {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    direction: rtl !important;
+    gap: 8px !important;
+    margin-bottom: 3px !important;
+    width: 100% !important;
+}
+
+.course-card-code {
+    font-size: 0.74rem !important;
+    font-family: monospace !important;
+    color: #94a3b8 !important;
+    font-weight: 700 !important;
+    direction: ltr !important;
+}
+
+.course-card-tag {
+    font-size: 0.68rem !important;
+    padding: 2px 8px !important;
+    border-radius: 4px !important;
+    font-weight: 700 !important;
+    white-space: nowrap !important;
+    line-height: 1.25 !important;
+    flex-shrink: 0 !important;
+}
+
+.course-card-title {
+    font-size: 0.84rem !important;
+    font-weight: 700 !important;
+    color: #f8fafc !important;
+    line-height: 1.25 !important;
+}
+
+.planner-sidebar {
+    overflow-y: auto !important;
+    scrollbar-width: thin !important;
+    scrollbar-color: rgba(56, 189, 248, 0.35) transparent !important;
+    padding-bottom: 32px !important;
+}
+
+/* 3. Header Progress Bar & Sidebar Polish */
+.char-title {
+    white-space: nowrap !important;
+    font-size: 0.98rem !important;
+    line-height: 1.2 !important;
+}
+
+.char-level {
+    white-space: nowrap !important;
+    font-size: 0.86rem !important;
+    padding: 2px 10px !important;
+    line-height: 1.2 !important;
+}
+
+.hud-sidebar {
+    padding: 14px !important;
+    gap: 14px !important;
+    overflow-y: auto !important;
+    scrollbar-width: thin !important;
+    scrollbar-color: rgba(56, 189, 248, 0.35) transparent !important;
+}
+
+.sidebar-section {
+    padding: 12px 14px !important;
+}
+
+.sidebar-section.moodle-sync input[type="text"],
+.sidebar-section.cheesefork-import input[type="text"] {
+    background: #090e1a !important;
+    border: 1px solid rgba(56, 189, 248, 0.35) !important;
+    color: #38bdf8 !important;
+    border-radius: 6px !important;
+    padding: 7px 10px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    direction: ltr !important;
+    text-align: left !important;
+}
+
+

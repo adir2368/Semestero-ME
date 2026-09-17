@@ -1,9 +1,11 @@
 const { app, BrowserWindow, Menu, ipcMain } = require('electron');
 const path = require('path');
 
+app.setName('Semestero ME');
+
 // Explicit Windows AppUserModelID to ensure Taskbar icon displays properly
 if (process.platform === 'win32') {
-    app.setAppUserModelId('technion.me.academic.skill.tree');
+    app.setAppUserModelId('adir.semestero.me');
 }
 
 let mainWindow = null;
@@ -16,7 +18,7 @@ function createWindow() {
         minHeight: 700,
         backgroundColor: '#0b0f19',
         icon: path.join(__dirname, 'icon.ico'),
-        title: "לוח תכנון ומעקב אקדמי - הנדסת מכונות הטכניון",
+        title: "Semestero ME",
         autoHideMenuBar: true,
         webPreferences: {
             nodeIntegration: false,
