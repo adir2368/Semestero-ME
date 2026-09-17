@@ -12065,6 +12065,8 @@ function setupNotionDashboard() {
 
     function setActiveMainTab(activeTabId) {
         window.currentActiveTab = activeTabId;
+        if (document.body) document.body.setAttribute('data-active-tab', activeTabId);
+        if (document.documentElement) document.documentElement.setAttribute('data-active-tab', activeTabId);
         if (tabCurriculum) tabCurriculum.classList.toggle("active", activeTabId === 'curriculum');
         if (tabPlanner) tabPlanner.classList.toggle("active", activeTabId === 'planner');
         if (tabTasks) tabTasks.classList.toggle("active", activeTabId === 'tasks');
@@ -16192,7 +16194,7 @@ function renderFinalsCalendar() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.09.17-v1.8.26",
+    code: "REV-2026.09.17-v1.8.27",
     build: "180000",
     date: "2026-09-17 21:55",
     description: "גרסה 1.8.22: ניקוי והסרת צבע כחול מהסמל (גלגל שיניים וזרוע רובוטית לבנים וחדים), הגדלת הסמל במחשב ל-54 פיקסלים לקריאות מושלמת, ורענון כל פורמטי האייקון"

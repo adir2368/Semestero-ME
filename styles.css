@@ -5287,6 +5287,21 @@ label[for="new-task-xp-input"],
     }
 
     /* Ultra-Sleek Compact Mobile Header */
+    /* Mobile Tab Focus: Display Top HUD Header strictly on Curriculum Tree */
+    body:not([data-active-tab="curriculum"]) .hud-header {
+        display: none !important;
+    }
+
+    /* Maximize vertical workspace height on mobile when top header is hidden */
+    body:not([data-active-tab="curriculum"]) .hud-workspace {
+        padding-top: max(8px, env(safe-area-inset-top, 8px)) !important;
+    }
+
+    html.is-iphone body:not([data-active-tab="curriculum"]) .hud-workspace,
+    .is-iphone body:not([data-active-tab="curriculum"]) .hud-workspace {
+        padding-top: max(env(safe-area-inset-top, 0px), 44px) !important;
+    }
+
     .hud-header {
         box-sizing: border-box !important;
         width: 100% !important;
@@ -5453,7 +5468,7 @@ label[for="new-task-xp-input"],
     /* Compact 4-Grid HUD Stats */
     .hud-stats {
         display: grid !important;
-        grid-template-columns: repeat(4, 1fr) !important;
+        grid-template-columns: repeat(3, 1fr) !important;
         gap: 4px !important;
         width: 100% !important;
     }
@@ -6073,7 +6088,7 @@ html.is-iphone .character-card {
 html.is-mobile-device .hud-stats,
 html.is-iphone .hud-stats {
     display: grid !important;
-    grid-template-columns: repeat(4, 1fr) !important;
+    grid-template-columns: repeat(3, 1fr) !important;
     gap: 4px !important;
     width: 100% !important;
 }
@@ -8932,16 +8947,57 @@ html.is-iphone .app-global-footer {
 /* Mobile Responsiveness */
 @media (max-width: 768px), screen and (max-device-width: 768px) {
     .planner-header-banner {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 6px;
-        padding: 6px 8px;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 4px !important;
+        padding: 4px 6px !important;
     }
 
-    .planner-header-left,
+    .planner-header-left {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 4px !important;
+        width: 100% !important;
+    }
+
+    .planner-mode-switch {
+        display: flex !important;
+        width: 100% !important;
+    }
+
+    .btn-planner-mode {
+        flex: 1 !important;
+        padding: 4px 6px !important;
+        font-size: 0.74rem !important;
+        justify-content: center !important;
+    }
+
+    .planner-summary-stats {
+        display: flex !important;
+        width: 100% !important;
+        gap: 4px !important;
+    }
+
+    .planner-stat-pill {
+        flex: 1 !important;
+        padding: 3px 6px !important;
+        font-size: 0.70rem !important;
+        justify-content: space-between !important;
+    }
+
     .planner-header-right {
-        justify-content: space-between;
-        width: 100%;
+        display: flex !important;
+        flex-wrap: wrap !important;
+        gap: 4px !important;
+        width: 100% !important;
+    }
+
+    .planner-header-right .btn {
+        flex: 1 1 calc(50% - 4px) !important;
+        padding: 4px 6px !important;
+        font-size: 0.72rem !important;
+        min-height: 28px !important;
+        justify-content: center !important;
     }
 
     .planner-main-container {
@@ -9763,7 +9819,7 @@ html.is-iphone .app-global-footer {
 
     .planner-semesters-scroll {
         display: grid !important;
-        grid-template-columns: repeat(4, 1fr) !important;
+        grid-template-columns: repeat(3, 1fr) !important;
         grid-template-rows: repeat(2, auto) !important;
         gap: 5px !important;
         width: 100% !important;
