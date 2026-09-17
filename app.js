@@ -8560,7 +8560,7 @@ const PRELOADED_USER_STATE = {
   "semesterGuardMode": "locked",
   "customCalendarEvents": [],
   "degreePlanUnassigned": [],
-  "currentActiveSemester": 2,
+  "currentActiveSemester": 3,
   "hasLoadedSemesterBExcel": true,
   "notificationPreferences": {
     "class10Min": true,
@@ -9099,29 +9099,18 @@ function loadSavedState() {
         gameState.hasLoadedGoogleCalendarAugustV3 = true;
         gameState.semesterGuardMode = gameState.semesterGuardMode || 'locked';
         const winterStarted = isWinterSemesterStarted();
-        const defaultSem = winterStarted ? 3 : 2;
-        if (window.AuthSync && window.AuthSync.isAdirActive()) {
-            gameState.currentActiveSemester = defaultSem;
-        } else {
-            const curUser = (window.AuthSync && window.AuthSync.getActiveUser()) ? window.AuthSync.getActiveUser() : null;
-            if (curUser && curUser.id === 'adir_moshe') {
-                gameState.currentActiveSemester = defaultSem;
-            } else {
-                gameState.currentActiveSemester = (gameState.currentActiveSemester !== undefined && gameState.currentActiveSemester !== null) ? gameState.currentActiveSemester : ((curUser && curUser.startingSemester) ? curUser.startingSemester : defaultSem);
-            }
+        let computedDefaultSem = 1;
+        if (gameState.courses && typeof getSemesterStats === 'function') {
+            if (getSemesterStats(1).isCompleted) computedDefaultSem = 2;
+            if (getSemesterStats(2).isCompleted) computedDefaultSem = 3;
         }
+        if (winterStarted) computedDefaultSem = Math.max(computedDefaultSem, 3);
 
-        if (!winterStarted && gameState.courses) {
-            Object.values(gameState.courses).forEach(c => {
-                if ((c.semester || 1) === 3 && c.status === 'active') {
-                    c.status = 'available';
-                    if (c.tasks) {
-                        c.tasks.forEach(t => {
-                            if (!t.completed) t.status = 'not_started';
-                        });
-                    }
-                }
-            });
+        const curUser = (window.AuthSync && window.AuthSync.getActiveUser()) ? window.AuthSync.getActiveUser() : null;
+        if (gameState.currentActiveSemester === undefined || gameState.currentActiveSemester === null) {
+            gameState.currentActiveSemester = (curUser && curUser.startingSemester) ? curUser.startingSemester : computedDefaultSem;
+        } else if (computedDefaultSem > gameState.currentActiveSemester) {
+            gameState.currentActiveSemester = computedDefaultSem;
         }
 
     // Strict Enforcement: Future semester courses beyond active semester CANNOT be active or available if previous semester is not completed
@@ -9331,20 +9320,7 @@ function recalculateCourseStates() {
 
     // Automatic Technion Semester Transition: Winter semester 2026/2027 starts on 28.10.2026
     const winterStarted = isWinterSemesterStarted();
-    if (!winterStarted) {
-        // Prior to 28.10.2026: Keep student in Semester 2 (סמסטר ב) and do NOT open next semester's tasks
-        gameState.currentActiveSemester = 2;
-        Object.values(gameState.courses).forEach(c => {
-            if ((c.semester || 1) === 3 && c.status === 'active') {
-                c.status = 'available';
-                if (c.tasks) {
-                    c.tasks.forEach(t => {
-                        if (!t.completed) t.status = 'not_started';
-                    });
-                }
-            }
-        });
-    } else {
+    if (winterStarted) {
         // From 28.10.2026 onwards: Auto-advance to Semester 3 (סמסטר ג / חורף)
         if (!gameState.currentActiveSemester || gameState.currentActiveSemester < 3) {
             gameState.currentActiveSemester = 3;
@@ -9353,6 +9329,13 @@ function recalculateCourseStates() {
                     c.status = 'active';
                 }
             });
+        }
+    } else {
+        // If prior semesters (1 & 2) are completed, allow advance to Semester 3
+        if (typeof getSemesterStats === 'function' && getSemesterStats(2).isCompleted) {
+            if (!gameState.currentActiveSemester || gameState.currentActiveSemester < 3) {
+                gameState.currentActiveSemester = 3;
+            }
         }
     }
 
@@ -9409,7 +9392,7 @@ function recalculateCourseStates() {
         if (course.status === 'active' && !hasPassingGrade && course.tasks && Array.isArray(course.tasks)) {
             // If winter semester has not started yet (before 28.10.2026), exclude semester > activeSem from openTasksCount
             const sem = course.semester || 1;
-            const activeSem = gameState.currentActiveSemester || 2;
+            const activeSem = gameState.currentActiveSemester || 3;
             if (!winterStarted && sem > activeSem) return;
 
             course.tasks.forEach(task => {
@@ -16209,7 +16192,7 @@ function renderFinalsCalendar() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.09.17-v1.8.25",
+    code: "REV-2026.09.17-v1.8.26",
     build: "180000",
     date: "2026-09-17 21:55",
     description: "גרסה 1.8.22: ניקוי והסרת צבע כחול מהסמל (גלגל שיניים וזרוע רובוטית לבנים וחדים), הגדלת הסמל במחשב ל-54 פיקסלים לקריאות מושלמת, ורענון כל פורמטי האייקון"

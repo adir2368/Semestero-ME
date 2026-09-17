@@ -5793,7 +5793,7 @@
   "semesterGuardMode": "locked",
   "customCalendarEvents": [],
   "degreePlanUnassigned": [],
-  "currentActiveSemester": 2,
+  "currentActiveSemester": 3,
   "hasLoadedSemesterBExcel": true,
   "notificationPreferences": {
     "class10Min": true,
