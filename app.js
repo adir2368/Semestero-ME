@@ -9196,6 +9196,11 @@ function saveState(skipNotify = false) {
         }
     } catch (err) {
         console.error("Failed to save state to localStorage:", err);
+        if (err && (err.name === 'QuotaExceededError' || err.name === 'NS_ERROR_DOM_QUOTA_REACHED' || (err.message && err.message.toLowerCase().includes('quota')))) {
+            if (typeof showHudToast === 'function') {
+                showHudToast('⚠️ שטח האחסון בדפדפן מלא (QuotaExceeded)! מומלץ לייצא גיבוי JSON בהגדרות.', 'error');
+            }
+        }
     }
     if (typeof triggerCloudGistSyncDebounced === "function") {
         triggerCloudGistSyncDebounced();
@@ -9462,10 +9467,20 @@ function recalculateCourseStates() {
         return false;
     };
 
-    // Check pre-reqs status loop to unlock available courses
+    // Check pre-reqs status loop to unlock available courses with circular dependency protection
     let loopChanged = true;
+    let loopIterations = 0;
+    const MAX_PREREQ_ITERATIONS = 30;
     while (loopChanged) {
         loopChanged = false;
+        loopIterations++;
+        if (loopIterations > MAX_PREREQ_ITERATIONS) {
+            console.warn('[Prereq Guard] Circular dependency detected in course prerequisites! Breaking loop to prevent freeze.');
+            if (typeof showHudToast === 'function') {
+                showHudToast('⚠️ זוהתה תלות מעגלית (Circular Dependency) בדרישות הקדם של הקורסים!', 'error');
+            }
+            break;
+        }
         Object.keys(gameState.courses).forEach(code => {
             const course = gameState.courses[code];
             if (course.status === 'mastered' || course.status === 'exempt') return;
@@ -9514,6 +9529,44 @@ function recalculateCourseStates() {
     
     return changed;
 }
+
+// Circular Dependency Detector for Academic Prerequisite Directed Graph
+function detectCircularPrerequisites(courses = (window.gameState && window.gameState.courses)) {
+    if (!courses) return { hasCycle: false, cycleNodes: [] };
+    const visited = new Set();
+    const recStack = new Set();
+    const cycleNodes = [];
+
+    function dfs(code) {
+        visited.add(code);
+        recStack.add(code);
+
+        const course = courses[code];
+        const prereqs = (course && course.prerequisites) || [];
+
+        for (const pre of prereqs) {
+            if (!visited.has(pre)) {
+                if (courses[pre] && dfs(pre)) return true;
+            } else if (recStack.has(pre)) {
+                cycleNodes.push(code, pre);
+                return true;
+            }
+        }
+
+        recStack.delete(code);
+        return false;
+    }
+
+    for (const code of Object.keys(courses)) {
+        if (!visited.has(code)) {
+            if (dfs(code)) {
+                return { hasCycle: true, cycleNodes };
+            }
+        }
+    }
+    return { hasCycle: false, cycleNodes: [] };
+}
+window.detectCircularPrerequisites = detectCircularPrerequisites;
 
 // Academic state update
 function addXp(amount) {
@@ -9733,15 +9786,19 @@ async function ensureCheeseForkDatabase() {
         }
     }
 
-    // Dynamic fetch fallback
+    // Dynamic script fallback without eval/Function
     if (!cheeseForkMap || cheeseForkMap.size === 0) {
         try {
-            const resp = await fetch('./cheesefork_database.js?v=1.7.1');
-            if (resp.ok) {
-                const codeText = await resp.text();
-                const fn = new Function(codeText);
-                fn();
+            if (typeof window.CHEESEFORK_DB !== 'undefined' && Array.isArray(window.CHEESEFORK_DB)) {
                 initCheeseForkDatabase();
+            } else {
+                await new Promise((resolve, reject) => {
+                    const s = document.createElement('script');
+                    s.src = './cheesefork_database.js?v=1.9.5';
+                    s.onload = () => { initCheeseForkDatabase(); resolve(); };
+                    s.onerror = (e) => reject(e);
+                    document.head.appendChild(s);
+                });
             }
         } catch (err) {
             console.warn('[CheeseFork] Fetch fallback failed:', err);
@@ -14300,6 +14357,16 @@ function setupFlowchartViewMode() {
         });
     }
 
+    // Export Flowchart as PNG Image
+    const exportFcBtn = document.getElementById("btn-fc-export-png");
+    if (exportFcBtn) {
+        exportFcBtn.addEventListener("click", () => {
+            const svgEl = document.getElementById("flowchart-svg");
+            if (!svgEl) return;
+            exportSvgToPng(svgEl, "Semestero_ME_Course_Flowchart.png");
+        });
+    }
+
     // Auto resize listener to maintain fit-width when window changes
     window.addEventListener("resize", () => {
         if (currentViewMode === 'flowchart' && isFlowchartFitWidth) {
@@ -17851,6 +17918,14 @@ function setupDailyTimetable() {
         });
     }
 
+    // 3b. Export Timetable as Image (PNG)
+    const exportTtBtn = document.getElementById('btn-export-timetable-png');
+    if (exportTtBtn) {
+        exportTtBtn.addEventListener('click', () => {
+            exportTimetableToCanvasPNG();
+        });
+    }
+
     // 4. Daily minute-ticker to keep "Happening now" / "Next up" strictly accurate
     setInterval(() => {
         const timetableWorkspace = document.getElementById('timetable-workspace');
@@ -18774,6 +18849,161 @@ function setupMobileNotifications() {
     // Periodic badge update every 60 seconds
     setInterval(updateNotificationBadge, 60000);
 }
+
+// ==============================================================================
+// Canvas / Image Export Engines (Flowchart & Weekly Timetable)
+// ==============================================================================
+
+function exportSvgToPng(svgElement, fileName = 'Semestero_ME_Course_Flowchart.png') {
+    try {
+        const svgClone = svgElement.cloneNode(true);
+        const svgString = new XMLSerializer().serializeToString(svgClone);
+        const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+        const URL = window.URL || window.webkitURL || window;
+        const blobURL = URL.createObjectURL(svgBlob);
+        const img = new Image();
+
+        img.onload = () => {
+            const canvas = document.createElement('canvas');
+            const box = svgElement.viewBox && svgElement.viewBox.baseVal;
+            canvas.width = (box && box.width) ? box.width : 1560;
+            canvas.height = (box && box.height) ? box.height : 1380;
+            const ctx = canvas.getContext('2d');
+
+            // Dark background
+            ctx.fillStyle = '#0b0f19';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(img, 0, 0);
+
+            const png = canvas.toDataURL('image/png');
+            const a = document.createElement('a');
+            a.download = fileName;
+            a.href = png;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(blobURL);
+
+            if (typeof showHudToast === 'function') {
+                showHudToast(`תרשים הקורסים נשמר כתמונה (${fileName}) 📸`, 'success');
+            }
+        };
+        img.src = blobURL;
+    } catch (err) {
+        console.error('[Export PNG] Failed to export SVG to PNG:', err);
+        if (typeof showHudToast === 'function') {
+            showHudToast('שגיאה בייצוא התמונה.', 'error');
+        }
+    }
+}
+window.exportSvgToPng = exportSvgToPng;
+
+function exportTimetableToCanvasPNG() {
+    try {
+        const canvas = document.createElement('canvas');
+        canvas.width = 1600;
+        canvas.height = 960;
+        const ctx = canvas.getContext('2d');
+
+        // Background
+        ctx.fillStyle = '#0b0f19';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Header Gradient Banner
+        const grad = ctx.createLinearGradient(0, 0, canvas.width, 0);
+        grad.addColorStop(0, '#0284c7');
+        grad.addColorStop(1, '#1e3a8a');
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, canvas.width, 70);
+
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 24px Arial, sans-serif';
+        ctx.textAlign = 'right';
+        ctx.fillText('🕒 מערכת שעות שבועית | סמסטר ג׳ - הפקולטה להנדסת מכונות הטכניון', 1560, 45);
+
+        ctx.font = '15px Arial, sans-serif';
+        ctx.textAlign = 'left';
+        ctx.fillText(new Date().toLocaleDateString('he-IL'), 40, 45);
+
+        // 5 Days (Sun to Thu)
+        const days = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי'];
+        const colW = 280;
+        const gap = 20;
+        const startX = 50;
+        const startY = 100;
+
+        days.forEach((dayName, dIdx) => {
+            const x = startX + dIdx * (colW + gap);
+            // Day Header Pill
+            ctx.fillStyle = '#1e293b';
+            ctx.fillRect(x, startY, colW, 40);
+            ctx.fillStyle = '#38bdf8';
+            ctx.font = 'bold 16px Arial, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText(`יום ${dayName}`, x + colW / 2, startY + 26);
+
+            // Day Column Box
+            ctx.fillStyle = '#111827';
+            ctx.strokeStyle = '#334155';
+            ctx.lineWidth = 1;
+            ctx.fillRect(x, startY + 45, colW, 760);
+            ctx.strokeRect(x, startY + 45, colW, 760);
+        });
+
+        // Current schedule courses
+        const schedule = (window.gameState && window.gameState.currentSemesterSchedule) || (typeof SEMESTER_3_SCHEDULE !== 'undefined' ? SEMESTER_3_SCHEDULE : []);
+        if (Array.isArray(schedule)) {
+            schedule.forEach(item => {
+                const dIdx = typeof item.day === 'number' ? item.day : -1;
+                if (dIdx >= 0 && dIdx <= 4) {
+                    const x = startX + dIdx * (colW + gap) + 10;
+                    const startHour = parseInt((item.time || item.start || '08:00').split(':')[0]) || 8;
+                    const startMin = parseInt((item.time || item.start || '08:00').split(':')[1]) || 0;
+                    const endHour = parseInt((item.endTime || item.end || '10:00').split(':')[0]) || (startHour + 2);
+                    const endMin = parseInt((item.endTime || item.end || '10:00').split(':')[1]) || 0;
+
+                    const topOffset = (startHour - 8 + startMin / 60) * 58;
+                    const durationH = Math.max(1, (endHour - startHour + (endMin - startMin) / 60));
+                    const itemHeight = Math.max(48, durationH * 58 - 6);
+                    const y = startY + 55 + topOffset;
+
+                    if (y + itemHeight <= startY + 800) {
+                        ctx.fillStyle = item.type === 'lecture' ? 'rgba(2, 132, 199, 0.3)' : (item.type === 'tutorial' ? 'rgba(16, 185, 129, 0.3)' : 'rgba(245, 158, 11, 0.3)');
+                        ctx.strokeStyle = item.type === 'lecture' ? '#38bdf8' : (item.type === 'tutorial' ? '#10b981' : '#f59e0b');
+                        ctx.lineWidth = 1.5;
+                        ctx.fillRect(x, y, colW - 20, itemHeight);
+                        ctx.strokeRect(x, y, colW - 20, itemHeight);
+
+                        ctx.fillStyle = '#ffffff';
+                        ctx.font = 'bold 13px Arial, sans-serif';
+                        ctx.textAlign = 'right';
+                        ctx.fillText(item.courseName || item.course || item.title || '', x + colW - 30, y + 20);
+
+                        ctx.fillStyle = '#94a3b8';
+                        ctx.font = '11px Arial, sans-serif';
+                        ctx.fillText(`${item.time || ''} | ${item.room || item.type || ''}`, x + colW - 30, y + 36);
+                    }
+                }
+            });
+        }
+
+        const png = canvas.toDataURL('image/png');
+        const dl = document.createElement('a');
+        dl.download = 'Semestero_ME_Timetable.png';
+        dl.href = png;
+        document.body.appendChild(dl);
+        dl.click();
+        document.body.removeChild(dl);
+
+        if (typeof showToastNotification === 'function') {
+            showToastNotification('מערכת השעות הורדה כתמונה בהצלחה! 📸', 'success');
+        }
+    } catch (err) {
+        console.error('[Export Timetable PNG] Failed to export timetable:', err);
+    }
+}
+window.exportTimetableToCanvasPNG = exportTimetableToCanvasPNG;
+
 
 
 

@@ -381,6 +381,10 @@
         const missingCodes = [];
 
         course.prereqs.forEach(prereqCode => {
+            if (prereqCode === course.code || prereqCode === course.altCode) {
+                // Ignore self-referential prerequisite
+                return;
+            }
             const prereqCourse = global.PLANNER_CATALOG.ALL_COURSES_MAP[prereqCode];
             const alt = prereqCourse ? prereqCourse.altCode : null;
 
@@ -498,6 +502,27 @@
             .replace(/>/g, '&gt;')
             .replace(/"/g, '&quot;')
             .replace(/'/g, '&#39;');
+    }
+
+    function cycleCourseElectiveList(code) {
+        const plan = getActivePlan();
+        for (const sem of plan) {
+            const c = (sem.courses || []).find(item => item.code === code || item.altCode === code);
+            if (c) {
+                const listOrder = ['A', 'B', 'C', 'D', 'E'];
+                const curList = (c.list || 'B').toUpperCase();
+                const curIdx = listOrder.indexOf(curList);
+                const nextList = listOrder[(curIdx + 1) % listOrder.length];
+                c.list = nextList;
+                saveCustomPlan(true);
+                renderDegreePlanner();
+                const listNames = { 'A': "רשימה א'", 'B': "רשימה ב'", 'C': "רשימה ג'", 'D': "רשימה ד'", 'E': "בחירה חופשית" };
+                if (typeof showPlannerToast === 'function') {
+                    showPlannerToast(`שיוך הרשימה שונה ל: ${listNames[nextList] || nextList} (עודכן בחישוב התואר)`);
+                }
+                return;
+            }
+        }
     }
 
     // --------------------------------------------------------------------------
@@ -726,7 +751,10 @@
                          data-semester="${semNum}">
                         <div class="course-card-top">
                             <span class="course-card-code">${escapeHtml(course.code)}</span>
-                            <span class="course-card-tag ${tagClass}">${tagLabel}</span>
+                            <span class="course-card-tag ${tagClass} ${course.list && !completed ? 'tag-interactive-list' : ''}" 
+                                  ${course.list && !completed ? `data-action="cycle-list" data-code="${escapeHtml(course.code)}" title="לחץ לשינוי שיוך רשימת בחירה (א׳ / ב׳ / ג׳ / ד׳ / חופשית)" style="cursor: pointer; user-select: none;"` : ''}>
+                                ${tagLabel} ${course.list && !completed ? '▾' : ''}
+                            </span>
                         </div>
                         <div class="course-card-title">${escapeHtml(course.name)}</div>
                         <div class="course-card-bottom">
@@ -1010,6 +1038,16 @@
 
         // 5. Global Click Delegation inside Planner
         plannerTab.addEventListener('click', (e) => {
+            // Elective List Cycle (manual list categorization)
+            const cycleTag = e.target.closest('[data-action="cycle-list"]');
+            if (cycleTag) {
+                const code = cycleTag.getAttribute('data-code');
+                if (code) {
+                    cycleCourseElectiveList(code);
+                    return;
+                }
+            }
+
             // Mode buttons
             const modeBtn = e.target.closest('#btn-planner-mode-custom, #btn-planner-mode-suggested');
             if (modeBtn) {
