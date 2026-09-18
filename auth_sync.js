@@ -56,6 +56,13 @@
             this.initSupabaseFromStorage();
             this.updateHudAuthControls();
             console.log('[AuthSync] Initialized. Logged in:', this.isLoggedIn() ? this.getActiveUser().name : 'אורח (Logged Out)');
+
+            // Auto-trigger onboarding wizard on very first launch for fresh guests
+            if (localStorage.getItem('ast_onboarding_shown') !== 'true' && !this.isLoggedIn() && !hasAdirLocalData()) {
+                setTimeout(() => {
+                    this.openOnboardingWizard();
+                }, 1200);
+            }
         },
 
         // Check if currently authenticated
@@ -825,10 +832,15 @@
                 }
             } else {
                 container.innerHTML = `
-                    <button type="button" class="btn-hud-login-top" id="btn-hud-login-top" onclick="AuthSync.openAuthModal()" title="התחברות ל-Semestero ME" aria-label="התחברות">
-                        <span class="login-icon">🔑</span>
-                        <span class="login-text">התחברות</span>
-                    </button>
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                        <button type="button" class="btn btn-outline btn-xs" onclick="AuthSync.openOnboardingWizard()" title="הגדרת מסלול לימודים וסיור מהיר" style="font-size: 0.78rem; padding: 4px 8px; border-color: rgba(56, 189, 248, 0.4); color: #38bdf8; border-radius: 6px;">
+                            💡 סיור
+                        </button>
+                        <button type="button" class="btn-hud-login-top" id="btn-hud-login-top" onclick="AuthSync.openAuthModal()" title="התחברות ל-Semestero ME" aria-label="התחברות">
+                            <span class="login-icon">🔑</span>
+                            <span class="login-text">התחברות</span>
+                        </button>
+                    </div>
                 `;
                 const hudCharAvatar = document.getElementById('hud-char-avatar');
                 if (hudCharAvatar) {
@@ -907,6 +919,7 @@
                 window.gameState = newState;
                 if (typeof notifyStateChanged === 'function') notifyStateChanged({ forceAll: true });
             }
+            localStorage.setItem('ast_onboarding_shown', 'true');
             const modal = document.getElementById('onboarding-wizard-modal');
             if (modal) modal.classList.remove('active');
             if (typeof showToastNotification === 'function') {
