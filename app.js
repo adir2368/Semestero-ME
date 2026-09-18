@@ -9794,7 +9794,7 @@ async function ensureCheeseForkDatabase() {
             } else {
                 await new Promise((resolve, reject) => {
                     const s = document.createElement('script');
-                    s.src = './cheesefork_database.js?v=1.9.5';
+                    s.src = './cheesefork_database.js?v=1.9.6';
                     s.onload = () => { initCheeseForkDatabase(); resolve(); };
                     s.onerror = (e) => reject(e);
                     document.head.appendChild(s);
@@ -16681,11 +16681,13 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.09.18-v1.9.5",
-    build: "190005",
-    date: "2026-09-18 14:00",
-    description: "גרסה 1.9.5: לוח שנה 6 ימים שבועי/חודשי, מודל אירועים שעתיים, סיור היכרות מובנה, ואבטחת פרטיות מלאה"
+    code: "REV-2026.09.18-v1.9.6",
+    version: "1.9.6",
+    build: "190006",
+    date: "2026-09-18 15:00",
+    description: "גרסה 1.9.6: מדריך SmartScreen, בדיקת עדכוני גרסה מ-GitHub, כפתור דיווח תקלות ואיפוס קשיח מלא"
 };
+window.APP_VERSION = "1.9.6";
 
 function ensureBaselineRevisions() {
     if (!gameState.revisions || !Array.isArray(gameState.revisions) || gameState.revisions.length === 0) {
@@ -17356,7 +17358,333 @@ async function triggerManualCalendarPull() {
             });
         };
     }
+
+    // --- Distribution, SmartScreen, Bug Report & Factory Reset Bindings ---
+    const btnCheckVer = document.getElementById("btn-check-version-updates");
+    if (btnCheckVer) btnCheckVer.onclick = () => window.checkRemoteAppVersion(true);
+
+    const cardCheckVer = document.getElementById("card-btn-check-update");
+    if (cardCheckVer) {
+        cardCheckVer.onclick = (e) => {
+            if (e.target && e.target.id === "btn-check-version-updates") return;
+            window.checkRemoteAppVersion(true);
+        };
+    }
+
+    const btnOpenSmartScreen = document.getElementById("btn-open-smartscreen-guide");
+    if (btnOpenSmartScreen) btnOpenSmartScreen.onclick = window.openSmartScreenGuideModal;
+
+    const cardSmartScreen = document.getElementById("card-btn-smartscreen-guide");
+    if (cardSmartScreen) {
+        cardSmartScreen.onclick = (e) => {
+            if (e.target && e.target.id === "btn-open-smartscreen-guide") return;
+            window.openSmartScreenGuideModal();
+        };
+    }
+
+    const btnCloseSmartScreen = document.getElementById("btn-close-smartscreen-modal");
+    if (btnCloseSmartScreen) btnCloseSmartScreen.onclick = window.closeSmartScreenGuideModal;
+
+    const btnUnderstoodSmartScreen = document.getElementById("btn-smartscreen-understood");
+    if (btnUnderstoodSmartScreen) btnUnderstoodSmartScreen.onclick = window.closeSmartScreenGuideModal;
+
+    const mockupMoreInfo = document.getElementById("mockup-link-more-info");
+    if (mockupMoreInfo) {
+        mockupMoreInfo.onclick = () => {
+            alert("הדמיה:\nבלחיצה על 'More info' בווינדוס ייחשף כפתור 'Run anyway' בתחתית החלון!");
+        };
+    }
+
+    const mockupRunAnyway = document.getElementById("mockup-btn-run-anyway");
+    if (mockupRunAnyway) {
+        mockupRunAnyway.onclick = () => {
+            alert("הדמיה:\nלחיצה על 'Run anyway' תפעיל מיד את Semestero ME בהצלחה!");
+            window.closeSmartScreenGuideModal();
+        };
+    }
+
+    const btnOpenBug = document.getElementById("btn-open-bug-report");
+    if (btnOpenBug) btnOpenBug.onclick = window.openBugReportModal;
+
+    const cardBug = document.getElementById("card-btn-bug-report");
+    if (cardBug) {
+        cardBug.onclick = (e) => {
+            if (e.target && e.target.id === "btn-open-bug-report") return;
+            window.openBugReportModal();
+        };
+    }
+
+    const btnCloseBug = document.getElementById("btn-close-bug-report-modal");
+    if (btnCloseBug) btnCloseBug.onclick = window.closeBugReportModal;
+
+    const btnCloseBugBottom = document.getElementById("btn-close-bug-modal-bottom");
+    if (btnCloseBugBottom) btnCloseBugBottom.onclick = window.closeBugReportModal;
+
+    const btnCopyDiag = document.getElementById("btn-copy-diagnostics");
+    if (btnCopyDiag) btnCopyDiag.onclick = window.copySystemDiagnostics;
+
+    const btnHardReset = document.getElementById("btn-hard-reset-app");
+    if (btnHardReset) btnHardReset.onclick = window.performFactoryReset;
+
+    const btnCloseUpdateModal = document.getElementById("btn-close-version-update-modal");
+    if (btnCloseUpdateModal) {
+        btnCloseUpdateModal.onclick = () => {
+            const m = document.getElementById("version-update-modal");
+            if (m) { m.style.display = "none"; m.classList.remove("active"); }
+        };
+    }
+
+    const btnLaterUpdate = document.getElementById("btn-later-update");
+    if (btnLaterUpdate) {
+        btnLaterUpdate.onclick = () => {
+            const m = document.getElementById("version-update-modal");
+            if (m) { m.style.display = "none"; m.classList.remove("active"); }
+        };
+    }
+
+    const footerSmartScreenBtn = document.getElementById("footer-smartscreen-btn");
+    if (footerSmartScreenBtn) footerSmartScreenBtn.onclick = window.openSmartScreenGuideModal;
+
+    const footerBugBtn = document.getElementById("footer-bug-report-btn");
+    if (footerBugBtn) footerBugBtn.onclick = window.openBugReportModal;
+
+    const footerVerBadge = document.getElementById("footer-version-badge");
+    if (footerVerBadge) footerVerBadge.onclick = () => window.checkRemoteAppVersion(true);
 }
+
+// ==============================================================================
+// Distribution, Version Updates & Help Controllers (v1.9.6)
+// ==============================================================================
+
+function compareSemver(v1, v2) {
+    const clean1 = (v1 || '').replace(/^[^\d]*/, '').split('.').map(n => parseInt(n, 10) || 0);
+    const clean2 = (v2 || '').replace(/^[^\d]*/, '').split('.').map(n => parseInt(n, 10) || 0);
+    for (let i = 0; i < Math.max(clean1.length, clean2.length); i++) {
+        const num1 = clean1[i] || 0;
+        const num2 = clean2[i] || 0;
+        if (num1 > num2) return 1;
+        if (num1 < num2) return -1;
+    }
+    return 0;
+}
+
+window.checkRemoteAppVersion = async function(isManualCheck = false) {
+    const currentVer = (APP_CURRENT_REVISION && APP_CURRENT_REVISION.version) || "1.9.6";
+    const statusTextEl = document.getElementById("version-check-status-text");
+    const footerBadgeEl = document.getElementById("footer-version-badge");
+    const checkBtn = document.getElementById("btn-check-version-updates");
+
+    if (checkBtn) {
+        checkBtn.disabled = true;
+        checkBtn.innerText = "🔄 בודק...";
+    }
+    if (statusTextEl && isManualCheck) {
+        statusTextEl.innerText = "בודק מול GitHub...";
+    }
+
+    try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000);
+        const resp = await fetch(`https://raw.githubusercontent.com/adir2368/Semestero-ME/main/package.json?t=${Date.now()}`, {
+            cache: 'no-cache',
+            signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+        const remotePkg = await resp.json();
+        const remoteVer = remotePkg && remotePkg.version ? remotePkg.version.trim() : null;
+
+        if (remoteVer && compareSemver(remoteVer, currentVer) > 0) {
+            // New version detected!
+            if (footerBadgeEl) {
+                footerBadgeEl.classList.add("has-update");
+                footerBadgeEl.innerText = `v${currentVer} ⬆️ (חדש: v${remoteVer})`;
+                footerBadgeEl.title = `קיימת גרסה חדשה להורדה (v${remoteVer})! לחץ כאן`;
+            }
+            if (statusTextEl) {
+                statusTextEl.innerHTML = `<span style="color: #34d399; font-weight: bold;">🎉 גרסה v${remoteVer} זמינה!</span>`;
+            }
+
+            // Populate update modal
+            const modVerText = document.getElementById("update-modal-version-text");
+            const modCurText = document.getElementById("update-modal-current-text");
+            const modDesc = document.getElementById("update-modal-description");
+            if (modVerText) modVerText.innerText = `גרסה חדשה זמינה: v${remoteVer}`;
+            if (modCurText) modCurText.innerText = `גרסה מותקנת אצלך: v${currentVer}`;
+            if (modDesc && remotePkg.description) modDesc.innerText = remotePkg.description;
+
+            const updateModal = document.getElementById("version-update-modal");
+            if (updateModal) {
+                updateModal.style.display = "flex";
+                updateModal.classList.add("active");
+            }
+            if (typeof showToastNotification === 'function') {
+                showToastNotification(`🎉 קיימת גרסה חדשה של Semestero ME (v${remoteVer})!`, 'info');
+            }
+        } else {
+            // System is up to date
+            if (statusTextEl) {
+                statusTextEl.innerText = `המערכת מעודכנת (v${currentVer}) ✓`;
+            }
+            if (footerBadgeEl) {
+                footerBadgeEl.classList.remove("has-update");
+                footerBadgeEl.innerText = `v${currentVer} 🔄`;
+            }
+            if (isManualCheck && typeof showToastNotification === 'function') {
+                showToastNotification(`✅ אתה משתמש בגרסה העדכנית ביותר (v${currentVer}).`, 'success');
+            }
+        }
+    } catch (err) {
+        console.warn("[VersionCheck] Failed to check remote version:", err);
+        if (statusTextEl) {
+            statusTextEl.innerText = isManualCheck ? "לא ניתן להתחבר ל-GitHub כרגע" : `גרסה v${currentVer}`;
+        }
+        if (isManualCheck && typeof showToastNotification === 'function') {
+            showToastNotification("⚠️ לא ניתן היה לבדוק עדכונים כעת (אין חיבור לרשת)", "warning");
+        }
+    } finally {
+        if (checkBtn) {
+            checkBtn.disabled = false;
+            checkBtn.innerText = "🔄 בדוק עדכונים עכשיו";
+        }
+    }
+};
+
+window.openSmartScreenGuideModal = function() {
+    const modal = document.getElementById("smartscreen-guide-modal");
+    if (modal) {
+        modal.style.display = "flex";
+        modal.classList.add("active");
+    }
+};
+
+window.closeSmartScreenGuideModal = function() {
+    const modal = document.getElementById("smartscreen-guide-modal");
+    if (modal) {
+        modal.style.display = "none";
+        modal.classList.remove("active");
+    }
+};
+
+window.getSystemDiagnosticsText = function() {
+    const isElectron = (window.process && window.process.type === 'renderer') || (navigator.userAgent && navigator.userAgent.includes('Electron'));
+    const courseList = (typeof gameState !== 'undefined' && gameState.courses)
+        ? (Array.isArray(gameState.courses) ? gameState.courses : Object.values(gameState.courses))
+        : [];
+    const coursesCompleted = courseList.filter(c => c && (c.state === 'COMPLETED' || c.completed)).length;
+    const activeTab = window.currentActiveTab || (document.body && document.body.getAttribute('data-active-tab')) || 'curriculum';
+    const uid = (window.AuthSync && typeof window.AuthSync.getActiveUser === 'function' && window.AuthSync.getActiveUser()) ? window.AuthSync.getActiveUser().id : 'guest';
+
+    return `--- Semestero ME Diagnostics ---
+Version: v${APP_CURRENT_REVISION.version || '1.9.6'} (${APP_CURRENT_REVISION.code || 'REV-2026.09.18'})
+Platform: ${isElectron ? 'Electron Desktop (.exe)' : 'Web Browser / Mobile PWA'}
+User-Agent: ${navigator.userAgent}
+Screen: ${window.innerWidth}x${window.innerHeight} (DPR: ${window.devicePixelRatio || 1})
+Active Tab: ${activeTab}
+User ID: ${uid}
+Completed Courses: ${coursesCompleted}
+Total Credits: ${(typeof gameState !== 'undefined' && gameState.totalCredits) ? gameState.totalCredits : 'N/A'}
+Timestamp: ${new Date().toISOString()}
+---------------------------------`;
+};
+
+window.openBugReportModal = function() {
+    const previewBox = document.getElementById("diagnostics-preview-box");
+    if (previewBox) {
+        previewBox.innerText = window.getSystemDiagnosticsText();
+    }
+    const modal = document.getElementById("bug-report-modal");
+    if (modal) {
+        modal.style.display = "flex";
+        modal.classList.add("active");
+    }
+};
+
+window.closeBugReportModal = function() {
+    const modal = document.getElementById("bug-report-modal");
+    if (modal) {
+        modal.style.display = "none";
+        modal.classList.remove("active");
+    }
+};
+
+window.copySystemDiagnostics = async function() {
+    const text = window.getSystemDiagnosticsText();
+    try {
+        await navigator.clipboard.writeText(text);
+        if (typeof showToastNotification === 'function') {
+            showToastNotification("📋 נתוני הדיאגנוסטיקה הועתקו ללוח בהצלחה!", "success");
+        } else {
+            alert("נתוני הדיאגנוסטיקה הועתקו ללוח בהצלחה!");
+        }
+    } catch (err) {
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        document.body.removeChild(ta);
+        if (typeof showToastNotification === 'function') {
+            showToastNotification("📋 נתוני הדיאגנוסטיקה הועתקו ללוח!", "success");
+        } else {
+            alert("נתוני הדיאגנוסטיקה הועתקו ללוח!");
+        }
+    }
+};
+
+window.performFactoryReset = async function() {
+    const msg = "⚠️ אזהרה קריטית: איפוס קשיח מלא (Factory Reset)\n\n" +
+                "פעולה זו תמחק לצמיתות את כל המידע השמור במכשיר זה:\n" +
+                "• כל ההגדרות, תוכנית התואר, הציונים והמשימות ב-localStorage\n" +
+                "• כל קובצי המטמון השמורים (Service Worker Caches)\n" +
+                "• כל נתוני המודל וה-CheeseFork המקומיים\n\n" +
+                "פעולה זו תחזיר את האפליקציה למצב התקנה ראשוני ונקי לחלוטין.\n" +
+                "האם ברצונך להמשיך באיפוס?";
+
+    if (!confirm(msg)) return;
+
+    const confirmPrompt = prompt("לאישור סופי, הקלד 'איפוס' (או 'reset') ולחץ אישור:");
+    if (!confirmPrompt || (confirmPrompt.trim() !== 'איפוס' && confirmPrompt.trim().toLowerCase() !== 'reset')) {
+        alert("האיפוס בוטל.");
+        return;
+    }
+
+    try {
+        // 1. Clear LocalStorage & SessionStorage
+        localStorage.clear();
+        sessionStorage.clear();
+
+        // 2. Clear Caches
+        if ('caches' in window) {
+            const cacheKeys = await caches.keys();
+            await Promise.all(cacheKeys.map(k => caches.delete(k)));
+        }
+
+        // 3. Unregister Service Workers
+        if ('serviceWorker' in navigator) {
+            const regs = await navigator.serviceWorker.getRegistrations();
+            await Promise.all(regs.map(r => r.unregister()));
+        }
+
+        alert("✅ המערכת אופסה במלואה בהצלחה. האפליקציה תיטען כעת מחדש במצב נקי.");
+        window.location.reload(true);
+    } catch (e) {
+        console.error("Error during factory reset:", e);
+        localStorage.clear();
+        sessionStorage.clear();
+        window.location.reload(true);
+    }
+};
+
+// Auto-check remote version 3.5 seconds after launch (non-blocking)
+setTimeout(() => {
+    try {
+        if (typeof window.checkRemoteAppVersion === 'function') {
+            window.checkRemoteAppVersion(false);
+        }
+    } catch (e) {}
+}, 3500);
 
 // =======================================================
 // Daily Timetable & CheeseFork Auto-Sync System

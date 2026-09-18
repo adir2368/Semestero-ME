@@ -9,15 +9,15 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Semestero">
-    <link rel="apple-touch-icon" href="apple-touch-icon.png?v=1.9.5">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png?v=1.9.6">
     <link rel="manifest" href="manifest.json">
     <title>Semestero ME</title>
     <!-- Fonts for Sci-Fi / Game HUD aesthetic -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Rubik:wght@300;400;500;700;900&display=swap" rel="stylesheet">
-    <link rel="icon" type="image/png" href="icon.png?v=1.9.5">
-    <link rel="stylesheet" href="styles.css?v=1.9.5">
+    <link rel="icon" type="image/png" href="icon.png?v=1.9.6">
+    <link rel="stylesheet" href="styles.css?v=1.9.6">
     <script>
         (function() {
             try {
@@ -49,7 +49,7 @@
             <!-- Top Right Section: Brand & Auth Controls -->
             <div class="hud-top-right-bar" id="hud-top-right-bar">
                 <div class="hud-logo" style="display: flex; align-items: center; gap: 10px;">
-                    <img src="icon.png?v=1.9.5" alt="Semestero ME" class="hud-brand-logo-img" style="width: 54px; height: 54px; object-fit: contain; filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.5)); border-radius: 12px; flex-shrink: 0;">
+                    <img src="icon.png?v=1.9.6" alt="Semestero ME" class="hud-brand-logo-img" style="width: 54px; height: 54px; object-fit: contain; filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.5)); border-radius: 12px; flex-shrink: 0;">
                     <div class="hud-logo-text-col" style="display: flex; flex-direction: column; justify-content: center;">
                         <span class="degree-title-text" style="font-size: 1.28rem; font-weight: 900; letter-spacing: 1px; color: #f8fafc; font-family: 'Orbitron', sans-serif; line-height: 1.15;">Se<span style="color: #38bdf8; text-shadow: 0 0 14px rgba(56, 189, 248, 0.95); font-weight: 900;">ME</span>stero</span>
                         <span class="hud-sub-faculty" style="font-size: 0.68rem; color: #38bdf8; font-weight: 600; letter-spacing: 0.5px; line-height: 1.1; margin-top: 2px;">הנדסת מכונות</span>
@@ -497,6 +497,63 @@
                     </div>
                 </div>
 
+                <!-- Section 2: Distribution, Version Updates & Help -->
+                <div class="settings-card" id="settings-card-distribution">
+                    <div class="settings-card-header">
+                        <div class="settings-card-title">
+                            <span>🚀 הפצה, עדכוני גרסה ותמיכה (Software Updates & Distribution)</span>
+                        </div>
+                    </div>
+                    <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 14px;">
+                        בדיקת עדכוני גרסה מול GitHub, מדריך להפעלת האפליקציה ב-Windows, ודיווח מהיר על שינויים במערכות הטכניון:
+                    </p>
+
+                    <div class="bug-report-grid">
+                        <div class="bug-report-card-btn" id="card-btn-check-update">
+                            <div class="btn-title">
+                                <span>🔄 בדיקת עדכוני גרסה</span>
+                                <span class="app-version-badge" style="font-size: 0.64rem;">v1.9.6</span>
+                            </div>
+                            <div class="btn-desc">
+                                בדיקה ישירה מול שרתי GitHub אם קיימת גרסה חדשה יותר להורדה או רענון.
+                            </div>
+                            <div style="margin-top: 8px; display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+                                <button type="button" class="btn btn-xs btn-primary" id="btn-check-version-updates" style="font-weight: 600;">
+                                    🔄 בדוק עדכונים עכשיו
+                                </button>
+                                <span id="version-check-status-text" style="font-size: 0.74rem; color: #38bdf8;">המערכת מעודכנת</span>
+                            </div>
+                        </div>
+
+                        <div class="bug-report-card-btn" id="card-btn-smartscreen-guide">
+                            <div class="btn-title">
+                                <span>🛡️ מדריך עקיפת Windows SmartScreen</span>
+                            </div>
+                            <div class="btn-desc">
+                                נתקלת בחלון הכחול "Windows protected your PC" בהרצה ראשונה? לחץ להסבר כיצד ללחוץ על More info ➔ Run anyway.
+                            </div>
+                            <div style="margin-top: 8px;">
+                                <button type="button" class="btn btn-xs btn-outline" id="btn-open-smartscreen-guide" style="border-color: #38bdf8; color: #38bdf8; font-weight: 600;">
+                                    📖 פתח מדריך מפורט עם הדמיה
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="bug-report-card-btn" id="card-btn-bug-report">
+                            <div class="btn-title">
+                                <span>🐛 דיווח על תקלה / שינוי במודל</span>
+                            </div>
+                            <div class="btn-desc">
+                                סנכרון המודל או CheeseFork נשבר? מבנה נתונים השתנה? דווח בלחיצה אחת ישירות למפתח.
+                            </div>
+                            <div style="margin-top: 8px;">
+                                <button type="button" class="btn btn-xs btn-outline" id="btn-open-bug-report" style="border-color: #f59e0b; color: #fbbf24; font-weight: 600;">
+                                    📝 פתח דיווח על תקלה
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
                 <!-- Section 3: Editable Google Calendar 2-Way Sync -->
                 <div class="settings-card">
@@ -767,11 +824,24 @@
                             <div class="settings-control-header">
                                 <span class="settings-control-icon">⚠️</span>
                                 <div class="settings-control-info">
-                                    <strong style="color: #f87171;">איפוס נתוני התקדמות</strong>
-                                    <span>מחיקת כל הנתונים, הציונים והמשימות והחזרת המערכת למצב התחלתי נקי.</span>
+                                    <strong style="color: #f87171;">איפוס נתוני התקדמות (Soft Reset)</strong>
+                                    <span>מחיקת כל הציונים והמשימות והחזרת עץ הקורסים למצב התחלתי בזיכרון.</span>
                                 </div>
                             </div>
-                            <button type="button" class="btn btn-danger btn-sm w-full" id="btn-reset">⚠️ איפוס נתונים</button>
+                            <button type="button" class="btn btn-danger btn-sm w-full" id="btn-reset">⚠️ איפוס נתוני התקדמות</button>
+                        </div>
+
+                        <div class="settings-control-box danger-zone" style="border-color: rgba(239, 68, 68, 0.45); background: rgba(239, 68, 68, 0.06);">
+                            <div class="settings-control-header">
+                                <span class="settings-control-icon">💥</span>
+                                <div class="settings-control-info">
+                                    <strong style="color: #ef4444;">איפוס קשיח מלא (Factory Reset)</strong>
+                                    <span>מחיקה טוטאלית של כל הנתונים, המטמון (Cache), ו-Service Workers. פותר כל שגיאה או תקיעה מקומית.</span>
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-danger btn-sm w-full" id="btn-hard-reset-app" style="background: linear-gradient(135deg, #b91c1c, #dc2626); border-color: #ef4444; font-weight: bold; box-shadow: 0 0 10px rgba(239, 68, 68, 0.35);">
+                                💥 בצע איפוס קשיח (Factory Reset)
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -1101,9 +1171,15 @@
                         <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.46 10.9v8.37H9.2V10.9H6.46M7.83 6.25c-.9 0-1.63.73-1.63 1.63s.73 1.63 1.63 1.63 1.63-.73 1.63-1.63c-.01-.9-.74-1.63-1.63-1.63Z"/>
                     </svg>
                 </a>
+                <button type="button" class="footer-action-link" id="footer-smartscreen-btn" title="מדריך עקיפת Windows SmartScreen (הפעלה ראשונה)">
+                    🛡️ מדריך Windows
+                </button>
+                <button type="button" class="footer-action-link" id="footer-bug-report-btn" title="דווח על תקלה / שינוי במודל">
+                    🐛 דווח על באג
+                </button>
             </div>
             <div class="footer-left-version">
-                <span class="app-version-badge" id="footer-version-badge" title="לחץ לטעינת הגרסה העדכנית ביותר (v1.9.5)" style="cursor: pointer;" onclick="if (window.forceAppUpdate) window.forceAppUpdate(); else window.location.reload(true);">v1.9.5 🔄</span>
+                <span class="app-version-badge" id="footer-version-badge" title="לחץ לבדיקת עדכונים ורענון המערכת (v1.9.6)" style="cursor: pointer;">v1.9.6 🔄</span>
             </div>
         </footer>
 
@@ -2129,25 +2205,160 @@
         </div>
     </div>
 
+    <!-- SmartScreen Windows Defender Guide Modal -->
+    <div class="modal-overlay" id="smartscreen-guide-modal">
+        <div class="modal-content" style="max-width: 620px; background: #0f172a; border: 1px solid rgba(56, 189, 248, 0.35);">
+            <div class="modal-header" style="border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding-bottom: 12px;">
+                <h2 style="display: flex; align-items: center; gap: 10px; margin: 0; font-size: 1.22rem; color: #f8fafc;">
+                    <span>🛡️</span> <span>מדריך הפעלה ראשונה ב-Windows (עקיפת SmartScreen)</span>
+                </h2>
+                <button type="button" class="modal-close" id="btn-close-smartscreen-modal">&times;</button>
+            </div>
+            <div class="modal-body" style="padding-top: 14px; font-size: 0.88rem; line-height: 1.6; color: #cbd5e1;">
+                <p style="margin-top: 0;">
+                    בעת הפעלת קובץ ההתקנה (<code>Semestero ME.exe</code>) בפעם הראשונה, Windows עשוי להציג חלון אזהרה כחול של <strong>Windows Defender SmartScreen</strong>.
+                </p>
+
+                <!-- Mockup of Windows Defender SmartScreen window -->
+                <div class="smartscreen-mockup-window">
+                    <div class="smartscreen-mockup-title">
+                        <span>🛡️</span>
+                        <span>Windows protected your PC / Windows מנע הפעלת אפליקציה</span>
+                    </div>
+                    <div class="smartscreen-mockup-text">
+                        Microsoft Defender SmartScreen prevented an unrecognized app from starting. Running this app might put your PC at risk.
+                    </div>
+                    <div style="margin: 10px 0;">
+                        <span class="smartscreen-step-pill">1</span>
+                        <span class="smartscreen-mockup-link" id="mockup-link-more-info">מידע נוסף (More info) 👈 לחצו כאן</span>
+                    </div>
+                    <div class="smartscreen-mockup-actions">
+                        <span class="smartscreen-step-pill">2</span>
+                        <button type="button" class="smartscreen-mockup-btn-run" id="mockup-btn-run-anyway">הפעל בכל זאת (Run anyway) 👈</button>
+                    </div>
+                </div>
+
+                <div style="background: rgba(56, 189, 248, 0.08); border: 1px dashed rgba(56, 189, 248, 0.35); border-radius: 8px; padding: 12px; margin-top: 14px;">
+                    <div style="font-weight: 700; color: #38bdf8; margin-bottom: 4px;">❓ למה זה קורה והאם זה בטוח?</div>
+                    <ul style="margin: 0; padding-right: 20px; font-size: 0.82rem; color: #94a3b8; line-height: 1.5;">
+                        <li><strong>למה זה קורה:</strong> חתימת קוד דיגיטלית רשמית (EV Code Signing) דורשת תשלום שנתי של אלפי שקלים. כאפליקציית קוד פתוח עצמאית לסטודנטים בטכניון, המערכת מופצת ישירות מ-GitHub.</li>
+                        <li><strong>בטיחות מלאה:</strong> קוד המקור פתוח ומאובטח במלואו, ללא תוכנות צד-ג', ללא פרסומות, וללא שליחת נתונים אישיים.</li>
+                        <li><strong>חד פעמי:</strong> לאחר לחיצה על "הפעל בכל זאת", Windows זוכר את הבחירה והאפליקציה תפעל מיידית בכל פעם ללא אזהרה נוספת.</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="modal-footer" style="padding: 12px 16px; border-top: 1px solid rgba(255, 255, 255, 0.08); display: flex; justify-content: flex-end;">
+                <button type="button" class="btn btn-primary btn-sm" id="btn-smartscreen-understood">הבנתי, תודה! ✓</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bug Report & Technion System Changes Modal -->
+    <div class="modal-overlay" id="bug-report-modal">
+        <div class="modal-content" style="max-width: 600px; background: #0f172a; border: 1px solid rgba(245, 158, 11, 0.35);">
+            <div class="modal-header" style="border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding-bottom: 12px;">
+                <h2 style="display: flex; align-items: center; gap: 10px; margin: 0; font-size: 1.22rem; color: #f8fafc;">
+                    <span>🐛</span> <span>דיווח על תקלה / שינוי במערכות הטכניון</span>
+                </h2>
+                <button type="button" class="modal-close" id="btn-close-bug-report-modal">&times;</button>
+            </div>
+            <div class="modal-body" style="padding-top: 14px; font-size: 0.88rem; line-height: 1.6; color: #cbd5e1;">
+                <p style="margin-top: 0;">
+                    סנכרון המודל או ה-CheeseFork הפסיק לעבוד? נתקלת בבאג בחישוב הממוצע או בתצוגה? נשמח לדיווח כדי שנוכל לתקן מיד!
+                </p>
+
+                <div class="bug-report-grid">
+                    <a href="https://github.com/adir2368/Semestero-ME/issues/new" target="_blank" rel="noopener noreferrer" class="bug-report-card-btn" id="btn-open-github-issue">
+                        <div class="btn-title">
+                            <span>🌐</span>
+                            <span>פתח פנייה ב-GitHub Issues</span>
+                        </div>
+                        <div class="btn-desc">
+                            הדרך המומלצת והמהירה ביותר למעקב אחרי סטטוס התיקון ישירות במאגר הקוד.
+                        </div>
+                    </a>
+
+                    <a href="mailto:adir2368@gmail.com?subject=Semestero%20ME%20-%20%D7%93%D7%99%D7%95%D7%95%D7%97%20%D7%A2%D7%9C%20%D7%AA%D7%A7%D7%9C%D7%94" class="bug-report-card-btn" id="btn-open-email-report">
+                        <div class="btn-title">
+                            <span>✉️</span>
+                            <span>שלח מייל ישיר למפתח</span>
+                        </div>
+                        <div class="btn-desc">
+                            פנייה בדוא״ל לאדיר משה עם פירוט התקלה או צילום מסך.
+                        </div>
+                    </a>
+                </div>
+
+                <div style="margin-top: 12px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                        <span style="font-size: 0.8rem; font-weight: 700; color: #94a3b8;">📋 מידע דיאגנוסטי למפתח (להעתקה וצירוף לדיווח):</span>
+                        <button type="button" class="btn btn-xs btn-outline" id="btn-copy-diagnostics" style="font-size: 0.72rem; padding: 2px 8px; border-color: #38bdf8; color: #38bdf8;">
+                            📋 העתק לוח
+                        </button>
+                    </div>
+                    <pre class="diagnostics-code-box" id="diagnostics-preview-box">טוען נתוני דיאגנוסטיקה...</pre>
+                </div>
+            </div>
+            <div class="modal-footer" style="padding: 12px 16px; border-top: 1px solid rgba(255, 255, 255, 0.08); display: flex; justify-content: flex-end;">
+                <button type="button" class="btn btn-secondary btn-sm" id="btn-close-bug-modal-bottom">סגור</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Version Update Available Notification Modal -->
+    <div class="modal-overlay" id="version-update-modal">
+        <div class="modal-content" style="max-width: 540px; background: #0f172a; border: 1px solid #10b981;">
+            <div class="modal-header" style="border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding-bottom: 12px;">
+                <h2 style="display: flex; align-items: center; gap: 10px; margin: 0; font-size: 1.22rem; color: #f8fafc;">
+                    <span>🎉</span> <span>קיימת גרסה חדשה של Semestero ME!</span>
+                </h2>
+                <button type="button" class="modal-close" id="btn-close-version-update-modal">&times;</button>
+            </div>
+            <div class="modal-body" style="padding-top: 14px; font-size: 0.88rem; line-height: 1.6; color: #cbd5e1;">
+                <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 8px; padding: 12px; margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between;">
+                    <div>
+                        <div style="font-weight: 700; color: #34d399;" id="update-modal-version-text">גרסה חדשה זמינה: v1.9.7</div>
+                        <div style="font-size: 0.76rem; color: #94a3b8;" id="update-modal-current-text">גרסה מותקנת אצלך: v1.9.6</div>
+                    </div>
+                    <span style="font-size: 1.8rem;">🚀</span>
+                </div>
+                <p id="update-modal-description" style="font-size: 0.84rem; color: #cbd5e1; margin-bottom: 14px;">
+                    הגרסה החדשה כוללת שיפורי ביצועים, תיקוני סנכרון ושדרוגי מערכת.
+                </p>
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+                    <a href="https://github.com/adir2368/Semestero-ME/releases" target="_blank" rel="noopener noreferrer" class="btn btn-primary w-full" style="display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 700; text-decoration: none; padding: 10px;">
+                        <span>📥</span> <span>הורד גרסה עדכנית מ-GitHub Releases</span>
+                    </a>
+                    <button type="button" class="btn btn-outline w-full" id="btn-force-refresh-app" onclick="if (window.forceAppUpdate) window.forceAppUpdate(); else window.location.reload(true);" style="font-weight: 600; padding: 8px;">
+                        <span>🔄</span> <span>רענן מטמון וטען מחדש עכשיו</span>
+                    </button>
+                </div>
+            </div>
+            <div class="modal-footer" style="padding: 10px 16px; border-top: 1px solid rgba(255, 255, 255, 0.08); display: flex; justify-content: flex-end;">
+                <button type="button" class="btn btn-secondary btn-sm" id="btn-later-update">הזכר לי מאוחר יותר</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Supabase JS Client for Cloud Sync -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <!-- CheeseFork Technion Courses Database (2,055 courses) -->
-    <script src="cheesefork_database.js?v=1.9.5"></script>
-    <script src="cheesefork_courses.min.js?v=1.9.5"></script>
+    <script src="cheesefork_database.js?v=1.9.6"></script>
+    <script src="cheesefork_courses.min.js?v=1.9.6"></script>
     <!-- Clean Curriculum Template -->
-    <script src="curriculum_template.js?v=1.9.5"></script>
+    <script src="curriculum_template.js?v=1.9.6"></script>
     <!-- Multi-User Identity & Sync Engine -->
-    <script src="auth_sync.js?v=1.9.5"></script>
+    <script src="auth_sync.js?v=1.9.6"></script>
     <!-- Moodle Live Calendar & Tasks Sync Engine -->
-    <script src="moodle_sync.js?v=1.9.5"></script>
+    <script src="moodle_sync.js?v=1.9.6"></script>
     <!-- Technion ME 2025/2026 Catalog & Electives Database -->
-    <script src="planner_catalog.js?v=1.9.5"></script>
+    <script src="planner_catalog.js?v=1.9.6"></script>
     <!-- Degree Planner Drag & Drop Engine -->
-    <script src="planner_module.js?v=1.9.5"></script>
+    <script src="planner_module.js?v=1.9.6"></script>
     <!-- Technion Official Academic Calendar & Holidays Engine -->
-    <script src="technion_academic_calendar.js?v=1.9.5"></script>
+    <script src="technion_academic_calendar.js?v=1.9.6"></script>
     <!-- Core Application Logic -->
-    <script src="app.js?v=1.9.5"></script>
+    <script src="app.js?v=1.9.6"></script>
     <!-- PWA Service Worker Registration -->
     <script>
         if ('serviceWorker' in navigator && window.location.protocol.startsWith('http')) {
