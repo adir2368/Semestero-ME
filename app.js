@@ -8599,8 +8599,9 @@ function loadSavedState() {
             loadedFromAuthSync = true;
             console.log("[AuthSync] Loaded active user state successfully for:", window.AuthSync.getActiveUser().name);
 
-            // Auto-upgrade if local save is missing courses or removedCourses compared to PRELOADED_USER_STATE
-            if (typeof PRELOADED_USER_STATE !== 'undefined' && PRELOADED_USER_STATE.courses) {
+            // Auto-upgrade if local save is missing courses or removedCourses compared to PRELOADED_USER_STATE (Adir only)
+            const isAdirActiveUser = (window.AuthSync && typeof window.AuthSync.isAdirActive === 'function' && window.AuthSync.isAdirActive());
+            if (isAdirActiveUser && typeof PRELOADED_USER_STATE !== 'undefined' && PRELOADED_USER_STATE.courses) {
                 const preloadedCount = Object.keys(PRELOADED_USER_STATE.courses).length;
                 const localCount = Object.keys(gameState.courses || {}).length;
                 if (localCount < preloadedCount) {
@@ -15571,6 +15572,8 @@ const CLOUD_GIST_SYNC = {
 let cloudSyncDebounceTimer = null;
 
 function triggerCloudGistSyncDebounced() {
+    const isAdir = (window.AuthSync && typeof window.AuthSync.isAdirActive === 'function' && window.AuthSync.isAdirActive());
+    if (!isAdir) return;
     if (cloudSyncDebounceTimer) clearTimeout(cloudSyncDebounceTimer);
     cloudSyncDebounceTimer = setTimeout(() => {
         syncScheduleToCloudGist(false);
@@ -15722,28 +15725,54 @@ function openCalendarSyncModal() {
     const copyBtn = document.getElementById("btn-copy-webcal-url");
     const input = document.getElementById("sync-webcal-url-input");
     const hint = document.getElementById("copy-webcal-url-hint");
+    const isAdir = (window.AuthSync && typeof window.AuthSync.isAdirActive === 'function' && window.AuthSync.isAdirActive());
+
+    if (input) {
+        if (isAdir) {
+            input.value = CLOUD_GIST_SYNC.rawUrl;
+            if (hint) hint.innerText = "💡 קישור זה מזין ישירות את Google Calendar במחשב ובסמארטפון.";
+        } else {
+            input.value = "ייצא קובץ .ics אישי לייבוא ישיר ל-Google Calendar של החשבון שלך";
+            if (hint) hint.innerText = "💡 להוספת היומן ל-Google Calendar הפרטי שלך, לחץ על 'הורד .ics ידנית' למטה וייבא אותו ליומן גוגל שלך.";
+        }
+    }
+
     if (copyBtn && input) {
         copyBtn.onclick = () => {
-            navigator.clipboard.writeText(input.value).then(() => {
-                copyBtn.innerText = "✓ הועתק!";
-                if (hint) hint.innerText = "✓ הקישור הועתק ללוח! הדבק אותו ב-Google Calendar תחת 'הוסף יומן מכתובת URL'.";
-                setTimeout(() => {
-                    copyBtn.innerText = "📋 העתק קישור";
-                }, 2500);
-            });
+            if (isAdir) {
+                navigator.clipboard.writeText(input.value).then(() => {
+                    copyBtn.innerText = "✓ הועתק!";
+                    if (hint) hint.innerText = "✓ הקישור הועתק ללוח! הדבק אותו ב-Google Calendar תחת 'הוסף יומן מכתובת URL'.";
+                    setTimeout(() => {
+                        copyBtn.innerText = "📋 העתק קישור";
+                    }, 2500);
+                });
+            } else {
+                exportScheduleToICS();
+            }
         };
+        if (!isAdir) {
+            copyBtn.innerText = "📥 הורד .ics ליומן";
+        } else {
+            copyBtn.innerText = "📋 העתק קישור";
+        }
     }
 
     const triggerBtn = document.getElementById("btn-trigger-cloud-sync");
     if (triggerBtn) {
-        triggerBtn.onclick = () => {
-            triggerBtn.disabled = true;
-            triggerBtn.innerText = "🔄 מסנכרן...";
-            syncScheduleToCloudGist(true).finally(() => {
-                triggerBtn.disabled = false;
-                triggerBtn.innerText = "🔄 סנכרן עכשיו לענן";
-            });
-        };
+        if (!isAdir) {
+            triggerBtn.style.display = "none";
+        } else {
+            triggerBtn.style.display = "inline-flex";
+            triggerBtn.onclick = () => {
+                triggerBtn.disabled = true;
+                triggerBtn.innerText = "🔄 מסנכרן...";
+                syncScheduleToCloudGist(true).finally(() => {
+                    triggerBtn.disabled = false;
+                    triggerBtn.innerText = "🔄 סנכרן עכשיו לענן";
+                });
+            };
+        }
     }
 
     const manualBtn = document.getElementById("btn-manual-download-ics");
@@ -16639,16 +16668,20 @@ function renderSettingsPage() {
     const calPracticeInput = document.getElementById("setting-cal-id-practice");
     const webhookInput = document.getElementById("input-apps-script-webhook");
     const syncFreqSelect = document.getElementById("setting-sync-frequency");
-
-    const defaultCals = {
+    const isAdirSettings = (window.AuthSync && typeof window.AuthSync.isAdirActive === 'function' && window.AuthSync.isAdirActive());
+    const defaultCals = isAdirSettings ? {
         exams: "f04b545847cb46d2694500ffc3ac3378bd9005e125ae4a59c2caea5a5f32725c@group.calendar.google.com",
         hw: "a887c830cc1a7b0ca4f97d1751bcf02477d837dd4ca9cf5de8385871f44a6c4d@group.calendar.google.com",
         practice: "d707cbfa99ea0f68a0a31ebc42cb4cd35eae834770a5a118051727eb0c1afdd5@group.calendar.google.com"
+    } : {
+        exams: "",
+        hw: "",
+        practice: ""
     };
 
-    if (calExamsInput) calExamsInput.value = (gameState.calendarIds && gameState.calendarIds.exams) || defaultCals.exams;
-    if (calHwInput) calHwInput.value = (gameState.calendarIds && gameState.calendarIds.hw) || defaultCals.hw;
-    if (calPracticeInput) calPracticeInput.value = (gameState.calendarIds && gameState.calendarIds.practice) || defaultCals.practice;
+    if (calExamsInput) calExamsInput.value = (gameState.calendarIds && gameState.calendarIds.exams !== undefined) ? gameState.calendarIds.exams : defaultCals.exams;
+    if (calHwInput) calHwInput.value = (gameState.calendarIds && gameState.calendarIds.hw !== undefined) ? gameState.calendarIds.hw : defaultCals.hw;
+    if (calPracticeInput) calPracticeInput.value = (gameState.calendarIds && gameState.calendarIds.practice !== undefined) ? gameState.calendarIds.practice : defaultCals.practice;
     
     const moodleCalInput = document.getElementById("setting-moodle-calendar-url");
     if (moodleCalInput) {

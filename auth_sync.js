@@ -147,16 +147,9 @@
             return 'ast_user_state_' + userId;
         },
 
-        // Load state for active user
+        // Load state for active user (persists in user's browser localStorage even if logged out)
         loadActiveUserState() {
             const user = this.getActiveUser();
-            if (!this.isLoggedIn()) {
-                if (typeof window.getCleanCurriculumState === 'function') {
-                    return window.getCleanCurriculumState(1);
-                }
-                return null;
-            }
-
             const key = this.getUserStorageKey(user.id);
             const saved = localStorage.getItem(key);
 
@@ -165,11 +158,11 @@
                     const parsed = JSON.parse(saved);
                     if (parsed && parsed.courses && Object.keys(parsed.courses).length > 0) {
                         // ANTI-POISONING GUARD:
-                        // If this is a student account, but somehow holds Adir Moshe's exact state
+                        // If this is a student or guest account, but somehow holds Adir Moshe's exact state
                         // (credits 39.5, or Calculus 1 grade 84 with completedCourses >= 10),
                         // this is contaminated data. Reset immediately to clean curriculum state!
                         if (user.id !== 'adir_moshe' && (parsed.credits === 39.5 && parsed.completedCourses === 11 && (parsed.gpa === 86.39 || (parsed.courses && parsed.courses['104041'] && parsed.courses['104041'].grade === 84)))) {
-                            console.warn('[AuthSync] Detected poisoned Adir state in student account:', user.id, '- resetting to clean state');
+                            console.warn('[AuthSync] Detected poisoned Adir state in account:', user.id, '- resetting to clean state');
                             if (typeof window.getCleanCurriculumState === 'function') {
                                 const clean = window.getCleanCurriculumState(user.startingSemester || 1);
                                 if (parsed.account_password) clean.account_password = parsed.account_password;
