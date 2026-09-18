@@ -17442,12 +17442,6 @@ async function triggerManualCalendarPull() {
         };
     }
 
-    const footerSmartScreenBtn = document.getElementById("footer-smartscreen-btn");
-    if (footerSmartScreenBtn) footerSmartScreenBtn.onclick = window.openSmartScreenGuideModal;
-
-    const footerBugBtn = document.getElementById("footer-bug-report-btn");
-    if (footerBugBtn) footerBugBtn.onclick = window.openBugReportModal;
-
     const footerVerBadge = document.getElementById("footer-version-badge");
     if (footerVerBadge) footerVerBadge.onclick = () => window.checkRemoteAppVersion(true);
 }
