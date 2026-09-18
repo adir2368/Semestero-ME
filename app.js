@@ -8694,8 +8694,9 @@ function loadSavedState() {
 
     // Guarantee 034028 (מכניקת מוצקים 1) and all core courses exist in gameState.courses
     if (gameState.courses) {
+        const isAdirCourseCheck = (window.AuthSync && typeof window.AuthSync.isAdirActive === 'function' && window.AuthSync.isAdirActive());
         if (!gameState.courses['034028']) {
-            if (typeof PRELOADED_USER_STATE !== 'undefined' && PRELOADED_USER_STATE.courses && PRELOADED_USER_STATE.courses['034028']) {
+            if (isAdirCourseCheck && typeof PRELOADED_USER_STATE !== 'undefined' && PRELOADED_USER_STATE.courses && PRELOADED_USER_STATE.courses['034028']) {
                 gameState.courses['034028'] = JSON.parse(JSON.stringify(PRELOADED_USER_STATE.courses['034028']));
             } else if (typeof SAMPLE_ME_DEGREE !== 'undefined' && SAMPLE_ME_DEGREE['034028']) {
                 gameState.courses['034028'] = JSON.parse(JSON.stringify(SAMPLE_ME_DEGREE['034028']));
@@ -8704,9 +8705,8 @@ function loadSavedState() {
         // Always enforce proper title
         if (gameState.courses['034028']) {
             gameState.courses['034028'].name = "מכניקת מוצקים 1";
-            // For Adir or if it was marked done previously, ensure it stays mastered with grade 82
-            const isAdir = (window.AuthSync && typeof window.AuthSync.isAdirActive === 'function' && window.AuthSync.isAdirActive());
-            if (isAdir || gameState.courses['034028'].grade === 82 || gameState.courses['034028'].status === 'mastered') {
+            // For Adir only, ensure it stays mastered with grade 82
+            if (isAdirCourseCheck) {
                 gameState.courses['034028'].status = 'mastered';
                 if (!gameState.courses['034028'].grade) gameState.courses['034028'].grade = 82;
                 if (gameState.courses['034028'].tasks) {

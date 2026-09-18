@@ -852,6 +852,68 @@
             if (modal) modal.classList.remove('active');
         },
 
+        // Open Onboarding Wizard for new students
+        openOnboardingWizard() {
+            const modal = document.getElementById('onboarding-wizard-modal');
+            if (!modal) return;
+            const container = document.getElementById('onboarding-courses-checklist');
+            if (container && typeof SAMPLE_ME_DEGREE !== 'undefined') {
+                container.innerHTML = '';
+                // Group courses from semesters 1 and 2
+                [1, 2, 3, 4].forEach(sem => {
+                    const semCourses = Object.values(SAMPLE_ME_DEGREE).filter(c => (c.semester || 1) === sem);
+                    if (semCourses.length > 0) {
+                        const header = document.createElement('div');
+                        header.className = 'onboarding-sem-header';
+                        header.style.cssText = 'font-size: 0.85rem; font-weight: 700; color: #38bdf8; margin-top: 6px;';
+                        header.innerText = `סמסטר ${['א׳','ב׳','ג׳','ד׳'][sem - 1]}`;
+                        container.appendChild(header);
+
+                        const grid = document.createElement('div');
+                        grid.className = 'onboarding-chips-grid';
+                        grid.style.cssText = 'display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; margin-top: 4px;';
+
+                        semCourses.forEach(c => {
+                            const label = document.createElement('label');
+                            label.className = 'onboarding-course-chip';
+                            label.style.cssText = 'display: flex; align-items: center; gap: 8px; background: rgba(30, 41, 59, 0.7); border: 1px solid #334155; border-radius: 6px; padding: 6px 10px; cursor: pointer; font-size: 0.82rem;';
+                            label.innerHTML = `
+                                <input type="checkbox" value="${c.code}" style="cursor: pointer;">
+                                <span>${c.name} (${c.credits || 0} נק״ז)</span>
+                            `;
+                            grid.appendChild(label);
+                        });
+                        container.appendChild(grid);
+                    }
+                });
+            }
+            modal.classList.add('active');
+        },
+
+        // Finish Onboarding Wizard
+        finishOnboarding() {
+            const nameInput = document.getElementById('onboarding-student-name-input');
+            const semSelect = document.getElementById('onboarding-current-sem-select');
+            const name = (nameInput && nameInput.value.trim()) || 'סטודנט אורח';
+            const semester = parseInt(semSelect && semSelect.value) || 1;
+            const priorCompleted = {};
+            document.querySelectorAll('#onboarding-courses-checklist input[type="checkbox"]:checked').forEach(chk => {
+                priorCompleted[chk.value] = { completed: true };
+            });
+            if (typeof window.getCleanCurriculumState === 'function') {
+                const newState = window.getCleanCurriculumState(semester, priorCompleted);
+                newState.student_name = name;
+                this.saveActiveUserState(newState);
+                window.gameState = newState;
+                if (typeof notifyStateChanged === 'function') notifyStateChanged({ forceAll: true });
+            }
+            const modal = document.getElementById('onboarding-wizard-modal');
+            if (modal) modal.classList.remove('active');
+            if (typeof showToastNotification === 'function') {
+                showToastNotification(`🎓 ברוך הבא ${name}! מסלול הלימודים הוגדר בהצלחה.`, 'success');
+            }
+        },
+
         // Backward compatibility: alias openAccountsModal to openAuthModal
         openAccountsModal() {
             this.openAuthModal();

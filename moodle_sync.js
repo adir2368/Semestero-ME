@@ -16,11 +16,11 @@
 (function (global) {
     'use strict';
 
-    const MOODLE_DEFAULT_URL = 'https://moodle25.technion.ac.il/calendar/export_execute.php?userid=43774&authtoken=a124e33d97c0722e89374bea7fddb03632778eee&preset_what=all&preset_time=custom';
+    const MOODLE_DEV_URL = 'https://moodle25.technion.ac.il/calendar/export_execute.php?userid=43774&authtoken=a124e33d97c0722e89374bea7fddb03632778eee&preset_what=all&preset_time=custom';
 
     const MoodleSync = {
         config: {
-            url: MOODLE_DEFAULT_URL,
+            url: '',
             autoSync: true,
             lastSyncTimestamp: null,
             lastSyncCount: 0
@@ -81,11 +81,14 @@
                     this.config.url = window.gameState.moodleCalendarUrl;
                 }
 
-                // Sanitize URL if present, or fallback to authenticated feed
+                const isAdirMoodle = (window.AuthSync && typeof window.AuthSync.isAdirActive === 'function' && window.AuthSync.isAdirActive());
+                // Sanitize URL if present, or fallback to authenticated feed ONLY for Adir
                 if (this.config.url) {
                     this.config.url = this.sanitizeUrl(this.config.url);
+                } else if (isAdirMoodle) {
+                    this.config.url = MOODLE_DEV_URL;
                 } else {
-                    this.config.url = MOODLE_DEFAULT_URL;
+                    this.config.url = '';
                 }
             } catch (e) {
                 console.warn('[MoodleSync] Error loading config:', e);
