@@ -10478,6 +10478,9 @@ function handleAddCourseSubmit(e) {
 
     recalculateCourseStates();
     saveState();
+    if (typeof DegreePlanner !== 'undefined' && DegreePlanner.syncTreeToPlanner) {
+        DegreePlanner.syncTreeToPlanner();
+    }
     notifyStateChanged({ forceAll: true });
     
     // Close modal & reset form
@@ -11785,6 +11788,11 @@ function deleteCourse(code) {
         gameState.removedCourses.push(code);
     }
 
+    // Also remove from Degree Planner
+    if (typeof DegreePlanner !== 'undefined' && DegreePlanner.removeCourse) {
+        DegreePlanner.removeCourse(code);
+    }
+
     // Remove from prerequisites of all other courses
     Object.keys(gameState.courses).forEach(cCode => {
         const c = gameState.courses[cCode];
@@ -12150,18 +12158,21 @@ function setupNotionDashboard() {
             if (tasksWorkspace) tasksWorkspace.style.display = "none";
             if (timetableWorkspace) timetableWorkspace.style.display = "none";
             if (settingsWorkspace) settingsWorkspace.style.display = "none";
-            if (viewsDirtyState.curriculum) {
-                renderFlowchartTree();
-                renderActiveQuestsSidebar();
-                viewsDirtyState.curriculum = false;
+            if (typeof DegreePlanner !== 'undefined' && DegreePlanner.syncPlannerToTree) {
+                DegreePlanner.syncPlannerToTree();
             }
+            renderFlowchartTree();
+            renderActiveQuestsSidebar();
+            viewsDirtyState.curriculum = false;
         } else if (activeTabId === 'planner') {
             if (curriculumWorkspace) curriculumWorkspace.style.display = "none";
             if (plannerWorkspace) plannerWorkspace.style.display = "flex";
             if (tasksWorkspace) tasksWorkspace.style.display = "none";
             if (timetableWorkspace) timetableWorkspace.style.display = "none";
             if (settingsWorkspace) settingsWorkspace.style.display = "none";
-            if (typeof DegreePlanner !== 'undefined' && DegreePlanner.renderDegreePlanner) {
+            if (typeof DegreePlanner !== 'undefined' && DegreePlanner.syncTreeToPlanner) {
+                DegreePlanner.syncTreeToPlanner();
+            } else if (typeof DegreePlanner !== 'undefined' && DegreePlanner.renderDegreePlanner) {
                 DegreePlanner.renderDegreePlanner();
             }
         } else if (activeTabId === 'tasks') {
@@ -16681,13 +16692,13 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.09.18-v1.9.6",
-    version: "1.9.6",
-    build: "190006",
-    date: "2026-09-18 15:00",
-    description: "גרסה 1.9.6: מדריך SmartScreen, בדיקת עדכוני גרסה מ-GitHub, כפתור דיווח תקלות ואיפוס קשיח מלא"
+    code: "REV-2026.10.04-v2.0.0",
+    version: "2.0.0",
+    build: "200000",
+    date: "2026-10-04 20:00",
+    description: "גרסה 2.0.0: מרכז ביצועים ונתוני תואר (Bklit UI / Shadcn Charts), אנימציות ומיקרו-אינטראקציות מתקדמות (Aceternity UI), וליטוש עיצובי מלא"
 };
-window.APP_VERSION = "1.9.6";
+window.APP_VERSION = "2.0.0";
 
 function ensureBaselineRevisions() {
     if (!gameState.revisions || !Array.isArray(gameState.revisions) || gameState.revisions.length === 0) {
@@ -17444,10 +17455,424 @@ async function triggerManualCalendarPull() {
 
     const footerVerBadge = document.getElementById("footer-version-badge");
     if (footerVerBadge) footerVerBadge.onclick = () => window.checkRemoteAppVersion(true);
+
+    // Analytics & GPA Hub Modal (v2.0.0 Bklit UI / Shadcn Charts)
+    const btnOpenAnalytics = document.getElementById("btn-open-analytics");
+    if (btnOpenAnalytics) btnOpenAnalytics.onclick = () => window.openAnalyticsModal();
+
+    const statGpaItem = document.getElementById("stat-item-gpa");
+    if (statGpaItem) statGpaItem.onclick = () => window.openAnalyticsModal();
+
+    const statCompletedItem = document.getElementById("stat-item-completed-courses");
+    if (statCompletedItem) statCompletedItem.onclick = () => window.openAnalyticsModal();
+
+    const hudXpContainer = document.getElementById("hud-xp-bar-container");
+    if (hudXpContainer) hudXpContainer.onclick = () => window.openAnalyticsModal();
+
+    const btnSettingsAnalytics = document.getElementById("btn-settings-open-analytics");
+    if (btnSettingsAnalytics) btnSettingsAnalytics.onclick = () => window.openAnalyticsModal();
+
+    const cardSettingsAnalytics = document.getElementById("card-btn-analytics-hub");
+    if (cardSettingsAnalytics) {
+        cardSettingsAnalytics.onclick = (e) => {
+            if (e.target && e.target.id === "btn-settings-open-analytics") return;
+            window.openAnalyticsModal();
+        };
+    }
+
+    const btnCloseAnalytics = document.getElementById("btn-close-analytics-modal");
+    if (btnCloseAnalytics) btnCloseAnalytics.onclick = () => window.closeAnalyticsModal();
+
+    const analyticsModal = document.getElementById("analytics-modal");
+    if (analyticsModal) {
+        analyticsModal.onclick = (e) => {
+            if (e.target === analyticsModal) window.closeAnalyticsModal();
+        };
+    }
 }
 
 // ==============================================================================
-// Distribution, Version Updates & Help Controllers (v1.9.6)
+// Degree Analytics, Interactive GPA Spline & Visualizations (v2.0.0)
+// ==============================================================================
+
+window.openAnalyticsModal = function() {
+    window.renderAnalyticsCharts();
+    const modal = document.getElementById("analytics-modal");
+    if (modal) {
+        modal.style.display = "flex";
+        modal.classList.add("active");
+    }
+};
+
+window.closeAnalyticsModal = function() {
+    const modal = document.getElementById("analytics-modal");
+    if (modal) {
+        modal.style.display = "none";
+        modal.classList.remove("active");
+    }
+    const tooltip = document.getElementById("chart-gpa-tooltip");
+    if (tooltip) tooltip.style.display = "none";
+};
+
+window.renderAnalyticsCharts = function() {
+    if (!gameState || !gameState.courses) return;
+
+    const allCourses = Object.values(gameState.courses).filter(c => c.status !== 'exempt');
+    const completedCourses = allCourses.filter(c => c.status === 'mastered');
+    const activeCourses = allCourses.filter(c => c.status === 'active');
+
+    const totalDegreeCredits = 157.5;
+    let earnedCredits = 0;
+    let gradedCredits = 0;
+    let weightedSum = 0;
+    let gradedCount = 0;
+
+    completedCourses.forEach(c => {
+        const cr = Number(c.credits) || 0;
+        earnedCredits += cr;
+        const isBinary = (c.isBinaryPass === true || c.grade === 'עובר' || c.grade === 'PASS');
+        if (!isBinary && c.grade !== undefined && c.grade !== null && c.grade !== '' && !isNaN(Number(c.grade)) && Number(c.grade) >= 55) {
+            gradedCredits += cr;
+            weightedSum += (Number(c.grade) * cr);
+            gradedCount++;
+        }
+    });
+
+    let activeCredits = 0;
+    activeCourses.forEach(c => activeCredits += (Number(c.credits) || 0));
+
+    const remainingCredits = Math.max(0, totalDegreeCredits - earnedCredits);
+    const cumulativeGpa = gradedCredits > 0 ? (weightedSum / gradedCredits) : (gameState.gpa || 0);
+
+    // 1. Update KPI Summary Cards
+    const kpiGpa = document.getElementById("analytics-kpi-gpa");
+    if (kpiGpa) kpiGpa.innerText = cumulativeGpa > 0 ? cumulativeGpa.toFixed(2) : "0.00";
+
+    const kpiCredits = document.getElementById("analytics-kpi-credits");
+    if (kpiCredits) kpiCredits.innerText = `${earnedCredits.toFixed(1)} / ${totalDegreeCredits}`;
+
+    const kpiCreditsPct = document.getElementById("analytics-kpi-credits-pct");
+    const completionPct = Math.min(100, (earnedCredits / totalDegreeCredits) * 100);
+    if (kpiCreditsPct) kpiCreditsPct.innerText = `${completionPct.toFixed(1)}% מכלל דרישות התואר`;
+
+    const kpiCourses = document.getElementById("analytics-kpi-courses");
+    if (kpiCourses) kpiCourses.innerText = completedCourses.length;
+
+    const kpiGradedRatio = document.getElementById("analytics-kpi-graded-ratio");
+    if (kpiGradedRatio) kpiGradedRatio.innerText = `${gradedCount} עם ציון מספרי (${(completedCourses.length - gradedCount)} בינארי)`;
+
+    // Calculate Semester GPA data for Semesters 1 to 8
+    const termNames = ["", "סמסטר א׳", "סמסטר ב׳", "סמסטר ג׳", "סמסטר ד׳", "סמסטר ה׳", "סמסטר ו׳", "סמסטר ז׳", "סמסטר ח׳"];
+    const semesterData = [];
+    let bestTerm = null;
+    let maxTermGpa = 0;
+
+    for (let s = 1; s <= 8; s++) {
+        const stats = typeof getSemesterStats === 'function' ? getSemesterStats(s) : { isCompleted: false, gpa: 0, gradedCredits: 0, totalCredits: 0, list: [] };
+        const hasGpa = stats.gpa > 0 && stats.gradedCredits > 0;
+        semesterData.push({
+            semester: s,
+            name: termNames[s],
+            gpa: stats.gpa || 0,
+            hasData: hasGpa,
+            gradedCredits: stats.gradedCredits || 0,
+            totalCredits: stats.totalCredits || 0,
+            courseCount: (stats.list || []).length
+        });
+
+        if (hasGpa && stats.gpa > maxTermGpa) {
+            maxTermGpa = stats.gpa;
+            bestTerm = `${termNames[s]} (${stats.gpa.toFixed(2)})`;
+        }
+    }
+
+    const kpiBestTerm = document.getElementById("analytics-kpi-best-term");
+    if (kpiBestTerm) kpiBestTerm.innerText = bestTerm || (semesterData.some(d => d.hasData) ? "-" : "בהמתנה לציונים");
+
+    // 2. Render GPA Spline & Area SVG Chart
+    renderGpaTrajectorySvg(semesterData, cumulativeGpa);
+
+    // 3. Render Radial Donut Chart for Credits
+    renderCreditsDonutSvg(earnedCredits, activeCredits, remainingCredits, totalDegreeCredits);
+
+    // 4. Render Curriculum Categories Breakdown
+    renderCategoriesDistribution(completedCourses);
+
+    // 5. Render Grade Buckets Histogram
+    renderGradeDistributionHistogram(completedCourses);
+};
+
+function renderGpaTrajectorySvg(semesterData, cumulativeGpa) {
+    const svg = document.getElementById("analytics-gpa-svg");
+    const tooltip = document.getElementById("chart-gpa-tooltip");
+    const container = document.getElementById("analytics-chart-canvas-box");
+    if (!svg) return;
+
+    const width = 860;
+    const height = 240;
+    const padLeft = 55;
+    const padRight = 35;
+    const padTop = 25;
+    const padBottom = 40;
+    const chartW = width - padLeft - padRight;
+    const chartH = height - padTop - padBottom;
+
+    const minY = 60;
+    const maxY = 100;
+    const getY = (val) => padTop + (1 - (val - minY) / (maxY - minY)) * chartH;
+    const getX = (semIdx) => padLeft + (semIdx / 7) * chartW;
+
+    let svgHtml = `
+        <defs>
+            <linearGradient id="gpaAreaGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.45"/>
+                <stop offset="100%" stop-color="#38bdf8" stop-opacity="0.0"/>
+            </linearGradient>
+            <filter id="pointGlow" x="-50%" y="-50%" width="200%" height="200%">
+                <feDropShadow dx="0" dy="0" stdDeviation="3" flood-color="#38bdf8" flood-opacity="0.8"/>
+            </filter>
+        </defs>
+    `;
+
+    [60, 70, 80, 90, 100].forEach(yVal => {
+        const y = getY(yVal);
+        svgHtml += `
+            <line x1="${padLeft}" y1="${y}" x2="${width - padRight}" y2="${y}" class="chart-grid-line" stroke="rgba(255,255,255,0.06)" stroke-dasharray="4 4"/>
+            <text x="${padLeft - 12}" y="${y + 4}" class="chart-axis-text" text-anchor="end" fill="#64748b" font-size="11" font-family="'Rubik', sans-serif">${yVal}</text>
+        `;
+    });
+
+    if (cumulativeGpa >= minY && cumulativeGpa <= maxY) {
+        const bY = getY(cumulativeGpa);
+        svgHtml += `
+            <line x1="${padLeft}" y1="${bY}" x2="${width - padRight}" y2="${bY}" class="chart-benchmark-line" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="6 4" opacity="0.85"/>
+            <text x="${padLeft + 12}" y="${bY - 6}" text-anchor="start" fill="#fbbf24" font-size="11" font-weight="700" font-family="'Rubik', sans-serif">★ ממוצע תואר: ${cumulativeGpa.toFixed(2)}</text>
+        `;
+    }
+
+    semesterData.forEach((d, idx) => {
+        const x = getX(idx);
+        svgHtml += `
+            <text x="${x}" y="${height - 12}" class="chart-axis-text" text-anchor="middle" fill="#94a3b8" font-size="12" font-weight="600" font-family="'Rubik', sans-serif">סמסטר ${d.semester}</text>
+        `;
+    });
+
+    const validPoints = [];
+    semesterData.forEach((d, idx) => {
+        if (d.hasData) {
+            validPoints.push({
+                x: getX(idx),
+                y: getY(d.gpa),
+                data: d
+            });
+        }
+    });
+
+    if (validPoints.length > 0) {
+        let pathD = `M ${validPoints[0].x} ${validPoints[0].y}`;
+        for (let i = 0; i < validPoints.length - 1; i++) {
+            const p0 = validPoints[i];
+            const p1 = validPoints[i + 1];
+            const cpx1 = p0.x + (p1.x - p0.x) / 2;
+            const cpy1 = p0.y;
+            const cpx2 = p0.x + (p1.x - p0.x) / 2;
+            const cpy2 = p1.y;
+            pathD += ` C ${cpx1} ${cpy1}, ${cpx2} ${cpy2}, ${p1.x} ${p1.y}`;
+        }
+
+        const firstP = validPoints[0];
+        const lastP = validPoints[validPoints.length - 1];
+        const baseY = getY(minY);
+        const areaD = `${pathD} L ${lastP.x} ${baseY} L ${firstP.x} ${baseY} Z`;
+
+        svgHtml += `<path d="${areaD}" fill="url(#gpaAreaGradient)" opacity="0.4"/>`;
+        svgHtml += `<path d="${pathD}" fill="none" stroke="#38bdf8" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" filter="url(#pointGlow)"/>`;
+
+        validPoints.forEach((p, pIdx) => {
+            svgHtml += `
+                <circle cx="${p.x}" cy="${p.y}" r="5.5" class="chart-point-outer"
+                        fill="#0b1120" stroke="#38bdf8" stroke-width="3"
+                        data-sem="${p.data.semester}" data-gpa="${p.data.gpa.toFixed(2)}"
+                        data-cr="${p.data.gradedCredits.toFixed(1)}" data-count="${p.data.courseCount}"
+                        style="cursor: pointer; transition: r 0.15s ease;" id="gpa-point-${pIdx}"/>
+            `;
+        });
+    } else {
+        svgHtml += `
+            <text x="${width / 2}" y="${height / 2}" text-anchor="middle" fill="#64748b" font-size="14" font-weight="600" font-family="'Rubik', sans-serif">
+                אין עדיין ציונים מעודכנים בסמסטרים. הזן ציונים בקורסים לצפייה בגרף!
+            </text>
+        `;
+    }
+
+    svg.innerHTML = svgHtml;
+
+    if (container && tooltip) {
+        const points = svg.querySelectorAll('.chart-point-outer');
+        points.forEach(pt => {
+            pt.onmouseenter = () => {
+                const sem = pt.getAttribute('data-sem');
+                const gpa = pt.getAttribute('data-gpa');
+                const cr = pt.getAttribute('data-cr');
+                const count = pt.getAttribute('data-count');
+                
+                tooltip.innerHTML = `
+                    <div style="font-weight: 800; color: #38bdf8; margin-bottom: 2px;">סמסטר ${sem}</div>
+                    <div>ממוצע סמסטריאלי: <strong style="color: #ffffff;">${gpa}</strong></div>
+                    <div style="color: #94a3b8; font-size: 0.7rem;">${cr} נק״ז עם ציון | ${count} קורסים</div>
+                `;
+                tooltip.style.display = 'block';
+
+                const rect = container.getBoundingClientRect();
+                const ptX = parseFloat(pt.getAttribute('cx')) * (rect.width / width);
+                const ptY = parseFloat(pt.getAttribute('cy')) * (rect.height / height);
+
+                tooltip.style.left = `${ptX}px`;
+                tooltip.style.top = `${ptY}px`;
+                pt.setAttribute('r', '8');
+            };
+            pt.onmouseleave = () => {
+                tooltip.style.display = 'none';
+                pt.setAttribute('r', '5.5');
+            };
+        });
+    }
+}
+
+function renderCreditsDonutSvg(earned, active, remaining, total) {
+    const svg = document.getElementById("analytics-donut-svg");
+    const pctEl = document.getElementById("donut-center-pct");
+    const legCompleted = document.getElementById("legend-credits-completed");
+    const legActive = document.getElementById("legend-credits-active");
+    const legRemaining = document.getElementById("legend-credits-remaining");
+    if (!svg) return;
+
+    const r = 60;
+    const cx = 85;
+    const cy = 85;
+    const strokeW = 18;
+    const circ = 2 * Math.PI * r;
+
+    const completedRatio = Math.min(1, earned / total);
+    const activeRatio = Math.min(1 - completedRatio, active / total);
+
+    const completedDash = completedRatio * circ;
+    const activeDash = activeRatio * circ;
+
+    const completedPct = (completedRatio * 100).toFixed(1);
+    if (pctEl) pctEl.innerText = `${completedPct}%`;
+    if (legCompleted) legCompleted.innerText = `${earned.toFixed(1)} נק״ז`;
+    if (legActive) legActive.innerText = `${active.toFixed(1)} נק״ז`;
+    if (legRemaining) legRemaining.innerText = `${remaining.toFixed(1)} נק״ז`;
+
+    svg.innerHTML = `
+        <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#1e293b" stroke-width="${strokeW}"/>
+        <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#10b981" stroke-width="${strokeW}"
+                stroke-dasharray="${completedDash} ${circ - completedDash}"
+                stroke-dashoffset="0"
+                transform="rotate(-90 ${cx} ${cy})"
+                stroke-linecap="round"
+                style="transition: stroke-dasharray 0.8s cubic-bezier(0.16, 1, 0.3, 1);"/>
+        <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#fbbf24" stroke-width="${strokeW}"
+                stroke-dasharray="${activeDash} ${circ - activeDash}"
+                stroke-dashoffset="${-completedDash}"
+                transform="rotate(-90 ${cx} ${cy})"
+                stroke-linecap="round"
+                style="transition: stroke-dasharray 0.8s cubic-bezier(0.16, 1, 0.3, 1);"/>
+    `;
+}
+
+function renderCategoriesDistribution(completedCourses) {
+    let coreDone = 0;
+    let electivesDone = 0;
+    let malagDone = 0;
+
+    completedCourses.forEach(c => {
+        const cr = Number(c.credits) || 0;
+        const type = c.type || 'core';
+        if (type === 'core') {
+            coreDone += cr;
+        } else if (type === 'elective') {
+            electivesDone += cr;
+        } else if (type === 'humanities' || type === 'sports') {
+            malagDone += cr;
+        } else {
+            coreDone += cr;
+        }
+    });
+
+    const coreTotal = 121.5;
+    const electivesTotal = 26.0;
+    const malagTotal = 10.0;
+
+    const corePct = Math.min(100, (coreDone / coreTotal) * 100);
+    const electivesPct = Math.min(100, (electivesDone / electivesTotal) * 100);
+    const malagPct = Math.min(100, (malagDone / malagTotal) * 100);
+
+    const coreText = document.getElementById("cat-core-text");
+    const coreFill = document.getElementById("cat-core-fill");
+    if (coreText) coreText.innerText = `${coreDone.toFixed(1)} / ${coreTotal} נק״ז (${corePct.toFixed(0)}%)`;
+    if (coreFill) coreFill.style.width = `${corePct}%`;
+
+    const electText = document.getElementById("cat-electives-text");
+    const electFill = document.getElementById("cat-electives-fill");
+    if (electText) electText.innerText = `${electivesDone.toFixed(1)} / ${electivesTotal} נק״ז (${electivesPct.toFixed(0)}%)`;
+    if (electFill) electFill.style.width = `${electivesPct}%`;
+
+    const malagText = document.getElementById("cat-malag-text");
+    const malagFill = document.getElementById("cat-malag-fill");
+    if (malagText) malagText.innerText = `${malagDone.toFixed(1)} / ${malagTotal} נק״ז (${malagPct.toFixed(0)}%)`;
+    if (malagFill) malagFill.style.width = `${malagPct}%`;
+}
+
+function renderGradeDistributionHistogram(completedCourses) {
+    const container = document.getElementById("analytics-histogram-bars");
+    const totalGradedEl = document.getElementById("analytics-histogram-total-graded");
+    if (!container) return;
+
+    const buckets = [
+        { label: "90-100", title: "מצטיינים", color: "#10b981", count: 0 },
+        { label: "80-89", title: "טוב מאוד", color: "#38bdf8", count: 0 },
+        { label: "70-79", title: "טוב", color: "#6366f1", count: 0 },
+        { label: "60-69", title: "כמעט טוב", color: "#f59e0b", count: 0 },
+        { label: "55-59", title: "עובר", color: "#f43f5e", count: 0 }
+    ];
+
+    let totalGraded = 0;
+    completedCourses.forEach(c => {
+        const isBinary = (c.isBinaryPass === true || c.grade === 'עובר' || c.grade === 'PASS');
+        if (!isBinary && c.grade !== undefined && c.grade !== null && c.grade !== '' && !isNaN(Number(c.grade)) && Number(c.grade) >= 55) {
+            const g = Number(c.grade);
+            totalGraded++;
+            if (g >= 90) buckets[0].count++;
+            else if (g >= 80) buckets[1].count++;
+            else if (g >= 70) buckets[2].count++;
+            else if (g >= 60) buckets[3].count++;
+            else if (g >= 55) buckets[4].count++;
+        }
+    });
+
+    if (totalGradedEl) totalGradedEl.innerText = `${totalGraded} ציונים מספריים`;
+
+    const maxCount = Math.max(1, ...buckets.map(b => b.count));
+    let html = '';
+
+    buckets.forEach(b => {
+        const heightPct = Math.max(8, (b.count / maxCount) * 100);
+        html += `
+            <div class="histogram-col" title="${b.label} (${b.title}): ${b.count} קורסים">
+                <span class="histogram-count">${b.count}</span>
+                <div class="histogram-bar" style="height: ${heightPct}%; background-color: ${b.color};"></div>
+                <span class="histogram-label">${b.label}</span>
+            </div>
+        `;
+    });
+
+    container.innerHTML = html;
+}
+
+// ==============================================================================
+// Distribution, Version Updates & Help Controllers (v2.0.0)
 // ==============================================================================
 
 function compareSemver(v1, v2) {
@@ -17463,7 +17888,7 @@ function compareSemver(v1, v2) {
 }
 
 window.checkRemoteAppVersion = async function(isManualCheck = false) {
-    const currentVer = (APP_CURRENT_REVISION && APP_CURRENT_REVISION.version) || "1.9.6";
+    const currentVer = (APP_CURRENT_REVISION && APP_CURRENT_REVISION.version) || "2.0.0";
     const statusTextEl = document.getElementById("version-check-status-text");
     const footerBadgeEl = document.getElementById("footer-version-badge");
     const checkBtn = document.getElementById("btn-check-version-updates");
@@ -17571,7 +17996,7 @@ window.getSystemDiagnosticsText = function() {
     const uid = (window.AuthSync && typeof window.AuthSync.getActiveUser === 'function' && window.AuthSync.getActiveUser()) ? window.AuthSync.getActiveUser().id : 'guest';
 
     return `--- Semestero ME Diagnostics ---
-Version: v${APP_CURRENT_REVISION.version || '1.9.6'} (${APP_CURRENT_REVISION.code || 'REV-2026.09.18'})
+Version: v${APP_CURRENT_REVISION.version || '2.0.0'} (${APP_CURRENT_REVISION.code || 'REV-2026.10.04-v2.0.0'})
 Platform: ${isElectron ? 'Electron Desktop (.exe)' : 'Web Browser / Mobile PWA'}
 User-Agent: ${navigator.userAgent}
 Screen: ${window.innerWidth}x${window.innerHeight} (DPR: ${window.devicePixelRatio || 1})
@@ -19179,6 +19604,162 @@ function setupMobileNotifications() {
 function exportSvgToPng(svgElement, fileName = 'Semestero_ME_Course_Flowchart.png') {
     try {
         const svgClone = svgElement.cloneNode(true);
+
+        // 1. Remove interactive action buttons from export (e.g. ➕ add to semester)
+        svgClone.querySelectorAll('.fc-sem-add-btn').forEach(el => el.remove());
+
+        // 2. Inline critical presentation attributes onto all elements
+        // This guarantees 100% color fidelity even when external CSS is sandboxed in Image Blob
+        svgClone.querySelectorAll('.fc-semester-band').forEach(el => {
+            if (el.classList.contains('alt')) {
+                el.setAttribute('fill', 'rgba(0, 0, 0, 0.25)');
+            } else {
+                el.setAttribute('fill', 'rgba(255, 255, 255, 0.02)');
+            }
+        });
+        svgClone.querySelectorAll('.fc-semester-divider').forEach(el => {
+            el.setAttribute('stroke', 'rgba(255, 255, 255, 0.08)');
+            el.setAttribute('stroke-width', '1');
+            el.setAttribute('stroke-dasharray', '4 4');
+        });
+        svgClone.querySelectorAll('.fc-semester-col-divider').forEach(el => {
+            el.setAttribute('stroke', 'rgba(255, 255, 255, 0.08)');
+            el.setAttribute('stroke-width', '1.5');
+            el.setAttribute('stroke-dasharray', '4 4');
+        });
+        svgClone.querySelectorAll('.fc-semester-badge-rect').forEach(el => {
+            el.setAttribute('fill', '#111827');
+            el.setAttribute('stroke', 'rgba(56, 189, 248, 0.45)');
+            el.setAttribute('stroke-width', '1.2');
+        });
+        svgClone.querySelectorAll('.fc-sem-year').forEach(el => {
+            el.setAttribute('fill', '#f1f5f9');
+            el.setAttribute('font-size', '13px');
+            el.setAttribute('font-weight', '700');
+            el.setAttribute('font-family', 'Arial, sans-serif');
+        });
+        svgClone.querySelectorAll('.fc-sem-term').forEach(el => {
+            el.setAttribute('fill', '#38bdf8');
+            el.setAttribute('font-size', '12px');
+            el.setAttribute('font-weight', '700');
+            el.setAttribute('font-family', 'Arial, sans-serif');
+        });
+        svgClone.querySelectorAll('.fc-semester-label').forEach(el => {
+            el.setAttribute('fill', '#64748b');
+            el.setAttribute('font-size', '13px');
+            el.setAttribute('font-weight', '700');
+            el.setAttribute('font-family', 'Arial, sans-serif');
+        });
+
+        // Nodes
+        svgClone.querySelectorAll('.fc-node-group').forEach(group => {
+            const isMastered = group.classList.contains('mastered');
+            const isActive = group.classList.contains('active');
+            const isAvailable = group.classList.contains('available');
+
+            const rect = group.querySelector('.fc-node-rect');
+            if (rect) {
+                if (isMastered) {
+                    rect.setAttribute('fill', '#102422');
+                    rect.setAttribute('stroke', '#10b981');
+                    rect.setAttribute('stroke-width', '1.5');
+                } else if (isActive) {
+                    rect.setAttribute('fill', '#132438');
+                    rect.setAttribute('stroke', '#38bdf8');
+                    rect.setAttribute('stroke-width', '1.5');
+                } else if (isAvailable) {
+                    rect.setAttribute('fill', '#161c2e');
+                    rect.setAttribute('stroke', '#0284c7');
+                    rect.setAttribute('stroke-width', '1.5');
+                    rect.setAttribute('stroke-dasharray', '4 3');
+                } else {
+                    rect.setAttribute('fill', '#111420');
+                    rect.setAttribute('stroke', '#334155');
+                    rect.setAttribute('stroke-width', '1.5');
+                    rect.setAttribute('opacity', '0.85');
+                }
+            }
+
+            const title = group.querySelector('.fc-node-title');
+            if (title) {
+                title.setAttribute('fill', '#f8fafc');
+                title.setAttribute('font-family', 'Arial, sans-serif');
+                title.setAttribute('font-weight', '700');
+            }
+            const sub = group.querySelector('.fc-node-sub');
+            if (sub) {
+                sub.setAttribute('fill', '#94a3b8');
+                sub.setAttribute('font-family', 'Arial, sans-serif');
+            }
+            const badge = group.querySelector('.fc-node-badge');
+            if (badge) {
+                badge.setAttribute('font-family', 'Arial, sans-serif');
+                badge.setAttribute('font-weight', '700');
+                if (isMastered) badge.setAttribute('fill', '#34d399');
+                else if (isActive) badge.setAttribute('fill', '#38bdf8');
+                else if (isAvailable) badge.setAttribute('fill', '#7dd3fc');
+                else badge.setAttribute('fill', '#64748b');
+            }
+        });
+
+        // Connector Beams
+        svgClone.querySelectorAll('.fc-beam').forEach(beam => {
+            beam.setAttribute('fill', 'none');
+            if (beam.classList.contains('mastered')) {
+                beam.setAttribute('stroke', '#10b981');
+                beam.setAttribute('stroke-width', '2.2');
+            } else if (beam.classList.contains('active')) {
+                beam.setAttribute('stroke', '#38bdf8');
+                beam.setAttribute('stroke-width', '2');
+                beam.setAttribute('stroke-dasharray', '5 4');
+            } else {
+                beam.setAttribute('stroke', '#334155');
+                beam.setAttribute('stroke-width', '1.3');
+                beam.setAttribute('opacity', '0.6');
+            }
+        });
+
+        // 3. Inject explicit self-contained CSS styles into <defs>
+        const styleElement = document.createElementNS("http://www.w3.org/2000/svg", "style");
+        styleElement.textContent = `
+            svg { background: #0b0f19; font-family: 'Assistant', 'Rubik', 'Segoe UI', Arial, sans-serif; }
+            .fc-semester-band { fill: rgba(255, 255, 255, 0.02); }
+            .fc-semester-band.alt { fill: rgba(0, 0, 0, 0.25); }
+            .fc-semester-divider { stroke: rgba(255, 255, 255, 0.08); stroke-width: 1px; stroke-dasharray: 4 4; }
+            .fc-semester-col-divider { stroke: rgba(255, 255, 255, 0.08); stroke-width: 1.5px; stroke-dasharray: 4 4; }
+            .fc-semester-badge-rect { fill: #111827; stroke: rgba(56, 189, 248, 0.45); stroke-width: 1.2px; }
+            .fc-sem-year { fill: #f1f5f9; font-size: 13px; font-weight: 700; }
+            .fc-sem-term { fill: #38bdf8; font-size: 12px; font-weight: 700; }
+            .fc-semester-label { fill: #64748b; font-size: 13px; font-weight: 700; }
+            .fc-sem-add-btn { display: none !important; }
+            .fc-node-rect { fill: #161c2e; stroke: #334155; stroke-width: 1.5px; }
+            .fc-node-group.mastered .fc-node-rect { stroke: #10b981; fill: #102422; }
+            .fc-node-group.active .fc-node-rect { stroke: #38bdf8; fill: #132438; }
+            .fc-node-group.available .fc-node-rect { stroke: #0284c7; fill: #161c2e; stroke-dasharray: 4 3; }
+            .fc-node-group.locked .fc-node-rect { stroke: #334155; fill: #111420; opacity: 0.85; }
+            .fc-node-title { fill: #f8fafc; font-size: 13px; font-weight: 700; text-anchor: middle; }
+            .fc-node-title.multi-line { font-size: 11.5px; }
+            .fc-node-sub { fill: #94a3b8; font-size: 10.5px; font-weight: 500; text-anchor: middle; }
+            .fc-node-badge { font-size: 10.5px; font-weight: 700; text-anchor: middle; }
+            .fc-node-group.mastered .fc-node-badge { fill: #34d399; }
+            .fc-node-group.active .fc-node-badge { fill: #38bdf8; }
+            .fc-node-group.available .fc-node-badge { fill: #7dd3fc; }
+            .fc-node-group.locked .fc-node-badge { fill: #64748b; }
+            .fc-beam { fill: none; stroke-linejoin: round; stroke-linecap: round; }
+            .fc-beam.mastered { stroke: #10b981; stroke-width: 2.2px; }
+            .fc-beam.active { stroke: #38bdf8; stroke-width: 2px; stroke-dasharray: 5 4; }
+            .fc-beam.locked { stroke: #334155; stroke-width: 1.3px; opacity: 0.6; }
+        `;
+        svgClone.insertBefore(styleElement, svgClone.firstChild);
+
+        // 4. Ensure viewBox and dimensions are explicitly set
+        let box = svgElement.viewBox && svgElement.viewBox.baseVal;
+        const svgW = (box && box.width) ? box.width : (window.FLOWCHART_TOTAL_WIDTH || 1720);
+        const svgH = (box && box.height) ? box.height : 1380;
+        svgClone.setAttribute('width', svgW);
+        svgClone.setAttribute('height', svgH);
+        svgClone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+
         const svgString = new XMLSerializer().serializeToString(svgClone);
         const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
         const URL = window.URL || window.webkitURL || window;
@@ -19186,16 +19767,34 @@ function exportSvgToPng(svgElement, fileName = 'Semestero_ME_Course_Flowchart.pn
         const img = new Image();
 
         img.onload = () => {
+            const headerHeight = 70;
             const canvas = document.createElement('canvas');
-            const box = svgElement.viewBox && svgElement.viewBox.baseVal;
-            canvas.width = (box && box.width) ? box.width : 1560;
-            canvas.height = (box && box.height) ? box.height : 1380;
+            canvas.width = svgW;
+            canvas.height = svgH + headerHeight;
             const ctx = canvas.getContext('2d');
 
-            // Dark background
+            // Rich RPG Canvas Dark Background
             ctx.fillStyle = '#0b0f19';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.drawImage(img, 0, 0);
+
+            // Top Header Banner
+            const grad = ctx.createLinearGradient(0, 0, canvas.width, 0);
+            grad.addColorStop(0, '#0284c7');
+            grad.addColorStop(1, '#1e3a8a');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, canvas.width, headerHeight);
+
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 22px Arial, sans-serif';
+            ctx.textAlign = 'right';
+            ctx.fillText('🎓 מפת קורסים ומסלול הלימודים | הפקולטה להנדסת מכונות - הטכניון', canvas.width - 40, 44);
+
+            ctx.font = '14px Arial, sans-serif';
+            ctx.textAlign = 'left';
+            ctx.fillText(new Date().toLocaleDateString('he-IL'), 40, 44);
+
+            // Draw SVG
+            ctx.drawImage(img, 0, headerHeight);
 
             const png = canvas.toDataURL('image/png');
             const a = document.createElement('a');
@@ -19207,7 +19806,14 @@ function exportSvgToPng(svgElement, fileName = 'Semestero_ME_Course_Flowchart.pn
             URL.revokeObjectURL(blobURL);
 
             if (typeof showHudToast === 'function') {
-                showHudToast(`תרשים הקורסים נשמר כתמונה (${fileName}) 📸`, 'success');
+                showHudToast(`תרשים הקורסים נשמר כתמונה באיכות גבוהה (${fileName}) 📸`, 'success');
+            }
+        };
+        img.onerror = (e) => {
+            console.error('[Export PNG] Image load error:', e);
+            URL.revokeObjectURL(blobURL);
+            if (typeof showHudToast === 'function') {
+                showHudToast('שגיאה ביצירת תמונת התרשים.', 'error');
             }
         };
         img.src = blobURL;

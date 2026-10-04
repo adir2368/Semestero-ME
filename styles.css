@@ -10553,5 +10553,558 @@ html.is-iphone .app-global-footer {
     text-align: left;
 }
 
+/* ==============================================================================
+   Semestero ME v2.0.0 - Aceternity UI Micro-Animations & Polished Interactions
+   ============================================================================== */
 
+/* Modal Backdrop Blur & Spring Scale Entrance */
+.modal-overlay {
+    backdrop-filter: blur(10px) !important;
+    -webkit-backdrop-filter: blur(10px) !important;
+}
 
+.modal-content {
+    animation: modalSpringIn 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+}
+
+@keyframes modalSpringIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.96) translateY(10px);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+/* XP Bar Glossy Shimmer Sweep (Aceternity style) */
+.xp-bar-container {
+    cursor: pointer;
+    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease;
+}
+
+.xp-bar-container:hover {
+    transform: scale(1.015);
+    box-shadow: 0 0 16px rgba(16, 185, 129, 0.35);
+}
+
+.xp-bar-fill {
+    position: relative;
+    overflow: hidden;
+}
+
+.xp-bar-fill::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 60%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.45), transparent);
+    transform: skewX(-25deg);
+    animation: xpShimmer 3.8s infinite ease-in-out;
+}
+
+@keyframes xpShimmer {
+    0% { left: -100%; }
+    40% { left: 160%; }
+    100% { left: 160%; }
+}
+
+/* Aceternity Rotating Border Beam */
+.border-beam-card {
+    position: relative;
+    border-radius: 12px;
+    background: #0f172a;
+    overflow: hidden;
+    z-index: 1;
+}
+
+.border-beam-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: conic-gradient(
+        from 0deg,
+        transparent 0deg 300deg,
+        #38bdf8 340deg,
+        #818cf8 360deg
+    );
+    animation: borderBeamRotate 6s linear infinite;
+    z-index: -2;
+}
+
+.border-beam-card::after {
+    content: '';
+    position: absolute;
+    inset: 1.5px;
+    background: #0b1120;
+    border-radius: 10.5px;
+    z-index: -1;
+}
+
+@keyframes borderBeamRotate {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* HUD Interactive KPI Badge Enhancements */
+#stat-item-gpa {
+    cursor: pointer;
+    border-radius: 8px;
+    padding: 6px 12px;
+    transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+}
+
+#stat-item-gpa:hover {
+    background: rgba(56, 189, 248, 0.14);
+    box-shadow: 0 4px 16px rgba(56, 189, 248, 0.28);
+    transform: translateY(-2px);
+    border: 1px solid rgba(56, 189, 248, 0.4);
+}
+
+#stat-completed-courses {
+    cursor: pointer;
+}
+
+/* Enhanced Course Card Micro-Interactions */
+.course-card {
+    transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.22s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease !important;
+}
+
+.course-card.mastered:hover {
+    transform: translateY(-3px) scale(1.012) !important;
+    box-shadow: 0 8px 24px -4px rgba(16, 185, 129, 0.45) !important;
+}
+
+.course-card.available:hover {
+    transform: translateY(-3px) scale(1.012) !important;
+    box-shadow: 0 8px 24px -4px rgba(56, 189, 248, 0.45) !important;
+}
+
+.course-card.active:hover {
+    transform: translateY(-3px) scale(1.012) !important;
+    box-shadow: 0 8px 24px -4px rgba(251, 191, 36, 0.45) !important;
+}
+
+/* ==============================================================================
+   Semestero ME v2.0.0 - Bklit UI / Shadcn Charts Style Analytics Modal
+   ============================================================================== */
+
+.analytics-modal-content {
+    width: 960px !important;
+    max-width: 95vw !important;
+    max-height: 90vh !important;
+    background: #090e1a !important;
+    border: 1px solid rgba(56, 189, 248, 0.28) !important;
+    border-radius: 16px !important;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), 0 0 35px rgba(56, 189, 248, 0.15) !important;
+    padding: 0 !important;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden !important;
+}
+
+.analytics-header-banner {
+    padding: 20px 24px;
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.75));
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+}
+
+.analytics-title-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.analytics-title-icon {
+    font-size: 1.8rem;
+    filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.5));
+}
+
+.analytics-title-text h2 {
+    font-size: 1.35rem;
+    color: #f8fafc;
+    font-weight: 800;
+    margin: 0;
+    letter-spacing: -0.3px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.analytics-title-text p {
+    font-size: 0.82rem;
+    color: #94a3b8;
+    margin: 3px 0 0 0;
+}
+
+.analytics-badge-v2 {
+    background: linear-gradient(135deg, #0ea5e9, #6366f1);
+    color: #ffffff;
+    font-size: 0.72rem;
+    font-weight: 800;
+    padding: 3px 8px;
+    border-radius: 9999px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 0 12px rgba(14, 165, 233, 0.5);
+}
+
+.analytics-body-scrollable {
+    padding: 24px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+/* 4 KPI Summary Cards Grid */
+.analytics-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+}
+
+.analytics-kpi-card {
+    background: rgba(15, 23, 42, 0.75);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease, box-shadow 0.2s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.analytics-kpi-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(56, 189, 248, 0.35);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+}
+
+.analytics-kpi-label {
+    font-size: 0.76rem;
+    font-weight: 600;
+    color: #94a3b8;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.analytics-kpi-value {
+    font-size: 1.65rem;
+    font-weight: 900;
+    color: #f8fafc;
+    font-family: 'Orbitron', 'Rubik', sans-serif;
+    letter-spacing: -0.5px;
+    line-height: 1.1;
+}
+
+.analytics-kpi-sub {
+    font-size: 0.72rem;
+    color: #64748b;
+    font-weight: 500;
+}
+
+/* Charts Main Panels */
+.analytics-panel {
+    background: rgba(15, 23, 42, 0.65);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.analytics-panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.analytics-panel-header h3 {
+    font-size: 1.05rem;
+    color: #f1f5f9;
+    font-weight: 700;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.analytics-panel-subtitle {
+    font-size: 0.78rem;
+    color: #94a3b8;
+}
+
+.analytics-panel-tag {
+    font-size: 0.72rem;
+    color: #38bdf8;
+    background: rgba(56, 189, 248, 0.1);
+    border: 1px solid rgba(56, 189, 248, 0.25);
+    padding: 3px 9px;
+    border-radius: 9999px;
+    font-weight: 600;
+}
+
+/* SVG Chart Container & Tooltips */
+.analytics-chart-canvas-box {
+    position: relative;
+    width: 100%;
+    min-height: 240px;
+}
+
+.analytics-svg-chart {
+    width: 100%;
+    height: 240px;
+    overflow: visible;
+}
+
+.chart-grid-line {
+    stroke: rgba(255, 255, 255, 0.06);
+    stroke-dasharray: 4 4;
+}
+
+.chart-axis-text {
+    fill: #64748b;
+    font-size: 11px;
+    font-family: 'Rubik', sans-serif;
+    font-weight: 500;
+}
+
+.chart-benchmark-line {
+    stroke: #f59e0b;
+    stroke-width: 1.5;
+    stroke-dasharray: 6 4;
+    opacity: 0.85;
+}
+
+.chart-area-path {
+    fill: url(#gpaAreaGradient);
+    opacity: 0.35;
+}
+
+.chart-spline-line {
+    fill: none;
+    stroke: #38bdf8;
+    stroke-width: 3.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.6));
+}
+
+.chart-point-outer {
+    fill: #0b1120;
+    stroke: #38bdf8;
+    stroke-width: 3;
+    cursor: pointer;
+    transition: r 0.15s ease, stroke-width 0.15s ease;
+}
+
+.chart-point-outer:hover {
+    r: 7;
+    stroke: #ffffff;
+    stroke-width: 4;
+    filter: drop-shadow(0 0 10px #38bdf8);
+}
+
+.chart-tooltip-box {
+    position: absolute;
+    background: rgba(15, 23, 42, 0.95);
+    border: 1px solid rgba(56, 189, 248, 0.4);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 0.76rem;
+    color: #f8fafc;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+    pointer-events: none;
+    z-index: 10;
+    transform: translate(-50%, -110%);
+    display: none;
+    white-space: nowrap;
+    text-align: right;
+    direction: rtl;
+    line-height: 1.35;
+}
+
+/* Two-Column Middle Section: Donut + Category Breakdown */
+.analytics-mid-split {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    gap: 20px;
+}
+
+/* Donut Chart Visual */
+.analytics-donut-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    padding: 10px 0;
+}
+
+.analytics-donut-svg-box {
+    position: relative;
+    width: 170px;
+    height: 170px;
+    flex-shrink: 0;
+}
+
+.analytics-donut-center-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.donut-center-pct {
+    font-size: 1.55rem;
+    font-weight: 900;
+    color: #10b981;
+    font-family: 'Orbitron', 'Rubik', sans-serif;
+    line-height: 1.1;
+}
+
+.donut-center-label {
+    font-size: 0.7rem;
+    color: #94a3b8;
+    font-weight: 600;
+}
+
+.analytics-donut-legend {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    flex-grow: 1;
+}
+
+.donut-legend-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.78rem;
+    color: #cbd5e1;
+}
+
+.donut-legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-left: 6px;
+    flex-shrink: 0;
+}
+
+/* Category Progress Bars */
+.analytics-categories-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.analytics-cat-row {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.analytics-cat-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #cbd5e1;
+}
+
+.analytics-cat-track {
+    height: 10px;
+    background: #090e1a;
+    border-radius: 9999px;
+    overflow: hidden;
+    position: relative;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.analytics-cat-fill {
+    height: 100%;
+    border-radius: 9999px;
+    transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Grade Distribution Histogram */
+.analytics-histogram-bars {
+    display: flex;
+    align-items: flex-end;
+    gap: 16px;
+    height: 160px;
+    padding: 10px 0 0 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.histogram-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100%;
+    justify-content: flex-end;
+    gap: 6px;
+}
+
+.histogram-bar {
+    width: 100%;
+    max-width: 46px;
+    border-radius: 6px 6px 2px 2px;
+    transition: height 0.6s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s ease;
+    min-height: 4px;
+    cursor: pointer;
+    position: relative;
+}
+
+.histogram-bar:hover {
+    filter: brightness(1.2);
+}
+
+.histogram-count {
+    font-size: 0.72rem;
+    font-weight: 800;
+    color: #f8fafc;
+}
+
+.histogram-label {
+    font-size: 0.72rem;
+    color: #94a3b8;
+    margin-top: 6px;
+    font-weight: 600;
+}
+
+/* Responsive adjustment for Mobile & Tablet */
+@media (max-width: 768px) {
+    .analytics-kpi-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+    .analytics-mid-split {
+        grid-template-columns: 1fr !important;
+    }
+    .analytics-donut-container {
+        flex-direction: column;
+    }
+}

@@ -219,7 +219,74 @@
         saveCustomPlan(true);
     }
 
-    function syncCompletedCoursesFromGameState() {
+    function syncCourseToGameState(courseObj, targetSemester) {
+        if (!global.gameState) return;
+        if (!global.gameState.courses) global.gameState.courses = {};
+        if (!courseObj || !courseObj.code) return;
+
+        const keys = getNormalizedCodes(courseObj.code, courseObj.altCode);
+        let foundKey = null;
+        for (let i = 0; i < keys.length; i++) {
+            if (global.gameState.courses[keys[i]]) {
+                foundKey = keys[i];
+                break;
+            }
+        }
+
+        if (foundKey) {
+            global.gameState.courses[foundKey].semester = targetSemester;
+        } else if (targetSemester > 0) {
+            const code = courseObj.code;
+            global.gameState.courses[code] = {
+                id: code,
+                code: code,
+                altCode: courseObj.altCode || '',
+                name: courseObj.name || courseObj.title || code,
+                credits: Number(courseObj.credits) || 3.0,
+                semester: targetSemester,
+                prerequisites: courseObj.prereqs || [],
+                status: isCourseCompleted(code, courseObj.altCode) ? 'mastered' : 'available',
+                tasks: [
+                    { id: `${code}_ex`, title: "מועד א", type: "exam", xp: 500, completed: false, status: 'not_started' }
+                ],
+                type: courseObj.type || 'elective'
+            };
+        }
+
+        global.gameState.lastModified = Date.now();
+        if (typeof global.saveState === 'function') global.saveState(true);
+        if (typeof global.renderFlowchartTree === 'function') global.renderFlowchartTree();
+        if (typeof global.updateHud === 'function') global.updateHud();
+    }
+
+    function syncPlannerToTree() {
+        if (!global.gameState || !global.gameState.courses || !customPlan) return;
+        let changed = false;
+        customPlan.forEach(sem => {
+            const semNum = sem.semester;
+            (sem.courses || []).forEach(c => {
+                const keys = getNormalizedCodes(c.code, c.altCode);
+                for (let i = 0; i < keys.length; i++) {
+                    const k = keys[i];
+                    if (global.gameState.courses[k]) {
+                        if (global.gameState.courses[k].semester !== semNum) {
+                            global.gameState.courses[k].semester = semNum;
+                            changed = true;
+                        }
+                        break;
+                    }
+                }
+            });
+        });
+        if (changed) {
+            global.gameState.lastModified = Date.now();
+            if (typeof global.saveState === 'function') global.saveState(true);
+            if (typeof global.renderFlowchartTree === 'function') global.renderFlowchartTree();
+            if (typeof global.updateHud === 'function') global.updateHud();
+        }
+    }
+
+    function syncAllCoursesFromGameState() {
         if (!global.gameState || !global.gameState.courses || !customPlan) return;
 
         Object.values(global.gameState.courses).forEach(c => {
@@ -227,22 +294,20 @@
             if (isPurgedCourse(c.code, c.altCode)) return;
 
             const actualSem = Number(c.semester);
+            const cKeys = new Set(getNormalizedCodes(c.code, c.altCode));
+
+            const hasNumeric = (c.grade !== undefined && c.grade !== null && c.grade !== '' && !isNaN(Number(c.grade)) && Number(c.grade) >= 55);
+            const isBinary = (c.status === 'mastered') && (c.isBinaryPass === true || c.grade === 'עובר' || c.grade === 'PASS');
+            const isDone = (c.status === 'mastered') || hasNumeric || isBinary;
+
             if (actualSem >= 1 && actualSem <= 8) {
-                const cKeys = new Set(getNormalizedCodes(c.code, c.altCode));
+                // Remove from unassigned if assigned to a semester
+                unassignedCourses = unassignedCourses.filter(u => {
+                    const uKeys = getNormalizedCodes(u.code, u.altCode);
+                    return !uKeys.some(k => cKeys.has(k));
+                });
 
-                const hasNumeric = (c.grade !== undefined && c.grade !== null && c.grade !== '' && !isNaN(Number(c.grade)) && Number(c.grade) >= 55);
-                const isBinary = (c.status === 'mastered') && (c.isBinaryPass === true || c.grade === 'עובר' || c.grade === 'PASS');
-                const isDone = (c.status === 'mastered') || hasNumeric || isBinary;
-
-                // Remove from unassigned if completed
-                if (isDone) {
-                    unassignedCourses = unassignedCourses.filter(u => {
-                        const uKeys = getNormalizedCodes(u.code, u.altCode);
-                        return !uKeys.some(k => cKeys.has(k));
-                    });
-                }
-
-                // Check if already in customPlan
+                // Find if already in customPlan
                 let foundCourse = null;
                 let foundInSemester = -1;
                 customPlan.forEach(sem => {
@@ -256,14 +321,8 @@
                     }
                 });
 
-                // Check if already in unassigned
-                const isUnassigned = unassignedCourses.some(u => {
-                    const uKeys = getNormalizedCodes(u.code, u.altCode);
-                    return uKeys.some(k => cKeys.has(k));
-                });
-
-                // If completed and in wrong semester, move to actual completed semester
-                if (isDone && foundCourse && foundInSemester !== actualSem) {
+                // If in wrong semester in customPlan, move to actual semester
+                if (foundCourse && foundInSemester !== actualSem) {
                     customPlan.forEach(sem => {
                         sem.courses = (sem.courses || []).filter(x => {
                             const xKeys = getNormalizedCodes(x.code, x.altCode);
@@ -277,10 +336,10 @@
                     }
                 }
 
-                // If NOT found in customPlan and NOT unassigned, add it
-                if (!foundCourse && !isUnassigned) {
-                    const catCourse = global.PLANNER_CATALOG.ALL_COURSES_MAP[c.code] ||
-                                      (c.altCode && global.PLANNER_CATALOG.ALL_COURSES_MAP[c.altCode]);
+                // If not in customPlan, add it
+                if (!foundCourse) {
+                    const catCourse = (global.PLANNER_CATALOG && global.PLANNER_CATALOG.ALL_COURSES_MAP) ? 
+                        (global.PLANNER_CATALOG.ALL_COURSES_MAP[c.code] || (c.altCode && global.PLANNER_CATALOG.ALL_COURSES_MAP[c.altCode])) : null;
                     if (catCourse) {
                         foundCourse = { ...catCourse };
                     } else {
@@ -300,15 +359,26 @@
                         targetSemObj.courses.push(foundCourse);
                     }
                 }
+            } else if (actualSem === 0) {
+                // If course was unassigned in tree, remove from customPlan
+                customPlan.forEach(sem => {
+                    sem.courses = (sem.courses || []).filter(x => {
+                        const xKeys = getNormalizedCodes(x.code, x.altCode);
+                        return !xKeys.some(k => cKeys.has(k));
+                    });
+                });
             }
         });
     }
+
+    // Alias for backwards compatibility
+    const syncCompletedCoursesFromGameState = syncAllCoursesFromGameState;
 
     function resetPlanToSuggested() {
         if (!global.PLANNER_CATALOG) return;
         customPlan = JSON.parse(JSON.stringify(global.PLANNER_CATALOG.SUGGESTED_MANDATORY_SYLLABUS));
         unassignedCourses = [];
-        syncCompletedCoursesFromGameState();
+        syncAllCoursesFromGameState();
         saveCustomPlan(true);
     }
 
@@ -1375,105 +1445,125 @@
     }
 
     function exportPlanToCanvasPNG() {
-        const plan = getActivePlan();
-        if (!plan || plan.length === 0) return;
+        try {
+            const plan = getActivePlan();
+            if (!plan || plan.length === 0) return;
 
-        const canvas = document.createElement('canvas');
-        canvas.width = 1920;
-        canvas.height = 1080;
-        const ctx = canvas.getContext('2d');
+            const canvas = document.createElement('canvas');
+            canvas.width = 1920;
+            canvas.height = 1080;
+            const ctx = canvas.getContext('2d');
 
-        // Dark RPG Canvas Background
-        ctx.fillStyle = '#0b0f19';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+            // Dark RPG Canvas Background
+            ctx.fillStyle = '#0b0f19';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        // Header Banner
-        const grad = ctx.createLinearGradient(0, 0, 1920, 0);
-        grad.addColorStop(0, '#0284c7');
-        grad.addColorStop(1, '#1e3a8a');
-        ctx.fillStyle = grad;
-        ctx.fillRect(0, 0, 1920, 80);
+            // Header Banner
+            const grad = ctx.createLinearGradient(0, 0, 1920, 0);
+            grad.addColorStop(0, '#0284c7');
+            grad.addColorStop(1, '#1e3a8a');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, 1920, 80);
 
-        ctx.fillStyle = '#ffffff';
-        ctx.font = 'bold 26px Arial, sans-serif';
-        ctx.textAlign = 'right';
-        ctx.fillText('🎓 טכניון - הפקולטה להנדסת מכונות | תוכנית לימודים לתואר ראשון', 1880, 50);
-
-        ctx.font = '16px Arial, sans-serif';
-        ctx.textAlign = 'left';
-        ctx.fillText(new Date().toLocaleDateString('he-IL'), 40, 50);
-
-        // 8 Semesters Grid (2 rows x 4 cols)
-        const colWidth = 430;
-        const colGap = 35;
-        const startX = 40;
-        const rowHeight = 440;
-        const startY = 110;
-
-        plan.slice(0, 8).forEach((sem, idx) => {
-            const colIdx = idx % 4;
-            const rowIdx = Math.floor(idx / 4);
-            const x = startX + colIdx * (colWidth + colGap);
-            const y = startY + rowIdx * (rowHeight + 40);
-
-            ctx.fillStyle = '#111827';
-            ctx.strokeStyle = '#1e293b';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.roundRect(x, y, colWidth, rowHeight, 10);
-            ctx.fill();
-            ctx.stroke();
-
-            ctx.fillStyle = '#38bdf8';
-            ctx.font = 'bold 18px Arial, sans-serif';
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 26px Arial, sans-serif';
             ctx.textAlign = 'right';
-            ctx.fillText(`סמסטר ${sem.semester || (idx + 1)}`, x + colWidth - 15, y + 30);
+            ctx.fillText('🎓 טכניון - הפקולטה להנדסת מכונות | תוכנית לימודים לתואר ראשון', 1880, 50);
 
-            let semCr = 0;
-            (sem.courses || []).forEach(c => semCr += Number(c.credits) || 0);
-            ctx.fillStyle = '#94a3b8';
-            ctx.font = '14px Arial, sans-serif';
+            ctx.font = '16px Arial, sans-serif';
             ctx.textAlign = 'left';
-            ctx.fillText(`${semCr.toFixed(1)} נק״ז`, x + 15, y + 30);
+            ctx.fillText(new Date().toLocaleDateString('he-IL'), 40, 50);
 
-            let curY = y + 45;
-            (sem.courses || []).slice(0, 7).forEach(c => {
-                const completed = isCourseCompleted(c.code, c.altCode);
-                ctx.fillStyle = completed ? 'rgba(16, 185, 129, 0.15)' : '#1e293b';
-                ctx.strokeStyle = completed ? '#10b981' : '#334155';
-                ctx.lineWidth = 1;
+            // 8 Semesters Grid (2 rows x 4 cols)
+            const colWidth = 430;
+            const colGap = 35;
+            const startX = 40;
+            const rowHeight = 440;
+            const startY = 110;
+
+            const drawBox = (x, y, w, h, r) => {
                 ctx.beginPath();
-                ctx.roundRect(x + 10, curY, colWidth - 20, 48, 6);
+                if (ctx.roundRect) {
+                    ctx.roundRect(x, y, w, h, r);
+                } else {
+                    ctx.rect(x, y, w, h);
+                }
                 ctx.fill();
                 ctx.stroke();
+            };
 
-                ctx.fillStyle = completed ? '#34d399' : '#f8fafc';
-                ctx.font = 'bold 13px Arial, sans-serif';
+            plan.slice(0, 8).forEach((sem, idx) => {
+                const colIdx = idx % 4;
+                const rowIdx = Math.floor(idx / 4);
+                const x = startX + colIdx * (colWidth + colGap);
+                const y = startY + rowIdx * (rowHeight + 40);
+
+                ctx.fillStyle = '#111827';
+                ctx.strokeStyle = '#1e293b';
+                ctx.lineWidth = 2;
+                drawBox(x, y, colWidth, rowHeight, 10);
+
+                ctx.fillStyle = '#38bdf8';
+                ctx.font = 'bold 18px Arial, sans-serif';
                 ctx.textAlign = 'right';
-                const courseName = c.name.length > 28 ? c.name.substring(0, 26) + '...' : c.name;
-                ctx.fillText(courseName, x + colWidth - 20, curY + 22);
+                ctx.fillText(`סמסטר ${sem.semester || (idx + 1)}`, x + colWidth - 15, y + 30);
 
+                let semCr = 0;
+                (sem.courses || []).forEach(c => semCr += Number(c.credits) || 0);
                 ctx.fillStyle = '#94a3b8';
-                ctx.font = '12px Arial, sans-serif';
-                ctx.textAlign = 'right';
-                ctx.fillText(`${c.code} • ${c.credits} נק״ז`, x + colWidth - 20, curY + 40);
+                ctx.font = '14px Arial, sans-serif';
+                ctx.textAlign = 'left';
+                ctx.fillText(`${semCr.toFixed(1)} נק״ז`, x + 15, y + 30);
 
-                if (completed) {
-                    ctx.fillStyle = '#10b981';
+                let curY = y + 45;
+                const coursesToRender = (sem.courses || []).slice(0, 7);
+                coursesToRender.forEach(c => {
+                    const completed = isCourseCompleted(c.code, c.altCode);
+                    ctx.fillStyle = completed ? 'rgba(16, 185, 129, 0.15)' : '#1e293b';
+                    ctx.strokeStyle = completed ? '#10b981' : '#334155';
+                    ctx.lineWidth = 1;
+                    drawBox(x + 10, curY, colWidth - 20, 48, 6);
+
+                    ctx.fillStyle = completed ? '#34d399' : '#f8fafc';
+                    ctx.font = 'bold 13px Arial, sans-serif';
+                    ctx.textAlign = 'right';
+                    const rawName = c.name || c.title || c.code || 'קורס';
+                    const courseName = rawName.length > 28 ? rawName.substring(0, 26) + '...' : rawName;
+                    ctx.fillText(courseName, x + colWidth - 20, curY + 22);
+
+                    ctx.fillStyle = '#94a3b8';
+                    ctx.font = '12px Arial, sans-serif';
+                    ctx.textAlign = 'right';
+                    ctx.fillText(`${c.code} • ${c.credits || 0} נק״ז`, x + colWidth - 20, curY + 40);
+
+                    if (completed) {
+                        ctx.fillStyle = '#10b981';
+                        ctx.font = 'bold 12px Arial, sans-serif';
+                        ctx.textAlign = 'left';
+                        ctx.fillText('✓ הושלם', x + 20, curY + 30);
+                    }
+
+                    curY += 54;
+                });
+
+                if ((sem.courses || []).length > 7) {
+                    const extra = (sem.courses || []).length - 7;
+                    ctx.fillStyle = '#38bdf8';
                     ctx.font = 'bold 12px Arial, sans-serif';
-                    ctx.textAlign = 'left';
-                    ctx.fillText('✓ הושלם', x + 20, curY + 30);
+                    ctx.textAlign = 'center';
+                    ctx.fillText(`+ עוד ${extra} קורסים בסמסטר זה`, x + (colWidth / 2), curY + 16);
                 }
-
-                curY += 54;
             });
-        });
 
-        const link = document.createElement('a');
-        link.download = `Technion_ME_Degree_Plan_${new Date().toISOString().split('T')[0]}.png`;
-        link.href = canvas.toDataURL('image/png');
-        link.click();
-        showPlannerToast('✓ תמונת התוכנית נוצרה והורדה בהצלחה!', false);
+            const link = document.createElement('a');
+            link.download = `Technion_ME_Degree_Plan_${new Date().toISOString().split('T')[0]}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+            showPlannerToast('✓ תמונת התוכנית נוצרה והורדה בהצלחה!', false);
+        } catch (err) {
+            console.error('[Export Plan PNG] Error:', err);
+            showPlannerToast('שגיאה בייצוא תמונת התכנון.');
+        }
     }
 
     function handleCourseDrop(data, targetSemester) {
@@ -1568,6 +1658,9 @@
             });
         }
 
+        // Synchronize placement to Course Tree (gameState.courses)
+        syncCourseToGameState(courseObj, targetSemester);
+
         saveCustomPlan();
         renderDegreePlanner();
     }
@@ -1600,6 +1693,9 @@
         })) {
             unassignedCourses.push(removedCourse);
         }
+
+        // Synchronize removal to Course Tree (gameState.courses)
+        syncCourseToGameState(removedCourse, 0);
 
         saveCustomPlan();
         renderDegreePlanner();
@@ -1711,6 +1807,32 @@
         },
         syncFromGameState: () => {
             initPlannerState(true);
+            renderDegreePlanner();
+        },
+        syncPlannerToTree: syncPlannerToTree,
+        syncTreeToPlanner: () => {
+            syncAllCoursesFromGameState();
+            saveCustomPlan(true);
+            renderDegreePlanner();
+        },
+        removeCourse: (code) => {
+            if (!code) return;
+            const keys = new Set(getNormalizedCodes(code, code));
+            if (customPlan) {
+                customPlan.forEach(sem => {
+                    sem.courses = (sem.courses || []).filter(c => {
+                        const cKeys = getNormalizedCodes(c.code, c.altCode);
+                        return !cKeys.some(k => keys.has(k));
+                    });
+                });
+            }
+            if (unassignedCourses) {
+                unassignedCourses = unassignedCourses.filter(c => {
+                    const uKeys = getNormalizedCodes(c.code, c.altCode);
+                    return !uKeys.some(k => keys.has(k));
+                });
+            }
+            saveCustomPlan(true);
             renderDegreePlanner();
         }
     };

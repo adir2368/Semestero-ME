@@ -49,7 +49,7 @@
             <!-- Top Right Section: Brand & Auth Controls -->
             <div class="hud-top-right-bar" id="hud-top-right-bar">
                 <div class="hud-logo" style="display: flex; align-items: center; gap: 10px;">
-                    <img src="icon.png?v=1.9.6" alt="Semestero ME" class="hud-brand-logo-img" style="width: 54px; height: 54px; object-fit: contain; filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.5)); border-radius: 12px; flex-shrink: 0;">
+                    <img src="icon.png?v=2.0.0" alt="Semestero ME" class="hud-brand-logo-img" style="width: 54px; height: 54px; object-fit: contain; filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.5)); border-radius: 12px; flex-shrink: 0;">
                     <div class="hud-logo-text-col" style="display: flex; flex-direction: column; justify-content: center;">
                         <span class="degree-title-text" style="font-size: 1.28rem; font-weight: 900; letter-spacing: 1px; color: #f8fafc; font-family: 'Orbitron', sans-serif; line-height: 1.15;">Se<span style="color: #38bdf8; text-shadow: 0 0 14px rgba(56, 189, 248, 0.95); font-weight: 900;">ME</span>stero</span>
                         <span class="hud-sub-faculty" style="font-size: 0.68rem; color: #38bdf8; font-weight: 600; letter-spacing: 0.5px; line-height: 1.1; margin-top: 2px;">הנדסת מכונות</span>
@@ -67,11 +67,14 @@
                         <span class="char-title" id="char-title">תואר ראשון B.Sc.</span>
                         <span class="char-level" id="char-level">התקדמות בתואר</span>
                     </div>
-                    <div class="xp-bar-container">
+                    <div class="xp-bar-container" id="hud-xp-bar-container" title="התקדמות נק״ז בתואר - לחץ לפתיחת מרכז נתונים וביצועים (v2.0.0)">
                         <div class="xp-bar-fill" id="xp-bar-fill" style="width: 0%;"></div>
                         <span class="xp-text" id="xp-text" style="direction: ltr; unicode-bidi: isolate;"><bdi dir="ltr">39.5 / 157.5</bdi> נק״ז</span>
                     </div>
                 </div>
+                <button type="button" class="btn-hud-bell" id="btn-open-analytics" title="מרכז ביצועים, ממוצעים ונתוני תואר (לחץ לפתיחה) 📊" aria-label="מרכז נתונים וביצועים" style="margin-left: 6px;">
+                    <span class="bell-icon">📊</span>
+                </button>
                 <button type="button" class="btn-hud-bell" id="btn-notification-bell" title="מרכז התראות יומיות ומשימות (לחץ לפתיחה)" aria-label="התראות">
                     <span class="bell-icon">🔔</span>
                     <span class="bell-badge" id="bell-badge-count" style="display: none;">0</span>
@@ -79,7 +82,7 @@
             </div>
 
             <div class="hud-stats">
-                <div class="stat-item">
+                <div class="stat-item" id="stat-item-completed-courses" title="קורסים שהושלמו - לחץ לפתיחת מרכז ביצועים ונתוני תואר" style="cursor: pointer;">
                     <span class="stat-label">קורסים שהושלמו:</span>
                     <span class="stat-value" id="stat-completed-courses">0</span>
                 </div>
@@ -87,7 +90,7 @@
                     <span class="stat-label">משימות פתוחות:</span>
                     <span class="stat-value" id="stat-open-tasks">0</span>
                 </div>
-                <div class="stat-item" id="stat-item-gpa" title="ממוצע תואר וממוצעי סמסטרים שהושלמו">
+                <div class="stat-item" id="stat-item-gpa" title="ממוצע תואר וממוצעי סמסטרים שהושלמו - לחץ לפתיחת מרכז ביצועים ונתוני תואר (v2.0.0)" style="cursor: pointer;">
                     <span class="stat-label">ממוצע תואר:</span>
                     <span class="stat-value" id="stat-gpa">0.00</span>
                     <div class="stat-gpa-sub" id="stat-gpa-semesters-hint" style="font-size: 0.62rem; color: #38bdf8; margin-top: 2px; direction: rtl; font-weight: 600;"></div>
@@ -512,7 +515,7 @@
                         <div class="bug-report-card-btn" id="card-btn-check-update">
                             <div class="btn-title">
                                 <span>🔄 בדיקת עדכוני גרסה</span>
-                                <span class="app-version-badge" style="font-size: 0.64rem;">v1.9.6</span>
+                                <span class="app-version-badge" style="font-size: 0.64rem;">v2.0.0</span>
                             </div>
                             <div class="btn-desc">
                                 בדיקה ישירה מול שרתי GitHub אם קיימת גרסה חדשה יותר להורדה או רענון.
@@ -522,6 +525,21 @@
                                     🔄 בדוק עדכונים עכשיו
                                 </button>
                                 <span id="version-check-status-text" style="font-size: 0.74rem; color: #38bdf8;">המערכת מעודכנת</span>
+                            </div>
+                        </div>
+
+                        <div class="bug-report-card-btn" id="card-btn-analytics-hub" style="border-color: rgba(14, 165, 233, 0.45);">
+                            <div class="btn-title">
+                                <span>📊 מרכז נתונים וביצועים (Analytics Hub)</span>
+                                <span class="analytics-badge-v2" style="font-size: 0.6rem; padding: 2px 6px;">חדש ב-v2</span>
+                            </div>
+                            <div class="btn-desc">
+                                צפייה בגרף מסלול ממוצעים סמסטריאלי, התפלגות ציונים, דונאט נק״ז וסטטיסטיקות מתקדמות.
+                            </div>
+                            <div style="margin-top: 8px;">
+                                <button type="button" class="btn btn-xs btn-primary" id="btn-settings-open-analytics" style="background: linear-gradient(135deg, #0284c7, #2563eb); font-weight: 600;">
+                                    📈 פתח מרכז נתונים וביצועים
+                                </button>
                             </div>
                         </div>
 
@@ -1173,7 +1191,7 @@
                 </a>
             </div>
             <div class="footer-left-version">
-                <span class="app-version-badge" id="footer-version-badge" title="לחץ לבדיקת עדכונים ורענון המערכת (v1.9.6)" style="cursor: pointer;">v1.9.6 🔄</span>
+                <span class="app-version-badge" id="footer-version-badge" title="לחץ לבדיקת עדכונים ורענון המערכת (v2.0.0)" style="cursor: pointer;">v2.0.0 🔄</span>
             </div>
         </footer>
 
@@ -2194,6 +2212,158 @@
                         <option value="📌">📌 תזכורת</option>
                     </select>
                     <button type="button" class="btn btn-sm btn-primary" id="btn-save-day-event" style="padding: 8px 18px; font-weight: 800; font-size: 0.85rem; border-radius: 8px;">💾 שמור</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Degree Analytics & Performance Hub Modal (v2.0.0 Bklit UI / Shadcn Charts) -->
+    <div class="modal-overlay" id="analytics-modal">
+        <div class="modal-content analytics-modal-content">
+            <div class="analytics-header-banner">
+                <div class="analytics-title-group">
+                    <span class="analytics-title-icon">📊</span>
+                    <div class="analytics-title-text">
+                        <h2>
+                            מרכז ביצועים ונתוני תואר
+                            <span class="analytics-badge-v2">v2.0.0</span>
+                        </h2>
+                        <p>ניתוח ממוצעים, התפלגות נק״ז ומסלול התקדמות בפקולטה להנדסת מכונות</p>
+                    </div>
+                </div>
+                <button type="button" class="modal-close" id="btn-close-analytics-modal" title="סגור חלון">&times;</button>
+            </div>
+
+            <div class="analytics-body-scrollable">
+                <!-- 4 Top KPI Cards -->
+                <div class="analytics-kpi-grid">
+                    <div class="analytics-kpi-card border-beam-card">
+                        <span class="analytics-kpi-label">🎯 ממוצע תואר מצטבר</span>
+                        <span class="analytics-kpi-value" id="analytics-kpi-gpa">0.00</span>
+                        <span class="analytics-kpi-sub" id="analytics-kpi-gpa-sub">מחושב מכל הקורסים שנלמדו</span>
+                    </div>
+                    <div class="analytics-kpi-card">
+                        <span class="analytics-kpi-label">🎓 נק״ז שהושלמו</span>
+                        <span class="analytics-kpi-value" id="analytics-kpi-credits" style="color: #10b981;">0 / 157.5</span>
+                        <span class="analytics-kpi-sub" id="analytics-kpi-credits-pct">0% מכלל דרישות התואר</span>
+                    </div>
+                    <div class="analytics-kpi-card">
+                        <span class="analytics-kpi-label">📚 קורסים שעברו</span>
+                        <span class="analytics-kpi-value" id="analytics-kpi-courses" style="color: #38bdf8;">0</span>
+                        <span class="analytics-kpi-sub" id="analytics-kpi-graded-ratio">0 עם ציון מספרי</span>
+                    </div>
+                    <div class="analytics-kpi-card">
+                        <span class="analytics-kpi-label">⭐ סמסטר מוביל</span>
+                        <span class="analytics-kpi-value" id="analytics-kpi-best-term" style="color: #fbbf24; font-size: 1.35rem;">-</span>
+                        <span class="analytics-kpi-sub" id="analytics-kpi-best-term-sub">הממוצע הגבוה ביותר</span>
+                    </div>
+                </div>
+
+                <!-- Spline Area Chart: GPA Trajectory over Semesters -->
+                <div class="analytics-panel">
+                    <div class="analytics-panel-header">
+                        <div>
+                            <h3>📈 מסלול ממוצע ציונים לפי סמסטרים</h3>
+                            <span class="analytics-panel-subtitle">התפלגות ממוצע סמסטריאלי (סמסטרים 1–8) בהשוואה לממוצע התואר</span>
+                        </div>
+                        <span class="analytics-panel-tag">אינטראקטיבי ⚡</span>
+                    </div>
+
+                    <div class="analytics-chart-canvas-box" id="analytics-chart-canvas-box">
+                        <div class="chart-tooltip-box" id="chart-gpa-tooltip"></div>
+                        <svg class="analytics-svg-chart" id="analytics-gpa-svg" viewBox="0 0 860 240" preserveAspectRatio="none">
+                            <!-- Injected dynamically via app.js -->
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- Middle Split: Radial Donut + Category Breakdown -->
+                <div class="analytics-mid-split">
+                    <!-- Donut Chart Card -->
+                    <div class="analytics-panel">
+                        <div class="analytics-panel-header">
+                            <h3>🍩 התפלגות סטטוס נק״ז</h3>
+                            <span class="analytics-panel-tag">סה״כ 157.5</span>
+                        </div>
+                        <div class="analytics-donut-container">
+                            <div class="analytics-donut-svg-box">
+                                <svg width="170" height="170" viewBox="0 0 170 170" id="analytics-donut-svg">
+                                    <!-- Injected dynamically via app.js -->
+                                </svg>
+                                <div class="analytics-donut-center-text">
+                                    <span class="donut-center-pct" id="donut-center-pct">0%</span>
+                                    <span class="donut-center-label">הושלם</span>
+                                </div>
+                            </div>
+                            <div class="analytics-donut-legend">
+                                <div class="donut-legend-row">
+                                    <div><span class="donut-legend-dot" style="background: #10b981;"></span><span>הושלם (Mastered)</span></div>
+                                    <strong id="legend-credits-completed" style="color: #10b981;">0 נק״ז</strong>
+                                </div>
+                                <div class="donut-legend-row">
+                                    <div><span class="donut-legend-dot" style="background: #fbbf24;"></span><span>בתהליך (Active)</span></div>
+                                    <strong id="legend-credits-active" style="color: #fbbf24;">0 נק״ז</strong>
+                                </div>
+                                <div class="donut-legend-row">
+                                    <div><span class="donut-legend-dot" style="background: #334155;"></span><span>נותר לתואר (Remaining)</span></div>
+                                    <strong id="legend-credits-remaining" style="color: #94a3b8;">157.5 נק״ז</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Category Breakdown -->
+                    <div class="analytics-panel">
+                        <div class="analytics-panel-header">
+                            <h3>📑 סיווג נק״ז לפי קטגוריה</h3>
+                            <span class="analytics-panel-tag">דרישות פקולטה</span>
+                        </div>
+                        <div class="analytics-categories-list">
+                            <div class="analytics-cat-row">
+                                <div class="analytics-cat-header">
+                                    <span>מקצועות חובה פקולטיים (Core)</span>
+                                    <span id="cat-core-text" style="color: #38bdf8; font-weight: 700;">0 / 121.5 נק״ז</span>
+                                </div>
+                                <div class="analytics-cat-track">
+                                    <div class="analytics-cat-fill" id="cat-core-fill" style="width: 0%; background: linear-gradient(90deg, #0284c7, #38bdf8);"></div>
+                                </div>
+                            </div>
+
+                            <div class="analytics-cat-row">
+                                <div class="analytics-cat-header">
+                                    <span>בחירה פקולטית (Faculty Electives)</span>
+                                    <span id="cat-electives-text" style="color: #fbbf24; font-weight: 700;">0 / 26.0 נק״ז</span>
+                                </div>
+                                <div class="analytics-cat-track">
+                                    <div class="analytics-cat-fill" id="cat-electives-fill" style="width: 0%; background: linear-gradient(90deg, #d97706, #fbbf24);"></div>
+                                </div>
+                            </div>
+
+                            <div class="analytics-cat-row">
+                                <div class="analytics-cat-header">
+                                    <span>בחירה חופשית, ספורט ומל״ג (Humanities/General)</span>
+                                    <span id="cat-malag-text" style="color: #a855f7; font-weight: 700;">0 / 10.0 נק״ז</span>
+                                </div>
+                                <div class="analytics-cat-track">
+                                    <div class="analytics-cat-fill" id="cat-malag-fill" style="width: 0%; background: linear-gradient(90deg, #7c3aed, #c084fc);"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Grade Distribution Histogram -->
+                <div class="analytics-panel">
+                    <div class="analytics-panel-header">
+                        <div>
+                            <h3>📊 התפלגות ציונים (Grade Buckets)</h3>
+                            <span class="analytics-panel-subtitle">חלוקת הקורסים שעברו לפי מדרגות ציון</span>
+                        </div>
+                        <span class="analytics-panel-tag" id="analytics-histogram-total-graded">0 ציונים</span>
+                    </div>
+                    <div class="analytics-histogram-bars" id="analytics-histogram-bars">
+                        <!-- Injected dynamically via app.js -->
+                    </div>
                 </div>
             </div>
         </div>
