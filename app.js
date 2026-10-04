@@ -16692,13 +16692,13 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.10.04-v2.0.0",
-    version: "2.0.0",
-    build: "200000",
-    date: "2026-10-04 20:00",
-    description: "גרסה 2.0.0: מרכז ביצועים ונתוני תואר (Bklit UI / Shadcn Charts), אנימציות ומיקרו-אינטראקציות מתקדמות (Aceternity UI), וליטוש עיצובי מלא"
+    code: "REV-2026.10.04-v2.0.1",
+    version: "2.0.1",
+    build: "200100",
+    date: "2026-10-04 22:05",
+    description: "גרסה 2.0.1: שיפור חוויית מובייל במרכז הביצועים, עיגון בלון הנתונים (Tooltip Clamping) בתוך המסך וליטוש כותרות"
 };
-window.APP_VERSION = "2.0.0";
+window.APP_VERSION = "2.0.1";
 
 function ensureBaselineRevisions() {
     if (!gameState.revisions || !Array.isArray(gameState.revisions) || gameState.revisions.length === 0) {
@@ -17767,15 +17767,40 @@ function renderGpaTrajectorySvg(semesterData, cumulativeGpa) {
                 const ptX = parseFloat(pt.getAttribute('cx')) * (rect.width / width);
                 const ptY = parseFloat(pt.getAttribute('cy')) * (rect.height / height);
 
-                tooltip.style.left = `${ptX}px`;
-                tooltip.style.top = `${ptY}px`;
+                // Calculate tooltip size and clamp strictly within container boundaries
+                const tooltipW = tooltip.offsetWidth || 160;
+                const tooltipH = tooltip.offsetHeight || 65;
+
+                // Center balloon horizontally above point, then clamp between 8px and (boxW - tooltipW - 8px)
+                let leftPos = ptX - (tooltipW / 2);
+                const minLeft = 8;
+                const maxLeft = Math.max(minLeft, rect.width - tooltipW - 8);
+                leftPos = Math.max(minLeft, Math.min(maxLeft, leftPos));
+
+                // Position above point; if near top edge, place below point
+                let topPos = ptY - tooltipH - 12;
+                if (topPos < 6) {
+                    topPos = ptY + 16;
+                }
+
+                tooltip.style.left = `${leftPos}px`;
+                tooltip.style.top = `${topPos}px`;
                 pt.setAttribute('r', isMobile ? '7' : '8');
             };
             pt.onmouseleave = () => {
                 tooltip.style.display = 'none';
                 pt.setAttribute('r', isMobile ? '5' : '5.5');
             };
+            // Touch support for mobile devices
+            pt.ontouchstart = (e) => {
+                e.stopPropagation();
+                pt.onmouseenter();
+            };
         });
+        // Tap outside to close tooltip on mobile
+        container.ontouchstart = () => {
+            tooltip.style.display = 'none';
+        };
     }
 }
 

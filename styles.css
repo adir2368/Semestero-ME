@@ -10923,21 +10923,21 @@ html.is-iphone .app-global-footer {
 
 .chart-tooltip-box {
     position: absolute;
-    background: rgba(15, 23, 42, 0.95);
-    border: 1px solid rgba(56, 189, 248, 0.4);
+    background: rgba(15, 23, 42, 0.96);
+    border: 1px solid rgba(56, 189, 248, 0.5);
     border-radius: 8px;
     padding: 8px 12px;
     font-size: 0.76rem;
     color: #f8fafc;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.75);
     pointer-events: none;
-    z-index: 10;
-    transform: translate(-50%, -110%);
+    z-index: 20;
     display: none;
     white-space: nowrap;
     text-align: right;
     direction: rtl;
     line-height: 1.35;
+    transition: opacity 0.15s ease;
 }
 
 /* Two-Column Middle Section: Donut + Category Breakdown */
