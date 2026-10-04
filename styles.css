@@ -1856,20 +1856,26 @@ body {
     transform: translateX(0);
 }
 .peek-cover {
-    height: 150px;
-    background-size: cover;
-    background-position: center;
+    display: none !important;
+}
+.peek-content {
+    padding: 20px 24px;
+    flex-grow: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    text-align: right;
     position: relative;
-    flex-shrink: 0;
 }
 .peek-close-btn {
     position: absolute;
-    top: 15px;
-    right: 15px;
-    background: rgba(15, 23, 42, 0.6);
+    top: 16px;
+    left: 16px;
+    background: rgba(15, 23, 42, 0.7);
     border: 1px solid var(--border-color);
     color: var(--text-light);
-    font-size: 1.5rem;
+    font-size: 1.4rem;
     cursor: pointer;
     width: 32px;
     height: 32px;
@@ -1878,20 +1884,12 @@ body {
     align-items: center;
     justify-content: center;
     line-height: 1;
-    transition: background-color 0.2s;
+    transition: background-color 0.2s, border-color 0.2s;
+    z-index: 10;
 }
 .peek-close-btn:hover {
     background: rgba(239, 68, 68, 0.8);
     border-color: #ef4444;
-}
-.peek-content {
-    padding: 24px;
-    flex-grow: 1;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    text-align: right;
 }
 .peek-header {
     display: flex;
@@ -11138,5 +11136,44 @@ html.is-iphone .app-global-footer {
     .analytics-svg-chart {
         height: auto !important;
         max-height: 220px !important;
+    }
+
+    /* Notion Slide-in Side Peek Mobile Optimization */
+    .task-side-peek {
+        width: 100vw !important;
+        max-width: 100vw !important;
+        border-right: none !important;
+    }
+    .peek-content {
+        padding: 16px 16px calc(24px + env(safe-area-inset-bottom)) 16px !important;
+    }
+    .peek-property-row {
+        grid-template-columns: 1fr !important;
+        gap: 4px !important;
+        margin-bottom: 8px !important;
+    }
+    .peek-property-label {
+        font-size: 0.8rem !important;
+    }
+    .peek-header {
+        padding-left: 40px !important; /* Leave room for close button on the left */
+    }
+    .peek-title-input {
+        font-size: 1.4rem !important;
+    }
+
+    /* Calendar Day Details Modal Mobile Optimization */
+    #calendar-day-modal .modal-content {
+        width: 95% !important;
+        max-width: 95% !important;
+        padding: 14px !important;
+        max-height: 90vh !important;
+        overflow-y: auto !important;
+    }
+    .day-modal-add-section {
+        padding: 10px !important;
+    }
+    .day-modal-add-section .form-control {
+        font-size: 0.8rem !important;
     }
 }

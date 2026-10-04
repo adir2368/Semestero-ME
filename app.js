@@ -16692,13 +16692,13 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.10.04-v2.0.1",
-    version: "2.0.1",
-    build: "200100",
-    date: "2026-10-04 22:05",
-    description: "גרסה 2.0.1: שיפור חוויית מובייל במרכז הביצועים, עיגון בלון הנתונים (Tooltip Clamping) בתוך המסך וליטוש כותרות"
+    code: "REV-2026.10.04-v2.0.2",
+    version: "2.0.2",
+    build: "200200",
+    date: "2026-10-04 22:20",
+    description: "גרסה 2.0.2: הסרת תמונת רקע ב-Side Peek, אופטימיזציית מובייל מלאה ללוח השנה ולפרטי משימות"
 };
-window.APP_VERSION = "2.0.1";
+window.APP_VERSION = "2.0.2";
 
 function ensureBaselineRevisions() {
     if (!gameState.revisions || !Array.isArray(gameState.revisions) || gameState.revisions.length === 0) {
