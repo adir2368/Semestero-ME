@@ -11094,17 +11094,49 @@ html.is-iphone .app-global-footer {
     color: #94a3b8;
     margin-top: 6px;
     font-weight: 600;
+    white-space: nowrap;
+    direction: ltr;
+    unicode-bidi: isolate;
 }
 
 /* Responsive adjustment for Mobile & Tablet */
 @media (max-width: 768px) {
     .analytics-kpi-grid {
         grid-template-columns: repeat(2, 1fr) !important;
+        gap: 10px !important;
+    }
+    .analytics-kpi-card {
+        padding: 12px 14px !important;
+    }
+    .analytics-kpi-value {
+        font-size: 1.35rem !important;
+    }
+    .analytics-panel {
+        padding: 14px 12px !important;
     }
     .analytics-mid-split {
         grid-template-columns: 1fr !important;
     }
     .analytics-donut-container {
         flex-direction: column;
+        gap: 16px !important;
+    }
+    .analytics-histogram-bars {
+        gap: 8px !important;
+    }
+    .histogram-label {
+        font-size: 0.62rem !important;
+    }
+    .analytics-cat-header {
+        font-size: 0.75rem !important;
+        flex-wrap: wrap;
+        gap: 4px;
+    }
+    .analytics-chart-canvas-box {
+        min-height: auto !important;
+    }
+    .analytics-svg-chart {
+        height: auto !important;
+        max-height: 220px !important;
     }
 }

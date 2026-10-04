@@ -17496,12 +17496,12 @@ async function triggerManualCalendarPull() {
 // ==============================================================================
 
 window.openAnalyticsModal = function() {
-    window.renderAnalyticsCharts();
     const modal = document.getElementById("analytics-modal");
     if (modal) {
         modal.style.display = "flex";
         modal.classList.add("active");
     }
+    window.renderAnalyticsCharts();
 };
 
 window.closeAnalyticsModal = function() {
@@ -17513,6 +17513,13 @@ window.closeAnalyticsModal = function() {
     const tooltip = document.getElementById("chart-gpa-tooltip");
     if (tooltip) tooltip.style.display = "none";
 };
+
+window.addEventListener('resize', () => {
+    const modal = document.getElementById("analytics-modal");
+    if (modal && modal.classList.contains("active")) {
+        window.renderAnalyticsCharts();
+    }
+});
 
 window.renderAnalyticsCharts = function() {
     if (!gameState || !gameState.courses) return;
@@ -17549,7 +17556,7 @@ window.renderAnalyticsCharts = function() {
     if (kpiGpa) kpiGpa.innerText = cumulativeGpa > 0 ? cumulativeGpa.toFixed(2) : "0.00";
 
     const kpiCredits = document.getElementById("analytics-kpi-credits");
-    if (kpiCredits) kpiCredits.innerText = `${earnedCredits.toFixed(1)} / ${totalDegreeCredits}`;
+    if (kpiCredits) kpiCredits.innerHTML = `<bdi dir="ltr">${earnedCredits.toFixed(1)} / ${totalDegreeCredits}</bdi>`;
 
     const kpiCreditsPct = document.getElementById("analytics-kpi-credits-pct");
     const completionPct = Math.min(100, (earnedCredits / totalDegreeCredits) * 100);
@@ -17582,15 +17589,24 @@ window.renderAnalyticsCharts = function() {
 
         if (hasGpa && stats.gpa > maxTermGpa) {
             maxTermGpa = stats.gpa;
-            bestTerm = `${termNames[s]} (${stats.gpa.toFixed(2)})`;
+            bestTerm = { name: termNames[s], gpa: stats.gpa.toFixed(2) };
         }
     }
 
     const kpiBestTerm = document.getElementById("analytics-kpi-best-term");
-    if (kpiBestTerm) kpiBestTerm.innerText = bestTerm || (semesterData.some(d => d.hasData) ? "-" : "בהמתנה לציונים");
+    if (kpiBestTerm) {
+        if (bestTerm) {
+            kpiBestTerm.innerHTML = `<span>${bestTerm.name}</span> <span style="font-size: 0.95rem; opacity: 0.9; display: inline-block; direction: ltr; font-weight: 700; color: #fde68a;">(<bdi dir="ltr">${bestTerm.gpa}</bdi>)</span>`;
+        } else {
+            kpiBestTerm.innerText = semesterData.some(d => d.hasData) ? "-" : "בהמתנה לציונים";
+        }
+    }
 
-    // 2. Render GPA Spline & Area SVG Chart
-    renderGpaTrajectorySvg(semesterData, cumulativeGpa);
+    // Filter to only semesters with at least one final grade
+    const gradedSemesters = semesterData.filter(d => d.hasData);
+
+    // 2. Render GPA Spline & Area SVG Chart (only showing semesters with actual grades)
+    renderGpaTrajectorySvg(gradedSemesters, cumulativeGpa);
 
     // 3. Render Radial Donut Chart for Credits
     renderCreditsDonutSvg(earnedCredits, activeCredits, remainingCredits, totalDegreeCredits);
@@ -17608,19 +17624,29 @@ function renderGpaTrajectorySvg(semesterData, cumulativeGpa) {
     const container = document.getElementById("analytics-chart-canvas-box");
     if (!svg) return;
 
-    const width = 860;
-    const height = 240;
-    const padLeft = 55;
-    const padRight = 35;
-    const padTop = 25;
-    const padBottom = 40;
+    // Responsive dimensions
+    const boxW = container ? container.getBoundingClientRect().width : window.innerWidth;
+    const isMobile = (window.innerWidth <= 650) || (boxW > 0 && boxW <= 650);
+    const width = isMobile ? 360 : 860;
+    const height = isMobile ? 210 : 240;
+    const padLeft = isMobile ? 36 : 55;
+    const padRight = isMobile ? 20 : 35;
+    const padTop = isMobile ? 22 : 25;
+    const padBottom = isMobile ? 32 : 40;
     const chartW = width - padLeft - padRight;
     const chartH = height - padTop - padBottom;
+
+    svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
 
     const minY = 60;
     const maxY = 100;
     const getY = (val) => padTop + (1 - (val - minY) / (maxY - minY)) * chartH;
-    const getX = (semIdx) => padLeft + (semIdx / 7) * chartW;
+
+    const count = semesterData.length;
+    const getX = (idx) => {
+        if (count <= 1) return padLeft + chartW / 2;
+        return padLeft + (idx / (count - 1)) * chartW;
+    };
 
     let svgHtml = `
         <defs>
@@ -17634,26 +17660,38 @@ function renderGpaTrajectorySvg(semesterData, cumulativeGpa) {
         </defs>
     `;
 
+    // Horizontal grid lines
     [60, 70, 80, 90, 100].forEach(yVal => {
         const y = getY(yVal);
         svgHtml += `
             <line x1="${padLeft}" y1="${y}" x2="${width - padRight}" y2="${y}" class="chart-grid-line" stroke="rgba(255,255,255,0.06)" stroke-dasharray="4 4"/>
-            <text x="${padLeft - 12}" y="${y + 4}" class="chart-axis-text" text-anchor="end" fill="#64748b" font-size="11" font-family="'Rubik', sans-serif">${yVal}</text>
+            <text x="${padLeft - (isMobile ? 6 : 10)}" y="${y + 4}" class="chart-axis-text" text-anchor="end" fill="#64748b" font-size="${isMobile ? 10 : 11}" font-family="'Rubik', sans-serif">${yVal}</text>
         `;
     });
 
+    // Degree Benchmark Line with background pill badge to prevent collisions
     if (cumulativeGpa >= minY && cumulativeGpa <= maxY) {
         const bY = getY(cumulativeGpa);
+        const badgeText = `★ ממוצע: ${cumulativeGpa.toFixed(2)}`;
+        const badgeW = isMobile ? 88 : 130;
+        const badgeH = isMobile ? 16 : 18;
+        const badgeX = width - padRight - badgeW;
+        const badgeY = Math.max(padTop - 6, bY - badgeH - 3);
+
         svgHtml += `
             <line x1="${padLeft}" y1="${bY}" x2="${width - padRight}" y2="${bY}" class="chart-benchmark-line" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="6 4" opacity="0.85"/>
-            <text x="${padLeft + 12}" y="${bY - 6}" text-anchor="start" fill="#fbbf24" font-size="11" font-weight="700" font-family="'Rubik', sans-serif">★ ממוצע תואר: ${cumulativeGpa.toFixed(2)}</text>
+            <g class="chart-benchmark-badge">
+                <rect x="${badgeX}" y="${badgeY}" width="${badgeW}" height="${badgeH}" rx="${isMobile ? 8 : 9}" fill="rgba(245, 158, 11, 0.22)" stroke="#f59e0b" stroke-width="0.8"/>
+                <text x="${badgeX + badgeW / 2}" y="${badgeY + badgeH / 2 + 3.5}" text-anchor="middle" fill="#fbbf24" font-size="${isMobile ? 8.5 : 10.5}" font-weight="700" font-family="'Rubik', sans-serif" direction="rtl">${badgeText}</text>
+            </g>
         `;
     }
 
+    // X-axis Semester Labels
     semesterData.forEach((d, idx) => {
         const x = getX(idx);
         svgHtml += `
-            <text x="${x}" y="${height - 12}" class="chart-axis-text" text-anchor="middle" fill="#94a3b8" font-size="12" font-weight="600" font-family="'Rubik', sans-serif">סמסטר ${d.semester}</text>
+            <text x="${x}" y="${height - (isMobile ? 10 : 12)}" class="chart-axis-text" text-anchor="middle" fill="#94a3b8" font-size="${isMobile ? 11 : 12}" font-weight="600" font-family="'Rubik', sans-serif">${d.name || ('סמסטר ' + d.semester)}</text>
         `;
     });
 
@@ -17685,21 +17723,23 @@ function renderGpaTrajectorySvg(semesterData, cumulativeGpa) {
         const baseY = getY(minY);
         const areaD = `${pathD} L ${lastP.x} ${baseY} L ${firstP.x} ${baseY} Z`;
 
-        svgHtml += `<path d="${areaD}" fill="url(#gpaAreaGradient)" opacity="0.4"/>`;
-        svgHtml += `<path d="${pathD}" fill="none" stroke="#38bdf8" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" filter="url(#pointGlow)"/>`;
+        if (validPoints.length > 1) {
+            svgHtml += `<path d="${areaD}" fill="url(#gpaAreaGradient)" opacity="0.4"/>`;
+            svgHtml += `<path d="${pathD}" fill="none" stroke="#38bdf8" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" filter="url(#pointGlow)"/>`;
+        }
 
         validPoints.forEach((p, pIdx) => {
             svgHtml += `
-                <circle cx="${p.x}" cy="${p.y}" r="5.5" class="chart-point-outer"
+                <circle cx="${p.x}" cy="${p.y}" r="${isMobile ? 5 : 5.5}" class="chart-point-outer"
                         fill="#0b1120" stroke="#38bdf8" stroke-width="3"
-                        data-sem="${p.data.semester}" data-gpa="${p.data.gpa.toFixed(2)}"
+                        data-sem="${p.data.semester}" data-sem-name="${p.data.name || ('סמסטר ' + p.data.semester)}" data-gpa="${p.data.gpa.toFixed(2)}"
                         data-cr="${p.data.gradedCredits.toFixed(1)}" data-count="${p.data.courseCount}"
                         style="cursor: pointer; transition: r 0.15s ease;" id="gpa-point-${pIdx}"/>
             `;
         });
     } else {
         svgHtml += `
-            <text x="${width / 2}" y="${height / 2}" text-anchor="middle" fill="#64748b" font-size="14" font-weight="600" font-family="'Rubik', sans-serif">
+            <text x="${width / 2}" y="${height / 2}" text-anchor="middle" fill="#64748b" font-size="${isMobile ? 12 : 14}" font-weight="600" font-family="'Rubik', sans-serif">
                 אין עדיין ציונים מעודכנים בסמסטרים. הזן ציונים בקורסים לצפייה בגרף!
             </text>
         `;
@@ -17711,15 +17751,15 @@ function renderGpaTrajectorySvg(semesterData, cumulativeGpa) {
         const points = svg.querySelectorAll('.chart-point-outer');
         points.forEach(pt => {
             pt.onmouseenter = () => {
-                const sem = pt.getAttribute('data-sem');
+                const semName = pt.getAttribute('data-sem-name');
                 const gpa = pt.getAttribute('data-gpa');
                 const cr = pt.getAttribute('data-cr');
                 const count = pt.getAttribute('data-count');
                 
                 tooltip.innerHTML = `
-                    <div style="font-weight: 800; color: #38bdf8; margin-bottom: 2px;">סמסטר ${sem}</div>
-                    <div>ממוצע סמסטריאלי: <strong style="color: #ffffff;">${gpa}</strong></div>
-                    <div style="color: #94a3b8; font-size: 0.7rem;">${cr} נק״ז עם ציון | ${count} קורסים</div>
+                    <div style="font-weight: 800; color: #38bdf8; margin-bottom: 2px;">${semName}</div>
+                    <div>ממוצע סמסטריאלי: <strong style="color: #ffffff;"><bdi dir="ltr">${gpa}</bdi></strong></div>
+                    <div style="color: #94a3b8; font-size: 0.72rem;"><bdi dir="ltr">${cr}</bdi> נק״ז עם ציון | ${count} קורסים</div>
                 `;
                 tooltip.style.display = 'block';
 
@@ -17729,11 +17769,11 @@ function renderGpaTrajectorySvg(semesterData, cumulativeGpa) {
 
                 tooltip.style.left = `${ptX}px`;
                 tooltip.style.top = `${ptY}px`;
-                pt.setAttribute('r', '8');
+                pt.setAttribute('r', isMobile ? '7' : '8');
             };
             pt.onmouseleave = () => {
                 tooltip.style.display = 'none';
-                pt.setAttribute('r', '5.5');
+                pt.setAttribute('r', isMobile ? '5' : '5.5');
             };
         });
     }
@@ -17811,17 +17851,17 @@ function renderCategoriesDistribution(completedCourses) {
 
     const coreText = document.getElementById("cat-core-text");
     const coreFill = document.getElementById("cat-core-fill");
-    if (coreText) coreText.innerText = `${coreDone.toFixed(1)} / ${coreTotal} נק״ז (${corePct.toFixed(0)}%)`;
+    if (coreText) coreText.innerHTML = `<bdi dir="ltr">${coreDone.toFixed(1)} / ${coreTotal}</bdi> נק״ז (${corePct.toFixed(0)}%)`;
     if (coreFill) coreFill.style.width = `${corePct}%`;
 
     const electText = document.getElementById("cat-electives-text");
     const electFill = document.getElementById("cat-electives-fill");
-    if (electText) electText.innerText = `${electivesDone.toFixed(1)} / ${electivesTotal} נק״ז (${electivesPct.toFixed(0)}%)`;
+    if (electText) electText.innerHTML = `<bdi dir="ltr">${electivesDone.toFixed(1)} / ${electivesTotal}</bdi> נק״ז (${electivesPct.toFixed(0)}%)`;
     if (electFill) electFill.style.width = `${electivesPct}%`;
 
     const malagText = document.getElementById("cat-malag-text");
     const malagFill = document.getElementById("cat-malag-fill");
-    if (malagText) malagText.innerText = `${malagDone.toFixed(1)} / ${malagTotal} נק״ז (${malagPct.toFixed(0)}%)`;
+    if (malagText) malagText.innerHTML = `<bdi dir="ltr">${malagDone.toFixed(1)} / ${malagTotal}</bdi> נק״ז (${malagPct.toFixed(0)}%)`;
     if (malagFill) malagFill.style.width = `${malagPct}%`;
 }
 
@@ -17863,7 +17903,7 @@ function renderGradeDistributionHistogram(completedCourses) {
             <div class="histogram-col" title="${b.label} (${b.title}): ${b.count} קורסים">
                 <span class="histogram-count">${b.count}</span>
                 <div class="histogram-bar" style="height: ${heightPct}%; background-color: ${b.color};"></div>
-                <span class="histogram-label">${b.label}</span>
+                <span class="histogram-label"><bdi dir="ltr">${b.label}</bdi></span>
             </div>
         `;
     });
