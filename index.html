@@ -43,6 +43,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Rubik:wght@300;400;500;700;900&display=swap" rel="stylesheet">
     <link rel="icon" type="image/png" href="icon.png?v=1.9.6">
     <link rel="stylesheet" href="styles.css?v=1.9.6">
+    <link rel="stylesheet" href="accessibility.css?v=2.0.2">
 
     <!-- Schema.org Structured Data for Google Search -->
     <script type="application/ld+json">
@@ -1240,7 +1241,8 @@
                     </svg>
                 </a>
             </div>
-            <div class="footer-left-version">
+            <div class="footer-left-version" style="display: inline-flex; align-items: center; gap: 8px;">
+                <button type="button" class="app-version-badge" onclick="window.openAccessibilityModal()" title="הצהרת נגישות והתאמות" style="cursor: pointer; background: rgba(2, 132, 199, 0.2); border-color: rgba(56, 189, 248, 0.4); color: #38bdf8;">♿ נגישות</button>
                 <span class="app-version-badge" id="footer-version-badge" title="לחץ לבדיקת עדכונים ורענון המערכת (v2.0.2)" style="cursor: pointer;">v2.0.2 🔄</span>
             </div>
         </footer>
@@ -2565,6 +2567,62 @@
     <!-- Technion Official Academic Calendar & Holidays Engine -->
     <script src="technion_academic_calendar.js?v=1.9.6"></script>
     <!-- Core Application Logic -->
+    <!-- Floating Accessibility Trigger Button -->
+    <button type="button" class="accessibility-trigger-btn" id="btn-accessibility-trigger" title="תפריט נגישות (Accessibility Menu)" aria-label="פתח תפריט נגישות">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 2c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2zm9 7h-6v13h-2v-6h-2v6H9V9H3V7h18v2z"/>
+        </svg>
+    </button>
+
+    <!-- Accessibility Modal (הצהרת נגישות ותפריט התאמות) -->
+    <div class="a11y-modal-overlay" id="accessibility-modal" aria-hidden="true" role="dialog" aria-labelledby="a11y-modal-title">
+        <div class="a11y-modal-card">
+            <div class="a11y-header">
+                <h3 id="a11y-modal-title">♿ נגישות והתאמת תצוגה</h3>
+                <button type="button" class="a11y-close-btn" id="a11y-close-btn" aria-label="סגור תפריט נגישות">&times;</button>
+            </div>
+            <div class="a11y-body">
+                <div class="a11y-grid">
+                    <button type="button" class="a11y-btn" id="a11y-btn-large-text">
+                        <span class="a11y-btn-icon">🔍</span>
+                        <span>הגדלת טקסט</span>
+                    </button>
+                    <button type="button" class="a11y-btn" id="a11y-btn-contrast">
+                        <span class="a11y-btn-icon">🌓</span>
+                        <span>ניגודיות גבוהה</span>
+                    </button>
+                    <button type="button" class="a11y-btn" id="a11y-btn-grayscale">
+                        <span class="a11y-btn-icon">🔘</span>
+                        <span>גווני אפור</span>
+                    </button>
+                    <button type="button" class="a11y-btn" id="a11y-btn-links">
+                        <span class="a11y-btn-icon">🔗</span>
+                        <span>הדגשת קישורים</span>
+                    </button>
+                    <button type="button" class="a11y-btn" id="a11y-btn-font">
+                        <span class="a11y-btn-icon">🔤</span>
+                        <span>גופן קריא</span>
+                    </button>
+                    <button type="button" class="a11y-btn" id="a11y-btn-anim">
+                        <span class="a11y-btn-icon">⏸️</span>
+                        <span>עצירת הבהובים</span>
+                    </button>
+                </div>
+
+                <button type="button" class="a11y-reset-btn" id="a11y-btn-reset">
+                    🔄 איפוס הגדרות נגישות
+                </button>
+
+                <div class="a11y-statement-box">
+                    <strong>הצהרת נגישות:</strong><br>
+                    אתר <strong>Semestero ME</strong> פועל בהתאם להנחיות הנגישות בתקן הישראלי (ת"י 5568) ברמה AA ולתקן הבינלאומי WCAG 2.1. האתר תומך בניווט מלא באמצעות מקלדת, קוראי מסך, ניגודיות צבעים והתאמות תצוגה.
+                    <div style="margin-top: 6px; font-size: 0.72rem; color: #64748b;">רכז נגישות: אדיר משה | Semestero ME</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="accessibility.js?v=2.0.2"></script>
     <script src="app.js?v=1.9.6"></script>
     <!-- PWA Service Worker Registration -->
     <script>

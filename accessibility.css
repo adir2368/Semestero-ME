@@ -1,0 +1,248 @@
+/* ==============================================================================
+   Accessibility (נגישות) Menu & Toolbar Widget - Israeli IS 5568 / WCAG 2.1 AA
+   ============================================================================== */
+
+/* Floating Accessibility Button */
+.accessibility-trigger-btn {
+    position: fixed;
+    bottom: 24px;
+    left: 24px;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #0284c7, #0369a1);
+    color: #ffffff;
+    border: 2px solid rgba(56, 189, 248, 0.6);
+    box-shadow: 0 4px 15px rgba(2, 132, 199, 0.4), 0 0 12px rgba(56, 189, 248, 0.3);
+    cursor: pointer;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease;
+}
+.accessibility-trigger-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 20px rgba(56, 189, 248, 0.6);
+}
+.accessibility-trigger-btn svg {
+    width: 26px;
+    height: 26px;
+    fill: currentColor;
+}
+
+/* Accessibility Modal Overlay */
+.a11y-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(10, 15, 29, 0.75);
+    backdrop-filter: blur(8px);
+    z-index: 10000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+}
+.a11y-modal-overlay.active {
+    display: flex;
+}
+
+.a11y-modal-card {
+    background: #0f172a;
+    border: 1px solid rgba(56, 189, 248, 0.4);
+    border-radius: 18px;
+    width: 100%;
+    max-width: 440px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8), 0 0 25px rgba(56, 189, 248, 0.25);
+    color: #f8fafc;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    text-align: right;
+    direction: rtl;
+    animation: a11yFadeIn 0.25s ease-out;
+}
+@keyframes a11yFadeIn {
+    from { opacity: 0; transform: scale(0.95) translateY(10px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.a11y-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 22px;
+    background: rgba(30, 41, 59, 0.7);
+    border-bottom: 1px solid rgba(56, 189, 248, 0.2);
+}
+.a11y-header h3 {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #38bdf8;
+}
+.a11y-close-btn {
+    background: none;
+    border: none;
+    color: #94a3b8;
+    font-size: 1.5rem;
+    cursor: pointer;
+    line-height: 1;
+    padding: 4px;
+    transition: color 0.2s;
+}
+.a11y-close-btn:hover {
+    color: #ef4444;
+}
+
+.a11y-body {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    max-height: 75vh;
+    overflow-y: auto;
+}
+
+.a11y-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+.a11y-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    background: rgba(30, 41, 59, 0.6);
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    border-radius: 12px;
+    padding: 12px 10px;
+    color: #f1f5f9;
+    font-family: inherit;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+}
+.a11y-btn:hover {
+    background: rgba(56, 189, 248, 0.15);
+    border-color: #38bdf8;
+    color: #38bdf8;
+}
+.a11y-btn.active {
+    background: rgba(2, 132, 199, 0.35);
+    border-color: #38bdf8;
+    color: #38bdf8;
+    box-shadow: inset 0 0 10px rgba(56, 189, 248, 0.3);
+}
+.a11y-btn-icon {
+    font-size: 1.3rem;
+}
+
+/* Accessibility Statement Box */
+.a11y-statement-box {
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(148, 163, 184, 0.15);
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 0.78rem;
+    line-height: 1.5;
+    color: #94a3b8;
+}
+.a11y-statement-box strong {
+    color: #cbd5e1;
+}
+
+.a11y-reset-btn {
+    background: rgba(239, 68, 68, 0.15);
+    border: 1px solid rgba(239, 68, 68, 0.4);
+    color: #f87171;
+    border-radius: 10px;
+    padding: 10px;
+    font-family: inherit;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.a11y-reset-btn:hover {
+    background: rgba(239, 68, 68, 0.3);
+    color: #ffffff;
+}
+
+/* ==============================================================================
+   Active Accessibility Modes
+   ============================================================================== */
+
+/* 1. Large Text */
+body.a11y-large-text {
+    font-size: 115% !important;
+}
+body.a11y-large-text .course-card-title,
+body.a11y-large-text .hud-stat-value,
+body.a11y-large-text .modal-header h2 {
+    font-size: 1.25em !important;
+}
+
+/* 2. High Contrast */
+body.a11y-high-contrast {
+    background-color: #000000 !important;
+    background-image: none !important;
+    color: #ffffff !important;
+}
+body.a11y-high-contrast .hud-container,
+body.a11y-high-contrast .course-card,
+body.a11y-high-contrast .modal-content,
+body.a11y-high-contrast .timetable-day-column {
+    background: #000000 !important;
+    border-color: #ffff00 !important;
+    color: #ffffff !important;
+}
+body.a11y-high-contrast a,
+body.a11y-high-contrast button {
+    border-color: #ffff00 !important;
+}
+
+/* 3. Inverted Colors / Dark Monolith */
+body.a11y-grayscale {
+    filter: grayscale(100%) !important;
+}
+
+/* 4. Highlight Links */
+body.a11y-highlight-links a,
+body.a11y-highlight-links button {
+    text-decoration: underline !important;
+    outline: 2px dashed #38bdf8 !important;
+    outline-offset: 2px !important;
+}
+
+/* 5. Readable Font */
+body.a11y-readable-font,
+body.a11y-readable-font * {
+    font-family: Arial, Helvetica, sans-serif !important;
+    letter-spacing: normal !important;
+}
+
+/* 6. Stop Animations */
+body.a11y-stop-animations * {
+    animation: none !important;
+    transition: none !important;
+}
+
+@media (max-width: 768px) {
+    .accessibility-trigger-btn {
+        bottom: 74px;
+        left: 16px;
+        width: 42px;
+        height: 42px;
+    }
+}
