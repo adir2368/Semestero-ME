@@ -2,33 +2,9 @@
    Accessibility (נגישות) Menu & Toolbar Widget - Israeli IS 5568 / WCAG 2.1 AA
    ============================================================================== */
 
-/* Floating Accessibility Button */
+/* Floating Accessibility Button removed per user request: only clean footer button is active */
 .accessibility-trigger-btn {
-    position: fixed;
-    bottom: 24px;
-    left: 24px;
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #0284c7, #0369a1);
-    color: #ffffff;
-    border: 2px solid rgba(56, 189, 248, 0.6);
-    box-shadow: 0 4px 15px rgba(2, 132, 199, 0.4), 0 0 12px rgba(56, 189, 248, 0.3);
-    cursor: pointer;
-    z-index: 9999;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease;
-}
-.accessibility-trigger-btn:hover {
-    transform: scale(1.1);
-    box-shadow: 0 6px 20px rgba(56, 189, 248, 0.6);
-}
-.accessibility-trigger-btn svg {
-    width: 26px;
-    height: 26px;
-    fill: currentColor;
+    display: none !important;
 }
 
 /* Accessibility Modal Overlay */
@@ -183,14 +159,30 @@
    Active Accessibility Modes
    ============================================================================== */
 
-/* 1. Large Text */
+/* 1. Large Text (Scales entire UI by boosting root rem and component fonts) */
+html.a11y-large-text {
+    font-size: 125% !important;
+}
 body.a11y-large-text {
-    font-size: 115% !important;
+    font-size: 1.15rem !important;
 }
 body.a11y-large-text .course-card-title,
 body.a11y-large-text .hud-stat-value,
-body.a11y-large-text .modal-header h2 {
-    font-size: 1.25em !important;
+body.a11y-large-text .modal-header h2,
+body.a11y-large-text h1,
+body.a11y-large-text h2,
+body.a11y-large-text h3 {
+    font-size: 1.35em !important;
+}
+body.a11y-large-text p,
+body.a11y-large-text span,
+body.a11y-large-text button,
+body.a11y-large-text input,
+body.a11y-large-text label,
+body.a11y-large-text select,
+body.a11y-large-text td,
+body.a11y-large-text th {
+    font-size: 1.12em !important;
 }
 
 /* 2. High Contrast */

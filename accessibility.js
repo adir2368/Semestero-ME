@@ -29,15 +29,20 @@
     }
 
     function applyA11yClasses() {
+        const root = document.documentElement;
         const body = document.body;
-        if (!body) return;
 
-        body.classList.toggle('a11y-large-text', !!currentPrefs.largeText);
-        body.classList.toggle('a11y-high-contrast', !!currentPrefs.highContrast);
-        body.classList.toggle('a11y-grayscale', !!currentPrefs.grayscale);
-        body.classList.toggle('a11y-highlight-links', !!currentPrefs.highlightLinks);
-        body.classList.toggle('a11y-readable-font', !!currentPrefs.readableFont);
-        body.classList.toggle('a11y-stop-animations', !!currentPrefs.stopAnimations);
+        const toggleClass = (cls, cond) => {
+            if (root) root.classList.toggle(cls, cond);
+            if (body) body.classList.toggle(cls, cond);
+        };
+
+        toggleClass('a11y-large-text', !!currentPrefs.largeText);
+        toggleClass('a11y-high-contrast', !!currentPrefs.highContrast);
+        toggleClass('a11y-grayscale', !!currentPrefs.grayscale);
+        toggleClass('a11y-highlight-links', !!currentPrefs.highlightLinks);
+        toggleClass('a11y-readable-font', !!currentPrefs.readableFont);
+        toggleClass('a11y-stop-animations', !!currentPrefs.stopAnimations);
 
         // Update active class on buttons
         updateButtonStates();

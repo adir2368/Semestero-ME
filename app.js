@@ -16692,13 +16692,13 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.10.04-v2.0.2",
-    version: "2.0.2",
-    build: "200200",
-    date: "2026-10-04 22:20",
-    description: "גרסה 2.0.2: הסרת תמונת רקע ב-Side Peek, אופטימיזציית מובייל מלאה ללוח השנה ולפרטי משימות"
+    code: "REV-2026.10.05-v2.0.3",
+    version: "2.0.3",
+    build: "200300",
+    date: "2026-10-05 23:55",
+    description: "גרסה 2.0.3: הסרת כפתור נגישות כפול, תיקון הגדלת גופן אמיתית, ניתוק שיבוץ מומלץ מהתקדמות אישית, מובייל אונבורדינג מיושר ומודול אבטחה IDOR"
 };
-window.APP_VERSION = "2.0.2";
+window.APP_VERSION = "2.0.3";
 
 function ensureBaselineRevisions() {
     if (!gameState.revisions || !Array.isArray(gameState.revisions) || gameState.revisions.length === 0) {

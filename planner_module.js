@@ -803,8 +803,9 @@
             `);
 
             (sem.courses || []).forEach(course => {
-                const completed = isCourseCompleted(course.code, course.altCode);
-                const grade = getCourseGrade(course.code, course.altCode);
+                const isSuggestedMode = currentMode === 'suggested';
+                const completed = !isSuggestedMode && isCourseCompleted(course.code, course.altCode);
+                const grade = !isSuggestedMode ? getCourseGrade(course.code, course.altCode) : null;
                 const prereqStatus = checkPrerequisites(course, semNum, courseSemMap);
 
                 const tagClass = completed ? 'tag-completed' : (course.list ? `tag-list-${course.list}` : (course.type ? `tag-${course.type}` : 'tag-mandatory'));
