@@ -16744,13 +16744,13 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.10.06-v2.0.6",
-    version: "2.0.6",
-    build: "200601",
-    date: "2026-10-06 18:45",
-    description: "גרסה 2.0.6: תיקון מרכוז מוחלט של הסיור, הזנת ציון סופי דינמית בסיור, נעילת קוד רוויזיה, והוספת חלונית מה חדש?"
+    code: "REV-2026.10.06-v2.0.7",
+    version: "2.0.7",
+    build: "200701",
+    date: "2026-10-06 20:00",
+    description: "גרסה 2.0.7: תיקון פאנל קרדיט וגרסה תחתון במובייל (אנדרואיד ו-iOS), הצמדה יציבה מעל סרגל הניווט, ותמיכה מלאה באירועי מגע (Touch)"
 };
-window.APP_VERSION = "2.0.6";
+window.APP_VERSION = "2.0.7";
 
 function ensureBaselineRevisions() {
     if (!gameState.revisions || !Array.isArray(gameState.revisions) || gameState.revisions.length === 0) {
@@ -17504,7 +17504,14 @@ async function triggerManualCalendarPull() {
     }
 
     const footerVerBadge = document.getElementById("footer-version-badge");
-    if (footerVerBadge) footerVerBadge.onclick = () => window.checkRemoteAppVersion(true);
+    if (footerVerBadge) {
+        const handleFooterVersionCheck = (e) => {
+            if (e && e.type === 'touchend') e.preventDefault();
+            window.checkRemoteAppVersion(true);
+        };
+        footerVerBadge.onclick = handleFooterVersionCheck;
+        footerVerBadge.addEventListener('touchend', handleFooterVersionCheck, { passive: false });
+    }
 
     // Analytics & GPA Hub Modal (v2.0.0 Bklit UI / Shadcn Charts)
     const btnOpenAnalytics = document.getElementById("btn-open-analytics");

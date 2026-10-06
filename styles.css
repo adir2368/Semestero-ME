@@ -5412,13 +5412,16 @@ label[for="new-task-xp-input"],
     body {
         overflow: hidden !important;
         height: 100vh !important;
+        height: 100dvh !important;
         width: 100vw !important;
         padding-bottom: 0 !important;
     }
 
     .hud-container {
         height: 100vh !important;
+        height: 100dvh !important;
         max-height: 100vh !important;
+        max-height: 100dvh !important;
         width: 100vw !important;
         display: flex !important;
         flex-direction: column !important;
@@ -5730,7 +5733,7 @@ label[for="new-task-xp-input"],
         min-height: 0;
         display: flex;
         flex-direction: column;
-        padding: 4px 4px calc(58px + env(safe-area-inset-bottom)) 4px !important;
+        padding: 4px 4px calc(86px + env(safe-area-inset-bottom, 0px)) 4px !important;
         overflow: hidden !important;
         position: relative !important;
     }
@@ -6267,7 +6270,9 @@ body.is-iphone {
 html.is-mobile-device .hud-container,
 html.is-iphone .hud-container {
     height: 100vh !important;
+    height: 100dvh !important;
     max-height: 100vh !important;
+    max-height: 100dvh !important;
     width: 100vw !important;
     max-width: 100vw !important;
     display: flex !important;
@@ -6410,7 +6415,7 @@ html.is-iphone .hud-workspace {
     min-height: 0;
     display: flex;
     flex-direction: column;
-    padding: 4px 4px calc(58px + env(safe-area-inset-bottom)) 4px !important;
+    padding: 4px 4px calc(86px + env(safe-area-inset-bottom, 0px)) 4px !important;
     overflow: hidden !important;
     position: relative !important;
 }
@@ -6456,9 +6461,29 @@ html.is-iphone .flowchart-hint {
 
 html.is-mobile-device .app-global-footer,
 html.is-iphone .app-global-footer {
-    padding: 4px 8px !important;
-    margin-bottom: 58px !important;
+    position: fixed !important;
+    bottom: calc(56px + env(safe-area-inset-bottom, 0px)) !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    height: 28px !important;
+    min-height: 28px !important;
+    margin: 0 !important;
+    padding: 0 10px !important;
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    direction: rtl !important;
+    z-index: 999 !important;
+    background: rgba(10, 15, 29, 0.96) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+    border-top: 1px solid rgba(56, 189, 248, 0.25) !important;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.6) !important;
+    box-sizing: border-box !important;
     font-size: 0.68rem !important;
+    pointer-events: auto !important;
 }
 
 /* ==========================================================================
@@ -8089,17 +8114,29 @@ html.is-iphone .app-global-footer {
 
 @media (max-width: 768px), screen and (max-device-width: 768px) {
     .app-global-footer {
-        padding: 3px 12px !important;
-        margin-bottom: 58px !important; /* Lift above mobile bottom nav bar */
+        position: fixed !important;
+        bottom: calc(56px + env(safe-area-inset-bottom, 0px)) !important;
+        left: 0 !important;
+        right: 0 !important;
+        width: 100% !important;
+        height: 28px !important;
+        min-height: 28px !important;
+        margin: 0 !important;
+        padding: 0 10px !important;
         display: flex !important;
         flex-direction: row !important;
         justify-content: space-between !important;
         align-items: center !important;
-        position: relative !important;
         direction: rtl !important; /* Right: Credit, Left: Version */
-        width: 100% !important;
+        z-index: 999 !important; /* Above canvas, below nav tabs (1000) */
+        background: rgba(10, 15, 29, 0.96) !important;
+        backdrop-filter: blur(12px) !important;
+        -webkit-backdrop-filter: blur(12px) !important;
+        border-top: 1px solid rgba(56, 189, 248, 0.25) !important;
+        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.6) !important;
         box-sizing: border-box !important;
-        font-size: 0.68rem;
+        font-size: 0.68rem !important;
+        pointer-events: auto !important;
     }
     .footer-left-version {
         position: static !important;
