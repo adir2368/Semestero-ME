@@ -121,12 +121,113 @@
     ];
 
     // ==========================================================================
-    // 2. Mandatory Semester Layout - Catalog 2026 (תשפ"ו / תשפ"ז - רפורמה מעודכנת)
+    // 2. Mandatory Semester Layout - Catalog 2027 (תשפ"ז - אוקטובר הקרוב)
+    // קטלוג רישום עדכני עבור מי שמתחיל באוקטובר תשפ״ז
+    // ==========================================================================
+    const SUGGESTED_MANDATORY_SYLLABUS_2027 = [
+        {
+            semester: 1,
+            title: "שנה א׳ - סמסטר א׳ (תשפ״ז)",
+            targetCredits: 19.0,
+            courses: [
+                { code: "01040041", altCode: "104041", name: "חדו\"א 1מ' 1", credits: 5.0, type: "mandatory", prereqs: [] },
+                { code: "01040065", altCode: "104065", name: "אלגברה 1 מ' 2", credits: 5.0, type: "mandatory", prereqs: [] },
+                { code: "01250001", altCode: "125001", name: "כימיה כללית", credits: 3.0, type: "mandatory", prereqs: [] },
+                { code: "01140051", altCode: "114051", name: "פיזיקה 1", credits: 3.5, type: "mandatory", trackGroup: "physics_1", mutuallyExclusiveWith: ["01140071"], prereqs: [] },
+                { code: "01140071", altCode: "114071", name: "פיזיקה 1מ'", credits: 3.5, type: "mandatory", trackGroup: "physics_1", mutuallyExclusiveWith: ["01140051"], prereqs: [] },
+                { code: "00350026", altCode: "035026", name: "מבוא יצירתי להנדסת מכונות", credits: 2.5, type: "mandatory", prereqs: [] }
+            ]
+        },
+        {
+            semester: 2,
+            title: "שנה א׳ - סמסטר ב׳",
+            targetCredits: 20.0,
+            courses: [
+                { code: "01040043", altCode: "104043", name: "חדו\"א 2מ' 1", credits: 5.0, type: "mandatory", prereqs: ["01040041"] },
+                { code: "00340028", altCode: "034028", name: "מכניקת מוצקים 1", credits: 4.0, type: "mandatory", prereqs: ["01040041", "01040065", "01140051"] },
+                { code: "01040131", altCode: "104131", name: "משוואות דיפרנציאליות רגילות/ח", credits: 2.5, type: "mandatory", prereqs: ["01040041", "01040065"] },
+                { code: "03140533", altCode: "314533", name: "מבוא להנדסת חומרים מ'", credits: 3.5, type: "mandatory", prereqs: ["01250001"] },
+                { code: "00340061", altCode: "034061", name: "מבוא לגרפיקה ותכנון הנדסי", credits: 3.5, type: "mandatory", prereqs: [] },
+                { code: "01140039", altCode: "114039", name: "מעבדה לפיזיקה 1מח'", credits: 1.0, type: "mandatory", prereqs: ["01140051"] },
+                { code: "01250013", altCode: "125013", name: "מעבדה בכימיה", credits: 0.5, type: "mandatory", prereqs: ["01250001"] }
+            ]
+        },
+        {
+            semester: 3,
+            title: "שנה ב׳ - סמסטר ג׳",
+            targetCredits: 18.5,
+            courses: [
+                { code: "00340053", altCode: "034053", name: "מכניקת מוצקים 2 מורחב", credits: 5.0, type: "mandatory", prereqs: ["00340028"] },
+                { code: "00340043", altCode: "034043", name: "שרטוט הנדסי ממוחשב", credits: 2.5, type: "mandatory", prereqs: ["00340061"] },
+                { code: "00340056", altCode: "034056", name: "מבוא לחישוב מדעי והנדסי", credits: 4.0, type: "mandatory", prereqs: ["01040065", "01040043"] },
+                { code: "00340035", altCode: "034035", name: "תרמודינמיקה 1", credits: 4.0, type: "mandatory", prereqs: ["01040043"] },
+                { code: "01040228", altCode: "104228", name: "מד\"ח מ'", credits: 3.0, type: "mandatory", prereqs: ["01040043", "01040131"] }
+            ]
+        },
+        {
+            semester: 4,
+            title: "שנה ב׳ - סמסטר ד׳",
+            targetCredits: 21.0,
+            courses: [
+                { code: "00340030", altCode: "034030", name: "תהליכי ייצור", credits: 3.5, type: "mandatory", prereqs: ["00340053", "00340061", "03140533"] },
+                { code: "00340010", altCode: "034010", name: "דינמיקה", credits: 5.0, type: "mandatory", prereqs: ["00340028", "01140051", "01040043", "01040131"] },
+                { code: "00340055", altCode: "034055", name: "תורת הזרימה 1 מורחב", credits: 5.0, type: "mandatory", prereqs: ["00340035", "01040131", "01040228"] },
+                { code: "00340032", altCode: "034032", name: "מערכות ליניאריות", credits: 4.0, type: "mandatory", prereqs: ["01040065", "01040131"] },
+                { code: "01140052", altCode: "114052", name: "פיזיקה 2", credits: 3.5, type: "mandatory", trackGroup: "physics_2", mutuallyExclusiveWith: ["01140075"], prereqs: ["01140051", "01040043"] },
+                { code: "01140075", altCode: "114075", name: "פיזיקה 2ממ'", credits: 5.0, type: "mandatory", trackGroup: "physics_2", mutuallyExclusiveWith: ["01140052"], prereqs: ["01140071", "01040043"] }
+            ]
+        },
+        {
+            semester: 5,
+            title: "שנה ג׳ - סמסטר ה׳",
+            targetCredits: 20.5,
+            courses: [
+                { code: "00340041", altCode: "034041", name: "מעבר חום", credits: 4.0, type: "mandatory", prereqs: ["00340035", "00340055", "01040228"] },
+                { code: "00340040", altCode: "034040", name: "מבוא לבקרה", credits: 3.0, type: "mandatory", prereqs: ["00340032"] },
+                { code: "00340022", altCode: "034022", name: "מבוא למכטרוניקה", credits: 2.5, type: "mandatory", prereqs: ["00340032"] },
+                { code: "00340054", altCode: "034054", name: "תכן מכני 1 מ'", credits: 4.0, type: "mandatory", prereqs: ["00340053", "00340061", "03140533"] },
+                { code: "00340058", altCode: "034058", name: "הסתברות וסטטיסטיקה מה' מכ'", credits: 3.0, type: "mandatory", prereqs: ["01040043"] },
+                { code: "01140032", altCode: "114032", name: "מעב' לפיזיקה 1 ח", credits: 1.0, type: "mandatory", prereqs: ["01140051", "01140052"] },
+                { code: "00340051", altCode: "034051", name: "דינמיקה ומכניקה של תנודות", credits: 3.0, type: "mandatory", prereqs: ["00340010", "00340032"] }
+            ]
+        },
+        {
+            semester: 6,
+            title: "שנה ג׳ - סמסטר ו׳",
+            targetCredits: 9.0,
+            courses: [
+                { code: "00340034", altCode: "034034", name: "הנע חשמלי", credits: 2.5, type: "mandatory", prereqs: ["00340032"] },
+                { code: "00340057", altCode: "034057", name: "מעבדה מתקדמת הנ. מכונות", credits: 4.0, type: "mandatory", prereqs: ["00340041", "00340051", "01140032"] },
+                { code: "00340371", altCode: "034371", name: "פרויקט תכן לייצור", credits: 2.5, type: "mandatory", prereqs: ["00340030", "00340054"] }
+            ]
+        },
+        {
+            semester: 7,
+            title: "שנה ד׳ - סמסטר ז׳",
+            targetCredits: 3.5,
+            courses: [
+                { code: "00340379", altCode: "034379", name: "פרויקט גמר הנדסי 1", credits: 3.0, type: "final_project", prereqs: ["00340054", "00340371"] },
+                { code: "00340382", altCode: "034382", name: "מתודולוגיות פיתוח הנדסי 1", credits: 0.5, type: "mandatory", prereqs: [] }
+            ]
+        },
+        {
+            semester: 8,
+            title: "שנה ד׳ - סמסטר ח׳",
+            targetCredits: 3.5,
+            courses: [
+                { code: "00340380", altCode: "034380", name: "פרויקט גמר הנדסי 2", credits: 3.0, type: "final_project", prereqs: ["00340379"] },
+                { code: "00340383", altCode: "034383", name: "מתודולוגיות פיתוח הנדסי 2", credits: 0.5, type: "mandatory", prereqs: ["00340382"] }
+            ]
+        }
+    ];
+
+    // ==========================================================================
+    // 3. Alternative/Experimental Layout with Python
     // ==========================================================================
     const SUGGESTED_MANDATORY_SYLLABUS_2026 = [
         {
             semester: 1,
-            title: "שנה א׳ - סמסטר א׳",
+            title: "שנה א׳ - סמסטר א׳ (פייתון)",
             targetCredits: 20.5,
             courses: [
                 { code: "01040041", altCode: "104041", name: "חדו\"א 1מ' 1", credits: 5.0, type: "mandatory", prereqs: [] },
@@ -152,7 +253,7 @@
         },
         {
             semester: 3,
-            title: "שנה ב׳ - סמסטר ג׳ (חורף נוכחי)",
+            title: "שנה ב׳ - סמסטר ג׳",
             targetCredits: 19.5,
             courses: [
                 { code: "00340053", altCode: "034053", name: "מכניקת מוצקים 2 מורחב", credits: 5.0, type: "mandatory", prereqs: ["00340028"] },
@@ -165,7 +266,7 @@
         },
         {
             semester: 4,
-            title: "שנה ב׳ - סמסטר ד׳ (אביב)",
+            title: "שנה ב׳ - סמסטר ד׳",
             targetCredits: 18.0,
             courses: [
                 { code: "00340030", altCode: "034030", name: "תהליכי ייצור", credits: 3.5, type: "mandatory", prereqs: ["00340053", "00340061", "03140533"] },
@@ -453,6 +554,9 @@
     SUGGESTED_MANDATORY_SYLLABUS_2024.forEach(sem => {
         (sem.courses || []).forEach(indexCourse);
     });
+    SUGGESTED_MANDATORY_SYLLABUS_2027.forEach(sem => {
+        (sem.courses || []).forEach(indexCourse);
+    });
     SUGGESTED_MANDATORY_SYLLABUS_2026.forEach(sem => {
         (sem.courses || []).forEach(indexCourse);
     });
@@ -460,30 +564,30 @@
         (sem.courses || []).forEach(indexCourse);
     });
 
-    // Alias for default backwards compatibility
-    const SUGGESTED_MANDATORY_SYLLABUS = SUGGESTED_MANDATORY_SYLLABUS_2024;
+    // Alias for default backwards compatibility (Tashpaz 2027)
+    const SUGGESTED_MANDATORY_SYLLABUS = SUGGESTED_MANDATORY_SYLLABUS_2027;
 
     const CURRICULUM_CATALOGS = {
-        year_2024: {
-            id: 'year_2024',
-            title: 'תוכנית לימודים (תשפ״ד - אוקטובר 2023)',
-            description: 'סילבוס קלאסי למתחילים בתשפ״ד (כולל מבוא יצירתי להנדסת מכונות)',
-            syllabus: SUGGESTED_MANDATORY_SYLLABUS_2024,
+        year_2027: {
+            id: 'year_2027',
+            title: 'תוכנית לימודים (תשפ״ז - אוקטובר הקרוב)',
+            description: 'קטלוג רישום עדכני למתחילים באוקטובר תשפ״ז (כולל מבוא יצירתי בסמסטר א׳, מעבדה 1מח׳ בסמסטר ב׳)',
+            syllabus: SUGGESTED_MANDATORY_SYLLABUS_2027,
             mandatoryCredits: 109.5
         },
         year_2025: {
             id: 'year_2025',
             title: 'תוכנית לימודים (תשפ״ה - אוקטובר 2024)',
-            description: 'קטלוג רישום עדכני למתחילים באוקטובר 2024 (מעבדה 1מח׳ נדחתה לסמסטר ב׳)',
+            description: 'קטלוג רישום למתחילים באוקטובר 2024 (תשפ״ה)',
             syllabus: SUGGESTED_MANDATORY_SYLLABUS_2024,
             mandatoryCredits: 109.5
         },
-        year_2027: {
-            id: 'year_2027',
-            title: 'תוכנית לימודים (תשפ״ז - רפורמה עתידית)',
-            description: 'תוכנית מעודכנת בהתהוות (לפי קדמים, פייתון ומבנה שעות חדש)',
-            syllabus: SUGGESTED_MANDATORY_SYLLABUS_2026,
-            mandatoryCredits: 107.0
+        year_2024: {
+            id: 'year_2024',
+            title: 'תוכנית לימודים (תשפ״ד - אוקטובר 2023)',
+            description: 'סילבוס קלאסי למתחילים בתשפ״ד',
+            syllabus: SUGGESTED_MANDATORY_SYLLABUS_2024,
+            mandatoryCredits: 109.5
         },
         barak: {
             id: 'barak',
@@ -498,6 +602,7 @@
     global.PLANNER_CATALOG = {
         DEGREE_RULES: DEGREE_RULES,
         SUGGESTED_MANDATORY_SYLLABUS: SUGGESTED_MANDATORY_SYLLABUS,
+        SUGGESTED_MANDATORY_SYLLABUS_2027: SUGGESTED_MANDATORY_SYLLABUS_2027,
         SUGGESTED_MANDATORY_SYLLABUS_2024: SUGGESTED_MANDATORY_SYLLABUS_2024,
         SUGGESTED_MANDATORY_SYLLABUS_2026: SUGGESTED_MANDATORY_SYLLABUS_2026,
         SUGGESTED_BARAK_SYLLABUS: SUGGESTED_BARAK_SYLLABUS,

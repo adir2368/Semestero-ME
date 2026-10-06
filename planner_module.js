@@ -11,7 +11,7 @@
     // Module State & Configuration
     // --------------------------------------------------------------------------
     let currentMode = 'custom'; // 'custom' | 'suggested'
-    let selectedTrack = 'regular_2026'; // 'regular_2026' | 'barak'
+    let selectedTrack = 'year_2027'; // 'year_2027' | 'year_2025' | 'year_2024' | 'barak'
     let isReservistDeduction = false;
     let selectedCategory = 'ALL'; // 'ALL' | 'A' | 'B' | 'C' | 'D' | 'E' | 'UNASSIGNED'
     let searchQuery = '';
@@ -671,7 +671,10 @@
         if (track === 'barak' && global.PLANNER_CATALOG.SUGGESTED_BARAK_SYLLABUS) {
             return global.PLANNER_CATALOG.SUGGESTED_BARAK_SYLLABUS;
         }
-        if ((track === 'year_2027' || track === 'year_2026') && global.PLANNER_CATALOG.SUGGESTED_MANDATORY_SYLLABUS_2026) {
+        if (track === 'year_2027' && global.PLANNER_CATALOG.SUGGESTED_MANDATORY_SYLLABUS_2027) {
+            return global.PLANNER_CATALOG.SUGGESTED_MANDATORY_SYLLABUS_2027;
+        }
+        if (track === 'year_2026' && global.PLANNER_CATALOG.SUGGESTED_MANDATORY_SYLLABUS_2026) {
             return global.PLANNER_CATALOG.SUGGESTED_MANDATORY_SYLLABUS_2026;
         }
         if ((track === 'year_2025' || track === 'year_2024') && global.PLANNER_CATALOG.SUGGESTED_MANDATORY_SYLLABUS_2024) {
@@ -1611,9 +1614,10 @@
                     localStorage.setItem(PLANNER_TRACK_KEY, selectedTrack);
                 } catch (err) {}
                 renderDegreePlanner();
-                let trackName = 'תוכנית לימודים (תשפ״ה - אוקטובר 2024)';
-                if (selectedTrack === 'year_2024') trackName = 'תוכנית לימודים (תשפ״ד - אוקטובר 2023)';
-                else if (selectedTrack === 'year_2027' || selectedTrack === 'year_2026') trackName = 'תוכנית לימודים (תשפ״ז - רפורמה עתידית)';
+                let trackName = 'תוכנית לימודים (תשפ״ז - אוקטובר הקרוב)';
+                if (selectedTrack === 'year_2025') trackName = 'תוכנית לימודים (תשפ״ה - אוקטובר 2024)';
+                else if (selectedTrack === 'year_2024') trackName = 'תוכנית לימודים (תשפ״ד - אוקטובר 2023)';
+                else if (selectedTrack === 'year_2027') trackName = 'תוכנית לימודים (תשפ״ז - אוקטובר הקרוב)';
                 else if (selectedTrack === 'barak') trackName = 'מסלול ברקים (תואר מזורז ומצטיינים)';
                 showPlannerToast(`שנתון/מסלול הלימודים עודכן: ${trackName} 🏛️`, false);
             });
