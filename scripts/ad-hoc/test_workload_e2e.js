@@ -125,22 +125,41 @@ app.whenReady().then(async () => {
 
                 // Click workload button to open popover
                 wlBtn.click();
-                await new Promise(r => setTimeout(r, 200));
+                await new Promise(r => setTimeout(r, 400));
 
                 const popover = document.getElementById('workload-popover-overlay');
                 const isVisible = popover && popover.style.display === 'flex';
                 const slider = document.getElementById('workload-slider-val');
                 if (!slider) return { error: 'Popover slider not rendered' };
 
-                // Set custom score 4.5 on slider
-                slider.value = '4.5';
-                slider.dispatchEvent(new Event('input', { bubbles: true }));
-                const saveBtn = document.getElementById('btn-workload-save');
-                saveBtn.click();
-                await new Promise(r => setTimeout(r, 500));
+                return {
+                    courseCode,
+                    initialScore,
+                    popoverOpened: isVisible
+                };
+            })()
+        `);
+        console.log('5. Interactive Popover Opened:', popoverTest);
 
-                // Check updated button and semester widget
-                const updatedBtn = document.querySelector(\`.btn-course-workload[data-code="\${courseCode}"]\`);
+        await new Promise(r => setTimeout(r, 300));
+        const popoverShotBuf = await win.capturePage();
+        const popoverShotPath = path.join(__dirname, '..', '..', 'open_popover_verified.png');
+        fs.writeFileSync(popoverShotPath, popoverShotBuf.toPNG());
+        console.log('Popover screenshot saved to:', popoverShotPath);
+
+        // Now test save
+        const saveCheck = await win.webContents.executeJavaScript(`
+            (async () => {
+                const slider = document.getElementById('workload-slider-val');
+                if (slider) {
+                    slider.value = '4.5';
+                    slider.dispatchEvent(new Event('input', { bubbles: true }));
+                }
+                const saveBtn = document.getElementById('btn-workload-save');
+                if (saveBtn) saveBtn.click();
+                await new Promise(r => setTimeout(r, 400));
+
+                const updatedBtn = document.querySelector('.btn-course-workload[data-code="01040041"]');
                 const hasOverrideClass = updatedBtn ? updatedBtn.classList.contains('has-override') : false;
                 const newScore = updatedBtn ? updatedBtn.getAttribute('data-workload') : null;
 
@@ -148,15 +167,13 @@ app.whenReady().then(async () => {
                 const updatedSemWidget = parentSemCol ? parentSemCol.querySelector('.cheesefork-workload-widget').innerText.replace(/\\s+/g, ' ').trim() : null;
 
                 return {
-                    courseCode,
-                    initialScore,
-                    popoverOpened: isVisible,
                     hasOverrideClass,
                     newScore,
                     updatedSemWidget
                 };
             })()
         `);
+        console.log('6. Save Verification:', saveCheck);
         console.log('5. Interactive Popover & Override Test:', popoverTest);
 
         // Take screenshot of the planner with workload badges

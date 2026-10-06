@@ -243,6 +243,7 @@
         kettlebellEmpty: `<svg class="cf-wl-icon cf-weight empty" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10h10l2 11H5L7 10z"/><path d="M9 10V6a3 3 0 0 1 6 0v4"/></svg>`,
         kettlebellFilled: `<svg class="cf-wl-icon cf-weight filled" viewBox="0 0 24 24" width="13" height="13" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10h10l2 11H5L7 10z"/><path d="M9 10V6a3 3 0 0 1 6 0v4" fill="none"/></svg>`,
         kettlebellHalf: `<svg class="cf-wl-icon cf-weight half" viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="1.5"><defs><linearGradient id="cfHalfGrad" x1="0" y1="0" x2="100%" y2="0"><stop offset="50%" stop-color="currentColor"/><stop offset="50%" stop-color="transparent"/></linearGradient></defs><path d="M7 10h10l2 11H5L7 10z" fill="url(#cfHalfGrad)"/><path d="M9 10V6a3 3 0 0 1 6 0v4" fill="none"/></svg>`,
+        scale: `<svg class="cf-wl-icon cf-scale" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="M7 21h10"/><path d="M12 3v18"/><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/></svg>`,
         scaleBadge: `<svg class="cf-badge-icon" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -1px;"><path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="M7 21h10"/><path d="M12 3v18"/><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/></svg>`,
         kettlebellBadge: `<svg class="cf-badge-icon" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -1px;"><path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="M7 21h10"/><path d="M12 3v18"/><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/></svg>`,
         dumbbell: `<svg class="cf-wl-icon cf-dumbbell" viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M6 5h2v14H6V5zm10 0h2v14h-2V5zM3 8h2v8H3V8zm16 0h2v8h-2V8zM8 11h8v2H8v-2z"/></svg>`
@@ -250,7 +251,7 @@
 
     function renderCheeseForkWorkloadMeter(totalScore) {
         // CheeseFork scale: 5 discrete weight slots (scale 10 to 25 pts)
-        // <= 14: Light feather
+        // <= 14: Light / balanced (scale)
         // 14 - 24: Progressive kettlebell weights (1 to 5 weights)
         // >= 24.5: Full dumbbell heavy weight
         const minWl = 12;
@@ -275,7 +276,7 @@
                     <span class="cf-wl-score">${totalScore}</span>
                 </div>
                 <div class="cf-wl-gauge">
-                    <span class="cf-wl-end feather" title="עומס קל">${CHEESEFORK_ICONS.feather}</span>
+                    <span class="cf-wl-end scale" title="עומס מאוזן">${CHEESEFORK_ICONS.scale}</span>
                     <span class="cf-wl-weights">${weightsHtml}</span>
                     <span class="cf-wl-end dumbbell" title="עומס כבד">${CHEESEFORK_ICONS.dumbbell}</span>
                 </div>
@@ -1663,43 +1664,28 @@
         overlay.innerHTML = `
             <div class="workload-popover-box" onclick="event.stopPropagation();">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <h4 class="workload-popover-title" style="display: flex; align-items: center; gap: 6px;">${CHEESEFORK_ICONS.scaleBadge} הגדרת רמת עומס אישית לקורס</h4>
-                    <span style="font-size: 0.75rem; color: #38bdf8; font-family: monospace;">${escapeHtml(code)}</span>
+                    <h4 class="workload-popover-title" style="display: flex; align-items: center; gap: 8px;">${CHEESEFORK_ICONS.scaleBadge} הגדרת רמת עומס</h4>
+                    <span style="font-size: 0.8rem; color: #38bdf8; font-family: monospace; background: rgba(56, 189, 248, 0.12); padding: 2px 8px; border-radius: 4px; border: 1px solid rgba(56, 189, 248, 0.3);">${escapeHtml(code)}</span>
                 </div>
                 <div class="workload-popover-desc">
-                    <strong>${escapeHtml(name)}</strong><br>
-                    גרור את הסליידר לבחירת רמת העומס/קושי (1 עד 5 בקפיצות של 0.5, תואם לסולם CheeseFork):
+                    <strong style="color: #f1f5f9; font-size: 0.92rem;">${escapeHtml(name)}</strong>
                 </div>
                 <div class="workload-popover-slider-wrap">
-                    <div class="workload-slider-val-row">
-                        <span style="font-size: 0.82rem; color: #cbd5e1;">רמת עומס נבחרת:</span>
-                        <span class="workload-slider-badge" id="workload-slider-display">
-                            ${CHEESEFORK_ICONS.scaleBadge} <strong id="workload-slider-num">${displayScore}</strong> / 5
-                        </span>
+                    <div class="workload-slider-hero">
+                        <span class="workload-slider-hero-num" id="workload-slider-num">${Number(displayScore).toFixed(1)}</span>
+                        <span class="workload-slider-hero-max">/ 5.0</span>
                     </div>
                     <input type="range" id="workload-slider-val" class="workload-range-slider" min="1.0" max="5.0" step="0.5" value="${displayScore}">
-                    <div class="workload-slider-ticks">
-                        <span>1 (קל)</span>
-                        <span>2</span>
-                        <span>3 (בינוני)</span>
-                        <span>4</span>
-                        <span>5 (כבד)</span>
-                    </div>
-                </div>
-                <div style="display: flex; gap: 6px; justify-content: center; flex-wrap: wrap;">
-                    <button type="button" class="btn btn-sm btn-outline btn-wl-preset" data-val="1.0" style="padding: 2px 8px; font-size: 0.72rem;">1 (קל מאוד)</button>
-                    <button type="button" class="btn btn-sm btn-outline btn-wl-preset" data-val="2.5" style="padding: 2px 8px; font-size: 0.72rem;">2.5 (סביר)</button>
-                    <button type="button" class="btn btn-sm btn-outline btn-wl-preset" data-val="3.5" style="padding: 2px 8px; font-size: 0.72rem;">3.5 (בינוני-גבוה)</button>
-                    <button type="button" class="btn btn-sm btn-outline btn-wl-preset" data-val="4.5" style="padding: 2px 8px; font-size: 0.72rem;">4.5 (כבד)</button>
-                    <button type="button" class="btn btn-sm btn-outline btn-wl-preset" data-val="5.0" style="padding: 2px 8px; font-size: 0.72rem;">5.0 (מקסימלי)</button>
                 </div>
                 <div class="workload-popover-actions">
-                    <button type="button" class="btn btn-sm btn-primary w-full" id="btn-workload-save" style="flex: 2; background: #0284c7; border-color: #38bdf8;">
-                        💾 שמור דירוג
+                    <button type="button" class="btn btn-sm btn-primary" id="btn-workload-save" style="flex: 2; background: #0284c7; border-color: #38bdf8; font-weight: 700;">
+                        שמירה
                     </button>
-                    <button type="button" class="btn btn-sm btn-outline" id="btn-workload-reset" style="flex: 1; border-color: #ef4444; color: #f87171;" title="אפס לבייסליין המחושב">
+                    ${existingOverride !== null ? `
+                    <button type="button" class="btn btn-sm btn-outline" id="btn-workload-reset" style="flex: 1; border-color: rgba(239, 68, 68, 0.5); color: #f87171;" title="איפוס לבייסליין המקורי">
                         איפוס
                     </button>
+                    ` : ''}
                     <button type="button" class="btn btn-sm btn-secondary" id="btn-workload-cancel" style="flex: 1;">
                         ביטול
                     </button>
@@ -1723,18 +1709,6 @@
             sliderEl.focus();
         }
 
-        // Preset buttons
-        overlay.querySelectorAll('.btn-wl-preset').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const v = btn.getAttribute('data-val');
-                if (sliderEl) {
-                    sliderEl.value = v;
-                    updateSliderDisplay(v);
-                }
-            });
-        });
-
         // Close handlers
         const closePopover = () => {
             overlay.style.display = 'none';
@@ -1756,12 +1730,15 @@
             }
         };
 
-        overlay.querySelector('#btn-workload-reset').onclick = () => {
-            setCourseUserWorkload(code, altCode, null);
-            closePopover();
-            renderDegreePlanner();
-            showPlannerToast(`דירוג העומס אופס לבייסליין המערכת לקורס ${name}`, false);
-        };
+        const resetBtn = overlay.querySelector('#btn-workload-reset');
+        if (resetBtn) {
+            resetBtn.onclick = () => {
+                setCourseUserWorkload(code, altCode, null);
+                closePopover();
+                renderDegreePlanner();
+                showPlannerToast(`דירוג העומס אופס לבייסליין המערכת לקורס ${name}`, false);
+            };
+        }
     }
 
     // --------------------------------------------------------------------------

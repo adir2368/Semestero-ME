@@ -16744,13 +16744,13 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.10.07-v2.1.3",
-    version: "2.1.3",
-    build: "201004",
-    date: "2026-10-07 01:05",
-    description: "גרסה 2.1.3: סליידר גרירה אינטראקטיבי להגדרת עומס קורסים (1-5 בקפיצות 0.5) וסמל מאזניים נקי"
+    code: "REV-2026.10.07-v2.1.4",
+    version: "2.1.4",
+    build: "201005",
+    date: "2026-10-07 01:15",
+    description: "גרסה 2.1.4: שדרוג חלונית עומס קורס: סליידר ברוחב מלא, תצוגת ציון מרכזית ועיצוב נקי ללא עומס מיותר"
 };
-window.APP_VERSION = "2.1.3";
+window.APP_VERSION = "2.1.4";
 
 function ensureBaselineRevisions() {
     if (!gameState.revisions || !Array.isArray(gameState.revisions) || gameState.revisions.length === 0) {

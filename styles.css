@@ -8894,8 +8894,14 @@ html.is-iphone .app-global-footer {
     transition: transform 0.2s ease, color 0.2s ease;
 }
 
+.cheesefork-workload-widget .cf-wl-end.scale,
 .cheesefork-workload-widget .cf-wl-end.feather {
     color: #cbd5e1;
+}
+
+.cheesefork-workload-widget .cf-wl-end.scale:hover {
+    color: #38bdf8;
+    transform: scale(1.1);
 }
 
 .cheesefork-workload-widget .cf-wl-end.dumbbell {
@@ -9006,107 +9012,114 @@ html.is-iphone .app-global-footer {
 }
 
 .workload-popover-box {
-    background: #0f172a;
+    background: #0b1329;
     border: 1px solid rgba(56, 189, 248, 0.35);
-    border-radius: 12px;
-    padding: 18px 20px;
-    width: 320px;
-    max-width: 90vw;
-    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.8), 0 0 20px rgba(56, 189, 248, 0.15);
+    border-radius: 16px;
+    padding: 22px 24px;
+    width: 360px;
+    max-width: 92vw;
+    box-shadow: 0 20px 45px rgba(0, 0, 0, 0.85), 0 0 25px rgba(56, 189, 248, 0.15);
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 16px;
     direction: rtl;
     text-align: right;
-    animation: popoverFadeIn 0.15s ease-out;
+    animation: popoverFadeIn 0.18s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @keyframes popoverFadeIn {
-    from { opacity: 0; transform: scale(0.95); }
-    to { opacity: 1; transform: scale(1); }
+    from { opacity: 0; transform: scale(0.96) translateY(6px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
 }
 
 .workload-popover-title {
-    font-size: 0.95rem;
+    font-size: 1.05rem;
     font-weight: 800;
     color: #f8fafc;
     margin: 0;
 }
 
 .workload-popover-desc {
-    font-size: 0.78rem;
+    font-size: 0.85rem;
     color: #94a3b8;
-    line-height: 1.4;
+    line-height: 1.45;
 }
 
+/* Full-width interactive slider card */
 .workload-popover-slider-wrap {
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    background: rgba(15, 23, 42, 0.6);
-    padding: 12px 14px;
-    border-radius: 8px;
+    gap: 14px;
+    background: rgba(15, 23, 42, 0.7);
+    padding: 16px 16px;
+    border-radius: 12px;
     border: 1px solid rgba(56, 189, 248, 0.2);
+    width: 100%;
+    box-sizing: border-box;
 }
 
-.workload-slider-val-row {
+.workload-slider-hero {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    align-items: baseline;
+    justify-content: center;
+    gap: 8px;
 }
 
-.workload-slider-badge {
-    font-size: 1.1rem;
-    font-weight: 800;
+.workload-slider-hero-num {
+    font-size: 2.3rem;
+    font-weight: 900;
     color: #38bdf8;
-    background: rgba(56, 189, 248, 0.15);
-    border: 1px solid rgba(56, 189, 248, 0.4);
-    padding: 2px 10px;
-    border-radius: 20px;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
+    font-family: monospace;
+    line-height: 1;
+    text-shadow: 0 0 16px rgba(56, 189, 248, 0.5);
+}
+
+.workload-slider-hero-max {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #64748b;
 }
 
 .workload-range-slider {
     width: 100%;
-    height: 8px;
-    border-radius: 4px;
-    background: #334155;
+    height: 10px;
+    border-radius: 6px;
+    background: linear-gradient(to left, rgba(239, 68, 68, 0.4), rgba(234, 179, 8, 0.4), rgba(56, 189, 248, 0.4));
     outline: none;
     cursor: pointer;
     accent-color: #38bdf8;
     -webkit-appearance: none;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.6);
+    margin: 4px 0;
 }
 
 .workload-range-slider::-webkit-slider-thumb {
     -webkit-appearance: none;
-    width: 22px;
-    height: 22px;
+    width: 24px;
+    height: 24px;
     border-radius: 50%;
     background: #38bdf8;
-    cursor: pointer;
-    box-shadow: 0 0 10px rgba(56, 189, 248, 0.6);
-    border: 2px solid #ffffff;
-    transition: transform 0.1s ease;
+    cursor: grab;
+    box-shadow: 0 0 12px rgba(56, 189, 248, 0.8), 0 2px 6px rgba(0, 0, 0, 0.5);
+    border: 3px solid #ffffff;
+    transition: transform 0.12s ease, background-color 0.12s ease;
 }
 
 .workload-range-slider::-webkit-slider-thumb:hover {
-    transform: scale(1.15);
+    transform: scale(1.18);
+    background: #7dd3fc;
 }
 
-.workload-slider-ticks {
-    display: flex;
-    justify-content: space-between;
-    font-size: 0.72rem;
-    color: #64748b;
-    padding: 0 4px;
+.workload-range-slider::-webkit-slider-thumb:active {
+    cursor: grabbing;
+    transform: scale(1.25);
+    box-shadow: 0 0 18px rgba(56, 189, 248, 1);
 }
 
 .workload-popover-actions {
     display: flex;
     gap: 8px;
-    margin-top: 4px;
+    margin-top: 2px;
 }
 
 /* Right Sidebar: Rules & Add Electives */
