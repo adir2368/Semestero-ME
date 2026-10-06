@@ -1,7 +1,7 @@
 {
   "name": "semestero-me",
   "productName": "Semestero ME",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "Semestero ME - Academic Skill Tree and Degree Orchestration System",
   "main": "main.js",
   "scripts": {

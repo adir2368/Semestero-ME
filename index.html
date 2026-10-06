@@ -544,7 +544,7 @@
                     <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; padding: 10px 14px; background: rgba(56, 189, 248, 0.08); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 8px;">
                         <div style="display: flex; align-items: center; gap: 8px;">
                             <span style="font-size: 0.82rem; color: #94a3b8;">גרסת מערכת פעילה:</span>
-                            <span style="font-weight: 700; color: #38bdf8; font-family: monospace; font-size: 0.88rem;" id="display-system-version">v2.1.0</span>
+                            <span style="font-weight: 700; color: #38bdf8; font-family: monospace; font-size: 0.88rem;" id="display-system-version">v2.1.1</span>
                         </div>
                         <span class="app-version-badge" style="font-size: 0.66rem; background: rgba(15, 23, 42, 0.6); border-color: rgba(56, 189, 248, 0.35); color: #7dd3fc;">🔒 נעול לעריכה</span>
                     </div>
@@ -590,7 +590,8 @@
                         <span class="app-version-badge" style="font-size: 0.65rem; border-color: rgba(56, 189, 248, 0.4); color: #38bdf8;">יומן גרסאות</span>
                     </div>
                     <ul class="whats-new-list" style="list-style-type: disc; padding-right: 22px; margin: 0; color: #e2e8f0; font-size: 0.88rem; line-height: 1.85;">
-                        <li><strong>v2.1.0 (07/10/2026):</strong> הוספת שנתון תשפ״ו (אוקטובר 2025) עם קורס שפת פייתון בסמסטר א׳, יישור וקיצור שמות השנתונים בבורר (הסרת 'תוכנית לימודים' וסוגריים מברקים), והתאמה מדויקת של קטלוג תשפ״ז למתחילים באוקטובר.</li>
+                        <li><strong>v2.1.1 (07/10/2026):</strong> נרמול עומס/קושי הקורסים לסולם 1 עד 5 לשמירה על יחס אחיד מול סרגל עומס המשקולות הסמסטריאלי (CheeseFork), החלפת אימוג׳י עומס ל-🏋️ (משקולת) ברורה ומובנת, ועדכון חלונית עריכת העומס האישי.</li>
+                        <li><strong>v2.1.0 (07/10/2026):</strong> הוספת שנתון תשפ״ו (אוקטובר 2025) עם קורס שפת פייתון בסמסטר א׳, יישור וקיצור שמות השנתונים בבורר (הסרת 'תוכנית לימודים' וסוגריים מברקים), והתאמה מדויקת של קטלוג תשפ״ז למתחילים באוקטובר 2026.</li>
                         <li><strong>v2.0.9 (06/10/2026):</strong> תמיכה רב-שנתית בקטלוגים (תשפ״ד, תשפ״ז, ברקים), מחשבון עומס סמסטריאלי ויזואלי המביא בחשבון עומס מעבדות ודוחות, ואפשרות להזנת דירוג עומס אישי ישירות מכרטיס הקורס.</li>
                         <li><strong>v2.0.8 (06/10/2026):</strong> תכנון תואר נקי כברירת מחדל לאורחים: הצגת הסילבוס המומלץ הרשמי ללא שינויים אישיים, הפרדת מפתחות אחסון מקומיים לכל משתמש, ומנגנון אנטי-זיהום לתוכנית הלימודים.</li>
                         <li><strong>v2.0.7 (06/10/2026):</strong> תיקון פאנל קרדיט וגרסה תחתון במובייל (אנדרואיד ו-iOS), הצמדה יציבה מעל סרגל הניווט, ותמיכה מלאה באירועי מגע (Touch).</li>
@@ -1296,7 +1297,7 @@
             </div>
             <div class="footer-left-version" style="display: inline-flex; align-items: center; gap: 8px;">
                 <button type="button" class="app-version-badge" onclick="window.openAccessibilityModal()" title="הצהרת נגישות והתאמות" style="cursor: pointer; background: rgba(2, 132, 199, 0.2); border-color: rgba(56, 189, 248, 0.4); color: #38bdf8;">♿ נגישות</button>
-                <button type="button" class="app-version-badge" id="footer-version-badge" title="לחץ לבדיקת עדכונים ורענון המערכת (v2.1.0)" aria-label="בדיקת עדכוני גרסה ורענון המערכת" style="cursor: pointer;">v2.1.0 🔄</button>
+                <button type="button" class="app-version-badge" id="footer-version-badge" title="לחץ לבדיקת עדכונים ורענון המערכת (v2.1.1)" aria-label="בדיקת עדכוני גרסה ורענון המערכת" style="cursor: pointer;">v2.1.1 🔄</button>
             </div>
         </footer>
 
@@ -2625,20 +2626,20 @@
     <!-- Supabase JS Client for Cloud Sync -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <!-- CheeseFork Technion Courses Database (2,055 courses) -->
-    <script src="cheesefork_database.js?v=2.1.0"></script>
-    <script src="cheesefork_courses.min.js?v=2.1.0"></script>
+    <script src="cheesefork_database.js?v=2.1.1"></script>
+    <script src="cheesefork_courses.min.js?v=2.1.1"></script>
     <!-- Clean Curriculum Template -->
-    <script src="curriculum_template.js?v=2.1.0"></script>
+    <script src="curriculum_template.js?v=2.1.1"></script>
     <!-- Multi-User Identity & Sync Engine -->
-    <script src="auth_sync.js?v=2.1.0"></script>
+    <script src="auth_sync.js?v=2.1.1"></script>
     <!-- Moodle Live Calendar & Tasks Sync Engine -->
-    <script src="moodle_sync.js?v=2.1.0"></script>
+    <script src="moodle_sync.js?v=2.1.1"></script>
     <!-- Technion ME 2025/2026 Catalog & Electives Database -->
-    <script src="planner_catalog.js?v=2.1.0"></script>
+    <script src="planner_catalog.js?v=2.1.1"></script>
     <!-- Degree Planner Drag & Drop Engine -->
-    <script src="planner_module.js?v=2.1.0"></script>
+    <script src="planner_module.js?v=2.1.1"></script>
     <!-- Technion Official Academic Calendar & Holidays Engine -->
-    <script src="technion_academic_calendar.js?v=2.1.0"></script>
+    <script src="technion_academic_calendar.js?v=2.1.1"></script>
     <!-- Core Application Logic -->
 
     <!-- Accessibility Modal (הצהרת נגישות ותפריט התאמות) -->
@@ -2690,7 +2691,7 @@
     </div>
 
     <script src="accessibility.js?v=2.0.2"></script>
-    <script src="app.js?v=2.1.0"></script>
+    <script src="app.js?v=2.1.1"></script>
     <!-- PWA Service Worker Registration -->
     <script>
         if ('serviceWorker' in navigator && window.location.protocol.startsWith('http')) {

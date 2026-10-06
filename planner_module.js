@@ -157,29 +157,29 @@
     // --------------------------------------------------------------------------
     const WORKLOAD_OVERRIDE_PREFIX = 'ast_course_workload_';
 
-    // Lab and high-demand course workload multipliers/overrides
-    // Technion labs have low credits (0.5 - 1.5) but demand days of pre/post reports
+    // Course workload scale: 1.0 to 5.0 (matching CheeseFork 1-5 weights ratio)
+    // Labs have low credits (0.5 - 1.5) but high workload (pre/post lab reports)
     const SPECIAL_COURSE_WORKLOAD_BASELINE = {
-        '01250013': 3.5, // מעבדה בכימיה - 0.5 creds, but 3 lab hrs + ~8-12 hrs pre/post reports!
+        '01250013': 3.5, // מעבדה בכימיה - 0.5 creds, high report demand
         '125013': 3.5,
-        '01140039': 3.5, // מעבדה לפיזיקה 1מח - 1.0 creds + heavy reports
+        '01140039': 3.5, // מעבדה לפיזיקה 1מח - 1.0 creds, heavy reports
         '114039': 3.5,
         '01140032': 3.5, // מעב' לפיזיקה 1 ח
         '114032': 3.5,
-        '00340057': 5.5, // מעבדה מתקדמת הנ. מכונות - intensive experimental setups
-        '034057': 5.5,
-        '01040041': 5.5, // Calculus 1M1 - high rigor
-        '104041': 5.5,
-        '01040043': 5.5, // Calculus 2M1
-        '104043': 5.5,
-        '00340028': 4.5, // Solid Mechanics 1
-        '034028': 4.5,
-        '00340053': 5.5, // Solid Mechanics 2 Extended
-        '034053': 5.5,
-        '00340010': 5.5, // Dynamics
-        '034010': 5.5,
-        '00340055': 5.5, // Fluid Mechanics 1 Extended
-        '034055': 5.5
+        '00340057': 5.0, // מעבדה מתקדמת הנ. מכונות - intensive experimental setups
+        '034057': 5.0,
+        '01040041': 5.0, // Calculus 1M1 - high rigor (5.0 credits)
+        '104041': 5.0,
+        '01040043': 5.0, // Calculus 2M1 (5.0 credits)
+        '104043': 5.0,
+        '00340028': 4.0, // Solid Mechanics 1
+        '034028': 4.0,
+        '00340053': 5.0, // Solid Mechanics 2 Extended
+        '034053': 5.0,
+        '00340010': 5.0, // Dynamics
+        '034010': 5.0,
+        '00340055': 5.0, // Fluid Mechanics 1 Extended
+        '034055': 5.0
     };
 
     function getCourseUserWorkload(code, altCode) {
@@ -189,7 +189,10 @@
             const val = localStorage.getItem(WORKLOAD_OVERRIDE_PREFIX + candidateCodes[i]);
             if (val !== null && val !== undefined && val !== '') {
                 const num = parseFloat(val);
-                if (!isNaN(num) && num > 0) return num;
+                if (!isNaN(num) && num > 0) {
+                    // Clamp between 1.0 and 5.0
+                    return Math.max(1.0, Math.min(5.0, parseFloat(num.toFixed(1))));
+                }
             }
         }
         return null;
@@ -203,10 +206,11 @@
             const candidateCodes = getNormalizedCodes(code, altCode);
             candidateCodes.forEach(c => localStorage.removeItem(WORKLOAD_OVERRIDE_PREFIX + c));
         } else {
-            localStorage.setItem(WORKLOAD_OVERRIDE_PREFIX + normCode, String(Number(value)));
+            const clampedVal = Math.max(1.0, Math.min(5.0, parseFloat(Number(value).toFixed(1))));
+            localStorage.setItem(WORKLOAD_OVERRIDE_PREFIX + normCode, String(clampedVal));
             const stripped = normCode.replace(/^0+/, '');
             if (stripped && stripped !== normCode) {
-                localStorage.setItem(WORKLOAD_OVERRIDE_PREFIX + stripped, String(Number(value)));
+                localStorage.setItem(WORKLOAD_OVERRIDE_PREFIX + stripped, String(clampedVal));
             }
         }
     }
@@ -227,9 +231,10 @@
             }
         }
 
-        // Standard baseline: credits weight
+        // Standard baseline: credits weight, normalized to 1.0 - 5.0 scale
         const creds = Number(course.credits) || 3.0;
-        return { score: creds, isOverride: false };
+        const clampedScore = Math.max(1.0, Math.min(5.0, parseFloat(creds.toFixed(1))));
+        return { score: clampedScore, isOverride: false };
     }
 
     // SVG Icons matching CheeseFork exactly: Feather, Kettlebell, Dumbbell
@@ -1118,8 +1123,8 @@
                                         data-alt-code="${escapeHtml(course.altCode || '')}"
                                         data-name="${escapeHtml(course.name)}"
                                         data-workload="${courseWl.score}"
-                                        title="${courseWl.isOverride ? `דירוג עומס אישי: ${courseWl.score} (לחץ לעריכה)` : `דירוג עומס מחושב: ${courseWl.score} (לחץ להזנת דירוג אישי)`}">
-                                    ⚡ ${courseWl.score}
+                                        title="${courseWl.isOverride ? `דירוג עומס אישי: ${courseWl.score} מתוך 5 (לחץ לעריכה)` : `דירוג עומס: ${courseWl.score} מתוך 5 (לחץ להזנת דירוג אישי)`}">
+                                    🏋️ ${courseWl.score}
                                 </button>
                             </div>
                             ${isWhatIfMode && !completed ? `
@@ -1656,22 +1661,23 @@
         overlay.innerHTML = `
             <div class="workload-popover-box" onclick="event.stopPropagation();">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <h4 class="workload-popover-title">⚡ הגדרת עומס שבועי אישי</h4>
+                    <h4 class="workload-popover-title">🏋️ הגדרת רמת עומס אישית לקורס</h4>
                     <span style="font-size: 0.75rem; color: #38bdf8; font-family: monospace;">${escapeHtml(code)}</span>
                 </div>
                 <div class="workload-popover-desc">
                     <strong>${escapeHtml(name)}</strong><br>
-                    הגדר את ציון העומס לפי כמות שעות העבודה השבועיות בפועל (כולל דוחות מעבדה, תרגילים ומטלות).
+                    הגדר רמת עומס/קושי בסולם של 1 עד 5 (תואם לסולם משקולות CheeseFork), כולל מטלות שבועיות, עומס שיעורי בית ודוחות מעבדה.
                 </div>
                 <div class="workload-popover-input-row">
-                    <label for="workload-input-val" style="font-size: 0.82rem; color: #cbd5e1; white-space: nowrap;">דירוג אישי (1 - 10):</label>
-                    <input type="number" id="workload-input-val" class="workload-popover-input" min="0.5" max="15" step="0.5" value="${displayScore}">
+                    <label for="workload-input-val" style="font-size: 0.82rem; color: #cbd5e1; white-space: nowrap;">דירוג קושי ועומס (1 עד 5):</label>
+                    <input type="number" id="workload-input-val" class="workload-popover-input" min="1.0" max="5.0" step="0.5" value="${displayScore}">
                 </div>
                 <div style="display: flex; gap: 6px; justify-content: center; flex-wrap: wrap;">
-                    <button type="button" class="btn btn-sm btn-outline btn-wl-preset" data-val="2.5" style="padding: 2px 8px; font-size: 0.72rem;">2.5 (קל)</button>
-                    <button type="button" class="btn btn-sm btn-outline btn-wl-preset" data-val="4.0" style="padding: 2px 8px; font-size: 0.72rem;">4.0 (סביר)</button>
-                    <button type="button" class="btn btn-sm btn-outline btn-wl-preset" data-val="5.5" style="padding: 2px 8px; font-size: 0.72rem;">5.5 (אינטנסיבי)</button>
-                    <button type="button" class="btn btn-sm btn-outline btn-wl-preset" data-val="7.5" style="padding: 2px 8px; font-size: 0.72rem;">7.5+ (עומס קיצוני/דוחות)</button>
+                    <button type="button" class="btn btn-sm btn-outline btn-wl-preset" data-val="1.0" style="padding: 2px 8px; font-size: 0.72rem;">1 (קל מאוד)</button>
+                    <button type="button" class="btn btn-sm btn-outline btn-wl-preset" data-val="2.5" style="padding: 2px 8px; font-size: 0.72rem;">2.5 (סביר)</button>
+                    <button type="button" class="btn btn-sm btn-outline btn-wl-preset" data-val="3.5" style="padding: 2px 8px; font-size: 0.72rem;">3.5 (בינוני-גבוה)</button>
+                    <button type="button" class="btn btn-sm btn-outline btn-wl-preset" data-val="4.5" style="padding: 2px 8px; font-size: 0.72rem;">4.5 (כבד)</button>
+                    <button type="button" class="btn btn-sm btn-outline btn-wl-preset" data-val="5.0" style="padding: 2px 8px; font-size: 0.72rem;">5.0 (עומס מקסימלי)</button>
                 </div>
                 <div class="workload-popover-actions">
                     <button type="button" class="btn btn-sm btn-primary w-full" id="btn-workload-save" style="flex: 2; background: #0284c7; border-color: #38bdf8;">
@@ -1718,7 +1724,7 @@
                 setCourseUserWorkload(code, altCode, val);
                 closePopover();
                 renderDegreePlanner();
-                showPlannerToast(`⚡ עודכן דירוג עומס אישי לקורס ${name}: ${val}`, false);
+                showPlannerToast(`🏋️ עודכן דירוג עומס אישי לקורס ${name}: ${val} מתוך 5`, false);
             } else {
                 closePopover();
             }

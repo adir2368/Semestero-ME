@@ -16744,13 +16744,13 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.10.07-v2.1.0",
-    version: "2.1.0",
-    build: "201001",
-    date: "2026-10-07 00:30",
-    description: "גרסה 2.1.0: הוספת שנתון תשפ״ו (אוקטובר 2025), יישור שמות מסלולים ותוכניות תמציתיים, וסנכרון מלא לקטלוג תשפ״ז"
+    code: "REV-2026.10.07-v2.1.1",
+    version: "2.1.1",
+    build: "201002",
+    date: "2026-10-07 00:45",
+    description: "גרסה 2.1.1: נרמול עומס/קושי קורסים לסולם 1-5 תואם CheeseFork, החלפת אימוג׳י עומס ל-🏋️ ושיפורי חוויית משתמש"
 };
-window.APP_VERSION = "2.1.0";
+window.APP_VERSION = "2.1.1";
 
 function ensureBaselineRevisions() {
     if (!gameState.revisions || !Array.isArray(gameState.revisions) || gameState.revisions.length === 0) {
