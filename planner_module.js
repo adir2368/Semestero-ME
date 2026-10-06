@@ -21,11 +21,33 @@
     let whatIfGrades = {};
     let defaultWhatIfGrade = 85;
 
-    // Local Storage Keys
+    // Local Storage Keys & Dynamic User-Scoped Helper
     const PLANNER_STORAGE_KEY_V2 = 'atlas_me_custom_degree_plan_v2';
     const PLANNER_STORAGE_KEY_V1 = 'atlas_me_custom_degree_plan_v1';
     const PLANNER_RESERVIST_KEY = 'semestero_reservist_deduction_active';
     const PLANNER_TRACK_KEY = 'semestero_planner_selected_track';
+
+    function getActiveUserId() {
+        if (global.AuthSync && typeof global.AuthSync.getActiveUser === 'function') {
+            const u = global.AuthSync.getActiveUser();
+            return (u && u.id) ? u.id : 'guest';
+        }
+        return 'guest';
+    }
+
+    function isAdirAuthenticated() {
+        return !!(global.AuthSync && typeof global.AuthSync.isAdirActive === 'function' && global.AuthSync.isAdirActive());
+    }
+
+    function getPlannerStorageKeyV2() {
+        const uid = getActiveUserId();
+        return uid === 'adir_moshe' ? `${PLANNER_STORAGE_KEY_V2}_adir` : `${PLANNER_STORAGE_KEY_V2}_${uid}`;
+    }
+
+    function getPlannerStorageKeyV1() {
+        const uid = getActiveUserId();
+        return uid === 'adir_moshe' ? `${PLANNER_STORAGE_KEY_V1}_adir` : `${PLANNER_STORAGE_KEY_V1}_${uid}`;
+    }
 
     // Purged Courses List (Removed/Exempt for user: English B & Creative Intro)
     const PURGED_CODES = new Set([
@@ -147,29 +169,51 @@
         let loadedPlan = null;
         let loadedUnassigned = [];
 
+        const isAdir = isAdirAuthenticated();
+        const v2Key = getPlannerStorageKeyV2();
+        const v1Key = getPlannerStorageKeyV1();
+
         // 1. First priority: cloud-synced degreePlan from global gameState
+        // For Adir: allow gameState.degreePlan
+        // For guest/students: only use gameState.degreePlan if it is explicitly non-empty AND user is logged in as that student
         if (global.gameState && Array.isArray(global.gameState.degreePlan) && global.gameState.degreePlan.length > 0) {
-            try {
-                loadedPlan = JSON.parse(JSON.stringify(global.gameState.degreePlan));
-                loadedUnassigned = Array.isArray(global.gameState.degreePlanUnassigned) ? JSON.parse(JSON.stringify(global.gameState.degreePlanUnassigned)) : [];
-                console.log('[Planner] Initialized plan from gameState.degreePlan');
-            } catch (e) {
-                console.error('[Planner] Error cloning gameState.degreePlan:', e);
+            // Anti-poisoning guard: if not Adir, but degreePlan matches Adir's custom plan, do not load it
+            const looksLikeAdirPlan = global.gameState.degreePlan.some(s => s.semester === 5 && (s.courses || []).some(c => c.code === '00350001' || c.code === '035001'));
+            if (isAdir || !looksLikeAdirPlan) {
+                try {
+                    loadedPlan = JSON.parse(JSON.stringify(global.gameState.degreePlan));
+                    loadedUnassigned = Array.isArray(global.gameState.degreePlanUnassigned) ? JSON.parse(JSON.stringify(global.gameState.degreePlanUnassigned)) : [];
+                    console.log('[Planner] Initialized plan from gameState.degreePlan');
+                } catch (e) {
+                    console.error('[Planner] Error cloning gameState.degreePlan:', e);
+                }
             }
         }
 
-        // 2. Local Storage V2
+        // 2. User-Scoped Local Storage V2
         if (!loadedPlan) {
             try {
-                const savedV2 = localStorage.getItem(PLANNER_STORAGE_KEY_V2);
+                // Check user-scoped key first
+                let savedV2 = localStorage.getItem(v2Key);
+                // Backward-compatibility: if Adir and user-scoped key empty, check legacy global key
+                if (!savedV2 && isAdir) {
+                    savedV2 = localStorage.getItem(PLANNER_STORAGE_KEY_V2);
+                }
                 if (savedV2) {
                     const parsed = JSON.parse(savedV2);
                     if (parsed && Array.isArray(parsed.semesters)) {
-                        loadedPlan = parsed.semesters;
-                        loadedUnassigned = Array.isArray(parsed.unassigned) ? parsed.unassigned : [];
+                        // Check if guest accidentally got Adir's custom courses in localStorage
+                        const hasAdirElectives = !isAdir && parsed.semesters.some(s => s.semester === 5 && (s.courses || []).some(c => c.code === '00350001' || c.code === '035001'));
+                        if (!hasAdirElectives) {
+                            loadedPlan = parsed.semesters;
+                            loadedUnassigned = Array.isArray(parsed.unassigned) ? parsed.unassigned : [];
+                        }
                     } else if (Array.isArray(parsed)) {
-                        loadedPlan = parsed;
-                        loadedUnassigned = [];
+                        const hasAdirElectives = !isAdir && parsed.some(s => s.semester === 5 && (s.courses || []).some(c => c.code === '00350001' || c.code === '035001'));
+                        if (!hasAdirElectives) {
+                            loadedPlan = parsed;
+                            loadedUnassigned = [];
+                        }
                     }
                 }
             } catch (e) {
@@ -177,15 +221,21 @@
             }
         }
 
-        // 3. Local Storage V1
+        // 3. User-Scoped Local Storage V1
         if (!loadedPlan) {
             try {
-                const savedV1 = localStorage.getItem(PLANNER_STORAGE_KEY_V1);
+                let savedV1 = localStorage.getItem(v1Key);
+                if (!savedV1 && isAdir) {
+                    savedV1 = localStorage.getItem(PLANNER_STORAGE_KEY_V1);
+                }
                 if (savedV1) {
                     const parsedV1 = JSON.parse(savedV1);
                     if (Array.isArray(parsedV1)) {
-                        loadedPlan = parsedV1;
-                        loadedUnassigned = [];
+                        const hasAdirElectives = !isAdir && parsedV1.some(s => s.semester === 5 && (s.courses || []).some(c => c.code === '00350001' || c.code === '035001'));
+                        if (!hasAdirElectives) {
+                            loadedPlan = parsedV1;
+                            loadedUnassigned = [];
+                        }
                     }
                 }
             } catch (e) {
@@ -193,7 +243,7 @@
             }
         }
 
-        // 4. Initialize from official suggested syllabus if empty
+        // 4. Initialize from official suggested syllabus if empty (Guests & Clean baseline)
         if (!loadedPlan || !Array.isArray(loadedPlan) || loadedPlan.length === 0) {
             loadedPlan = JSON.parse(JSON.stringify(global.PLANNER_CATALOG.SUGGESTED_MANDATORY_SYLLABUS));
             loadedUnassigned = [];
@@ -406,8 +456,15 @@
                     unassigned: unassignedCourses
                 };
                 const jsonStr = JSON.stringify(dataToSave);
-                localStorage.setItem(PLANNER_STORAGE_KEY_V2, jsonStr);
-                localStorage.setItem(PLANNER_STORAGE_KEY_V1, JSON.stringify(customPlan));
+                const v2Key = getPlannerStorageKeyV2();
+                const v1Key = getPlannerStorageKeyV1();
+                localStorage.setItem(v2Key, jsonStr);
+                localStorage.setItem(v1Key, JSON.stringify(customPlan));
+
+                if (isAdirAuthenticated()) {
+                    localStorage.setItem(PLANNER_STORAGE_KEY_V2, jsonStr);
+                    localStorage.setItem(PLANNER_STORAGE_KEY_V1, JSON.stringify(customPlan));
+                }
 
                 if (global.gameState) {
                     global.gameState.degreePlan = customPlan;
@@ -1850,6 +1907,14 @@
         getCourseGrade: getCourseGrade,
         adoptPlanFromState: function(plan, unassigned) {
             if (Array.isArray(plan) && plan.length > 0) {
+                // If not Adir, prevent adopting a plan that contains Adir's custom electives
+                if (!isAdirAuthenticated()) {
+                    const hasAdirElectives = plan.some(s => s.semester === 5 && (s.courses || []).some(c => c.code === '00350001' || c.code === '035001'));
+                    if (hasAdirElectives) {
+                        console.warn('[DegreePlanner] Prevented adopting Adir custom plan for non-Adir account.');
+                        return;
+                    }
+                }
                 customPlan = JSON.parse(JSON.stringify(plan));
                 unassignedCourses = Array.isArray(unassigned) ? JSON.parse(JSON.stringify(unassigned)) : [];
                 if (customPlan) {
@@ -1864,6 +1929,14 @@
                 saveCustomPlan(true);
                 renderDegreePlanner();
             }
+        },
+        resetToCleanSyllabus: function() {
+            if (!global.PLANNER_CATALOG || !global.PLANNER_CATALOG.SUGGESTED_MANDATORY_SYLLABUS) return;
+            customPlan = JSON.parse(JSON.stringify(global.PLANNER_CATALOG.SUGGESTED_MANDATORY_SYLLABUS));
+            unassignedCourses = [];
+            syncCompletedCoursesFromGameState();
+            saveCustomPlan(true);
+            renderDegreePlanner();
         },
         syncFromGameState: () => {
             initPlannerState(true);

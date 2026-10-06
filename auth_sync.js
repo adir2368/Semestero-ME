@@ -178,6 +178,15 @@
                                 return clean;
                             }
                         }
+                        // If non-Adir user state contains Adir's custom degreePlan electives, strip it
+                        if (user.id !== 'adir_moshe' && parsed.degreePlan && Array.isArray(parsed.degreePlan)) {
+                            const hasAdirElectives = parsed.degreePlan.some(s => s.semester === 5 && (s.courses || []).some(c => c.code === '00350001' || c.code === '035001'));
+                            if (hasAdirElectives) {
+                                console.warn('[AuthSync] Stripping poisoned Adir degreePlan from account:', user.id);
+                                delete parsed.degreePlan;
+                                delete parsed.degreePlanUnassigned;
+                            }
+                        }
                         return parsed;
                     }
                 } catch (e) {
@@ -592,6 +601,11 @@
                 }
             }
 
+            // Reset DegreePlanner to official clean suggested syllabus
+            if (window.DegreePlanner && typeof window.DegreePlanner.resetToCleanSyllabus === 'function') {
+                window.DegreePlanner.resetToCleanSyllabus();
+            }
+
             // 4. Update UI
             this.refreshAllAppViews();
             this.updateHudAuthControls();
@@ -767,6 +781,11 @@
                 } else if (window.gameState) {
                     window.gameState = clean;
                 }
+            }
+
+            // Reset DegreePlanner to clean syllabus
+            if (window.DegreePlanner && typeof window.DegreePlanner.resetToCleanSyllabus === 'function') {
+                window.DegreePlanner.resetToCleanSyllabus();
             }
 
             // 5. Update UI
@@ -1417,11 +1436,19 @@
                                         }
                                         if (remoteState.degreePlan && Array.isArray(remoteState.degreePlan)) {
                                             try {
-                                                localStorage.setItem('atlas_me_custom_degree_plan_v2', JSON.stringify({
+                                                const v2Key = user.id === 'adir_moshe' ? 'atlas_me_custom_degree_plan_v2_adir' : `atlas_me_custom_degree_plan_v2_${user.id}`;
+                                                const v1Key = user.id === 'adir_moshe' ? 'atlas_me_custom_degree_plan_v1_adir' : `atlas_me_custom_degree_plan_v1_${user.id}`;
+                                                const planPayload = JSON.stringify({
                                                     semesters: remoteState.degreePlan,
                                                     unassigned: remoteState.degreePlanUnassigned || []
-                                                }));
-                                                localStorage.setItem('atlas_me_custom_degree_plan_v1', JSON.stringify(remoteState.degreePlan));
+                                                });
+                                                localStorage.setItem(v2Key, planPayload);
+                                                localStorage.setItem(v1Key, JSON.stringify(remoteState.degreePlan));
+
+                                                if (user.id === 'adir_moshe') {
+                                                    localStorage.setItem('atlas_me_custom_degree_plan_v2', planPayload);
+                                                    localStorage.setItem('atlas_me_custom_degree_plan_v1', JSON.stringify(remoteState.degreePlan));
+                                                }
                                                 if (window.DegreePlanner && typeof window.DegreePlanner.adoptPlanFromState === 'function') {
                                                     window.DegreePlanner.adoptPlanFromState(remoteState.degreePlan, remoteState.degreePlanUnassigned);
                                                 }
@@ -1524,11 +1551,19 @@
                     }
                     if (remoteState.degreePlan && Array.isArray(remoteState.degreePlan)) {
                         try {
-                            localStorage.setItem('atlas_me_custom_degree_plan_v2', JSON.stringify({
+                            const v2Key = user.id === 'adir_moshe' ? 'atlas_me_custom_degree_plan_v2_adir' : `atlas_me_custom_degree_plan_v2_${user.id}`;
+                            const v1Key = user.id === 'adir_moshe' ? 'atlas_me_custom_degree_plan_v1_adir' : `atlas_me_custom_degree_plan_v1_${user.id}`;
+                            const planPayload = JSON.stringify({
                                 semesters: remoteState.degreePlan,
                                 unassigned: remoteState.degreePlanUnassigned || []
-                            }));
-                            localStorage.setItem('atlas_me_custom_degree_plan_v1', JSON.stringify(remoteState.degreePlan));
+                            });
+                            localStorage.setItem(v2Key, planPayload);
+                            localStorage.setItem(v1Key, JSON.stringify(remoteState.degreePlan));
+
+                            if (user.id === 'adir_moshe') {
+                                localStorage.setItem('atlas_me_custom_degree_plan_v2', planPayload);
+                                localStorage.setItem('atlas_me_custom_degree_plan_v1', JSON.stringify(remoteState.degreePlan));
+                            }
                             if (window.DegreePlanner && typeof window.DegreePlanner.adoptPlanFromState === 'function') {
                                 window.DegreePlanner.adoptPlanFromState(remoteState.degreePlan, remoteState.degreePlanUnassigned);
                             }

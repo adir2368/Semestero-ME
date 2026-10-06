@@ -16744,13 +16744,13 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.10.06-v2.0.7",
-    version: "2.0.7",
-    build: "200701",
-    date: "2026-10-06 20:00",
-    description: "גרסה 2.0.7: תיקון פאנל קרדיט וגרסה תחתון במובייל (אנדרואיד ו-iOS), הצמדה יציבה מעל סרגל הניווט, ותמיכה מלאה באירועי מגע (Touch)"
+    code: "REV-2026.10.06-v2.0.8",
+    version: "2.0.8",
+    build: "200801",
+    date: "2026-10-06 20:30",
+    description: "גרסה 2.0.8: תכנון תואר - שיבוץ מומלץ רשמי כברירת מחדל לאורחים, הפרדת שמירות ואנטי-זיהום של התוכנית האישית"
 };
-window.APP_VERSION = "2.0.7";
+window.APP_VERSION = "2.0.8";
 
 function ensureBaselineRevisions() {
     if (!gameState.revisions || !Array.isArray(gameState.revisions) || gameState.revisions.length === 0) {
