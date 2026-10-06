@@ -11,6 +11,8 @@
     // Module State & Configuration
     // --------------------------------------------------------------------------
     let currentMode = 'custom'; // 'custom' | 'suggested'
+    let selectedTrack = 'regular_2026'; // 'regular_2026' | 'barak'
+    let isReservistDeduction = false;
     let selectedCategory = 'ALL'; // 'ALL' | 'A' | 'B' | 'C' | 'D' | 'E' | 'UNASSIGNED'
     let searchQuery = '';
     let customPlan = null;
@@ -22,6 +24,8 @@
     // Local Storage Keys
     const PLANNER_STORAGE_KEY_V2 = 'atlas_me_custom_degree_plan_v2';
     const PLANNER_STORAGE_KEY_V1 = 'atlas_me_custom_degree_plan_v1';
+    const PLANNER_RESERVIST_KEY = 'semestero_reservist_deduction_active';
+    const PLANNER_TRACK_KEY = 'semestero_planner_selected_track';
 
     // Purged Courses List (Removed/Exempt for user: English B & Creative Intro)
     const PURGED_CODES = new Set([
@@ -128,6 +132,16 @@
         if (!global.PLANNER_CATALOG) {
             console.warn('[Planner] PLANNER_CATALOG not loaded yet');
             return;
+        }
+
+        try {
+            isReservistDeduction = localStorage.getItem(PLANNER_RESERVIST_KEY) === 'true';
+            const savedTrack = localStorage.getItem(PLANNER_TRACK_KEY);
+            if (savedTrack && (savedTrack === 'regular_2026' || savedTrack === 'barak')) {
+                selectedTrack = savedTrack;
+            }
+        } catch (e) {
+            console.warn('[Planner] Could not read preferences from localStorage:', e);
         }
 
         let loadedPlan = null;
@@ -423,6 +437,9 @@
 
     function getActivePlan() {
         if (currentMode === 'suggested') {
+            if (selectedTrack === 'barak' && global.PLANNER_CATALOG.SUGGESTED_BARAK_SYLLABUS) {
+                return global.PLANNER_CATALOG.SUGGESTED_BARAK_SYLLABUS;
+            }
             return global.PLANNER_CATALOG.SUGGESTED_MANDATORY_SYLLABUS;
         }
         return customPlan || global.PLANNER_CATALOG.SUGGESTED_MANDATORY_SYLLABUS;
@@ -633,6 +650,9 @@
             });
         });
 
+        const requiredDegreeCredits = isReservistDeduction ? 155.5 : 157.5;
+        const requiredElectiveCredits = 32.5;
+
         return {
             countA,
             countB,
@@ -641,13 +661,15 @@
             creditsBCD,
             totalElectiveCredits,
             totalDegreeCredits,
+            requiredDegreeCredits,
+            isReservistDeduction,
             ruleA_met: countA >= 1,
             ruleB_met: countB >= 2,
             ruleC_met: countC >= 2,
             ruleD_met: countD >= 1,
             ruleBCD_met: creditsBCD >= 14.0,
-            ruleTotalElectives_met: totalElectiveCredits >= 32.5,
-            ruleDegreeTotal_met: totalDegreeCredits >= 157.5
+            ruleTotalElectives_met: totalElectiveCredits >= requiredElectiveCredits,
+            ruleDegreeTotal_met: totalDegreeCredits >= requiredDegreeCredits
         };
     }
 
@@ -767,9 +789,10 @@
     function renderHeaderStats(rulesEval) {
         const totalCredsEl = document.getElementById('planner-total-credits-val');
         const electivesCredsEl = document.getElementById('planner-electives-credits-val');
+        const reqDegree = rulesEval.requiredDegreeCredits || 157.5;
 
         if (totalCredsEl) {
-            totalCredsEl.innerText = `${rulesEval.totalDegreeCredits.toFixed(1)} / 157.5`;
+            totalCredsEl.innerText = `${rulesEval.totalDegreeCredits.toFixed(1)} / ${reqDegree.toFixed(1)}`;
             totalCredsEl.style.color = rulesEval.ruleDegreeTotal_met ? '#10b981' : '#38bdf8';
         }
         if (electivesCredsEl) {
@@ -781,6 +804,16 @@
         const btnSuggested = document.getElementById('btn-planner-mode-suggested');
         if (btnCustom) btnCustom.classList.toggle('active', currentMode === 'custom');
         if (btnSuggested) btnSuggested.classList.toggle('active', currentMode === 'suggested');
+
+        // Track selector state
+        const trackSelect = document.getElementById('planner-track-select');
+        if (trackSelect) trackSelect.value = selectedTrack;
+
+        // Reservist toggle state
+        const reservistToggle = document.getElementById('toggle-planner-reservist');
+        const reservistBadge = document.getElementById('planner-reservist-badge');
+        if (reservistToggle) reservistToggle.checked = isReservistDeduction;
+        if (reservistBadge) reservistBadge.style.display = isReservistDeduction ? 'inline-block' : 'none';
     }
 
     function renderSemesterColumns(plan, courseSemMap) {
@@ -1298,6 +1331,32 @@
                     searchQuery = e.target.value.trim();
                     renderAddElectivesSection(getActivePlan(), buildCourseSemesterMap(getActivePlan()));
                 }, 150);
+            });
+        }
+
+        // 7. Track & Cohort Selector Change Listener
+        const trackSelect = document.getElementById('planner-track-select');
+        if (trackSelect) {
+            trackSelect.addEventListener('change', (e) => {
+                selectedTrack = e.target.value;
+                try {
+                    localStorage.setItem(PLANNER_TRACK_KEY, selectedTrack);
+                } catch (err) {}
+                renderDegreePlanner();
+                showPlannerToast(`מסלול שונה ל-${selectedTrack === 'barak' ? 'מסלול ברקים (מזורז)' : 'סילבוס רגיל (תשפ״ו)'}`, true);
+            });
+        }
+
+        // 8. Reservist Credit Deduction Toggle Listener
+        const reservistToggle = document.getElementById('toggle-planner-reservist');
+        if (reservistToggle) {
+            reservistToggle.addEventListener('change', (e) => {
+                isReservistDeduction = e.target.checked;
+                try {
+                    localStorage.setItem(PLANNER_RESERVIST_KEY, isReservistDeduction ? 'true' : 'false');
+                } catch (err) {}
+                renderDegreePlanner();
+                showPlannerToast(isReservistDeduction ? 'הופעל פטור מילואים: הופחתו 2 נק״ז מדרישות התואר! 🎖️' : 'בוטל פטור מילואים: דרישות התואר חזרו ל-157.5 נק״ז.', true);
             });
         }
     }

@@ -41,8 +41,12 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Rubik:wght@300;400;500;700;900&display=swap" rel="stylesheet">
-    <link rel="icon" type="image/png" href="icon.png?v=1.9.6">
-    <link rel="stylesheet" href="styles.css?v=1.9.6">
+    <link rel="shortcut icon" href="favicon.ico?v=2.0.4">
+    <link rel="icon" href="favicon.ico?v=2.0.4" sizes="any">
+    <link rel="icon" type="image/png" sizes="48x48" href="icon-48.png?v=2.0.4">
+    <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png?v=2.0.4">
+    <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png?v=2.0.4">
+    <link rel="stylesheet" href="styles.css?v=2.0.4">
     <link rel="stylesheet" href="accessibility.css?v=2.0.2">
 
     <!-- Schema.org Structured Data for Google Search -->
@@ -293,6 +297,9 @@
                             <button type="button" class="btn btn-sm btn-primary" id="btn-fc-add-course" title="הוסף קורס חדש למפת הקורסים" style="background: linear-gradient(135deg, #0284c7, #2563eb); border-color: #38bdf8; display: inline-flex; align-items: center; gap: 5px; font-weight: 600; box-shadow: 0 0 8px rgba(56, 189, 248, 0.3); padding: 4px 12px; margin-left: 6px;">
                                 <span>➕</span><span>הוסף קורס</span>
                             </button>
+                            <button type="button" class="btn btn-sm btn-outline" id="btn-fc-critical-path" title="הדגש את צוואר הבקבוק ושרשרת הקדמים הקריטית לתואר (מה חוסם את התואר?)" style="border-color: #f43f5e; color: #fb7185; display: inline-flex; align-items: center; gap: 5px; font-weight: 600; transition: all 0.2s ease;">
+                                <span>🔴</span><span>מה חוסם לי את התואר?</span>
+                            </button>
                             <div class="fc-zoom-control-pill" style="display: flex; align-items: center; background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 8px; padding: 2px 6px; gap: 4px;">
                                 <button type="button" class="btn-fc-zoom-step" id="btn-fc-zoom-out" title="הקטן תצוגה (Zoom Out)" style="background: none; border: none; color: #cbd5e1; cursor: pointer; font-size: 13px; font-weight: 700; padding: 4px 8px; border-radius: 4px; transition: all 0.15s ease;">➖</button>
                                 <button type="button" id="btn-fc-zoom-reset" title="לחץ לאיפוס זום ל-100%" style="background: none; border: none; font-size: 0.82rem; font-weight: 700; color: #38bdf8; cursor: pointer; padding: 2px 6px; min-width: 46px; text-align: center;">100%</button>
@@ -337,6 +344,14 @@
                             <button type="button" class="btn-planner-mode" id="btn-planner-mode-suggested">
                                 <span>🏛️ שיבוץ מומלץ (Suggested Syllabus)</span>
                             </button>
+                        </div>
+                        <!-- Cohort & Program Track Selector -->
+                        <div class="planner-track-select-wrap" style="display: flex; align-items: center; gap: 6px; margin-right: 8px;">
+                            <label for="planner-track-select" style="font-size: 0.76rem; color: #94a3b8; font-weight: 600;">מסלול/שנתון:</label>
+                            <select id="planner-track-select" style="background: rgba(15, 23, 42, 0.9); border: 1px solid rgba(56, 189, 248, 0.35); color: #38bdf8; font-size: 0.78rem; font-weight: 700; border-radius: 6px; padding: 4px 8px; cursor: pointer; outline: none;">
+                                <option value="regular_2026">סילבוס רגיל (תשפ״ו / 2025-2026)</option>
+                                <option value="barak">מסלול ברקים (תואר מזורז ומצטיינים)</option>
+                            </select>
                         </div>
                         <div class="planner-summary-stats">
                             <div class="planner-stat-pill" id="planner-stat-total-credits" title="סה״כ נקודות זכות מתוכננות מתוך 157.5">
@@ -424,6 +439,16 @@
                                         <span class="rule-status" id="rule-status-total">⏳</span>
                                     </div>
                                 </div>
+
+                                <!-- Reservist (מילואים) Credit Deduction Toggle -->
+                                <div class="planner-reservist-toggle-card" style="margin-top: 10px; padding: 8px 12px; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.35); border-radius: 6px; display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+                                    <label for="toggle-planner-reservist" style="display: flex; align-items: center; gap: 8px; font-size: 0.78rem; color: #f8fafc; cursor: pointer; user-select: none; margin: 0; font-weight: 600;">
+                                        <input type="checkbox" id="toggle-planner-reservist" style="accent-color: #10b981; width: 16px; height: 16px; cursor: pointer;">
+                                        <span>🎖️ שירות מילואים (פטור 2 נק״ז בחירה חופשית)</span>
+                                    </label>
+                                    <span id="planner-reservist-badge" style="display: none; font-size: 0.68rem; background: #10b981; color: #022c22; font-weight: 800; padding: 2px 6px; border-radius: 4px;">-2 נק״ז</span>
+                                </div>
+
                                 <div class="planner-rules-note">
                                     💡 בדיקת דרישות קדם מאומתת לפי הקטלוג הרשמי של הטכניון לקורסי חובה ורשימות א׳-ד׳.
                                 </div>
@@ -566,7 +591,7 @@
                         <div class="bug-report-card-btn" id="card-btn-check-update">
                             <div class="btn-title">
                                 <span>🔄 בדיקת עדכוני גרסה</span>
-                                <span class="app-version-badge" style="font-size: 0.64rem;">v2.0.3</span>
+                                <span class="app-version-badge" style="font-size: 0.64rem;">v2.0.4</span>
                             </div>
                             <div class="btn-desc">
                                 בדיקה ישירה מול שרתי GitHub אם קיימת גרסה חדשה יותר להורדה או רענון.
@@ -1243,7 +1268,7 @@
             </div>
             <div class="footer-left-version" style="display: inline-flex; align-items: center; gap: 8px;">
                 <button type="button" class="app-version-badge" onclick="window.openAccessibilityModal()" title="הצהרת נגישות והתאמות" style="cursor: pointer; background: rgba(2, 132, 199, 0.2); border-color: rgba(56, 189, 248, 0.4); color: #38bdf8;">♿ נגישות</button>
-                <span class="app-version-badge" id="footer-version-badge" title="לחץ לבדיקת עדכונים ורענון המערכת (v2.0.3)" style="cursor: pointer;">v2.0.3 🔄</span>
+                <span class="app-version-badge" id="footer-version-badge" title="לחץ לבדיקת עדכונים ורענון המערכת (v2.0.4)" style="cursor: pointer;">v2.0.4 🔄</span>
             </div>
         </footer>
 
@@ -1327,6 +1352,25 @@
                                 <button type="button" class="btn btn-sm btn-outline" id="btn-apply-calculated-grade" title="החל ציון מחושב כציון סופי" style="font-size: 0.72rem; padding: 4px 8px; height: 30px; white-space: nowrap; border-color: #38bdf8; color: #38bdf8; display: flex; align-items: center; gap: 4px;">
                                     החל ציון ⚡
                                 </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Target Grade Calculator ("כמה לקבל במועד ב׳?") -->
+                    <div class="target-exam-calc-box" style="margin-bottom: 12px; background: rgba(245, 158, 11, 0.08); border: 1px dashed rgba(245, 158, 11, 0.4); border-radius: 6px; padding: 10px 12px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                            <span style="font-size: 0.8rem; font-weight: 700; color: #fbbf24; display: flex; align-items: center; gap: 6px;">
+                                🎯 מחשבון יעד מבחן (כמה לקבל במועד ב׳?)
+                            </span>
+                            <span id="target-exam-result-badge" style="font-size: 0.75rem; font-weight: 800; color: #fbbf24; background: rgba(245, 158, 11, 0.2); padding: 2px 8px; border-radius: 4px;">--</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                            <div style="flex: 1; min-width: 140px;">
+                                <label for="target-final-grade-input" style="font-size: 0.72rem; color: #cbd5e1; display: block; margin-bottom: 3px;">ציון סופי רצוי בקורס:</label>
+                                <input type="number" id="target-final-grade-input" min="55" max="100" placeholder="למשל 85" style="width: 100%; box-sizing: border-box; background: var(--bg-deep); border: 1px solid rgba(245, 158, 11, 0.4); color: #fff; border-radius: 4px; padding: 5px 8px; font-size: 0.85rem; text-align: center; font-family: inherit;">
+                            </div>
+                            <div style="flex: 2; min-width: 180px; font-size: 0.76rem; color: #94a3b8; line-height: 1.4;">
+                                <span id="target-exam-advice">הזן ציון סופי רצוי כדי לחשב במדויק כמה נקודות חסרות בבחינה בהתאם למשקל המבחן וציון המטלות.</span>
                             </div>
                         </div>
                     </div>

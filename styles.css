@@ -4705,6 +4705,48 @@ label[for="new-task-xp-input"],
     filter: drop-shadow(0 0 16px rgba(56, 189, 248, 0.6)) !important;
 }
 
+/* Critical Path Bottleneck Highlighting */
+.fc-node-group.critical-node .fc-node-rect {
+    stroke: #f43f5e !important;
+    stroke-width: 3px !important;
+    filter: drop-shadow(0 0 18px rgba(244, 63, 94, 0.85)) !important;
+    animation: pulseCriticalNode 2s infinite ease-in-out;
+}
+
+.fc-beam.critical-beam {
+    stroke: #f43f5e !important;
+    stroke-width: 3.5px !important;
+    opacity: 1 !important;
+    filter: drop-shadow(0 0 10px rgba(244, 63, 94, 0.9)) !important;
+    stroke-dasharray: 8 4;
+    animation: flowCriticalBeam 1.5s linear infinite;
+}
+
+@keyframes pulseCriticalNode {
+    0%, 100% {
+        filter: drop-shadow(0 0 10px rgba(244, 63, 94, 0.6));
+    }
+    50% {
+        filter: drop-shadow(0 0 22px rgba(244, 63, 94, 0.95));
+    }
+}
+
+@keyframes flowCriticalBeam {
+    from {
+        stroke-dashoffset: 24;
+    }
+    to {
+        stroke-dashoffset: 0;
+    }
+}
+
+#btn-fc-critical-path.active {
+    background: rgba(244, 63, 94, 0.22) !important;
+    border-color: #f43f5e !important;
+    color: #fff !important;
+    box-shadow: 0 0 14px rgba(244, 63, 94, 0.45) !important;
+}
+
 .fc-beam {
     stroke-linejoin: round;
     stroke-linecap: round;

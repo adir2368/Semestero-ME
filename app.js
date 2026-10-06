@@ -10873,6 +10873,56 @@ function openCourseDetails(code) {
             saveState();
         };
 
+        // Target Exam Grade Calculator ("כמה לקבל במועד ב׳?")
+        const targetFinalInput = document.getElementById("target-final-grade-input");
+        const targetBadge = document.getElementById("target-exam-result-badge");
+        const targetAdvice = document.getElementById("target-exam-advice");
+
+        function updateTargetExamCalculator() {
+            if (!targetFinalInput || !targetBadge || !targetAdvice) return;
+            const target = parseFloat(targetFinalInput.value);
+            const ew = parseFloat(calcWeightInput.value);
+            const hg = parseFloat(calcHwInput.value);
+
+            if (isNaN(target) || isNaN(ew) || isNaN(hg) || ew <= 0) {
+                targetBadge.innerText = "--";
+                targetBadge.style.background = "rgba(245, 158, 11, 0.2)";
+                targetBadge.style.color = "#fbbf24";
+                targetAdvice.innerText = "הזן ציון סופי רצוי כדי לחשב במדויק כמה נקודות חסרות בבחינה בהתאם למשקל המבחן וציון המטלות.";
+                return;
+            }
+
+            const hwPart = hg * ((100 - ew) / 100);
+            const neededExam = (target - hwPart) / (ew / 100);
+            const roundedNeeded = Math.ceil(neededExam);
+
+            if (roundedNeeded <= 0) {
+                targetBadge.innerText = "0+ (עברת)";
+                targetBadge.style.background = "rgba(16, 185, 129, 0.2)";
+                targetBadge.style.color = "#34d399";
+                targetAdvice.innerHTML = `ציון המגן והמטלות (${hg}) כבר מבטיחים לך לעבור את היעד (${target})! כל ציון עובר במבחן מספיק.`;
+            } else if (roundedNeeded <= 100) {
+                targetBadge.innerText = `${roundedNeeded} במועד ב׳`;
+                targetBadge.style.background = roundedNeeded > 85 ? "rgba(239, 68, 68, 0.2)" : "rgba(245, 158, 11, 0.2)";
+                targetBadge.style.color = roundedNeeded > 85 ? "#f87171" : "#fbbf24";
+                targetAdvice.innerHTML = `כדי לסיים את הקורס בציון <strong>${target}</strong>, עליך להוציא לפחות <strong>${roundedNeeded}</strong> במבחן (משקל ${ew}%).`;
+            } else {
+                targetBadge.innerText = `${roundedNeeded} (בלתי אפשרי)`;
+                targetBadge.style.background = "rgba(239, 68, 68, 0.2)";
+                targetBadge.style.color = "#f87171";
+                targetAdvice.innerHTML = `גם עם 100 במועד ב׳, הציון המקסימלי האפשרי הוא <strong>${Math.round((100 * (ew/100)) + hwPart)}</strong> בגלל ציוני המטלות הקיימים.`;
+            }
+        }
+
+        if (targetFinalInput) {
+            targetFinalInput.oninput = updateTargetExamCalculator;
+            // Pre-fill target if course has Dean's Honor or standard 85 target
+            if (!targetFinalInput.value) {
+                targetFinalInput.value = (gameState.deansHonorThreshold || 85);
+            }
+            updateTargetExamCalculator();
+        }
+
         // Apply calculated grade button
         if (applyCalcBtn) {
             applyCalcBtn.onclick = () => {
@@ -14378,6 +14428,14 @@ function setupFlowchartViewMode() {
         });
     }
 
+    // Critical Path Bottleneck Highlighter ("מה חוסם לי את התואר?")
+    const critPathBtn = document.getElementById("btn-fc-critical-path");
+    if (critPathBtn) {
+        critPathBtn.addEventListener("click", () => {
+            toggleCriticalPathFilter();
+        });
+    }
+
     // Auto resize listener to maintain fit-width when window changes
     window.addEventListener("resize", () => {
         if (currentViewMode === 'flowchart' && isFlowchartFitWidth) {
@@ -14904,6 +14962,7 @@ function highlightFlowchartPath(code) {
 }
 
 function clearFlowchartHighlight() {
+    if (isCriticalPathActive) return; // Keep critical path active until toggled off
     const svgEl = document.getElementById("flowchart-svg");
     if (svgEl) svgEl.classList.remove("has-highlight");
 
@@ -14914,6 +14973,143 @@ function clearFlowchartHighlight() {
 
     const nodeGroups = document.querySelectorAll(".fc-node-group");
     nodeGroups.forEach(ng => ng.classList.remove("highlighted-node"));
+}
+
+// -----------------------------------------------------------------------------
+// Critical Path Bottleneck Analysis ("מה חוסם לי את התואר?")
+// -----------------------------------------------------------------------------
+let isCriticalPathActive = false;
+
+function toggleCriticalPathFilter() {
+    isCriticalPathActive = !isCriticalPathActive;
+    const btn = document.getElementById("btn-fc-critical-path");
+    const svgEl = document.getElementById("flowchart-svg");
+
+    if (btn) btn.classList.toggle("active", isCriticalPathActive);
+
+    if (!isCriticalPathActive) {
+        if (svgEl) {
+            svgEl.classList.remove("has-highlight");
+            svgEl.querySelectorAll(".critical-node").forEach(n => n.classList.remove("critical-node", "highlighted-node"));
+            svgEl.querySelectorAll(".critical-beam").forEach(b => b.classList.remove("critical-beam", "highlighted"));
+        }
+        if (typeof showToastNotification === 'function') {
+            showToastNotification('בוטלה הדגשת שרשרת קריטית', 'info');
+        }
+        return;
+    }
+
+    // 1. Build adjacency list of dependencies among uncompleted courses
+    const courses = gameState.courses || {};
+    const uncompleted = new Set();
+    const childrenMap = {}; // courseCode -> array of dependent child courses
+    const parentMap = {};   // courseCode -> array of prereq courses
+
+    Object.values(courses).forEach(c => {
+        if (!c || !c.code) return;
+        const isMastered = c.status === 'mastered' || (c.grade && !isNaN(Number(c.grade)) && Number(c.grade) >= 55) || c.isBinaryPass;
+        if (!isMastered) {
+            uncompleted.add(c.code);
+        }
+        childrenMap[c.code] = [];
+        parentMap[c.code] = [];
+    });
+
+    Object.values(courses).forEach(c => {
+        if (!c || !c.code) return;
+        const prereqList = c.prerequisites || c.prereqs || [];
+        prereqList.forEach(pre => {
+            const normPre = pre.replace(/^0+/, '');
+            const targetPre = Object.keys(courses).find(k => k === pre || k === normPre || k.replace(/^0+/, '') === normPre);
+            if (targetPre) {
+                if (!childrenMap[targetPre]) childrenMap[targetPre] = [];
+                childrenMap[targetPre].push(c.code);
+                parentMap[c.code].push(targetPre);
+            }
+        });
+    });
+
+    // 2. Compute longest downstream chain length for each uncompleted course
+    const memoChain = {};
+    function getLongestDownstream(code, visited = new Set()) {
+        if (memoChain[code] !== undefined) return memoChain[code];
+        if (visited.has(code)) return 0;
+        visited.add(code);
+
+        let maxChildLen = 0;
+        const children = childrenMap[code] || [];
+        for (let i = 0; i < children.length; i++) {
+            const childCode = children[i];
+            const childLen = getLongestDownstream(childCode, new Set(visited));
+            if (childLen > maxChildLen) {
+                maxChildLen = childLen;
+            }
+        }
+
+        const res = 1 + maxChildLen;
+        memoChain[code] = res;
+        return res;
+    }
+
+    let maxChainLength = 0;
+    uncompleted.forEach(code => {
+        const len = getLongestDownstream(code);
+        if (len > maxChainLength) {
+            maxChainLength = len;
+        }
+    });
+
+    // Top critical bottleneck courses are uncompleted courses with highest downstream depth
+    const criticalNodes = new Set();
+    const criticalBeams = new Set();
+
+    // Threshold: courses with chain depth >= 3 or top tier
+    const minDepthThreshold = Math.max(2, maxChainLength - 1);
+    uncompleted.forEach(code => {
+        if (getLongestDownstream(code) >= minDepthThreshold) {
+            criticalNodes.add(code);
+        }
+    });
+
+    // Trace connections connecting these critical bottlenecks
+    criticalNodes.forEach(code => {
+        const children = childrenMap[code] || [];
+        children.forEach(ch => {
+            if (criticalNodes.has(ch) || uncompleted.has(ch)) {
+                criticalNodes.add(ch);
+                criticalBeams.add(`${code}->${ch}`);
+            }
+        });
+    });
+
+    // 3. Apply CSS glow and dimming to SVG elements
+    if (svgEl) {
+        svgEl.classList.add("has-highlight");
+        
+        const beams = svgEl.querySelectorAll(".fc-beam");
+        beams.forEach(b => {
+            const key = `${b.dataset.from}->${b.dataset.to}`;
+            if (criticalBeams.has(key)) {
+                b.classList.add("critical-beam", "highlighted");
+            } else {
+                b.classList.remove("critical-beam", "highlighted");
+            }
+        });
+
+        const nodeGroups = svgEl.querySelectorAll(".fc-node-group");
+        nodeGroups.forEach(ng => {
+            const cCode = ng.getAttribute("data-code");
+            if (criticalNodes.has(cCode)) {
+                ng.classList.add("critical-node", "highlighted-node");
+            } else {
+                ng.classList.remove("critical-node", "highlighted-node");
+            }
+        });
+    }
+
+    if (typeof showToastNotification === 'function') {
+        showToastNotification(`הודגשו ${criticalNodes.size} קורסים בשרשרת הקריטית המעכבת את סיום התואר! 🔴`, 'warning');
+    }
 }
 
 
@@ -16692,13 +16888,13 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.10.05-v2.0.3",
-    version: "2.0.3",
-    build: "200300",
-    date: "2026-10-05 23:55",
-    description: "גרסה 2.0.3: הסרת כפתור נגישות כפול, תיקון הגדלת גופן אמיתית, ניתוק שיבוץ מומלץ מהתקדמות אישית, מובייל אונבורדינג מיושר ומודול אבטחה IDOR"
+    code: "REV-2026.10.06-v2.0.4",
+    version: "2.0.4",
+    build: "200400",
+    date: "2026-10-06 08:35",
+    description: "גרסה 2.0.4: פילטר שרשרת קריטית (מה חוסם את התואר), פטור מילואים 2 נק״ז, מחשבון יעד מועד ב׳, בחירת שנתון ומסלול ברקים, ותיקון Favicon לגוגל"
 };
-window.APP_VERSION = "2.0.3";
+window.APP_VERSION = "2.0.4";
 
 function ensureBaselineRevisions() {
     if (!gameState.revisions || !Array.isArray(gameState.revisions) || gameState.revisions.length === 0) {
