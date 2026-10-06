@@ -232,6 +232,50 @@
         return { score: creds, isOverride: false };
     }
 
+    // SVG Icons matching CheeseFork exactly: Feather, Kettlebell, Dumbbell
+    const CHEESEFORK_ICONS = {
+        feather: `<svg class="cf-wl-icon cf-feather" viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5l6.74-6.76zm-9.74 5.26H6.5v-3.99l6-6c1.17-1.17 3.07-1.17 4.24 0s1.17 3.07 0 4.24l-6.24 6.25zM3 21h18v1H3z"/></svg>`,
+        kettlebellEmpty: `<svg class="cf-wl-icon cf-weight empty" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10h10l2 11H5L7 10z"/><path d="M9 10V6a3 3 0 0 1 6 0v4"/></svg>`,
+        kettlebellFilled: `<svg class="cf-wl-icon cf-weight filled" viewBox="0 0 24 24" width="13" height="13" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10h10l2 11H5L7 10z"/><path d="M9 10V6a3 3 0 0 1 6 0v4" fill="none"/></svg>`,
+        kettlebellHalf: `<svg class="cf-wl-icon cf-weight half" viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="1.5"><defs><linearGradient id="cfHalfGrad" x1="0" y1="0" x2="100%" y2="0"><stop offset="50%" stop-color="currentColor"/><stop offset="50%" stop-color="transparent"/></linearGradient></defs><path d="M7 10h10l2 11H5L7 10z" fill="url(#cfHalfGrad)"/><path d="M9 10V6a3 3 0 0 1 6 0v4" fill="none"/></svg>`,
+        dumbbell: `<svg class="cf-wl-icon cf-dumbbell" viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M6 5h2v14H6V5zm10 0h2v14h-2V5zM3 8h2v8H3V8zm16 0h2v8h-2V8zM8 11h8v2H8v-2z"/></svg>`
+    };
+
+    function renderCheeseForkWorkloadMeter(totalScore) {
+        // CheeseFork scale: 5 discrete weight slots (scale 10 to 25 pts)
+        // <= 14: Light feather
+        // 14 - 24: Progressive kettlebell weights (1 to 5 weights)
+        // >= 24.5: Full dumbbell heavy weight
+        const minWl = 12;
+        const maxWl = 25;
+        const norm = Math.max(0, Math.min(5, ((totalScore - minWl) / (maxWl - minWl)) * 5));
+        
+        let weightsHtml = '';
+        for (let i = 1; i <= 5; i++) {
+            if (norm >= i) {
+                weightsHtml += CHEESEFORK_ICONS.kettlebellFilled;
+            } else if (norm >= i - 0.5) {
+                weightsHtml += CHEESEFORK_ICONS.kettlebellHalf;
+            } else {
+                weightsHtml += CHEESEFORK_ICONS.kettlebellEmpty;
+            }
+        }
+
+        return `
+            <div class="cheesefork-workload-widget" title="עומס: ${totalScore}">
+                <div class="cf-wl-header">
+                    <span class="cf-wl-title">עומס</span>
+                    <span class="cf-wl-score">${totalScore}</span>
+                </div>
+                <div class="cf-wl-gauge">
+                    <span class="cf-wl-end feather" title="עומס קל">${CHEESEFORK_ICONS.feather}</span>
+                    <span class="cf-wl-weights">${weightsHtml}</span>
+                    <span class="cf-wl-end dumbbell" title="עומס כבד">${CHEESEFORK_ICONS.dumbbell}</span>
+                </div>
+            </div>
+        `;
+    }
+
     function calculateSemesterWorkload(courses) {
         let totalScore = 0;
         let overrideCount = 0;
@@ -256,12 +300,15 @@
             color = '#ffc107'; // Yellow
         }
 
+        const scoreRounded = parseFloat(totalScore.toFixed(1));
+
         return {
-            totalScore: parseFloat(totalScore.toFixed(1)),
+            totalScore: scoreRounded,
             level: level,
             levelKey: levelKey,
             color: color,
-            overrideCount: overrideCount
+            overrideCount: overrideCount,
+            meterHtml: renderCheeseForkWorkloadMeter(scoreRounded)
         };
     }
 
@@ -282,10 +329,10 @@
             isReservistDeduction = localStorage.getItem(PLANNER_RESERVIST_KEY) === 'true';
             const savedTrack = localStorage.getItem(PLANNER_TRACK_KEY);
             if (savedTrack) {
-                if (savedTrack === 'year_2024' || savedTrack === 'year_2026' || savedTrack === 'barak') {
+                if (savedTrack === 'year_2025' || savedTrack === 'year_2024' || savedTrack === 'year_2027' || savedTrack === 'year_2026' || savedTrack === 'barak') {
                     selectedTrack = savedTrack;
                 } else if (savedTrack === 'regular_2026') {
-                    selectedTrack = 'year_2026';
+                    selectedTrack = 'year_2027';
                 }
             }
         } catch (e) {
@@ -624,10 +671,10 @@
         if (track === 'barak' && global.PLANNER_CATALOG.SUGGESTED_BARAK_SYLLABUS) {
             return global.PLANNER_CATALOG.SUGGESTED_BARAK_SYLLABUS;
         }
-        if (track === 'year_2026' && global.PLANNER_CATALOG.SUGGESTED_MANDATORY_SYLLABUS_2026) {
+        if ((track === 'year_2027' || track === 'year_2026') && global.PLANNER_CATALOG.SUGGESTED_MANDATORY_SYLLABUS_2026) {
             return global.PLANNER_CATALOG.SUGGESTED_MANDATORY_SYLLABUS_2026;
         }
-        if (track === 'year_2024' && global.PLANNER_CATALOG.SUGGESTED_MANDATORY_SYLLABUS_2024) {
+        if ((track === 'year_2025' || track === 'year_2024') && global.PLANNER_CATALOG.SUGGESTED_MANDATORY_SYLLABUS_2024) {
             return global.PLANNER_CATALOG.SUGGESTED_MANDATORY_SYLLABUS_2024;
         }
         return global.PLANNER_CATALOG.SUGGESTED_MANDATORY_SYLLABUS || [];
@@ -1029,9 +1076,7 @@
                         <span class="semester-col-title">סמסטר ${semNum}</span>
                         <span class="semester-col-credits">${semCredits.toFixed(1)} נק״ז</span>
                     </div>
-                    <div class="semester-workload-badge workload-${semWorkload.levelKey}" style="border-color: ${semWorkload.color};" title="מדד עומס סמסטריאלי מחושב (${semWorkload.overrideCount > 0 ? `${semWorkload.overrideCount} דירוגים אישיים` : 'לפי בייסליין'})">
-                        <span>⚡ עומס: ${semWorkload.totalScore} (${semWorkload.level})</span>
-                    </div>
+                    ${semWorkload.meterHtml}
                     <div class="planner-course-list" data-semester="${semNum}">
             `);
 
@@ -1566,8 +1611,9 @@
                     localStorage.setItem(PLANNER_TRACK_KEY, selectedTrack);
                 } catch (err) {}
                 renderDegreePlanner();
-                let trackName = 'תוכנית לימודים (תשפ״ד - תשפ״ה / אוקטובר 2024)';
-                if (selectedTrack === 'year_2026') trackName = 'תוכנית לימודים חדשה (תשפ״ו - תשפ״ז / רפורמה)';
+                let trackName = 'תוכנית לימודים (תשפ״ה - אוקטובר 2024)';
+                if (selectedTrack === 'year_2024') trackName = 'תוכנית לימודים (תשפ״ד - אוקטובר 2023)';
+                else if (selectedTrack === 'year_2027' || selectedTrack === 'year_2026') trackName = 'תוכנית לימודים (תשפ״ז - רפורמה עתידית)';
                 else if (selectedTrack === 'barak') trackName = 'מסלול ברקים (תואר מזורז ומצטיינים)';
                 showPlannerToast(`שנתון/מסלול הלימודים עודכן: ${trackName} 🏛️`, false);
             });

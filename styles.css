@@ -8837,7 +8837,96 @@ html.is-iphone .app-global-footer {
     font-weight: 600;
 }
 
-/* Semester Workload Badge */
+/* CheeseFork Style Semester Workload Widget */
+.cheesefork-workload-widget {
+    margin: 4px 10px 8px 10px;
+    padding: 6px 12px;
+    background: #19202c;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    user-select: none;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.35);
+}
+
+.cheesefork-workload-widget .cf-wl-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #e2e8f0;
+    font-size: 0.86rem;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    font-family: inherit;
+}
+
+.cheesefork-workload-widget .cf-wl-title {
+    color: #cbd5e1;
+}
+
+.cheesefork-workload-widget .cf-wl-score {
+    font-size: 0.72rem;
+    font-family: monospace;
+    color: #94a3b8;
+    background: rgba(15, 23, 42, 0.6);
+    padding: 1px 5px;
+    border-radius: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.cheesefork-workload-widget .cf-wl-gauge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    direction: ltr;
+}
+
+.cheesefork-workload-widget .cf-wl-end {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #94a3b8;
+    transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.cheesefork-workload-widget .cf-wl-end.feather {
+    color: #cbd5e1;
+}
+
+.cheesefork-workload-widget .cf-wl-end.dumbbell {
+    color: #94a3b8;
+}
+
+.cheesefork-workload-widget .cf-wl-weights {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.cheesefork-workload-widget .cf-weight {
+    color: #94a3b8;
+    transition: all 0.2s ease;
+}
+
+.cheesefork-workload-widget .cf-weight.filled {
+    color: #e2e8f0;
+}
+
+.cheesefork-workload-widget .cf-weight.half {
+    color: #cbd5e1;
+}
+
+.cheesefork-workload-widget .cf-weight.empty {
+    color: #64748b;
+    opacity: 0.55;
+}
+
+/* Fallback & Compact Workload Badges */
 .semester-workload-badge {
     margin: 4px 10px 6px 10px;
     padding: 3px 8px;

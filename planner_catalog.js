@@ -140,13 +140,14 @@
         {
             semester: 2,
             title: "שנה א׳ - סמסטר ב׳",
-            targetCredits: 18.5,
+            targetCredits: 19.5,
             courses: [
                 { code: "01040043", altCode: "104043", name: "חדו\"א 2מ' 1", credits: 5.0, type: "mandatory", prereqs: ["01040041"] },
                 { code: "00340028", altCode: "034028", name: "מכניקת מוצקים 1", credits: 4.0, type: "mandatory", prereqs: ["01040041", "01040065", "01140051"] },
                 { code: "01040131", altCode: "104131", name: "משוואות דיפרנציאליות רגילות/ח", credits: 2.5, type: "mandatory", prereqs: ["01040041", "01040065"] },
                 { code: "03140533", altCode: "314533", name: "מבוא להנדסת חומרים מ'", credits: 3.5, type: "mandatory", prereqs: ["01250001"] },
-                { code: "00340061", altCode: "034061", name: "מבוא לגרפיקה ותכנון הנדסי", credits: 3.5, type: "mandatory", prereqs: [] }
+                { code: "00340061", altCode: "034061", name: "מבוא לגרפיקה ותכנון הנדסי", credits: 3.5, type: "mandatory", prereqs: [] },
+                { code: "01140039", altCode: "114039", name: "מעבדה לפיזיקה 1מח'", credits: 1.0, type: "mandatory", prereqs: ["01140051"] }
             ]
         },
         {
@@ -465,22 +466,29 @@
     const CURRICULUM_CATALOGS = {
         year_2024: {
             id: 'year_2024',
-            title: 'תוכנית לימודים (תשפ״ד - תשפ״ה / אוקטובר 2024)',
-            description: 'סילבוס קלאסי - כולל מבוא יצירתי להנדסת מכונות ומעבדה בפיזיקה 1מח׳',
+            title: 'תוכנית לימודים (תשפ״ד - אוקטובר 2023)',
+            description: 'סילבוס קלאסי למתחילים בתשפ״ד (כולל מבוא יצירתי להנדסת מכונות)',
             syllabus: SUGGESTED_MANDATORY_SYLLABUS_2024,
             mandatoryCredits: 109.5
         },
-        year_2026: {
-            id: 'year_2026',
-            title: 'תוכנית לימודים חדשה (תשפ״ו - תשפ״ז / רפורמה)',
-            description: 'סילבוס מעודכן - ללא אנגלית ב׳ ומבוא יצירתי כחובה',
+        year_2025: {
+            id: 'year_2025',
+            title: 'תוכנית לימודים (תשפ״ה - אוקטובר 2024)',
+            description: 'קטלוג רישום עדכני למתחילים באוקטובר 2024 (מעבדה 1מח׳ נדחתה לסמסטר ב׳)',
+            syllabus: SUGGESTED_MANDATORY_SYLLABUS_2024,
+            mandatoryCredits: 109.5
+        },
+        year_2027: {
+            id: 'year_2027',
+            title: 'תוכנית לימודים (תשפ״ז - רפורמה עתידית)',
+            description: 'תוכנית מעודכנת בהתהוות (לפי קדמים, פייתון ומבנה שעות חדש)',
             syllabus: SUGGESTED_MANDATORY_SYLLABUS_2026,
             mandatoryCredits: 107.0
         },
         barak: {
             id: 'barak',
             title: 'מסלול ברקים (תואר מזורז ומצטיינים)',
-            description: 'סילבוס תוכנית המצטיינים ברקים (7 סמסטרים מואצים)',
+            description: 'סילבוס קבוע ומואץ לתלמידי תוכנית ברקים (7 סמסטרים)',
             syllabus: SUGGESTED_BARAK_SYLLABUS,
             mandatoryCredits: 120.5
         }
