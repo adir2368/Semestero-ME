@@ -129,12 +129,12 @@ app.whenReady().then(async () => {
 
                 const popover = document.getElementById('workload-popover-overlay');
                 const isVisible = popover && popover.style.display === 'flex';
-                const input = document.getElementById('workload-input-val');
+                const slider = document.getElementById('workload-slider-val');
+                if (!slider) return { error: 'Popover slider not rendered' };
 
-                if (!input) return { error: 'Popover input not rendered' };
-
-                // Set custom score 4.5
-                input.value = '4.5';
+                // Set custom score 4.5 on slider
+                slider.value = '4.5';
+                slider.dispatchEvent(new Event('input', { bubbles: true }));
                 const saveBtn = document.getElementById('btn-workload-save');
                 saveBtn.click();
                 await new Promise(r => setTimeout(r, 500));

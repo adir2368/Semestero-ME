@@ -243,7 +243,8 @@
         kettlebellEmpty: `<svg class="cf-wl-icon cf-weight empty" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10h10l2 11H5L7 10z"/><path d="M9 10V6a3 3 0 0 1 6 0v4"/></svg>`,
         kettlebellFilled: `<svg class="cf-wl-icon cf-weight filled" viewBox="0 0 24 24" width="13" height="13" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10h10l2 11H5L7 10z"/><path d="M9 10V6a3 3 0 0 1 6 0v4" fill="none"/></svg>`,
         kettlebellHalf: `<svg class="cf-wl-icon cf-weight half" viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="1.5"><defs><linearGradient id="cfHalfGrad" x1="0" y1="0" x2="100%" y2="0"><stop offset="50%" stop-color="currentColor"/><stop offset="50%" stop-color="transparent"/></linearGradient></defs><path d="M7 10h10l2 11H5L7 10z" fill="url(#cfHalfGrad)"/><path d="M9 10V6a3 3 0 0 1 6 0v4" fill="none"/></svg>`,
-        kettlebellBadge: `<svg class="cf-badge-icon" viewBox="0 0 24 24" width="12" height="12" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -1px;"><path d="M7 10h10l2 11H5L7 10z"/><path d="M9 10V6a3 3 0 0 1 6 0v4" fill="none"/></svg>`,
+        scaleBadge: `<svg class="cf-badge-icon" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -1px;"><path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="M7 21h10"/><path d="M12 3v18"/><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/></svg>`,
+        kettlebellBadge: `<svg class="cf-badge-icon" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -1px;"><path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="M7 21h10"/><path d="M12 3v18"/><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/></svg>`,
         dumbbell: `<svg class="cf-wl-icon cf-dumbbell" viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M6 5h2v14H6V5zm10 0h2v14h-2V5zM3 8h2v8H3V8zm16 0h2v8h-2V8zM8 11h8v2H8v-2z"/></svg>`
     };
 
@@ -1125,7 +1126,7 @@
                                         data-name="${escapeHtml(course.name)}"
                                         data-workload="${courseWl.score}"
                                         title="${courseWl.isOverride ? `דירוג עומס אישי: ${courseWl.score} מתוך 5 (לחץ לעריכה)` : `דירוג עומס: ${courseWl.score} מתוך 5 (לחץ להזנת דירוג אישי)`}">
-                                    ${CHEESEFORK_ICONS.kettlebellBadge}<span>${courseWl.score}</span>
+                                    ${CHEESEFORK_ICONS.scaleBadge}<span>${courseWl.score}</span>
                                 </button>
                             </div>
                             ${isWhatIfMode && !completed ? `
@@ -1662,23 +1663,35 @@
         overlay.innerHTML = `
             <div class="workload-popover-box" onclick="event.stopPropagation();">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <h4 class="workload-popover-title" style="display: flex; align-items: center; gap: 6px;">${CHEESEFORK_ICONS.kettlebellBadge} הגדרת רמת עומס אישית לקורס</h4>
+                    <h4 class="workload-popover-title" style="display: flex; align-items: center; gap: 6px;">${CHEESEFORK_ICONS.scaleBadge} הגדרת רמת עומס אישית לקורס</h4>
                     <span style="font-size: 0.75rem; color: #38bdf8; font-family: monospace;">${escapeHtml(code)}</span>
                 </div>
                 <div class="workload-popover-desc">
                     <strong>${escapeHtml(name)}</strong><br>
-                    הגדר רמת עומס/קושי בסולם של 1 עד 5 (תואם לסולם משקולות CheeseFork), כולל מטלות שבועיות, עומס שיעורי בית ודוחות מעבדה.
+                    גרור את הסליידר לבחירת רמת העומס/קושי (1 עד 5 בקפיצות של 0.5, תואם לסולם CheeseFork):
                 </div>
-                <div class="workload-popover-input-row">
-                    <label for="workload-input-val" style="font-size: 0.82rem; color: #cbd5e1; white-space: nowrap;">דירוג קושי ועומס (1 עד 5):</label>
-                    <input type="number" id="workload-input-val" class="workload-popover-input" min="1.0" max="5.0" step="0.5" value="${displayScore}">
+                <div class="workload-popover-slider-wrap">
+                    <div class="workload-slider-val-row">
+                        <span style="font-size: 0.82rem; color: #cbd5e1;">רמת עומס נבחרת:</span>
+                        <span class="workload-slider-badge" id="workload-slider-display">
+                            ${CHEESEFORK_ICONS.scaleBadge} <strong id="workload-slider-num">${displayScore}</strong> / 5
+                        </span>
+                    </div>
+                    <input type="range" id="workload-slider-val" class="workload-range-slider" min="1.0" max="5.0" step="0.5" value="${displayScore}">
+                    <div class="workload-slider-ticks">
+                        <span>1 (קל)</span>
+                        <span>2</span>
+                        <span>3 (בינוני)</span>
+                        <span>4</span>
+                        <span>5 (כבד)</span>
+                    </div>
                 </div>
                 <div style="display: flex; gap: 6px; justify-content: center; flex-wrap: wrap;">
                     <button type="button" class="btn btn-sm btn-outline btn-wl-preset" data-val="1.0" style="padding: 2px 8px; font-size: 0.72rem;">1 (קל מאוד)</button>
                     <button type="button" class="btn btn-sm btn-outline btn-wl-preset" data-val="2.5" style="padding: 2px 8px; font-size: 0.72rem;">2.5 (סביר)</button>
                     <button type="button" class="btn btn-sm btn-outline btn-wl-preset" data-val="3.5" style="padding: 2px 8px; font-size: 0.72rem;">3.5 (בינוני-גבוה)</button>
                     <button type="button" class="btn btn-sm btn-outline btn-wl-preset" data-val="4.5" style="padding: 2px 8px; font-size: 0.72rem;">4.5 (כבד)</button>
-                    <button type="button" class="btn btn-sm btn-outline btn-wl-preset" data-val="5.0" style="padding: 2px 8px; font-size: 0.72rem;">5.0 (עומס מקסימלי)</button>
+                    <button type="button" class="btn btn-sm btn-outline btn-wl-preset" data-val="5.0" style="padding: 2px 8px; font-size: 0.72rem;">5.0 (מקסימלי)</button>
                 </div>
                 <div class="workload-popover-actions">
                     <button type="button" class="btn btn-sm btn-primary w-full" id="btn-workload-save" style="flex: 2; background: #0284c7; border-color: #38bdf8;">
@@ -1696,17 +1709,29 @@
 
         overlay.style.display = 'flex';
 
-        const inputEl = overlay.querySelector('#workload-input-val');
-        if (inputEl) {
-            inputEl.focus();
-            inputEl.select();
+        const sliderEl = overlay.querySelector('#workload-slider-val');
+        const numDisplayEl = overlay.querySelector('#workload-slider-num');
+
+        const updateSliderDisplay = (val) => {
+            if (numDisplayEl) numDisplayEl.textContent = parseFloat(val).toFixed(1);
+        };
+
+        if (sliderEl) {
+            sliderEl.addEventListener('input', (e) => {
+                updateSliderDisplay(e.target.value);
+            });
+            sliderEl.focus();
         }
 
         // Preset buttons
         overlay.querySelectorAll('.btn-wl-preset').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.stopPropagation();
-                if (inputEl) inputEl.value = btn.getAttribute('data-val');
+                const v = btn.getAttribute('data-val');
+                if (sliderEl) {
+                    sliderEl.value = v;
+                    updateSliderDisplay(v);
+                }
             });
         });
 
@@ -1720,7 +1745,7 @@
         overlay.querySelector('#btn-workload-cancel').onclick = closePopover;
 
         overlay.querySelector('#btn-workload-save').onclick = () => {
-            const val = parseFloat(inputEl.value);
+            const val = parseFloat(sliderEl ? sliderEl.value : displayScore);
             if (!isNaN(val) && val > 0) {
                 setCourseUserWorkload(code, altCode, val);
                 closePopover();

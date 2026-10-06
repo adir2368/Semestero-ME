@@ -16744,13 +16744,13 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.10.07-v2.1.2",
-    version: "2.1.2",
-    build: "201003",
-    date: "2026-10-07 00:57",
-    description: "גרסה 2.1.2: החלפת סימון עומס הקורסים לסמל משקולת Kettlebell SVG תואם CheeseFork"
+    code: "REV-2026.10.07-v2.1.3",
+    version: "2.1.3",
+    build: "201004",
+    date: "2026-10-07 01:05",
+    description: "גרסה 2.1.3: סליידר גרירה אינטראקטיבי להגדרת עומס קורסים (1-5 בקפיצות 0.5) וסמל מאזניים נקי"
 };
-window.APP_VERSION = "2.1.2";
+window.APP_VERSION = "2.1.3";
 
 function ensureBaselineRevisions() {
     if (!gameState.revisions || !Array.isArray(gameState.revisions) || gameState.revisions.length === 0) {
