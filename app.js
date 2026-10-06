@@ -14428,13 +14428,7 @@ function setupFlowchartViewMode() {
         });
     }
 
-    // Critical Path Bottleneck Highlighter ("מה חוסם לי את התואר?")
-    const critPathBtn = document.getElementById("btn-fc-critical-path");
-    if (critPathBtn) {
-        critPathBtn.addEventListener("click", () => {
-            toggleCriticalPathFilter();
-        });
-    }
+
 
     // Auto resize listener to maintain fit-width when window changes
     window.addEventListener("resize", () => {
@@ -14962,7 +14956,6 @@ function highlightFlowchartPath(code) {
 }
 
 function clearFlowchartHighlight() {
-    if (isCriticalPathActive) return; // Keep critical path active until toggled off
     const svgEl = document.getElementById("flowchart-svg");
     if (svgEl) svgEl.classList.remove("has-highlight");
 
@@ -14973,143 +14966,6 @@ function clearFlowchartHighlight() {
 
     const nodeGroups = document.querySelectorAll(".fc-node-group");
     nodeGroups.forEach(ng => ng.classList.remove("highlighted-node"));
-}
-
-// -----------------------------------------------------------------------------
-// Critical Path Bottleneck Analysis ("מה חוסם לי את התואר?")
-// -----------------------------------------------------------------------------
-let isCriticalPathActive = false;
-
-function toggleCriticalPathFilter() {
-    isCriticalPathActive = !isCriticalPathActive;
-    const btn = document.getElementById("btn-fc-critical-path");
-    const svgEl = document.getElementById("flowchart-svg");
-
-    if (btn) btn.classList.toggle("active", isCriticalPathActive);
-
-    if (!isCriticalPathActive) {
-        if (svgEl) {
-            svgEl.classList.remove("has-highlight");
-            svgEl.querySelectorAll(".critical-node").forEach(n => n.classList.remove("critical-node", "highlighted-node"));
-            svgEl.querySelectorAll(".critical-beam").forEach(b => b.classList.remove("critical-beam", "highlighted"));
-        }
-        if (typeof showToastNotification === 'function') {
-            showToastNotification('בוטלה הדגשת שרשרת קריטית', 'info');
-        }
-        return;
-    }
-
-    // 1. Build adjacency list of dependencies among uncompleted courses
-    const courses = gameState.courses || {};
-    const uncompleted = new Set();
-    const childrenMap = {}; // courseCode -> array of dependent child courses
-    const parentMap = {};   // courseCode -> array of prereq courses
-
-    Object.values(courses).forEach(c => {
-        if (!c || !c.code) return;
-        const isMastered = c.status === 'mastered' || (c.grade && !isNaN(Number(c.grade)) && Number(c.grade) >= 55) || c.isBinaryPass;
-        if (!isMastered) {
-            uncompleted.add(c.code);
-        }
-        childrenMap[c.code] = [];
-        parentMap[c.code] = [];
-    });
-
-    Object.values(courses).forEach(c => {
-        if (!c || !c.code) return;
-        const prereqList = c.prerequisites || c.prereqs || [];
-        prereqList.forEach(pre => {
-            const normPre = pre.replace(/^0+/, '');
-            const targetPre = Object.keys(courses).find(k => k === pre || k === normPre || k.replace(/^0+/, '') === normPre);
-            if (targetPre) {
-                if (!childrenMap[targetPre]) childrenMap[targetPre] = [];
-                childrenMap[targetPre].push(c.code);
-                parentMap[c.code].push(targetPre);
-            }
-        });
-    });
-
-    // 2. Compute longest downstream chain length for each uncompleted course
-    const memoChain = {};
-    function getLongestDownstream(code, visited = new Set()) {
-        if (memoChain[code] !== undefined) return memoChain[code];
-        if (visited.has(code)) return 0;
-        visited.add(code);
-
-        let maxChildLen = 0;
-        const children = childrenMap[code] || [];
-        for (let i = 0; i < children.length; i++) {
-            const childCode = children[i];
-            const childLen = getLongestDownstream(childCode, new Set(visited));
-            if (childLen > maxChildLen) {
-                maxChildLen = childLen;
-            }
-        }
-
-        const res = 1 + maxChildLen;
-        memoChain[code] = res;
-        return res;
-    }
-
-    let maxChainLength = 0;
-    uncompleted.forEach(code => {
-        const len = getLongestDownstream(code);
-        if (len > maxChainLength) {
-            maxChainLength = len;
-        }
-    });
-
-    // Top critical bottleneck courses are uncompleted courses with highest downstream depth
-    const criticalNodes = new Set();
-    const criticalBeams = new Set();
-
-    // Threshold: courses with chain depth >= 3 or top tier
-    const minDepthThreshold = Math.max(2, maxChainLength - 1);
-    uncompleted.forEach(code => {
-        if (getLongestDownstream(code) >= minDepthThreshold) {
-            criticalNodes.add(code);
-        }
-    });
-
-    // Trace connections connecting these critical bottlenecks
-    criticalNodes.forEach(code => {
-        const children = childrenMap[code] || [];
-        children.forEach(ch => {
-            if (criticalNodes.has(ch) || uncompleted.has(ch)) {
-                criticalNodes.add(ch);
-                criticalBeams.add(`${code}->${ch}`);
-            }
-        });
-    });
-
-    // 3. Apply CSS glow and dimming to SVG elements
-    if (svgEl) {
-        svgEl.classList.add("has-highlight");
-        
-        const beams = svgEl.querySelectorAll(".fc-beam");
-        beams.forEach(b => {
-            const key = `${b.dataset.from}->${b.dataset.to}`;
-            if (criticalBeams.has(key)) {
-                b.classList.add("critical-beam", "highlighted");
-            } else {
-                b.classList.remove("critical-beam", "highlighted");
-            }
-        });
-
-        const nodeGroups = svgEl.querySelectorAll(".fc-node-group");
-        nodeGroups.forEach(ng => {
-            const cCode = ng.getAttribute("data-code");
-            if (criticalNodes.has(cCode)) {
-                ng.classList.add("critical-node", "highlighted-node");
-            } else {
-                ng.classList.remove("critical-node", "highlighted-node");
-            }
-        });
-    }
-
-    if (typeof showToastNotification === 'function') {
-        showToastNotification(`הודגשו ${criticalNodes.size} קורסים בשרשרת הקריטית המעכבת את סיום התואר! 🔴`, 'warning');
-    }
 }
 
 
@@ -16890,9 +16746,9 @@ function initCalendarDayModal() {
 const APP_CURRENT_REVISION = {
     code: "REV-2026.10.06-v2.0.4",
     version: "2.0.4",
-    build: "200400",
-    date: "2026-10-06 08:35",
-    description: "גרסה 2.0.4: פילטר שרשרת קריטית (מה חוסם את התואר), פטור מילואים 2 נק״ז, מחשבון יעד מועד ב׳, בחירת שנתון ומסלול ברקים, ותיקון Favicon לגוגל"
+    build: "200401",
+    date: "2026-10-06 08:50",
+    description: "גרסה 2.0.4: פטור מילואים 2 נק״ז, מחשבון יעד מועד ב׳, בחירת שנתון ומסלול ברקים, ותיקון Favicon רשמי לגוגל"
 };
 window.APP_VERSION = "2.0.4";
 
