@@ -1,5 +1,5 @@
-// Service Worker for Academic Skill Tree (Semestero ME) - v2.0.8
-const CACHE_NAME = 'semestero-me-v2.0.8';
+// Service Worker for Academic Skill Tree (Semestero ME) - v2.0.9
+const CACHE_NAME = 'semestero-me-v2.0.9';
 
 const STATIC_ASSETS = [
     './',
@@ -109,6 +109,13 @@ self.addEventListener('fetch', (event) => {
             });
         })
     );
+});
+
+// Skip waiting immediately when instructed by the client
+self.addEventListener('message', (event) => {
+    if (event.data && event.data.action === 'skipWaiting') {
+        self.skipWaiting();
+    }
 });
 
 // Notification Click Handler: Deep-link to Timetable or Tasks view

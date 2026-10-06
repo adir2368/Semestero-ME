@@ -542,7 +542,7 @@
                     <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; padding: 10px 14px; background: rgba(56, 189, 248, 0.08); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 8px;">
                         <div style="display: flex; align-items: center; gap: 8px;">
                             <span style="font-size: 0.82rem; color: #94a3b8;">גרסת מערכת פעילה:</span>
-                            <span style="font-weight: 700; color: #38bdf8; font-family: monospace; font-size: 0.88rem;" id="display-system-version">v2.0.8</span>
+                            <span style="font-weight: 700; color: #38bdf8; font-family: monospace; font-size: 0.88rem;" id="display-system-version">v2.0.9</span>
                         </div>
                         <span class="app-version-badge" style="font-size: 0.66rem; background: rgba(15, 23, 42, 0.6); border-color: rgba(56, 189, 248, 0.35); color: #7dd3fc;">🔒 נעול לעריכה</span>
                     </div>
@@ -588,6 +588,7 @@
                         <span class="app-version-badge" style="font-size: 0.65rem; border-color: rgba(56, 189, 248, 0.4); color: #38bdf8;">יומן גרסאות</span>
                     </div>
                     <ul class="whats-new-list" style="list-style-type: disc; padding-right: 22px; margin: 0; color: #e2e8f0; font-size: 0.88rem; line-height: 1.85;">
+                        <li><strong>v2.0.9 (06/10/2026):</strong> תמיכה רב-שנתית בקטלוגים (תשפ״ד, תשפ״ז, ברקים), מחשבון עומס סמסטריאלי ויזואלי המביא בחשבון עומס מעבדות ודוחות, ואפשרות להזנת דירוג עומס אישי ישירות מכרטיס הקורס.</li>
                         <li><strong>v2.0.8 (06/10/2026):</strong> תכנון תואר נקי כברירת מחדל לאורחים: הצגת הסילבוס המומלץ הרשמי ללא שינויים אישיים, הפרדת מפתחות אחסון מקומיים לכל משתמש, ומנגנון אנטי-זיהום לתוכנית הלימודים.</li>
                         <li><strong>v2.0.7 (06/10/2026):</strong> תיקון פאנל קרדיט וגרסה תחתון במובייל (אנדרואיד ו-iOS), הצמדה יציבה מעל סרגל הניווט, ותמיכה מלאה באירועי מגע (Touch).</li>
                         <li><strong>v2.0.6 (06/10/2026):</strong> מרכוז מוחלט של הסיור במובייל, הזנת ציון סופי דינמית בסיור, נעילת קוד רוויזיה, והוספת חלונית מה חדש?</li>
@@ -615,7 +616,7 @@
                         <div class="bug-report-card-btn" id="card-btn-check-update">
                             <div class="btn-title">
                                 <span>🔄 בדיקת עדכוני גרסה</span>
-                                <span class="app-version-badge" style="font-size: 0.64rem;">v2.0.8</span>
+                                <span class="app-version-badge" style="font-size: 0.64rem;">v2.0.9</span>
                             </div>
                             <div class="btn-desc">
                                 בדיקה ישירה מול שרתי GitHub אם קיימת גרסה חדשה יותר להורדה או רענון.
@@ -1292,7 +1293,7 @@
             </div>
             <div class="footer-left-version" style="display: inline-flex; align-items: center; gap: 8px;">
                 <button type="button" class="app-version-badge" onclick="window.openAccessibilityModal()" title="הצהרת נגישות והתאמות" style="cursor: pointer; background: rgba(2, 132, 199, 0.2); border-color: rgba(56, 189, 248, 0.4); color: #38bdf8;">♿ נגישות</button>
-                <button type="button" class="app-version-badge" id="footer-version-badge" title="לחץ לבדיקת עדכונים ורענון המערכת (v2.0.8)" aria-label="בדיקת עדכוני גרסה ורענון המערכת" style="cursor: pointer;">v2.0.8 🔄</button>
+                <button type="button" class="app-version-badge" id="footer-version-badge" title="לחץ לבדיקת עדכונים ורענון המערכת (v2.0.9)" aria-label="בדיקת עדכוני גרסה ורענון המערכת" style="cursor: pointer;">v2.0.9 🔄</button>
             </div>
         </footer>
 
@@ -2621,20 +2622,20 @@
     <!-- Supabase JS Client for Cloud Sync -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <!-- CheeseFork Technion Courses Database (2,055 courses) -->
-    <script src="cheesefork_database.js?v=1.9.6"></script>
-    <script src="cheesefork_courses.min.js?v=1.9.6"></script>
+    <script src="cheesefork_database.js?v=2.0.9"></script>
+    <script src="cheesefork_courses.min.js?v=2.0.9"></script>
     <!-- Clean Curriculum Template -->
-    <script src="curriculum_template.js?v=1.9.6"></script>
+    <script src="curriculum_template.js?v=2.0.9"></script>
     <!-- Multi-User Identity & Sync Engine -->
-    <script src="auth_sync.js?v=1.9.6"></script>
+    <script src="auth_sync.js?v=2.0.9"></script>
     <!-- Moodle Live Calendar & Tasks Sync Engine -->
-    <script src="moodle_sync.js?v=1.9.6"></script>
+    <script src="moodle_sync.js?v=2.0.9"></script>
     <!-- Technion ME 2025/2026 Catalog & Electives Database -->
-    <script src="planner_catalog.js?v=1.9.6"></script>
+    <script src="planner_catalog.js?v=2.0.9"></script>
     <!-- Degree Planner Drag & Drop Engine -->
-    <script src="planner_module.js?v=1.9.6"></script>
+    <script src="planner_module.js?v=2.0.9"></script>
     <!-- Technion Official Academic Calendar & Holidays Engine -->
-    <script src="technion_academic_calendar.js?v=1.9.6"></script>
+    <script src="technion_academic_calendar.js?v=2.0.9"></script>
     <!-- Core Application Logic -->
 
     <!-- Accessibility Modal (הצהרת נגישות ותפריט התאמות) -->
@@ -2686,7 +2687,7 @@
     </div>
 
     <script src="accessibility.js?v=2.0.2"></script>
-    <script src="app.js?v=1.9.6"></script>
+    <script src="app.js?v=2.0.9"></script>
     <!-- PWA Service Worker Registration -->
     <script>
         if ('serviceWorker' in navigator && window.location.protocol.startsWith('http')) {
@@ -2709,15 +2710,31 @@
         }
 
         window.forceAppUpdate = async function() {
-            if ('caches' in window) {
-                const keys = await caches.keys();
-                await Promise.all(keys.map(k => caches.delete(k)));
+            const btn = document.getElementById('btn-force-refresh-app');
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<span>⏳</span> <span>מעדכן ומנקה זיכרון מטמון...</span>';
             }
-            if ('serviceWorker' in navigator) {
-                const regs = await navigator.serviceWorker.getRegistrations();
-                await Promise.all(regs.map(r => r.unregister()));
+            try {
+                if ('serviceWorker' in navigator) {
+                    const regs = await navigator.serviceWorker.getRegistrations();
+                    for (const reg of regs) {
+                        if (reg.waiting) {
+                            reg.waiting.postMessage({ action: 'skipWaiting' });
+                        }
+                        await reg.unregister();
+                    }
+                }
+                if ('caches' in window) {
+                    const keys = await caches.keys();
+                    await Promise.all(keys.map(k => caches.delete(k)));
+                }
+            } catch (err) {
+                console.warn('[forceAppUpdate] Cache clearing error:', err);
             }
-            window.location.reload(true);
+            // Append cache buster to force hard-refresh from network
+            const cleanUrl = window.location.origin + window.location.pathname + '?reload=' + Date.now() + window.location.hash;
+            window.location.replace(cleanUrl);
         };
     </script>
 </body>

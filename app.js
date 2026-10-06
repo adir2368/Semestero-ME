@@ -16744,13 +16744,13 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.10.06-v2.0.8",
-    version: "2.0.8",
-    build: "200801",
-    date: "2026-10-06 20:30",
-    description: "גרסה 2.0.8: תכנון תואר - שיבוץ מומלץ רשמי כברירת מחדל לאורחים, הפרדת שמירות ואנטי-זיהום של התוכנית האישית"
+    code: "REV-2026.10.06-v2.0.9",
+    version: "2.0.9",
+    build: "200901",
+    date: "2026-10-06 23:25",
+    description: "גרסה 2.0.9: בחירת שנתון ותוכנית לימודים (תשפ״ד/תשפ״ז/ברקים), מנוע ויזואליזציית עומס סמסטריאלי, ודירוגי עומס אישיים"
 };
-window.APP_VERSION = "2.0.8";
+window.APP_VERSION = "2.0.9";
 
 function ensureBaselineRevisions() {
     if (!gameState.revisions || !Array.isArray(gameState.revisions) || gameState.revisions.length === 0) {
