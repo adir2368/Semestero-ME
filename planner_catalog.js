@@ -222,12 +222,13 @@
     ];
 
     // ==========================================================================
-    // 3. Alternative/Experimental Layout with Python
+    // 3. Mandatory Semester Layout - Catalog 2026 (תשפ"ו - אוקטובר 2025)
+    // קטלוג רישום למתחילים באוקטובר 2025 (תשפ״ו - כולל שפת פייתון 02340128 בסמסטר א׳)
     // ==========================================================================
     const SUGGESTED_MANDATORY_SYLLABUS_2026 = [
         {
             semester: 1,
-            title: "שנה א׳ - סמסטר א׳ (פייתון)",
+            title: "שנה א׳ - סמסטר א׳ (תשפ״ו)",
             targetCredits: 20.5,
             courses: [
                 { code: "01040041", altCode: "104041", name: "חדו\"א 1מ' 1", credits: 5.0, type: "mandatory", prereqs: [] },
@@ -570,28 +571,35 @@
     const CURRICULUM_CATALOGS = {
         year_2027: {
             id: 'year_2027',
-            title: 'תוכנית לימודים (תשפ״ז - אוקטובר הקרוב)',
+            title: 'תשפ״ז - אוקטובר הקרוב',
             description: 'קטלוג רישום עדכני למתחילים באוקטובר תשפ״ז (כולל מבוא יצירתי בסמסטר א׳, מעבדה 1מח׳ בסמסטר ב׳)',
             syllabus: SUGGESTED_MANDATORY_SYLLABUS_2027,
             mandatoryCredits: 109.5
         },
+        year_2026: {
+            id: 'year_2026',
+            title: 'תשפ״ו - אוקטובר 2025',
+            description: 'קטלוג רישום למתחילים באוקטובר 2025 (תשפ״ו - כולל שפת פייתון בסמסטר א׳)',
+            syllabus: SUGGESTED_MANDATORY_SYLLABUS_2026,
+            mandatoryCredits: 107.0
+        },
         year_2025: {
             id: 'year_2025',
-            title: 'תוכנית לימודים (תשפ״ה - אוקטובר 2024)',
+            title: 'תשפ״ה - אוקטובר 2024',
             description: 'קטלוג רישום למתחילים באוקטובר 2024 (תשפ״ה)',
             syllabus: SUGGESTED_MANDATORY_SYLLABUS_2024,
             mandatoryCredits: 109.5
         },
         year_2024: {
             id: 'year_2024',
-            title: 'תוכנית לימודים (תשפ״ד - אוקטובר 2023)',
+            title: 'תשפ״ד - אוקטובר 2023',
             description: 'סילבוס קלאסי למתחילים בתשפ״ד',
             syllabus: SUGGESTED_MANDATORY_SYLLABUS_2024,
             mandatoryCredits: 109.5
         },
         barak: {
             id: 'barak',
-            title: 'מסלול ברקים (תואר מזורז ומצטיינים)',
+            title: 'מסלול ברקים',
             description: 'סילבוס קבוע ומואץ לתלמידי תוכנית ברקים (7 סמסטרים)',
             syllabus: SUGGESTED_BARAK_SYLLABUS,
             mandatoryCredits: 120.5
