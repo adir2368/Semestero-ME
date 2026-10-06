@@ -16744,13 +16744,13 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.10.06-v2.0.4",
-    version: "2.0.4",
-    build: "200401",
-    date: "2026-10-06 08:50",
-    description: "גרסה 2.0.4: פטור מילואים 2 נק״ז, מחשבון יעד מועד ב׳, בחירת שנתון ומסלול ברקים, ותיקון Favicon רשמי לגוגל"
+    code: "REV-2026.10.06-v2.0.5",
+    version: "2.0.5",
+    build: "200501",
+    date: "2026-10-06 09:00",
+    description: "גרסה 2.0.5: עדכון סילבוס מומלץ רשמי - העברת מעבדה בכימיה לסמסטר ד׳ כפי שמוגדר בתוכנית הפקולטית הרשמית"
 };
-window.APP_VERSION = "2.0.4";
+window.APP_VERSION = "2.0.5";
 
 function ensureBaselineRevisions() {
     if (!gameState.revisions || !Array.isArray(gameState.revisions) || gameState.revisions.length === 0) {
