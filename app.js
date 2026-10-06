@@ -16744,13 +16744,13 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.10.07-v2.1.4",
-    version: "2.1.4",
-    build: "201005",
-    date: "2026-10-07 01:15",
-    description: "גרסה 2.1.4: שדרוג חלונית עומס קורס: סליידר ברוחב מלא, תצוגת ציון מרכזית ועיצוב נקי ללא עומס מיותר"
+    code: "REV-2026.10.07-v2.1.5",
+    version: "2.1.5",
+    build: "201006",
+    date: "2026-10-07 02:10",
+    description: "גרסה 2.1.5: הוספת מדיניות פרטיות ואמנת הגנת מידע מלאה (Privacy Policy), ארכיטקטורת Local-First ושקיפות מלאה"
 };
-window.APP_VERSION = "2.1.4";
+window.APP_VERSION = "2.1.5";
 
 function ensureBaselineRevisions() {
     if (!gameState.revisions || !Array.isArray(gameState.revisions) || gameState.revisions.length === 0) {
@@ -18149,6 +18149,40 @@ window.closeBugReportModal = function() {
         modal.classList.remove("active");
     }
 };
+
+window.openPrivacyPolicyModal = function() {
+    const modal = document.getElementById("privacy-policy-modal");
+    if (modal) {
+        modal.classList.add("active");
+        modal.setAttribute("aria-hidden", "false");
+    }
+};
+
+window.closePrivacyPolicyModal = function() {
+    const modal = document.getElementById("privacy-policy-modal");
+    if (modal) {
+        modal.classList.remove("active");
+        modal.setAttribute("aria-hidden", "true");
+    }
+};
+
+// Bind overlay click and escape key to close privacy policy modal
+if (typeof document !== 'undefined') {
+    document.addEventListener("click", function(e) {
+        const modal = document.getElementById("privacy-policy-modal");
+        if (modal && e.target === modal) {
+            window.closePrivacyPolicyModal();
+        }
+    });
+    document.addEventListener("keydown", function(e) {
+        if (e.key === "Escape") {
+            const modal = document.getElementById("privacy-policy-modal");
+            if (modal && modal.classList.contains("active")) {
+                window.closePrivacyPolicyModal();
+            }
+        }
+    });
+}
 
 window.copySystemDiagnostics = async function() {
     const text = window.getSystemDiagnosticsText();
