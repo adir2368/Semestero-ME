@@ -1614,11 +1614,11 @@
                     localStorage.setItem(PLANNER_TRACK_KEY, selectedTrack);
                 } catch (err) {}
                 renderDegreePlanner();
-                let trackName = 'תשפ״ז - אוקטובר הקרוב';
+                let trackName = 'תשפ״ז - אוקטובר 2026';
                 if (selectedTrack === 'year_2026') trackName = 'תשפ״ו - אוקטובר 2025';
                 else if (selectedTrack === 'year_2025') trackName = 'תשפ״ה - אוקטובר 2024';
                 else if (selectedTrack === 'year_2024') trackName = 'תשפ״ד - אוקטובר 2023';
-                else if (selectedTrack === 'year_2027') trackName = 'תשפ״ז - אוקטובר הקרוב';
+                else if (selectedTrack === 'year_2027') trackName = 'תשפ״ז - אוקטובר 2026';
                 else if (selectedTrack === 'barak') trackName = 'מסלול ברקים';
                 showPlannerToast(`שנתון/מסלול הלימודים עודכן: ${trackName} 🏛️`, false);
             });
