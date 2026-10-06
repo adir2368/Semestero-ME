@@ -88,13 +88,22 @@
     function isPurgedCourse(code, altCode) {
         if (!code && !altCode) return false;
         const codes = getNormalizedCodes(code, altCode);
-        for (let i = 0; i < codes.length; i++) {
-            const k = codes[i];
-            if (PURGED_CODES.has(k)) return true;
-            if (global.gameState && Array.isArray(global.gameState.removedCourses) && global.gameState.removedCourses.includes(k)) {
-                return true;
+
+        // Explicit user-removed courses always take precedence
+        if (global.gameState && Array.isArray(global.gameState.removedCourses)) {
+            for (let i = 0; i < codes.length; i++) {
+                if (global.gameState.removedCourses.includes(codes[i])) return true;
             }
         }
+
+        // For Adir specifically, PURGED_CODES (English B & Creative Intro) are exempt from his degree
+        // But for year_2024 catalog or other students, these courses exist as valid curriculum courses!
+        if (isAdirAuthenticated()) {
+            for (let i = 0; i < codes.length; i++) {
+                if (PURGED_CODES.has(codes[i])) return true;
+            }
+        }
+
         return false;
     }
 
@@ -144,6 +153,119 @@
     }
 
     // --------------------------------------------------------------------------
+    // Workload Calculation Engine (CheeseFork Baseline + User Overrides)
+    // --------------------------------------------------------------------------
+    const WORKLOAD_OVERRIDE_PREFIX = 'ast_course_workload_';
+
+    // Lab and high-demand course workload multipliers/overrides
+    // Technion labs have low credits (0.5 - 1.5) but demand days of pre/post reports
+    const SPECIAL_COURSE_WORKLOAD_BASELINE = {
+        '01250013': 3.5, // מעבדה בכימיה - 0.5 creds, but 3 lab hrs + ~8-12 hrs pre/post reports!
+        '125013': 3.5,
+        '01140039': 3.5, // מעבדה לפיזיקה 1מח - 1.0 creds + heavy reports
+        '114039': 3.5,
+        '01140032': 3.5, // מעב' לפיזיקה 1 ח
+        '114032': 3.5,
+        '00340057': 5.5, // מעבדה מתקדמת הנ. מכונות - intensive experimental setups
+        '034057': 5.5,
+        '01040041': 5.5, // Calculus 1M1 - high rigor
+        '104041': 5.5,
+        '01040043': 5.5, // Calculus 2M1
+        '104043': 5.5,
+        '00340028': 4.5, // Solid Mechanics 1
+        '034028': 4.5,
+        '00340053': 5.5, // Solid Mechanics 2 Extended
+        '034053': 5.5,
+        '00340010': 5.5, // Dynamics
+        '034010': 5.5,
+        '00340055': 5.5, // Fluid Mechanics 1 Extended
+        '034055': 5.5
+    };
+
+    function getCourseUserWorkload(code, altCode) {
+        if (!code && !altCode) return null;
+        const candidateCodes = getNormalizedCodes(code, altCode);
+        for (let i = 0; i < candidateCodes.length; i++) {
+            const val = localStorage.getItem(WORKLOAD_OVERRIDE_PREFIX + candidateCodes[i]);
+            if (val !== null && val !== undefined && val !== '') {
+                const num = parseFloat(val);
+                if (!isNaN(num) && num > 0) return num;
+            }
+        }
+        return null;
+    }
+
+    function setCourseUserWorkload(code, altCode, value) {
+        if (!code && !altCode) return;
+        const mainCode = code || altCode;
+        const normCode = String(mainCode).trim();
+        if (value === null || value === undefined || value === '' || isNaN(Number(value))) {
+            const candidateCodes = getNormalizedCodes(code, altCode);
+            candidateCodes.forEach(c => localStorage.removeItem(WORKLOAD_OVERRIDE_PREFIX + c));
+        } else {
+            localStorage.setItem(WORKLOAD_OVERRIDE_PREFIX + normCode, String(Number(value)));
+            const stripped = normCode.replace(/^0+/, '');
+            if (stripped && stripped !== normCode) {
+                localStorage.setItem(WORKLOAD_OVERRIDE_PREFIX + stripped, String(Number(value)));
+            }
+        }
+    }
+
+    function calculateCourseWorkload(course) {
+        if (!course) return { score: 0, isOverride: false };
+        const userOverride = getCourseUserWorkload(course.code, course.altCode);
+        if (userOverride !== null) {
+            return { score: userOverride, isOverride: true };
+        }
+
+        // Check special baseline
+        const candidateCodes = getNormalizedCodes(course.code, course.altCode);
+        for (let i = 0; i < candidateCodes.length; i++) {
+            const k = candidateCodes[i];
+            if (SPECIAL_COURSE_WORKLOAD_BASELINE[k] !== undefined) {
+                return { score: SPECIAL_COURSE_WORKLOAD_BASELINE[k], isOverride: false };
+            }
+        }
+
+        // Standard baseline: credits weight
+        const creds = Number(course.credits) || 3.0;
+        return { score: creds, isOverride: false };
+    }
+
+    function calculateSemesterWorkload(courses) {
+        let totalScore = 0;
+        let overrideCount = 0;
+        (courses || []).forEach(c => {
+            const wl = calculateCourseWorkload(c);
+            totalScore += wl.score;
+            if (wl.isOverride) overrideCount++;
+        });
+
+        // Thresholds: Light <= 18.0, Moderate 18.1 - 22.5, Heavy > 22.5
+        let level = 'סביר';
+        let levelKey = 'light';
+        let color = '#28a745'; // Green
+
+        if (totalScore > 22.5) {
+            level = 'כבד';
+            levelKey = 'heavy';
+            color = '#dc3545'; // Red
+        } else if (totalScore > 18.0) {
+            level = 'בינוני';
+            levelKey = 'moderate';
+            color = '#ffc107'; // Yellow
+        }
+
+        return {
+            totalScore: parseFloat(totalScore.toFixed(1)),
+            level: level,
+            levelKey: levelKey,
+            color: color,
+            overrideCount: overrideCount
+        };
+    }
+
+    // --------------------------------------------------------------------------
     // State Initialization & Persistence
     // --------------------------------------------------------------------------
     function initPlannerState(force = false) {
@@ -159,8 +281,12 @@
         try {
             isReservistDeduction = localStorage.getItem(PLANNER_RESERVIST_KEY) === 'true';
             const savedTrack = localStorage.getItem(PLANNER_TRACK_KEY);
-            if (savedTrack && (savedTrack === 'regular_2026' || savedTrack === 'barak')) {
-                selectedTrack = savedTrack;
+            if (savedTrack) {
+                if (savedTrack === 'year_2024' || savedTrack === 'year_2026' || savedTrack === 'barak') {
+                    selectedTrack = savedTrack;
+                } else if (savedTrack === 'regular_2026') {
+                    selectedTrack = 'year_2026';
+                }
             }
         } catch (e) {
             console.warn('[Planner] Could not read preferences from localStorage:', e);
@@ -440,7 +566,8 @@
 
     function resetPlanToSuggested() {
         if (!global.PLANNER_CATALOG) return;
-        customPlan = JSON.parse(JSON.stringify(global.PLANNER_CATALOG.SUGGESTED_MANDATORY_SYLLABUS));
+        const targetSyllabus = getSuggestedCatalogForTrack(selectedTrack);
+        customPlan = JSON.parse(JSON.stringify(targetSyllabus));
         unassignedCourses = [];
         syncAllCoursesFromGameState();
         saveCustomPlan(true);
@@ -492,14 +619,25 @@
         }
     }
 
+    function getSuggestedCatalogForTrack(track) {
+        if (!global.PLANNER_CATALOG) return [];
+        if (track === 'barak' && global.PLANNER_CATALOG.SUGGESTED_BARAK_SYLLABUS) {
+            return global.PLANNER_CATALOG.SUGGESTED_BARAK_SYLLABUS;
+        }
+        if (track === 'year_2026' && global.PLANNER_CATALOG.SUGGESTED_MANDATORY_SYLLABUS_2026) {
+            return global.PLANNER_CATALOG.SUGGESTED_MANDATORY_SYLLABUS_2026;
+        }
+        if (track === 'year_2024' && global.PLANNER_CATALOG.SUGGESTED_MANDATORY_SYLLABUS_2024) {
+            return global.PLANNER_CATALOG.SUGGESTED_MANDATORY_SYLLABUS_2024;
+        }
+        return global.PLANNER_CATALOG.SUGGESTED_MANDATORY_SYLLABUS || [];
+    }
+
     function getActivePlan() {
         if (currentMode === 'suggested') {
-            if (selectedTrack === 'barak' && global.PLANNER_CATALOG.SUGGESTED_BARAK_SYLLABUS) {
-                return global.PLANNER_CATALOG.SUGGESTED_BARAK_SYLLABUS;
-            }
-            return global.PLANNER_CATALOG.SUGGESTED_MANDATORY_SYLLABUS;
+            return getSuggestedCatalogForTrack(selectedTrack);
         }
-        return customPlan || global.PLANNER_CATALOG.SUGGESTED_MANDATORY_SYLLABUS;
+        return customPlan || getSuggestedCatalogForTrack(selectedTrack);
     }
 
     function buildCourseSemesterMap(plan) {
@@ -883,11 +1021,16 @@
             let semCredits = 0;
             (sem.courses || []).forEach(c => { semCredits += Number(c.credits) || 0; });
 
+            const semWorkload = calculateSemesterWorkload(sem.courses || []);
+
             chunks.push(`
                 <div class="planner-semester-col" data-semester="${semNum}">
                     <div class="semester-col-header">
                         <span class="semester-col-title">סמסטר ${semNum}</span>
                         <span class="semester-col-credits">${semCredits.toFixed(1)} נק״ז</span>
+                    </div>
+                    <div class="semester-workload-badge workload-${semWorkload.levelKey}" style="border-color: ${semWorkload.color};" title="מדד עומס סמסטריאלי מחושב (${semWorkload.overrideCount > 0 ? `${semWorkload.overrideCount} דירוגים אישיים` : 'לפי בייסליין'})">
+                        <span>⚡ עומס: ${semWorkload.totalScore} (${semWorkload.level})</span>
                     </div>
                     <div class="planner-course-list" data-semester="${semNum}">
             `);
@@ -897,6 +1040,7 @@
                 const completed = !isSuggestedMode && isCourseCompleted(course.code, course.altCode);
                 const grade = !isSuggestedMode ? getCourseGrade(course.code, course.altCode) : null;
                 const prereqStatus = checkPrerequisites(course, semNum, courseSemMap);
+                const courseWl = calculateCourseWorkload(course);
 
                 const tagClass = completed ? 'tag-completed' : (course.list ? `tag-list-${course.list}` : (course.type ? `tag-${course.type}` : 'tag-mandatory'));
                 const tagLabel = completed ? (grade ? `✓ הושלם [${grade}]` : '✓ הושלם') : (course.list ? `בחירה ${course.list}׳` : (course.type === 'final_project' ? 'פרויקט גמר' : 'חובה'));
@@ -919,7 +1063,17 @@
                         </div>
                         <div class="course-card-title">${escapeHtml(course.name)}</div>
                         <div class="course-card-bottom">
-                            <span class="course-card-credits">${course.credits} נק״ז</span>
+                            <div style="display: flex; align-items: center; gap: 5px;">
+                                <span class="course-card-credits">${course.credits} נק״ז</span>
+                                <button type="button" class="btn-course-workload ${courseWl.isOverride ? 'has-override' : ''}" 
+                                        data-code="${escapeHtml(course.code)}" 
+                                        data-alt-code="${escapeHtml(course.altCode || '')}"
+                                        data-name="${escapeHtml(course.name)}"
+                                        data-workload="${courseWl.score}"
+                                        title="${courseWl.isOverride ? `דירוג עומס אישי: ${courseWl.score} (לחץ לעריכה)` : `דירוג עומס מחושב: ${courseWl.score} (לחץ להזנת דירוג אישי)`}">
+                                    ⚡ ${courseWl.score}
+                                </button>
+                            </div>
                             ${isWhatIfMode && !completed ? `
                                 <div class="course-card-whatif-wrap" title="ציון משוער בסימולטור">
                                     <span style="font-size: 0.68rem; color: #fde047;">ציון:</span>
@@ -1344,10 +1498,22 @@
                 return;
             }
 
+            // Course Workload Override Button Click (⚡ button)
+            const workloadBtn = e.target.closest('.btn-course-workload');
+            if (workloadBtn) {
+                e.stopPropagation();
+                const code = workloadBtn.getAttribute('data-code');
+                const altCode = workloadBtn.getAttribute('data-alt-code');
+                const name = workloadBtn.getAttribute('data-name');
+                const currentWl = workloadBtn.getAttribute('data-workload');
+                openWorkloadEditPopover(code, altCode, name, currentWl);
+                return;
+            }
+
             // Course card tap -> Mobile tap-to-move action sheet
             const card = e.target.closest('.planner-course-card, .planner-pool-item');
             if (card) {
-                if (e.target.closest('.course-card-whatif-input, .btn-card-remove, .btn-add-to-plan')) return;
+                if (e.target.closest('.course-card-whatif-input, .btn-card-remove, .btn-add-to-plan, .btn-course-workload')) return;
 
                 const code = card.getAttribute('data-code');
                 const altCode = card.getAttribute('data-alt-code');
@@ -1400,7 +1566,10 @@
                     localStorage.setItem(PLANNER_TRACK_KEY, selectedTrack);
                 } catch (err) {}
                 renderDegreePlanner();
-                showPlannerToast(`מסלול שונה ל-${selectedTrack === 'barak' ? 'מסלול ברקים (מזורז)' : 'סילבוס רגיל (תשפ״ו)'}`, true);
+                let trackName = 'תוכנית לימודים (תשפ״ד - תשפ״ה / אוקטובר 2024)';
+                if (selectedTrack === 'year_2026') trackName = 'תוכנית לימודים חדשה (תשפ״ו - תשפ״ז / רפורמה)';
+                else if (selectedTrack === 'barak') trackName = 'מסלול ברקים (תואר מזורז ומצטיינים)';
+                showPlannerToast(`שנתון/מסלול הלימודים עודכן: ${trackName} 🏛️`, false);
             });
         }
 
@@ -1416,6 +1585,100 @@
                 showPlannerToast(isReservistDeduction ? 'הופעל פטור מילואים: הופחתו 2 נק״ז מדרישות התואר! 🎖️' : 'בוטל פטור מילואים: דרישות התואר חזרו ל-157.5 נק״ז.', true);
             });
         }
+    }
+
+    // --------------------------------------------------------------------------
+    // Interactive User Workload Popover (Micro-Input Editor)
+    // --------------------------------------------------------------------------
+    function openWorkloadEditPopover(code, altCode, name, currentScore) {
+        let overlay = document.getElementById('workload-popover-overlay');
+        if (!overlay) {
+            overlay = document.createElement('div');
+            overlay.id = 'workload-popover-overlay';
+            overlay.className = 'workload-popover-overlay';
+            document.body.appendChild(overlay);
+        }
+
+        const existingOverride = getCourseUserWorkload(code, altCode);
+        const displayScore = existingOverride !== null ? existingOverride : currentScore;
+
+        overlay.innerHTML = `
+            <div class="workload-popover-box" onclick="event.stopPropagation();">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h4 class="workload-popover-title">⚡ הגדרת עומס שבועי אישי</h4>
+                    <span style="font-size: 0.75rem; color: #38bdf8; font-family: monospace;">${escapeHtml(code)}</span>
+                </div>
+                <div class="workload-popover-desc">
+                    <strong>${escapeHtml(name)}</strong><br>
+                    הגדר את ציון העומס לפי כמות שעות העבודה השבועיות בפועל (כולל דוחות מעבדה, תרגילים ומטלות).
+                </div>
+                <div class="workload-popover-input-row">
+                    <label for="workload-input-val" style="font-size: 0.82rem; color: #cbd5e1; white-space: nowrap;">דירוג אישי (1 - 10):</label>
+                    <input type="number" id="workload-input-val" class="workload-popover-input" min="0.5" max="15" step="0.5" value="${displayScore}">
+                </div>
+                <div style="display: flex; gap: 6px; justify-content: center; flex-wrap: wrap;">
+                    <button type="button" class="btn btn-sm btn-outline btn-wl-preset" data-val="2.5" style="padding: 2px 8px; font-size: 0.72rem;">2.5 (קל)</button>
+                    <button type="button" class="btn btn-sm btn-outline btn-wl-preset" data-val="4.0" style="padding: 2px 8px; font-size: 0.72rem;">4.0 (סביר)</button>
+                    <button type="button" class="btn btn-sm btn-outline btn-wl-preset" data-val="5.5" style="padding: 2px 8px; font-size: 0.72rem;">5.5 (אינטנסיבי)</button>
+                    <button type="button" class="btn btn-sm btn-outline btn-wl-preset" data-val="7.5" style="padding: 2px 8px; font-size: 0.72rem;">7.5+ (עומס קיצוני/דוחות)</button>
+                </div>
+                <div class="workload-popover-actions">
+                    <button type="button" class="btn btn-sm btn-primary w-full" id="btn-workload-save" style="flex: 2; background: #0284c7; border-color: #38bdf8;">
+                        💾 שמור דירוג
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline" id="btn-workload-reset" style="flex: 1; border-color: #ef4444; color: #f87171;" title="אפס לבייסליין המחושב">
+                        איפוס
+                    </button>
+                    <button type="button" class="btn btn-sm btn-secondary" id="btn-workload-cancel" style="flex: 1;">
+                        ביטול
+                    </button>
+                </div>
+            </div>
+        `;
+
+        overlay.style.display = 'flex';
+
+        const inputEl = overlay.querySelector('#workload-input-val');
+        if (inputEl) {
+            inputEl.focus();
+            inputEl.select();
+        }
+
+        // Preset buttons
+        overlay.querySelectorAll('.btn-wl-preset').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (inputEl) inputEl.value = btn.getAttribute('data-val');
+            });
+        });
+
+        // Close handlers
+        const closePopover = () => {
+            overlay.style.display = 'none';
+            overlay.innerHTML = '';
+        };
+
+        overlay.onclick = closePopover;
+        overlay.querySelector('#btn-workload-cancel').onclick = closePopover;
+
+        overlay.querySelector('#btn-workload-save').onclick = () => {
+            const val = parseFloat(inputEl.value);
+            if (!isNaN(val) && val > 0) {
+                setCourseUserWorkload(code, altCode, val);
+                closePopover();
+                renderDegreePlanner();
+                showPlannerToast(`⚡ עודכן דירוג עומס אישי לקורס ${name}: ${val}`, false);
+            } else {
+                closePopover();
+            }
+        };
+
+        overlay.querySelector('#btn-workload-reset').onclick = () => {
+            setCourseUserWorkload(code, altCode, null);
+            closePopover();
+            renderDegreePlanner();
+            showPlannerToast(`דירוג העומס אופס לבייסליין המערכת לקורס ${name}`, false);
+        };
     }
 
     // --------------------------------------------------------------------------
@@ -1967,7 +2230,11 @@
             }
             saveCustomPlan(true);
             renderDegreePlanner();
-        }
+        },
+        calculateCourseWorkload: calculateCourseWorkload,
+        calculateSemesterWorkload: calculateSemesterWorkload,
+        setCourseUserWorkload: setCourseUserWorkload,
+        getCourseUserWorkload: getCourseUserWorkload
     };
 
     // Auto initialize events on DOM load
