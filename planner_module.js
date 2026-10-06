@@ -243,6 +243,7 @@
         kettlebellEmpty: `<svg class="cf-wl-icon cf-weight empty" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10h10l2 11H5L7 10z"/><path d="M9 10V6a3 3 0 0 1 6 0v4"/></svg>`,
         kettlebellFilled: `<svg class="cf-wl-icon cf-weight filled" viewBox="0 0 24 24" width="13" height="13" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10h10l2 11H5L7 10z"/><path d="M9 10V6a3 3 0 0 1 6 0v4" fill="none"/></svg>`,
         kettlebellHalf: `<svg class="cf-wl-icon cf-weight half" viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="1.5"><defs><linearGradient id="cfHalfGrad" x1="0" y1="0" x2="100%" y2="0"><stop offset="50%" stop-color="currentColor"/><stop offset="50%" stop-color="transparent"/></linearGradient></defs><path d="M7 10h10l2 11H5L7 10z" fill="url(#cfHalfGrad)"/><path d="M9 10V6a3 3 0 0 1 6 0v4" fill="none"/></svg>`,
+        kettlebellBadge: `<svg class="cf-badge-icon" viewBox="0 0 24 24" width="12" height="12" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -1px;"><path d="M7 10h10l2 11H5L7 10z"/><path d="M9 10V6a3 3 0 0 1 6 0v4" fill="none"/></svg>`,
         dumbbell: `<svg class="cf-wl-icon cf-dumbbell" viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M6 5h2v14H6V5zm10 0h2v14h-2V5zM3 8h2v8H3V8zm16 0h2v8h-2V8zM8 11h8v2H8v-2z"/></svg>`
     };
 
@@ -1124,7 +1125,7 @@
                                         data-name="${escapeHtml(course.name)}"
                                         data-workload="${courseWl.score}"
                                         title="${courseWl.isOverride ? `דירוג עומס אישי: ${courseWl.score} מתוך 5 (לחץ לעריכה)` : `דירוג עומס: ${courseWl.score} מתוך 5 (לחץ להזנת דירוג אישי)`}">
-                                    🏋️ ${courseWl.score}
+                                    ${CHEESEFORK_ICONS.kettlebellBadge}<span>${courseWl.score}</span>
                                 </button>
                             </div>
                             ${isWhatIfMode && !completed ? `
@@ -1661,7 +1662,7 @@
         overlay.innerHTML = `
             <div class="workload-popover-box" onclick="event.stopPropagation();">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <h4 class="workload-popover-title">🏋️ הגדרת רמת עומס אישית לקורס</h4>
+                    <h4 class="workload-popover-title" style="display: flex; align-items: center; gap: 6px;">${CHEESEFORK_ICONS.kettlebellBadge} הגדרת רמת עומס אישית לקורס</h4>
                     <span style="font-size: 0.75rem; color: #38bdf8; font-family: monospace;">${escapeHtml(code)}</span>
                 </div>
                 <div class="workload-popover-desc">
@@ -1724,7 +1725,7 @@
                 setCourseUserWorkload(code, altCode, val);
                 closePopover();
                 renderDegreePlanner();
-                showPlannerToast(`🏋️ עודכן דירוג עומס אישי לקורס ${name}: ${val} מתוך 5`, false);
+                showPlannerToast(`עודכן דירוג עומס אישי לקורס ${name}: ${val} מתוך 5`, false);
             } else {
                 closePopover();
             }
