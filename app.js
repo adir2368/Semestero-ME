@@ -16744,13 +16744,13 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.10.06-v2.0.5",
-    version: "2.0.5",
-    build: "200501",
-    date: "2026-10-06 09:00",
-    description: "גרסה 2.0.5: עדכון סילבוס מומלץ רשמי - העברת מעבדה בכימיה לסמסטר ד׳ כפי שמוגדר בתוכנית הפקולטית הרשמית"
+    code: "REV-2026.10.06-v2.0.6",
+    version: "2.0.6",
+    build: "200601",
+    date: "2026-10-06 18:45",
+    description: "גרסה 2.0.6: תיקון מרכוז מוחלט של הסיור, הזנת ציון סופי דינמית בסיור, נעילת קוד רוויזיה, והוספת חלונית מה חדש?"
 };
-window.APP_VERSION = "2.0.5";
+window.APP_VERSION = "2.0.6";
 
 function ensureBaselineRevisions() {
     if (!gameState.revisions || !Array.isArray(gameState.revisions) || gameState.revisions.length === 0) {
@@ -16783,13 +16783,13 @@ function ensureBaselineRevisions() {
 function renderSettingsPage() {
     ensureBaselineRevisions();
 
-    // 1. Populate Section 1: Revision & Semester Control
-    const revCodeInput = document.getElementById("setting-revision-code");
+    // 1. Populate Section 1: Semester & System Control
+    const displayVersion = document.getElementById("display-system-version");
     const activeSemSelect = document.getElementById("setting-active-semester");
     const guardModeSelect = document.getElementById("setting-semester-guard-mode");
     const charClassInput = document.getElementById("setting-character-class");
 
-    if (revCodeInput) revCodeInput.value = gameState.customRevisionCode || APP_CURRENT_REVISION.code;
+    if (displayVersion) displayVersion.textContent = `v${APP_CURRENT_REVISION.version} (${APP_CURRENT_REVISION.code})`;
     if (activeSemSelect) activeSemSelect.value = gameState.currentActiveSemester || 3;
     if (guardModeSelect) guardModeSelect.value = gameState.semesterGuardMode || "locked";
     if (charClassInput) charClassInput.value = gameState.characterClass || "סטודנט להנדסת מכונות - הטכניון";
@@ -16940,20 +16940,18 @@ function editRevisionDetails(rId) {
     showToastNotification("פרטי הרוויזיה עודכנו בהצלחה!", "success");
 }
 
-// Save Section 1: Revision & Semester Controls
+// Save Section 1: Semester & System Controls
 function saveRevisionSection() {
-    const revCodeInput = document.getElementById("setting-revision-code");
     const activeSemSelect = document.getElementById("setting-active-semester");
     const guardModeSelect = document.getElementById("setting-semester-guard-mode");
     const charClassInput = document.getElementById("setting-character-class");
 
-    if (revCodeInput) gameState.customRevisionCode = revCodeInput.value.trim();
     if (activeSemSelect) gameState.currentActiveSemester = parseInt(activeSemSelect.value) || 3;
     if (guardModeSelect) gameState.semesterGuardMode = guardModeSelect.value;
     if (charClassInput) gameState.characterClass = charClassInput.value.trim();
 
     notifyStateChanged({ tab: 'settings' });
-    showToastNotification("✅ הגדרות רוויזיה וסמסטרים נשמרו בהצלחה!", "success");
+    showToastNotification("✅ הגדרות סמסטר נשמרו בהצלחה!", "success");
 }
 
 // Save Section 3: Google Calendars

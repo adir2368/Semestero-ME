@@ -41,12 +41,12 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Rubik:wght@300;400;500;700;900&display=swap" rel="stylesheet">
-    <link rel="shortcut icon" href="favicon.ico?v=2.0.5">
-    <link rel="icon" href="favicon.ico?v=2.0.5" sizes="any">
-    <link rel="icon" type="image/png" sizes="48x48" href="icon-48.png?v=2.0.5">
-    <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png?v=2.0.5">
-    <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png?v=2.0.5">
-    <link rel="stylesheet" href="styles.css?v=2.0.5">
+    <link rel="shortcut icon" href="favicon.ico?v=2.0.6">
+    <link rel="icon" href="favicon.ico?v=2.0.6" sizes="any">
+    <link rel="icon" type="image/png" sizes="48x48" href="icon-48.png?v=2.0.6">
+    <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png?v=2.0.6">
+    <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png?v=2.0.6">
+    <link rel="stylesheet" href="styles.css?v=2.0.6">
     <link rel="stylesheet" href="accessibility.css?v=2.0.2">
 
     <!-- Schema.org Structured Data for Google Search -->
@@ -525,23 +525,26 @@
                     </div>
                 </div>
 
-                <!-- Section 1: Editable System Revision & Semester Guard -->
+                <!-- Section 1: System Revision & Semester Control (Revision code is read-only) -->
                 <div class="settings-card">
                     <div class="settings-card-header">
                         <div class="settings-card-title">
-                            <span>🏷️ עריכת רוויזיית מערכת וסטטוס סמסטר (System Revision & Semester Control)</span>
+                            <span>🏷️ הגדרות סמסטר פעיל וסטטוס מערכת (Semester & System Control)</span>
                         </div>
                         <button type="button" class="btn btn-xs btn-outline" id="btn-save-section-revision" style="border-color: #38bdf8; color: #38bdf8;">
-                            💾 שמור שינויי רוויזיה
+                            💾 שמור הגדרות סמסטר
                         </button>
                     </div>
 
-                    <div class="settings-form-grid">
-                        <div class="form-group">
-                            <label class="setting-label">קוד רוויזיה / גרסה (Revision Tag):</label>
-                            <input type="text" id="setting-revision-code" class="modal-input" value="REV-2026.09.12-v3.5" style="width: 100%; font-family: monospace;">
-                            <span class="setting-hint">תגית זיהוי הרוויזיה הנוכחית של העץ</span>
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; padding: 10px 14px; background: rgba(56, 189, 248, 0.08); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 8px;">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span style="font-size: 0.82rem; color: #94a3b8;">גרסת מערכת פעילה:</span>
+                            <span style="font-weight: 700; color: #38bdf8; font-family: monospace; font-size: 0.88rem;" id="display-system-version">v2.0.5</span>
                         </div>
+                        <span class="app-version-badge" style="font-size: 0.66rem; background: rgba(15, 23, 42, 0.6); border-color: rgba(56, 189, 248, 0.35); color: #7dd3fc;">🔒 נעול לעריכה</span>
+                    </div>
+
+                    <div class="settings-form-grid">
                         <div class="form-group">
                             <label class="setting-label">סמסטר נוכחי פעיל בלימודים:</label>
                             <select id="setting-active-semester" class="modal-select" style="width: 100%;">
@@ -565,12 +568,31 @@
                             </select>
                             <span class="setting-hint">מונע הרשמה בטעות לקורסי סמסטר ד' ומעלה</span>
                         </div>
-                        <div class="form-group">
+                        <div class="form-group" style="grid-column: 1 / -1;">
                             <label class="setting-label">כינוי אקדמי / כותרת הסטודנט:</label>
                             <input type="text" id="setting-character-class" class="modal-input" value="סטודנט להנדסת מכונות - הטכניון" style="width: 100%;">
                             <span class="setting-hint">מוצג בראש המסך הראשי</span>
                         </div>
                     </div>
+                </div>
+
+                <!-- Section: What's New? Changelog Card (מה חדש?) -->
+                <div class="settings-card" id="settings-card-whats-new" style="border-color: rgba(56, 189, 248, 0.35); background: #0b1329;">
+                    <div class="settings-card-header" style="border-bottom: 1px solid rgba(56, 189, 248, 0.2); padding-bottom: 10px; margin-bottom: 14px;">
+                        <div class="settings-card-title" style="color: #38bdf8; font-size: 1.15rem; font-weight: 800; display: flex; align-items: center; gap: 8px;">
+                            <span>✨</span> <span>מה חדש?</span>
+                        </div>
+                        <span class="app-version-badge" style="font-size: 0.65rem; border-color: rgba(56, 189, 248, 0.4); color: #38bdf8;">יומן גרסאות</span>
+                    </div>
+                    <ul class="whats-new-list" style="list-style-type: disc; padding-right: 22px; margin: 0; color: #e2e8f0; font-size: 0.88rem; line-height: 1.85;">
+                        <li><strong>v2.0.6 (06/10/2026):</strong> מרכוז מוחלט של הסיור במובייל, הזנת ציון סופי דינמית בסיור, נעילת קוד רוויזיה, והוספת חלונית מה חדש?</li>
+                        <li><strong>v2.0.5 (06/10/2026):</strong> עדכון סילבוס מומלץ רשמי: העברת מעבדה בכימיה לסמסטר ד׳ בהתאמה מדויקת לתוכנית הפקולטית.</li>
+                        <li><strong>v2.0.4 (06/10/2026):</strong> פטור מילואים 2 נק״ז, מחשבון יעד למועד ב׳ במודל הקורס, ובחירת מסלול ברקים מואץ.</li>
+                        <li><strong>v2.0.3 (05/10/2026):</strong> הנגשת המערכת (תקן AA מלא), סימולציית שוורם MiroFish לשיפורי UX וביצועים.</li>
+                        <li><strong>v2.0.2 (04/10/2026):</strong> התאמה מלאה למסכי מובייל וטאבלט, עיצוב מחדש של המודלים וסרגל תחתון מותאם.</li>
+                        <li><strong>v2.0.1 (04/10/2026):</strong> ייצוא והדפסת גיליון ציונים (A4), סנכרון התקדמות אוטומטי מול Moodle ו-CheeseFork.</li>
+                        <li><strong>v2.0.0 (04/10/2026):</strong> השקת מנוע Semestero ME 2.0 המלא - מפת מיומנויות תואר, מעקב ממוצע וקרדיטים, ומערכת שעות.</li>
+                    </ul>
                 </div>
 
                 <!-- Section 2: Distribution, Version Updates & Help -->
@@ -588,7 +610,7 @@
                         <div class="bug-report-card-btn" id="card-btn-check-update">
                             <div class="btn-title">
                                 <span>🔄 בדיקת עדכוני גרסה</span>
-                                <span class="app-version-badge" style="font-size: 0.64rem;">v2.0.5</span>
+                                <span class="app-version-badge" style="font-size: 0.64rem;">v2.0.6</span>
                             </div>
                             <div class="btn-desc">
                                 בדיקה ישירה מול שרתי GitHub אם קיימת גרסה חדשה יותר להורדה או רענון.
@@ -1265,7 +1287,7 @@
             </div>
             <div class="footer-left-version" style="display: inline-flex; align-items: center; gap: 8px;">
                 <button type="button" class="app-version-badge" onclick="window.openAccessibilityModal()" title="הצהרת נגישות והתאמות" style="cursor: pointer; background: rgba(2, 132, 199, 0.2); border-color: rgba(56, 189, 248, 0.4); color: #38bdf8;">♿ נגישות</button>
-                <span class="app-version-badge" id="footer-version-badge" title="לחץ לבדיקת עדכונים ורענון המערכת (v2.0.5)" style="cursor: pointer;">v2.0.5 🔄</span>
+                <span class="app-version-badge" id="footer-version-badge" title="לחץ לבדיקת עדכונים ורענון המערכת (v2.0.6)" style="cursor: pointer;">v2.0.6 🔄</span>
             </div>
         </footer>
 
@@ -2167,7 +2189,7 @@
 
     <!-- Onboarding Wizard Modal for New Students -->
     <div class="modal-overlay" id="onboarding-wizard-modal">
-        <div class="modal-content" style="max-width: 640px; max-height: 88vh; display: flex; flex-direction: column;">
+        <div class="modal-content" style="max-width: 640px; max-height: 90vh; display: flex; flex-direction: column;">
             <div class="modal-header">
                 <h2 style="display: flex; align-items: center; gap: 10px; margin: 0; font-size: 1.25rem;">
                     <span>🎓</span> <span>ברוך הבא לתכנון התואר בהנדסת מכונות!</span>
@@ -2176,6 +2198,7 @@
                     בוא נגדיר את מסלול הלימודים שלך בטכניון בשלושה שלבים מהירים:
                 </p>
             </div>
+            <div class="modal-body" style="overflow-y: auto; flex: 1 1 auto; padding: 16px 20px;">
                 <div style="background: rgba(56, 189, 248, 0.08); border: 1px dashed rgba(56, 189, 248, 0.35); border-radius: 8px; padding: 12px; margin-bottom: 14px; font-size: 0.82rem; color: #cbd5e1; line-height: 1.6;">
                     <strong style="color: #38bdf8;">🧭 טיפים לשימוש מהיר:</strong><br>
                     • <strong>עץ דרישות קדומות:</strong> לחיצה על קורס מציגה סילבוס, ציונים, ומשימות בית.<br>
@@ -2575,13 +2598,13 @@
                 <p id="update-modal-description" style="font-size: 0.84rem; color: #cbd5e1; margin-bottom: 14px;">
                     הגרסה החדשה כוללת שיפורי ביצועים, תיקוני סנכרון ושדרוגי מערכת.
                 </p>
-                <div style="display: flex; flex-direction: column; gap: 8px;">
-                    <a href="https://github.com/adir2368/Semestero-ME/releases" target="_blank" rel="noopener noreferrer" class="btn btn-primary w-full" style="display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 700; text-decoration: none; padding: 10px;">
-                        <span>📥</span> <span>הורד גרסה עדכנית מ-GitHub Releases</span>
-                    </a>
-                    <button type="button" class="btn btn-outline w-full" id="btn-force-refresh-app" onclick="if (window.forceAppUpdate) window.forceAppUpdate(); else window.location.reload(true);" style="font-weight: 600; padding: 8px;">
-                        <span>🔄</span> <span>רענן מטמון וטען מחדש עכשיו</span>
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <button type="button" class="btn btn-primary w-full" id="btn-force-refresh-app" onclick="if (window.forceAppUpdate) window.forceAppUpdate(); else window.location.reload(true);" style="display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 700; padding: 12px; background: linear-gradient(135deg, #10b981, #059669); font-size: 0.92rem; border: none; cursor: pointer;">
+                        <span>🔄</span> <span>רענן מטמון וטען גרסה חדשה עכשיו (מומלץ למובייל/ווב)</span>
                     </button>
+                    <a href="https://github.com/adir2368/Semestero-ME/releases" target="_blank" rel="noopener noreferrer" class="btn btn-outline w-full" style="display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 600; text-decoration: none; padding: 9px; font-size: 0.82rem; color: #94a3b8; border-color: rgba(255,255,255,0.15);">
+                        <span>💻</span> <span>הורדת קובץ התקנה למחשב (Windows) מ-GitHub Releases</span>
+                    </a>
                 </div>
             </div>
             <div class="modal-footer" style="padding: 10px 16px; border-top: 1px solid rgba(255, 255, 255, 0.08); display: flex; justify-content: flex-end;">

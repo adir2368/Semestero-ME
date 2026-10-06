@@ -883,17 +883,49 @@
 
                         const grid = document.createElement('div');
                         grid.className = 'onboarding-chips-grid';
-                        grid.style.cssText = 'display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; margin-top: 4px;';
+                        grid.style.cssText = 'display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 8px; margin-top: 4px;';
 
                         semCourses.forEach(c => {
-                            const label = document.createElement('label');
-                            label.className = 'onboarding-course-chip';
-                            label.style.cssText = 'display: flex; align-items: center; gap: 8px; background: rgba(30, 41, 59, 0.7); border: 1px solid #334155; border-radius: 6px; padding: 6px 10px; cursor: pointer; font-size: 0.82rem;';
-                            label.innerHTML = `
-                                <input type="checkbox" value="${c.code}" style="cursor: pointer;">
-                                <span>${c.name} (${c.credits || 0} נק״ז)</span>
+                            const card = document.createElement('div');
+                            card.className = 'onboarding-course-chip';
+                            card.style.cssText = 'display: flex; flex-direction: column; gap: 6px; background: rgba(30, 41, 59, 0.7); border: 1px solid #334155; border-radius: 8px; padding: 10px 12px; transition: all 0.2s ease;';
+
+                            const topRow = document.createElement('label');
+                            topRow.style.cssText = 'display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 0.85rem; color: #f1f5f9; user-select: none; margin: 0;';
+                            topRow.innerHTML = `
+                                <input type="checkbox" value="${c.code}" class="onboarding-course-checkbox" style="width: 18px; height: 18px; cursor: pointer; accent-color: #38bdf8;">
+                                <span style="font-weight: 600; flex: 1;">${c.name} <span style="font-size: 0.74rem; color: #94a3b8; font-weight: normal;">(${c.credits || 0} נק״ז)</span></span>
                             `;
-                            grid.appendChild(label);
+
+                            const gradeRow = document.createElement('div');
+                            gradeRow.className = 'onboarding-grade-row';
+                            gradeRow.style.cssText = 'display: none; align-items: center; gap: 8px; padding-top: 8px; border-top: 1px dashed rgba(56, 189, 248, 0.25); margin-top: 2px;';
+                            gradeRow.innerHTML = `
+                                <span style="font-size: 0.78rem; color: #38bdf8; font-weight: 700;">ציון סופי:</span>
+                                <input type="number" min="0" max="100" placeholder="למשל 85" class="onboarding-grade-input" style="width: 76px; padding: 4px 8px; background: #0f172a; border: 1px solid #38bdf8; border-radius: 6px; color: #38bdf8; font-size: 0.84rem; font-weight: 800; text-align: center;">
+                                <span style="font-size: 0.72rem; color: #94a3b8;">(לא חובה)</span>
+                            `;
+
+                            const chk = topRow.querySelector('.onboarding-course-checkbox');
+                            chk.addEventListener('change', () => {
+                                if (chk.checked) {
+                                    card.style.borderColor = '#38bdf8';
+                                    card.style.background = 'rgba(14, 165, 233, 0.12)';
+                                    gradeRow.style.display = 'flex';
+                                    const gInput = gradeRow.querySelector('.onboarding-grade-input');
+                                    if (gInput) setTimeout(() => gInput.focus(), 50);
+                                } else {
+                                    card.style.borderColor = '#334155';
+                                    card.style.background = 'rgba(30, 41, 59, 0.7)';
+                                    gradeRow.style.display = 'none';
+                                    const gInput = gradeRow.querySelector('.onboarding-grade-input');
+                                    if (gInput) gInput.value = '';
+                                }
+                            });
+
+                            card.appendChild(topRow);
+                            card.appendChild(gradeRow);
+                            grid.appendChild(card);
                         });
                         container.appendChild(grid);
                     }
@@ -910,7 +942,13 @@
             const semester = parseInt(semSelect && semSelect.value) || 1;
             const priorCompleted = {};
             document.querySelectorAll('#onboarding-courses-checklist input[type="checkbox"]:checked').forEach(chk => {
-                priorCompleted[chk.value] = { completed: true };
+                const card = chk.closest('.onboarding-course-chip');
+                const gInput = card ? card.querySelector('.onboarding-grade-input') : null;
+                const gVal = (gInput && gInput.value.trim() !== '') ? parseFloat(gInput.value.trim()) : null;
+                priorCompleted[chk.value] = {
+                    completed: true,
+                    grade: (gVal !== null && !isNaN(gVal) && gVal >= 0 && gVal <= 100) ? gVal : null
+                };
             });
             if (typeof window.getCleanCurriculumState === 'function') {
                 const newState = window.getCleanCurriculumState(semester, priorCompleted);
