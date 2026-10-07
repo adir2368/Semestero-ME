@@ -389,6 +389,39 @@
                 }
             ],
             tip: '💡 טיפ: סימון משימות שביצעת מוסיף נקודות ניסיון (XP) לרמת השחקן שלך!'
+        },
+
+        'tasks-calendar-view-pane': {
+            title: 'לוח שנה אקדמי משולב (Academic Calendar)',
+            purpose: 'תצוגה חודשית ושבועית מרכזית של כל מועדי הבחינות (מועד א\' וב\'), מטלות מודל, הגשות WebWork, אירועים אישיים ומרווחי ימי למידה.',
+            sections: [
+                {
+                    icon: '📅',
+                    title: 'תצוגת חודש / שבוע',
+                    desc: 'מעבר בלחיצה בין פריסה חודשית מלאה לפריסה שבועית ממוקדת.'
+                },
+                {
+                    icon: '➕',
+                    title: 'הוספת אירוע / משימה אישית',
+                    desc: 'לחיצה על כפתור "אירוע אישי" או לחיצה ישירה על יום בלוח מאפשרת הוספת אירוע יום שלם או לפי שעות.'
+                },
+                {
+                    icon: '📊',
+                    title: 'מרווחי ימים בין בחינות (Exam Runway)',
+                    desc: 'כרטיס מתקפל בראש הלוח המחשב נטו ימי למידה פנויים בין מועדי המבחנים של הסמסטר.'
+                },
+                {
+                    icon: '🎨',
+                    title: 'מקרא צבעים חכם',
+                    desc: 'הבחנה ברורה בין ימי מבחן רשמיים, מטלות מודל, מבחנים לתרגול וחופשות.'
+                },
+                {
+                    icon: '📤',
+                    title: 'ייצוא ליומן Google',
+                    desc: 'סנכרון בלחיצה אחת של כל האירועים והמועדים ישירות ליומן האישי שלך.'
+                }
+            ],
+            tip: '💡 טיפ: לחיצה על כל תא יום בלוח פותחת את פירוט היום ומאפשרת הוספת אירועים ומשימות!'
         }
     };
 
@@ -564,7 +597,9 @@
             } else if (modalId === 'planner-workspace') {
                 targetContainer = modalEl.querySelector('.planner-header-right') || modalEl.querySelector('.planner-header-banner');
             } else if (modalId === 'timetable-workspace') {
-                targetContainer = modalEl.querySelector('.timetable-sync-actions') || modalEl.querySelector('.timetable-header-card');
+                targetContainer = modalEl.querySelector('#timetable-day-selector') || modalEl.querySelector('.timetable-day-selector') || modalEl.querySelector('.timetable-container');
+            } else if (modalId === 'tasks-calendar-view-pane') {
+                targetContainer = modalEl.querySelector('.cal-actions-row') || modalEl.querySelector('.finals-calendar-header-bar') || modalEl.querySelector('.cal-title-group');
             } else if (modalId === 'notion-tasks-workspace') {
                 targetContainer = modalEl.querySelector('.notion-tasks-header-actions') || modalEl.querySelector('.notion-tasks-header-main');
             } else {
@@ -583,8 +618,9 @@
 
             if (modalId === 'course-modal') {
                 btn.style.marginRight = '8px';
-            } else if (modalId.includes('-workspace')) {
+            } else if (modalId.includes('-workspace') || modalId.includes('-pane')) {
                 btn.style.marginLeft = '8px';
+                btn.style.alignSelf = 'center';
             }
 
             btn.onclick = (e) => {
@@ -593,9 +629,22 @@
             };
 
             // Prepend or append depending on layout
-            if (targetContainer.classList && (targetContainer.classList.contains('course-settings-container') || targetContainer.classList.contains('flowchart-actions') || targetContainer.classList.contains('timetable-sync-actions'))) {
+            if (targetContainer.classList && (
+                targetContainer.classList.contains('course-settings-container') || 
+                targetContainer.classList.contains('flowchart-actions') || 
+                targetContainer.classList.contains('timetable-sync-actions') ||
+                targetContainer.classList.contains('cal-actions-row') ||
+                targetContainer.id === 'timetable-day-selector' ||
+                targetContainer.classList.contains('timetable-day-selector')
+            )) {
                 targetContainer.appendChild(btn);
-            } else if (targetContainer.classList && (targetContainer.classList.contains('modal-header') || targetContainer.classList.contains('analytics-header-banner') || targetContainer.classList.contains('settings-header-actions') || targetContainer.classList.contains('planner-header-right') || targetContainer.classList.contains('notion-tasks-header-actions'))) {
+            } else if (targetContainer.classList && (
+                targetContainer.classList.contains('modal-header') || 
+                targetContainer.classList.contains('analytics-header-banner') || 
+                targetContainer.classList.contains('settings-header-actions') || 
+                targetContainer.classList.contains('planner-header-right') || 
+                targetContainer.classList.contains('notion-tasks-header-actions')
+            )) {
                 targetContainer.appendChild(btn);
             } else {
                 targetContainer.insertBefore(btn, targetContainer.firstChild);
@@ -655,6 +704,8 @@
 
             // Insert banner at the top of modal body or scrollable content
             let bodyTarget = modalEl.querySelector('.modal-body') || 
+                             modalEl.querySelector('.finals-calendar-card') ||
+                             modalEl.querySelector('.finals-calendar-container') ||
                              modalEl.querySelector('.flowchart-viewport') ||
                              modalEl.querySelector('.planner-main-container') ||
                              modalEl.querySelector('.timetable-container') ||

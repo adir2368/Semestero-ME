@@ -12947,6 +12947,10 @@ function setupNotionDashboard() {
                 viewsDirtyState.settings = false;
             }
         }
+
+        if (window.ModalHelp && typeof window.ModalHelp.setupAllModalHelpTriggers === 'function') {
+            window.ModalHelp.setupAllModalHelpTriggers();
+        }
     }
 
     window.setActiveMainTab = setActiveMainTab;
@@ -13320,6 +13324,19 @@ function renderNotionTasksTable() {
         else if (t.status === 'not_started') displayLabel = 'not started';
         else displayLabel = STATUS_LABELS[t.status] || t.status;
         
+        let moodleUrl = t.moodleUrl || '';
+        if (!moodleUrl && (t.moodleEventId || t.source === 'moodle')) {
+            const evId = t.moodleEventId || (t.id && t.id.startsWith('task_moodle_') ? t.id.split('_')[2] : '');
+            if (evId && /^\d+$/.test(evId)) {
+                moodleUrl = `https://moodle25.technion.ac.il/calendar/view.php?view=event&id=${evId}`;
+            }
+        }
+        const moodleLinkHtml = moodleUrl ? `
+            <a href="${moodleUrl}" target="_blank" rel="noopener noreferrer" class="notion-moodle-link-btn" title="פתח דף הגשה במודל הטכניון" onclick="event.stopPropagation();">
+                <span>🎓 הגשה במודל ↗</span>
+            </a>
+        ` : '';
+
         rowsHtml += `
             <tr data-course-code="${c.code}" data-task-id="${t.id}">
                 <td><input type="checkbox" class="notion-row-checkbox" ${isDone ? 'checked' : ''}></td>
@@ -13329,6 +13346,7 @@ function renderNotionTasksTable() {
                             ${taskBadgeHtml}
                             <span class="notion-title-editable" contenteditable="true" spellcheck="false" title="לחץ לעריכת שם המשימה">${t.title}</span>
                         </span>
+                        ${moodleLinkHtml}
                         <button class="notion-open-peek-btn" title="פתח תצוגת צד">🔲 OPEN</button>
                     </div>
                 </td>
@@ -13603,6 +13621,24 @@ function openTaskSidePeek(courseCode, taskId) {
         saveState();
     };
     
+    const moodleRow = document.getElementById("peek-property-moodle-row");
+    const moodleLink = document.getElementById("peek-property-moodle-link");
+    let resolvedMoodleUrl = task.moodleUrl || '';
+    if (!resolvedMoodleUrl && (task.moodleEventId || task.source === 'moodle')) {
+        const evId = task.moodleEventId || (task.id && task.id.startsWith('task_moodle_') ? task.id.split('_')[2] : '');
+        if (evId && /^\d+$/.test(evId)) {
+            resolvedMoodleUrl = `https://moodle25.technion.ac.il/calendar/view.php?view=event&id=${evId}`;
+        }
+    }
+    if (moodleRow && moodleLink) {
+        if (resolvedMoodleUrl) {
+            moodleRow.style.display = "grid";
+            moodleLink.href = resolvedMoodleUrl;
+        } else {
+            moodleRow.style.display = "none";
+        }
+    }
+
     const gradeRow = document.getElementById("peek-property-grade-row");
     const gradeInput = document.getElementById("peek-property-grade");
     if (task.type === 'exam') {
@@ -17232,11 +17268,10 @@ function createCalendarDayCell(dateStr, dayNum, isToday, itemsByDate, isOtherMon
     cell.className = cellClasses.join(" ");
     cell.dataset.date = dateStr;
 
-    const todayBadgeHtml = isToday ? `<span class="cal-today-pill-badge">היום</span>` : '';
+    const todayBadgeHtml = '';
     let cellHtml = `
         <div class="cal-day-num">
             <span class="cal-day-number-label ${isToday ? 'is-today-num' : ''}">${dayNum}</span>
-            ${todayBadgeHtml}
         </div>
         <button type="button" class="btn-add-day-item" data-date="${dateStr}" title="הוסף אירוע ליום זה">+</button>
         <div class="cal-events-list" style="display: flex; flex-direction: column; gap: 4px;">
@@ -17282,7 +17317,14 @@ function createCalendarDayCell(dateStr, dayNum, isToday, itemsByDate, isOtherMon
             const doneClass = item.completed ? "done" : "";
             const checkIcon = item.completed ? "☑" : "⚪";
             const evIcon = item.icon || "🔵";
-            const timeBadge = item.time ? `<span class="cal-event-time-badge">${item.time}</span>` : '';
+            let timeBadge = '';
+            if (item.isAllDay) {
+                timeBadge = `<span class="cal-event-time-badge" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.35);">יום שלם</span>`;
+            } else if (item.startTime && item.endTime) {
+                timeBadge = `<span class="cal-event-time-badge">${item.startTime}-${item.endTime}</span>`;
+            } else if (item.time) {
+                timeBadge = `<span class="cal-event-time-badge">${item.time}</span>`;
+            }
             cellHtml += `
                 <div class="cal-event-pill personal-event ${doneClass}" data-pe-id="${item.id || ''}" title="${item.time ? item.time + ' - ' : ''}${item.description ? item.description + ' - ' : ''}${item.title}">
                     <span class="cal-personal-check" data-pe-id="${item.id || ''}" title="סמן כהושלם/לא הושלם">${checkIcon}</span>
@@ -17439,6 +17481,16 @@ function openCalendarDayModal(dateStr) {
     renderDayModalEventsList(dateStr);
 
     const titleInput = document.getElementById("day-modal-event-title");
+    const allDayCheckbox = document.getElementById("day-modal-event-allday");
+    const timesContainer = document.getElementById("day-modal-times-container");
+    const startInput = document.getElementById("day-modal-event-time-start");
+    const endInput = document.getElementById("day-modal-event-time-end");
+
+    if (allDayCheckbox) allDayCheckbox.checked = false;
+    if (timesContainer) timesContainer.style.display = "flex";
+    if (startInput) startInput.value = "10:00";
+    if (endInput) endInput.value = "11:30";
+
     if (titleInput) {
         titleInput.value = "";
         setTimeout(() => titleInput.focus(), 120);
@@ -17467,7 +17519,7 @@ function renderDayModalEventsList(dateStr) {
         listEl.innerHTML = `
             <div style="text-align: center; padding: 18px 10px; color: #94a3b8; font-size: 0.84rem; background: rgba(255,255,255,0.02); border-radius: 8px;">
                 אין אירועים או משימות רשומים ליום זה. ✨<br>
-                <span style="font-size: 0.76rem; color: #64748b;">ניתן להוסיף אירוע חדש בשעה ספציפית בטופס שלמטה.</span>
+                <span style="font-size: 0.76rem; color: #64748b;">ניתן להוסיף אירוע חדש ליום שלם או בשעות ספציפיות בטופס שלמטה.</span>
             </div>
         `;
         return;
@@ -17477,7 +17529,16 @@ function renderDayModalEventsList(dateStr) {
         const itemRow = document.createElement("div");
         itemRow.className = "day-modal-event-item";
 
-        let timeHtml = item.time ? `<span class="day-modal-event-time-tag">${item.time}</span>` : `<span style="font-size: 0.72rem; color: #64748b; font-family: monospace;">--:--</span>`;
+        let timeHtml = '';
+        if (item.isAllDay) {
+            timeHtml = `<span class="day-modal-event-time-tag" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; border-color: rgba(245, 158, 11, 0.4);">יום שלם</span>`;
+        } else if (item.startTime && item.endTime) {
+            timeHtml = `<span class="day-modal-event-time-tag">${item.startTime}-${item.endTime}</span>`;
+        } else if (item.time) {
+            timeHtml = `<span class="day-modal-event-time-tag">${item.time}</span>`;
+        } else {
+            timeHtml = `<span style="font-size: 0.72rem; color: #64748b; font-family: monospace;">--:--</span>`;
+        }
         let delBtnHtml = item.isPersonalEvent ? `<button type="button" class="btn-del-modal-event" data-pe-id="${item.id}" title="מחק אירוע זה">🗑️</button>` : '';
 
         let badgeIcon = "📌";
@@ -17529,6 +17590,14 @@ function initCalendarDayModal() {
     const modal = document.getElementById("calendar-day-modal");
     const closeBtn = document.getElementById("btn-close-day-modal");
     const saveBtn = document.getElementById("btn-save-day-event");
+    const allDayCheckbox = document.getElementById("day-modal-event-allday");
+    const timesContainer = document.getElementById("day-modal-times-container");
+
+    if (allDayCheckbox && timesContainer) {
+        allDayCheckbox.addEventListener("change", () => {
+            timesContainer.style.display = allDayCheckbox.checked ? "none" : "flex";
+        });
+    }
 
     if (closeBtn) {
         closeBtn.addEventListener("click", closeCalendarDayModal);
@@ -17543,11 +17612,14 @@ function initCalendarDayModal() {
     if (saveBtn) {
         saveBtn.addEventListener("click", () => {
             const titleInput = document.getElementById("day-modal-event-title");
-            const timeInput = document.getElementById("day-modal-event-time");
+            const startInput = document.getElementById("day-modal-event-time-start");
+            const endInput = document.getElementById("day-modal-event-time-end");
             const catSelect = document.getElementById("day-modal-event-cat");
+            const isAllDay = allDayCheckbox ? allDayCheckbox.checked : false;
 
             const title = (titleInput ? titleInput.value : "").trim();
-            const time = timeInput ? timeInput.value : "10:00";
+            const startTime = startInput ? startInput.value : "10:00";
+            const endTime = endInput ? endInput.value : "11:30";
             const icon = catSelect ? catSelect.value : "🔵";
 
             if (!title) {
@@ -17561,10 +17633,15 @@ function initCalendarDayModal() {
                 currentSelectedDayModalDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
             }
 
+            const displayTime = isAllDay ? "יום שלם" : (startTime ? (endTime ? `${startTime}-${endTime}` : startTime) : "10:00");
+
             const newEv = {
                 id: "pe-" + Date.now(),
                 date: currentSelectedDayModalDate,
-                time: time || "10:00",
+                time: displayTime,
+                isAllDay: isAllDay,
+                startTime: isAllDay ? "" : startTime,
+                endTime: isAllDay ? "" : endTime,
                 title: title,
                 icon: icon,
                 completed: false
@@ -17578,7 +17655,10 @@ function initCalendarDayModal() {
             renderDayModalEventsList(currentSelectedDayModalDate);
 
             if (titleInput) titleInput.value = "";
-            if (typeof showHudToast === 'function') showHudToast(`האירוע "${title}" נשמר לשעה ${time}! 💾`, "success");
+            if (typeof showHudToast === 'function') {
+                const toastMsg = isAllDay ? `האירוע "${title}" נשמר לכל היום! ☀️` : `האירוע "${title}" נשמר (${displayTime})! 💾`;
+                showHudToast(toastMsg, "success");
+            }
         });
     }
 }
@@ -17589,13 +17669,13 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.10.07-v2.2.2",
-    version: "2.2.2",
-    build: "201007_7",
-    date: "2026-10-07 22:05",
-    description: "גרסה 2.2.2: כפתורי עזרה '?' בחלונות הראשיים (עץ הקורסים, תכנון תואר, מערכת שעות, משימות), ימי השבוע במערכת שעות ללא קידומת, וסנכרון מלא"
+    code: "REV-2026.10.07-v2.2.3",
+    version: "2.2.3",
+    build: "201007_8",
+    date: "2026-10-07 22:45",
+    description: "גרסה 2.2.3: כפתורי עזרה '?' בלוח שנה ומערכת שעות, אירועי יום שלם / זמני התחלה וסיום בלוח שנה, קישור ישיר לדף הגשה במודל, והסרת תגית 'היום' החתוכה"
 };
-window.APP_VERSION = "2.2.2";
+window.APP_VERSION = "2.2.3";
 
 function ensureBaselineRevisions() {
     if (!gameState.revisions || !Array.isArray(gameState.revisions) || gameState.revisions.length === 0) {

@@ -555,6 +555,21 @@
                     targetCourse.tasks = [];
                 }
 
+                // Extract URL if available
+                let moodleUrl = '';
+                const urlMatch = block.match(/URL(?:;[^:]+)?:([^\r\n]+)/i);
+                if (urlMatch && urlMatch[1].trim().startsWith('http')) {
+                    moodleUrl = urlMatch[1].trim();
+                } else {
+                    const descMatch = block.match(/DESCRIPTION:([^\r\n]+)/i);
+                    const descUrlMatch = (descMatch ? descMatch[1] : block).match(/https?:\/\/[^\s"<>]+/i);
+                    if (descUrlMatch) {
+                        moodleUrl = descUrlMatch[0];
+                    } else if (eventId && /^\d+$/.test(eventId)) {
+                        moodleUrl = `https://moodle25.technion.ac.il/calendar/view.php?view=event&id=${eventId}`;
+                    }
+                }
+
                 // Check if task already exists
                 const existingTask = targetCourse.tasks.find(t => 
                     t.moodleUid === uid || 
@@ -571,6 +586,9 @@
                     }
                     existingTask.moodleUid = uid;
                     existingTask.moodleEventId = eventId;
+                    if (moodleUrl) {
+                        existingTask.moodleUrl = moodleUrl;
+                    }
                 } else {
                     // Create new task
                     const newTask = {
@@ -583,6 +601,7 @@
                         completed: false,
                         moodleUid: uid,
                         moodleEventId: eventId,
+                        moodleUrl: moodleUrl,
                         source: 'moodle'
                     };
                     targetCourse.tasks.push(newTask);

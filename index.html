@@ -43,13 +43,13 @@
     <!-- Google Site Verification -->
     <meta name="google-site-verification" content="x6ltFZxiwqA-OEpSqCrG4E9O8-it6d-7-Pu5YvVvt-c">
 
-    <link rel="shortcut icon" href="favicon.ico?v=2.2.2">
-    <link rel="icon" href="favicon.ico?v=2.2.2" sizes="any">
-    <link rel="icon" type="image/png" sizes="48x48" href="icon-48.png?v=2.2.2">
-    <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png?v=2.2.2">
-    <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png?v=2.2.2">
-    <link rel="stylesheet" href="styles.css?v=2.2.2">
-    <link rel="stylesheet" href="accessibility.css?v=2.2.2">
+    <link rel="shortcut icon" href="favicon.ico?v=2.2.3">
+    <link rel="icon" href="favicon.ico?v=2.2.3" sizes="any">
+    <link rel="icon" type="image/png" sizes="48x48" href="icon-48.png?v=2.2.3">
+    <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png?v=2.2.3">
+    <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png?v=2.2.3">
+    <link rel="stylesheet" href="styles.css?v=2.2.3">
+    <link rel="stylesheet" href="accessibility.css?v=2.2.3">
 
     <!-- Schema.org Structured Data for Google Search Site Name & WebApplication -->
     <script type="application/ld+json">
@@ -311,17 +311,17 @@
                 <div class="flowchart-viewport" id="flowchart-viewport">
                     <div class="flowchart-toolbar">
                         <span class="flowchart-hint">💡 לחץ על קורס לפתיחת המשימות והציונים. רחף עם העכבר להארת נתיבי דרישות הקדם.</span>
-                        <div class="flowchart-actions" style="display: flex; gap: 8px; align-items: center;">
-                            <button type="button" class="btn btn-sm btn-primary" id="btn-fc-add-course" title="הוסף קורס חדש למפת הקורסים" style="background: linear-gradient(135deg, #0284c7, #2563eb); border-color: #38bdf8; display: inline-flex; align-items: center; gap: 5px; font-weight: 600; box-shadow: 0 0 8px rgba(56, 189, 248, 0.3); padding: 4px 12px; margin-left: 6px;">
+                        <div class="flowchart-actions" style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
+                            <div class="fc-zoom-control-pill" style="display: flex; align-items: center; background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 8px; padding: 1px 3px; gap: 2px;">
+                                <button type="button" class="btn-fc-zoom-step" id="btn-fc-zoom-out" title="הקטן תצוגה (Zoom Out)" style="background: none; border: none; color: #cbd5e1; cursor: pointer; font-size: 11px; font-weight: 700; padding: 2px 5px; border-radius: 4px; transition: all 0.15s ease;">➖</button>
+                                <button type="button" id="btn-fc-zoom-reset" title="לחץ לאיפוס זום ל-100%" style="background: none; border: none; font-size: 0.76rem; font-weight: 700; color: #38bdf8; cursor: pointer; padding: 1px 3px; min-width: 38px; text-align: center;">100%</button>
+                                <button type="button" class="btn-fc-zoom-step" id="btn-fc-zoom-in" title="הגדל תצוגה (Zoom In)" style="background: none; border: none; color: #cbd5e1; cursor: pointer; font-size: 11px; font-weight: 700; padding: 2px 5px; border-radius: 4px; transition: all 0.15s ease;">➕</button>
+                            </div>
+                            <button type="button" class="btn btn-sm btn-outline" id="btn-fc-toggle-fit" title="התאם לרוחב המסך" style="padding: 3px 8px; font-size: 0.76rem;">📐 התאם</button>
+                            <button type="button" class="btn btn-sm btn-outline" id="btn-fc-export-png" title="שמור תרשים קורסים כתמונה (PNG)" style="padding: 3px 8px; font-size: 0.76rem;">📸 תמונה</button>
+                            <button type="button" class="btn btn-sm btn-primary" id="btn-fc-add-course" title="הוסף קורס חדש למפת הקורסים" style="background: linear-gradient(135deg, #0284c7, #2563eb); border-color: #38bdf8; display: inline-flex; align-items: center; gap: 4px; font-weight: 600; box-shadow: 0 0 8px rgba(56, 189, 248, 0.3); padding: 3px 10px; font-size: 0.76rem;">
                                 <span>➕</span><span>הוסף קורס</span>
                             </button>
-                            <div class="fc-zoom-control-pill" style="display: flex; align-items: center; background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 8px; padding: 2px 6px; gap: 4px;">
-                                <button type="button" class="btn-fc-zoom-step" id="btn-fc-zoom-out" title="הקטן תצוגה (Zoom Out)" style="background: none; border: none; color: #cbd5e1; cursor: pointer; font-size: 13px; font-weight: 700; padding: 4px 8px; border-radius: 4px; transition: all 0.15s ease;">➖</button>
-                                <button type="button" id="btn-fc-zoom-reset" title="לחץ לאיפוס זום ל-100%" style="background: none; border: none; font-size: 0.82rem; font-weight: 700; color: #38bdf8; cursor: pointer; padding: 2px 6px; min-width: 46px; text-align: center;">100%</button>
-                                <button type="button" class="btn-fc-zoom-step" id="btn-fc-zoom-in" title="הגדל תצוגה (Zoom In)" style="background: none; border: none; color: #cbd5e1; cursor: pointer; font-size: 13px; font-weight: 700; padding: 4px 8px; border-radius: 4px; transition: all 0.15s ease;">➕</button>
-                            </div>
-                            <button type="button" class="btn btn-sm btn-outline" id="btn-fc-toggle-fit" title="התאם לרוחב המסך">📐 התאם רוחב</button>
-                            <button type="button" class="btn btn-sm btn-outline" id="btn-fc-export-png" title="שמור תרשים קורסים כתמונה (PNG)">📸 שמור תמונה</button>
                             <button type="button" class="btn btn-sm btn-outline" id="btn-fc-reset-zoom" style="display:none;" title="מרכז את התרשים">🔍 מרכז תרשים</button>
                         </div>
                     </div>
@@ -563,7 +563,7 @@
                     <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; padding: 10px 14px; background: rgba(56, 189, 248, 0.08); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 8px;">
                         <div style="display: flex; align-items: center; gap: 8px;">
                             <span style="font-size: 0.82rem; color: #94a3b8;">גרסת מערכת פעילה:</span>
-                            <span style="font-weight: 700; color: #38bdf8; font-family: monospace; font-size: 0.88rem;" id="display-system-version">v2.2.2</span>
+                            <span style="font-weight: 700; color: #38bdf8; font-family: monospace; font-size: 0.88rem;" id="display-system-version">v2.2.3</span>
                         </div>
                         <span class="app-version-badge" style="font-size: 0.66rem; background: rgba(15, 23, 42, 0.6); border-color: rgba(56, 189, 248, 0.35); color: #7dd3fc;">🔒 נעול לעריכה</span>
                     </div>
@@ -606,9 +606,10 @@
                         <div class="settings-card-title" style="color: #38bdf8; font-size: 1.15rem; font-weight: 800; display: flex; align-items: center; gap: 8px;">
                             <span>✨</span> <span>מה חדש?</span>
                         </div>
-                        <span class="app-version-badge" style="font-size: 0.65rem; border-color: rgba(56, 189, 248, 0.4); color: #38bdf8;">גרסה אחרונה v2.2.2</span>
+                        <span class="app-version-badge" style="font-size: 0.65rem; border-color: rgba(56, 189, 248, 0.4); color: #38bdf8;">גרסה אחרונה v2.2.3</span>
                     </div>
                     <ul class="whats-new-list" style="list-style-type: disc; padding-right: 22px; margin: 0; color: #e2e8f0; font-size: 0.88rem; line-height: 1.85;">
+                        <li><strong>v2.2.3 (07/10/2026):</strong> כפתור עזרה (?) משולב בלוח שנה ובמערכת שעות, הוספת אירועים ליום שלם או שעות התחלה וסיום מוגדרות, קישור ישיר לדף הגשה במודל למטלות, והסרת תגית "היום" החתוכה בלוח השנה.</li>
                         <li><strong>v2.2.2 (07/10/2026):</strong> כפתור עזרה מעוצב וממוקד (?), סיור מודרך מהודק ונגיש בראש ההגדרות, תצוגת יומן גרסאות קומפקטית, אבטחת לוח משתמשים וטלמטריה למנהל בלבד, ומיקום כפתור הפלוס בפינת לוח השנה.</li>
                     </ul>
                     <div style="margin-top: 12px; text-align: center;">
@@ -1393,7 +1394,7 @@
             <div class="footer-left-version" style="display: inline-flex; align-items: center; gap: 8px;">
                 <button type="button" class="app-version-badge" onclick="window.openPrivacyPolicyModal()" title="מדיניות פרטיות והגנת מידע" style="cursor: pointer; background: rgba(16, 185, 129, 0.15); border-color: rgba(16, 185, 129, 0.4); color: #34d399;">🔒 פרטיות</button>
                 <button type="button" class="app-version-badge" onclick="window.openAccessibilityModal()" title="הצהרת נגישות והתאמות" style="cursor: pointer; background: rgba(2, 132, 199, 0.2); border-color: rgba(56, 189, 248, 0.4); color: #38bdf8;">♿ נגישות</button>
-                <button type="button" class="app-version-badge" id="footer-version-badge" title="לחץ לבדיקת עדכונים ורענון המערכת (v2.2.2)" aria-label="בדיקת עדכוני גרסה ורענון המערכת" style="cursor: pointer;">v2.2.2 🔄</button>
+                <button type="button" class="app-version-badge" id="footer-version-badge" title="לחץ לבדיקת עדכונים ורענון המערכת (v2.2.3)" aria-label="בדיקת עדכוני גרסה ורענון המערכת" style="cursor: pointer;">v2.2.3 🔄</button>
             </div>
         </footer>
 
@@ -1543,7 +1544,7 @@
                 <div class="details-section">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
                         <h3 style="margin: 0;">🔗 דרישות קדם (Prerequisites)</h3>
-                        <button type="button" id="btn-modal-manage-prereqs" class="btn btn-xs btn-outline" style="font-size: 0.72rem; padding: 2px 8px; border-color: rgba(56, 189, 248, 0.4); color: #38bdf8; cursor: pointer; border-radius: 4px;" title="עריכת קורסי קדם בעזרת חיפוש ותגיות">✏️ ערוך קדמים בחיפוש</button>
+                        <button type="button" id="btn-modal-manage-prereqs" class="btn btn-xs btn-outline" style="font-size: 0.72rem; padding: 2px 8px; border-color: rgba(56, 189, 248, 0.4); color: #38bdf8; cursor: pointer; border-radius: 4px;" title="עריכת קורסי קדם">✏️ ערוך קדמים</button>
                     </div>
                     <div class="prereqs-tags" id="modal-prereqs-list">
                         <!-- Dynamic list of pre-req course codes -->
@@ -1757,6 +1758,15 @@
                     <span class="peek-property-value">
                         <input type="number" id="peek-property-grade" class="peek-grade-input" min="0" max="100" placeholder="הזן ציון מבחן...">
                         <div style="font-size: 0.68rem; color: var(--text-muted); margin-top: 2px;">ציון המבחן בלבד — הציון הסופי בקורס מורכב מחלקו</div>
+                    </span>
+                </div>
+                <!-- Direct Moodle Assignment Link -->
+                <div class="peek-property-row" id="peek-property-moodle-row" style="display: none;">
+                    <span class="peek-property-label">🎓 הגשה במודל (Moodle)</span>
+                    <span class="peek-property-value">
+                        <a id="peek-property-moodle-link" href="#" target="_blank" rel="noopener noreferrer" style="color: #38bdf8; text-decoration: underline; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; font-size: 0.82rem;">
+                            פתח דף הגשה במודל ↗
+                        </a>
                     </span>
                 </div>
             </div>
@@ -2440,15 +2450,31 @@
                 </div>
             </div>
 
-            <!-- Add Event at Specific Hour Section -->
+            <!-- Add Event (All-Day or Specific Hours) Section -->
             <div class="day-modal-add-section" style="background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 14px;">
-                <div style="font-size: 0.88rem; font-weight: 800; color: #f8fafc; margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">
-                    <span>➕</span>
-                    <span>הוספת אירוע בשעה ספציפית</span>
+                <div style="font-size: 0.88rem; font-weight: 800; color: #f8fafc; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between;">
+                    <span style="display: flex; align-items: center; gap: 6px;">
+                        <span>➕</span>
+                        <span>הוספת אירוע אישי</span>
+                    </span>
+                    <label style="display: flex; align-items: center; gap: 6px; font-size: 0.78rem; color: #38bdf8; cursor: pointer; user-select: none;">
+                        <input type="checkbox" id="day-modal-event-allday" style="accent-color: #38bdf8; width: 15px; height: 15px; cursor: pointer;">
+                        <span>☀️ יום שלם (כל היום)</span>
+                    </label>
                 </div>
-                <div style="display: flex; gap: 8px; margin-bottom: 10px;">
-                    <input type="text" id="day-modal-event-title" placeholder="כותרת האירוע / משימה..." class="form-control" style="flex: 1; padding: 8px 10px; font-size: 0.84rem; background: #0b0f19; border: 1px solid #334155; color: #fff; border-radius: 8px;">
-                    <input type="time" id="day-modal-event-time" value="10:00" class="form-control" style="width: 110px; padding: 7px 8px; font-size: 0.84rem; background: #0b0f19; border: 1px solid #334155; color: #fff; border-radius: 8px; direction: ltr; text-align: center;">
+                <div style="margin-bottom: 8px;">
+                    <input type="text" id="day-modal-event-title" placeholder="כותרת האירוע / משימה..." class="form-control" style="width: 100%; box-sizing: border-box; padding: 8px 10px; font-size: 0.84rem; background: #0b0f19; border: 1px solid #334155; color: #fff; border-radius: 8px;">
+                </div>
+                <!-- Time Range (shown when not all-day) -->
+                <div id="day-modal-times-container" style="display: flex; gap: 8px; margin-bottom: 10px; align-items: center;">
+                    <div style="flex: 1; display: flex; align-items: center; gap: 6px;">
+                        <span style="font-size: 0.74rem; color: #94a3b8; white-space: nowrap;">התחלה:</span>
+                        <input type="time" id="day-modal-event-time-start" value="10:00" class="form-control" style="width: 100%; padding: 6px 8px; font-size: 0.82rem; background: #0b0f19; border: 1px solid #334155; color: #fff; border-radius: 6px; direction: ltr; text-align: center;">
+                    </div>
+                    <div style="flex: 1; display: flex; align-items: center; gap: 6px;">
+                        <span style="font-size: 0.74rem; color: #94a3b8; white-space: nowrap;">סיום:</span>
+                        <input type="time" id="day-modal-event-time-end" value="11:30" class="form-control" style="width: 100%; padding: 6px 8px; font-size: 0.82rem; background: #0b0f19; border: 1px solid #334155; color: #fff; border-radius: 6px; direction: ltr; text-align: center;">
+                    </div>
                 </div>
                 <div style="display: flex; gap: 8px; align-items: center;">
                     <select id="day-modal-event-cat" class="form-control" style="flex: 1; padding: 8px 10px; font-size: 0.82rem; background: #0b0f19; border: 1px solid #334155; color: #cbd5e1; border-radius: 8px;">
@@ -2771,26 +2797,26 @@
     <!-- Supabase JS Client for Cloud Sync -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <!-- CheeseFork Technion Courses Database (2,055 courses) -->
-    <script src="cheesefork_database.js?v=2.2.2"></script>
-    <script src="cheesefork_courses.min.js?v=2.2.2"></script>
+    <script src="cheesefork_database.js?v=2.2.3"></script>
+    <script src="cheesefork_courses.min.js?v=2.2.3"></script>
     <!-- Clean Curriculum Template -->
-    <script src="curriculum_template.js?v=2.2.2"></script>
+    <script src="curriculum_template.js?v=2.2.3"></script>
     <!-- Multi-User Identity & Sync Engine -->
-    <script src="auth_sync.js?v=2.2.2"></script>
+    <script src="auth_sync.js?v=2.2.3"></script>
     <!-- Site Telemetry & Audience Analytics Engine -->
-    <script src="site_analytics.js?v=2.2.2"></script>
+    <script src="site_analytics.js?v=2.2.3"></script>
     <!-- Modal & Feature Interactive Help Guide Engine -->
-    <script src="modal_help.js?v=2.2.2"></script>
+    <script src="modal_help.js?v=2.2.3"></script>
     <!-- Interactive Guided Tour Engine -->
-    <script src="interactive_tour.js?v=2.2.2"></script>
+    <script src="interactive_tour.js?v=2.2.3"></script>
     <!-- Moodle Live Calendar & Tasks Sync Engine -->
-    <script src="moodle_sync.js?v=2.2.2"></script>
+    <script src="moodle_sync.js?v=2.2.3"></script>
     <!-- Technion ME 2025/2026 Catalog & Electives Database -->
-    <script src="planner_catalog.js?v=2.2.2"></script>
+    <script src="planner_catalog.js?v=2.2.3"></script>
     <!-- Degree Planner Drag & Drop Engine -->
-    <script src="planner_module.js?v=2.2.2"></script>
+    <script src="planner_module.js?v=2.2.3"></script>
     <!-- Technion Official Academic Calendar & Holidays Engine -->
-    <script src="technion_academic_calendar.js?v=2.2.2"></script>
+    <script src="technion_academic_calendar.js?v=2.2.3"></script>
     <!-- Core Application Logic -->
 
     <!-- Accessibility Modal (הצהרת נגישות ותפריט התאמות) -->
@@ -2912,8 +2938,8 @@
         </div>
     </div>
 
-    <script src="accessibility.js?v=2.2.2"></script>
-    <script src="app.js?v=2.2.2"></script>
+    <script src="accessibility.js?v=2.2.3"></script>
+    <script src="app.js?v=2.2.3"></script>
     <!-- PWA Service Worker Registration -->
     <script>
         if ('serviceWorker' in navigator && window.location.protocol.startsWith('http')) {
