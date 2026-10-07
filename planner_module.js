@@ -166,26 +166,39 @@
     // Course workload scale: 1.0 to 5.0 (matching CheeseFork 1-5 weights ratio)
     // Labs have low credits (0.5 - 1.5) but high workload (pre/post lab reports)
     const SPECIAL_COURSE_WORKLOAD_BASELINE = {
-        '01250013': 3.5, // מעבדה בכימיה - 0.5 creds, high report demand
-        '125013': 3.5,
-        '01140039': 3.5, // מעבדה לפיזיקה 1מח - 1.0 creds, heavy reports
-        '114039': 3.5,
-        '01140032': 3.5, // מעב' לפיזיקה 1 ח
-        '114032': 3.5,
-        '00340057': 5.0, // מעבדה מתקדמת הנ. מכונות - intensive experimental setups
-        '034057': 5.0,
-        '01040041': 5.0, // Calculus 1M1 - high rigor (5.0 credits)
-        '104041': 5.0,
-        '01040043': 5.0, // Calculus 2M1 (5.0 credits)
-        '104043': 5.0,
-        '00340028': 4.0, // Solid Mechanics 1
-        '034028': 4.0,
-        '00340053': 5.0, // Solid Mechanics 2 Extended
-        '034053': 5.0,
-        '00340010': 5.0, // Dynamics
-        '034010': 5.0,
-        '00340055': 5.0, // Fluid Mechanics 1 Extended
-        '034055': 5.0
+        // Chemistry & Labs
+        '01250001': 3.0, '125001': 3.0, '0124012': 3.0, '124012': 3.0, // כימיה כללית
+        '01250013': 3.5, '125013': 3.5, // מעבדה בכימיה
+        
+        // Physics & Labs
+        '01140051': 4.0, '114051': 4.0, '0114005': 4.0, '114005': 4.0, // פיזיקה 1
+        '01140071': 4.0, '114071': 4.0, // פיזיקה 1מ'
+        '01140052': 4.5, '114052': 4.5, '01140075': 4.5, '114075': 4.5, // פיזיקה 2 / 2מ'
+        '01140039': 3.5, '114039': 3.5, // מעבדה לפיזיקה 1מח
+        '01140032': 3.5, '114032': 3.5, // מעב' לפיזיקה 1 ח
+        
+        // Computer Science & Programming
+        '02340128': 3.5, '234128': 3.5, '0234012': 3.5, '234012': 3.5, // שפת פייתון / מבוא למחשב
+        '02340114': 4.0, '234114': 4.0, // מבוא למדעי המחשב C
+        
+        // Mathematics
+        '01040041': 5.0, '104041': 5.0, // חדו"א 1מ' 1
+        '01040013': 5.0, '104013': 5.0, '0104195': 5.0, '104195': 5.0, // חדו"א 1 / 1ת'
+        '01040065': 4.5, '104065': 4.5, '01040019': 4.5, '104019': 4.5, // אלגברה 1מ'
+        '01040043': 5.0, '104043': 5.0, // חדו"א 2מ' 1
+        '01040022': 5.0, '104022': 5.0, // חדו"א 2
+        '01040131': 3.5, '104131': 3.5, // מד"ר
+        
+        // Mechanical Engineering Core
+        '00340028': 4.5, '034028': 4.5, // מכניקת מוצקים 1
+        '00340053': 5.0, '034053': 5.0, // מכניקת מוצקים 2 מורחב
+        '00340010': 5.0, '034010': 5.0, // דינמיקה
+        '00340035': 4.5, '034035': 4.5, // תרמודינמיקה 1
+        '00340055': 5.0, '034055': 5.0, // מכניקת זורמים 1 מורחב
+        '00340061': 3.5, '034061': 3.5, // מבוא לגרפיקה ותכנון הנדסי
+        '03140533': 3.5, '314533': 3.5, // מבוא לחומרים מ'
+        '00340056': 4.0, '034056': 4.0, // תכנות הנדסי ואנליזה נומרית
+        '00340057': 5.0, '034057': 5.0  // מעבדה מתקדמת מכונות
     };
 
     function getCourseUserWorkload(code, altCode) {
@@ -255,14 +268,22 @@
         dumbbell: `<svg class="cf-wl-icon cf-dumbbell" viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M6 5h2v14H6V5zm10 0h2v14h-2V5zM3 8h2v8H3V8zm16 0h2v8h-2V8zM8 11h8v2H8v-2z"/></svg>`
     };
 
+    function getWorkloadNormalizedWeights(totalScore) {
+        if (!totalScore || totalScore <= 0) return 0;
+        if (totalScore <= 6) return 1.0;
+        if (totalScore <= 10) return 1.0 + ((totalScore - 6) / 4.0) * 1.0; // 6..10 -> 1.0..2.0
+        if (totalScore <= 15) return 2.0 + ((totalScore - 10) / 5.0) * 1.0; // 10..15 -> 2.0..3.0 (at 15 => exactly 3.0 weights!)
+        if (totalScore <= 21.5) return 3.0 + ((totalScore - 15) / 6.5) * 1.0; // 15..21.5 -> 3.0..4.0 (at 21.5 => exactly 4.0 weights!)
+        if (totalScore <= 26) return 4.0 + ((totalScore - 21.5) / 4.5) * 1.0; // 21.5..26 -> 4.0..5.0
+        return 5.0;
+    }
+
     function renderCheeseForkWorkloadMeter(totalScore) {
-        // CheeseFork scale: 5 discrete weight slots (scale 10 to 25 pts)
-        // <= 14: Light / balanced (scale)
-        // 14 - 24: Progressive kettlebell weights (1 to 5 weights)
-        // >= 24.5: Full dumbbell heavy weight
-        const minWl = 12;
-        const maxWl = 25;
-        const norm = Math.max(0, Math.min(5, ((totalScore - minWl) / (maxWl - minWl)) * 5));
+        // Calibrated scale matching Technion student expectations:
+        // ~15 pts (Sem 1) = exactly 3 kettlebells
+        // ~21.5 pts (Sem 2) = exactly 4 kettlebells
+        // >= 25 pts = full heavy dumbbell
+        const norm = Math.max(0, Math.min(5, getWorkloadNormalizedWeights(totalScore)));
         
         let weightsHtml = '';
         for (let i = 1; i <= 5; i++) {
@@ -276,7 +297,7 @@
         }
 
         return `
-            <div class="cheesefork-workload-widget" title="עומס: ${totalScore}">
+            <div class="cheesefork-workload-widget" title="עומס סמסטריאלי: ${totalScore} (דירוג משוקלל: ${norm.toFixed(1)} מתוך 5)">
                 <div class="cf-wl-header">
                     <span class="cf-wl-title">עומס</span>
                     <span class="cf-wl-score">${totalScore}</span>
@@ -299,19 +320,24 @@
             if (wl.isOverride) overrideCount++;
         });
 
-        // Thresholds: Light <= 18.0, Moderate 18.1 - 22.5, Heavy > 22.5
-        let level = 'סביר';
-        let levelKey = 'light';
-        let color = '#28a745'; // Green
+        // Thresholds calibrated to engineering workloads:
+        // <= 13.5 Light, 14.0 - 19.5 Balanced, 20.0 - 23.5 Intense, > 23.5 Heavy
+        let level = 'מאוזן';
+        let levelKey = 'moderate';
+        let color = '#10b981'; // Green
 
-        if (totalScore > 22.5) {
+        if (totalScore > 23.5) {
             level = 'כבד';
             levelKey = 'heavy';
-            color = '#dc3545'; // Red
-        } else if (totalScore > 18.0) {
-            level = 'בינוני';
-            levelKey = 'moderate';
-            color = '#ffc107'; // Yellow
+            color = '#ef4444'; // Red
+        } else if (totalScore >= 20.0) {
+            level = 'אינטנסיבי';
+            levelKey = 'intense';
+            color = '#f59e0b'; // Amber
+        } else if (totalScore < 14.0) {
+            level = 'קל';
+            levelKey = 'light';
+            color = '#38bdf8'; // Blue
         }
 
         const scoreRounded = parseFloat(totalScore.toFixed(1));
