@@ -98,8 +98,8 @@
                 },
                 {
                     icon: '🔗',
-                    title: 'דרישות קדם (מופרדות בפסיקים)',
-                    desc: 'קודי קורסים שחובה להשלים לפני הרישום לקורס זה. הקשרים יימתחו אוטומטית בעץ.'
+                    title: 'דרישות קדם (בלוקים בודדים וחיפוש קל)',
+                    desc: 'הוספת קדמים בעזרת חיפוש מהיר לפי שם או מספר קורס וניהול תגיות בלחיצה (✕ להסרה).'
                 }
             ],
             tip: '💡 טיפ: לקורסי ספורט או פטור בינארי, סמן את התיבה "ציון בינארי (עובר ללא ממוצע)".'
@@ -267,6 +267,128 @@
                 }
             ],
             tip: '💡 טיפ: לאחר שינוי הגדרות, לחץ על "💾 שמור את כל השינויים" בראש המסך.'
+        },
+
+        'curriculum-tree-workspace': {
+            title: 'עץ מפת הקורסים והקשרים האקדמיים (Skill Tree)',
+            purpose: 'מפה גרפית אינטראקטיבית של כל הקורסים בתואר בהנדסת מכונות, מסלולי הקדם והקשרים בין הסמסטרים.',
+            sections: [
+                {
+                    icon: '📊',
+                    title: 'תרשים זרימה (Flowchart DAG)',
+                    desc: 'הצגת כל שרשראות הקורסים לפי סמסטרים, עם זום וגרירה חופשית.'
+                },
+                {
+                    icon: '🔗',
+                    title: 'נתיבי קדם ותלויות',
+                    desc: 'ריחוף מעל קורס מאיר את כל הקדמים שלו אחורה ואת הקורסים שהוא פותח קדימה.'
+                },
+                {
+                    icon: '📝',
+                    title: 'כרטיס קורס',
+                    desc: 'לחיצה על קורס פותחת את כרטיס המשימות, הציונים, החלפת סמסטר ועריכת קדמים.'
+                },
+                {
+                    icon: '🎓',
+                    title: 'סנכרון Moodle ו-CheeseFork',
+                    desc: 'משיכת מטלות ומערכת שעות ישירות מהטכניון.'
+                },
+                {
+                    icon: '➕',
+                    title: 'הוספת קורס',
+                    desc: 'הוספת קורסי בחירה, ספורט, מל״ג או פרויקטים אישיים ישירות למפה.'
+                }
+            ],
+            tip: '💡 טיפ: רחף עם העכבר מעל כל קורס בעץ כדי לראות את כל שרשרת התלויות שלו מודגשת בזמן אמת!'
+        },
+
+        'planner-workspace': {
+            title: 'מתכנן התואר האוטומטי (Degree Planner)',
+            purpose: 'תכנון פריסת התואר, גרירת קורסים בין סמסטרים, חישובי נק״ז ובדיקת חוקי בחירה פקולטית.',
+            sections: [
+                {
+                    icon: '📋',
+                    title: 'התוכנית שלי מול שיבוץ מומלץ',
+                    desc: 'מעבר בלחיצה בין התוכנית המותאמת אישית לבין המבנה המומלץ של הפקולטה.'
+                },
+                {
+                    icon: '✋',
+                    title: 'גרירה ושחרור (Drag & Drop)',
+                    desc: 'הזזת קורסים בין סמסטרים תוך בדיקת עומסים ונק״ז.'
+                },
+                {
+                    icon: '⚖️',
+                    title: 'בדיקת חוקי בחירה ודרישות',
+                    desc: 'מנוע חוקים אוטומטי המוודא השלמת 32.5 נק״ז בחירה, רשימות א׳-ד׳ ופרויקטים.'
+                },
+                {
+                    icon: '🎓',
+                    title: 'סימולטור ממוצע (What-If)',
+                    desc: 'חישוב והערכת ממוצע תואר עתידי לפי ציונים צפויים.'
+                },
+                {
+                    icon: '💾',
+                    title: 'שמירת שינויים',
+                    desc: 'שמירה מהירה של התוכנית לענן ולמכשיר.'
+                }
+            ],
+            tip: '💡 טיפ: השתמש בסימולטור הממוצע כדי לבדוק איך ציון בכל קורס ישפיע על ה-GPA הסופי שלך!'
+        },
+
+        'timetable-workspace': {
+            title: 'מערכת שעות שבועית ויומית (Timetable)',
+            purpose: 'צפייה בלוח הזמנים השבועי, שיעורים, תרגולים ומעבדות, עם התמקדות יומית אוטומטית.',
+            sections: [
+                {
+                    icon: '⭐',
+                    title: 'תצוגת היום (Today Focus)',
+                    desc: 'מציגה אוטומטית את לו״ז היום הנוכחי וזמני השיעורים הבאים.'
+                },
+                {
+                    icon: '📅',
+                    title: 'תצוגה שבועית מלאה',
+                    desc: 'פריסה שבועית מראשון עד חמישי עם שעות ומיקומי כיתות.'
+                },
+                {
+                    icon: '🔄',
+                    title: 'סנכרון CheeseFork',
+                    desc: 'סנכרון ישיר של מערכת השעות המעודכנת מהטכניון.'
+                },
+                {
+                    icon: '📸',
+                    title: 'שמירה כתמונה (PNG)',
+                    desc: 'ייצוא מערכת השעות לתמונה יפה לשמירה בטלפון או כרקע.'
+                }
+            ],
+            tip: '💡 טיפ: המערכת מתאימה את עצמה ליום הנוכחי ומדגישה את השיעור הקרוב!'
+        },
+
+        'notion-tasks-workspace': {
+            title: 'לוח משימות, שיעורי בית ומבחנים (Notion Tasks)',
+            purpose: 'ניהול מעקב מלא אחרי תרגילי בית, דוחות מעבדה, פרויקטים ומועדי בחינות בסגנון Notion.',
+            sections: [
+                {
+                    icon: '🔔',
+                    title: 'התראות דחופות (Study Runway)',
+                    desc: 'ריכוז משימות ומטלות שמועד הגשתן מתקרב.'
+                },
+                {
+                    icon: '➕',
+                    title: 'משימה אישית חדשה',
+                    desc: 'הוספת משימה או אירוע לימודים מקושר לקורס.'
+                },
+                {
+                    icon: '🔍',
+                    title: 'סינון וחיפוש',
+                    desc: 'סינון משימות לפי קורס, סטטוס (טרם הושלם / הושלם) או סוג (מבחן / בית / פרויקט).'
+                },
+                {
+                    icon: '📅',
+                    title: 'סנכרון יומנים',
+                    desc: 'ייצוא משימות ל-Google Calendar ו-Google Tasks.'
+                }
+            ],
+            tip: '💡 טיפ: סימון משימות שביצעת מוסיף נקודות ניסיון (XP) לרמת השחקן שלך!'
         }
     };
 
@@ -437,6 +559,14 @@
                 targetContainer = modalEl.querySelector('.course-settings-container') || modalEl.querySelector('.modal-header');
             } else if (modalId === 'settings-workspace') {
                 targetContainer = modalEl.querySelector('.settings-header-actions') || modalEl.querySelector('.settings-header-banner');
+            } else if (modalId === 'curriculum-tree-workspace') {
+                targetContainer = modalEl.querySelector('.flowchart-actions') || modalEl.querySelector('.tree-controls');
+            } else if (modalId === 'planner-workspace') {
+                targetContainer = modalEl.querySelector('.planner-header-right') || modalEl.querySelector('.planner-header-banner');
+            } else if (modalId === 'timetable-workspace') {
+                targetContainer = modalEl.querySelector('.timetable-sync-actions') || modalEl.querySelector('.timetable-header-card');
+            } else if (modalId === 'notion-tasks-workspace') {
+                targetContainer = modalEl.querySelector('.notion-tasks-header-actions') || modalEl.querySelector('.notion-tasks-header-main');
             } else {
                 targetContainer = modalEl.querySelector('.modal-header') || modalEl.querySelector('.analytics-header-banner') || modalEl.querySelector('.modal-content');
             }
@@ -453,6 +583,8 @@
 
             if (modalId === 'course-modal') {
                 btn.style.marginRight = '8px';
+            } else if (modalId.includes('-workspace')) {
+                btn.style.marginLeft = '8px';
             }
 
             btn.onclick = (e) => {
@@ -461,9 +593,9 @@
             };
 
             // Prepend or append depending on layout
-            if (targetContainer.classList && targetContainer.classList.contains('course-settings-container')) {
+            if (targetContainer.classList && (targetContainer.classList.contains('course-settings-container') || targetContainer.classList.contains('flowchart-actions') || targetContainer.classList.contains('timetable-sync-actions'))) {
                 targetContainer.appendChild(btn);
-            } else if (targetContainer.classList && (targetContainer.classList.contains('modal-header') || targetContainer.classList.contains('analytics-header-banner') || targetContainer.classList.contains('settings-header-actions'))) {
+            } else if (targetContainer.classList && (targetContainer.classList.contains('modal-header') || targetContainer.classList.contains('analytics-header-banner') || targetContainer.classList.contains('settings-header-actions') || targetContainer.classList.contains('planner-header-right') || targetContainer.classList.contains('notion-tasks-header-actions'))) {
                 targetContainer.appendChild(btn);
             } else {
                 targetContainer.insertBefore(btn, targetContainer.firstChild);
@@ -500,7 +632,7 @@
             banner.innerHTML = `
                 <div class="modal-help-header">
                     <div class="modal-help-title">
-                        <span>💡</span> <span>מדריך לחלונית: ${helpData.title}</span>
+                        <span>💡</span> <span>מדריך: ${helpData.title}</span>
                     </div>
                     <button type="button" style="background: none; border: none; color: #94a3b8; font-size: 1.2rem; cursor: pointer; padding: 0 4px;" title="סגור הסבר">&times;</button>
                 </div>
@@ -523,6 +655,10 @@
 
             // Insert banner at the top of modal body or scrollable content
             let bodyTarget = modalEl.querySelector('.modal-body') || 
+                             modalEl.querySelector('.flowchart-viewport') ||
+                             modalEl.querySelector('.planner-main-container') ||
+                             modalEl.querySelector('.timetable-container') ||
+                             modalEl.querySelector('.notion-tasks-container') ||
                              modalEl.querySelector('.analytics-body-scrollable') || 
                              modalEl.querySelector('#site-analytics-content') || 
                              modalEl.querySelector('.settings-container') ||

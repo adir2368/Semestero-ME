@@ -43,13 +43,13 @@
     <!-- Google Site Verification -->
     <meta name="google-site-verification" content="x6ltFZxiwqA-OEpSqCrG4E9O8-it6d-7-Pu5YvVvt-c">
 
-    <link rel="shortcut icon" href="favicon.ico?v=2.2.1">
-    <link rel="icon" href="favicon.ico?v=2.2.1" sizes="any">
-    <link rel="icon" type="image/png" sizes="48x48" href="icon-48.png?v=2.2.1">
-    <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png?v=2.2.1">
-    <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png?v=2.2.1">
-    <link rel="stylesheet" href="styles.css?v=2.2.1">
-    <link rel="stylesheet" href="accessibility.css?v=2.2.1">
+    <link rel="shortcut icon" href="favicon.ico?v=2.2.2">
+    <link rel="icon" href="favicon.ico?v=2.2.2" sizes="any">
+    <link rel="icon" type="image/png" sizes="48x48" href="icon-48.png?v=2.2.2">
+    <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png?v=2.2.2">
+    <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png?v=2.2.2">
+    <link rel="stylesheet" href="styles.css?v=2.2.2">
+    <link rel="stylesheet" href="accessibility.css?v=2.2.2">
 
     <!-- Schema.org Structured Data for Google Search Site Name & WebApplication -->
     <script type="application/ld+json">
@@ -665,7 +665,7 @@
                         <div class="bug-report-card-btn" id="card-btn-check-update">
                             <div class="btn-title">
                                 <span>🔄 בדיקת עדכוני גרסה</span>
-                                <span class="app-version-badge" style="font-size: 0.64rem;">v2.0.9</span>
+                                <span class="app-version-badge" style="font-size: 0.64rem;">v2.2.2</span>
                             </div>
                             <div class="btn-desc">
                                 בדיקה ישירה מול שרתי GitHub אם קיימת גרסה חדשה יותר להורדה או רענון.
@@ -1360,11 +1360,11 @@
                     <button type="button" class="day-tab-pill active" data-day="today" id="tab-pill-today">
                         <span>⭐</span> היום
                     </button>
-                    <button type="button" class="day-tab-pill" data-day="0">א׳ ראשון</button>
-                    <button type="button" class="day-tab-pill" data-day="1">ב׳ שני</button>
-                    <button type="button" class="day-tab-pill" data-day="2">ג׳ שלישי</button>
-                    <button type="button" class="day-tab-pill" data-day="3">ד׳ רביעי</button>
-                    <button type="button" class="day-tab-pill" data-day="4">ה׳ חמישי</button>
+                    <button type="button" class="day-tab-pill" data-day="0">ראשון</button>
+                    <button type="button" class="day-tab-pill" data-day="1">שני</button>
+                    <button type="button" class="day-tab-pill" data-day="2">שלישי</button>
+                    <button type="button" class="day-tab-pill" data-day="3">רביעי</button>
+                    <button type="button" class="day-tab-pill" data-day="4">חמישי</button>
                     <button type="button" class="day-tab-pill" data-day="all">
                         <span>📅</span> כל השבוע
                     </button>
@@ -1393,7 +1393,7 @@
             <div class="footer-left-version" style="display: inline-flex; align-items: center; gap: 8px;">
                 <button type="button" class="app-version-badge" onclick="window.openPrivacyPolicyModal()" title="מדיניות פרטיות והגנת מידע" style="cursor: pointer; background: rgba(16, 185, 129, 0.15); border-color: rgba(16, 185, 129, 0.4); color: #34d399;">🔒 פרטיות</button>
                 <button type="button" class="app-version-badge" onclick="window.openAccessibilityModal()" title="הצהרת נגישות והתאמות" style="cursor: pointer; background: rgba(2, 132, 199, 0.2); border-color: rgba(56, 189, 248, 0.4); color: #38bdf8;">♿ נגישות</button>
-                <button type="button" class="app-version-badge" id="footer-version-badge" title="לחץ לבדיקת עדכונים ורענון המערכת (v2.2.0)" aria-label="בדיקת עדכוני גרסה ורענון המערכת" style="cursor: pointer;">v2.2.0 🔄</button>
+                <button type="button" class="app-version-badge" id="footer-version-badge" title="לחץ לבדיקת עדכונים ורענון המערכת (v2.2.2)" aria-label="בדיקת עדכוני גרסה ורענון המערכת" style="cursor: pointer;">v2.2.2 🔄</button>
             </div>
         </footer>
 
@@ -1541,7 +1541,10 @@
 
                 <!-- Prerequisites list -->
                 <div class="details-section">
-                    <h3>🔗 דרישות קדם (Prerequisites)</h3>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                        <h3 style="margin: 0;">🔗 דרישות קדם (Prerequisites)</h3>
+                        <button type="button" id="btn-modal-manage-prereqs" class="btn btn-xs btn-outline" style="font-size: 0.72rem; padding: 2px 8px; border-color: rgba(56, 189, 248, 0.4); color: #38bdf8; cursor: pointer; border-radius: 4px;" title="עריכת קורסי קדם בעזרת חיפוש ותגיות">✏️ ערוך קדמים בחיפוש</button>
+                    </div>
                     <div class="prereqs-tags" id="modal-prereqs-list">
                         <!-- Dynamic list of pre-req course codes -->
                     </div>
@@ -1665,10 +1668,28 @@
                             </label>
                         </div>
                     </div>
-                    <div class="form-group">
-                        <label for="course-prereqs">קורסי קדם (בחר קודים מופרדים בפסיקים):</label>
-                        <input type="text" id="course-prereqs" placeholder="למשל: 104041, 104065">
-                        <small style="color: var(--text-muted); font-size: 0.72rem;">הזן קודים של קורסים קיימים מופרדים בפסיקים (או השאר ריק אם אין קדמים).</small>
+                    <div class="form-group" id="course-prereqs-group">
+                        <label for="course-prereq-search-input" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                            <span>🔗 קורסי קדם (Prerequisites):</span>
+                            <span id="course-prereqs-count-badge" style="font-size: 0.72rem; color: #38bdf8; font-weight: normal; background: rgba(56, 189, 248, 0.12); padding: 2px 8px; border-radius: 10px; border: 1px solid rgba(56, 189, 248, 0.3);">0 קדמים</span>
+                        </label>
+                        
+                        <!-- Selected Prerequisite Chips (בלוקים בודדים) -->
+                        <div id="course-prereqs-chips" class="prereq-chips-container" aria-live="polite">
+                            <!-- Populated with individual interactive chip blocks -->
+                        </div>
+
+                        <!-- Autocomplete search input container (הוספה עם חיפוש) -->
+                        <div class="prereq-search-box" style="position: relative; margin-top: 8px;">
+                            <input type="text" id="course-prereq-search-input" placeholder="🔍 חפש קורס קדם לפי שם או מספר (למשל: חדו״א, 104041, פיסיקה)..." autocomplete="off" style="width: 100%; box-sizing: border-box; padding: 8px 12px; font-size: 0.82rem; background: var(--bg-deep); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-light);">
+                            <div id="course-prereq-dropdown" class="prereq-autocomplete-dropdown" style="display: none;"></div>
+                        </div>
+
+                        <!-- Hidden backing field preserving form compatibility -->
+                        <input type="hidden" id="course-prereqs" value="">
+                        <small style="color: var(--text-muted); font-size: 0.72rem; display: block; margin-top: 4px;">
+                            הקלד שם או מספר קורס ובחר מהרשימה. כל קדם מוצג כבלוק עצמאי עם אפשרות הסרה בלחיצה (✕).
+                        </small>
                     </div>
                     <button type="submit" id="add-course-submit-btn" class="btn btn-primary w-full" style="background: linear-gradient(135deg, #0284c7, #2563eb); font-weight: 700; padding: 10px;">הוסף קורס למפה 🚀</button>
                 </form>
@@ -2750,26 +2771,26 @@
     <!-- Supabase JS Client for Cloud Sync -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <!-- CheeseFork Technion Courses Database (2,055 courses) -->
-    <script src="cheesefork_database.js?v=2.2.1"></script>
-    <script src="cheesefork_courses.min.js?v=2.2.1"></script>
+    <script src="cheesefork_database.js?v=2.2.2"></script>
+    <script src="cheesefork_courses.min.js?v=2.2.2"></script>
     <!-- Clean Curriculum Template -->
-    <script src="curriculum_template.js?v=2.2.1"></script>
+    <script src="curriculum_template.js?v=2.2.2"></script>
     <!-- Multi-User Identity & Sync Engine -->
-    <script src="auth_sync.js?v=2.2.1"></script>
+    <script src="auth_sync.js?v=2.2.2"></script>
     <!-- Site Telemetry & Audience Analytics Engine -->
-    <script src="site_analytics.js?v=2.2.1"></script>
+    <script src="site_analytics.js?v=2.2.2"></script>
     <!-- Modal & Feature Interactive Help Guide Engine -->
-    <script src="modal_help.js?v=2.2.1"></script>
+    <script src="modal_help.js?v=2.2.2"></script>
     <!-- Interactive Guided Tour Engine -->
-    <script src="interactive_tour.js?v=2.2.1"></script>
+    <script src="interactive_tour.js?v=2.2.2"></script>
     <!-- Moodle Live Calendar & Tasks Sync Engine -->
-    <script src="moodle_sync.js?v=2.2.1"></script>
+    <script src="moodle_sync.js?v=2.2.2"></script>
     <!-- Technion ME 2025/2026 Catalog & Electives Database -->
-    <script src="planner_catalog.js?v=2.2.1"></script>
+    <script src="planner_catalog.js?v=2.2.2"></script>
     <!-- Degree Planner Drag & Drop Engine -->
-    <script src="planner_module.js?v=2.2.1"></script>
+    <script src="planner_module.js?v=2.2.2"></script>
     <!-- Technion Official Academic Calendar & Holidays Engine -->
-    <script src="technion_academic_calendar.js?v=2.2.1"></script>
+    <script src="technion_academic_calendar.js?v=2.2.2"></script>
     <!-- Core Application Logic -->
 
     <!-- Accessibility Modal (הצהרת נגישות ותפריט התאמות) -->
@@ -2891,8 +2912,8 @@
         </div>
     </div>
 
-    <script src="accessibility.js?v=2.2.1"></script>
-    <script src="app.js?v=2.2.1"></script>
+    <script src="accessibility.js?v=2.2.2"></script>
+    <script src="app.js?v=2.2.2"></script>
     <!-- PWA Service Worker Registration -->
     <script>
         if ('serviceWorker' in navigator && window.location.protocol.startsWith('http')) {

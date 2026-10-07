@@ -2262,7 +2262,7 @@ var SAMPLE_ME_DEGREE = (typeof window !== 'undefined' && window.SAMPLE_ME_DEGREE
         name: "מכניקת מוצקים 1",
         credits: 4,
         semester: 2,
-        prerequisites: ["104041","104065","114051"],
+        prerequisites: ["104041","104065","114071","114051"],
         status: "locked",
         tasks: [
             { id: "034028_h1", title: "תרגיל בית 1: מאמצים ועיוותים חד-מימדיים", type: "hw", xp: 50, completed: false },
@@ -2398,7 +2398,7 @@ var SAMPLE_ME_DEGREE = (typeof window !== 'undefined' && window.SAMPLE_ME_DEGREE
         name: "דינמיקה",
         credits: 5,
         semester: 4,
-        prerequisites: ["034028","114051","104043","104131"],
+        prerequisites: ["034028","114071","114051","104043","104131"],
         status: "locked",
         tasks: [
             { id: "034010_h1", title: "תרגיל בית 1: קינמטיקה של גוף קשיח בדו-מימד", type: "hw", xp: 60, completed: false },
@@ -2519,7 +2519,7 @@ var SAMPLE_ME_DEGREE = (typeof window !== 'undefined' && window.SAMPLE_ME_DEGREE
         name: "מבוא למכטרוניקה והנע חשמלי",
         credits: 4,
         semester: 6,
-        prerequisites: ["034032","114052"],
+        prerequisites: ["034032","114075","114052"],
         status: "locked",
         tasks: [
             { id: "034060_h1", title: "תרגיל בית 1: מנועי זרם ישר וצעד", type: "hw", xp: 50, completed: false },
@@ -2532,7 +2532,7 @@ var SAMPLE_ME_DEGREE = (typeof window !== 'undefined' && window.SAMPLE_ME_DEGREE
         name: "מעבדה מתקדמת בהנדסת מכונות",
         credits: 4,
         semester: 6,
-        prerequisites: ["034041","034040","034051","034058","114032"],
+        prerequisites: ["034010","034053","034041","034040","034051","034058","114032"],
         status: "available",
         tasks: [
             { id: "034057_p1", title: "ניסוי מעבדה 1: מעבר חום וזורמים", type: "project", xp: 150, completed: false },
@@ -2545,7 +2545,7 @@ var SAMPLE_ME_DEGREE = (typeof window !== 'undefined' && window.SAMPLE_ME_DEGREE
         name: "פרויקט תכן לייצור",
         credits: 2.5,
         semester: 6,
-        prerequisites: ["034054","034030"],
+        prerequisites: ["034054","034030","034053"],
         status: "locked",
         tasks: [
             { id: "034371_p1", title: "תכנון חלקים לייצור ממוחשב ו-CNC", type: "project", xp: 200, completed: false },
@@ -2558,7 +2558,7 @@ var SAMPLE_ME_DEGREE = (typeof window !== 'undefined' && window.SAMPLE_ME_DEGREE
         name: "פרויקט גמר הנדסי 1",
         credits: 3,
         semester: 7,
-        prerequisites: ["034371"],
+        prerequisites: ["034371","034054","034060","034041","034040","034010"],
         status: "locked",
         tasks: [
             { id: "034379_p1", title: "הגשת ספר פרויקט - שלב תכנון רעיוני", type: "project", xp: 250, completed: false },
@@ -8801,6 +8801,9 @@ function loadSavedState() {
                 if (removedList.includes(code)) return; // Strictly respect user deletions!
                 if (!gameState.courses[code]) {
                     gameState.courses[code] = JSON.parse(JSON.stringify(SAMPLE_ME_DEGREE[code]));
+                } else if (SAMPLE_ME_DEGREE[code].prerequisites) {
+                    // Synchronize canonical updated prerequisites without altering user grades/status/tasks
+                    gameState.courses[code].prerequisites = [...SAMPLE_ME_DEGREE[code].prerequisites];
                 }
             });
         }
@@ -9945,6 +9948,339 @@ function searchCheeseForkCourses(query, maxResults = 8) {
     return results;
 }
 
+// ==============================================================================
+// Prerequisite Interactive Chips & Autocomplete Search Engine (v2.2.2)
+// ==============================================================================
+let _activePrereqCodes = [];
+
+function escapeHtmlPrereq(str) {
+    if (!str) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+function getCourseDisplayNameByCode(code) {
+    if (!code) return '';
+    const norm = String(code).trim();
+    if (window.gameState && window.gameState.courses && window.gameState.courses[norm]) {
+        return window.gameState.courses[norm].name;
+    }
+    // Check CheeseFork database
+    if (typeof findCheeseForkCourse === 'function') {
+        const cf = findCheeseForkCourse(norm);
+        if (cf && cf.name) return cf.name;
+    }
+    if (window.CHEESEFORK_DB && Array.isArray(window.CHEESEFORK_DB)) {
+        const cfMatch = window.CHEESEFORK_DB.find(c => c.code6 === norm || c.rawNum === norm);
+        if (cfMatch && cfMatch.name) return cfMatch.name;
+    }
+    // Check catalog
+    if (window.PLANNER_CATALOG && Array.isArray(window.PLANNER_CATALOG.allCourses)) {
+        const cat = window.PLANNER_CATALOG.allCourses.find(c => c.code === norm);
+        if (cat && cat.name) return cat.name;
+    }
+    return '';
+}
+
+function renderPrereqChips() {
+    const container = document.getElementById('course-prereqs-chips');
+    const hiddenInput = document.getElementById('course-prereqs');
+    const badge = document.getElementById('course-prereqs-count-badge');
+    if (!container) return;
+
+    if (hiddenInput) {
+        hiddenInput.value = _activePrereqCodes.join(', ');
+    }
+    if (badge) {
+        badge.innerText = `${_activePrereqCodes.length} קדמים`;
+    }
+
+    if (_activePrereqCodes.length === 0) {
+        container.innerHTML = `<span class="prereq-chips-empty">טרם נבחרו קורסי קדם (הקורס יהיה פתוח לרישום)</span>`;
+        return;
+    }
+
+    container.innerHTML = '';
+    _activePrereqCodes.forEach(code => {
+        const name = getCourseDisplayNameByCode(code);
+        const chip = document.createElement('div');
+        chip.className = 'prereq-chip-block';
+        chip.dataset.code = code;
+        chip.innerHTML = `
+            <span class="prereq-chip-badge">${code}</span>
+            <span class="prereq-chip-title" title="${escapeHtmlPrereq(name || code)}">${escapeHtmlPrereq(name || code)}</span>
+            <button type="button" class="prereq-chip-del" title="הסר קורס קדם ${code}" aria-label="הסר ${code}">&times;</button>
+        `;
+        const delBtn = chip.querySelector('.prereq-chip-del');
+        if (delBtn) {
+            delBtn.onclick = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                removePrereqChip(code);
+            };
+        }
+        container.appendChild(chip);
+    });
+}
+
+function addPrereqChip(code) {
+    if (!code) return;
+    const clean = String(code).trim().replace(/[-\s]/g, '');
+    if (!clean) return;
+
+    // Check self-dependency
+    const currentCodeInput = document.getElementById('course-code');
+    const currentCourseCode = currentCodeInput ? currentCodeInput.value.trim() : '';
+    if (currentCourseCode && (clean === currentCourseCode || clean.replace(/^0+/, '') === currentCourseCode.replace(/^0+/, ''))) {
+        if (typeof showToastNotification === 'function') {
+            showToastNotification('קורס אינו יכול להוות דרישת קדם של עצמו!', 'error');
+        } else {
+            alert('קורס אינו יכול להוות דרישת קדם של עצמו!');
+        }
+        return;
+    }
+
+    // Check duplicate
+    if (_activePrereqCodes.includes(clean)) {
+        if (typeof showToastNotification === 'function') {
+            showToastNotification(`קורס ${clean} כבר קיים ברשימת הקדמים.`, 'info');
+        }
+        return;
+    }
+
+    _activePrereqCodes.push(clean);
+    renderPrereqChips();
+
+    // Clear search input and hide dropdown
+    const searchInput = document.getElementById('course-prereq-search-input');
+    const dropdown = document.getElementById('course-prereq-dropdown');
+    if (searchInput) searchInput.value = '';
+    if (dropdown) dropdown.style.display = 'none';
+}
+
+function removePrereqChip(code) {
+    _activePrereqCodes = _activePrereqCodes.filter(c => c !== code);
+    renderPrereqChips();
+}
+
+function setPrereqChips(codes) {
+    _activePrereqCodes = Array.isArray(codes) ? [...new Set(codes.filter(Boolean).map(c => String(c).trim().replace(/[-\s]/g, '')))] : [];
+    renderPrereqChips();
+}
+
+function getPrereqChips() {
+    return [..._activePrereqCodes];
+}
+
+function initPrereqChipsSearch() {
+    const input = document.getElementById("course-prereq-search-input");
+    const dropdown = document.getElementById("course-prereq-dropdown");
+    if (!input || !dropdown) return;
+
+    let debounceTimer = null;
+    let highlightedIndex = -1;
+    let currentResults = [];
+
+    function closeDropdown() {
+        dropdown.style.display = "none";
+        dropdown.innerHTML = "";
+        highlightedIndex = -1;
+        currentResults = [];
+    }
+
+    function searchPrereqCandidates(query) {
+        if (!query || query.trim().length === 0) return [];
+        const q = query.trim().toLowerCase();
+        const results = [];
+        const seenCodes = new Set();
+
+        // 1. Current degree courses in gameState
+        if (window.gameState && window.gameState.courses) {
+            Object.values(window.gameState.courses).forEach(c => {
+                if (!c || !c.code) return;
+                const cCode = String(c.code).toLowerCase();
+                const cName = String(c.name || '').toLowerCase();
+                if (cCode.includes(q) || cName.includes(q)) {
+                    seenCodes.add(c.code);
+                    results.push({
+                        code: c.code,
+                        name: c.name,
+                        credits: c.credits,
+                        semester: c.semester,
+                        source: 'degree'
+                    });
+                }
+            });
+        }
+
+        // 2. CheeseFork Database (Technion courses)
+        const cfCourses = (typeof getCheeseForkCoursesArray === 'function') 
+            ? getCheeseForkCoursesArray() 
+            : (window.CHEESEFORK_DB || []);
+
+        for (const c of cfCourses) {
+            if (results.length >= 15) break;
+            const code6 = c.code6 || c.rawNum;
+            if (!code6 || seenCodes.has(code6)) continue;
+            const name = c.name || '';
+            if (code6.toLowerCase().includes(q) || name.toLowerCase().includes(q)) {
+                seenCodes.add(code6);
+                results.push({
+                    code: code6,
+                    name: name,
+                    credits: c.credits,
+                    faculty: c.faculty,
+                    source: 'cheesefork'
+                });
+            }
+        }
+
+        // 3. Planner catalog courses
+        if (results.length < 15 && window.PLANNER_CATALOG && Array.isArray(window.PLANNER_CATALOG.allCourses)) {
+            for (const c of window.PLANNER_CATALOG.allCourses) {
+                if (results.length >= 15) break;
+                if (!c.code || seenCodes.has(c.code)) continue;
+                const name = c.name || '';
+                if (c.code.toLowerCase().includes(q) || name.toLowerCase().includes(q)) {
+                    seenCodes.add(c.code);
+                    results.push({
+                        code: c.code,
+                        name: name,
+                        credits: c.credits,
+                        source: 'catalog'
+                    });
+                }
+            }
+        }
+
+        return results;
+    }
+
+    function renderDropdown(items, query) {
+        currentResults = items;
+        dropdown.innerHTML = "";
+        highlightedIndex = -1;
+
+        if (items.length === 0) {
+            dropdown.innerHTML = `
+                <div class="prereq-dropdown-item" id="prereq-dropdown-custom-add" style="color: #38bdf8; justify-content: center;">
+                    <span>➕ הוסף קוד מותאם אישית: <strong>${escapeHtmlPrereq(query)}</strong></span>
+                </div>
+            `;
+            const customAdd = document.getElementById("prereq-dropdown-custom-add");
+            if (customAdd) {
+                customAdd.onclick = () => {
+                    addPrereqChip(query);
+                    closeDropdown();
+                };
+            }
+            dropdown.style.display = "block";
+            return;
+        }
+
+        items.forEach((item, idx) => {
+            const isAlready = _activePrereqCodes.includes(item.code);
+            const el = document.createElement("div");
+            el.className = `prereq-dropdown-item ${isAlready ? 'is-selected' : ''}`;
+            el.dataset.index = idx;
+            
+            const metaText = item.source === 'degree' 
+                ? `סמסטר ${item.semester} • ${item.credits} נק״ז` 
+                : `${item.faculty || 'הטכניון'} • ${item.credits || 3} נק״ז`;
+
+            el.innerHTML = `
+                <div class="prereq-dropdown-info">
+                    <span class="prereq-chip-badge">${item.code}</span>
+                    <span class="prereq-dropdown-name">${escapeHtmlPrereq(item.name || item.code)}</span>
+                </div>
+                <div class="prereq-dropdown-meta">
+                    ${isAlready ? '<span>✓ נבחר</span>' : `<span>${metaText}</span>`}
+                </div>
+            `;
+
+            el.onclick = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (isAlready) return;
+                addPrereqChip(item.code);
+                closeDropdown();
+            };
+
+            dropdown.appendChild(el);
+        });
+
+        dropdown.style.display = "block";
+    }
+
+    input.addEventListener("input", () => {
+        clearTimeout(debounceTimer);
+        const q = input.value.trim();
+        if (q.length === 0) {
+            closeDropdown();
+            return;
+        }
+        debounceTimer = setTimeout(() => {
+            const matches = searchPrereqCandidates(q);
+            renderDropdown(matches, q);
+        }, 120);
+    });
+
+    input.addEventListener("keydown", (e) => {
+        if (dropdown.style.display === "none") return;
+        const items = dropdown.querySelectorAll(".prereq-dropdown-item:not(.is-selected)");
+        if (!items || items.length === 0) return;
+
+        if (e.key === "ArrowDown") {
+            e.preventDefault();
+            highlightedIndex = (highlightedIndex + 1) % items.length;
+            updateHighlight(items);
+        } else if (e.key === "ArrowUp") {
+            e.preventDefault();
+            highlightedIndex = (highlightedIndex - 1 + items.length) % items.length;
+            updateHighlight(items);
+        } else if (e.key === "Enter") {
+            e.preventDefault();
+            if (highlightedIndex >= 0 && items[highlightedIndex]) {
+                items[highlightedIndex].click();
+            } else if (items.length > 0) {
+                items[0].click();
+            } else if (input.value.trim()) {
+                addPrereqChip(input.value.trim());
+                closeDropdown();
+            }
+        } else if (e.key === "Escape") {
+            closeDropdown();
+        }
+    });
+
+    function updateHighlight(items) {
+        items.forEach((it, idx) => {
+            if (idx === highlightedIndex) {
+                it.classList.add("highlighted");
+                it.scrollIntoView({ block: "nearest" });
+            } else {
+                it.classList.remove("highlighted");
+            }
+        });
+    }
+
+    // Close on click outside
+    document.addEventListener("click", (e) => {
+        if (!input.contains(e.target) && !dropdown.contains(e.target)) {
+            closeDropdown();
+        }
+    });
+}
+window.setPrereqChips = setPrereqChips;
+window.getPrereqChips = getPrereqChips;
+window.addPrereqChip = addPrereqChip;
+window.removePrereqChip = removePrereqChip;
+window.initPrereqChipsSearch = initPrereqChipsSearch;
+
 function applyCheeseForkCourse(entry) {
     if (!entry) return;
     window._currentCheeseForkData = entry;
@@ -9963,18 +10299,19 @@ function applyCheeseForkCourse(entry) {
     if (typeSelect) typeSelect.value = entry.detectedType || 'elective';
 
     // Prerequisite matching: prioritize prereqs that already exist in the degree
-    if (prereqsInput) {
-        let relevantPrereqs = [];
-        if (entry.parsedPrereqs && entry.parsedPrereqs.length > 0) {
-            if (window.gameState && window.gameState.courses) {
-                const degreePrereqs = entry.parsedPrereqs.filter(p => !!window.gameState.courses[p]);
-                relevantPrereqs = degreePrereqs.length > 0 ? degreePrereqs : entry.parsedPrereqs.slice(0, 3);
-            } else {
-                relevantPrereqs = entry.parsedPrereqs.slice(0, 3);
-            }
+    let relevantPrereqs = [];
+    if (entry.parsedPrereqs && entry.parsedPrereqs.length > 0) {
+        if (window.gameState && window.gameState.courses) {
+            const degreePrereqs = entry.parsedPrereqs.filter(p => !!window.gameState.courses[p]);
+            relevantPrereqs = degreePrereqs.length > 0 ? degreePrereqs : entry.parsedPrereqs.slice(0, 3);
+        } else {
+            relevantPrereqs = entry.parsedPrereqs.slice(0, 3);
         }
+    }
+    if (prereqsInput) {
         prereqsInput.value = relevantPrereqs.join(', ');
     }
+    setPrereqChips(relevantPrereqs);
 
     // Register exam dates in CHEESEFORK_EXAM_DATES
     const isoA = parseDateToIso(entry.moedA);
@@ -10055,6 +10392,8 @@ function setupEventListeners() {
         const binaryToggle = document.getElementById("add-course-binary-pass");
         if (binaryToggle) binaryToggle.checked = false;
 
+        setPrereqChips([]);
+
         const modal = document.getElementById("add-course-modal");
         if (modal) modal.classList.add("active");
 
@@ -10063,6 +10402,9 @@ function setupEventListeners() {
             ensureCheeseForkDatabase();
         }
     };
+
+    // Wire Interactive Prerequisite Chips & Search autocomplete
+    initPrereqChipsSearch();
 
     // Wire CheeseFork auto-completion and search
     const courseCodeInput = document.getElementById("course-code");
@@ -10433,8 +10775,11 @@ function handleAddCourseSubmit(e) {
     const gradeInput = document.getElementById("course-initial-grade");
     const initialGrade = (gradeInput && gradeInput.value) ? parseFloat(gradeInput.value) : null;
     
-    // Forgiving prerequisite resolution: strip dashes/spaces and match existing course keys
-    const rawPrereqs = prereqsString ? prereqsString.split(',').map(s => s.trim().toLowerCase().replace(/[-\s]/g, '')).filter(Boolean) : [];
+    // Forgiving prerequisite resolution: check chip codes first, then fallback to input
+    const chipCodes = (typeof getPrereqChips === 'function') ? getPrereqChips() : [];
+    const rawPrereqs = chipCodes.length > 0 
+        ? chipCodes 
+        : (prereqsString ? prereqsString.split(',').map(s => s.trim().toLowerCase().replace(/[-\s]/g, '')).filter(Boolean) : []);
     const prerequisites = [];
     const invalidPrereqs = [];
 
@@ -10448,6 +10793,26 @@ function handleAddCourseSubmit(e) {
             if (c && c.altCode) {
                 const altClean = String(c.altCode).replace(/[-\s]/g, '');
                 if (altClean === pKey || altClean.replace(/^0+/, '') === stripped) return k;
+            }
+        }
+        // If course exists in CheeseFork database, auto-instantiate as course in degree tree!
+        if (typeof findCheeseForkCourse === 'function') {
+            const cf = findCheeseForkCourse(pKey);
+            if (cf) {
+                const cfCode = cf.code6 || cf.rawNum || pKey;
+                if (!gameState.courses[cfCode]) {
+                    gameState.courses[cfCode] = {
+                        code: cfCode,
+                        name: cf.name,
+                        credits: cf.credits || 3,
+                        semester: Math.max(1, semester - 1),
+                        prerequisites: [],
+                        status: 'available',
+                        type: cf.detectedType || 'elective',
+                        tasks: []
+                    };
+                }
+                return cfCode;
             }
         }
         return null;
@@ -11391,7 +11756,20 @@ function openCourseDetails(code) {
         document.getElementById("course-semester").value = course.semester;
         document.getElementById("course-type").value = course.type || 'core';
         document.getElementById("course-prereqs").value = course.prerequisites ? course.prerequisites.join(", ") : "";
+        setPrereqChips(course.prerequisites || []);
     };
+
+    // Modal manage prerequisites quick button
+    const managePrereqsBtn = document.getElementById("btn-modal-manage-prereqs");
+    if (managePrereqsBtn) {
+        managePrereqsBtn.onclick = () => {
+            editCourseBtn.click();
+            setTimeout(() => {
+                const searchInput = document.getElementById("course-prereq-search-input");
+                if (searchInput) searchInput.focus();
+            }, 120);
+        };
+    }
 
     // Modal delete course listener
     const deleteCourseBtn = document.getElementById("modal-btn-delete-course");
@@ -17211,13 +17589,13 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.10.07-v2.2.1",
-    version: "2.2.1",
-    build: "201007_6",
-    date: "2026-10-07 21:15",
-    description: "גרסה 2.2.1: מיתוג ראשי Semestero ME, אייקון Full-Bleed נקי ללא השלמות, שמירת סמסטר בעץ, טלמטריה ואנליטיקת כניסות אופליין, וכפתורי עזרה והסבר (?) בכל חלונית"
+    code: "REV-2026.10.07-v2.2.2",
+    version: "2.2.2",
+    build: "201007_7",
+    date: "2026-10-07 22:05",
+    description: "גרסה 2.2.2: כפתורי עזרה '?' בחלונות הראשיים (עץ הקורסים, תכנון תואר, מערכת שעות, משימות), ימי השבוע במערכת שעות ללא קידומת, וסנכרון מלא"
 };
-window.APP_VERSION = "2.2.1";
+window.APP_VERSION = "2.2.2";
 
 function ensureBaselineRevisions() {
     if (!gameState.revisions || !Array.isArray(gameState.revisions) || gameState.revisions.length === 0) {
@@ -19015,7 +19393,7 @@ function renderTimetableGrid() {
         html += `
             <div class="timetable-day-col" data-day-col="${day.dayIndex}">
                 <div class="timetable-day-header">
-                    <span class="timetable-day-title">${day.fullName || ('יום ' + day.name)}</span>
+                    <span class="timetable-day-title">${day.name || day.fullName}</span>
                     <span class="timetable-day-badge ${badgeClass}">${badgeText}</span>
                 </div>
                 <div class="timetable-day-body">

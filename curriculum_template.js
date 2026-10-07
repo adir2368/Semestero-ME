@@ -72,7 +72,7 @@ var SAMPLE_ME_DEGREE = (typeof window !== 'undefined' && window.SAMPLE_ME_DEGREE
         name: "מכניקת מוצקים 1",
         credits: 4,
         semester: 2,
-        prerequisites: ["104041","104065","114051"],
+        prerequisites: ["104041","104065","114071","114051"],
         status: "locked",
         tasks: [
             { id: "034028_h1", title: "תרגיל בית 1: מאמצים ועיוותים חד-מימדיים", type: "hw", xp: 50, completed: false },
@@ -240,7 +240,7 @@ var SAMPLE_ME_DEGREE = (typeof window !== 'undefined' && window.SAMPLE_ME_DEGREE
         name: "דינמיקה",
         credits: 5,
         semester: 4,
-        prerequisites: ["034028","114051","104043","104131"],
+        prerequisites: ["034028","114071","114051","104043","104131"],
         status: "locked",
         tasks: [
             { id: "034010_h1", title: "תרגיל בית 1: קינמטיקה של גוף קשיח בדו-מימד", type: "hw", xp: 60, completed: false },
@@ -361,7 +361,7 @@ var SAMPLE_ME_DEGREE = (typeof window !== 'undefined' && window.SAMPLE_ME_DEGREE
         name: "מבוא למכטרוניקה והנע חשמלי",
         credits: 4,
         semester: 6,
-        prerequisites: ["034032","114052"],
+        prerequisites: ["034032","114075","114052"],
         status: "locked",
         tasks: [
             { id: "034060_h1", title: "תרגיל בית 1: מנועי זרם ישר וצעד", type: "hw", xp: 50, completed: false },
@@ -374,7 +374,7 @@ var SAMPLE_ME_DEGREE = (typeof window !== 'undefined' && window.SAMPLE_ME_DEGREE
         name: "מעבדה מתקדמת בהנדסת מכונות",
         credits: 4,
         semester: 6,
-        prerequisites: ["034041","034040","034051","034058","114032"],
+        prerequisites: ["034010","034053","034041","034040","034051","034058","114032"],
         status: "available",
         tasks: [
             { id: "034057_p1", title: "ניסוי מעבדה 1: מעבר חום וזורמים", type: "project", xp: 150, completed: false },
@@ -387,7 +387,7 @@ var SAMPLE_ME_DEGREE = (typeof window !== 'undefined' && window.SAMPLE_ME_DEGREE
         name: "פרויקט תכן לייצור",
         credits: 2.5,
         semester: 6,
-        prerequisites: ["034054","034030"],
+        prerequisites: ["034054","034030","034053"],
         status: "locked",
         tasks: [
             { id: "034371_p1", title: "תכנון חלקים לייצור ממוחשב ו-CNC", type: "project", xp: 200, completed: false },
@@ -400,7 +400,7 @@ var SAMPLE_ME_DEGREE = (typeof window !== 'undefined' && window.SAMPLE_ME_DEGREE
         name: "פרויקט גמר הנדסי 1",
         credits: 3,
         semester: 7,
-        prerequisites: ["034371"],
+        prerequisites: ["034371","034054","034060","034041","034040","034010"],
         status: "locked",
         tasks: [
             { id: "034379_p1", title: "הגשת ספר פרויקט - שלב תכנון רעיוני", type: "project", xp: 250, completed: false },
