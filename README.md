@@ -1,17 +1,17 @@
-# Semestero ME (v2.0.2) 🎓⚙️
+# סמסטרו ME (Semestero) 🎓⚙️
 
-> **Personal Degree Operating System & Academic Navigation Platform**  
-> *Technion Mechanical Engineering Edition*
+> **מערכת ניווט ותכנון תואר אקדמי - הנדסת מכונות בטכניון**  
+> *Personal Degree Operating System & Academic Navigation Platform*
 
-[![Version](https://img.shields.io/badge/version-2.0.2-blue.svg)](https://adir2368.github.io/Semestero-ME/)
-[![Live Web App](https://img.shields.io/badge/Live_App-Semestero_ME-brightgreen.svg)](https://adir2368.github.io/Semestero-ME/)
+[![Version](https://img.shields.io/badge/version-2.1.7-blue.svg)](https://adir2368.github.io/Semestero-ME/)
+[![Live Web App](https://img.shields.io/badge/סמסטרו_ME-כניסה_לאפליקציה-brightgreen.svg)](https://adir2368.github.io/Semestero-ME/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 ---
 
-## 🌐 Live Web & Mobile App (PWA)
-Launch the platform directly in any browser or install it as a standalone app on your mobile home screen:  
-👉 **[https://adir2368.github.io/Semestero-ME/](https://adir2368.github.io/Semestero-ME/)**
+## 🌐 כניסה למערכת סמסטרו ME (Live Web & Mobile App)
+היכנסו למערכת ישירות דרך הדפדפן או התקינו אותה כאפליקציית מובייל (PWA):  
+👉 **[סמסטרו ME - אתר רשמי (Semestero)](https://adir2368.github.io/Semestero-ME/)**
 
 ---
 
