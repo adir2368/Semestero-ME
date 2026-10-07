@@ -1,9 +1,98 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+
+  <!-- ================================================================== -->
+  <!-- 1. Primary Entry Point: Semestero ME Academic Web Application      -->
+  <!-- ================================================================== -->
   <url>
     <loc>https://adir2368.github.io/Semestero-ME/</loc>
-    <lastmod>2026-10-07</lastmod>
+    <lastmod>2026-10-08</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
+    <image:image>
+      <image:loc>https://adir2368.github.io/Semestero-ME/og-preview.png</image:loc>
+      <image:title>Semestero ME - Academic Operating System</image:title>
+      <image:caption>מערכת ניווט ותכנון תואר אקדמי בהנדסת מכונות - הטכניון</image:caption>
+    </image:image>
+    <image:image>
+      <image:loc>https://adir2368.github.io/Semestero-ME/icon-512.png</image:loc>
+      <image:title>Semestero ME App Icon</image:title>
+      <image:caption>סמל אפליקציית סמסטרו ME</image:caption>
+    </image:image>
   </url>
+
+  <!-- ================================================================== -->
+  <!-- 2. Core Workspace Deep-Links (Deep-Linked via URL query parameters) -->
+  <!-- ================================================================== -->
+
+  <!-- Curriculum Prerequisite Tree (מפת קורסים ודרישות קדם) -->
+  <url>
+    <loc>https://adir2368.github.io/Semestero-ME/?tab=curriculum</loc>
+    <lastmod>2026-10-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- Degree Planner & Multi-Year Workload Balancer (מתכנן תואר אקדמי) -->
+  <url>
+    <loc>https://adir2368.github.io/Semestero-ME/?tab=planner</loc>
+    <lastmod>2026-10-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- Notion-Style Task Board & Moodle Assignments (לוח משימות ומטלות מודל) -->
+  <url>
+    <loc>https://adir2368.github.io/Semestero-ME/?tab=tasks</loc>
+    <lastmod>2026-10-08</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.85</priority>
+  </url>
+
+  <!-- Technion Academic Calendar & Personal Events (לוח שנה אקדמי ואירועים) -->
+  <url>
+    <loc>https://adir2368.github.io/Semestero-ME/?tab=calendar</loc>
+    <lastmod>2026-10-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+
+  <!-- Weekly Timetable & CheeseFork Class Schedule (מערכת שעות שבועית) -->
+  <url>
+    <loc>https://adir2368.github.io/Semestero-ME/?tab=timetable</loc>
+    <lastmod>2026-10-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- System Settings & User Preferences (הגדרות מערכת ופרופיל) -->
+  <url>
+    <loc>https://adir2368.github.io/Semestero-ME/?tab=settings</loc>
+    <lastmod>2026-10-08</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <!-- ================================================================== -->
+  <!-- 3. Machine-Readable Discovery & Manifest Assets                    -->
+  <!-- ================================================================== -->
+
+  <!-- LLM & AI Discoverability Manifest -->
+  <url>
+    <loc>https://adir2368.github.io/Semestero-ME/llms.txt</loc>
+    <lastmod>2026-10-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Progressive Web App (PWA) Manifest -->
+  <url>
+    <loc>https://adir2368.github.io/Semestero-ME/manifest.json</loc>
+    <lastmod>2026-10-08</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+
 </urlset>
