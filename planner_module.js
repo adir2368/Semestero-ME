@@ -536,30 +536,82 @@
         if (typeof global.updateHud === 'function') global.updateHud();
     }
 
-    function syncPlannerToTree() {
-        if (!global.gameState || !global.gameState.courses || !customPlan) return;
-        let changed = false;
-        customPlan.forEach(sem => {
-            const semNum = sem.semester;
-            (sem.courses || []).forEach(c => {
-                const keys = getNormalizedCodes(c.code, c.altCode);
-                for (let i = 0; i < keys.length; i++) {
-                    const k = keys[i];
-                    if (global.gameState.courses[k]) {
-                        if (global.gameState.courses[k].semester !== semNum) {
-                            global.gameState.courses[k].semester = semNum;
+    let isSyncingPlannerToTree = false;
+    function syncPlannerToTree(skipRerender) {
+        if (isSyncingPlannerToTree) return;
+        isSyncingPlannerToTree = true;
+        try {
+            if (!global.gameState || !customPlan) return;
+            if (!global.gameState.courses) global.gameState.courses = {};
+            let changed = false;
+
+            customPlan.forEach(sem => {
+                const semNum = sem.semester;
+                (sem.courses || []).forEach(c => {
+                    if (!c || !c.code) return;
+                    const keys = getNormalizedCodes(c.code, c.altCode);
+                    let foundKey = null;
+                    for (let i = 0; i < keys.length; i++) {
+                        if (global.gameState.courses[keys[i]]) {
+                            foundKey = keys[i];
+                            break;
+                        }
+                    }
+
+                    if (foundKey) {
+                        if (global.gameState.courses[foundKey].semester !== semNum) {
+                            global.gameState.courses[foundKey].semester = semNum;
                             changed = true;
                         }
-                        break;
+                    } else {
+                        // New elective or custom course added in "התוכנית שלי" that isn't yet in gameState.courses!
+                        const code = c.code;
+                        global.gameState.courses[code] = {
+                            id: code,
+                            code: code,
+                            altCode: c.altCode || '',
+                            name: c.name || c.title || code,
+                            credits: Number(c.credits) || 3.0,
+                            semester: semNum,
+                            prerequisites: c.prereqs || c.prerequisites || [],
+                            status: isCourseCompleted(code, c.altCode) ? 'mastered' : 'available',
+                            grade: c.grade || null,
+                            type: c.type || (c.list ? 'elective' : (c.code.startsWith('0394') ? 'sports' : 'mandatory')),
+                            tasks: [
+                                { id: `${code}_ex`, title: "מועד א", type: "exam", xp: 500, completed: false, status: 'not_started' }
+                            ]
+                        };
+                        changed = true;
                     }
-                }
+                });
             });
-        });
-        if (changed) {
-            global.gameState.lastModified = Date.now();
-            if (typeof global.saveState === 'function') global.saveState(true);
-            if (typeof global.renderFlowchartTree === 'function') global.renderFlowchartTree();
-            if (typeof global.updateHud === 'function') global.updateHud();
+
+            // Courses placed in unassignedCourses should not occupy an active semester on the flowchart tree
+            if (unassignedCourses && unassignedCourses.length > 0) {
+                unassignedCourses.forEach(u => {
+                    if (!u || !u.code) return;
+                    const uKeys = getNormalizedCodes(u.code, u.altCode);
+                    for (let i = 0; i < uKeys.length; i++) {
+                        const k = uKeys[i];
+                        if (global.gameState.courses[k]) {
+                            if (global.gameState.courses[k].semester !== 0) {
+                                global.gameState.courses[k].semester = 0;
+                                changed = true;
+                            }
+                            break;
+                        }
+                    }
+                });
+            }
+
+            if (changed) {
+                global.gameState.lastModified = Date.now();
+                if (typeof global.saveState === 'function') global.saveState(true);
+                if (!skipRerender && typeof global.renderFlowchartTree === 'function') global.renderFlowchartTree();
+                if (typeof global.updateHud === 'function') global.updateHud();
+            }
+        } finally {
+            isSyncingPlannerToTree = false;
         }
     }
 
@@ -598,8 +650,8 @@
                     }
                 });
 
-                // If in wrong semester in customPlan, move to actual semester
-                if (foundCourse && foundInSemester !== actualSem) {
+                // ONLY if the course was already completed with a grade in a past semester, lock it to actualSem
+                if (foundCourse && foundInSemester !== actualSem && isDone) {
                     customPlan.forEach(sem => {
                         sem.courses = (sem.courses || []).filter(x => {
                             const xKeys = getNormalizedCodes(x.code, x.altCode);
@@ -687,6 +739,9 @@
                         global.saveState(true);
                     }
                 }
+
+                // Synchronize all planned courses & semesters directly to the Skill Tree
+                syncPlannerToTree();
 
                 // Notify other components (HUD, Timetable, Flowchart) of state change
                 if (typeof global.notifyStateChanged === 'function') {

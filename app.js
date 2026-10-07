@@ -12311,9 +12311,7 @@ function setupNotionDashboard() {
             if (tasksWorkspace) tasksWorkspace.style.display = "none";
             if (timetableWorkspace) timetableWorkspace.style.display = "none";
             if (settingsWorkspace) settingsWorkspace.style.display = "none";
-            if (typeof DegreePlanner !== 'undefined' && DegreePlanner.syncTreeToPlanner) {
-                DegreePlanner.syncTreeToPlanner();
-            } else if (typeof DegreePlanner !== 'undefined' && DegreePlanner.renderDegreePlanner) {
+            if (typeof DegreePlanner !== 'undefined' && DegreePlanner.renderDegreePlanner) {
                 DegreePlanner.renderDegreePlanner();
             }
         } else if (activeTabId === 'tasks') {
@@ -14738,6 +14736,11 @@ function renderFlowchartTree() {
 
     const TOTAL_SEMESTERS = 8;
 
+    // Sync planned courses and semesters from "התוכנית שלי" (customPlan)
+    if (typeof DegreePlanner !== 'undefined' && DegreePlanner.syncPlannerToTree) {
+        DegreePlanner.syncPlannerToTree(true);
+    }
+
     // 1. Group all courses by their ACTUAL semester in gameState.courses
     const semesterCourses = {};
     for (let s = 1; s <= TOTAL_SEMESTERS; s++) {
@@ -14748,7 +14751,8 @@ function renderFlowchartTree() {
     Object.values(gameState.courses || {}).forEach(course => {
         if (!course || !course.code) return;
         if (PURGED_FLOWCHART_CODES.has(course.code)) return;
-        const sem = Math.max(1, Math.min(TOTAL_SEMESTERS, course.semester || 1));
+        if (course.semester === 0 || course.semester === '0') return;
+        const sem = Math.max(1, Math.min(TOTAL_SEMESTERS, Number(course.semester) || 1));
         semesterCourses[sem].push(course);
     });
 
