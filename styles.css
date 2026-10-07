@@ -11698,3 +11698,31 @@ html.is-iphone .app-global-footer {
     gap: 10px;
     flex-shrink: 0;
 }
+
+
+/* -------------------------------------------------------------------------- */
+/* Inline Form Validation & Forgiving Input Feedback (Reel 2 UX Standard)     */
+/* -------------------------------------------------------------------------- */
+.form-input-error {
+    border-color: #ef4444 !important;
+    box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.25) !important;
+    animation: shake-input-error 0.35s ease-in-out;
+}
+
+@keyframes shake-input-error {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-4px); }
+    40% { transform: translateX(4px); }
+    60% { transform: translateX(-3px); }
+    80% { transform: translateX(3px); }
+}
+
+.form-field-helper-error {
+    color: #f87171;
+    font-size: 0.74rem;
+    margin-top: 4px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-weight: 500;
+}

@@ -2,3 +2,5 @@ User-agent: *
 Allow: /
 
 Sitemap: https://adir2368.github.io/Semestero-ME/sitemap.xml
+# LLM & AI Discoverability
+# https://adir2368.github.io/Semestero-ME/llms.txt

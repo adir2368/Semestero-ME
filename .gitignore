@@ -4,6 +4,7 @@ __pycache__/
 *.log
 *.txt
 !robots.txt
+!llms.txt
 raw_cheesefork.json
 accurate_cheesefork_mapping.json
 courses_prereq_audit.json

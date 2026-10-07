@@ -70,19 +70,25 @@
     // --------------------------------------------------------------------------
     function getNormalizedCodes(code, altCode) {
         const codes = [];
-        if (code) {
-            const cStr = String(code).trim();
-            codes.push(cStr);
-            const stripped = cStr.replace(/^0+/, '');
-            if (stripped && stripped !== cStr) codes.push(stripped);
-        }
-        if (altCode) {
-            const aStr = String(altCode).trim();
-            codes.push(aStr);
-            const strippedAlt = aStr.replace(/^0+/, '');
-            if (strippedAlt && strippedAlt !== aStr) codes.push(strippedAlt);
-        }
-        return codes;
+        const process = (val) => {
+            if (!val) return;
+            const str = String(val).trim();
+            codes.push(str);
+            const clean = str.replace(/[-\s]/g, '');
+            if (clean && clean !== str) codes.push(clean);
+            const stripped = clean.replace(/^0+/, '');
+            if (stripped && stripped !== clean) codes.push(stripped);
+            // 8-digit Moodle code to 6-digit conversion (e.g., 00340028 -> 034028 or 01040041 -> 104041)
+            if (/^\d{8}$/.test(clean) && clean.startsWith('0')) {
+                const c6 = clean.slice(1, 4) + clean.slice(5);
+                codes.push(c6);
+                const strippedC6 = c6.replace(/^0+/, '');
+                if (strippedC6 !== c6) codes.push(strippedC6);
+            }
+        };
+        process(code);
+        process(altCode);
+        return Array.from(new Set(codes));
     }
 
     function isPurgedCourse(code, altCode) {
@@ -1247,10 +1253,22 @@
         const coursesToShow = [];
         const q = searchQuery.toLowerCase();
 
+        const normQ = q.replace(/["'״׳`]/g, '').trim();
+        const cleanDigitsQ = q.replace(/\D/g, '');
+
         const matchesSearch = (course) => {
             if (!q) return true;
-            const matchName = (course.name || '').toLowerCase().includes(q);
-            const matchCode = (course.code || '').includes(q) || (course.altCode && course.altCode.includes(q));
+            const normName = (course.name || '').replace(/["'״׳`]/g, '').toLowerCase();
+            const matchName = normName.includes(normQ) || (course.name || '').toLowerCase().includes(q);
+            
+            let matchCode = (course.code || '').includes(q) || (course.altCode && course.altCode.includes(q));
+            if (!matchCode && cleanDigitsQ && cleanDigitsQ.length >= 2) {
+                const cDigits = (course.code || '').replace(/\D/g, '');
+                const aDigits = (course.altCode || '').replace(/\D/g, '');
+                matchCode = cDigits.includes(cleanDigitsQ) || aDigits.includes(cleanDigitsQ) ||
+                            cDigits.replace(/^0+/, '').includes(cleanDigitsQ.replace(/^0+/, '')) ||
+                            aDigits.replace(/^0+/, '').includes(cleanDigitsQ.replace(/^0+/, ''));
+            }
             return matchName || matchCode;
         };
 

@@ -9839,8 +9839,14 @@ function findCheeseForkCourse(query) {
         }
     }
 
-    // 2. Exact or normalized name match
-    const byName = (cheeseForkList || []).find(c => c.name.toLowerCase() === q || c.name.replace(/["']/g, '') === q.replace(/["']/g, ''));
+    // 2. Exact or normalized name match (ignoring Hebrew quotes & hyphens)
+    const normQ = q.replace(/["'״׳`]/g, '').trim();
+    const byName = (cheeseForkList || []).find(c => {
+        const cLower = c.name.toLowerCase();
+        if (cLower === q) return true;
+        const cNorm = cLower.replace(/["'״׳`]/g, '').trim();
+        return cNorm === normQ;
+    });
     if (byName) return byName;
 
     // 3. Substring match for codes with length >= 5
@@ -9859,15 +9865,24 @@ function searchCheeseForkCourses(query, maxResults = 8) {
     const q = String(query || '').trim().toLowerCase();
     if (!q || q.length < 2) return [];
 
-    const isDigitSearch = /^\d+$/.test(q);
+    const cleanDigits = q.replace(/\D/g, '');
+    const cleanNoDash = q.replace(/[-\s]/g, '');
+    const isDigitSearch = cleanDigits.length >= 2 && cleanDigits.length === cleanNoDash.length;
+    const normQ = q.replace(/["'״׳`]/g, '').trim();
     const results = [];
 
     for (const c of cheeseForkList) {
         let matched = false;
         if (isDigitSearch) {
-            matched = c.code6.includes(q) || c.rawNum.includes(q);
+            matched = c.code6.includes(cleanDigits) || c.rawNum.includes(cleanDigits) ||
+                      c.code6.replace(/^0+/, '').includes(cleanDigits.replace(/^0+/, ''));
         } else {
-            matched = c.name.toLowerCase().includes(q) || c.code6.includes(q) || c.faculty.toLowerCase().includes(q);
+            const normCName = (c.name || '').toLowerCase().replace(/["'״׳`]/g, '').trim();
+            matched = normCName.includes(normQ) ||
+                      c.name.toLowerCase().includes(q) ||
+                      c.code6.includes(q) ||
+                      (cleanDigits.length >= 3 && (c.code6.includes(cleanDigits) || c.rawNum.includes(cleanDigits))) ||
+                      (c.faculty && c.faculty.toLowerCase().includes(q));
         }
 
         if (matched) {
@@ -10305,11 +10320,58 @@ function toggleForm(id) {
 // Handle Add Course Form Submission
 function handleAddCourseSubmit(e) {
     e.preventDefault();
-    let name = document.getElementById("course-name").value.trim();
+    const nameInput = document.getElementById("course-name");
+    const codeInput = document.getElementById("course-code");
+    
+    // Clear previous inline validation states
+    [nameInput, codeInput].forEach(inp => {
+        if (inp) inp.classList.remove('form-input-error');
+    });
+
+    let name = nameInput ? nameInput.value.trim() : "";
     if (typeof sanitizeHebrewCourseTitle === 'function') {
         name = sanitizeHebrewCourseTitle(name);
     }
-    const code = document.getElementById("course-code").value.trim().toLowerCase();
+    
+    const rawCode = codeInput ? codeInput.value.trim().toLowerCase() : "";
+    let code = rawCode.replace(/[-\s]/g, '');
+
+    // Forgiving code formatting: if 5 digits, pad to 6 (e.g. 34028 -> 034028)
+    if (/^\d{5}$/.test(code)) {
+        code = '0' + code;
+    } else if (/^\d{8}$/.test(code) && code.startsWith('0')) {
+        // 8-digit Moodle format (e.g. 00340028 -> 034028, 01040041 -> 104041)
+        code = code.slice(1, 4) + code.slice(5);
+    }
+
+    if (!code) {
+        if (codeInput) {
+            codeInput.classList.add('form-input-error');
+            codeInput.focus();
+            codeInput.addEventListener('input', () => codeInput.classList.remove('form-input-error'), { once: true });
+        }
+        if (typeof showToastNotification === 'function') {
+            showToastNotification('נא להזין קוד קורס תקין.', 'error');
+        } else {
+            alert('נא להזין קוד קורס!');
+        }
+        return;
+    }
+
+    if (!name) {
+        if (nameInput) {
+            nameInput.classList.add('form-input-error');
+            nameInput.focus();
+            nameInput.addEventListener('input', () => nameInput.classList.remove('form-input-error'), { once: true });
+        }
+        if (typeof showToastNotification === 'function') {
+            showToastNotification('נא להזין שם קורס.', 'error');
+        } else {
+            alert('נא להזין שם קורס!');
+        }
+        return;
+    }
+
     const credits = parseFloat(document.getElementById("course-credits").value) || 3;
     const semester = parseInt(document.getElementById("course-semester").value) || 1;
     const prereqsString = document.getElementById("course-prereqs").value.trim();
@@ -10319,12 +10381,41 @@ function handleAddCourseSubmit(e) {
     const gradeInput = document.getElementById("course-initial-grade");
     const initialGrade = (gradeInput && gradeInput.value) ? parseFloat(gradeInput.value) : null;
     
-    const prerequisites = prereqsString ? prereqsString.split(',').map(s => s.trim().toLowerCase()).filter(s => s) : [];
+    // Forgiving prerequisite resolution: strip dashes/spaces and match existing course keys
+    const rawPrereqs = prereqsString ? prereqsString.split(',').map(s => s.trim().toLowerCase().replace(/[-\s]/g, '')).filter(Boolean) : [];
+    const prerequisites = [];
+    const invalidPrereqs = [];
 
-    // Verify all listed prerequisites actually exist
-    const invalidPrereqs = prerequisites.filter(p => !gameState.courses[p]);
+    const resolvePrereqKey = (pKey) => {
+        if (!pKey) return null;
+        if (gameState.courses[pKey]) return pKey;
+        const stripped = pKey.replace(/^0+/, '');
+        for (const [k, c] of Object.entries(gameState.courses)) {
+            const kClean = k.replace(/[-\s]/g, '');
+            if (kClean === pKey || kClean.replace(/^0+/, '') === stripped) return k;
+            if (c && c.altCode) {
+                const altClean = String(c.altCode).replace(/[-\s]/g, '');
+                if (altClean === pKey || altClean.replace(/^0+/, '') === stripped) return k;
+            }
+        }
+        return null;
+    };
+
+    rawPrereqs.forEach(p => {
+        const matched = resolvePrereqKey(p);
+        if (matched) {
+            prerequisites.push(matched);
+        } else {
+            invalidPrereqs.push(p);
+        }
+    });
+
     if (invalidPrereqs.length > 0) {
-        alert(`הקורסים הבאים המשמשים כקדמים לא קיימים בעץ עדיין: ${invalidPrereqs.join(', ')}`);
+        if (typeof showToastNotification === 'function') {
+            showToastNotification(`הקורסים הבאים כקדמים לא קיימים בעץ: ${invalidPrereqs.join(', ')}`, 'error');
+        } else {
+            alert(`הקורסים הבאים המשמשים כקדמים לא קיימים בעץ עדיין: ${invalidPrereqs.join(', ')}`);
+        }
         return;
     }
 
@@ -13510,15 +13601,39 @@ function handleCreateTaskSubmit() {
     const dateInput = document.getElementById("new-task-due-date");
     const descInput = document.getElementById("personal-event-desc-input");
 
+    // Clear previous inline validation states
+    [titleInput, dateInput].forEach(inp => {
+        if (inp) inp.classList.remove('form-input-error');
+    });
+
     const title = titleInput ? titleInput.value.trim() : "";
     if (!title) {
-        alert(currentTaskModalCategory === 'personal' ? "נא להזין שם לאירוע!" : "נא להזין שם למשימה!");
+        if (titleInput) {
+            titleInput.classList.add('form-input-error');
+            titleInput.focus();
+            titleInput.addEventListener('input', () => titleInput.classList.remove('form-input-error'), { once: true });
+        }
+        const msg = currentTaskModalCategory === 'personal' ? "נא להזין שם לאירוע!" : "נא להזין שם למשימה!";
+        if (typeof showToastNotification === 'function') {
+            showToastNotification(msg, 'error');
+        } else {
+            alert(msg);
+        }
         return;
     }
 
     const eventDate = dateInput ? dateInput.value : "";
     if (!eventDate) {
-        alert("נא לבחור תאריך!");
+        if (dateInput) {
+            dateInput.classList.add('form-input-error');
+            dateInput.focus();
+            dateInput.addEventListener('input', () => dateInput.classList.remove('form-input-error'), { once: true });
+        }
+        if (typeof showToastNotification === 'function') {
+            showToastNotification("נא לבחור תאריך!", 'error');
+        } else {
+            alert("נא לבחור תאריך!");
+        }
         return;
     }
 
@@ -16744,13 +16859,13 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.10.07-v2.1.5",
-    version: "2.1.5",
-    build: "201006",
-    date: "2026-10-07 02:10",
-    description: "גרסה 2.1.5: הוספת מדיניות פרטיות ואמנת הגנת מידע מלאה (Privacy Policy), ארכיטקטורת Local-First ושקיפות מלאה"
+    code: "REV-2026.10.07-v2.1.6",
+    version: "2.1.6",
+    build: "201007",
+    date: "2026-10-07 09:15",
+    description: "גרסה 2.1.6: הטמעת תקן llms.txt לגילוי AI, התאמת פורמטים גמישה (Forgiving Formatting) ומשוב אימות שדות חי (Inline Validation)"
 };
-window.APP_VERSION = "2.1.5";
+window.APP_VERSION = "2.1.6";
 
 function ensureBaselineRevisions() {
     if (!gameState.revisions || !Array.isArray(gameState.revisions) || gameState.revisions.length === 0) {

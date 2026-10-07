@@ -1,0 +1,39 @@
+# Semestero ME (סמסטרו ME)
+
+> An advanced, local-first academic skill tree and degree navigation platform engineered for Technion Mechanical Engineering and Barak students.
+
+Semestero ME transforms undergraduate degree management into an interactive, visual skill tree and Notion-style workspace. Designed specifically for the Technion – Israel Institute of Technology (הפקולטה להנדסת מכונות), it empowers students to plan semesters, balance workloads, simulate GPAs, and synchronize assignments directly from Technion Moodle and CheeseFork.
+
+## Core Capabilities
+
+- **Interactive Academic Skill Tree**: Visualizes prerequisite chains, co-requisites, core vs. elective branches, and semester allocations across the entire degree curriculum.
+- **Degree Planner & Workload Engine (מתכנן תואר)**: Multi-semester curriculum planner featuring real-time credit tracking, semester workload metrics, Reservist credit exemptions (פטור מילואים 2 נק״ז), and drag-and-drop course reallocations.
+- **Academic GPA & What-If Simulator**: Exact Technion-weighted GPA calculation, pass/fail (בינארי) handling, credit quotas, and what-if simulation for target GPAs and honors requirements.
+- **Notion-Style Task & Exam Command Center**: KanBan boards, table views, Eisenhower priority matrix, exam date countdowns, and XP gamification.
+- **Technion Moodle Live Sync**: Secure, passive iCal feed synchronization (`export_execute.php`) importing real homework and assignment deadlines without storing credentials or passwords.
+- **CheeseFork Academic Database Integration**: Auto-completion and instant catalog lookup for course numbers, names, credits, faculties, and official prerequisite graphs.
+- **Local-First Privacy Architecture**: Zero server tracking or telemetry; 100% of user notes, grades, tokens, and progress remain strictly on the client device (LocalStorage / Electron storage).
+
+## Curricula & Catalogs Supported
+
+- **Technion Faculty of Mechanical Engineering (הנדסת מכונות)**:
+  - Catalog 2023–2024 (תשפ״ד - 157.5 credits)
+  - Catalog 2024–2025 (תשפ״ה - 157.5 credits)
+  - Catalog 2025–2026 (תשפ״ו - 157.5 credits)
+  - Catalog 2026–2027 (תשפ״ז - 157.5 credits)
+- **Barak Elite Program (מסלול ברקים)**:
+  - Combined B.Sc. + M.Sc. curriculum (171.5 credits)
+
+## Architecture & Technology
+
+- **Frontend**: Lightweight, high-performance vanilla ES6+ JavaScript, modular architecture, responsive CSS3 with CSS variables and glassmorphism UI.
+- **Offline & Desktop**: PWA with offline Service Worker caching (`sw.js`) and cross-platform native Electron desktop packaging.
+- **Data Persistence**: Offline-first JSON storage, automated schema migrations, zero third-party cloud database dependencies.
+
+## Key Links & Resources
+
+- Live Application: https://adir2368.github.io/Semestero-ME/
+- Source Code Repository: https://github.com/adir2368/Semestero-ME
+- Privacy Policy: https://adir2368.github.io/Semestero-ME/#privacy-policy
+- XML Sitemap: https://adir2368.github.io/Semestero-ME/sitemap.xml
+- LLMs Text Reference: https://adir2368.github.io/Semestero-ME/llms.txt

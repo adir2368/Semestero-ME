@@ -1,5 +1,5 @@
-// Service Worker for Academic Skill Tree (Semestero ME) - v2.1.5
-const CACHE_NAME = 'semestero-me-v2.1.5';
+// Service Worker for Academic Skill Tree (Semestero ME) - v2.1.6
+const CACHE_NAME = 'semestero-me-v2.1.6';
 
 const STATIC_ASSETS = [
     './',
@@ -17,6 +17,7 @@ const STATIC_ASSETS = [
     './moodle_sync.js',
     './app.js',
     './manifest.json',
+    './llms.txt',
     './favicon.ico',
     './icon-48.png',
     './icon.png',
