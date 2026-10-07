@@ -2384,7 +2384,7 @@
                 </div>
             </div>
             <div class="modal-footer" style="padding: 12px 14px; border-top: 1px solid rgba(255,255,255,0.08); display: flex; justify-content: flex-end; gap: 10px;">
-                <button class="btn btn-secondary" onclick="localStorage.setItem('ast_onboarding_shown', 'true'); document.getElementById('onboarding-wizard-modal').classList.remove('active')">
+                <button class="btn btn-secondary" onclick="localStorage.setItem('ast_onboarding_shown', 'true'); document.getElementById('onboarding-wizard-modal').classList.remove('active'); if (window.InteractiveTour && localStorage.getItem('ast_interactive_tour_completed') !== 'true') setTimeout(() => window.InteractiveTour.showWelcomeTourPrompt(), 900);">
                     דלג והתחל
                 </button>
                 <button class="btn btn-primary" onclick="AuthSync.finishOnboarding()">

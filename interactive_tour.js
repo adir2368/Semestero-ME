@@ -94,13 +94,22 @@
         init() {
             this.injectStyles();
 
-            // Auto-prompt tour on first launch for new users
+            // Auto-prompt tour on launch ONLY if initial data entry (onboarding) was ALREADY completed!
             setTimeout(() => {
                 const tourDone = localStorage.getItem(TOUR_STORAGE_KEY);
-                if (tourDone !== 'true') {
+                const onboardingDone = localStorage.getItem('ast_onboarding_shown') === 'true';
+                const onboardingModal = document.getElementById('onboarding-wizard-modal');
+                const isOnboardingActive = onboardingModal && (
+                    onboardingModal.classList.contains('active') || 
+                    onboardingModal.style.display === 'flex' || 
+                    onboardingModal.style.display === 'block'
+                );
+
+                // If user is brand new and hasn't finished initial data entry yet, wait until finishOnboarding()!
+                if (tourDone !== 'true' && onboardingDone && !isOnboardingActive) {
                     this.showWelcomeTourPrompt();
                 }
-            }, 1600);
+            }, 1800);
         },
 
         injectStyles() {
@@ -228,7 +237,18 @@
         },
 
         showWelcomeTourPrompt() {
-            // Prompt user gently on first visit
+            // Guard: Never display tour prompt if already open or while Onboarding Wizard is active
+            if (document.getElementById('tour-welcome-prompt') || document.getElementById('interactive-tour-container')) return;
+            const onboardingModal = document.getElementById('onboarding-wizard-modal');
+            if (onboardingModal && (
+                onboardingModal.classList.contains('active') || 
+                onboardingModal.style.display === 'flex' || 
+                onboardingModal.style.display === 'block'
+            )) {
+                return;
+            }
+
+            // Prompt user gently after onboarding
             const promptEl = document.createElement('div');
             promptEl.id = 'tour-welcome-prompt';
             promptEl.className = 'tour-backdrop';

@@ -959,6 +959,13 @@
             if (typeof showToastNotification === 'function') {
                 showToastNotification(`🎓 ברוך הבא ${name}! מסלול הלימודים הוגדר בהצלחה.`, 'success');
             }
+
+            // Trigger the interactive tour gently only after completing initial data entry
+            if (window.InteractiveTour && localStorage.getItem('ast_interactive_tour_completed') !== 'true') {
+                setTimeout(() => {
+                    window.InteractiveTour.showWelcomeTourPrompt();
+                }, 900);
+            }
         },
 
         // Backward compatibility: alias openAccountsModal to openAuthModal
