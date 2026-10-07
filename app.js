@@ -8672,13 +8672,22 @@ function loadSavedState() {
     // Finals mode is put to sleep (dormant) per user request - always keep normal semester mode active
     gameState.isFinalsMode = false;
 
-    // 1. Purge canceled / user-removed courses:
-    // 035044 (CAD), 324033 / 03240033 (English B), 035026 (Creative Intro)
-    const PURGED_APP_CODES = ['035044', '324033', '03240033', '035026', '35026'];
+    // 1. Purge canceled / user-removed courses & deduplicate any accidental 8-digit courses
+    const PURGED_APP_CODES = ['035044', '324033', '03240033', '035026', '35026', '01140071', '114071'];
     if (gameState.courses) {
         PURGED_APP_CODES.forEach(code => {
             if (gameState.courses[code]) {
                 delete gameState.courses[code];
+            }
+        });
+        // Deduplicate any 8-digit codes that have a 6-digit counterpart
+        Object.keys(gameState.courses).forEach(key => {
+            if (/^\d{8}$/.test(key) && !key.startsWith('0394')) {
+                const norm = (key.slice(1, 4) + key.slice(5)).replace(/^0+/, '');
+                const stripped = key.replace(/^0+/, '');
+                if (gameState.courses[norm] || gameState.courses[stripped] || gameState.courses['0' + norm]) {
+                    delete gameState.courses[key];
+                }
             }
         });
         Object.values(gameState.courses).forEach(c => {
@@ -8691,6 +8700,29 @@ function loadSavedState() {
     PURGED_APP_CODES.forEach(code => {
         if (!gameState.removedCourses.includes(code)) gameState.removedCourses.push(code);
     });
+
+    // Self-healing / Restoration of Authentic State & Degree Plan
+    if (typeof PRELOADED_USER_STATE !== 'undefined') {
+        const needsCourseRestore = !gameState.courses || Object.keys(gameState.courses).length < 30;
+        const needsPlanRestore = !gameState.degreePlan || !Array.isArray(gameState.degreePlan) || gameState.degreePlan.length === 0;
+
+        if (needsCourseRestore && PRELOADED_USER_STATE.courses) {
+            console.log('[Recovery] Restoring full authentic course state from PRELOADED_USER_STATE...');
+            gameState.courses = JSON.parse(JSON.stringify(PRELOADED_USER_STATE.courses));
+            gameState.xp = PRELOADED_USER_STATE.xp;
+            gameState.gpa = PRELOADED_USER_STATE.gpa;
+            gameState.level = PRELOADED_USER_STATE.level;
+            gameState.completedCourses = PRELOADED_USER_STATE.completedCourses;
+            gameState.credits = PRELOADED_USER_STATE.credits;
+            saveState();
+        }
+        if (needsPlanRestore && PRELOADED_USER_STATE.degreePlan) {
+            console.log('[Recovery] Restoring full authentic degreePlan from PRELOADED_USER_STATE...');
+            gameState.degreePlan = JSON.parse(JSON.stringify(PRELOADED_USER_STATE.degreePlan));
+            gameState.degreePlanUnassigned = JSON.parse(JSON.stringify(PRELOADED_USER_STATE.degreePlanUnassigned || []));
+            saveState();
+        }
+    }
 
     // Guarantee 034028 (מכניקת מוצקים 1) and all core courses exist in gameState.courses
     if (gameState.courses) {
@@ -14747,11 +14779,22 @@ function renderFlowchartTree() {
         semesterCourses[s] = [];
     }
 
-    const PURGED_FLOWCHART_CODES = new Set(['324033', '03240033', '035026', '35026', '035044']);
+    const PURGED_FLOWCHART_CODES = new Set(['324033', '03240033', '035026', '35026', '035044', '01140071', '114071']);
+    const seenRootsInTree = new Set();
     Object.values(gameState.courses || {}).forEach(course => {
         if (!course || !course.code) return;
         if (PURGED_FLOWCHART_CODES.has(course.code)) return;
         if (course.semester === 0 || course.semester === '0') return;
+
+        // Deduplication root check: avoid rendering two cards for the same course!
+        let root = course.altCode || course.code;
+        if (/^\d{8}$/.test(root) && root.startsWith('0') && !root.startsWith('0394')) {
+            root = root.slice(1, 4) + root.slice(5);
+        }
+        root = root.replace(/^0+/, '');
+        if (seenRootsInTree.has(root)) return;
+        seenRootsInTree.add(root);
+
         const sem = Math.max(1, Math.min(TOTAL_SEMESTERS, Number(course.semester) || 1));
         semesterCourses[sem].push(course);
     });
@@ -16863,13 +16906,13 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.10.07-v2.1.8",
-    version: "2.1.8",
-    build: "201007_3",
-    date: "2026-10-07 18:50",
-    description: "גרסה 2.1.8: כיול מד עומס סמסטריאלי (3 משקולות לסמסטר 1 ו-4 לסמסטר 2) ועדכון דירוגי קושי לקורסי ליבה בטכניון"
+    code: "REV-2026.10.07-v2.1.9",
+    version: "2.1.9",
+    build: "201007_4",
+    date: "2026-10-07 19:50",
+    description: "גרסה 2.1.9: שחזור תוכנית הלימודים, מניעת כפילות קורסים בעץ וסנכרון בלעדי של התוכנית שלי"
 };
-window.APP_VERSION = "2.1.8";
+window.APP_VERSION = "2.1.9";
 
 function ensureBaselineRevisions() {
     if (!gameState.revisions || !Array.isArray(gameState.revisions) || gameState.revisions.length === 0) {

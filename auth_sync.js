@@ -178,15 +178,6 @@
                                 return clean;
                             }
                         }
-                        // If non-Adir user state contains Adir's custom degreePlan electives, strip it
-                        if (user.id !== 'adir_moshe' && parsed.degreePlan && Array.isArray(parsed.degreePlan)) {
-                            const hasAdirElectives = parsed.degreePlan.some(s => s.semester === 5 && (s.courses || []).some(c => c.code === '00350001' || c.code === '035001'));
-                            if (hasAdirElectives) {
-                                console.warn('[AuthSync] Stripping poisoned Adir degreePlan from account:', user.id);
-                                delete parsed.degreePlan;
-                                delete parsed.degreePlanUnassigned;
-                            }
-                        }
                         return parsed;
                     }
                 } catch (e) {

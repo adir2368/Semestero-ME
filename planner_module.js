@@ -387,46 +387,37 @@
         const v1Key = getPlannerStorageKeyV1();
 
         // 1. First priority: cloud-synced degreePlan from global gameState
-        // For Adir: allow gameState.degreePlan
-        // For guest/students: only use gameState.degreePlan if it is explicitly non-empty AND user is logged in as that student
         if (global.gameState && Array.isArray(global.gameState.degreePlan) && global.gameState.degreePlan.length > 0) {
-            // Anti-poisoning guard: if not Adir, but degreePlan matches Adir's custom plan, do not load it
-            const looksLikeAdirPlan = global.gameState.degreePlan.some(s => s.semester === 5 && (s.courses || []).some(c => c.code === '00350001' || c.code === '035001'));
-            if (isAdir || !looksLikeAdirPlan) {
-                try {
-                    loadedPlan = JSON.parse(JSON.stringify(global.gameState.degreePlan));
-                    loadedUnassigned = Array.isArray(global.gameState.degreePlanUnassigned) ? JSON.parse(JSON.stringify(global.gameState.degreePlanUnassigned)) : [];
-                    console.log('[Planner] Initialized plan from gameState.degreePlan');
-                } catch (e) {
-                    console.error('[Planner] Error cloning gameState.degreePlan:', e);
-                }
+            try {
+                loadedPlan = JSON.parse(JSON.stringify(global.gameState.degreePlan));
+                loadedUnassigned = Array.isArray(global.gameState.degreePlanUnassigned) ? JSON.parse(JSON.stringify(global.gameState.degreePlanUnassigned)) : [];
+                console.log('[Planner] Initialized plan from gameState.degreePlan');
+            } catch (e) {
+                console.error('[Planner] Error cloning gameState.degreePlan:', e);
             }
         }
 
-        // 2. User-Scoped Local Storage V2
+        // 2. Preloaded authentic degreePlan from PRELOADED_USER_STATE
+        if (!loadedPlan && typeof PRELOADED_USER_STATE !== 'undefined' && Array.isArray(PRELOADED_USER_STATE.degreePlan) && PRELOADED_USER_STATE.degreePlan.length > 0) {
+            try {
+                loadedPlan = JSON.parse(JSON.stringify(PRELOADED_USER_STATE.degreePlan));
+                loadedUnassigned = Array.isArray(PRELOADED_USER_STATE.degreePlanUnassigned) ? JSON.parse(JSON.stringify(PRELOADED_USER_STATE.degreePlanUnassigned)) : [];
+                console.log('[Planner] Initialized plan from PRELOADED_USER_STATE.degreePlan');
+            } catch (e) {}
+        }
+
+        // 3. User-Scoped Local Storage V2
         if (!loadedPlan) {
             try {
-                // Check user-scoped key first
-                let savedV2 = localStorage.getItem(v2Key);
-                // Backward-compatibility: if Adir and user-scoped key empty, check legacy global key
-                if (!savedV2 && isAdir) {
-                    savedV2 = localStorage.getItem(PLANNER_STORAGE_KEY_V2);
-                }
+                let savedV2 = localStorage.getItem(v2Key) || localStorage.getItem(PLANNER_STORAGE_KEY_V2);
                 if (savedV2) {
                     const parsed = JSON.parse(savedV2);
-                    if (parsed && Array.isArray(parsed.semesters)) {
-                        // Check if guest accidentally got Adir's custom courses in localStorage
-                        const hasAdirElectives = !isAdir && parsed.semesters.some(s => s.semester === 5 && (s.courses || []).some(c => c.code === '00350001' || c.code === '035001'));
-                        if (!hasAdirElectives) {
-                            loadedPlan = parsed.semesters;
-                            loadedUnassigned = Array.isArray(parsed.unassigned) ? parsed.unassigned : [];
-                        }
-                    } else if (Array.isArray(parsed)) {
-                        const hasAdirElectives = !isAdir && parsed.some(s => s.semester === 5 && (s.courses || []).some(c => c.code === '00350001' || c.code === '035001'));
-                        if (!hasAdirElectives) {
-                            loadedPlan = parsed;
-                            loadedUnassigned = [];
-                        }
+                    if (parsed && Array.isArray(parsed.semesters) && parsed.semesters.length > 0) {
+                        loadedPlan = parsed.semesters;
+                        loadedUnassigned = Array.isArray(parsed.unassigned) ? parsed.unassigned : [];
+                    } else if (Array.isArray(parsed) && parsed.length > 0) {
+                        loadedPlan = parsed;
+                        loadedUnassigned = [];
                     }
                 }
             } catch (e) {
@@ -434,21 +425,15 @@
             }
         }
 
-        // 3. User-Scoped Local Storage V1
+        // 4. User-Scoped Local Storage V1
         if (!loadedPlan) {
             try {
-                let savedV1 = localStorage.getItem(v1Key);
-                if (!savedV1 && isAdir) {
-                    savedV1 = localStorage.getItem(PLANNER_STORAGE_KEY_V1);
-                }
+                let savedV1 = localStorage.getItem(v1Key) || localStorage.getItem(PLANNER_STORAGE_KEY_V1);
                 if (savedV1) {
                     const parsedV1 = JSON.parse(savedV1);
-                    if (Array.isArray(parsedV1)) {
-                        const hasAdirElectives = !isAdir && parsedV1.some(s => s.semester === 5 && (s.courses || []).some(c => c.code === '00350001' || c.code === '035001'));
-                        if (!hasAdirElectives) {
-                            loadedPlan = parsedV1;
-                            loadedUnassigned = [];
-                        }
+                    if (Array.isArray(parsedV1) && parsedV1.length > 0) {
+                        loadedPlan = parsedV1;
+                        loadedUnassigned = [];
                     }
                 }
             } catch (e) {
@@ -456,7 +441,7 @@
             }
         }
 
-        // 4. Initialize from official suggested syllabus if empty (Guests & Clean baseline)
+        // 5. Initialize from official suggested syllabus ONLY if empty
         if (!loadedPlan || !Array.isArray(loadedPlan) || loadedPlan.length === 0) {
             loadedPlan = JSON.parse(JSON.stringify(global.PLANNER_CATALOG.SUGGESTED_MANDATORY_SYLLABUS));
             loadedUnassigned = [];
@@ -539,16 +524,43 @@
     let isSyncingPlannerToTree = false;
     function syncPlannerToTree(skipRerender) {
         if (isSyncingPlannerToTree) return;
+        // CRITICAL: Only synchronize "התוכנית שלי" (customPlan), NEVER "שיבוץ מומלץ" (suggested catalog)
+        if (currentMode !== 'custom') return;
+        if (!global.gameState || !customPlan) return;
+        if (!global.gameState.courses) global.gameState.courses = {};
+
+        // Safety: If customPlan is pointing to suggested syllabus template, do not overwrite tree courses
+        if (customPlan === global.PLANNER_CATALOG.SUGGESTED_MANDATORY_SYLLABUS) return;
+
         isSyncingPlannerToTree = true;
         try {
-            if (!global.gameState || !customPlan) return;
-            if (!global.gameState.courses) global.gameState.courses = {};
             let changed = false;
 
+            // 1. Purge accidental 8-digit duplicate courses and purged courses from gameState.courses
+            const PURGED_TREE_CODES = new Set(['324033', '03240033', '035026', '35026', '035044', '01140071', '114071']);
+            Object.keys(global.gameState.courses).forEach(key => {
+                if (PURGED_TREE_CODES.has(key)) {
+                    delete global.gameState.courses[key];
+                    changed = true;
+                    return;
+                }
+                if (/^\d{8}$/.test(key) && !key.startsWith('0394')) {
+                    const norm = (key.slice(1, 4) + key.slice(5)).replace(/^0+/, '');
+                    const stripped = key.replace(/^0+/, '');
+                    if (global.gameState.courses[norm] || global.gameState.courses[stripped] || global.gameState.courses['0' + norm]) {
+                        delete global.gameState.courses[key];
+                        changed = true;
+                    }
+                }
+            });
+
+            // 2. Sync courses from customPlan
             customPlan.forEach(sem => {
                 const semNum = sem.semester;
                 (sem.courses || []).forEach(c => {
                     if (!c || !c.code) return;
+                    if (isPurgedCourse(c.code, c.altCode)) return;
+
                     const keys = getNormalizedCodes(c.code, c.altCode);
                     let foundKey = null;
                     for (let i = 0; i < keys.length; i++) {
@@ -564,21 +576,40 @@
                             changed = true;
                         }
                     } else {
-                        // New elective or custom course added in "התוכנית שלי" that isn't yet in gameState.courses!
-                        const code = c.code;
-                        global.gameState.courses[code] = {
-                            id: code,
-                            code: code,
-                            altCode: c.altCode || '',
-                            name: c.name || c.title || code,
+                        // DO NOT inject alternative tracks of mandatory courses (e.g. Physics 1M if Physics 1 was taken)
+                        if (c.trackGroup === 'physics_1' || c.code === '01140071' || c.code === '114071') return;
+                        if (c.code === '00350026' || c.code === '035026' || c.code === '35026') return;
+
+                        // Normalize key to 6-digit course code
+                        let normCode = c.altCode || c.code;
+                        if (/^\d{8}$/.test(normCode) && normCode.startsWith('0') && !normCode.startsWith('0394')) {
+                            normCode = normCode.slice(1, 4) + normCode.slice(5);
+                        }
+                        const strippedCode = normCode.replace(/^0+/, '');
+
+                        if (global.gameState.courses[normCode] || global.gameState.courses[strippedCode]) {
+                            const k = global.gameState.courses[normCode] ? normCode : strippedCode;
+                            if (global.gameState.courses[k].semester !== semNum) {
+                                global.gameState.courses[k].semester = semNum;
+                                changed = true;
+                            }
+                            return;
+                        }
+
+                        // Truly new elective/custom course added in "התוכנית שלי"
+                        global.gameState.courses[normCode] = {
+                            id: normCode,
+                            code: normCode,
+                            altCode: c.altCode || c.code,
+                            name: c.name || c.title || normCode,
                             credits: Number(c.credits) || 3.0,
                             semester: semNum,
                             prerequisites: c.prereqs || c.prerequisites || [],
-                            status: isCourseCompleted(code, c.altCode) ? 'mastered' : 'available',
+                            status: isCourseCompleted(c.code, c.altCode) ? 'mastered' : 'available',
                             grade: c.grade || null,
-                            type: c.type || (c.list ? 'elective' : (c.code.startsWith('0394') ? 'sports' : 'mandatory')),
+                            type: c.type || (c.list ? 'elective' : (normCode.startsWith('0394') ? 'sports' : 'mandatory')),
                             tasks: [
-                                { id: `${code}_ex`, title: "מועד א", type: "exam", xp: 500, completed: false, status: 'not_started' }
+                                { id: `${normCode}_ex`, title: "מועד א", type: "exam", xp: 500, completed: false, status: 'not_started' }
                             ]
                         };
                         changed = true;
@@ -586,7 +617,7 @@
                 });
             });
 
-            // Courses placed in unassignedCourses should not occupy an active semester on the flowchart tree
+            // 3. Courses placed in unassignedCourses should not occupy an active semester on the flowchart tree
             if (unassignedCourses && unassignedCourses.length > 0) {
                 unassignedCourses.forEach(u => {
                     if (!u || !u.code) return;
@@ -665,8 +696,8 @@
                     }
                 }
 
-                // If not in customPlan, add it
-                if (!foundCourse) {
+                // If not in customPlan, only add if the course is ALREADY COMPLETED (has grade or mastered)
+                if (!foundCourse && isDone) {
                     const catCourse = (global.PLANNER_CATALOG && global.PLANNER_CATALOG.ALL_COURSES_MAP) ? 
                         (global.PLANNER_CATALOG.ALL_COURSES_MAP[c.code] || (c.altCode && global.PLANNER_CATALOG.ALL_COURSES_MAP[c.altCode])) : null;
                     if (catCourse) {
@@ -2329,14 +2360,6 @@
         getCourseGrade: getCourseGrade,
         adoptPlanFromState: function(plan, unassigned) {
             if (Array.isArray(plan) && plan.length > 0) {
-                // If not Adir, prevent adopting a plan that contains Adir's custom electives
-                if (!isAdirAuthenticated()) {
-                    const hasAdirElectives = plan.some(s => s.semester === 5 && (s.courses || []).some(c => c.code === '00350001' || c.code === '035001'));
-                    if (hasAdirElectives) {
-                        console.warn('[DegreePlanner] Prevented adopting Adir custom plan for non-Adir account.');
-                        return;
-                    }
-                }
                 customPlan = JSON.parse(JSON.stringify(plan));
                 unassignedCourses = Array.isArray(unassigned) ? JSON.parse(JSON.stringify(unassigned)) : [];
                 if (customPlan) {
