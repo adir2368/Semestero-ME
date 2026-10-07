@@ -11726,3 +11726,26 @@ html.is-iphone .app-global-footer {
     gap: 4px;
     font-weight: 500;
 }
+
+
+/* Mobile Footer Spacing Optimization */
+@media (max-width: 768px), screen and (max-device-width: 768px) {
+    .app-global-footer {
+        padding: 0 8px !important;
+    }
+    .footer-left-version {
+        gap: 5px !important;
+    }
+    .footer-credit-content {
+        gap: 4px !important;
+    }
+    .footer-credit-content .credit-text {
+        font-size: 0.66rem !important;
+        white-space: nowrap !important;
+    }
+    .app-version-badge {
+        font-size: 0.62rem !important;
+        padding: 1px 5px !important;
+        white-space: nowrap !important;
+    }
+}

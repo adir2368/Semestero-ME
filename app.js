@@ -16859,13 +16859,13 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.10.07-v2.1.6",
-    version: "2.1.6",
-    build: "201007",
-    date: "2026-10-07 09:15",
-    description: "גרסה 2.1.6: הטמעת תקן llms.txt לגילוי AI, התאמת פורמטים גמישה (Forgiving Formatting) ומשוב אימות שדות חי (Inline Validation)"
+    code: "REV-2026.10.07-v2.1.7",
+    version: "2.1.7",
+    build: "201007_2",
+    date: "2026-10-07 11:55",
+    description: "גרסה 2.1.7: פינוי מקום בסרגל התחתון (by Adir Moshe), מרווחים מותאמים למובייל לכפתורי פרטיות ונגישות, ותיקוני תצוגה"
 };
-window.APP_VERSION = "2.1.6";
+window.APP_VERSION = "2.1.7";
 
 function ensureBaselineRevisions() {
     if (!gameState.revisions || !Array.isArray(gameState.revisions) || gameState.revisions.length === 0) {
