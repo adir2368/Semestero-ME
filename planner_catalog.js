@@ -564,6 +564,11 @@
     SUGGESTED_BARAK_SYLLABUS.forEach(sem => {
         (sem.courses || []).forEach(indexCourse);
     });
+    if (typeof ELECTIVE_CATALOG !== 'undefined') {
+        Object.values(ELECTIVE_CATALOG).forEach(list => {
+            (list || []).forEach(indexCourse);
+        });
+    }
 
     // Alias for default backwards compatibility (Tashpaz 2027)
     const SUGGESTED_MANDATORY_SYLLABUS = SUGGESTED_MANDATORY_SYLLABUS_2027;

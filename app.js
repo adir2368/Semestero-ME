@@ -17684,13 +17684,13 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.10.07-v2.2.4",
-    version: "2.2.4",
-    build: "201007_9",
-    date: "2026-10-07 23:20",
-    description: "גרסה 2.2.4: בידוד מוחלט של נתוני מפתח - משתמשים חדשים ואורחים מתחילים עם סילבוס נקי לחלוטין ואפס נתונים מוזנים מראש, וטיהור נתונים מזוהמים"
+    code: "REV-2026.10.07-v2.2.5",
+    version: "2.2.5",
+    build: "201007_10",
+    date: "2026-10-07 23:45",
+    description: "גרסה 2.2.5: תיקון גרירת קורסים מהרשימת צד בתכנון תואר, כפתורי עזרה בולטים באדום-ורוד וניתוב מדריך לוח משימות"
 };
-window.APP_VERSION = "2.2.4";
+window.APP_VERSION = "2.2.5";
 
 function ensureBaselineRevisions() {
     if (!gameState.revisions || !Array.isArray(gameState.revisions) || gameState.revisions.length === 0) {

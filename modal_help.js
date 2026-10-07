@@ -448,28 +448,30 @@
                     display: inline-flex;
                     align-items: center;
                     justify-content: center;
-                    width: 24px;
-                    height: 24px;
-                    min-width: 24px;
+                    width: 26px;
+                    height: 26px;
+                    min-width: 26px;
                     border-radius: 50%;
-                    background: rgba(56, 189, 248, 0.12);
-                    color: #38bdf8;
-                    border: 1px solid rgba(56, 189, 248, 0.45);
-                    font-size: 0.84rem;
-                    font-weight: 800;
+                    background: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%);
+                    color: #ffffff;
+                    border: 1.5px solid #fda4af;
+                    font-size: 0.88rem;
+                    font-weight: 900;
                     cursor: pointer;
-                    transition: all 0.2s ease;
+                    transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
                     font-family: inherit;
                     user-select: none;
                     line-height: 1;
                     padding: 0;
+                    box-shadow: 0 0 12px rgba(244, 63, 94, 0.45), 0 2px 4px rgba(0, 0, 0, 0.3);
+                    flex-shrink: 0;
                 }
                 .btn-modal-help:hover {
-                    background: rgba(56, 189, 248, 0.3);
-                    border-color: #38bdf8;
-                    color: #fff;
-                    box-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
-                    transform: translateY(-1px) scale(1.08);
+                    background: linear-gradient(135deg, #fb7185 0%, #f43f5e 100%);
+                    border-color: #ffffff;
+                    color: #ffffff;
+                    box-shadow: 0 0 18px rgba(244, 63, 94, 0.75), 0 3px 6px rgba(0, 0, 0, 0.4);
+                    transform: translateY(-1.5px) scale(1.12);
                 }
                 .modal-help-banner {
                     background: linear-gradient(135deg, rgba(15, 23, 42, 0.98), rgba(11, 19, 43, 0.98));
@@ -580,11 +582,11 @@
             const modalEl = document.getElementById(modalId);
             if (!modalEl) return;
 
-            // Check if trigger button already exists
-            if (modalEl.querySelector('.btn-modal-help')) return;
-
             const helpData = MODAL_HELP_REGISTRY[modalId];
             if (!helpData) return;
+
+            // Check if trigger button already exists for this specific modal
+            if (modalEl.querySelector(`.btn-modal-help[data-help-target="${modalId}"]`)) return;
 
             // Find best insertion target in modal header
             let targetContainer = null;
@@ -608,10 +610,14 @@
 
             if (!targetContainer) return;
 
+            // Prevent duplicate button in the same container
+            if (targetContainer.querySelector(`.btn-modal-help[data-help-target="${modalId}"]`) || targetContainer.querySelector('.btn-modal-help')) return;
+
             // Create button
             const btn = document.createElement('button');
             btn.type = 'button';
             btn.className = 'btn-modal-help';
+            btn.setAttribute('data-help-target', modalId);
             btn.setAttribute('aria-label', 'עזרה והסבר על החלונית');
             btn.title = 'עזרה: מה עושים בחלונית זו ומה כל רכיב עושה?';
             btn.innerHTML = '?';
@@ -655,7 +661,7 @@
             const modalEl = document.getElementById(modalId);
             if (!modalEl) return;
 
-            const existingBanner = modalEl.querySelector(`.modal-help-banner[data-modal-id="${modalId}"]`);
+            const existingBanner = document.querySelector(`.modal-help-banner[data-modal-id="${modalId}"]`);
             if (existingBanner) {
                 existingBanner.remove();
                 return;
@@ -703,7 +709,13 @@
             if (closeBottom) closeBottom.onclick = () => banner.remove();
 
             // Insert banner at the top of modal body or scrollable content
-            let bodyTarget = modalEl.querySelector('.modal-body') || 
+            let bodyTarget = null;
+            if (modalId === 'notion-tasks-workspace') {
+                bodyTarget = document.getElementById('tasks-table-view-pane') || modalEl.querySelector('.notion-tasks-container');
+            } else if (modalId === 'tasks-calendar-view-pane') {
+                bodyTarget = modalEl.querySelector('.finals-calendar-card') || modalEl.querySelector('.finals-calendar-container') || document.getElementById('tasks-calendar-view-pane');
+            } else {
+                bodyTarget = modalEl.querySelector('.modal-body') || 
                              modalEl.querySelector('.finals-calendar-card') ||
                              modalEl.querySelector('.finals-calendar-container') ||
                              modalEl.querySelector('.flowchart-viewport') ||
@@ -714,6 +726,7 @@
                              modalEl.querySelector('#site-analytics-content') || 
                              modalEl.querySelector('.settings-container') ||
                              modalEl.querySelector('.modal-content');
+            }
 
             if (bodyTarget) {
                 bodyTarget.insertBefore(banner, bodyTarget.firstChild);

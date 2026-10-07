@@ -1475,10 +1475,9 @@
 
     function bindDelegatedPlannerEvents() {
         if (isEventsBound) return;
-        isEventsBound = true;
-
         const plannerTab = document.getElementById('planner-workspace');
         if (!plannerTab) return;
+        isEventsBound = true;
 
         // 1. Drag Start Delegation
         plannerTab.addEventListener('dragstart', (e) => {
@@ -1515,7 +1514,7 @@
 
         // 3. Drag Over & Drag Leave Delegation
         plannerTab.addEventListener('dragover', (e) => {
-            const dropZone = e.target.closest('.planner-course-list, .planner-sidebar, #planner-unassigned-dropzone');
+            const dropZone = e.target.closest('.planner-course-list, .planner-semester-col, .planner-sidebar, #planner-unassigned-dropzone');
             if (dropZone) {
                 e.preventDefault();
                 dropZone.classList.add('drag-over');
@@ -1523,7 +1522,7 @@
         });
 
         plannerTab.addEventListener('dragleave', (e) => {
-            const dropZone = e.target.closest('.planner-course-list, .planner-sidebar, #planner-unassigned-dropzone');
+            const dropZone = e.target.closest('.planner-course-list, .planner-semester-col, .planner-sidebar, #planner-unassigned-dropzone');
             if (dropZone && !dropZone.contains(e.relatedTarget)) {
                 dropZone.classList.remove('drag-over');
             }
@@ -1531,7 +1530,7 @@
 
         // 4. Drop Delegation
         plannerTab.addEventListener('drop', (e) => {
-            const semZone = e.target.closest('.planner-course-list');
+            const semZone = e.target.closest('.planner-course-list, .planner-semester-col');
             const sidebarZone = e.target.closest('.planner-sidebar, #planner-unassigned-dropzone');
 
             let payload = activeDragPayload;
@@ -1545,12 +1544,18 @@
             }
             if (!payload) return;
 
+            document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+
             if (semZone) {
                 e.preventDefault();
                 e.stopPropagation();
-                semZone.classList.remove('drag-over');
-                const targetSemester = parseInt(semZone.getAttribute('data-semester'));
-                handleCourseDrop(payload, targetSemester);
+                let targetSemester = parseInt(semZone.getAttribute('data-semester'));
+                if (isNaN(targetSemester) && semZone.closest('.planner-semester-col')) {
+                    targetSemester = parseInt(semZone.closest('.planner-semester-col').getAttribute('data-semester'));
+                }
+                if (targetSemester) {
+                    handleCourseDrop(payload, targetSemester);
+                }
             } else if (sidebarZone && payload.type === 'semester-course') {
                 e.preventDefault();
                 e.stopPropagation();
@@ -2158,6 +2163,65 @@
         }
     }
 
+    function resolveCourseObject(code) {
+        if (!code) return null;
+        const cKeys = new Set(getNormalizedCodes(code, code));
+
+        // 1. Unassigned courses
+        let found = (unassignedCourses || []).find(c => {
+            const uKeys = getNormalizedCodes(c.code, c.altCode);
+            return uKeys.some(k => cKeys.has(k));
+        });
+        if (found) return { ...found };
+
+        // 2. ELECTIVE_CATALOG
+        if (global.PLANNER_CATALOG && global.PLANNER_CATALOG.ELECTIVE_CATALOG) {
+            for (const cat of Object.keys(global.PLANNER_CATALOG.ELECTIVE_CATALOG)) {
+                found = (global.PLANNER_CATALOG.ELECTIVE_CATALOG[cat] || []).find(c => {
+                    const uKeys = getNormalizedCodes(c.code, c.altCode);
+                    return uKeys.some(k => cKeys.has(k));
+                });
+                if (found) return { ...found };
+            }
+        }
+
+        // 3. ALL_COURSES_MAP
+        if (global.PLANNER_CATALOG && global.PLANNER_CATALOG.ALL_COURSES_MAP) {
+            for (const k of cKeys) {
+                if (global.PLANNER_CATALOG.ALL_COURSES_MAP[k]) {
+                    return { ...global.PLANNER_CATALOG.ALL_COURSES_MAP[k] };
+                }
+            }
+        }
+
+        // 4. Global gameState
+        if (global.gameState && global.gameState.courses) {
+            for (const k of cKeys) {
+                if (global.gameState.courses[k]) {
+                    return { ...global.gameState.courses[k] };
+                }
+            }
+        }
+
+        // 5. CHEESEFORK_DB
+        if (typeof CHEESEFORK_DB !== 'undefined') {
+            for (const k of cKeys) {
+                if (CHEESEFORK_DB[k]) {
+                    const cf = CHEESEFORK_DB[k];
+                    return {
+                        code: k,
+                        altCode: cf.altCode || null,
+                        name: cf.name,
+                        credits: cf.credits || 3.0,
+                        prereqs: cf.prerequisites || []
+                    };
+                }
+            }
+        }
+
+        return null;
+    }
+
     function handleCourseDrop(data, targetSemester) {
         if (!customPlan) return;
 
@@ -2186,13 +2250,12 @@
                 return;
             }
         } else {
-            const cKeys = new Set(getNormalizedCodes(data.code, data.code));
-            courseObj = (unassignedCourses || []).find(c => {
-                const uKeys = getNormalizedCodes(c.code, c.altCode);
-                return uKeys.some(k => cKeys.has(k));
-            }) || (global.PLANNER_CATALOG.ALL_COURSES_MAP && (global.PLANNER_CATALOG.ALL_COURSES_MAP[data.code] || global.PLANNER_CATALOG.ALL_COURSES_MAP[data.code.replace(/^0+/, '')]));
+            courseObj = resolveCourseObject(data.code);
 
-            if (!courseObj) return;
+            if (!courseObj) {
+                console.warn('[Planner] Could not resolve course for drop:', data.code);
+                return;
+            }
 
             if (isCourseCompleted(courseObj.code, courseObj.altCode)) {
                 showPlannerToast(`הקורס "${courseObj.name}" כבר הושלם ואינו ניתן לשיבוץ חוזר.`);
@@ -2200,11 +2263,15 @@
             }
 
             // Check if already placed in plan
+            const cKeys = new Set(getNormalizedCodes(courseObj.code, courseObj.altCode));
             const alreadyInPlan = customPlan.some(s => (s.courses || []).some(c => {
                 const placedKeys = getNormalizedCodes(c.code, c.altCode);
                 return placedKeys.some(k => cKeys.has(k));
             }));
-            if (alreadyInPlan) return;
+            if (alreadyInPlan) {
+                showPlannerToast(`הקורס "${courseObj.name}" כבר משובץ בתוכנית.`);
+                return;
+            }
         }
 
         if (!courseObj) return;
@@ -2296,11 +2363,7 @@
 
     // Interactive Non-Blocking Semester Selector Modal
     function promptAddCourseToSemester(code) {
-        const cKeys = new Set(getNormalizedCodes(code, code));
-        const course = (unassignedCourses || []).find(c => {
-            const uKeys = getNormalizedCodes(c.code, c.altCode);
-            return uKeys.some(k => cKeys.has(k));
-        }) || (global.PLANNER_CATALOG.ALL_COURSES_MAP && (global.PLANNER_CATALOG.ALL_COURSES_MAP[code] || global.PLANNER_CATALOG.ALL_COURSES_MAP[code.replace(/^0+/, '')]));
+        const course = resolveCourseObject(code);
 
         if (!course || !customPlan) return;
 

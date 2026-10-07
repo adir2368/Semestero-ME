@@ -12057,9 +12057,21 @@ html.is-iphone .app-global-footer {
     box-shadow: 0 2px 6px rgba(56, 189, 248, 0.3);
 }
 
-/* Ensure modal help button is always visible and never squeezed */
+/* Ensure modal help button is always visible, prominent red-pink and never squeezed */
 .btn-modal-help {
     flex-shrink: 0 !important;
+    background: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%) !important;
+    color: #ffffff !important;
+    border: 1.5px solid #fda4af !important;
+    box-shadow: 0 0 12px rgba(244, 63, 94, 0.45), 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+}
+
+.btn-modal-help:hover {
+    background: linear-gradient(135deg, #fb7185 0%, #f43f5e 100%) !important;
+    border-color: #ffffff !important;
+    color: #ffffff !important;
+    box-shadow: 0 0 18px rgba(244, 63, 94, 0.75), 0 3px 6px rgba(0, 0, 0, 0.4) !important;
+    transform: translateY(-1.5px) scale(1.12) !important;
 }
 
 .flowchart-actions {
