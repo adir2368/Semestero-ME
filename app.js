@@ -8627,15 +8627,25 @@ function loadSavedState() {
         if (saved) {
             try {
                 const parsed = JSON.parse(saved);
+                const hasAdirDegreePlan = parsed && parsed.degreePlan && Array.isArray(parsed.degreePlan) && parsed.degreePlan.some(s => s.semester === 1 && (s.courses || []).some(c => c.code === '02340128' || c.code === '234128'));
                 const isContaminated = !isAdir && (
                     parsed.characterClass === 'סטודנט למדעי המחשב' ||
-                    (parsed.completedCourses >= 10 && (parsed.gpa >= 86 || parsed.credits >= 38) && localStorage.getItem('ast_onboarding_shown') !== 'true')
+                    (parsed.completedCourses >= 10 && (parsed.gpa >= 86 || parsed.credits >= 38)) ||
+                    hasAdirDegreePlan
                 );
                 if (isContaminated) {
                     console.warn('[app.js] Detected contaminated legacy save for non-Adir user. Purging.');
                     localStorage.removeItem('academic_skill_tree_save');
+                    localStorage.removeItem('atlas_me_custom_degree_plan_v2_guest');
+                    localStorage.removeItem('atlas_me_custom_degree_plan_v1_guest');
+                    localStorage.removeItem('atlas_me_custom_degree_plan_v2');
+                    localStorage.removeItem('atlas_me_custom_degree_plan_v1');
                 } else if (parsed && parsed.courses && Object.keys(parsed.courses).length > 0) {
                     gameState = parsed;
+                    if (!isAdir && gameState.degreePlan && hasAdirDegreePlan) {
+                        delete gameState.degreePlan;
+                        delete gameState.degreePlanUnassigned;
+                    }
                     loadedFromAuthSync = true;
                     Object.values(gameState.courses).forEach(course => {
                         if (course.status === 'mastered' && course.tasks) {
@@ -8751,6 +8761,15 @@ function loadSavedState() {
             console.log('[Recovery] Restoring full authentic degreePlan from PRELOADED_USER_STATE for Adir...');
             gameState.degreePlan = JSON.parse(JSON.stringify(PRELOADED_USER_STATE.degreePlan));
             gameState.degreePlanUnassigned = JSON.parse(JSON.stringify(PRELOADED_USER_STATE.degreePlanUnassigned || []));
+            saveState();
+        }
+    } else if (gameState) {
+        // Guarantee non-Adir sessions never retain Adir's custom degree plan
+        const hasAdirPlan = gameState.degreePlan && Array.isArray(gameState.degreePlan) && gameState.degreePlan.some(s => s.semester === 1 && (s.courses || []).some(c => c.code === '02340128' || c.code === '234128'));
+        if (hasAdirPlan) {
+            console.warn('[app.js] Found Adir custom degreePlan in non-Adir gameState. Removing.');
+            delete gameState.degreePlan;
+            delete gameState.degreePlanUnassigned;
             saveState();
         }
     }
@@ -17684,13 +17703,13 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.10.07-v2.2.5",
-    version: "2.2.5",
-    build: "201007_10",
-    date: "2026-10-07 23:45",
-    description: "גרסה 2.2.5: תיקון גרירת קורסים מהרשימת צד בתכנון תואר, כפתורי עזרה בולטים באדום-ורוד וניתוב מדריך לוח משימות"
+    code: "REV-2026.10.07-v2.2.6",
+    version: "2.2.6",
+    build: "201007_11",
+    date: "2026-10-07 23:59",
+    description: "גרסה 2.2.6: בידוד וטיהור מוחלט של תכנון התואר - משתמשים חדשים ואורחים מתחילים עם סילבוס נקי משינויים, וטיהור יזום של תוכניות שהודלפו"
 };
-window.APP_VERSION = "2.2.5";
+window.APP_VERSION = "2.2.6";
 
 function ensureBaselineRevisions() {
     if (!gameState.revisions || !Array.isArray(gameState.revisions) || gameState.revisions.length === 0) {

@@ -171,9 +171,11 @@
                     // Contamination purge for guest / non-developer:
                     // If a guest state contains developer's old test signature or contaminated preloaded data:
                     if (user.id === 'guest' || user.id !== 'adir_moshe') {
+                        const hasAdirPlan = parsed && parsed.degreePlan && Array.isArray(parsed.degreePlan) && parsed.degreePlan.some(s => s.semester === 1 && (s.courses || []).some(c => c.code === '02340128' || c.code === '234128'));
                         const isContaminated = (
                             parsed.characterClass === 'סטודנט למדעי המחשב' ||
-                            (parsed.completedCourses >= 10 && (parsed.gpa >= 86 || parsed.credits >= 38) && localStorage.getItem('ast_onboarding_shown') !== 'true')
+                            (parsed.completedCourses >= 10 && (parsed.gpa >= 86 || parsed.credits >= 38)) ||
+                            hasAdirPlan
                         );
                         if (isContaminated) {
                             console.warn('[AuthSync] Detected contaminated guest/student state. Purging and resetting to clean curriculum...');
@@ -181,7 +183,15 @@
                             localStorage.removeItem(LEGACY_SAVE_KEY);
                             localStorage.removeItem('atlas_me_custom_degree_plan_v2_guest');
                             localStorage.removeItem('atlas_me_custom_degree_plan_v1_guest');
+                            localStorage.removeItem('atlas_me_custom_degree_plan_v2');
+                            localStorage.removeItem('atlas_me_custom_degree_plan_v1');
+                            localStorage.removeItem(`atlas_me_custom_degree_plan_v2_${user.id}`);
+                            localStorage.removeItem(`atlas_me_custom_degree_plan_v1_${user.id}`);
                         } else if (parsed && parsed.courses && Object.keys(parsed.courses).length > 0) {
+                            if (hasAdirPlan) {
+                                delete parsed.degreePlan;
+                                delete parsed.degreePlanUnassigned;
+                            }
                             return parsed;
                         }
                     } else if (parsed && parsed.courses && Object.keys(parsed.courses).length > 0) {
@@ -380,6 +390,16 @@
                     window.setGlobalGameState(matched.state_json);
                 }
 
+                if (matched.state_json && matched.state_json.degreePlan && Array.isArray(matched.state_json.degreePlan)) {
+                    if (window.DegreePlanner && typeof window.DegreePlanner.adoptPlanFromState === 'function') {
+                        window.DegreePlanner.adoptPlanFromState(matched.state_json.degreePlan, matched.state_json.degreePlanUnassigned);
+                    }
+                } else {
+                    if (window.DegreePlanner && typeof window.DegreePlanner.resetToCleanSyllabus === 'function') {
+                        window.DegreePlanner.resetToCleanSyllabus();
+                    }
+                }
+
                 this.setupRealtimeSubscription();
                 this.refreshAllAppViews();
                 this.updateHudAuthControls();
@@ -560,6 +580,10 @@
 
             if (window.setGlobalGameState) {
                 window.setGlobalGameState(cleanState);
+            }
+
+            if (window.DegreePlanner && typeof window.DegreePlanner.resetToCleanSyllabus === 'function') {
+                window.DegreePlanner.resetToCleanSyllabus();
             }
 
             this.setupRealtimeSubscription();
@@ -973,6 +997,9 @@
                 newState.student_name = name;
                 this.saveActiveUserState(newState);
                 window.gameState = newState;
+                if (window.DegreePlanner && typeof window.DegreePlanner.resetToCleanSyllabus === 'function') {
+                    window.DegreePlanner.resetToCleanSyllabus();
+                }
                 if (typeof notifyStateChanged === 'function') notifyStateChanged({ forceAll: true });
             }
             localStorage.setItem('ast_onboarding_shown', 'true');

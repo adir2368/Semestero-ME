@@ -386,14 +386,47 @@
         const v2Key = getPlannerStorageKeyV2();
         const v1Key = getPlannerStorageKeyV1();
 
+        // Helper to detect Adir's custom degree plan (Python in semester 1)
+        function isAdirCustomPlan(plan) {
+            if (!plan || !Array.isArray(plan) || plan.length === 0) return false;
+            const sem1 = plan.find(s => s.semester === 1);
+            if (!sem1 || !Array.isArray(sem1.courses)) return false;
+            return sem1.courses.some(c => c.code === '02340128' || c.code === '234128' || c.altCode === '234128');
+        }
+
+        // For non-Adir users: aggressively purge any leaked/contaminated plan from storage & gameState
+        if (!isAdir) {
+            ['atlas_me_custom_degree_plan_v2_guest', 'atlas_me_custom_degree_plan_v1_guest', v2Key, v1Key, PLANNER_STORAGE_KEY_V2, PLANNER_STORAGE_KEY_V1].forEach(k => {
+                try {
+                    const raw = localStorage.getItem(k);
+                    if (raw) {
+                        const p = JSON.parse(raw);
+                        const semCandidate = Array.isArray(p.semesters) ? p.semesters : (Array.isArray(p) ? p : null);
+                        if (isAdirCustomPlan(semCandidate)) {
+                            console.warn(`[Planner] Purging leaked Adir plan from ${k} for non-Adir user.`);
+                            localStorage.removeItem(k);
+                        }
+                    }
+                } catch (e) {}
+            });
+
+            if (global.gameState && isAdirCustomPlan(global.gameState.degreePlan)) {
+                console.warn('[Planner] Purging leaked Adir plan from global gameState.degreePlan for non-Adir user.');
+                delete global.gameState.degreePlan;
+                delete global.gameState.degreePlanUnassigned;
+            }
+        }
+
         // 1. First priority: cloud-synced degreePlan from global gameState
         if (global.gameState && Array.isArray(global.gameState.degreePlan) && global.gameState.degreePlan.length > 0) {
-            try {
-                loadedPlan = JSON.parse(JSON.stringify(global.gameState.degreePlan));
-                loadedUnassigned = Array.isArray(global.gameState.degreePlanUnassigned) ? JSON.parse(JSON.stringify(global.gameState.degreePlanUnassigned)) : [];
-                console.log('[Planner] Initialized plan from gameState.degreePlan');
-            } catch (e) {
-                console.error('[Planner] Error cloning gameState.degreePlan:', e);
+            if (isAdir || !isAdirCustomPlan(global.gameState.degreePlan)) {
+                try {
+                    loadedPlan = JSON.parse(JSON.stringify(global.gameState.degreePlan));
+                    loadedUnassigned = Array.isArray(global.gameState.degreePlanUnassigned) ? JSON.parse(JSON.stringify(global.gameState.degreePlanUnassigned)) : [];
+                    console.log('[Planner] Initialized plan from gameState.degreePlan');
+                } catch (e) {
+                    console.error('[Planner] Error cloning gameState.degreePlan:', e);
+                }
             }
         }
 
@@ -412,12 +445,15 @@
                 let savedV2 = localStorage.getItem(v2Key) || (isAdir ? localStorage.getItem(PLANNER_STORAGE_KEY_V2) : null);
                 if (savedV2) {
                     const parsed = JSON.parse(savedV2);
-                    if (parsed && Array.isArray(parsed.semesters) && parsed.semesters.length > 0) {
-                        loadedPlan = parsed.semesters;
-                        loadedUnassigned = Array.isArray(parsed.unassigned) ? parsed.unassigned : [];
-                    } else if (Array.isArray(parsed) && parsed.length > 0) {
-                        loadedPlan = parsed;
-                        loadedUnassigned = [];
+                    const semCandidate = Array.isArray(parsed.semesters) ? parsed.semesters : (Array.isArray(parsed) ? parsed : null);
+                    if (isAdir || !isAdirCustomPlan(semCandidate)) {
+                        if (parsed && Array.isArray(parsed.semesters) && parsed.semesters.length > 0) {
+                            loadedPlan = parsed.semesters;
+                            loadedUnassigned = Array.isArray(parsed.unassigned) ? parsed.unassigned : [];
+                        } else if (Array.isArray(parsed) && parsed.length > 0) {
+                            loadedPlan = parsed;
+                            loadedUnassigned = [];
+                        }
                     }
                 }
             } catch (e) {
@@ -431,7 +467,7 @@
                 let savedV1 = localStorage.getItem(v1Key) || (isAdir ? localStorage.getItem(PLANNER_STORAGE_KEY_V1) : null);
                 if (savedV1) {
                     const parsedV1 = JSON.parse(savedV1);
-                    if (Array.isArray(parsedV1) && parsedV1.length > 0) {
+                    if (Array.isArray(parsedV1) && parsedV1.length > 0 && (isAdir || !isAdirCustomPlan(parsedV1))) {
                         loadedPlan = parsedV1;
                         loadedUnassigned = [];
                     }
@@ -443,7 +479,8 @@
 
         // 5. Initialize from official suggested syllabus ONLY if empty
         if (!loadedPlan || !Array.isArray(loadedPlan) || loadedPlan.length === 0) {
-            loadedPlan = JSON.parse(JSON.stringify(global.PLANNER_CATALOG.SUGGESTED_MANDATORY_SYLLABUS));
+            const targetSyllabus = getSuggestedCatalogForTrack(selectedTrack);
+            loadedPlan = JSON.parse(JSON.stringify(targetSyllabus || global.PLANNER_CATALOG.SUGGESTED_MANDATORY_SYLLABUS));
             loadedUnassigned = [];
         }
 
@@ -1070,7 +1107,21 @@
     // Rendering Sub-systems
     // --------------------------------------------------------------------------
     function renderDegreePlanner() {
-        initPlannerState();
+        const isAdir = isAdirAuthenticated();
+        function isAdirPlan(p) {
+            if (!p || !Array.isArray(p) || p.length === 0) return false;
+            const sem1 = p.find(s => s.semester === 1);
+            if (!sem1 || !Array.isArray(sem1.courses)) return false;
+            return sem1.courses.some(c => c.code === '02340128' || c.code === '234128' || c.altCode === '234128');
+        }
+        if (!isAdir && isAdirPlan(customPlan)) {
+            console.warn('[Planner] Detected in-memory Adir plan during non-Adir render. Resetting to clean syllabus.');
+            customPlan = null;
+            unassignedCourses = [];
+            initPlannerState(true);
+        } else {
+            initPlannerState();
+        }
         if (!global.PLANNER_CATALOG) return;
 
         requestAnimationFrame(() => {
@@ -2444,7 +2495,15 @@
         isCourseCompleted: isCourseCompleted,
         getCourseGrade: getCourseGrade,
         adoptPlanFromState: function(plan, unassigned) {
-            if (Array.isArray(plan) && plan.length > 0) {
+            const isAdir = isAdirAuthenticated();
+            function isAdirPlan(p) {
+                if (!p || !Array.isArray(p) || p.length === 0) return false;
+                const sem1 = p.find(s => s.semester === 1);
+                if (!sem1 || !Array.isArray(sem1.courses)) return false;
+                return sem1.courses.some(c => c.code === '02340128' || c.code === '234128' || c.altCode === '234128');
+            }
+
+            if (Array.isArray(plan) && plan.length > 0 && (isAdir || !isAdirPlan(plan))) {
                 customPlan = JSON.parse(JSON.stringify(plan));
                 unassignedCourses = Array.isArray(unassigned) ? JSON.parse(JSON.stringify(unassigned)) : [];
                 if (customPlan) {
@@ -2458,11 +2517,14 @@
                 syncCompletedCoursesFromGameState();
                 saveCustomPlan(true);
                 renderDegreePlanner();
+            } else if (!isAdir) {
+                this.resetToCleanSyllabus();
             }
         },
         resetToCleanSyllabus: function() {
-            if (!global.PLANNER_CATALOG || !global.PLANNER_CATALOG.SUGGESTED_MANDATORY_SYLLABUS) return;
-            customPlan = JSON.parse(JSON.stringify(global.PLANNER_CATALOG.SUGGESTED_MANDATORY_SYLLABUS));
+            if (!global.PLANNER_CATALOG) return;
+            const targetSyllabus = getSuggestedCatalogForTrack(selectedTrack);
+            customPlan = JSON.parse(JSON.stringify(targetSyllabus || global.PLANNER_CATALOG.SUGGESTED_MANDATORY_SYLLABUS));
             unassignedCourses = [];
             syncCompletedCoursesFromGameState();
             saveCustomPlan(true);
