@@ -16859,13 +16859,13 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.10.07-v2.1.7",
-    version: "2.1.7",
-    build: "201007_2",
-    date: "2026-10-07 11:55",
-    description: "גרסה 2.1.7: פינוי מקום בסרגל התחתון (by Adir Moshe), מרווחים מותאמים למובייל לכפתורי פרטיות ונגישות, ותיקוני תצוגה"
+    code: "REV-2026.10.07-v2.1.8",
+    version: "2.1.8",
+    build: "201007_3",
+    date: "2026-10-07 18:50",
+    description: "גרסה 2.1.8: כיול מד עומס סמסטריאלי (3 משקולות לסמסטר 1 ו-4 לסמסטר 2) ועדכון דירוגי קושי לקורסי ליבה בטכניון"
 };
-window.APP_VERSION = "2.1.7";
+window.APP_VERSION = "2.1.8";
 
 function ensureBaselineRevisions() {
     if (!gameState.revisions || !Array.isArray(gameState.revisions) || gameState.revisions.length === 0) {
@@ -17607,6 +17607,7 @@ async function triggerManualCalendarPull() {
         btnCloseUpdateModal.onclick = () => {
             const m = document.getElementById("version-update-modal");
             if (m) { m.style.display = "none"; m.classList.remove("active"); }
+            try { sessionStorage.setItem("dismissed_update", "true"); } catch (e) {}
         };
     }
 
@@ -17615,6 +17616,7 @@ async function triggerManualCalendarPull() {
         btnLaterUpdate.onclick = () => {
             const m = document.getElementById("version-update-modal");
             if (m) { m.style.display = "none"; m.classList.remove("active"); }
+            try { sessionStorage.setItem("dismissed_update", "true"); } catch (e) {}
         };
     }
 
@@ -18170,8 +18172,12 @@ window.checkRemoteAppVersion = async function(isManualCheck = false) {
             if (modCurText) modCurText.innerText = `גרסה מותקנת אצלך: v${currentVer}`;
             if (modDesc && remotePkg.description) modDesc.innerText = remotePkg.description;
 
+            // Check if dismissed in this session
+            let isDismissed = false;
+            try { isDismissed = !isManualCheck && sessionStorage.getItem("dismissed_update") === "true"; } catch (e) {}
+
             const updateModal = document.getElementById("version-update-modal");
-            if (updateModal) {
+            if (updateModal && !isDismissed) {
                 updateModal.style.display = "flex";
                 updateModal.classList.add("active");
             }
