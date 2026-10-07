@@ -1,5 +1,5 @@
-// Service Worker for Academic Skill Tree (Semestero ME) - v2.2.0
-const CACHE_NAME = 'semestero-me-v2.2.0';
+// Service Worker for Academic Skill Tree (Semestero ME) - v2.2.1
+const CACHE_NAME = 'semestero-me-v2.2.1';
 
 const STATIC_ASSETS = [
     './',
@@ -14,6 +14,9 @@ const STATIC_ASSETS = [
     './planner_module.js',
     './technion_academic_calendar.js',
     './auth_sync.js',
+    './site_analytics.js',
+    './modal_help.js',
+    './interactive_tour.js',
     './moodle_sync.js',
     './app.js',
     './manifest.json',

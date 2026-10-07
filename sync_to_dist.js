@@ -15,6 +15,9 @@ if (targetDirs.length === 0) {
 const filesToCopy = [
     'app.js',
     'auth_sync.js',
+    'site_analytics.js',
+    'modal_help.js',
+    'interactive_tour.js',
     'index.html',
     'styles.css',
     'technion_academic_calendar.js',

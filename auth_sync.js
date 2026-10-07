@@ -282,6 +282,7 @@
                 let matchedRows = [];
                 if (cleanUser) {
                     matchedRows = data.filter(row => {
+                        if (row.user_id && row.user_id.startsWith('__')) return false;
                         const rName = (row.user_name || '').trim().toLowerCase();
                         const rEmail = (row.user_email || '').trim().toLowerCase();
                         const rId = (row.user_id || '').trim().toLowerCase();
@@ -292,7 +293,7 @@
                                cleanUserLower.includes(rName);
                     });
                 } else {
-                    matchedRows = data.filter(r => r.user_id !== 'adir_moshe');
+                    matchedRows = data.filter(r => r.user_id !== 'adir_moshe' && !(r.user_id && r.user_id.startsWith('__')));
                 }
 
                 if (matchedRows.length === 0) {
@@ -401,6 +402,7 @@
                 }
 
                 const userRows = data.filter(row => {
+                    if (row.user_id && row.user_id.startsWith('__')) return false;
                     const rName = (row.user_name || '').trim().toLowerCase();
                     const rEmail = (row.user_email || '').trim().toLowerCase();
                     const rId = (row.user_id || '').trim().toLowerCase();
@@ -827,8 +829,8 @@
             } else {
                 container.innerHTML = `
                     <div style="display: flex; align-items: center; gap: 6px;">
-                        <button type="button" class="btn btn-outline btn-xs" onclick="AuthSync.openOnboardingWizard()" title="הגדרת מסלול לימודים וסיור מהיר" style="font-size: 0.78rem; padding: 4px 8px; border-color: rgba(56, 189, 248, 0.4); color: #38bdf8; border-radius: 6px;">
-                            💡 סיור
+                        <button type="button" class="btn btn-outline btn-xs" onclick="if (window.startInteractiveTour) window.startInteractiveTour(); else AuthSync.openOnboardingWizard();" title="סיור מודרך והסבר על המערכת" style="font-size: 0.78rem; padding: 4px 8px; border-color: rgba(56, 189, 248, 0.4); color: #38bdf8; border-radius: 6px;">
+                            🧭 סיור
                         </button>
                         <button type="button" class="btn-hud-login-top" id="btn-hud-login-top" onclick="AuthSync.openAuthModal()" title="התחברות ל-Semestero ME" aria-label="התחברות">
                             <span class="login-icon">🔑</span>

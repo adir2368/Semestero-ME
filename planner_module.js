@@ -703,8 +703,8 @@
                     }
                 });
 
-                // ONLY if the course was already completed with a grade in a past semester, lock it to actualSem
-                if (foundCourse && foundInSemester !== actualSem && isDone) {
+                // If the course is in customPlan and its semester in gameState changed, update customPlan!
+                if (foundCourse && foundInSemester !== actualSem) {
                     customPlan.forEach(sem => {
                         sem.courses = (sem.courses || []).filter(x => {
                             const xKeys = getNormalizedCodes(x.code, x.altCode);
@@ -2434,6 +2434,85 @@
             }
             saveCustomPlan(true);
             renderDegreePlanner();
+        },
+        setCourseSemester: function(code, targetSemester) {
+            if (!code) return false;
+            if (!customPlan) initPlannerState();
+            const semNum = parseInt(targetSemester);
+            if (!semNum || semNum < 1 || semNum > 8) return false;
+
+            const cKeys = new Set(getNormalizedCodes(code, code));
+            let foundCourse = null;
+
+            // 1. Remove from wherever it was in customPlan
+            customPlan.forEach(sem => {
+                sem.courses = (sem.courses || []).filter(x => {
+                    const xKeys = getNormalizedCodes(x.code, x.altCode);
+                    if (xKeys.some(k => cKeys.has(k))) {
+                        foundCourse = x;
+                        return false;
+                    }
+                    return true;
+                });
+            });
+
+            // 2. Remove from unassignedCourses if present
+            if (unassignedCourses) {
+                unassignedCourses = unassignedCourses.filter(u => {
+                    const uKeys = getNormalizedCodes(u.code, u.altCode);
+                    if (uKeys.some(k => cKeys.has(k))) {
+                        if (!foundCourse) foundCourse = u;
+                        return false;
+                    }
+                    return true;
+                });
+            }
+
+            // If not found in customPlan, reconstruct from gameState or catalog
+            if (!foundCourse) {
+                const fromState = global.gameState && global.gameState.courses && (global.gameState.courses[code] || global.gameState.courses[code.replace(/^0+/, '')]);
+                if (fromState) {
+                    foundCourse = {
+                        code: fromState.code,
+                        altCode: fromState.altCode || fromState.code,
+                        name: fromState.name,
+                        credits: fromState.credits,
+                        type: fromState.type || 'elective',
+                        prereqs: fromState.prerequisites || []
+                    };
+                } else if (global.PLANNER_CATALOG && global.PLANNER_CATALOG.ALL_COURSES_MAP) {
+                    const cat = global.PLANNER_CATALOG.ALL_COURSES_MAP[code] || global.PLANNER_CATALOG.ALL_COURSES_MAP[code.replace(/^0+/, '')];
+                    if (cat) foundCourse = { ...cat };
+                }
+            }
+
+            if (foundCourse) {
+                const targetSemObj = customPlan.find(s => s.semester === semNum);
+                if (targetSemObj) {
+                    targetSemObj.courses = targetSemObj.courses || [];
+                    targetSemObj.courses.push(foundCourse);
+                }
+            }
+
+            // 3. Update in gameState.courses
+            if (global.gameState && global.gameState.courses) {
+                for (const k of cKeys) {
+                    if (global.gameState.courses[k]) {
+                        global.gameState.courses[k].semester = semNum;
+                    }
+                }
+                if (global.gameState.courses[code]) {
+                    global.gameState.courses[code].semester = semNum;
+                }
+            }
+
+            // 4. Save and re-render
+            saveCustomPlan(true);
+            if (typeof global.saveState === 'function') {
+                global.saveState(true);
+            }
+            renderDegreePlanner();
+            return true;
         },
         calculateCourseWorkload: calculateCourseWorkload,
         calculateSemesterWorkload: calculateSemesterWorkload,

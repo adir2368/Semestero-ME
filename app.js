@@ -10538,6 +10538,10 @@ function handleAddCourseSubmit(e) {
             }
         }
 
+        if (window.DegreePlanner && typeof window.DegreePlanner.setCourseSemester === 'function') {
+            window.DegreePlanner.setCourseSemester(code, semester);
+        }
+
         editingCourseCode = null;
         if (typeof showToastNotification === 'function') {
             showToastNotification(`✓ פרטי הקורס "${name}" עודכנו בהצלחה`, 'success');
@@ -10880,14 +10884,49 @@ function openCourseDetails(code) {
     badge.className = `course-status-badge ${course.status}`;
     badge.innerText = STATUS_LABELS[course.status] || course.status;
 
-    // Set current semester select value
+    // Set current semester select value and wire persistence
     const semesterSelect = document.getElementById("modal-course-semester-select");
-    semesterSelect.value = course.semester;
-    semesterSelect.onchange = (e) => {
-        course.semester = parseInt(e.target.value);
+    const saveSemesterBtn = document.getElementById("btn-save-course-semester");
+    const saveSemesterBadge = document.getElementById("modal-semester-save-badge");
+    if (saveSemesterBadge) saveSemesterBadge.style.display = "none";
+
+    const performSaveSemester = (newSem) => {
+        newSem = parseInt(newSem);
+        if (!newSem || newSem < 1 || newSem > 8) return;
+        course.semester = newSem;
+
+        // Persist to planner module so customPlan is updated and never reverts on re-render
+        if (window.DegreePlanner && typeof window.DegreePlanner.setCourseSemester === 'function') {
+            window.DegreePlanner.setCourseSemester(course.code, newSem);
+        }
+
         saveState();
         renderUI();
+
+        if (saveSemesterBadge) {
+            saveSemesterBadge.style.display = "inline-block";
+            setTimeout(() => {
+                if (saveSemesterBadge) saveSemesterBadge.style.display = "none";
+            }, 3000);
+        }
+        if (typeof showToastNotification === 'function') {
+            showToastNotification(`✓ הקורס ${course.name} הועבר לסמסטר ${newSem} ונשמר בהצלחה`, 'success');
+        }
     };
+
+    if (semesterSelect) {
+        semesterSelect.value = course.semester;
+        semesterSelect.onchange = (e) => {
+            performSaveSemester(e.target.value);
+        };
+    }
+    if (saveSemesterBtn) {
+        saveSemesterBtn.onclick = () => {
+            if (semesterSelect) {
+                performSaveSemester(semesterSelect.value);
+            }
+        };
+    }
 
     // Grade Input & Breakdown Controller (Separating Exam Grade from Final Course Grade)
     const gradeSection = document.getElementById("modal-grade-section");
@@ -17174,13 +17213,13 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.10.07-v2.2.0",
-    version: "2.2.0",
-    build: "201007_5",
-    date: "2026-10-07 20:45",
-    description: "גרסה 2.2.0: שרשראות קדמים רב-דוריות מלאות בעץ, ניווט קורסים פותחים דור הבא וחיבור קדמים מושלם"
+    code: "REV-2026.10.07-v2.2.1",
+    version: "2.2.1",
+    build: "201007_6",
+    date: "2026-10-07 21:15",
+    description: "גרסה 2.2.1: מיתוג ראשי Semestero ME, אייקון Full-Bleed נקי ללא השלמות, שמירת סמסטר בעץ, טלמטריה ואנליטיקת כניסות אופליין, וכפתורי עזרה והסבר (?) בכל חלונית"
 };
-window.APP_VERSION = "2.2.0";
+window.APP_VERSION = "2.2.1";
 
 function ensureBaselineRevisions() {
     if (!gameState.revisions || !Array.isArray(gameState.revisions) || gameState.revisions.length === 0) {

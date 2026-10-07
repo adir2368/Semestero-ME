@@ -1,0 +1,541 @@
+// Semestero ME - Interactive Modal & Feature Help Guide Engine (v2.2.1)
+// Provides an interactive '❓ מה עושים כאן?' question mark button in every modal and pane
+// to explain all features, buttons, and workflows for students who feel lost.
+
+(function(window) {
+    'use strict';
+
+    const MODAL_HELP_REGISTRY = {
+        'course-modal': {
+            title: 'כרטיס קורס: ציונים, סמסטר ודרישות קדם',
+            purpose: 'כאן מנהלים את כל המידע על הקורס: ציונים סופיים, הזזת הקורס לסמסטר אחר, בדיקת עומס ודרישות קדם.',
+            sections: [
+                {
+                    icon: '📅',
+                    title: 'סמסטר מתוכנן ושינוי מיקום (💾 שמור שינוי)',
+                    desc: 'בחירת הסמסטר בו תלמד את הקורס. לחיצה על "💾 שמור שינוי" מעבירה את הקורס בעץ ובתוכנית הלימודים ושומרת את המיקום מיד.'
+                },
+                {
+                    icon: '🎓',
+                    title: 'ציונים והרכב הציון הסופי (מחשבון שקלול)',
+                    desc: 'הזנת ציון מבחן, אחוז משקל וציון שאר המטלות/מגן. לחיצה על "החל ציון ⚡" מחשבת את הציון המשוקלל ומעבירה אותו כציון סופי.'
+                },
+                {
+                    icon: '📝',
+                    title: 'הזנת ציון סופי רשמי',
+                    desc: 'הציון הרשמי שמופיע בגיליון הציונים בטכניון ונכנס לחישוב הממוצע המצטבר (GPA).'
+                },
+                {
+                    icon: '✅',
+                    title: 'ציון עובר בינארי (Pass)',
+                    desc: 'סמן כאן אם הקורס נותן נק״ז אך לא נכנס לממוצע (למשל פטור מילואים, שפות, ספורט או קורסים בציון בינארי).'
+                },
+                {
+                    icon: '⚖️',
+                    title: 'סרגל עומס וקושי (1 עד 5)',
+                    desc: 'דירוג אישי של רמת הקושי וההשקעה השבועית בקורס לצורך חישוב מאזני העומס הסמסטריאלי.'
+                },
+                {
+                    icon: '🔗',
+                    title: 'דרישות קדם ושרשראות קורסים',
+                    desc: 'לחיצה על הקורס בעץ מאירה את כל הקדמים שלו אחורה (בכחול/זהב) ואת הקורסים שהם תלויים בו קדימה (בירוק).'
+                },
+                {
+                    icon: '🧀',
+                    title: 'מועדי בחינות CheeseFork',
+                    desc: 'מועדי א\' וב\' הרשמיים של המבחנים, זמני שעת הבחינה וקישור ישיר לקורס באתר CheeseFork.'
+                }
+            ],
+            tip: '💡 טיפ: אם שובצת מחדש בסמסטר אחר, שנה את הסמסטר בבורר ולחץ "שמור שינוי" — העץ יתעדכן מיד!'
+        },
+
+        'analytics-modal': {
+            title: 'מרכז ביצועים, ממוצעים ואנליטיקת תואר',
+            purpose: 'תמונת מצב אקדמית מקיפה על ההתקדמות שלך בתואר בהנדסת מכונות.',
+            sections: [
+                {
+                    icon: '📈',
+                    title: 'גרף מסלול ממוצעים סמסטריאלי',
+                    desc: 'מציג את התפתחות הממוצע שלך בכל סמסטר ואת הממוצע המצטבר. ריחוף מעל נקודה מציג פירוט מדויק.'
+                },
+                {
+                    icon: '🍩',
+                    title: 'דונאט חלוקת נק״ז',
+                    desc: 'פילוח הנק״ז שצברת לפי קורסי חובה, בחירה פקולטית, בחירה חופשית ומדעים, מתוך דרישות התואר (155.5 / 157.5 נק״ז).'
+                },
+                {
+                    icon: '📊',
+                    title: 'התפלגות ציונים',
+                    desc: 'פילוח הקורסים שעברת לפי מדרגות ציונים (מצויינות 90+, טוב מאוד 80-89, וכדומה).'
+                },
+                {
+                    icon: '⚖️',
+                    title: 'מדד עומס סמסטריאלי',
+                    desc: 'מאזני עומס המשקללים שעות שבועיות, מעבדות, דוחות ותרגילי בית בכל סמסטר למניעת עומס יתר.'
+                }
+            ],
+            tip: '💡 טיפ: לחץ על כל כרטיס מדד (KPI) כדי לסנן קורסים רלוונטיים באותה קטגוריה.'
+        },
+
+        'add-course-modal': {
+            title: 'הוספת קורס אישי או עריכת קורס קיים',
+            purpose: 'מאפשר להוסיף קורסי בחירה, קורסים מפקולטות אחרות, או לערוך פרטים של קורס שכבר קיים בעץ.',
+            sections: [
+                {
+                    icon: '🔢',
+                    title: 'מספר קורס (6 ספרות)',
+                    desc: 'קוד הקורס בטכניון (לדוגמה 034013). המערכת תזהה אותו אוטומטית מול מאגר CheeseFork!'
+                },
+                {
+                    icon: '🧀',
+                    title: 'סנכרון נתונים אוטומטי מ-CheeseFork',
+                    desc: 'ברגע שתזין מספר קורס תקין, המערכת תמשוך לבד את שמו, מספר הנק״ז שלו ומועדי המבחנים.'
+                },
+                {
+                    icon: '📅',
+                    title: 'סמסטר מתוכנן',
+                    desc: 'איזה סמסטר (א\' עד ח\') הקורס ישויך אליו בעץ ובתוכנית הלימודים.'
+                },
+                {
+                    icon: '🔗',
+                    title: 'דרישות קדם (מופרדות בפסיקים)',
+                    desc: 'קודי קורסים שחובה להשלים לפני הרישום לקורס זה. הקשרים יימתחו אוטומטית בעץ.'
+                }
+            ],
+            tip: '💡 טיפ: לקורסי ספורט או פטור בינארי, סמן את התיבה "ציון בינארי (עובר ללא ממוצע)".'
+        },
+
+        'auth-modal': {
+            title: 'חשבון סטודנט, פרופיל וסנכרון ענן (Supabase)',
+            purpose: 'ניהול החשבון האישי שלך, גיבוי הנתונים בענן וסנכרון בזמן אמת בין המחשב לנייד.',
+            sections: [
+                {
+                    icon: '☁️',
+                    title: 'סנכרון ענן אוטומטי (Cloud Sync)',
+                    desc: 'כל שינוי בתוכנית או בציונים נשמר בענן ומסתנכרן תוך שניות בין כל המכשירים המחוברים שלך.'
+                },
+                {
+                    icon: '👤',
+                    title: 'מצב אורח (Guest Mode)',
+                    desc: 'שימוש במערכת ללא חשבון — הנתונים נשמרים מקומית במכשיר שלך בלבד (Local-First).'
+                },
+                {
+                    icon: '🔐',
+                    title: 'התחברות והרשמה מהירה',
+                    desc: 'הרשמה פשוטה באמצעות שם וסיסמה לשמירת תוכנית הלימודים האישית שלך.'
+                }
+            ],
+            tip: '💡 טיפ: מחובר גם מהטלפון וגם מהמחשב? השינויים מופיעים בזמן אמת בשני המכשירים!'
+        },
+
+        'site-analytics-modal': {
+            title: 'סטטיסטיקת שימוש, משתמשים וכניסות אופליין',
+            purpose: 'מעקב אחר פעילות המערכת, כמות הסטודנטים הרשומים והפעלות ללא חיבור אינטרנט.',
+            sections: [
+                {
+                    icon: '👥',
+                    title: 'משתמשים רשומים',
+                    desc: 'כמות חשבונות הסטודנטים הפעילים הרשומים בענן Supabase.'
+                },
+                {
+                    icon: '📴',
+                    title: 'כניסות בלי חיבור (אופליין)',
+                    desc: 'כמות הפעמים שהאפליקציה (PWA) הופעלה במצב מנותק ללא חיבור רשת.'
+                },
+                {
+                    icon: '👤',
+                    title: 'כניסות ללא התחברות (אורחים)',
+                    desc: 'סשנים של סטודנטים המשתמשים במערכת כאורחים ללא כניסה לחשבון.'
+                },
+                {
+                    icon: '🌐',
+                    title: 'סה״כ כניסות לאתר',
+                    desc: 'כלל הסשנים והכניסות שבוצעו במערכת.'
+                }
+            ],
+            tip: '💡 טיפ: לחץ על "רענן נתונים" כדי למשוך את הנתונים העדכניים ביותר ישירות מהענן.'
+        },
+
+        'moodle-sync-modal': {
+            title: 'סנכרון Moodle הטכניון',
+            purpose: 'משיכת מטלות, שיעורי בית, מועדי הגשות ומבחנים ישירות ממערכת ה-Moodle של הטכניון.',
+            sections: [
+                {
+                    icon: '🔗',
+                    title: 'קישור יומן Moodle (iCal / WebCal)',
+                    desc: 'מדביקים כאן את הקישור מ-Moodle (לוח שנה ➔ ייצוא לוח שנה ➔ קבלת כתובת URL של לוח שנה).'
+                },
+                {
+                    icon: '🔄',
+                    title: 'סנכרון מטלות ללוח ה-Notion',
+                    desc: 'כל שיעורי הבית ומטלות המודל מתווספים ישירות לסרגל המשימות עם זמני יעד.'
+                }
+            ],
+            tip: '💡 טיפ: הקישור הוא אישי שלך ולא מצריך הזנת סיסמת הטכניון באפליקציה!'
+        },
+
+        'calendar-sync-modal': {
+            title: 'סנכרון לוחות שנה (Google Calendar & WebCal)',
+            purpose: 'ייצוא מערכת השעות, שיעורי הבית ומועדי הבחינות ישירות ליומן הטלפון שלך.',
+            sections: [
+                {
+                    icon: '📅',
+                    title: 'מנוי ליומן WebCal',
+                    desc: 'העתק את הקישור והדבק ביומן Google או Apple — היומן יתעדכן מעצמו בכל שינוי.'
+                },
+                {
+                    icon: '⚡',
+                    title: 'סנכרון אירועים אישיים',
+                    desc: 'אפשרות ליצירת אירועים ותזכורות לימודים המקושרים לקורסים שלך.'
+                }
+            ],
+            tip: '💡 טיפ: הוספת היומן לטלפון שולחת לך תזכורות על מועדי בחינות והגשות בזמן!'
+        },
+
+        'past-exams-modal': {
+            title: 'מאגר בחינות ופתרונות עבר',
+            purpose: 'איתור והורדה מהירה של בחינות משנים קודמות ופתרונות רשמיים לצורך תרגול ולמידה.',
+            sections: [
+                {
+                    icon: '🔍',
+                    title: 'חיפוש וסינון',
+                    desc: 'סינון לפי מועד א\', מועד ב\', סמסטר ושנת לימודים.'
+                },
+                {
+                    icon: '📥',
+                    title: 'צפייה והורדת PDF',
+                    desc: 'פתיחת קובץ הבחינה בלחיצה אחת ישירות מהמכשיר.'
+                }
+            ],
+            tip: '💡 טיפ: מומלץ לתרגל קודם בחינות מהשנתיים האחרונות של אותו מרצה.'
+        },
+
+        'modal-add-custom-task': {
+            title: 'הוספת משימה או אירוע לימודים',
+            purpose: 'יצירת משימה אישית, הכנה למבחן, או תרגיל בית בלוח המשימות בסגנון Notion.',
+            sections: [
+                {
+                    icon: '📝',
+                    title: 'שם המשימה ושיוך לקורס',
+                    desc: 'הגדרת נושא המשימה ושיוכה לקורס המתאים כדי שתופיע בצבע הנכון.'
+                },
+                {
+                    icon: '⏰',
+                    title: 'תאריך יעד ועדיפות',
+                    desc: 'קביעת מועד סופי שיקפיץ את המשימה בסרגל המשימות הדחופות (Study Runway).'
+                }
+            ],
+            tip: '💡 טיפ: סימון משימה כבוצעה מוסיף לך נקודות ניסיון (XP) במדד ההתקדמות!'
+        },
+
+        'import-modal': {
+            title: 'גיבוי, שחזור וייצוא נתונים',
+            purpose: 'שמירת עותק גיבוי מלא של תוכנית הלימודים, הציונים וההגדרות בקובץ JSON מקומי.',
+            sections: [
+                {
+                    icon: '📤',
+                    title: 'ייצוא גיבוי מלא (Export)',
+                    desc: 'הורדת קובץ JSON המכיל את כל הנתונים שלך למחשב או לטלפון.'
+                },
+                {
+                    icon: '📥',
+                    title: 'שחזור מקובץ (Import)',
+                    desc: 'טעינת קובץ גיבוי שנשמר בעבר לשחזור מהיר של כל הציונים והתוכנית.'
+                }
+            ],
+            tip: '💡 טיפ: מומלץ לייצא גיבוי לפני ביצוע שינויים נרחבים בתוכנית הלימודים.'
+        },
+
+        'settings-workspace': {
+            title: 'מרכז הגדרות המערכת ורוויזיות',
+            purpose: 'קביעת שנתון אקדמי (תשפ״ד/תשפ״ו/תשפ״ז/ברקים), ניהול סמסטרים, הגדרות פרטיות וסנכרון.',
+            sections: [
+                {
+                    icon: '📚',
+                    title: 'בחירת שנתון ומסלול לימודים',
+                    desc: 'התאמת הסילבוס המומלץ לפי שנת תחילת הלימודים או מסלול ברקים מואץ.'
+                },
+                {
+                    icon: '🔒',
+                    title: 'מדיניות פרטיות והגנת מידע',
+                    desc: 'הגדרות Local-First ושליטה מלאה בנתונים האישיים שלך.'
+                },
+                {
+                    icon: '🚀',
+                    title: 'עדכוני גרסה וסטטיסטיקה',
+                    desc: 'בדיקת עדכונים מול GitHub Pages וצפייה ביומן הגרסאות "מה חדש?".'
+                }
+            ],
+            tip: '💡 טיפ: לאחר שינוי הגדרות, לחץ על "💾 שמור את כל השינויים" בראש המסך.'
+        }
+    };
+
+    window.MODAL_HELP_REGISTRY = MODAL_HELP_REGISTRY;
+
+    const ModalHelp = {
+        init() {
+            this.injectHelpStyles();
+            this.setupAllModalHelpTriggers();
+
+            // Observe DOM for dynamically opened modals
+            const observer = new MutationObserver(() => {
+                this.setupAllModalHelpTriggers();
+            });
+            observer.observe(document.body, { childList: true, subtree: true });
+        },
+
+        injectHelpStyles() {
+            if (document.getElementById('modal-help-styles')) return;
+            const style = document.createElement('style');
+            style.id = 'modal-help-styles';
+            style.textContent = `
+                .btn-modal-help {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 5px;
+                    background: rgba(56, 189, 248, 0.12);
+                    color: #38bdf8;
+                    border: 1px solid rgba(56, 189, 248, 0.35);
+                    padding: 4px 10px;
+                    border-radius: 16px;
+                    font-size: 0.76rem;
+                    font-weight: 700;
+                    cursor: pointer;
+                    transition: all 0.2s ease;
+                    font-family: inherit;
+                    user-select: none;
+                }
+                .btn-modal-help:hover {
+                    background: rgba(56, 189, 248, 0.25);
+                    border-color: #38bdf8;
+                    color: #fff;
+                    box-shadow: 0 0 10px rgba(56, 189, 248, 0.4);
+                    transform: translateY(-1px);
+                }
+                .modal-help-banner {
+                    background: linear-gradient(135deg, rgba(15, 23, 42, 0.98), rgba(11, 19, 43, 0.98));
+                    border: 1px solid rgba(56, 189, 248, 0.35);
+                    border-radius: 10px;
+                    padding: 14px 16px;
+                    margin-bottom: 15px;
+                    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+                    animation: helpBannerFadeIn 0.25s ease-out;
+                    direction: rtl;
+                    text-align: right;
+                }
+                @keyframes helpBannerFadeIn {
+                    from { opacity: 0; transform: translateY(-8px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+                .modal-help-header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    border-bottom: 1px solid rgba(56, 189, 248, 0.2);
+                    padding-bottom: 8px;
+                    margin-bottom: 12px;
+                }
+                .modal-help-title {
+                    font-size: 0.96rem;
+                    font-weight: 800;
+                    color: #38bdf8;
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
+                }
+                .modal-help-purpose {
+                    font-size: 0.82rem;
+                    color: #cbd5e1;
+                    margin-bottom: 12px;
+                    line-height: 1.5;
+                }
+                .modal-help-sections {
+                    display: grid;
+                    grid-template-columns: 1fr;
+                    gap: 8px;
+                    margin-bottom: 12px;
+                }
+                .modal-help-item {
+                    display: flex;
+                    align-items: flex-start;
+                    gap: 8px;
+                    padding: 6px 8px;
+                    background: rgba(255, 255, 255, 0.03);
+                    border-radius: 6px;
+                    border: 1px solid rgba(255, 255, 255, 0.05);
+                }
+                .modal-help-item-icon {
+                    font-size: 1.1rem;
+                    line-height: 1.2;
+                    flex-shrink: 0;
+                }
+                .modal-help-item-text strong {
+                    color: #f8fafc;
+                    font-size: 0.82rem;
+                    display: block;
+                    margin-bottom: 2px;
+                }
+                .modal-help-item-text span {
+                    color: #94a3b8;
+                    font-size: 0.77rem;
+                    line-height: 1.4;
+                    display: block;
+                }
+                .modal-help-tip {
+                    background: rgba(245, 158, 11, 0.08);
+                    border: 1px solid rgba(245, 158, 11, 0.25);
+                    border-radius: 6px;
+                    padding: 8px 10px;
+                    font-size: 0.76rem;
+                    color: #fde68a;
+                    margin-bottom: 10px;
+                }
+                .btn-close-help-banner {
+                    background: rgba(56, 189, 248, 0.15);
+                    border: 1px solid rgba(56, 189, 248, 0.3);
+                    color: #38bdf8;
+                    font-size: 0.76rem;
+                    font-weight: 700;
+                    padding: 5px 14px;
+                    border-radius: 6px;
+                    cursor: pointer;
+                    width: 100%;
+                    text-align: center;
+                    transition: all 0.2s;
+                }
+                .btn-close-help-banner:hover {
+                    background: #38bdf8;
+                    color: #0f172a;
+                }
+            `;
+            document.head.appendChild(style);
+        },
+
+        setupAllModalHelpTriggers() {
+            Object.keys(MODAL_HELP_REGISTRY).forEach(modalId => {
+                this.setupTriggerForModal(modalId);
+            });
+        },
+
+        setupTriggerForModal(modalId) {
+            const modalEl = document.getElementById(modalId);
+            if (!modalEl) return;
+
+            // Check if trigger button already exists
+            if (modalEl.querySelector('.btn-modal-help')) return;
+
+            const helpData = MODAL_HELP_REGISTRY[modalId];
+            if (!helpData) return;
+
+            // Find best insertion target in modal header
+            let targetContainer = null;
+            if (modalId === 'course-modal') {
+                targetContainer = modalEl.querySelector('.course-settings-container') || modalEl.querySelector('.modal-header');
+            } else if (modalId === 'settings-workspace') {
+                targetContainer = modalEl.querySelector('.settings-header-actions') || modalEl.querySelector('.settings-header-banner');
+            } else {
+                targetContainer = modalEl.querySelector('.modal-header') || modalEl.querySelector('.analytics-header-banner') || modalEl.querySelector('.modal-content');
+            }
+
+            if (!targetContainer) return;
+
+            // Create button
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'btn-modal-help';
+            btn.setAttribute('aria-label', 'עזרה והסבר על החלונית');
+            btn.title = 'לחץ להסבר: מה עושים בחלונית זו ומה עושה כל רכיב?';
+            btn.innerHTML = '<span>❓</span> <span>מה עושים כאן?</span>';
+
+            if (modalId === 'course-modal') {
+                btn.style.marginRight = '8px';
+            }
+
+            btn.onclick = (e) => {
+                e.stopPropagation();
+                this.toggleHelpBanner(modalId);
+            };
+
+            // Prepend or append depending on layout
+            if (targetContainer.classList && targetContainer.classList.contains('course-settings-container')) {
+                targetContainer.appendChild(btn);
+            } else if (targetContainer.classList && (targetContainer.classList.contains('modal-header') || targetContainer.classList.contains('analytics-header-banner') || targetContainer.classList.contains('settings-header-actions'))) {
+                targetContainer.appendChild(btn);
+            } else {
+                targetContainer.insertBefore(btn, targetContainer.firstChild);
+            }
+        },
+
+        toggleHelpBanner(modalId) {
+            const modalEl = document.getElementById(modalId);
+            if (!modalEl) return;
+
+            const existingBanner = modalEl.querySelector(`.modal-help-banner[data-modal-id="${modalId}"]`);
+            if (existingBanner) {
+                existingBanner.remove();
+                return;
+            }
+
+            const helpData = MODAL_HELP_REGISTRY[modalId];
+            if (!helpData) return;
+
+            const banner = document.createElement('div');
+            banner.className = 'modal-help-banner';
+            banner.setAttribute('data-modal-id', modalId);
+
+            const sectionsHtml = (helpData.sections || []).map(s => `
+                <div class="modal-help-item">
+                    <span class="modal-help-item-icon">${s.icon}</span>
+                    <div class="modal-help-item-text">
+                        <strong>${s.title}</strong>
+                        <span>${s.desc}</span>
+                    </div>
+                </div>
+            `).join('');
+
+            banner.innerHTML = `
+                <div class="modal-help-header">
+                    <div class="modal-help-title">
+                        <span>💡</span> <span>מדריך לחלונית: ${helpData.title}</span>
+                    </div>
+                    <button type="button" style="background: none; border: none; color: #94a3b8; font-size: 1.2rem; cursor: pointer; padding: 0 4px;" title="סגור הסבר">&times;</button>
+                </div>
+                <div class="modal-help-purpose">
+                    ${helpData.purpose}
+                </div>
+                <div class="modal-help-sections">
+                    ${sectionsHtml}
+                </div>
+                ${helpData.tip ? `<div class="modal-help-tip">${helpData.tip}</div>` : ''}
+                <button type="button" class="btn-close-help-banner">✓ הבנתי, סגור הסבר</button>
+            `;
+
+            // Close button listeners
+            const closeX = banner.querySelector('.modal-help-header button');
+            if (closeX) closeX.onclick = () => banner.remove();
+
+            const closeBottom = banner.querySelector('.btn-close-help-banner');
+            if (closeBottom) closeBottom.onclick = () => banner.remove();
+
+            // Insert banner at the top of modal body or scrollable content
+            let bodyTarget = modalEl.querySelector('.modal-body') || 
+                             modalEl.querySelector('.analytics-body-scrollable') || 
+                             modalEl.querySelector('#site-analytics-content') || 
+                             modalEl.querySelector('.settings-container') ||
+                             modalEl.querySelector('.modal-content');
+
+            if (bodyTarget) {
+                bodyTarget.insertBefore(banner, bodyTarget.firstChild);
+                // Scroll banner into view smoothly
+                banner.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+    };
+
+    window.ModalHelp = ModalHelp;
+
+    document.addEventListener('DOMContentLoaded', () => {
+        ModalHelp.init();
+    });
+
+})(window);
