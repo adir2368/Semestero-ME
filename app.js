@@ -1827,7 +1827,7 @@ function getTaskTypeBadgeHtml(task) {
 
 // Initial state structure
 const INITIAL_STATE = {
-    characterClass: "סטודנט למדעי המחשב",
+    characterClass: "סטודנט להנדסת מכונות - הטכניון",
     xp: 0,
     level: 1,
     credits: 0,
@@ -8622,11 +8622,20 @@ function loadSavedState() {
     }
 
     if (!loadedFromAuthSync) {
+        const isAdir = (window.AuthSync && typeof window.AuthSync.isAdirActive === 'function' && window.AuthSync.isAdirActive());
         const saved = localStorage.getItem("academic_skill_tree_save");
         if (saved) {
             try {
-                gameState = JSON.parse(saved);
-                if (gameState && gameState.courses && Object.keys(gameState.courses).length > 0) {
+                const parsed = JSON.parse(saved);
+                const isContaminated = !isAdir && (
+                    parsed.characterClass === 'סטודנט למדעי המחשב' ||
+                    (parsed.completedCourses >= 10 && (parsed.gpa >= 86 || parsed.credits >= 38) && localStorage.getItem('ast_onboarding_shown') !== 'true')
+                );
+                if (isContaminated) {
+                    console.warn('[app.js] Detected contaminated legacy save for non-Adir user. Purging.');
+                    localStorage.removeItem('academic_skill_tree_save');
+                } else if (parsed && parsed.courses && Object.keys(parsed.courses).length > 0) {
+                    gameState = parsed;
                     loadedFromAuthSync = true;
                     Object.values(gameState.courses).forEach(course => {
                         if (course.status === 'mastered' && course.tasks) {
@@ -8642,9 +8651,9 @@ function loadSavedState() {
             }
         }
 
-        // If still not loaded, load from authentic PRELOADED_USER_STATE
-        if (!loadedFromAuthSync && typeof PRELOADED_USER_STATE !== 'undefined' && PRELOADED_USER_STATE.courses) {
-            console.log("Loading authentic user state from PRELOADED_USER_STATE...");
+        // If still not loaded, load from authentic PRELOADED_USER_STATE (Adir ONLY)
+        if (!loadedFromAuthSync && isAdir && typeof PRELOADED_USER_STATE !== 'undefined' && PRELOADED_USER_STATE.courses) {
+            console.log("Loading authentic user state from PRELOADED_USER_STATE for Adir...");
             gameState = JSON.parse(JSON.stringify(PRELOADED_USER_STATE));
             recalculateCourseStates();
             loadedFromAuthSync = true;
@@ -8660,12 +8669,13 @@ function loadSavedState() {
         }
     }
 
-    // Grade preservation & recovery:
+    // Grade preservation & recovery (Adir developer ONLY):
     // If courses exist but all grades were wiped, restore authentic grades from PRELOADED_USER_STATE
-    if (gameState && gameState.courses && typeof PRELOADED_USER_STATE !== 'undefined' && PRELOADED_USER_STATE.courses) {
+    const isAdirForRecovery = (window.AuthSync && typeof window.AuthSync.isAdirActive === 'function' && window.AuthSync.isAdirActive());
+    if (isAdirForRecovery && gameState && gameState.courses && typeof PRELOADED_USER_STATE !== 'undefined' && PRELOADED_USER_STATE.courses) {
         const completedCount = Object.values(gameState.courses).filter(c => c.status === 'mastered' || (c.grade && Number(c.grade) >= 55)).length;
         if (completedCount === 0) {
-            console.log('[Recovery] Restoring completed courses and grades from PRELOADED_USER_STATE...');
+            console.log('[Recovery] Restoring completed courses and grades from PRELOADED_USER_STATE for Adir...');
             Object.entries(PRELOADED_USER_STATE.courses).forEach(([code, preloadedCourse]) => {
                 if (preloadedCourse.grade || preloadedCourse.status === 'mastered') {
                     if (gameState.courses[code]) {
@@ -8722,13 +8732,13 @@ function loadSavedState() {
         if (!gameState.removedCourses.includes(code)) gameState.removedCourses.push(code);
     });
 
-    // Self-healing / Restoration of Authentic State & Degree Plan
-    if (typeof PRELOADED_USER_STATE !== 'undefined') {
+    // Self-healing / Restoration of Authentic State & Degree Plan (Adir ONLY)
+    if (isAdirForRecovery && typeof PRELOADED_USER_STATE !== 'undefined') {
         const needsCourseRestore = !gameState.courses || Object.keys(gameState.courses).length < 30;
         const needsPlanRestore = !gameState.degreePlan || !Array.isArray(gameState.degreePlan) || gameState.degreePlan.length === 0;
 
         if (needsCourseRestore && PRELOADED_USER_STATE.courses) {
-            console.log('[Recovery] Restoring full authentic course state from PRELOADED_USER_STATE...');
+            console.log('[Recovery] Restoring full authentic course state from PRELOADED_USER_STATE for Adir...');
             gameState.courses = JSON.parse(JSON.stringify(PRELOADED_USER_STATE.courses));
             gameState.xp = PRELOADED_USER_STATE.xp;
             gameState.gpa = PRELOADED_USER_STATE.gpa;
@@ -8738,11 +8748,16 @@ function loadSavedState() {
             saveState();
         }
         if (needsPlanRestore && PRELOADED_USER_STATE.degreePlan) {
-            console.log('[Recovery] Restoring full authentic degreePlan from PRELOADED_USER_STATE...');
+            console.log('[Recovery] Restoring full authentic degreePlan from PRELOADED_USER_STATE for Adir...');
             gameState.degreePlan = JSON.parse(JSON.stringify(PRELOADED_USER_STATE.degreePlan));
             gameState.degreePlanUnassigned = JSON.parse(JSON.stringify(PRELOADED_USER_STATE.degreePlanUnassigned || []));
             saveState();
         }
+    }
+
+    // Always sanitize legacy character class
+    if (gameState && gameState.characterClass === 'סטודנט למדעי המחשב') {
+        gameState.characterClass = 'סטודנט להנדסת מכונות - הטכניון';
     }
 
     // Guarantee 034028 (מכניקת מוצקים 1) and all core courses exist in gameState.courses
@@ -17669,13 +17684,13 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.10.07-v2.2.3",
-    version: "2.2.3",
-    build: "201007_8",
-    date: "2026-10-07 22:45",
-    description: "גרסה 2.2.3: כפתורי עזרה '?' בלוח שנה ומערכת שעות, אירועי יום שלם / זמני התחלה וסיום בלוח שנה, קישור ישיר לדף הגשה במודל, והסרת תגית 'היום' החתוכה"
+    code: "REV-2026.10.07-v2.2.4",
+    version: "2.2.4",
+    build: "201007_9",
+    date: "2026-10-07 23:20",
+    description: "גרסה 2.2.4: בידוד מוחלט של נתוני מפתח - משתמשים חדשים ואורחים מתחילים עם סילבוס נקי לחלוטין ואפס נתונים מוזנים מראש, וטיהור נתונים מזוהמים"
 };
-window.APP_VERSION = "2.2.3";
+window.APP_VERSION = "2.2.4";
 
 function ensureBaselineRevisions() {
     if (!gameState.revisions || !Array.isArray(gameState.revisions) || gameState.revisions.length === 0) {

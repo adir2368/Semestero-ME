@@ -397,19 +397,19 @@
             }
         }
 
-        // 2. Preloaded authentic degreePlan from PRELOADED_USER_STATE
-        if (!loadedPlan && typeof PRELOADED_USER_STATE !== 'undefined' && Array.isArray(PRELOADED_USER_STATE.degreePlan) && PRELOADED_USER_STATE.degreePlan.length > 0) {
+        // 2. Preloaded authentic degreePlan from PRELOADED_USER_STATE (Adir only)
+        if (!loadedPlan && isAdir && typeof PRELOADED_USER_STATE !== 'undefined' && Array.isArray(PRELOADED_USER_STATE.degreePlan) && PRELOADED_USER_STATE.degreePlan.length > 0) {
             try {
                 loadedPlan = JSON.parse(JSON.stringify(PRELOADED_USER_STATE.degreePlan));
                 loadedUnassigned = Array.isArray(PRELOADED_USER_STATE.degreePlanUnassigned) ? JSON.parse(JSON.stringify(PRELOADED_USER_STATE.degreePlanUnassigned)) : [];
-                console.log('[Planner] Initialized plan from PRELOADED_USER_STATE.degreePlan');
+                console.log('[Planner] Initialized plan from PRELOADED_USER_STATE.degreePlan (Adir authentic)');
             } catch (e) {}
         }
 
         // 3. User-Scoped Local Storage V2
         if (!loadedPlan) {
             try {
-                let savedV2 = localStorage.getItem(v2Key) || localStorage.getItem(PLANNER_STORAGE_KEY_V2);
+                let savedV2 = localStorage.getItem(v2Key) || (isAdir ? localStorage.getItem(PLANNER_STORAGE_KEY_V2) : null);
                 if (savedV2) {
                     const parsed = JSON.parse(savedV2);
                     if (parsed && Array.isArray(parsed.semesters) && parsed.semesters.length > 0) {
@@ -428,7 +428,7 @@
         // 4. User-Scoped Local Storage V1
         if (!loadedPlan) {
             try {
-                let savedV1 = localStorage.getItem(v1Key) || localStorage.getItem(PLANNER_STORAGE_KEY_V1);
+                let savedV1 = localStorage.getItem(v1Key) || (isAdir ? localStorage.getItem(PLANNER_STORAGE_KEY_V1) : null);
                 if (savedV1) {
                     const parsedV1 = JSON.parse(savedV1);
                     if (Array.isArray(parsedV1) && parsedV1.length > 0) {

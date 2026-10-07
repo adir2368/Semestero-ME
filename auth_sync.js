@@ -31,13 +31,9 @@
     // Check if this device already has Adir's personal save file (developer PC only)
     function hasAdirLocalData() {
         try {
-            const saved = localStorage.getItem(LEGACY_SAVE_KEY);
-            if (saved) {
-                const parsed = JSON.parse(saved);
-                if (parsed && (parsed.credits === 39.5 || (parsed.gpa >= 86 && parsed.completedCourses >= 10))) {
-                    return true;
-                }
-            }
+            if (localStorage.getItem('ast_profile_adir_moshe')) return true;
+            if (localStorage.getItem(SESSION_USER_KEY) === 'adir_moshe') return true;
+            if (localStorage.getItem('ast_is_developer_device') === 'true') return true;
         } catch (e) {}
         return false;
     }
@@ -47,10 +43,19 @@
         init() {
             let sessionUser = localStorage.getItem(SESSION_USER_KEY);
 
-            // Auto-login on Adir's existing developer PC ONLY if no session key exists at all (initial launch)
+            // Auto-login on Adir's existing developer PC ONLY if explicit developer marker exists
             if (sessionUser === null && hasAdirLocalData()) {
                 sessionUser = 'adir_moshe';
                 localStorage.setItem(SESSION_USER_KEY, 'adir_moshe');
+            }
+
+            // Guard against accidental auto-assignment of adir_moshe to fresh guests
+            if (sessionUser === 'adir_moshe' && !localStorage.getItem('ast_profile_adir_moshe') && !localStorage.getItem('ast_is_developer_device')) {
+                if (localStorage.getItem('ast_onboarding_shown') !== 'true') {
+                    console.warn('[AuthSync] Resetting accidental developer session to guest for clean visitor.');
+                    sessionUser = 'guest';
+                    localStorage.setItem(SESSION_USER_KEY, 'guest');
+                }
             }
 
             this.initSupabaseFromStorage();
@@ -163,7 +168,23 @@
             if (saved) {
                 try {
                     const parsed = JSON.parse(saved);
-                    if (parsed && parsed.courses && Object.keys(parsed.courses).length > 0) {
+                    // Contamination purge for guest / non-developer:
+                    // If a guest state contains developer's old test signature or contaminated preloaded data:
+                    if (user.id === 'guest' || user.id !== 'adir_moshe') {
+                        const isContaminated = (
+                            parsed.characterClass === 'סטודנט למדעי המחשב' ||
+                            (parsed.completedCourses >= 10 && (parsed.gpa >= 86 || parsed.credits >= 38) && localStorage.getItem('ast_onboarding_shown') !== 'true')
+                        );
+                        if (isContaminated) {
+                            console.warn('[AuthSync] Detected contaminated guest/student state. Purging and resetting to clean curriculum...');
+                            localStorage.removeItem(key);
+                            localStorage.removeItem(LEGACY_SAVE_KEY);
+                            localStorage.removeItem('atlas_me_custom_degree_plan_v2_guest');
+                            localStorage.removeItem('atlas_me_custom_degree_plan_v1_guest');
+                        } else if (parsed && parsed.courses && Object.keys(parsed.courses).length > 0) {
+                            return parsed;
+                        }
+                    } else if (parsed && parsed.courses && Object.keys(parsed.courses).length > 0) {
                         return parsed;
                     }
                 } catch (e) {
@@ -176,10 +197,11 @@
                 return JSON.parse(JSON.stringify(PRELOADED_USER_STATE));
             }
 
-            // Clean syllabus template for fresh student
+            // Clean syllabus template for fresh student or guest
             if (typeof window.getCleanCurriculumState === 'function') {
                 const cleanState = window.getCleanCurriculumState(user.startingSemester || 1);
-                cleanState.student_name = user.name;
+                cleanState.student_name = user.name || (user.id === 'guest' ? 'אורח' : 'סטודנט');
+                cleanState.characterClass = 'סטודנט להנדסת מכונות - הטכניון';
                 return cleanState;
             }
             return null;
