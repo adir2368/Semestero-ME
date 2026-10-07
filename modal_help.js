@@ -41,9 +41,9 @@
                     desc: 'לחיצה על הקורס בעץ מאירה את כל הקדמים שלו אחורה (בכחול/זהב) ואת הקורסים שהם תלויים בו קדימה (בירוק).'
                 },
                 {
-                    icon: '🧀',
-                    title: 'מועדי בחינות CheeseFork',
-                    desc: 'מועדי א\' וב\' הרשמיים של המבחנים, זמני שעת הבחינה וקישור ישיר לקורס באתר CheeseFork.'
+                    icon: '📝',
+                    title: 'מועדי בחינות רשמיים',
+                    desc: 'מועדי א\' וב\' הרשמיים של המבחנים, זמני שעת הבחינה וקישורים רלוונטיים.'
                 }
             ],
             tip: '💡 טיפ: אם שובצת מחדש בסמסטר אחר, שנה את הסמסטר בבורר ולחץ "שמור שינוי" — העץ יתעדכן מיד!'
@@ -59,8 +59,8 @@
                     desc: 'מציג את התפתחות הממוצע שלך בכל סמסטר ואת הממוצע המצטבר. ריחוף מעל נקודה מציג פירוט מדויק.'
                 },
                 {
-                    icon: '🍩',
-                    title: 'דונאט חלוקת נק״ז',
+                    icon: '📊',
+                    title: 'תרשים פילוח נק״ז לתואר',
                     desc: 'פילוח הנק״ז שצברת לפי קורסי חובה, בחירה פקולטית, בחירה חופשית ומדעים, מתוך דרישות התואר (155.5 / 157.5 נק״ז).'
                 },
                 {
@@ -84,11 +84,11 @@
                 {
                     icon: '🔢',
                     title: 'מספר קורס (6 ספרות)',
-                    desc: 'קוד הקורס בטכניון (לדוגמה 034013). המערכת תזהה אותו אוטומטית מול מאגר CheeseFork!'
+                    desc: 'קוד הקורס בטכניון (לדוגמה 034013). המערכת תזהה אותו אוטומטית מול קטלוג הקורסים!'
                 },
                 {
-                    icon: '🧀',
-                    title: 'סנכרון נתונים אוטומטי מ-CheeseFork',
+                    icon: '⚡',
+                    title: 'זיהוי נתונים אוטומטי',
                     desc: 'ברגע שתזין מספר קורס תקין, המערכת תמשוך לבד את שמו, מספר הנק״ז שלו ומועדי המבחנים.'
                 },
                 {
@@ -106,7 +106,7 @@
         },
 
         'auth-modal': {
-            title: 'חשבון סטודנט, פרופיל וסנכרון ענן (Supabase)',
+            title: 'חשבון סטודנט, פרופיל וסנכרון ענן',
             purpose: 'ניהול החשבון האישי שלך, גיבוי הנתונים בענן וסנכרון בזמן אמת בין המחשב לנייד.',
             sections: [
                 {
@@ -135,7 +135,7 @@
                 {
                     icon: '👥',
                     title: 'משתמשים רשומים',
-                    desc: 'כמות חשבונות הסטודנטים הפעילים הרשומים בענן Supabase.'
+                    desc: 'כמות חשבונות הסטודנטים הפעילים הרשומים בענן המאובטח.'
                 },
                 {
                     icon: '📴',
@@ -292,25 +292,29 @@
                 .btn-modal-help {
                     display: inline-flex;
                     align-items: center;
-                    gap: 5px;
+                    justify-content: center;
+                    width: 24px;
+                    height: 24px;
+                    min-width: 24px;
+                    border-radius: 50%;
                     background: rgba(56, 189, 248, 0.12);
                     color: #38bdf8;
-                    border: 1px solid rgba(56, 189, 248, 0.35);
-                    padding: 4px 10px;
-                    border-radius: 16px;
-                    font-size: 0.76rem;
-                    font-weight: 700;
+                    border: 1px solid rgba(56, 189, 248, 0.45);
+                    font-size: 0.84rem;
+                    font-weight: 800;
                     cursor: pointer;
                     transition: all 0.2s ease;
                     font-family: inherit;
                     user-select: none;
+                    line-height: 1;
+                    padding: 0;
                 }
                 .btn-modal-help:hover {
-                    background: rgba(56, 189, 248, 0.25);
+                    background: rgba(56, 189, 248, 0.3);
                     border-color: #38bdf8;
                     color: #fff;
-                    box-shadow: 0 0 10px rgba(56, 189, 248, 0.4);
-                    transform: translateY(-1px);
+                    box-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
+                    transform: translateY(-1px) scale(1.08);
                 }
                 .modal-help-banner {
                     background: linear-gradient(135deg, rgba(15, 23, 42, 0.98), rgba(11, 19, 43, 0.98));
@@ -444,8 +448,8 @@
             btn.type = 'button';
             btn.className = 'btn-modal-help';
             btn.setAttribute('aria-label', 'עזרה והסבר על החלונית');
-            btn.title = 'לחץ להסבר: מה עושים בחלונית זו ומה עושה כל רכיב?';
-            btn.innerHTML = '<span>❓</span> <span>מה עושים כאן?</span>';
+            btn.title = 'עזרה: מה עושים בחלונית זו ומה כל רכיב עושה?';
+            btn.innerHTML = '?';
 
             if (modalId === 'course-modal') {
                 btn.style.marginRight = '8px';

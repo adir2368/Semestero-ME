@@ -213,6 +213,13 @@
             if (offlineEl) offlineEl.innerText = offlineCount;
             if (guestEl) guestEl.innerText = guestCount;
             if (totalEl) totalEl.innerText = totalCount;
+
+            // Only display the telemetry card in Settings for developer Adir
+            const cardEl = document.getElementById('card-btn-site-analytics');
+            if (cardEl) {
+                const isAdir = window.AuthSync && typeof window.AuthSync.isAdirActive === 'function' && window.AuthSync.isAdirActive();
+                cardEl.style.display = isAdir ? 'block' : 'none';
+            }
         },
 
         renderModal() {
@@ -360,7 +367,7 @@
                         <h4 style="margin: 0; color: #f1f5f9; font-size: 0.95rem; font-weight: 700;">
                             🎓 פירוט משתמשי ענן רשומים (${usersCount})
                         </h4>
-                        <span style="font-size: 0.72rem; color: #94a3b8;">מסונכרן מול Supabase Cloud</span>
+                        <span style="font-size: 0.72rem; color: #94a3b8;">סנכרון ענן מאובטח</span>
                     </div>
                     <div style="max-height: 260px; overflow-y: auto; padding-right: 4px;">
                         ${usersListHtml}
@@ -383,6 +390,20 @@
         },
 
         async openModal() {
+            // Restrict access: Developer Adir only, or require master password
+            const isAdir = window.AuthSync && typeof window.AuthSync.isAdirActive === 'function' && window.AuthSync.isAdirActive();
+            if (!isAdir) {
+                const pass = prompt('🔒 גישה לנתוני משתמשים וכניסות מוגבלת למנהל המערכת בלבד.\nאנא הזן סיסמת מפתח:');
+                if (pass !== 'BenchyTech1' && pass !== 'adir2368') {
+                    if (typeof showToastNotification === 'function') {
+                        showToastNotification('⛔ סיסמה שגויה - גישה נדחתה', 'error');
+                    } else {
+                        alert('⛔ סיסמה שגויה - גישה נדחתה');
+                    }
+                    return;
+                }
+            }
+
             let modal = document.getElementById('site-analytics-modal');
             if (!modal) return;
 

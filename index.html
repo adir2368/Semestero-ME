@@ -145,9 +145,6 @@
                         <span class="xp-text" id="xp-text" style="direction: ltr; unicode-bidi: isolate;"><bdi dir="ltr">39.5 / 157.5</bdi> נק״ז</span>
                     </div>
                 </div>
-                <button type="button" class="btn-hud-bell" id="btn-open-interactive-tour" onclick="if (window.startInteractiveTour) window.startInteractiveTour();" title="סיור מודרך במערכת (לחץ להפעלה) 🧭" aria-label="סיור במערכת" style="margin-left: 6px;">
-                    <span class="bell-icon">🧭</span>
-                </button>
                 <button type="button" class="btn-hud-bell" id="btn-open-analytics" title="מרכז ביצועים, ממוצעים ונתוני תואר (לחץ לפתיחה) 📊" aria-label="מרכז נתונים וביצועים" style="margin-left: 6px;">
                     <span class="bell-icon">📊</span>
                 </button>
@@ -533,6 +530,9 @@
                         <p class="settings-page-subtitle">עריכה וניהול של רוויזיות, סנכרון יומני Google, מדדים אקדמיים ומבנה הסמסטרים</p>
                     </div>
                     <div class="settings-header-actions">
+                        <button type="button" class="btn btn-sm" id="btn-settings-header-tour" onclick="if (window.startInteractiveTour) window.startInteractiveTour();" style="background: rgba(56, 189, 248, 0.15); border: 1px solid #38bdf8; color: #38bdf8; font-weight: 700; box-shadow: 0 0 10px rgba(56, 189, 248, 0.25);">
+                            🧭 סיור מודרך במערכת
+                        </button>
                         <button type="button" class="btn btn-primary btn-sm" id="btn-save-all-settings" style="background: #10b981; border-color: #10b981; font-weight: bold; box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);">
                             💾 שמור את כל השינויים
                         </button>
@@ -563,7 +563,7 @@
                     <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; padding: 10px 14px; background: rgba(56, 189, 248, 0.08); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 8px;">
                         <div style="display: flex; align-items: center; gap: 8px;">
                             <span style="font-size: 0.82rem; color: #94a3b8;">גרסת מערכת פעילה:</span>
-                            <span style="font-weight: 700; color: #38bdf8; font-family: monospace; font-size: 0.88rem;" id="display-system-version">v2.2.0</span>
+                            <span style="font-weight: 700; color: #38bdf8; font-family: monospace; font-size: 0.88rem;" id="display-system-version">v2.2.2</span>
                         </div>
                         <span class="app-version-badge" style="font-size: 0.66rem; background: rgba(15, 23, 42, 0.6); border-color: rgba(56, 189, 248, 0.35); color: #7dd3fc;">🔒 נעול לעריכה</span>
                     </div>
@@ -606,29 +606,48 @@
                         <div class="settings-card-title" style="color: #38bdf8; font-size: 1.15rem; font-weight: 800; display: flex; align-items: center; gap: 8px;">
                             <span>✨</span> <span>מה חדש?</span>
                         </div>
-                        <span class="app-version-badge" style="font-size: 0.65rem; border-color: rgba(56, 189, 248, 0.4); color: #38bdf8;">יומן גרסאות</span>
+                        <span class="app-version-badge" style="font-size: 0.65rem; border-color: rgba(56, 189, 248, 0.4); color: #38bdf8;">גרסה אחרונה v2.2.2</span>
                     </div>
                     <ul class="whats-new-list" style="list-style-type: disc; padding-right: 22px; margin: 0; color: #e2e8f0; font-size: 0.88rem; line-height: 1.85;">
-                        <li><strong>v2.2.1 (07/10/2026):</strong> מיתוג ראשי רשמי Semestero ME, אייקון Full-Bleed נקי ללא פסי השלמה בגוגל, כפתור שמירת סמסטר ייעודי בעץ (💾 שמור שינוי), לוח סטטיסטיקה ומעקב משתמשים וכניסות ללא חיבור (אופליין), וכפתורי סימן שאלה (❓ מה עושים כאן?) בכל חלונית המסבירים את כל הפיצ'רים.</li>
-                        <li><strong>v2.1.7 (07/10/2026):</strong> אופטימיזציית מקום בסרגל התחתון למובייל: קיצור הכיתוב ל-"by Adir Moshe", ריווח מותאם לכפתורי הפרטיות, הנגישות וגרסת המערכת למניעת גלישה.</li>
-                        <li><strong>v2.1.6 (07/10/2026):</strong> הטמעת תקן llms.txt רשמי לגילוי מנועי AI ו-LLM, התאמת פורמטים גמישה (Forgiving Input) לקודי קורסים עם מקפים וגרשיים בחיפוש בעברית (חדו"א/חדוא), ואימות שדות מובנה ואינטואיטיבי (Inline Form Validation) במודלים.</li>
-                        <li><strong>v2.1.5 (07/10/2026):</strong> הוספת מדיניות פרטיות ואמנת הגנת מידע מלאה (Privacy Policy) בהתאם לחוק הגנת הפרטיות, שקיפות מלאה על ארכיטקטורת Local-First, אפס מעקב פרסומי, זכות מחיקת נתונים, ושילוב חלונית ייעודית בהגדרות ובסרגל התחתון.</li>
-                        <li><strong>v2.1.4 (07/10/2026):</strong> פישוט וייעול ממשק המשתמש (UI/UX נקי ואינטואיטיבי), סרגל עומס ודירוג קורסים ברוחב מלא, והחלפת סמל הנוצה במאזניים מדויקים (Scale) בעומס הסמסטריאלי.</li>
-                        <li><strong>v2.1.3 (07/10/2026):</strong> הוספת סליידר גרירה אינטראקטיבי לבחירת רמת קושי/עומס קורס (1 עד 5 בקפיצות של 0.5) והחלפת הסמל לסמל מאזניים נקי (Scale).</li>
-                        <li><strong>v2.1.2 (07/10/2026):</strong> עדכון ממשק עומס הקורסים וחיבורו המלא לסולם CheeseFork.</li>
-                        <li><strong>v2.1.1 (07/10/2026):</strong> נרמול עומס/קושי הקורסים לסולם 1 עד 5 לשמירה על יחס אחיד מול סרגל עומס המשקולות הסמסטריאלי (CheeseFork), ועדכון חלונית עריכת העומס האישי.</li>
-                        <li><strong>v2.1.0 (07/10/2026):</strong> הוספת שנתון תשפ״ו (אוקטובר 2025) עם קורס שפת פייתון בסמסטר א׳, יישור וקיצור שמות השנתונים בבורר (הסרת 'תוכנית לימודים' וסוגריים מברקים), והתאמה מדויקת של קטלוג תשפ״ז למתחילים באוקטובר 2026.</li>
-                        <li><strong>v2.0.9 (06/10/2026):</strong> תמיכה רב-שנתית בקטלוגים (תשפ״ד, תשפ״ז, ברקים), מחשבון עומס סמסטריאלי ויזואלי המביא בחשבון עומס מעבדות ודוחות, ואפשרות להזנת דירוג עומס אישי ישירות מכרטיס הקורס.</li>
-                        <li><strong>v2.0.8 (06/10/2026):</strong> תכנון תואר נקי כברירת מחדל לאורחים: הצגת הסילבוס המומלץ הרשמי ללא שינויים אישיים, הפרדת מפתחות אחסון מקומיים לכל משתמש, ומנגנון אנטי-זיהום לתוכנית הלימודים.</li>
-                        <li><strong>v2.0.7 (06/10/2026):</strong> תיקון פאנל קרדיט וגרסה תחתון במובייל (אנדרואיד ו-iOS), הצמדה יציבה מעל סרגל הניווט, ותמיכה מלאה באירועי מגע (Touch).</li>
-                        <li><strong>v2.0.6 (06/10/2026):</strong> מרכוז מוחלט של הסיור במובייל, הזנת ציון סופי דינמית בסיור, נעילת קוד רוויזיה, והוספת חלונית מה חדש?</li>
-                        <li><strong>v2.0.5 (06/10/2026):</strong> עדכון סילבוס מומלץ רשמי: העברת מעבדה בכימיה לסמסטר ד׳ בהתאמה מדויקת לתוכנית הפקולטית.</li>
-                        <li><strong>v2.0.4 (06/10/2026):</strong> פטור מילואים 2 נק״ז, מחשבון יעד למועד ב׳ במודל הקורס, ובחירת מסלול ברקים מואץ.</li>
-                        <li><strong>v2.0.3 (05/10/2026):</strong> הנגשת המערכת (תקן AA מלא), סימולציית שוורם MiroFish לשיפורי UX וביצועים.</li>
-                        <li><strong>v2.0.2 (04/10/2026):</strong> התאמה מלאה למסכי מובייל וטאבלט, עיצוב מחדש של המודלים וסרגל תחתון מותאם.</li>
-                        <li><strong>v2.0.1 (04/10/2026):</strong> ייצוא והדפסת גיליון ציונים (A4), סנכרון התקדמות אוטומטי מול Moodle ו-CheeseFork.</li>
-                        <li><strong>v2.0.0 (04/10/2026):</strong> השקת מנוע Semestero ME 2.0 המלא - מפת מיומנויות תואר, מעקב ממוצע וקרדיטים, ומערכת שעות.</li>
+                        <li><strong>v2.2.2 (07/10/2026):</strong> כפתור עזרה מעוצב וממוקד (?), סיור מודרך מהודק ונגיש בראש ההגדרות, תצוגת יומן גרסאות קומפקטית, אבטחת לוח משתמשים וטלמטריה למנהל בלבד, ומיקום כפתור הפלוס בפינת לוח השנה.</li>
                     </ul>
+                    <div style="margin-top: 12px; text-align: center;">
+                        <button type="button" class="btn btn-xs btn-outline" id="btn-toggle-older-versions" onclick="
+                            var el = document.getElementById('older-versions-list');
+                            if (el.style.display === 'none') {
+                                el.style.display = 'block';
+                                this.innerHTML = '▲ הסתר היסטוריית גרסאות קודמות';
+                            } else {
+                                el.style.display = 'none';
+                                this.innerHTML = '📜 הצג היסטוריית גרסאות קודמות (19)';
+                            }
+                        " style="border-color: rgba(56, 189, 248, 0.4); color: #38bdf8; font-weight: 600; padding: 4px 14px; border-radius: 8px;">
+                            📜 הצג היסטוריית גרסאות קודמות (19)
+                        </button>
+                    </div>
+                    <div id="older-versions-list" style="display: none; margin-top: 12px; border-top: 1px dashed rgba(56, 189, 248, 0.25); padding-top: 10px;">
+                        <ul style="list-style-type: disc; padding-right: 22px; margin: 0; color: #94a3b8; font-size: 0.84rem; line-height: 1.75;">
+                            <li><strong>v2.2.1 (07/10/2026):</strong> מיתוג ראשי רשמי Semestero ME, אייקון Full-Bleed נקי ללא פסי השלמה בגוגל, כפתור שמירת סמסטר ייעודי בעץ (💾 שמור שינוי), לוח סטטיסטיקה ומעקב משתמשים וכניסות ללא חיבור (אופליין), וסיור מודרך מקיף במערכת.</li>
+                            <li><strong>v2.1.7 (07/10/2026):</strong> אופטימיזציית מקום בסרגל התחתון למובייל: קיצור הכיתוב ל-"by Adir Moshe", ריווח מותאם לכפתורי הפרטיות, הנגישות וגרסת המערכת למניעת גלישה.</li>
+                            <li><strong>v2.1.6 (07/10/2026):</strong> הטמעת תקן llms.txt רשמי לגילוי מנועי AI ו-LLM, התאמת פורמטים גמישה (Forgiving Input) לקודי קורסים עם מקפים וגרשיים בחיפוש בעברית (חדו"א/חדוא), ואימות שדות מובנה ואינטואיטיבי (Inline Form Validation) במודלים.</li>
+                            <li><strong>v2.1.5 (07/10/2026):</strong> הוספת מדיניות פרטיות ואמנת הגנת מידע מלאה (Privacy Policy) בהתאם לחוק הגנת הפרטיות, שקיפות מלאה על ארכיטקטורת Local-First, אפס מעקב פרסומי, זכות מחיקת נתונים, ושילוב חלונית ייעודית בהגדרות ובסרגל התחתון.</li>
+                            <li><strong>v2.1.4 (07/10/2026):</strong> פישוט וייעול ממשק המשתמש (UI/UX נקי ואינטואיטיבי), סרגל עומס ודירוג קורסים ברוחב מלא, והחלפת סמל הנוצה במאזניים מדויקים (Scale) בעומס הסמסטריאלי.</li>
+                            <li><strong>v2.1.3 (07/10/2026):</strong> הוספת סליידר גרירה אינטראקטיבי לבחירת רמת קושי/עומס קורס (1 עד 5 בקפיצות של 0.5) והחלפת הסמל לסמל מאזניים נקי (Scale).</li>
+                            <li><strong>v2.1.2 (07/10/2026):</strong> עדכון ממשק עומס הקורסים וחיבורו המלא לסולם CheeseFork.</li>
+                            <li><strong>v2.1.1 (07/10/2026):</strong> נרמול עומס/קושי הקורסים לסולם 1 עד 5 לשמירה על יחס אחיד מול סרגל עומס המשקולות הסמסטריאלי (CheeseFork), ועדכון חלונית עריכת העומס האישי.</li>
+                            <li><strong>v2.1.0 (07/10/2026):</strong> הוספת שנתון תשפ״ו (אוקטובר 2025) עם קורס שפת פייתון בסמסטר א׳, יישור וקיצור שמות השנתונים בבורר (הסרת 'תוכנית לימודים' וסוגריים מברקים), והתאמה מדויקת של קטלוג תשפ״ז למתחילים באוקטובר 2026.</li>
+                            <li><strong>v2.0.9 (06/10/2026):</strong> תמיכה רב-שנתית בקטלוגים (תשפ״ד, תשפ״ז, ברקים), מחשבון עומס סמסטריאלי ויזואלי המביא בחשבון עומס מעבדות ודוחות, ואפשרות להזנת דירוג עומס אישי ישירות מכרטיס הקורס.</li>
+                            <li><strong>v2.0.8 (06/10/2026):</strong> תכנון תואר נקי כברירת מחדל לאורחים: הצגת הסילבוס המומלץ הרשמי ללא שינויים אישיים, הפרדת מפתחות אחסון מקומיים לכל משתמש, ומנגנון אנטי-זיהום לתוכנית הלימודים.</li>
+                            <li><strong>v2.0.7 (06/10/2026):</strong> תיקון פאנל קרדיט וגרסה תחתון במובייל (אנדרואיד ו-iOS), הצמדה יציבה מעל סרגל הניווט, ותמיכה מלאה באירועי מגע (Touch).</li>
+                            <li><strong>v2.0.6 (06/10/2026):</strong> מרכוז מוחלט של הסיור במובייל, הזנת ציון סופי דינמית בסיור, נעילת קוד רוויזיה, והוספת חלונית מה חדש?</li>
+                            <li><strong>v2.0.5 (06/10/2026):</strong> עדכון סילבוס מומלץ רשמי: העברת מעבדה בכימיה לסמסטר ד׳ בהתאמה מדויקת לתוכנית הפקולטית.</li>
+                            <li><strong>v2.0.4 (06/10/2026):</strong> פטור מילואים 2 נק״ז, מחשבון יעד למועד ב׳ במודל הקורס, ובחירת מסלול ברקים מואץ.</li>
+                            <li><strong>v2.0.3 (05/10/2026):</strong> הנגשת המערכת (תקן AA מלא), סימולציית שוורם MiroFish לשיפורי UX וביצועים.</li>
+                            <li><strong>v2.0.2 (04/10/2026):</strong> התאמה מלאה למסכי מובייל וטאבלט, עיצוב מחדש של המודלים וסרגל תחתון מותאם.</li>
+                            <li><strong>v2.0.1 (04/10/2026):</strong> ייצוא והדפסת גיליון ציונים (A4), סנכרון התקדמות אוטומטי מול Moodle ו-CheeseFork.</li>
+                            <li><strong>v2.0.0 (04/10/2026):</strong> השקת מנוע Semestero ME 2.0 המלא - מפת מיומנויות תואר, מעקב ממוצע וקרדיטים, ומערכת שעות.</li>
+                        </ul>
+                    </div>
                 </div>
 
                 <!-- Section 2: Distribution, Version Updates & Help -->
@@ -665,7 +684,7 @@
                                 <span class="analytics-badge-v2" style="font-size: 0.6rem; padding: 2px 6px;">חדש ב-v2</span>
                             </div>
                             <div class="btn-desc">
-                                צפייה בגרף מסלול ממוצעים סמסטריאלי, התפלגות ציונים, דונאט נק״ז וסטטיסטיקות מתקדמות.
+                                צפייה בגרף מסלול ממוצעים סמסטריאלי, התפלגות ציונים, תרשים פילוח נק״ז לתואר וסטטיסטיקות מתקדמות.
                             </div>
                             <div style="margin-top: 8px;">
                                 <button type="button" class="btn btn-xs btn-primary" id="btn-settings-open-analytics" style="background: linear-gradient(135deg, #0284c7, #2563eb); font-weight: 600;">
@@ -674,10 +693,10 @@
                             </div>
                         </div>
 
-                        <div class="bug-report-card-btn" id="card-btn-site-analytics" style="border-color: rgba(56, 189, 248, 0.45); background: rgba(14, 165, 233, 0.05);">
+                        <div class="bug-report-card-btn" id="card-btn-site-analytics" style="display: none; border-color: rgba(56, 189, 248, 0.45); background: rgba(14, 165, 233, 0.05);">
                             <div class="btn-title">
                                 <span>👥 סטטיסטיקת משתמשים וכניסות (Audience & Telemetry)</span>
-                                <span class="analytics-badge-v2" style="font-size: 0.6rem; padding: 2px 6px; background: rgba(56, 189, 248, 0.2); color: #38bdf8; border-color: rgba(56, 189, 248, 0.4);">טלמטריה v2.2</span>
+                                <span class="analytics-badge-v2" style="font-size: 0.6rem; padding: 2px 6px; background: rgba(56, 189, 248, 0.2); color: #38bdf8; border-color: rgba(56, 189, 248, 0.4);">מנהל בלבד</span>
                             </div>
                             <div class="btn-desc">
                                 מעקב כמות משתמשי האתר, כניסות ללא חיבור (Offline PWA), כניסות אורחים ללא התחברות, וסך הסשנים.

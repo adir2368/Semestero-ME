@@ -16857,12 +16857,10 @@ function createCalendarDayCell(dateStr, dayNum, isToday, itemsByDate, isOtherMon
     const todayBadgeHtml = isToday ? `<span class="cal-today-pill-badge">היום</span>` : '';
     let cellHtml = `
         <div class="cal-day-num">
-            <span style="display: inline-flex; align-items: center; gap: 4px;">
-                <span>${dayNum}</span>
-                ${todayBadgeHtml}
-            </span>
-            <button type="button" class="btn-add-day-item" data-date="${dateStr}" title="הוסף אירוע בשעה ספציפית ליום זה">➕</button>
+            <span class="cal-day-number-label ${isToday ? 'is-today-num' : ''}">${dayNum}</span>
+            ${todayBadgeHtml}
         </div>
+        <button type="button" class="btn-add-day-item" data-date="${dateStr}" title="הוסף אירוע ליום זה">+</button>
         <div class="cal-events-list" style="display: flex; flex-direction: column; gap: 4px;">
     `;
 
