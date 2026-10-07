@@ -8622,42 +8622,33 @@ function loadSavedState() {
     }
 
     if (!loadedFromAuthSync) {
-        const isAdir = (window.AuthSync && typeof window.AuthSync.isAdirActive === 'function' && window.AuthSync.isAdirActive());
-
-        if (isAdir) {
-            const saved = localStorage.getItem("academic_skill_tree_save");
-            let needsRestoreFromPreload = false;
-
-            if (saved) {
-                try {
-                    gameState = JSON.parse(saved);
-                    if (!gameState.courses || Object.keys(gameState.courses).length === 0) {
-                        needsRestoreFromPreload = true;
-                    } else {
-                        Object.values(gameState.courses).forEach(course => {
-                            if (course.status === 'mastered' && course.tasks) {
-                                course.tasks.forEach(task => {
-                                    task.completed = true;
-                                    task.status = 'done';
-                                });
-                            }
-                        });
-                    }
-                } catch (e) {
-                    console.error("Error loading save file, loading user preloaded progress", e);
-                    needsRestoreFromPreload = true;
+        const saved = localStorage.getItem("academic_skill_tree_save");
+        if (saved) {
+            try {
+                gameState = JSON.parse(saved);
+                if (gameState && gameState.courses && Object.keys(gameState.courses).length > 0) {
+                    loadedFromAuthSync = true;
+                    Object.values(gameState.courses).forEach(course => {
+                        if (course.status === 'mastered' && course.tasks) {
+                            course.tasks.forEach(task => {
+                                task.completed = true;
+                                task.status = 'done';
+                            });
+                        }
+                    });
                 }
-            } else {
-                needsRestoreFromPreload = true;
+            } catch (e) {
+                console.error("Error parsing academic_skill_tree_save:", e);
             }
+        }
 
-            if (needsRestoreFromPreload) {
-                console.log("Restoring user's website progress into local storage...");
-                gameState = JSON.parse(JSON.stringify(PRELOADED_USER_STATE));
-                recalculateCourseStates();
-            }
-        } else {
-            // Clean student or guest state - NEVER inject Adir's data!
+        // If still not loaded, load from authentic PRELOADED_USER_STATE
+        if (!loadedFromAuthSync && typeof PRELOADED_USER_STATE !== 'undefined' && PRELOADED_USER_STATE.courses) {
+            console.log("Loading authentic user state from PRELOADED_USER_STATE...");
+            gameState = JSON.parse(JSON.stringify(PRELOADED_USER_STATE));
+            recalculateCourseStates();
+            loadedFromAuthSync = true;
+        } else if (!loadedFromAuthSync) {
             const curUser = (window.AuthSync && typeof window.AuthSync.getActiveUser === 'function') ? window.AuthSync.getActiveUser() : null;
             const targetSem = (curUser && curUser.startingSemester) ? curUser.startingSemester : 1;
             if (typeof window.getCleanCurriculumState === 'function') {
@@ -8666,6 +8657,28 @@ function loadSavedState() {
                 gameState = JSON.parse(JSON.stringify(INITIAL_STATE));
             }
             recalculateCourseStates();
+        }
+    }
+
+    // Grade preservation & recovery:
+    // If courses exist but all grades were wiped, restore authentic grades from PRELOADED_USER_STATE
+    if (gameState && gameState.courses && typeof PRELOADED_USER_STATE !== 'undefined' && PRELOADED_USER_STATE.courses) {
+        const completedCount = Object.values(gameState.courses).filter(c => c.status === 'mastered' || (c.grade && Number(c.grade) >= 55)).length;
+        if (completedCount === 0) {
+            console.log('[Recovery] Restoring completed courses and grades from PRELOADED_USER_STATE...');
+            Object.entries(PRELOADED_USER_STATE.courses).forEach(([code, preloadedCourse]) => {
+                if (preloadedCourse.grade || preloadedCourse.status === 'mastered') {
+                    if (gameState.courses[code]) {
+                        gameState.courses[code].grade = preloadedCourse.grade;
+                        gameState.courses[code].status = preloadedCourse.status;
+                        if (preloadedCourse.tasks) {
+                            gameState.courses[code].tasks = JSON.parse(JSON.stringify(preloadedCourse.tasks));
+                        }
+                    }
+                }
+            });
+            recalculateCourseStates();
+            saveState();
         }
     }
 
@@ -9223,9 +9236,8 @@ function saveState(skipNotify = false) {
 
         if (window.AuthSync && typeof window.AuthSync.saveActiveUserState === 'function') {
             window.AuthSync.saveActiveUserState(gameState);
-        } else {
-            localStorage.setItem("academic_skill_tree_save", JSON.stringify(gameState));
         }
+        localStorage.setItem("academic_skill_tree_save", JSON.stringify(gameState));
     } catch (err) {
         console.error("Failed to save state to localStorage:", err);
         if (err && (err.name === 'QuotaExceededError' || err.name === 'NS_ERROR_DOM_QUOTA_REACHED' || (err.message && err.message.toLowerCase().includes('quota')))) {

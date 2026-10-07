@@ -164,20 +164,6 @@
                 try {
                     const parsed = JSON.parse(saved);
                     if (parsed && parsed.courses && Object.keys(parsed.courses).length > 0) {
-                        // ANTI-POISONING GUARD:
-                        // If this is a student or guest account, but somehow holds Adir Moshe's exact state
-                        // (credits 39.5, or Calculus 1 grade 84 with completedCourses >= 10),
-                        // this is contaminated data. Reset immediately to clean curriculum state!
-                        if (user.id !== 'adir_moshe' && (parsed.credits === 39.5 && parsed.completedCourses === 11 && (parsed.gpa === 86.39 || (parsed.courses && parsed.courses['104041'] && parsed.courses['104041'].grade === 84)))) {
-                            console.warn('[AuthSync] Detected poisoned Adir state in account:', user.id, '- resetting to clean state');
-                            if (typeof window.getCleanCurriculumState === 'function') {
-                                const clean = window.getCleanCurriculumState(user.startingSemester || 1);
-                                if (parsed.account_password) clean.account_password = parsed.account_password;
-                                clean.student_name = user.name;
-                                this.saveActiveUserState(clean);
-                                return clean;
-                            }
-                        }
                         return parsed;
                     }
                 } catch (e) {
@@ -224,9 +210,7 @@
                     }
                 }
                 localStorage.setItem(key, JSON.stringify(state));
-                if (user.id === 'adir_moshe') {
-                    localStorage.setItem(LEGACY_SAVE_KEY, JSON.stringify(state));
-                }
+                localStorage.setItem(LEGACY_SAVE_KEY, JSON.stringify(state));
                 if (this.isLoggedIn()) {
                     this.triggerDebouncedCloudSync(state);
                 }
@@ -1379,11 +1363,7 @@
                                     return;
                                 }
 
-                                // Ignore contaminated Adir state for student accounts
-                                if (user.id !== 'adir_moshe' && (remoteState.credits === 39.5 || (remoteState.courses && remoteState.courses['104041'] && remoteState.courses['104041'].grade === 84))) {
-                                    console.warn('[AuthSync Realtime] Ignored poisoned remote state for student:', user.id);
-                                    return;
-                                }
+
                                 const key = this.getUserStorageKey(user.id);
                                 const localRaw = localStorage.getItem(key);
                                 let localState = null;
@@ -1494,21 +1474,7 @@
                         localState = localRaw ? JSON.parse(localRaw) : null;
                     } catch (e) {}
 
-                    // Anti-poisoning guard: Never let student account adopt Adir's state
-                    if (user.id !== 'adir_moshe' && (remoteState.credits === 39.5 && remoteState.completedCourses === 11 && (remoteState.gpa === 86.39 || (remoteState.courses && remoteState.courses['104041'] && remoteState.courses['104041'].grade === 84)))) {
-                        console.warn('[AuthSync] Cloud state for student is poisoned with Adir data. Resetting cloud state for:', user.name);
-                        if (typeof window.getCleanCurriculumState === 'function') {
-                            const clean = window.getCleanCurriculumState(user.startingSemester || 1);
-                            if (remoteState.account_password) clean.account_password = remoteState.account_password;
-                            clean.student_name = user.name;
-                            this.saveActiveUserState(clean);
-                            if (window.setGlobalGameState) {
-                                window.setGlobalGameState(clean);
-                            }
-                            this.refreshAllAppViews();
-                            return clean;
-                        }
-                    }
+
 
                     const localLastMod = (localState && localState.lastModified) || 0;
                     const remoteLastMod = (remoteState && remoteState.lastModified) || (data && data.updated_at ? new Date(data.updated_at).getTime() : 0);
