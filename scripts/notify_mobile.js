@@ -1,8 +1,7 @@
 const https = require('https');
 
-function sendMobileNotification(message, title = 'Atlas ME • Antigravity', tags = 'white_check_mark,rocket', priority = 'default') {
+function sendMobileNotification(message, title = 'Semestero ME Updates', tags = 'white_check_mark,rocket', priority = 'default', topic = process.env.NTFY_TOPIC || 'adir-semestero-me-updates') {
     return new Promise((resolve) => {
-        const topic = 'adir-antigravity-done';
         const req = https.request(`https://ntfy.sh/${topic}`, {
             method: 'POST',
             headers: {
@@ -26,9 +25,10 @@ function sendMobileNotification(message, title = 'Atlas ME • Antigravity', tag
 }
 
 if (require.main === module) {
-    const msg = process.argv[2] || 'הבקשה שלך הושלמה בהצלחה!';
-    const ttl = process.argv[3] || 'Atlas ME • Antigravity';
-    sendMobileNotification(msg, ttl).then((ok) => {
+    const msg = process.argv[2] || 'העדכון ב-Semestero ME הושלם בהצלחה!';
+    const ttl = process.argv[3] || 'Semestero ME Updates';
+    const tpc = process.argv[4] || process.env.NTFY_TOPIC || 'adir-semestero-me-updates';
+    sendMobileNotification(msg, ttl, 'white_check_mark,rocket', 'default', tpc).then((ok) => {
         console.log(ok ? 'NOTIFICATION_SENT_SUCCESSFULLY' : 'NOTIFICATION_FAILED');
         process.exit(ok ? 0 : 1);
     });
