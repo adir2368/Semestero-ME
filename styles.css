@@ -4688,23 +4688,104 @@ label[for="new-task-xp-input"],
     height: 1794px !important;
 }
 
-/* Interactive Dimming & Highlighting */
+/* Interactive Dimming & Multi-Generational Highlighting */
 .flowchart-svg.has-highlight .fc-beam:not(.highlighted) {
-    opacity: 0.12 !important;
+    opacity: 0.10 !important;
     stroke-width: 1px !important;
 }
 
 .flowchart-svg.has-highlight .fc-node-group:not(.highlighted-node) {
-    opacity: 0.35 !important;
+    opacity: 0.28 !important;
     transition: opacity 0.2s ease;
 }
 
-.fc-node-group.highlighted-node .fc-node-rect {
+/* Selected Target Node */
+.fc-node-group.highlighted-target .fc-node-rect {
+    stroke: #fbbf24 !important;
+    stroke-width: 3.4px !important;
+    filter: drop-shadow(0 0 18px rgba(251, 191, 36, 0.85)) !important;
+}
+
+/* Multi-Generational Ancestor Nodes (Prerequisites Chain Backwards) */
+.fc-node-group.highlighted-ancestor .fc-node-rect {
+    stroke: #38bdf8 !important;
+    stroke-width: 2.8px !important;
+    filter: drop-shadow(0 0 14px rgba(56, 189, 248, 0.75)) !important;
+}
+
+/* Next Generation Child Nodes (Unlocked Dependents Gen +1) */
+.fc-node-group.highlighted-child .fc-node-rect {
+    stroke: #10b981 !important;
+    stroke-width: 2.8px !important;
+    filter: drop-shadow(0 0 14px rgba(16, 185, 129, 0.8)) !important;
+}
+
+/* Ancestor Beams (Prerequisites Flow Backwards) */
+.fc-beam.highlighted.highlighted-ancestor {
+    stroke: #38bdf8 !important;
+    stroke-width: 3.8px !important;
+    stroke-dasharray: none !important;
+    filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.9)) !important;
+    opacity: 1 !important;
+}
+
+/* Child Beams (Next Generation Flow Forward) */
+.fc-beam.highlighted.highlighted-child {
+    stroke: #10b981 !important;
+    stroke-width: 3.8px !important;
+    stroke-dasharray: 6 3 !important;
+    filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.9)) !important;
+    opacity: 1 !important;
+}
+
+.fc-beam.highlighted:not(.highlighted-ancestor):not(.highlighted-child) {
+    stroke: #38bdf8 !important;
+    stroke-width: 3.6px !important;
+    filter: drop-shadow(0 0 6px rgba(56, 189, 248, 0.85)) !important;
+    opacity: 1 !important;
+}
+
+.fc-node-group.highlighted-node:not(.highlighted-target):not(.highlighted-ancestor):not(.highlighted-child) .fc-node-rect {
     stroke: #38bdf8 !important;
     stroke-width: 2.6 !important;
     filter: drop-shadow(0 0 16px rgba(56, 189, 248, 0.6)) !important;
 }
 
+/* Modal Prerequisites Interactive Tags & Flow */
+.prereq-tag, .prereq-child-tag, .prereq-chain-chip {
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    user-select: none;
+}
+
+.prereq-tag:hover, .prereq-child-tag:hover, .prereq-chain-chip:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.prereq-child-tag {
+    font-size: 0.75rem;
+    padding: 4px 10px;
+    border-radius: 4px;
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid #10b981;
+    color: #34d399;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.prereq-chain-chip {
+    font-size: 0.72rem;
+    padding: 3px 8px;
+    border-radius: 4px;
+    background: rgba(56, 189, 248, 0.08);
+    border: 1px solid rgba(56, 189, 248, 0.35);
+    color: #7dd3fc;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
 
 .fc-beam {
     stroke-linejoin: round;

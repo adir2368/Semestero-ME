@@ -571,9 +571,23 @@
                     }
 
                     if (foundKey) {
-                        if (global.gameState.courses[foundKey].semester !== semNum) {
-                            global.gameState.courses[foundKey].semester = semNum;
+                        const targetCourse = global.gameState.courses[foundKey];
+                        if (targetCourse.semester !== semNum) {
+                            targetCourse.semester = semNum;
                             changed = true;
+                        }
+                        if (targetCourse.prerequisites && targetCourse.prerequisites.length > 0) {
+                            const cleaned = targetCourse.prerequisites.map(p => {
+                                let np = String(p);
+                                if (/^\d{8}$/.test(np) && np.startsWith('0') && !np.startsWith('0394')) {
+                                    np = np.slice(1, 4) + np.slice(5);
+                                }
+                                return np;
+                            });
+                            if (JSON.stringify(cleaned) !== JSON.stringify(targetCourse.prerequisites)) {
+                                targetCourse.prerequisites = cleaned;
+                                changed = true;
+                            }
                         }
                     } else {
                         // DO NOT inject alternative tracks of mandatory courses (e.g. Physics 1M if Physics 1 was taken)
@@ -597,6 +611,14 @@
                         }
 
                         // Truly new elective/custom course added in "התוכנית שלי"
+                        const normPrereqs = (c.prereqs || c.prerequisites || []).map(p => {
+                            let np = String(p);
+                            if (/^\d{8}$/.test(np) && np.startsWith('0') && !np.startsWith('0394')) {
+                                np = np.slice(1, 4) + np.slice(5);
+                            }
+                            return np;
+                        });
+
                         global.gameState.courses[normCode] = {
                             id: normCode,
                             code: normCode,
@@ -604,7 +626,7 @@
                             name: c.name || c.title || normCode,
                             credits: Number(c.credits) || 3.0,
                             semester: semNum,
-                            prerequisites: c.prereqs || c.prerequisites || [],
+                            prerequisites: normPrereqs,
                             status: isCourseCompleted(c.code, c.altCode) ? 'mastered' : 'available',
                             grade: c.grade || null,
                             type: c.type || (c.list ? 'elective' : (normCode.startsWith('0394') ? 'sports' : 'mandatory')),

@@ -8705,7 +8705,15 @@ function loadSavedState() {
         });
         Object.values(gameState.courses).forEach(c => {
             if (c.prerequisites) {
-                c.prerequisites = c.prerequisites.filter(p => !PURGED_APP_CODES.includes(p));
+                c.prerequisites = c.prerequisites
+                    .filter(p => !PURGED_APP_CODES.includes(p))
+                    .map(p => {
+                        let np = String(p);
+                        if (/^\d{8}$/.test(np) && np.startsWith('0') && !np.startsWith('0394')) {
+                            np = np.slice(1, 4) + np.slice(5);
+                        }
+                        return np;
+                    });
             }
         });
     }
@@ -11474,22 +11482,135 @@ function openCourseDetails(code) {
         bannerDiv.style.display = "none";
     }
 
-    // Prerequisites list
+    // Prerequisites list: Multi-generation ancestry and next generation dependent courses
     const prereqsContainer = document.getElementById("modal-prereqs-list");
-    prereqsContainer.innerHTML = "";
-    if (course.prerequisites.length === 0) {
-        prereqsContainer.innerHTML = `<span style="font-size: 0.8rem; color: var(--text-muted);">אין דרישות קדם לקורס זה.</span>`;
-    } else {
-        course.prerequisites.forEach(preCode => {
-            const preCourse = gameState.courses[preCode];
-            if (!preCourse) return;
-
-            const isPassed = preCourse.status === 'mastered';
-            const tag = document.createElement("span");
-            tag.className = `prereq-tag ${isPassed ? 'passed' : 'missing'}`;
-            tag.innerHTML = `${isPassed ? '✅' : '❌'} ${preCourse.name} (${preCode.toUpperCase()})`;
-            prereqsContainer.appendChild(tag);
+    if (prereqsContainer) {
+        prereqsContainer.innerHTML = "";
+        
+        // 1. Direct Prerequisites (דור 1 אחורה)
+        const directPrereqs = (course.prerequisites || []).map(p => {
+            return findCourseObj(p) || { code: p, name: p, status: 'locked' };
         });
+
+        // 2. Full Ancestry Chain (דורות קודמים - קדמים של קדמים)
+        const allAncestors = [];
+        const ancQueue = [...(course.prerequisites || [])];
+        const ancVisited = new Set([course.code, normalizeCourseCodeForFlowchart(course.code)]);
+        
+        while (ancQueue.length > 0) {
+            const pCode = ancQueue.shift();
+            const pObj = findCourseObj(pCode);
+            const pNorm = pObj ? pObj.code : normalizeCourseCodeForFlowchart(pCode);
+            if (!ancVisited.has(pNorm)) {
+                ancVisited.add(pNorm);
+                if (pObj && pNorm !== normalizeCourseCodeForFlowchart(course.code)) {
+                    allAncestors.push(pObj);
+                    if (pObj.prerequisites && pObj.prerequisites.length > 0) {
+                        pObj.prerequisites.forEach(subP => ancQueue.push(subP));
+                    }
+                }
+            }
+        }
+
+        // 3. Dependent Children (דור 1 קדימה - קורסים שקורס זה פותח)
+        const directChildren = [];
+        const curNorm = normalizeCourseCodeForFlowchart(course.code);
+        Object.values(gameState.courses || {}).forEach(other => {
+            if (!other || !other.prerequisites || other.code === course.code) return;
+            const hasCur = other.prerequisites.some(p => {
+                const pNorm = normalizeCourseCodeForFlowchart(p);
+                return pNorm === curNorm || p === course.code || (course.altCode && p === course.altCode);
+            });
+            if (hasCur) {
+                directChildren.push(other);
+            }
+        });
+
+        let prereqsHtml = `
+            <div style="display: flex; flex-direction: column; gap: 14px; width: 100%;">
+                <!-- Direct Prerequisites -->
+                <div>
+                    <div style="font-size: 0.8rem; font-weight: 700; color: #38bdf8; margin-bottom: 6px; display: flex; align-items: center; gap: 6px;">
+                        <span>📥</span> <span>דרישות קדם ישירות (${directPrereqs.length}):</span>
+                    </div>
+                    <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+        `;
+
+        if (directPrereqs.length === 0) {
+            prereqsHtml += `<span style="font-size: 0.8rem; color: var(--text-muted);">אין דרישות קדם לקורס זה (קורס בסיס).</span>`;
+        } else {
+            directPrereqs.forEach(pre => {
+                const isPassed = pre.status === 'mastered' || (pre.grade && Number(pre.grade) >= 55);
+                const gradeLabel = pre.grade ? ` [${pre.grade}]` : '';
+                prereqsHtml += `
+                    <span class="prereq-tag ${isPassed ? 'passed' : 'missing'}" 
+                          onclick="openCourseDetails('${pre.code}')" 
+                          title="לחץ לפתיחת פרטי ${pre.name}">
+                        ${isPassed ? '✅' : '❌'} <strong>${pre.name}</strong> (${pre.code})${gradeLabel}
+                    </span>
+                `;
+            });
+        }
+
+        prereqsHtml += `
+                    </div>
+                </div>
+        `;
+
+        // Full Ancestry Chain (if there are deeper ancestors)
+        const deepAncestors = allAncestors.filter(a => !directPrereqs.some(d => d.code === a.code));
+        if (deepAncestors.length > 0) {
+            prereqsHtml += `
+                <div>
+                    <div style="font-size: 0.8rem; font-weight: 700; color: #7dd3fc; margin-bottom: 6px; display: flex; align-items: center; gap: 6px;">
+                        <span>🌳</span> <span>שרשרת קדמים מורחבת (קדמים של קדמים - ${deepAncestors.length}):</span>
+                    </div>
+                    <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+            `;
+            deepAncestors.forEach(anc => {
+                const isPassed = anc.status === 'mastered' || (anc.grade && Number(anc.grade) >= 55);
+                prereqsHtml += `
+                    <span class="prereq-chain-chip" 
+                          onclick="openCourseDetails('${anc.code}')" 
+                          title="חלק משרשרת הקדמים - לחץ לפתיחה">
+                        ${isPassed ? '✓' : '🔒'} ${anc.name} (${anc.code})
+                    </span>
+                `;
+            });
+            prereqsHtml += `
+                    </div>
+                </div>
+            `;
+        }
+
+        // Direct Children (דור 1 קדימה)
+        prereqsHtml += `
+                <div>
+                    <div style="font-size: 0.8rem; font-weight: 700; color: #34d399; margin-bottom: 6px; display: flex; align-items: center; gap: 6px;">
+                        <span>🚀</span> <span>פותח את הקורסים הבאים (דור 1 קדימה - ${directChildren.length}):</span>
+                    </div>
+                    <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+        `;
+        if (directChildren.length === 0) {
+            prereqsHtml += `<span style="font-size: 0.8rem; color: var(--text-muted);">קורס זה אינו מהווה קדם לקורסים נוספים (קורס מתקדם / פרויקט מסכם).</span>`;
+        } else {
+            directChildren.forEach(child => {
+                prereqsHtml += `
+                    <span class="prereq-child-tag" 
+                          onclick="openCourseDetails('${child.code}')" 
+                          title="לחץ לפתיחת פרטי ${child.name}">
+                        🔓 <strong>${child.name}</strong> (${child.code} • סמסטר ${child.semester || '?'})
+                    </span>
+                `;
+            });
+        }
+        prereqsHtml += `
+                    </div>
+                </div>
+            </div>
+        `;
+
+        prereqsContainer.innerHTML = prereqsHtml;
     }
 
     // Hide inline add-forms
@@ -14980,6 +15101,27 @@ function renderFlowchartTree() {
         });
     }
 
+    // Position & Course Resolver: Guaranteed mapping for 6-digit, 8-digit, stripped and altCode keys
+    function resolveCoursePosition(code) {
+        if (!code) return null;
+        if (coursePositions[code]) return { pos: coursePositions[code], code: code };
+        let norm = String(code).trim();
+        if (/^\d{8}$/.test(norm) && norm.startsWith('0') && !norm.startsWith('0394')) {
+            norm = norm.slice(1, 4) + norm.slice(5);
+        }
+        if (coursePositions[norm]) return { pos: coursePositions[norm], code: norm };
+        const stripped = norm.replace(/^0+/, '');
+        if (coursePositions[stripped]) return { pos: coursePositions[stripped], code: stripped };
+        if (coursePositions['0' + stripped]) return { pos: coursePositions['0' + stripped], code: '0' + stripped };
+        for (const [k, c] of Object.entries(gameState.courses || {})) {
+            if (c.code === code || c.altCode === code || c.id === code || (c.code && c.code.replace(/^0+/,'') === stripped)) {
+                if (coursePositions[k]) return { pos: coursePositions[k], code: k };
+                if (coursePositions[c.code]) return { pos: coursePositions[c.code], code: c.code };
+            }
+        }
+        return null;
+    }
+
     // 4. Draw Clean Connecting Bezier Curves (WITHOUT arrow heads)
     let connectionsHtml = "";
     Object.values(gameState.courses).forEach(course => {
@@ -14988,13 +15130,17 @@ function renderFlowchartTree() {
 
         if (course.prerequisites && course.prerequisites.length > 0) {
             course.prerequisites.forEach(preCode => {
-                const src = coursePositions[preCode];
-                if (!src) return;
+                const srcResolved = resolveCoursePosition(preCode);
+                if (!srcResolved) return;
 
-                const preCourse = gameState.courses[preCode];
+                const src = srcResolved.pos;
+                const srcCode = srcResolved.code;
+                const destCode = course.code;
+
+                const preCourse = gameState.courses[srcCode] || gameState.courses[preCode];
                 let beamClass = "locked";
 
-                if (preCourse && preCourse.status === 'mastered') {
+                if (preCourse && (preCourse.status === 'mastered' || (preCourse.grade && Number(preCourse.grade) >= 55))) {
                     beamClass = "mastered";
                 } else if (course.status !== 'locked') {
                     beamClass = "active";
@@ -15019,8 +15165,8 @@ function renderFlowchartTree() {
                 connectionsHtml += `
                     <path d="${d}" 
                           class="fc-beam ${beamClass}" 
-                          data-from="${preCode}" 
-                          data-to="${course.code}" />
+                          data-from="${srcCode}" 
+                          data-to="${destCode}" />
                 `;
             });
         }
@@ -15100,46 +15246,156 @@ function renderFlowchartTree() {
     });
 }
 
-// Highlights incoming and outgoing flowchart lines and related course cards (NO arrowheads)
-function highlightFlowchartPath(code) {
+// Normalizes any course code to standard 6-digit root for flowchart operations
+function normalizeCourseCodeForFlowchart(code) {
+    if (!code) return '';
+    let str = String(code).trim();
+    if (/^\d{8}$/.test(str) && str.startsWith('0') && !str.startsWith('0394')) {
+        str = str.slice(1, 4) + str.slice(5);
+    }
+    return str;
+}
+
+function findCourseObj(code) {
+    if (!code || !gameState.courses) return null;
+    if (gameState.courses[code]) return gameState.courses[code];
+    const norm = normalizeCourseCodeForFlowchart(code);
+    if (gameState.courses[norm]) return gameState.courses[norm];
+    const stripped = norm.replace(/^0+/, '');
+    if (gameState.courses[stripped]) return gameState.courses[stripped];
+    if (gameState.courses['0' + stripped]) return gameState.courses['0' + stripped];
+    for (const c of Object.values(gameState.courses)) {
+        if (c.code === code || c.altCode === code || (c.code && c.code.replace(/^0+/, '') === stripped)) {
+            return c;
+        }
+    }
+    return null;
+}
+
+// Multi-Generational Flowchart Path Tracing:
+// 1. Recursively traces the FULL prerequisite chain backwards (parents, grandparents, great-grandparents to roots)
+// 2. Traces EXACTLY 1 generation forward (direct downstream courses that require this course as a prerequisite)
+function highlightFlowchartPath(rawCode) {
     const svgEl = document.getElementById("flowchart-svg");
-    if (svgEl) svgEl.classList.add("has-highlight");
+    if (!svgEl) return;
+    svgEl.classList.add("has-highlight");
 
-    const beams = document.querySelectorAll(".fc-beam");
-    const activeNodes = new Set([code]);
+    const targetCourse = findCourseObj(rawCode);
+    const targetCode = targetCourse ? targetCourse.code : normalizeCourseCodeForFlowchart(rawCode);
 
-    beams.forEach(b => {
-        if (b.dataset.from === code || b.dataset.to === code) {
-            b.classList.add("highlighted");
-            if (b.dataset.from) activeNodes.add(b.dataset.from);
-            if (b.dataset.to) activeNodes.add(b.dataset.to);
-        } else {
-            b.classList.remove("highlighted");
+    // 1. Ancestors: Traverse backwards recursively through all prerequisites
+    const ancestorNodes = new Set();
+    const ancestorBeams = new Set();
+    const queue = [targetCode];
+    const visited = new Set([targetCode]);
+
+    while (queue.length > 0) {
+        const currCode = queue.shift();
+        const currCourse = findCourseObj(currCode);
+        if (currCourse && currCourse.prerequisites && currCourse.prerequisites.length > 0) {
+            currCourse.prerequisites.forEach(preCode => {
+                const preCourse = findCourseObj(preCode);
+                const resolvedPreCode = preCourse ? preCourse.code : normalizeCourseCodeForFlowchart(preCode);
+                
+                ancestorNodes.add(resolvedPreCode);
+                ancestorBeams.add(`${resolvedPreCode}->${currCourse.code}`);
+                ancestorBeams.add(`${preCode}->${currCourse.code}`);
+                ancestorBeams.add(`${resolvedPreCode}->${currCode}`);
+
+                if (!visited.has(resolvedPreCode)) {
+                    visited.add(resolvedPreCode);
+                    queue.push(resolvedPreCode);
+                }
+            });
+        }
+    }
+
+    // 2. Children: Find courses for which targetCode is a direct prerequisite (Generation +1 ONLY)
+    const childNodes = new Set();
+    const childBeams = new Set();
+
+    Object.values(gameState.courses || {}).forEach(other => {
+        if (!other || !other.prerequisites) return;
+        if (other.code === targetCode) return;
+
+        const isDirectPrereq = other.prerequisites.some(p => {
+            const pCourse = findCourseObj(p);
+            const pResolved = pCourse ? pCourse.code : normalizeCourseCodeForFlowchart(p);
+            return pResolved === targetCode || p === targetCode || (targetCourse && p === targetCourse.altCode);
+        });
+
+        if (isDirectPrereq) {
+            childNodes.add(other.code);
+            childBeams.add(`${targetCode}->${other.code}`);
+            if (targetCourse && targetCourse.altCode) {
+                childBeams.add(`${targetCourse.altCode}->${other.code}`);
+            }
         }
     });
 
+    // 3. Update Beams with distinct ancestor and child glowing classes
+    const beams = document.querySelectorAll(".fc-beam");
+    beams.forEach(b => {
+        const from = b.dataset.from;
+        const to = b.dataset.to;
+        const key = `${from}->${to}`;
+
+        b.classList.remove("highlighted", "highlighted-ancestor", "highlighted-child");
+
+        let isAncestor = ancestorBeams.has(key);
+        if (!isAncestor) {
+            const fromResolved = findCourseObj(from)?.code || normalizeCourseCodeForFlowchart(from);
+            const toResolved = findCourseObj(to)?.code || normalizeCourseCodeForFlowchart(to);
+            isAncestor = ancestorBeams.has(`${fromResolved}->${toResolved}`);
+        }
+
+        let isChild = childBeams.has(key);
+        if (!isChild) {
+            const fromResolved = findCourseObj(from)?.code || normalizeCourseCodeForFlowchart(from);
+            const toResolved = findCourseObj(to)?.code || normalizeCourseCodeForFlowchart(to);
+            isChild = childBeams.has(`${fromResolved}->${toResolved}`);
+        }
+
+        if (isAncestor) {
+            b.classList.add("highlighted", "highlighted-ancestor");
+        } else if (isChild) {
+            b.classList.add("highlighted", "highlighted-child");
+        }
+    });
+
+    // 4. Update Node Cards with targeted, ancestor, and child styles
     const nodeGroups = document.querySelectorAll(".fc-node-group");
     nodeGroups.forEach(ng => {
         const cCode = ng.getAttribute("data-code");
-        if (activeNodes.has(cCode)) {
-            ng.classList.add("highlighted-node");
-        } else {
-            ng.classList.remove("highlighted-node");
+        const cCourse = findCourseObj(cCode);
+        const resolvedCode = cCourse ? cCourse.code : normalizeCourseCodeForFlowchart(cCode);
+
+        ng.classList.remove("highlighted-node", "highlighted-target", "highlighted-ancestor", "highlighted-child");
+
+        if (resolvedCode === targetCode || cCode === targetCode) {
+            ng.classList.add("highlighted-node", "highlighted-target");
+        } else if (ancestorNodes.has(resolvedCode) || ancestorNodes.has(cCode)) {
+            ng.classList.add("highlighted-node", "highlighted-ancestor");
+        } else if (childNodes.has(resolvedCode) || childNodes.has(cCode)) {
+            ng.classList.add("highlighted-node", "highlighted-child");
         }
     });
 }
 
 function clearFlowchartHighlight() {
+    if (window._pinnedFlowchartCode) return; // Keep pinned if active
     const svgEl = document.getElementById("flowchart-svg");
     if (svgEl) svgEl.classList.remove("has-highlight");
 
     const beams = document.querySelectorAll(".fc-beam");
     beams.forEach(b => {
-        b.classList.remove("highlighted");
+        b.classList.remove("highlighted", "highlighted-ancestor", "highlighted-child");
     });
 
     const nodeGroups = document.querySelectorAll(".fc-node-group");
-    nodeGroups.forEach(ng => ng.classList.remove("highlighted-node"));
+    nodeGroups.forEach(ng => {
+        ng.classList.remove("highlighted-node", "highlighted-target", "highlighted-ancestor", "highlighted-child");
+    });
 }
 
 
@@ -16918,13 +17174,13 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.10.07-v2.1.9",
-    version: "2.1.9",
-    build: "201007_4",
-    date: "2026-10-07 19:50",
-    description: "גרסה 2.1.9: שחזור תוכנית הלימודים, מניעת כפילות קורסים בעץ וסנכרון בלעדי של התוכנית שלי"
+    code: "REV-2026.10.07-v2.2.0",
+    version: "2.2.0",
+    build: "201007_5",
+    date: "2026-10-07 20:45",
+    description: "גרסה 2.2.0: שרשראות קדמים רב-דוריות מלאות בעץ, ניווט קורסים פותחים דור הבא וחיבור קדמים מושלם"
 };
-window.APP_VERSION = "2.1.9";
+window.APP_VERSION = "2.2.0";
 
 function ensureBaselineRevisions() {
     if (!gameState.revisions || !Array.isArray(gameState.revisions) || gameState.revisions.length === 0) {
