@@ -34,9 +34,14 @@ const filesToCopy = [
     'package.json',
     'sw.js',
     'manifest.json',
+    'accessibility.js',
     'icon.png',
+    'icon_small.png',
+    'icon_small.webp',
     'icon.ico',
-    'adir_avatar.png'
+    'adir_avatar.png',
+    'adir_avatar_small.png',
+    'adir_avatar_small.webp'
 ];
 
 for (const targetDir of targetDirs) {

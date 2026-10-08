@@ -30,10 +30,11 @@
             this.loadConfig();
             this.bindUI();
             
-            // Background auto-sync on app launch if URL is configured
-            if (this.config.url && this.config.autoSync) {
+            // Background auto-sync on app launch if URL is configured and running in Electron (where CORS is bypassed via IPC)
+            const isElectron = !!(window.electronAPI && window.electronAPI.isElectron);
+            if (this.config.url && this.config.autoSync && isElectron) {
                 setTimeout(() => {
-                    console.log('[MoodleSync] Triggering background auto-sync on startup...');
+                    console.log('[MoodleSync] Triggering background auto-sync on startup (Electron IPC)...');
                     this.sync({ isSilent: true });
                 }, 2000);
             }
@@ -381,7 +382,11 @@
                     });
                 }
             } catch (err) {
-                console.error('[MoodleSync] Sync error:', err);
+                if (isSilent) {
+                    console.info('[MoodleSync] Background sync skipped:', err && err.message);
+                } else {
+                    console.error('[MoodleSync] Sync error:', err);
+                }
                 const cleanUrl = this.sanitizeUrl(this.config.url);
 
                 if (err.message === 'CORS_RESTRICTION' || (err.name === 'TypeError' && err.message.includes('fetch'))) {

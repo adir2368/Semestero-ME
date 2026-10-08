@@ -8149,9 +8149,9 @@ html.is-iphone .app-global-footer {
     font-size: 0.68rem;
     font-weight: 500;
     letter-spacing: 0.4px;
-    color: #64748b;
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.07);
+    color: #cbd5e1;
+    background: rgba(56, 189, 248, 0.08);
+    border: 1px solid rgba(56, 189, 248, 0.28);
     padding: 2px 7px;
     border-radius: 5px;
     user-select: none;
@@ -8161,10 +8161,10 @@ html.is-iphone .app-global-footer {
 }
 
 .app-version-badge:hover {
-    color: #94a3b8;
-    background: rgba(255, 255, 255, 0.07);
-    border-color: rgba(56, 189, 248, 0.25);
-    box-shadow: 0 0 8px rgba(56, 189, 248, 0.1);
+    color: #f8fafc;
+    background: rgba(56, 189, 248, 0.16);
+    border-color: rgba(56, 189, 248, 0.45);
+    box-shadow: 0 0 8px rgba(56, 189, 248, 0.2);
 }
 
 .footer-credit-content {
@@ -8175,13 +8175,13 @@ html.is-iphone .app-global-footer {
 }
 
 .footer-credit-content .credit-text {
-    color: #64748b;
+    color: #94a3b8;
     font-size: 0.72rem;
     letter-spacing: 0.2px;
 }
 
 .footer-credit-content strong {
-    color: #94a3b8;
+    color: #f8fafc;
     font-weight: 600;
 }
 

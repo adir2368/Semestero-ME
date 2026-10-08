@@ -30,17 +30,25 @@
 
         init() {
             this.loadLocalCounts();
-            this.recordSession();
+
+            // Defer non-critical analytics recording to browser idle time to optimize TBT and FCP
+            if (typeof window.requestIdleCallback === 'function') {
+                window.requestIdleCallback(() => this.recordSession(), { timeout: 3500 });
+            } else {
+                setTimeout(() => this.recordSession(), 2500);
+            }
 
             window.addEventListener('online', () => {
                 console.log('[SiteAnalytics] Network reconnected - syncing pending offline telemetry...');
                 this.syncPendingOfflineVisits();
             });
 
-            // Update stats badge in Settings if elements exist
-            setTimeout(() => {
-                this.updateSettingsPills();
-            }, 1000);
+            // Update stats badge in Settings once idle
+            if (typeof window.requestIdleCallback === 'function') {
+                window.requestIdleCallback(() => this.updateSettingsPills(), { timeout: 5000 });
+            } else {
+                setTimeout(() => this.updateSettingsPills(), 3500);
+            }
         },
 
         loadLocalCounts() {
