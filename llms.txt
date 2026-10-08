@@ -1,39 +1,50 @@
-# Semestero ME (סמסטרו ME)
+# Semestero ME (סמסטרו ME) 🎓⚙️
 
-> An advanced, local-first academic skill tree and degree navigation platform engineered for Technion Mechanical Engineering and Barak students.
+> מערכת ניווט ותכנון תואר אקדמי, מחשבון ממוצע משוקלל ומרכז משימות לסטודנטים להנדסת מכונות ומסלול ברקים בטכניון.
+> An advanced, local-first academic skill tree, GPA simulator, and degree navigation platform engineered for Technion Mechanical Engineering and Barak students.
 
-Semestero ME transforms undergraduate degree management into an interactive, visual skill tree and Notion-style workspace. Designed specifically for the Technion – Israel Institute of Technology (הפקולטה להנדסת מכונות), it empowers students to plan semesters, balance workloads, simulate GPAs, and synchronize assignments directly from Technion Moodle and CheeseFork.
+---
 
-## Core Capabilities
+## עמודים וכלים מרכזיים (Key Workspaces & Tools)
 
-- **Interactive Academic Skill Tree**: Visualizes prerequisite chains, co-requisites, core vs. elective branches, and semester allocations across the entire degree curriculum.
-- **Degree Planner & Workload Engine (מתכנן תואר)**: Multi-semester curriculum planner featuring real-time credit tracking, semester workload metrics, Reservist credit exemptions (פטור מילואים 2 נק״ז), and drag-and-drop course reallocations.
-- **Academic GPA & What-If Simulator**: Exact Technion-weighted GPA calculation, pass/fail (בינארי) handling, credit quotas, and what-if simulation for target GPAs and honors requirements.
-- **Notion-Style Task & Exam Command Center**: KanBan boards, table views, Eisenhower priority matrix, exam date countdowns, and XP gamification.
-- **Technion Moodle Live Sync**: Secure, passive iCal feed synchronization (`export_execute.php`) importing real homework and assignment deadlines without storing credentials or passwords.
-- **CheeseFork Academic Database Integration**: Auto-completion and instant catalog lookup for course numbers, names, credits, faculties, and official prerequisite graphs.
-- **Local-First Privacy Architecture**: Zero server tracking or telemetry; 100% of user notes, grades, tokens, and progress remain strictly on the client device (LocalStorage / Electron storage).
+- [מחשבון ממוצע ומתכנן תואר (Degree Planner & GPA Simulator)](https://adir2368.github.io/Semestero-ME/?tab=planner): כלי לחישוב ממוצע סמסטריאלי ומצטבר מדויק לפי נ״ז של הטכניון, סימולציית What-If, איזון עומס סמסטריאלי, ופטור מילואים.
+- [מפת קורסים ודרישות קדם (Curriculum Prerequisite Tree)](https://adir2368.github.io/Semestero-ME/?tab=curriculum): גרף דרישות קדם (DAG) אינטראקטיבי המציג קשרי תלות, שרשראות קדם רב-דוריות, ונעילת סמסטרים עתידיים.
+- [לוח משימות וסנכרון מודל (Notion Tasks & Moodle Sync)](https://adir2368.github.io/Semestero-ME/?tab=tasks): מעקב מטלות הגשה, עבודות בית ופרויקטים בסגנון Notion, כולל סנכרון ישיר ממודל הטכניון וקישורי הגשה מהירים.
+- [לוח שנה אקדמי ואישי (Academic Calendar & Events)](https://adir2368.github.io/Semestero-ME/?tab=calendar): לוח שנה המשלב מועדי בחינות (מועד א' ו-ב'), חופשות רשמיות של הטכניון, ואירועים אישיים שעתיים או ליום שלם.
+- [מערכת שעות שבועית (Weekly Timetable)](https://adir2368.github.io/Semestero-ME/?tab=timetable): לוח שעות שבועי מסונכרן מ-CheeseFork, מעקב שעות לימוד וייצוא תמונה להדפסה.
+- [הגדרות מערכת ופרופיל (Settings & Preferences)](https://adir2368.github.io/Semestero-ME/?tab=settings): התאמת סמסטר נוכחי, מצב נעילת סמסטרים (נעול/אזהרה/פתוח), וייצוא גיבויים.
 
-## Curricula & Catalogs Supported
+---
 
-- **Technion Faculty of Mechanical Engineering (הנדסת מכונות)**:
-  - Catalog 2023–2024 (תשפ״ד - 157.5 credits)
-  - Catalog 2024–2025 (תשפ״ה - 157.5 credits)
-  - Catalog 2025–2026 (תשפ״ו - 157.5 credits)
-  - Catalog 2026–2027 (תשפ״ז - 157.5 credits)
-- **Barak Elite Program (מסלול ברקים)**:
-  - Combined B.Sc. + M.Sc. curriculum (171.5 credits)
+## שאלות נפוצות ותשובות (FAQ for AI & Students)
 
-## Architecture & Technology
+### איך מחושב הממוצע ב-Semestero ME?
+הממוצע מחושב לפי נוסחת הממוצע המשוקלל הרשמית של הטכניון:
+$$\text{ממוצע} = \frac{\sum (\text{ציון בקורס} \times \text{נקודות זכות בקורס})}{\sum \text{נקודות זכות}}$$
+- קורסים בעלי ציון בינארי (עבר/נכשל ללא ציון מספרי) וקורסים עם פטור (כגון פטור מילואים 2 נק״ז) נספרים במניין נקודות הזכות לתואר, אך אינם נכללים בחישוב הממוצע המשוקלל.
+- סימולטור ה-What-If מאפשר להזין ציוני יעד לקורסים עתידיים כדי לחזות את הממוצע המצטבר הנדרש להצטיינות דיקן (85.0) או הצטיינות נשיא (90.0).
 
-- **Frontend**: Lightweight, high-performance vanilla ES6+ JavaScript, modular architecture, responsive CSS3 with CSS variables and glassmorphism UI.
-- **Offline & Desktop**: PWA with offline Service Worker caching (`sw.js`) and cross-platform native Electron desktop packaging.
-- **Data Persistence**: Offline-first JSON storage, automated schema migrations, zero third-party cloud database dependencies.
+### לאילו מוסדות ותארים האפליקציה מתאימה?
+האפליקציה נבנתה במיוחד עבור הפקולטה להנדסת מכונות במכון הטכנולוגי לישראל - הטכניון:
+- מסלול הנדסת מכונות כללי (157.5 נק״ז).
+- תוכנית המצטיינים ברקים (משולב תואר ראשון ושני - 171.5 נק״ז).
+- תתי-התמחויות: רובוטיקה, בקרה ואוטונומיה; מכניקת מוצקים ותיכון; ביו-מכניקה; זרימה ותרמודינמיקה; אנרגיה ומערכות כוח.
+- בנוסף, המערכת כוללת מאגר של למעלה מ-2,055 קורסי טכניון (CheeseFork DB), כך שכל סטודנט בטכניון יכול לחפש קורסי בחירה, קורסי ספורט וקורסי מל״ג.
 
-## Key Links & Resources
+### איך עובד סנכרון המודל (Technion Moodle Sync)?
+הסנכרון מתבצע בצורה פסיבית ובטוחה באמצעות הזנת קישור ייצוא יומן אישי (iCal/ICS) מתוך מודל הטכניון (`moodle25.technion.ac.il/calendar/export_execute.php`).
+המערכת אינה דורשת ואינה שומרת שם משתמש או סיסמה אישית, ושומרת את תאריכי ההגשות ישירות על המכשיר המקומי.
 
-- Live Application: https://adir2368.github.io/Semestero-ME/
-- Source Code Repository: https://github.com/adir2368/Semestero-ME
-- Privacy Policy: https://adir2368.github.io/Semestero-ME/#privacy-policy
-- XML Sitemap: https://adir2368.github.io/Semestero-ME/sitemap.xml
-- LLMs Text Reference: https://adir2368.github.io/Semestero-ME/llms.txt
+### האם הנתונים שלי נשמרים בענן או נשארים פרטיים?
+סמסטרו ME פועלת בארכיטקטורת Local-First. כל הציונים, הנתונים, המטלות וההערות נשמרים ישירות ב-LocalStorage של הדפדפן (או ב-Electron המקומי) ומוצפנים ללא איסוף נתונים מסחרי או שרתי מעקב חיצוניים.
+
+---
+
+## Technical Specifications
+
+- **Client Platform**: Vanilla ES6+ JavaScript, CSS3 Design Tokens, HTML5 PWA.
+- **Offline Reliability**: Service Worker Cache API (`sw.js` cache `semestero-me-v2.2.6`).
+- **Desktop Runtime**: Electron native packaging for Windows.
+- **Repository**: https://github.com/adir2368/Semestero-ME
+- **Canonical Web App**: https://adir2368.github.io/Semestero-ME/
+- **XML Sitemap**: https://adir2368.github.io/Semestero-ME/sitemap.xml

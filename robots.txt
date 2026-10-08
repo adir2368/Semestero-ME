@@ -1,6 +1,36 @@
+# robots.txt for Semestero ME (סמסטרו ME)
+# Live URL: https://adir2368.github.io/Semestero-ME/
+
 User-agent: *
 Allow: /
 
+# Explicit AI & Generative Engine Optimization (GEO) Allow Directives
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+User-agent: Amazonbot
+Allow: /
+
+# XML Sitemap
 Sitemap: https://adir2368.github.io/Semestero-ME/sitemap.xml
-# LLM & AI Discoverability
+
+# LLM & AI Knowledge Base
 # https://adir2368.github.io/Semestero-ME/llms.txt
