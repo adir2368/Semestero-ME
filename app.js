@@ -17703,13 +17703,13 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.10.07-v2.2.6",
-    version: "2.2.6",
-    build: "201007_11",
-    date: "2026-10-07 23:59",
-    description: "גרסה 2.2.6: בידוד וטיהור מוחלט של תכנון התואר - משתמשים חדשים ואורחים מתחילים עם סילבוס נקי משינויים, וטיהור יזום של תוכניות שהודלפו"
+    code: "REV-2026.10.08-v2.3.0",
+    version: "2.3.0",
+    build: "20261008_02",
+    date: "2026-10-08 10:25",
+    description: "גרסה 2.3.0: חבילת פביקון ומיתוג וקטורי מלאה, שיפורי נגישות וביצועים (Lighthouse AA), בידוד מלא של תכנון תואר למשתמשים חדשים ותיקון גרירת קורסים"
 };
-window.APP_VERSION = "2.2.6";
+window.APP_VERSION = "2.3.0";
 
 function ensureBaselineRevisions() {
     if (!gameState.revisions || !Array.isArray(gameState.revisions) || gameState.revisions.length === 0) {
