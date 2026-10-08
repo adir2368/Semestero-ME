@@ -2620,6 +2620,18 @@ document.addEventListener("DOMContentLoaded", () => {
     
     // Periodically update paths on window resize
     window.addEventListener("resize", drawConnections);
+
+    // Warm up CheeseFork course database during browser idle time (unblocking first paint & TBT)
+    const warmUpCheeseFork = () => {
+        if (typeof ensureCheeseForkDatabase === 'function') {
+            ensureCheeseForkDatabase().catch(() => {});
+        }
+    };
+    if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+        window.requestIdleCallback(warmUpCheeseFork, { timeout: 4500 });
+    } else {
+        setTimeout(warmUpCheeseFork, 3000);
+    }
 });
 
 // Moodle Sync Logic
@@ -9853,48 +9865,43 @@ function initCheeseForkDatabase() {
     });
 }
 
+let _cheeseForkLoadPromise = null;
+
 async function ensureCheeseForkDatabase() {
     if (cheeseForkMap && cheeseForkMap.size > 0) return true;
     initCheeseForkDatabase();
     if (cheeseForkMap && cheeseForkMap.size > 0) return true;
 
-    // Dynamically inject cheesefork_database.js if not yet loaded
-    if (!window.CHEESEFORK_DB && (!window.courses_from_rishum || window.courses_from_rishum.length === 0)) {
-        try {
-            console.log('[CheeseFork] Dynamically loading cheesefork_database.js...');
-            await new Promise((resolve) => {
-                const s = document.createElement('script');
-                s.src = 'cheesefork_database.js?v=1.7.1';
-                s.onload = () => resolve(true);
-                s.onerror = () => resolve(false);
-                document.head.appendChild(s);
-            });
-            initCheeseForkDatabase();
-        } catch (e) {
-            console.warn('[CheeseFork] Dynamic script load failed:', e);
-        }
+    if (_cheeseForkLoadPromise) {
+        return _cheeseForkLoadPromise;
     }
 
-    // Dynamic script fallback without eval/Function
-    if (!cheeseForkMap || cheeseForkMap.size === 0) {
+    _cheeseForkLoadPromise = (async () => {
         try {
-            if (typeof window.CHEESEFORK_DB !== 'undefined' && Array.isArray(window.CHEESEFORK_DB)) {
-                initCheeseForkDatabase();
-            } else {
-                await new Promise((resolve, reject) => {
+            if (!window.CHEESEFORK_DB && (!window.courses_from_rishum || window.courses_from_rishum.length === 0)) {
+                const scriptVersion = window.APP_VERSION || '2.3.1';
+                await new Promise((resolve) => {
                     const s = document.createElement('script');
-                    s.src = './cheesefork_database.js?v=1.9.6';
-                    s.onload = () => { initCheeseForkDatabase(); resolve(); };
-                    s.onerror = (e) => reject(e);
+                    s.src = `cheesefork_database.js?v=${scriptVersion}`;
+                    s.async = true;
+                    s.onload = () => resolve(true);
+                    s.onerror = (e) => {
+                        console.warn('[CheeseFork] Dynamic script load failed:', e);
+                        resolve(false);
+                    };
                     document.head.appendChild(s);
                 });
             }
-        } catch (err) {
-            console.warn('[CheeseFork] Fetch fallback failed:', err);
+            initCheeseForkDatabase();
+        } catch (e) {
+            console.warn('[CheeseFork] Dynamic load error:', e);
+        } finally {
+            _cheeseForkLoadPromise = null;
         }
-    }
+        return (cheeseForkMap && cheeseForkMap.size > 0);
+    })();
 
-    return (cheeseForkMap && cheeseForkMap.size > 0);
+    return _cheeseForkLoadPromise;
 }
 
 function findCheeseForkCourse(query) {
@@ -17703,13 +17710,13 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.10.08-v2.3.0",
-    version: "2.3.0",
-    build: "20261008_02",
-    date: "2026-10-08 10:25",
-    description: "גרסה 2.3.0: חבילת פביקון ומיתוג וקטורי מלאה, שיפורי נגישות וביצועים (Lighthouse AA), בידוד מלא של תכנון תואר למשתמשים חדשים ותיקון גרירת קורסים"
+    code: "REV-2026.10.08-v2.3.1",
+    version: "2.3.1",
+    build: "20261008_03",
+    date: "2026-10-08 11:30",
+    description: "גרסה 2.3.1: אופטימיזציית ביצועים ונגישות (Lighthouse 100% A11y), ביטול preconnect מיותר, מעבר מלא לתמונות WebP מוקטנות, טעינה עצלה של מאגר הקורסים (CheeseFork) ואנימציות חומרה 100% GPU"
 };
-window.APP_VERSION = "2.3.0";
+window.APP_VERSION = "2.3.1";
 
 function ensureBaselineRevisions() {
     if (!gameState.revisions || !Array.isArray(gameState.revisions) || gameState.revisions.length === 0) {

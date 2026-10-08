@@ -43,7 +43,7 @@ $$\text{ממוצע} = \frac{\sum (\text{ציון בקורס} \times \text{נקו
 ## Technical Specifications
 
 - **Client Platform**: Vanilla ES6+ JavaScript, CSS3 Design Tokens, HTML5 PWA.
-- **Offline Reliability**: Service Worker Cache API (`sw.js` cache `semestero-me-v2.3.0`).
+- **Offline Reliability**: Service Worker Cache API (`sw.js` cache `semestero-me-v2.3.1`).
 - **Desktop Runtime**: Electron native packaging for Windows.
 - **Repository**: https://github.com/adir2368/Semestero-ME
 - **Canonical Web App**: https://adir2368.github.io/Semestero-ME/

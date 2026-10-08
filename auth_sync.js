@@ -113,7 +113,7 @@
                     email: 'adir.moshe@campus.technion.ac.il',
                     phone: persistentPhone || fallbackPhone,
                     avatar: '🎓',
-                    avatarImg: 'adir_avatar.png',
+                    avatarImg: 'adir_avatar_small.webp?v=2.3.1',
                     role: 'developer',
                     startingSemester: (window.gameState && window.gameState.currentActiveSemester) ? window.gameState.currentActiveSemester : 3
                 }, customProfile || {});
@@ -855,7 +855,7 @@
                 const user = this.getActiveUser();
                 const isDev = user.id === 'adir_moshe';
                 const avatarHtml = isDev
-                    ? `<img src="adir_avatar.png" class="hud-user-avatar-img" alt="Adir Moshe">`
+                    ? `<picture><source srcset="adir_avatar_small.webp?v=2.3.1" type="image/webp"><img src="adir_avatar_small.png?v=2.3.1" class="hud-user-avatar-img" alt="Adir Moshe" width="34" height="34"></picture>`
                     : (user.avatarImg ? `<img src="${user.avatarImg}" class="hud-user-avatar-img" alt="${user.name}">` : user.avatar);
                 container.innerHTML = `
                     <button type="button" class="btn-hud-user-chip" id="btn-hud-user-chip" onclick="AuthSync.openAuthModal()" title="לחץ לצפייה בפרטי חשבון והתנתקות" aria-label="פרופיל משתמש">
@@ -867,7 +867,7 @@
                 const hudCharAvatar = document.getElementById('hud-char-avatar');
                 if (hudCharAvatar) {
                     if (isDev) {
-                        hudCharAvatar.innerHTML = `<img src="adir_avatar.png" alt="Adir Moshe" class="char-avatar-img" style="width: 100%; height: 100%; object-fit: contain; padding: 2px; filter: drop-shadow(0 0 6px rgba(56, 189, 248, 0.45));">`;
+                        hudCharAvatar.innerHTML = `<picture><source srcset="adir_avatar_small.webp?v=2.3.1" type="image/webp"><img src="adir_avatar_small.png?v=2.3.1" alt="Adir Moshe" class="char-avatar-img" width="40" height="40" style="width: 100%; height: 100%; object-fit: contain; padding: 2px; filter: drop-shadow(0 0 6px rgba(56, 189, 248, 0.45));"></picture>`;
                     } else {
                         hudCharAvatar.innerHTML = user.avatar || '🎓';
                     }
@@ -1031,7 +1031,7 @@
                 const isDev = user.id === 'adir_moshe';
                 const currentSem = (window.gameState && window.gameState.currentActiveSemester) ? window.gameState.currentActiveSemester : (user.startingSemester || 1);
                 const headerAvatar = isDev 
-                    ? `<img src="adir_avatar.png" alt="Adir Moshe" style="width: 28px; height: 28px; object-fit: contain; vertical-align: middle; filter: drop-shadow(0 0 6px rgba(56, 189, 248, 0.45));">` 
+                    ? `<picture><source srcset="adir_avatar_small.webp?v=2.3.1" type="image/webp"><img src="adir_avatar_small.png?v=2.3.1" alt="Adir Moshe" width="28" height="28" style="width: 28px; height: 28px; object-fit: contain; vertical-align: middle; filter: drop-shadow(0 0 6px rgba(56, 189, 248, 0.45));"></picture>` 
                     : `<span>${user.avatar}</span>`;
                 container.innerHTML = `
                     <div class="modal-header">
@@ -1048,7 +1048,10 @@
                             <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 10px;">
                                 ${isDev 
                                     ? `<div style="width: 48px; height: 48px; border-radius: 50%; background: radial-gradient(circle, rgba(56, 189, 248, 0.25) 0%, rgba(15, 23, 42, 0.95) 100%); border: 1.5px solid #38bdf8; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 12px rgba(56, 189, 248, 0.45); flex-shrink: 0; overflow: hidden;">
-                                         <img src="adir_avatar.png" alt="Adir Moshe" style="width: 100%; height: 100%; object-fit: contain; padding: 3px;">
+                                         <picture style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
+                                             <source srcset="adir_avatar_small.webp?v=2.3.1" type="image/webp">
+                                             <img src="adir_avatar_small.png?v=2.3.1" alt="Adir Moshe" width="48" height="48" style="width: 100%; height: 100%; object-fit: contain; padding: 3px;">
+                                         </picture>
                                        </div>` 
                                     : `<div style="width: 48px; height: 48px; border-radius: 50%; background: rgba(56, 189, 248, 0.15); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0;">${user.avatar}</div>`
                                 }

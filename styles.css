@@ -331,6 +331,7 @@ body {
     background: linear-gradient(90deg, #059669, #10b981, #34d399) !important;
     box-shadow: 0 0 12px rgba(16, 185, 129, 0.45);
     transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: width;
     border-radius: 11px;
 }
 
@@ -4840,7 +4841,7 @@ label[for="new-task-xp-input"],
     display: block;
     margin: 0 auto;
     transform-origin: 50% 0%;
-    transition: width 0.15s ease, height 0.15s ease;
+    will-change: transform;
     background: radial-gradient(circle at 50% 15%, rgba(30, 41, 69, 0.4) 0%, #0a0d17 100%);
 }
 
@@ -7676,18 +7677,19 @@ html.is-iphone .app-global-footer {
     justify-content: center;
     padding: 0 4px;
     border: 1.5px solid #0b0f19;
-    box-shadow: 0 0 8px rgba(239, 68, 68, 0.8);
-    animation: notif-pulse-badge 2s infinite;
+    box-shadow: 0 0 8px rgba(239, 68, 68, 0.85);
+    will-change: transform, opacity;
+    animation: notif-pulse-badge 2s infinite ease-in-out;
 }
 
 @keyframes notif-pulse-badge {
     0%, 100% {
         transform: scale(1);
-        box-shadow: 0 0 6px rgba(239, 68, 68, 0.7);
+        opacity: 0.92;
     }
     50% {
-        transform: scale(1.1);
-        box-shadow: 0 0 12px rgba(239, 68, 68, 1);
+        transform: scale(1.12);
+        opacity: 1;
     }
 }
 
@@ -9556,22 +9558,24 @@ html.is-iphone .app-global-footer {
 @keyframes prereqBeaconPulse {
     0% {
         border-color: #ef4444;
-        box-shadow: 0 0 10px #ef4444, 0 0 20px rgba(239, 68, 68, 0.6);
         transform: scale(1);
+        opacity: 0.88;
     }
     50% {
         border-color: #f59e0b;
-        box-shadow: 0 0 25px #f59e0b, 0 0 35px rgba(245, 158, 11, 0.8);
-        transform: scale(1.05);
+        transform: scale(1.04);
+        opacity: 1;
     }
     100% {
         border-color: #ef4444;
-        box-shadow: 0 0 10px #ef4444, 0 0 20px rgba(239, 68, 68, 0.6);
         transform: scale(1);
+        opacity: 0.88;
     }
 }
 
 .prereq-pulse-beacon {
+    box-shadow: 0 0 16px rgba(239, 68, 68, 0.6) !important;
+    will-change: transform, opacity;
     animation: prereqBeaconPulse 0.75s ease-in-out infinite alternate !important;
     z-index: 100 !important;
     position: relative !important;
@@ -10841,12 +10845,13 @@ html.is-iphone .app-global-footer {
     box-shadow: 0 0 10px rgba(16, 185, 129, 0.45) !important;
     font-weight: 700 !important;
     cursor: pointer !important;
+    will-change: transform, opacity;
     animation: pulseUpdateBadge 2s infinite ease-in-out;
 }
 
 @keyframes pulseUpdateBadge {
-    0%, 100% { transform: scale(1); box-shadow: 0 0 10px rgba(16, 185, 129, 0.45); }
-    50% { transform: scale(1.04); box-shadow: 0 0 18px rgba(16, 185, 129, 0.85); }
+    0%, 100% { transform: scale(1); opacity: 0.9; }
+    50% { transform: scale(1.05); opacity: 1; }
 }
 
 /* SmartScreen Guide Styles */
