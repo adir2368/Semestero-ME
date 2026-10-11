@@ -14,6 +14,7 @@
     let selectedTrack = 'year_2027'; // 'year_2027' | 'year_2025' | 'year_2024' | 'barak'
     let isReservistDeduction = false;
     let isEnglishExemption = false;
+    let englishLevel = 'none'; // 'exempt_all' | 'exempt_a' | 'none'
     let selectedCategory = 'ALL'; // 'ALL' | 'A' | 'B' | 'C' | 'D' | 'E' | 'UNASSIGNED'
     let searchQuery = '';
     let customPlan = null;
@@ -26,6 +27,7 @@
     const PLANNER_STORAGE_KEY_V2 = 'atlas_me_custom_degree_plan_v2';
     const PLANNER_STORAGE_KEY_V1 = 'atlas_me_custom_degree_plan_v1';
     const PLANNER_RESERVIST_KEY = 'semestero_reservist_deduction_active';
+    const PLANNER_ENGLISH_LEVEL_KEY = 'semestero_english_level';
     const PLANNER_ENGLISH_EXEMPTION_KEY = 'semestero_english_exemption_active';
     const PLANNER_TRACK_KEY = 'semestero_planner_selected_track';
 
@@ -171,6 +173,80 @@
             }
         }
         return false;
+    }
+
+    function isCourseExempt(code, altCode) {
+        if (!global.gameState) return false;
+        const candidateCodes = getNormalizedCodes(code, altCode);
+        for (let i = 0; i < candidateCodes.length; i++) {
+            const cCode = candidateCodes[i];
+            if (global.gameState.exemptions && global.gameState.exemptions[cCode]) {
+                return true;
+            }
+            const c = global.gameState.courses && global.gameState.courses[cCode];
+            if (c && c.isExempt === true) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    function applyEnglishLevelState(level) {
+        if (level !== 'exempt_all' && level !== 'exempt_a' && level !== 'none') {
+            level = 'none';
+        }
+        englishLevel = level;
+        isEnglishExemption = (level === 'exempt_all');
+        try {
+            localStorage.setItem(PLANNER_ENGLISH_LEVEL_KEY, level);
+            localStorage.setItem(PLANNER_ENGLISH_EXEMPTION_KEY, isEnglishExemption ? 'true' : 'false');
+        } catch (e) {}
+
+        if (global.gameState) {
+            if (!global.gameState.exemptions) global.gameState.exemptions = {};
+
+            if (level === 'exempt_all') {
+                // Full Exemption (134+): Both Mitkadmim A (324032) and Mitkadmim B (324033) are exempt
+                ['03240032', '324032', '03240033', '324033'].forEach(k => {
+                    global.gameState.exemptions[k] = true;
+                    if (global.gameState.courses && global.gameState.courses[k]) {
+                        global.gameState.courses[k].isExempt = true;
+                    }
+                });
+            } else if (level === 'exempt_a') {
+                // Partial Exemption (120-133): Mitkadmim A (324032) is exempt; Mitkadmim B (324033) is NOT exempt (mandatory!)
+                ['03240032', '324032'].forEach(k => {
+                    global.gameState.exemptions[k] = true;
+                    if (global.gameState.courses && global.gameState.courses[k]) {
+                        global.gameState.courses[k].isExempt = true;
+                    }
+                });
+                ['03240033', '324033'].forEach(k => {
+                    delete global.gameState.exemptions[k];
+                    if (global.gameState.courses && global.gameState.courses[k]) {
+                        global.gameState.courses[k].isExempt = false;
+                    }
+                });
+            } else { // 'none'
+                // No Exemption (104-119): Neither is exempt, both must be taken
+                ['03240032', '324032', '03240033', '324033'].forEach(k => {
+                    delete global.gameState.exemptions[k];
+                    if (global.gameState.courses && global.gameState.courses[k]) {
+                        global.gameState.courses[k].isExempt = false;
+                    }
+                });
+            }
+
+            // Remove from removedCourses if student is taking them
+            if (Array.isArray(global.gameState.removedCourses)) {
+                if (level === 'exempt_a' || level === 'none') {
+                    global.gameState.removedCourses = global.gameState.removedCourses.filter(c => c !== '324033' && c !== '03240033');
+                }
+                if (level === 'none') {
+                    global.gameState.removedCourses = global.gameState.removedCourses.filter(c => c !== '324032' && c !== '03240032');
+                }
+            }
+        }
     }
 
     function getCourseGrade(code, altCode) {
@@ -401,17 +477,14 @@
 
         try {
             isReservistDeduction = localStorage.getItem(PLANNER_RESERVIST_KEY) === 'true';
-            isEnglishExemption = localStorage.getItem(PLANNER_ENGLISH_EXEMPTION_KEY) === 'true';
-            if (isEnglishExemption && global.gameState) {
-                if (!global.gameState.exemptions) global.gameState.exemptions = {};
-                global.gameState.exemptions['03240033'] = true;
-                global.gameState.exemptions['324033'] = true;
-                if (global.gameState.courses) {
-                    ['03240033', '324033'].forEach(k => {
-                        if (global.gameState.courses[k]) global.gameState.courses[k].isExempt = true;
-                    });
-                }
+            const savedLevel = localStorage.getItem(PLANNER_ENGLISH_LEVEL_KEY);
+            if (savedLevel === 'exempt_all' || savedLevel === 'exempt_a' || savedLevel === 'none') {
+                englishLevel = savedLevel;
+            } else {
+                const oldExemption = localStorage.getItem(PLANNER_ENGLISH_EXEMPTION_KEY);
+                englishLevel = (oldExemption === 'true') ? 'exempt_all' : 'none';
             }
+            applyEnglishLevelState(englishLevel);
             const savedTrack = localStorage.getItem(PLANNER_TRACK_KEY);
             if (savedTrack) {
                 if (savedTrack === 'year_2025' || savedTrack === 'year_2024' || savedTrack === 'year_2027' || savedTrack === 'year_2026' || savedTrack === 'barak') {
@@ -1107,10 +1180,15 @@
             if (countedEnglishCodes.has(c.code)) return;
 
             let isEng = c.taughtInEnglish === true || c.isEnglish === true;
-            // Language training courses (Mitkadmim A 324032 and Mitkadmim B 324033) officially count towards the 2 English courses requirement in Technion
+            // Language training courses (Mitkadmim A 324032 and Mitkadmim B 324033) officially count towards the 2 English courses requirement in Technion,
+            // BUT ONLY IF the student actually studies/takes them (i.e. is NOT exempt from them)!
+            // In Technion: an exemption (פטור) from language courses does NOT count as a studied English course.
             const isLanguageTraining = normCodes.some(code => code === '324033' || code === '03240033' || code === '324032' || code === '03240032');
             if (isLanguageTraining) {
-                isEng = true;
+                const exempt = isCourseExempt(c.code, c.altCode);
+                if (!exempt) {
+                    isEng = true;
+                }
             }
             if (!isEng && global.gameState && global.gameState.englishContentCourses) {
                 if (normCodes.some(code => global.gameState.englishContentCourses[code])) {
@@ -1345,11 +1423,40 @@
         const trackSelect = document.getElementById('planner-track-select');
         if (trackSelect) trackSelect.value = selectedTrack;
 
-        // English exemption toggle state
-        const englishToggle = document.getElementById('toggle-planner-english-exemption');
+        // English level selector & badge state
+        const englishSelect = document.getElementById('select-planner-english-level');
         const englishBadge = document.getElementById('planner-english-badge');
-        if (englishToggle) englishToggle.checked = isEnglishExemption;
-        if (englishBadge) englishBadge.style.display = isEnglishExemption ? 'inline-block' : 'none';
+        const englishHint = document.getElementById('planner-english-hint');
+        const legacyToggle = document.getElementById('toggle-planner-english-exemption');
+        if (englishSelect) englishSelect.value = englishLevel;
+        if (legacyToggle) legacyToggle.checked = (englishLevel === 'exempt_all');
+        if (englishBadge) {
+            if (englishLevel === 'exempt_all') {
+                englishBadge.style.display = 'inline-block';
+                englishBadge.innerText = 'פטור מלא (134+)';
+                englishBadge.style.background = '#38bdf8';
+                englishBadge.style.color = '#082f49';
+            } else if (englishLevel === 'exempt_a') {
+                englishBadge.style.display = 'inline-block';
+                englishBadge.innerText = 'פטור מ-א׳ (לומד ב׳)';
+                englishBadge.style.background = '#f59e0b';
+                englishBadge.style.color = '#451a03';
+            } else {
+                englishBadge.style.display = 'inline-block';
+                englishBadge.innerText = 'סיווג א׳ (ללא פטור)';
+                englishBadge.style.background = '#64748b';
+                englishBadge.style.color = '#f8fafc';
+            }
+        }
+        if (englishHint) {
+            if (englishLevel === 'exempt_all') {
+                englishHint.innerText = '💡 פטור משני קורסי השפה. עליך להשלים 2 קורסי תוכן/מל״ג הנלמדים באנגלית.';
+            } else if (englishLevel === 'exempt_a') {
+                englishHint.innerText = '💡 פטור ממתקדמים א׳. חובה ללמוד מתקדמים ב׳ (324033, 3 נק״ז) אשר מכסה 1 מתוך 2 קורסי האנגלית הנדרשים! נדרש בנוסף רק קורס תוכן/מל״ג אחד באנגלית.';
+            } else {
+                englishHint.innerText = '💡 סיווג למתקדמים א׳. יש לקחת מתקדמים א׳ (324032) ומתקדמים ב׳ (324033) המכסים יחד את חובת 2 הקורסים באנגלית לתואר.';
+            }
+        }
 
         // Reservist toggle state
         const reservistToggle = document.getElementById('toggle-planner-reservist');
@@ -1992,43 +2099,40 @@
             });
         }
 
-        // 9. English Exemption (Amirnet) Toggle Listener
+        // 9. English Level Selector Listener
+        const englishSelect = document.getElementById('select-planner-english-level');
+        if (englishSelect && !englishSelect.dataset.bound) {
+            englishSelect.dataset.bound = 'true';
+            englishSelect.addEventListener('change', (e) => {
+                const newLevel = e.target.value;
+                applyEnglishLevelState(newLevel);
+                renderDegreePlanner();
+                if (typeof renderUI === 'function') renderUI();
+                if (typeof renderFlowchartTree === 'function') renderFlowchartTree();
+
+                let toastMsg = 'עודכנה הגדרת סיווג אנגלית.';
+                if (newLevel === 'exempt_all') {
+                    toastMsg = 'הופעל פטור מלא מקורסי שפה (134+): פטור מ-324033 ו-324032 (חובת 2 קורסי תוכן באנגלית חלה) 🇬🇧';
+                } else if (newLevel === 'exempt_a') {
+                    toastMsg = 'סיווג מתקדמים ב׳: פטור מ-324032. חובה ללמוד 324033 (3 נק״ז), המכסה 1 מתוך 2 קורסי האנגלית! 🇬🇧';
+                } else {
+                    toastMsg = 'סיווג מתקדמים א׳: ללא פטור משפה. נדרשים מתקדמים א׳ (324032) ומתקדמים ב׳ (324033). 🇬🇧';
+                }
+                showPlannerToast(toastMsg, true);
+            });
+        }
+
+        // Support legacy toggle if present
         const englishToggle = document.getElementById('toggle-planner-english-exemption');
         if (englishToggle && !englishToggle.dataset.bound) {
             englishToggle.dataset.bound = 'true';
             englishToggle.addEventListener('change', (e) => {
-                isEnglishExemption = e.target.checked;
-                try {
-                    localStorage.setItem(PLANNER_ENGLISH_EXEMPTION_KEY, isEnglishExemption ? 'true' : 'false');
-                } catch (err) {}
-                if (global.gameState) {
-                    if (!global.gameState.exemptions) global.gameState.exemptions = {};
-                    if (isEnglishExemption) {
-                        global.gameState.exemptions['03240033'] = true;
-                        global.gameState.exemptions['324033'] = true;
-                        global.gameState.exemptions['03240032'] = true;
-                        global.gameState.exemptions['324032'] = true;
-                        if (global.gameState.courses) {
-                            ['03240033', '324033', '03240032', '324032'].forEach(k => {
-                                if (global.gameState.courses[k]) global.gameState.courses[k].isExempt = true;
-                            });
-                        }
-                    } else {
-                        delete global.gameState.exemptions['03240033'];
-                        delete global.gameState.exemptions['324033'];
-                        delete global.gameState.exemptions['03240032'];
-                        delete global.gameState.exemptions['324032'];
-                        if (global.gameState.courses) {
-                            ['03240033', '324033', '03240032', '324032'].forEach(k => {
-                                if (global.gameState.courses[k]) global.gameState.courses[k].isExempt = false;
-                            });
-                        }
-                    }
-                }
+                const newLevel = e.target.checked ? 'exempt_all' : 'none';
+                applyEnglishLevelState(newLevel);
                 renderDegreePlanner();
                 if (typeof renderUI === 'function') renderUI();
                 if (typeof renderFlowchartTree === 'function') renderFlowchartTree();
-                showPlannerToast(isEnglishExemption ? 'הופעל פטור מקורסי שפה (134+): פטור מ-324033 ו-324032! (חובת 2 קורסי תוכן באנגלית חלה) 🇬🇧' : 'בוטל פטור מקורסי שפה.', true);
+                showPlannerToast(e.target.checked ? 'הופעל פטור מקורסי שפה (134+).' : 'בוטל פטור מקורסי שפה.', true);
             });
         }
     }
@@ -3107,6 +3211,10 @@
         if (typeof global.renderFlowchartTree === 'function') global.renderFlowchartTree();
         showPlannerToast(`עודכנה גרסת הפיזיקה: ${foundCourse.name} (${foundCourse.credits} נק״ז) ⚛️`, false);
     };
+
+    // Public API for English Level State
+    global.applyEnglishLevelState = applyEnglishLevelState;
+    global.getEnglishLevel = () => englishLevel;
 
     // Auto initialize events on DOM load
     if (typeof document !== 'undefined') {
