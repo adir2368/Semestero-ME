@@ -17995,13 +17995,13 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.10.11-v2.3.4",
-    version: "2.3.4",
-    build: "20261011_03",
-    date: "2026-10-11 22:45",
-    description: "גרסה 2.3.4: ביטול מוחלט של לולאת עדכון הגרסה וקפיצות הריענון האוטומטיות (controllerchange), סנכרון PWA נקי, שילוב סמסטר קיץ מובנה בעץ מתחת לשנה א' סמסטר ב', בורר גרסאות פיזיקה 1 ו-2 (כולל פיזיקה 1ת' ו-2ת'), רענון אוטומטי בהחלפת שנתון, חובת 2 קורסי תוכן באנגלית ופטור אמירנ״ט מקורסי שפה 324033."
+    code: "REV-2026.10.11-v2.3.5",
+    version: "2.3.5",
+    build: "20261011_04",
+    date: "2026-10-11 23:45",
+    description: "גרסה 2.3.5: תמיכה מלאה בהגדרות אנגלית לפי נהלי הטכניון (ספירת מתקדמים א' 324032 ומתקדמים ב' 324033 במניין 2 הקורסים באנגלית, פטור פסיכומטרי/אמירנ״ט 134+, פתיחת אפשרות הוספת קורסי אנגלית), ואופטימיזציית מנועי חיפוש גנרטיביים (GEO)."
 };
-window.APP_VERSION = "2.3.4";
+window.APP_VERSION = "2.3.5";
 
 function ensureBaselineRevisions() {
     if (!gameState.revisions || !Array.isArray(gameState.revisions) || gameState.revisions.length === 0) {
@@ -19266,7 +19266,7 @@ window.checkRemoteAppVersion = async function(isManualCheck = false) {
     const isElectron = Boolean(window.electronAPI || (window.process && window.process.type === 'renderer') || (navigator.userAgent && navigator.userAgent.includes('Electron')));
     const domVerEl = document.getElementById("display-system-version");
     const domVer = domVerEl ? domVerEl.innerText.replace(/^v/, "").trim() : "";
-    const currentVer = domVer || (window.APP_VERSION) || (APP_CURRENT_REVISION && APP_CURRENT_REVISION.version) || "2.3.4";
+    const currentVer = domVer || (window.APP_VERSION) || (APP_CURRENT_REVISION && APP_CURRENT_REVISION.version) || "2.3.5";
     const statusTextEl = document.getElementById("version-check-status-text");
     const footerBadgeEl = document.getElementById("footer-version-badge");
     const checkBtn = document.getElementById("btn-check-version-updates");
