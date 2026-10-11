@@ -17995,13 +17995,13 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.10.11-v2.3.3",
-    version: "2.3.3",
-    build: "20261011_02",
-    date: "2026-10-11 22:30",
-    description: "גרסה 2.3.3: שילוב סמסטר קיץ מובנה בעץ מתחת לשנה א' סמסטר ב', בורר גרסאות פיזיקה 1 ו-2 (כולל פיזיקה 1ת' ו-2ת') מהעץ והמודאל, רענון אוטומטי בהחלפת שנתון, חובת 2 קורסי תוכן באנגלית ופטור אמירנ״ט מקורסי שפה 324033, וניקוי דרישות קדם."
+    code: "REV-2026.10.11-v2.3.4",
+    version: "2.3.4",
+    build: "20261011_03",
+    date: "2026-10-11 22:45",
+    description: "גרסה 2.3.4: ביטול מוחלט של לולאת עדכון הגרסה וקפיצות הריענון האוטומטיות (controllerchange), סנכרון PWA נקי, שילוב סמסטר קיץ מובנה בעץ מתחת לשנה א' סמסטר ב', בורר גרסאות פיזיקה 1 ו-2 (כולל פיזיקה 1ת' ו-2ת'), רענון אוטומטי בהחלפת שנתון, חובת 2 קורסי תוכן באנגלית ופטור אמירנ״ט מקורסי שפה 324033."
 };
-window.APP_VERSION = "2.3.3";
+window.APP_VERSION = "2.3.4";
 
 function ensureBaselineRevisions() {
     if (!gameState.revisions || !Array.isArray(gameState.revisions) || gameState.revisions.length === 0) {
@@ -19266,7 +19266,7 @@ window.checkRemoteAppVersion = async function(isManualCheck = false) {
     const isElectron = Boolean(window.electronAPI || (window.process && window.process.type === 'renderer') || (navigator.userAgent && navigator.userAgent.includes('Electron')));
     const domVerEl = document.getElementById("display-system-version");
     const domVer = domVerEl ? domVerEl.innerText.replace(/^v/, "").trim() : "";
-    const currentVer = domVer || (window.APP_VERSION) || (APP_CURRENT_REVISION && APP_CURRENT_REVISION.version) || "2.3.3";
+    const currentVer = domVer || (window.APP_VERSION) || (APP_CURRENT_REVISION && APP_CURRENT_REVISION.version) || "2.3.4";
     const statusTextEl = document.getElementById("version-check-status-text");
     const footerBadgeEl = document.getElementById("footer-version-badge");
     const checkBtn = document.getElementById("btn-check-version-updates");
@@ -19317,20 +19317,20 @@ window.checkRemoteAppVersion = async function(isManualCheck = false) {
                 refreshBtn.style.display = isElectron ? "none" : "flex";
             }
 
-            // Check if dismissed in this session
-            let isDismissed = false;
-            try { isDismissed = !isManualCheck && sessionStorage.getItem("dismissed_update") === "true"; } catch (e) {}
-
+            // CRITICAL: NEVER automatically open the blocking modal on startup or background checks!
+            // Only open the modal if the user explicitly clicked to check for updates (isManualCheck === true).
             const updateModal = document.getElementById("version-update-modal");
-            if (updateModal && !isDismissed) {
+            if (isManualCheck && updateModal) {
                 updateModal.style.display = "flex";
                 updateModal.classList.add("active");
             }
-            if (typeof showToastNotification === 'function') {
-                showToastNotification(`🎉 קיימת גרסה חדשה של Semestero ME (v${remoteVer})!`, 'info');
-            }
         } else {
             // System is up to date
+            const updateModal = document.getElementById("version-update-modal");
+            if (updateModal) {
+                updateModal.style.display = "none";
+                updateModal.classList.remove("active");
+            }
             if (statusTextEl) {
                 statusTextEl.innerText = `המערכת מעודכנת (v${currentVer}) ✓`;
             }
@@ -19365,16 +19365,27 @@ window.forceAppUpdate = async function() {
         btn.innerHTML = `<span>🔄</span> <span>מרענן מטמון ומעדכן גרסה...</span>`;
     }
 
+    // Immediately close update modal
+    const updateModal = document.getElementById("version-update-modal");
+    if (updateModal) {
+        updateModal.style.display = "none";
+        updateModal.classList.remove("active");
+    }
+
     try {
         sessionStorage.setItem("dismissed_update", "true");
+        localStorage.setItem("semestero_dismissed_update", "true");
+    } catch (e) {}
 
+    try {
         // 1. Post skipWaiting to all active service workers
         if ('serviceWorker' in navigator) {
             const regs = await navigator.serviceWorker.getRegistrations();
             for (const reg of regs) {
-                if (reg.waiting) reg.waiting.postMessage({ action: 'skipWaiting' });
-                if (reg.active) reg.active.postMessage({ action: 'skipWaiting' });
-                await reg.update().catch(() => {});
+                try {
+                    if (reg.waiting) reg.waiting.postMessage({ action: 'skipWaiting' });
+                    if (reg.active) reg.active.postMessage({ action: 'skipWaiting' });
+                } catch (e) {}
             }
         }
 
@@ -19387,13 +19398,12 @@ window.forceAppUpdate = async function() {
         // 3. Unregister service worker to force fresh fetch
         if ('serviceWorker' in navigator) {
             const regs = await navigator.serviceWorker.getRegistrations();
-            await Promise.all(regs.map(r => r.unregister()));
+            await Promise.all(regs.map(r => r.unregister().catch(() => {})));
         }
 
         // 4. Force hard navigation reload with cache buster
-        const cleanUrl = new URL(window.location.href);
-        cleanUrl.searchParams.set('v_sync', Date.now());
-        window.location.replace(cleanUrl.toString());
+        const cleanUrl = window.location.origin + window.location.pathname + '?v_clean=' + Date.now() + window.location.hash;
+        window.location.replace(cleanUrl);
     } catch (e) {
         console.warn("[Update] forceAppUpdate fallback reload:", e);
         window.location.reload(true);

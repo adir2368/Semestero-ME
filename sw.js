@@ -1,5 +1,5 @@
-// Service Worker for Academic Skill Tree (Semestero ME) - v2.3.3
-const CACHE_NAME = 'semestero-me-v2.3.3';
+// Service Worker for Academic Skill Tree (Semestero ME) - v2.3.4
+const CACHE_NAME = 'semestero-me-v2.3.4';
 
 const STATIC_ASSETS = [
     './',
@@ -82,7 +82,7 @@ self.addEventListener('fetch', (event) => {
     if (isAppCode) {
         // Network-First strategy: always fetch freshest version online, fallback to cache offline
         event.respondWith(
-            fetch(event.request).then((networkResponse) => {
+            fetch(event.request, { cache: 'no-cache' }).then((networkResponse) => {
                 if (networkResponse && networkResponse.status === 200) {
                     const responseToCache = networkResponse.clone();
                     caches.open(CACHE_NAME).then((cache) => {
@@ -91,10 +91,10 @@ self.addEventListener('fetch', (event) => {
                 }
                 return networkResponse;
             }).catch(() => {
-                return caches.match(event.request).then((cachedResponse) => {
+                return caches.match(event.request, { ignoreSearch: true }).then((cachedResponse) => {
                     if (cachedResponse) return cachedResponse;
                     if (event.request.mode === 'navigate') {
-                        return caches.match('./index.html');
+                        return caches.match('./index.html', { ignoreSearch: true });
                     }
                 });
             })
