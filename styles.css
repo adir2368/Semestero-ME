@@ -12116,20 +12116,6 @@ html.is-iphone .app-global-footer {
     fill: #94a3b8 !important;
 }
 
-/* Clean Beams Mode (Reduces spiderweb visual clutter, highlights on hover) */
-.flowchart-svg.clean-beams .fc-beam {
-    opacity: 0.12 !important;
-    stroke-width: 1.2 !important;
-    transition: opacity 0.2s ease, stroke-width 0.2s ease;
-}
-
-.flowchart-svg.clean-beams .fc-beam.highlighted,
-.flowchart-svg.clean-beams .fc-beam.active,
-.flowchart-svg.clean-beams .fc-beam:hover {
-    opacity: 1 !important;
-    stroke-width: 2.8 !important;
-    filter: drop-shadow(0 0 6px currentColor);
-}
 
 /* ==========================================================================
    Preferred Sources Quick Bar (Google, Drive, CheeseFork, Moodle, Panopto)

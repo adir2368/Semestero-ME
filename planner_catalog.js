@@ -42,7 +42,8 @@
                     variants: [
                         { code: "01140051", altCode: "114051", name: "פיזיקה 1", credits: 3.5 },
                         { code: "01140071", altCode: "114071", name: "פיזיקה 1מ'", credits: 3.5 },
-                        { code: "01140077", altCode: "114077", name: "פיזיקה 1פ'", credits: 4.0 }
+                        { code: "01140077", altCode: "114077", name: "פיזיקה 1פ'", credits: 4.0 },
+                        { code: "01140055", altCode: "114055", name: "פיזיקה 1ת'", credits: 3.5 }
                     ],
                     prereqs: [] 
                 },
@@ -93,8 +94,9 @@
                     variantGroupId: "physics_2",
                     variants: [
                         { code: "01140052", altCode: "114052", name: "פיזיקה 2", credits: 3.5 },
-                        { code: "01140075", altCode: "114075", name: "פיזיקה 2ממ'", credits: 5.0 },
-                        { code: "01140078", altCode: "114078", name: "פיזיקה 2פ'", credits: 5.0 }
+                        { code: "01140075", altCode: "114075", name: "פיזיקה 2מ'", credits: 5.0 },
+                        { code: "01140078", altCode: "114078", name: "פיזיקה 2פ'", credits: 5.0 },
+                        { code: "01140076", altCode: "114076", name: "פיזיקה 2ת'", credits: 5.0 }
                     ],
                     prereqs: ["01140051", "01040043"] 
                 }

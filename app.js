@@ -1884,6 +1884,7 @@ function getXpNeeded(level) {
 const SEMESTER_LABELS = {
     1: "שנה א' - סמסטר א'",
     2: "שנה א' - סמסטר ב'",
+    9: "שנה א׳ - סמסטר קיץ ☀️",
     3: "שנה ב' - סמסטר ג'",
     4: "שנה ב' - סמסטר ד'",
     5: "שנה ג' - סמסטר ה'",
@@ -11361,33 +11362,69 @@ function openCourseDetails(code) {
         };
     }
 
-    // Preferred Sources Quick Bar (Google Search, Google Drive, CheeseFork, Moodle, Panopto)
-    const sourcesContainer = document.getElementById("modal-preferred-sources-links");
-    if (sourcesContainer) {
-        const cleanCode = course.code.replace(/^0+/, '');
-        const queryTerm = encodeURIComponent(`טכניון ${course.code} ${course.name}`);
-        sourcesContainer.innerHTML = `
-            <a href="https://www.google.com/search?q=${queryTerm}" target="_blank" rel="noopener noreferrer" class="pref-source-btn google-search" title="חפש קורס זה בגוגל">
-                <svg viewBox="0 0 24 24" width="14" height="14"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
-                <span>Google</span>
-            </a>
-            <a href="https://drive.google.com/drive/search?q=${encodeURIComponent(course.code)}" target="_blank" rel="noopener noreferrer" class="pref-source-btn google-drive" title="חפש חומרי לימוד ב-Google Drive">
-                <svg viewBox="0 0 24 24" width="14" height="14"><path fill="#0F9D58" d="M7.74 16.5l-4.74-8.25h9.48l4.74 8.25z"/><path fill="#FFBA00" d="M12 3.75l4.74 8.25H7.26l4.74-8.25z"/><path fill="#4285F4" d="M16.26 16.5l4.74-8.25H11.52l-4.74 8.25z"/></svg>
-                <span>Drive</span>
-            </a>
-            <a href="https://cheesefork.cf/course/${cleanCode}" target="_blank" rel="noopener noreferrer" class="pref-source-btn cheesefork" title="פתח עמוד קורס ב-CheeseFork">
-                <span>🧀</span>
-                <span>CheeseFork</span>
-            </a>
-            <a href="https://moodle.technion.ac.il/" target="_blank" rel="noopener noreferrer" class="pref-source-btn moodle" title="עבור למודל הטכניון">
-                <span>🎓</span>
-                <span>Moodle</span>
-            </a>
-            <a href="https://panopto.technion.ac.il/" target="_blank" rel="noopener noreferrer" class="pref-source-btn panopto" title="הקלטות הרצאות ב-Panopto">
-                <span>🎥</span>
-                <span>Panopto</span>
-            </a>
-        `;
+    // Physics Variants Chooser (Rendered if course is Physics 1 or Physics 2)
+    const physicsVariantsContainer = document.getElementById("modal-physics-variants-container");
+    if (physicsVariantsContainer) {
+        const phys1Family = [
+            { code: "01140051", altCode: "114051", name: "פיזיקה 1", credits: 3.5 },
+            { code: "01140071", altCode: "114071", name: "פיזיקה 1מ'", credits: 3.5 },
+            { code: "01140077", altCode: "114077", name: "פיזיקה 1פ'", credits: 4.0 },
+            { code: "01140055", altCode: "114055", name: "פיזיקה 1ת'", credits: 3.5 }
+        ];
+        const phys2Family = [
+            { code: "01140052", altCode: "114052", name: "פיזיקה 2", credits: 3.5 },
+            { code: "01140075", altCode: "114075", name: "פיזיקה 2מ'", credits: 5.0 },
+            { code: "01140078", altCode: "114078", name: "פיזיקה 2פ'", credits: 5.0 },
+            { code: "01140076", altCode: "114076", name: "פיזיקה 2ת'", credits: 5.0 }
+        ];
+
+        const isPhys1 = phys1Family.some(v => v.code === course.code || v.altCode === course.code);
+        const isPhys2 = phys2Family.some(v => v.code === course.code || v.altCode === course.code);
+
+        if (isPhys1 || isPhys2) {
+            const family = isPhys1 ? phys1Family : phys2Family;
+            const title = isPhys1 ? "בחירת גרסת פיזיקה 1:" : "בחירת גרסת פיזיקה 2:";
+            physicsVariantsContainer.innerHTML = `
+                <div style="background: rgba(56, 189, 248, 0.08); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 8px; padding: 10px 12px; margin-bottom: 12px;">
+                    <div style="font-size: 0.82rem; font-weight: 700; color: #38bdf8; margin-bottom: 8px;">⚛️ ${title}</div>
+                    <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                        ${family.map(v => {
+                            const isCurrent = v.code === course.code || v.altCode === course.code;
+                            return `
+                                <button type="button" class="btn btn-sm ${isCurrent ? 'btn-primary' : 'btn-outline-primary'}"
+                                        data-variant-code="${v.code}"
+                                        style="font-size: 0.78rem; padding: 4px 10px; border-radius: 6px; cursor: pointer; ${isCurrent ? 'background: #38bdf8; color: #0f172a; font-weight: 700;' : 'background: transparent; color: #94a3b8; border: 1px solid #475569;'}">
+                                    ${v.name} (${v.credits} נק״ז)
+                                </button>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+            `;
+            physicsVariantsContainer.querySelectorAll('button[data-variant-code]').forEach(btn => {
+                btn.onclick = () => {
+                    const targetCode = btn.dataset.variantCode;
+                    if (targetCode && targetCode !== course.code) {
+                        if (window.DegreePlanner && typeof window.DegreePlanner.handlePhysicsVariantSelect === 'function') {
+                            window.DegreePlanner.handlePhysicsVariantSelect(targetCode);
+                        } else {
+                            const vObj = family.find(f => f.code === targetCode);
+                            if (vObj) {
+                                course.code = vObj.code;
+                                course.altCode = vObj.altCode;
+                                course.name = vObj.name;
+                                course.credits = vObj.credits;
+                                saveState();
+                                renderUI();
+                            }
+                        }
+                        openCourseDetails(targetCode);
+                    }
+                };
+            });
+        } else {
+            physicsVariantsContainer.innerHTML = '';
+        }
     }
 
     // Set current semester select value and wire persistence
@@ -11398,7 +11435,7 @@ function openCourseDetails(code) {
 
     const performSaveSemester = (newSem) => {
         newSem = parseInt(newSem);
-        if (!newSem || newSem < 1 || newSem > 8) return;
+        if (!newSem || (newSem < 1 || (newSem > 8 && newSem !== 9))) return;
         course.semester = newSem;
 
         // Persist to planner module so customPlan is updated and never reverts on re-render
@@ -11415,8 +11452,9 @@ function openCourseDetails(code) {
                 if (saveSemesterBadge) saveSemesterBadge.style.display = "none";
             }, 3000);
         }
+        const semName = newSem === 9 ? "שנה א׳ - סמסטר קיץ ☀️" : `סמסטר ${newSem}`;
         if (typeof showToastNotification === 'function') {
-            showToastNotification(`✓ הקורס ${course.name} הועבר לסמסטר ${newSem} ונשמר בהצלחה`, 'success');
+            showToastNotification(`✓ הקורס ${course.name} הועבר ל${semName} ונשמר בהצלחה`, 'success');
         }
     };
 
@@ -11430,6 +11468,33 @@ function openCourseDetails(code) {
         saveSemesterBtn.onclick = () => {
             if (semesterSelect) {
                 performSaveSemester(semesterSelect.value);
+            }
+        };
+    }
+
+    // English content course toggle (קורס הנלמד באנגלית)
+    const engContentCheckbox = document.getElementById("modal-course-english-content-checkbox");
+    if (engContentCheckbox) {
+        const isEng = Boolean(
+            (gameState.englishContentCourses && (gameState.englishContentCourses[course.code] || (course.altCode && gameState.englishContentCourses[course.altCode]))) ||
+            course.taughtInEnglish ||
+            course.isEnglish
+        );
+        engContentCheckbox.checked = isEng;
+        engContentCheckbox.onchange = (e) => {
+            const checked = e.target.checked;
+            gameState.englishContentCourses = gameState.englishContentCourses || {};
+            gameState.englishContentCourses[course.code] = checked;
+            if (course.altCode) gameState.englishContentCourses[course.altCode] = checked;
+            course.taughtInEnglish = checked;
+            course.isEnglish = checked;
+            saveState();
+            if (typeof renderUI === 'function') renderUI();
+            if (window.DegreePlanner && typeof window.DegreePlanner.renderDegreePlanner === 'function') {
+                window.DegreePlanner.renderDegreePlanner();
+            }
+            if (typeof showToastNotification === 'function') {
+                showToastNotification(checked ? `✓ ${course.name} סומן כנלמד באנגלית (נחשב לחובת 2 קורסים באנגלית)` : `בוטל סימון אנגלית עבור ${course.name}`, 'info');
             }
         };
     }
@@ -12087,64 +12152,72 @@ function openCourseDetails(code) {
         // Build CNF Clauses (Disjunction of Alternatives separated by Conjunction AND)
         const cnfClauses = [];
         const seasonalMap = (window.PLANNER_CATALOG && window.PLANNER_CATALOG.SEASONAL_COURSE_MAPPINGS) || {};
+        const seenClauseRoots = new Set();
 
         (course.prerequisites || []).forEach(preCode => {
-            const rawSet = new Set();
-            rawSet.add(preCode);
-            const strClean = String(preCode).replace(/^0+/, '');
-            rawSet.add(strClean);
-            if (preCode.length === 6) rawSet.add('00' + preCode);
+            const normRoot = normalizeCourseCodeForFlowchart(preCode);
+            if (seenClauseRoots.has(normRoot)) return;
+            seenClauseRoots.add(normRoot);
 
-            // Physics 1 variants
-            if (['01140051', '114051', '01140071', '114071', '01140077', '114077'].includes(preCode) ||
-                ['01140051', '114051', '01140071', '114071', '01140077', '114077'].includes(strClean)) {
-                rawSet.add('01140051'); rawSet.add('01140071'); rawSet.add('01140077');
-            }
-
-            // Physics 2 variants
-            if (['01140052', '114052', '01140075', '114075', '01140078', '114078'].includes(preCode) ||
-                ['01140052', '114052', '01140075', '114075', '01140078', '114078'].includes(strClean)) {
-                rawSet.add('01140052'); rawSet.add('01140075'); rawSet.add('01140078');
-            }
-
-            // Seasonal pairs
-            const sInfo = seasonalMap[preCode] || seasonalMap[strClean] || seasonalMap['0' + strClean];
-            if (sInfo) {
-                if (sInfo.winter) rawSet.add(sInfo.winter);
-                if (sInfo.spring) rawSet.add(sInfo.spring);
-                if (sInfo.altSpring) rawSet.add(sInfo.altSpring);
-                if (sInfo.altWinter) rawSet.add(sInfo.altWinter);
-            }
-
-            // Equivalent groups
-            if (['104041', '104042', '01040041', '01040042', '01040165'].includes(strClean)) {
-                rawSet.add('104010'); rawSet.add('104012'); rawSet.add('104013');
-            }
-            if (['104065', '104064', '01040065', '01040064'].includes(strClean)) {
-                rawSet.add('104016'); rawSet.add('104019');
-            }
-            if (['104043', '104044', '01040043', '01040044', '01040166'].includes(strClean)) {
-                rawSet.add('104022'); rawSet.add('104020');
-            }
-
+            const cObj = findCourseObj(preCode) || findCourseObj(normRoot);
             const alts = [];
-            const seenCodes = new Set();
-            rawSet.forEach(c => {
-                const normC = c.replace(/^0+/, '');
-                if (seenCodes.has(normC)) return;
-                seenCodes.add(normC);
 
-                const cObj = findCourseObj(c) || (window.PLANNER_CATALOG && window.PLANNER_CATALOG.ALL_COURSES_MAP && (window.PLANNER_CATALOG.ALL_COURSES_MAP[c] || window.PLANNER_CATALOG.ALL_COURSES_MAP[normC]));
-                const name = cObj ? cObj.name : c;
-                const isSatisfied = (cObj && (cObj.status === 'mastered' || (cObj.grade && Number(cObj.grade) >= 55))) ||
-                                    (gameState.exemptions && (gameState.exemptions[c] || (cObj && gameState.exemptions[cObj.code])));
+            // Check if this prerequisite is Physics 1 or Physics 2
+            const isPhys1 = ['01140051', '114051', '01140071', '114071', '01140077', '114077', '01140055', '114055'].includes(preCode) || ['114051', '114071', '114077', '114055'].includes(normRoot);
+            const isPhys2 = ['01140052', '114052', '01140075', '114075', '01140078', '114078', '01140076', '114076'].includes(preCode) || ['114052', '114075', '114078', '114076'].includes(normRoot);
+
+            if (isPhys1) {
+                const p1Variants = [
+                    { code: '01140051', altCode: '114051', name: 'פיזיקה 1' },
+                    { code: '01140071', altCode: '114071', name: "פיזיקה 1מ'" },
+                    { code: '01140077', altCode: '114077', name: "פיזיקה 1פ'" },
+                    { code: '01140055', altCode: '114055', name: "פיזיקה 1ת'" }
+                ];
+                p1Variants.forEach(v => {
+                    const obj = findCourseObj(v.code) || findCourseObj(v.altCode);
+                    const isSat = (obj && (obj.status === 'mastered' || (obj.grade && Number(obj.grade) >= 55))) ||
+                                  (gameState.exemptions && (gameState.exemptions[v.code] || gameState.exemptions[v.altCode] || (obj && gameState.exemptions[obj.code])));
+                    alts.push({
+                        code: (obj && obj.code) || v.altCode,
+                        name: v.name,
+                        obj: obj,
+                        isSatisfied: Boolean(isSat)
+                    });
+                });
+            } else if (isPhys2) {
+                const p2Variants = [
+                    { code: '01140052', altCode: '114052', name: 'פיזיקה 2' },
+                    { code: '01140075', altCode: '114075', name: "פיזיקה 2מ'" },
+                    { code: '01140078', altCode: '114078', name: "פיזיקה 2פ'" },
+                    { code: '01140076', altCode: '114076', name: "פיזיקה 2ת'" }
+                ];
+                p2Variants.forEach(v => {
+                    const obj = findCourseObj(v.code) || findCourseObj(v.altCode);
+                    const isSat = (obj && (obj.status === 'mastered' || (obj.grade && Number(obj.grade) >= 55))) ||
+                                  (gameState.exemptions && (gameState.exemptions[v.code] || gameState.exemptions[v.altCode] || (obj && gameState.exemptions[obj.code])));
+                    alts.push({
+                        code: (obj && obj.code) || v.altCode,
+                        name: v.name,
+                        obj: obj,
+                        isSatisfied: Boolean(isSat)
+                    });
+                });
+            } else {
+                // Check if this course has seasonal equivalents (e.g. ODE 104131/01040135)
+                const strClean = String(preCode).replace(/^0+/, '');
+                const sInfo = seasonalMap[preCode] || seasonalMap[strClean] || seasonalMap['0' + strClean];
+                const seasonalCodes = sInfo ? [sInfo.spring || sInfo.winter].filter(Boolean) : [];
+
+                const name = (cObj && cObj.name) || (sInfo && sInfo.name) || preCode;
+                const isSat = (cObj && (cObj.status === 'mastered' || (cObj.grade && Number(cObj.grade) >= 55))) ||
+                              (gameState.exemptions && (gameState.exemptions[preCode] || gameState.exemptions[normRoot] || (cObj && gameState.exemptions[cObj.code])));
                 alts.push({
-                    code: c,
+                    code: (cObj && cObj.code) || normRoot,
                     name: name,
                     obj: cObj,
-                    isSatisfied: Boolean(isSatisfied)
+                    isSatisfied: Boolean(isSat)
                 });
-            });
+            }
 
             if (alts.length > 0) {
                 cnfClauses.push(alts);
@@ -12186,7 +12259,7 @@ function openCourseDetails(code) {
                         <span class="prereq-cnf-pill ${pillClass}" onclick="openCourseDetails('${alt.code}')" title="לחץ לפתיחת פרטי ${alt.name}">
                             <span>${icon}</span>
                             <strong>${alt.name}</strong>
-                            <span style="font-size: 0.72rem; opacity: 0.85;">${alt.code}</span>
+                            ${alt.code && String(alt.code) !== String(alt.name) ? `<span style="font-size: 0.72rem; opacity: 0.85;">${alt.code}</span>` : ''}
                         </span>
                     `;
                     if (altIdx < clause.length - 1) {
@@ -15304,7 +15377,7 @@ let flowchartZoom = 1.0;
 let isFlowchartFitWidth = false;
 
 const BASE_FLOWCHART_WIDTH = 1560;
-const BASE_FLOWCHART_HEIGHT = 1380;
+const BASE_FLOWCHART_HEIGHT = 1540;
 const FLOWCHART_ZOOM_MULTIPLIER = 1.15;
 
 function isMobileView() {
@@ -15389,20 +15462,6 @@ function setupFlowchartViewMode() {
             } else {
                 toggleFitBtn.classList.remove("active");
                 setFlowchartZoom(1.0);
-            }
-        });
-    }
-
-    const toggleCleanBeamsBtn = document.getElementById("btn-fc-toggle-clean-beams");
-    if (toggleCleanBeamsBtn) {
-        toggleCleanBeamsBtn.addEventListener("click", () => {
-            const svgEl = document.getElementById("flowchart-svg");
-            if (!svgEl) return;
-            const isClean = svgEl.classList.toggle("clean-beams");
-            toggleCleanBeamsBtn.classList.toggle("active", isClean);
-            toggleCleanBeamsBtn.style.background = isClean ? "rgba(56, 189, 248, 0.2)" : "";
-            if (typeof showToastNotification === 'function') {
-                showToastNotification(isClean ? "✓ מצב קווים נקיים הופעל: הקווים מוחלשים ויוצגו בעוצמה מלאה בריחוף" : "מצב קווים מלא הופעל", "info");
             }
         });
     }
@@ -15610,20 +15669,30 @@ function renderFlowchartTree() {
     connectionsGroup.innerHTML = "";
     nodesGroup.innerHTML = "";
 
-    const TOTAL_SEMESTERS = 8;
+    // 1. Group all courses by their ACTUAL semester in gameState.courses
+    const SEMESTER_ROWS = [
+        { sem: 1, year: "שנה א׳", term: "סמסטר א׳" },
+        { sem: 2, year: "שנה א׳", term: "סמסטר ב׳" },
+        { sem: 9, year: "שנה א׳", term: "סמסטר קיץ ☀️", isSummer: true },
+        { sem: 3, year: "שנה ב׳", term: "סמסטר ג׳" },
+        { sem: 4, year: "שנה ב׳", term: "סמסטר ד׳" },
+        { sem: 5, year: "שנה ג׳", term: "סמסטר ה׳" },
+        { sem: 6, year: "שנה ג׳", term: "סמסטר ו׳" },
+        { sem: 7, year: "שנה ד׳", term: "סמסטר ז׳" },
+        { sem: 8, year: "שנה ד׳", term: "סמסטר ח׳" }
+    ];
 
     // Sync planned courses and semesters from "התוכנית שלי" (customPlan)
     if (typeof DegreePlanner !== 'undefined' && DegreePlanner.syncPlannerToTree) {
         DegreePlanner.syncPlannerToTree(true);
     }
 
-    // 1. Group all courses by their ACTUAL semester in gameState.courses
     const semesterCourses = {};
-    for (let s = 1; s <= TOTAL_SEMESTERS; s++) {
-        semesterCourses[s] = [];
-    }
+    SEMESTER_ROWS.forEach(r => {
+        semesterCourses[r.sem] = [];
+    });
 
-    const PURGED_FLOWCHART_CODES = new Set(['324033', '03240033', '035026', '35026', '035044', '01140071', '114071']);
+    const PURGED_FLOWCHART_CODES = new Set(['035026', '35026', '035044', '01140071', '114071']);
     const seenRootsInTree = new Set();
     Object.values(gameState.courses || {}).forEach(course => {
         if (!course || !course.code) return;
@@ -15639,17 +15708,21 @@ function renderFlowchartTree() {
         if (seenRootsInTree.has(root)) return;
         seenRootsInTree.add(root);
 
-        const sem = Math.max(1, Math.min(TOTAL_SEMESTERS, Number(course.semester) || 1));
+        let sem = Number(course.semester) || 1;
+        if (sem !== 9) {
+            sem = Math.max(1, Math.min(8, sem));
+        }
+        if (!semesterCourses[sem]) semesterCourses[sem] = [];
         semesterCourses[sem].push(course);
     });
 
     // Check maximum courses in any single semester to scale width gracefully
     let maxCoursesInAnySem = 6;
-    for (let s = 1; s <= TOTAL_SEMESTERS; s++) {
-        if ((semesterCourses[s] || []).length > maxCoursesInAnySem) {
-            maxCoursesInAnySem = semesterCourses[s].length;
+    SEMESTER_ROWS.forEach(row => {
+        if ((semesterCourses[row.sem] || []).length > maxCoursesInAnySem) {
+            maxCoursesInAnySem = semesterCourses[row.sem].length;
         }
-    }
+    });
     const NUM_COLS = Math.max(6, maxCoursesInAnySem);
     const LEFT_MARGIN = 175; // Left margin for row title
     const RIGHT_MARGIN = 35;
@@ -15664,17 +15737,6 @@ function renderFlowchartTree() {
     svgEl.setAttribute("viewBox", `0 0 ${TOTAL_WIDTH} ${TOTAL_HEIGHT}`);
 
     // 2. Draw Semester Background Bands & Labels (Never cut off in RTL or LTR)
-    const SEMESTER_ROWS = [
-        { sem: 1, year: "שנה א׳", term: "סמסטר א׳" },
-        { sem: 2, year: "שנה א׳", term: "סמסטר ב׳" },
-        { sem: 3, year: "שנה ב׳", term: "סמסטר ג׳" },
-        { sem: 4, year: "שנה ב׳", term: "סמסטר ד׳" },
-        { sem: 5, year: "שנה ג׳", term: "סמסטר ה׳" },
-        { sem: 6, year: "שנה ג׳", term: "סמסטר ו׳" },
-        { sem: 7, year: "שנה ד׳", term: "סמסטר ז׳" },
-        { sem: 8, year: "שנה ד׳", term: "סמסטר ח׳" }
-    ];
-
     let bgHtml = "";
     SEMESTER_ROWS.forEach((row, idx) => {
         const topY = idx * ROW_HEIGHT + 6;
@@ -15774,11 +15836,11 @@ function renderFlowchartTree() {
         return LEFT_MARGIN + colIdx * colSpacing + (colSpacing / 2);
     }
 
-    for (let s = 1; s <= TOTAL_SEMESTERS; s++) {
-        const list = semesterCourses[s];
-        if (!list || list.length === 0) continue;
+    SEMESTER_ROWS.forEach((row, rowIdx) => {
+        const list = semesterCourses[row.sem];
+        if (!list || list.length === 0) return;
 
-        const nodeY = (s - 1) * ROW_HEIGHT + (ROW_HEIGHT / 2) + 4;
+        const nodeY = rowIdx * ROW_HEIGHT + (ROW_HEIGHT / 2) + 4;
         const usedColsInSem = new Set();
 
         list.forEach(course => {
@@ -15804,13 +15866,13 @@ function renderFlowchartTree() {
             coursePositions[course.code] = {
                 x: nodeX,
                 y: nodeY,
-                sem: s,
+                sem: row.sem,
                 col: col,
                 w: nodeWidth,
                 h: nodeHeight
             };
         });
-    }
+    });
 
     // Position & Course Resolver: Guaranteed mapping for 6-digit, 8-digit, stripped and altCode keys
     function resolveCoursePosition(code) {

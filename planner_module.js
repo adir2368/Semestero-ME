@@ -13,6 +13,7 @@
     let currentMode = 'custom'; // 'custom' | 'suggested'
     let selectedTrack = 'year_2027'; // 'year_2027' | 'year_2025' | 'year_2024' | 'barak'
     let isReservistDeduction = false;
+    let isEnglishExemption = false;
     let selectedCategory = 'ALL'; // 'ALL' | 'A' | 'B' | 'C' | 'D' | 'E' | 'UNASSIGNED'
     let searchQuery = '';
     let customPlan = null;
@@ -25,6 +26,7 @@
     const PLANNER_STORAGE_KEY_V2 = 'atlas_me_custom_degree_plan_v2';
     const PLANNER_STORAGE_KEY_V1 = 'atlas_me_custom_degree_plan_v1';
     const PLANNER_RESERVIST_KEY = 'semestero_reservist_deduction_active';
+    const PLANNER_ENGLISH_EXEMPTION_KEY = 'semestero_english_exemption_active';
     const PLANNER_TRACK_KEY = 'semestero_planner_selected_track';
 
     function getActiveUserId() {
@@ -49,9 +51,8 @@
         return uid === 'adir_moshe' ? `${PLANNER_STORAGE_KEY_V1}_adir` : `${PLANNER_STORAGE_KEY_V1}_${uid}`;
     }
 
-    // Purged Courses List (Removed/Exempt for user: English B & Creative Intro)
+    // Purged Courses List (Removed/Exempt for user: Creative Intro)
     const PURGED_CODES = new Set([
-        '03240033', '324033',
         '00350026', '035026', '35026',
         '035044'
     ]);
@@ -102,9 +103,9 @@
             });
         }
 
-        // Include Physics variants family equivalents (פיזיקה 1, 1מ', 1פ' / פיזיקה 2, 2ממ', 2פ')
-        const phys1Codes = ['01140051', '114051', '01140071', '114071', '01140077', '114077'];
-        const phys2Codes = ['01140052', '114052', '01140075', '114075', '01140078', '114078'];
+        // Include Physics variants family equivalents (פיזיקה 1, 1מ', 1פ', 1ת' / פיזיקה 2, 2מ', 2פ', 2ת')
+        const phys1Codes = ['01140051', '114051', '01140071', '114071', '01140077', '114077', '01140055', '114055'];
+        const phys2Codes = ['01140052', '114052', '01140075', '114075', '01140078', '114078', '01140076', '114076'];
         if (phys1Codes.includes(code) || phys1Codes.includes(altCode)) {
             phys1Codes.forEach(process);
         }
@@ -400,6 +401,17 @@
 
         try {
             isReservistDeduction = localStorage.getItem(PLANNER_RESERVIST_KEY) === 'true';
+            isEnglishExemption = localStorage.getItem(PLANNER_ENGLISH_EXEMPTION_KEY) === 'true';
+            if (isEnglishExemption && global.gameState) {
+                if (!global.gameState.exemptions) global.gameState.exemptions = {};
+                global.gameState.exemptions['03240033'] = true;
+                global.gameState.exemptions['324033'] = true;
+                if (global.gameState.courses) {
+                    ['03240033', '324033'].forEach(k => {
+                        if (global.gameState.courses[k]) global.gameState.courses[k].isExempt = true;
+                    });
+                }
+            }
             const savedTrack = localStorage.getItem(PLANNER_TRACK_KEY);
             if (savedTrack) {
                 if (savedTrack === 'year_2025' || savedTrack === 'year_2024' || savedTrack === 'year_2027' || savedTrack === 'year_2026' || savedTrack === 'barak') {
@@ -1087,8 +1099,39 @@
         let totalElectiveCredits = 0;
         let totalDegreeCredits = 0;
 
+        let countEnglishContent = 0;
+        const countedEnglishCodes = new Set();
+        const checkEnglishContent = (c) => {
+            if (!c || !c.code) return;
+            const normCodes = getNormalizedCodes(c.code, c.altCode);
+            // Exclude language courses themselves (324033, 324031, etc.)
+            if (normCodes.some(code => code === '324033' || code === '03240033' || code === '324031' || code === '324032')) return;
+            if (countedEnglishCodes.has(c.code)) return;
+
+            let isEng = c.taughtInEnglish === true || c.isEnglish === true;
+            if (!isEng && global.gameState && global.gameState.englishContentCourses) {
+                if (normCodes.some(code => global.gameState.englishContentCourses[code])) {
+                    isEng = true;
+                }
+            }
+            if (!isEng && global.gameState && global.gameState.courses) {
+                normCodes.forEach(code => {
+                    const st = global.gameState.courses[code];
+                    if (st && (st.taughtInEnglish === true || st.isEnglish === true)) {
+                        isEng = true;
+                    }
+                });
+            }
+
+            if (isEng) {
+                countedEnglishCodes.add(c.code);
+                countEnglishContent++;
+            }
+        };
+
         plan.forEach(sem => {
             (sem.courses || []).forEach(c => {
+                checkEnglishContent(c);
                 const creds = Number(c.credits) || 0;
                 totalDegreeCredits += creds;
 
@@ -1113,6 +1156,17 @@
             });
         });
 
+        if (unassignedCourses) {
+            unassignedCourses.forEach(c => checkEnglishContent(c));
+        }
+        if (global.gameState && global.gameState.courses) {
+            Object.values(global.gameState.courses).forEach(c => {
+                if (isCourseCompleted(c.code, c.altCode)) {
+                    checkEnglishContent(c);
+                }
+            });
+        }
+
         const requiredDegreeCredits = isReservistDeduction ? 155.5 : 157.5;
         const requiredElectiveCredits = 32.5;
 
@@ -1126,6 +1180,8 @@
             totalDegreeCredits,
             requiredDegreeCredits,
             isReservistDeduction,
+            countEnglishContent,
+            ruleEnglishContent_met: countEnglishContent >= 2,
             ruleA_met: countA >= 1,
             ruleB_met: countB >= 2,
             ruleC_met: countC >= 2,
@@ -1286,6 +1342,12 @@
         const trackSelect = document.getElementById('planner-track-select');
         if (trackSelect) trackSelect.value = selectedTrack;
 
+        // English exemption toggle state
+        const englishToggle = document.getElementById('toggle-planner-english-exemption');
+        const englishBadge = document.getElementById('planner-english-badge');
+        if (englishToggle) englishToggle.checked = isEnglishExemption;
+        if (englishBadge) englishBadge.style.display = isEnglishExemption ? 'inline-block' : 'none';
+
         // Reservist toggle state
         const reservistToggle = document.getElementById('toggle-planner-reservist');
         const reservistBadge = document.getElementById('planner-reservist-badge');
@@ -1336,28 +1398,6 @@
                 const canDrag = currentMode === 'custom' && !completed;
                 const canRemove = currentMode === 'custom' && !completed;
 
-                // Physics Variants Selector
-                const isPhys1 = ['01140051', '114051', '01140071', '114071', '01140077', '114077'].includes(course.code) || course.variantGroupId === 'physics_1';
-                const isPhys2 = ['01140052', '114052', '01140075', '114075', '01140078', '114078'].includes(course.code) || course.variantGroupId === 'physics_2';
-                let variantDropdownHtml = '';
-                if (isPhys1) {
-                    variantDropdownHtml = `
-                        <select class="card-variant-select" onclick="event.stopPropagation()" onchange="window.handlePhysicsVariantSelect('${escapeHtml(course.code)}', this.value, event)" title="בחר גרסת פיזיקה 1">
-                            <option value="01140051" ${['01140051', '114051'].includes(course.code) ? 'selected' : ''}>פיזיקה 1 (3.5)</option>
-                            <option value="01140071" ${['01140071', '114071'].includes(course.code) ? 'selected' : ''}>פיזיקה 1מ' (3.5)</option>
-                            <option value="01140077" ${['01140077', '114077'].includes(course.code) ? 'selected' : ''}>פיזיקה 1פ' (4.0)</option>
-                        </select>
-                    `;
-                } else if (isPhys2) {
-                    variantDropdownHtml = `
-                        <select class="card-variant-select" onclick="event.stopPropagation()" onchange="window.handlePhysicsVariantSelect('${escapeHtml(course.code)}', this.value, event)" title="בחר גרסת פיזיקה 2">
-                            <option value="01140052" ${['01140052', '114052'].includes(course.code) ? 'selected' : ''}>פיזיקה 2 (3.5)</option>
-                            <option value="01140075" ${['01140075', '114075'].includes(course.code) ? 'selected' : ''}>פיזיקה 2ממ' (5.0)</option>
-                            <option value="01140078" ${['01140078', '114078'].includes(course.code) ? 'selected' : ''}>פיזיקה 2פ' (5.0)</option>
-                        </select>
-                    `;
-                }
-
                 // Origin Badges (Moved / Retake)
                 const movedBadge = (course.movedFromSemester !== undefined && course.movedFromSemester !== null)
                     ? `<span class="badge-course-origin moved" title="קורס זה הועבר מסמסטר ${course.movedFromSemester}">הועבר מסמ' ${course.movedFromSemester}</span>`
@@ -1381,7 +1421,6 @@
                         <div class="course-card-top">
                             <span class="course-card-code">${escapeHtml(course.code)}</span>
                             <div style="display: flex; align-items: center; gap: 4px; flex-wrap: wrap;">
-                                ${variantDropdownHtml}
                                 ${movedBadge}
                                 ${retakeBadge}
                                 ${termBadge}
@@ -1433,21 +1472,6 @@
                     </div>
                 </div>
             `);
-
-            // After each Spring semester (even semesters like 2, 4, 6, 8), render "+ הוסף סמסטר קיץ" if none exists
-            if (currentMode === 'custom' && !isSummer && semNum % 2 === 0) {
-                const nextSem = plan[idx + 1];
-                const hasSummerNext = nextSem && (nextSem.isSummer === true || nextSem.type === 'summer');
-                if (!hasSummerNext) {
-                    chunks.push(`
-                        <div class="planner-add-summer-col-wrap">
-                            <button type="button" class="btn-add-summer-col" onclick="window.addSummerSemesterAfter(${semNum})" title="הוסף סמסטר קיץ לאחר סמסטר ${semNum}">
-                                + הוסף סמסטר קיץ
-                            </button>
-                        </div>
-                    `);
-                }
-            }
         });
 
         container.innerHTML = chunks.join('');
@@ -1469,6 +1493,7 @@
         updateRuleRow('C', `${rulesEval.countC} / 2`, rulesEval.ruleC_met);
         updateRuleRow('BCD', `${rulesEval.creditsBCD.toFixed(1)} / 14.0 נק״ז`, rulesEval.ruleBCD_met);
         updateRuleRow('total', `${rulesEval.totalElectiveCredits.toFixed(1)} / 32.5 נק״ז`, rulesEval.ruleTotalElectives_met);
+        updateRuleRow('english-content', `${rulesEval.countEnglishContent} / 2`, rulesEval.ruleEnglishContent_met);
 
         const summaryBadge = document.getElementById('planner-rules-summary-badge');
         if (summaryBadge) {
@@ -1919,7 +1944,7 @@
             });
         }
 
-        // 7. Track & Cohort Selector Change Listener
+        // 7. Track & Cohort Selector Change Listener (Auto-Refresh on Change)
         const trackSelect = document.getElementById('planner-track-select');
         if (trackSelect) {
             trackSelect.addEventListener('change', (e) => {
@@ -1927,14 +1952,27 @@
                 try {
                     localStorage.setItem(PLANNER_TRACK_KEY, selectedTrack);
                 } catch (err) {}
+
+                // Automatically update and align degree plan to new track syllabus
+                const targetSyllabus = getSuggestedCatalogForTrack(selectedTrack);
+                if (targetSyllabus) {
+                    customPlan = JSON.parse(JSON.stringify(targetSyllabus));
+                    unassignedCourses = [];
+                    syncCompletedCoursesFromGameState();
+                    saveCustomPlan(true);
+                }
+
                 renderDegreePlanner();
+                if (typeof global.renderUI === 'function') global.renderUI();
+                if (typeof global.renderFlowchartTree === 'function') global.renderFlowchartTree();
+
                 let trackName = 'תשפ״ז - אוקטובר 2026';
                 if (selectedTrack === 'year_2026') trackName = 'תשפ״ו - אוקטובר 2025';
                 else if (selectedTrack === 'year_2025') trackName = 'תשפ״ה - אוקטובר 2024';
                 else if (selectedTrack === 'year_2024') trackName = 'תשפ״ד - אוקטובר 2023';
                 else if (selectedTrack === 'year_2027') trackName = 'תשפ״ז - אוקטובר 2026';
                 else if (selectedTrack === 'barak') trackName = 'מסלול ברקים';
-                showPlannerToast(`שנתון/מסלול הלימודים עודכן: ${trackName} 🏛️`, false);
+                showPlannerToast(`תוכנית/שנתון הלימודים עודכנה ורועננה אוטומטית: ${trackName} 🏛️`, false);
             });
         }
 
@@ -1948,6 +1986,42 @@
                 } catch (err) {}
                 renderDegreePlanner();
                 showPlannerToast(isReservistDeduction ? 'הופעל פטור מילואים: הופחתו 2 נק״ז מדרישות התואר! 🎖️' : 'בוטל פטור מילואים: דרישות התואר חזרו ל-157.5 נק״ז.', true);
+            });
+        }
+
+        // 9. English Exemption (Amirnet) Toggle Listener
+        const englishToggle = document.getElementById('toggle-planner-english-exemption');
+        if (englishToggle && !englishToggle.dataset.bound) {
+            englishToggle.dataset.bound = 'true';
+            englishToggle.addEventListener('change', (e) => {
+                isEnglishExemption = e.target.checked;
+                try {
+                    localStorage.setItem(PLANNER_ENGLISH_EXEMPTION_KEY, isEnglishExemption ? 'true' : 'false');
+                } catch (err) {}
+                if (global.gameState) {
+                    if (!global.gameState.exemptions) global.gameState.exemptions = {};
+                    if (isEnglishExemption) {
+                        global.gameState.exemptions['03240033'] = true;
+                        global.gameState.exemptions['324033'] = true;
+                        if (global.gameState.courses) {
+                            ['03240033', '324033'].forEach(k => {
+                                if (global.gameState.courses[k]) global.gameState.courses[k].isExempt = true;
+                            });
+                        }
+                    } else {
+                        delete global.gameState.exemptions['03240033'];
+                        delete global.gameState.exemptions['324033'];
+                        if (global.gameState.courses) {
+                            ['03240033', '324033'].forEach(k => {
+                                if (global.gameState.courses[k]) global.gameState.courses[k].isExempt = false;
+                            });
+                        }
+                    }
+                }
+                renderDegreePlanner();
+                if (typeof renderUI === 'function') renderUI();
+                if (typeof renderFlowchartTree === 'function') renderFlowchartTree();
+                showPlannerToast(isEnglishExemption ? 'הופעל פטור אמירנ״ט: ניתן פטור מקורס שפה 324033! 🇬🇧' : 'בוטל פטור אמירנ״ט.', true);
             });
         }
     }
@@ -2711,7 +2785,7 @@
             if (!code) return false;
             if (!customPlan) initPlannerState();
             const semNum = parseInt(targetSemester);
-            if (!semNum || semNum < 1 || semNum > 8) return false;
+            if (!semNum || (semNum < 1 || (semNum > 8 && semNum !== 9))) return false;
 
             const cKeys = new Set(getNormalizedCodes(code, code));
             let foundCourse = null;
@@ -2759,11 +2833,20 @@
             }
 
             if (foundCourse) {
-                const targetSemObj = customPlan.find(s => s.semester === semNum);
-                if (targetSemObj) {
-                    targetSemObj.courses = targetSemObj.courses || [];
-                    targetSemObj.courses.push(foundCourse);
+                let targetSemObj = customPlan.find(s => s.semester === semNum);
+                if (!targetSemObj) {
+                    targetSemObj = {
+                        semester: semNum,
+                        label: semNum === 9 ? "שנה א׳ - סמסטר קיץ ☀️" : `סמסטר ${semNum}`,
+                        isSummer: semNum === 9,
+                        courses: []
+                    };
+                    customPlan.push(targetSemObj);
+                    const getSemOrder = (s) => (s === 9 ? 2.5 : Number(s) || 1);
+                    customPlan.sort((a, b) => getSemOrder(a.semester) - getSemOrder(b.semester));
                 }
+                targetSemObj.courses = targetSemObj.courses || [];
+                targetSemObj.courses.push(foundCourse);
             }
 
             // 3. Update in gameState.courses
@@ -2973,9 +3056,11 @@
             '01140051': { name: 'פיזיקה 1', credits: 3.5, altCode: '114051' },
             '01140071': { name: "פיזיקה 1מ'", credits: 3.5, altCode: '114071' },
             '01140077': { name: "פיזיקה 1פ'", credits: 4.0, altCode: '114077' },
+            '01140055': { name: "פיזיקה 1ת'", credits: 3.5, altCode: '114055' },
             '01140052': { name: 'פיזיקה 2', credits: 3.5, altCode: '114052' },
-            '01140075': { name: "פיזיקה 2ממ'", credits: 5.0, altCode: '114075' },
-            '01140078': { name: "פיזיקה 2פ'", credits: 5.0, altCode: '114078' }
+            '01140075': { name: "פיזיקה 2מ'", credits: 5.0, altCode: '114075' },
+            '01140078': { name: "פיזיקה 2פ'", credits: 5.0, altCode: '114078' },
+            '01140076': { name: "פיזיקה 2ת'", credits: 5.0, altCode: '114076' }
         }[selectedCode];
 
         if (variantMeta) {
@@ -2987,15 +3072,32 @@
 
         if (!global.gameState.userSettings) global.gameState.userSettings = {};
         if (!global.gameState.userSettings.physicsVariants) global.gameState.userSettings.physicsVariants = {};
-        if (['01140051', '01140071', '01140077'].includes(selectedCode)) {
+        if (['01140051', '01140071', '01140077', '01140055'].includes(selectedCode)) {
             global.gameState.userSettings.physicsVariants.physics1 = selectedCode;
         } else {
             global.gameState.userSettings.physicsVariants.physics2 = selectedCode;
         }
 
+        // Synchronize in gameState.courses so Tree and Flowchart reflect choice immediately
+        if (global.gameState && global.gameState.courses) {
+            for (let [k, cObj] of Object.entries(global.gameState.courses)) {
+                const cNorms = getNormalizedCodes(cObj.code, cObj.altCode);
+                if (cNorms.includes(currentCode) || cNorms.includes(selectedCode)) {
+                    if (variantMeta) {
+                        cObj.name = variantMeta.name;
+                        cObj.credits = variantMeta.credits;
+                        cObj.code = selectedCode;
+                        cObj.altCode = variantMeta.altCode;
+                    }
+                }
+            }
+        }
+
         saveCustomPlan();
         renderDegreePlanner();
+        if (typeof global.saveState === 'function') global.saveState();
         if (typeof global.renderUI === 'function') global.renderUI();
+        if (typeof global.renderFlowchartTree === 'function') global.renderFlowchartTree();
         showPlannerToast(`עודכנה גרסת הפיזיקה: ${foundCourse.name} (${foundCourse.credits} נק״ז) ⚛️`, false);
     };
 
