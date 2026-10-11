@@ -19,6 +19,7 @@ const filesToCopy = [
     'modal_help.js',
     'interactive_tour.js',
     'index.html',
+    'widgets.html',
     'styles.css',
     'technion_academic_calendar.js',
     'main.js',

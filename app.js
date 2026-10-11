@@ -11290,6 +11290,106 @@ function openCourseDetails(code) {
     badge.className = `course-status-badge ${course.status}`;
     badge.innerText = STATUS_LABELS[course.status] || course.status;
 
+    // Header Badges Strip (Type, Credits, Semester Term, International)
+    const typeBadge = document.getElementById("modal-course-type-badge");
+    if (typeBadge) {
+        const isMandatory = course.type === 'mandatory' || !course.type;
+        typeBadge.innerText = isMandatory ? 'חובה' : 'בחירה';
+        typeBadge.style.background = isMandatory ? 'rgba(16, 185, 129, 0.2)' : 'rgba(56, 189, 248, 0.2)';
+        typeBadge.style.color = isMandatory ? '#10b981' : '#38bdf8';
+        typeBadge.style.borderColor = isMandatory ? '#10b981' : '#38bdf8';
+    }
+
+    const creditsBadge = document.getElementById("modal-course-credits-badge");
+    if (creditsBadge) {
+        creditsBadge.innerText = `${course.credits} נק״ז`;
+    }
+
+    const semBadge = document.getElementById("modal-course-semester-badge");
+    if (semBadge) {
+        const semNum = Number(course.semester) || 1;
+        const termLabel = semNum % 2 === 1 ? 'חורף' : 'אביב';
+        semBadge.innerText = `סמסטר ${semNum} (${termLabel})`;
+    }
+
+    const intlBadge = document.getElementById("modal-course-intl-badge");
+    if (intlBadge) {
+        const offerings = (window.PLANNER_CATALOG && window.PLANNER_CATALOG.COURSE_TERM_OFFERINGS) || {};
+        const offerInfo = offerings[course.code] || offerings[course.code.replace(/^0+/, '')];
+        if (offerInfo && offerInfo.terms && offerInfo.terms.includes('winter_intl')) {
+            intlBadge.style.display = 'inline-block';
+            intlBadge.innerText = 'חורף: סטודנטים בינלאומיים';
+        } else {
+            intlBadge.style.display = 'none';
+        }
+    }
+
+    // Exemption Checkbox (Saved to gameState.exemptions)
+    const exemptionToggle = document.getElementById("modal-course-exemption-toggle");
+    const exemptionBadge = document.getElementById("modal-exemption-badge");
+    const isCurrentlyExempt = Boolean(
+        (gameState.exemptions && (gameState.exemptions[course.code] || gameState.exemptions[course.code.replace(/^0+/, '')])) ||
+        course.isExempt
+    );
+    if (exemptionToggle) {
+        exemptionToggle.checked = isCurrentlyExempt;
+        if (exemptionBadge) exemptionBadge.style.display = isCurrentlyExempt ? 'inline-block' : 'none';
+        exemptionToggle.onchange = (e) => {
+            const checked = e.target.checked;
+            gameState.exemptions = gameState.exemptions || {};
+            if (checked) {
+                gameState.exemptions[course.code] = true;
+                course.isExempt = true;
+                course.status = 'mastered';
+                if (exemptionBadge) exemptionBadge.style.display = 'inline-block';
+                if (typeof showToastNotification === 'function') {
+                    showToastNotification(`✓ נקבע פטור עבור ${course.name} (${course.code}). יוצג כהושלם במתכנן ולא יחושב בממוצע.`, 'success');
+                }
+            } else {
+                delete gameState.exemptions[course.code];
+                delete gameState.exemptions[course.code.replace(/^0+/, '')];
+                course.isExempt = false;
+                if (exemptionBadge) exemptionBadge.style.display = 'none';
+                if (typeof showToastNotification === 'function') {
+                    showToastNotification(`בוטל פטור עבור ${course.name}.`, 'info');
+                }
+            }
+            if (typeof recalculateCourseStates === 'function') recalculateCourseStates();
+            if (typeof saveState === 'function') saveState();
+            if (typeof renderUI === 'function') renderUI();
+            openCourseDetails(course.code);
+        };
+    }
+
+    // Preferred Sources Quick Bar (Google Search, Google Drive, CheeseFork, Moodle, Panopto)
+    const sourcesContainer = document.getElementById("modal-preferred-sources-links");
+    if (sourcesContainer) {
+        const cleanCode = course.code.replace(/^0+/, '');
+        const queryTerm = encodeURIComponent(`טכניון ${course.code} ${course.name}`);
+        sourcesContainer.innerHTML = `
+            <a href="https://www.google.com/search?q=${queryTerm}" target="_blank" rel="noopener noreferrer" class="pref-source-btn google-search" title="חפש קורס זה בגוגל">
+                <svg viewBox="0 0 24 24" width="14" height="14"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
+                <span>Google</span>
+            </a>
+            <a href="https://drive.google.com/drive/search?q=${encodeURIComponent(course.code)}" target="_blank" rel="noopener noreferrer" class="pref-source-btn google-drive" title="חפש חומרי לימוד ב-Google Drive">
+                <svg viewBox="0 0 24 24" width="14" height="14"><path fill="#0F9D58" d="M7.74 16.5l-4.74-8.25h9.48l4.74 8.25z"/><path fill="#FFBA00" d="M12 3.75l4.74 8.25H7.26l4.74-8.25z"/><path fill="#4285F4" d="M16.26 16.5l4.74-8.25H11.52l-4.74 8.25z"/></svg>
+                <span>Drive</span>
+            </a>
+            <a href="https://cheesefork.cf/course/${cleanCode}" target="_blank" rel="noopener noreferrer" class="pref-source-btn cheesefork" title="פתח עמוד קורס ב-CheeseFork">
+                <span>🧀</span>
+                <span>CheeseFork</span>
+            </a>
+            <a href="https://moodle.technion.ac.il/" target="_blank" rel="noopener noreferrer" class="pref-source-btn moodle" title="עבור למודל הטכניון">
+                <span>🎓</span>
+                <span>Moodle</span>
+            </a>
+            <a href="https://panopto.technion.ac.il/" target="_blank" rel="noopener noreferrer" class="pref-source-btn panopto" title="הקלטות הרצאות ב-Panopto">
+                <span>🎥</span>
+                <span>Panopto</span>
+            </a>
+        `;
+    }
+
     // Set current semester select value and wire persistence
     const semesterSelect = document.getElementById("modal-course-semester-select");
     const saveSemesterBtn = document.getElementById("btn-save-course-semester");
@@ -11984,35 +12084,135 @@ function openCourseDetails(code) {
             }
         });
 
-        let prereqsHtml = `
-            <div style="display: flex; flex-direction: column; gap: 14px; width: 100%;">
-                <!-- Direct Prerequisites -->
-                <div>
-                    <div style="font-size: 0.8rem; font-weight: 700; color: #38bdf8; margin-bottom: 6px; display: flex; align-items: center; gap: 6px;">
-                        <span>📥</span> <span>דרישות קדם ישירות (${directPrereqs.length}):</span>
-                    </div>
-                    <div style="display: flex; flex-wrap: wrap; gap: 8px;">
-        `;
+        // Build CNF Clauses (Disjunction of Alternatives separated by Conjunction AND)
+        const cnfClauses = [];
+        const seasonalMap = (window.PLANNER_CATALOG && window.PLANNER_CATALOG.SEASONAL_COURSE_MAPPINGS) || {};
 
-        if (directPrereqs.length === 0) {
-            prereqsHtml += `<span style="font-size: 0.8rem; color: var(--text-muted);">אין דרישות קדם לקורס זה (קורס בסיס).</span>`;
-        } else {
-            directPrereqs.forEach(pre => {
-                const isPassed = pre.status === 'mastered' || (pre.grade && Number(pre.grade) >= 55);
-                const gradeLabel = pre.grade ? ` [${pre.grade}]` : '';
-                prereqsHtml += `
-                    <span class="prereq-tag ${isPassed ? 'passed' : 'missing'}" 
-                          onclick="openCourseDetails('${pre.code}')" 
-                          title="לחץ לפתיחת פרטי ${pre.name}">
-                        ${isPassed ? '✅' : '❌'} <strong>${pre.name}</strong> (${pre.code})${gradeLabel}
-                    </span>
-                `;
+        (course.prerequisites || []).forEach(preCode => {
+            const rawSet = new Set();
+            rawSet.add(preCode);
+            const strClean = String(preCode).replace(/^0+/, '');
+            rawSet.add(strClean);
+            if (preCode.length === 6) rawSet.add('00' + preCode);
+
+            // Physics 1 variants
+            if (['01140051', '114051', '01140071', '114071', '01140077', '114077'].includes(preCode) ||
+                ['01140051', '114051', '01140071', '114071', '01140077', '114077'].includes(strClean)) {
+                rawSet.add('01140051'); rawSet.add('01140071'); rawSet.add('01140077');
+            }
+
+            // Physics 2 variants
+            if (['01140052', '114052', '01140075', '114075', '01140078', '114078'].includes(preCode) ||
+                ['01140052', '114052', '01140075', '114075', '01140078', '114078'].includes(strClean)) {
+                rawSet.add('01140052'); rawSet.add('01140075'); rawSet.add('01140078');
+            }
+
+            // Seasonal pairs
+            const sInfo = seasonalMap[preCode] || seasonalMap[strClean] || seasonalMap['0' + strClean];
+            if (sInfo) {
+                if (sInfo.winter) rawSet.add(sInfo.winter);
+                if (sInfo.spring) rawSet.add(sInfo.spring);
+                if (sInfo.altSpring) rawSet.add(sInfo.altSpring);
+                if (sInfo.altWinter) rawSet.add(sInfo.altWinter);
+            }
+
+            // Equivalent groups
+            if (['104041', '104042', '01040041', '01040042', '01040165'].includes(strClean)) {
+                rawSet.add('104010'); rawSet.add('104012'); rawSet.add('104013');
+            }
+            if (['104065', '104064', '01040065', '01040064'].includes(strClean)) {
+                rawSet.add('104016'); rawSet.add('104019');
+            }
+            if (['104043', '104044', '01040043', '01040044', '01040166'].includes(strClean)) {
+                rawSet.add('104022'); rawSet.add('104020');
+            }
+
+            const alts = [];
+            const seenCodes = new Set();
+            rawSet.forEach(c => {
+                const normC = c.replace(/^0+/, '');
+                if (seenCodes.has(normC)) return;
+                seenCodes.add(normC);
+
+                const cObj = findCourseObj(c) || (window.PLANNER_CATALOG && window.PLANNER_CATALOG.ALL_COURSES_MAP && (window.PLANNER_CATALOG.ALL_COURSES_MAP[c] || window.PLANNER_CATALOG.ALL_COURSES_MAP[normC]));
+                const name = cObj ? cObj.name : c;
+                const isSatisfied = (cObj && (cObj.status === 'mastered' || (cObj.grade && Number(cObj.grade) >= 55))) ||
+                                    (gameState.exemptions && (gameState.exemptions[c] || (cObj && gameState.exemptions[cObj.code])));
+                alts.push({
+                    code: c,
+                    name: name,
+                    obj: cObj,
+                    isSatisfied: Boolean(isSatisfied)
+                });
             });
+
+            if (alts.length > 0) {
+                cnfClauses.push(alts);
+            }
+        });
+
+        // Compute fulfillment summary
+        const satisfiedClauseCount = cnfClauses.filter(clause => clause.some(a => a.isSatisfied)).length;
+        const totalClauses = cnfClauses.length;
+        const isAllSatisfied = totalClauses === 0 || satisfiedClauseCount === totalClauses;
+
+        const prereqsTitleEl = document.getElementById("modal-prereqs-title");
+        if (prereqsTitleEl) {
+            prereqsTitleEl.innerText = totalClauses > 0 ? `דרישות קדם (${totalClauses} תנאים):` : 'דרישות קדם:';
+        }
+        const fulfillmentBadge = document.getElementById("modal-prereqs-fulfillment-badge");
+        if (fulfillmentBadge) {
+            fulfillmentBadge.innerText = totalClauses > 0 ? `${satisfiedClauseCount}/${totalClauses} הושלמו` : 'פטור מדרישות';
+            fulfillmentBadge.style.background = isAllSatisfied ? 'rgba(16, 185, 129, 0.2)' : 'rgba(245, 158, 11, 0.2)';
+            fulfillmentBadge.style.color = isAllSatisfied ? '#10b981' : '#f59e0b';
+            fulfillmentBadge.style.borderColor = isAllSatisfied ? '#10b981' : '#f59e0b';
         }
 
-        prereqsHtml += `
-                    </div>
-                </div>
+        // Render CNF Clauses HTML
+        const cnfContainer = document.getElementById("modal-prereqs-cnf-container");
+        let cnfHtml = `<div class="prereq-cnf-container">`;
+
+        if (totalClauses === 0) {
+            cnfHtml += `<div style="font-size: 0.82rem; color: #94a3b8; padding: 10px; background: rgba(15, 23, 42, 0.4); border-radius: 6px;">אין דרישות קדם לקורס זה (קורס בסיס).</div>`;
+        } else {
+            cnfClauses.forEach((clause, idx) => {
+                const isClauseMet = clause.some(a => a.isSatisfied);
+                cnfHtml += `<div class="prereq-cnf-clause-row ${isClauseMet ? 'clause-satisfied' : ''}">`;
+
+                clause.forEach((alt, altIdx) => {
+                    const pillClass = alt.isSatisfied ? 'satisfied' : 'missing';
+                    const icon = alt.isSatisfied ? '✓' : '•';
+                    cnfHtml += `
+                        <span class="prereq-cnf-pill ${pillClass}" onclick="openCourseDetails('${alt.code}')" title="לחץ לפתיחת פרטי ${alt.name}">
+                            <span>${icon}</span>
+                            <strong>${alt.name}</strong>
+                            <span style="font-size: 0.72rem; opacity: 0.85;">${alt.code}</span>
+                        </span>
+                    `;
+                    if (altIdx < clause.length - 1) {
+                        cnfHtml += `<span class="prereq-cnf-or-chip">או (OR)</span>`;
+                    }
+                });
+
+                cnfHtml += `</div>`;
+
+                if (idx < cnfClauses.length - 1) {
+                    cnfHtml += `
+                        <div class="prereq-cnf-and-divider">
+                            <span>וגם (AND)</span>
+                        </div>
+                    `;
+                }
+            });
+        }
+        cnfHtml += `</div>`;
+
+        if (cnfContainer) {
+            cnfContainer.innerHTML = cnfHtml;
+        }
+
+        let prereqsHtml = `
+            <div style="display: flex; flex-direction: column; gap: 14px; width: 100%; margin-top: 10px;">
         `;
 
         // Full Ancestry Chain (if there are deeper ancestors)
@@ -12026,7 +12226,8 @@ function openCourseDetails(code) {
                     <div style="display: flex; flex-wrap: wrap; gap: 6px;">
             `;
             deepAncestors.forEach(anc => {
-                const isPassed = anc.status === 'mastered' || (anc.grade && Number(anc.grade) >= 55);
+                const isPassed = anc.status === 'mastered' || (anc.grade && Number(anc.grade) >= 55) ||
+                                 (gameState.exemptions && gameState.exemptions[anc.code]);
                 prereqsHtml += `
                     <span class="prereq-chain-chip" 
                           onclick="openCourseDetails('${anc.code}')" 
@@ -12068,7 +12269,9 @@ function openCourseDetails(code) {
             </div>
         `;
 
-        prereqsContainer.innerHTML = prereqsHtml;
+        if (prereqsContainer) {
+            prereqsContainer.innerHTML = prereqsHtml;
+        }
     }
 
     // Hide inline add-forms
@@ -15190,6 +15393,20 @@ function setupFlowchartViewMode() {
         });
     }
 
+    const toggleCleanBeamsBtn = document.getElementById("btn-fc-toggle-clean-beams");
+    if (toggleCleanBeamsBtn) {
+        toggleCleanBeamsBtn.addEventListener("click", () => {
+            const svgEl = document.getElementById("flowchart-svg");
+            if (!svgEl) return;
+            const isClean = svgEl.classList.toggle("clean-beams");
+            toggleCleanBeamsBtn.classList.toggle("active", isClean);
+            toggleCleanBeamsBtn.style.background = isClean ? "rgba(56, 189, 248, 0.2)" : "";
+            if (typeof showToastNotification === 'function') {
+                showToastNotification(isClean ? "✓ מצב קווים נקיים הופעל: הקווים מוחלשים ויוצגו בעוצמה מלאה בריחוף" : "מצב קווים מלא הופעל", "info");
+            }
+        });
+    }
+
     // Export Flowchart as PNG Image
     const exportFcBtn = document.getElementById("btn-fc-export-png");
     if (exportFcBtn) {
@@ -15700,13 +15917,19 @@ function renderFlowchartTree() {
         let subY = topY + 49;
         let badgeY = topY + 68;
 
+        const isMastered = course.status === 'mastered';
+        const isActive = course.status === 'active';
+        const rectFill = isMastered ? '#064e3b' : (isActive ? '#0c4a6e' : '#161c2e');
+        const rectStroke = isMastered ? '#10b981' : (isActive ? '#38bdf8' : '#334155');
+        const badgeColor = isMastered ? '#34d399' : (isActive ? '#38bdf8' : '#64748b');
+
         if (!split.isMulti) {
-            titleSvg = `<text x="${pos.x}" y="${topY + 28}" text-anchor="middle" class="fc-node-title single-line">${split.line1}</text>`;
+            titleSvg = `<text x="${pos.x}" y="${topY + 28}" text-anchor="middle" fill="#f8fafc" style="fill: #f8fafc !important; font-weight: 700;" class="fc-node-title single-line">${split.line1}</text>`;
         } else {
             titleSvg = `
-                <text x="${pos.x}" y="${topY + 21}" text-anchor="middle" class="fc-node-title multi-line">
-                    <tspan x="${pos.x}" dy="0">${split.line1}</tspan>
-                    <tspan x="${pos.x}" dy="15">${split.line2}</tspan>
+                <text x="${pos.x}" y="${topY + 21}" text-anchor="middle" fill="#f8fafc" style="fill: #f8fafc !important; font-weight: 700;" class="fc-node-title multi-line">
+                    <tspan x="${pos.x}" dy="0" fill="#f8fafc">${split.line1}</tspan>
+                    <tspan x="${pos.x}" dy="15" fill="#f8fafc">${split.line2}</tspan>
                 </text>
             `;
             subY = topY + 53;
@@ -15714,13 +15937,13 @@ function renderFlowchartTree() {
         }
 
         g.innerHTML = `
-            <rect x="${leftX}" y="${topY}" width="${pos.w}" height="${pos.h}" rx="8" class="fc-node-rect" />
-            <!-- Line 1: Course Title (Complete, never truncated, correct Hebrew BiDi) -->
+            <rect x="${leftX}" y="${topY}" width="${pos.w}" height="${pos.h}" rx="8" fill="${rectFill}" stroke="${rectStroke}" class="fc-node-rect" />
+            <!-- Line 1: Course Title (High contrast white text, never white-on-white) -->
             ${titleSvg}
             <!-- Line 2: Subtitle: Code + Credits -->
-            <text x="${pos.x}" y="${subY}" text-anchor="middle" class="fc-node-sub">${course.code} • ${course.credits} נק״ז</text>
+            <text x="${pos.x}" y="${subY}" text-anchor="middle" fill="#94a3b8" style="fill: #94a3b8 !important;" class="fc-node-sub">${course.code} • ${course.credits} נק״ז</text>
             <!-- Line 3: Status Badge -->
-            <text x="${pos.x}" y="${badgeY}" text-anchor="middle" class="fc-node-badge">${badgeText}</text>
+            <text x="${pos.x}" y="${badgeY}" text-anchor="middle" fill="${badgeColor}" style="fill: ${badgeColor} !important; font-weight: 700;" class="fc-node-badge">${badgeText}</text>
         `;
 
         // Hover effect: highlight incoming prerequisites AND outgoing dependents
@@ -17710,13 +17933,13 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.10.08-v2.3.1",
-    version: "2.3.1",
-    build: "20261008_03",
-    date: "2026-10-08 11:30",
-    description: "גרסה 2.3.1: אופטימיזציית ביצועים ונגישות (Lighthouse 100% A11y), ביטול preconnect מיותר, מעבר מלא לתמונות WebP מוקטנות, טעינה עצלה של מאגר הקורסים (CheeseFork) ואנימציות חומרה 100% GPU"
+    code: "REV-2026.10.11-v2.3.2",
+    version: "2.3.2",
+    build: "20261011_01",
+    date: "2026-10-11 20:30",
+    description: "גרסה 2.3.2: איחוד חלופות פיזיקה 1 ו-2 (1/1מ'/1פ'), דרישות קדם בפורמט CNF וצ'קבוקס פטור, מקורות מועדפים (Google Search & Drive), סמסטרי קיץ דינמיים, הגנה על קורסים חד-שנתיים/בינלאומיים, ווידג'טים לאנדרואיד ותיקון ניגודיות Flowchart ל-Safari/Mac"
 };
-window.APP_VERSION = "2.3.1";
+window.APP_VERSION = "2.3.2";
 
 function ensureBaselineRevisions() {
     if (!gameState.revisions || !Array.isArray(gameState.revisions) || gameState.revisions.length === 0) {

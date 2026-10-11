@@ -32,8 +32,20 @@
                 { code: "01040041", altCode: "104041", name: "חדו\"א 1מ' 1", credits: 5.0, type: "mandatory", prereqs: [] },
                 { code: "01040065", altCode: "104065", name: "אלגברה 1 מ'", credits: 5.0, type: "mandatory", prereqs: [] },
                 { code: "01250001", altCode: "125001", name: "כימיה כללית", credits: 3.0, type: "mandatory", prereqs: [] },
-                { code: "01140051", altCode: "114051", name: "פיזיקה 1", credits: 3.5, type: "mandatory", trackGroup: "physics_1", mutuallyExclusiveWith: ["01140071"], prereqs: [] },
-                { code: "01140071", altCode: "114071", name: "פיזיקה 1מ'", credits: 3.5, type: "mandatory", trackGroup: "physics_1", mutuallyExclusiveWith: ["01140051"], prereqs: [] },
+                { 
+                    code: "01140051", 
+                    altCode: "114051", 
+                    name: "פיזיקה 1", 
+                    credits: 3.5, 
+                    type: "mandatory", 
+                    variantGroupId: "physics_1",
+                    variants: [
+                        { code: "01140051", altCode: "114051", name: "פיזיקה 1", credits: 3.5 },
+                        { code: "01140071", altCode: "114071", name: "פיזיקה 1מ'", credits: 3.5 },
+                        { code: "01140077", altCode: "114077", name: "פיזיקה 1פ'", credits: 4.0 }
+                    ],
+                    prereqs: [] 
+                },
                 { code: "00350026", altCode: "035026", name: "מבוא יצירתי להנדסת מכונות", credits: 2.5, type: "mandatory", prereqs: [] }
             ]
         },
@@ -72,8 +84,20 @@
                 { code: "00340010", altCode: "034010", name: "דינמיקה", credits: 5.0, type: "mandatory", prereqs: ["00340028", "01140051", "01040043", "01040131"] },
                 { code: "00340055", altCode: "034055", name: "תורת הזרימה 1 מורחב", credits: 5.0, type: "mandatory", prereqs: ["00340035", "01040131", "01040228"] },
                 { code: "00340032", altCode: "034032", name: "מערכות ליניאריות", credits: 4.0, type: "mandatory", prereqs: ["01040065", "01040131"] },
-                { code: "01140052", altCode: "114052", name: "פיזיקה 2", credits: 3.5, type: "mandatory", trackGroup: "physics_2", mutuallyExclusiveWith: ["01140075"], prereqs: ["01140051", "01040043"] },
-                { code: "01140075", altCode: "114075", name: "פיזיקה 2ממ'", credits: 5.0, type: "mandatory", trackGroup: "physics_2", mutuallyExclusiveWith: ["01140052"], prereqs: ["01140071", "01040043"] }
+                { 
+                    code: "01140052", 
+                    altCode: "114052", 
+                    name: "פיזיקה 2", 
+                    credits: 3.5, 
+                    type: "mandatory", 
+                    variantGroupId: "physics_2",
+                    variants: [
+                        { code: "01140052", altCode: "114052", name: "פיזיקה 2", credits: 3.5 },
+                        { code: "01140075", altCode: "114075", name: "פיזיקה 2ממ'", credits: 5.0 },
+                        { code: "01140078", altCode: "114078", name: "פיזיקה 2פ'", credits: 5.0 }
+                    ],
+                    prereqs: ["01140051", "01040043"] 
+                }
             ]
         },
         {
@@ -133,8 +157,20 @@
                 { code: "01040041", altCode: "104041", name: "חדו\"א 1מ' 1", credits: 5.0, type: "mandatory", prereqs: [] },
                 { code: "01040065", altCode: "104065", name: "אלגברה 1 מ' 2", credits: 5.0, type: "mandatory", prereqs: [] },
                 { code: "01250001", altCode: "125001", name: "כימיה כללית", credits: 3.0, type: "mandatory", prereqs: [] },
-                { code: "01140051", altCode: "114051", name: "פיזיקה 1", credits: 3.5, type: "mandatory", trackGroup: "physics_1", mutuallyExclusiveWith: ["01140071"], prereqs: [] },
-                { code: "01140071", altCode: "114071", name: "פיזיקה 1מ'", credits: 3.5, type: "mandatory", trackGroup: "physics_1", mutuallyExclusiveWith: ["01140051"], prereqs: [] },
+                { 
+                    code: "01140051", 
+                    altCode: "114051", 
+                    name: "פיזיקה 1", 
+                    credits: 3.5, 
+                    type: "mandatory", 
+                    variantGroupId: "physics_1",
+                    variants: [
+                        { code: "01140051", altCode: "114051", name: "פיזיקה 1", credits: 3.5 },
+                        { code: "01140071", altCode: "114071", name: "פיזיקה 1מ'", credits: 3.5 },
+                        { code: "01140077", altCode: "114077", name: "פיזיקה 1פ'", credits: 4.0 }
+                    ],
+                    prereqs: [] 
+                },
                 { code: "00350026", altCode: "035026", name: "מבוא יצירתי להנדסת מכונות", credits: 2.5, type: "mandatory", prereqs: [] }
             ]
         },
@@ -173,8 +209,20 @@
                 { code: "00340010", altCode: "034010", name: "דינמיקה", credits: 5.0, type: "mandatory", prereqs: ["00340028", "01140051", "01040043", "01040131"] },
                 { code: "00340055", altCode: "034055", name: "תורת הזרימה 1 מורחב", credits: 5.0, type: "mandatory", prereqs: ["00340035", "01040131", "01040228"] },
                 { code: "00340032", altCode: "034032", name: "מערכות ליניאריות", credits: 4.0, type: "mandatory", prereqs: ["01040065", "01040131"] },
-                { code: "01140052", altCode: "114052", name: "פיזיקה 2", credits: 3.5, type: "mandatory", trackGroup: "physics_2", mutuallyExclusiveWith: ["01140075"], prereqs: ["01140051", "01040043"] },
-                { code: "01140075", altCode: "114075", name: "פיזיקה 2ממ'", credits: 5.0, type: "mandatory", trackGroup: "physics_2", mutuallyExclusiveWith: ["01140052"], prereqs: ["01140071", "01040043"] }
+                { 
+                    code: "01140052", 
+                    altCode: "114052", 
+                    name: "פיזיקה 2", 
+                    credits: 3.5, 
+                    type: "mandatory", 
+                    variantGroupId: "physics_2",
+                    variants: [
+                        { code: "01140052", altCode: "114052", name: "פיזיקה 2", credits: 3.5 },
+                        { code: "01140075", altCode: "114075", name: "פיזיקה 2ממ'", credits: 5.0 },
+                        { code: "01140078", altCode: "114078", name: "פיזיקה 2פ'", credits: 5.0 }
+                    ],
+                    prereqs: ["01140051", "01040043"] 
+                }
             ]
         },
         {
@@ -235,8 +283,20 @@
                 { code: "01040065", altCode: "104065", name: "אלגברה 1 מ'", credits: 5.0, type: "mandatory", prereqs: [] },
                 { code: "01250001", altCode: "125001", name: "כימיה כללית", credits: 3.0, type: "mandatory", prereqs: [] },
                 { code: "02340128", altCode: "234128", name: "שפת פייתון", credits: 4.0, type: "mandatory", prereqs: [] },
-                { code: "01140051", altCode: "114051", name: "פיזיקה 1", credits: 3.5, type: "mandatory", trackGroup: "physics_1", mutuallyExclusiveWith: ["01140071"], prereqs: [] },
-                { code: "01140071", altCode: "114071", name: "פיזיקה 1מ'", credits: 3.5, type: "mandatory", trackGroup: "physics_1", mutuallyExclusiveWith: ["01140051"], prereqs: [] }
+                { 
+                    code: "01140051", 
+                    altCode: "114051", 
+                    name: "פיזיקה 1", 
+                    credits: 3.5, 
+                    type: "mandatory", 
+                    variantGroupId: "physics_1",
+                    variants: [
+                        { code: "01140051", altCode: "114051", name: "פיזיקה 1", credits: 3.5 },
+                        { code: "01140071", altCode: "114071", name: "פיזיקה 1מ'", credits: 3.5 },
+                        { code: "01140077", altCode: "114077", name: "פיזיקה 1פ'", credits: 4.0 }
+                    ],
+                    prereqs: [] 
+                }
             ]
         },
         {
@@ -258,8 +318,20 @@
             targetCredits: 19.5,
             courses: [
                 { code: "00340053", altCode: "034053", name: "מכניקת מוצקים 2 מורחב", credits: 5.0, type: "mandatory", prereqs: ["00340028"] },
-                { code: "01140052", altCode: "114052", name: "פיזיקה 2", credits: 3.5, type: "mandatory", trackGroup: "physics_2", mutuallyExclusiveWith: ["01140075"], prereqs: ["01140051", "01040043"] },
-                { code: "01140075", altCode: "114075", name: "פיזיקה 2ממ'", credits: 5.0, type: "mandatory", trackGroup: "physics_2", mutuallyExclusiveWith: ["01140052"], prereqs: ["01140071", "01040043"] },
+                { 
+                    code: "01140052", 
+                    altCode: "114052", 
+                    name: "פיזיקה 2", 
+                    credits: 3.5, 
+                    type: "mandatory", 
+                    variantGroupId: "physics_2",
+                    variants: [
+                        { code: "01140052", altCode: "114052", name: "פיזיקה 2", credits: 3.5 },
+                        { code: "01140075", altCode: "114075", name: "פיזיקה 2ממ'", credits: 5.0 },
+                        { code: "01140078", altCode: "114078", name: "פיזיקה 2פ'", credits: 5.0 }
+                    ],
+                    prereqs: ["01140051", "01040043"] 
+                },
                 { code: "00340056", altCode: "034056", name: "מבוא לחישוב מדעי והנדסי", credits: 4.0, type: "mandatory", prereqs: ["02340128", "01040065", "01040043"] },
                 { code: "00340035", altCode: "034035", name: "תרמודינמיקה 1", credits: 4.0, type: "mandatory", prereqs: ["01040043"] },
                 { code: "01040228", altCode: "104228", name: "מד\"ח מ'", credits: 3.0, type: "mandatory", prereqs: ["01040043", "01040131"] }
@@ -611,6 +683,64 @@
         }
     };
 
+    // ==========================================================================
+    // Seasonal Course Equivalencies (חורף / אביב)
+    // ==========================================================================
+    const SEASONAL_COURSE_MAPPINGS = {
+        '01040041': { winter: '01040041', spring: '01040042', altSpring: '01040165', name: "חדו\"א 1מ'" },
+        '01040042': { winter: '01040041', spring: '01040042', altSpring: '01040165', name: "חדו\"א 1מ'" },
+        '01040165': { winter: '01040041', spring: '01040042', altSpring: '01040165', name: "חדו\"א 1מ'" },
+        '104041':   { winter: '01040041', spring: '01040042', altSpring: '01040165', name: "חדו\"א 1מ'" },
+        '104042':   { winter: '01040041', spring: '01040042', altSpring: '01040165', name: "חדו\"א 1מ'" },
+
+        '01040043': { winter: '01040044', spring: '01040043', altWinter: '01040166', name: "חדו\"א 2מ'" },
+        '01040044': { winter: '01040044', spring: '01040043', altWinter: '01040166', name: "חדו\"א 2מ'" },
+        '01040166': { winter: '01040044', spring: '01040043', altWinter: '01040166', name: "חדו\"א 2מ'" },
+        '104043':   { winter: '01040044', spring: '01040043', altWinter: '01040166', name: "חדו\"א 2מ'" },
+        '104044':   { winter: '01040044', spring: '01040043', altWinter: '01040166', name: "חדו\"א 2מ'" },
+
+        '01040065': { winter: '01040065', spring: '01040064', name: "אלגברה 1 מ'" },
+        '01040064': { winter: '01040065', spring: '01040064', name: "אלגברה 1 מ'" },
+        '104065':   { winter: '01040065', spring: '01040064', name: "אלגברה 1 מ'" },
+        '104064':   { winter: '01040065', spring: '01040064', name: "אלגברה 1 מ'" },
+
+        '01040131': { winter: '01040135', spring: '01040131', name: "משוואות דיפרנציאליות רגילות/ח" },
+        '01040135': { winter: '01040135', spring: '01040131', name: "משוואות דיפרנציאליות רגילות/ח" },
+        '104131':   { winter: '01040135', spring: '01040131', name: "משוואות דיפרנציאליות רגילות/ח" },
+        '104135':   { winter: '01040135', spring: '01040131', name: "משוואות דיפרנציאליות רגילות/ח" },
+
+        '01040228': { winter: '01040228', spring: '01040218', name: "מד\"ח מ'" },
+        '01040218': { winter: '01040228', spring: '01040218', name: "מד\"ח מ'" },
+        '104228':   { winter: '01040228', spring: '01040218', name: "מד\"ח מ'" },
+        '104218':   { winter: '01040228', spring: '01040218', name: "מד\"ח מ'" },
+
+        '00340030': { winter: '00340043', spring: '00340030', name: "תהליכי ייצור" },
+        '00340043': { winter: '00340043', spring: '00340030', name: "תהליכי ייצור" },
+        '034030':   { winter: '00340043', spring: '00340030', name: "תהליכי ייצור" }
+    };
+
+    // ==========================================================================
+    // Course Term Offerings & Annual Restrictions (חד-שנתי / בינלאומי)
+    // ==========================================================================
+    const COURSE_TERM_OFFERINGS = {
+        '00340010': { terms: ['spring', 'winter_intl'], label: 'אביב (חורף: בינלאומי)', note: 'מוצע בסמסטר אביב לכלל הסטודנטים, ובסמסטר חורף לסטודנטים בינלאומיים' },
+        '034010':   { terms: ['spring', 'winter_intl'], label: 'אביב (חורף: בינלאומי)', note: 'מוצע בסמסטר אביב לכלל הסטודנטים, ובסמסטר חורף לסטודנטים בינלאומיים' },
+        '00350026': { terms: ['winter'], label: 'חורף בלבד', note: 'מוצע בסמסטר חורף בלבד' },
+        '035026':   { terms: ['winter'], label: 'חורף בלבד', note: 'מוצע בסמסטר חורף בלבד' },
+        '00340057': { terms: ['spring'], label: 'אביב בלבד', note: 'מעבדה מתקדמת – מוצעת באביב בלבד' },
+        '034057':   { terms: ['spring'], label: 'אביב בלבד', note: 'מעבדה מתקדמת – מוצעת באביב בלבד' },
+        '00340371': { terms: ['spring'], label: 'אביב בלבד', note: 'פרויקט תכן לייצור – מוצע באביב בלבד' },
+        '034371':   { terms: ['spring'], label: 'אביב בלבד', note: 'פרויקט תכן לייצור – מוצע באביב בלבד' },
+        '00340382': { terms: ['winter'], label: 'חורף בלבד', note: 'מתודולוגיות פיתוח 1 – מוצע בחורף בלבד' },
+        '034382':   { terms: ['winter'], label: 'חורף בלבד', note: 'מתודולוגיות פיתוח 1 – מוצע בחורף בלבד' },
+        '00340383': { terms: ['spring'], label: 'אביב בלבד', note: 'מתודולוגיות פיתוח 2 – מוצע באביב בלבד' },
+        '034383':   { terms: ['spring'], label: 'אביב בלבד', note: 'מתודולוגיות פיתוח 2 – מוצע באביב בלבד' },
+        '01140032': { terms: ['winter'], label: 'חורף בלבד', note: 'מעבדה לפיזיקה 1ח – מוצעת בחורף בלבד' },
+        '114032':   { terms: ['winter'], label: 'חורף בלבד', note: 'מעבדה לפיזיקה 1ח – מוצעת בחורף בלבד' },
+        '01140039': { terms: ['spring'], label: 'אביב בלבד', note: 'מעבדה לפיזיקה 1מח – מוצעת באביב בלבד' },
+        '114039':   { terms: ['spring'], label: 'אביב בלבד', note: 'מעבדה לפיזיקה 1מח – מוצעת באביב בלבד' }
+    };
+
     // Expose to window / global
     global.PLANNER_CATALOG = {
         DEGREE_RULES: DEGREE_RULES,
@@ -621,7 +751,9 @@
         SUGGESTED_BARAK_SYLLABUS: SUGGESTED_BARAK_SYLLABUS,
         CURRICULUM_CATALOGS: CURRICULUM_CATALOGS,
         ELECTIVE_CATALOG: ELECTIVE_CATALOG,
-        ALL_COURSES_MAP: ALL_COURSES_MAP
+        ALL_COURSES_MAP: ALL_COURSES_MAP,
+        SEASONAL_COURSE_MAPPINGS: SEASONAL_COURSE_MAPPINGS,
+        COURSE_TERM_OFFERINGS: COURSE_TERM_OFFERINGS
     };
 
 })(typeof window !== 'undefined' ? window : global);

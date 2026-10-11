@@ -12083,4 +12083,205 @@ html.is-iphone .app-global-footer {
     flex-shrink: 0;
 }
 
+/* ==========================================================================
+   Flowchart High-Contrast Fix (Mac / iOS Safari & Clean Beams Mode)
+   ========================================================================== */
+.fc-node-rect {
+    fill: #161c2e !important;
+    stroke: #334155 !important;
+}
+
+.fc-node-group.mastered .fc-node-rect {
+    fill: #064e3b !important;
+    stroke: #10b981 !important;
+}
+
+.fc-node-group.active .fc-node-rect {
+    fill: #0c4a6e !important;
+    stroke: #38bdf8 !important;
+}
+
+.fc-node-group.locked .fc-node-rect {
+    fill: #0f172a !important;
+    stroke: #334155 !important;
+}
+
+.fc-node-title {
+    fill: #f8fafc !important;
+    color: #f8fafc !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7);
+}
+
+.fc-node-sub {
+    fill: #94a3b8 !important;
+}
+
+/* Clean Beams Mode (Reduces spiderweb visual clutter, highlights on hover) */
+.flowchart-svg.clean-beams .fc-beam {
+    opacity: 0.12 !important;
+    stroke-width: 1.2 !important;
+    transition: opacity 0.2s ease, stroke-width 0.2s ease;
+}
+
+.flowchart-svg.clean-beams .fc-beam.highlighted,
+.flowchart-svg.clean-beams .fc-beam.active,
+.flowchart-svg.clean-beams .fc-beam:hover {
+    opacity: 1 !important;
+    stroke-width: 2.8 !important;
+    filter: drop-shadow(0 0 6px currentColor);
+}
+
+/* ==========================================================================
+   Preferred Sources Quick Bar (Google, Drive, CheeseFork, Moodle, Panopto)
+   ========================================================================== */
+.pref-source-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-decoration: none;
+    color: #e2e8f0;
+    background: rgba(30, 41, 59, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.15s ease;
+}
+
+.pref-source-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+}
+
+.pref-source-btn.google-search:hover {
+    background: rgba(66, 133, 244, 0.2);
+    border-color: #4285F4;
+    color: #93c5fd;
+}
+
+.pref-source-btn.google-drive:hover {
+    background: rgba(15, 157, 88, 0.2);
+    border-color: #0F9D58;
+    color: #86efac;
+}
+
+.pref-source-btn.cheesefork:hover {
+    background: rgba(245, 158, 11, 0.2);
+    border-color: #f59e0b;
+    color: #fde68a;
+}
+
+.pref-source-btn.moodle:hover {
+    background: rgba(56, 189, 248, 0.2);
+    border-color: #38bdf8;
+    color: #bae6fd;
+}
+
+.pref-source-btn.panopto:hover {
+    background: rgba(239, 68, 68, 0.2);
+    border-color: #ef4444;
+    color: #fca5a5;
+}
+
+/* ==========================================================================
+   CNF Prerequisites Structure (Conjunction of Alternative Disjunctions)
+   ========================================================================== */
+.prereq-cnf-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+    margin-top: 6px;
+}
+
+.prereq-cnf-clause-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    background: rgba(15, 23, 42, 0.6);
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    transition: border-color 0.2s ease;
+}
+
+.prereq-cnf-clause-row.clause-satisfied {
+    border-color: rgba(16, 185, 129, 0.35);
+    background: rgba(16, 185, 129, 0.05);
+}
+
+.prereq-cnf-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    user-select: none;
+    text-decoration: none;
+}
+
+.prereq-cnf-pill.satisfied {
+    background: rgba(16, 185, 129, 0.2);
+    border: 1px solid #10b981;
+    color: #f8fafc;
+    box-shadow: 0 0 10px rgba(16, 185, 129, 0.25);
+}
+
+.prereq-cnf-pill.satisfied:hover {
+    background: rgba(16, 185, 129, 0.35);
+    transform: translateY(-1px);
+}
+
+.prereq-cnf-pill.missing {
+    background: #1e293b;
+    border: 1px solid #334155;
+    color: #94a3b8;
+}
+
+.prereq-cnf-pill.missing:hover {
+    background: #27354f;
+    color: #e2e8f0;
+    transform: translateY(-1px);
+    border-color: #64748b;
+}
+
+.prereq-cnf-or-chip {
+    font-size: 0.7rem;
+    font-weight: 800;
+    color: #fbbf24;
+    background: rgba(245, 158, 11, 0.15);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    padding: 2px 7px;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
+    user-select: none;
+}
+
+.prereq-cnf-and-divider {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin: 4px 0;
+    color: #64748b;
+    font-size: 0.72rem;
+    font-weight: 700;
+    user-select: none;
+}
+
+.prereq-cnf-and-divider::before,
+.prereq-cnf-and-divider::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+
 

@@ -81,6 +81,40 @@
           "sizes": "192x192"
         }
       ]
+    },
+    {
+      "name": "וויג'טים לאנדרואיד",
+      "short_name": "Widgets",
+      "description": "וויג'טים דינמיים למסך הבית (Up Next, Next Exam, Semester)",
+      "url": "./widgets.html",
+      "icons": [
+        {
+          "src": "icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ],
+  "widgets": [
+    {
+      "name": "Up Next S",
+      "short_name": "UpNext",
+      "description": "המטלה והמבחן הקרובים ביותר",
+      "tag": "tecme-upnext-s",
+      "template": "widgets.html",
+      "ms_ac_template": "widgets.html",
+      "data": "widgets.html",
+      "type": "application/json"
+    },
+    {
+      "name": "Semester M",
+      "short_name": "Semester",
+      "description": "מעקב שבועות סמסטר וממוצע תואר",
+      "tag": "tecme-semester-m",
+      "template": "widgets.html",
+      "ms_ac_template": "widgets.html",
+      "data": "widgets.html",
+      "type": "application/json"
     }
   ]
 }
