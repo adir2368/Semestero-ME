@@ -9879,7 +9879,7 @@ async function ensureCheeseForkDatabase() {
     _cheeseForkLoadPromise = (async () => {
         try {
             if (!window.CHEESEFORK_DB && (!window.courses_from_rishum || window.courses_from_rishum.length === 0)) {
-                const scriptVersion = window.APP_VERSION || '2.3.1';
+                const scriptVersion = window.APP_VERSION || '2.3.2';
                 await new Promise((resolve) => {
                     const s = document.createElement('script');
                     s.src = `cheesefork_database.js?v=${scriptVersion}`;
