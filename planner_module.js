@@ -619,7 +619,7 @@
             let changed = false;
 
             // 1. Purge accidental 8-digit duplicate courses and purged courses from gameState.courses
-            const PURGED_TREE_CODES = new Set(['324033', '03240033', '035026', '35026', '035044', '01140071', '114071']);
+            const PURGED_TREE_CODES = new Set(['035044', '035026', '35026', '01140071', '114071']);
             Object.keys(global.gameState.courses).forEach(key => {
                 if (PURGED_TREE_CODES.has(key)) {
                     delete global.gameState.courses[key];
@@ -1104,11 +1104,14 @@
         const checkEnglishContent = (c) => {
             if (!c || !c.code) return;
             const normCodes = getNormalizedCodes(c.code, c.altCode);
-            // Exclude language courses themselves (324033, 324031, etc.)
-            if (normCodes.some(code => code === '324033' || code === '03240033' || code === '324031' || code === '324032')) return;
             if (countedEnglishCodes.has(c.code)) return;
 
             let isEng = c.taughtInEnglish === true || c.isEnglish === true;
+            // Language training courses (Mitkadmim A 324032 and Mitkadmim B 324033) officially count towards the 2 English courses requirement in Technion
+            const isLanguageTraining = normCodes.some(code => code === '324033' || code === '03240033' || code === '324032' || code === '03240032');
+            if (isLanguageTraining) {
+                isEng = true;
+            }
             if (!isEng && global.gameState && global.gameState.englishContentCourses) {
                 if (normCodes.some(code => global.gameState.englishContentCourses[code])) {
                     isEng = true;
@@ -2003,16 +2006,20 @@
                     if (isEnglishExemption) {
                         global.gameState.exemptions['03240033'] = true;
                         global.gameState.exemptions['324033'] = true;
+                        global.gameState.exemptions['03240032'] = true;
+                        global.gameState.exemptions['324032'] = true;
                         if (global.gameState.courses) {
-                            ['03240033', '324033'].forEach(k => {
+                            ['03240033', '324033', '03240032', '324032'].forEach(k => {
                                 if (global.gameState.courses[k]) global.gameState.courses[k].isExempt = true;
                             });
                         }
                     } else {
                         delete global.gameState.exemptions['03240033'];
                         delete global.gameState.exemptions['324033'];
+                        delete global.gameState.exemptions['03240032'];
+                        delete global.gameState.exemptions['324032'];
                         if (global.gameState.courses) {
-                            ['03240033', '324033'].forEach(k => {
+                            ['03240033', '324033', '03240032', '324032'].forEach(k => {
                                 if (global.gameState.courses[k]) global.gameState.courses[k].isExempt = false;
                             });
                         }
@@ -2021,7 +2028,7 @@
                 renderDegreePlanner();
                 if (typeof renderUI === 'function') renderUI();
                 if (typeof renderFlowchartTree === 'function') renderFlowchartTree();
-                showPlannerToast(isEnglishExemption ? 'הופעל פטור אמירנ״ט: ניתן פטור מקורס שפה 324033! 🇬🇧' : 'בוטל פטור אמירנ״ט.', true);
+                showPlannerToast(isEnglishExemption ? 'הופעל פטור מקורסי שפה (134+): פטור מ-324033 ו-324032! (חובת 2 קורסי תוכן באנגלית חלה) 🇬🇧' : 'בוטל פטור מקורסי שפה.', true);
             });
         }
     }

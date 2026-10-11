@@ -8719,7 +8719,7 @@ function loadSavedState() {
     gameState.isFinalsMode = false;
 
     // 1. Purge canceled / user-removed courses & deduplicate any accidental 8-digit courses
-    const PURGED_APP_CODES = ['035044', '324033', '03240033', '035026', '35026', '01140071', '114071'];
+    const PURGED_APP_CODES = ['035044', '035026', '35026', '01140071', '114071'];
     if (gameState.courses) {
         PURGED_APP_CODES.forEach(code => {
             if (gameState.courses[code]) {

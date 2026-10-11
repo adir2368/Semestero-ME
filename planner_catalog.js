@@ -521,6 +521,7 @@
             { code: "00360045", altCode: "036045", name: "גיאומטריה חישובית ומודלים בתיב\"ם 2", credits: 3.0, list: "E", prereqs: ["00350003"] },
             { code: "0940202", altCode: "094202", name: "מבוא לניתוח נתונים", credits: 3.5, list: "E", prereqs: ["02340128"] },
             { code: "2340268", altCode: "234268", name: "מבני נתונים ואלגוריתמים", credits: 3.0, list: "E", prereqs: ["02340128"] },
+            { code: "03240032", altCode: "324032", name: "אנגלית - מתקדמים א'", credits: 0.0, list: "E", prereqs: [] },
             { code: "03240033", altCode: "324033", name: "אנגלית טכנית מתקדמים ב'", credits: 3.0, list: "E", prereqs: [] },
             { code: "00350026", altCode: "035026", name: "מבוא יצירתי להנדסת מכונות (רשות)", credits: 2.5, list: "E", prereqs: [] }
         ]
