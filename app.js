@@ -17995,13 +17995,13 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.10.11-v2.3.2",
-    version: "2.3.2",
-    build: "20261011_01",
-    date: "2026-10-11 20:30",
-    description: "גרסה 2.3.2: איחוד חלופות פיזיקה 1 ו-2 (1/1מ'/1פ'), דרישות קדם בפורמט CNF וצ'קבוקס פטור, מקורות מועדפים (Google Search & Drive), סמסטרי קיץ דינמיים, הגנה על קורסים חד-שנתיים/בינלאומיים, ווידג'טים לאנדרואיד ותיקון ניגודיות Flowchart ל-Safari/Mac"
+    code: "REV-2026.10.11-v2.3.3",
+    version: "2.3.3",
+    build: "20261011_02",
+    date: "2026-10-11 22:30",
+    description: "גרסה 2.3.3: שילוב סמסטר קיץ מובנה בעץ מתחת לשנה א' סמסטר ב', בורר גרסאות פיזיקה 1 ו-2 (כולל פיזיקה 1ת' ו-2ת') מהעץ והמודאל, רענון אוטומטי בהחלפת שנתון, חובת 2 קורסי תוכן באנגלית ופטור אמירנ״ט מקורסי שפה 324033, וניקוי דרישות קדם."
 };
-window.APP_VERSION = "2.3.2";
+window.APP_VERSION = "2.3.3";
 
 function ensureBaselineRevisions() {
     if (!gameState.revisions || !Array.isArray(gameState.revisions) || gameState.revisions.length === 0) {
@@ -19263,7 +19263,10 @@ function compareSemver(v1, v2) {
 }
 
 window.checkRemoteAppVersion = async function(isManualCheck = false) {
-    const currentVer = (APP_CURRENT_REVISION && APP_CURRENT_REVISION.version) || "2.0.0";
+    const isElectron = Boolean(window.electronAPI || (window.process && window.process.type === 'renderer') || (navigator.userAgent && navigator.userAgent.includes('Electron')));
+    const domVerEl = document.getElementById("display-system-version");
+    const domVer = domVerEl ? domVerEl.innerText.replace(/^v/, "").trim() : "";
+    const currentVer = domVer || (window.APP_VERSION) || (APP_CURRENT_REVISION && APP_CURRENT_REVISION.version) || "2.3.3";
     const statusTextEl = document.getElementById("version-check-status-text");
     const footerBadgeEl = document.getElementById("footer-version-badge");
     const checkBtn = document.getElementById("btn-check-version-updates");
@@ -19308,6 +19311,12 @@ window.checkRemoteAppVersion = async function(isManualCheck = false) {
             if (modCurText) modCurText.innerText = `גרסה מותקנת אצלך: v${currentVer}`;
             if (modDesc && remotePkg.description) modDesc.innerText = remotePkg.description;
 
+            // In Electron desktop, hide the web refresh button and emphasize the desktop release download
+            const refreshBtn = document.getElementById("btn-force-refresh-app");
+            if (refreshBtn) {
+                refreshBtn.style.display = isElectron ? "none" : "flex";
+            }
+
             // Check if dismissed in this session
             let isDismissed = false;
             try { isDismissed = !isManualCheck && sessionStorage.getItem("dismissed_update") === "true"; } catch (e) {}
@@ -19346,6 +19355,48 @@ window.checkRemoteAppVersion = async function(isManualCheck = false) {
             checkBtn.disabled = false;
             checkBtn.innerText = "🔄 בדוק עדכונים עכשיו";
         }
+    }
+};
+
+window.forceAppUpdate = async function() {
+    const btn = document.getElementById("btn-force-refresh-app");
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = `<span>🔄</span> <span>מרענן מטמון ומעדכן גרסה...</span>`;
+    }
+
+    try {
+        sessionStorage.setItem("dismissed_update", "true");
+
+        // 1. Post skipWaiting to all active service workers
+        if ('serviceWorker' in navigator) {
+            const regs = await navigator.serviceWorker.getRegistrations();
+            for (const reg of regs) {
+                if (reg.waiting) reg.waiting.postMessage({ action: 'skipWaiting' });
+                if (reg.active) reg.active.postMessage({ action: 'skipWaiting' });
+                await reg.update().catch(() => {});
+            }
+        }
+
+        // 2. Clear old browser caches
+        if ('caches' in window) {
+            const cacheKeys = await caches.keys();
+            await Promise.all(cacheKeys.map(k => caches.delete(k)));
+        }
+
+        // 3. Unregister service worker to force fresh fetch
+        if ('serviceWorker' in navigator) {
+            const regs = await navigator.serviceWorker.getRegistrations();
+            await Promise.all(regs.map(r => r.unregister()));
+        }
+
+        // 4. Force hard navigation reload with cache buster
+        const cleanUrl = new URL(window.location.href);
+        cleanUrl.searchParams.set('v_sync', Date.now());
+        window.location.replace(cleanUrl.toString());
+    } catch (e) {
+        console.warn("[Update] forceAppUpdate fallback reload:", e);
+        window.location.reload(true);
     }
 };
 
