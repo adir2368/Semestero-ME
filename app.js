@@ -2622,16 +2622,23 @@ document.addEventListener("DOMContentLoaded", () => {
     // Periodically update paths on window resize
     window.addEventListener("resize", drawConnections);
 
-    // Warm up CheeseFork course database during browser idle time (unblocking first paint & TBT)
+    // Warm up CheeseFork course database lazily well after page load or on user intent (unblocking first paint & TBT)
     const warmUpCheeseFork = () => {
         if (typeof ensureCheeseForkDatabase === 'function') {
             ensureCheeseForkDatabase().catch(() => {});
         }
     };
+    const onUserInteraction = () => {
+        window.removeEventListener('pointerdown', onUserInteraction);
+        window.removeEventListener('keydown', onUserInteraction);
+        setTimeout(warmUpCheeseFork, 150);
+    };
+    window.addEventListener('pointerdown', onUserInteraction, { once: true, passive: true });
+    window.addEventListener('keydown', onUserInteraction, { once: true, passive: true });
     if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
-        window.requestIdleCallback(warmUpCheeseFork, { timeout: 4500 });
+        window.requestIdleCallback(warmUpCheeseFork, { timeout: 9000 });
     } else {
-        setTimeout(warmUpCheeseFork, 3000);
+        setTimeout(warmUpCheeseFork, 7000);
     }
 });
 
@@ -15488,8 +15495,10 @@ function setupFlowchartViewMode() {
     // Pan & Mouse Wheel
     setupFlowchartPanAndWheel();
 
-    // Default to flowchart view on start
-    setMode('flowchart');
+    // Default to flowchart view state without duplicate SVG compilation (renderUI handles initial paint)
+    currentViewMode = 'flowchart';
+    if (btnFlowchart) btnFlowchart.classList.add("active");
+    if (fcViewport) fcViewport.style.display = 'flex';
 }
 
 function initFlowchartZoom() {
@@ -15501,23 +15510,25 @@ function initFlowchartZoom() {
 }
 
 function fitFlowchartToWidth() {
-    const scrollWrap = document.getElementById("flowchart-scroll-wrapper");
-    const toggleFitBtn = document.getElementById("btn-fc-toggle-fit");
-    if (!scrollWrap) return;
+    requestAnimationFrame(() => {
+        const scrollWrap = document.getElementById("flowchart-scroll-wrapper");
+        const toggleFitBtn = document.getElementById("btn-fc-toggle-fit");
+        if (!scrollWrap) return;
 
-    const availableWidth = scrollWrap.clientWidth || (window.innerWidth - 20);
-    const baseW = window.FLOWCHART_TOTAL_WIDTH || BASE_FLOWCHART_WIDTH;
-    const effectiveBaseW = baseW * FLOWCHART_ZOOM_MULTIPLIER;
-    const fitFactor = Math.max(0.12, Math.min(1.3, (availableWidth - 16) / effectiveBaseW));
-    setFlowchartZoom(fitFactor);
-    isFlowchartFitWidth = true;
-    window.isFlowchartFitWidth = true;
-    if (toggleFitBtn) toggleFitBtn.classList.add("active");
+        const availableWidth = scrollWrap.clientWidth || (window.innerWidth - 20);
+        const baseW = window.FLOWCHART_TOTAL_WIDTH || BASE_FLOWCHART_WIDTH;
+        const effectiveBaseW = baseW * FLOWCHART_ZOOM_MULTIPLIER;
+        const fitFactor = Math.max(0.12, Math.min(1.3, (availableWidth - 16) / effectiveBaseW));
+        setFlowchartZoom(fitFactor, availableWidth);
+        isFlowchartFitWidth = true;
+        window.isFlowchartFitWidth = true;
+        if (toggleFitBtn) toggleFitBtn.classList.add("active");
+    });
 }
 
-function setFlowchartZoom(zoomVal) {
+function setFlowchartZoom(zoomVal, cachedAvailableWidth) {
     const scrollWrap = document.getElementById("flowchart-scroll-wrapper");
-    const availableWidth = scrollWrap ? scrollWrap.clientWidth : (window.innerWidth - 20);
+    const availableWidth = cachedAvailableWidth !== undefined ? cachedAvailableWidth : (scrollWrap ? scrollWrap.clientWidth : (window.innerWidth - 20));
     const baseW = window.FLOWCHART_TOTAL_WIDTH || BASE_FLOWCHART_WIDTH;
     const effectiveBaseW = baseW * FLOWCHART_ZOOM_MULTIPLIER;
     const widthFitZoom = (availableWidth - 16) / effectiveBaseW;
@@ -16599,12 +16610,30 @@ function toggleFinalsMode(enable) {
             renderFinalsCalendar();
         }
     } else {
-        renderFinalsCalendar();
+        if (window.currentActiveTab === 'calendar') {
+            renderFinalsCalendar();
+        } else if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+            window.requestIdleCallback(() => renderFinalsCalendar(), { timeout: 4000 });
+        } else {
+            setTimeout(renderFinalsCalendar, 1800);
+        }
     }
 
-    // 4. Update runway and tasks table
-    renderExamGapRunway();
-    renderNotionTasksTable();
+    // 4. Update runway and tasks table (defer if on another tab to keep main thread completely unblocked)
+    if (window.currentActiveTab === 'tasks') {
+        renderExamGapRunway();
+        renderNotionTasksTable();
+    } else if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+        window.requestIdleCallback(() => {
+            renderExamGapRunway();
+            renderNotionTasksTable();
+        }, { timeout: 3500 });
+    } else {
+        setTimeout(() => {
+            renderExamGapRunway();
+            renderNotionTasksTable();
+        }, 1200);
+    }
 }
 
 // Renders the Course Tabs inside the Manager Modal
@@ -17995,13 +18024,13 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.10.12-v2.3.6",
-    version: "2.3.6",
-    build: "20261012_01",
-    date: "2026-10-12 00:27",
-    description: "גרסה 2.3.6: סיווג אנגלית תלת-שלבי מורחב לפי נהלי הטכניון (פטור מלא 134+, פטור חלקי ממתקדמים א' בלבד 120–133 עם חובת מתקדמים ב' 324033 המכסה קורס אנגלית אחד מתוך 2, וללא פטור 104–119 עם חובת א'+ב')."
+    code: "REV-2026.10.12-v2.3.7",
+    version: "2.3.7",
+    build: "20261012_02",
+    date: "2026-10-12 01:05",
+    description: "גרסה 2.3.7: אופטימיזציית ביצועים ונגישות מקיפה לפי ביקורת Lighthouse (ציון 100 בנגישות וב-Agentic Browsing, ביטול Forced Reflows ב-flowchart zoom, דחיית טעינת מאגר CheeseFork ויומן בחינות ברקע להפחתת TBT, מניעת רינדור כפול, ושיפור LCP עם Preload ו-Preconnect)."
 };
-window.APP_VERSION = "2.3.6";
+window.APP_VERSION = "2.3.7";
 
 function ensureBaselineRevisions() {
     if (!gameState.revisions || !Array.isArray(gameState.revisions) || gameState.revisions.length === 0) {
@@ -19266,7 +19295,7 @@ window.checkRemoteAppVersion = async function(isManualCheck = false) {
     const isElectron = Boolean(window.electronAPI || (window.process && window.process.type === 'renderer') || (navigator.userAgent && navigator.userAgent.includes('Electron')));
     const domVerEl = document.getElementById("display-system-version");
     const domVer = domVerEl ? domVerEl.innerText.replace(/^v/, "").trim() : "";
-    const currentVer = domVer || (window.APP_VERSION) || (APP_CURRENT_REVISION && APP_CURRENT_REVISION.version) || "2.3.6";
+    const currentVer = domVer || (window.APP_VERSION) || (APP_CURRENT_REVISION && APP_CURRENT_REVISION.version) || "2.3.7";
     const statusTextEl = document.getElementById("version-check-status-text");
     const footerBadgeEl = document.getElementById("footer-version-badge");
     const checkBtn = document.getElementById("btn-check-version-updates");
