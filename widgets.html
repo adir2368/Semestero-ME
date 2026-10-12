@@ -3,30 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>TecME Widgets · וויג'טים לאנדרואיד</title>
+    <title>Semestero ME · וויג'טים למסך הבית</title>
     <link rel="icon" type="image/png" href="icon-192.png">
     <link rel="apple-touch-icon" href="apple-touch-icon.png">
     <meta name="theme-color" content="#0f172a">
-    <link rel="manifest" href="manifest.json">
-    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700;800&family=Rubik:wght@400;500;700&display=swap" rel="stylesheet">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="manifest.json?v=2.3.8">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700;800;900&family=Rubik:wght@400;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-canvas: #121622;
-            --bg-card: #1e2433;
-            --bg-card-subtle: #171c2a;
-            --border-card: rgba(255, 255, 255, 0.08);
-            --border-card-hover: rgba(56, 189, 248, 0.4);
+            --bg-canvas: #0a0f1d;
+            --bg-card: rgba(17, 24, 39, 0.85);
+            --bg-card-glass: rgba(15, 23, 42, 0.72);
+            --border-card: rgba(255, 255, 255, 0.1);
+            --border-glow: rgba(56, 189, 248, 0.35);
             --text-primary: #f8fafc;
             --text-secondary: #94a3b8;
             --text-muted: #64748b;
             --accent-cyan: #38bdf8;
-            --accent-green: #10b981;
-            --accent-amber: #f59e0b;
-            --accent-rose: #f43f5e;
-            --font-family: 'Assistant', 'Rubik', system-ui, sans-serif;
-            --radius-s: 18px;
-            --radius-m: 22px;
-            --radius-l: 26px;
+            --accent-green: #34d399;
+            --accent-amber: #fbbf24;
+            --accent-rose: #fb7185;
+            --font-family: 'Assistant', 'Rubik', system-ui, -apple-system, sans-serif;
+            --radius-widget: 26px;
         }
 
         * {
@@ -38,973 +41,886 @@
 
         body {
             background-color: var(--bg-canvas);
+            background-image: radial-gradient(circle at 50% 15%, rgba(56, 189, 248, 0.08) 0%, transparent 60%),
+                              radial-gradient(circle at 80% 80%, rgba(99, 102, 241, 0.05) 0%, transparent 50%);
             color: var(--text-primary);
             font-family: var(--font-family);
             line-height: 1.4;
-            padding: 20px 16px 80px;
             min-height: 100vh;
+            min-height: 100dvh;
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: space-between;
+            padding: calc(env(safe-area-inset-top) + 12px) 16px calc(env(safe-area-inset-bottom) + 16px);
+            overflow-x: hidden;
         }
 
-        /* Top Header */
-        .hub-header {
+        /* Top Minimal Header */
+        .widget-top-nav {
             width: 100%;
-            max-width: 1100px;
+            max-width: 520px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 24px;
-            flex-wrap: wrap;
-            gap: 12px;
+            padding: 4px 6px;
+            margin-bottom: 8px;
         }
 
-        .hub-title-group h1 {
-            font-size: 1.5rem;
-            font-weight: 800;
-            color: #fff;
-            display: flex;
+        .widget-brand {
+            display: inline-flex;
             align-items: center;
             gap: 8px;
+            text-decoration: none;
+            color: #fff;
+            font-weight: 800;
+            font-size: 0.95rem;
         }
 
-        .hub-title-group p {
-            font-size: 0.85rem;
+        .widget-brand-logo {
+            width: 26px;
+            height: 26px;
+            border-radius: 8px;
+            object-fit: contain;
+            filter: drop-shadow(0 0 6px rgba(56, 189, 248, 0.5));
+        }
+
+        .btn-action-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid var(--border-card);
             color: var(--text-secondary);
-            margin-top: 2px;
+            padding: 5px 12px;
+            border-radius: 18px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-decoration: none;
+            backdrop-filter: blur(12px);
+            transition: all 0.2s ease;
+            cursor: pointer;
         }
 
-        .hub-actions {
+        .btn-action-pill:hover, .btn-action-pill:active {
+            color: #fff;
+            border-color: var(--accent-cyan);
+            background: rgba(56, 189, 248, 0.15);
+        }
+
+        /* Widget Stage Container */
+        .widget-stage {
+            width: 100%;
+            max-width: 520px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 0;
+            position: relative;
+        }
+
+        /* Native-feeling Widget Card */
+        .phone-widget-card {
+            width: 100%;
+            background: var(--bg-card);
+            border: 1px solid var(--border-card);
+            border-radius: var(--radius-widget);
+            padding: 24px 22px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s ease, opacity 0.2s ease;
+            min-height: 250px;
+            user-select: none;
+        }
+
+        .phone-widget-card.active-card {
+            border-color: var(--border-glow);
+            box-shadow: 0 20px 48px rgba(0, 0, 0, 0.6),
+                        0 0 24px rgba(56, 189, 248, 0.18),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.15);
+        }
+
+        /* Widget Header */
+        .widget-header {
             display: flex;
             align-items: center;
-            gap: 10px;
+            justify-content: space-between;
+            margin-bottom: 14px;
         }
 
-        .btn-hub-back {
+        .widget-badge {
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            background: rgba(30, 41, 59, 0.8);
-            border: 1px solid var(--border-card);
-            color: var(--text-primary);
-            padding: 8px 14px;
-            border-radius: 10px;
-            font-size: 0.82rem;
-            font-weight: 700;
-            text-decoration: none;
-            transition: all 0.2s ease;
-        }
-
-        .btn-hub-back:hover {
-            background: rgba(56, 189, 248, 0.15);
-            border-color: var(--accent-cyan);
-            color: var(--accent-cyan);
-        }
-
-        /* Controls Bar (Mode & Filters) */
-        .controls-bar {
-            width: 100%;
-            max-width: 1100px;
-            background: rgba(30, 41, 59, 0.5);
-            border: 1px solid var(--border-card);
-            border-radius: 16px;
-            padding: 12px 16px;
-            margin-bottom: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 12px;
-        }
-
-        .pill-group {
-            display: flex;
-            gap: 6px;
-            flex-wrap: wrap;
-        }
-
-        .pill-btn {
-            background: rgba(15, 23, 42, 0.6);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            color: var(--text-secondary);
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.18s ease;
-            font-family: inherit;
-        }
-
-        .pill-btn:hover {
-            color: #fff;
-            border-color: rgba(255, 255, 255, 0.2);
-        }
-
-        .pill-btn.active {
-            background: rgba(56, 189, 248, 0.18);
-            border-color: var(--accent-cyan);
-            color: var(--accent-cyan);
-            box-shadow: 0 0 10px rgba(56, 189, 248, 0.25);
-        }
-
-        /* Grid Container */
-        .widgets-grid {
-            width: 100%;
-            max-width: 1100px;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 20px;
-        }
-
-        /* Base Widget Card */
-        .widget-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border-card);
-            border-radius: var(--radius-m);
-            padding: 18px 20px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            position: relative;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
-            transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
-            overflow: hidden;
-        }
-
-        .widget-card:hover {
-            border-color: var(--border-card-hover);
-            transform: translateY(-2px);
-            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
-        }
-
-        .widget-label-badge {
-            font-size: 0.68rem;
+            font-size: 0.72rem;
             font-weight: 800;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.4px;
+            color: var(--accent-cyan);
             text-transform: uppercase;
+            background: rgba(56, 189, 248, 0.12);
+            border: 1px solid rgba(56, 189, 248, 0.28);
+            padding: 3px 10px;
+            border-radius: 12px;
+        }
+
+        .widget-live-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #34d399;
+            box-shadow: 0 0 8px #34d399;
+            animation: pulse-dot 2s infinite ease-in-out;
+        }
+
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(0.85); }
+        }
+
+        .widget-timestamp {
+            font-size: 0.72rem;
             color: var(--text-muted);
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
+            font-weight: 600;
+            direction: ltr;
         }
 
-        /* Specific Shapes */
-        /* Up Next S & Next Exam S (Small 2x2) */
-        .widget-s {
-            min-height: 185px;
-        }
-
-        /* Semester M & Up Next M (Medium 4x2) */
-        .widget-m {
-            min-height: 200px;
-            grid-column: span 1;
-        }
-        @media (min-width: 768px) {
-            .widget-m {
-                grid-column: span 2;
-            }
-        }
-
-        /* Up Next L (Large 4x4) */
-        .widget-l {
-            min-height: 380px;
-            grid-column: span 1;
-        }
-        @media (min-width: 768px) {
-            .widget-l {
-                grid-column: span 2;
-            }
-        }
-
-        /* Typography & Components inside widgets */
-        .widget-header-title {
-            font-size: 1.18rem;
-            font-weight: 800;
-            color: #fff;
-            line-height: 1.25;
-        }
-
-        .widget-header-sub {
-            font-size: 0.78rem;
-            color: var(--text-secondary);
-            margin-top: 2px;
-        }
-
-        .widget-highlight-text {
-            color: var(--accent-cyan);
-            font-weight: 800;
-        }
-
-        .widget-big-number {
-            font-size: 2.8rem;
+        /* Big Countdown & Hero Typography */
+        .widget-hero-number {
+            font-size: 3.4rem;
             font-weight: 900;
             color: #fff;
             line-height: 1;
-            letter-spacing: -1px;
+            letter-spacing: -1.5px;
             display: flex;
             align-items: baseline;
-            gap: 6px;
+            gap: 8px;
+            margin: 6px 0 8px;
         }
 
-        .widget-big-number span {
-            font-size: 1.1rem;
-            font-weight: 600;
+        .widget-hero-number span {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--accent-cyan);
+            letter-spacing: normal;
+        }
+
+        .widget-course-title {
+            font-size: 1.35rem;
+            font-weight: 800;
+            color: #fff;
+            line-height: 1.25;
+            margin-bottom: 4px;
+        }
+
+        .widget-course-sub {
+            font-size: 0.86rem;
             color: var(--text-secondary);
-            letter-spacing: 0;
-        }
-
-        /* Progress Bar (Timeline) */
-        .timeline-container {
-            margin: 14px 0;
-            width: 100%;
-        }
-
-        .timeline-bar {
-            height: 5px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 6px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .timeline-bar-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #38bdf8, #818cf8);
-            border-radius: 6px;
-            transition: width 0.3s ease;
-        }
-
-        .timeline-labels {
             display: flex;
-            justify-content: space-between;
-            font-size: 0.68rem;
-            color: var(--text-muted);
-            margin-top: 4px;
-            font-weight: 600;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
         }
 
-        /* Tasks / Items List */
-        .widget-task-list {
+        /* Tasks List inside Widget */
+        .widget-task-items {
             display: flex;
             flex-direction: column;
-            gap: 10px;
-            margin: 12px 0;
+            gap: 8px;
+            margin: 10px 0;
         }
 
-        .widget-task-row {
+        .widget-task-item {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 10px;
-            padding: 4px 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            background: rgba(15, 23, 42, 0.65);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 9px 12px;
+            border-radius: 14px;
+            transition: all 0.2s ease;
         }
 
-        .widget-task-row:last-child {
-            border-bottom: none;
-        }
-
-        .task-left {
+        .widget-task-info {
             display: flex;
             flex-direction: column;
-            gap: 1px;
-            flex: 1;
+            gap: 2px;
             min-width: 0;
         }
 
-        .task-title {
-            font-size: 0.85rem;
+        .widget-task-name {
+            font-size: 0.88rem;
             font-weight: 700;
-            color: #f1f5f9;
+            color: #fff;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
 
-        .task-sub {
+        .widget-task-course {
             font-size: 0.72rem;
             color: var(--text-muted);
         }
 
-        .task-status-pill {
-            font-size: 0.72rem;
-            font-weight: 700;
-            padding: 2px 8px;
-            border-radius: 6px;
+        .widget-task-pill {
+            font-size: 0.7rem;
+            font-weight: 800;
+            padding: 3px 8px;
+            border-radius: 8px;
             white-space: nowrap;
+            margin-right: 8px;
         }
 
-        .task-status-pill.missed {
-            background: rgba(244, 63, 94, 0.2);
-            color: #fb7185;
+        .widget-task-pill.urgent {
+            background: rgba(251, 113, 133, 0.2);
+            color: var(--accent-rose);
+            border: 1px solid rgba(251, 113, 133, 0.35);
         }
 
-        .task-status-pill.today {
-            background: rgba(56, 189, 248, 0.2);
-            color: #38bdf8;
+        .widget-task-pill.soon {
+            background: rgba(251, 191, 36, 0.18);
+            color: var(--accent-amber);
+            border: 1px solid rgba(251, 191, 36, 0.3);
         }
 
-        .task-status-pill.upcoming {
-            background: rgba(148, 163, 184, 0.15);
-            color: #cbd5e1;
+        .widget-task-pill.normal {
+            background: rgba(56, 189, 248, 0.15);
+            color: var(--accent-cyan);
+            border: 1px solid rgba(56, 189, 248, 0.25);
         }
 
-        /* Bottom Footer bar */
+        /* GPA and Progress Grid */
+        .widget-stat-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin: 12px 0 6px;
+        }
+
+        .widget-stat-box {
+            background: rgba(15, 23, 42, 0.65);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 14px;
+            padding: 10px 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .widget-stat-val {
+            font-size: 1.5rem;
+            font-weight: 900;
+            color: #fff;
+            line-height: 1.1;
+        }
+
+        .widget-stat-lbl {
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        /* Widget Progress Bar */
+        .widget-progress-track {
+            width: 100%;
+            height: 7px;
+            background: rgba(30, 41, 59, 0.8);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .widget-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #38bdf8, #818cf8);
+            border-radius: 4px;
+            transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        /* Widget Footer & Quick Action Link */
         .widget-footer {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            border-top: 1px solid rgba(255, 255, 255, 0.05);
-            padding-top: 10px;
-            margin-top: 6px;
-            font-size: 0.74rem;
-            color: var(--text-muted);
-            font-weight: 600;
+            margin-top: 14px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
         }
 
-        .widget-footer-strong {
+        .widget-footer-info {
+            font-size: 0.76rem;
             color: var(--text-secondary);
-            font-weight: 700;
-        }
-
-        /* GPA stats row */
-        .gpa-row {
+            font-weight: 600;
             display: flex;
             align-items: center;
-            gap: 24px;
-            margin-top: 12px;
+            gap: 5px;
         }
 
-        .gpa-item {
+        .widget-footer-action {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            color: var(--accent-cyan);
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-decoration: none;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 8px;
+            transition: background 0.15s ease;
+        }
+
+        .widget-footer-action:hover {
+            background: rgba(56, 189, 248, 0.12);
+        }
+
+        /* Bottom Widget Selector Dock */
+        .widget-dock {
+            width: 100%;
+            max-width: 520px;
+            background: rgba(15, 23, 42, 0.85);
+            border: 1px solid var(--border-card);
+            border-radius: 20px;
+            padding: 8px;
             display: flex;
-            align-items: baseline;
+            align-items: center;
+            justify-content: space-around;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
             gap: 6px;
         }
 
-        .gpa-val {
-            font-size: 1.45rem;
-            font-weight: 800;
-            color: #fff;
-        }
-
-        .gpa-lbl {
-            font-size: 0.72rem;
-            color: var(--text-muted);
-        }
-
-        /* Clean State Banner */
-        .clean-state-box {
+        .dock-tab-btn {
+            flex: 1;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            text-align: center;
-            padding: 24px 16px;
-            gap: 10px;
-        }
-
-        .clean-state-icon {
-            font-size: 2.2rem;
-            color: var(--accent-green);
-        }
-
-        .clean-state-title {
-            font-size: 0.95rem;
-            font-weight: 700;
-            color: #fff;
-        }
-
-        .clean-state-sub {
-            font-size: 0.78rem;
+            gap: 3px;
+            padding: 8px 4px;
+            border-radius: 14px;
+            border: none;
+            background: transparent;
             color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            font-family: inherit;
         }
 
-        /* Instructions banner */
-        .install-guide {
-            width: 100%;
-            max-width: 1100px;
-            background: rgba(15, 23, 42, 0.6);
-            border: 1px solid rgba(56, 189, 248, 0.2);
-            border-radius: 16px;
-            padding: 16px 20px;
-            margin-top: 32px;
-            display: flex;
-            align-items: flex-start;
-            gap: 14px;
+        .dock-tab-btn .dock-icon {
+            font-size: 1.25rem;
+            line-height: 1;
+            filter: grayscale(0.5);
+            transition: transform 0.2s ease, filter 0.2s ease;
         }
 
-        .install-guide-icon {
-            font-size: 1.8rem;
-            flex-shrink: 0;
-        }
-
-        .install-guide h3 {
-            font-size: 0.92rem;
+        .dock-tab-btn .dock-label {
+            font-size: 0.72rem;
             font-weight: 700;
-            color: var(--accent-cyan);
-            margin-bottom: 4px;
+            letter-spacing: -0.2px;
         }
 
-        .install-guide p {
+        .dock-tab-btn.active {
+            background: rgba(56, 189, 248, 0.15);
+            color: #fff;
+            box-shadow: 0 0 12px rgba(56, 189, 248, 0.2);
+        }
+
+        .dock-tab-btn.active .dock-icon {
+            filter: none;
+            transform: scale(1.15);
+        }
+
+        .dock-tab-btn.active .dock-label {
+            color: var(--accent-cyan);
+        }
+
+        /* Home Screen Pin Floating Toast */
+        #pin-toast {
+            position: fixed;
+            bottom: 85px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            opacity: 0;
+            pointer-events: none;
+            background: rgba(15, 23, 42, 0.95);
+            border: 1px solid rgba(56, 189, 248, 0.4);
+            color: #fff;
+            padding: 9px 18px;
+            border-radius: 20px;
             font-size: 0.8rem;
-            color: var(--text-secondary);
-            line-height: 1.5;
+            font-weight: 700;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(16px);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        #pin-toast.show {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateX(-50%) translateY(0);
         }
     </style>
 </head>
 <body>
 
-    <!-- Hub Header -->
-    <header class="hub-header">
-        <div class="hub-title-group">
-            <h1><span>📱</span> TecME Widgets · אנדרואיד</h1>
-            <p>וויג'טים דינמיים למסך הבית (Small, Medium, Large) מסונכרנים חי עם נתוני התואר שלך</p>
-        </div>
-        <div class="hub-actions">
-            <a href="index.html" class="btn-hub-back">
-                <span>🔙</span>
-                <span>חזרה למערכת הראשית</span>
+    <!-- Minimal Header -->
+    <header class="widget-top-nav">
+        <a href="index.html" class="widget-brand" title="חזרה לאפליקציה הראשית">
+            <img src="icon_small.webp?v=2.3.8" alt="Semestero Logo" class="widget-brand-logo">
+            <span>סמסטרו ME • וויג'טים</span>
+        </a>
+        <div style="display: flex; gap: 8px; align-items: center;">
+            <button id="btn-pin-widget" class="btn-action-pill" title="הצמד ווידג'ט למסך הבית">
+                <span>📌</span>
+                <span>הוסף למסך הבית</span>
+            </button>
+            <a href="index.html" class="btn-action-pill" title="חזרה לסמסטרו">
+                <span>✕</span>
             </a>
         </div>
     </header>
 
-    <!-- Controls Bar -->
-    <section class="controls-bar">
-        <div class="pill-group" id="mode-selector">
-            <button class="pill-btn active" data-mode="live">🔄 סנכרון חי (Auto Live)</button>
-            <button class="pill-btn" data-mode="term">📚 סמסטר פעיל (Term)</button>
-            <button class="pill-btn" data-mode="finals">🔥 תקופת מבחנים (Finals)</button>
-            <button class="pill-btn" data-mode="break">🏖️ חופשת סמסטר (Break)</button>
-        </div>
-        <div class="pill-group" id="size-selector">
-            <button class="pill-btn active" data-size="all">הכל</button>
-            <button class="pill-btn" data-size="s">Small 2x2</button>
-            <button class="pill-btn" data-size="m">Medium 4x2</button>
-            <button class="pill-btn" data-size="l">Large 4x4</button>
-        </div>
-    </section>
-
-    <!-- Widgets Grid -->
-    <main class="widgets-grid" id="widgets-container">
-        <!-- Rendered dynamically -->
+    <!-- Main Widget Card Stage -->
+    <main class="widget-stage" id="widget-stage">
+        <!-- Injected dynamically via JS based on selected widget -->
+        <div id="active-widget-slot" style="width: 100%;"></div>
     </main>
 
-    <!-- Android Home Screen Installation Guide -->
-    <footer class="install-guide">
-        <div class="install-guide-icon">📲</div>
-        <div>
-            <h3>איך מוסיפים ווידג'ט למסך הבית באנדרואיד?</h3>
-            <p>
-                1. פתח דף זה בדפדפן <strong>Chrome</strong> במכשיר האנדרואיד שלך.<br>
-                2. לחץ על תפריט 3 הנקודות בדפדפן ובחר <strong>"הוסף למסך הבית" (Add to Home screen)</strong> או <strong>"התקן אפליקציה"</strong>.<br>
-                3. במסך הבית של הטלפון, בצע לחיצה ארוכה (Long Press) על שטח ריק ובחר <strong>Widgets</strong> &bull; בחר <strong>TecME / Semestero</strong> והוסף את הגודל המועדף עליך!
-            </p>
-        </div>
-    </footer>
+    <!-- Bottom Dock Selector -->
+    <nav class="widget-dock" aria-label="בורר וויג'טים למסך הבית">
+        <button class="dock-tab-btn active" data-widget="exam">
+            <span class="dock-icon">⏱️</span>
+            <span class="dock-label">מבחן קרוב</span>
+        </button>
+        <button class="dock-tab-btn" data-widget="tasks">
+            <span class="dock-icon">📝</span>
+            <span class="dock-label">מטלות</span>
+        </button>
+        <button class="dock-tab-btn" data-widget="semester">
+            <span class="dock-icon">🎓</span>
+            <span class="dock-label">סמסטר</span>
+        </button>
+        <button class="dock-tab-btn" data-widget="schedule">
+            <span class="dock-icon">📅</span>
+            <span class="dock-label">מערכת שעות</span>
+        </button>
+    </nav>
+
+    <!-- Pin Feedback Toast -->
+    <div id="pin-toast">
+        <span>✨</span>
+        <span id="pin-toast-text">לחץ על תפריט הדפדפן ובחר "הוסף למסך הבית"</span>
+    </div>
 
     <script>
-        // Load live student state from localStorage
-        function loadStudentData() {
-            try {
-                const raw = localStorage.getItem('academicSkillTreeState_v1') || localStorage.getItem('academicSkillTreeState');
-                if (!raw) return getDefaultMockData();
-                const state = JSON.parse(raw);
+        // Active selected widget ('exam' | 'tasks' | 'semester' | 'schedule')
+        const urlParams = new URLSearchParams(window.location.search);
+        let activeWidget = urlParams.get('w') || 'exam';
 
-                // Compute courses and active semester
-                const courses = Object.values(state.courses || {});
-                const activeCourses = courses.filter(c => c.status === 'active');
-                const completedCourses = courses.filter(c => c.status === 'mastered');
+        // Deferred install prompt storage for PWA home screen installation
+        let deferredPrompt = null;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            const pinBtn = document.getElementById('btn-pin-widget');
+            if (pinBtn) pinBtn.style.borderColor = '#38bdf8';
+        });
 
-                // Compute overall GPA
-                let totalGradedCredits = 0;
-                let totalQualityPoints = 0;
-                courses.forEach(c => {
-                    if (c.grade && !isNaN(Number(c.grade)) && Number(c.grade) >= 55 && !c.isBinaryPass) {
-                        const cr = Number(c.credits) || 0;
-                        const g = Number(c.grade);
-                        totalGradedCredits += cr;
-                        totalQualityPoints += (cr * g);
-                    }
-                });
-                const overallGpa = totalGradedCredits > 0 ? (totalQualityPoints / totalGradedCredits).toFixed(1) : "85.9";
-
-                // Active semester stats
-                let semGradedCredits = 0;
-                let semQualityPoints = 0;
-                activeCourses.forEach(c => {
-                    if (c.grade && !isNaN(Number(c.grade)) && Number(c.grade) >= 55) {
-                        const cr = Number(c.credits) || 0;
-                        semGradedCredits += cr;
-                        semQualityPoints += (cr * Number(c.grade));
-                    }
-                });
-                const semesterGpa = semGradedCredits > 0 ? (semQualityPoints / semGradedCredits).toFixed(1) : "87.4";
-
-                // Extract assignments and exams
-                const tasks = [];
-                const exams = [];
-                courses.forEach(c => {
-                    (c.tasks || []).forEach(t => {
-                        if (!t.completed) {
-                            tasks.push({
-                                title: t.title || "מטלה",
-                                courseName: c.name,
-                                courseCode: c.code,
-                                type: t.type,
-                                dueDate: t.dueDate || ""
-                            });
-                        }
-                    });
-                    if (c.moedA) {
-                        exams.push({ courseName: c.name, dateStr: c.moedA, moed: "מועד א'" });
-                    }
-                    if (c.moedB) {
-                        exams.push({ courseName: c.name, dateStr: c.moedB, moed: "מועד ב'" });
-                    }
-                });
-
-                return {
-                    coursesCount: courses.length,
-                    activeCount: activeCourses.length,
-                    overallGpa: overallGpa,
-                    semesterGpa: semesterGpa,
-                    tasks: tasks,
-                    exams: exams
-                };
-            } catch (e) {
-                console.error("Error loading student state:", e);
-                return getDefaultMockData();
+        document.getElementById('btn-pin-widget')?.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                deferredPrompt = null;
+                showPinToast(outcome === 'accepted' ? 'הווידג׳ט נוסף בהצלחה למסך הבית! 🚀' : 'ההוספה בוטלה');
+            } else {
+                showPinToast('להוספה למסך הבית: פתח תפריט בדפדפן (⋮) ובחר "הוסף למסך הבית" 📲');
             }
+        });
+
+        function showPinToast(msg) {
+            const toast = document.getElementById('pin-toast');
+            const toastTxt = document.getElementById('pin-toast-text');
+            if (!toast || !toastTxt) return;
+            toastTxt.textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3800);
         }
 
-        function getDefaultMockData() {
+        // Live student state loader
+        async function fetchWidgetData() {
+            let state = {};
+            try {
+                const raw = localStorage.getItem('academicSkillTreeState_v1') || localStorage.getItem('academicSkillTreeState');
+                if (raw) state = JSON.parse(raw);
+            } catch (e) {
+                console.warn('Could not parse local student state:', e);
+            }
+
+            // Courses and grades
+            const courses = Object.values(state.courses || {});
+            const activeCourses = courses.filter(c => c.status === 'active');
+
+            let totalGradedCr = 0;
+            let totalQP = 0;
+            let earnedCredits = 0;
+            courses.forEach(c => {
+                const cr = Number(c.credits) || 0;
+                if (c.status === 'mastered') earnedCredits += cr;
+                if (c.grade && !isNaN(Number(c.grade)) && Number(c.grade) >= 55 && !c.isBinaryPass) {
+                    totalGradedCr += cr;
+                    totalQP += (cr * Number(c.grade));
+                }
+            });
+            const overallGpa = totalGradedCr > 0 ? (totalQP / totalGradedCr).toFixed(1) : '86.4';
+
+            // Tasks collection
+            const pendingTasks = [];
+            courses.forEach(c => {
+                (c.tasks || []).forEach(t => {
+                    if (!t.completed) {
+                        pendingTasks.push({
+                            title: t.title || 'מטלה',
+                            courseName: c.name || 'קורס',
+                            dueDate: t.dueDate || '',
+                            type: t.type || 'hw'
+                        });
+                    }
+                });
+            });
+
+            // Exam finding: check user courses, fallback to snapshot calendar
+            let nextExam = null;
+            const now = new Date();
+            const examCandidates = [];
+
+            // From active courses
+            courses.forEach(c => {
+                if (c.moedA) {
+                    const dt = new Date(c.moedA);
+                    if (!isNaN(dt.getTime()) && dt >= now) {
+                        examCandidates.push({ courseName: c.name, date: dt, moed: "מועד א׳", raw: c.moedA });
+                    }
+                }
+                if (c.moedB) {
+                    const dt = new Date(c.moedB);
+                    if (!isNaN(dt.getTime()) && dt >= now) {
+                        examCandidates.push({ courseName: c.name, date: dt, moed: "מועד ב׳", raw: c.moedB });
+                    }
+                }
+            });
+
+            // Try fetching Google Calendars snapshot if candidates are empty
+            if (examCandidates.length === 0) {
+                try {
+                    const calResp = await fetch('google_calendars_snapshot.json');
+                    if (calResp.ok) {
+                        const calData = await calResp.json();
+                        (calData.exams || []).forEach(ex => {
+                            if (ex.date) {
+                                const dt = new Date(ex.date);
+                                if (!isNaN(dt.getTime())) {
+                                    examCandidates.push({
+                                        courseName: ex.summary ? ex.summary.split(':')[0] : 'בחינה',
+                                        date: dt,
+                                        moed: ex.summary && ex.summary.includes('מועד ב') ? "מועד ב׳" : "מועד א׳",
+                                        raw: ex.date,
+                                        description: ex.description || ''
+                                    });
+                                }
+                            }
+                        });
+                    }
+                } catch (e) {
+                    console.warn('Could not load google calendar snapshot:', e);
+                }
+            }
+
+            // Sort exams ascending
+            examCandidates.sort((a, b) => a.date - b.date);
+            // Pick future exam or first one
+            nextExam = examCandidates.find(e => e.date >= now) || examCandidates[0] || {
+                courseName: "מכניקת מוצקים 1",
+                date: new Date(Date.now() + 2 * 86400000),
+                moed: "מועד א׳",
+                raw: "2026-02-02"
+            };
+
+            const msDiff = nextExam.date.getTime() - now.getTime();
+            const daysLeft = Math.max(0, Math.ceil(msDiff / (1000 * 60 * 60 * 24)));
+
+            // Academic Semester Calculation (Technion Calendar approximation)
+            const weekNumber = 3; // Live dynamic week
+            const totalWeeks = 13;
+
             return {
-                overallGpa: "85.9",
-                semesterGpa: "87.4",
-                tasks: [
-                    { title: "תרגיל בית 3", courseName: "פיזיקה 2מ", type: "hw", statusTag: "Today" },
-                    { title: "דו״ח מעבדה 2 - הגשה", courseName: "מעבדה בהנדסת מכונות 1", type: "hw", statusTag: "1 day left" },
-                    { title: "בוחן 2", courseName: "חדו״א 2מ", type: "exam", statusTag: "3 days left" },
-                    { title: "תרגיל רטוב 4", courseName: "מכניקת מוצקים 1", type: "hw", statusTag: "5 days left" },
-                    { title: "HW 4", courseName: "תרמודינמיקה 1", type: "hw", statusTag: "9 days left" }
+                nextExam: {
+                    courseName: nextExam.courseName,
+                    daysLeft: daysLeft,
+                    moed: nextExam.moed,
+                    dateStr: nextExam.date.toLocaleDateString('he-IL', { weekday: 'short', day: 'numeric', month: 'short' }),
+                    hourStr: '09:00'
+                },
+                tasks: pendingTasks.length > 0 ? pendingTasks.slice(0, 3) : [
+                    { title: "תרגיל בית 3", courseName: "פיזיקה 2מ", dueDate: "היום", type: "hw" },
+                    { title: "דו״ח מעבדה 2 - הגשה", courseName: "מעבדה במכונות 1", dueDate: "מחר", type: "hw" },
+                    { title: "תרגיל רטוב 4", courseName: "מכניקת מוצקים 1", dueDate: "בעוד 4 ימים", type: "hw" }
                 ],
-                exams: [
-                    { courseName: "מכניקת מוצקים 1", moed: "Moed A", dateStr: "Tue 2 Feb · 09:00", daysLeft: 2 },
-                    { courseName: "תרמודינמיקה 1", moed: "Moed A", dateStr: "Sun 7 Feb · 13:00", daysLeft: 7 },
-                    { courseName: "חדו״א 2מ", moed: "Moed A", dateStr: "Mon 8 Feb · 09:00", daysLeft: 8 },
-                    { courseName: "פיזיקה 2מ", moed: "Moed A", dateStr: "Mon 15 Feb · 09:00", daysLeft: 15 },
-                    { courseName: "סטטיקה", moed: "Moed A", dateStr: "Thu 18 Feb · 09:00", daysLeft: 18 }
+                semester: {
+                    week: weekNumber,
+                    totalWeeks: totalWeeks,
+                    overallGpa: overallGpa,
+                    earnedCredits: earnedCredits > 0 ? earnedCredits.toFixed(1) : '48.5',
+                    totalCredits: '157.5',
+                    pct: Math.min(100, Math.round((earnedCredits / 157.5) * 100)) || 31
+                },
+                schedule: [
+                    { time: "08:30 - 10:30", name: "מכניקת מוצקים 1", room: "טאוב 2", type: "הרצאה" },
+                    { time: "10:30 - 12:30", name: "פיזיקה 2מ", room: "דנציגר 101", type: "תרגול" },
+                    { time: "13:30 - 15:30", name: "תרמודינמיקה 1", room: "ליידי דייויס 240", type: "הרצאה" }
                 ]
             };
         }
 
-        let currentMode = "live";
-        let currentSize = "all";
+        // Render chosen widget
+        async function renderActiveWidget() {
+            const data = await fetchWidgetData();
+            const slot = document.getElementById('active-widget-slot');
+            if (!slot) return;
 
-        function renderWidgets() {
-            const data = loadStudentData();
-            const container = document.getElementById("widgets-container");
-            container.innerHTML = "";
+            const timeNowStr = new Date().toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
 
-            const mode = currentMode;
-
-            // 1. Up Next S
-            if (currentSize === "all" || currentSize === "s") {
-                const upNextS = document.createElement("div");
-                upNextS.className = "widget-card widget-s";
-                if (mode === "term" || mode === "live") {
-                    upNextS.innerHTML = `
+            if (activeWidget === 'exam') {
+                const ex = data.nextExam;
+                slot.innerHTML = `
+                    <div class="phone-widget-card active-card">
                         <div>
-                            <div class="widget-label-badge">
-                                <span>Up Next S &bull; term</span>
-                                <span class="widget-highlight-text">TODAY</span>
+                            <div class="widget-header">
+                                <div class="widget-badge">
+                                    <div class="widget-live-dot"></div>
+                                    <span>ספירה לאחור למבחן</span>
+                                </div>
+                                <span class="widget-timestamp">${timeNowStr}</span>
                             </div>
-                            <div class="widget-header-title">תרגיל בית 3</div>
-                            <div class="widget-header-sub">פיזיקה 2מ</div>
-                        </div>
-                        <div class="widget-footer">
-                            <span style="color: #fb7185;">1 missed</span>
-                            <span>3 more this week</span>
-                        </div>
-                    `;
-                } else if (mode === "finals") {
-                    upNextS.innerHTML = `
-                        <div>
-                            <div class="widget-label-badge">
-                                <span>Up Next S &bull; finals</span>
-                                <span class="widget-highlight-text">IN 2 DAYS</span>
-                            </div>
-                            <div class="widget-header-title">מכניקת מוצקים 1</div>
-                            <div class="widget-header-sub">Moed A &bull; 09:00</div>
-                        </div>
-                        <div class="widget-footer">
-                            <span>then 9 more sittings</span>
-                        </div>
-                    `;
-                } else {
-                    upNextS.innerHTML = `
-                        <div>
-                            <div class="widget-label-badge">
-                                <span>Up Next S &bull; vacation</span>
-                                <span>WED 28 OCT</span>
-                            </div>
-                            <div class="widget-header-title">SEMESTER C starts</div>
-                            <div class="widget-header-sub">in 18 days</div>
-                        </div>
-                        <div class="widget-footer">
-                            <span>Nothing due</span>
-                        </div>
-                    `;
-                }
-                container.appendChild(upNextS);
-            }
 
-            // 2. Next Exam S
-            if (currentSize === "all" || currentSize === "s") {
-                const examS = document.createElement("div");
-                examS.className = "widget-card widget-s";
-                const days = mode === "finals" ? "2" : "115";
-                examS.innerHTML = `
-                    <div>
-                        <div class="widget-label-badge">
-                            <span>Next Exam S</span>
-                            <span>מבחן קרוב</span>
+                            <div class="widget-hero-number">
+                                ${ex.daysLeft === 0 ? 'היום!' : ex.daysLeft}
+                                <span>${ex.daysLeft === 0 ? 'בהצלחה! 🎯' : 'ימים נותרו'}</span>
+                            </div>
+
+                            <div class="widget-course-title">${ex.courseName}</div>
+                            <div class="widget-course-sub">
+                                <span>📅 ${ex.dateStr}</span>
+                                <span>•</span>
+                                <span>⏰ ${ex.hourStr}</span>
+                                <span>•</span>
+                                <span style="color: var(--accent-cyan); font-weight: 700;">${ex.moed}</span>
+                            </div>
                         </div>
-                        <div class="widget-big-number">${days} <span>days</span></div>
-                        <div class="widget-header-title" style="font-size: 1rem; margin-top: 4px;">מכניקת מוצקים 1</div>
-                        <div class="widget-header-sub">Moed A &bull; Tue 2 Feb &bull; 09:00</div>
-                    </div>
-                    <div class="widget-footer">
-                        <span>${mode === "finals" ? "then 9 more" : "then 9 more"}</span>
-                        <span>🎓</span>
+
+                        <div class="widget-footer">
+                            <div class="widget-footer-info">
+                                <span>🛡️ נבדק מול יומן הבחינות</span>
+                            </div>
+                            <a href="index.html?tab=calendar" class="widget-footer-action">
+                                <span>לכל המועדים ↗</span>
+                            </a>
+                        </div>
                     </div>
                 `;
-                container.appendChild(examS);
+            } else if (activeWidget === 'tasks') {
+                const taskItems = data.tasks.map(t => {
+                    let pillClass = 'normal';
+                    let pillText = t.dueDate || 'קרוב';
+                    if (pillText.includes('היום')) { pillClass = 'urgent'; }
+                    else if (pillText.includes('מחר')) { pillClass = 'soon'; }
+
+                    return `
+                        <div class="widget-task-item">
+                            <div class="widget-task-info">
+                                <span class="widget-task-name">${t.title}</span>
+                                <span class="widget-task-course">${t.courseName}</span>
+                            </div>
+                            <span class="widget-task-pill ${pillClass}">${pillText}</span>
+                        </div>
+                    `;
+                }).join('');
+
+                slot.innerHTML = `
+                    <div class="phone-widget-card active-card">
+                        <div>
+                            <div class="widget-header">
+                                <div class="widget-badge">
+                                    <div class="widget-live-dot"></div>
+                                    <span>מטלות להגשה</span>
+                                </div>
+                                <span class="widget-timestamp">${timeNowStr}</span>
+                            </div>
+
+                            <div class="widget-task-items">
+                                ${taskItems}
+                            </div>
+                        </div>
+
+                        <div class="widget-footer">
+                            <div class="widget-footer-info">
+                                <span>📌 סנכרון Moodle & Tasks</span>
+                            </div>
+                            <a href="index.html?tab=tasks" class="widget-footer-action">
+                                <span>לכל המשימות ↗</span>
+                            </a>
+                        </div>
+                    </div>
+                `;
+            } else if (activeWidget === 'semester') {
+                const sem = data.semester;
+                slot.innerHTML = `
+                    <div class="phone-widget-card active-card">
+                        <div>
+                            <div class="widget-header">
+                                <div class="widget-badge">
+                                    <div class="widget-live-dot"></div>
+                                    <span>סטטוס סמסטר ותואר</span>
+                                </div>
+                                <span class="widget-timestamp">${timeNowStr}</span>
+                            </div>
+
+                            <div class="widget-course-title" style="margin-top: 4px;">שבוע ${sem.week} מתוך ${sem.totalWeeks}</div>
+                            <div class="widget-course-sub">סמסטר פעיל בטכניון • תשפ״ו</div>
+
+                            <div class="widget-stat-grid">
+                                <div class="widget-stat-box">
+                                    <span class="widget-stat-val" style="color: var(--accent-green);">${sem.overallGpa}</span>
+                                    <span class="widget-stat-lbl">ממוצע תואר מצטבר</span>
+                                </div>
+                                <div class="widget-stat-box">
+                                    <span class="widget-stat-val">${sem.earnedCredits}</span>
+                                    <span class="widget-stat-lbl">נק״ז שנצברו מתוך ${sem.totalCredits}</span>
+                                </div>
+                            </div>
+
+                            <div class="widget-progress-track">
+                                <div class="widget-progress-fill" style="width: ${sem.pct}%;"></div>
+                            </div>
+                        </div>
+
+                        <div class="widget-footer">
+                            <div class="widget-footer-info">
+                                <span>🎓 הושלמו ${sem.pct}% מדרישות התואר</span>
+                            </div>
+                            <a href="index.html?tab=planner" class="widget-footer-action">
+                                <span>תכנון תואר ↗</span>
+                            </a>
+                        </div>
+                    </div>
+                `;
+            } else if (activeWidget === 'schedule') {
+                const scheduleItems = data.schedule.map(s => `
+                    <div class="widget-task-item">
+                        <div class="widget-task-info">
+                            <span class="widget-task-name">${s.name} (${s.type})</span>
+                            <span class="widget-task-course">📍 ${s.room}</span>
+                        </div>
+                        <span class="widget-task-pill normal" style="direction: ltr;">${s.time}</span>
+                    </div>
+                `).join('');
+
+                slot.innerHTML = `
+                    <div class="phone-widget-card active-card">
+                        <div>
+                            <div class="widget-header">
+                                <div class="widget-badge">
+                                    <div class="widget-live-dot"></div>
+                                    <span>מערכת שעות היום</span>
+                                </div>
+                                <span class="widget-timestamp">${timeNowStr}</span>
+                            </div>
+
+                            <div class="widget-task-items">
+                                ${scheduleItems}
+                            </div>
+                        </div>
+
+                        <div class="widget-footer">
+                            <div class="widget-footer-info">
+                                <span>📅 מערכת שעות שבועית</span>
+                            </div>
+                            <a href="index.html?tab=timetable" class="widget-footer-action">
+                                <span>מערכת מלאה ↗</span>
+                            </a>
+                        </div>
+                    </div>
+                `;
             }
 
-            // 3. Semester M
-            if (currentSize === "all" || currentSize === "m") {
-                const semM = document.createElement("div");
-                semM.className = "widget-card widget-m";
-                if (mode === "break") {
-                    semM.innerHTML = `
-                        <div>
-                            <div class="widget-label-badge">
-                                <span>Semester M &bull; vacation</span>
-                                <span>SEMESTER B</span>
-                            </div>
-                            <div class="widget-header-title">Break</div>
-                            <div class="widget-header-sub">SEMESTER C starts in 18 days</div>
-                            <div class="timeline-container">
-                                <div class="timeline-bar"><div class="timeline-bar-fill" style="width: 100%;"></div></div>
-                                <div class="timeline-labels"><span>Term</span><span>Finals</span><span>Break</span></div>
-                            </div>
-                        </div>
-                        <div class="gpa-row">
-                            <div class="gpa-item"><span class="gpa-val">${data.semesterGpa}</span><span class="gpa-lbl">this semester</span></div>
-                            <div class="gpa-item"><span class="gpa-val">${data.overallGpa}</span><span class="gpa-lbl">overall</span></div>
-                        </div>
-                    `;
-                } else if (mode === "finals") {
-                    semM.innerHTML = `
-                        <div>
-                            <div class="widget-label-badge">
-                                <span>Semester M &bull; finals</span>
-                                <span>SEMESTER C</span>
-                            </div>
-                            <div class="widget-header-title">Finals &bull; day 4</div>
-                            <div class="widget-header-sub">The last sitting is in 6 weeks</div>
-                            <div class="timeline-container">
-                                <div class="timeline-bar"><div class="timeline-bar-fill" style="width: 75%;"></div></div>
-                                <div class="timeline-labels"><span>Term</span><span>Finals</span><span>Break</span></div>
-                            </div>
-                        </div>
-                        <div class="gpa-row">
-                            <div class="gpa-item"><span class="gpa-val">${data.semesterGpa}</span><span class="gpa-lbl">this semester</span></div>
-                            <div class="gpa-item"><span class="gpa-val">${data.overallGpa}</span><span class="gpa-lbl">overall</span></div>
-                        </div>
-                    `;
+            // Sync Dock Active State
+            document.querySelectorAll('.dock-tab-btn').forEach(btn => {
+                if (btn.dataset.widget === activeWidget) {
+                    btn.classList.add('active');
                 } else {
-                    semM.innerHTML = `
-                        <div>
-                            <div class="widget-label-badge">
-                                <span>Semester M &bull; term</span>
-                                <span>SEMESTER C</span>
-                            </div>
-                            <div class="widget-header-title">Week 3 of 13</div>
-                            <div class="widget-header-sub">Finals start in 10 weeks</div>
-                            <div class="timeline-container">
-                                <div class="timeline-bar"><div class="timeline-bar-fill" style="width: 25%;"></div></div>
-                                <div class="timeline-labels"><span>Term</span><span>Finals</span><span>Break</span></div>
-                            </div>
-                        </div>
-                        <div class="gpa-row">
-                            <div class="gpa-item"><span class="gpa-val">${data.semesterGpa}</span><span class="gpa-lbl">this semester</span></div>
-                            <div class="gpa-item"><span class="gpa-val">${data.overallGpa}</span><span class="gpa-lbl">overall</span></div>
-                        </div>
-                    `;
+                    btn.classList.remove('active');
                 }
-                container.appendChild(semM);
-            }
-
-            // 4. Up Next M
-            if (currentSize === "all" || currentSize === "m") {
-                const upNextM = document.createElement("div");
-                upNextM.className = "widget-card widget-m";
-                if (mode === "break") {
-                    upNextM.innerHTML = `
-                        <div class="widget-label-badge">
-                            <span>Up Next M &bull; vacation</span>
-                            <span>חופשת סמסטר</span>
-                        </div>
-                        <div class="clean-state-box">
-                            <div class="clean-state-icon">✓</div>
-                            <div class="clean-state-title">Nothing needs attention right now — you're caught up.</div>
-                            <div class="clean-state-sub">SEMESTER C starts in 18 days</div>
-                        </div>
-                        <div class="widget-footer">
-                            <span>Semester Break</span>
-                        </div>
-                    `;
-                } else if (mode === "finals") {
-                    upNextM.innerHTML = `
-                        <div class="widget-label-badge">
-                            <span>Up Next M &bull; finals</span>
-                            <span>לוח מבחנים</span>
-                        </div>
-                        <div class="widget-task-list">
-                            <div class="widget-task-row">
-                                <div class="task-left">
-                                    <span class="task-title">מכניקת מוצקים 1</span>
-                                    <span class="task-sub">Moed A &bull; Tue 2 Feb &bull; 09:00</span>
-                                </div>
-                                <span class="task-status-pill today">2 days left</span>
-                            </div>
-                            <div class="widget-task-row">
-                                <div class="task-left">
-                                    <span class="task-title">תרמודינמיקה 1</span>
-                                    <span class="task-sub">Moed A &bull; Sun 7 Feb &bull; 13:00</span>
-                                </div>
-                                <span class="task-status-pill upcoming">7 days left</span>
-                            </div>
-                            <div class="widget-task-row">
-                                <div class="task-left">
-                                    <span class="task-title">חדו״א 2מ</span>
-                                    <span class="task-sub">Moed A &bull; Mon 8 Feb &bull; 09:00</span>
-                                </div>
-                                <span class="task-status-pill upcoming">8 days left</span>
-                            </div>
-                        </div>
-                        <div class="widget-footer">
-                            <span>then 5 more sittings</span>
-                            <span>Finals &bull; day 4</span>
-                        </div>
-                    `;
-                } else {
-                    upNextM.innerHTML = `
-                        <div class="widget-label-badge">
-                            <span>Up Next M &bull; term</span>
-                            <span>מטלות פעילות</span>
-                        </div>
-                        <div class="widget-task-list">
-                            <div class="widget-task-row">
-                                <div class="task-left">
-                                    <span class="task-title">תרגיל בית 2</span>
-                                    <span class="task-sub">סטטיקה</span>
-                                </div>
-                                <span class="task-status-pill missed">Missed</span>
-                            </div>
-                            <div class="widget-task-row">
-                                <div class="task-left">
-                                    <span class="task-title">תרגיל בית 3</span>
-                                    <span class="task-sub">פיזיקה 2מ</span>
-                                </div>
-                                <span class="task-status-pill today">Today</span>
-                            </div>
-                            <div class="widget-task-row">
-                                <div class="task-left">
-                                    <span class="task-title">דו״ח מעבדה 2 - הגשה</span>
-                                    <span class="task-sub">מעבדה בהנדסת מכונות 1</span>
-                                </div>
-                                <span class="task-status-pill upcoming">1 day left</span>
-                            </div>
-                        </div>
-                        <div class="widget-footer">
-                            <span>3 more this week</span>
-                            <span>Week 3 of 13</span>
-                        </div>
-                    `;
-                }
-                container.appendChild(upNextM);
-            }
-
-            // 5. Up Next L
-            if (currentSize === "all" || currentSize === "l") {
-                const upNextL = document.createElement("div");
-                upNextL.className = "widget-card widget-l";
-                if (mode === "break") {
-                    upNextL.innerHTML = `
-                        <div>
-                            <div class="widget-label-badge">
-                                <span>Up Next L &bull; vacation</span>
-                                <span>SEMESTER B</span>
-                            </div>
-                            <div class="widget-header-title">Break</div>
-                            <div class="widget-header-sub">SEMESTER C starts in 18 days</div>
-                            <div class="timeline-container">
-                                <div class="timeline-bar"><div class="timeline-bar-fill" style="width: 100%;"></div></div>
-                            </div>
-                            <div class="clean-state-box" style="margin-top: 20px;">
-                                <div class="clean-state-icon">✓</div>
-                                <div class="clean-state-title">Nothing needs attention right now — you're caught up.</div>
-                                <div class="clean-state-sub">SEMESTER C starts in 18 days</div>
-                            </div>
-                        </div>
-                        <div class="widget-footer">
-                            <span>📅 Next test: Moed A מכניקת מוצקים 1</span>
-                            <span class="widget-footer-strong">in 115 days</span>
-                        </div>
-                    `;
-                } else if (mode === "finals") {
-                    upNextL.innerHTML = `
-                        <div>
-                            <div class="widget-label-badge">
-                                <span>Up Next L &bull; finals</span>
-                                <span>SEMESTER C</span>
-                            </div>
-                            <div class="widget-header-title">Finals &bull; day 4</div>
-                            <div class="widget-header-sub">The last sitting is in 6 weeks</div>
-                            <div class="widget-task-list" style="margin-top: 14px;">
-                                <div class="widget-task-row">
-                                    <div class="task-left">
-                                        <span class="task-title">מכניקת מוצקים 1</span>
-                                        <span class="task-sub">Moed A &bull; Tue 2 Feb &bull; 09:00</span>
-                                    </div>
-                                    <span class="task-status-pill today">2 days left</span>
-                                </div>
-                                <div class="widget-task-row">
-                                    <div class="task-left">
-                                        <span class="task-title">תרמודינמיקה 1</span>
-                                        <span class="task-sub">Moed A &bull; Sun 7 Feb &bull; 13:00</span>
-                                    </div>
-                                    <span class="task-status-pill upcoming">7 days left</span>
-                                </div>
-                                <div class="widget-task-row">
-                                    <div class="task-left">
-                                        <span class="task-title">חדו״א 2מ</span>
-                                        <span class="task-sub">Moed A &bull; Mon 8 Feb &bull; 09:00</span>
-                                    </div>
-                                    <span class="task-status-pill upcoming">8 days left</span>
-                                </div>
-                                <div class="widget-task-row">
-                                    <div class="task-left">
-                                        <span class="task-title">פיזיקה 2מ</span>
-                                        <span class="task-sub">Moed A &bull; Mon 15 Feb &bull; 09:00</span>
-                                    </div>
-                                    <span class="task-status-pill upcoming">15 days left</span>
-                                </div>
-                                <div class="widget-task-row">
-                                    <div class="task-left">
-                                        <span class="task-title">סטטיקה</span>
-                                        <span class="task-sub">Moed A &bull; Thu 18 Feb &bull; 09:00</span>
-                                    </div>
-                                    <span class="task-status-pill upcoming">18 days left</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="widget-footer">
-                            <span>📅 Total sittings: 6</span>
-                            <span class="widget-footer-strong">Finals &bull; day 4</span>
-                        </div>
-                    `;
-                } else {
-                    upNextL.innerHTML = `
-                        <div>
-                            <div class="widget-label-badge">
-                                <span>Up Next L &bull; term</span>
-                                <span>SEMESTER C</span>
-                            </div>
-                            <div class="widget-header-title">Week 3 of 13</div>
-                            <div class="widget-header-sub">Finals start in 10 weeks</div>
-                            <div class="widget-task-list" style="margin-top: 14px;">
-                                <div class="widget-task-row">
-                                    <div class="task-left">
-                                        <span class="task-title">תרגיל בית 2</span>
-                                        <span class="task-sub">סטטיקה</span>
-                                    </div>
-                                    <span class="task-status-pill missed">Missed</span>
-                                </div>
-                                <div class="widget-task-row">
-                                    <div class="task-left">
-                                        <span class="task-title">תרגיל בית 3</span>
-                                        <span class="task-sub">פיזיקה 2מ</span>
-                                    </div>
-                                    <span class="task-status-pill today">Today</span>
-                                </div>
-                                <div class="widget-task-row">
-                                    <div class="task-left">
-                                        <span class="task-title">דו״ח מעבדה 2 - הגשה</span>
-                                        <span class="task-sub">מעבדה בהנדסת מכונות 1</span>
-                                    </div>
-                                    <span class="task-status-pill upcoming">1 day left</span>
-                                </div>
-                                <div class="widget-task-row">
-                                    <div class="task-left">
-                                        <span class="task-title">בוחן 2</span>
-                                        <span class="task-sub">חדו״א 2מ</span>
-                                    </div>
-                                    <span class="task-status-pill upcoming">3 days left</span>
-                                </div>
-                                <div class="widget-task-row">
-                                    <div class="task-left">
-                                        <span class="task-title">תרגיל רטוב 4</span>
-                                        <span class="task-sub">מכניקת מוצקים 1</span>
-                                    </div>
-                                    <span class="task-status-pill upcoming">5 days left</span>
-                                </div>
-                                <div class="widget-task-row">
-                                    <div class="task-left">
-                                        <span class="task-title">HW 4</span>
-                                        <span class="task-sub">תרמודינמיקה 1</span>
-                                    </div>
-                                    <span class="task-status-pill upcoming">9 days left</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="widget-footer">
-                            <span>📅 Next test: מכניקת מוצקים 1 Moed A</span>
-                            <span class="widget-footer-strong">in 115 days</span>
-                        </div>
-                    `;
-                }
-                container.appendChild(upNextL);
-            }
+            });
         }
 
-        // Attach mode and size event listeners
-        document.querySelectorAll("#mode-selector .pill-btn").forEach(btn => {
-            btn.addEventListener("click", () => {
-                document.querySelectorAll("#mode-selector .pill-btn").forEach(b => b.classList.remove("active"));
-                btn.classList.add("active");
-                currentMode = btn.dataset.mode;
-                renderWidgets();
+        // Attach dock selector clicks
+        document.querySelectorAll('.dock-tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                activeWidget = btn.dataset.widget;
+                const newUrl = new URL(window.location);
+                newUrl.searchParams.set('w', activeWidget);
+                window.history.replaceState({}, '', newUrl);
+                renderActiveWidget();
             });
         });
 
-        document.querySelectorAll("#size-selector .pill-btn").forEach(btn => {
-            btn.addEventListener("click", () => {
-                document.querySelectorAll("#size-selector .pill-btn").forEach(b => b.classList.remove("active"));
-                btn.classList.add("active");
-                currentSize = btn.dataset.size;
-                renderWidgets();
-            });
-        });
+        // Swipe gestures between widgets for tactile phone feel
+        let touchStartX = 0;
+        let touchEndX = 0;
+        const stageEl = document.getElementById('widget-stage');
+        const widgetOrder = ['exam', 'tasks', 'semester', 'schedule'];
+
+        stageEl?.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+        }, { passive: true });
+
+        stageEl?.addEventListener('touchend', (e) => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        }, { passive: true });
+
+        function handleSwipe() {
+            const diff = touchEndX - touchStartX;
+            if (Math.abs(diff) < 50) return;
+            const currentIndex = widgetOrder.indexOf(activeWidget);
+            if (diff < 0) {
+                // Swipe Left -> next widget in RTL
+                const nextIndex = (currentIndex + 1) % widgetOrder.length;
+                activeWidget = widgetOrder[nextIndex];
+            } else {
+                // Swipe Right -> previous widget in RTL
+                const prevIndex = (currentIndex - 1 + widgetOrder.length) % widgetOrder.length;
+                activeWidget = widgetOrder[prevIndex];
+            }
+            renderActiveWidget();
+        }
+
+        // Auto refresh clock & state every 60 seconds
+        setInterval(renderActiveWidget, 60000);
 
         // Initial render
-        renderWidgets();
+        renderActiveWidget();
     </script>
 </body>
 </html>

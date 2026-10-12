@@ -51,7 +51,8 @@ const filesToCopy = [
     'icon.ico',
     'adir_avatar.png',
     'adir_avatar_small.png',
-    'adir_avatar_small.webp'
+    'adir_avatar_small.webp',
+    'widget.html'
 ];
 
 for (const targetDir of targetDirs) {
@@ -65,6 +66,19 @@ for (const targetDir of targetDirs) {
             console.warn(`File not found: ${srcFile}`);
         }
     }
+
+    // Copy widgets directory
+    const srcWidgetsDir = path.join(srcDir, 'widgets');
+    const destWidgetsDir = path.join(targetDir, 'widgets');
+    if (fs.existsSync(srcWidgetsDir)) {
+        if (!fs.existsSync(destWidgetsDir)) fs.mkdirSync(destWidgetsDir, { recursive: true });
+        const widgetFiles = fs.readdirSync(srcWidgetsDir);
+        for (const wf of widgetFiles) {
+            fs.copyFileSync(path.join(srcWidgetsDir, wf), path.join(destWidgetsDir, wf));
+            console.log(`Copied: widgets/${wf} -> ${path.basename(path.dirname(path.dirname(targetDir)))}`);
+        }
+    }
 }
 
 console.log('All files successfully copied into dist app resources!');
+

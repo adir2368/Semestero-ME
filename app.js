@@ -18024,13 +18024,13 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.10.12-v2.3.7",
-    version: "2.3.7",
-    build: "20261012_02",
-    date: "2026-10-12 01:05",
-    description: "גרסה 2.3.7: אופטימיזציית ביצועים ונגישות מקיפה לפי ביקורת Lighthouse (ציון 100 בנגישות וב-Agentic Browsing, ביטול Forced Reflows ב-flowchart zoom, דחיית טעינת מאגר CheeseFork ויומן בחינות ברקע להפחתת TBT, מניעת רינדור כפול, ושיפור LCP עם Preload ו-Preconnect)."
+    code: "REV-2026.10.12-v2.3.8",
+    version: "2.3.8",
+    build: "20261012_03",
+    date: "2026-10-12 17:30",
+    description: "גרסה 2.3.8: וויג'טים דינמיים למסך הבית בנייד (מבחן קרוב, מטלות להגשה, סטטוס סמסטר ומערכת שעות) ללא חלונות הסבר — תמיכה ב-Android Shortcuts במסך הבית, תבניות Adaptive Cards וסנכרון Service Worker חי."
 };
-window.APP_VERSION = "2.3.7";
+window.APP_VERSION = "2.3.8";
 
 function ensureBaselineRevisions() {
     if (!gameState.revisions || !Array.isArray(gameState.revisions) || gameState.revisions.length === 0) {
@@ -19295,7 +19295,7 @@ window.checkRemoteAppVersion = async function(isManualCheck = false) {
     const isElectron = Boolean(window.electronAPI || (window.process && window.process.type === 'renderer') || (navigator.userAgent && navigator.userAgent.includes('Electron')));
     const domVerEl = document.getElementById("display-system-version");
     const domVer = domVerEl ? domVerEl.innerText.replace(/^v/, "").trim() : "";
-    const currentVer = domVer || (window.APP_VERSION) || (APP_CURRENT_REVISION && APP_CURRENT_REVISION.version) || "2.3.7";
+    const currentVer = domVer || (window.APP_VERSION) || (APP_CURRENT_REVISION && APP_CURRENT_REVISION.version) || "2.3.8";
     const statusTextEl = document.getElementById("version-check-status-text");
     const footerBadgeEl = document.getElementById("footer-version-badge");
     const checkBtn = document.getElementById("btn-check-version-updates");

@@ -53,8 +53,10 @@
   ],
   "shortcuts": [
     {
-      "name": "מפת קורסים",
-      "url": "./index.html#curriculum",
+      "name": "מבחן קרוב ⏱️",
+      "short_name": "מבחן",
+      "description": "ווידג'ט ספירה לאחור למבחן הקרוב ביותר",
+      "url": "./widgets.html?w=exam",
       "icons": [
         {
           "src": "icon-192.png",
@@ -63,8 +65,10 @@
       ]
     },
     {
-      "name": "לוח משימות",
-      "url": "./index.html#tasks",
+      "name": "מטלות להגשה 📝",
+      "short_name": "מטלות",
+      "description": "ווידג'ט מטלות ושיעורי בית קרובים להגשה",
+      "url": "./widgets.html?w=tasks",
       "icons": [
         {
           "src": "icon-192.png",
@@ -73,8 +77,10 @@
       ]
     },
     {
-      "name": "לוח שנה",
-      "url": "./index.html#calendar",
+      "name": "סטטוס סמסטר 🎓",
+      "short_name": "סמסטר",
+      "description": "ווידג'ט שבוע סמסטר, ממוצע תואר והתקדמות",
+      "url": "./widgets.html?w=semester",
       "icons": [
         {
           "src": "icon-192.png",
@@ -83,10 +89,10 @@
       ]
     },
     {
-      "name": "וויג'טים לאנדרואיד",
-      "short_name": "Widgets",
-      "description": "וויג'טים דינמיים למסך הבית (Up Next, Next Exam, Semester)",
-      "url": "./widgets.html",
+      "name": "מערכת שעות 📅",
+      "short_name": "מערכת",
+      "description": "ווידג'ט לוח זמנים יומי ושעות הרצאות",
+      "url": "./widgets.html?w=schedule",
       "icons": [
         {
           "src": "icon-192.png",
@@ -97,23 +103,33 @@
   ],
   "widgets": [
     {
-      "name": "Up Next S",
-      "short_name": "UpNext",
-      "description": "המטלה והמבחן הקרובים ביותר",
-      "tag": "tecme-upnext-s",
-      "template": "widgets.html",
-      "ms_ac_template": "widgets.html",
-      "data": "widgets.html",
+      "name": "מבחן קרוב",
+      "short_name": "מבחן",
+      "description": "ספירה לאחור למבחן הקרוב",
+      "tag": "semestero-exam-widget",
+      "template": "widgets/ms_ac_exam.json",
+      "ms_ac_template": "widgets/ms_ac_exam.json",
+      "data": "widgets/data_exam.json",
       "type": "application/json"
     },
     {
-      "name": "Semester M",
-      "short_name": "Semester",
-      "description": "מעקב שבועות סמסטר וממוצע תואר",
-      "tag": "tecme-semester-m",
-      "template": "widgets.html",
-      "ms_ac_template": "widgets.html",
-      "data": "widgets.html",
+      "name": "מטלות קרובות",
+      "short_name": "מטלות",
+      "description": "מטלות להגשה ושיעורי בית",
+      "tag": "semestero-tasks-widget",
+      "template": "widgets/ms_ac_tasks.json",
+      "ms_ac_template": "widgets/ms_ac_tasks.json",
+      "data": "widgets/data_tasks.json",
+      "type": "application/json"
+    },
+    {
+      "name": "סטטוס סמסטר",
+      "short_name": "סמסטר",
+      "description": "שבוע לימודים וממוצע תואר",
+      "tag": "semestero-semester-widget",
+      "template": "widgets/ms_ac_semester.json",
+      "ms_ac_template": "widgets/ms_ac_semester.json",
+      "data": "widgets/data_semester.json",
       "type": "application/json"
     }
   ]
