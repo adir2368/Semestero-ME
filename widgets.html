@@ -1269,14 +1269,14 @@
         function copyWidgetDirectUrl() {
             const url = `${window.location.origin}${window.location.pathname}?view=l`;
             navigator.clipboard.writeText(url).then(() => {
-                alert('הקישור לוויג'ט הועתק ללוח! הדבק אותו באפליקציית Web Widget או בדפדפן.');
+                alert(`הקישור לוויג'ט הועתק ללוח! הדבק אותו באפליקציית Web Widget או בדפדפן.`);
             });
         }
 
         function copyCalendarFeed() {
             const icsUrl = 'https://gist.githubusercontent.com/adir2368/71ec3efb9e46b0abafa44532f0e2aab1/raw/technion_schedule.ics';
             navigator.clipboard.writeText(icsUrl).then(() => {
-                alert('כתובת יומן הבחינות והמטלות (Webcal) הועתקה! הוסף אותה ב-Google Calendar או Samsung Calendar.');
+                alert(`כתובת יומן הבחינות והמטלות (Webcal) הועתקה! הוסף אותה ב-Google Calendar או Samsung Calendar.`);
             });
         }
 
