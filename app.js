@@ -18038,13 +18038,13 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.10.12-v2.3.8",
-    version: "2.3.8",
-    build: "20261012_03",
-    date: "2026-10-12 17:30",
-    description: "גרסה 2.3.8: וויג'טים דינמיים למסך הבית בנייד (מבחן קרוב, מטלות להגשה, סטטוס סמסטר ומערכת שעות) ללא חלונות הסבר — תמיכה ב-Android Shortcuts במסך הבית, תבניות Adaptive Cards וסנכרון Service Worker חי."
+    code: "REV-2026.10.12-v2.4.1",
+    version: "2.4.1",
+    build: "20261012_04",
+    date: "2026-10-12 21:30",
+    description: "גרסה 2.4.1: שחזור תגית אחוזי התקדמות בתואר בכותרת הראשית (ללא התנגשות כפתורים), הפיכת סמסטר קיץ לאופציונלי בלבד בכל השנתונים (הוספה ומחיקה לפי דרישה בלבד), ובידוד מוחלט של קבצי הוויג'טים בתיקיית גיבוי."
 };
-window.APP_VERSION = "2.3.8";
+window.APP_VERSION = "2.4.1";
 
 function ensureBaselineRevisions() {
     if (!gameState.revisions || !Array.isArray(gameState.revisions) || gameState.revisions.length === 0) {
