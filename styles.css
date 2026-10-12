@@ -288,6 +288,7 @@ body {
     display: flex;
     flex-direction: column;
     gap: 6px;
+    min-width: 0;
 }
 
 .char-name-row {
@@ -295,6 +296,7 @@ body {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 2px;
+    min-width: 0;
 }
 
 .char-title {
@@ -7348,20 +7350,31 @@ html.is-iphone .app-global-footer {
     }
     .character-card {
         padding: 5px 8px;
-        max-width: 380px;
+        max-width: 340px !important;
+        overflow: hidden;
+    }
+    .char-info {
+        min-width: 0 !important;
+        overflow: hidden !important;
     }
     .char-avatar {
         width: 34px;
         height: 34px;
         font-size: 1.2rem !important;
         margin-left: 6px;
+        flex-shrink: 0;
     }
     .char-title {
-        font-size: 0.84rem;
+        font-size: 0.82rem;
+        max-width: 110px !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
     }
     .char-level {
         font-size: 0.78rem;
         padding: 1px 4px;
+        flex-shrink: 0;
     }
     .xp-bar-container {
         height: 16px;
@@ -7369,9 +7382,12 @@ html.is-iphone .app-global-footer {
     .xp-text {
         font-size: 0.68rem;
     }
-    .btn-hud-bell {
-        width: 30px;
-        height: 30px;
+    .character-card .btn-hud-bell {
+        width: 30px !important;
+        height: 30px !important;
+        margin-left: 3px !important;
+        margin-right: 0 !important;
+        flex-shrink: 0 !important;
     }
     .bell-icon {
         font-size: 0.88rem;
