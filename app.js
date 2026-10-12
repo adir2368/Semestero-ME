@@ -3,7 +3,10 @@ function getSemesterStats(semNumber) {
     if (!gameState || !gameState.courses) {
         return { isCompleted: false, gpa: 0, gradedCredits: 0, totalCredits: 0, list: [] };
     }
-    const list = Object.values(gameState.courses).filter(c => (c.semester || 1) == semNumber);
+    const list = Object.values(gameState.courses).filter(c => {
+        const s = Number(c.semester || 1);
+        return s == semNumber || (semNumber == 2.5 && s == 9);
+    });
     if (!list || list.length === 0) {
         return { isCompleted: false, gpa: 0, gradedCredits: 0, totalCredits: 0, list: [] };
     }
@@ -8785,7 +8788,7 @@ function loadSavedState() {
         }
     } else if (gameState) {
         // Guarantee non-Adir sessions never retain Adir's custom degree plan
-        const hasAdirPlan = gameState.degreePlan && Array.isArray(gameState.degreePlan) && gameState.degreePlan.some(s => s.semester === 1 && (s.courses || []).some(c => c.code === '02340128' || c.code === '234128'));
+        const hasAdirPlan = gameState.degreePlan && Array.isArray(gameState.degreePlan) && gameState.degreePlan.some(s => s.semester === 1 && (s.courses || []).length <= 4 && (s.courses || []).some(c => c.code === '02340128' || c.code === '234128') && !(s.courses || []).some(c => c.code === '01140051' || c.code === '114051'));
         if (hasAdirPlan) {
             console.warn('[app.js] Found Adir custom degreePlan in non-Adir gameState. Removing.');
             delete gameState.degreePlan;
@@ -10433,8 +10436,44 @@ function setupEventListeners() {
         }
 
         const activeSem = (gameState && gameState.currentActiveSemester) ? gameState.currentActiveSemester : 1;
-        const targetSem = defaultSemester !== null ? defaultSemester : activeSem;
-        if (semSelect) semSelect.value = targetSem;
+        let targetSem = defaultSemester !== null ? defaultSemester : activeSem;
+        if (targetSem === 9) targetSem = 2.5;
+
+        if (semSelect) {
+            const activeDegreePlan = (typeof DegreePlanner !== 'undefined' && DegreePlanner.getCustomPlan) 
+                ? DegreePlanner.getCustomPlan() 
+                : (gameState.degreePlan || []);
+
+            const isSummerActive = (semNum) => {
+                const inPlan = Array.isArray(activeDegreePlan) && activeDegreePlan.some(s => {
+                    const sNum = Number(s.semester);
+                    return (s.isSummer === true || s.type === 'summer') && (sNum === semNum || (semNum === 2.5 && sNum === 9));
+                });
+                const hasCourses = Object.values(gameState.courses || {}).some(c => {
+                    if (!c || c.semester === 0 || c.semester === '0') return false;
+                    const cSem = Number(c.semester);
+                    return cSem === semNum || (semNum === 2.5 && cSem === 9);
+                });
+                return inPlan || hasCourses;
+            };
+
+            const options = [
+                { val: 1, label: "שנה א׳ - סמסטר א׳" },
+                { val: 2, label: "שנה א׳ - סמסטר ב׳" },
+                ...(isSummerActive(2.5) || targetSem === 2.5 ? [{ val: 2.5, label: "שנה א׳ - סמסטר קיץ ☀️" }] : []),
+                { val: 3, label: "שנה ב׳ - סמסטר א׳" },
+                { val: 4, label: "שנה ב׳ - סמסטר ב׳" },
+                ...(isSummerActive(4.5) || targetSem === 4.5 ? [{ val: 4.5, label: "שנה ב׳ - סמסטר קיץ ☀️" }] : []),
+                { val: 5, label: "שנה ג׳ - סמסטר א׳" },
+                { val: 6, label: "שנה ג׳ - סמסטר ב׳" },
+                ...(isSummerActive(6.5) || targetSem === 6.5 ? [{ val: 6.5, label: "שנה ג׳ - סמסטר קיץ ☀️" }] : []),
+                { val: 7, label: "שנה ד׳ - סמסטר א׳" },
+                { val: 8, label: "שנה ד׳ - סמסטר ב׳" },
+                ...(isSummerActive(8.5) || targetSem === 8.5 ? [{ val: 8.5, label: "שנה ד׳ - סמסטר קיץ ☀️" }] : [])
+            ];
+            semSelect.innerHTML = options.map(opt => `<option value="${opt.val}">${opt.label}</option>`).join('');
+            semSelect.value = String(targetSem);
+        }
 
         if (statusSelect) {
             statusSelect.value = (targetSem === activeSem) ? "active" : "available";
@@ -10822,7 +10861,7 @@ function handleAddCourseSubmit(e) {
     }
 
     const credits = parseFloat(document.getElementById("course-credits").value) || 3;
-    const semester = parseInt(document.getElementById("course-semester").value) || 1;
+    const semester = parseFloat(document.getElementById("course-semester").value) || 1;
     const prereqsString = document.getElementById("course-prereqs").value.trim();
     const type = document.getElementById("course-type").value || 'elective';
     const statusSelect = document.getElementById("course-status-initial");
@@ -11447,8 +11486,9 @@ function openCourseDetails(code) {
     if (saveSemesterBadge) saveSemesterBadge.style.display = "none";
 
     const performSaveSemester = (newSem) => {
-        newSem = parseInt(newSem);
-        if (!newSem || (newSem < 1 || (newSem > 8 && newSem !== 9))) return;
+        newSem = parseFloat(newSem);
+        if (isNaN(newSem) || newSem < 1) return;
+        if (newSem === 9) newSem = 2.5;
         course.semester = newSem;
 
         // Persist to planner module so customPlan is updated and never reverts on re-render
@@ -11465,14 +11505,49 @@ function openCourseDetails(code) {
                 if (saveSemesterBadge) saveSemesterBadge.style.display = "none";
             }, 3000);
         }
-        const semName = newSem === 9 ? "שנה א׳ - סמסטר קיץ ☀️" : `סמסטר ${newSem}`;
+        const semName = (newSem % 1 !== 0) ? "סמסטר קיץ ☀️" : `סמסטר ${newSem}`;
         if (typeof showToastNotification === 'function') {
             showToastNotification(`✓ הקורס ${course.name} הועבר ל${semName} ונשמר בהצלחה`, 'success');
         }
     };
 
     if (semesterSelect) {
-        semesterSelect.value = course.semester;
+        const activeDegreePlan = (typeof DegreePlanner !== 'undefined' && DegreePlanner.getCustomPlan) 
+            ? DegreePlanner.getCustomPlan() 
+            : (gameState.degreePlan || []);
+
+        const isSummerActive = (semNum) => {
+            const inPlan = Array.isArray(activeDegreePlan) && activeDegreePlan.some(s => {
+                const sNum = Number(s.semester);
+                return (s.isSummer === true || s.type === 'summer') && (sNum === semNum || (semNum === 2.5 && sNum === 9));
+            });
+            const hasCourses = Object.values(gameState.courses || {}).some(c => {
+                if (!c || c.semester === 0 || c.semester === '0') return false;
+                const cSem = Number(c.semester);
+                return cSem === semNum || (semNum === 2.5 && cSem === 9);
+            });
+            return inPlan || hasCourses;
+        };
+
+        const currentCourseSem = Number(course.semester) === 9 ? 2.5 : Number(course.semester || 1);
+
+        const options = [
+            { val: 1, label: "שנה א׳ - סמסטר א׳" },
+            { val: 2, label: "שנה א׳ - סמסטר ב׳" },
+            ...(isSummerActive(2.5) || currentCourseSem === 2.5 ? [{ val: 2.5, label: "שנה א׳ - סמסטר קיץ ☀️" }] : []),
+            { val: 3, label: "שנה ב׳ - סמסטר א׳" },
+            { val: 4, label: "שנה ב׳ - סמסטר ב׳" },
+            ...(isSummerActive(4.5) || currentCourseSem === 4.5 ? [{ val: 4.5, label: "שנה ב׳ - סמסטר קיץ ☀️" }] : []),
+            { val: 5, label: "שנה ג׳ - סמסטר א׳" },
+            { val: 6, label: "שנה ג׳ - סמסטר ב׳" },
+            ...(isSummerActive(6.5) || currentCourseSem === 6.5 ? [{ val: 6.5, label: "שנה ג׳ - סמסטר קיץ ☀️" }] : []),
+            { val: 7, label: "שנה ד׳ - סמסטר א׳" },
+            { val: 8, label: "שנה ד׳ - סמסטר ב׳" },
+            ...(isSummerActive(8.5) || currentCourseSem === 8.5 ? [{ val: 8.5, label: "שנה ד׳ - סמסטר קיץ ☀️" }] : [])
+        ];
+        semesterSelect.innerHTML = options.map(opt => `<option value="${opt.val}">${opt.label}</option>`).join('');
+        semesterSelect.value = String(currentCourseSem);
+
         semesterSelect.onchange = (e) => {
             performSaveSemester(e.target.value);
         };
@@ -15686,31 +15761,46 @@ function renderFlowchartTree() {
     connectionsGroup.innerHTML = "";
     nodesGroup.innerHTML = "";
 
+    // Sync planned courses and semesters from "התוכנית שלי" (customPlan) before building rows
+    if (typeof DegreePlanner !== 'undefined' && DegreePlanner.syncPlannerToTree) {
+        DegreePlanner.syncPlannerToTree(true);
+    }
+
     // 1. Group all courses by their ACTUAL semester in gameState.courses
-    // Check if user has explicitly placed courses in Summer Semester (sem 9)
-    const hasSummerCourses = Object.values(gameState.courses || {}).some(c => c && Number(c.semester) === 9);
+    // Check which summer semesters are active (either explicitly added in planner or having assigned courses)
+    const activeDegreePlan = (typeof DegreePlanner !== 'undefined' && DegreePlanner.getCustomPlan) 
+        ? DegreePlanner.getCustomPlan() 
+        : (gameState.degreePlan || []);
+
+    const isSummerActive = (semNum) => {
+        const inPlan = Array.isArray(activeDegreePlan) && activeDegreePlan.some(s => {
+            const sNum = Number(s.semester);
+            return (s.isSummer === true || s.type === 'summer') && (sNum === semNum || (semNum === 2.5 && sNum === 9));
+        });
+        const hasCourses = Object.values(gameState.courses || {}).some(c => {
+            if (!c || c.semester === 0 || c.semester === '0') return false;
+            const cSem = Number(c.semester);
+            return cSem === semNum || (semNum === 2.5 && cSem === 9);
+        });
+        return inPlan || hasCourses;
+    };
 
     const ALL_SEMESTER_ROWS = [
         { sem: 1, year: "שנה א׳", term: "סמסטר א׳" },
         { sem: 2, year: "שנה א׳", term: "סמסטר ב׳" },
-        { sem: 9, year: "שנה א׳", term: "סמסטר קיץ ☀️", isSummer: true },
+        ...(isSummerActive(2.5) ? [{ sem: 2.5, year: "שנה א׳", term: "סמסטר קיץ ☀️", isSummer: true }] : []),
         { sem: 3, year: "שנה ב׳", term: "סמסטר ג׳" },
         { sem: 4, year: "שנה ב׳", term: "סמסטר ד׳" },
+        ...(isSummerActive(4.5) ? [{ sem: 4.5, year: "שנה ב׳", term: "סמסטר קיץ ☀️", isSummer: true }] : []),
         { sem: 5, year: "שנה ג׳", term: "סמסטר ה׳" },
         { sem: 6, year: "שנה ג׳", term: "סמסטר ו׳" },
+        ...(isSummerActive(6.5) ? [{ sem: 6.5, year: "שנה ג׳", term: "סמסטר קיץ ☀️", isSummer: true }] : []),
         { sem: 7, year: "שנה ד׳", term: "סמסטר ז׳" },
-        { sem: 8, year: "שנה ד׳", term: "סמסטר ח׳" }
+        { sem: 8, year: "שנה ד׳", term: "סמסטר ח׳" },
+        ...(isSummerActive(8.5) ? [{ sem: 8.5, year: "שנה ד׳", term: "סמסטר קיץ ☀️", isSummer: true }] : [])
     ];
 
-    // Summer semester is an optional row: rendered only if courses are assigned to it!
-    const SEMESTER_ROWS = hasSummerCourses
-        ? ALL_SEMESTER_ROWS
-        : ALL_SEMESTER_ROWS.filter(r => !r.isSummer);
-
-    // Sync planned courses and semesters from "התוכנית שלי" (customPlan)
-    if (typeof DegreePlanner !== 'undefined' && DegreePlanner.syncPlannerToTree) {
-        DegreePlanner.syncPlannerToTree(true);
-    }
+    const SEMESTER_ROWS = ALL_SEMESTER_ROWS;
 
     const semesterCourses = {};
     SEMESTER_ROWS.forEach(r => {
@@ -15734,7 +15824,11 @@ function renderFlowchartTree() {
         seenRootsInTree.add(root);
 
         let sem = Number(course.semester) || 1;
-        if (sem !== 9) {
+        if (sem === 9) sem = 2.5;
+        if (!SEMESTER_ROWS.some(r => r.sem === sem)) {
+            if (sem % 1 !== 0) {
+                sem = Math.floor(sem);
+            }
             sem = Math.max(1, Math.min(8, sem));
         }
         if (!semesterCourses[sem]) semesterCourses[sem] = [];
@@ -15828,7 +15922,7 @@ function renderFlowchartTree() {
             const btn = e.target.closest(".fc-sem-add-btn");
             if (btn) {
                 e.stopPropagation();
-                const sem = parseInt(btn.dataset.sem) || 1;
+                const sem = parseFloat(btn.dataset.sem) || 1;
                 window.openAddCourseModal(sem);
             }
         });

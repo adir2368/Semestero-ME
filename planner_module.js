@@ -504,12 +504,14 @@
         const v2Key = getPlannerStorageKeyV2();
         const v1Key = getPlannerStorageKeyV1();
 
-        // Helper to detect Adir's custom degree plan (Python in semester 1)
+        // Helper to detect Adir's custom degree plan (Python in semester 1 without Physics 1)
         function isAdirCustomPlan(plan) {
             if (!plan || !Array.isArray(plan) || plan.length === 0) return false;
             const sem1 = plan.find(s => s.semester === 1);
             if (!sem1 || !Array.isArray(sem1.courses)) return false;
-            return sem1.courses.some(c => c.code === '02340128' || c.code === '234128' || c.altCode === '234128');
+            const hasPhysics1 = sem1.courses.some(c => c.code === '01140051' || c.code === '114051' || c.altCode === '114051');
+            const hasPython = sem1.courses.some(c => c.code === '02340128' || c.code === '234128' || c.altCode === '234128');
+            return hasPython && !hasPhysics1 && sem1.courses.length <= 4;
         }
 
         // For non-Adir users: aggressively purge any leaked/contaminated plan from storage & gameState
@@ -1277,19 +1279,7 @@
     // Rendering Sub-systems
     // --------------------------------------------------------------------------
     function renderDegreePlanner() {
-        const isAdir = isAdirAuthenticated();
-        function isAdirPlan(p) {
-            if (!p || !Array.isArray(p) || p.length === 0) return false;
-            const sem1 = p.find(s => s.semester === 1);
-            if (!sem1 || !Array.isArray(sem1.courses)) return false;
-            return sem1.courses.some(c => c.code === '02340128' || c.code === '234128' || c.altCode === '234128');
-        }
-        if (!isAdir && isAdirPlan(customPlan)) {
-            console.warn('[Planner] Detected in-memory Adir plan during non-Adir render. Resetting to clean syllabus.');
-            customPlan = null;
-            unassignedCourses = [];
-            initPlannerState(true);
-        } else {
+        if (!customPlan) {
             initPlannerState();
         }
         if (!global.PLANNER_CATALOG) return;
@@ -1785,7 +1775,7 @@
 
             if (card.classList.contains('planner-course-card')) {
                 const code = card.getAttribute('data-code');
-                const sem = parseInt(card.getAttribute('data-semester'));
+                const sem = parseFloat(card.getAttribute('data-semester'));
                 activeDragPayload = {
                     type: 'semester-course',
                     code: code,
@@ -1848,9 +1838,9 @@
             if (semZone) {
                 e.preventDefault();
                 e.stopPropagation();
-                let targetSemester = parseInt(semZone.getAttribute('data-semester'));
+                let targetSemester = parseFloat(semZone.getAttribute('data-semester'));
                 if (isNaN(targetSemester) && semZone.closest('.planner-semester-col')) {
-                    targetSemester = parseInt(semZone.closest('.planner-semester-col').getAttribute('data-semester'));
+                    targetSemester = parseFloat(semZone.closest('.planner-semester-col').getAttribute('data-semester'));
                 }
                 if (targetSemester) {
                     handleCourseDrop(payload, targetSemester);
@@ -1954,7 +1944,7 @@
             if (removeBtn) {
                 e.stopPropagation();
                 const code = removeBtn.getAttribute('data-code');
-                const semNum = parseInt(removeBtn.getAttribute('data-semester'));
+                const semNum = parseFloat(removeBtn.getAttribute('data-semester'));
                 handleSidebarDrop({
                     type: 'semester-course',
                     code: code,
@@ -2030,7 +2020,7 @@
                 const code = card.getAttribute('data-code');
                 const altCode = card.getAttribute('data-alt-code');
                 const semAttr = card.getAttribute('data-semester');
-                const semNum = semAttr ? parseInt(semAttr, 10) : null;
+                const semNum = semAttr ? parseFloat(semAttr) : null;
 
                 if (isCourseCompleted(code, altCode)) {
                     showPlannerToast('✓ קורס זה הושלם כבר בהצלחה - אינו ניתן להזזה.', false);
@@ -2277,9 +2267,11 @@
         plan.forEach(s => {
             const semNum = s.semester;
             const isCurrent = semNum === currentSemester;
+            const isSummer = s.isSummer === true || s.type === 'summer';
+            const semTitle = isSummer ? (s.title || (s.yearLabel ? `סמסטר קיץ ${s.yearLabel} ☀️` : 'סמסטר קיץ ☀️')) : `סמסטר ${semNum}`;
             semButtonsHtml += `
                 <button type="button" class="sheet-sem-btn ${isCurrent ? 'current' : ''}" data-target-sem="${semNum}">
-                    סמסטר ${semNum} ${isCurrent ? '📍' : ''}
+                    ${escapeHtml(semTitle)} ${isCurrent ? '📍' : ''}
                 </button>
             `;
         });
@@ -2324,7 +2316,7 @@
         const semBtns = sheet.querySelectorAll('.sheet-sem-btn');
         semBtns.forEach(btn => {
             btn.onclick = () => {
-                const targetSem = parseInt(btn.getAttribute('data-target-sem'));
+                const targetSem = parseFloat(btn.getAttribute('data-target-sem'));
                 closeSheet();
                 if (targetSem === currentSemester) return;
                 handleCourseDrop({
@@ -2783,11 +2775,13 @@
 
         const semButtons = customPlan.map(s => {
             const semNum = s.semester;
+            const isSummer = s.isSummer === true || s.type === 'summer';
+            const semTitle = isSummer ? (s.title || (s.yearLabel ? `סמסטר קיץ ${s.yearLabel} ☀️` : 'סמסטר קיץ ☀️')) : `סמסטר ${semNum}`;
             const prereqCheck = checkPrerequisites(course, semNum, activeMap);
             const isValid = prereqCheck.valid;
             return `
                 <button type="button" class="btn btn-outline sem-choice-btn" data-semester="${semNum}" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 12px; border-radius: 8px; border: 1px solid ${isValid ? 'rgba(56, 189, 248, 0.35)' : 'rgba(239, 68, 68, 0.35)'}; background: ${isValid ? 'rgba(15, 23, 42, 0.7)' : 'rgba(239, 68, 68, 0.08)'}; cursor: pointer; transition: all 0.15s ease;">
-                    <span style="font-weight: 700; color: #f8fafc; font-size: 0.95rem;">סמסטר ${semNum}</span>
+                    <span style="font-weight: 700; color: #f8fafc; font-size: 0.95rem;">${escapeHtml(semTitle)}</span>
                     <span style="font-size: 0.72rem; color: ${isValid ? '#34d399' : '#f87171'}; margin-top: 4px;">${isValid ? '✓ זמין לשיבוץ' : '⚠️ קדמים חסרים'}</span>
                 </button>
             `;
@@ -2821,7 +2815,7 @@
 
         modal.querySelectorAll('.sem-choice-btn').forEach(btn => {
             btn.addEventListener('click', () => {
-                const chosenSem = parseInt(btn.getAttribute('data-semester'));
+                const chosenSem = parseFloat(btn.getAttribute('data-semester'));
                 closeModal();
                 handleCourseDrop({ type: 'pool-elective', code: course.code }, chosenSem);
             });
@@ -2847,7 +2841,9 @@
                 if (!p || !Array.isArray(p) || p.length === 0) return false;
                 const sem1 = p.find(s => s.semester === 1);
                 if (!sem1 || !Array.isArray(sem1.courses)) return false;
-                return sem1.courses.some(c => c.code === '02340128' || c.code === '234128' || c.altCode === '234128');
+                const hasPhysics1 = sem1.courses.some(c => c.code === '01140051' || c.code === '114051' || c.altCode === '114051');
+                const hasPython = sem1.courses.some(c => c.code === '02340128' || c.code === '234128' || c.altCode === '234128');
+                return hasPython && !hasPhysics1 && sem1.courses.length <= 4;
             }
 
             if (Array.isArray(plan) && plan.length > 0 && (isAdir || !isAdirPlan(plan))) {
@@ -2910,8 +2906,9 @@
         setCourseSemester: function(code, targetSemester) {
             if (!code) return false;
             if (!customPlan) initPlannerState();
-            const semNum = parseInt(targetSemester);
-            if (!semNum || (semNum < 1 || (semNum > 8 && semNum !== 9))) return false;
+            let semNum = parseFloat(targetSemester);
+            if (isNaN(semNum) || semNum < 1) return false;
+            if (semNum === 9) semNum = 2.5;
 
             const cKeys = new Set(getNormalizedCodes(code, code));
             let foundCourse = null;
@@ -2940,7 +2937,10 @@
                 });
             }
 
-            // If not found in customPlan, reconstruct from gameState or catalog
+            // If not found in customPlan, reconstruct from resolveCourseObject, gameState or catalog
+            if (!foundCourse) {
+                foundCourse = resolveCourseObject(code);
+            }
             if (!foundCourse) {
                 const fromState = global.gameState && global.gameState.courses && (global.gameState.courses[code] || global.gameState.courses[code.replace(/^0+/, '')]);
                 if (fromState) {
@@ -2958,34 +2958,33 @@
                 }
             }
 
-            if (foundCourse) {
-                let targetSemObj = customPlan.find(s => s.semester === semNum);
-                if (!targetSemObj) {
-                    targetSemObj = {
-                        semester: semNum,
-                        label: semNum === 9 ? "שנה א׳ - סמסטר קיץ ☀️" : `סמסטר ${semNum}`,
-                        isSummer: semNum === 9,
-                        courses: []
-                    };
-                    customPlan.push(targetSemObj);
-                    const getSemOrder = (s) => (s === 9 ? 2.5 : Number(s) || 1);
-                    customPlan.sort((a, b) => getSemOrder(a.semester) - getSemOrder(b.semester));
-                }
-                targetSemObj.courses = targetSemObj.courses || [];
-                targetSemObj.courses.push(foundCourse);
+            if (!foundCourse) {
+                console.warn('[DegreePlanner.setCourseSemester] Course could not be resolved:', code);
+                return false;
             }
 
-            // 3. Update in gameState.courses
-            if (global.gameState && global.gameState.courses) {
-                for (const k of cKeys) {
-                    if (global.gameState.courses[k]) {
-                        global.gameState.courses[k].semester = semNum;
-                    }
-                }
-                if (global.gameState.courses[code]) {
-                    global.gameState.courses[code].semester = semNum;
-                }
+            let targetSemObj = customPlan.find(s => s.semester === semNum);
+            if (!targetSemObj) {
+                const isSummer = semNum % 1 !== 0;
+                const yearNum = Math.ceil(semNum / 2);
+                const hebrewYears = ['א׳', 'ב׳', 'ג׳', 'ד׳', 'ה׳'];
+                const yearLabel = hebrewYears[yearNum - 1] || `${yearNum}`;
+                targetSemObj = {
+                    semester: semNum,
+                    label: isSummer ? `שנה ${yearLabel} - סמסטר קיץ ☀️` : `סמסטר ${semNum}`,
+                    title: isSummer ? `סמסטר קיץ ${yearLabel}` : `סמסטר ${semNum}`,
+                    isSummer: isSummer,
+                    courses: []
+                };
+                customPlan.push(targetSemObj);
+                const getSemOrder = (s) => (s === 9 ? 2.5 : Number(s) || 1);
+                customPlan.sort((a, b) => getSemOrder(a.semester) - getSemOrder(b.semester));
             }
+            targetSemObj.courses = targetSemObj.courses || [];
+            targetSemObj.courses.push(foundCourse);
+
+            // 3. Update in gameState.courses
+            syncCourseToGameState(foundCourse, semNum);
 
             // 4. Save and re-render
             saveCustomPlan(true);
@@ -2993,6 +2992,18 @@
                 global.saveState(true);
             }
             renderDegreePlanner();
+            if (typeof syncPlannerToTree === 'function') {
+                syncPlannerToTree(false);
+            }
+            if (typeof global.renderFlowchartTree === 'function') {
+                global.renderFlowchartTree();
+            }
+            if (typeof global.renderUI === 'function') {
+                global.renderUI();
+            }
+            if (typeof global.notifyStateChanged === 'function') {
+                global.notifyStateChanged({ source: 'planner' });
+            }
             return true;
         },
         calculateCourseWorkload: calculateCourseWorkload,
@@ -3109,6 +3120,7 @@
 
     // Global Action Helpers for UI Interaction
     global.addSummerSemesterAfter = function(afterSemesterNum) {
+        if (!customPlan) initPlannerState();
         if (!customPlan) return;
         const afterIdx = customPlan.findIndex(s => s.semester === afterSemesterNum);
         if (afterIdx === -1) return;
@@ -3134,12 +3146,19 @@
         };
 
         customPlan.splice(afterIdx + 1, 0, newSummerSem);
-        saveCustomPlan();
+        saveCustomPlan(true);
         renderDegreePlanner();
+        if (typeof syncPlannerToTree === 'function') syncPlannerToTree(false);
+        if (typeof global.renderFlowchartTree === 'function') global.renderFlowchartTree();
+        if (typeof global.renderUI === 'function') global.renderUI();
+        if (typeof global.notifyStateChanged === 'function') {
+            global.notifyStateChanged({ source: 'planner' });
+        }
         showPlannerToast(`סמסטר קיץ ${yearLabel} נוסף בהצלחה! ☀️`, false);
     };
 
     global.deleteSummerSemester = function(semNum) {
+        if (!customPlan) initPlannerState();
         if (!customPlan) return;
         const semIdx = customPlan.findIndex(s => s.semester === semNum);
         if (semIdx === -1) return;
@@ -3151,8 +3170,14 @@
             sem.courses.forEach(c => unassignedCourses.push(c));
         }
         customPlan.splice(semIdx, 1);
-        saveCustomPlan();
+        saveCustomPlan(true);
         renderDegreePlanner();
+        if (typeof syncPlannerToTree === 'function') syncPlannerToTree(false);
+        if (typeof global.renderFlowchartTree === 'function') global.renderFlowchartTree();
+        if (typeof global.renderUI === 'function') global.renderUI();
+        if (typeof global.notifyStateChanged === 'function') {
+            global.notifyStateChanged({ source: 'planner' });
+        }
         showPlannerToast('סמסטר הקיץ נמחק בהצלחה.', false);
     };
 
