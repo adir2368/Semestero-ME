@@ -59,8 +59,14 @@
       "url": "./widgets.html?w=exam",
       "icons": [
         {
-          "src": "icon-192.png",
-          "sizes": "192x192"
+          "src": "shortcut-exam-96.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        },
+        {
+          "src": "shortcut-exam-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
         }
       ]
     },
@@ -71,8 +77,14 @@
       "url": "./widgets.html?w=tasks",
       "icons": [
         {
-          "src": "icon-192.png",
-          "sizes": "192x192"
+          "src": "shortcut-tasks-96.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        },
+        {
+          "src": "shortcut-tasks-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
         }
       ]
     },
@@ -83,8 +95,14 @@
       "url": "./widgets.html?w=semester",
       "icons": [
         {
-          "src": "icon-192.png",
-          "sizes": "192x192"
+          "src": "shortcut-semester-96.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        },
+        {
+          "src": "shortcut-semester-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
         }
       ]
     },
@@ -95,8 +113,14 @@
       "url": "./widgets.html?w=schedule",
       "icons": [
         {
-          "src": "icon-192.png",
-          "sizes": "192x192"
+          "src": "shortcut-schedule-96.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        },
+        {
+          "src": "shortcut-schedule-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
         }
       ]
     }
