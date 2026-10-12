@@ -15687,7 +15687,10 @@ function renderFlowchartTree() {
     nodesGroup.innerHTML = "";
 
     // 1. Group all courses by their ACTUAL semester in gameState.courses
-    const SEMESTER_ROWS = [
+    // Check if user has explicitly placed courses in Summer Semester (sem 9)
+    const hasSummerCourses = Object.values(gameState.courses || {}).some(c => c && Number(c.semester) === 9);
+
+    const ALL_SEMESTER_ROWS = [
         { sem: 1, year: "שנה א׳", term: "סמסטר א׳" },
         { sem: 2, year: "שנה א׳", term: "סמסטר ב׳" },
         { sem: 9, year: "שנה א׳", term: "סמסטר קיץ ☀️", isSummer: true },
@@ -15698,6 +15701,11 @@ function renderFlowchartTree() {
         { sem: 7, year: "שנה ד׳", term: "סמסטר ז׳" },
         { sem: 8, year: "שנה ד׳", term: "סמסטר ח׳" }
     ];
+
+    // Summer semester is an optional row: rendered only if courses are assigned to it!
+    const SEMESTER_ROWS = hasSummerCourses
+        ? ALL_SEMESTER_ROWS
+        : ALL_SEMESTER_ROWS.filter(r => !r.isSummer);
 
     // Sync planned courses and semesters from "התוכנית שלי" (customPlan)
     if (typeof DegreePlanner !== 'undefined' && DegreePlanner.syncPlannerToTree) {
@@ -15747,7 +15755,7 @@ function renderFlowchartTree() {
     const TOTAL_WIDTH = Math.max(BASE_FLOWCHART_WIDTH, LEFT_MARGIN + NUM_COLS * colSpacing + RIGHT_MARGIN + 120);
     window.FLOWCHART_TOTAL_WIDTH = TOTAL_WIDTH;
     const ROW_HEIGHT = 168; // Golden ratio vertical spacing (84px card + 84px gap)
-    const TOTAL_HEIGHT = BASE_FLOWCHART_HEIGHT;
+    const TOTAL_HEIGHT = Math.max(BASE_FLOWCHART_HEIGHT, SEMESTER_ROWS.length * ROW_HEIGHT + 36);
     const nodeWidth = 196; // Generous card width so all Hebrew titles fit completely
     const nodeHeight = 84;
 

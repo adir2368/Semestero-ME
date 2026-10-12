@@ -293,6 +293,7 @@ body {
 
 .char-name-row {
     display: flex;
+    justify-content: space-between;
     align-items: center;
     margin-bottom: 2px;
     min-width: 0;
@@ -309,7 +310,18 @@ body {
 }
 
 .char-level {
-    display: none !important;
+    font-weight: 800;
+    font-size: 0.88rem;
+    color: #fbbf24;
+    text-shadow: 0 0 8px rgba(251, 191, 36, 0.35);
+    background: rgba(245, 158, 11, 0.12);
+    border: 1px solid rgba(245, 158, 11, 0.35);
+    padding: 1px 8px;
+    border-radius: 6px;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+    flex-shrink: 0;
+    margin-right: 8px;
 }
 
 .hud-card-actions {
@@ -7227,6 +7239,10 @@ html.is-iphone .app-global-footer {
         overflow: hidden;
         text-overflow: ellipsis;
     }
+    .char-level {
+        font-size: 0.82rem;
+        padding: 1px 6px;
+    }
     .xp-bar-container {
         height: 18px;
     }
@@ -7297,6 +7313,10 @@ html.is-iphone .app-global-footer {
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
+    }
+    .char-level {
+        font-size: 0.78rem;
+        padding: 1px 5px;
     }
     .xp-bar-container {
         height: 16px;
@@ -8837,6 +8857,62 @@ html.is-iphone .app-global-footer {
 
 .planner-semester-col:hover {
     border-color: rgba(56, 189, 248, 0.3);
+}
+
+.planner-summer-col {
+    border-color: rgba(245, 158, 11, 0.35) !important;
+    background: rgba(245, 158, 11, 0.05) !important;
+}
+
+.planner-summer-col .summer-header {
+    background: rgba(245, 158, 11, 0.15) !important;
+    border-bottom: 1px solid rgba(245, 158, 11, 0.25) !important;
+}
+
+.btn-delete-summer-sem {
+    background: rgba(239, 68, 68, 0.15);
+    border: 1px solid rgba(239, 68, 68, 0.35);
+    color: #ef4444;
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-size: 0.72rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-delete-summer-sem:hover {
+    background: rgba(239, 68, 68, 0.3);
+}
+
+.planner-add-summer-col-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    flex-shrink: 0;
+}
+
+.btn-add-summer-col {
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    background: rgba(245, 158, 11, 0.08);
+    border: 1px dashed rgba(245, 158, 11, 0.4);
+    color: #fbbf24;
+    padding: 16px 8px;
+    border-radius: 8px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    letter-spacing: 0.5px;
+}
+
+.btn-add-summer-col:hover {
+    background: rgba(245, 158, 11, 0.18);
+    border-style: solid;
+    border-color: #fbbf24;
+    box-shadow: 0 0 10px rgba(245, 158, 11, 0.25);
 }
 
 .semester-col-header {

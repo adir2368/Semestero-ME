@@ -4,14 +4,6 @@ const CACHE_NAME = 'semestero-me-v2.4.0';
 const STATIC_ASSETS = [
     './',
     './index.html',
-    './widgets.html',
-    './widget.html',
-    './widgets/ms_ac_exam.json',
-    './widgets/ms_ac_tasks.json',
-    './widgets/ms_ac_semester.json',
-    './widgets/data_exam.json',
-    './widgets/data_tasks.json',
-    './widgets/data_semester.json',
     './styles.css',
     './accessibility.css',
     './accessibility.js',
@@ -203,62 +195,5 @@ self.addEventListener('periodicsync', (event) => {
         console.log('[SW] Running periodic background sync for class reminders');
     }
 });
-
-// PWA Widgets API Lifecycle Handlers (Chromium & Windows Widgets Board)
-self.addEventListener('widgetinstall', (event) => {
-    console.log('[SW Widget] Installed widget:', event.widget ? event.widget.tag : 'unknown');
-    if (self.widgets && event.widget) {
-        event.waitUntil(updateWidgetData(event.widget));
-    }
-});
-
-self.addEventListener('widgetresume', (event) => {
-    console.log('[SW Widget] Resumed widget:', event.widget ? event.widget.tag : 'unknown');
-    if (self.widgets && event.widget) {
-        event.waitUntil(updateWidgetData(event.widget));
-    }
-});
-
-self.addEventListener('widgetclick', (event) => {
-    console.log('[SW Widget] Clicked widget action:', event.action);
-    const tag = event.widget ? event.widget.tag : '';
-    let targetUrl = './widgets.html';
-    if (tag === 'semestero-exam-widget') targetUrl = './widgets.html?w=exam';
-    else if (tag === 'semestero-tasks-widget') targetUrl = './widgets.html?w=tasks';
-    else if (tag === 'semestero-semester-widget') targetUrl = './widgets.html?w=semester';
-
-    event.waitUntil(
-        self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
-            for (const client of clientList) {
-                if (client.url && 'focus' in client) {
-                    return client.focus();
-                }
-            }
-            if (self.clients.openWindow) {
-                return self.clients.openWindow(targetUrl);
-            }
-        })
-    );
-});
-
-async function updateWidgetData(widget) {
-    if (!self.widgets) return;
-    try {
-        let dataPayload = {};
-        if (widget.tag === 'semestero-exam-widget') {
-            const resp = await fetch('./widgets/data_exam.json');
-            dataPayload = await resp.json();
-        } else if (widget.tag === 'semestero-tasks-widget') {
-            const resp = await fetch('./widgets/data_tasks.json');
-            dataPayload = await resp.json();
-        } else if (widget.tag === 'semestero-semester-widget') {
-            const resp = await fetch('./widgets/data_semester.json');
-            dataPayload = await resp.json();
-        }
-        await self.widgets.updateByTag(widget.tag, { data: JSON.stringify(dataPayload) });
-    } catch (e) {
-        console.warn('[SW Widget] Could not update widget data:', e);
-    }
-}
 
 

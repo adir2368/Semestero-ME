@@ -1582,6 +1582,21 @@
                     </div>
                 </div>
             `);
+
+            // After each Spring semester (even semesters like 2, 4, 6, 8), render "+ הוסף סמסטר קיץ" if none exists
+            if (currentMode === 'custom' && !isSummer && semNum % 2 === 0) {
+                const nextSem = plan[idx + 1];
+                const hasSummerNext = nextSem && (nextSem.isSummer === true || nextSem.type === 'summer');
+                if (!hasSummerNext) {
+                    chunks.push(`
+                        <div class="planner-add-summer-col-wrap">
+                            <button type="button" class="btn-add-summer-col" onclick="window.addSummerSemesterAfter(${semNum})" title="הוסף סמסטר קיץ לאחר סמסטר ${semNum}">
+                                + הוסף סמסטר קיץ ☀️
+                            </button>
+                        </div>
+                    `);
+                }
+            }
         });
 
         container.innerHTML = chunks.join('');
