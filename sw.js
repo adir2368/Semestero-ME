@@ -1,5 +1,5 @@
-// Service Worker for Academic Skill Tree (Semestero ME) - v2.3.8
-const CACHE_NAME = 'semestero-me-v2.3.8';
+// Service Worker for Academic Skill Tree (Semestero ME) - v2.3.9
+const CACHE_NAME = 'semestero-me-v2.3.9';
 
 const STATIC_ASSETS = [
     './',
@@ -37,6 +37,8 @@ const STATIC_ASSETS = [
     './icon_small.webp',
     './icon-192.png',
     './icon-512.png',
+    './web-app-manifest-192x192.png',
+    './web-app-manifest-512x512.png',
     './apple-touch-icon.png',
     './shortcut-exam-96.png',
     './shortcut-exam-192.png',
