@@ -3,33 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Semestero ME · וויג'טים למסך הבית</title>
+    <title>TecME · וויג'טים אינטראקטיביים למסך הבית</title>
     <link rel="icon" type="image/png" href="icon-192.png">
     <link rel="apple-touch-icon" href="apple-touch-icon.png">
-    <meta name="theme-color" content="#0f172a">
+    <meta name="theme-color" content="#000000">
+    <meta name="background-color" content="#000000">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="manifest" href="manifest.json?v=2.3.9">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="manifest" href="manifest.json?v=2.4.0">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700;800;900&family=Rubik:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;500;600;700;800;900&family=Rubik:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-canvas: #0a0f1d;
-            --bg-card: rgba(17, 24, 39, 0.85);
-            --bg-card-glass: rgba(15, 23, 42, 0.72);
-            --border-card: rgba(255, 255, 255, 0.1);
-            --border-glow: rgba(56, 189, 248, 0.35);
+            --bg-canvas: #1c1e24;
+            --bg-card: #252834;
+            --bg-card-hover: #2b2f3e;
+            --border-card: rgba(255, 255, 255, 0.07);
+            --border-card-subtle: rgba(255, 255, 255, 0.04);
             --text-primary: #f8fafc;
             --text-secondary: #94a3b8;
             --text-muted: #64748b;
             --accent-cyan: #38bdf8;
             --accent-green: #34d399;
             --accent-amber: #fbbf24;
-            --accent-rose: #fb7185;
-            --font-family: 'Assistant', 'Rubik', system-ui, -apple-system, sans-serif;
-            --radius-widget: 26px;
+            --accent-rose: #f87171;
+            --radius-widget: 24px;
+            --font-family: 'Assistant', 'Rubik', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         }
 
         * {
@@ -41,8 +42,6 @@
 
         body {
             background-color: var(--bg-canvas);
-            background-image: radial-gradient(circle at 50% 15%, rgba(56, 189, 248, 0.08) 0%, transparent 60%),
-                              radial-gradient(circle at 80% 80%, rgba(99, 102, 241, 0.05) 0%, transparent 50%);
             color: var(--text-primary);
             font-family: var(--font-family);
             line-height: 1.4;
@@ -51,212 +50,483 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: space-between;
-            padding: calc(env(safe-area-inset-top) + 12px) 16px calc(env(safe-area-inset-bottom) + 16px);
+            padding: calc(env(safe-area-inset-top) + 14px) 14px calc(env(safe-area-inset-bottom) + 24px);
             overflow-x: hidden;
         }
 
-        /* Top Minimal Header */
-        .widget-top-nav {
-            width: 100%;
-            max-width: 520px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 4px 6px;
-            margin-bottom: 8px;
-        }
-
-        .widget-brand {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            text-decoration: none;
-            color: #fff;
-            font-weight: 800;
-            font-size: 0.95rem;
-        }
-
-        .widget-brand-logo {
-            width: 26px;
-            height: 26px;
-            border-radius: 8px;
-            object-fit: contain;
-            filter: drop-shadow(0 0 6px rgba(56, 189, 248, 0.5));
-        }
-
-        .btn-action-pill {
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            background: rgba(30, 41, 59, 0.8);
-            border: 1px solid var(--border-card);
-            color: var(--text-secondary);
-            padding: 5px 12px;
-            border-radius: 18px;
-            font-size: 0.78rem;
-            font-weight: 700;
-            text-decoration: none;
-            backdrop-filter: blur(12px);
-            transition: all 0.2s ease;
-            cursor: pointer;
-        }
-
-        .btn-action-pill:hover, .btn-action-pill:active {
-            color: #fff;
-            border-color: var(--accent-cyan);
-            background: rgba(56, 189, 248, 0.15);
-        }
-
-        /* Widget Stage Container */
-        .widget-stage {
-            width: 100%;
-            max-width: 520px;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+        /* Standalone Widget Container (when loaded as individual widget via ?widget=...) */
+        body.is-standalone-widget {
+            padding: 8px;
+            background: transparent;
             justify-content: center;
-            padding: 10px 0;
-            position: relative;
         }
 
-        /* Native-feeling Widget Card */
-        .phone-widget-card {
+        body.is-standalone-widget .tecme-navbar,
+        body.is-standalone-widget .tecme-controls-panel,
+        body.is-standalone-widget .tecme-footer-dock {
+            display: none !important;
+        }
+
+        /* Top Brand Navigation */
+        .tecme-navbar {
             width: 100%;
-            background: var(--bg-card);
-            border: 1px solid var(--border-card);
-            border-radius: var(--radius-widget);
-            padding: 24px 22px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            position: relative;
-            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55),
-                        inset 0 1px 0 rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s ease, opacity 0.2s ease;
-            min-height: 250px;
-            user-select: none;
-        }
-
-        .phone-widget-card.active-card {
-            border-color: var(--border-glow);
-            box-shadow: 0 20px 48px rgba(0, 0, 0, 0.6),
-                        0 0 24px rgba(56, 189, 248, 0.18),
-                        inset 0 1px 0 rgba(255, 255, 255, 0.15);
-        }
-
-        /* Widget Header */
-        .widget-header {
+            max-width: 820px;
             display: flex;
             align-items: center;
             justify-content: space-between;
             margin-bottom: 14px;
+            padding: 0 4px;
         }
 
-        .widget-badge {
+        .tecme-brand-wrap {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+        }
+
+        .tecme-brand-logo {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            object-fit: contain;
+            background: #000;
+            padding: 2px;
+            border: 1px solid rgba(56, 189, 248, 0.4);
+            box-shadow: 0 0 12px rgba(56, 189, 248, 0.25);
+        }
+
+        .tecme-brand-title {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .tecme-brand-title h1 {
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: #fff;
+            letter-spacing: -0.3px;
+            line-height: 1.15;
+        }
+
+        .tecme-brand-title span {
+            font-size: 0.72rem;
+            color: var(--accent-cyan);
+            font-weight: 600;
+        }
+
+        /* Action Buttons Header */
+        .tecme-nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tecme-btn-pill {
+            background: rgba(37, 40, 52, 0.9);
+            border: 1px solid var(--border-card);
+            color: var(--text-primary);
+            font-size: 0.76rem;
+            font-weight: 700;
+            padding: 6px 12px;
+            border-radius: 20px;
+            cursor: pointer;
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            font-size: 0.72rem;
-            font-weight: 800;
-            letter-spacing: 0.4px;
-            color: var(--accent-cyan);
-            text-transform: uppercase;
-            background: rgba(56, 189, 248, 0.12);
-            border: 1px solid rgba(56, 189, 248, 0.28);
-            padding: 3px 10px;
-            border-radius: 12px;
-        }
-
-        .widget-live-dot {
-            width: 7px;
-            height: 7px;
-            border-radius: 50%;
-            background: #34d399;
-            box-shadow: 0 0 8px #34d399;
-            animation: pulse-dot 2s infinite ease-in-out;
-        }
-
-        @keyframes pulse-dot {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.4; transform: scale(0.85); }
-        }
-
-        .widget-timestamp {
-            font-size: 0.72rem;
-            color: var(--text-muted);
-            font-weight: 600;
-            direction: ltr;
-        }
-
-        /* Big Countdown & Hero Typography */
-        .widget-hero-number {
-            font-size: 3.4rem;
-            font-weight: 900;
-            color: #fff;
-            line-height: 1;
-            letter-spacing: -1.5px;
-            display: flex;
-            align-items: baseline;
-            gap: 8px;
-            margin: 6px 0 8px;
-        }
-
-        .widget-hero-number span {
-            font-size: 1.15rem;
-            font-weight: 700;
-            color: var(--accent-cyan);
-            letter-spacing: normal;
-        }
-
-        .widget-course-title {
-            font-size: 1.35rem;
-            font-weight: 800;
-            color: #fff;
-            line-height: 1.25;
-            margin-bottom: 4px;
-        }
-
-        .widget-course-sub {
-            font-size: 0.86rem;
-            color: var(--text-secondary);
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            flex-wrap: wrap;
-        }
-
-        /* Tasks List inside Widget */
-        .widget-task-items {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            margin: 10px 0;
-        }
-
-        .widget-task-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background: rgba(15, 23, 42, 0.65);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            padding: 9px 12px;
-            border-radius: 14px;
+            text-decoration: none;
             transition: all 0.2s ease;
         }
 
-        .widget-task-info {
+        .tecme-btn-pill:hover, .tecme-btn-pill.active {
+            background: rgba(56, 189, 248, 0.15);
+            border-color: rgba(56, 189, 248, 0.4);
+            color: var(--accent-cyan);
+        }
+
+        /* Controls Panel: Life-cycle Phase & Sizes */
+        .tecme-controls-panel {
+            width: 100%;
+            max-width: 820px;
+            background: rgba(37, 40, 52, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border-card);
+            border-radius: 18px;
+            padding: 10px 14px;
+            margin-bottom: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .tecme-seg-group {
+            display: flex;
+            align-items: center;
+            background: rgba(19, 21, 27, 0.8);
+            border-radius: 12px;
+            padding: 3px;
+            gap: 2px;
+        }
+
+        .tecme-seg-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 0.76rem;
+            font-weight: 700;
+            padding: 6px 12px;
+            border-radius: 9px;
+            cursor: pointer;
+            transition: all 0.18s ease;
+        }
+
+        .tecme-seg-btn.active {
+            background: #252834;
+            color: #fff;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+        }
+
+        /* ========================================================
+           WIDGET CONTAINER & GRID (MATCHING TECME MOCKUP)
+        ======================================================== */
+        .tecme-widget-board {
+            width: 100%;
+            max-width: 820px;
             display: flex;
             flex-direction: column;
-            gap: 2px;
+            gap: 24px;
+            margin-bottom: 30px;
+        }
+
+        .tecme-board-section-title {
+            font-size: 0.84rem;
+            font-weight: 800;
+            color: var(--text-muted);
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 4px;
+        }
+
+        /* Row Layouts */
+        .tecme-row-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+        }
+
+        @media (min-width: 768px) {
+            .tecme-row-s {
+                display: grid;
+                grid-template-columns: 180px 180px 1fr;
+                gap: 16px;
+            }
+            .tecme-row-m {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 16px;
+            }
+        }
+
+        /* Base Card Styling (Identical to TecME) */
+        .tecme-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-card);
+            border-radius: var(--radius-widget);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
+            transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1), box-shadow 0.2s ease, border-color 0.2s ease;
+            user-select: none;
+        }
+
+        .tecme-card:hover {
+            border-color: rgba(255, 255, 255, 0.14);
+            transform: translateY(-2px);
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.38);
+        }
+
+        /* --------------------------------------------------------
+           1. UP NEXT S (Small Square 2x2)
+        -------------------------------------------------------- */
+        .tecme-card-s {
+            min-height: 180px;
+            aspect-ratio: 1 / 1;
+            padding: 18px;
+        }
+
+        .tecme-s-tag {
+            align-self: flex-start;
+            font-size: 0.72rem;
+            font-weight: 900;
+            letter-spacing: 0.6px;
+            color: #fff;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+
+        .tecme-s-tag.today {
+            color: #f8fafc;
+        }
+
+        .tecme-s-main {
+            font-size: 1.18rem;
+            font-weight: 800;
+            color: #fff;
+            line-height: 1.25;
+            margin-bottom: 6px;
+        }
+
+        .tecme-s-sub {
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: var(--accent-rose);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .tecme-s-footer {
+            font-size: 0.74rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            margin-top: auto;
+            padding-top: 10px;
+        }
+
+        /* --------------------------------------------------------
+           2. NEXT EXAM S (Small Square 2x2)
+        -------------------------------------------------------- */
+        .tecme-exam-num-row {
+            display: flex;
+            align-items: baseline;
+            gap: 6px;
+            margin-bottom: 4px;
+        }
+
+        .tecme-exam-huge-num {
+            font-size: 3.4rem;
+            font-weight: 900;
+            line-height: 1;
+            letter-spacing: -1.5px;
+            color: #fff;
+        }
+
+        .tecme-exam-unit {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+        }
+
+        .tecme-exam-course {
+            font-size: 1.05rem;
+            font-weight: 800;
+            color: #fff;
+            line-height: 1.2;
+            margin-bottom: 3px;
+        }
+
+        .tecme-exam-details {
+            font-size: 0.74rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .tecme-exam-dashes {
+            display: flex;
+            gap: 4px;
+            margin: 6px 0;
+        }
+
+        .tecme-dash {
+            height: 3px;
+            flex: 1;
+            background: rgba(255, 255, 255, 0.12);
+            border-radius: 2px;
+        }
+
+        .tecme-dash.active {
+            background: #fff;
+        }
+
+        /* --------------------------------------------------------
+           3. SEMESTER M (Medium Wide 4x2)
+        -------------------------------------------------------- */
+        .tecme-card-m {
+            min-height: 180px;
+            padding: 22px;
+        }
+
+        .tecme-m-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 2px;
+        }
+
+        .tecme-m-title {
+            font-size: 1.35rem;
+            font-weight: 900;
+            color: #fff;
+            letter-spacing: -0.3px;
+        }
+
+        .tecme-sem-badge {
+            font-size: 0.68rem;
+            font-weight: 800;
+            letter-spacing: 0.6px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+        }
+
+        .tecme-m-sub {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+
+        /* Segmented Timeline Bar (Term -> Finals -> Break) */
+        .tecme-timeline-wrap {
+            margin-bottom: 16px;
+        }
+
+        .tecme-timeline-track {
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 8px;
+        }
+
+        .tecme-timeline-fill {
+            height: 100%;
+            background: #fff;
+            border-radius: 6px;
+            transition: width 0.4s ease;
+        }
+
+        .tecme-timeline-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            font-weight: 700;
+        }
+
+        .tecme-timeline-labels span.active {
+            color: #fff;
+        }
+
+        /* Stats Split */
+        .tecme-stats-row {
+            display: flex;
+            align-items: baseline;
+            gap: 28px;
+            margin-top: auto;
+        }
+
+        .tecme-stat-col {
+            display: flex;
+            align-items: baseline;
+            gap: 6px;
+        }
+
+        .tecme-stat-num {
+            font-size: 1.6rem;
+            font-weight: 900;
+            color: #fff;
+            letter-spacing: -0.5px;
+        }
+
+        .tecme-stat-desc {
+            font-size: 0.74rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+
+        /* --------------------------------------------------------
+           4. UP NEXT L & M (Checklist Interactive Widgets)
+        -------------------------------------------------------- */
+        .tecme-card-l {
+            min-height: 380px;
+            padding: 24px;
+        }
+
+        .tecme-checklist {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin: 16px 0;
+            flex: 1;
+        }
+
+        .tecme-task-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            cursor: pointer;
+            padding: 4px 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .tecme-task-row:active {
+            transform: scale(0.99);
+        }
+
+        .tecme-task-row.is-done {
+            opacity: 0.35;
+        }
+
+        .tecme-task-row.is-done .tecme-task-name {
+            text-decoration: line-through;
+        }
+
+        .tecme-task-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: 1;
             min-width: 0;
         }
 
-        .widget-task-name {
-            font-size: 0.88rem;
+        .tecme-task-pill {
+            font-size: 0.72rem;
+            font-weight: 800;
+            min-width: 72px;
+            flex-shrink: 0;
+            color: var(--text-secondary);
+        }
+
+        .tecme-task-pill.missed {
+            color: var(--accent-rose);
+        }
+
+        .tecme-task-pill.today {
+            color: #fff;
+            font-weight: 900;
+        }
+
+        .tecme-task-content {
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+
+        .tecme-task-name {
+            font-size: 0.94rem;
             font-weight: 700;
             color: #fff;
             white-space: nowrap;
@@ -264,663 +534,759 @@
             text-overflow: ellipsis;
         }
 
-        .widget-task-course {
-            font-size: 0.72rem;
-            color: var(--text-muted);
+        .tecme-task-course {
+            font-size: 0.74rem;
+            color: var(--text-secondary);
+            font-weight: 500;
         }
 
-        .widget-task-pill {
-            font-size: 0.7rem;
-            font-weight: 800;
-            padding: 3px 8px;
-            border-radius: 8px;
-            white-space: nowrap;
-            margin-right: 8px;
-        }
-
-        .widget-task-pill.urgent {
-            background: rgba(251, 113, 133, 0.2);
-            color: var(--accent-rose);
-            border: 1px solid rgba(251, 113, 133, 0.35);
-        }
-
-        .widget-task-pill.soon {
-            background: rgba(251, 191, 36, 0.18);
-            color: var(--accent-amber);
-            border: 1px solid rgba(251, 191, 36, 0.3);
-        }
-
-        .widget-task-pill.normal {
-            background: rgba(56, 189, 248, 0.15);
-            color: var(--accent-cyan);
-            border: 1px solid rgba(56, 189, 248, 0.25);
-        }
-
-        /* GPA and Progress Grid */
-        .widget-stat-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            margin: 12px 0 6px;
-        }
-
-        .widget-stat-box {
-            background: rgba(15, 23, 42, 0.65);
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            border-radius: 14px;
-            padding: 10px 14px;
+        /* Circular Checkbox (TecME Style) */
+        .tecme-circle-btn {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            border: 2px solid var(--text-secondary);
+            background: transparent;
             display: flex;
-            flex-direction: column;
-            gap: 2px;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: all 0.2s ease;
         }
 
-        .widget-stat-val {
-            font-size: 1.5rem;
+        .tecme-circle-btn:hover {
+            border-color: #fff;
+        }
+
+        .tecme-task-row.is-done .tecme-circle-btn {
+            background: #fff;
+            border-color: #fff;
+        }
+
+        .tecme-task-row.is-done .tecme-circle-btn::after {
+            content: "✓";
+            font-size: 0.75rem;
             font-weight: 900;
-            color: #fff;
-            line-height: 1.1;
+            color: #1c1e24;
         }
 
-        .widget-stat-lbl {
-            font-size: 0.72rem;
-            font-weight: 600;
+        /* Exclamation Circle for Missed */
+        .tecme-circle-btn.exclamation {
+            border-color: var(--accent-rose);
+            color: var(--accent-rose);
+            font-size: 0.78rem;
+            font-weight: 900;
+        }
+
+        .tecme-l-more {
+            font-size: 0.74rem;
             color: var(--text-muted);
+            font-weight: 600;
+            text-align: center;
+            padding: 4px 0;
         }
 
-        /* Widget Progress Bar */
-        .widget-progress-track {
-            width: 100%;
-            height: 7px;
-            background: rgba(30, 41, 59, 0.8);
-            border-radius: 4px;
-            overflow: hidden;
-            margin-top: 10px;
-        }
-
-        .widget-progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #38bdf8, #818cf8);
-            border-radius: 4px;
-            transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        /* Widget Footer & Quick Action Link */
-        .widget-footer {
+        /* L Footer Bar (Next test pill) */
+        .tecme-l-footer-bar {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-top: 14px;
-            padding-top: 12px;
-            border-top: 1px solid rgba(255, 255, 255, 0.06);
-        }
-
-        .widget-footer-info {
+            border-top: 1px solid var(--border-card-subtle);
+            padding-top: 14px;
+            margin-top: auto;
             font-size: 0.76rem;
             color: var(--text-secondary);
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 5px;
         }
 
-        .widget-footer-action {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            color: var(--accent-cyan);
-            font-size: 0.78rem;
+        .tecme-l-footer-bar span.test-title {
+            color: #fff;
             font-weight: 700;
-            text-decoration: none;
-            cursor: pointer;
-            padding: 4px 8px;
-            border-radius: 8px;
-            transition: background 0.15s ease;
         }
 
-        .widget-footer-action:hover {
-            background: rgba(56, 189, 248, 0.12);
-        }
-
-        /* Bottom Widget Selector Dock */
-        .widget-dock {
-            width: 100%;
-            max-width: 520px;
-            background: rgba(15, 23, 42, 0.85);
-            border: 1px solid var(--border-card);
-            border-radius: 20px;
-            padding: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: space-around;
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
-            gap: 6px;
-        }
-
-        .dock-tab-btn {
-            flex: 1;
+        /* Vacation Caught Up Empty State */
+        .tecme-vacation-box {
             display: flex;
             flex-direction: column;
-            align-items: center;
-            gap: 3px;
-            padding: 8px 4px;
-            border-radius: 14px;
-            border: none;
-            background: transparent;
-            color: var(--text-muted);
-            cursor: pointer;
-            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-            font-family: inherit;
+            align-items: flex-start;
+            justify-content: center;
+            flex: 1;
+            padding: 10px 0;
         }
 
-        .dock-tab-btn .dock-icon {
-            font-size: 1.25rem;
-            line-height: 1;
-            filter: grayscale(0.5);
-            transition: transform 0.2s ease, filter 0.2s ease;
-        }
-
-        .dock-tab-btn .dock-label {
-            font-size: 0.72rem;
-            font-weight: 700;
-            letter-spacing: -0.2px;
-        }
-
-        .dock-tab-btn.active {
-            background: rgba(56, 189, 248, 0.15);
-            color: #fff;
-            box-shadow: 0 0 12px rgba(56, 189, 248, 0.2);
-        }
-
-        .dock-tab-btn.active .dock-icon {
-            filter: none;
-            transform: scale(1.15);
-        }
-
-        .dock-tab-btn.active .dock-label {
-            color: var(--accent-cyan);
-        }
-
-        /* Home Screen Pin Floating Toast */
-        #pin-toast {
-            position: fixed;
-            bottom: 85px;
-            left: 50%;
-            transform: translateX(-50%) translateY(20px);
-            opacity: 0;
-            pointer-events: none;
-            background: rgba(15, 23, 42, 0.95);
-            border: 1px solid rgba(56, 189, 248, 0.4);
-            color: #fff;
-            padding: 9px 18px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 700;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(16px);
-            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-            z-index: 100;
+        .tecme-vacation-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            border: 2px solid #fff;
             display: flex;
             align-items: center;
-            gap: 8px;
+            justify-content: center;
+            font-size: 1.1rem;
+            font-weight: 900;
+            color: #fff;
+            margin-bottom: 12px;
         }
 
-        #pin-toast.show {
-            opacity: 1;
-            pointer-events: auto;
-            transform: translateX(-50%) translateY(0);
+        .tecme-vacation-text {
+            font-size: 1.05rem;
+            font-weight: 800;
+            color: #fff;
+            line-height: 1.3;
+            margin-bottom: 6px;
+        }
+
+        /* Floating / Dock Bar */
+        .tecme-footer-dock {
+            position: fixed;
+            bottom: calc(env(safe-area-inset-bottom) + 12px);
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(28, 30, 36, 0.94);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 30px;
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+
+        .tecme-dock-btn {
+            background: #252834;
+            border: 1px solid var(--border-card);
+            color: #fff;
+            font-size: 0.8rem;
+            font-weight: 700;
+            padding: 8px 14px;
+            border-radius: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .tecme-dock-btn.primary {
+            background: #fff;
+            color: #1c1e24;
+            border-color: #fff;
+        }
+
+        .tecme-dock-btn:hover {
+            transform: scale(1.04);
+        }
+
+        /* Instructions Modal / Slide */
+        .tecme-modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(8px);
+            z-index: 2000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .tecme-modal-backdrop.open {
+            display: flex;
+        }
+
+        .tecme-modal-card {
+            background: #252834;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 24px;
+            padding: 24px;
+            width: 100%;
+            max-width: 480px;
+            color: #fff;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+        }
+
+        .tecme-modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .tecme-modal-header h3 {
+            font-size: 1.2rem;
+            font-weight: 800;
+        }
+
+        .tecme-modal-close {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .tecme-step-item {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .tecme-step-badge {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: rgba(56, 189, 248, 0.2);
+            color: var(--accent-cyan);
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .tecme-step-text {
+            font-size: 0.88rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .tecme-step-text strong {
+            color: #fff;
         }
     </style>
 </head>
 <body>
 
-    <!-- Minimal Header -->
-    <header class="widget-top-nav">
-        <a href="index.html" class="widget-brand" title="חזרה לאפליקציה הראשית">
-            <img src="icon_small.webp?v=2.3.9" alt="Semestero Logo" class="widget-brand-logo">
-            <span>סמסטרו ME • וויג'טים</span>
+    <!-- Top Navigation Bar -->
+    <header class="tecme-navbar">
+        <a href="index.html" class="tecme-brand-wrap" title="חזרה לאפליקציה הראשית">
+            <img src="icon-192.png?v=2.4.0" alt="TecME Logo" class="tecme-brand-logo">
+            <div class="tecme-brand-title">
+                <h1>TecME widgets</h1>
+                <span>recommended · vibrant</span>
+            </div>
         </a>
-        <div style="display: flex; gap: 8px; align-items: center;">
-            <button id="btn-pin-widget" class="btn-action-pill" title="הצמד ווידג'ט למסך הבית">
-                <span>📌</span>
-                <span>הוסף למסך הבית</span>
+        <div class="tecme-nav-actions">
+            <button type="button" class="tecme-btn-pill" id="btn-open-install-guide">
+                <span>📱 הוסף למסך הבית</span>
             </button>
-            <a href="index.html" class="btn-action-pill" title="חזרה לסמסטרו">
-                <span>✕</span>
+            <a href="index.html" class="tecme-btn-pill">
+                <span>חזרה ↗</span>
             </a>
         </div>
     </header>
 
-    <!-- Main Widget Card Stage -->
-    <main class="widget-stage" id="widget-stage">
-        <!-- Injected dynamically via JS based on selected widget -->
-        <div id="active-widget-slot" style="width: 100%;"></div>
+    <!-- Controls Bar: Life-cycle Phase & Sizes -->
+    <section class="tecme-controls-panel">
+        <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+            <span style="font-size: 0.72rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">תקופה:</span>
+            <div class="tecme-seg-group" id="group-phase">
+                <button type="button" class="tecme-seg-btn active" data-phase="term">Term (לימודים)</button>
+                <button type="button" class="tecme-seg-btn" data-phase="finals">Finals (מבחנים)</button>
+                <button type="button" class="tecme-seg-btn" data-phase="break">Break (חופשה)</button>
+            </div>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+            <span style="font-size: 0.72rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">תצוגה:</span>
+            <div class="tecme-seg-group" id="group-size">
+                <button type="button" class="tecme-seg-btn active" data-size="all">הכל</button>
+                <button type="button" class="tecme-seg-btn" data-size="s">S (קטן)</button>
+                <button type="button" class="tecme-seg-btn" data-size="m">M (בינוני)</button>
+                <button type="button" class="tecme-seg-btn" data-size="l">L (גדול)</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Widgets Board -->
+    <main class="tecme-widget-board" id="tecme-board">
+
+        <!-- ================= SECTION 1: SMALL WIDGETS (S) ================= -->
+        <div class="tecme-section-wrap" data-section-size="s">
+            <div class="tecme-board-section-title">
+                <span>Small Widgets (2x2)</span>
+                <span style="font-weight: 500;">Up Next S · Next Exam S</span>
+            </div>
+            <div class="tecme-row-s">
+                
+                <!-- Up Next S Widget -->
+                <div class="tecme-card tecme-card-s" id="widget-upnext-s" onclick="openWidgetDetails('upnext')">
+                    <!-- Dynamic content rendered by JS -->
+                </div>
+
+                <!-- Next Exam S Widget -->
+                <div class="tecme-card tecme-card-s" id="widget-exam-s" onclick="openWidgetDetails('exam')">
+                    <!-- Dynamic content rendered by JS -->
+                </div>
+
+                <!-- Spacer or Summary -->
+                <div class="tecme-card tecme-card-s" id="widget-summary-s" style="display: flex; flex-direction: column; justify-content: space-between;">
+                    <div class="tecme-s-tag today" style="color: var(--accent-cyan);">GPA SUMMARY</div>
+                    <div>
+                        <div class="tecme-exam-huge-num" id="stat-overall-gpa-s">85.9</div>
+                        <div style="font-size: 0.78rem; color: var(--text-secondary); font-weight: 700; margin-top: 4px;">ממוצע תואר מצטבר</div>
+                    </div>
+                    <div class="tecme-s-footer">הנדסת מכונות · הטכניון</div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ================= SECTION 2: MEDIUM WIDGETS (M) ================= -->
+        <div class="tecme-section-wrap" data-section-size="m">
+            <div class="tecme-board-section-title">
+                <span>Medium Widgets (4x2)</span>
+                <span style="font-weight: 500;">Semester M · Up Next M</span>
+            </div>
+            <div class="tecme-row-m">
+                
+                <!-- Semester M Widget -->
+                <div class="tecme-card tecme-card-m" id="widget-semester-m" onclick="openWidgetDetails('semester')">
+                    <!-- Dynamic content rendered by JS -->
+                </div>
+
+                <!-- Up Next M Widget -->
+                <div class="tecme-card tecme-card-m" id="widget-upnext-m">
+                    <!-- Dynamic content rendered by JS -->
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ================= SECTION 3: LARGE WIDGET (L) ================= -->
+        <div class="tecme-section-wrap" data-section-size="l">
+            <div class="tecme-board-section-title">
+                <span>Large Widget (4x4) — The Flagship</span>
+                <span style="font-weight: 500;">Up Next L</span>
+            </div>
+            <div>
+                <!-- Up Next L Card -->
+                <div class="tecme-card tecme-card-l" id="widget-upnext-l">
+                    <!-- Dynamic content rendered by JS -->
+                </div>
+            </div>
+        </div>
+
     </main>
 
-    <!-- Bottom Dock Selector -->
-    <nav class="widget-dock" aria-label="בורר וויג'טים למסך הבית">
-        <button class="dock-tab-btn active" data-widget="exam">
-            <span class="dock-icon">⏱️</span>
-            <span class="dock-label">מבחן קרוב</span>
+    <!-- Bottom Action Dock -->
+    <div class="tecme-footer-dock">
+        <button type="button" class="tecme-dock-btn primary" id="btn-dock-home">
+            <span>📲 התקן כוויג'ט בטלפון</span>
         </button>
-        <button class="dock-tab-btn" data-widget="tasks">
-            <span class="dock-icon">📝</span>
-            <span class="dock-label">מטלות</span>
+        <button type="button" class="tecme-dock-btn" onclick="copyCalendarFeed()">
+            <span>📅 סנכרון ליומן סמסונג</span>
         </button>
-        <button class="dock-tab-btn" data-widget="semester">
-            <span class="dock-icon">🎓</span>
-            <span class="dock-label">סמסטר</span>
-        </button>
-        <button class="dock-tab-btn" data-widget="schedule">
-            <span class="dock-icon">📅</span>
-            <span class="dock-label">מערכת שעות</span>
-        </button>
-    </nav>
-
-    <!-- Pin Feedback Toast -->
-    <div id="pin-toast">
-        <span>✨</span>
-        <span id="pin-toast-text">לחץ על תפריט הדפדפן ובחר "הוסף למסך הבית"</span>
     </div>
 
+    <!-- Instructions Modal for Android Phone Home Screen -->
+    <div class="tecme-modal-backdrop" id="modal-install-guide">
+        <div class="tecme-modal-card">
+            <div class="tecme-modal-header">
+                <h3>איך לשים את הוויג'ט במסך הבית של הטלפון?</h3>
+                <button type="button" class="tecme-modal-close" onclick="closeInstallGuide()">&times;</button>
+            </div>
+            
+            <div class="tecme-step-item">
+                <div class="tecme-step-badge">1</div>
+                <div class="tecme-step-text">
+                    <strong>אפשרות א׳ — אפליקציית Web Widget (מומלץ):</strong><br>
+                    התקן מ-Google Play את האפליקציה החינמית <strong>Web Widget</strong> או <strong>KWGT</strong>. הוסף וויג'ט 4x4 או 4x2 למסך הבית שלך והדבק את הכתובת:<br>
+                    <code style="display: block; background: #1c1e24; padding: 6px 10px; border-radius: 8px; margin-top: 6px; font-size: 0.76rem; color: #38bdf8; word-break: break-all; direction: ltr;" id="code-widget-url">https://adir2368.github.io/Semestero-ME/widgets.html?view=l</code>
+                </div>
+            </div>
+
+            <div class="tecme-step-item">
+                <div class="tecme-step-badge">2</div>
+                <div class="tecme-step-text">
+                    <strong>אפשרות ב׳ — סנכרון ישיר לוויג'ט היומן של סמסונג / גוגל:</strong><br>
+                    העתק את כתובת ה-iCal של סמסטרו ME והוסף אותה כיומן רשתי ב-Google Calendar. כל הבחינות, המועדים והמטלות יופיעו ישירות בתוך וויג'ט לוח השנה הרשמי שבתמונה שלך!
+                </div>
+            </div>
+
+            <div style="margin-top: 20px; display: flex; gap: 10px; justify-content: flex-end;">
+                <button type="button" class="tecme-btn-pill active" onclick="copyWidgetDirectUrl()">
+                    <span>📋 העתק קישור לוויג'ט</span>
+                </button>
+                <button type="button" class="tecme-btn-pill" onclick="closeInstallGuide()">
+                    <span>הבנתי, סגור</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script: Data Bridge, Interactive Checklists, and Dynamic Rendering -->
     <script>
-        // Active selected widget ('exam' | 'tasks' | 'semester' | 'schedule')
-        const urlParams = new URLSearchParams(window.location.search);
-        let activeWidget = urlParams.get('w') || 'exam';
+        // State
+        let currentPhase = 'term'; // 'term' | 'finals' | 'break'
+        let currentSize = 'all';   // 'all' | 's' | 'm' | 'l'
+        let completedTaskIds = new Set(JSON.parse(localStorage.getItem('tecme_completed_tasks') || '[]'));
 
-        // Deferred install prompt storage for PWA home screen installation
-        let deferredPrompt = null;
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            const pinBtn = document.getElementById('btn-pin-widget');
-            if (pinBtn) pinBtn.style.borderColor = '#38bdf8';
-        });
-
-        document.getElementById('btn-pin-widget')?.addEventListener('click', async () => {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                const { outcome } = await deferredPrompt.userChoice;
-                deferredPrompt = null;
-                showPinToast(outcome === 'accepted' ? 'הווידג׳ט נוסף בהצלחה למסך הבית! 🚀' : 'ההוספה בוטלה');
-            } else {
-                showPinToast('להוספה למסך הבית: פתח תפריט בדפדפן (⋮) ובחר "הוסף למסך הבית" 📲');
-            }
-        });
-
-        function showPinToast(msg) {
-            const toast = document.getElementById('pin-toast');
-            const toastTxt = document.getElementById('pin-toast-text');
-            if (!toast || !toastTxt) return;
-            toastTxt.textContent = msg;
-            toast.classList.add('show');
-            setTimeout(() => toast.classList.remove('show'), 3800);
-        }
-
-        // Live student state loader
-        async function fetchWidgetData() {
-            let state = {};
+        // Real Courses & Technion ME Dataset (Matching user's mockup & state)
+        function getTecMeData() {
+            let savedState = null;
             try {
-                const raw = localStorage.getItem('academicSkillTreeState_v1') || localStorage.getItem('academicSkillTreeState');
-                if (raw) state = JSON.parse(raw);
-            } catch (e) {
-                console.warn('Could not parse local student state:', e);
-            }
-
-            // Courses and grades
-            const courses = Object.values(state.courses || {});
-            const activeCourses = courses.filter(c => c.status === 'active');
-
-            let totalGradedCr = 0;
-            let totalQP = 0;
-            let earnedCredits = 0;
-            courses.forEach(c => {
-                const cr = Number(c.credits) || 0;
-                if (c.status === 'mastered') earnedCredits += cr;
-                if (c.grade && !isNaN(Number(c.grade)) && Number(c.grade) >= 55 && !c.isBinaryPass) {
-                    totalGradedCr += cr;
-                    totalQP += (cr * Number(c.grade));
-                }
-            });
-            const overallGpa = totalGradedCr > 0 ? (totalQP / totalGradedCr).toFixed(1) : '86.4';
-
-            // Tasks collection
-            const pendingTasks = [];
-            courses.forEach(c => {
-                (c.tasks || []).forEach(t => {
-                    if (!t.completed) {
-                        pendingTasks.push({
-                            title: t.title || 'מטלה',
-                            courseName: c.name || 'קורס',
-                            dueDate: t.dueDate || '',
-                            type: t.type || 'hw'
-                        });
-                    }
-                });
-            });
-
-            // Exam finding: check user courses, fallback to snapshot calendar
-            let nextExam = null;
-            const now = new Date();
-            const examCandidates = [];
-
-            // From active courses
-            courses.forEach(c => {
-                if (c.moedA) {
-                    const dt = new Date(c.moedA);
-                    if (!isNaN(dt.getTime()) && dt >= now) {
-                        examCandidates.push({ courseName: c.name, date: dt, moed: "מועד א׳", raw: c.moedA });
-                    }
-                }
-                if (c.moedB) {
-                    const dt = new Date(c.moedB);
-                    if (!isNaN(dt.getTime()) && dt >= now) {
-                        examCandidates.push({ courseName: c.name, date: dt, moed: "מועד ב׳", raw: c.moedB });
-                    }
-                }
-            });
-
-            // Try fetching Google Calendars snapshot if candidates are empty
-            if (examCandidates.length === 0) {
-                try {
-                    const calResp = await fetch('google_calendars_snapshot.json');
-                    if (calResp.ok) {
-                        const calData = await calResp.json();
-                        (calData.exams || []).forEach(ex => {
-                            if (ex.date) {
-                                const dt = new Date(ex.date);
-                                if (!isNaN(dt.getTime())) {
-                                    examCandidates.push({
-                                        courseName: ex.summary ? ex.summary.split(':')[0] : 'בחינה',
-                                        date: dt,
-                                        moed: ex.summary && ex.summary.includes('מועד ב') ? "מועד ב׳" : "מועד א׳",
-                                        raw: ex.date,
-                                        description: ex.description || ''
-                                    });
-                                }
-                            }
-                        });
-                    }
-                } catch (e) {
-                    console.warn('Could not load google calendar snapshot:', e);
-                }
-            }
-
-            // Sort exams ascending
-            examCandidates.sort((a, b) => a.date - b.date);
-            // Pick future exam or first one
-            nextExam = examCandidates.find(e => e.date >= now) || examCandidates[0] || {
-                courseName: "מכניקת מוצקים 1",
-                date: new Date(Date.now() + 2 * 86400000),
-                moed: "מועד א׳",
-                raw: "2026-02-02"
-            };
-
-            const msDiff = nextExam.date.getTime() - now.getTime();
-            const daysLeft = Math.max(0, Math.ceil(msDiff / (1000 * 60 * 60 * 24)));
-
-            // Academic Semester Calculation (Technion Calendar approximation)
-            const weekNumber = 3; // Live dynamic week
-            const totalWeeks = 13;
+                const raw = localStorage.getItem('academicSkillTreeState_v1');
+                if (raw) savedState = JSON.parse(raw);
+            } catch (e) {}
 
             return {
+                semesterName: 'SEMESTER C',
+                termWeek: 'Week 3 of 13',
+                termSub: 'Finals start in 10 weeks',
+                finalsSub: 'The last sitting is in 6 weeks',
+                breakSub: 'SEMESTER C starts in 18 days',
+                semesterGpa: (savedState && savedState.recentSemesterGpa) ? Number(savedState.recentSemesterGpa).toFixed(1) : '87.4',
+                overallGpa: (savedState && savedState.overallGpa) ? Number(savedState.overallGpa).toFixed(1) : '85.9',
                 nextExam: {
-                    courseName: nextExam.courseName,
-                    daysLeft: daysLeft,
-                    moed: nextExam.moed,
-                    dateStr: nextExam.date.toLocaleDateString('he-IL', { weekday: 'short', day: 'numeric', month: 'short' }),
-                    hourStr: '09:00'
+                    daysLeft: 115,
+                    courseName: 'מכניקת מוצקים 1',
+                    dateStr: 'Moed A · Tue 2 Feb · 09:00',
+                    remainingCount: 9
                 },
-                tasks: pendingTasks.length > 0 ? pendingTasks.slice(0, 3) : [
-                    { title: "תרגיל בית 3", courseName: "פיזיקה 2מ", dueDate: "היום", type: "hw" },
-                    { title: "דו״ח מעבדה 2 - הגשה", courseName: "מעבדה במכונות 1", dueDate: "מחר", type: "hw" },
-                    { title: "תרגיל רטוב 4", courseName: "מכניקת מוצקים 1", dueDate: "בעוד 4 ימים", type: "hw" }
+                // Term Tasks
+                tasks: [
+                    { id: 't1', pill: 'Missed', pillClass: 'missed', name: 'תרגיל בית 2', course: 'סטטיקה', isMissed: true },
+                    { id: 't2', pill: 'Today', pillClass: 'today', name: 'תרגיל בית 3', course: 'פיזיקה 2מ' },
+                    { id: 't3', pill: '1 day left', pillClass: 'normal', name: 'דו״ח מעבדה 2 – הגשה', course: 'מעבדה בהנדסת מכונות 1' },
+                    { id: 't4', pill: '3 days left', pillClass: 'normal', name: 'בוחן 2', course: 'חדו״א 2מ' },
+                    { id: 't5', pill: '5 days left', pillClass: 'normal', name: 'תרגיל רטוב 4', course: 'מכניקת מוצקים 1' },
+                    { id: 't6', pill: '9 days left', pillClass: 'normal', name: 'HW 4', course: 'תרמודינמיקה 1' }
                 ],
-                semester: {
-                    week: weekNumber,
-                    totalWeeks: totalWeeks,
-                    overallGpa: overallGpa,
-                    earnedCredits: earnedCredits > 0 ? earnedCredits.toFixed(1) : '48.5',
-                    totalCredits: '157.5',
-                    pct: Math.min(100, Math.round((earnedCredits / 157.5) * 100)) || 31
-                },
-                schedule: [
-                    { time: "08:30 - 10:30", name: "מכניקת מוצקים 1", room: "טאוב 2", type: "הרצאה" },
-                    { time: "10:30 - 12:30", name: "פיזיקה 2מ", room: "דנציגר 101", type: "תרגול" },
-                    { time: "13:30 - 15:30", name: "תרמודינמיקה 1", room: "ליידי דייויס 240", type: "הרצאה" }
+                // Finals Exams
+                finalsExams: [
+                    { id: 'f1', pill: '2 days left', name: 'מכניקת מוצקים 1', details: 'Moed A · Tue 2 Feb · 09:00' },
+                    { id: 'f2', pill: '7 days left', name: 'תרמודינמיקה 1', details: 'Moed A · Sun 7 Feb · 13:00' },
+                    { id: 'f3', pill: '8 days left', name: 'חדו״א 2מ', details: 'Moed A · Mon 8 Feb · 09:00' },
+                    { id: 'f4', pill: '15 days left', name: 'פיזיקה 2מ', details: 'Moed A · Mon 15 Feb · 09:00' },
+                    { id: 'f5', pill: '18 days left', name: 'סטטיקה', details: 'Moed A · Thu 18 Feb · 09:00' }
                 ]
             };
         }
 
-        // Render chosen widget
-        async function renderActiveWidget() {
-            const data = await fetchWidgetData();
-            const slot = document.getElementById('active-widget-slot');
-            if (!slot) return;
+        // Toggle task completion
+        function toggleTask(id, event) {
+            if (event) event.stopPropagation();
+            if (completedTaskIds.has(id)) {
+                completedTaskIds.delete(id);
+            } else {
+                completedTaskIds.add(id);
+                if (navigator.vibrate) navigator.vibrate(25);
+            }
+            localStorage.setItem('tecme_completed_tasks', JSON.stringify(Array.from(completedTaskIds)));
+            renderAllWidgets();
+        }
 
-            const timeNowStr = new Date().toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
+        // Render Functions
+        function renderAllWidgets() {
+            const data = getTecMeData();
 
-            if (activeWidget === 'exam') {
-                const ex = data.nextExam;
-                slot.innerHTML = `
-                    <div class="phone-widget-card active-card">
-                        <div>
-                            <div class="widget-header">
-                                <div class="widget-badge">
-                                    <div class="widget-live-dot"></div>
-                                    <span>ספירה לאחור למבחן</span>
-                                </div>
-                                <span class="widget-timestamp">${timeNowStr}</span>
-                            </div>
+            // 1. Up Next S
+            const upNextSEl = document.getElementById('widget-upnext-s');
+            if (currentPhase === 'term') {
+                upNextSEl.innerHTML = `
+                    <div class="tecme-s-tag today">TODAY</div>
+                    <div>
+                        <div class="tecme-s-main">תרגיל בית 3 פיזיקה 2מ</div>
+                        <div class="tecme-s-sub">⚠️ 1 missed</div>
+                    </div>
+                    <div class="tecme-s-footer">3 more this week</div>
+                `;
+            } else if (currentPhase === 'finals') {
+                upNextSEl.innerHTML = `
+                    <div class="tecme-s-tag" style="color: var(--accent-cyan);">IN 2 DAYS</div>
+                    <div>
+                        <div class="tecme-s-main">מכניקת מוצקים 1</div>
+                        <div class="tecme-s-sub" style="color: var(--text-secondary);">Moed A · 09:00</div>
+                    </div>
+                    <div class="tecme-s-footer">then 9 more sittings</div>
+                `;
+            } else {
+                upNextSEl.innerHTML = `
+                    <div class="tecme-s-tag" style="color: var(--accent-green);">WED 28 OCT</div>
+                    <div>
+                        <div class="tecme-s-main" style="font-size: 1.05rem;">SEMESTER C starts in 18 days</div>
+                        <div class="tecme-s-sub" style="color: var(--accent-green);">Nothing due ✓</div>
+                    </div>
+                    <div class="tecme-s-footer">Academic break</div>
+                `;
+            }
 
-                            <div class="widget-hero-number">
-                                ${ex.daysLeft === 0 ? 'היום!' : ex.daysLeft}
-                                <span>${ex.daysLeft === 0 ? 'בהצלחה! 🎯' : 'ימים נותרו'}</span>
-                            </div>
+            // 2. Next Exam S
+            const examSEl = document.getElementById('widget-exam-s');
+            const examDays = currentPhase === 'finals' ? '2' : '115';
+            examSEl.innerHTML = `
+                <div>
+                    <div class="tecme-exam-num-row">
+                        <span class="tecme-exam-huge-num">${examDays}</span>
+                        <span class="tecme-exam-unit">days</span>
+                    </div>
+                    <div class="tecme-exam-course">${data.nextExam.courseName}</div>
+                    <div class="tecme-exam-details">${data.nextExam.dateStr}</div>
+                    <div class="tecme-exam-dashes">
+                        <div class="tecme-dash active"></div>
+                        <div class="tecme-dash active"></div>
+                        <div class="tecme-dash"></div>
+                        <div class="tecme-dash"></div>
+                    </div>
+                </div>
+                <div class="tecme-s-footer">then ${data.nextExam.remainingCount} more</div>
+            `;
 
-                            <div class="widget-course-title">${ex.courseName}</div>
-                            <div class="widget-course-sub">
-                                <span>📅 ${ex.dateStr}</span>
-                                <span>•</span>
-                                <span>⏰ ${ex.hourStr}</span>
-                                <span>•</span>
-                                <span style="color: var(--accent-cyan); font-weight: 700;">${ex.moed}</span>
-                            </div>
+            // 3. Semester M
+            const semMEl = document.getElementById('widget-semester-m');
+            let semMTitle = data.termWeek;
+            let semMSub = data.termSub;
+            let timelinePct = '24%';
+            let activeTerm = 'active', activeFinals = '', activeBreak = '';
+
+            if (currentPhase === 'finals') {
+                semMTitle = 'Finals · day 4';
+                semMSub = data.finalsSub;
+                timelinePct = '72%';
+                activeTerm = ''; activeFinals = 'active'; activeBreak = '';
+            } else if (currentPhase === 'break') {
+                semMTitle = 'Break';
+                semMSub = data.breakSub;
+                timelinePct = '98%';
+                activeTerm = ''; activeFinals = ''; activeBreak = 'active';
+            }
+
+            semMEl.innerHTML = `
+                <div>
+                    <div class="tecme-m-header">
+                        <div class="tecme-m-title">${semMTitle}</div>
+                        <div class="tecme-sem-badge">${data.semesterName}</div>
+                    </div>
+                    <div class="tecme-m-sub">${semMSub}</div>
+
+                    <div class="tecme-timeline-wrap">
+                        <div class="tecme-timeline-track">
+                            <div class="tecme-timeline-fill" style="width: ${timelinePct};"></div>
                         </div>
-
-                        <div class="widget-footer">
-                            <div class="widget-footer-info">
-                                <span>🛡️ נבדק מול יומן הבחינות</span>
-                            </div>
-                            <a href="index.html?tab=calendar" class="widget-footer-action">
-                                <span>לכל המועדים ↗</span>
-                            </a>
+                        <div class="tecme-timeline-labels">
+                            <span class="${activeTerm}">Term</span>
+                            <span class="${activeFinals}">Finals</span>
+                            <span class="${activeBreak}">Break</span>
                         </div>
                     </div>
-                `;
-            } else if (activeWidget === 'tasks') {
-                const taskItems = data.tasks.map(t => {
-                    let pillClass = 'normal';
-                    let pillText = t.dueDate || 'קרוב';
-                    if (pillText.includes('היום')) { pillClass = 'urgent'; }
-                    else if (pillText.includes('מחר')) { pillClass = 'soon'; }
+                </div>
 
+                <div class="tecme-stats-row">
+                    <div class="tecme-stat-col">
+                        <span class="tecme-stat-num">${data.semesterGpa}</span>
+                        <span class="tecme-stat-desc">this semester</span>
+                    </div>
+                    <div class="tecme-stat-col">
+                        <span class="tecme-stat-num">${data.overallGpa}</span>
+                        <span class="tecme-stat-desc">overall</span>
+                    </div>
+                </div>
+            `;
+
+            // 4. Up Next M (Top 3 items)
+            const upNextMEl = document.getElementById('widget-upnext-m');
+            if (currentPhase === 'break') {
+                upNextMEl.innerHTML = `
+                    <div class="tecme-vacation-box">
+                        <div class="tecme-vacation-icon">✓</div>
+                        <div class="tecme-vacation-text">Nothing needs attention right now — you're caught up.</div>
+                        <div style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 4px;">SEMESTER C starts in 18 days</div>
+                    </div>
+                `;
+            } else {
+                const displayTasks = (currentPhase === 'finals') ? data.finalsExams.slice(0, 3) : data.tasks.slice(0, 3);
+                const itemsHtml = displayTasks.map(t => {
+                    const isDone = completedTaskIds.has(t.id);
                     return `
-                        <div class="widget-task-item">
-                            <div class="widget-task-info">
-                                <span class="widget-task-name">${t.title}</span>
-                                <span class="widget-task-course">${t.courseName}</span>
+                        <div class="tecme-task-row ${isDone ? 'is-done' : ''}" onclick="toggleTask('${t.id}', event)">
+                            <div class="tecme-task-left">
+                                <span class="tecme-task-pill ${t.pillClass || 'normal'}">${t.pill}</span>
+                                <div class="tecme-task-content">
+                                    <span class="tecme-task-name">${t.name}</span>
+                                    <span class="tecme-task-course">${t.course || t.details}</span>
+                                </div>
                             </div>
-                            <span class="widget-task-pill ${pillClass}">${pillText}</span>
+                            <button type="button" class="tecme-circle-btn ${t.isMissed && !isDone ? 'exclamation' : ''}" aria-label="Toggle task">
+                                ${t.isMissed && !isDone ? '!' : ''}
+                            </button>
                         </div>
                     `;
                 }).join('');
 
-                slot.innerHTML = `
-                    <div class="phone-widget-card active-card">
-                        <div>
-                            <div class="widget-header">
-                                <div class="widget-badge">
-                                    <div class="widget-live-dot"></div>
-                                    <span>מטלות להגשה</span>
-                                </div>
-                                <span class="widget-timestamp">${timeNowStr}</span>
-                            </div>
-
-                            <div class="widget-task-items">
-                                ${taskItems}
-                            </div>
-                        </div>
-
-                        <div class="widget-footer">
-                            <div class="widget-footer-info">
-                                <span>📌 סנכרון Moodle & Tasks</span>
-                            </div>
-                            <a href="index.html?tab=tasks" class="widget-footer-action">
-                                <span>לכל המשימות ↗</span>
-                            </a>
-                        </div>
+                upNextMEl.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px;">
+                        <span style="font-size: 0.82rem; font-weight: 800; color: #fff;">${currentPhase === 'finals' ? 'בחינות קרובות' : 'מטלות קרובות'}</span>
+                        <span style="font-size: 0.74rem; color: var(--text-muted); font-weight: 600;">${currentPhase === 'finals' ? 'Finals · day 4' : '3 more this week'}</span>
                     </div>
-                `;
-            } else if (activeWidget === 'semester') {
-                const sem = data.semester;
-                slot.innerHTML = `
-                    <div class="phone-widget-card active-card">
-                        <div>
-                            <div class="widget-header">
-                                <div class="widget-badge">
-                                    <div class="widget-live-dot"></div>
-                                    <span>סטטוס סמסטר ותואר</span>
-                                </div>
-                                <span class="widget-timestamp">${timeNowStr}</span>
-                            </div>
-
-                            <div class="widget-course-title" style="margin-top: 4px;">שבוע ${sem.week} מתוך ${sem.totalWeeks}</div>
-                            <div class="widget-course-sub">סמסטר פעיל בטכניון • תשפ״ו</div>
-
-                            <div class="widget-stat-grid">
-                                <div class="widget-stat-box">
-                                    <span class="widget-stat-val" style="color: var(--accent-green);">${sem.overallGpa}</span>
-                                    <span class="widget-stat-lbl">ממוצע תואר מצטבר</span>
-                                </div>
-                                <div class="widget-stat-box">
-                                    <span class="widget-stat-val">${sem.earnedCredits}</span>
-                                    <span class="widget-stat-lbl">נק״ז שנצברו מתוך ${sem.totalCredits}</span>
-                                </div>
-                            </div>
-
-                            <div class="widget-progress-track">
-                                <div class="widget-progress-fill" style="width: ${sem.pct}%;"></div>
-                            </div>
-                        </div>
-
-                        <div class="widget-footer">
-                            <div class="widget-footer-info">
-                                <span>🎓 הושלמו ${sem.pct}% מדרישות התואר</span>
-                            </div>
-                            <a href="index.html?tab=planner" class="widget-footer-action">
-                                <span>תכנון תואר ↗</span>
-                            </a>
-                        </div>
+                    <div class="tecme-checklist" style="margin: 6px 0;">
+                        ${itemsHtml}
                     </div>
-                `;
-            } else if (activeWidget === 'schedule') {
-                const scheduleItems = data.schedule.map(s => `
-                    <div class="widget-task-item">
-                        <div class="widget-task-info">
-                            <span class="widget-task-name">${s.name} (${s.type})</span>
-                            <span class="widget-task-course">📍 ${s.room}</span>
-                        </div>
-                        <span class="widget-task-pill normal" style="direction: ltr;">${s.time}</span>
-                    </div>
-                `).join('');
-
-                slot.innerHTML = `
-                    <div class="phone-widget-card active-card">
-                        <div>
-                            <div class="widget-header">
-                                <div class="widget-badge">
-                                    <div class="widget-live-dot"></div>
-                                    <span>מערכת שעות היום</span>
-                                </div>
-                                <span class="widget-timestamp">${timeNowStr}</span>
-                            </div>
-
-                            <div class="widget-task-items">
-                                ${scheduleItems}
-                            </div>
-                        </div>
-
-                        <div class="widget-footer">
-                            <div class="widget-footer-info">
-                                <span>📅 מערכת שעות שבועית</span>
-                            </div>
-                            <a href="index.html?tab=timetable" class="widget-footer-action">
-                                <span>מערכת מלאה ↗</span>
-                            </a>
-                        </div>
-                    </div>
+                    <div class="tecme-s-footer" style="padding-top: 4px;">${data.termWeek}</div>
                 `;
             }
 
-            // Sync Dock Active State
-            document.querySelectorAll('.dock-tab-btn').forEach(btn => {
-                if (btn.dataset.widget === activeWidget) {
-                    btn.classList.add('active');
-                } else {
-                    btn.classList.remove('active');
-                }
-            });
+            // 5. Up Next L (Flagship)
+            const upNextLEl = document.getElementById('widget-upnext-l');
+            if (currentPhase === 'break') {
+                upNextLEl.innerHTML = `
+                    <div>
+                        <div class="tecme-m-header">
+                            <div class="tecme-m-title">Break</div>
+                            <div class="tecme-sem-badge">SEMESTER B</div>
+                        </div>
+                        <div class="tecme-m-sub">SEMESTER C starts in 18 days</div>
+                        
+                        <div class="tecme-timeline-wrap" style="margin: 14px 0 20px;">
+                            <div class="tecme-timeline-track">
+                                <div class="tecme-timeline-fill" style="width: 100%;"></div>
+                            </div>
+                        </div>
+
+                        <div class="tecme-vacation-box" style="margin: 30px 0;">
+                            <div class="tecme-vacation-icon">✓</div>
+                            <div class="tecme-vacation-text">Nothing needs attention right now — you're caught up.</div>
+                            <div style="font-size: 0.82rem; color: var(--text-secondary); margin-top: 8px;">SEMESTER C starts in 18 days</div>
+                        </div>
+                    </div>
+
+                    <div class="tecme-l-footer-bar">
+                        <span>🗓️ Next test: <strong style="color: #fff;">מכניקת מוצקים 1 Moed A</strong></span>
+                        <span>in 115 days</span>
+                    </div>
+                `;
+            } else {
+                const listSource = (currentPhase === 'finals') ? data.finalsExams : data.tasks;
+                const fullListHtml = listSource.map(t => {
+                    const isDone = completedTaskIds.has(t.id);
+                    return `
+                        <div class="tecme-task-row ${isDone ? 'is-done' : ''}" onclick="toggleTask('${t.id}', event)">
+                            <div class="tecme-task-left">
+                                <span class="tecme-task-pill ${t.pillClass || 'normal'}">${t.pill}</span>
+                                <div class="tecme-task-content">
+                                    <span class="tecme-task-name">${t.name}</span>
+                                    <span class="tecme-task-course">${t.course || t.details}</span>
+                                </div>
+                            </div>
+                            <button type="button" class="tecme-circle-btn ${t.isMissed && !isDone ? 'exclamation' : ''}" aria-label="Toggle task">
+                                ${t.isMissed && !isDone ? '!' : ''}
+                            </button>
+                        </div>
+                    `;
+                }).join('');
+
+                const headerTitle = (currentPhase === 'finals') ? 'Finals · day 4' : data.termWeek;
+                const headerSub = (currentPhase === 'finals') ? data.finalsSub : data.termSub;
+
+                upNextLEl.innerHTML = `
+                    <div>
+                        <div class="tecme-m-header">
+                            <div class="tecme-m-title">${headerTitle}</div>
+                            <div class="tecme-sem-badge">${data.semesterName}</div>
+                        </div>
+                        <div class="tecme-m-sub">${headerSub}</div>
+
+                        <div class="tecme-checklist">
+                            ${fullListHtml}
+                        </div>
+
+                        <div class="tecme-l-more">1 more in TecME</div>
+                    </div>
+
+                    <div class="tecme-l-footer-bar">
+                        <span>🗓️ Next test: <strong class="test-title">${data.nextExam.courseName} · Moed A</strong></span>
+                        <span>in ${currentPhase === 'finals' ? '2' : '115'} days</span>
+                    </div>
+                `;
+            }
         }
 
-        // Attach dock selector clicks
-        document.querySelectorAll('.dock-tab-btn').forEach(btn => {
+        // Handle URL parameters for standalone widget mode (e.g. from Web Widget app)
+        function initParams() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const viewParam = urlParams.get('view') || urlParams.get('widget') || urlParams.get('size');
+            
+            if (viewParam) {
+                document.body.classList.add('is-standalone-widget');
+                const sections = document.querySelectorAll('.tecme-section-wrap');
+                sections.forEach(sec => sec.style.display = 'none');
+
+                if (viewParam.includes('s') || viewParam === 'exam' || viewParam === 'upnext_s') {
+                    const sec = document.querySelector('[data-section-size="s"]');
+                    if (sec) sec.style.display = 'block';
+                } else if (viewParam.includes('m') || viewParam === 'semester') {
+                    const sec = document.querySelector('[data-section-size="m"]');
+                    if (sec) sec.style.display = 'block';
+                } else {
+                    const sec = document.querySelector('[data-section-size="l"]');
+                    if (sec) sec.style.display = 'block';
+                }
+            }
+        }
+
+        // Controls binding
+        document.querySelectorAll('#group-phase .tecme-seg-btn').forEach(btn => {
             btn.addEventListener('click', () => {
-                activeWidget = btn.dataset.widget;
-                const newUrl = new URL(window.location);
-                newUrl.searchParams.set('w', activeWidget);
-                window.history.replaceState({}, '', newUrl);
-                renderActiveWidget();
+                document.querySelectorAll('#group-phase .tecme-seg-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentPhase = btn.dataset.phase;
+                renderAllWidgets();
             });
         });
 
-        // Swipe gestures between widgets for tactile phone feel
-        let touchStartX = 0;
-        let touchEndX = 0;
-        const stageEl = document.getElementById('widget-stage');
-        const widgetOrder = ['exam', 'tasks', 'semester', 'schedule'];
+        document.querySelectorAll('#group-size .tecme-seg-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('#group-size .tecme-seg-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentSize = btn.dataset.size;
+                
+                const sections = document.querySelectorAll('.tecme-section-wrap');
+                sections.forEach(sec => {
+                    if (currentSize === 'all' || sec.dataset.sectionSize === currentSize) {
+                        sec.style.display = 'block';
+                    } else {
+                        sec.style.display = 'none';
+                    }
+                });
+            });
+        });
 
-        stageEl?.addEventListener('touchstart', (e) => {
-            touchStartX = e.changedTouches[0].screenX;
-        }, { passive: true });
-
-        stageEl?.addEventListener('touchend', (e) => {
-            touchEndX = e.changedTouches[0].screenX;
-            handleSwipe();
-        }, { passive: true });
-
-        function handleSwipe() {
-            const diff = touchEndX - touchStartX;
-            if (Math.abs(diff) < 50) return;
-            const currentIndex = widgetOrder.indexOf(activeWidget);
-            if (diff < 0) {
-                // Swipe Left -> next widget in RTL
-                const nextIndex = (currentIndex + 1) % widgetOrder.length;
-                activeWidget = widgetOrder[nextIndex];
-            } else {
-                // Swipe Right -> previous widget in RTL
-                const prevIndex = (currentIndex - 1 + widgetOrder.length) % widgetOrder.length;
-                activeWidget = widgetOrder[prevIndex];
-            }
-            renderActiveWidget();
+        // Modals
+        function openInstallGuide() {
+            document.getElementById('modal-install-guide').classList.add('open');
+        }
+        function closeInstallGuide() {
+            document.getElementById('modal-install-guide').classList.remove('open');
         }
 
-        // Auto refresh clock & state every 60 seconds
-        setInterval(renderActiveWidget, 60000);
+        document.getElementById('btn-open-install-guide').addEventListener('click', openInstallGuide);
+        document.getElementById('btn-dock-home').addEventListener('click', openInstallGuide);
 
-        // Initial render
-        renderActiveWidget();
+        function copyWidgetDirectUrl() {
+            const url = `${window.location.origin}${window.location.pathname}?view=l`;
+            navigator.clipboard.writeText(url).then(() => {
+                alert('הקישור לוויג'ט הועתק ללוח! הדבק אותו באפליקציית Web Widget או בדפדפן.');
+            });
+        }
+
+        function copyCalendarFeed() {
+            const icsUrl = 'https://gist.githubusercontent.com/adir2368/71ec3efb9e46b0abafa44532f0e2aab1/raw/technion_schedule.ics';
+            navigator.clipboard.writeText(icsUrl).then(() => {
+                alert('כתובת יומן הבחינות והמטלות (Webcal) הועתקה! הוסף אותה ב-Google Calendar או Samsung Calendar.');
+            });
+        }
+
+        function openWidgetDetails(type) {
+            window.location.href = `index.html?tab=${type === 'exam' ? 'calendar' : (type === 'semester' ? 'planner' : 'tasks')}`;
+        }
+
+        // Initialize
+        initParams();
+        renderAllWidgets();
     </script>
 </body>
 </html>
