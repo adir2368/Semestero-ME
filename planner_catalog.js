@@ -723,26 +723,164 @@
     };
 
     // ==========================================================================
-    // Course Term Offerings & Annual Restrictions (חד-שנתי / בינלאומי)
+    // Course Term Offerings & Annual Restrictions (חד-שנתי / בינלאומי / קיץ)
     // ==========================================================================
     const COURSE_TERM_OFFERINGS = {
-        '00340010': { terms: ['spring', 'winter_intl'], label: 'אביב (חורף: בינלאומי)', note: 'מוצע בסמסטר אביב לכלל הסטודנטים, ובסמסטר חורף לסטודנטים בינלאומיים' },
-        '034010':   { terms: ['spring', 'winter_intl'], label: 'אביב (חורף: בינלאומי)', note: 'מוצע בסמסטר אביב לכלל הסטודנטים, ובסמסטר חורף לסטודנטים בינלאומיים' },
-        '00350026': { terms: ['winter'], label: 'חורף בלבד', note: 'מוצע בסמסטר חורף בלבד' },
-        '035026':   { terms: ['winter'], label: 'חורף בלבד', note: 'מוצע בסמסטר חורף בלבד' },
-        '00340057': { terms: ['spring'], label: 'אביב בלבד', note: 'מעבדה מתקדמת – מוצעת באביב בלבד' },
-        '034057':   { terms: ['spring'], label: 'אביב בלבד', note: 'מעבדה מתקדמת – מוצעת באביב בלבד' },
-        '00340371': { terms: ['spring'], label: 'אביב בלבד', note: 'פרויקט תכן לייצור – מוצע באביב בלבד' },
-        '034371':   { terms: ['spring'], label: 'אביב בלבד', note: 'פרויקט תכן לייצור – מוצע באביב בלבד' },
-        '00340382': { terms: ['winter'], label: 'חורף בלבד', note: 'מתודולוגיות פיתוח 1 – מוצע בחורף בלבד' },
-        '034382':   { terms: ['winter'], label: 'חורף בלבד', note: 'מתודולוגיות פיתוח 1 – מוצע בחורף בלבד' },
-        '00340383': { terms: ['spring'], label: 'אביב בלבד', note: 'מתודולוגיות פיתוח 2 – מוצע באביב בלבד' },
-        '034383':   { terms: ['spring'], label: 'אביב בלבד', note: 'מתודולוגיות פיתוח 2 – מוצע באביב בלבד' },
-        '01140032': { terms: ['winter'], label: 'חורף בלבד', note: 'מעבדה לפיזיקה 1ח – מוצעת בחורף בלבד' },
-        '114032':   { terms: ['winter'], label: 'חורף בלבד', note: 'מעבדה לפיזיקה 1ח – מוצעת בחורף בלבד' },
-        '01140039': { terms: ['spring'], label: 'אביב בלבד', note: 'מעבדה לפיזיקה 1מח – מוצעת באביב בלבד' },
-        '114039':   { terms: ['spring'], label: 'אביב בלבד', note: 'מעבדה לפיזיקה 1מח – מוצעת באביב בלבד' }
+        '00340010': { terms: ['spring', 'summer', 'winter_intl'], label: 'אביב/קיץ (חורף: בינלאומי)', note: 'מוצע בסמסטר אביב וקיץ לכלל הסטודנטים, ובסמסטר חורף לסטודנטים בינלאומיים' },
+        '034010':   { terms: ['spring', 'summer', 'winter_intl'], label: 'אביב/קיץ (חורף: בינלאומי)', note: 'מוצע בסמסטר אביב וקיץ לכלל הסטודנטים, ובסמסטר חורף לסטודנטים בינלאומיים' },
+        '00350026': { terms: ['winter'], label: 'חורף בלבד', note: 'מוצע בסמסטר חורף בלבד ואינו נפתח בקיץ' },
+        '035026':   { terms: ['winter'], label: 'חורף בלבד', note: 'מוצע בסמסטר חורף בלבד ואינו נפתח בקיץ' },
+        '00340057': { terms: ['spring'], label: 'אביב בלבד', note: 'מעבדה מתקדמת – מוצעת באביב בלבד ואינה נפתחת בקיץ' },
+        '034057':   { terms: ['spring'], label: 'אביב בלבד', note: 'מעבדה מתקדמת – מוצעת באביב בלבד ואינה נפתחת בקיץ' },
+        '00340371': { terms: ['spring'], label: 'אביב בלבד', note: 'פרויקט תכן לייצור – מוצע באביב בלבד ואינו נפתח בקיץ' },
+        '034371':   { terms: ['spring'], label: 'אביב בלבד', note: 'פרויקט תכן לייצור – מוצע באביב בלבד ואינו נפתח בקיץ' },
+        '00340382': { terms: ['winter'], label: 'חורף בלבד', note: 'מתודולוגיות פיתוח 1 – מוצע בחורף בלבד ואינו נפתח בקיץ' },
+        '034382':   { terms: ['winter'], label: 'חורף בלבד', note: 'מתודולוגיות פיתוח 1 – מוצע בחורף בלבד ואינו נפתח בקיץ' },
+        '00340383': { terms: ['spring'], label: 'אביב בלבד', note: 'מתודולוגיות פיתוח 2 – מוצע באביב בלבד ואינו נפתח בקיץ' },
+        '034383':   { terms: ['spring'], label: 'אביב בלבד', note: 'מתודולוגיות פיתוח 2 – מוצע באביב בלבד ואינו נפתח בקיץ' },
+        '01140032': { terms: ['winter'], label: 'חורף בלבד', note: 'מעבדה לפיזיקה 1ח – מוצעת בחורף בלבד ואינה נפתחת בקיץ' },
+        '114032':   { terms: ['winter'], label: 'חורף בלבד', note: 'מעבדה לפיזיקה 1ח – מוצעת בחורף בלבד ואינה נפתחת בקיץ' },
+        '01140039': { terms: ['spring'], label: 'אביב בלבד', note: 'מעבדה לפיזיקה 1מח – מוצעת באביב בלבד ואינה נפתחת בקיץ' },
+        '114039':   { terms: ['spring'], label: 'אביב בלבד', note: 'מעבדה לפיזיקה 1מח – מוצעת באביב בלבד ואינה נפתחת בקיץ' }
     };
+
+    // ==========================================================================
+    // Technion Summer Semester Availability Catalog & Verifier (סמסטר קיץ)
+    // ==========================================================================
+    const SUMMER_CONFIRMED_COURSES = new Set([
+        // Math & Basic Sciences
+        '104041', '01040041', // חדו"א 1מ' 1
+        '104043', '01040043', // חדו"א 2מ' 1
+        '104065', '01040065', // אלגברה 1 מ'
+        '104016', '01040016', // אלגברה לינארית מ'
+        '104019', '01040019', // אלגברה לינארית
+        '104131', '01040131', // משוואות דיפרנציאליות רגילות/ח
+        '104228', '01040228', // מד"ח מ'
+        '104215', '01040215', // פונקציות מרוכבות א'
+        '104034', '01040034', // מבוא להסתברות
+        '034058', '00340058', // הסתברות וסטטיסטיקה מה' מכ'
+        '094411', '00940411', // הסתברות
+        '094412', '00940412', // הסתברות וסטטיסטיקה
+        // Physics & Chemistry
+        '114051', '01140051', '114071', '01140071', '114055', '01140055', '114077', '01140077', // פיזיקה 1 (כל הגרסאות)
+        '114052', '01140052', '114075', '01140075', '114078', '01140078', // פיזיקה 2 (כל הגרסאות)
+        '125001', '01250001', // כימיה כללית
+        // CS & Programming
+        '234128', '02340128', // שפת פייתון
+        '234114', '02340114', '234117', '02340117', '234124', '02340124', // מבוא למדעי המחשב / C
+        // Core Mechanical Engineering (Retakes & Foundations available in Summer)
+        '034028', '00340028', // מכניקת מוצקים 1
+        '034010', '00340010', // דינמיקה
+        '034035', '00340035', // תרמודינמיקה 1
+        '034056', '00340056', // מבוא לחישוב מדעי והנדסי
+        '034053', '00340053', // מכניקת מוצקים 2 מורחב
+        '034055', '00340055', // תורת הזרימה 1 מורחב
+        '034032', '00340032', // מערכות ליניאריות
+        '034040', '00340040', // מבוא לבקרה
+        '314533', '03140533', // מבוא להנדסת חומרים מ'
+        '034045', '00340045', // החלטות כלכליות
+        '014603', '00140603', // כלכלה הנדסית
+        // General Science & English
+        '134058', '01340058', // ביולוגיה 1
+        '324033', '03240033', // אנגלית טכנית
+        '324015', '03240015'  // אנגלית מתקדמים ב'
+    ]);
+
+    function isCourseOfferedInSummer(courseCode, courseObj) {
+        if (!courseCode && !courseObj) return { offered: true, note: '' };
+        const code = String(courseCode || (courseObj && courseObj.code) || '').trim();
+        const altCode = String((courseObj && courseObj.altCode) || '').trim();
+
+        const getKeys = (c) => {
+            if (!c) return [];
+            const res = [c];
+            const clean = c.replace(/[-\s]/g, '');
+            if (clean && clean !== c) res.push(clean);
+            const stripped = clean.replace(/^0+/, '');
+            if (stripped && stripped !== clean) res.push(stripped);
+            if (/^\d{8}$/.test(clean) && clean.startsWith('0')) {
+                const c6 = clean.slice(1, 4) + clean.slice(5);
+                res.push(c6);
+                const sc6 = c6.replace(/^0+/, '');
+                if (sc6 !== c6) res.push(sc6);
+            }
+            return res;
+        };
+
+        const keys = [...new Set([...getKeys(code), ...getKeys(altCode)])];
+
+        // 1. Explicit term offerings in COURSE_TERM_OFFERINGS
+        for (const k of keys) {
+            if (COURSE_TERM_OFFERINGS[k]) {
+                const terms = COURSE_TERM_OFFERINGS[k].terms || [];
+                if (terms.includes('summer') || terms.includes('both')) {
+                    return { offered: true, note: 'מוצע בסמסטר קיץ' };
+                }
+                if (!terms.includes('summer')) {
+                    return { 
+                        offered: false, 
+                        note: COURSE_TERM_OFFERINGS[k].note || 'מוצע בסמסטרי חורף/אביב בלבד ואינו נפתח בקיץ' 
+                    };
+                }
+            }
+        }
+
+        // 2. Whitelist of confirmed summer courses (Foundation & Core ME)
+        if (keys.some(k => SUMMER_CONFIRMED_COURSES.has(k))) {
+            return { offered: true, note: 'קורס זה נפתח באופן קבוע בסמסטר קיץ' };
+        }
+
+        // 3. Sports courses (394xxx or 0394xxxx)
+        if (keys.some(k => k.startsWith('394') || k.startsWith('0394'))) {
+            return { offered: true, note: 'קורסי חינוך גופני מוצעים בסמסטר קיץ' };
+        }
+
+        // 4. MALAG / Humanities / Free Electives
+        if (courseObj && (courseObj.type === 'malag' || courseObj.type === 'free' || courseObj.isMalag)) {
+            return { offered: true, note: 'קורסי מל״ג ובחירה חופשית מוצעים בסמסטר קיץ' };
+        }
+
+        // 5. Laboratories (Always closed in summer in Technion)
+        const name = (courseObj && (courseObj.name || courseObj.title)) || '';
+        const isLab = name.includes('מעבדה') ||
+                      keys.some(k => k.startsWith('0344') || k.startsWith('344') || ['114032', '01140032', '114039', '01140039', '034057', '00340057'].includes(k));
+        if (isLab) {
+            return { offered: false, note: 'מעבדות אינן מוצעות בסמסטר קיץ בטכניון' };
+        }
+
+        // 6. Capstone / Projects / Design (Always closed in summer)
+        const isProject = keys.some(k => ['034371', '00340371', '034382', '00340382', '034383', '00340383', '034054', '00340054', '034016', '00340016', '035026', '00350026'].includes(k)) ||
+                          name.includes('פרויקט');
+        if (isProject) {
+            return { offered: false, note: 'פרויקטי תכן וגמר אינם מוצעים בסמסטר קיץ' };
+        }
+
+        // 6. Whitelist of confirmed summer courses (Foundation & Core ME)
+        if (keys.some(k => SUMMER_CONFIRMED_COURSES.has(k))) {
+            return { offered: true, note: 'קורס זה נפתח באופן קבוע בסמסטר קיץ' };
+        }
+
+        // 7. Known mandatory advanced ME courses NOT in summer
+        const NOT_IN_SUMMER_ME = new Set([
+            '034061', '00340061', // גרפיקה ותכנון הנדסי
+            '034030', '00340030', '034043', '00340043', // תהליכי ייצור
+            '034041', '00340041', // מעבר חום
+            '034022', '00340022', // מבוא למכטרוניקה
+            '034034', '00340034', // הנע חשמלי
+            '034051', '00340051'  // דינמיקה ותנודות
+        ]);
+        if (keys.some(k => NOT_IN_SUMMER_ME.has(k))) {
+            return { offered: false, note: 'קורס חובה מתקדם זה נלמד בסמסטרי חורף/אביב בלבד ואינו מוצע בקיץ' };
+        }
+
+        // 8. Advanced Technical Electives (Lists A-E)
+        if (courseObj && (courseObj.list === 'A' || courseObj.list === 'B' || courseObj.list === 'C')) {
+            return { offered: false, note: 'קורסי בחירה מתקדמים בפקולטה אינם מוצעים בסמסטר קיץ' };
+        }
+
+        // Fallback for general faculty courses
+        return { offered: false, note: 'לפי תוכנית הלימודים בטכניון, קורס זה לרוב אינו מוצע בסמסטר קיץ' };
+    }
 
     // Expose to window / global
     global.PLANNER_CATALOG = {
@@ -756,7 +894,9 @@
         ELECTIVE_CATALOG: ELECTIVE_CATALOG,
         ALL_COURSES_MAP: ALL_COURSES_MAP,
         SEASONAL_COURSE_MAPPINGS: SEASONAL_COURSE_MAPPINGS,
-        COURSE_TERM_OFFERINGS: COURSE_TERM_OFFERINGS
+        COURSE_TERM_OFFERINGS: COURSE_TERM_OFFERINGS,
+        SUMMER_CONFIRMED_COURSES: SUMMER_CONFIRMED_COURSES,
+        isCourseOfferedInSummer: isCourseOfferedInSummer
     };
 
 })(typeof window !== 'undefined' ? window : global);

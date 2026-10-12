@@ -1512,6 +1512,16 @@
                     : null;
                 const termBadge = termOffering ? `<span class="badge-term-offering" title="${escapeHtml(termOffering.note)}">${escapeHtml(termOffering.label)}</span>` : '';
 
+                let summerWarningBadge = '';
+                if (isSummer) {
+                    const summerCheck = global.PLANNER_CATALOG && global.PLANNER_CATALOG.isCourseOfferedInSummer
+                        ? global.PLANNER_CATALOG.isCourseOfferedInSummer(course.code, course)
+                        : { offered: true, note: '' };
+                    if (!summerCheck.offered) {
+                        summerWarningBadge = `<span class="badge-term-offering" style="background: rgba(239, 68, 68, 0.2); border: 1px solid rgba(239, 68, 68, 0.5); color: #f87171;" title="שים לב: ${escapeHtml(summerCheck.note)}">⚠️ לא מוצע בקיץ</span>`;
+                    }
+                }
+
                 chunks.push(`
                     <div class="planner-course-card ${completed ? 'course-card-completed' : ''}" 
                          draggable="${canDrag ? 'true' : 'false'}" 
@@ -1524,6 +1534,7 @@
                                 ${movedBadge}
                                 ${retakeBadge}
                                 ${termBadge}
+                                ${summerWarningBadge}
                                 <span class="course-card-tag ${tagClass} ${course.list && !completed ? 'tag-interactive-list' : ''}" 
                                       ${course.list && !completed ? `data-action="cycle-list" data-code="${escapeHtml(course.code)}" title="לחץ לשינוי שיוך רשימת בחירה (א׳ / ב׳ / ג׳ / ד׳ / חופשית)" style="cursor: pointer; user-select: none;"` : ''}>
                                     ${tagLabel} ${course.list && !completed ? '▾' : ''}
@@ -1703,6 +1714,24 @@
                 if (!matchesSearch(course)) return;
                 coursesToShow.push({ ...course, isUnassignedItem: true });
             });
+        } else if (selectedCategory === 'SUMMER') {
+            const allCandidates = [];
+            (unassignedCourses || []).forEach(c => allCandidates.push({ ...c, isUnassignedItem: true }));
+            ['A', 'B', 'C', 'D', 'E'].forEach(cat => {
+                (global.PLANNER_CATALOG.ELECTIVE_CATALOG[cat] || []).forEach(c => allCandidates.push(c));
+            });
+            allCandidates.forEach(course => {
+                const keys = getNormalizedCodes(course.code, course.altCode);
+                if (keys.some(k => placedCodes.has(k))) return;
+                if (isCourseCompleted(course.code, course.altCode)) return;
+                if (!matchesSearch(course)) return;
+                const isSummerAvailable = global.PLANNER_CATALOG && global.PLANNER_CATALOG.isCourseOfferedInSummer
+                    ? global.PLANNER_CATALOG.isCourseOfferedInSummer(course.code, course).offered
+                    : false;
+                if (isSummerAvailable) {
+                    coursesToShow.push(course);
+                }
+            });
         } else {
             if (selectedCategory === 'ALL') {
                 (unassignedCourses || []).forEach(course => {
@@ -1729,7 +1758,9 @@
         if (coursesToShow.length === 0) {
             const emptyMsg = selectedCategory === 'UNASSIGNED' 
                 ? 'אין כרגע קורסים שלא שובצו. גרור קורסים מכל סמסטר לכאן כדי להסיר אותם מהתכנון.' 
-                : 'לא נמצאו קורסי בחירה מתאימים לסינון.';
+                : (selectedCategory === 'SUMMER' 
+                    ? 'לא נמצאו קורסים המוצעים בסמסטר קיץ התואמים לחיפוש.' 
+                    : 'לא נמצאו קורסי בחירה מתאימים לסינון.');
             poolContainer.innerHTML = `<div style="font-size: 0.76rem; color: #94a3b8; text-align: center; padding: 16px;">${emptyMsg}</div>`;
         } else {
             poolContainer.innerHTML = coursesToShow.map(course => {
@@ -2662,6 +2693,22 @@
             }
         }
 
+        // Summer semester availability verification
+        if (isSummer) {
+            const summerCheck = global.PLANNER_CATALOG && global.PLANNER_CATALOG.isCourseOfferedInSummer
+                ? global.PLANNER_CATALOG.isCourseOfferedInSummer(courseObj.code, courseObj)
+                : { offered: true, note: '' };
+            if (!summerCheck.offered) {
+                if (!violations.some(v => v.type === 'term' || v.type === 'summer_offering')) {
+                    violations.push({
+                        type: 'summer_offering',
+                        title: 'קורס אינו מוצע בסמסטר קיץ ☀️',
+                        message: `הקורס "${courseObj.name}" (${courseObj.code}) אינו נפתח בסמסטר קיץ בטכניון (${summerCheck.note}).`
+                    });
+                }
+            }
+        }
+
         const applyPlacement = (hasOverride = false) => {
             if (data.type === 'semester-course') {
                 const sourceSemObj = customPlan.find(s => s.semester === sourceSemester);
@@ -2778,11 +2825,27 @@
             const isSummer = s.isSummer === true || s.type === 'summer';
             const semTitle = isSummer ? (s.title || (s.yearLabel ? `סמסטר קיץ ${s.yearLabel} ☀️` : 'סמסטר קיץ ☀️')) : `סמסטר ${semNum}`;
             const prereqCheck = checkPrerequisites(course, semNum, activeMap);
-            const isValid = prereqCheck.valid;
+            const isValidPrereq = prereqCheck.valid;
+            const summerCheck = isSummer && global.PLANNER_CATALOG && global.PLANNER_CATALOG.isCourseOfferedInSummer
+                ? global.PLANNER_CATALOG.isCourseOfferedInSummer(course.code, course)
+                : { offered: true, note: '' };
+            const isSummerBlocked = isSummer && !summerCheck.offered;
+            const isValid = isValidPrereq && !isSummerBlocked;
+
+            let statusText = '✓ זמין לשיבוץ';
+            let statusColor = '#34d399';
+            if (!isValidPrereq) {
+                statusText = '⚠️ קדמים חסרים';
+                statusColor = '#f87171';
+            } else if (isSummerBlocked) {
+                statusText = '⚠️ לא מוצע בקיץ';
+                statusColor = '#f87171';
+            }
+
             return `
                 <button type="button" class="btn btn-outline sem-choice-btn" data-semester="${semNum}" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 12px; border-radius: 8px; border: 1px solid ${isValid ? 'rgba(56, 189, 248, 0.35)' : 'rgba(239, 68, 68, 0.35)'}; background: ${isValid ? 'rgba(15, 23, 42, 0.7)' : 'rgba(239, 68, 68, 0.08)'}; cursor: pointer; transition: all 0.15s ease;">
                     <span style="font-weight: 700; color: #f8fafc; font-size: 0.95rem;">${escapeHtml(semTitle)}</span>
-                    <span style="font-size: 0.72rem; color: ${isValid ? '#34d399' : '#f87171'}; margin-top: 4px;">${isValid ? '✓ זמין לשיבוץ' : '⚠️ קדמים חסרים'}</span>
+                    <span style="font-size: 0.72rem; color: ${statusColor}; margin-top: 4px;">${statusText}</span>
                 </button>
             `;
         }).join('');
@@ -3009,7 +3072,12 @@
         calculateCourseWorkload: calculateCourseWorkload,
         calculateSemesterWorkload: calculateSemesterWorkload,
         setCourseUserWorkload: setCourseUserWorkload,
-        getCourseUserWorkload: getCourseUserWorkload
+        getCourseUserWorkload: getCourseUserWorkload,
+        isCourseOfferedInSummer: (code, obj) => {
+            return global.PLANNER_CATALOG && global.PLANNER_CATALOG.isCourseOfferedInSummer
+                ? global.PLANNER_CATALOG.isCourseOfferedInSummer(code, obj)
+                : { offered: true, note: '' };
+        }
     };
 
     // --------------------------------------------------------------------------

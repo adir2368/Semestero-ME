@@ -11505,9 +11505,20 @@ function openCourseDetails(code) {
                 if (saveSemesterBadge) saveSemesterBadge.style.display = "none";
             }, 3000);
         }
-        const semName = (newSem % 1 !== 0) ? "סמסטר קיץ ☀️" : `סמסטר ${newSem}`;
+        const isSummerTarget = (newSem % 1 !== 0);
+        const semName = isSummerTarget ? "סמסטר קיץ ☀️" : `סמסטר ${newSem}`;
+        let summerWarning = '';
+        if (isSummerTarget && typeof PLANNER_CATALOG !== 'undefined' && PLANNER_CATALOG.isCourseOfferedInSummer) {
+            const sCheck = PLANNER_CATALOG.isCourseOfferedInSummer(course.code, course);
+            if (!sCheck.offered) {
+                summerWarning = ` (שים לב: ${sCheck.note || 'קורס זה לרוב אינו נפתח בקיץ בטכניון'})`;
+            }
+        }
         if (typeof showToastNotification === 'function') {
-            showToastNotification(`✓ הקורס ${course.name} הועבר ל${semName} ונשמר בהצלחה`, 'success');
+            const toastMsg = summerWarning 
+                ? `⚠️ הקורס ${course.name} הועבר ל${semName}.${summerWarning}` 
+                : `✓ הקורס ${course.name} הועבר ל${semName} ונשמר בהצלחה`;
+            showToastNotification(toastMsg, summerWarning ? 'warning' : 'success');
         }
     };
 
@@ -11531,19 +11542,24 @@ function openCourseDetails(code) {
 
         const currentCourseSem = Number(course.semester) === 9 ? 2.5 : Number(course.semester || 1);
 
+        const summerStatus = (typeof PLANNER_CATALOG !== 'undefined' && PLANNER_CATALOG.isCourseOfferedInSummer)
+            ? PLANNER_CATALOG.isCourseOfferedInSummer(course.code, course)
+            : { offered: true };
+        const summerLabelSuffix = !summerStatus.offered ? ' ⚠️ (לרוב לא מוצע בקיץ)' : '';
+
         const options = [
             { val: 1, label: "שנה א׳ - סמסטר א׳" },
             { val: 2, label: "שנה א׳ - סמסטר ב׳" },
-            ...(isSummerActive(2.5) || currentCourseSem === 2.5 ? [{ val: 2.5, label: "שנה א׳ - סמסטר קיץ ☀️" }] : []),
+            ...(isSummerActive(2.5) || currentCourseSem === 2.5 ? [{ val: 2.5, label: `שנה א׳ - סמסטר קיץ ☀️${summerLabelSuffix}` }] : []),
             { val: 3, label: "שנה ב׳ - סמסטר א׳" },
             { val: 4, label: "שנה ב׳ - סמסטר ב׳" },
-            ...(isSummerActive(4.5) || currentCourseSem === 4.5 ? [{ val: 4.5, label: "שנה ב׳ - סמסטר קיץ ☀️" }] : []),
+            ...(isSummerActive(4.5) || currentCourseSem === 4.5 ? [{ val: 4.5, label: `שנה ב׳ - סמסטר קיץ ☀️${summerLabelSuffix}` }] : []),
             { val: 5, label: "שנה ג׳ - סמסטר א׳" },
             { val: 6, label: "שנה ג׳ - סמסטר ב׳" },
-            ...(isSummerActive(6.5) || currentCourseSem === 6.5 ? [{ val: 6.5, label: "שנה ג׳ - סמסטר קיץ ☀️" }] : []),
+            ...(isSummerActive(6.5) || currentCourseSem === 6.5 ? [{ val: 6.5, label: `שנה ג׳ - סמסטר קיץ ☀️${summerLabelSuffix}` }] : []),
             { val: 7, label: "שנה ד׳ - סמסטר א׳" },
             { val: 8, label: "שנה ד׳ - סמסטר ב׳" },
-            ...(isSummerActive(8.5) || currentCourseSem === 8.5 ? [{ val: 8.5, label: "שנה ד׳ - סמסטר קיץ ☀️" }] : [])
+            ...(isSummerActive(8.5) || currentCourseSem === 8.5 ? [{ val: 8.5, label: `שנה ד׳ - סמסטר קיץ ☀️${summerLabelSuffix}` }] : [])
         ];
         semesterSelect.innerHTML = options.map(opt => `<option value="${opt.val}">${opt.label}</option>`).join('');
         semesterSelect.value = String(currentCourseSem);
