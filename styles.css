@@ -7243,6 +7243,83 @@ html.is-iphone .app-global-footer {
     margin-top: 4px;
 }
 
+@media (max-width: 1300px) and (min-width: 769px) {
+    .hud-header {
+        padding: 6px 14px;
+        gap: 12px;
+    }
+    .hud-stats {
+        gap: 10px;
+    }
+    .stat-item {
+        padding: 5px 10px;
+        min-width: 85px;
+    }
+    .stat-label {
+        font-size: 0.64rem;
+    }
+    .stat-value {
+        font-size: 0.95rem;
+    }
+    .stat-gpa-sub {
+        font-size: 0.56rem !important;
+    }
+    .character-card {
+        padding: 8px 12px;
+        max-width: 480px;
+    }
+    .btn-hud-bell {
+        width: 34px;
+        height: 34px;
+    }
+    .hud-brand-logo-img {
+        width: 44px;
+        height: 44px;
+    }
+    .degree-title-text {
+        font-size: 1.12rem !important;
+    }
+}
+
+@media (max-width: 1100px) and (min-width: 769px) {
+    .hud-stats {
+        gap: 6px;
+    }
+    .stat-item {
+        padding: 4px 8px;
+        min-width: 75px;
+    }
+    .character-card {
+        max-width: 420px;
+    }
+    .char-avatar {
+        width: 38px;
+        height: 38px;
+        font-size: 1.3rem !important;
+        margin-left: 8px;
+    }
+    .char-title {
+        font-size: 0.88rem;
+    }
+    .char-level {
+        font-size: 0.82rem;
+        padding: 1px 6px;
+    }
+    .xp-bar-container {
+        height: 18px;
+    }
+    .xp-text {
+        font-size: 0.72rem;
+    }
+    .btn-hud-bell {
+        width: 32px;
+        height: 32px;
+    }
+    .bell-icon {
+        font-size: 0.95rem;
+    }
+}
+
 @media (max-width: 1024px) {
     .timetable-grid {
         grid-template-columns: repeat(2, 1fr);
