@@ -9694,7 +9694,13 @@ function updateHud() {
     const progressPercent = Math.min(100, (earnedCredits / totalDegreeCredits) * 100);
 
     const charTitle = document.getElementById("char-title");
-    if (charTitle) charTitle.innerText = gameState.characterClass || "הנדסת מכונות (B.Sc.)";
+    if (charTitle) {
+        let title = gameState.characterClass || "הנדסת מכונות (B.Sc.)";
+        if (title.includes("סטודנט להנדסת מכונות")) {
+            title = "הנדסת מכונות (B.Sc.)";
+        }
+        charTitle.innerText = title;
+    }
 
     const charLevel = document.getElementById("char-level");
     if (charLevel) charLevel.innerText = `${progressPercent.toFixed(1)}% הושלמו`;
@@ -9707,7 +9713,7 @@ function updateHud() {
 
     const xpText = document.getElementById("xp-text");
     if (xpText) {
-        xpText.innerHTML = `<bdi dir="ltr">${earnedCredits} / ${totalDegreeCredits}</bdi> נק״ז`;
+        xpText.innerHTML = `<bdi dir="ltr">${earnedCredits} / ${totalDegreeCredits}</bdi> נק״ז (${progressPercent.toFixed(1)}%)`;
     }
 
     const statCredits = document.getElementById("stat-credits");
@@ -18834,11 +18840,45 @@ async function triggerManualCalendarPull() {
 // Degree Analytics, Interactive GPA Spline & Visualizations (v2.0.0)
 // ==============================================================================
 
+window.switchAnalyticsTab = function(tab) {
+    const summaryBtn = document.getElementById('tab-btn-analytics-summary');
+    const deepBtn = document.getElementById('tab-btn-analytics-deep');
+    const summarySec = document.getElementById('analytics-section-summary');
+    const deepSec = document.getElementById('analytics-section-deep');
+
+    if (tab === 'summary') {
+        if (summaryBtn) {
+            summaryBtn.style.borderBottomColor = '#38bdf8';
+            summaryBtn.style.color = '#38bdf8';
+        }
+        if (deepBtn) {
+            deepBtn.style.borderBottomColor = 'transparent';
+            deepBtn.style.color = '#94a3b8';
+        }
+        if (summarySec) summarySec.style.display = 'block';
+        if (deepSec) deepSec.style.display = 'none';
+    } else {
+        if (deepBtn) {
+            deepBtn.style.borderBottomColor = '#38bdf8';
+            deepBtn.style.color = '#38bdf8';
+        }
+        if (summaryBtn) {
+            summaryBtn.style.borderBottomColor = 'transparent';
+            summaryBtn.style.color = '#94a3b8';
+        }
+        if (summarySec) summarySec.style.display = 'none';
+        if (deepSec) deepSec.style.display = 'block';
+    }
+};
+
 window.openAnalyticsModal = function() {
     const modal = document.getElementById("analytics-modal");
     if (modal) {
         modal.style.display = "flex";
         modal.classList.add("active");
+    }
+    if (typeof window.switchAnalyticsTab === 'function') {
+        window.switchAnalyticsTab('summary');
     }
     window.renderAnalyticsCharts();
 };

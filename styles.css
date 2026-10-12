@@ -293,7 +293,6 @@ body {
 
 .char-name-row {
     display: flex;
-    justify-content: space-between;
     align-items: center;
     margin-bottom: 2px;
     min-width: 0;
@@ -301,21 +300,24 @@ body {
 
 .char-title {
     font-weight: 700;
-    font-size: 1.0rem;
+    font-size: 0.96rem;
     color: #f8fafc;
     letter-spacing: 0.2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .char-level {
-    font-weight: 800;
-    font-size: 0.95rem;
-    color: #fbbf24;
-    text-shadow: 0 0 8px rgba(251, 191, 36, 0.35);
-    background: rgba(245, 158, 11, 0.12);
-    border: 1px solid rgba(245, 158, 11, 0.35);
-    padding: 2px 10px;
-    border-radius: 6px;
-    letter-spacing: 0.3px;
+    display: none !important;
+}
+
+.hud-card-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+    margin-right: 14px;
 }
 
 .xp-bar-container {
@@ -1160,84 +1162,7 @@ body {
     }
 }
 
-@keyframes bossPulse {
-    0% { transform: scale(1); filter: drop-shadow(0 0 5px rgba(239,68,68,0.4)); }
-    50% { transform: scale(1.08); filter: drop-shadow(0 0 15px rgba(239,68,68,0.8)); }
-    100% { transform: scale(1); filter: drop-shadow(0 0 5px rgba(239,68,68,0.4)); }
-}
 
-/* Level Up Splash Screen */
-.level-up-splash {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: rgba(0, 0, 0, 0.85);
-    z-index: 200;
-    display: none; /* flex when active */
-    align-items: center;
-    justify-content: center;
-    backdrop-filter: blur(8px);
-}
-
-.level-up-splash.active {
-    display: flex;
-}
-
-.splash-box {
-    background: var(--bg-dark);
-    border: 3px solid var(--accent-gold);
-    border-radius: 15px;
-    width: 350px;
-    padding: 30px;
-    text-align: center;
-    box-shadow: var(--shadow-glow-gold);
-    animation: zoomInLevelUp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-.splash-stars {
-    font-size: 2rem;
-    margin-bottom: 10px;
-    animation: rotateStars 10s infinite linear;
-}
-
-.splash-box h2 {
-    font-family: var(--font-header);
-    color: var(--accent-gold);
-    font-size: 1.5rem;
-    font-weight: 900;
-    margin-bottom: 15px;
-    text-shadow: 0 0 10px rgba(251, 191, 36, 0.5);
-}
-
-.splash-level {
-    font-family: var(--font-header);
-    font-size: 5rem;
-    font-weight: 900;
-    color: #fff;
-    text-shadow: 0 0 20px var(--accent-gold), 0 0 40px var(--accent-gold-dark);
-    margin: 15px 0;
-    line-height: 1;
-}
-
-.splash-box p {
-    font-size: 0.85rem;
-    color: var(--text-muted);
-    margin-bottom: 20px;
-    line-height: 1.5;
-}
-
-@keyframes zoomInLevelUp {
-    from {
-        transform: scale(0.5);
-        opacity: 0;
-    }
-    to {
-        transform: scale(1);
-        opacity: 1;
-    }
-}
 
 /* Moodle Sync Panel Customizations */
 .moodle-sync {
@@ -7285,8 +7210,8 @@ html.is-iphone .app-global-footer {
         font-size: 0.54rem !important;
     }
     .character-card {
-        padding: 6px 10px;
-        max-width: 460px;
+        padding: 6px 12px;
+        max-width: 500px;
         flex: 1 1 auto;
     }
     .char-avatar {
@@ -7294,19 +7219,23 @@ html.is-iphone .app-global-footer {
         height: 40px;
         font-size: 1.35rem !important;
         margin-left: 8px;
+        flex-shrink: 0;
     }
     .char-title {
         font-size: 0.92rem;
-    }
-    .char-level {
-        font-size: 0.85rem;
-        padding: 1px 6px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
     .xp-bar-container {
         height: 18px;
     }
     .xp-text {
         font-size: 0.72rem;
+    }
+    .hud-card-actions {
+        gap: 6px;
+        margin-right: 10px;
     }
     .btn-hud-bell {
         width: 32px;
@@ -7350,8 +7279,7 @@ html.is-iphone .app-global-footer {
     }
     .character-card {
         padding: 5px 8px;
-        max-width: 340px !important;
-        overflow: hidden;
+        max-width: 430px;
     }
     .char-info {
         min-width: 0 !important;
@@ -7365,16 +7293,10 @@ html.is-iphone .app-global-footer {
         flex-shrink: 0;
     }
     .char-title {
-        font-size: 0.82rem;
-        max-width: 110px !important;
-        overflow: hidden !important;
-        text-overflow: ellipsis !important;
-        white-space: nowrap !important;
-    }
-    .char-level {
-        font-size: 0.78rem;
-        padding: 1px 4px;
-        flex-shrink: 0;
+        font-size: 0.86rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
     .xp-bar-container {
         height: 16px;
@@ -7382,11 +7304,13 @@ html.is-iphone .app-global-footer {
     .xp-text {
         font-size: 0.68rem;
     }
-    .character-card .btn-hud-bell {
+    .hud-card-actions {
+        gap: 4px;
+        margin-right: 6px;
+    }
+    .hud-card-actions .btn-hud-bell {
         width: 30px !important;
         height: 30px !important;
-        margin-left: 3px !important;
-        margin-right: 0 !important;
         flex-shrink: 0 !important;
     }
     .bell-icon {
