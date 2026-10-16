@@ -786,28 +786,28 @@
         '324015', '03240015'  // אנגלית מתקדמים ב'
     ]);
 
+    const getCourseKeys = (c) => {
+        if (!c) return [];
+        const res = [c];
+        const clean = c.replace(/[-\s]/g, '');
+        if (clean && clean !== c) res.push(clean);
+        const stripped = clean.replace(/^0+/, '');
+        if (stripped && stripped !== clean) res.push(stripped);
+        if (/^\d{8}$/.test(clean) && clean.startsWith('0')) {
+            const c6 = clean.slice(1, 4) + clean.slice(5);
+            res.push(c6);
+            const sc6 = c6.replace(/^0+/, '');
+            if (sc6 !== c6) res.push(sc6);
+        }
+        return res;
+    };
+
     function isCourseOfferedInSummer(courseCode, courseObj) {
         if (!courseCode && !courseObj) return { offered: true, note: '' };
         const code = String(courseCode || (courseObj && courseObj.code) || '').trim();
         const altCode = String((courseObj && courseObj.altCode) || '').trim();
 
-        const getKeys = (c) => {
-            if (!c) return [];
-            const res = [c];
-            const clean = c.replace(/[-\s]/g, '');
-            if (clean && clean !== c) res.push(clean);
-            const stripped = clean.replace(/^0+/, '');
-            if (stripped && stripped !== clean) res.push(stripped);
-            if (/^\d{8}$/.test(clean) && clean.startsWith('0')) {
-                const c6 = clean.slice(1, 4) + clean.slice(5);
-                res.push(c6);
-                const sc6 = c6.replace(/^0+/, '');
-                if (sc6 !== c6) res.push(sc6);
-            }
-            return res;
-        };
-
-        const keys = [...new Set([...getKeys(code), ...getKeys(altCode)])];
+        const keys = [...new Set([...getCourseKeys(code), ...getCourseKeys(altCode)])];
 
         // 1. Explicit term offerings in COURSE_TERM_OFFERINGS
         for (const k of keys) {
@@ -882,6 +882,51 @@
         return { offered: false, note: 'לפי תוכנית הלימודים בטכניון, קורס זה לרוב אינו מוצע בסמסטר קיץ' };
     }
 
+    function isCourseOfferedInSemester(courseCode, courseObj, targetSemester, isIntl) {
+        if (!courseCode && !courseObj) return { offered: true, note: '' };
+        const code = String(courseCode || (courseObj && courseObj.code) || '').trim();
+        const altCode = String((courseObj && courseObj.altCode) || '').trim();
+        const semNum = Number(targetSemester);
+
+        const keys = [...new Set([...getCourseKeys(code), ...getCourseKeys(altCode)])];
+
+        // 1. Summer semester check
+        const isSummer = (semNum % 1 !== 0) || semNum === 2.5 || semNum === 4.5 || semNum === 6.5 || semNum === 8.5;
+        if (isSummer) {
+            return isCourseOfferedInSummer(code, courseObj);
+        }
+
+        // 2. Winter vs Spring
+        const isWinter = (semNum % 2 === 1);
+        const isSpring = (semNum % 2 === 0);
+
+        for (const k of keys) {
+            if (COURSE_TERM_OFFERINGS[k]) {
+                const terms = COURSE_TERM_OFFERINGS[k].terms || [];
+                let allowed = false;
+                if (terms.includes('both')) allowed = true;
+                if (isWinter && (terms.includes('winter') || (isIntl && terms.includes('winter_intl')))) allowed = true;
+                if (isSpring && terms.includes('spring')) allowed = true;
+
+                if (!allowed) {
+                    if (isWinter && terms.includes('winter_intl') && !isIntl) {
+                        return {
+                            offered: false,
+                            note: 'מוצע בסמסטר חורף לסטודנטים בינלאומיים בלבד (באביב/קיץ לכלל הסטודנטים)'
+                        };
+                    }
+                    return {
+                        offered: false,
+                        note: COURSE_TERM_OFFERINGS[k].note || `אינו מוצע בסמסטר ${isWinter ? 'חורף' : 'אביב'}`
+                    };
+                }
+                return { offered: true, note: '' };
+            }
+        }
+
+        return { offered: true, note: '' };
+    }
+
     // Expose to window / global
     global.PLANNER_CATALOG = {
         DEGREE_RULES: DEGREE_RULES,
@@ -896,7 +941,8 @@
         SEASONAL_COURSE_MAPPINGS: SEASONAL_COURSE_MAPPINGS,
         COURSE_TERM_OFFERINGS: COURSE_TERM_OFFERINGS,
         SUMMER_CONFIRMED_COURSES: SUMMER_CONFIRMED_COURSES,
-        isCourseOfferedInSummer: isCourseOfferedInSummer
+        isCourseOfferedInSummer: isCourseOfferedInSummer,
+        isCourseOfferedInSemester: isCourseOfferedInSemester
     };
 
 })(typeof window !== 'undefined' ? window : global);

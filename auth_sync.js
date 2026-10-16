@@ -119,6 +119,11 @@
                 }, customProfile || {});
                 if (persistentPhone) base.phone = persistentPhone;
                 else if (!base.phone && fallbackPhone) base.phone = fallbackPhone;
+                base.isInternationalStudent = Boolean(
+                    base.isInternationalStudent ||
+                    (window.gameState && window.gameState.isInternationalStudent) ||
+                    (window.gameState && window.gameState.userProfile && window.gameState.userProfile.isInternationalStudent)
+                );
                 return base;
             }
             try {
@@ -131,6 +136,11 @@
                     if (persistentPhone) parsed.phone = persistentPhone;
                     else if (!parsed.phone && fallbackPhone) parsed.phone = fallbackPhone;
                     if (!parsed.avatar) parsed.avatar = '🎓';
+                    parsed.isInternationalStudent = Boolean(
+                        parsed.isInternationalStudent ||
+                        (window.gameState && window.gameState.isInternationalStudent) ||
+                        (window.gameState && window.gameState.userProfile && window.gameState.userProfile.isInternationalStudent)
+                    );
                     return parsed;
                 }
             } catch (e) {}
@@ -142,7 +152,8 @@
                 phone: fallbackPhone,
                 avatar: '🎓',
                 role: 'student',
-                startingSemester: currentSem
+                startingSemester: currentSem,
+                isInternationalStudent: Boolean((window.gameState && window.gameState.isInternationalStudent) || (window.gameState && window.gameState.userProfile && window.gameState.userProfile.isInternationalStudent))
             };
         },
 
@@ -699,6 +710,13 @@
             const chosenAvatar = (params.avatar || user.avatar || '🎓').trim();
             state.avatar = chosenAvatar;
 
+            const isIntl = params.isInternationalStudent !== undefined 
+                ? Boolean(params.isInternationalStudent) 
+                : Boolean(state.isInternationalStudent || user.isInternationalStudent);
+            state.isInternationalStudent = isIntl;
+            if (!state.userProfile) state.userProfile = {};
+            state.userProfile.isInternationalStudent = isIntl;
+
             // Update user profile object
             const updatedProfile = {
                 id: user.id,
@@ -708,7 +726,8 @@
                 password: state.account_password || '',
                 avatar: chosenAvatar,
                 role: user.role || 'student',
-                startingSemester: semester
+                startingSemester: semester,
+                isInternationalStudent: isIntl
             };
             localStorage.setItem('ast_profile_' + user.id, JSON.stringify(updatedProfile));
 
@@ -1070,6 +1089,7 @@
                                 <div>אימייל: <span style="color: #e2e8f0;">${user.email || 'לא הוגדר'}</span></div>
                                 <div>טלפון להתראות: <span style="color: #38bdf8; font-weight: 600;" dir="ltr">${user.phone || (window.gameState && window.gameState.userProfile && window.gameState.userProfile.phone) || '⚠️ לא הוגדר'}</span></div>
                                 <div>סמסטר נוכחי פעיל: <span style="color: #fbbf24; font-weight: bold;">סמסטר ${currentSem}</span></div>
+                                <div>מעמד אקדמי: <span style="color: ${(window.gameState && window.gameState.isInternationalStudent) || user.isInternationalStudent ? '#38bdf8' : '#94a3b8'}; font-weight: 600;">${(window.gameState && window.gameState.isInternationalStudent) || user.isInternationalStudent ? '🌍 סטודנט בינלאומי' : '🇮🇱 סטודנט ישראלי'}</span></div>
                                 <div>סטטוס סנכרון: 🟢 פעיל ומסונכרן אוטומטית בין מכשירים</div>
                             </div>
                         </div>
@@ -1079,7 +1099,7 @@
                             <h3 style="font-size: 0.9rem; color: #38bdf8; margin: 0 0 10px 0; display: flex; align-items: center; gap: 6px;">
                                 ✏️ עריכת פרטי חשבון
                             </h3>
-                            <form onsubmit="event.preventDefault(); const n = document.getElementById('edit-profile-name').value; const e = document.getElementById('edit-profile-email').value; const ph = document.getElementById('edit-profile-phone').value; const s = document.getElementById('edit-profile-sem').value; const p = document.getElementById('edit-profile-pass').value; const a = (document.getElementById('edit-profile-avatar') ? document.getElementById('edit-profile-avatar').value : ''); AuthSync.updateUserProfile({ name: n, email: e, phone: ph, semester: s, password: p, avatar: a });">
+                            <form onsubmit="event.preventDefault(); const n = document.getElementById('edit-profile-name').value; const e = document.getElementById('edit-profile-email').value; const ph = document.getElementById('edit-profile-phone').value; const s = document.getElementById('edit-profile-sem').value; const p = document.getElementById('edit-profile-pass').value; const a = (document.getElementById('edit-profile-avatar') ? document.getElementById('edit-profile-avatar').value : ''); const isIntl = (document.getElementById('edit-profile-intl') ? document.getElementById('edit-profile-intl').checked : false); AuthSync.updateUserProfile({ name: n, email: e, phone: ph, semester: s, password: p, avatar: a, isInternationalStudent: isIntl });">
                                 <div class="form-group" style="margin-bottom: 8px;">
                                     <label style="display: block; font-size: 0.78rem; color: #94a3b8; margin-bottom: 3px;">שם מלא / כינוי:</label>
                                     <input type="text" id="edit-profile-name" class="form-input" style="width: 100%; padding: 6px 10px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff; font-size: 0.86rem;" value="${user.name}" required>
@@ -1122,6 +1142,13 @@
                                         <option value="7" ${currentSem === 7 ? 'selected' : ''}>סמסטר ז׳ (שנה ד׳)</option>
                                         <option value="8" ${currentSem === 8 ? 'selected' : ''}>סמסטר ח׳ (שנה ד׳)</option>
                                     </select>
+                                </div>
+                                <div class="form-group" style="margin-bottom: 10px; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 6px; padding: 8px 10px;">
+                                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; margin: 0; font-size: 0.82rem; color: #f8fafc; font-weight: 600;">
+                                        <input type="checkbox" id="edit-profile-intl" style="width: 17px; height: 17px; accent-color: #38bdf8; cursor: pointer;" ${(window.gameState && window.gameState.isInternationalStudent) || user.isInternationalStudent ? 'checked' : ''}>
+                                        <span>🌍 סטודנט בינלאומי (International Student)</span>
+                                    </label>
+                                    <span style="display: block; font-size: 0.70rem; color: #94a3b8; margin-top: 3px;">מאפשר רישום לקורסים המוצעים בסמסטר חורף לבינלאומיים (כגון דינמיקה בחורף)</span>
                                 </div>
                                 <div class="form-group" style="margin-bottom: 10px;">
                                     <label style="display: block; font-size: 0.78rem; color: #94a3b8; margin-bottom: 3px;">שינוי סיסמה (אופציונלי):</label>

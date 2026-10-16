@@ -10977,6 +10977,19 @@ function handleAddCourseSubmit(e) {
         }
     }
 
+    // Strict seasonal and summer offering validation
+    const isIntlStudent = !!(gameState.isInternationalStudent || (gameState.userProfile && gameState.userProfile.isInternationalStudent));
+    if (typeof PLANNER_CATALOG !== 'undefined' && typeof PLANNER_CATALOG.isCourseOfferedInSemester === 'function') {
+        const dummyCourse = { code, altCode: (editingCourseCode && gameState.courses[editingCourseCode]) ? gameState.courses[editingCourseCode].altCode : code, name, type };
+        const termCheck = PLANNER_CATALOG.isCourseOfferedInSemester(code, dummyCourse, semester, isIntlStudent);
+        if (!termCheck.offered) {
+            const msg = `הקורס "${name}" ${termCheck.note || 'אינו מוצע בסמסטר זה'}!`;
+            if (typeof showToastNotification === 'function') showToastNotification(`❌ חסימת שיבוץ: ${msg}`, 'error');
+            else alert(`חסימת שיבוץ: ${msg}`);
+            return;
+        }
+    }
+
     if (editingCourseCode) {
         const oldCode = editingCourseCode;
         if (code !== oldCode && gameState.courses[code]) {
@@ -11411,14 +11424,7 @@ function openCourseDetails(code) {
 
     const intlBadge = document.getElementById("modal-course-intl-badge");
     if (intlBadge) {
-        const offerings = (window.PLANNER_CATALOG && window.PLANNER_CATALOG.COURSE_TERM_OFFERINGS) || {};
-        const offerInfo = offerings[course.code] || offerings[course.code.replace(/^0+/, '')];
-        if (offerInfo && offerInfo.terms && offerInfo.terms.includes('winter_intl')) {
-            intlBadge.style.display = 'inline-block';
-            intlBadge.innerText = 'חורף: סטודנטים בינלאומיים';
-        } else {
-            intlBadge.style.display = 'none';
-        }
+        intlBadge.style.display = 'none';
     }
 
     // Exemption Checkbox (Saved to gameState.exemptions)
@@ -11583,6 +11589,25 @@ function openCourseDetails(code) {
                 semesterSelect.value = String(cur);
             }
             return;
+        }
+
+        // Strict seasonal and summer offering validation
+        const isIntl = !!(gameState.isInternationalStudent || (gameState.userProfile && gameState.userProfile.isInternationalStudent));
+        if (typeof PLANNER_CATALOG !== 'undefined' && typeof PLANNER_CATALOG.isCourseOfferedInSemester === 'function') {
+            const termCheck = PLANNER_CATALOG.isCourseOfferedInSemester(course.code, course, newSem, isIntl);
+            if (!termCheck.offered) {
+                const msg = `הקורס "${course.name}" ${termCheck.note || 'אינו מוצע בסמסטר זה'}!`;
+                if (typeof showToastNotification === 'function') {
+                    showToastNotification(`❌ חסימת שיבוץ: ${msg}`, 'error');
+                } else {
+                    alert(`חסימת שיבוץ: ${msg}`);
+                }
+                if (semesterSelect) {
+                    const cur = Number(course.semester) === 9 ? 2.5 : Number(course.semester || 1);
+                    semesterSelect.value = String(cur);
+                }
+                return;
+            }
         }
 
         course.semester = newSem;
@@ -18567,13 +18592,13 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.10.16-v2.4.5",
-    version: "2.4.5",
-    build: "20261016_02",
-    date: "2026-10-16 21:30",
-    description: "גרסה 2.4.5: אכיפה קשיחה של דרישות קדם והזזת קורסים (Zero-Bypass Guard), יישור קו מלא של תגית ממוצע סמסטר א׳ בעיצוב סמסטר ב׳, והסרת אחוזים כפולים מסרגל הנק״ז."
+    code: "REV-2026.10.16-v2.4.6",
+    version: "2.4.6",
+    build: "20261016_03",
+    date: "2026-10-16 22:30",
+    description: "גרסה 2.4.6: חסימה קשיחה של שיבוץ והזזת קורסים לסמסטרים שאינם מוצעים בהם, תמיכה מלאה בסימון סטודנט בינלאומי בהגדרות ובפרופיל, והסרת תגיות טקסט מיותרות מכרטיסי הקורסים."
 };
-window.APP_VERSION = "2.4.5";
+window.APP_VERSION = "2.4.6";
 
 function ensureBaselineRevisions() {
     if (!gameState.revisions || !Array.isArray(gameState.revisions) || gameState.revisions.length === 0) {
@@ -18611,11 +18636,19 @@ function renderSettingsPage() {
     const activeSemSelect = document.getElementById("setting-active-semester");
     const guardModeSelect = document.getElementById("setting-semester-guard-mode");
     const charClassInput = document.getElementById("setting-character-class");
+    const intlCheckbox = document.getElementById("setting-is-international");
 
     if (displayVersion) displayVersion.textContent = `v${APP_CURRENT_REVISION.version} (${APP_CURRENT_REVISION.code})`;
     if (activeSemSelect) activeSemSelect.value = gameState.currentActiveSemester || 3;
     if (guardModeSelect) guardModeSelect.value = gameState.semesterGuardMode || "locked";
     if (charClassInput) charClassInput.value = gameState.characterClass || "סטודנט להנדסת מכונות - הטכניון";
+    if (intlCheckbox) {
+        intlCheckbox.checked = Boolean(
+            gameState.isInternationalStudent ||
+            (gameState.userProfile && gameState.userProfile.isInternationalStudent) ||
+            (window.AuthSync && window.AuthSync.getActiveUser && window.AuthSync.getActiveUser().isInternationalStudent)
+        );
+    }
 
     // 2. Populate Section 3: Google Calendar IDs & Sync
     const calExamsInput = document.getElementById("setting-cal-id-exams");
@@ -18768,10 +18801,26 @@ function saveRevisionSection() {
     const activeSemSelect = document.getElementById("setting-active-semester");
     const guardModeSelect = document.getElementById("setting-semester-guard-mode");
     const charClassInput = document.getElementById("setting-character-class");
+    const intlCheckbox = document.getElementById("setting-is-international");
 
     if (activeSemSelect) gameState.currentActiveSemester = parseInt(activeSemSelect.value) || 3;
     if (guardModeSelect) gameState.semesterGuardMode = guardModeSelect.value;
     if (charClassInput) gameState.characterClass = charClassInput.value.trim();
+    if (intlCheckbox) {
+        const isIntl = Boolean(intlCheckbox.checked);
+        gameState.isInternationalStudent = isIntl;
+        if (!gameState.userProfile) gameState.userProfile = {};
+        gameState.userProfile.isInternationalStudent = isIntl;
+        if (window.AuthSync && typeof window.AuthSync.getActiveUser === 'function') {
+            const u = window.AuthSync.getActiveUser();
+            if (u && u.id) {
+                u.isInternationalStudent = isIntl;
+                try {
+                    localStorage.setItem('ast_profile_' + u.id, JSON.stringify(u));
+                } catch (e) {}
+            }
+        }
+    }
 
     notifyStateChanged({ tab: 'settings' });
     showToastNotification("✅ הגדרות סמסטר נשמרו בהצלחה!", "success");

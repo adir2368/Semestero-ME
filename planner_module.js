@@ -1535,11 +1535,9 @@
                     ? `<span class="badge-course-origin retake" title="שיפור ציון / נלקח מחדש">נלקח מחדש (סמ' ${course.retakeFromSemester})</span>`
                     : '';
 
-                // Annual Term Offering Tag
-                const termOffering = global.PLANNER_CATALOG && global.PLANNER_CATALOG.COURSE_TERM_OFFERINGS
-                    ? (global.PLANNER_CATALOG.COURSE_TERM_OFFERINGS[course.code] || global.PLANNER_CATALOG.COURSE_TERM_OFFERINGS[course.altCode])
-                    : null;
-                const termBadge = termOffering ? `<span class="badge-term-offering" title="${escapeHtml(termOffering.note)}">${escapeHtml(termOffering.label)}</span>` : '';
+                // Annual Term Offering Tag - suppressed from card face per user request
+                // (validation and blocking are enforced upon placement/move)
+                const termBadge = '';
 
                 let summerWarningBadge = '';
                 if (isSummer) {
@@ -1562,7 +1560,6 @@
                             <div style="display: flex; align-items: center; gap: 4px; flex-wrap: wrap;">
                                 ${movedBadge}
                                 ${retakeBadge}
-                                ${termBadge}
                                 ${summerWarningBadge}
                                 <span class="course-card-tag ${tagClass} ${course.list && !completed ? 'tag-interactive-list' : ''}" 
                                       ${course.list && !completed ? `data-action="cycle-list" data-code="${escapeHtml(course.code)}" title="לחץ לשינוי שיוך רשימת בחירה (א׳ / ב׳ / ג׳ / ד׳ / חופשית)" style="cursor: pointer; user-select: none;"` : ''}>
@@ -2788,15 +2785,15 @@
         };
 
         if (violations.length > 0) {
-            const isStrictPrereqBlocked = violations.some(v => v.type === 'prereqs' || v.type === 'dependent_violation');
+            const isStrictBlocked = violations.some(v => v.type === 'prereqs' || v.type === 'dependent_violation' || v.type === 'term' || v.type === 'summer_offering');
             highlightMissingPrerequisites(
                 prereqStatus.missingCodes || [],
-                isStrictPrereqBlocked 
-                    ? `❌ חסימת שיבוץ: לא ניתן לשבץ קורס לפני קורסי הקדם שלו!`
+                isStrictBlocked 
+                    ? `❌ חסימת שיבוץ: לא ניתן לשבץ את הקורס בסמסטר זה!`
                     : `התראת שיבוץ עבור "${courseObj.name}" בסמסטר ${targetSemester}`,
                 targetSemester
             );
-            openCoursePlacementGuardModal(courseObj, targetSemester, sourceSemester, data, violations, isStrictPrereqBlocked ? null : applyPlacement);
+            openCoursePlacementGuardModal(courseObj, targetSemester, sourceSemester, data, violations, isStrictBlocked ? null : applyPlacement);
             return;
         }
 
@@ -2873,8 +2870,13 @@
             const summerCheck = isSummer && global.PLANNER_CATALOG && global.PLANNER_CATALOG.isCourseOfferedInSummer
                 ? global.PLANNER_CATALOG.isCourseOfferedInSummer(course.code, course)
                 : { offered: true, note: '' };
-            const isSummerBlocked = isSummer && !summerCheck.offered;
-            const isValid = isValidPrereq && isValidDep && !isSummerBlocked;
+            const isIntl = !!(global.gameState && global.gameState.isInternationalStudent);
+            const termCheck = (global.PLANNER_CATALOG && global.PLANNER_CATALOG.isCourseOfferedInSemester)
+                ? global.PLANNER_CATALOG.isCourseOfferedInSemester(course.code, course, semNum, isIntl)
+                : { offered: true, note: '' };
+            const isTermBlocked = !termCheck.offered;
+
+            const isValid = isValidPrereq && isValidDep && !isSummerBlocked && !isTermBlocked;
 
             let statusText = '✓ זמין לשיבוץ';
             let statusColor = '#34d399';
@@ -2885,11 +2887,14 @@
                 statusText = '⛔ חסום (קורס המשך)';
                 statusColor = '#ef4444';
             } else if (isSummerBlocked) {
-                statusText = '⚠️ לא מוצע בקיץ';
-                statusColor = '#f87171';
+                statusText = '⛔ לא מוצע בקיץ';
+                statusColor = '#ef4444';
+            } else if (isTermBlocked) {
+                statusText = '⛔ לא מוצע בסמסטר זה';
+                statusColor = '#ef4444';
             }
 
-            const isStrictlyBlocked = !isValidPrereq || !isValidDep;
+            const isStrictlyBlocked = !isValidPrereq || !isValidDep || isSummerBlocked || isTermBlocked;
 
             return `
                 <button type="button" class="btn btn-outline sem-choice-btn" data-semester="${semNum}" ${isStrictlyBlocked ? 'disabled="disabled"' : ''} style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 12px; border-radius: 8px; border: 1px solid ${isValid ? 'rgba(56, 189, 248, 0.35)' : 'rgba(239, 68, 68, 0.35)'}; background: ${isValid ? 'rgba(15, 23, 42, 0.7)' : 'rgba(239, 68, 68, 0.08)'}; cursor: ${isStrictlyBlocked ? 'not-allowed' : 'pointer'}; opacity: ${isStrictlyBlocked ? '0.45' : '1'}; transition: all 0.15s ease;">
@@ -3098,6 +3103,20 @@
                 return false;
             }
 
+            // Term and summer offering validation
+            const isIntl = !!(global.gameState && global.gameState.isInternationalStudent);
+            if (global.PLANNER_CATALOG && typeof global.PLANNER_CATALOG.isCourseOfferedInSemester === 'function') {
+                const termCheck = global.PLANNER_CATALOG.isCourseOfferedInSemester(foundCourse.code, foundCourse, semNum, isIntl);
+                if (!termCheck.offered) {
+                    console.warn(`[DegreePlanner.setCourseSemester] Term restriction violation for ${foundCourse.name}:`, termCheck.note);
+                    if (typeof showPlannerToast === 'function') {
+                        showPlannerToast(`❌ לא ניתן לשבץ את "${foundCourse.name}" בסמסטר ${semNum}: ${termCheck.note || 'הקורס אינו מוצע בסמסטר זה'}`, true);
+                    }
+                    saveCustomPlan(true);
+                    return false;
+                }
+            }
+
             let targetSemObj = customPlan.find(s => s.semester === semNum);
             if (!targetSemObj) {
                 const isSummer = semNum % 1 !== 0;
@@ -3185,20 +3204,20 @@
             document.body.appendChild(modal);
         }
 
-        const isStrictPrereqBlocked = violations.some(v => v.type === 'prereqs' || v.type === 'dependent_violation') || !onConfirmPlacement;
+        const isStrictBlocked = violations.some(v => v.type === 'prereqs' || v.type === 'dependent_violation' || v.type === 'term' || v.type === 'summer_offering') || !onConfirmPlacement;
 
         const violationItemsHtml = violations.map(v => `
             <div style="background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.35); border-radius: 6px; padding: 10px 12px; margin-bottom: 8px;">
-                <div style="color: #f87171; font-weight: bold; font-size: 0.85rem; margin-bottom: 3px;">${v.type === 'prereqs' || v.type === 'dependent_violation' ? '⛔' : '⚠️'} ${escapeHtml(v.title)}</div>
+                <div style="color: #f87171; font-weight: bold; font-size: 0.85rem; margin-bottom: 3px;">⛔ ${escapeHtml(v.title)}</div>
                 <div style="color: #cbd5e1; font-size: 0.8rem; line-height: 1.4; white-space: pre-line;">${escapeHtml(v.message)}</div>
             </div>
         `).join('');
 
         modal.innerHTML = `
-            <div class="modal-card" style="background: #161c2e; border: 1px solid ${isStrictPrereqBlocked ? '#ef4444' : '#334155'}; border-radius: 12px; padding: 22px; width: 90%; max-width: 480px; direction: rtl; box-shadow: 0 10px 30px rgba(0,0,0,0.6);">
+            <div class="modal-card" style="background: #161c2e; border: 1px solid ${isStrictBlocked ? '#ef4444' : '#334155'}; border-radius: 12px; padding: 22px; width: 90%; max-width: 480px; direction: rtl; box-shadow: 0 10px 30px rgba(0,0,0,0.6);">
                 <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
-                    <span style="font-size: 1.4rem;">${isStrictPrereqBlocked ? '⛔' : '⚠️'}</span>
-                    <h3 style="margin: 0; font-size: 1.1rem; color: #f8fafc; font-weight: 700;">${isStrictPrereqBlocked ? 'חסימת שיבוץ (דרישות קדם)' : 'התראת שיבוץ קורס'}: ${escapeHtml(courseObj.name)}</h3>
+                    <span style="font-size: 1.4rem;">${isStrictBlocked ? '⛔' : '⚠️'}</span>
+                    <h3 style="margin: 0; font-size: 1.1rem; color: #f8fafc; font-weight: 700;">${isStrictBlocked ? 'חסימת שיבוץ קורס' : 'התראת שיבוץ קורס'}: ${escapeHtml(courseObj.name)}</h3>
                 </div>
                 <div style="font-size: 0.82rem; color: #94a3b8; margin-bottom: 14px;">
                     ניסית לשבץ את הקורס ב<strong>סמסטר ${targetSemester}</strong>, אך התגלו המגבלות הבאות:
@@ -3206,10 +3225,10 @@
                 <div style="margin-bottom: 18px;">
                     ${violationItemsHtml}
                 </div>
-                ${isStrictPrereqBlocked ? `
+                ${isStrictBlocked ? `
                     <div style="background: rgba(239, 68, 68, 0.18); border: 1px solid rgba(239, 68, 68, 0.5); border-radius: 8px; padding: 10px 12px; margin-bottom: 14px; text-align: center;">
                         <div style="color: #f87171; font-weight: 800; font-size: 0.88rem; margin-bottom: 2px;">⛔ שיבוץ זה אינו מורשה</div>
-                        <div style="color: #fecaca; font-size: 0.80rem;">אין אפשרות לשבץ קורס לפני קורסי הקדם שלו, ולא ניתן להעביר קורס קדם מעבר לקורסים התלויים בו.</div>
+                        <div style="color: #fecaca; font-size: 0.80rem;">אין אפשרות לשבץ קורס בסמסטר שאינו מוצע בו או לפני קורסי הקדם שלו.</div>
                     </div>
                     <button type="button" id="btn-guard-cancel" style="background: #2563eb; border: none; color: #ffffff; padding: 10px 16px; border-radius: 6px; font-weight: 700; font-size: 0.88rem; cursor: pointer; width: 100%; transition: all 0.15s ease;">
                         ✕ הבנתי, בטל פעולה והשאר את הקורס במקומו
