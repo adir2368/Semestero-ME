@@ -12442,5 +12442,73 @@ html.is-iphone .app-global-footer {
     background: rgba(255, 255, 255, 0.08);
 }
 
+/* ==========================================================================
+   New Academic Features: Clashes, Panopto, Honors & Consensus Styling
+   ========================================================================== */
+
+.runway-gap-pill.clash,
+.runway-connector.clash .runway-badge {
+    background: #ef4444 !important;
+    border-color: #f87171 !important;
+    color: #ffffff !important;
+    font-weight: 800 !important;
+    animation: pulseClash 1.8s infinite ease-in-out;
+}
+
+.runway-connector.clash .runway-line {
+    background: #ef4444 !important;
+}
+
+@keyframes pulseClash {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.6);
+        transform: scale(1);
+    }
+    50% {
+        box-shadow: 0 0 0 8px rgba(239, 68, 68, 0);
+        transform: scale(1.04);
+    }
+}
+
+.runway-conflict-banner {
+    animation: fadeInSlideDown 0.3s ease-out;
+}
+
+@keyframes fadeInSlideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-6px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.btn-toggle-panopto-item {
+    transition: all 0.15s ease;
+}
+
+.btn-toggle-panopto-item:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+.btn-toggle-panopto-item.is-watched {
+    box-shadow: 0 0 8px rgba(16, 185, 129, 0.2);
+}
+
+.modal-peer-consensus-box {
+    animation: fadeIn 0.25s ease;
+}
+
+.analytics-honors-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.analytics-honors-card:hover {
+    box-shadow: 0 6px 24px rgba(251, 191, 36, 0.15);
+}
+
 
 

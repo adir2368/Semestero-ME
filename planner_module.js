@@ -1241,9 +1241,45 @@
             }
         };
 
+        let countMalag = 0;
+        let creditsMalag = 0;
+        let countSport = 0;
+        let hasScienceElective = false;
+        let hasCapstone = false;
+
+        const checkSpecialRequirements = (c) => {
+            if (!c) return;
+            const codeStr = String(c.code || '').replace(/^0+/, '');
+            const nameStr = String(c.name || '');
+            const creds = Number(c.credits) || 0;
+
+            // Malag / Humanities (dept 324, list E, or name contains מל"ג)
+            if (c.list === 'E' || codeStr.startsWith('324') || nameStr.includes('מל"ג') || nameStr.includes('מלג')) {
+                countMalag++;
+                creditsMalag += creds;
+            }
+
+            // Sport / Physical Education (dept 394 or 0394)
+            if (codeStr.startsWith('394') || nameStr.includes('ספורט') || nameStr.includes('חינוך גופני')) {
+                countSport++;
+            }
+
+            // Science elective (125001 general chemistry, 114073 physics 3, 134058 biology, 124120, 124503)
+            const scienceCodes = ['125001', '114073', '134058', '124120', '124503'];
+            if (scienceCodes.includes(codeStr) || (c.altCode && scienceCodes.includes(String(c.altCode).replace(/^0+/, '')))) {
+                hasScienceElective = true;
+            }
+
+            // Capstone / Final Project (034045, 035045, or title contains פרויקט גמר)
+            if (codeStr === '34045' || codeStr === '35045' || nameStr.includes('פרויקט גמר')) {
+                hasCapstone = true;
+            }
+        };
+
         plan.forEach(sem => {
             (sem.courses || []).forEach(c => {
                 checkEnglishContent(c);
+                checkSpecialRequirements(c);
                 const creds = Number(c.credits) || 0;
                 totalDegreeCredits += creds;
 
@@ -1269,18 +1305,51 @@
         });
 
         if (unassignedCourses) {
-            unassignedCourses.forEach(c => checkEnglishContent(c));
+            unassignedCourses.forEach(c => {
+                checkEnglishContent(c);
+                checkSpecialRequirements(c);
+            });
         }
         if (global.gameState && global.gameState.courses) {
             Object.values(global.gameState.courses).forEach(c => {
                 if (isCourseCompleted(c.code, c.altCode)) {
                     checkEnglishContent(c);
+                    checkSpecialRequirements(c);
                 }
             });
         }
 
         const requiredDegreeCredits = isReservistDeduction ? 155.5 : 157.5;
         const requiredElectiveCredits = 32.5;
+
+        const ruleDegreeTotal_met = totalDegreeCredits >= requiredDegreeCredits;
+        const ruleTotalElectives_met = totalElectiveCredits >= requiredElectiveCredits;
+        const ruleBCD_met = creditsBCD >= 14.0;
+        const ruleA_met = countA >= 1;
+        const ruleB_met = countB >= 2;
+        const ruleC_met = countC >= 2;
+        const ruleD_met = countD >= 1;
+        const ruleFacultyLists_met = ruleA_met && ruleB_met && ruleC_met && ruleD_met;
+        const ruleEnglishContent_met = countEnglishContent >= 2;
+        const ruleMalag_met = (creditsMalag + (isReservistDeduction ? 2.0 : 0)) >= 6.0;
+        const ruleSport_met = countSport >= 2;
+        const ruleScience_met = hasScienceElective === true;
+        const ruleCapstone_met = hasCapstone === true;
+
+        const clearanceRules = [
+            { id: 'degreeTotal', name: 'סה״כ נק״ז לתואר', score: `${totalDegreeCredits.toFixed(1)} / ${requiredDegreeCredits.toFixed(1)} נק״ז`, isMet: ruleDegreeTotal_met, hint: 'מינימום 157.5 נק״ז (155.5 למשרתי מילואים)' },
+            { id: 'totalElectives', name: 'נקודות בחירה פקולטיות', score: `${totalElectiveCredits.toFixed(1)} / ${requiredElectiveCredits.toFixed(1)} נק״ז`, isMet: ruleTotalElectives_met, hint: 'לפחות 32.5 נק״ז מרשימות הבחירה' },
+            { id: 'creditsBCD', name: 'סל רשימות ב׳+ג׳+ד׳', score: `${creditsBCD.toFixed(1)} / 14.0 נק״ז`, isMet: ruleBCD_met, hint: 'חובת עומק והתמחות הנדסית' },
+            { id: 'facultyLists', name: 'חלוקת רשימות (א׳, ב׳, ג׳, ד׳)', score: `א׳: ${countA}/1 • ב׳: ${countB}/2 • ג׳: ${countC}/2 • ד׳: ${countD}/1`, isMet: ruleFacultyLists_met, hint: '1 חישובי, 2 ליבה, 2 יישומי, 1 סמינר' },
+            { id: 'englishContent', name: 'קורסים באנגלית (תוכן/מל״ג)', score: `${countEnglishContent} / 2`, isMet: ruleEnglishContent_met, hint: 'חובת הטכניון: 2 קורסים הנלמדים באנגלית' },
+            { id: 'malag', name: 'קורסי מל״ג / מדעי הרוח', score: `${creditsMalag.toFixed(1)} / 6.0 נק״ז`, isMet: ruleMalag_met, hint: 'בין 6.0 ל-10.0 נק״ז מל״ג (מילואים מקנה 2 נק״ז)' },
+            { id: 'sport', name: 'חינוך גופני (ספורט)', score: `${countSport} / 2 קורסים`, isMet: ruleSport_met, hint: '2 קורסי ספורט בינאריים ללא ציון מספרי' },
+            { id: 'scienceCapstone', name: 'בחירה מדעית ופרויקט גמר', score: `מדעי: ${hasScienceElective ? '✅' : '⏳'} • פרויקט: ${hasCapstone ? '✅' : '⏳'}`, isMet: hasScienceElective && hasCapstone, hint: 'כימיה/ביולוגיה/פיזיקה 3 + פרויקט גמר' }
+        ];
+
+        const clearanceMetCount = clearanceRules.filter(r => r.isMet).length;
+        const clearancePct = Math.round((clearanceMetCount / clearanceRules.length) * 100);
+        const isClearanceReady = clearanceMetCount === clearanceRules.length;
 
         return {
             countA,
@@ -1293,16 +1362,116 @@
             requiredDegreeCredits,
             isReservistDeduction,
             countEnglishContent,
-            ruleEnglishContent_met: countEnglishContent >= 2,
-            ruleA_met: countA >= 1,
-            ruleB_met: countB >= 2,
-            ruleC_met: countC >= 2,
-            ruleD_met: countD >= 1,
-            ruleBCD_met: creditsBCD >= 14.0,
-            ruleTotalElectives_met: totalElectiveCredits >= requiredElectiveCredits,
-            ruleDegreeTotal_met: totalDegreeCredits >= requiredDegreeCredits
+            countMalag,
+            creditsMalag,
+            countSport,
+            hasScienceElective,
+            hasCapstone,
+            ruleEnglishContent_met,
+            ruleA_met,
+            ruleB_met,
+            ruleC_met,
+            ruleD_met,
+            ruleBCD_met,
+            ruleFacultyLists_met,
+            ruleTotalElectives_met,
+            ruleDegreeTotal_met,
+            ruleMalag_met,
+            ruleSport_met,
+            ruleScience_met,
+            ruleCapstone_met,
+            clearanceRules,
+            clearanceMetCount,
+            clearancePct,
+            isClearanceReady
         };
     }
+
+    // --------------------------------------------------------------------------
+    // Technion Degree Audit & Graduation Clearance Modal
+    // --------------------------------------------------------------------------
+    function openGraduationClearanceModal() {
+        const plan = getActivePlan();
+        const rulesEval = evaluateDegreeRules(plan);
+
+        let modal = document.getElementById('planner-graduation-clearance-modal');
+        if (modal) modal.remove();
+
+        modal = document.createElement('div');
+        modal.id = 'planner-graduation-clearance-modal';
+        modal.className = 'modal-backdrop active';
+        modal.style.cssText = 'position: fixed; inset: 0; background: rgba(10, 15, 29, 0.88); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 100000; padding: 16px;';
+
+        const statusColor = rulesEval.isClearanceReady ? '#10b981' : '#38bdf8';
+        const statusTitle = rulesEval.isClearanceReady 
+            ? '🎓 זכאי לתואר בהנדסת מכונות B.Sc.!' 
+            : `⏳ בתהליך השלמת התואר (${rulesEval.clearanceMetCount} מתוך 8 חובות)`;
+
+        modal.innerHTML = `
+            <div class="modal-card" style="background: #0f172a; border: 1px solid ${statusColor}; border-radius: 16px; padding: 24px; width: 100%; max-width: 620px; max-height: 90vh; overflow-y: auto; direction: rtl; box-shadow: 0 15px 40px rgba(0,0,0,0.8);">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 12px;">
+                    <div>
+                        <h2 style="margin: 0; font-size: 1.25rem; font-weight: 800; color: #f8fafc; display: flex; align-items: center; gap: 8px;">
+                            <span>🎓</span>
+                            <span>בדיקת זכאות לתואר וחובות סיום</span>
+                        </h2>
+                        <span style="font-size: 0.76rem; color: #94a3b8;">הפקולטה להנדסת מכונות • הטכניון מכון טכנולוגי לישראל</span>
+                    </div>
+                    <button type="button" class="btn-close-clearance-modal" aria-label="סגור חלון" style="background: transparent; border: none; font-size: 1.4rem; color: #94a3b8; cursor: pointer; padding: 4px;">✕</button>
+                </div>
+
+                <!-- Clearance Gauge Card -->
+                <div style="background: rgba(255,255,255,0.03); border: 1px solid ${rulesEval.isClearanceReady ? 'rgba(16, 185, 129, 0.4)' : 'rgba(56, 189, 248, 0.3)'}; border-radius: 12px; padding: 14px 18px; margin-bottom: 18px; display: flex; align-items: center; justify-content: space-between; gap: 14px;">
+                    <div>
+                        <div style="font-size: 1.05rem; font-weight: 800; color: ${statusColor}; margin-bottom: 4px;">${statusTitle}</div>
+                        <div style="font-size: 0.8rem; color: #cbd5e1; line-height: 1.4;">
+                            ${rulesEval.isClearanceReady 
+                                ? 'כל דרישות הסף לתואר הושלמו כולל נק״ז, רשימות בחירה, אנגלית, מל״ג, ספורט ופרויקט גמר.' 
+                                : `הושלמו ${rulesEval.clearanceMetCount} מתוך 8 חובות (${rulesEval.clearancePct}%). נותרו ${8 - rulesEval.clearanceMetCount} חובות לסיום התואר.`}
+                        </div>
+                    </div>
+                    <div style="font-size: 1.6rem; font-weight: 900; color: ${statusColor}; background: rgba(0,0,0,0.3); border: 1px solid ${statusColor}; border-radius: 50%; width: 56px; height: 56px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                        ${rulesEval.clearanceMetCount}/8
+                    </div>
+                </div>
+
+                <!-- 8-Point Clearance Checklist -->
+                <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px;">
+                    ${rulesEval.clearanceRules.map(r => `
+                        <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border-radius: 8px; background: ${r.isMet ? 'rgba(16, 185, 129, 0.08)' : 'rgba(255,255,255,0.02)'}; border: 1px solid ${r.isMet ? 'rgba(16, 185, 129, 0.3)' : 'rgba(255,255,255,0.06)'};">
+                            <div style="flex: 1;">
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <span style="font-size: 0.95rem;">${r.isMet ? '✅' : '⏳'}</span>
+                                    <strong style="font-size: 0.88rem; color: ${r.isMet ? '#f8fafc' : '#cbd5e1'};">${r.name}</strong>
+                                </div>
+                                <div style="font-size: 0.72rem; color: #94a3b8; margin-top: 2px; padding-right: 22px;">${r.hint}</div>
+                            </div>
+                            <div style="font-size: 0.84rem; font-weight: 700; color: ${r.isMet ? '#34d399' : '#38bdf8'}; direction: ltr; white-space: nowrap;">
+                                ${r.score}
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+
+                <div style="display: flex; justify-content: flex-end;">
+                    <button type="button" class="btn btn-sm btn-primary btn-close-clearance-modal" style="background: #38bdf8; color: #082f49; font-weight: 800; padding: 8px 18px; border-radius: 8px; border: none; cursor: pointer;">
+                        הבנתי, תודה
+                    </button>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        const closeModal = () => modal.remove();
+        modal.querySelectorAll('.btn-close-clearance-modal').forEach(b => b.addEventListener('click', closeModal));
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) closeModal();
+        });
+    }
+
+    global.DegreePlanner = global.DegreePlanner || {};
+    global.DegreePlanner.openGraduationClearanceModal = openGraduationClearanceModal;
 
     // --------------------------------------------------------------------------
     // Rendering Sub-systems
@@ -2057,6 +2226,13 @@
             const exportBtn = e.target.closest('#btn-planner-export');
             if (exportBtn) {
                 promptExportPlan();
+                return;
+            }
+
+            // Graduation Clearance Audit Button
+            const clearanceBtn = e.target.closest('#btn-open-graduation-clearance, #planner-rules-summary-badge');
+            if (clearanceBtn) {
+                openGraduationClearanceModal();
                 return;
             }
 
