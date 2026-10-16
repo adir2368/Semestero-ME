@@ -954,7 +954,7 @@
                             const topRow = document.createElement('label');
                             topRow.style.cssText = 'display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 0.85rem; color: #f1f5f9; user-select: none; margin: 0;';
                             topRow.innerHTML = `
-                                <input type="checkbox" value="${c.code}" class="onboarding-course-checkbox" style="width: 18px; height: 18px; cursor: pointer; accent-color: #38bdf8;">
+                                <input type="checkbox" value="${c.code}" aria-label="סימון קורס ${c.name} כהושלם" class="onboarding-course-checkbox" style="width: 18px; height: 18px; cursor: pointer; accent-color: #38bdf8;">
                                 <span style="font-weight: 600; flex: 1;">${c.name} <span style="font-size: 0.74rem; color: #94a3b8; font-weight: normal;">(${c.credits || 0} נק״ז)</span></span>
                             `;
 
@@ -963,7 +963,7 @@
                             gradeRow.style.cssText = 'display: none; align-items: center; gap: 8px; padding-top: 8px; border-top: 1px dashed rgba(56, 189, 248, 0.25); margin-top: 2px;';
                             gradeRow.innerHTML = `
                                 <span style="font-size: 0.78rem; color: #38bdf8; font-weight: 700;">ציון סופי:</span>
-                                <input type="number" min="0" max="100" placeholder="למשל 85" class="onboarding-grade-input" style="width: 76px; padding: 4px 8px; background: #0f172a; border: 1px solid #38bdf8; border-radius: 6px; color: #38bdf8; font-size: 0.84rem; font-weight: 800; text-align: center;">
+                                <input type="number" min="0" max="100" placeholder="למשל 85" aria-label="ציון סופי עבור ${c.name}" class="onboarding-grade-input" style="width: 76px; padding: 4px 8px; background: #0f172a; border: 1px solid #38bdf8; border-radius: 6px; color: #38bdf8; font-size: 0.84rem; font-weight: 800; text-align: center;">
                                 <span style="font-size: 0.72rem; color: #94a3b8;">(לא חובה)</span>
                             `;
 

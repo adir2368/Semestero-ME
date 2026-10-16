@@ -18592,13 +18592,13 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.10.16-v2.4.6",
-    version: "2.4.6",
-    build: "20261016_03",
-    date: "2026-10-16 22:30",
-    description: "גרסה 2.4.6: חסימה קשיחה של שיבוץ והזזת קורסים לסמסטרים שאינם מוצעים בהם, תמיכה מלאה בסימון סטודנט בינלאומי בהגדרות ובפרופיל, והסרת תגיות טקסט מיותרות מכרטיסי הקורסים."
+    code: "REV-2026.10.16-v2.4.7",
+    version: "2.4.7",
+    build: "20261016_04",
+    date: "2026-10-16 23:25",
+    description: "גרסה 2.4.7: תיקון מטמון Service Worker והסרת סמלילים חסרים, יישור קו של Preload תמונות, הנגשה מלאה בתקן WCAG 2.1 AA (הוספת aria-label לכלל השדות), ניקוי תגיות וסגנונות כפולים."
 };
-window.APP_VERSION = "2.4.6";
+window.APP_VERSION = "2.4.7";
 
 function ensureBaselineRevisions() {
     if (!gameState.revisions || !Array.isArray(gameState.revisions) || gameState.revisions.length === 0) {

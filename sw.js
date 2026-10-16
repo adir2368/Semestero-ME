@@ -1,5 +1,5 @@
-// Service Worker for Academic Skill Tree (Semestero ME) - v2.4.6
-const CACHE_NAME = 'semestero-me-v2.4.6';
+// Service Worker for Academic Skill Tree (Semestero ME) - v2.4.7
+const CACHE_NAME = 'semestero-me-v2.4.7';
 
 const STATIC_ASSETS = [
     './',
@@ -32,14 +32,6 @@ const STATIC_ASSETS = [
     './web-app-manifest-192x192.png',
     './web-app-manifest-512x512.png',
     './apple-touch-icon.png',
-    './shortcut-exam-96.png',
-    './shortcut-exam-192.png',
-    './shortcut-tasks-96.png',
-    './shortcut-tasks-192.png',
-    './shortcut-semester-96.png',
-    './shortcut-semester-192.png',
-    './shortcut-schedule-96.png',
-    './shortcut-schedule-192.png',
     './faculty_logo_cyan.png',
     './adir_avatar.png',
     './adir_avatar_small.png',

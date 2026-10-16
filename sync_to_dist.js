@@ -51,16 +51,7 @@ const filesToCopy = [
     'icon.ico',
     'adir_avatar.png',
     'adir_avatar_small.png',
-    'adir_avatar_small.webp',
-    'widget.html',
-    'shortcut-exam-96.png',
-    'shortcut-exam-192.png',
-    'shortcut-tasks-96.png',
-    'shortcut-tasks-192.png',
-    'shortcut-semester-96.png',
-    'shortcut-semester-192.png',
-    'shortcut-schedule-96.png',
-    'shortcut-schedule-192.png'
+    'adir_avatar_small.webp'
 ];
 
 for (const targetDir of targetDirs) {
