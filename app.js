@@ -18567,13 +18567,13 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.10.16-v2.4.4",
-    version: "2.4.4",
-    build: "20261016_01",
-    date: "2026-10-16 10:45",
-    description: "גרסה 2.4.4: סנכרון אמיתי מלא מול CheeseFork (מערכת שעות שבועית, קבוצות הרצאה ותרגול, מועדי בחינות א׳ ו-ב׳ ועדכון קורסים פעילים) ותיקון מקיף למנגנון עדכוני הגרסה וה-Service Worker."
+    code: "REV-2026.10.16-v2.4.5",
+    version: "2.4.5",
+    build: "20261016_02",
+    date: "2026-10-16 21:30",
+    description: "גרסה 2.4.5: אכיפה קשיחה של דרישות קדם והזזת קורסים (Zero-Bypass Guard), יישור קו מלא של תגית ממוצע סמסטר א׳ בעיצוב סמסטר ב׳, והסרת אחוזים כפולים מסרגל הנק״ז."
 };
-window.APP_VERSION = "2.4.4";
+window.APP_VERSION = "2.4.5";
 
 function ensureBaselineRevisions() {
     if (!gameState.revisions || !Array.isArray(gameState.revisions) || gameState.revisions.length === 0) {
@@ -19876,7 +19876,7 @@ function compareSemver(v1, v2) {
 window.checkRemoteAppVersion = async function(isManualCheck = false) {
     const isElectron = Boolean(window.electronAPI || (window.process && window.process.type === 'renderer') || (navigator.userAgent && navigator.userAgent.includes('Electron')));
     const domVerEl = document.getElementById("display-system-version");
-    let currentVer = (window.APP_VERSION) || (APP_CURRENT_REVISION && APP_CURRENT_REVISION.version) || "2.4.4";
+    let currentVer = (window.APP_VERSION) || (APP_CURRENT_REVISION && APP_CURRENT_REVISION.version) || "2.4.5";
     if (domVerEl && domVerEl.innerText) {
         const match = domVerEl.innerText.match(/\b\d+\.\d+\.\d+\b/);
         if (match) currentVer = match[0];
