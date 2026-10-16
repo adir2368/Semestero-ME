@@ -12832,83 +12832,406 @@ function saveQuest() {
 }
 
 
-async function importFromCheesefork(url) {
+// =======================================================
+// CheeseFork Live Synchronization Engine (v2.4.4)
+// =======================================================
+
+function parseCheeseForkUrl(url) {
+    if (!url || typeof url !== 'string') return null;
+    try {
+        let semester = null;
+        let uid = null;
+        
+        // 1. Check URL search params
+        try {
+            const urlObj = new URL(url.trim());
+            semester = urlObj.searchParams.get("semester");
+            uid = urlObj.searchParams.get("uid");
+            
+            // If in hash (e.g. #/?semester=...&uid=...)
+            if ((!semester || !uid) && urlObj.hash) {
+                const hashQuery = urlObj.hash.includes('?') ? urlObj.hash.substring(urlObj.hash.indexOf('?') + 1) : urlObj.hash;
+                const hashParams = new URLSearchParams(hashQuery);
+                if (!semester) semester = hashParams.get("semester");
+                if (!uid) uid = hashParams.get("uid");
+            }
+        } catch (_) {}
+
+        // 2. Fallback regex extraction
+        if (!semester) {
+            const semMatch = url.match(/[?&#]semester=(\d+)/i);
+            if (semMatch) semester = semMatch[1];
+        }
+        if (!uid) {
+            const uidMatch = url.match(/[?&#]uid=([a-zA-Z0-9_-]+)/i);
+            if (uidMatch) uid = uidMatch[1];
+        }
+
+        if (semester && uid) {
+            return { semester, uid };
+        }
+    } catch (e) {
+        console.warn("[CheeseFork] URL parse error:", e);
+    }
+    return null;
+}
+
+function cleanTechnionCourseCode(raw) {
+    if (!raw) return '';
+    raw = String(raw).trim();
+    if (raw.length === 8 && (raw.startsWith('00') || raw.startsWith('01'))) {
+        return raw.substring(1, 4) + raw.substring(5);
+    }
+    if (raw.length === 8 && raw.startsWith('03')) {
+        return raw.substring(1);
+    }
+    if (raw.length === 8) {
+        return raw.substring(1, 4) + raw.substring(5);
+    }
+    return raw;
+}
+
+function formatCheeseForkDateToIso(dStr) {
+    if (!dStr || typeof dStr !== 'string') return '';
+    const parts = dStr.trim().split('-');
+    if (parts.length === 3) {
+        if (parts[0].length === 4) return dStr; // already YYYY-MM-DD
+        return `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+    }
+    return dStr;
+}
+
+window.syncLiveCheeseForkData = async function(customUrl = null, isManual = false) {
     const statusDiv = document.getElementById("cheesefork-import-status");
-    statusDiv.style.color = "var(--text-light)";
-    statusDiv.innerText = "Connecting to CheeseFork...";
+    if (statusDiv) {
+        statusDiv.style.color = "var(--text-light)";
+        statusDiv.innerText = "מתחבר לשרת CheeseFork...";
+    }
+
+    const defaultUrl = "https://cheesefork.netlify.app/?semester=202601&uid=D4bh8oHO0GQI5Gx1iYAbWsouBVx2";
+    const targetUrl = customUrl || localStorage.getItem('ast_cheesefork_url') || defaultUrl;
+    const parsed = parseCheeseForkUrl(targetUrl);
+
+    if (!parsed) {
+        const errMsg = "קישור CheeseFork אינו תקין. עליו להכיל מזהה לוח (uid) וסמסטר (semester).";
+        if (statusDiv) {
+            statusDiv.style.color = "#ef4444";
+            statusDiv.innerText = errMsg;
+        }
+        if (isManual && typeof showToastNotification === 'function') {
+            showToastNotification(`⚠️ ${errMsg}`, 'error');
+        }
+        throw new Error(errMsg);
+    }
+
+    const { semester, uid } = parsed;
+    const firestoreUrl = `https://firestore.googleapis.com/v1/projects/cheesefork-de9af/databases/(default)/documents/users/${uid}/semesters/${semester}`;
 
     try {
-        const urlObj = new URL(url);
-        const semester = urlObj.searchParams.get("semester");
-        const uid = urlObj.searchParams.get("uid");
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 9000);
+        
+        const response = await fetch(firestoreUrl, {
+            cache: 'no-cache',
+            signal: controller.signal
+        });
+        clearTimeout(timeoutId);
 
-        if (!uid || !semester) {
-            throw new Error("Invalid link format. Must contain semester and uid.");
+        if (!response.ok) {
+            throw new Error(`שרת CheeseFork החזיר שגיאה (HTTP ${response.status}) - ייתכן שהמערכת טרם פורסמה או שהמזהה שגוי.`);
         }
 
-        const firestoreUrl = `https://firestore.googleapis.com/v1/projects/cheesefork-de9af/databases/(default)/documents/users/${uid}/semesters/${semester}`;
-        
-        const response = await fetch(firestoreUrl);
-        if (!response.ok) throw new Error("Schedule not found on server.");
-        
         const data = await response.json();
-        
-        const coursesField = data.fields[`${semester}_courses`];
+        const fields = data.fields;
+        if (!fields) {
+            throw new Error("לא נמצאו נתונים במסמך CheeseFork.");
+        }
+
+        const coursesField = fields[`${semester}_courses`];
         if (!coursesField || !coursesField.arrayValue || !coursesField.arrayValue.values) {
-            throw new Error("No courses found in this schedule.");
+            throw new Error("לא נמצאו קורסים רשומים במערכת שעות זו.");
         }
 
-        const moodleCodes = coursesField.arrayValue.values.map(v => v.stringValue);
+        const rawCourseCodes = coursesField.arrayValue.values.map(v => v.stringValue);
+        const dayMap = { 'ראשון': 0, 'שני': 1, 'שלישי': 2, 'רביעי': 3, 'חמישי': 4, 'שישי': 5, 'שבת': 6 };
+        const dayNames = ["ראשון", "שני", "שלישי", "רביעי", "חמישי", "שישי", "שבת"];
         
-        // Ensure ME preset is loaded
-        if (!gameState.courses["104041"]) {
-            gameState = JSON.parse(JSON.stringify(INITIAL_STATE));
-            gameState.characterClass = "Student of Mechanical Engineering (Technion)";
-            gameState.courses = JSON.parse(JSON.stringify(SAMPLE_ME_DEGREE));
-        }
+        const timetableDays = [0, 1, 2, 3, 4].map(idx => ({
+            dayIndex: idx,
+            name: dayNames[idx],
+            fullName: `יום ${dayNames[idx]}`,
+            isFree: false,
+            classes: []
+        }));
 
-        let activatedCount = 0;
-        let addedMissingCount = 0;
-        moodleCodes.forEach(moodleCode => {
-            const cleanCode = (moodleCode.length === 8) ? (moodleCode.substring(1, 4) + moodleCode.substring(5)) : moodleCode;
-            let course = gameState.courses[cleanCode];
-            if (course) {
-                if (course.status !== 'mastered') {
-                    course.status = 'active';
-                    activatedCount++;
+        let activatedCoursesCount = 0;
+        let createdElectivesCount = 0;
+        let syncedExamsCount = 0;
+        let totalClassesCount = 0;
+        const seenClassSignatures = new Set();
+
+        rawCourseCodes.forEach(rawCode => {
+            const cleanCode = cleanTechnionCourseCode(rawCode);
+            const groupKey = `${semester}_${rawCode}`;
+            const metaKey = `${semester}_metadata_${rawCode}`;
+
+            // 1. Extract chosen groups
+            const chosenGroups = new Set();
+            if (fields[groupKey] && fields[groupKey].mapValue && fields[groupKey].mapValue.fields) {
+                Object.values(fields[groupKey].mapValue.fields).forEach(valObj => {
+                    const gVal = valObj.integerValue || valObj.stringValue;
+                    if (gVal !== undefined && gVal !== null && gVal !== '') {
+                        chosenGroups.add(String(gVal));
+                    }
+                });
+            }
+
+            // 2. Extract metadata
+            let courseName = `קורס ${cleanCode}`;
+            let moedA = '';
+            let moedB = '';
+            let credits = 3.0;
+
+            if (fields[metaKey] && fields[metaKey].mapValue && fields[metaKey].mapValue.fields) {
+                const meta = fields[metaKey].mapValue.fields;
+                if (meta.general && meta.general.mapValue && meta.general.mapValue.fields) {
+                    const gen = meta.general.mapValue.fields;
+                    if (gen['שם מקצוע'] && gen['שם מקצוע'].stringValue) {
+                        courseName = gen['שם מקצוע'].stringValue;
+                    }
+                    if (gen['מועד א'] && gen['מועד א'].stringValue) {
+                        moedA = formatCheeseForkDateToIso(gen['מועד א'].stringValue);
+                    }
+                    if (gen['מועד ב'] && gen['מועד ב'].stringValue) {
+                        moedB = formatCheeseForkDateToIso(gen['מועד ב'].stringValue);
+                    }
+                    if (gen['נקודות'] && gen['נקודות'].stringValue) {
+                        const parsedCred = parseFloat(gen['נקודות'].stringValue);
+                        if (!isNaN(parsedCred) && parsedCred > 0) credits = parsedCred;
+                    }
                 }
-            } else {
-                // Dynamically create missing elective/sport course!
+
+                // Parse schedule classes
+                if (meta.schedule && meta.schedule.arrayValue && meta.schedule.arrayValue.values) {
+                    meta.schedule.arrayValue.values.forEach(it => {
+                        if (!it.mapValue || !it.mapValue.fields) return;
+                        const f = it.mapValue.fields;
+                        const itemGroup = String(f['מס.']?.integerValue || f['קבוצה']?.integerValue || f['קבוצה']?.stringValue || '');
+                        const itemDay = f['יום']?.stringValue;
+                        const itemTime = f['שעה']?.stringValue;
+                        const itemType = f['סוג']?.stringValue || 'הרצאה';
+                        const itemLecturer = f['מרצה/מתרגל']?.stringValue || '';
+                        const itemRoom = f['חדר']?.stringValue || f['כיתה']?.stringValue || '';
+                        const itemBuilding = f['בניין']?.stringValue || '';
+                        const roomCombined = [itemBuilding, itemRoom].filter(Boolean).join(' ') || 'כיתת טכניון';
+
+                        // Check if item belongs to student (matches selected group, or single group in sports/seminar)
+                        const isMatch = chosenGroups.has(itemGroup) || chosenGroups.size === 0;
+                        if (isMatch && itemDay && itemTime) {
+                            const dayIdx = dayMap[itemDay];
+                            if (dayIdx !== undefined && dayIdx >= 0 && dayIdx <= 4) {
+                                const parts = itemTime.split('-').map(s => s.trim());
+                                const startTime = parts[0] || '08:30';
+                                const endTime = parts[1] || '10:30';
+                                
+                                const sig = `${dayIdx}_${cleanCode}_${startTime}_${endTime}_${itemType}_${itemGroup}`;
+                                if (!seenClassSignatures.has(sig)) {
+                                    seenClassSignatures.add(sig);
+
+                                    // Pick aesthetic card class
+                                    let cardClass = 'timetable-card-default';
+                                    if (cleanCode.includes('114052') || cleanCode.includes('114051')) cardClass = 'timetable-card-physics';
+                                    else if (cleanCode.includes('034053') || cleanCode.includes('034028')) cardClass = 'timetable-card-solids';
+                                    else if (cleanCode.includes('034035') || cleanCode.includes('034033')) cardClass = 'timetable-card-thermo';
+                                    else if (cleanCode.includes('104228') || cleanCode.includes('104131')) cardClass = 'timetable-card-pde';
+                                    else if (cleanCode.includes('034056')) cardClass = 'timetable-card-computing';
+                                    else if (cleanCode.includes('394') || cleanCode.includes('0394')) cardClass = 'timetable-card-yoga';
+
+                                    timetableDays[dayIdx].classes.push({
+                                        courseId: cleanCode,
+                                        courseName: courseName,
+                                        type: itemGroup ? `${itemType} (קבוצה ${itemGroup})` : itemType,
+                                        lecturer: itemLecturer,
+                                        room: roomCombined,
+                                        startTime: startTime,
+                                        endTime: endTime,
+                                        duration: '',
+                                        cardClass: cardClass
+                                    });
+                                    totalClassesCount++;
+                                }
+                            }
+                        }
+                    });
+                }
+            }
+
+            // 3. Sync into gameState.courses
+            if (!gameState.courses) gameState.courses = {};
+            let course = gameState.courses[cleanCode];
+            if (!course) {
+                // Dynamically create elective/sport course if not yet present
                 gameState.courses[cleanCode] = {
                     code: cleanCode,
-                    name: `קורס בחירה ${cleanCode}`,
-                    credits: 3.0,
-                    semester: 1, // default to semester 1
+                    name: courseName,
+                    credits: credits,
+                    semester: gameState.currentActiveSemester || 3,
                     status: 'active',
                     prerequisites: [],
-                    type: 'elective',
-                    tasks: [
-                        { id: `task-${Date.now()}-h1`, title: "תרגיל הגשה 1", type: "hw", completed: false, status: "not_started", xp: 50, dueDate: "" },
-                        { id: `task-${Date.now()}-h2`, title: "תרגיל הגשה 2", type: "hw", completed: false, status: "not_started", xp: 50, dueDate: "" },
-                        { id: `task-${Date.now()}-exam`, title: `מבחן מסכם בקורס ${cleanCode}`, type: "exam", completed: false, status: "not_started", xp: 500, dueDate: "" }
-                    ]
+                    type: cleanCode.startsWith('394') || cleanCode.startsWith('0394') ? 'sport' : 'elective',
+                    tasks: []
                 };
-                addedMissingCount++;
+                course = gameState.courses[cleanCode];
+                createdElectivesCount++;
+            } else {
+                if (course.status !== 'mastered') {
+                    course.status = 'active';
+                    activatedCoursesCount++;
+                }
+                if (courseName && (!course.name || course.name.startsWith('קורס בחירה'))) {
+                    course.name = courseName;
+                }
+            }
+
+            // 4. Sync Exam Dates into Tasks & Dictionary
+            if (moedA || moedB) {
+                if (typeof CHEESEFORK_EXAM_DATES !== 'undefined') {
+                    CHEESEFORK_EXAM_DATES[cleanCode] = {
+                        moedA: moedA || '',
+                        moedB: moedB || '',
+                        name: courseName
+                    };
+                }
+
+                if (!Array.isArray(course.tasks)) course.tasks = [];
+
+                if (moedA) {
+                    let taskA = course.tasks.find(t => t.type === 'exam' && !t.title.includes('מועד ב') && !t.title.includes('מועד ג'));
+                    if (!taskA) {
+                        course.tasks.push({
+                            id: `task-${cleanCode}-exam-a`,
+                            title: `מועד א`,
+                            type: "exam",
+                            completed: false,
+                            status: "not_started",
+                            xp: 500,
+                            dueDate: moedA
+                        });
+                    } else {
+                        taskA.dueDate = moedA;
+                        if (taskA.title.includes('מבחן סופי') || taskA.title.includes('מבחן סוף')) taskA.title = 'מועד א';
+                    }
+                    syncedExamsCount++;
+                }
+
+                if (moedB) {
+                    let taskB = course.tasks.find(t => t.type === 'exam' && t.title.includes('מועד ב'));
+                    if (!taskB) {
+                        course.tasks.push({
+                            id: `task-${cleanCode}-exam-b`,
+                            title: `מועד ב'`,
+                            type: "exam",
+                            completed: false,
+                            status: "not_started",
+                            xp: 500,
+                            dueDate: moedB
+                        });
+                    } else {
+                        taskB.dueDate = moedB;
+                    }
+                    syncedExamsCount++;
+                }
             }
         });
 
-        recalculateCourseStates();
-        saveState();
-        renderUI();
+        // 5. Finalize Timetable Days structure
+        timetableDays.forEach(d => {
+            d.classes.sort((a, b) => a.startTime.localeCompare(b.startTime));
+            d.isFree = d.classes.length === 0;
+        });
 
-        statusDiv.style.color = "var(--color-mastered)";
-        statusDiv.innerText = `Successfully imported ${moodleCodes.length} courses from CheeseFork!`;
-        alert(`CheeseFork schedule imported successfully!\n\nImported ${moodleCodes.length} courses:\n- ${activatedCount} marked as Active in your skill tree.\n- ${addedMissingCount} missing elective/sport courses created dynamically.`);
+        const freeDayIndices = timetableDays.filter(d => d.isFree).map(d => d.dayIndex);
 
+        const newTimetable = {
+            semester: semester,
+            name: `סמסטר ${semester}`,
+            freeDays: freeDayIndices,
+            dayNames: dayNames,
+            syncedAt: new Date().toISOString(),
+            source: 'CheeseFork Live',
+            days: timetableDays
+        };
+
+        gameState.timetable = newTimetable;
+        if (typeof CHEESEFORK_SEMESTER_SCHEDULE !== 'undefined') {
+            CHEESEFORK_SEMESTER_SCHEDULE.days = timetableDays;
+            CHEESEFORK_SEMESTER_SCHEDULE.freeDays = freeDayIndices;
+        }
+
+        // 6. Save State and Sync Timestamp
+        const now = new Date();
+        const dateStr = now.toLocaleDateString('he-IL', { day: 'numeric', month: 'numeric', year: 'numeric' });
+        const timeStr = now.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
+        localStorage.setItem('ast_cheesefork_last_daily_sync', `${dateStr} ${timeStr}`);
+        localStorage.setItem('ast_cheesefork_url', targetUrl);
+
+        if (typeof recalculateCourseStates === 'function') recalculateCourseStates();
+        if (typeof saveState === 'function') saveState();
+
+        // 7. Refresh Active Views
+        if (typeof updateDailyTimetableFocus === 'function') updateDailyTimetableFocus();
+        if (typeof renderTimetableGrid === 'function') renderTimetableGrid();
+        if (typeof renderStudyRunway === 'function') renderStudyRunway();
+        if (typeof renderNotionTasksTable === 'function') renderNotionTasksTable();
+        if (typeof renderUI === 'function') renderUI();
+
+        const successMsg = `סונכרנו בהצלחה ${rawCourseCodes.length} קורסים, ${totalClassesCount} שיעורים שבועיים ו-${syncedExamsCount} מועדי בחינות מ-CheeseFork!`;
+
+        if (statusDiv) {
+            statusDiv.style.color = "var(--color-mastered)";
+            statusDiv.innerText = successMsg;
+        }
+
+        if (isManual && typeof showToastNotification === 'function') {
+            showToastNotification(`🧀 ${successMsg}`, 'success');
+        }
+
+        return {
+            success: true,
+            coursesCount: rawCourseCodes.length,
+            classesCount: totalClassesCount,
+            examsCount: syncedExamsCount
+        };
+
+    } catch (err) {
+        console.error("[CheeseFork] Live sync error:", err);
+        const errMsg = err.message || "שגיאת רשת בעת חיבור ל-CheeseFork";
+        if (statusDiv) {
+            statusDiv.style.color = "#ef4444";
+            statusDiv.innerText = `שגיאה: ${errMsg}`;
+        }
+        if (isManual && typeof showToastNotification === 'function') {
+            showToastNotification(`⚠️ לא ניתן היה לסנכרן כעת מ-CheeseFork: ${errMsg}`, 'error');
+        }
+        throw err;
+    }
+};
+
+async function importFromCheesefork(url) {
+    if (!url) {
+        alert("נא להזין קישור שיתוף של CheeseFork!");
+        return;
+    }
+    const statusDiv = document.getElementById("cheesefork-import-status");
+    if (statusDiv) {
+        statusDiv.style.color = "var(--text-light)";
+        statusDiv.innerText = "מתחבר ל-CheeseFork ומייבא נתונים...";
+    }
+    try {
+        const res = await window.syncLiveCheeseForkData(url, true);
+        alert(`סנכרון CheeseFork הושלם בהצלחה!\n\n- ${res.coursesCount} קורסים נטענו/עודכנו\n- ${res.classesCount} שיעורים שבועיים סונכרנו למערכת השעות\n- ${res.examsCount} מועדי בחינות שובצו אוטומטית במשימות`);
     } catch (e) {
-        console.error("CheeseFork import error:", e);
-        statusDiv.style.color = "#ef4444";
-        statusDiv.innerText = `Error: ${e.message || "Network error"}`;
+        console.warn("[CheeseFork] Import warning:", e);
     }
 }
 
@@ -18148,13 +18471,13 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.10.12-v2.4.1",
-    version: "2.4.1",
-    build: "20261012_04",
-    date: "2026-10-12 21:30",
-    description: "גרסה 2.4.1: שחזור תגית אחוזי התקדמות בתואר בכותרת הראשית (ללא התנגשות כפתורים), הפיכת סמסטר קיץ לאופציונלי בלבד בכל השנתונים (הוספה ומחיקה לפי דרישה בלבד), ובידוד מוחלט של קבצי הוויג'טים בתיקיית גיבוי."
+    code: "REV-2026.10.16-v2.4.4",
+    version: "2.4.4",
+    build: "20261016_01",
+    date: "2026-10-16 10:45",
+    description: "גרסה 2.4.4: סנכרון אמיתי מלא מול CheeseFork (מערכת שעות שבועית, קבוצות הרצאה ותרגול, מועדי בחינות א׳ ו-ב׳ ועדכון קורסים פעילים) ותיקון מקיף למנגנון עדכוני הגרסה וה-Service Worker."
 };
-window.APP_VERSION = "2.4.1";
+window.APP_VERSION = "2.4.4";
 
 function ensureBaselineRevisions() {
     if (!gameState.revisions || !Array.isArray(gameState.revisions) || gameState.revisions.length === 0) {
@@ -19438,8 +19761,13 @@ function renderGradeDistributionHistogram(completedCourses) {
 // ==============================================================================
 
 function compareSemver(v1, v2) {
-    const clean1 = (v1 || '').replace(/^[^\d]*/, '').split('.').map(n => parseInt(n, 10) || 0);
-    const clean2 = (v2 || '').replace(/^[^\d]*/, '').split('.').map(n => parseInt(n, 10) || 0);
+    const clean = (v) => {
+        const m = String(v || '').match(/(\d+)\.(\d+)\.(\d+)/);
+        if (m) return [parseInt(m[1], 10), parseInt(m[2], 10), parseInt(m[3], 10)];
+        return (v || '').replace(/^[^\d]*/, '').split('.').map(n => parseInt(n, 10) || 0);
+    };
+    const clean1 = clean(v1);
+    const clean2 = clean(v2);
     for (let i = 0; i < Math.max(clean1.length, clean2.length); i++) {
         const num1 = clean1[i] || 0;
         const num2 = clean2[i] || 0;
@@ -19452,8 +19780,11 @@ function compareSemver(v1, v2) {
 window.checkRemoteAppVersion = async function(isManualCheck = false) {
     const isElectron = Boolean(window.electronAPI || (window.process && window.process.type === 'renderer') || (navigator.userAgent && navigator.userAgent.includes('Electron')));
     const domVerEl = document.getElementById("display-system-version");
-    const domVer = domVerEl ? domVerEl.innerText.replace(/^v/, "").trim() : "";
-    const currentVer = domVer || (window.APP_VERSION) || (APP_CURRENT_REVISION && APP_CURRENT_REVISION.version) || "2.3.8";
+    let currentVer = (window.APP_VERSION) || (APP_CURRENT_REVISION && APP_CURRENT_REVISION.version) || "2.4.4";
+    if (domVerEl && domVerEl.innerText) {
+        const match = domVerEl.innerText.match(/\b\d+\.\d+\.\d+\b/);
+        if (match) currentVer = match[0];
+    }
     const statusTextEl = document.getElementById("version-check-status-text");
     const footerBadgeEl = document.getElementById("footer-version-badge");
     const checkBtn = document.getElementById("btn-check-version-updates");
@@ -19560,41 +19891,35 @@ window.forceAppUpdate = async function() {
     }
 
     try {
-        sessionStorage.setItem("dismissed_update", "true");
-        localStorage.setItem("semestero_dismissed_update", "true");
+        sessionStorage.removeItem("dismissed_update");
+        localStorage.removeItem("semestero_dismissed_update");
     } catch (e) {}
 
     try {
-        // 1. Post skipWaiting to all active service workers
+        // 1. Post skipWaiting to all active service workers and unregister
         if ('serviceWorker' in navigator) {
             const regs = await navigator.serviceWorker.getRegistrations();
             for (const reg of regs) {
                 try {
                     if (reg.waiting) reg.waiting.postMessage({ action: 'skipWaiting' });
                     if (reg.active) reg.active.postMessage({ action: 'skipWaiting' });
+                    await reg.unregister();
                 } catch (e) {}
             }
         }
 
-        // 2. Clear old browser caches
+        // 2. Clear all browser caches
         if ('caches' in window) {
             const cacheKeys = await caches.keys();
             await Promise.all(cacheKeys.map(k => caches.delete(k)));
         }
-
-        // 3. Unregister service worker to force fresh fetch
-        if ('serviceWorker' in navigator) {
-            const regs = await navigator.serviceWorker.getRegistrations();
-            await Promise.all(regs.map(r => r.unregister().catch(() => {})));
-        }
-
-        // 4. Force hard navigation reload with cache buster
-        const cleanUrl = window.location.origin + window.location.pathname + '?v_clean=' + Date.now() + window.location.hash;
-        window.location.replace(cleanUrl);
     } catch (e) {
-        console.warn("[Update] forceAppUpdate fallback reload:", e);
-        window.location.reload(true);
+        console.warn("[Update] Cache clear warning:", e);
     }
+
+    // 3. Force hard navigation reload with cache buster
+    const cleanUrl = window.location.origin + window.location.pathname + '?v_app=' + Date.now() + window.location.hash;
+    window.location.replace(cleanUrl);
 };
 
 window.openSmartScreenGuideModal = function() {
@@ -19974,12 +20299,12 @@ function getLiveClassStatus(startTime, endTime) {
 }
 
 function getActiveTimetableSchedule() {
-    if (window.AuthSync && typeof window.AuthSync.isAdirActive === 'function' && window.AuthSync.isAdirActive()) {
-        return CHEESEFORK_SEMESTER_SCHEDULE;
-    }
     const curState = (window.getGlobalGameState ? window.getGlobalGameState() : window.gameState);
     if (curState && curState.timetable && curState.timetable.days && curState.timetable.days.length > 0) {
         return curState.timetable;
+    }
+    if (typeof CHEESEFORK_SEMESTER_SCHEDULE !== 'undefined' && CHEESEFORK_SEMESTER_SCHEDULE && CHEESEFORK_SEMESTER_SCHEDULE.days && CHEESEFORK_SEMESTER_SCHEDULE.days.length > 0) {
+        return CHEESEFORK_SEMESTER_SCHEDULE;
     }
     return null;
 }
@@ -20303,26 +20628,26 @@ function setupDailyTimetable() {
     // 3. Manual Sync Button
     const syncBtn = document.getElementById('btn-sync-cheesefork-now');
     if (syncBtn) {
-        syncBtn.addEventListener('click', () => {
+        syncBtn.addEventListener('click', async () => {
             syncBtn.disabled = true;
             const btnText = document.getElementById('btn-sync-text');
-            if (btnText) btnText.innerText = 'מסנכרן...';
+            if (btnText) btnText.innerText = 'מתחבר ל-CheeseFork...';
 
-            setTimeout(() => {
-                const now = new Date();
-                const dateStr = now.toLocaleDateString('he-IL', { day: 'numeric', month: 'numeric', year: 'numeric' });
-                const timeStr = now.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
-                localStorage.setItem('ast_cheesefork_last_daily_sync', `${dateStr} ${timeStr}`);
-                
-                updateDailyTimetableFocus();
-                
+            try {
+                if (typeof window.syncLiveCheeseForkData === 'function') {
+                    await window.syncLiveCheeseForkData(null, true);
+                } else {
+                    updateDailyTimetableFocus();
+                }
+            } catch (err) {
+                console.error('[Timetable] Sync button error:', err);
+                if (typeof showToastNotification === 'function') {
+                    showToastNotification('שגיאה בסנכרון מול CheeseFork: ' + (err.message || err), 'error');
+                }
+            } finally {
                 syncBtn.disabled = false;
                 if (btnText) btnText.innerText = 'סנכרן להיום';
-
-                if (typeof showToastNotification === 'function') {
-                    showToastNotification(`מערכת השעות סונכרנה ועודכנה להיום (${dateStr})!`, 'success');
-                }
-            }, 600);
+            }
         });
     }
 
