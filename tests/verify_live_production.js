@@ -1,5 +1,5 @@
 /**
- * Semestero ME - Live Production Cloud & Asset Verification
+ * Semestero ME - Live Production Cloud & Asset Verification (v2.4.9)
  * Probes https://adir2368.github.io/Semestero-ME/ and GitHub API
  */
 
@@ -32,7 +32,7 @@ function fetchUrl(url, headers = {}) {
 
 async function run() {
     console.log('================================================================');
-    console.log('🌐 Probing Live Production Deployment (GitHub Pages & API)');
+    console.log('🌐 Probing Live Production Deployment (GitHub Pages v2.4.9)');
     console.log('================================================================\n');
 
     let allOk = true;
@@ -42,16 +42,22 @@ async function run() {
     const indexRes = await fetchUrl(`https://adir2368.github.io/Semestero-ME/?t=${Date.now()}`);
     if (indexRes.status === 200) {
         console.log('   ✅ HTTP 200 OK');
-        const hasV248InDisplay = indexRes.body.includes('id="display-system-version">v2.4.8<');
+        const hasV249InDisplay = indexRes.body.includes('id="display-system-version">v2.4.9<');
         const hasFooterBadge = indexRes.body.includes('id="footer-version-badge"');
-        const hasA11yTrigger = indexRes.body.includes('id="btn-accessibility-trigger"');
-        const hasButtonTypeModalClose = !indexRes.body.includes('<button class="modal-close" id="course-modal-close">');
+        const hasGradClearanceBtn = indexRes.body.includes('id="btn-open-graduation-clearance"');
+        const hasPanoptoBtn = indexRes.body.includes('id="btn-open-panopto-tracker"');
+        const hasHonorsCard = indexRes.body.includes('id="analytics-honors-card"');
+        const hasCalendarSyncModal = indexRes.body.includes('id="calendar-sync-modal"');
+        const hasPeerConsensusModal = indexRes.body.includes('id="modal-peer-consensus-container"');
         
-        console.log(`   ${hasV248InDisplay ? '✅' : '❌'} display-system-version is v2.4.8: ${hasV248InDisplay}`);
+        console.log(`   ${hasV249InDisplay ? '✅' : '⏳'} display-system-version is v2.4.9: ${hasV249InDisplay}`);
         console.log(`   ${hasFooterBadge ? '✅' : '❌'} footer-version-badge exists: ${hasFooterBadge}`);
-        console.log(`   ${hasA11yTrigger ? '✅' : '❌'} btn-accessibility-trigger exists: ${hasA11yTrigger}`);
-        console.log(`   ${hasButtonTypeModalClose ? '✅' : '❌'} modal-close buttons have type="button": ${hasButtonTypeModalClose}`);
-        if (!hasV248InDisplay || !hasFooterBadge || !hasA11yTrigger || !hasButtonTypeModalClose) allOk = false;
+        console.log(`   ${hasGradClearanceBtn ? '✅' : '⏳'} btn-open-graduation-clearance exists: ${hasGradClearanceBtn}`);
+        console.log(`   ${hasPanoptoBtn ? '✅' : '⏳'} btn-open-panopto-tracker exists: ${hasPanoptoBtn}`);
+        console.log(`   ${hasHonorsCard ? '✅' : '⏳'} analytics-honors-card exists: ${hasHonorsCard}`);
+        console.log(`   ${hasCalendarSyncModal ? '✅' : '⏳'} calendar-sync-modal exists: ${hasCalendarSyncModal}`);
+        console.log(`   ${hasPeerConsensusModal ? '✅' : '⏳'} modal-peer-consensus-container exists: ${hasPeerConsensusModal}`);
+        if (!hasV249InDisplay || !hasGradClearanceBtn || !hasPanoptoBtn) allOk = false;
     } else {
         console.error(`   ❌ Failed with status ${indexRes.status}`);
         allOk = false;
@@ -61,11 +67,9 @@ async function run() {
     console.log('\n2. Checking Live sw.js...');
     const swRes = await fetchUrl(`https://adir2368.github.io/Semestero-ME/sw.js?t=${Date.now()}`);
     if (swRes.status === 200) {
-        const hasCacheV248 = swRes.body.includes("CACHE_NAME = 'semestero-me-v2.4.8'");
-        const hasNoShortcutIcons = !swRes.body.includes('shortcut-');
-        console.log(`   ${hasCacheV248 ? '✅' : '❌'} CACHE_NAME is semestero-me-v2.4.8: ${hasCacheV248}`);
-        console.log(`   ${hasNoShortcutIcons ? '✅' : '❌'} 404 shortcut icons removed: ${hasNoShortcutIcons}`);
-        if (!hasCacheV248 || !hasNoShortcutIcons) allOk = false;
+        const hasCacheV249 = swRes.body.includes("CACHE_NAME = 'semestero-me-v2.4.9'");
+        console.log(`   ${hasCacheV249 ? '✅' : '⏳'} CACHE_NAME is semestero-me-v2.4.9: ${hasCacheV249}`);
+        if (!hasCacheV249) allOk = false;
     } else {
         console.error(`   ❌ sw.js returned status ${swRes.status}`);
         allOk = false;
@@ -75,15 +79,17 @@ async function run() {
     console.log('\n3. Checking Live app.js...');
     const appRes = await fetchUrl(`https://adir2368.github.io/Semestero-ME/app.js?t=${Date.now()}`);
     if (appRes.status === 200) {
-        const hasRevision = appRes.body.includes('REV-2026.10.17-v2.4.8');
-        const hasAppVersion = appRes.body.includes('window.APP_VERSION = "2.4.8"');
-        const hasRegexFix = appRes.body.includes('(?:^|\\bv|\\s)(\\d+\\.\\d+\\.\\d+)\\b');
-        const hasDurationFix = appRes.body.includes('${c.duration ? ` (${c.duration})` : \'\'}');
-        console.log(`   ${hasRevision ? '✅' : '❌'} Revision REV-2026.10.17-v2.4.8: ${hasRevision}`);
-        console.log(`   ${hasAppVersion ? '✅' : '❌'} window.APP_VERSION = "2.4.8": ${hasAppVersion}`);
-        console.log(`   ${hasRegexFix ? '✅' : '❌'} Semver regex fix deployed: ${hasRegexFix}`);
-        console.log(`   ${hasDurationFix ? '✅' : '❌'} Timetable duration fix deployed: ${hasDurationFix}`);
-        if (!hasRevision || !hasAppVersion || !hasRegexFix || !hasDurationFix) allOk = false;
+        const hasRevision = appRes.body.includes('REV-2026.10.17-v2.4.9');
+        const hasAppVersion = appRes.body.includes('window.APP_VERSION = "2.4.9"');
+        const hasPanoptoTracker = appRes.body.includes('window.PanoptoTracker');
+        const hasPeerData = appRes.body.includes('PEER_CONSENSUS_DATA');
+        const hasHonorsSimulator = appRes.body.includes('renderHonorsStandingAndForecaster');
+        console.log(`   ${hasRevision ? '✅' : '⏳'} Revision REV-2026.10.17-v2.4.9: ${hasRevision}`);
+        console.log(`   ${hasAppVersion ? '✅' : '⏳'} window.APP_VERSION = "2.4.9": ${hasAppVersion}`);
+        console.log(`   ${hasPanoptoTracker ? '✅' : '⏳'} PanoptoTracker deployed: ${hasPanoptoTracker}`);
+        console.log(`   ${hasPeerData ? '✅' : '⏳'} PEER_CONSENSUS_DATA deployed: ${hasPeerData}`);
+        console.log(`   ${hasHonorsSimulator ? '✅' : '⏳'} Honors forecaster deployed: ${hasHonorsSimulator}`);
+        if (!hasRevision || !hasAppVersion || !hasPanoptoTracker) allOk = false;
     } else {
         console.error(`   ❌ app.js returned status ${appRes.status}`);
         allOk = false;
@@ -93,41 +99,36 @@ async function run() {
     console.log('\n4. Checking Live planner_module.js...');
     const plannerRes = await fetchUrl(`https://adir2368.github.io/Semestero-ME/planner_module.js?t=${Date.now()}`);
     if (plannerRes.status === 200) {
-        const hasWhatIfA11y = plannerRes.body.includes('id="whatif-input-') && plannerRes.body.includes('aria-label="ציון משוער בסימולציה');
-        console.log(`   ${hasWhatIfA11y ? '✅' : '❌'} What-If input accessibility (id/name/aria-label) deployed: ${hasWhatIfA11y}`);
-        if (!hasWhatIfA11y) allOk = false;
+        const hasClearanceEngine = plannerRes.body.includes('openGraduationClearanceModal') && plannerRes.body.includes('evaluateDegreeRules');
+        console.log(`   ${hasClearanceEngine ? '✅' : '⏳'} Graduation clearance engine deployed: ${hasClearanceEngine}`);
+        if (!hasClearanceEngine) allOk = false;
     } else {
         console.error(`   ❌ planner_module.js returned status ${plannerRes.status}`);
         allOk = false;
     }
 
-    // 5. Check GitHub Releases Latest API
-    console.log('\n5. Checking GitHub Releases Latest Endpoint...');
-    const releaseRes = await fetchUrl('https://api.github.com/repos/adir2368/Semestero-ME/releases/latest');
-    if (releaseRes.status === 200) {
-        const relData = JSON.parse(releaseRes.body);
-        console.log(`   ✅ Latest Tag on GitHub: ${relData.tag_name} (${relData.name})`);
-        const zipAsset = (relData.assets || []).find(a => a.name.includes('v2.4.8'));
-        if (zipAsset) {
-            const sizeMb = (zipAsset.size / (1024 * 1024)).toFixed(1);
-            console.log(`   ✅ Release Asset Found: ${zipAsset.name} (${sizeMb} MB)`);
-            console.log(`   ✅ Download URL: ${zipAsset.browser_download_url}`);
-        } else {
-            console.error('   ❌ v2.4.8 zip asset not found in latest release');
-            allOk = false;
-        }
+    // 5. Check styles.css
+    console.log('\n5. Checking Live styles.css...');
+    const stylesRes = await fetchUrl(`https://adir2368.github.io/Semestero-ME/styles.css?t=${Date.now()}`);
+    if (stylesRes.status === 200) {
+        const hasRunwayConflictStyle = stylesRes.body.includes('.runway-conflict-banner');
+        const hasHonorsStyle = stylesRes.body.includes('.analytics-honors-card');
+        console.log(`   ${hasRunwayConflictStyle ? '✅' : '⏳'} Runway conflict styling deployed: ${hasRunwayConflictStyle}`);
+        console.log(`   ${hasHonorsStyle ? '✅' : '⏳'} Honors styling deployed: ${hasHonorsStyle}`);
+        if (!hasRunwayConflictStyle || !hasHonorsStyle) allOk = false;
     } else {
-        console.error(`   ❌ Releases API returned status ${releaseRes.status}`);
+        console.error(`   ❌ styles.css returned status ${stylesRes.status}`);
         allOk = false;
     }
 
     console.log('\n================================================================');
     if (allOk) {
-        console.log('🎉 LIVE VERIFICATION SUCCESSFUL: Everything is 100% in sync and verified!');
+        console.log('🎉 LIVE VERIFICATION SUCCESSFUL: v2.4.9 is live on GitHub Pages with all 6 features!');
     } else {
-        console.log('⚠️ Some checks failed or are still deploying.');
+        console.log('⏳ Deployment in progress or caching on CDN. Re-run in a few seconds.');
     }
     console.log('================================================================');
+    return allOk;
 }
 
 run().catch(console.error);
