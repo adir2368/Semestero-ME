@@ -6,7 +6,7 @@
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "pack": "electron-packager . \"Semestero ME\" --platform=win32 --arch=x64 --icon=icon.ico --out=dist --overwrite"
+    "pack": "electron-packager . \"Semestero ME\" --platform=win32 --arch=x64 --icon=icon.ico --out=dist --overwrite --ignore=\"^(dist|backups|_backup_widgets|graphify-out)\""
   },
   "keywords": [
     "academic",
