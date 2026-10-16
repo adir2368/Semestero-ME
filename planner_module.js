@@ -1057,6 +1057,35 @@
         };
     }
 
+    function getDownstreamDependentViolations(courseObj, targetSemester, plan) {
+        if (!courseObj || !plan || !Array.isArray(plan)) return [];
+        const courseCodes = new Set(getNormalizedCodes(courseObj.code, courseObj.altCode));
+        const violations = [];
+        plan.forEach(semObj => {
+            const sNum = semObj.semester;
+            if (sNum <= targetSemester) {
+                (semObj.courses || []).forEach(c => {
+                    const cKeys = getNormalizedCodes(c.code, c.altCode);
+                    if (cKeys.some(k => courseCodes.has(k))) return; // Ignore self
+                    if (isCourseCompleted(c.code, c.altCode)) return;
+
+                    const prereqs = c.prereqs || c.prerequisites || [];
+                    const dependsOnThis = prereqs.some(p => {
+                        const normP = getNormalizedCodes(p, p);
+                        return normP.some(k => courseCodes.has(k));
+                    });
+                    if (dependsOnThis) {
+                        violations.push({
+                            dependentCourse: c,
+                            dependentSemester: sNum
+                        });
+                    }
+                });
+            }
+        });
+        return violations;
+    }
+
     function highlightMissingPrerequisites(missingCodes, reasonMsg, targetSemester) {
         showPlannerToast(reasonMsg, true);
 
@@ -2658,6 +2687,7 @@
 
         // === PREREQUISITE & TERM OFFERING VALIDATION ===
         const prereqStatus = checkPrerequisites(courseObj, targetSemester, activeCourseMap);
+        const dependentViolations = getDownstreamDependentViolations(courseObj, targetSemester, customPlan);
         const isWinter = (targetSemester % 2 === 1 && !targetSemObj.isSummer);
         const isSpring = (targetSemester % 2 === 0 && !targetSemObj.isSummer);
         const isSummer = targetSemObj.isSummer || targetSemObj.type === 'summer';
@@ -2671,9 +2701,18 @@
         if (!prereqStatus.valid) {
             violations.push({
                 type: 'prereqs',
-                title: 'דרישות קדם חסרות בסמסטרים קודמים',
-                message: `דרישות קדם שטרם מולאו: ${prereqStatus.missing.join(', ')}`,
+                title: 'חסימת קדם: דרישות קדם טרם הושלמו',
+                message: `לא ניתן לשבץ את "${courseObj.name}" בסמסטר ${targetSemester} לפני קורסי הקדם שלו: ${prereqStatus.missing.join(', ')}`,
                 codes: prereqStatus.missingCodes
+            });
+        }
+
+        if (dependentViolations.length > 0) {
+            const depList = dependentViolations.map(d => `• ${d.dependentCourse.name} (${d.dependentCourse.code}) בסמסטר ${d.dependentSemester}`).join('\n');
+            violations.push({
+                type: 'dependent_violation',
+                title: 'חסימת הזזה: קורס המשך תלוי בקורס זה כקדם',
+                message: `לא ניתן להעביר את "${courseObj.name}" לסמסטר ${targetSemester} מכיוון שקורסים הבאים תלויים בו כקדם ומשובצים בסמסטר מוקדם או זהה:\n${depList}`
             });
         }
 
@@ -2749,12 +2788,15 @@
         };
 
         if (violations.length > 0) {
+            const isStrictPrereqBlocked = violations.some(v => v.type === 'prereqs' || v.type === 'dependent_violation');
             highlightMissingPrerequisites(
-                prereqStatus.missingCodes,
-                `התראת שיבוץ עבור "${courseObj.name}" בסמסטר ${targetSemester}`,
+                prereqStatus.missingCodes || [],
+                isStrictPrereqBlocked 
+                    ? `❌ חסימת שיבוץ: לא ניתן לשבץ קורס לפני קורסי הקדם שלו!`
+                    : `התראת שיבוץ עבור "${courseObj.name}" בסמסטר ${targetSemester}`,
                 targetSemester
             );
-            openCoursePlacementGuardModal(courseObj, targetSemester, sourceSemester, data, violations, applyPlacement);
+            openCoursePlacementGuardModal(courseObj, targetSemester, sourceSemester, data, violations, isStrictPrereqBlocked ? null : applyPlacement);
             return;
         }
 
@@ -2826,26 +2868,33 @@
             const semTitle = isSummer ? (s.title || (s.yearLabel ? `סמסטר קיץ ${s.yearLabel} ☀️` : 'סמסטר קיץ ☀️')) : `סמסטר ${semNum}`;
             const prereqCheck = checkPrerequisites(course, semNum, activeMap);
             const isValidPrereq = prereqCheck.valid;
+            const depViolations = getDownstreamDependentViolations(course, semNum, customPlan);
+            const isValidDep = depViolations.length === 0;
             const summerCheck = isSummer && global.PLANNER_CATALOG && global.PLANNER_CATALOG.isCourseOfferedInSummer
                 ? global.PLANNER_CATALOG.isCourseOfferedInSummer(course.code, course)
                 : { offered: true, note: '' };
             const isSummerBlocked = isSummer && !summerCheck.offered;
-            const isValid = isValidPrereq && !isSummerBlocked;
+            const isValid = isValidPrereq && isValidDep && !isSummerBlocked;
 
             let statusText = '✓ זמין לשיבוץ';
             let statusColor = '#34d399';
             if (!isValidPrereq) {
-                statusText = '⚠️ קדמים חסרים';
-                statusColor = '#f87171';
+                statusText = '⛔ חסום (קדמים חסרים)';
+                statusColor = '#ef4444';
+            } else if (!isValidDep) {
+                statusText = '⛔ חסום (קורס המשך)';
+                statusColor = '#ef4444';
             } else if (isSummerBlocked) {
                 statusText = '⚠️ לא מוצע בקיץ';
                 statusColor = '#f87171';
             }
 
+            const isStrictlyBlocked = !isValidPrereq || !isValidDep;
+
             return `
-                <button type="button" class="btn btn-outline sem-choice-btn" data-semester="${semNum}" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 12px; border-radius: 8px; border: 1px solid ${isValid ? 'rgba(56, 189, 248, 0.35)' : 'rgba(239, 68, 68, 0.35)'}; background: ${isValid ? 'rgba(15, 23, 42, 0.7)' : 'rgba(239, 68, 68, 0.08)'}; cursor: pointer; transition: all 0.15s ease;">
+                <button type="button" class="btn btn-outline sem-choice-btn" data-semester="${semNum}" ${isStrictlyBlocked ? 'disabled="disabled"' : ''} style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 12px; border-radius: 8px; border: 1px solid ${isValid ? 'rgba(56, 189, 248, 0.35)' : 'rgba(239, 68, 68, 0.35)'}; background: ${isValid ? 'rgba(15, 23, 42, 0.7)' : 'rgba(239, 68, 68, 0.08)'}; cursor: ${isStrictlyBlocked ? 'not-allowed' : 'pointer'}; opacity: ${isStrictlyBlocked ? '0.45' : '1'}; transition: all 0.15s ease;">
                     <span style="font-weight: 700; color: #f8fafc; font-size: 0.95rem;">${escapeHtml(semTitle)}</span>
-                    <span style="font-size: 0.72rem; color: ${statusColor}; margin-top: 4px;">${statusText}</span>
+                    <span style="font-size: 0.72rem; color: ${statusColor}; margin-top: 4px; font-weight: 600;">${statusText}</span>
                 </button>
             `;
         }).join('');
@@ -2878,6 +2927,7 @@
 
         modal.querySelectorAll('.sem-choice-btn').forEach(btn => {
             btn.addEventListener('click', () => {
+                if (btn.disabled) return;
                 const chosenSem = parseFloat(btn.getAttribute('data-semester'));
                 closeModal();
                 handleCourseDrop({ type: 'pool-elective', code: course.code }, chosenSem);
@@ -3026,6 +3076,28 @@
                 return false;
             }
 
+            // Strict prerequisite and dependent validation
+            const activeMap = buildCourseSemesterMap(customPlan);
+            const prereqCheck = checkPrerequisites(foundCourse, semNum, activeMap);
+            if (!prereqCheck.valid) {
+                console.warn(`[DegreePlanner.setCourseSemester] Prerequisite validation failed for ${foundCourse.name}:`, prereqCheck.missing);
+                if (typeof showPlannerToast === 'function') {
+                    showPlannerToast(`❌ לא ניתן לשבץ את "${foundCourse.name}" בסמסטר ${semNum}: קורסי קדם חסרים (${prereqCheck.missing.join(', ')})`, true);
+                }
+                saveCustomPlan(true);
+                return false;
+            }
+            const depViolations = getDownstreamDependentViolations(foundCourse, semNum, customPlan);
+            if (depViolations.length > 0) {
+                const dep = depViolations[0];
+                console.warn(`[DegreePlanner.setCourseSemester] Dependent course violation for ${foundCourse.name}:`, dep);
+                if (typeof showPlannerToast === 'function') {
+                    showPlannerToast(`❌ לא ניתן להעביר את "${foundCourse.name}" לסמסטר ${semNum}: הקורס "${dep.dependentCourse.name}" משובץ בסמסטר ${dep.dependentSemester} ותלוי בו כקדם!`, true);
+                }
+                saveCustomPlan(true);
+                return false;
+            }
+
             let targetSemObj = customPlan.find(s => s.semester === semNum);
             if (!targetSemObj) {
                 const isSummer = semNum % 1 !== 0;
@@ -3113,18 +3185,20 @@
             document.body.appendChild(modal);
         }
 
+        const isStrictPrereqBlocked = violations.some(v => v.type === 'prereqs' || v.type === 'dependent_violation') || !onConfirmPlacement;
+
         const violationItemsHtml = violations.map(v => `
             <div style="background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.35); border-radius: 6px; padding: 10px 12px; margin-bottom: 8px;">
-                <div style="color: #f87171; font-weight: bold; font-size: 0.85rem; margin-bottom: 3px;">⚠️ ${escapeHtml(v.title)}</div>
-                <div style="color: #cbd5e1; font-size: 0.8rem; line-height: 1.4;">${escapeHtml(v.message)}</div>
+                <div style="color: #f87171; font-weight: bold; font-size: 0.85rem; margin-bottom: 3px;">${v.type === 'prereqs' || v.type === 'dependent_violation' ? '⛔' : '⚠️'} ${escapeHtml(v.title)}</div>
+                <div style="color: #cbd5e1; font-size: 0.8rem; line-height: 1.4; white-space: pre-line;">${escapeHtml(v.message)}</div>
             </div>
         `).join('');
 
         modal.innerHTML = `
-            <div class="modal-card" style="background: #161c2e; border: 1px solid #334155; border-radius: 12px; padding: 22px; width: 90%; max-width: 460px; direction: rtl; box-shadow: 0 10px 30px rgba(0,0,0,0.6);">
+            <div class="modal-card" style="background: #161c2e; border: 1px solid ${isStrictPrereqBlocked ? '#ef4444' : '#334155'}; border-radius: 12px; padding: 22px; width: 90%; max-width: 480px; direction: rtl; box-shadow: 0 10px 30px rgba(0,0,0,0.6);">
                 <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
-                    <span style="font-size: 1.4rem;">⚠️</span>
-                    <h3 style="margin: 0; font-size: 1.1rem; color: #f8fafc; font-weight: 700;">התראת שיבוץ קורס: ${escapeHtml(courseObj.name)}</h3>
+                    <span style="font-size: 1.4rem;">${isStrictPrereqBlocked ? '⛔' : '⚠️'}</span>
+                    <h3 style="margin: 0; font-size: 1.1rem; color: #f8fafc; font-weight: 700;">${isStrictPrereqBlocked ? 'חסימת שיבוץ (דרישות קדם)' : 'התראת שיבוץ קורס'}: ${escapeHtml(courseObj.name)}</h3>
                 </div>
                 <div style="font-size: 0.82rem; color: #94a3b8; margin-bottom: 14px;">
                     ניסית לשבץ את הקורס ב<strong>סמסטר ${targetSemester}</strong>, אך התגלו המגבלות הבאות:
@@ -3132,26 +3206,39 @@
                 <div style="margin-bottom: 18px;">
                     ${violationItemsHtml}
                 </div>
-                <div style="font-size: 0.82rem; color: #f1f5f9; font-weight: 600; margin-bottom: 12px;">
-                    מה ברצונך לעשות?
-                </div>
-                <div style="display: flex; flex-direction: column; gap: 8px;">
-                    <button type="button" id="btn-guard-override" style="background: rgba(251, 191, 36, 0.2); border: 1px solid #fbbf24; color: #fbbf24; padding: 9px 14px; border-radius: 6px; font-weight: bold; font-size: 0.85rem; cursor: pointer; text-align: right; transition: all 0.15s ease;">
-                        ⚡ שבץ בכל זאת (אישור חריג / לימוד קדם במקביל)
+                ${isStrictPrereqBlocked ? `
+                    <div style="background: rgba(239, 68, 68, 0.18); border: 1px solid rgba(239, 68, 68, 0.5); border-radius: 8px; padding: 10px 12px; margin-bottom: 14px; text-align: center;">
+                        <div style="color: #f87171; font-weight: 800; font-size: 0.88rem; margin-bottom: 2px;">⛔ שיבוץ זה אינו מורשה</div>
+                        <div style="color: #fecaca; font-size: 0.80rem;">אין אפשרות לשבץ קורס לפני קורסי הקדם שלו, ולא ניתן להעביר קורס קדם מעבר לקורסים התלויים בו.</div>
+                    </div>
+                    <button type="button" id="btn-guard-cancel" style="background: #2563eb; border: none; color: #ffffff; padding: 10px 16px; border-radius: 6px; font-weight: 700; font-size: 0.88rem; cursor: pointer; width: 100%; transition: all 0.15s ease;">
+                        ✕ הבנתי, בטל פעולה והשאר את הקורס במקומו
                     </button>
-                    <button type="button" id="btn-guard-cancel" style="background: #1e293b; border: 1px solid #475569; color: #cbd5e1; padding: 9px 14px; border-radius: 6px; font-weight: 600; font-size: 0.85rem; cursor: pointer; text-align: right; transition: all 0.15s ease;">
-                        ✕ בטל פעולה והשאר את הקורס במקומו
-                    </button>
-                </div>
+                ` : `
+                    <div style="font-size: 0.82rem; color: #f1f5f9; font-weight: 600; margin-bottom: 12px;">
+                        מה ברצונך לעשות?
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                        <button type="button" id="btn-guard-override" style="background: rgba(251, 191, 36, 0.2); border: 1px solid #fbbf24; color: #fbbf24; padding: 9px 14px; border-radius: 6px; font-weight: bold; font-size: 0.85rem; cursor: pointer; text-align: right; transition: all 0.15s ease;">
+                            ⚡ שבץ בכל זאת (אישור חריג)
+                        </button>
+                        <button type="button" id="btn-guard-cancel" style="background: #1e293b; border: 1px solid #475569; color: #cbd5e1; padding: 9px 14px; border-radius: 6px; font-weight: 600; font-size: 0.85rem; cursor: pointer; text-align: right; transition: all 0.15s ease;">
+                            ✕ בטל פעולה והשאר את הקורס במקומו
+                        </button>
+                    </div>
+                `}
             </div>
         `;
 
         modal.style.display = 'flex';
 
-        document.getElementById('btn-guard-override').onclick = () => {
-            modal.style.display = 'none';
-            onConfirmPlacement(true);
-        };
+        const overrideBtn = document.getElementById('btn-guard-override');
+        if (overrideBtn) {
+            overrideBtn.onclick = () => {
+                modal.style.display = 'none';
+                if (typeof onConfirmPlacement === 'function') onConfirmPlacement(true);
+            };
+        }
         document.getElementById('btn-guard-cancel').onclick = () => {
             modal.style.display = 'none';
         };

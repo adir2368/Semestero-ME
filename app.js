@@ -18,6 +18,11 @@ function getSemesterStats(semNumber) {
 
     list.forEach(c => {
         if (c.status === 'exempt') return; // Skip alternative track courses (e.g. Physics 1 vs 1M)
+        if (['114071', '104016', '104166', '01140071'].includes(c.code) && !c.grade && c.status !== 'mastered') return;
+        if (c.mutuallyExclusiveWith && Array.isArray(c.mutuallyExclusiveWith)) {
+            const hasMasteredPartner = c.mutuallyExclusiveWith.some(code => gameState.courses && gameState.courses[code] && (gameState.courses[code].status === 'mastered' || (gameState.courses[code].grade && Number(gameState.courses[code].grade) >= 55)));
+            if (hasMasteredPartner && c.status !== 'mastered') return;
+        }
         const cr = c.credits || 0;
         totalCredits += cr;
         if (c.status !== 'mastered') {
@@ -9716,7 +9721,7 @@ function updateHud() {
 
     const xpText = document.getElementById("xp-text");
     if (xpText) {
-        xpText.innerHTML = `<bdi dir="ltr">${earnedCredits} / ${totalDegreeCredits}</bdi> נק״ז (${progressPercent.toFixed(1)}%)`;
+        xpText.innerHTML = `<bdi dir="ltr">${earnedCredits} / ${totalDegreeCredits}</bdi> נק״ז`;
     }
 
     const statCredits = document.getElementById("stat-credits");
@@ -9741,7 +9746,7 @@ function updateHud() {
         const termNames = ["", "א׳", "ב׳", "ג׳", "ד׳", "ה׳", "ו׳", "ז׳", "ח׳"];
         for (let s = 1; s <= 8; s++) {
             const stats = getSemesterStats(s);
-            if (stats.isCompleted && stats.gpa > 0) {
+            if (stats.gpa > 0) {
                 completedGpaList.push(`סמסטר ${termNames[s]}: ${stats.gpa.toFixed(2)}`);
             }
         }
@@ -10933,6 +10938,45 @@ function handleAddCourseSubmit(e) {
     const isBinaryToggle = document.getElementById("add-course-binary-pass");
     const isBinaryPass = !!(isBinaryToggle && isBinaryToggle.checked);
 
+    // Prerequisite placement check: cannot place course in semester <= any unfinished prerequisite's semester
+    for (const p of prerequisites) {
+        if (p === code || (editingCourseCode && p === editingCourseCode)) continue;
+        const pCourse = gameState.courses[p];
+        if (pCourse) {
+            const isCompleted = pCourse.status === 'mastered' || (pCourse.grade && Number(pCourse.grade) >= 55) || pCourse.isBinaryPass;
+            if (!isCompleted) {
+                const pSem = Number(pCourse.semester || 1);
+                if (pSem >= semester) {
+                    const msg = `לא ניתן לשבץ את הקורס בסמסטר ${semester} לפני קורס הקדם "${pCourse.name}" (${pCourse.code}) המשובץ בסמסטר ${pSem}!`;
+                    if (typeof showToastNotification === 'function') showToastNotification(msg, 'error');
+                    else alert(msg);
+                    return;
+                }
+            }
+        }
+    }
+
+    // Downstream dependent courses check: cannot move prerequisite past courses depending on it
+    if (editingCourseCode) {
+        const thisKeys = [editingCourseCode, code, (editingCourseCode || '').replace(/^0+/, ''), (code || '').replace(/^0+/, '')];
+        for (const otherCourse of Object.values(gameState.courses || {})) {
+            if (!otherCourse || otherCourse.code === editingCourseCode || otherCourse.code === code) continue;
+            const otherPrereqs = otherCourse.prerequisites || otherCourse.prereqs || [];
+            const hasDep = otherPrereqs.some(p => thisKeys.includes(p) || thisKeys.includes(p.replace(/^0+/, '')));
+            if (hasDep) {
+                const isOtherMastered = otherCourse.status === 'mastered' || (otherCourse.grade && Number(otherCourse.grade) >= 55);
+                if (isOtherMastered) continue;
+                const otherSem = Number(otherCourse.semester || 1);
+                if (otherSem <= semester) {
+                    const msg = `לא ניתן להעביר את הקורס לסמסטר ${semester}: הקורס "${otherCourse.name}" (${otherCourse.code}) משובץ בסמסטר ${otherSem} ותלוי בו כקדם!`;
+                    if (typeof showToastNotification === 'function') showToastNotification(msg, 'error');
+                    else alert(msg);
+                    return;
+                }
+            }
+        }
+    }
+
     if (editingCourseCode) {
         const oldCode = editingCourseCode;
         if (code !== oldCode && gameState.courses[code]) {
@@ -11489,6 +11533,58 @@ function openCourseDetails(code) {
         newSem = parseFloat(newSem);
         if (isNaN(newSem) || newSem < 1) return;
         if (newSem === 9) newSem = 2.5;
+
+        // Strict prerequisite and dependent validation
+        const validatePrereqs = (crs, targetSem) => {
+            const prereqs = crs.prerequisites || crs.prereqs || [];
+            for (const p of prereqs) {
+                if (p === crs.code) continue;
+                const pCourse = gameState.courses && (gameState.courses[p] || gameState.courses[p.replace(/^0+/, '')]);
+                const isMastered = pCourse && (pCourse.status === 'mastered' || (pCourse.grade && Number(pCourse.grade) >= 55) || pCourse.isBinaryPass);
+                if (isMastered) continue;
+
+                const pSem = pCourse ? Number(pCourse.semester || 1) : null;
+                const pName = pCourse ? pCourse.name : p;
+                if (pSem === null || isNaN(pSem)) {
+                    return { valid: false, message: `קורס הקדם "${pName}" (${p}) טרם שובץ או הושלם!` };
+                }
+                if (pSem >= targetSem) {
+                    return { valid: false, message: `לא ניתן לשבץ את "${crs.name}" בסמסטר ${targetSem} לפני קורס הקדם "${pName}" (${p}) המשובץ בסמסטר ${pSem}!` };
+                }
+            }
+
+            const thisKeys = [crs.code, (crs.code || '').replace(/^0+/, '')];
+            if (crs.altCode) thisKeys.push(crs.altCode, String(crs.altCode).replace(/^0+/, ''));
+            for (const otherCourse of Object.values(gameState.courses || {})) {
+                if (!otherCourse || otherCourse.code === crs.code) continue;
+                const otherPrereqs = otherCourse.prerequisites || otherCourse.prereqs || [];
+                const hasDep = otherPrereqs.some(p => thisKeys.includes(p) || thisKeys.includes(p.replace(/^0+/, '')));
+                if (hasDep) {
+                    const isOtherMastered = otherCourse.status === 'mastered' || (otherCourse.grade && Number(otherCourse.grade) >= 55);
+                    if (isOtherMastered) continue;
+                    const otherSem = Number(otherCourse.semester || 1);
+                    if (otherSem <= targetSem) {
+                        return { valid: false, message: `לא ניתן להעביר את "${crs.name}" לסמסטר ${targetSem}: הקורס "${otherCourse.name}" (${otherCourse.code}) משובץ בסמסטר ${otherSem} ותלוי בו כקדם!` };
+                    }
+                }
+            }
+            return { valid: true };
+        };
+
+        const prereqCheck = validatePrereqs(course, newSem);
+        if (!prereqCheck.valid) {
+            if (typeof showToastNotification === 'function') {
+                showToastNotification(`❌ חסימת שיבוץ: ${prereqCheck.message}`, 'error');
+            } else {
+                alert(`חסימת שיבוץ: ${prereqCheck.message}`);
+            }
+            if (semesterSelect) {
+                const cur = Number(course.semester) === 9 ? 2.5 : Number(course.semester || 1);
+                semesterSelect.value = String(cur);
+            }
+            return;
+        }
+
         course.semester = newSem;
 
         // Persist to planner module so customPlan is updated and never reverts on re-render
@@ -16212,9 +16308,9 @@ function renderFlowchartTree() {
                 const semStats = getSemesterStats(row.sem);
                 const hasActive = Object.values(gameState.courses || {}).some(c => (c.semester || 1) == row.sem && c.status === 'active');
                 
-                if (semStats.isCompleted && semStats.gpa > 0) {
+                if (semStats.gpa > 0) {
                     const gpaFormatted = semStats.gpa.toFixed(2);
-                    const breakdown = (semStats.list || []).map(c => `• ${c.name}: ${c.grade || '-'}`).join('&#10;');
+                    const breakdown = (semStats.list || []).filter(c => c.grade !== undefined && c.grade !== null && c.grade !== '').map(c => `• ${c.name}: ${c.grade || '-'}`).join('&#10;');
                     const tooltip = `${row.year} / ${row.term} הושלם בהצלחה!&#10;ממוצע סמסטריאלי: ${gpaFormatted} (${semStats.gradedCredits} נק״ז)&#10;${breakdown}`;
                     return `
                         <g class="fc-semester-badge-group completed" title="${tooltip}">
