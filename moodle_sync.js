@@ -604,6 +604,7 @@
                         dueTimestamp: dueDateObj.getTime(),
                         xp: 50,
                         completed: false,
+                        status: 'not_started',
                         moodleUid: uid,
                         moodleEventId: eventId,
                         moodleUrl: moodleUrl,

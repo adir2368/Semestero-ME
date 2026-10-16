@@ -14186,8 +14186,8 @@ function renderNotionTasksTable() {
         else if (t.status === 'submitted') displayLabel = 'Submitted';
         else if (t.status === 'done') displayLabel = 'done';
         else if (t.status === 'late') displayLabel = 'Late';
-        else if (t.status === 'not_started') displayLabel = 'not started';
-        else displayLabel = STATUS_LABELS[t.status] || t.status;
+        else if (t.status === 'not_started' || !t.status) displayLabel = 'not started';
+        else displayLabel = (typeof STATUS_LABELS !== 'undefined' && STATUS_LABELS[t.status]) || t.status || 'not started';
         
         let moodleUrl = t.moodleUrl || '';
         if (!moodleUrl && (t.moodleEventId || t.source === 'moodle')) {
@@ -18592,13 +18592,13 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.10.16-v2.4.7",
-    version: "2.4.7",
-    build: "20261016_04",
-    date: "2026-10-16 23:25",
-    description: "גרסה 2.4.7: תיקון מטמון Service Worker והסרת סמלילים חסרים, יישור קו של Preload תמונות, הנגשה מלאה בתקן WCAG 2.1 AA (הוספת aria-label לכלל השדות), ניקוי תגיות וסגנונות כפולים."
+    code: "REV-2026.10.17-v2.4.8",
+    version: "2.4.8",
+    build: "20261017_01",
+    date: "2026-10-17 00:15",
+    description: "גרסה 2.4.8: תיקון קריטי במנגנון בדיקת העדכונים (התאמת ביטוי רגולרי לזיהוי גרסה מול רוויזיה), חיבור תפריט נגישות ייעודי ופונקציות גלובליות, הסרת סוגריים ריקים במערכת שעות, תיקון תצוגת סטטוס משימות מודל (undefined), הנגשת שדות סימולטור What-If (הוספת id/name/aria-label לכלל 72 השדות), והמרת כפתורי סגירת מודאלים ל-type=button."
 };
-window.APP_VERSION = "2.4.7";
+window.APP_VERSION = "2.4.8";
 
 function ensureBaselineRevisions() {
     if (!gameState.revisions || !Array.isArray(gameState.revisions) || gameState.revisions.length === 0) {
@@ -19925,11 +19925,12 @@ function compareSemver(v1, v2) {
 window.checkRemoteAppVersion = async function(isManualCheck = false) {
     const isElectron = Boolean(window.electronAPI || (window.process && window.process.type === 'renderer') || (navigator.userAgent && navigator.userAgent.includes('Electron')));
     const domVerEl = document.getElementById("display-system-version");
-    let currentVer = (window.APP_VERSION) || (APP_CURRENT_REVISION && APP_CURRENT_REVISION.version) || "2.4.5";
-    if (domVerEl && domVerEl.innerText) {
-        const match = domVerEl.innerText.match(/\b\d+\.\d+\.\d+\b/);
-        if (match) currentVer = match[0];
+    let currentVer = (window.APP_VERSION) || (typeof APP_CURRENT_REVISION !== 'undefined' && APP_CURRENT_REVISION && APP_CURRENT_REVISION.version);
+    if (!currentVer && domVerEl && domVerEl.innerText) {
+        const match = domVerEl.innerText.match(/(?:^|\bv|\s)(\d+\.\d+\.\d+)\b/);
+        if (match) currentVer = match[1];
     }
+    currentVer = currentVer || "2.4.8";
     const statusTextEl = document.getElementById("version-check-status-text");
     const footerBadgeEl = document.getElementById("footer-version-badge");
     const checkBtn = document.getElementById("btn-check-version-updates");
@@ -20503,7 +20504,7 @@ function renderTimetableGrid() {
 
                 bodyHtml += `
                     <div class="timetable-card ${c.cardClass || ''}" onclick="if (typeof openCourseDetails === 'function') openCourseDetails('${c.courseId}')">
-                        <div class="timetable-card-time">⏰ ${c.startTime} - ${c.endTime} (${c.duration || ''})</div>
+                        <div class="timetable-card-time">⏰ ${c.startTime} - ${c.endTime}${c.duration ? ` (${c.duration})` : ''}</div>
                         <div class="timetable-card-title">${c.courseName} (${c.courseId})</div>
                         <div class="timetable-card-meta">
                             <span class="timetable-tag">${c.type}</span>

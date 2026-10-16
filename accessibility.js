@@ -150,4 +150,11 @@
             modal.setAttribute('aria-hidden', 'false');
         }
     };
+    window.closeAccessibilityModal = function() {
+        const modal = document.getElementById('accessibility-modal');
+        if (modal) {
+            modal.classList.remove('active');
+            modal.setAttribute('aria-hidden', 'true');
+        }
+    };
 })();

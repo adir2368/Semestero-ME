@@ -1584,6 +1584,9 @@
                                 <div class="course-card-whatif-wrap" title="ציון משוער בסימולטור">
                                     <span style="font-size: 0.68rem; color: #fde047;">ציון:</span>
                                     <input type="number" min="0" max="100" class="course-card-whatif-input" 
+                                           id="whatif-input-${escapeHtml(course.code)}"
+                                           name="whatif-input-${escapeHtml(course.code)}"
+                                           aria-label="ציון משוער בסימולציה לקורס ${escapeHtml(course.name || course.code)}"
                                            data-code="${escapeHtml(course.code)}" 
                                            value="${whatIfGrades[course.code] !== undefined ? whatIfGrades[course.code] : defaultWhatIfGrade}">
                                 </div>
