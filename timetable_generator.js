@@ -1013,6 +1013,14 @@
         },
 
         computeAndRender: function () {
+            if (global.gameState && global.gameState.courses) {
+                const activeCodes = Object.values(global.gameState.courses)
+                    .filter(c => c.status === 'active' || Number(c.semester) === 3)
+                    .map(c => c.code);
+                if (activeCodes.length > 0 && (!this.selectedCourses || this.selectedCourses.length === 0)) {
+                    this.selectedCourses = Array.from(new Set(activeCodes));
+                }
+            }
             const activeAnchors = this.getActiveAnchorGroups();
             this.options = generateTimetableCombinations(this.selectedCourses, {
                 sortBy: this.currentSort,
