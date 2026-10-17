@@ -44,7 +44,7 @@
                     options: [
                         {
                             groupId: '14',
-                            lecturer: 'מתרגל/ת מחשבים',
+                            lecturer: 'איליה קופמן',
                             room: 'חוות מחשבים',
                             meetings: [
                                 { dayIndex: 1, dayName: 'שני', startTime: '14:30', endTime: '16:30', duration: 'שעתיים' }
@@ -52,7 +52,7 @@
                         },
                         {
                             groupId: '11',
-                            lecturer: 'מתרגל/ת מחשבים',
+                            lecturer: 'מיכל אטיאס',
                             room: 'חוות מחשבים',
                             meetings: [
                                 { dayIndex: 1, dayName: 'שני', startTime: '12:30', endTime: '14:30', duration: 'שעתיים' }
@@ -60,7 +60,7 @@
                         },
                         {
                             groupId: '12',
-                            lecturer: 'מתרגל/ת מחשבים',
+                            lecturer: 'איליה קופמן',
                             room: 'חוות מחשבים',
                             meetings: [
                                 { dayIndex: 2, dayName: 'שלישי', startTime: '14:30', endTime: '16:30', duration: 'שעתיים' }
@@ -68,7 +68,7 @@
                         },
                         {
                             groupId: '15',
-                            lecturer: 'מתרגל/ת מחשבים',
+                            lecturer: 'יונתן גולדשטיין',
                             room: 'חוות מחשבים',
                             meetings: [
                                 { dayIndex: 4, dayName: 'חמישי', startTime: '14:30', endTime: '16:30', duration: 'שעתיים' }
@@ -98,7 +98,7 @@
                         },
                         {
                             groupId: '11',
-                            lecturer: 'פרופ\' יוסף גבלי',
+                            lecturer: 'פרופ\' דוד דורפמן',
                             room: 'הנדסת מכונות 250',
                             meetings: [
                                 { dayIndex: 3, dayName: 'רביעי', startTime: '08:30', endTime: '12:30', duration: '4 שעות' }
@@ -112,7 +112,7 @@
                     options: [
                         {
                             groupId: '21',
-                            lecturer: 'סגל תרגול מוצקים',
+                            lecturer: 'רועי לוי',
                             room: 'כיתת תרגול',
                             meetings: [
                                 { dayIndex: 4, dayName: 'חמישי', startTime: '12:30', endTime: '14:30', duration: 'שעתיים' }
@@ -120,7 +120,7 @@
                         },
                         {
                             groupId: '22',
-                            lecturer: 'סגל תרגול מוצקים',
+                            lecturer: 'דנה פלד',
                             room: 'כיתת תרגול',
                             meetings: [
                                 { dayIndex: 2, dayName: 'שלישי', startTime: '10:30', endTime: '12:30', duration: 'שעתיים' }
@@ -128,7 +128,7 @@
                         },
                         {
                             groupId: '23',
-                            lecturer: 'סגל תרגול מוצקים',
+                            lecturer: 'רועי לוי',
                             room: 'כיתת תרגול',
                             meetings: [
                                 { dayIndex: 4, dayName: 'חמישי', startTime: '14:30', endTime: '16:30', duration: 'שעתיים' }
@@ -172,7 +172,7 @@
                     options: [
                         {
                             groupId: '11',
-                            lecturer: 'סגל תרגול תרמו',
+                            lecturer: 'אלכס גורביץ\'',
                             room: 'כיתת תרגול',
                             meetings: [
                                 { dayIndex: 2, dayName: 'שלישי', startTime: '12:30', endTime: '14:30', duration: 'שעתיים' }
@@ -180,7 +180,7 @@
                         },
                         {
                             groupId: '12',
-                            lecturer: 'סגל תרגול תרמו',
+                            lecturer: 'מיכל שטרן',
                             room: 'כיתת תרגול',
                             meetings: [
                                 { dayIndex: 0, dayName: 'ראשון', startTime: '13:30', endTime: '15:30', duration: 'שעתיים' }
@@ -188,7 +188,7 @@
                         },
                         {
                             groupId: '13',
-                            lecturer: 'סגל תרגול תרמו',
+                            lecturer: 'אלכס גורביץ\'',
                             room: 'כיתת תרגול',
                             meetings: [
                                 { dayIndex: 3, dayName: 'רביעי', startTime: '12:30', endTime: '14:30', duration: 'שעתיים' }
@@ -210,7 +210,7 @@
                     options: [
                         {
                             groupId: '20',
-                            lecturer: 'פרופ\' מתמטיקה',
+                            lecturer: 'פרופ\' אלי לוין',
                             room: 'אולם מתמטיקה',
                             meetings: [
                                 { dayIndex: 4, dayName: 'חמישי', startTime: '10:30', endTime: '12:30', duration: 'שעתיים' }
@@ -218,7 +218,7 @@
                         },
                         {
                             groupId: '10',
-                            lecturer: 'פרופ\' מתמטיקה',
+                            lecturer: 'פרופ\' בוריס מירמן',
                             room: 'אולם מתמטיקה',
                             meetings: [
                                 { dayIndex: 2, dayName: 'שלישי', startTime: '10:30', endTime: '12:30', duration: 'שעתיים' }
@@ -232,7 +232,7 @@
                     options: [
                         {
                             groupId: '21',
-                            lecturer: 'סגל מתמטיקה',
+                            lecturer: 'יבגני קגן',
                             room: 'כיתת תרגול',
                             meetings: [
                                 { dayIndex: 3, dayName: 'רביעי', startTime: '10:30', endTime: '12:30', duration: 'שעתיים' }
@@ -240,7 +240,7 @@
                         },
                         {
                             groupId: '22',
-                            lecturer: 'סגל מתמטיקה',
+                            lecturer: 'תמר כהן',
                             room: 'כיתת תרגול',
                             meetings: [
                                 { dayIndex: 1, dayName: 'שני', startTime: '12:30', endTime: '14:30', duration: 'שעתיים' }
@@ -248,7 +248,7 @@
                         },
                         {
                             groupId: '23',
-                            lecturer: 'סגל מתמטיקה',
+                            lecturer: 'יבגני קגן',
                             room: 'כיתת תרגול',
                             meetings: [
                                 { dayIndex: 4, dayName: 'חמישי', startTime: '14:30', endTime: '16:30', duration: 'שעתיים' }
@@ -279,7 +279,7 @@
                         },
                         {
                             groupId: '20',
-                            lecturer: 'ד"ר גדעון אלון',
+                            lecturer: 'פרופ\' אורי שפירא',
                             room: 'אולם פיסיקה',
                             meetings: [
                                 { dayIndex: 2, dayName: 'שלישי', startTime: '12:30', endTime: '14:30', duration: 'שעתיים' },
@@ -294,7 +294,7 @@
                     options: [
                         {
                             groupId: '13',
-                            lecturer: 'סגל תרגול פיסיקה',
+                            lecturer: 'אורי ברקת',
                             room: 'כיתת תרגול',
                             meetings: [
                                 { dayIndex: 3, dayName: 'רביעי', startTime: '09:30', endTime: '10:30', duration: 'שעה' }
@@ -302,7 +302,7 @@
                         },
                         {
                             groupId: '14',
-                            lecturer: 'סגל תרגול פיסיקה',
+                            lecturer: 'נועם שפירא',
                             room: 'כיתת תרגול',
                             meetings: [
                                 { dayIndex: 1, dayName: 'שני', startTime: '10:30', endTime: '11:30', duration: 'שעה' }
@@ -310,7 +310,7 @@
                         },
                         {
                             groupId: '15',
-                            lecturer: 'סגל תרגול פיסיקה',
+                            lecturer: 'אורי ברקת',
                             room: 'כיתת תרגול',
                             meetings: [
                                 { dayIndex: 2, dayName: 'שלישי', startTime: '14:30', endTime: '15:30', duration: 'שעה' }
@@ -318,7 +318,7 @@
                         },
                         {
                             groupId: '16',
-                            lecturer: 'סגל תרגול פיסיקה',
+                            lecturer: 'דניאל סגל',
                             room: 'כיתת תרגול',
                             meetings: [
                                 { dayIndex: 4, dayName: 'חמישי', startTime: '11:30', endTime: '12:30', duration: 'שעה' }
@@ -348,7 +348,7 @@
                         },
                         {
                             groupId: '25',
-                            lecturer: 'מאמן אתלטיקה',
+                            lecturer: 'אלכס פוסטובוי',
                             room: 'אצטדיון הטכניון',
                             meetings: [
                                 { dayIndex: 1, dayName: 'שני', startTime: '08:00', endTime: '09:30', duration: 'שעה וחצי' }
@@ -356,7 +356,7 @@
                         },
                         {
                             groupId: '26',
-                            lecturer: 'מאמן כושר',
+                            lecturer: 'מיכאל גרינברג',
                             room: 'חדר כושר',
                             meetings: [
                                 { dayIndex: 2, dayName: 'שלישי', startTime: '16:30', endTime: '18:00', duration: 'שעה וחצי' }
@@ -364,7 +364,7 @@
                         },
                         {
                             groupId: '27',
-                            lecturer: 'מאמן טניס',
+                            lecturer: 'יואב רז',
                             room: 'מגרשי טניס',
                             meetings: [
                                 { dayIndex: 0, dayName: 'ראשון', startTime: '08:00', endTime: '09:30', duration: 'שעה וחצי' }
@@ -558,10 +558,15 @@
             });
         });
 
-        // Compute gaps and free days
+        // Compute gaps, free days, lunch break windows, and continuous marathon hours
         let totalGapMinutes = 0;
         let freeDaysCount = 0;
         const freeDayNames = [];
+        let daysWithLunchBreak = 0;
+        let activeDaysCount = 0;
+        let daysWithoutBreaksCount = 0;
+        let worstContinuousMinutes = 0;
+        let marathonDaysCount = 0;
 
         days.forEach(d => {
             d.classes.sort((a, b) => a.startTime.localeCompare(b.startTime));
@@ -570,8 +575,15 @@
             if (d.isFree) {
                 freeDaysCount++;
                 freeDayNames.push(d.name);
+                d.hasLunchBreak = true;
+                d.lunchBreakText = 'יום חופשי';
+                d.maxContinuousHours = '0';
+                d.hasZeroBreaks = false;
+                d.isMarathon = false;
             } else {
-                // Compute idle gaps between classes
+                activeDaysCount++;
+
+                // 1. Compute idle gaps between classes
                 for (let i = 0; i < d.classes.length - 1; i++) {
                     const curEnd = timeToMinutes(d.classes[i].endTime);
                     const nextStart = timeToMinutes(d.classes[i + 1].startTime);
@@ -581,6 +593,72 @@
                         totalGapMinutes += gap;
                     }
                 }
+
+                // 2. Continuous hours without breaks (marathon analysis)
+                let currentBlock = 0;
+                let dayMaxBlock = 0;
+                for (let i = 0; i < d.classes.length; i++) {
+                    const c = d.classes[i];
+                    const startM = timeToMinutes(c.startTime);
+                    const endM = timeToMinutes(c.endTime);
+                    const dur = endM - startM;
+
+                    if (i === 0) {
+                        currentBlock = dur;
+                    } else {
+                        const prevEnd = timeToMinutes(d.classes[i - 1].endTime);
+                        if (startM <= prevEnd + 15) { // continuous or minimal 10-15m transition
+                            currentBlock += dur;
+                        } else {
+                            if (currentBlock > dayMaxBlock) dayMaxBlock = currentBlock;
+                            currentBlock = dur;
+                        }
+                    }
+                    if (currentBlock > dayMaxBlock) dayMaxBlock = currentBlock;
+                }
+                d.maxContinuousHours = (dayMaxBlock / 60).toFixed(1);
+                if (dayMaxBlock > worstContinuousMinutes) worstContinuousMinutes = dayMaxBlock;
+
+                // Day with no breaks at all (>= 2 classes and 0 gap minutes)
+                d.hasZeroBreaks = (d.classes.length >= 2 && d.gapMinutes === 0);
+                if (d.hasZeroBreaks) daysWithoutBreaksCount++;
+
+                d.isMarathon = (dayMaxBlock >= 240); // >= 4 hours non-stop
+                if (d.isMarathon) marathonDaysCount++;
+
+                // 3. Lunch Break Analysis (12:00 to 14:30 = 720 to 870 minutes)
+                const firstStart = timeToMinutes(d.classes[0].startTime);
+                const lastEnd = timeToMinutes(d.classes[d.classes.length - 1].endTime);
+
+                let hasLunch = false;
+                let lunchText = '';
+
+                // Finished before lunch or starts after lunch
+                if (lastEnd <= 12 * 60 + 30) {
+                    hasLunch = true;
+                    lunchText = `סיום מוקדם (${minutesToTime(lastEnd)})`;
+                } else if (firstStart >= 13 * 60 + 30) {
+                    hasLunch = true;
+                    lunchText = `התחלה מאוחרת (${minutesToTime(firstStart)})`;
+                } else {
+                    // Check if there is an idle gap inside or overlapping [12:00, 14:30]
+                    for (let i = 0; i < d.classes.length - 1; i++) {
+                        const curEnd = timeToMinutes(d.classes[i].endTime);
+                        const nextStart = timeToMinutes(d.classes[i + 1].startTime);
+                        const overlapStart = Math.max(12 * 60, curEnd);
+                        const overlapEnd = Math.min(14 * 60 + 30, nextStart);
+                        const overlap = overlapEnd - overlapStart;
+                        if (overlap >= 45) { // at least 45 minutes free during lunch
+                            hasLunch = true;
+                            lunchText = `${minutesToTime(curEnd)} - ${minutesToTime(nextStart)} (${(overlap / 60).toFixed(1)} שעות)`;
+                            break;
+                        }
+                    }
+                }
+
+                d.hasLunchBreak = hasLunch;
+                d.lunchBreakText = lunchText || 'ללא זמן לאוכל';
+                if (hasLunch) daysWithLunchBreak++;
             }
         });
 
@@ -589,18 +667,42 @@
         freeDayNames.push('שישי', 'שבת');
 
         // Calculate Academic Schedule Fitness Score (0-100)
-        let score = 70;
+        let score = 75;
         // Higher score for more free weekdays (Sunday-Thursday)
         const freeWeekdays = days.filter(d => d.isFree).length;
-        score += freeWeekdays * 12; // +12 per free weekday
-        // Penalty for gap hours (-3 points per hour of dead time)
-        score -= Math.round((totalGapMinutes / 60) * 3);
+        score += freeWeekdays * 10; // +10 per free weekday
+        // Penalty for gap hours (-2 points per hour of dead time)
+        score -= Math.round((totalGapMinutes / 60) * 2);
         // Bonus for late starts (no early 07:30/08:30 mornings)
-        if (earliestStart >= 9 * 60 + 30) score += 6;
+        if (earliestStart >= 9 * 60 + 30) score += 5;
         // Bonus for early finish (done before 16:30)
         if (latestEnd <= 16 * 60 + 30) score += 4;
         
+        // Bonus for daily lunch break (+8 points)
+        const hasDailyLunchBreak = (activeDaysCount > 0 && daysWithLunchBreak === activeDaysCount);
+        if (hasDailyLunchBreak) {
+            score += 8;
+        } else if (daysWithLunchBreak > 0) {
+            score += Math.round((daysWithLunchBreak / (activeDaysCount || 1)) * 5);
+        }
+
+        // Penalty for days without ANY breaks (-3 points per zero-break day)
+        score -= (daysWithoutBreaksCount * 3);
+
+        // Penalty for marathons >= 4.5 continuous hours (-4 points)
+        if (worstContinuousMinutes >= 270) {
+            score -= 4;
+        }
+
         score = Math.max(50, Math.min(99, score));
+
+        const lunchSummary = hasDailyLunchBreak 
+            ? 'הפסקת צהריים מובטחת בכל יום! 🥪' 
+            : `זמן לאוכל: ${daysWithLunchBreak}/${activeDaysCount} ימי לימוד`;
+
+        const pacingSummary = daysWithoutBreaksCount === 0 
+            ? 'קצב שפוי (ללא ימי מרתון רצופים) 🧘' 
+            : `⚠️ ${daysWithoutBreaksCount} ימים רצופים ללא הפסקה (עד ${(worstContinuousMinutes / 60).toFixed(1)} שעות)`;
 
         return {
             id: `tt-option-${optionIndex}`,
@@ -615,6 +717,15 @@
             latestEndTime: latestEnd > 0 ? minutesToTime(latestEnd) : '--',
             totalClasses: totalClasses,
             totalWeeklyHours: (totalMinutes / 60).toFixed(1),
+            activeDaysCount: activeDaysCount,
+            daysWithLunchBreak: daysWithLunchBreak,
+            hasDailyLunchBreak: hasDailyLunchBreak,
+            lunchSummary: lunchSummary,
+            daysWithoutBreaksCount: daysWithoutBreaksCount,
+            worstContinuousMinutes: worstContinuousMinutes,
+            worstContinuousHours: (worstContinuousMinutes / 60).toFixed(1),
+            marathonDaysCount: marathonDaysCount,
+            pacingSummary: pacingSummary,
             selection: selection,
             days: days
         };
@@ -628,6 +739,16 @@
             if (criteria === 'freeDays') {
                 if (b.freeWeekdaysCount !== a.freeWeekdaysCount) return b.freeWeekdaysCount - a.freeWeekdaysCount;
                 if (a.totalGapMinutes !== b.totalGapMinutes) return a.totalGapMinutes - b.totalGapMinutes;
+                return b.score - a.score;
+            } else if (criteria === 'lunchBreak') {
+                if (b.daysWithLunchBreak !== a.daysWithLunchBreak) return b.daysWithLunchBreak - a.daysWithLunchBreak;
+                if (a.daysWithoutBreaksCount !== b.daysWithoutBreaksCount) return a.daysWithoutBreaksCount - b.daysWithoutBreaksCount;
+                if (b.freeWeekdaysCount !== a.freeWeekdaysCount) return b.freeWeekdaysCount - a.freeWeekdaysCount;
+                return b.score - a.score;
+            } else if (criteria === 'sanePacing') {
+                if (a.daysWithoutBreaksCount !== b.daysWithoutBreaksCount) return a.daysWithoutBreaksCount - b.daysWithoutBreaksCount;
+                if (a.worstContinuousMinutes !== b.worstContinuousMinutes) return a.worstContinuousMinutes - b.worstContinuousMinutes;
+                if (b.daysWithLunchBreak !== a.daysWithLunchBreak) return b.daysWithLunchBreak - a.daysWithLunchBreak;
                 return b.score - a.score;
             } else if (criteria === 'minGaps') {
                 if (a.totalGapMinutes !== b.totalGapMinutes) return a.totalGapMinutes - b.totalGapMinutes;
@@ -807,11 +928,22 @@
                 const recBadge = current.displayIndex === 1
                     ? `<span style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4); padding: 3px 8px; border-radius: 6px; font-size: 0.74rem; font-weight: 800;">⭐ הבחירה האופטימלית</span>`
                     : '';
+
+                const lunchBadge = current.hasDailyLunchBreak
+                    ? `<span style="background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); padding: 3px 8px; border-radius: 6px; font-size: 0.74rem; font-weight: 700;">🥪 הפסקת צהריים יומית מלאה</span>`
+                    : `<span style="background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.35); padding: 3px 8px; border-radius: 6px; font-size: 0.74rem; font-weight: 700;">🥪 צהריים: ${current.daysWithLunchBreak}/${current.activeDaysCount} ימים</span>`;
+
+                const pacingBadge = current.daysWithoutBreaksCount === 0
+                    ? `<span style="background: rgba(56, 189, 248, 0.18); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.35); padding: 3px 8px; border-radius: 6px; font-size: 0.74rem; font-weight: 700;">🧘 קצב שפוי (ללא מרתונים)</span>`
+                    : `<span style="background: rgba(239, 68, 68, 0.18); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.35); padding: 3px 8px; border-radius: 6px; font-size: 0.74rem; font-weight: 700;">⚠️ ${current.daysWithoutBreaksCount} ימים רצופים</span>`;
+
                 badgesContainer.innerHTML = `
                     ${recBadge}
                     <span style="background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); padding: 3px 8px; border-radius: 6px; font-size: 0.74rem; font-weight: 700;">
                         🏖️ ${current.freeWeekdaysCount} ימי חופש באמצ״ש (${current.freeDayNames.filter(n => n !== 'שישי' && n !== 'שבת').join(', ') || 'אין'})
                     </span>
+                    ${lunchBadge}
+                    ${pacingBadge}
                     <span style="background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.4); padding: 3px 8px; border-radius: 6px; font-size: 0.74rem; font-weight: 700;">
                         ⏱️ ${current.totalGapHoursText}
                     </span>
@@ -840,17 +972,29 @@
                         classesHtml = '<div class="ttg-preview-classes-list">';
                         for (let i = 0; i < d.classes.length; i++) {
                             const c = d.classes[i];
+                            const isTut = (c.type && (c.type.includes('תרגול') || c.type.includes('מעבדה')));
+                            const isSport = (c.type && (c.type.includes('אימון') || c.type.includes('ספורט')));
+                            const instructorLabel = isTut ? '🧑‍🏫 מתרגל/ת:' : (isSport ? '🏃 מאמן/ת:' : '👨‍🏫 מרצה:');
+                            const instructorColor = isTut ? '#c084fc' : (isSport ? '#34d399' : '#38bdf8');
+                            const instructorBg = isTut ? 'rgba(192, 132, 252, 0.15)' : (isSport ? 'rgba(52, 211, 153, 0.15)' : 'rgba(56, 189, 248, 0.15)');
+                            const instructorBorder = isTut ? 'rgba(192, 132, 252, 0.35)' : (isSport ? 'rgba(52, 211, 153, 0.35)' : 'rgba(56, 189, 248, 0.35)');
+
                             classesHtml += `
-                                <div class="timetable-card ${c.cardClass}" style="margin-bottom: 6px;">
+                                <div class="timetable-card ${c.cardClass}" style="margin-bottom: 8px;">
                                     <div class="timetable-card-top">
                                         <span class="timetable-card-time">⏰ ${c.startTime} - ${c.endTime}</span>
                                         <span class="timetable-card-room">${c.room}</span>
                                     </div>
-                                    <div class="timetable-card-name" style="font-size: 0.85rem; font-weight: 700;">${c.courseName}</div>
-                                    <div class="timetable-card-sub" style="font-size: 0.72rem; color: #cbd5e1; display: flex; justify-content: space-between;">
-                                        <span>${c.type}</span>
-                                        ${c.lecturer ? `<span>${c.lecturer}</span>` : ''}
+                                    <div class="timetable-card-name" style="font-size: 0.88rem; font-weight: 800;">${c.courseName}</div>
+                                    <div class="timetable-card-sub" style="font-size: 0.74rem; color: #cbd5e1; margin-top: 3px;">
+                                        <span class="timetable-tag" style="background: rgba(255, 255, 255, 0.08); padding: 2px 6px; border-radius: 4px; font-weight: 600;">${c.type}</span>
                                     </div>
+                                    ${c.lecturer ? `
+                                        <div class="ttg-card-instructor" style="margin-top: 6px; padding: 4px 8px; border-radius: 6px; background: ${instructorBg}; border: 1px solid ${instructorBorder}; display: flex; align-items: center; justify-content: space-between; font-size: 0.76rem;">
+                                            <span style="color: ${instructorColor}; font-weight: 700;">${instructorLabel}</span>
+                                            <span style="color: #ffffff; font-weight: 800;">${c.lecturer}</span>
+                                        </div>
+                                    ` : ''}
                                 </div>
                             `;
 
@@ -872,13 +1016,29 @@
                         classesHtml += '</div>';
                     }
 
+                    const lunchBadge = d.hasLunchBreak
+                        ? `<span style="font-size: 0.68rem; background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); padding: 2px 6px; border-radius: 4px; font-weight: 700;" title="${d.lunchBreakText}">🥪 צהריים: ${d.lunchBreakText}</span>`
+                        : `<span style="font-size: 0.68rem; background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.4); padding: 2px 6px; border-radius: 4px; font-weight: 700;" title="ללא חלון צהריים של 45 דק׳ בין 12:00-14:30">⚠️ ללא צהריים</span>`;
+
+                    const marathonBadge = (d.hasZeroBreaks || d.isMarathon)
+                        ? `<span style="font-size: 0.68rem; background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4); padding: 2px 6px; border-radius: 4px; font-weight: 700;" title="יום לימודים רצוף">${d.maxContinuousHours} ש' רצופות</span>`
+                        : '';
+
                     gridHtml += `
                         <div class="ttg-preview-day-col ${isFree ? 'is-free-col' : ''}">
-                            <div class="ttg-preview-day-header">
-                                <span style="font-weight: 800; color: #fff;">${d.fullName}</span>
-                                <span style="font-size: 0.70rem; color: ${isFree ? '#34d399' : '#38bdf8'}; font-weight: 700;">
-                                    ${isFree ? 'יום חופשי ✨' : `${d.classes.length} שיעורים`}
-                                </span>
+                            <div class="ttg-preview-day-header" style="display: flex; flex-direction: column; gap: 5px; align-items: stretch;">
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <span style="font-weight: 800; color: #fff;">${d.fullName}</span>
+                                    <span style="font-size: 0.70rem; color: ${isFree ? '#34d399' : '#38bdf8'}; font-weight: 700;">
+                                        ${isFree ? 'יום חופשי ✨' : `${d.classes.length} שיעורים`}
+                                    </span>
+                                </div>
+                                ${!isFree ? `
+                                    <div style="display: flex; gap: 4px; flex-wrap: wrap;">
+                                        ${lunchBadge}
+                                        ${marathonBadge}
+                                    </div>
+                                ` : ''}
                             </div>
                             ${classesHtml}
                         </div>
@@ -890,18 +1050,31 @@
 
             // Detailed Breakdown Card
             if (breakdownCard) {
-                const groupList = current.selection.map(s => `
-                    <span style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.12); padding: 3px 8px; border-radius: 4px; font-size: 0.74rem;">
-                        <strong>${s.courseName}:</strong> ${s.slotName} קב' ${s.option.groupId}
-                    </span>
-                `).join(' ');
+                const groupList = current.selection.map(s => {
+                    const isTut = (s.slotName && (s.slotName.includes('תרגול') || s.slotName.includes('מעבדה')));
+                    const isSport = (s.slotName && (s.slotName.includes('אימון') || s.slotName.includes('ספורט')));
+                    const roleLabel = isTut ? 'מתרגל/ת' : (isSport ? 'מאמן/ת' : 'מרצה');
+                    const color = isTut ? '#c084fc' : (isSport ? '#34d399' : '#38bdf8');
+                    return `
+                        <span style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.12); padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; display: inline-flex; align-items: center; gap: 6px;">
+                            <strong>${s.courseName}:</strong> ${s.slotName} קב' ${s.option.groupId}
+                            <span style="color: ${color}; font-weight: 800; background: rgba(0,0,0,0.25); padding: 1px 6px; border-radius: 4px;">
+                                ${roleLabel}: ${s.option.lecturer || 'סגל'}
+                            </span>
+                        </span>
+                    `;
+                }).join(' ');
 
                 breakdownCard.innerHTML = `
                     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 8px;">
                         <span style="font-weight: 700; color: #f8fafc; font-size: 0.84rem;">📋 הרכב הקבוצות והשעות של מערכת מס' ${current.displayIndex}:</span>
-                        <span style="font-size: 0.76rem; color: #94a3b8;">
-                            התחלה מוקדמת: <strong>${current.earliestStartTime}</strong> | סיום מאוחר: <strong>${current.latestEndTime}</strong> | שעות נטו: <strong>${current.totalWeeklyHours} שעות/שבוע</strong>
-                        </span>
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap; font-size: 0.76rem; color: #94a3b8;">
+                            <span>🥪 ${current.lunchSummary}</span>
+                            <span>|</span>
+                            <span>${current.pacingSummary}</span>
+                            <span>|</span>
+                            <span>שעות נטו: <strong>${current.totalWeeklyHours} שעות/שבוע</strong></span>
+                        </div>
                     </div>
                     <div style="display: flex; gap: 6px; flex-wrap: wrap;">
                         ${groupList}

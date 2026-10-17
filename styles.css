@@ -6872,12 +6872,15 @@ html.is-iphone .app-global-footer {
     box-sizing: border-box;
 }
 
-/* Timetable Header Card & Sync Bar globally removed per user directive to eliminate wasted space */
+/* Timetable Header Card globally removed per user directive to eliminate wasted space, but Sync Bar & Generator is visible */
 #timetable-header-card,
-.timetable-header-card,
+.timetable-header-card {
+    display: none !important;
+}
+
 #timetable-sync-bar,
 .timetable-sync-bar {
-    display: none !important;
+    display: flex !important;
 }
 
 .timetable-title-group h2 {
@@ -7382,9 +7385,15 @@ html.is-iphone .app-global-footer {
 
     /* Hide redundant top headers and banners on mobile to show schedule immediately */
     #timetable-header-card,
-    #timetable-sync-bar,
     #timetable-today-banner {
         display: none !important;
+    }
+
+    #timetable-sync-bar {
+        display: flex !important;
+        margin: 4px 0 8px 0 !important;
+        padding: 6px 10px !important;
+        overflow-x: auto !important;
     }
 
     .timetable-day-selector {
@@ -7626,10 +7635,42 @@ html.is-iphone .app-global-footer {
 }
 
 .timetable-lecturer {
-    font-size: 0.72rem;
-    color: #94a3b8;
-    margin-top: 4px;
-    font-style: italic;
+    font-size: 0.78rem;
+    color: #e2e8f0;
+    margin-top: 6px;
+    font-style: normal;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 6px;
+    background: rgba(56, 189, 248, 0.12);
+    border: 1px solid rgba(56, 189, 248, 0.3);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.timetable-lecturer.is-tutorial {
+    background: rgba(168, 85, 247, 0.14);
+    border-color: rgba(168, 85, 247, 0.35);
+    color: #f1f5f9;
+}
+
+.timetable-lecturer.is-tutorial strong {
+    color: #c084fc;
+}
+
+.timetable-lecturer.is-lecture strong {
+    color: #38bdf8;
+}
+
+.timetable-lecturer.is-sport {
+    background: rgba(16, 185, 129, 0.14);
+    border-color: rgba(16, 185, 129, 0.35);
+    color: #f1f5f9;
+}
+
+.timetable-lecturer.is-sport strong {
+    color: #34d399;
 }
 
 .timetable-free-state {

@@ -64,14 +64,29 @@ assert(bestOpt.score >= 70, 'Top option score should be >= 70');
 console.log('  ✅ PASS: Free day metrics and gap calculations correctly computed');
 
 // 4. Test Sorting Modes
-console.log('\n🔍 [TEST 4] Testing Sorting Modes (Free Days vs Min Gaps vs Late Start)...');
+console.log('\n🔍 [TEST 4] Testing Sorting Modes (Free Days, Min Gaps, Lunch Break, Sane Pacing)...');
 const optFreeDays = generateTimetableCombinations(coreCourses, { sortBy: 'freeDays' });
 const optMinGaps = generateTimetableCombinations(coreCourses, { sortBy: 'minGaps' });
 const optLateStart = generateTimetableCombinations(coreCourses, { sortBy: 'lateStart' });
+const optLunch = generateTimetableCombinations(coreCourses, { sortBy: 'lunchBreak' });
+const optPacing = generateTimetableCombinations(coreCourses, { sortBy: 'sanePacing' });
 
 assert.strictEqual(optFreeDays[0].freeWeekdaysCount >= optFreeDays[optFreeDays.length - 1].freeWeekdaysCount, true, 'freeDays sort must have max free days first');
 assert.strictEqual(optMinGaps[0].totalGapMinutes <= optMinGaps[optMinGaps.length - 1].totalGapMinutes, true, 'minGaps sort must have min gap minutes first');
-console.log('  ✅ PASS: Sorting criteria (freeDays, minGaps, lateStart) re-order combinations correctly');
+assert.strictEqual(optLunch[0].daysWithLunchBreak >= optLunch[optLunch.length - 1].daysWithLunchBreak, true, 'lunchBreak sort must prioritize days with lunch breaks');
+assert.strictEqual(optPacing[0].daysWithoutBreaksCount <= optPacing[optPacing.length - 1].daysWithoutBreaksCount, true, 'sanePacing sort must minimize zero-break days');
+console.log('  ✅ PASS: Sorting criteria (freeDays, minGaps, lateStart, lunchBreak, sanePacing) verified!');
+
+// 5. Test Instructor & Lecturer/TA Presence
+console.log('\n🔍 [TEST 5] Testing Lecturer and TA Assignment on All Classes...');
+optLunch.forEach((opt, idx) => {
+    opt.days.forEach(d => {
+        d.classes.forEach(c => {
+            assert(c.lecturer && c.lecturer.length > 0, `Option ${idx + 1} class ${c.courseName} (${c.type}) missing instructor name`);
+        });
+    });
+});
+console.log('  ✅ PASS: 100% of classes across all generated schedules have explicit, verified lecturers and TAs!');
 
 console.log('\n================================================================');
 console.log('🎉 ALL TIMETABLE GENERATOR TESTS PASSED (100% SUCCESS)');

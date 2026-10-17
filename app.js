@@ -21232,14 +21232,23 @@ function renderTimetableGrid() {
                     }
                 }
 
+                const isTut = (c.type && (c.type.includes('תרגול') || c.type.includes('מעבדה')));
+                const isSport = (c.type && (c.type.includes('אימון') || c.type.includes('ספורט')));
+                const instructorRole = isTut ? 'מתרגל/ת' : (isSport ? 'מאמן/ת' : 'מרצה');
+                const instructorClass = isTut ? 'is-tutorial' : (isSport ? 'is-sport' : 'is-lecture');
+                const instructorIcon = isTut ? '🧑‍🏫' : (isSport ? '🏃' : '👨‍🏫');
+
                 bodyHtml += `
                     <div class="timetable-card ${c.cardClass || ''}" onclick="if (typeof openCourseDetails === 'function') openCourseDetails('${c.courseId}')">
-                        <div class="timetable-card-time">⏰ ${c.startTime} - ${c.endTime}${c.duration ? ` (${c.duration})` : ''}</div>
+                        <div class="timetable-card-top">
+                            <span class="timetable-card-time">⏰ ${c.startTime} - ${c.endTime}${c.duration ? ` (${c.duration})` : ''}</span>
+                            ${c.room ? `<span class="timetable-card-room">${c.room}</span>` : ''}
+                        </div>
                         <div class="timetable-card-title">${c.courseName} (${c.courseId})</div>
                         <div class="timetable-card-meta">
                             <span class="timetable-tag">${c.type}</span>
                         </div>
-                        ${c.lecturer ? `<div class="timetable-lecturer">מרצה: ${c.lecturer}</div>` : ''}
+                        ${c.lecturer ? `<div class="timetable-lecturer ${instructorClass}"><span>${instructorIcon} ${instructorRole}:</span> <strong>${c.lecturer}</strong></div>` : ''}
                     </div>
                 `;
             });

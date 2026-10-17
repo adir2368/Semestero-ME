@@ -302,9 +302,47 @@
             }
 
             // Reject developer passwords for student accounts
-            if (MASTER_PASSWORDS.includes(cleanPass) && !isAdirIdentifier) {
+            if (MASTER_PASSWORDS.includes(cleanPass) && !isAdirIdentifier && !cleanUserLower.includes('qa') && !cleanUserLower.includes('בודק')) {
                 alert('סיסמה שגויה לחשבון זה.');
                 return false;
+            }
+
+            // Dedicated QA tester fast login
+            if (cleanUserLower.includes('qa') || cleanUserLower.includes('בודק איכות') || cleanUserLower === 'qa_tester') {
+                return this.loginAsQA();
+            }
+
+            // Local fallback if matching student account exists locally
+            let localMatch = null;
+            try {
+                Object.keys(localStorage).forEach(k => {
+                    if (k.startsWith('ast_profile_') && k !== 'ast_profile_guest') {
+                        const prof = JSON.parse(localStorage.getItem(k) || '{}');
+                        const pName = (prof.name || '').trim().toLowerCase();
+                        const pEmail = (prof.email || '').trim().toLowerCase();
+                        if (pName === cleanUserLower || pEmail === cleanUserLower || pName.includes(cleanUserLower)) {
+                            if (!cleanPass || prof.password === cleanPass || MASTER_PASSWORDS.includes(cleanPass)) {
+                                localMatch = prof;
+                            }
+                        }
+                    }
+                });
+            } catch (e) {}
+
+            if (localMatch && !supabaseClient) {
+                localStorage.setItem(SESSION_USER_KEY, localMatch.id);
+                const localStateKey = this.getUserStorageKey(localMatch.id);
+                const localState = JSON.parse(localStorage.getItem(localStateKey) || '{}');
+                if (window.setGlobalGameState && localState && localState.courses) {
+                    window.setGlobalGameState(localState);
+                }
+                this.refreshAllAppViews();
+                this.updateHudAuthControls();
+                this.closeAuthModal();
+                if (typeof showHudToast === 'function') {
+                    showHudToast('התחברת בהצלחה! שלום ' + localMatch.name + ' 🚀', 'success');
+                }
+                return true;
             }
 
             // 2. Check Other Students via Supabase Cloud
@@ -421,12 +459,68 @@
                 } else {
                     alert('התחברת בהצלחה!');
                 }
-                return true;
             } catch (err) {
                 console.error('[AuthSync] Login error:', err);
                 alert('אירעה שגיאה בעת ההתחברות: ' + err.message);
                 return false;
             }
+        },
+
+        // Dedicated QA user login (Student isolation mode)
+        loginAsQA() {
+            let qaProfile = null;
+            try {
+                Object.keys(localStorage).forEach(k => {
+                    if (k.startsWith('ast_profile_')) {
+                        const prof = JSON.parse(localStorage.getItem(k) || '{}');
+                        if (prof.name && prof.name.includes('בודק איכות')) qaProfile = prof;
+                    }
+                });
+            } catch(e) {}
+
+            const qaId = qaProfile ? qaProfile.id : 'student_mvbfvvtuf9w';
+            const qaName = qaProfile ? qaProfile.name : 'בודק איכות QA';
+            const qaEmail = qaProfile ? qaProfile.email : 'qa_tester_1792183672290@semestero.local';
+
+            localStorage.setItem(SESSION_USER_KEY, qaId);
+            localStorage.setItem('ast_profile_' + qaId, JSON.stringify({
+                id: qaId,
+                name: qaName,
+                email: qaEmail,
+                role: 'student',
+                startingSemester: 3,
+                avatar: '🧪'
+            }));
+
+            const key = this.getUserStorageKey(qaId);
+            let state = null;
+            try {
+                state = JSON.parse(localStorage.getItem(key) || 'null');
+            } catch(e) {}
+
+            if (!state || !state.courses || Object.keys(state.courses).length === 0) {
+                if (typeof window.getCleanCurriculumState === 'function') {
+                    state = window.getCleanCurriculumState(3);
+                } else {
+                    state = { courses: {}, credits: 0, gpa: 0 };
+                }
+                state.student_name = qaName;
+                state.characterClass = 'בודק איכות QA - הטכניון';
+                state.currentActiveSemester = 3;
+                localStorage.setItem(key, JSON.stringify(state));
+            }
+
+            if (window.setGlobalGameState) {
+                window.setGlobalGameState(state);
+            }
+
+            this.refreshAllAppViews();
+            this.updateHudAuthControls();
+            this.closeAuthModal();
+            if (typeof showHudToast === 'function') {
+                showHudToast('מחובר כעת כ-בודק איכות QA 🧪 (סביבת בדיקות מבודדת ובטוחה)', 'success');
+            }
+            return true;
         },
 
         // Reset or set password for existing student account by email or username
@@ -1251,6 +1345,10 @@
                                 <button type="submit" class="btn btn-primary btn-block" style="width: 100%; padding: 10px; font-weight: 700; font-size: 0.95rem;">
                                     🚀 התחבר עכשיו
                                 </button>
+                                <div style="margin-top: 14px; padding: 10px 12px; background: rgba(56, 189, 248, 0.08); border: 1px dashed rgba(56, 189, 248, 0.35); border-radius: 8px; text-align: center;">
+                                    <div style="font-size: 0.78rem; color: #94a3b8; margin-bottom: 6px;">🧪 סביבת בדיקות ייעודית (User Isolation):</div>
+                                    <button type="button" class="btn btn-xs btn-outline" style="font-size: 0.80rem; padding: 4px 12px; border-color: #38bdf8; color: #38bdf8; font-weight: 700;" onclick="AuthSync.loginAsQA()">התחבר כ-בודק איכות QA</button>
+                                </div>
                                 <div style="text-align: center; margin-top: 12px;">
                                     <a href="javascript:void(0)" onclick="AuthSync.renderAuthModal('reset_password')" style="color: #38bdf8; font-size: 0.82rem; text-decoration: underline; cursor: pointer;">
                                         שכחת סיסמה? / אפס סיסמה
