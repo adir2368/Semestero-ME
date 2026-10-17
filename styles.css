@@ -12802,12 +12802,131 @@ tr.is-task-pinned {
     align-items: start;
     gap: 10px;
     margin: 12px 0;
-    min-height: 280px;
+    min-height: max-content;
+    height: auto;
+}
+
+.ttg-mobile-day-tabs {
+    display: none;
 }
 
 @media (max-width: 900px) {
+    .ttg-mobile-day-tabs {
+        display: flex;
+        gap: 6px;
+        overflow-x: auto;
+        padding: 4px 2px 8px 2px;
+        margin-top: 6px;
+        margin-bottom: 4px;
+        scrollbar-width: none;
+        -webkit-overflow-scrolling: touch;
+    }
+    .ttg-mobile-day-tabs::-webkit-scrollbar {
+        display: none;
+    }
+    .ttg-mobile-day-tab {
+        flex: 1;
+        min-width: 54px;
+        padding: 6px 6px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 8px;
+        color: #cbd5e1;
+        font-size: 0.74rem;
+        font-weight: 700;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        white-space: nowrap;
+        font-family: inherit;
+    }
+    .ttg-mobile-day-tab:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: #ffffff;
+    }
+    .ttg-mobile-day-tab.active {
+        background: linear-gradient(135deg, rgba(56, 189, 248, 0.25) 0%, rgba(14, 165, 233, 0.25) 100%);
+        border-color: #38bdf8;
+        color: #ffffff;
+        box-shadow: 0 0 10px rgba(56, 189, 248, 0.25);
+    }
+    .ttg-mobile-day-tab.is-free-day {
+        border-color: rgba(16, 185, 129, 0.4);
+        color: #34d399;
+    }
+
     .ttg-preview-grid {
-        grid-template-columns: 1fr;
+        display: flex;
+        flex-direction: row;
+        overflow-x: auto;
+        overflow-y: hidden;
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+        gap: 12px;
+        padding: 4px 2px 14px 2px;
+        margin: 8px 0 12px 0;
+        scrollbar-width: thin;
+        scrollbar-color: rgba(56, 189, 248, 0.4) transparent;
+        height: auto;
+        min-height: max-content;
+    }
+    .ttg-preview-grid::-webkit-scrollbar {
+        height: 6px;
+    }
+    .ttg-preview-grid::-webkit-scrollbar-thumb {
+        background: rgba(56, 189, 248, 0.4);
+        border-radius: 4px;
+    }
+    .ttg-preview-day-col {
+        width: 82vw !important;
+        min-width: 270px !important;
+        max-width: 360px !important;
+        flex-shrink: 0 !important;
+        scroll-snap-align: center !important;
+        box-sizing: border-box !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .ttg-modal-content {
+        width: 96vw !important;
+        max-height: 94vh !important;
+        max-height: 94dvh !important;
+        margin: 6px auto !important;
+        border-radius: 12px !important;
+    }
+    #modal-timetable-generator .modal-header {
+        padding: 10px 14px 6px 14px !important;
+    }
+    #modal-timetable-generator .modal-header h2 {
+        font-size: 1.05rem !important;
+    }
+    #modal-timetable-generator .modal-header p {
+        display: none !important;
+    }
+    #modal-timetable-generator .modal-body {
+        padding: 8px 12px !important;
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch;
+    }
+    #modal-timetable-generator .modal-footer {
+        padding: 8px 12px !important;
+        flex-direction: column !important;
+        gap: 8px !important;
+    }
+    #modal-timetable-generator .modal-footer > div:first-child {
+        display: none !important;
+    }
+    #modal-timetable-generator .modal-footer > div:last-child {
+        width: 100% !important;
+        display: flex !important;
+        gap: 8px !important;
+    }
+    #modal-timetable-generator .modal-footer > div:last-child button {
+        flex: 1 !important;
+    }
+    #ttg-active-anchors-container {
+        padding: 6px 10px !important;
     }
 }
 

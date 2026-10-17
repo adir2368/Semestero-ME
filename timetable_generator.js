@@ -1270,10 +1270,72 @@
                 `;
             }
 
-            // Render 5 Days Columns
+            // Render 5 Days Columns & Mobile Day Tabs
+            const mobileDayTabs = document.getElementById('ttg-mobile-day-tabs');
+            if (mobileDayTabs) {
+                let tabsHtml = '';
+                current.days.forEach((d, idx) => {
+                    const shortName = d.fullName.replace('יום ', '');
+                    tabsHtml += `
+                        <button type="button" class="ttg-mobile-day-tab ${idx === 0 ? 'active' : ''} ${d.isFree ? 'is-free-day' : ''}" data-day-index="${idx}">
+                            ${d.isFree ? '🏖️ ' : ''}${shortName}
+                        </button>
+                    `;
+                });
+                mobileDayTabs.innerHTML = tabsHtml;
+
+                const tabBtns = mobileDayTabs.querySelectorAll('.ttg-mobile-day-tab');
+                tabBtns.forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const targetIdx = parseInt(btn.dataset.dayIndex, 10);
+                        tabBtns.forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        if (previewGrid) {
+                            const cols = previewGrid.querySelectorAll('.ttg-preview-day-col');
+                            if (cols[targetIdx]) {
+                                cols[targetIdx].scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+                            }
+                        }
+                    });
+                });
+            }
+
             if (previewGrid) {
+                if (!previewGrid._hasSwipeListener) {
+                    previewGrid._hasSwipeListener = true;
+                    let scrollTimeout = null;
+                    previewGrid.addEventListener('scroll', () => {
+                        if (window.innerWidth > 900) return;
+                        clearTimeout(scrollTimeout);
+                        scrollTimeout = setTimeout(() => {
+                            const cols = previewGrid.querySelectorAll('.ttg-preview-day-col');
+                            const gridRect = previewGrid.getBoundingClientRect();
+                            const gridCenter = gridRect.left + gridRect.width / 2;
+                            let closestIdx = 0;
+                            let minDiff = Infinity;
+                            cols.forEach((col, idx) => {
+                                const rect = col.getBoundingClientRect();
+                                const colCenter = rect.left + rect.width / 2;
+                                const diff = Math.abs(colCenter - gridCenter);
+                                if (diff < minDiff) {
+                                    minDiff = diff;
+                                    closestIdx = idx;
+                                }
+                            });
+                            const tabs = document.querySelectorAll('.ttg-mobile-day-tab');
+                            tabs.forEach((tab, idx) => {
+                                if (idx === closestIdx) {
+                                    tab.classList.add('active');
+                                } else {
+                                    tab.classList.remove('active');
+                                }
+                            });
+                        }, 50);
+                    }, { passive: true });
+                }
+
                 let gridHtml = '';
-                current.days.forEach(d => {
+                current.days.forEach((d, idx) => {
                     const isFree = d.isFree;
                     let classesHtml = '';
 
@@ -1384,7 +1446,7 @@
                         : '';
 
                     gridHtml += `
-                        <div class="ttg-preview-day-col ${isFree ? 'is-free-col' : ''}">
+                        <div class="ttg-preview-day-col ${isFree ? 'is-free-col' : ''}" data-day-index="${idx}">
                             <div class="ttg-preview-day-header" style="display: flex; flex-direction: column; gap: 5px; align-items: stretch;">
                                 <div style="display: flex; justify-content: space-between; align-items: center;">
                                     <span style="font-weight: 800; color: #fff;">${d.fullName}</span>
