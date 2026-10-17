@@ -330,24 +330,32 @@
         },
         '03940805': {
             code: '03940805',
-            name: 'חינוך גופני',
+            name: 'חינוך גופני (יוגה)',
             credits: 1.0,
             cardClass: 'timetable-card-yoga',
+            isAnchor: true,
+            anchorGroupId: '24',
+            anchorNote: 'עוגן במערכת: יוגה (יום חמישי 07:30-09:00)',
             slots: [
                 {
                     slotType: 'sport',
                     slotName: 'אימון',
+                    isAnchor: true,
+                    anchorGroupId: '24',
                     options: [
                         {
                             groupId: '24',
+                            sportName: 'יוגה',
                             lecturer: 'שלומית בן-איש',
-                            room: 'אולם ספורט',
+                            room: 'אולם ספורט (יוגה)',
+                            isAnchor: true,
                             meetings: [
                                 { dayIndex: 4, dayName: 'חמישי', startTime: '07:30', endTime: '09:00', duration: 'שעה וחצי' }
                             ]
                         },
                         {
                             groupId: '25',
+                            sportName: 'אתלטיקה',
                             lecturer: 'אלכס פוסטובוי',
                             room: 'אצטדיון הטכניון',
                             meetings: [
@@ -356,6 +364,7 @@
                         },
                         {
                             groupId: '26',
+                            sportName: 'חדר כושר',
                             lecturer: 'מיכאל גרינברג',
                             room: 'חדר כושר',
                             meetings: [
@@ -364,6 +373,7 @@
                         },
                         {
                             groupId: '27',
+                            sportName: 'טניס',
                             lecturer: 'יואב רז',
                             room: 'מגרשי טניס',
                             meetings: [
@@ -435,6 +445,22 @@
 
             cInfo.slots.forEach(slot => {
                 if (slot.options && slot.options.length > 0) {
+                    let eligibleOptions = slot.options;
+
+                    // In Technion sport registration, students enroll into ONE specific sport section
+                    // with a fixed, unmovable time. It acts as a hard anchor (עוגן) in the schedule.
+                    const isSportOrAnchor = Boolean(cInfo.isAnchor || slot.isAnchor || slot.slotType === 'sport');
+                    const targetAnchorId = (preferences.anchorGroups && preferences.anchorGroups[cInfo.code])
+                        || slot.anchorGroupId
+                        || (isSportOrAnchor ? '24' : null);
+
+                    if (targetAnchorId) {
+                        const matched = slot.options.filter(o => o.groupId === targetAnchorId);
+                        if (matched.length > 0) {
+                            eligibleOptions = matched;
+                        }
+                    }
+
                     requiredSlots.push({
                         courseCode: cInfo.code,
                         courseName: cInfo.name,
@@ -442,7 +468,8 @@
                         cardClass: cInfo.cardClass,
                         slotType: slot.slotType,
                         slotName: slot.slotName,
-                        options: slot.options
+                        isAnchor: isSportOrAnchor,
+                        options: eligibleOptions
                     });
                 }
             });
@@ -542,6 +569,7 @@
                     if (startMin < earliestStart) earliestStart = startMin;
                     if (endMin > latestEnd) latestEnd = endMin;
 
+                    const isClassAnchor = Boolean(item.isAnchor || opt.isAnchor || item.slotType === 'sport');
                     days[m.dayIndex].classes.push({
                         courseId: item.courseCode,
                         courseName: item.courseName,
@@ -552,7 +580,9 @@
                         startTime: m.startTime,
                         endTime: m.endTime,
                         duration: m.duration || `${(dur / 60).toFixed(1)} שעות`,
-                        cardClass: item.cardClass || 'timetable-card-default'
+                        cardClass: item.cardClass || 'timetable-card-default',
+                        isAnchor: isClassAnchor,
+                        anchorLabel: isClassAnchor ? '⚓ עוגן במערכת' : ''
                     });
                 }
             });
@@ -834,6 +864,7 @@
                     <label class="ttg-course-chip ${isChecked ? 'is-checked' : ''}" style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 6px; font-size: 0.76rem; background: ${isChecked ? 'rgba(56, 189, 248, 0.15)' : 'rgba(255, 255, 255, 0.04)'}; border: 1px solid ${isChecked ? '#38bdf8' : 'rgba(255, 255, 255, 0.1)'}; color: ${isChecked ? '#fff' : '#94a3b8'}; cursor: pointer; user-select: none;">
                         <input type="checkbox" class="ttg-course-cb" value="${c.code}" ${isChecked ? 'checked' : ''} style="accent-color: #38bdf8;">
                         <span>${c.name} (${c.code})</span>
+                        ${c.isAnchor ? `<span style="background: rgba(245, 158, 11, 0.22); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.45); padding: 1px 6px; border-radius: 4px; font-weight: 800; font-size: 0.68rem;" title="${c.anchorNote || 'עוגן במערכת'}">⚓ עוגן (חמישי 07:30)</span>` : ''}
                         <span style="opacity: 0.7; font-size: 0.70rem;">• ${c.credits} נק״ז</span>
                     </label>
                 `;
@@ -939,6 +970,9 @@
 
                 badgesContainer.innerHTML = `
                     ${recBadge}
+                    <span style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.45); padding: 3px 8px; border-radius: 6px; font-size: 0.74rem; font-weight: 700;">
+                        ⚓ עוגן: יוגה (חמישי 07:30-09:00)
+                    </span>
                     <span style="background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); padding: 3px 8px; border-radius: 6px; font-size: 0.74rem; font-weight: 700;">
                         🏖️ ${current.freeWeekdaysCount} ימי חופש באמצ״ש (${current.freeDayNames.filter(n => n !== 'שישי' && n !== 'שבת').join(', ') || 'אין'})
                     </span>
@@ -986,8 +1020,9 @@
                                         <span class="timetable-card-room">${c.room}</span>
                                     </div>
                                     <div class="timetable-card-name" style="font-size: 0.88rem; font-weight: 800;">${c.courseName}</div>
-                                    <div class="timetable-card-sub" style="font-size: 0.74rem; color: #cbd5e1; margin-top: 3px;">
+                                    <div class="timetable-card-sub" style="font-size: 0.74rem; color: #cbd5e1; margin-top: 3px; display: flex; gap: 4px; align-items: center; flex-wrap: wrap;">
                                         <span class="timetable-tag" style="background: rgba(255, 255, 255, 0.08); padding: 2px 6px; border-radius: 4px; font-weight: 600;">${c.type}</span>
+                                        ${(c.isAnchor || isSport) ? `<span class="timetable-tag is-anchor" style="background: rgba(245, 158, 11, 0.22); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.45); font-weight: 800; padding: 2px 6px; border-radius: 4px;">⚓ עוגן קבוע</span>` : ''}
                                     </div>
                                     ${c.lecturer ? `
                                         <div class="ttg-card-instructor" style="margin-top: 6px; padding: 4px 8px; border-radius: 6px; background: ${instructorBg}; border: 1px solid ${instructorBorder}; display: flex; align-items: center; justify-content: space-between; font-size: 0.76rem;">
@@ -1024,6 +1059,11 @@
                         ? `<span style="font-size: 0.68rem; background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4); padding: 2px 6px; border-radius: 4px; font-weight: 700;" title="יום לימודים רצוף">${d.maxContinuousHours} ש' רצופות</span>`
                         : '';
 
+                    const hasAnchor = d.classes.some(c => c.isAnchor || (c.type && (c.type.includes('יוגה') || c.type.includes('אימון'))));
+                    const anchorBadge = hasAnchor
+                        ? `<span style="font-size: 0.68rem; background: rgba(245, 158, 11, 0.22); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.45); padding: 2px 6px; border-radius: 4px; font-weight: 700;" title="עוגן שבועי קבוע">⚓ יוגה 07:30</span>`
+                        : '';
+
                     gridHtml += `
                         <div class="ttg-preview-day-col ${isFree ? 'is-free-col' : ''}">
                             <div class="ttg-preview-day-header" style="display: flex; flex-direction: column; gap: 5px; align-items: stretch;">
@@ -1035,6 +1075,7 @@
                                 </div>
                                 ${!isFree ? `
                                     <div style="display: flex; gap: 4px; flex-wrap: wrap;">
+                                        ${anchorBadge}
                                         ${lunchBadge}
                                         ${marathonBadge}
                                     </div>
@@ -1079,6 +1120,12 @@
                     <div style="display: flex; gap: 6px; flex-wrap: wrap;">
                         ${groupList}
                     </div>
+                    ${current.selection.some(s => s.isAnchor || s.slotType === 'sport') ? `
+                        <div style="margin-top: 10px; padding: 7px 12px; border-radius: 6px; background: rgba(245, 158, 11, 0.12); border: 1px solid rgba(245, 158, 11, 0.35); font-size: 0.76rem; color: #fde68a; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px;">
+                            <span>⚓ <strong>עוגן קשיח במערכת:</strong> קורס ספורט (יוגה, יום חמישי 07:30-09:00 • מאמנת: שלומית בן-איש) נעול כעוגן מערכתי - כל הקומבינציות סודרו סביבו ב-100% ללא התנגשות!</span>
+                            <span style="font-size: 0.70rem; opacity: 0.85; background: rgba(0,0,0,0.25); padding: 2px 6px; border-radius: 4px;">קבוצה 24 (אולם ספורט)</span>
+                        </div>
+                    ` : ''}
                 `;
             }
         },

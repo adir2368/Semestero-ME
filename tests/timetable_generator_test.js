@@ -88,6 +88,20 @@ optLunch.forEach((opt, idx) => {
 });
 console.log('  ✅ PASS: 100% of classes across all generated schedules have explicit, verified lecturers and TAs!');
 
+// 6. Test Sports Course Hard Anchor (Yoga on Thursday 07:30-09:00)
+console.log('\n🔍 [TEST 6] Testing Sports Hard Anchor (Yoga on Thursday 07:30-09:00)...');
+options.forEach((opt, idx) => {
+    const thursday = opt.days[4];
+    const yogaClass = thursday.classes.find(c => c.courseId === '03940805' || c.type.includes('יוגה'));
+    assert(yogaClass, `Option ${idx + 1} must include yoga on Thursday`);
+    assert.strictEqual(yogaClass.startTime, '07:30', `Yoga must start at 07:30 in Option ${idx + 1}`);
+    assert.strictEqual(yogaClass.endTime, '09:00', `Yoga must end at 09:00 in Option ${idx + 1}`);
+    assert.strictEqual(yogaClass.group, '24', `Yoga group must be 24 in Option ${idx + 1}`);
+    assert.strictEqual(yogaClass.lecturer, 'שלומית בן-איש', `Yoga coach must be Shlomit Ben-Ish in Option ${idx + 1}`);
+    assert.strictEqual(yogaClass.isAnchor, true, `Yoga class must have isAnchor flag set to true in Option ${idx + 1}`);
+});
+console.log('  ✅ PASS: 100% of generated timetable options anchor Yoga strictly to Thursday 07:30-09:00 with zero collisions!');
+
 console.log('\n================================================================');
 console.log('🎉 ALL TIMETABLE GENERATOR TESTS PASSED (100% SUCCESS)');
 console.log('================================================================\n');

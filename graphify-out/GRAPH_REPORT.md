@@ -1,7 +1,7 @@
 # Graph Report - academic-skill-tree  (2026-10-17)
 
 ## Corpus Check
-- 65 files · ~556,556 words
+- 65 files · ~557,062 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 11 file(s) not represented in the graph (top: .bat 5, .css 2, .ico 2)
 
@@ -11,7 +11,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `14794ce2`
+- Built from commit: `bc949975`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 

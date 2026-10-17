@@ -21116,12 +21116,13 @@ const CHEESEFORK_SEMESTER_SCHEDULE = {
                     courseId: "03940805",
                     courseName: "חינוך גופני - יוגה",
                     type: "יוגה (קבוצה 24)",
-                    lecturer: "",
+                    lecturer: "שלומית בן-איש",
                     room: "אולם ספורט",
                     startTime: "07:30",
                     endTime: "09:00",
                     duration: "שעה וחצי",
-                    cardClass: "timetable-card-yoga"
+                    cardClass: "timetable-card-yoga",
+                    isAnchor: true
                 },
                 {
                     courseId: "104228",

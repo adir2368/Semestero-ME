@@ -42,9 +42,9 @@
     "semantic_hash": ""
   },
   "app.js": {
-    "mtime": 1792231945.961987,
-    "seen": 1792250387.6513987,
-    "ast_hash": "ac775fd43a16b63a223abe2d3c72a203",
+    "mtime": 1792250870.67957,
+    "seen": 1792251159.0320888,
+    "ast_hash": "277a8eef3cd536c44950dd3046a1f00f",
     "semantic_hash": ""
   },
   "app_restored.js": {
@@ -306,9 +306,9 @@
     "semantic_hash": ""
   },
   "sync_to_dist.js": {
-    "mtime": 1792181737.733507,
-    "seen": 1792250387.6514356,
-    "ast_hash": "05d408e5a30fc09c7dcce0921aa0f286",
+    "mtime": 1792250683.64513,
+    "seen": 1792251159.0321584,
+    "ast_hash": "98903c46f6b90ec2b0f03d7242c95323",
     "semantic_hash": ""
   },
   "technion_academic_calendar.js": {
@@ -348,9 +348,9 @@
     "semantic_hash": ""
   },
   "tests/timetable_generator_test.js": {
-    "mtime": 1792231960.8663714,
-    "seen": 1792250387.6514409,
-    "ast_hash": "318bf9426da37ccfd3b81f2215c789ff",
+    "mtime": 1792251079.2494133,
+    "seen": 1792251159.0321686,
+    "ast_hash": "a0110cb12b253c9388ecc5f2e489d2e4",
     "semantic_hash": ""
   },
   "tests/verify_live_production.js": {
@@ -360,9 +360,9 @@
     "semantic_hash": ""
   },
   "timetable_generator.js": {
-    "mtime": 1792231987.0536356,
-    "seen": 1792250387.6514425,
-    "ast_hash": "c6ab25c3847724d138c477e55a32d44b",
+    "mtime": 1792251064.476737,
+    "seen": 1792251159.0321715,
+    "ast_hash": "a5f9b59ddab2313fb19dec0891d26301",
     "semantic_hash": ""
   },
   "update_shortcut_to_exe.py": {

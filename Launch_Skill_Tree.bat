@@ -2,6 +2,11 @@
 title Academic Skill Tree Launcher
 cd /d "%~dp0"
 
+if exist "dist\Semestero ME-win32-x64\Semestero ME.exe" (
+    start "" "dist\Semestero ME-win32-x64\Semestero ME.exe"
+    exit
+)
+
 if exist "dist\Academic Skill Tree-win32-x64\Academic Skill Tree.exe" (
     start "" "dist\Academic Skill Tree-win32-x64\Academic Skill Tree.exe"
     exit

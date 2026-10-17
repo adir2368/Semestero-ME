@@ -14,6 +14,7 @@ if (targetDirs.length === 0) {
 
 const filesToCopy = [
     'app.js',
+    'timetable_generator.js',
     'auth_sync.js',
     'site_analytics.js',
     'modal_help.js',
