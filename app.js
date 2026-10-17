@@ -2626,6 +2626,9 @@ document.addEventListener("DOMContentLoaded", () => {
     renderUI();
     setupDailyTimetable();
     setupMobileNotifications();
+    if (window.MiluimRightsAdvisor && typeof window.MiluimRightsAdvisor.init === 'function') {
+        window.MiluimRightsAdvisor.init();
+    }
     
     // Periodically update paths on window resize
     window.addEventListener("resize", drawConnections);
@@ -14343,9 +14346,8 @@ function renderNotionTasksTable() {
     // Gather tasks and pre-compute timestamp for high-performance sorting
     Object.values(gameState.courses).forEach(course => {
         if (course.status !== 'active' && course.status !== 'mastered') return;
-        if (!isWinterSemesterStarted() && (course.semester || 1) > (gameState.currentActiveSemester || 2) && courseFilter === 'all') return;
         if (courseFilter !== 'all' && course.code !== courseFilter) return;
-        
+        if (!Array.isArray(course.tasks)) course.tasks = [];
         course.tasks.forEach(task => {
             const dueTime = task.dueDate ? (Date.parse(task.dueDate) || Infinity) : Infinity;
             allTasks.push({
@@ -15186,20 +15188,20 @@ function renderExamGapRunway() {
             const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
 
             let paceClass = "comfortable";
-            let badgeText = `${diffDays} ימים`;
+            let badgeText = `🟢 ${diffDays} ימים (מרווח)`;
 
             if (diffDays === 0) {
                 paceClass = "clash";
                 badgeText = "🛑 0 ימים (התנגשות!)";
             } else if (diffDays === 1) {
                 paceClass = "urgent";
-                badgeText = "⚠️ יום 1 (צפיפות!)";
+                badgeText = "⚠️ יום 1 (צפיפות קריטית!)";
             } else if (diffDays <= 2) {
                 paceClass = "urgent";
-                badgeText = `${diffDays} ימים (צפוף)`;
+                badgeText = `🔴 ${diffDays} ימים (צפוף מאוד)`;
             } else if (diffDays <= 5) {
                 paceClass = "moderate";
-                badgeText = `${diffDays} ימים`;
+                badgeText = `🟡 ${diffDays} ימים (סטנדרטי)`;
             }
 
             html += `
@@ -15282,6 +15284,30 @@ function setupAddCustomTaskModal() {
         panoptoBtn.addEventListener("click", () => {
             if (window.PanoptoTracker && typeof window.PanoptoTracker.openModal === 'function') {
                 window.PanoptoTracker.openModal();
+            }
+        });
+    }
+
+    const moodleSyncTasksBtn = document.getElementById("btn-sync-moodle-tasks");
+    if (moodleSyncTasksBtn) {
+        moodleSyncTasksBtn.addEventListener("click", () => {
+            if (window.MoodleSync) {
+                if (window.MoodleSync.config && window.MoodleSync.config.url) {
+                    window.MoodleSync.sync({ isSilent: false });
+                } else if (typeof window.MoodleSync.openModal === 'function') {
+                    window.MoodleSync.openModal();
+                }
+            } else if (typeof showHudToast === 'function') {
+                showHudToast('מודול סנכרון מודל אינו זמין כרגע', 'info');
+            }
+        });
+    }
+
+    const miluimAdvisorBtn = document.getElementById("btn-open-miluim-advisor");
+    if (miluimAdvisorBtn) {
+        miluimAdvisorBtn.addEventListener("click", () => {
+            if (window.MiluimRightsAdvisor && typeof window.MiluimRightsAdvisor.openModal === 'function') {
+                window.MiluimRightsAdvisor.openModal();
             }
         });
     }
@@ -15914,6 +15940,265 @@ window.PanoptoTracker = {
                 if (m) m.remove();
             };
         });
+    }
+};
+
+/* ==========================================================================
+   Technion Miluim (Reservist) Rights Advisor & Binary Pass (עובר) GPA Simulator
+   ========================================================================== */
+
+window.MiluimRightsAdvisor = {
+    simulatedConversions: new Set(),
+
+    init() {
+        const modal = document.getElementById("modal-miluim-rights");
+        const closeBtn = document.getElementById("btn-close-miluim-modal");
+        const closeBottomBtn = document.getElementById("btn-close-miluim-modal-bottom");
+        const daysInput = document.getElementById("miluim-days-input");
+        const quickDayBtns = document.querySelectorAll(".miluim-quick-day-btn");
+        const filterTasksBtn = document.getElementById("btn-filter-miluim-tasks-from-advisor");
+
+        if (!modal) return;
+
+        if (closeBtn) closeBtn.onclick = () => this.closeModal();
+        if (closeBottomBtn) closeBottomBtn.onclick = () => this.closeModal();
+
+        modal.onclick = (e) => {
+            if (e.target === modal) this.closeModal();
+        };
+
+        if (daysInput) {
+            daysInput.oninput = () => this.render();
+        }
+
+        quickDayBtns.forEach(btn => {
+            btn.onclick = () => {
+                const days = parseInt(btn.dataset.days, 10);
+                if (daysInput && !isNaN(days)) {
+                    daysInput.value = days;
+                    this.render();
+                }
+            };
+        });
+
+        if (filterTasksBtn) {
+            filterTasksBtn.onclick = () => {
+                this.closeModal();
+                const tasksTabBtn = document.getElementById("tab-notion-tasks");
+                if (tasksTabBtn) tasksTabBtn.click();
+                setTimeout(() => {
+                    const miluimPill = document.querySelector('.organit-pill[data-category="miluim"]');
+                    if (miluimPill) miluimPill.click();
+                }, 60);
+            };
+        }
+    },
+
+    openModal() {
+        const modal = document.getElementById("modal-miluim-rights");
+        if (!modal) return;
+        modal.style.display = "flex";
+        this.render();
+    },
+
+    closeModal() {
+        const modal = document.getElementById("modal-miluim-rights");
+        if (modal) modal.style.display = "none";
+    },
+
+    render() {
+        const daysInput = document.getElementById("miluim-days-input");
+        const days = daysInput ? Math.max(0, parseInt(daysInput.value, 10) || 0) : 21;
+
+        // 1. Moed G / Special Moed Status
+        const badgeMoed = document.getElementById("miluim-status-badge-moed");
+        const textMoed = document.getElementById("miluim-text-moed");
+        if (badgeMoed && textMoed) {
+            if (days >= 21) {
+                badgeMoed.style.background = "rgba(16, 185, 129, 0.2)";
+                badgeMoed.style.color = "#34d399";
+                badgeMoed.style.borderColor = "#10b981";
+                badgeMoed.innerText = "זכאי מלא (מועד מיוחד לכל המקצועות)";
+                textMoed.innerText = `על בסיס שירות של ${days} ימים, הנך זכאי למועד מיוחד (מועד ג') בכל מקצועות הסמסטר שבהם נבצר ממך לגשת למועד רגיל או שביקשת לשפר ציון.`;
+            } else if (days >= 10) {
+                badgeMoed.style.background = "rgba(245, 158, 11, 0.2)";
+                badgeMoed.style.color = "#fbbf24";
+                badgeMoed.style.borderColor = "#f59e0b";
+                badgeMoed.innerText = "זכאות מותנית";
+                textMoed.innerText = `שירות של ${days} ימים: זכאי למועד מיוחד אם השירות חל במהלך תקופת הבחינות או שבוע לפניה. נדרש 21 יום לזכאות גורפת.`;
+            } else {
+                badgeMoed.style.background = "rgba(239, 68, 68, 0.2)";
+                badgeMoed.style.color = "#f87171";
+                badgeMoed.style.borderColor = "#ef4444";
+                badgeMoed.innerText = "אישור פרטני";
+                textMoed.innerText = `שירות של ${days} ימים: זכאות תלויה באישור רכז המילואים הפקולטי במידה והשירות חפף מועד בחינה ספציפי.`;
+            }
+        }
+
+        // 2. Binary Pass Conversion Rights
+        const badgePass = document.getElementById("miluim-status-badge-pass");
+        const textPass = document.getElementById("miluim-text-pass");
+        const maxPassAllowed = (days >= 60) ? 3 : (days >= 30 ? 2 : (days >= 14 ? 1 : 0));
+
+        if (badgePass && textPass) {
+            if (maxPassAllowed >= 2) {
+                badgePass.style.background = "rgba(236, 72, 153, 0.2)";
+                badgePass.style.color = "#f472b6";
+                badgePass.style.borderColor = "#ec4899";
+                badgePass.innerText = `עד ${maxPassAllowed} קורסים (${maxPassAllowed * 4} נ"ז)`;
+                textPass.innerText = `שירות של ${days} ימים מקנה זכות להמרת עד ${maxPassAllowed} קורסים לציון "עובר" בינארי, להשמטת הציון מחישוב הממוצע תוך שמירה מלאה על כל נקודות הזיכוי!`;
+            } else if (maxPassAllowed === 1) {
+                badgePass.style.background = "rgba(245, 158, 11, 0.2)";
+                badgePass.style.color = "#fbbf24";
+                badgePass.style.borderColor = "#f59e0b";
+                badgePass.innerText = `קורס 1 (עד 4 נ"ז)`;
+                textPass.innerText = `שירות של ${days} ימים מקנה זכות להמרת קורס 1 לציון עובר בינארי (בכפוף לאישור ועדת הוראה).`;
+            } else {
+                badgePass.style.background = "rgba(148, 163, 184, 0.2)";
+                badgePass.style.color = "#94a3b8";
+                badgePass.style.borderColor = "#475569";
+                badgePass.innerText = "מינימום 14 יום";
+                textPass.innerText = `המרת ציונים לעובר בינארי ניתנת במקור למשרתים 30 יום ומעלה (או 14 יום באישור ועדת הוראה).`;
+            }
+        }
+
+        // 3. Populate Candidate Courses & Run Simulation
+        const listEl = document.getElementById("miluim-candidate-courses-list");
+        if (!listEl) return;
+
+        if (!window.gameState || !window.gameState.courses) {
+            listEl.innerHTML = `<div style="color: #94a3b8; font-size: 0.82rem; text-align: center; padding: 8px;">אין נתוני קורסים זמינים.</div>`;
+            return;
+        }
+
+        // Collect all mastered courses with valid numeric grades
+        const candidates = [];
+        Object.keys(window.gameState.courses).forEach(code => {
+            const c = window.gameState.courses[code];
+            const isMastered = (c.status === 'mastered');
+            const numGrade = parseFloat(c.grade);
+            const credits = parseFloat(c.credits) || 0;
+            if (isMastered && !isNaN(numGrade) && numGrade >= 55 && credits > 0) {
+                candidates.push({
+                    code,
+                    name: c.name || code,
+                    grade: numGrade,
+                    credits,
+                    isBinaryPass: (c.isBinaryPass === true || c.grade === 'עובר' || c.grade === 'PASS')
+                });
+            }
+        });
+
+        if (candidates.length === 0) {
+            listEl.innerHTML = `<div style="color: #94a3b8; font-size: 0.82rem; text-align: center; padding: 10px;">אין עדיין קורסים שהושלמו עם ציון מספרי. ברגע שתוזן בחינה ראשונה, הסימולטור יחשב את ההמרה האופטימלית.</div>`;
+            this.updateKpis([], 0);
+            return;
+        }
+
+        // Sort ascending: lowest grades first (best candidates for binary pass conversion)
+        candidates.sort((a, b) => a.grade - b.grade);
+
+        // Pre-select 1 or 2 lowest courses on first run if set is empty
+        if (this.simulatedConversions.size === 0) {
+            const numToSelect = Math.min(Math.max(1, maxPassAllowed), candidates.length);
+            for (let i = 0; i < numToSelect; i++) {
+                if (candidates[i].grade < 85) {
+                    this.simulatedConversions.add(candidates[i].code);
+                }
+            }
+        }
+
+        let html = '';
+        candidates.slice(0, 6).forEach((c, index) => {
+            const isChecked = this.simulatedConversions.has(c.code);
+            const isTopPick = index < Math.min(2, Math.max(1, maxPassAllowed));
+            const starTag = isTopPick ? `<span style="font-size: 0.7rem; background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.4); padding: 1px 6px; border-radius: 4px;">מומלץ להמרה ⭐</span>` : '';
+
+            html += `
+                <div style="display: flex; align-items: center; justify-content: space-between; background: rgba(255, 255, 255, 0.04); border: 1px solid ${isChecked ? '#38bdf8' : 'rgba(255, 255, 255, 0.08)'}; border-radius: 6px; padding: 6px 10px; transition: all 0.2s;">
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; flex: 1;">
+                        <input type="checkbox" class="miluim-course-checkbox" data-code="${c.code}" ${isChecked ? 'checked' : ''} style="accent-color: #38bdf8; width: 16px; height: 16px;">
+                        <div>
+                            <span style="font-weight: 600; font-size: 0.85rem; color: #fff;">${c.name}</span>
+                            <span style="font-size: 0.75rem; color: #94a3b8; margin-right: 6px;">(${c.code} • ${c.credits} נ"ז)</span>
+                            ${starTag}
+                        </div>
+                    </label>
+                    <div style="font-weight: 800; font-size: 0.95rem; color: ${c.grade < 75 ? '#f87171' : (c.grade < 85 ? '#fbbf24' : '#34d399')};">
+                        ${c.grade}
+                    </div>
+                </div>
+            `;
+        });
+
+        listEl.innerHTML = html;
+
+        listEl.querySelectorAll('.miluim-course-checkbox').forEach(cb => {
+            cb.onchange = (e) => {
+                const code = e.target.dataset.code;
+                if (e.target.checked) {
+                    this.simulatedConversions.add(code);
+                } else {
+                    this.simulatedConversions.delete(code);
+                }
+                this.updateKpis(candidates);
+            };
+        });
+
+        this.updateKpis(candidates);
+    },
+
+    updateKpis(candidates) {
+        const currentGpaEl = document.getElementById("miluim-current-gpa");
+        const simGpaEl = document.getElementById("miluim-simulated-gpa");
+        const diffEl = document.getElementById("miluim-gpa-diff");
+
+        if (!candidates || candidates.length === 0) {
+            if (currentGpaEl) currentGpaEl.innerText = "--";
+            if (simGpaEl) simGpaEl.innerText = "--";
+            if (diffEl) diffEl.innerText = "--";
+            return;
+        }
+
+        // 1. Calculate actual current GPA
+        let actualWeighted = 0;
+        let actualCredits = 0;
+        candidates.forEach(c => {
+            if (!c.isBinaryPass) {
+                actualWeighted += (c.grade * c.credits);
+                actualCredits += c.credits;
+            }
+        });
+        const actualGpa = actualCredits > 0 ? (actualWeighted / actualCredits) : 0;
+
+        // 2. Calculate simulated GPA with selected courses converted to binary pass
+        let simWeighted = 0;
+        let simCredits = 0;
+        candidates.forEach(c => {
+            const isSimulatedPass = this.simulatedConversions.has(c.code) || c.isBinaryPass;
+            if (!isSimulatedPass) {
+                simWeighted += (c.grade * c.credits);
+                simCredits += c.credits;
+            }
+        });
+
+        const simGpa = simCredits > 0 ? (simWeighted / simCredits) : actualGpa;
+        const diff = simGpa - actualGpa;
+
+        if (currentGpaEl) currentGpaEl.innerText = actualGpa.toFixed(2);
+        if (simGpaEl) simGpaEl.innerText = simGpa.toFixed(2);
+        if (diffEl) {
+            if (diff > 0.001) {
+                diffEl.innerText = `+${diff.toFixed(2)} נק׳ 🚀`;
+                diffEl.style.color = "#34d399";
+            } else if (diff < -0.001) {
+                diffEl.innerText = `${diff.toFixed(2)} נק׳`;
+                diffEl.style.color = "#f87171";
+            } else {
+                diffEl.innerText = `ללא שינוי`;
+                diffEl.style.color = "#94a3b8";
+            }
+        }
     }
 };
 
