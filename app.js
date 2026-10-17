@@ -11415,6 +11415,27 @@ const MOODLE26_COURSE_MAP = {
     '3940805': 1212
 };
 
+const PANGEA_COURSE_MAP = {
+    '034053': 'https://idofangbentov.uk/Technion/SLD2/',
+    '34053': 'https://idofangbentov.uk/Technion/SLD2/',
+    '034035': 'https://idofangbentov.uk/Technion/THE1/',
+    '34035': 'https://idofangbentov.uk/Technion/THE1/',
+    '104043': 'https://idofangbentov.uk/Technion/CAL2/',
+    '104228': 'https://idofangbentov.uk/Technion/PDE/',
+    '034056': 'https://idofangbentov.uk/Technion/MTH/',
+    '34056': 'https://idofangbentov.uk/Technion/MTH/',
+    '114052': 'https://idofangbentov.uk/Technion/PHY2/',
+    '114075': 'https://idofangbentov.uk/Technion/PHY2/',
+    '104041': 'https://idofangbentov.uk/Technion/CAL1/',
+    '104065': 'https://idofangbentov.uk/Technion/ALG1/',
+    '034015': 'https://idofangbentov.uk/Technion/DYN/',
+    '34015': 'https://idofangbentov.uk/Technion/DYN/',
+    '034013': 'https://idofangbentov.uk/Technion/SLD1/',
+    '34013': 'https://idofangbentov.uk/Technion/SLD1/',
+    '034033': 'https://idofangbentov.uk/Technion/FL1/',
+    '34033': 'https://idofangbentov.uk/Technion/FL1/'
+};
+
 function renderTechnionPlusQuickBar(course) {
     const groupEl = document.getElementById("technion-plus-links-group");
     if (!groupEl || !course) return;
@@ -11427,6 +11448,8 @@ function renderTechnionPlusQuickBar(course) {
     const panoptoUrl = `https://panopto.technion.ac.il/Panopto/Pages/Sessions/List.aspx#query=${encodeURIComponent(cleanCode || fullCode)}`;
     const asatUrl = `https://asat.org.il/past-exams`;
     const cfUrl = `https://cheesefork.cf/course/${cleanCode || fullCode}`;
+    const pangeaDirectUrl = PANGEA_COURSE_MAP[fullCode] || PANGEA_COURSE_MAP[cleanCode];
+    const pangeaUrl = pangeaDirectUrl || `https://idofangbentov.uk/?q=${encodeURIComponent(cleanCode || fullCode)}`;
     const driveUrl = `https://www.google.com/search?q=${encodeURIComponent('טכניון ' + (cleanCode || fullCode) + ' ' + (course.name || '') + ' סיכומים מבחנים drive')}`;
 
     groupEl.innerHTML = `
@@ -11441,6 +11464,9 @@ function renderTechnionPlusQuickBar(course) {
         </a>
         <a href="${cfUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-xs technion-link-btn" style="background: rgba(245, 158, 11, 0.18); border: 1px solid #f59e0b; color: #fbbf24; text-decoration: none; padding: 4px 10px; border-radius: 6px; font-size: 0.76rem; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;" title="דף הקורס ומערכת שעות ב-CheeseFork">
             <span>🧀</span> צ'יזפורק ↗
+        </a>
+        <a href="${pangeaUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-xs technion-link-btn" style="background: rgba(14, 165, 233, 0.18); border: 1px solid #0284c7; color: #38bdf8; text-decoration: none; padding: 4px 10px; border-radius: 6px; font-size: 0.76rem; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;" title="סיכומים ודפי נוסחאות בפנגייה (Ido Fang Bentov)">
+            <span>💧</span> פנגייה ↗
         </a>
         <a href="${driveUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-xs technion-link-btn" style="background: rgba(168, 85, 247, 0.18); border: 1px solid #a855f7; color: #c084fc; text-decoration: none; padding: 4px 10px; border-radius: 6px; font-size: 0.76rem; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;" title="חיפוש תיקיות Google Drive, סיכומים וחומרי עזר">
             <span>🔍</span> דרייב וסיכומים ↗
