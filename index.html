@@ -591,7 +591,7 @@
 
                             <!-- Search Input -->
                             <div class="planner-search-wrap">
-                                <input type="text" id="planner-elective-search-input" class="planner-search-input" placeholder="🔍 חיפוש קורס לפי שם או מספר...">
+                                <input type="text" id="planner-elective-search-input" name="planner_elective_search" aria-label="חיפוש קורס בחירה לפי שם או מספר" class="planner-search-input" placeholder="🔍 חיפוש קורס לפי שם או מספר...">
                             </div>
 
                             <!-- Available Electives Draggable Pool -->
@@ -928,21 +928,21 @@
                             <input type="text" id="setting-cal-id-practice" aria-label="מזהה יומן תרגול למבחנים בגוגל" class="modal-input setting-cal-input" value="d707cbfa99ea0f68a0a31ebc42cb4cd35eae834770a5a118051727eb0c1afdd5@group.calendar.google.com" spellcheck="false">
                         </div>
                         <div class="sync-cal-box" style="border-color: rgba(56, 189, 248, 0.4); background: rgba(56, 189, 248, 0.04);">
-                            <label class="setting-label" style="display: flex; align-items: center; gap: 6px; direction: rtl; text-align: right; margin-bottom: 4px;">
+                            <label for="setting-moodle-calendar-url" class="setting-label" style="display: flex; align-items: center; gap: 6px; direction: rtl; text-align: right; margin-bottom: 4px;">
                                 <span class="sync-cal-box-icon">🎓</span>
                                 <span>קישור יומן מודל <bdi dir="ltr">(Moodle iCal Feed URL)</bdi>:</span>
                             </label>
-                            <input type="text" id="setting-moodle-calendar-url" class="modal-input setting-cal-input" placeholder="https://moodle26.technion.ac.il/calendar/export_execute.php?..." spellcheck="false">
+                            <input type="text" id="setting-moodle-calendar-url" name="setting_moodle_calendar_url" aria-label="קישור ליומן Moodle 26" class="modal-input setting-cal-input" placeholder="https://moodle26.technion.ac.il/calendar/export_execute.php?..." spellcheck="false">
                         </div>
                     </div>
 
                     <!-- Webhook & Two-Way Controls -->
                     <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid #334155; border-radius: 8px; padding: 14px; margin-top: 16px;">
-                        <label class="setting-label" style="margin-bottom: 6px; display: flex; align-items: center; gap: 6px; direction: rtl; text-align: right;">
+                        <label for="input-apps-script-webhook" class="setting-label" style="margin-bottom: 6px; display: flex; align-items: center; gap: 6px; direction: rtl; text-align: right;">
                             <span>🚀 כתובת Google Apps Script Webhook <bdi dir="ltr">(לסנכרון דו-כיווני)</bdi>:</span>
                         </label>
                         <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                            <input type="text" id="input-apps-script-webhook" class="modal-input" placeholder="https://script.google.com/macros/s/.../exec" style="flex: 1; min-width: 320px; font-family: monospace; font-size: 0.8rem;" spellcheck="false">
+                            <input type="text" id="input-apps-script-webhook" name="apps_script_webhook" aria-label="כתובת Webhook ל-Google Apps Script" class="modal-input" placeholder="https://script.google.com/macros/s/.../exec" style="flex: 1; min-width: 320px; font-family: monospace; font-size: 0.8rem;" spellcheck="false">
                             <button type="button" class="btn btn-outline btn-sm" id="btn-trigger-manual-calendar-pull">🔄 משוך מיומנים עכשיו</button>
                         </div>
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
@@ -1427,7 +1427,7 @@
                                 </select>
                             </div>
                             <div class="filter-group search">
-                                <input type="text" id="search-tasks" placeholder="חיפוש משימה...">
+                                <input type="text" id="search-tasks" name="search_tasks" aria-label="חיפוש משימה בלוח המטלות" placeholder="חיפוש משימה...">
                             </div>
                         </div>
                     </div>
@@ -1715,16 +1715,16 @@
                     <!-- Grade Calculator Grid -->
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; margin-bottom: 12px; background: rgba(0,0,0,0.25); padding: 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.05);">
                         <div>
-                            <label style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-bottom: 4px;">📝 ציון מבחן סוף:</label>
-                            <input type="number" id="calc-exam-grade" min="0" max="100" placeholder="--" style="width: 100%; box-sizing: border-box; background: var(--bg-deep); border: 1px solid var(--border-color); color: var(--text-light); border-radius: 4px; padding: 5px 8px; font-size: 0.85rem; text-align: center; font-family: inherit;">
+                            <label for="calc-exam-grade" style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-bottom: 4px;">📝 ציון מבחן סוף:</label>
+                            <input type="number" id="calc-exam-grade" name="calc_exam_grade" aria-label="ציון מבחן סוף" min="0" max="100" placeholder="--" style="width: 100%; box-sizing: border-box; background: var(--bg-deep); border: 1px solid var(--border-color); color: var(--text-light); border-radius: 4px; padding: 5px 8px; font-size: 0.85rem; text-align: center; font-family: inherit;">
                         </div>
                         <div>
-                            <label style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-bottom: 4px;">⚖️ משקל מבחן (%):</label>
-                            <input type="number" id="calc-exam-weight" aria-label="משקל מבחן באחוזים" min="0" max="100" value="70" style="width: 100%; box-sizing: border-box; background: var(--bg-deep); border: 1px solid var(--border-color); color: var(--text-light); border-radius: 4px; padding: 5px 8px; font-size: 0.85rem; text-align: center; font-family: inherit;">
+                            <label for="calc-exam-weight" style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-bottom: 4px;">⚖️ משקל מבחן (%):</label>
+                            <input type="number" id="calc-exam-weight" name="calc_exam_weight" aria-label="משקל מבחן באחוזים" min="0" max="100" value="70" style="width: 100%; box-sizing: border-box; background: var(--bg-deep); border: 1px solid var(--border-color); color: var(--text-light); border-radius: 4px; padding: 5px 8px; font-size: 0.85rem; text-align: center; font-family: inherit;">
                         </div>
                         <div>
-                            <label style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-bottom: 4px;">📚 ציון שאר מטלות/מגן:</label>
-                            <input type="number" id="calc-hw-grade" min="0" max="100" placeholder="100" style="width: 100%; box-sizing: border-box; background: var(--bg-deep); border: 1px solid var(--border-color); color: var(--text-light); border-radius: 4px; padding: 5px 8px; font-size: 0.85rem; text-align: center; font-family: inherit;">
+                            <label for="calc-hw-grade" style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-bottom: 4px;">📚 ציון שאר מטלות/מגן:</label>
+                            <input type="number" id="calc-hw-grade" name="calc_hw_grade" aria-label="ציון שאר מטלות או מגן" min="0" max="100" placeholder="100" style="width: 100%; box-sizing: border-box; background: var(--bg-deep); border: 1px solid var(--border-color); color: var(--text-light); border-radius: 4px; padding: 5px 8px; font-size: 0.85rem; text-align: center; font-family: inherit;">
                         </div>
                         <div>
                             <label style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-bottom: 4px;">⚡ ציון מחושב:</label>
@@ -1818,7 +1818,7 @@
                     
                     <!-- Syllabus Paste Area -->
                     <div id="syllabus-paste-area" style="display: none; flex-direction: column; gap: 8px; margin-top: 10px; border-top: 1px solid var(--border-color); padding-top: 10px;">
-                        <textarea id="input-syllabus-text" rows="4" placeholder="הדבק כאן את הטקסט של הסילבוס (לדוגמה: תרגיל בית 1 בנושא קינמטיקה, מעבדה 2, פרויקט מסכם, מבחן סוף...)" style="background: var(--bg-deep); border: 1px solid var(--border-color); color: var(--text-light); border-radius: 4px; padding: 8px; font-family: inherit; font-size: 0.8rem; resize: vertical; width: 100%; box-sizing: border-box;"></textarea>
+                        <textarea id="input-syllabus-text" name="input_syllabus_text" aria-label="טקסט סילבוס הקורס" rows="4" placeholder="הדבק כאן את הטקסט של הסילבוס (לדוגמה: תרגיל בית 1 בנושא קינמטיקה, מעבדה 2, פרויקט מסכם, מבחן סוף...)" style="background: var(--bg-deep); border: 1px solid var(--border-color); color: var(--text-light); border-radius: 4px; padding: 8px; font-family: inherit; font-size: 0.8rem; resize: vertical; width: 100%; box-sizing: border-box;"></textarea>
                         <button class="btn btn-sm" id="btn-import-syllabus-submit" style="background-color: var(--color-mastered); color: #fff; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; padding: 6px 12px; font-family: inherit; align-self: flex-start;">נתח וייבא משימות</button>
                     </div>
                 </div>
@@ -1964,7 +1964,7 @@
                 <h2>ייבוא שמירה (JSON)</h2>
             </div>
             <div class="modal-body">
-                <textarea id="import-text" placeholder="הדבק כאן את תוכן השמירה המיוצא..." rows="10" style="width: 100%; background: var(--bg-dark); color: var(--text-light); font-family: monospace; padding: 10px; border: 1px solid var(--border-color); border-radius: 4px; resize: none;"></textarea>
+                <textarea id="import-text" name="import_text" aria-label="תוכן קובץ שמירה לייבוא" placeholder="הדבק כאן את תוכן השמירה המיוצא..." rows="10" style="width: 100%; background: var(--bg-dark); color: var(--text-light); font-family: monospace; padding: 10px; border: 1px solid var(--border-color); border-radius: 4px; resize: none;"></textarea>
                 <button class="btn btn-primary w-full mt-10" id="btn-import-submit">ייבא נתונים</button>
             </div>
         </div>
@@ -1977,7 +1977,7 @@
             <!-- Icon and Editable Title -->
             <div class="peek-header">
                 <div class="peek-icon">📋</div>
-                <input type="text" id="peek-task-title" class="peek-title-input" placeholder="שם המשימה...">
+                <input type="text" id="peek-task-title" name="peek_task_title" aria-label="כותרת משימה ב-Side Peek" class="peek-title-input" placeholder="שם המשימה...">
             </div>
 
             <!-- Properties List -->
@@ -2029,7 +2029,7 @@
                     <span class="peek-property-label">📌 נעיצה לראש הטבלה</span>
                     <span class="peek-property-value">
                         <label style="display: inline-flex; align-items: center; gap: 6px; cursor: pointer; user-select: none;">
-                            <input type="checkbox" id="peek-property-pinned-toggle" style="accent-color: #f59e0b; width: 16px; height: 16px;">
+                            <input type="checkbox" id="peek-property-pinned-toggle" name="peek_property_pinned" aria-label="נעיצת משימה לראש הרשימה" style="accent-color: #f59e0b; width: 16px; height: 16px;">
                             <span id="peek-pinned-label" style="font-size: 0.8rem; color: #cbd5e1;">נעוץ בראש</span>
                         </label>
                     </span>
@@ -2039,7 +2039,7 @@
                     <span class="peek-property-label">🇮🇱 התאמת מילואים</span>
                     <span class="peek-property-value">
                         <label style="display: inline-flex; align-items: center; gap: 6px; cursor: pointer; user-select: none;">
-                            <input type="checkbox" id="peek-property-miluim-toggle" style="accent-color: #10b981; width: 16px; height: 16px;">
+                            <input type="checkbox" id="peek-property-miluim-toggle" name="peek_property_miluim" aria-label="התאמת מילואים למשימה" style="accent-color: #10b981; width: 16px; height: 16px;">
                             <span id="peek-miluim-label" style="font-size: 0.8rem; color: #34d399;">הקלה / דחייה צבאית</span>
                         </label>
                     </span>
@@ -2056,7 +2056,7 @@
                     <!-- Populated dynamically via JS -->
                 </div>
                 <div class="peek-comment-input-row">
-                    <textarea id="peek-new-comment-text" placeholder="הוסף הערה או תזכורת... (Shift+Enter לשורה חדשה)"></textarea>
+                    <textarea id="peek-new-comment-text" name="peek_new_comment" aria-label="הוספת הערה או תזכורת למשימה" placeholder="הוסף הערה או תזכורת... (Shift+Enter לשורה חדשה)"></textarea>
                     <button class="btn btn-sm btn-primary" id="peek-btn-add-comment">שלח</button>
                 </div>
             </div>
@@ -2392,7 +2392,7 @@
                         <input type="date" id="new-task-due-date" class="modal-input" style="width: 100%;">
                     </div>
                     <label style="display: flex; align-items: center; gap: 8px; font-size: 0.80rem; color: #34d399; margin-top: 2px; cursor: pointer; user-select: none;">
-                        <input type="checkbox" id="new-task-miluim-toggle" style="accent-color: #10b981; width: 16px; height: 16px;">
+                        <input type="checkbox" id="new-task-miluim-toggle" name="new_task_miluim" aria-label="התאמת מילואים צבאית" style="accent-color: #10b981; width: 16px; height: 16px;">
                         <span>🇮🇱 התאמת מילואים (דחייה / פטור / הקלה אקדמית צבאית)</span>
                     </label>
                     <input type="hidden" id="new-task-xp-input" value="0">
@@ -2582,7 +2582,7 @@
             <!-- Search Bar -->
             <div class="icon-picker-search-bar">
                 <span class="search-icon">🔍</span>
-                <input type="text" id="icon-picker-search" placeholder="חפש סמל... (מד״ר, יוגה, חדו״א, מוצקים, gear, flame, atom...)" autocomplete="off">
+                <input type="text" id="icon-picker-search" name="icon_picker_search" aria-label="חיפוש סמל לקורס" placeholder="חפש סמל... (מד״ר, יוגה, חדו״א, מוצקים, gear, flame, atom...)" autocomplete="off">
                 <button type="button" id="btn-clear-icon-search" class="btn-clear-search" style="display: none;">✕</button>
             </div>
 
@@ -2862,7 +2862,7 @@
                     </label>
                 </div>
                 <div style="margin-bottom: 8px;">
-                    <input type="text" id="day-modal-event-title" placeholder="כותרת האירוע / משימה..." class="form-control" style="width: 100%; box-sizing: border-box; padding: 8px 10px; font-size: 0.84rem; background: #0b0f19; border: 1px solid #334155; color: #fff; border-radius: 8px;">
+                    <input type="text" id="day-modal-event-title" name="day_modal_event_title" aria-label="כותרת האירוע או המשימה ביומן" placeholder="כותרת האירוע / משימה..." class="form-control" style="width: 100%; box-sizing: border-box; padding: 8px 10px; font-size: 0.84rem; background: #0b0f19; border: 1px solid #334155; color: #fff; border-radius: 8px;">
                 </div>
                 <!-- Time Range (shown when not all-day) -->
                 <div id="day-modal-times-container" style="display: flex; gap: 8px; margin-bottom: 10px; align-items: center;">
