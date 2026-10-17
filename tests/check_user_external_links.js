@@ -26,20 +26,20 @@ const USER_LINKS = [
         category: 'CheeseFork'
     },
     {
-        name: 'Technion Moodle 2025/2026 Homepage',
-        url: 'https://moodle25.technion.ac.il/',
+        name: 'Technion Moodle 26 (2026/2027) Homepage',
+        url: 'https://moodle26.technion.ac.il/',
         expected: [200, 302, 303],
         category: 'Technion Moodle'
     },
     {
-        name: 'Technion Moodle Calendar Export Page',
-        url: 'https://moodle25.technion.ac.il/calendar/export.php',
+        name: 'Technion Moodle 26 Calendar Export Page',
+        url: 'https://moodle26.technion.ac.il/calendar/export.php',
         expected: [200, 302, 303],
         category: 'Technion Moodle'
     },
     {
-        name: 'Technion Moodle Calendar View',
-        url: 'https://moodle25.technion.ac.il/calendar/view.php',
+        name: 'Technion Moodle 26 Calendar View',
+        url: 'https://moodle26.technion.ac.il/calendar/view.php',
         expected: [200, 302, 303],
         category: 'Technion Moodle'
     },

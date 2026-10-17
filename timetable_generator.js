@@ -1,0 +1,1062 @@
+/**
+ * Semestero ME - Algorithmic Timetable Generator & Combinations Studio (v2.4.10)
+ * 
+ * Automatically generates, scores, and browses all conflict-free timetable combinations
+ * based on CheeseFork and Technion faculty catalogs for students to find their optimal schedule.
+ */
+
+(function (global) {
+    'use strict';
+
+    // Master Course Groups Catalog (Technion Semester 3 - Winter 2026/2027 תשפ״ז)
+    const TECH_COURSE_GROUPS_CATALOG = {
+        '034056': {
+            code: '034056',
+            name: 'מבוא לחישוב מדעי והנדסי',
+            credits: 4.0,
+            cardClass: 'timetable-card-computing',
+            slots: [
+                {
+                    slotType: 'lecture',
+                    slotName: 'הרצאה',
+                    options: [
+                        {
+                            groupId: '10',
+                            lecturer: 'ד"ר דניאל הקסנר',
+                            room: 'אודיטוריום',
+                            meetings: [
+                                { dayIndex: 3, dayName: 'רביעי', startTime: '14:30', endTime: '17:30', duration: '3 שעות' }
+                            ]
+                        },
+                        {
+                            groupId: '11',
+                            lecturer: 'ד"ר דניאל הקסנר',
+                            room: 'כיתה 200',
+                            meetings: [
+                                { dayIndex: 0, dayName: 'ראשון', startTime: '10:30', endTime: '13:30', duration: '3 שעות' }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    slotType: 'tutorial',
+                    slotName: 'תרגול',
+                    options: [
+                        {
+                            groupId: '14',
+                            lecturer: 'מתרגל/ת מחשבים',
+                            room: 'חוות מחשבים',
+                            meetings: [
+                                { dayIndex: 1, dayName: 'שני', startTime: '14:30', endTime: '16:30', duration: 'שעתיים' }
+                            ]
+                        },
+                        {
+                            groupId: '11',
+                            lecturer: 'מתרגל/ת מחשבים',
+                            room: 'חוות מחשבים',
+                            meetings: [
+                                { dayIndex: 1, dayName: 'שני', startTime: '12:30', endTime: '14:30', duration: 'שעתיים' }
+                            ]
+                        },
+                        {
+                            groupId: '12',
+                            lecturer: 'מתרגל/ת מחשבים',
+                            room: 'חוות מחשבים',
+                            meetings: [
+                                { dayIndex: 2, dayName: 'שלישי', startTime: '14:30', endTime: '16:30', duration: 'שעתיים' }
+                            ]
+                        },
+                        {
+                            groupId: '15',
+                            lecturer: 'מתרגל/ת מחשבים',
+                            room: 'חוות מחשבים',
+                            meetings: [
+                                { dayIndex: 4, dayName: 'חמישי', startTime: '14:30', endTime: '16:30', duration: 'שעתיים' }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        '034053': {
+            code: '034053',
+            name: 'מכניקת מוצקים 2מ',
+            credits: 4.5,
+            cardClass: 'timetable-card-solids',
+            slots: [
+                {
+                    slotType: 'lecture',
+                    slotName: 'הרצאה',
+                    options: [
+                        {
+                            groupId: '10',
+                            lecturer: 'פרופ\' יוסף גבלי',
+                            room: 'הנדסת מכונות 250',
+                            meetings: [
+                                { dayIndex: 1, dayName: 'שני', startTime: '10:30', endTime: '14:30', duration: '4 שעות' }
+                            ]
+                        },
+                        {
+                            groupId: '11',
+                            lecturer: 'פרופ\' יוסף גבלי',
+                            room: 'הנדסת מכונות 250',
+                            meetings: [
+                                { dayIndex: 3, dayName: 'רביעי', startTime: '08:30', endTime: '12:30', duration: '4 שעות' }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    slotType: 'tutorial',
+                    slotName: 'תרגול',
+                    options: [
+                        {
+                            groupId: '21',
+                            lecturer: 'סגל תרגול מוצקים',
+                            room: 'כיתת תרגול',
+                            meetings: [
+                                { dayIndex: 4, dayName: 'חמישי', startTime: '12:30', endTime: '14:30', duration: 'שעתיים' }
+                            ]
+                        },
+                        {
+                            groupId: '22',
+                            lecturer: 'סגל תרגול מוצקים',
+                            room: 'כיתת תרגול',
+                            meetings: [
+                                { dayIndex: 2, dayName: 'שלישי', startTime: '10:30', endTime: '12:30', duration: 'שעתיים' }
+                            ]
+                        },
+                        {
+                            groupId: '23',
+                            lecturer: 'סגל תרגול מוצקים',
+                            room: 'כיתת תרגול',
+                            meetings: [
+                                { dayIndex: 4, dayName: 'חמישי', startTime: '14:30', endTime: '16:30', duration: 'שעתיים' }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        '034035': {
+            code: '034035',
+            name: 'תרמודינמיקה 1',
+            credits: 4.0,
+            cardClass: 'timetable-card-thermo',
+            slots: [
+                {
+                    slotType: 'lecture',
+                    slotName: 'הרצאה',
+                    options: [
+                        {
+                            groupId: '10',
+                            lecturer: 'פרופ\' לאוניד טרטקובסקי',
+                            room: 'אולם הרצאות',
+                            meetings: [
+                                { dayIndex: 2, dayName: 'שלישי', startTime: '08:30', endTime: '11:30', duration: '3 שעות' }
+                            ]
+                        },
+                        {
+                            groupId: '11',
+                            lecturer: 'פרופ\' לאוניד טרטקובסקי',
+                            room: 'אולם הרצאות',
+                            meetings: [
+                                { dayIndex: 0, dayName: 'ראשון', startTime: '09:30', endTime: '12:30', duration: '3 שעות' }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    slotType: 'tutorial',
+                    slotName: 'תרגול',
+                    options: [
+                        {
+                            groupId: '11',
+                            lecturer: 'סגל תרגול תרמו',
+                            room: 'כיתת תרגול',
+                            meetings: [
+                                { dayIndex: 2, dayName: 'שלישי', startTime: '12:30', endTime: '14:30', duration: 'שעתיים' }
+                            ]
+                        },
+                        {
+                            groupId: '12',
+                            lecturer: 'סגל תרגול תרמו',
+                            room: 'כיתת תרגול',
+                            meetings: [
+                                { dayIndex: 0, dayName: 'ראשון', startTime: '13:30', endTime: '15:30', duration: 'שעתיים' }
+                            ]
+                        },
+                        {
+                            groupId: '13',
+                            lecturer: 'סגל תרגול תרמו',
+                            room: 'כיתת תרגול',
+                            meetings: [
+                                { dayIndex: 3, dayName: 'רביעי', startTime: '12:30', endTime: '14:30', duration: 'שעתיים' }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        '104228': {
+            code: '104228',
+            name: 'משוואות דיפרנציאליות חלקיות מ\'',
+            credits: 3.5,
+            cardClass: 'timetable-card-pde',
+            slots: [
+                {
+                    slotType: 'lecture',
+                    slotName: 'הרצאה',
+                    options: [
+                        {
+                            groupId: '20',
+                            lecturer: 'פרופ\' מתמטיקה',
+                            room: 'אולם מתמטיקה',
+                            meetings: [
+                                { dayIndex: 4, dayName: 'חמישי', startTime: '10:30', endTime: '12:30', duration: 'שעתיים' }
+                            ]
+                        },
+                        {
+                            groupId: '10',
+                            lecturer: 'פרופ\' מתמטיקה',
+                            room: 'אולם מתמטיקה',
+                            meetings: [
+                                { dayIndex: 2, dayName: 'שלישי', startTime: '10:30', endTime: '12:30', duration: 'שעתיים' }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    slotType: 'tutorial',
+                    slotName: 'תרגול',
+                    options: [
+                        {
+                            groupId: '21',
+                            lecturer: 'סגל מתמטיקה',
+                            room: 'כיתת תרגול',
+                            meetings: [
+                                { dayIndex: 3, dayName: 'רביעי', startTime: '10:30', endTime: '12:30', duration: 'שעתיים' }
+                            ]
+                        },
+                        {
+                            groupId: '22',
+                            lecturer: 'סגל מתמטיקה',
+                            room: 'כיתת תרגול',
+                            meetings: [
+                                { dayIndex: 1, dayName: 'שני', startTime: '12:30', endTime: '14:30', duration: 'שעתיים' }
+                            ]
+                        },
+                        {
+                            groupId: '23',
+                            lecturer: 'סגל מתמטיקה',
+                            room: 'כיתת תרגול',
+                            meetings: [
+                                { dayIndex: 4, dayName: 'חמישי', startTime: '14:30', endTime: '16:30', duration: 'שעתיים' }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        '114052': {
+            code: '114052',
+            name: 'פיסיקה 2',
+            credits: 3.5,
+            cardClass: 'timetable-card-physics',
+            slots: [
+                {
+                    slotType: 'lecture',
+                    slotName: 'הרצאה',
+                    options: [
+                        {
+                            groupId: '10',
+                            lecturer: 'ד"ר גדעון אלון',
+                            room: 'אולם פיסיקה',
+                            meetings: [
+                                { dayIndex: 1, dayName: 'שני', startTime: '08:30', endTime: '10:30', duration: 'שעתיים' },
+                                { dayIndex: 3, dayName: 'רביעי', startTime: '08:30', endTime: '09:30', duration: 'שעה' }
+                            ]
+                        },
+                        {
+                            groupId: '20',
+                            lecturer: 'ד"ר גדעון אלון',
+                            room: 'אולם פיסיקה',
+                            meetings: [
+                                { dayIndex: 2, dayName: 'שלישי', startTime: '12:30', endTime: '14:30', duration: 'שעתיים' },
+                                { dayIndex: 4, dayName: 'חמישי', startTime: '10:30', endTime: '11:30', duration: 'שעה' }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    slotType: 'tutorial',
+                    slotName: 'תרגול',
+                    options: [
+                        {
+                            groupId: '13',
+                            lecturer: 'סגל תרגול פיסיקה',
+                            room: 'כיתת תרגול',
+                            meetings: [
+                                { dayIndex: 3, dayName: 'רביעי', startTime: '09:30', endTime: '10:30', duration: 'שעה' }
+                            ]
+                        },
+                        {
+                            groupId: '14',
+                            lecturer: 'סגל תרגול פיסיקה',
+                            room: 'כיתת תרגול',
+                            meetings: [
+                                { dayIndex: 1, dayName: 'שני', startTime: '10:30', endTime: '11:30', duration: 'שעה' }
+                            ]
+                        },
+                        {
+                            groupId: '15',
+                            lecturer: 'סגל תרגול פיסיקה',
+                            room: 'כיתת תרגול',
+                            meetings: [
+                                { dayIndex: 2, dayName: 'שלישי', startTime: '14:30', endTime: '15:30', duration: 'שעה' }
+                            ]
+                        },
+                        {
+                            groupId: '16',
+                            lecturer: 'סגל תרגול פיסיקה',
+                            room: 'כיתת תרגול',
+                            meetings: [
+                                { dayIndex: 4, dayName: 'חמישי', startTime: '11:30', endTime: '12:30', duration: 'שעה' }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        '03940805': {
+            code: '03940805',
+            name: 'חינוך גופני',
+            credits: 1.0,
+            cardClass: 'timetable-card-yoga',
+            slots: [
+                {
+                    slotType: 'sport',
+                    slotName: 'אימון',
+                    options: [
+                        {
+                            groupId: '24',
+                            lecturer: 'שלומית בן-איש',
+                            room: 'אולם ספורט',
+                            meetings: [
+                                { dayIndex: 4, dayName: 'חמישי', startTime: '07:30', endTime: '09:00', duration: 'שעה וחצי' }
+                            ]
+                        },
+                        {
+                            groupId: '25',
+                            lecturer: 'מאמן אתלטיקה',
+                            room: 'אצטדיון הטכניון',
+                            meetings: [
+                                { dayIndex: 1, dayName: 'שני', startTime: '08:00', endTime: '09:30', duration: 'שעה וחצי' }
+                            ]
+                        },
+                        {
+                            groupId: '26',
+                            lecturer: 'מאמן כושר',
+                            room: 'חדר כושר',
+                            meetings: [
+                                { dayIndex: 2, dayName: 'שלישי', startTime: '16:30', endTime: '18:00', duration: 'שעה וחצי' }
+                            ]
+                        },
+                        {
+                            groupId: '27',
+                            lecturer: 'מאמן טניס',
+                            room: 'מגרשי טניס',
+                            meetings: [
+                                { dayIndex: 0, dayName: 'ראשון', startTime: '08:00', endTime: '09:30', duration: 'שעה וחצי' }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    };
+
+    const DAY_NAMES = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'];
+
+    // Convert "HH:MM" to minutes from 00:00
+    function timeToMinutes(tStr) {
+        if (!tStr) return 0;
+        const parts = tStr.split(':').map(Number);
+        return (parts[0] || 0) * 60 + (parts[1] || 0);
+    }
+
+    // Minutes to "HH:MM"
+    function minutesToTime(mins) {
+        const h = Math.floor(mins / 60);
+        const m = mins % 60;
+        return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+    }
+
+    // Check if two class meetings conflict in time on the same day
+    function doMeetingsOverlap(m1, m2) {
+        if (m1.dayIndex !== m2.dayIndex) return false;
+        const s1 = timeToMinutes(m1.startTime);
+        const e1 = timeToMinutes(m1.endTime);
+        const s2 = timeToMinutes(m2.startTime);
+        const e2 = timeToMinutes(m2.endTime);
+        return Math.max(s1, s2) < Math.min(e1, e2);
+    }
+
+    // Ingest extra or user-synced schedule groups from CheeseFork
+    function ingestCheeseForkCourseGroups(catalog, coursesField) {
+        if (!coursesField || typeof coursesField !== 'object') return;
+        // Merge any dynamic course options
+        Object.entries(coursesField).forEach(([code, cData]) => {
+            const cleanCode = code.replace(/^0+/, '');
+            if (cData && cData.slots && Array.isArray(cData.slots)) {
+                catalog[cleanCode] = cData;
+                catalog[code] = cData;
+            }
+        });
+    }
+
+    /**
+     * Core Algorithm: Generates all conflict-free timetable combinations.
+     * Uses depth-first backtracking with early pruning.
+     */
+    function generateTimetableCombinations(selectedCodes, preferences = {}) {
+        const catalog = Object.assign({}, TECH_COURSE_GROUPS_CATALOG);
+        
+        // 1. Gather all required slots for selected courses
+        const requiredSlots = [];
+        const validCodes = (selectedCodes && selectedCodes.length > 0)
+            ? selectedCodes
+            : ['034056', '034053', '034035', '104228', '114052', '03940805'];
+
+        validCodes.forEach(code => {
+            const cleanCode = code.replace(/^0+/, '');
+            const cInfo = catalog[code] || catalog[cleanCode];
+            if (!cInfo || !cInfo.slots) return;
+
+            cInfo.slots.forEach(slot => {
+                if (slot.options && slot.options.length > 0) {
+                    requiredSlots.push({
+                        courseCode: cInfo.code,
+                        courseName: cInfo.name,
+                        credits: cInfo.credits,
+                        cardClass: cInfo.cardClass,
+                        slotType: slot.slotType,
+                        slotName: slot.slotName,
+                        options: slot.options
+                    });
+                }
+            });
+        });
+
+        if (requiredSlots.length === 0) {
+            return [];
+        }
+
+        const validSolutions = [];
+        const MAX_SOLUTIONS = 100; // Cap to keep browser UI instantaneous
+
+        function backtrack(slotIdx, currentSelection, allCurrentMeetings) {
+            if (validSolutions.length >= MAX_SOLUTIONS) return;
+
+            if (slotIdx === requiredSlots.length) {
+                // Found a collision-free complete schedule!
+                validSolutions.push(buildTimetableOption(currentSelection, validSolutions.length + 1));
+                return;
+            }
+
+            const currentSlot = requiredSlots[slotIdx];
+            for (let i = 0; i < currentSlot.options.length; i++) {
+                const candidateOption = currentSlot.options[i];
+                const meetings = candidateOption.meetings || [];
+
+                // Check conflict against already chosen meetings
+                let hasConflict = false;
+                for (let m = 0; m < meetings.length; m++) {
+                    const candidateMeeting = meetings[m];
+                    for (let c = 0; c < allCurrentMeetings.length; c++) {
+                        if (doMeetingsOverlap(candidateMeeting, allCurrentMeetings[c])) {
+                            hasConflict = true;
+                            break;
+                        }
+                    }
+                    if (hasConflict) break;
+                }
+
+                if (!hasConflict) {
+                    // Recurse down
+                    const nextMeetings = allCurrentMeetings.concat(meetings);
+                    currentSelection.push({
+                        courseCode: currentSlot.courseCode,
+                        courseName: currentSlot.courseName,
+                        credits: currentSlot.credits,
+                        cardClass: currentSlot.cardClass,
+                        slotType: currentSlot.slotType,
+                        slotName: currentSlot.slotName,
+                        option: candidateOption
+                    });
+
+                    backtrack(slotIdx + 1, currentSelection, nextMeetings);
+
+                    currentSelection.pop();
+                }
+            }
+        }
+
+        backtrack(0, [], []);
+
+        // 2. Score and sort solutions
+        const sortCriteria = preferences.sortBy || 'freeDays';
+        sortOptions(validSolutions, sortCriteria);
+
+        return validSolutions;
+    }
+
+    /**
+     * Builds a structured, complete Timetable Option object
+     */
+    function buildTimetableOption(selection, optionIndex) {
+        const days = [0, 1, 2, 3, 4].map(idx => ({
+            dayIndex: idx,
+            name: DAY_NAMES[idx],
+            fullName: `יום ${DAY_NAMES[idx]}`,
+            isFree: true,
+            classes: [],
+            gapMinutes: 0
+        }));
+
+        let totalClasses = 0;
+        let totalMinutes = 0;
+        let earliestStart = 24 * 60;
+        let latestEnd = 0;
+
+        selection.forEach(item => {
+            const opt = item.option;
+            (opt.meetings || []).forEach(m => {
+                if (m.dayIndex >= 0 && m.dayIndex <= 4) {
+                    const startMin = timeToMinutes(m.startTime);
+                    const endMin = timeToMinutes(m.endTime);
+                    const dur = endMin - startMin;
+
+                    totalClasses++;
+                    totalMinutes += dur;
+                    if (startMin < earliestStart) earliestStart = startMin;
+                    if (endMin > latestEnd) latestEnd = endMin;
+
+                    days[m.dayIndex].classes.push({
+                        courseId: item.courseCode,
+                        courseName: item.courseName,
+                        type: `${item.slotName} (קבוצה ${opt.groupId})`,
+                        group: opt.groupId,
+                        lecturer: opt.lecturer || '',
+                        room: opt.room || 'כיתת טכניון',
+                        startTime: m.startTime,
+                        endTime: m.endTime,
+                        duration: m.duration || `${(dur / 60).toFixed(1)} שעות`,
+                        cardClass: item.cardClass || 'timetable-card-default'
+                    });
+                }
+            });
+        });
+
+        // Compute gaps and free days
+        let totalGapMinutes = 0;
+        let freeDaysCount = 0;
+        const freeDayNames = [];
+
+        days.forEach(d => {
+            d.classes.sort((a, b) => a.startTime.localeCompare(b.startTime));
+            d.isFree = d.classes.length === 0;
+
+            if (d.isFree) {
+                freeDaysCount++;
+                freeDayNames.push(d.name);
+            } else {
+                // Compute idle gaps between classes
+                for (let i = 0; i < d.classes.length - 1; i++) {
+                    const curEnd = timeToMinutes(d.classes[i].endTime);
+                    const nextStart = timeToMinutes(d.classes[i + 1].startTime);
+                    const gap = nextStart - curEnd;
+                    if (gap > 0) {
+                        d.gapMinutes += gap;
+                        totalGapMinutes += gap;
+                    }
+                }
+            }
+        });
+
+        // Add standard Friday/Saturday as free
+        freeDaysCount += 2;
+        freeDayNames.push('שישי', 'שבת');
+
+        // Calculate Academic Schedule Fitness Score (0-100)
+        let score = 70;
+        // Higher score for more free weekdays (Sunday-Thursday)
+        const freeWeekdays = days.filter(d => d.isFree).length;
+        score += freeWeekdays * 12; // +12 per free weekday
+        // Penalty for gap hours (-3 points per hour of dead time)
+        score -= Math.round((totalGapMinutes / 60) * 3);
+        // Bonus for late starts (no early 07:30/08:30 mornings)
+        if (earliestStart >= 9 * 60 + 30) score += 6;
+        // Bonus for early finish (done before 16:30)
+        if (latestEnd <= 16 * 60 + 30) score += 4;
+        
+        score = Math.max(50, Math.min(99, score));
+
+        return {
+            id: `tt-option-${optionIndex}`,
+            index: optionIndex,
+            score: score,
+            freeDaysCount: freeDaysCount,
+            freeWeekdaysCount: freeWeekdays,
+            freeDayNames: freeDayNames,
+            totalGapMinutes: totalGapMinutes,
+            totalGapHoursText: totalGapMinutes === 0 ? '0 שעות (רציף!)' : `${(totalGapMinutes / 60).toFixed(1)} שעות חלון`,
+            earliestStartTime: earliestStart < 24 * 60 ? minutesToTime(earliestStart) : '--',
+            latestEndTime: latestEnd > 0 ? minutesToTime(latestEnd) : '--',
+            totalClasses: totalClasses,
+            totalWeeklyHours: (totalMinutes / 60).toFixed(1),
+            selection: selection,
+            days: days
+        };
+    }
+
+    /**
+     * Sorts combinations according to user's objective
+     */
+    function sortOptions(options, criteria) {
+        options.sort((a, b) => {
+            if (criteria === 'freeDays') {
+                if (b.freeWeekdaysCount !== a.freeWeekdaysCount) return b.freeWeekdaysCount - a.freeWeekdaysCount;
+                if (a.totalGapMinutes !== b.totalGapMinutes) return a.totalGapMinutes - b.totalGapMinutes;
+                return b.score - a.score;
+            } else if (criteria === 'minGaps') {
+                if (a.totalGapMinutes !== b.totalGapMinutes) return a.totalGapMinutes - b.totalGapMinutes;
+                if (b.freeWeekdaysCount !== a.freeWeekdaysCount) return b.freeWeekdaysCount - a.freeWeekdaysCount;
+                return b.score - a.score;
+            } else if (criteria === 'lateStart') {
+                const sA = timeToMinutes(a.earliestStartTime);
+                const sB = timeToMinutes(b.earliestStartTime);
+                if (sB !== sA) return sB - sA;
+                return b.score - a.score;
+            } else if (criteria === 'earlyFinish') {
+                const eA = timeToMinutes(a.latestEndTime);
+                const eB = timeToMinutes(b.latestEndTime);
+                if (eA !== eB) return eA - eB;
+                return b.score - a.score;
+            } else {
+                return b.score - a.score;
+            }
+        });
+
+        // Re-index after sorting
+        options.forEach((opt, idx) => {
+            opt.displayIndex = idx + 1;
+        });
+    }
+
+    // =========================================================================
+    // UI Controller & Modal Studio
+    // =========================================================================
+    const TimetableStudio = {
+        options: [],
+        currentOptionIndex: 0,
+        selectedCourses: ['034056', '034053', '034035', '104228', '114052', '03940805'],
+        currentSort: 'freeDays',
+        isInitialized: false,
+
+        open: function () {
+            const modal = document.getElementById('modal-timetable-generator');
+            if (!modal) return;
+
+            // Collect active courses from gameState if available
+            if (global.gameState && global.gameState.courses) {
+                const activeSem3 = Object.values(global.gameState.courses)
+                    .filter(c => c.status === 'active' || Number(c.semester) === 3)
+                    .map(c => c.code);
+                if (activeSem3.length > 0) {
+                    this.selectedCourses = Array.from(new Set(activeSem3));
+                }
+            }
+
+            this.computeAndRender();
+            modal.style.display = 'flex';
+            this.bindEventsOnce();
+        },
+
+        close: function () {
+            const modal = document.getElementById('modal-timetable-generator');
+            if (modal) modal.style.display = 'none';
+        },
+
+        computeAndRender: function () {
+            this.options = generateTimetableCombinations(this.selectedCourses, { sortBy: this.currentSort });
+            this.currentOptionIndex = 0;
+            this.renderCourseChips();
+            this.renderPillsCarousel();
+            this.renderActiveOption();
+        },
+
+        renderCourseChips: function () {
+            const container = document.getElementById('ttg-courses-chips');
+            const summary = document.getElementById('ttg-courses-summary');
+            if (!container) return;
+
+            const catalog = TECH_COURSE_GROUPS_CATALOG;
+            let totalCredits = 0;
+            let html = '';
+
+            Object.values(catalog).forEach(c => {
+                const isChecked = this.selectedCourses.includes(c.code) || this.selectedCourses.includes(c.code.replace(/^0+/, ''));
+                if (isChecked) totalCredits += (c.credits || 0);
+
+                html += `
+                    <label class="ttg-course-chip ${isChecked ? 'is-checked' : ''}" style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 6px; font-size: 0.76rem; background: ${isChecked ? 'rgba(56, 189, 248, 0.15)' : 'rgba(255, 255, 255, 0.04)'}; border: 1px solid ${isChecked ? '#38bdf8' : 'rgba(255, 255, 255, 0.1)'}; color: ${isChecked ? '#fff' : '#94a3b8'}; cursor: pointer; user-select: none;">
+                        <input type="checkbox" class="ttg-course-cb" value="${c.code}" ${isChecked ? 'checked' : ''} style="accent-color: #38bdf8;">
+                        <span>${c.name} (${c.code})</span>
+                        <span style="opacity: 0.7; font-size: 0.70rem;">• ${c.credits} נק״ז</span>
+                    </label>
+                `;
+            });
+
+            container.innerHTML = html;
+            if (summary) {
+                summary.innerText = `(${this.selectedCourses.length} קורסים נבחרו, סה״כ ${totalCredits} נק״ז)`;
+            }
+
+            container.querySelectorAll('.ttg-course-cb').forEach(cb => {
+                cb.onchange = () => {
+                    const code = cb.value;
+                    if (cb.checked) {
+                        if (!this.selectedCourses.includes(code)) this.selectedCourses.push(code);
+                    } else {
+                        this.selectedCourses = this.selectedCourses.filter(c => c !== code && c !== code.replace(/^0+/, ''));
+                    }
+                    this.computeAndRender();
+                };
+            });
+        },
+
+        renderPillsCarousel: function () {
+            const row = document.getElementById('ttg-options-pills-row');
+            if (!row) return;
+
+            if (this.options.length === 0) {
+                row.innerHTML = `<div style="color: #ef4444; font-size: 0.85rem; padding: 8px;">❌ לא נמצאו קומבינציות חופשיות מהתנגשויות לקורסים שנבחרו. נסה להסיר קורס אחד או לשנות שילוב.</div>`;
+                return;
+            }
+
+            let html = '';
+            this.options.forEach((opt, idx) => {
+                const isActive = (idx === this.currentOptionIndex);
+                const star = idx === 0 ? '⭐ ' : '';
+                html += `
+                    <button type="button" class="ttg-opt-pill ${isActive ? 'active' : ''}" data-index="${idx}">
+                        <span>${star}מערכת ${opt.displayIndex}</span>
+                        <span style="font-size: 0.68rem; opacity: 0.85;">(${opt.score}%)</span>
+                        <span style="font-size: 0.68rem; background: rgba(0,0,0,0.25); padding: 1px 5px; border-radius: 8px;">${opt.freeWeekdaysCount} ימים חופשיים</span>
+                    </button>
+                `;
+            });
+
+            row.innerHTML = html;
+            row.querySelectorAll('.ttg-opt-pill').forEach(btn => {
+                btn.onclick = () => {
+                    this.currentOptionIndex = parseInt(btn.dataset.index, 10);
+                    this.renderActiveOption();
+                    this.updatePillsActiveState();
+                };
+            });
+        },
+
+        updatePillsActiveState: function () {
+            const row = document.getElementById('ttg-options-pills-row');
+            if (!row) return;
+            row.querySelectorAll('.ttg-opt-pill').forEach((btn, idx) => {
+                btn.classList.toggle('active', idx === this.currentOptionIndex);
+                if (idx === this.currentOptionIndex) {
+                    btn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                }
+            });
+        },
+
+        renderActiveOption: function () {
+            const previewGrid = document.getElementById('ttg-preview-grid');
+            const pagingInfo = document.getElementById('ttg-paging-info');
+            const badgesContainer = document.getElementById('ttg-option-badges');
+            const breakdownCard = document.getElementById('ttg-breakdown-card');
+            const prevBtn = document.getElementById('ttg-btn-prev');
+            const nextBtn = document.getElementById('ttg-btn-next');
+
+            if (!this.options || this.options.length === 0) {
+                if (previewGrid) previewGrid.innerHTML = '<div style="grid-column: 1 / -1; padding: 30px; text-align: center; color: #94a3b8;">אין מערכות שעות להצגה.</div>';
+                if (pagingInfo) pagingInfo.innerText = '0 מתוך 0';
+                if (badgesContainer) badgesContainer.innerHTML = '';
+                if (breakdownCard) breakdownCard.innerHTML = '';
+                return;
+            }
+
+            const current = this.options[this.currentOptionIndex];
+
+            // Paging Buttons state
+            if (prevBtn) prevBtn.disabled = (this.currentOptionIndex === 0);
+            if (nextBtn) nextBtn.disabled = (this.currentOptionIndex === this.options.length - 1);
+            if (pagingInfo) pagingInfo.innerText = `אפשרות ${current.displayIndex} מתוך ${this.options.length}`;
+
+            // Badges
+            if (badgesContainer) {
+                const recBadge = current.displayIndex === 1
+                    ? `<span style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4); padding: 3px 8px; border-radius: 6px; font-size: 0.74rem; font-weight: 800;">⭐ הבחירה האופטימלית</span>`
+                    : '';
+                badgesContainer.innerHTML = `
+                    ${recBadge}
+                    <span style="background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); padding: 3px 8px; border-radius: 6px; font-size: 0.74rem; font-weight: 700;">
+                        🏖️ ${current.freeWeekdaysCount} ימי חופש באמצ״ש (${current.freeDayNames.filter(n => n !== 'שישי' && n !== 'שבת').join(', ') || 'אין'})
+                    </span>
+                    <span style="background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.4); padding: 3px 8px; border-radius: 6px; font-size: 0.74rem; font-weight: 700;">
+                        ⏱️ ${current.totalGapHoursText}
+                    </span>
+                    <span style="background: rgba(168, 85, 247, 0.2); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.4); padding: 3px 8px; border-radius: 6px; font-size: 0.74rem; font-weight: 800;">
+                        🏆 ציון: ${current.score}%
+                    </span>
+                `;
+            }
+
+            // Render 5 Days Columns
+            if (previewGrid) {
+                let gridHtml = '';
+                current.days.forEach(d => {
+                    const isFree = d.isFree;
+                    let classesHtml = '';
+
+                    if (isFree) {
+                        classesHtml = `
+                            <div class="timetable-free-state" style="padding: 30px 10px; text-align: center; color: #94a3b8;">
+                                <div style="font-size: 2rem; margin-bottom: 6px;">🏖️</div>
+                                <div style="font-weight: 700; color: #fff; font-size: 0.88rem;">יום חופשי!</div>
+                                <div style="font-size: 0.72rem; margin-top: 4px; line-height: 1.3;">אין לימודים פרונטליים ביום זה</div>
+                            </div>
+                        `;
+                    } else {
+                        classesHtml = '<div class="ttg-preview-classes-list">';
+                        for (let i = 0; i < d.classes.length; i++) {
+                            const c = d.classes[i];
+                            classesHtml += `
+                                <div class="timetable-card ${c.cardClass}" style="margin-bottom: 6px;">
+                                    <div class="timetable-card-top">
+                                        <span class="timetable-card-time">⏰ ${c.startTime} - ${c.endTime}</span>
+                                        <span class="timetable-card-room">${c.room}</span>
+                                    </div>
+                                    <div class="timetable-card-name" style="font-size: 0.85rem; font-weight: 700;">${c.courseName}</div>
+                                    <div class="timetable-card-sub" style="font-size: 0.72rem; color: #cbd5e1; display: flex; justify-content: space-between;">
+                                        <span>${c.type}</span>
+                                        ${c.lecturer ? `<span>${c.lecturer}</span>` : ''}
+                                    </div>
+                                </div>
+                            `;
+
+                            // Show gap indicator if there is an idle window before the next class
+                            if (i < d.classes.length - 1) {
+                                const endMin = timeToMinutes(c.endTime);
+                                const nextStart = timeToMinutes(d.classes[i + 1].startTime);
+                                const gap = nextStart - endMin;
+                                if (gap > 0) {
+                                    const gapText = gap === 60 ? 'שעה' : (gap === 120 ? 'שעתיים' : `${(gap / 60).toFixed(1)} שעות`);
+                                    classesHtml += `
+                                        <div class="ttg-gap-indicator">
+                                            <span>⏳ חלון / שעה מתה: <strong>${gapText}</strong></span>
+                                        </div>
+                                    `;
+                                }
+                            }
+                        }
+                        classesHtml += '</div>';
+                    }
+
+                    gridHtml += `
+                        <div class="ttg-preview-day-col ${isFree ? 'is-free-col' : ''}">
+                            <div class="ttg-preview-day-header">
+                                <span style="font-weight: 800; color: #fff;">${d.fullName}</span>
+                                <span style="font-size: 0.70rem; color: ${isFree ? '#34d399' : '#38bdf8'}; font-weight: 700;">
+                                    ${isFree ? 'יום חופשי ✨' : `${d.classes.length} שיעורים`}
+                                </span>
+                            </div>
+                            ${classesHtml}
+                        </div>
+                    `;
+                });
+
+                previewGrid.innerHTML = gridHtml;
+            }
+
+            // Detailed Breakdown Card
+            if (breakdownCard) {
+                const groupList = current.selection.map(s => `
+                    <span style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.12); padding: 3px 8px; border-radius: 4px; font-size: 0.74rem;">
+                        <strong>${s.courseName}:</strong> ${s.slotName} קב' ${s.option.groupId}
+                    </span>
+                `).join(' ');
+
+                breakdownCard.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 8px;">
+                        <span style="font-weight: 700; color: #f8fafc; font-size: 0.84rem;">📋 הרכב הקבוצות והשעות של מערכת מס' ${current.displayIndex}:</span>
+                        <span style="font-size: 0.76rem; color: #94a3b8;">
+                            התחלה מוקדמת: <strong>${current.earliestStartTime}</strong> | סיום מאוחר: <strong>${current.latestEndTime}</strong> | שעות נטו: <strong>${current.totalWeeklyHours} שעות/שבוע</strong>
+                        </span>
+                    </div>
+                    <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                        ${groupList}
+                    </div>
+                `;
+            }
+        },
+
+        next: function () {
+            if (this.currentOptionIndex < this.options.length - 1) {
+                this.currentOptionIndex++;
+                this.renderActiveOption();
+                this.updatePillsActiveState();
+            }
+        },
+
+        prev: function () {
+            if (this.currentOptionIndex > 0) {
+                this.currentOptionIndex--;
+                this.renderActiveOption();
+                this.updatePillsActiveState();
+            }
+        },
+
+        applyActiveSchedule: function () {
+            if (!this.options || this.options.length === 0) return;
+            const chosen = this.options[this.currentOptionIndex];
+
+            const freeDayIndices = chosen.days.filter(d => d.isFree).map(d => d.dayIndex);
+            // Append Friday and Saturday
+            freeDayIndices.push(5, 6);
+
+            const newTimetable = {
+                semester: (global.gameState && global.gameState.currentActiveSemester) ? `20260${global.gameState.currentActiveSemester}` : '202601',
+                name: `מערכת מותאמת אישית (אפשרות ${chosen.displayIndex})`,
+                freeDays: freeDayIndices,
+                dayNames: DAY_NAMES,
+                syncedAt: new Date().toISOString(),
+                source: `CheeseFork Options Studio (Option ${chosen.displayIndex})`,
+                days: chosen.days
+            };
+
+            if (global.gameState) {
+                global.gameState.timetable = newTimetable;
+            }
+
+            if (typeof global.CHEESEFORK_SEMESTER_SCHEDULE !== 'undefined') {
+                global.CHEESEFORK_SEMESTER_SCHEDULE.days = chosen.days;
+                global.CHEESEFORK_SEMESTER_SCHEDULE.freeDays = freeDayIndices;
+            }
+
+            if (typeof global.saveState === 'function') global.saveState();
+            if (typeof global.updateDailyTimetableFocus === 'function') global.updateDailyTimetableFocus();
+            if (typeof global.renderTimetableGrid === 'function') global.renderTimetableGrid();
+
+            this.close();
+
+            const toastMsg = `🎉 מערכת שעות מס' ${chosen.displayIndex} הוחלה בהצלחה! (${chosen.freeWeekdaysCount} ימי חופש שבועיים, ${chosen.totalGapHoursText})`;
+            if (typeof global.showHudToast === 'function') {
+                global.showHudToast(toastMsg, 'success');
+            } else if (typeof global.showToastNotification === 'function') {
+                global.showToastNotification(toastMsg, 'success');
+            } else {
+                alert(toastMsg);
+            }
+        },
+
+        bindEventsOnce: function () {
+            if (this.isInitialized) return;
+            this.isInitialized = true;
+
+            const closeBtn = document.getElementById('modal-timetable-generator-close');
+            const bottomCloseBtn = document.getElementById('ttg-btn-close');
+            const prevBtn = document.getElementById('ttg-btn-prev');
+            const nextBtn = document.getElementById('ttg-btn-next');
+            const applyBtn = document.getElementById('ttg-btn-apply');
+            const syncCfBtn = document.getElementById('ttg-btn-sync-cf-live');
+
+            if (closeBtn) closeBtn.onclick = () => this.close();
+            if (bottomCloseBtn) bottomCloseBtn.onclick = () => this.close();
+            if (prevBtn) prevBtn.onclick = () => this.prev();
+            if (nextBtn) nextBtn.onclick = () => this.next();
+            if (applyBtn) applyBtn.onclick = () => this.applyActiveSchedule();
+
+            // Sort Tabs
+            const sortContainer = document.getElementById('ttg-sort-tabs');
+            if (sortContainer) {
+                sortContainer.querySelectorAll('.ttg-sort-btn').forEach(btn => {
+                    btn.onclick = () => {
+                        sortContainer.querySelectorAll('.ttg-sort-btn').forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        this.currentSort = btn.dataset.sort || 'freeDays';
+                        this.computeAndRender();
+                    };
+                });
+            }
+
+            // Sync from CheeseFork Live button
+            if (syncCfBtn) {
+                syncCfBtn.onclick = async () => {
+                    syncCfBtn.disabled = true;
+                    syncCfBtn.innerHTML = '<span>⏳</span> מסנכרן מ-CheeseFork...';
+                    try {
+                        if (typeof global.syncLiveCheeseForkData === 'function') {
+                            await global.syncLiveCheeseForkData(null, true);
+                        }
+                        this.computeAndRender();
+                    } catch (e) {
+                        console.warn('[TimetableGenerator] CheeseFork sync warning:', e);
+                    } finally {
+                        syncCfBtn.disabled = false;
+                        syncCfBtn.innerHTML = '<span>🧀</span> סנכרן מ-CheeseFork';
+                    }
+                };
+            }
+
+            // Keyboard navigation (ArrowLeft = prev, ArrowRight = next)
+            window.addEventListener('keydown', (e) => {
+                const modal = document.getElementById('modal-timetable-generator');
+                if (!modal || modal.style.display === 'none') return;
+
+                if (e.key === 'ArrowLeft') {
+                    e.preventDefault();
+                    this.prev();
+                } else if (e.key === 'ArrowRight') {
+                    e.preventDefault();
+                    this.next();
+                } else if (e.key === 'Escape') {
+                    this.close();
+                }
+            });
+        }
+    };
+
+    // Export module
+    global.TimetableGenerator = {
+        catalog: TECH_COURSE_GROUPS_CATALOG,
+        generateTimetableCombinations: generateTimetableCombinations,
+        studio: TimetableStudio,
+        open: function () {
+            TimetableStudio.open();
+        },
+        close: function () {
+            TimetableStudio.close();
+        }
+    };
+
+    if (typeof module !== 'undefined' && module.exports) {
+        module.exports = {
+            TECH_COURSE_GROUPS_CATALOG,
+            generateTimetableCombinations,
+            timeToMinutes,
+            minutesToTime,
+            doMeetingsOverlap
+        };
+    }
+
+})(typeof window !== 'undefined' ? window : global);

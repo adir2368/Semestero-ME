@@ -8970,6 +8970,23 @@ function loadSavedState() {
                 let exB = c.tasks.find(t => t.id === '034056_ex_b' || t.title.includes("מועד ב"));
                 if (exB) { exB.dueDate = '2027-03-10'; exB.title = "חישוב מדעי והנדסי - מועד ב'"; }
                 else { c.tasks.push({ id: '034056_ex_b', title: "חישוב מדעי והנדסי - מועד ב'", type: 'exam', xp: 500, completed: false, status: 'not_started', dueDate: '2027-03-10' }); }
+
+                // Active Moodle 26 Homework: לומדת MATLAB (2 bonus points)
+                let matlabTask = c.tasks.find(t => t.id === 'task_moodle_43952' || t.title.includes('MATLAB') || t.title.includes('מטלאב'));
+                if (!matlabTask) {
+                    c.tasks.unshift({
+                        id: 'task_moodle_43952',
+                        moodleEventId: '43952',
+                        moodleUrl: 'https://moodle26.technion.ac.il/mod/assign/view.php?id=43952',
+                        source: 'moodle',
+                        title: "לומדת MATLAB (בונוס 2 נקודות לציון)",
+                        type: 'hw',
+                        xp: 100,
+                        completed: false,
+                        status: 'not_started',
+                        dueDate: '2026-11-19'
+                    });
+                }
             }
             if (gameState.courses['034053']) {
                 const c = gameState.courses['034053'];
@@ -11382,6 +11399,55 @@ function renderActiveQuestsSidebar() {
     }
 }
 
+// Technion Moodle 26 (תשפ״ז - Winter 2026/2027) Real Course Portal IDs
+const MOODLE26_COURSE_MAP = {
+    '034056': 119,
+    '00340056': 119,
+    '034053': 116,
+    '00340053': 116,
+    '034035': 112,
+    '00340035': 112,
+    '104228': 643,
+    '01040228': 643,
+    '114052': 676,
+    '01140052': 676,
+    '03940805': 1212,
+    '3940805': 1212
+};
+
+function renderTechnionPlusQuickBar(course) {
+    const groupEl = document.getElementById("technion-plus-links-group");
+    if (!groupEl || !course) return;
+    const cleanCode = (course.code || '').replace(/^0+/, '');
+    const fullCode = course.code || '';
+    const moodleCourseId = MOODLE26_COURSE_MAP[fullCode] || MOODLE26_COURSE_MAP[cleanCode];
+    const moodleUrl = moodleCourseId 
+        ? `https://moodle26.technion.ac.il/course/view.php?id=${moodleCourseId}`
+        : `https://moodle26.technion.ac.il/course/search.php?search=${encodeURIComponent(cleanCode || fullCode)}`;
+    const panoptoUrl = `https://panopto.technion.ac.il/Panopto/Pages/Sessions/List.aspx#query=${encodeURIComponent(cleanCode || fullCode)}`;
+    const asatUrl = `https://asat.org.il/past-exams`;
+    const cfUrl = `https://cheesefork.cf/course/${cleanCode || fullCode}`;
+    const driveUrl = `https://www.google.com/search?q=${encodeURIComponent('טכניון ' + (cleanCode || fullCode) + ' ' + (course.name || '') + ' סיכומים מבחנים drive')}`;
+
+    groupEl.innerHTML = `
+        <a href="${moodleUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-xs technion-link-btn" style="background: rgba(2, 132, 199, 0.22); border: 1px solid #0284c7; color: #38bdf8; text-decoration: none; padding: 4px 10px; border-radius: 6px; font-size: 0.76rem; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;" title="מעבר ישיר לקורס במודל תשפ״ז (Moodle 26)">
+            <span>🎓</span> מודל 26 ↗
+        </a>
+        <a href="${panoptoUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-xs technion-link-btn" style="background: rgba(244, 63, 94, 0.18); border: 1px solid #f43f5e; color: #fb7185; text-decoration: none; padding: 4px 10px; border-radius: 6px; font-size: 0.76rem; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;" title="חיפוש הקלטות הקורס בפנופטו הטכניון">
+            <span>📹</span> פנופטו ↗
+        </a>
+        <a href="${asatUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-xs technion-link-btn" style="background: rgba(16, 185, 129, 0.18); border: 1px solid #10b981; color: #34d399; text-decoration: none; padding: 4px 10px; border-radius: 6px; font-size: 0.76rem; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;" title="מאגר בחינות וסיכומים של אס״ט">
+            <span>📚</span> בחינות אס״ט ↗
+        </a>
+        <a href="${cfUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-xs technion-link-btn" style="background: rgba(245, 158, 11, 0.18); border: 1px solid #f59e0b; color: #fbbf24; text-decoration: none; padding: 4px 10px; border-radius: 6px; font-size: 0.76rem; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;" title="דף הקורס ומערכת שעות ב-CheeseFork">
+            <span>🧀</span> צ'יזפורק ↗
+        </a>
+        <a href="${driveUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-xs technion-link-btn" style="background: rgba(168, 85, 247, 0.18); border: 1px solid #a855f7; color: #c084fc; text-decoration: none; padding: 4px 10px; border-radius: 6px; font-size: 0.76rem; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;" title="חיפוש תיקיות Google Drive, סיכומים וחומרי עזר">
+            <span>🔍</span> דרייב וסיכומים ↗
+        </a>
+    `;
+}
+
 // Open and load details into Course Details Modal
 function openCourseDetails(code) {
     window.openCourseDetails = openCourseDetails;
@@ -12006,7 +12072,7 @@ function openCourseDetails(code) {
 
         moodleFetchBtn.onclick = async () => {
             const token = document.getElementById("moodle-token") ? document.getElementById("moodle-token").value.trim() : "";
-            const moodleUrl = document.getElementById("moodle-url") ? document.getElementById("moodle-url").value.trim() : "https://moodle25.technion.ac.il";
+            const moodleUrl = document.getElementById("moodle-url") ? document.getElementById("moodle-url").value.trim() : "https://moodle26.technion.ac.il";
             
             moodleFetchBtn.disabled = true;
             moodleFetchBtn.innerText = "🔄 מושך נתונים...";
@@ -12578,6 +12644,8 @@ function openCourseDetails(code) {
     // Reset inputs
     document.getElementById("input-quest-title").value = "";
     document.getElementById("input-quest-date").value = "";
+    // Technion++ Quick Links & Resources Bar
+    renderTechnionPlusQuickBar(course);
 
     // CheeseFork Schedule & Exam Information Section
     const cfContainer = document.getElementById("modal-cheesefork-container");
@@ -13978,6 +14046,22 @@ function setupNotionDashboard() {
             const taskId = tr.dataset.taskId;
             if (!courseCode || !taskId) return;
 
+            // 0. Pin button click -> pin task to top of list
+            if (e.target.classList.contains("notion-pin-task-btn") || e.target.closest(".notion-pin-task-btn")) {
+                e.stopPropagation();
+                const course = gameState.courses[courseCode];
+                const task = course ? (course.tasks || []).find(t => t.id === taskId) : null;
+                if (task) {
+                    task.pinned = !task.pinned;
+                    if (typeof saveState === 'function') saveState();
+                    renderNotionTasksTable();
+                    if (typeof showHudToast === 'function') {
+                        showHudToast(task.pinned ? '📌 המשימה ננעצה בראש הרשימה' : 'המשימה שוחררה מנעיצה', 'info');
+                    }
+                }
+                return;
+            }
+
             // 1. Checkbox click -> surgical status toggle with zero latency
             if (e.target.classList.contains("notion-row-checkbox")) {
                 e.stopPropagation();
@@ -14164,10 +14248,59 @@ function calculateTimeRemaining(dueDateStr, isCompleted) {
     }
 }
 
+// Organit++ Category Filtering & Counter (Technion++ Extension Feature)
+window.activeOrganitCategory = 'all';
+
+function setupOrganitCategoryPills() {
+    const container = document.getElementById("organit-category-pills");
+    if (!container || container.dataset.initialized) return;
+    container.dataset.initialized = "true";
+
+    container.querySelectorAll(".organit-pill").forEach(pill => {
+        pill.addEventListener("click", () => {
+            container.querySelectorAll(".organit-pill").forEach(p => {
+                p.classList.remove("active");
+                p.setAttribute("aria-selected", "false");
+            });
+            pill.classList.add("active");
+            pill.setAttribute("aria-selected", "true");
+            window.activeOrganitCategory = pill.dataset.category || 'all';
+            renderNotionTasksTable();
+        });
+    });
+}
+
+function updateOrganitCategoryCounts(allTasks) {
+    if (!Array.isArray(allTasks)) return;
+    let counts = { all: allTasks.length, hw: 0, exam: 0, project: 0, miluim: 0 };
+    allTasks.forEach(item => {
+        const t = item.task;
+        if (t.type === 'hw' || t.type === 'homework' || t.type === 'assignment' || t.type === 'quiz') counts.hw++;
+        if (t.type === 'exam' || t.type === 'midterm' || t.type === 'moed_a' || t.type === 'moed_b') counts.exam++;
+        if (t.type === 'project' || t.type === 'lab') counts.project++;
+        if (t.isMiluim === true || t.miluim === true) counts.miluim++;
+    });
+
+    const elAll = document.getElementById("organit-count-all");
+    const elHw = document.getElementById("organit-count-hw");
+    const elExam = document.getElementById("organit-count-exam");
+    const elProject = document.getElementById("organit-count-project");
+    const elMiluim = document.getElementById("organit-count-miluim");
+
+    if (elAll) elAll.innerText = counts.all;
+    if (elHw) elHw.innerText = counts.hw;
+    if (elExam) elExam.innerText = counts.exam;
+    if (elProject) elProject.innerText = counts.project;
+    if (elMiluim) elMiluim.innerText = counts.miluim;
+}
+
 // Renders the Notion Tasks Table body dynamically
 function renderNotionTasksTable() {
     const tableBody = document.getElementById("notion-tasks-table-body");
     if (!tableBody) return;
+    
+    // Ensure Organit pills are hooked up
+    setupOrganitCategoryPills();
     
     tableBody.innerHTML = "";
     
@@ -14197,10 +14330,30 @@ function renderNotionTasksTable() {
         });
     });
     
+    // Update Organit++ Category Badges on full task set
+    updateOrganitCategoryCounts(allTasks);
+
     // Apply filters
     allTasks = allTasks.filter(item => {
         const t = item.task;
         
+        // 0. Organit++ Category Filter
+        const organitCat = window.activeOrganitCategory || 'all';
+        if (organitCat !== 'all') {
+            if (organitCat === 'hw' && !(t.type === 'hw' || t.type === 'homework' || t.type === 'assignment' || t.type === 'quiz')) {
+                return false;
+            }
+            if (organitCat === 'exam' && !(t.type === 'exam' || t.type === 'midterm' || t.type === 'moed_a' || t.type === 'moed_b')) {
+                return false;
+            }
+            if (organitCat === 'project' && !(t.type === 'project' || t.type === 'lab')) {
+                return false;
+            }
+            if (organitCat === 'miluim' && !(t.isMiluim === true || t.miluim === true)) {
+                return false;
+            }
+        }
+
         // 1. Status Filter (Multi-select)
         const currentTaskStatus = t.status || 'not_started';
         if (activeStatusFilters.length > 0 && !activeStatusFilters.includes(currentTaskStatus)) {
@@ -14220,8 +14373,13 @@ function renderNotionTasksTable() {
         return true;
     });
     
-    // Sort tasks: Incomplete first, then by pre-computed due date timestamp ascending
+    // Sort tasks: Pinned first, then incomplete first, then by pre-computed due date timestamp ascending
     allTasks.sort((a, b) => {
+        const aPinned = a.task.pinned ? 1 : 0;
+        const bPinned = b.task.pinned ? 1 : 0;
+        if (aPinned !== bPinned) {
+            return bPinned - aPinned; // Pinned first
+        }
         const aDone = a.task.status === 'done' || a.task.status === 'submitted';
         const bDone = b.task.status === 'done' || b.task.status === 'submitted';
         if (aDone !== bDone) {
@@ -14253,7 +14411,13 @@ function renderNotionTasksTable() {
         const timeInfo = calculateTimeRemaining(t.dueDate, isDone);
         
         const taskBadgeHtml = getTaskTypeBadgeHtml(t);
-        
+        const isPinned = !!t.pinned;
+        const isMiluim = !!(t.isMiluim || t.miluim);
+        const miluimBadgeHtml = isMiluim ? `<span class="miluim-task-badge">🪖 מילואים</span>` : '';
+        const pinBtnHtml = `
+            <button type="button" class="notion-pin-task-btn ${isPinned ? 'is-pinned' : ''}" title="${isPinned ? 'בטל נעיצה' : 'נעץ משימה בראש הרשימה'}" data-action="toggle-pin">📌</button>
+        `;
+
         let statusClass = t.status || 'not_started';
         let displayLabel = 'not started';
         if (t.status === 'in_progress') displayLabel = 'In progress';
@@ -14267,7 +14431,8 @@ function renderNotionTasksTable() {
         if (!moodleUrl && (t.moodleEventId || t.source === 'moodle')) {
             const evId = t.moodleEventId || (t.id && t.id.startsWith('task_moodle_') ? t.id.split('_')[2] : '');
             if (evId && /^\d+$/.test(evId)) {
-                moodleUrl = `https://moodle25.technion.ac.il/calendar/view.php?view=event&id=${evId}`;
+                const baseHost = (gameState.moodleCalendarUrl && gameState.moodleCalendarUrl.includes('moodle25')) ? 'https://moodle25.technion.ac.il' : 'https://moodle26.technion.ac.il';
+                moodleUrl = `${baseHost}/calendar/view.php?view=event&id=${evId}`;
             }
         }
         const moodleLinkHtml = moodleUrl ? `
@@ -14277,12 +14442,14 @@ function renderNotionTasksTable() {
         ` : '';
 
         rowsHtml += `
-            <tr data-course-code="${c.code}" data-task-id="${t.id}">
+            <tr data-course-code="${c.code}" data-task-id="${t.id}" class="${isPinned ? 'is-task-pinned' : ''}">
                 <td><input type="checkbox" class="notion-row-checkbox" ${isDone ? 'checked' : ''}></td>
                 <td>
                     <div class="notion-title-cell">
+                        ${pinBtnHtml}
                         <span class="notion-course-tag">
                             ${taskBadgeHtml}
+                            ${miluimBadgeHtml}
                             <span class="notion-title-editable" contenteditable="true" spellcheck="false" title="לחץ לעריכת שם המשימה">${t.title}</span>
                         </span>
                         ${moodleLinkHtml}
@@ -14566,7 +14733,8 @@ function openTaskSidePeek(courseCode, taskId) {
     if (!resolvedMoodleUrl && (task.moodleEventId || task.source === 'moodle')) {
         const evId = task.moodleEventId || (task.id && task.id.startsWith('task_moodle_') ? task.id.split('_')[2] : '');
         if (evId && /^\d+$/.test(evId)) {
-            resolvedMoodleUrl = `https://moodle25.technion.ac.il/calendar/view.php?view=event&id=${evId}`;
+            const baseHost = (gameState.moodleCalendarUrl && gameState.moodleCalendarUrl.includes('moodle25')) ? 'https://moodle25.technion.ac.il' : 'https://moodle26.technion.ac.il';
+            resolvedMoodleUrl = `${baseHost}/calendar/view.php?view=event&id=${evId}`;
         }
     }
     if (moodleRow && moodleLink) {
@@ -14653,6 +14821,28 @@ function openTaskSidePeek(courseCode, taskId) {
     } else {
         gradeRow.style.display = "none";
         gradeInput.onchange = null;
+    }
+
+    // Pin and Miluim Toggles in Side Peek
+    const pinToggle = document.getElementById("peek-property-pinned-toggle");
+    if (pinToggle) {
+        pinToggle.checked = !!task.pinned;
+        pinToggle.onchange = (e) => {
+            task.pinned = e.target.checked;
+            renderNotionTasksTable();
+            saveState();
+        };
+    }
+
+    const miluimToggle = document.getElementById("peek-property-miluim-toggle");
+    if (miluimToggle) {
+        miluimToggle.checked = !!(task.isMiluim || task.miluim);
+        miluimToggle.onchange = (e) => {
+            task.isMiluim = e.target.checked;
+            task.miluim = e.target.checked;
+            renderNotionTasksTable();
+            saveState();
+        };
     }
     
     renderPeekComments(task);
@@ -19021,13 +19211,13 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.10.17-v2.4.9",
-    version: "2.4.9",
-    build: "20261017_02",
-    date: "2026-10-17 02:30",
-    description: "גרסה 2.4.9: הוספת מזהה התנגשויות וצפיפות בחינות ב-Runway (התראות 0 ימים ופחות מ-48 שעות), מנוע ביקורת תואר ואישור זכאות לסיום (8 ממדי חובה, פקולטה, מל\"ג, ספורט וסל BCD), מעקב שיעורי פנופטו וחישוב קצב הדבקת פערים יומי למבחן, סימולטור הצטיינות דיקן ונשיא בטכניון (סף 18 נק\"ז וממוצע 85/90), סנכרון יומנים אוניברסלי Webcal/iCal לטלפונים ניידים (iOS, Android, Outlook), וכרטיס קונצנזוס עומס וקושי סטודנטים ברוח UW Flow."
+    code: "REV-2026.10.17-v2.4.10",
+    version: "2.4.10",
+    build: "20261017_03",
+    date: "2026-10-17 12:45",
+    description: "גרסה 2.4.10: מחולל מערכות שעות אלגוריתמי מבוסס CheeseFork המחשב את כל הקומבינציות האפשריות ללא התנגשויות (מיון לפי מקסימום ימי חופש, מינימום חלונות והתחלה מאוחרת), שילוב פיצ'רים של תוסף Technion++ (סרגלי קישורים ישירים למודל 26, Panopto, מבחני עבר וצ'יזפורק), סינון משימות לפי קטגוריות Organit++ ונעיצת משימות חשובות (📌)."
 };
-window.APP_VERSION = "2.4.9";
+window.APP_VERSION = "2.4.10";
 
 function ensureBaselineRevisions() {
     if (!gameState.revisions || !Array.isArray(gameState.revisions) || gameState.revisions.length === 0) {
@@ -21342,6 +21532,16 @@ function setupDailyTimetable() {
     if (exportTtBtn) {
         exportTtBtn.addEventListener('click', () => {
             exportTimetableToCanvasPNG();
+        });
+    }
+
+    // 3c. Open Algorithmic Timetable Generator & Combinations Studio
+    const openGenBtn = document.getElementById('btn-open-timetable-generator');
+    if (openGenBtn) {
+        openGenBtn.addEventListener('click', () => {
+            if (window.TimetableGenerator && typeof window.TimetableGenerator.open === 'function') {
+                window.TimetableGenerator.open();
+            }
         });
     }
 

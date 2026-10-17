@@ -32,7 +32,7 @@ function fetchUrl(url, headers = {}) {
 
 async function run() {
     console.log('================================================================');
-    console.log('🌐 Probing Live Production Deployment (GitHub Pages v2.4.9)');
+    console.log('🌐 Probing Live Production Deployment (GitHub Pages v2.4.10)');
     console.log('================================================================\n');
 
     let allOk = true;
@@ -42,22 +42,20 @@ async function run() {
     const indexRes = await fetchUrl(`https://adir2368.github.io/Semestero-ME/?t=${Date.now()}`);
     if (indexRes.status === 200) {
         console.log('   ✅ HTTP 200 OK');
-        const hasV249InDisplay = indexRes.body.includes('id="display-system-version">v2.4.9<');
+        const hasV2410InDisplay = indexRes.body.includes('id="display-system-version">v2.4.10<');
         const hasFooterBadge = indexRes.body.includes('id="footer-version-badge"');
-        const hasGradClearanceBtn = indexRes.body.includes('id="btn-open-graduation-clearance"');
-        const hasPanoptoBtn = indexRes.body.includes('id="btn-open-panopto-tracker"');
-        const hasHonorsCard = indexRes.body.includes('id="analytics-honors-card"');
-        const hasCalendarSyncModal = indexRes.body.includes('id="calendar-sync-modal"');
-        const hasPeerConsensusModal = indexRes.body.includes('id="modal-peer-consensus-container"');
+        const hasTimetableGenBtn = indexRes.body.includes('id="btn-open-timetable-generator"');
+        const hasTimetableGenModal = indexRes.body.includes('id="modal-timetable-generator"');
+        const hasOrganitPills = indexRes.body.includes('id="organit-category-pills"');
+        const hasTechnionPlusBar = indexRes.body.includes('id="modal-technion-plus-bar"');
         
-        console.log(`   ${hasV249InDisplay ? '✅' : '⏳'} display-system-version is v2.4.9: ${hasV249InDisplay}`);
+        console.log(`   ${hasV2410InDisplay ? '✅' : '⏳'} display-system-version is v2.4.10: ${hasV2410InDisplay}`);
         console.log(`   ${hasFooterBadge ? '✅' : '❌'} footer-version-badge exists: ${hasFooterBadge}`);
-        console.log(`   ${hasGradClearanceBtn ? '✅' : '⏳'} btn-open-graduation-clearance exists: ${hasGradClearanceBtn}`);
-        console.log(`   ${hasPanoptoBtn ? '✅' : '⏳'} btn-open-panopto-tracker exists: ${hasPanoptoBtn}`);
-        console.log(`   ${hasHonorsCard ? '✅' : '⏳'} analytics-honors-card exists: ${hasHonorsCard}`);
-        console.log(`   ${hasCalendarSyncModal ? '✅' : '⏳'} calendar-sync-modal exists: ${hasCalendarSyncModal}`);
-        console.log(`   ${hasPeerConsensusModal ? '✅' : '⏳'} modal-peer-consensus-container exists: ${hasPeerConsensusModal}`);
-        if (!hasV249InDisplay || !hasGradClearanceBtn || !hasPanoptoBtn) allOk = false;
+        console.log(`   ${hasTimetableGenBtn ? '✅' : '⏳'} btn-open-timetable-generator exists: ${hasTimetableGenBtn}`);
+        console.log(`   ${hasTimetableGenModal ? '✅' : '⏳'} modal-timetable-generator exists: ${hasTimetableGenModal}`);
+        console.log(`   ${hasOrganitPills ? '✅' : '⏳'} organit-category-pills exists: ${hasOrganitPills}`);
+        console.log(`   ${hasTechnionPlusBar ? '✅' : '⏳'} modal-technion-plus-bar exists: ${hasTechnionPlusBar}`);
+        if (!hasV2410InDisplay || !hasTimetableGenBtn || !hasTimetableGenModal) allOk = false;
     } else {
         console.error(`   ❌ Failed with status ${indexRes.status}`);
         allOk = false;
@@ -67,43 +65,47 @@ async function run() {
     console.log('\n2. Checking Live sw.js...');
     const swRes = await fetchUrl(`https://adir2368.github.io/Semestero-ME/sw.js?t=${Date.now()}`);
     if (swRes.status === 200) {
-        const hasCacheV249 = swRes.body.includes("CACHE_NAME = 'semestero-me-v2.4.9'");
-        console.log(`   ${hasCacheV249 ? '✅' : '⏳'} CACHE_NAME is semestero-me-v2.4.9: ${hasCacheV249}`);
-        if (!hasCacheV249) allOk = false;
+        const hasCacheV2410 = swRes.body.includes("CACHE_NAME = 'semestero-me-v2.4.10'");
+        const hasTimetableInAssets = swRes.body.includes("'./timetable_generator.js'");
+        console.log(`   ${hasCacheV2410 ? '✅' : '⏳'} CACHE_NAME is semestero-me-v2.4.10: ${hasCacheV2410}`);
+        console.log(`   ${hasTimetableInAssets ? '✅' : '⏳'} timetable_generator.js in cache: ${hasTimetableInAssets}`);
+        if (!hasCacheV2410 || !hasTimetableInAssets) allOk = false;
     } else {
         console.error(`   ❌ sw.js returned status ${swRes.status}`);
         allOk = false;
     }
 
-    // 3. Check app.js
-    console.log('\n3. Checking Live app.js...');
-    const appRes = await fetchUrl(`https://adir2368.github.io/Semestero-ME/app.js?t=${Date.now()}`);
-    if (appRes.status === 200) {
-        const hasRevision = appRes.body.includes('REV-2026.10.17-v2.4.9');
-        const hasAppVersion = appRes.body.includes('window.APP_VERSION = "2.4.9"');
-        const hasPanoptoTracker = appRes.body.includes('window.PanoptoTracker');
-        const hasPeerData = appRes.body.includes('PEER_CONSENSUS_DATA');
-        const hasHonorsSimulator = appRes.body.includes('renderHonorsStandingAndForecaster');
-        console.log(`   ${hasRevision ? '✅' : '⏳'} Revision REV-2026.10.17-v2.4.9: ${hasRevision}`);
-        console.log(`   ${hasAppVersion ? '✅' : '⏳'} window.APP_VERSION = "2.4.9": ${hasAppVersion}`);
-        console.log(`   ${hasPanoptoTracker ? '✅' : '⏳'} PanoptoTracker deployed: ${hasPanoptoTracker}`);
-        console.log(`   ${hasPeerData ? '✅' : '⏳'} PEER_CONSENSUS_DATA deployed: ${hasPeerData}`);
-        console.log(`   ${hasHonorsSimulator ? '✅' : '⏳'} Honors forecaster deployed: ${hasHonorsSimulator}`);
-        if (!hasRevision || !hasAppVersion || !hasPanoptoTracker) allOk = false;
+    // 3. Check timetable_generator.js
+    console.log('\n3. Checking Live timetable_generator.js...');
+    const ttRes = await fetchUrl(`https://adir2368.github.io/Semestero-ME/timetable_generator.js?t=${Date.now()}`);
+    if (ttRes.status === 200) {
+        const hasCatalog = ttRes.body.includes('TECH_COURSE_GROUPS_CATALOG');
+        const hasCombinations = ttRes.body.includes('generateTimetableCombinations');
+        const hasStudio = ttRes.body.includes('TimetableStudio');
+        console.log(`   ${hasCatalog ? '✅' : '⏳'} TECH_COURSE_GROUPS_CATALOG deployed: ${hasCatalog}`);
+        console.log(`   ${hasCombinations ? '✅' : '⏳'} generateTimetableCombinations deployed: ${hasCombinations}`);
+        console.log(`   ${hasStudio ? '✅' : '⏳'} TimetableStudio UI controller deployed: ${hasStudio}`);
+        if (!hasCatalog || !hasCombinations || !hasStudio) allOk = false;
     } else {
-        console.error(`   ❌ app.js returned status ${appRes.status}`);
+        console.error(`   ❌ timetable_generator.js returned status ${ttRes.status}`);
         allOk = false;
     }
 
-    // 4. Check planner_module.js
-    console.log('\n4. Checking Live planner_module.js...');
-    const plannerRes = await fetchUrl(`https://adir2368.github.io/Semestero-ME/planner_module.js?t=${Date.now()}`);
-    if (plannerRes.status === 200) {
-        const hasClearanceEngine = plannerRes.body.includes('openGraduationClearanceModal') && plannerRes.body.includes('evaluateDegreeRules');
-        console.log(`   ${hasClearanceEngine ? '✅' : '⏳'} Graduation clearance engine deployed: ${hasClearanceEngine}`);
-        if (!hasClearanceEngine) allOk = false;
+    // 4. Check app.js
+    console.log('\n4. Checking Live app.js...');
+    const appRes = await fetchUrl(`https://adir2368.github.io/Semestero-ME/app.js?t=${Date.now()}`);
+    if (appRes.status === 200) {
+        const hasRevision = appRes.body.includes('REV-2026.10.17-v2.4.10');
+        const hasAppVersion = appRes.body.includes('window.APP_VERSION = "2.4.10"');
+        const hasOrganitLogic = appRes.body.includes('setupOrganitCategoryPills');
+        const hasTechnionPlusBarLogic = appRes.body.includes('renderTechnionPlusQuickBar');
+        console.log(`   ${hasRevision ? '✅' : '⏳'} Revision REV-2026.10.17-v2.4.10: ${hasRevision}`);
+        console.log(`   ${hasAppVersion ? '✅' : '⏳'} window.APP_VERSION = "2.4.10": ${hasAppVersion}`);
+        console.log(`   ${hasOrganitLogic ? '✅' : '⏳'} Organit++ filtering deployed: ${hasOrganitLogic}`);
+        console.log(`   ${hasTechnionPlusBarLogic ? '✅' : '⏳'} Technion++ bar deployed: ${hasTechnionPlusBarLogic}`);
+        if (!hasRevision || !hasAppVersion || !hasOrganitLogic) allOk = false;
     } else {
-        console.error(`   ❌ planner_module.js returned status ${plannerRes.status}`);
+        console.error(`   ❌ app.js returned status ${appRes.status}`);
         allOk = false;
     }
 
@@ -111,11 +113,13 @@ async function run() {
     console.log('\n5. Checking Live styles.css...');
     const stylesRes = await fetchUrl(`https://adir2368.github.io/Semestero-ME/styles.css?t=${Date.now()}`);
     if (stylesRes.status === 200) {
-        const hasRunwayConflictStyle = stylesRes.body.includes('.runway-conflict-banner');
-        const hasHonorsStyle = stylesRes.body.includes('.analytics-honors-card');
-        console.log(`   ${hasRunwayConflictStyle ? '✅' : '⏳'} Runway conflict styling deployed: ${hasRunwayConflictStyle}`);
-        console.log(`   ${hasHonorsStyle ? '✅' : '⏳'} Honors styling deployed: ${hasHonorsStyle}`);
-        if (!hasRunwayConflictStyle || !hasHonorsStyle) allOk = false;
+        const hasTtgPreviewGrid = stylesRes.body.includes('.ttg-preview-grid');
+        const hasTtgOptPill = stylesRes.body.includes('.ttg-opt-pill');
+        const hasOrganitPills = stylesRes.body.includes('.organit-pill');
+        console.log(`   ${hasTtgPreviewGrid ? '✅' : '⏳'} Timetable grid styles deployed: ${hasTtgPreviewGrid}`);
+        console.log(`   ${hasTtgOptPill ? '✅' : '⏳'} Options pills styles deployed: ${hasTtgOptPill}`);
+        console.log(`   ${hasOrganitPills ? '✅' : '⏳'} Organit pills styles deployed: ${hasOrganitPills}`);
+        if (!hasTtgPreviewGrid || !hasTtgOptPill || !hasOrganitPills) allOk = false;
     } else {
         console.error(`   ❌ styles.css returned status ${stylesRes.status}`);
         allOk = false;
@@ -123,7 +127,7 @@ async function run() {
 
     console.log('\n================================================================');
     if (allOk) {
-        console.log('🎉 LIVE VERIFICATION SUCCESSFUL: v2.4.9 is live on GitHub Pages with all 6 features!');
+        console.log('🎉 LIVE VERIFICATION SUCCESSFUL: v2.4.10 is live on GitHub Pages with Timetable Generator & Technion++ features!');
     } else {
         console.log('⏳ Deployment in progress or caching on CDN. Re-run in a few seconds.');
     }

@@ -12510,5 +12510,315 @@ html.is-iphone .app-global-footer {
     box-shadow: 0 6px 24px rgba(251, 191, 36, 0.15);
 }
 
+/* ==========================================================================
+   Technion++ & Organit++ Integration Styles (v2.4.10)
+   ========================================================================== */
+
+/* Organit++ Category Filter Pills */
+.organit-category-pills {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-bottom: 12px;
+    padding: 2px 0;
+}
+
+.organit-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: var(--text-light, #cbd5e1);
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 6px 14px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+    user-select: none;
+    font-family: inherit;
+}
+
+.organit-pill:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.22);
+    color: #fff;
+    transform: translateY(-1px);
+}
+
+.organit-pill.active {
+    background: rgba(56, 189, 248, 0.18);
+    border-color: #38bdf8;
+    color: #38bdf8;
+    box-shadow: 0 0 12px rgba(56, 189, 248, 0.25);
+}
+
+.organit-pill-count {
+    font-size: 0.70rem;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.1);
+    color: #94a3b8;
+    margin-right: 2px;
+    transition: all 0.15s ease;
+}
+
+.organit-pill.active .organit-pill-count {
+    background: rgba(56, 189, 248, 0.3);
+    color: #fff;
+}
+
+/* Task Pinning Button in Notion Table */
+.notion-pin-task-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 0.88rem;
+    line-height: 1;
+    padding: 3px 5px;
+    border-radius: 4px;
+    transition: transform 0.15s ease, opacity 0.15s ease;
+    opacity: 0.35;
+    color: #94a3b8;
+}
+
+.notion-pin-task-btn:hover {
+    opacity: 0.85;
+    transform: scale(1.15);
+}
+
+.notion-pin-task-btn.is-pinned {
+    opacity: 1;
+    color: #f59e0b;
+    filter: drop-shadow(0 0 4px rgba(245, 158, 11, 0.6));
+}
+
+/* Row Pinned Indicator */
+tr.is-task-pinned {
+    background: rgba(245, 158, 11, 0.04) !important;
+    border-right: 3px solid #f59e0b !important;
+}
+
+/* Miluim Badge */
+.miluim-task-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    background: rgba(16, 185, 129, 0.15);
+    color: #34d399;
+    border: 1px solid rgba(16, 185, 129, 0.35);
+    padding: 2px 7px;
+    border-radius: 4px;
+    margin-right: 6px;
+}
+
+/* Technion++ Quick Links Bar in Course Modal */
+.modal-technion-plus-bar {
+    animation: fadeIn 0.2s ease;
+}
+
+.technion-link-btn {
+    transition: all 0.18s ease;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.technion-link-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+    filter: brightness(1.15);
+}
+
+/* =========================================================================
+   Algorithmic Timetable Generator & Combinations Studio (v2.4.10)
+   ========================================================================= */
+
+.btn-generator-action {
+    background: linear-gradient(135deg, rgba(168, 85, 247, 0.25) 0%, rgba(99, 102, 241, 0.25) 100%) !important;
+    border: 1px solid rgba(168, 85, 247, 0.5) !important;
+    color: #e9d5ff !important;
+    font-weight: 700 !important;
+    box-shadow: 0 0 12px rgba(168, 85, 247, 0.2);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-generator-action:hover {
+    background: linear-gradient(135deg, rgba(168, 85, 247, 0.4) 0%, rgba(99, 102, 241, 0.4) 100%) !important;
+    border-color: #c084fc !important;
+    color: #ffffff !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(168, 85, 247, 0.35);
+}
+
+.ttg-modal-content {
+    max-width: 1240px !important;
+    width: 95vw !important;
+    max-height: 90vh !important;
+    display: flex !important;
+    flex-direction: column !important;
+    background: var(--bg-card, #111827) !important;
+    border: 1px solid rgba(168, 85, 247, 0.35) !important;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), 0 0 30px rgba(168, 85, 247, 0.15) !important;
+}
+
+.ttg-sort-tabs {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.ttg-sort-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #cbd5e1;
+    padding: 5px 12px;
+    border-radius: 6px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    user-select: none;
+    font-family: inherit;
+}
+
+.ttg-sort-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+    border-color: rgba(255, 255, 255, 0.25);
+}
+
+.ttg-sort-btn.active {
+    background: linear-gradient(135deg, rgba(56, 189, 248, 0.25) 0%, rgba(14, 165, 233, 0.25) 100%);
+    border-color: #38bdf8;
+    color: #ffffff;
+    font-weight: 700;
+    box-shadow: 0 0 10px rgba(56, 189, 248, 0.25);
+}
+
+.ttg-options-pills-row {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding: 6px 2px 10px 2px;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(168, 85, 247, 0.4) transparent;
+}
+
+.ttg-options-pills-row::-webkit-scrollbar {
+    height: 6px;
+}
+
+.ttg-options-pills-row::-webkit-scrollbar-thumb {
+    background: rgba(168, 85, 247, 0.4);
+    border-radius: 4px;
+}
+
+.ttg-opt-pill {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #cbd5e1;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 0.76rem;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.15s ease;
+    flex-shrink: 0;
+    user-select: none;
+    font-family: inherit;
+}
+
+.ttg-opt-pill:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.25);
+    color: #ffffff;
+    transform: translateY(-1px);
+}
+
+.ttg-opt-pill.active {
+    background: linear-gradient(135deg, rgba(168, 85, 247, 0.3) 0%, rgba(126, 34, 206, 0.3) 100%);
+    border-color: #c084fc;
+    color: #ffffff;
+    font-weight: 800;
+    box-shadow: 0 0 12px rgba(168, 85, 247, 0.3);
+    transform: translateY(-1px);
+}
+
+.ttg-preview-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+    margin: 12px 0;
+    min-height: 280px;
+}
+
+@media (max-width: 900px) {
+    .ttg-preview-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.ttg-preview-day-col {
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 8px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    min-height: 200px;
+    transition: border-color 0.2s ease;
+}
+
+.ttg-preview-day-col.is-free-col {
+    background: rgba(16, 185, 129, 0.03);
+    border: 1px dashed rgba(16, 185, 129, 0.35);
+}
+
+.ttg-preview-day-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 8px;
+    margin-bottom: 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.ttg-preview-classes-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1;
+}
+
+.ttg-gap-indicator {
+    padding: 4px 8px;
+    background: rgba(245, 158, 11, 0.08);
+    border: 1px dashed rgba(245, 158, 11, 0.35);
+    border-radius: 5px;
+    color: #fbbf24;
+    font-size: 0.68rem;
+    text-align: center;
+    margin: 2px 0;
+}
+
+.ttg-breakdown-card {
+    background: rgba(15, 23, 42, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin-top: 10px;
+}
+
+
 
 

@@ -16,7 +16,7 @@
 (function (global) {
     'use strict';
 
-    const MOODLE_DEV_URL = 'https://moodle25.technion.ac.il/calendar/export_execute.php?userid=43774&authtoken=a124e33d97c0722e89374bea7fddb03632778eee&preset_what=all&preset_time=custom';
+    const MOODLE_DEV_URL = 'https://moodle26.technion.ac.il/calendar/export_execute.php?userid=39495&authtoken=47ff4e9841a2293be4696691eeeafe5127137f5c&preset_what=all&preset_time=custom';
 
     const MoodleSync = {
         config: {
@@ -571,7 +571,8 @@
                     if (descUrlMatch) {
                         moodleUrl = descUrlMatch[0];
                     } else if (eventId && /^\d+$/.test(eventId)) {
-                        moodleUrl = `https://moodle25.technion.ac.il/calendar/view.php?view=event&id=${eventId}`;
+                        const host = (this.config.url && this.config.url.includes('moodle25')) ? 'https://moodle25.technion.ac.il' : 'https://moodle26.technion.ac.il';
+                        moodleUrl = `${host}/calendar/view.php?view=event&id=${eventId}`;
                     }
                 }
 
