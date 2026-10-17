@@ -12798,6 +12798,8 @@ tr.is-task-pinned {
 .ttg-preview-grid {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
+    grid-auto-rows: min-content;
+    align-items: start;
     gap: 10px;
     margin: 12px 0;
     min-height: 280px;
@@ -12858,6 +12860,77 @@ tr.is-task-pinned {
     border-radius: 8px;
     padding: 10px 14px;
     margin-top: 10px;
+}
+
+/* =========================================================================
+   Timetable Generator Anchor Controls & Badges
+   ========================================================================= */
+.ttg-anchor-chip {
+    transition: all 0.2s ease;
+    user-select: none;
+}
+
+.ttg-anchor-chip:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.ttg-anchor-chip.is-user-anchor {
+    box-shadow: 0 0 10px rgba(56, 189, 248, 0.15);
+}
+
+.ttg-anchor-chip.is-system-anchor {
+    box-shadow: 0 0 10px rgba(245, 158, 11, 0.15);
+}
+
+.ttg-btn-toggle-anchor {
+    font-family: inherit;
+    user-select: none;
+}
+
+.ttg-btn-toggle-anchor:hover {
+    transform: translateY(-1px);
+    background: rgba(56, 189, 248, 0.12) !important;
+    border-color: rgba(56, 189, 248, 0.5) !important;
+    color: #ffffff !important;
+}
+
+.ttg-btn-toggle-anchor.is-anchored {
+    background: linear-gradient(135deg, rgba(56, 189, 248, 0.25) 0%, rgba(14, 165, 233, 0.25) 100%) !important;
+    border-color: #38bdf8 !important;
+    color: #ffffff !important;
+    box-shadow: 0 0 10px rgba(56, 189, 248, 0.25);
+}
+
+.ttg-btn-toggle-anchor.is-anchored:hover {
+    background: rgba(239, 68, 68, 0.2) !important;
+    border-color: #f87171 !important;
+    color: #f87171 !important;
+}
+
+.ttg-breakdown-anchor-btn {
+    font-family: inherit;
+    transition: all 0.15s ease;
+    user-select: none;
+}
+
+.ttg-breakdown-anchor-btn:hover {
+    background: rgba(56, 189, 248, 0.2) !important;
+    border-color: #38bdf8 !important;
+    color: #ffffff !important;
+}
+
+.ttg-breakdown-anchor-btn.is-anchored {
+    background: rgba(56, 189, 248, 0.25) !important;
+    border-color: #38bdf8 !important;
+    color: #ffffff !important;
+    box-shadow: 0 0 8px rgba(56, 189, 248, 0.2);
+}
+
+.ttg-breakdown-anchor-btn.is-anchored:hover {
+    background: rgba(239, 68, 68, 0.25) !important;
+    border-color: #f87171 !important;
+    color: #f87171 !important;
 }
 
 

@@ -102,6 +102,51 @@ options.forEach((opt, idx) => {
 });
 console.log('  ✅ PASS: 100% of generated timetable options anchor Yoga strictly to Thursday 07:30-09:00 with zero collisions!');
 
+// 7. Test Student-Driven Dynamic Anchoring (e.g. Locking Prof. Yosef Gaveli in Solids 2)
+console.log('\n🔍 [TEST 7] Testing Student-Driven Dynamic Lecturer Anchoring...');
+const customAnchored = generateTimetableCombinations(coreCourses, {
+    sortBy: 'freeDays',
+    anchorGroups: {
+        '034053_lecture': '10', // Prof. Yosef Gaveli
+        '03940805_sport': '24'  // Shlomit Ben-Ish (Yoga)
+    }
+});
+
+console.log(`  📊 Generated ${customAnchored.length} timetable options with Prof. Gaveli (034053) + Yoga anchored!`);
+assert(customAnchored.length > 0, 'Must generate conflict-free options with Prof. Gaveli and Yoga anchored');
+
+customAnchored.forEach((opt, idx) => {
+    // 1. Verify Prof. Gaveli's lecture is in the schedule
+    const gaveliClass = opt.days.flatMap(d => d.classes).find(c => c.courseId === '034053' && c.type.includes('הרצאה'));
+    assert(gaveliClass, `Option ${idx + 1} must have 034053 lecture`);
+    assert.strictEqual(gaveliClass.group, '10', `Option ${idx + 1} 034053 lecture group must be 10`);
+    assert.strictEqual(gaveliClass.lecturer, 'פרופ\' יוסף גבלי', `Option ${idx + 1} must have Prof. Gaveli as lecturer`);
+    assert.strictEqual(gaveliClass.isAnchor, true, `Option ${idx + 1} anchored lecture must have isAnchor=true`);
+
+    // 2. Verify Yoga is also anchored
+    const yogaClass = opt.days[4].classes.find(c => c.courseId === '03940805');
+    assert(yogaClass, `Option ${idx + 1} must retain Yoga`);
+    assert.strictEqual(yogaClass.group, '24');
+
+    // 3. Verify ZERO collisions
+    opt.days.forEach(day => {
+        for (let i = 0; i < day.classes.length; i++) {
+            for (let j = i + 1; j < day.classes.length; j++) {
+                const c1 = day.classes[i];
+                const c2 = day.classes[j];
+                const s1 = timeToMinutes(c1.startTime);
+                const e1 = timeToMinutes(c1.endTime);
+                const s2 = timeToMinutes(c2.startTime);
+                const e2 = timeToMinutes(c2.endTime);
+                const overlaps = Math.max(s1, s2) < Math.min(e1, e2);
+                assert(!overlaps, `Overlap detected in anchored schedule on day ${day.name}`);
+            }
+        }
+    });
+});
+console.log('  ✅ PASS: 100% of combinations lock Prof. Gaveli (034053_lecture:10) + Yoga (03940805:24) with zero collisions!');
+
 console.log('\n================================================================');
 console.log('🎉 ALL TIMETABLE GENERATOR TESTS PASSED (100% SUCCESS)');
 console.log('================================================================\n');
+

@@ -386,6 +386,22 @@
         }
     };
 
+    // Master System Anchors (Fixed institutional requirements, e.g. dedicated Sport section)
+    const SYSTEM_ANCHORS = {
+        '03940805_sport': {
+            slotKey: '03940805_sport',
+            courseCode: '03940805',
+            courseName: 'חינוך גופני (יוגה)',
+            slotType: 'sport',
+            slotName: 'אימון',
+            groupId: '24',
+            lecturer: 'שלומית בן-איש',
+            title: 'יוגה (חמישי 07:30)',
+            isFixed: true,
+            timeDesc: 'חמישי 07:30-09:00'
+        }
+    };
+
     const DAY_NAMES = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'];
 
     // Convert "HH:MM" to minutes from 00:00
@@ -428,6 +444,7 @@
     /**
      * Core Algorithm: Generates all conflict-free timetable combinations.
      * Uses depth-first backtracking with early pruning.
+     * Supports both global system anchors (e.g. Yoga) and student-defined dynamic anchors (lecturers/TAs).
      */
     function generateTimetableCombinations(selectedCodes, preferences = {}) {
         const catalog = Object.assign({}, TECH_COURSE_GROUPS_CATALOG);
@@ -447,15 +464,38 @@
                 if (slot.options && slot.options.length > 0) {
                     let eligibleOptions = slot.options;
 
-                    // In Technion sport registration, students enroll into ONE specific sport section
-                    // with a fixed, unmovable time. It acts as a hard anchor (עוגן) in the schedule.
-                    const isSportOrAnchor = Boolean(cInfo.isAnchor || slot.isAnchor || slot.slotType === 'sport');
-                    const targetAnchorId = (preferences.anchorGroups && preferences.anchorGroups[cInfo.code])
-                        || slot.anchorGroupId
-                        || (isSportOrAnchor ? '24' : null);
+                    // Slot key for granular anchoring (e.g. '034053_lecture' vs '034053_tutorial')
+                    const slotKey = `${cInfo.code}_${slot.slotType}`;
+                    const cleanSlotKey = `${cleanCode}_${slot.slotType}`;
 
+                    // In Technion sport registration, students enroll into ONE specific sport section
+                    // with a fixed, unmovable time. It acts as a hard system anchor in the schedule.
+                    const isSystemSportAnchor = Boolean(cInfo.isAnchor || slot.isAnchor || slot.slotType === 'sport');
+
+                    // Check for active anchors:
+                    // 1. Direct preferences.anchorGroups by slotKey ('034053_lecture') or courseCode ('034053')
+                    // 2. preferences.userAnchors map
+                    // 3. Static catalog / system anchor (Yoga = 24)
+                    let targetAnchorId = null;
+                    if (preferences.anchorGroups) {
+                        targetAnchorId = preferences.anchorGroups[slotKey]
+                            || preferences.anchorGroups[cleanSlotKey]
+                            || preferences.anchorGroups[cInfo.code]
+                            || preferences.anchorGroups[cleanCode];
+                    }
+                    if (!targetAnchorId && preferences.userAnchors) {
+                        const userAnchor = preferences.userAnchors[slotKey] || preferences.userAnchors[cleanSlotKey];
+                        if (userAnchor && userAnchor.groupId) {
+                            targetAnchorId = userAnchor.groupId;
+                        }
+                    }
+                    if (!targetAnchorId) {
+                        targetAnchorId = slot.anchorGroupId || (isSystemSportAnchor ? '24' : null);
+                    }
+
+                    const isSlotAnchored = Boolean(targetAnchorId);
                     if (targetAnchorId) {
-                        const matched = slot.options.filter(o => o.groupId === targetAnchorId);
+                        const matched = slot.options.filter(o => String(o.groupId) === String(targetAnchorId));
                         if (matched.length > 0) {
                             eligibleOptions = matched;
                         }
@@ -468,7 +508,9 @@
                         cardClass: cInfo.cardClass,
                         slotType: slot.slotType,
                         slotName: slot.slotName,
-                        isAnchor: isSportOrAnchor,
+                        slotKey: slotKey,
+                        isAnchor: isSlotAnchored,
+                        anchorGroupId: targetAnchorId,
                         options: eligibleOptions
                     });
                 }
@@ -487,7 +529,7 @@
 
             if (slotIdx === requiredSlots.length) {
                 // Found a collision-free complete schedule!
-                validSolutions.push(buildTimetableOption(currentSelection, validSolutions.length + 1));
+                validSolutions.push(buildTimetableOption(currentSelection.slice(), validSolutions.length + 1));
                 return;
             }
 
@@ -519,6 +561,9 @@
                         cardClass: currentSlot.cardClass,
                         slotType: currentSlot.slotType,
                         slotName: currentSlot.slotName,
+                        slotKey: currentSlot.slotKey,
+                        isAnchor: currentSlot.isAnchor,
+                        anchorGroupId: currentSlot.anchorGroupId,
                         option: candidateOption
                     });
 
@@ -573,6 +618,9 @@
                     days[m.dayIndex].classes.push({
                         courseId: item.courseCode,
                         courseName: item.courseName,
+                        slotType: item.slotType,
+                        slotName: item.slotName,
+                        slotKey: item.slotKey || `${item.courseCode}_${item.slotType}`,
                         type: `${item.slotName} (קבוצה ${opt.groupId})`,
                         group: opt.groupId,
                         lecturer: opt.lecturer || '',
@@ -582,6 +630,7 @@
                         duration: m.duration || `${(dur / 60).toFixed(1)} שעות`,
                         cardClass: item.cardClass || 'timetable-card-default',
                         isAnchor: isClassAnchor,
+                        anchorGroupId: item.anchorGroupId || opt.groupId,
                         anchorLabel: isClassAnchor ? '⚓ עוגן במערכת' : ''
                     });
                 }
@@ -813,11 +862,134 @@
         currentOptionIndex: 0,
         selectedCourses: ['034056', '034053', '034035', '104228', '114052', '03940805'],
         currentSort: 'freeDays',
+        userAnchors: {}, // Map of slotKey => { slotKey, courseCode, courseName, slotType, groupId, lecturer, isFixed }
         isInitialized: false,
+
+        loadAnchors: function () {
+            try {
+                const stored = localStorage.getItem('ast_timetable_user_anchors');
+                if (stored) {
+                    this.userAnchors = JSON.parse(stored);
+                } else {
+                    this.userAnchors = {};
+                }
+            } catch (e) {
+                this.userAnchors = {};
+            }
+        },
+
+        saveAnchors: function () {
+            try {
+                localStorage.setItem('ast_timetable_user_anchors', JSON.stringify(this.userAnchors || {}));
+            } catch (e) {
+                console.warn('[TimetableStudio] Failed to save anchors:', e);
+            }
+        },
+
+        getActiveAnchorGroups: function () {
+            const map = {};
+            // 1. Institutional system anchors (e.g. Yoga = 24)
+            Object.values(SYSTEM_ANCHORS).forEach(a => {
+                map[a.slotKey] = String(a.groupId);
+                map[a.courseCode] = String(a.groupId);
+            });
+            // 2. User-chosen anchors
+            if (this.userAnchors) {
+                Object.entries(this.userAnchors).forEach(([key, val]) => {
+                    if (val && val.groupId) {
+                        map[key] = String(val.groupId);
+                    }
+                });
+            }
+            return map;
+        },
+
+        isSlotAnchored: function (slotKey, groupId) {
+            if (SYSTEM_ANCHORS[slotKey] && (!groupId || String(SYSTEM_ANCHORS[slotKey].groupId) === String(groupId))) {
+                return true;
+            }
+            if (this.userAnchors && this.userAnchors[slotKey]) {
+                return !groupId || String(this.userAnchors[slotKey].groupId) === String(groupId);
+            }
+            return false;
+        },
+
+        toggleAnchor: function (courseCode, slotType, groupId, lecturer, courseName) {
+            const slotKey = `${courseCode}_${slotType}`;
+
+            // Prevent removing hard institutional system anchor (Sport/Yoga)
+            if (SYSTEM_ANCHORS[slotKey] && SYSTEM_ANCHORS[slotKey].isFixed) {
+                const msg = '🔒 עוגן זה הינו עוגן מערכתי קבוע (רישום לחוג ספורט בטכניון הינו לקבוצה ייעודית בלבד)';
+                if (typeof global.showHudToast === 'function') global.showHudToast(msg, 'warning');
+                else if (typeof global.showToastNotification === 'function') global.showToastNotification(msg, 'warning');
+                return;
+            }
+
+            const existing = this.userAnchors[slotKey];
+            if (existing && String(existing.groupId) === String(groupId)) {
+                // Remove anchor
+                delete this.userAnchors[slotKey];
+                this.saveAnchors();
+                this.computeAndRender();
+                const roleDesc = slotType === 'lecture' ? 'מההרצאה' : (slotType === 'tutorial' ? 'מהתרגול' : 'מהשיעור');
+                const msg = `🔓 הוסר העוגן ${roleDesc} של ${courseName}. המערכת חזרה לאופטימיזציה גמישה!`;
+                if (typeof global.showHudToast === 'function') global.showHudToast(msg, 'info');
+                else if (typeof global.showToastNotification === 'function') global.showToastNotification(msg, 'info');
+                return;
+            }
+
+            // Set new anchor
+            this.userAnchors[slotKey] = {
+                slotKey: slotKey,
+                courseCode: courseCode,
+                courseName: courseName,
+                slotType: slotType,
+                groupId: String(groupId),
+                lecturer: lecturer || 'סגל הקורס',
+                isFixed: false
+            };
+
+            this.saveAnchors();
+            this.computeAndRender();
+
+            if (this.options.length === 0) {
+                const warnMsg = `⚠️ שים לב: עגינת ${lecturer || 'קבוצה ' + groupId} יצרה התנגשות מלאה (0 מערכות אפשריות). נסה לשחרר עוגן קודם או להחליף קבוצה.`;
+                if (typeof global.showHudToast === 'function') global.showHudToast(warnMsg, 'warning');
+                else if (typeof global.showToastNotification === 'function') global.showToastNotification(warnMsg, 'warning');
+            } else {
+                const roleDesc = slotType === 'lecture' ? 'הרצאה של' : (slotType === 'tutorial' ? 'תרגול של' : 'אימון של');
+                const successMsg = `⚓ ${roleDesc} ${lecturer || 'קב׳ ' + groupId} (${courseName}) עוגן בהצלחה! כל ${this.options.length} המערכות סודרו סביבו.`;
+                if (typeof global.showHudToast === 'function') global.showHudToast(successMsg, 'success');
+                else if (typeof global.showToastNotification === 'function') global.showToastNotification(successMsg, 'success');
+            }
+        },
+
+        removeAnchor: function (slotKey) {
+            if (this.userAnchors && this.userAnchors[slotKey]) {
+                const item = this.userAnchors[slotKey];
+                delete this.userAnchors[slotKey];
+                this.saveAnchors();
+                this.computeAndRender();
+                const msg = `🔓 הוסר העוגן מ${item.courseName || 'קורס'}.`;
+                if (typeof global.showHudToast === 'function') global.showHudToast(msg, 'info');
+                else if (typeof global.showToastNotification === 'function') global.showToastNotification(msg, 'info');
+            }
+        },
+
+        clearAllCustomAnchors: function () {
+            this.userAnchors = {};
+            this.saveAnchors();
+            this.computeAndRender();
+            const msg = '🔓 כל העוגנים המותאמים אישית אופסו. המערכת חזרה לגמישות מקסימלית!';
+            if (typeof global.showHudToast === 'function') global.showHudToast(msg, 'success');
+            else if (typeof global.showToastNotification === 'function') global.showToastNotification(msg, 'success');
+        },
 
         open: function () {
             const modal = document.getElementById('modal-timetable-generator');
             if (!modal) return;
+
+            this.loadAnchors();
 
             // Collect active courses from gameState if available
             if (global.gameState && global.gameState.courses) {
@@ -825,6 +997,7 @@
                     .filter(c => c.status === 'active' || Number(c.semester) === 3)
                     .map(c => c.code);
                 if (activeSem3.length > 0) {
+                    if (!activeSem3.includes('03940805')) activeSem3.push('03940805');
                     this.selectedCourses = Array.from(new Set(activeSem3));
                 }
             }
@@ -840,11 +1013,84 @@
         },
 
         computeAndRender: function () {
-            this.options = generateTimetableCombinations(this.selectedCourses, { sortBy: this.currentSort });
+            const activeAnchors = this.getActiveAnchorGroups();
+            this.options = generateTimetableCombinations(this.selectedCourses, {
+                sortBy: this.currentSort,
+                anchorGroups: activeAnchors,
+                userAnchors: this.userAnchors
+            });
             this.currentOptionIndex = 0;
             this.renderCourseChips();
+            this.renderActiveAnchorsStrip();
             this.renderPillsCarousel();
             this.renderActiveOption();
+        },
+
+        renderActiveAnchorsStrip: function () {
+            const container = document.getElementById('ttg-active-anchors-container');
+            const list = document.getElementById('ttg-active-anchors-list');
+            const countBadge = document.getElementById('ttg-anchors-count-badge');
+            const clearBtn = document.getElementById('ttg-btn-clear-anchors');
+            if (!container || !list) return;
+
+            let html = '';
+            let totalAnchors = 0;
+
+            // 1. Fixed system anchor (Yoga)
+            const isYogaSelected = this.selectedCourses.includes('03940805') || this.selectedCourses.includes('3940805');
+            if (isYogaSelected) {
+                totalAnchors++;
+                html += `
+                    <span class="ttg-anchor-chip is-system-anchor" style="background: rgba(245, 158, 11, 0.16); border: 1px solid rgba(245, 158, 11, 0.45); color: #fbbf24; font-size: 0.74rem; font-weight: 700; padding: 3px 10px; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px;" title="עוגן מערכתי קבוע (רישום לקבוצת יוגה בלבד)">
+                        <span>🔒</span>
+                        <span>יוגה (חמישי 07:30 • שלומית בן-איש)</span>
+                        <span style="font-size: 0.65rem; background: rgba(0,0,0,0.25); padding: 1px 5px; border-radius: 4px;">קבוע</span>
+                    </span>
+                `;
+            }
+
+            // 2. Custom user anchors
+            const customKeys = Object.keys(this.userAnchors || {});
+            customKeys.forEach(k => {
+                const a = this.userAnchors[k];
+                if (!a) return;
+                totalAnchors++;
+                const roleLabel = a.slotType === 'lecture' ? 'הרצאה' : (a.slotType === 'tutorial' ? 'תרגול' : 'אימון');
+                html += `
+                    <span class="ttg-anchor-chip is-user-anchor" style="background: rgba(56, 189, 248, 0.16); border: 1px solid rgba(56, 189, 248, 0.45); color: #38bdf8; font-size: 0.74rem; font-weight: 700; padding: 3px 10px; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px;">
+                        <span>⚓</span>
+                        <span>${a.courseName || a.courseCode}: ${roleLabel} קב' ${a.groupId} (${a.lecturer})</span>
+                        <button type="button" class="ttg-btn-unanchor" data-key="${k}" title="הסר עוגן זה וחזור לחישוב גמיש" style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); color: #f87171; border-radius: 4px; font-size: 0.72rem; cursor: pointer; padding: 1px 6px; line-height: 1.2; margin-right: 2px;">
+                            ✕
+                        </button>
+                    </span>
+                `;
+            });
+
+            if (totalAnchors === 0) {
+                html = `<span style="font-size: 0.74rem; color: #94a3b8;">אין עוגנים פעילים. לחץ על ⚓ "עגן מרצה" בכרטיס שיעור או בפירוט כדי לקבע מרצה אהוב!</span>`;
+            } else if (customKeys.length === 0) {
+                html += `<span style="font-size: 0.72rem; color: #94a3b8; margin-right: 4px;">💡 ניתן לעגן כל מרצה או מתרגל נוסף בלחיצה על ⚓ "עגן מרצה"</span>`;
+            }
+
+            list.innerHTML = html;
+
+            list.querySelectorAll('.ttg-btn-unanchor').forEach(btn => {
+                btn.onclick = (e) => {
+                    e.stopPropagation();
+                    const k = btn.dataset.key;
+                    this.removeAnchor(k);
+                };
+            });
+
+            if (countBadge) {
+                countBadge.innerText = `${totalAnchors} ${totalAnchors === 1 ? 'עוגן פעיל' : 'עוגנים פעילים'}`;
+            }
+
+            if (clearBtn) {
+                clearBtn.style.display = customKeys.length > 0 ? 'inline-flex' : 'none';
+                clearBtn.onclick = () => this.clearAllCustomAnchors();
+            }
         },
 
         renderCourseChips: function () {
@@ -860,11 +1106,20 @@
                 const isChecked = this.selectedCourses.includes(c.code) || this.selectedCourses.includes(c.code.replace(/^0+/, ''));
                 if (isChecked) totalCredits += (c.credits || 0);
 
+                const courseAnchors = Object.values(this.userAnchors || {}).filter(a => a.courseCode === c.code || a.courseCode === c.code.replace(/^0+/, ''));
+                let anchorChipBadge = '';
+                if (c.isAnchor) {
+                    anchorChipBadge = `<span style="background: rgba(245, 158, 11, 0.22); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.45); padding: 1px 6px; border-radius: 4px; font-weight: 800; font-size: 0.68rem;" title="${c.anchorNote || 'עוגן במערכת'}">⚓ עוגן (חמישי 07:30)</span>`;
+                } else if (courseAnchors.length > 0) {
+                    const aNames = courseAnchors.map(a => a.lecturer).join(', ');
+                    anchorChipBadge = `<span style="background: rgba(56, 189, 248, 0.22); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.45); padding: 1px 6px; border-radius: 4px; font-weight: 800; font-size: 0.68rem;" title="מרצה מעוגן: ${aNames}">⚓ ${aNames}</span>`;
+                }
+
                 html += `
                     <label class="ttg-course-chip ${isChecked ? 'is-checked' : ''}" style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 6px; font-size: 0.76rem; background: ${isChecked ? 'rgba(56, 189, 248, 0.15)' : 'rgba(255, 255, 255, 0.04)'}; border: 1px solid ${isChecked ? '#38bdf8' : 'rgba(255, 255, 255, 0.1)'}; color: ${isChecked ? '#fff' : '#94a3b8'}; cursor: pointer; user-select: none;">
                         <input type="checkbox" class="ttg-course-cb" value="${c.code}" ${isChecked ? 'checked' : ''} style="accent-color: #38bdf8;">
                         <span>${c.name} (${c.code})</span>
-                        ${c.isAnchor ? `<span style="background: rgba(245, 158, 11, 0.22); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.45); padding: 1px 6px; border-radius: 4px; font-weight: 800; font-size: 0.68rem;" title="${c.anchorNote || 'עוגן במערכת'}">⚓ עוגן (חמישי 07:30)</span>` : ''}
+                        ${anchorChipBadge}
                         <span style="opacity: 0.7; font-size: 0.70rem;">• ${c.credits} נק״ז</span>
                     </label>
                 `;
@@ -892,8 +1147,20 @@
             const row = document.getElementById('ttg-options-pills-row');
             if (!row) return;
 
+            const customKeys = Object.keys(this.userAnchors || {});
             if (this.options.length === 0) {
-                row.innerHTML = `<div style="color: #ef4444; font-size: 0.85rem; padding: 8px;">❌ לא נמצאו קומבינציות חופשיות מהתנגשויות לקורסים שנבחרו. נסה להסיר קורס אחד או לשנות שילוב.</div>`;
+                let errorHelp = 'נסה להסיר קורס אחד או לשנות שילוב.';
+                if (customKeys.length > 0) {
+                    errorHelp = 'אחד העוגנים שבחרת יוצר התנגשות זמנים מלאה עם שאר הקורסים.';
+                }
+                row.innerHTML = `
+                    <div style="color: #ef4444; font-size: 0.85rem; padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 8px; width: 100%;">
+                        <span>❌ לא נמצאו קומבינציות חופשיות מהתנגשויות לקורסים שנבחרו. ${errorHelp}</span>
+                        ${customKeys.length > 0 ? `<button type="button" class="btn btn-sm btn-outline" id="ttg-err-clear-anchors" style="border-color: #ef4444; color: #ef4444; font-size: 0.72rem; padding: 3px 10px; border-radius: 4px;">שחרר עוגנים מותאמים ✕</button>` : ''}
+                    </div>
+                `;
+                const errClearBtn = document.getElementById('ttg-err-clear-anchors');
+                if (errClearBtn) errClearBtn.onclick = () => this.clearAllCustomAnchors();
                 return;
             }
 
@@ -940,7 +1207,7 @@
             const nextBtn = document.getElementById('ttg-btn-next');
 
             if (!this.options || this.options.length === 0) {
-                if (previewGrid) previewGrid.innerHTML = '<div style="grid-column: 1 / -1; padding: 30px; text-align: center; color: #94a3b8;">אין מערכות שעות להצגה.</div>';
+                if (previewGrid) previewGrid.innerHTML = '<div style="grid-column: 1 / -1; padding: 30px; text-align: center; color: #94a3b8;">אין מערכות שעות להצגה עם העוגנים והקורסים הנוכחיים.</div>';
                 if (pagingInfo) pagingInfo.innerText = '0 מתוך 0';
                 if (badgesContainer) badgesContainer.innerHTML = '';
                 if (breakdownCard) breakdownCard.innerHTML = '';
@@ -968,11 +1235,27 @@
                     ? `<span style="background: rgba(56, 189, 248, 0.18); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.35); padding: 3px 8px; border-radius: 6px; font-size: 0.74rem; font-weight: 700;">🧘 קצב שפוי (ללא מרתונים)</span>`
                     : `<span style="background: rgba(239, 68, 68, 0.18); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.35); padding: 3px 8px; border-radius: 6px; font-size: 0.74rem; font-weight: 700;">⚠️ ${current.daysWithoutBreaksCount} ימים רצופים</span>`;
 
+                const isYogaSelected = this.selectedCourses.includes('03940805') || this.selectedCourses.includes('3940805');
+                let anchorsBadgeList = '';
+                if (isYogaSelected) {
+                    anchorsBadgeList += `
+                        <span style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.45); padding: 3px 8px; border-radius: 6px; font-size: 0.74rem; font-weight: 700;">
+                            ⚓ עוגן: יוגה (חמישי 07:30)
+                        </span>
+                    `;
+                }
+                Object.values(this.userAnchors || {}).forEach(a => {
+                    const shortName = a.courseName ? a.courseName.split(' ')[0] : a.courseCode;
+                    anchorsBadgeList += `
+                        <span style="background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.45); padding: 3px 8px; border-radius: 6px; font-size: 0.74rem; font-weight: 700;">
+                            ⚓ עוגן: ${shortName} (${a.lecturer})
+                        </span>
+                    `;
+                });
+
                 badgesContainer.innerHTML = `
                     ${recBadge}
-                    <span style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.45); padding: 3px 8px; border-radius: 6px; font-size: 0.74rem; font-weight: 700;">
-                        ⚓ עוגן: יוגה (חמישי 07:30-09:00)
-                    </span>
+                    ${anchorsBadgeList}
                     <span style="background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); padding: 3px 8px; border-radius: 6px; font-size: 0.74rem; font-weight: 700;">
                         🏖️ ${current.freeWeekdaysCount} ימי חופש באמצ״ש (${current.freeDayNames.filter(n => n !== 'שישי' && n !== 'שבת').join(', ') || 'אין'})
                     </span>
@@ -1007,11 +1290,46 @@
                         for (let i = 0; i < d.classes.length; i++) {
                             const c = d.classes[i];
                             const isTut = (c.type && (c.type.includes('תרגול') || c.type.includes('מעבדה')));
-                            const isSport = (c.type && (c.type.includes('אימון') || c.type.includes('ספורט')));
+                            const isSport = (c.type && (c.type.includes('אימון') || c.type.includes('ספורט') || c.courseId === '03940805'));
                             const instructorLabel = isTut ? '🧑‍🏫 מתרגל/ת:' : (isSport ? '🏃 מאמן/ת:' : '👨‍🏫 מרצה:');
                             const instructorColor = isTut ? '#c084fc' : (isSport ? '#34d399' : '#38bdf8');
                             const instructorBg = isTut ? 'rgba(192, 132, 252, 0.15)' : (isSport ? 'rgba(52, 211, 153, 0.15)' : 'rgba(56, 189, 248, 0.15)');
                             const instructorBorder = isTut ? 'rgba(192, 132, 252, 0.35)' : (isSport ? 'rgba(52, 211, 153, 0.35)' : 'rgba(56, 189, 248, 0.35)');
+
+                            const slotType = c.slotType || (c.type && c.type.includes('הרצאה') ? 'lecture' : (c.type && c.type.includes('תרגול') ? 'tutorial' : 'sport'));
+                            const slotKey = c.slotKey || `${c.courseId}_${slotType}`;
+                            const isAnchored = this.isSlotAnchored(slotKey, c.group);
+
+                            const anchorBadgeHtml = isSport
+                                ? `<span class="timetable-tag is-anchor" style="background: rgba(245, 158, 11, 0.22); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.45); font-weight: 800; padding: 2px 6px; border-radius: 4px;">⚓ עוגן קבוע</span>`
+                                : (isAnchored ? `<span class="timetable-tag is-anchor" style="background: rgba(56, 189, 248, 0.22); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.45); font-weight: 800; padding: 2px 6px; border-radius: 4px;">⚓ מעוגן</span>` : '');
+
+                            let cardAnchorAction = '';
+                            if (isSport) {
+                                cardAnchorAction = `
+                                    <div style="margin-top: 6px;">
+                                        <span style="display: flex; align-items: center; justify-content: center; gap: 4px; padding: 3px 6px; border-radius: 4px; background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.35); color: #fbbf24; font-size: 0.68rem; font-weight: 700;">
+                                            <span>🔒</span> <span>עוגן ספורט קבוע</span>
+                                        </span>
+                                    </div>
+                                `;
+                            } else {
+                                cardAnchorAction = `
+                                    <div style="margin-top: 6px;">
+                                        <button type="button" class="ttg-btn-toggle-anchor ${isAnchored ? 'is-anchored' : ''}"
+                                            data-course="${c.courseId}"
+                                            data-slottype="${slotType}"
+                                            data-group="${c.group}"
+                                            data-lecturer="${c.lecturer || ''}"
+                                            data-coursename="${c.courseName}"
+                                            title="${isAnchored ? 'לחץ להסרת עוגן זה וחזרה לחישוב גמיש' : 'קבע מרצה וקבוצה זו כעוגן בלתי משתנה בכל הקומבינציות'}"
+                                            style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 5px; padding: 4px 8px; border-radius: 5px; font-size: 0.72rem; font-weight: 700; cursor: pointer; transition: all 0.2s ease; border: 1px solid ${isAnchored ? '#38bdf8' : 'rgba(255, 255, 255, 0.14)'}; background: ${isAnchored ? 'rgba(56, 189, 248, 0.2)' : 'rgba(255, 255, 255, 0.05)'}; color: ${isAnchored ? '#38bdf8' : '#cbd5e1'};">
+                                            <span>⚓</span>
+                                            <span>${isAnchored ? 'מרצה מעוגן (לחץ לביטול)' : 'עגן מרצה זה'}</span>
+                                        </button>
+                                    </div>
+                                `;
+                            }
 
                             classesHtml += `
                                 <div class="timetable-card ${c.cardClass}" style="margin-bottom: 8px;">
@@ -1022,7 +1340,7 @@
                                     <div class="timetable-card-name" style="font-size: 0.88rem; font-weight: 800;">${c.courseName}</div>
                                     <div class="timetable-card-sub" style="font-size: 0.74rem; color: #cbd5e1; margin-top: 3px; display: flex; gap: 4px; align-items: center; flex-wrap: wrap;">
                                         <span class="timetable-tag" style="background: rgba(255, 255, 255, 0.08); padding: 2px 6px; border-radius: 4px; font-weight: 600;">${c.type}</span>
-                                        ${(c.isAnchor || isSport) ? `<span class="timetable-tag is-anchor" style="background: rgba(245, 158, 11, 0.22); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.45); font-weight: 800; padding: 2px 6px; border-radius: 4px;">⚓ עוגן קבוע</span>` : ''}
+                                        ${anchorBadgeHtml}
                                     </div>
                                     ${c.lecturer ? `
                                         <div class="ttg-card-instructor" style="margin-top: 6px; padding: 4px 8px; border-radius: 6px; background: ${instructorBg}; border: 1px solid ${instructorBorder}; display: flex; align-items: center; justify-content: space-between; font-size: 0.76rem;">
@@ -1030,6 +1348,7 @@
                                             <span style="color: #ffffff; font-weight: 800;">${c.lecturer}</span>
                                         </div>
                                     ` : ''}
+                                    ${cardAnchorAction}
                                 </div>
                             `;
 
@@ -1060,8 +1379,8 @@
                         : '';
 
                     const hasAnchor = d.classes.some(c => c.isAnchor || (c.type && (c.type.includes('יוגה') || c.type.includes('אימון'))));
-                    const anchorBadge = hasAnchor
-                        ? `<span style="font-size: 0.68rem; background: rgba(245, 158, 11, 0.22); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.45); padding: 2px 6px; border-radius: 4px; font-weight: 700;" title="עוגן שבועי קבוע">⚓ יוגה 07:30</span>`
+                    const dayAnchorBadge = hasAnchor
+                        ? `<span style="font-size: 0.68rem; background: rgba(245, 158, 11, 0.22); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.45); padding: 2px 6px; border-radius: 4px; font-weight: 700;" title="יום עם עוגנים">⚓ עוגן ביום זה</span>`
                         : '';
 
                     gridHtml += `
@@ -1075,7 +1394,7 @@
                                 </div>
                                 ${!isFree ? `
                                     <div style="display: flex; gap: 4px; flex-wrap: wrap;">
-                                        ${anchorBadge}
+                                        ${dayAnchorBadge}
                                         ${lunchBadge}
                                         ${marathonBadge}
                                     </div>
@@ -1091,20 +1410,57 @@
 
             // Detailed Breakdown Card
             if (breakdownCard) {
+                const isYogaSelected = this.selectedCourses.includes('03940805') || this.selectedCourses.includes('3940805');
                 const groupList = current.selection.map(s => {
                     const isTut = (s.slotName && (s.slotName.includes('תרגול') || s.slotName.includes('מעבדה')));
-                    const isSport = (s.slotName && (s.slotName.includes('אימון') || s.slotName.includes('ספורט')));
+                    const isSport = (s.slotName && (s.slotName.includes('אימון') || s.slotName.includes('ספורט') || s.courseCode === '03940805'));
                     const roleLabel = isTut ? 'מתרגל/ת' : (isSport ? 'מאמן/ת' : 'מרצה');
                     const color = isTut ? '#c084fc' : (isSport ? '#34d399' : '#38bdf8');
+                    const slotKey = s.slotKey || `${s.courseCode}_${s.slotType}`;
+                    const isAnchored = this.isSlotAnchored(slotKey, s.option.groupId);
+
+                    const anchorPillBtn = isSport
+                        ? `<span style="font-size: 0.68rem; background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.35); padding: 1px 6px; border-radius: 4px; font-weight: 700;">🔒 עוגן קבוע</span>`
+                        : `
+                            <button type="button" class="ttg-breakdown-anchor-btn ${isAnchored ? 'is-anchored' : ''}"
+                                data-course="${s.courseCode}"
+                                data-slottype="${s.slotType}"
+                                data-group="${s.option.groupId}"
+                                data-lecturer="${s.option.lecturer || 'סגל'}"
+                                data-coursename="${s.courseName}"
+                                title="${isAnchored ? 'בטל עגינה של מרצה זה' : 'עגן מרצה זה בכל המערכות'}"
+                                style="background: ${isAnchored ? 'rgba(56, 189, 248, 0.25)' : 'rgba(255, 255, 255, 0.08)'}; border: 1px solid ${isAnchored ? '#38bdf8' : 'rgba(255, 255, 255, 0.15)'}; color: ${isAnchored ? '#38bdf8' : '#cbd5e1'}; font-size: 0.68rem; font-weight: 700; padding: 1px 7px; border-radius: 4px; cursor: pointer;">
+                                <span>⚓</span> ${isAnchored ? 'מעוגן ✕' : 'עגן'}
+                            </button>
+                        `;
+
                     return `
                         <span style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.12); padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; display: inline-flex; align-items: center; gap: 6px;">
                             <strong>${s.courseName}:</strong> ${s.slotName} קב' ${s.option.groupId}
                             <span style="color: ${color}; font-weight: 800; background: rgba(0,0,0,0.25); padding: 1px 6px; border-radius: 4px;">
                                 ${roleLabel}: ${s.option.lecturer || 'סגל'}
                             </span>
+                            ${anchorPillBtn}
                         </span>
                     `;
                 }).join(' ');
+
+                const allActiveAnchors = [];
+                if (isYogaSelected) allActiveAnchors.push('יוגה (חמישי 07:30 • שלומית בן-איש)');
+                Object.values(this.userAnchors || {}).forEach(a => {
+                    allActiveAnchors.push(`${a.courseName} (${a.lecturer}, קב' ${a.groupId})`);
+                });
+
+                const anchorsCalloutHtml = allActiveAnchors.length > 0 ? `
+                    <div style="margin-top: 10px; padding: 8px 12px; border-radius: 6px; background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.35); font-size: 0.76rem; color: #bae6fd; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px;">
+                        <div>
+                            <span>⚓ <strong>עוגנים פעילים במערכת:</strong></span>
+                            <span style="color: #ffffff; margin-right: 6px;">${allActiveAnchors.join(' • ')}</span>
+                            <span style="opacity: 0.85; font-size: 0.72rem;">- כל הקומבינציות סודרו סביבם ב-100% ללא התנגשויות!</span>
+                        </div>
+                        <span style="font-size: 0.70rem; opacity: 0.9; background: rgba(0,0,0,0.3); padding: 2px 8px; border-radius: 4px; color: #38bdf8; font-weight: 700;">${allActiveAnchors.length} עוגנים</span>
+                    </div>
+                ` : '';
 
                 breakdownCard.innerHTML = `
                     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 8px;">
@@ -1120,14 +1476,27 @@
                     <div style="display: flex; gap: 6px; flex-wrap: wrap;">
                         ${groupList}
                     </div>
-                    ${current.selection.some(s => s.isAnchor || s.slotType === 'sport') ? `
-                        <div style="margin-top: 10px; padding: 7px 12px; border-radius: 6px; background: rgba(245, 158, 11, 0.12); border: 1px solid rgba(245, 158, 11, 0.35); font-size: 0.76rem; color: #fde68a; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px;">
-                            <span>⚓ <strong>עוגן קשיח במערכת:</strong> קורס ספורט (יוגה, יום חמישי 07:30-09:00 • מאמנת: שלומית בן-איש) נעול כעוגן מערכתי - כל הקומבינציות סודרו סביבו ב-100% ללא התנגשות!</span>
-                            <span style="font-size: 0.70rem; opacity: 0.85; background: rgba(0,0,0,0.25); padding: 2px 6px; border-radius: 4px;">קבוצה 24 (אולם ספורט)</span>
-                        </div>
-                    ` : ''}
+                    ${anchorsCalloutHtml}
                 `;
             }
+
+            // Bind anchor toggle buttons in both preview grid and breakdown card
+            const bindAnchorBtns = (root) => {
+                if (!root) return;
+                root.querySelectorAll('.ttg-btn-toggle-anchor, .ttg-breakdown-anchor-btn').forEach(btn => {
+                    btn.onclick = (e) => {
+                        e.stopPropagation();
+                        const cCode = btn.dataset.course;
+                        const sType = btn.dataset.slottype;
+                        const grp = btn.dataset.group;
+                        const lec = btn.dataset.lecturer;
+                        const cName = btn.dataset.coursename;
+                        this.toggleAnchor(cCode, sType, grp, lec, cName);
+                    };
+                });
+            };
+            bindAnchorBtns(previewGrid);
+            bindAnchorBtns(breakdownCard);
         },
 
         next: function () {

@@ -2260,6 +2260,22 @@
                     </div>
                 </div>
 
+                <!-- Active Anchors Control Strip -->
+                <div id="ttg-active-anchors-container" style="background: rgba(245, 158, 11, 0.08); border: 1px dashed rgba(245, 158, 11, 0.35); border-radius: 8px; padding: 8px 14px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+                    <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                        <span style="font-size: 0.8rem; font-weight: 800; color: #fbbf24; display: flex; align-items: center; gap: 5px;">
+                            <span>⚓</span> <span>עוגנים פעילים במערכת:</span>
+                        </span>
+                        <div id="ttg-active-anchors-list" style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center;"></div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span id="ttg-anchors-count-badge" style="font-size: 0.72rem; color: #cbd5e1; background: rgba(0,0,0,0.3); padding: 3px 8px; border-radius: 6px;">1 עוגן פעיל</span>
+                        <button type="button" class="btn btn-sm btn-outline" id="ttg-btn-clear-anchors" style="display: none; font-size: 0.72rem; padding: 2px 8px; height: 26px; border-color: rgba(239, 68, 68, 0.4); color: #f87171;" title="בטל את כל העוגנים המותאמים אישית וחזור לגמישות מלאה">
+                            ✕ איפוס עוגנים
+                        </button>
+                    </div>
+                </div>
+
                 <!-- Options Pills Horizontal Strip -->
                 <div>
                     <div class="ttg-options-pills-row" id="ttg-options-pills-row"></div>
