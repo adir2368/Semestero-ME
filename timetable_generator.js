@@ -624,7 +624,7 @@
                         type: `${item.slotName} (קבוצה ${opt.groupId})`,
                         group: opt.groupId,
                         lecturer: opt.lecturer || '',
-                        room: opt.room || 'כיתת טכניון',
+                        room: (opt.room && opt.room !== 'כיתת טכניון') ? opt.room : '',
                         startTime: m.startTime,
                         endTime: m.endTime,
                         duration: m.duration || `${(dur / 60).toFixed(1)} שעות`,
@@ -991,15 +991,28 @@
 
             this.loadAnchors();
 
-            // Collect active courses from gameState if available
+            const catalogCodes = Object.keys(TECH_COURSE_GROUPS_CATALOG);
+
+            // Collect active courses from gameState if available and in catalog
             if (global.gameState && global.gameState.courses) {
-                const activeSem3 = Object.values(global.gameState.courses)
-                    .filter(c => c.status === 'active' || Number(c.semester) === 3)
-                    .map(c => c.code);
-                if (activeSem3.length > 0) {
-                    if (!activeSem3.includes('03940805')) activeSem3.push('03940805');
-                    this.selectedCourses = Array.from(new Set(activeSem3));
+                const activeMatching = Object.values(global.gameState.courses)
+                    .filter(c => (c.status === 'active' || Number(c.semester) === 3))
+                    .map(c => {
+                        if (TECH_COURSE_GROUPS_CATALOG[c.code]) return c.code;
+                        if (TECH_COURSE_GROUPS_CATALOG['0' + c.code]) return '0' + c.code;
+                        const match = catalogCodes.find(k => k.replace(/^0+/, '') === String(c.code).replace(/^0+/, ''));
+                        return match || null;
+                    })
+                    .filter(Boolean);
+
+                if (activeMatching.length >= 2) {
+                    if (!activeMatching.includes('03940805')) activeMatching.push('03940805');
+                    this.selectedCourses = Array.from(new Set(activeMatching));
+                } else {
+                    this.selectedCourses = [...catalogCodes];
                 }
+            } else if (!this.selectedCourses || this.selectedCourses.length === 0) {
+                this.selectedCourses = [...catalogCodes];
             }
 
             this.computeAndRender();
@@ -1013,13 +1026,9 @@
         },
 
         computeAndRender: function () {
-            if (global.gameState && global.gameState.courses) {
-                const activeCodes = Object.values(global.gameState.courses)
-                    .filter(c => c.status === 'active' || Number(c.semester) === 3)
-                    .map(c => c.code);
-                if (activeCodes.length > 0 && (!this.selectedCourses || this.selectedCourses.length === 0)) {
-                    this.selectedCourses = Array.from(new Set(activeCodes));
-                }
+            const catalogCodes = Object.keys(TECH_COURSE_GROUPS_CATALOG);
+            if (!this.selectedCourses || this.selectedCourses.length === 0) {
+                this.selectedCourses = [...catalogCodes];
             }
             const activeAnchors = this.getActiveAnchorGroups();
             this.options = generateTimetableCombinations(this.selectedCourses, {
@@ -1029,9 +1038,15 @@
             });
             this.currentOptionIndex = 0;
             this.renderCourseChips();
+            this.renderPreAnchorHub();
             this.renderActiveAnchorsStrip();
             this.renderPillsCarousel();
             this.renderActiveOption();
+
+            const resultsCountPreview = document.getElementById('ttg-results-count-preview');
+            if (resultsCountPreview) {
+                resultsCountPreview.innerText = `(${this.options.length} מערכות שעות אפשריות)`;
+            }
         },
 
         renderActiveAnchorsStrip: function () {
@@ -1147,6 +1162,117 @@
                         this.selectedCourses = this.selectedCourses.filter(c => c !== code && c !== code.replace(/^0+/, ''));
                     }
                     this.computeAndRender();
+                };
+            });
+        },
+
+        renderPreAnchorHub: function () {
+            const grid = document.getElementById('ttg-pre-anchor-grid');
+            const badge = document.getElementById('ttg-pre-anchor-summary-badge');
+            if (!grid) return;
+
+            const catalog = TECH_COURSE_GROUPS_CATALOG;
+            let html = '';
+            let totalLocked = 0;
+
+            const isYogaSelected = this.selectedCourses.includes('03940805') || this.selectedCourses.includes('3940805');
+            if (isYogaSelected) totalLocked++;
+
+            const customAnchors = Object.values(this.userAnchors || {});
+            totalLocked += customAnchors.length;
+
+            this.selectedCourses.forEach(code => {
+                const item = catalog[code] || Object.values(catalog).find(c => c.code.replace(/^0+/, '') === code.replace(/^0+/, ''));
+                if (!item) return;
+
+                const isYoga = (item.code === '03940805' || item.code === '3940805');
+
+                html += `
+                    <div class="ttg-pre-anchor-card" style="background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px; padding: 10px 12px; display: flex; flex-direction: column; gap: 8px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255, 255, 255, 0.06); padding-bottom: 6px;">
+                            <div style="font-weight: 800; font-size: 0.84rem; color: #f1f5f9; display: flex; align-items: center; gap: 6px;">
+                                <span class="timetable-course-dot" style="width: 8px; height: 8px; border-radius: 50%; background: #38bdf8; display: inline-block;"></span>
+                                <span>${item.name}</span>
+                            </div>
+                            <span style="font-size: 0.70rem; color: #94a3b8;">${item.code}</span>
+                        </div>
+                `;
+
+                if (isYoga) {
+                    html += `
+                        <div style="background: rgba(245, 158, 11, 0.12); border: 1px solid rgba(245, 158, 11, 0.35); border-radius: 6px; padding: 8px 10px; font-size: 0.76rem; color: #fbbf24; display: flex; align-items: center; gap: 6px;">
+                            <span>🔒</span>
+                            <span><strong>עוגן קבוע:</strong> קבוצה 05 • שלומית בן-איש (חמישי 07:30)</span>
+                        </div>
+                    `;
+                } else if (item.slots && item.slots.length > 0) {
+                    item.slots.forEach(slot => {
+                        const slotKey = `${item.code}_${slot.slotType}`;
+                        const existingAnchorKey = Object.keys(this.userAnchors || {}).find(k => k.startsWith(slotKey));
+                        const currentAnchor = existingAnchorKey ? this.userAnchors[existingAnchorKey] : null;
+
+                        html += `
+                            <div style="display: flex; flex-direction: column; gap: 4px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <span style="font-size: 0.72rem; font-weight: 700; color: #94a3b8;">
+                                        ${slot.slotName} (${slot.slotType === 'lecture' ? 'מרצה' : 'מתרגל'}):
+                                    </span>
+                                    ${currentAnchor ? `<span style="font-size: 0.68rem; color: #38bdf8; font-weight: 800;">⚓ נעול (קב' ${currentAnchor.groupId})</span>` : `<span style="font-size: 0.68rem; color: #64748b;">גמיש</span>`}
+                                </div>
+                                <select class="ttg-pre-anchor-select" data-course="${item.code}" data-slottype="${slot.slotType}" style="width: 100%; background: #0f172a; border: 1px solid ${currentAnchor ? '#38bdf8' : 'rgba(255, 255, 255, 0.15)'}; color: ${currentAnchor ? '#f8fafc' : '#cbd5e1'}; font-size: 0.76rem; padding: 6px 8px; border-radius: 6px; outline: none; cursor: pointer;">
+                                    <option value="">🎲 גמיש (האלגוריתם יבחר את הטוב ביותר)</option>
+                                    ${slot.options.map(opt => {
+                                        const isOptSelected = currentAnchor && String(currentAnchor.groupId) === String(opt.groupId);
+                                        const meetingSummary = opt.meetings.map(m => `${m.dayName} ${m.startTime}`).join(', ');
+                                        const roomSummary = (opt.room && opt.room !== 'כיתת טכניון') ? ` • 📍 ${opt.room}` : '';
+                                        return `<option value="${opt.groupId}" ${isOptSelected ? 'selected' : ''}>⚓ קב' ${opt.groupId}: ${opt.lecturer} (${meetingSummary}${roomSummary})</option>`;
+                                    }).join('')}
+                                </select>
+                            </div>
+                        `;
+                    });
+                }
+
+                html += `</div>`;
+            });
+
+            grid.innerHTML = html;
+
+            if (badge) {
+                badge.innerText = `${totalLocked} ${totalLocked === 1 ? 'עוגן פעיל' : 'עוגנים פעילים'}${isYogaSelected ? ' (כולל יוגה)' : ''}`;
+            }
+
+            // Sync selections to userAnchors on change
+            grid.querySelectorAll('.ttg-pre-anchor-select').forEach(sel => {
+                sel.onchange = () => {
+                    const courseCode = sel.dataset.course;
+                    const slotType = sel.dataset.slottype;
+                    const groupId = sel.value;
+                    const item = catalog[courseCode] || Object.values(catalog).find(c => c.code.replace(/^0+/, '') === courseCode.replace(/^0+/, ''));
+                    if (!item) return;
+
+                    const prefix = `${item.code}_${slotType}_`;
+                    Object.keys(this.userAnchors || {}).forEach(k => {
+                        if (k.startsWith(prefix)) delete this.userAnchors[k];
+                    });
+
+                    if (groupId) {
+                        const slot = item.slots ? item.slots.find(s => s.slotType === slotType) : null;
+                        const opt = slot ? slot.options.find(o => String(o.groupId) === String(groupId)) : null;
+                        if (opt) {
+                            const anchorKey = `${prefix}${groupId}`;
+                            this.userAnchors[anchorKey] = {
+                                courseCode: item.code,
+                                courseName: item.name,
+                                slotType: slotType,
+                                groupId: groupId,
+                                lecturer: opt.lecturer || '',
+                                meetings: opt.meetings
+                            };
+                        }
+                    }
+                    this.saveAnchors();
+                    this.renderActiveAnchorsStrip();
                 };
             });
         },
@@ -1405,7 +1531,7 @@
                                 <div class="timetable-card ${c.cardClass}" style="margin-bottom: 8px;">
                                     <div class="timetable-card-top">
                                         <span class="timetable-card-time">⏰ ${c.startTime} - ${c.endTime}</span>
-                                        <span class="timetable-card-room">${c.room}</span>
+                                        ${(c.room && c.room !== 'כיתת טכניון') ? `<span class="timetable-card-room">📍 ${c.room}</span>` : ''}
                                     </div>
                                     <div class="timetable-card-name" style="font-size: 0.88rem; font-weight: 800;">${c.courseName}</div>
                                     <div class="timetable-card-sub" style="font-size: 0.74rem; color: #cbd5e1; margin-top: 3px; display: flex; gap: 4px; align-items: center; flex-wrap: wrap;">
@@ -1644,6 +1770,51 @@
             if (prevBtn) prevBtn.onclick = () => this.prev();
             if (nextBtn) nextBtn.onclick = () => this.next();
             if (applyBtn) applyBtn.onclick = () => this.applyActiveSchedule();
+
+            // Step 1: Pre-Anchoring Hub Controls
+            const runGenerateBtn = document.getElementById('ttg-btn-run-generate');
+            if (runGenerateBtn) {
+                runGenerateBtn.onclick = () => {
+                    this.computeAndRender();
+                    const count = this.options.length;
+                    const msg = count > 0 
+                        ? `⚡ חושבו ${count} מערכות שעות בהתאמה מדויקת לעוגנים שנבחרו!`
+                        : `⚠️ לא נמצאה מערכת אפשרית עם שילוב עוגנים זה (התנגשות שעות). נסה להגדיר אחד הקורסים כגמיש.`;
+                    if (typeof global.showHudToast === 'function') {
+                        global.showHudToast(msg, count > 0 ? 'success' : 'warning');
+                    } else if (typeof global.showToastNotification === 'function') {
+                        global.showToastNotification(msg, count > 0 ? 'success' : 'warning');
+                    }
+
+                    const sortEl = document.getElementById('ttg-sort-tabs');
+                    if (sortEl) {
+                        sortEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    }
+                };
+            }
+
+            const resetPreBtn = document.getElementById('ttg-btn-reset-pre-anchors');
+            if (resetPreBtn) {
+                resetPreBtn.onclick = () => {
+                    this.clearAllCustomAnchors();
+                    this.renderPreAnchorHub();
+                };
+            }
+
+            const togglePreBtn = document.getElementById('ttg-btn-toggle-pre-anchor');
+            const preBody = document.getElementById('ttg-pre-anchor-body');
+            const toggleText = document.getElementById('ttg-toggle-pre-anchor-text');
+            if (togglePreBtn && preBody) {
+                togglePreBtn.onclick = () => {
+                    if (preBody.style.display === 'none') {
+                        preBody.style.display = 'block';
+                        if (toggleText) toggleText.innerText = 'צמצם פנל ▴';
+                    } else {
+                        preBody.style.display = 'none';
+                        if (toggleText) toggleText.innerText = 'פתח פנל עוגנים ▾';
+                    }
+                };
+            }
 
             // Sort Tabs
             const sortContainer = document.getElementById('ttg-sort-tabs');

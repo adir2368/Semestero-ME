@@ -13315,7 +13315,7 @@ window.syncLiveCheeseForkData = async function(customUrl = null, isManual = fals
                         const itemLecturer = f['מרצה/מתרגל']?.stringValue || '';
                         const itemRoom = f['חדר']?.stringValue || f['כיתה']?.stringValue || '';
                         const itemBuilding = f['בניין']?.stringValue || '';
-                        const roomCombined = [itemBuilding, itemRoom].filter(Boolean).join(' ') || 'כיתת טכניון';
+                        const roomCombined = [itemBuilding, itemRoom].filter(Boolean).join(' ');
 
                         // Check if item belongs to student (matches selected group, or single group in sports/seminar)
                         const isMatch = chosenGroups.has(itemGroup) || chosenGroups.size === 0;
@@ -15605,36 +15605,10 @@ function setupNotionFilterPopover() {
         }
     });
     
-    // Group checkbox changes
-    const grpCheckboxes = popover.querySelectorAll(".notion-filter-grp-cb");
-    grpCheckboxes.forEach(grpCb => {
-        grpCb.addEventListener("change", (e) => {
-            const grp = grpCb.dataset.group;
-            const optCheckboxes = popover.querySelectorAll(`.notion-filter-opt-cb[data-group="${grp}"]`);
-            optCheckboxes.forEach(optCb => {
-                optCb.checked = grpCb.checked;
-            });
-            updateFilterSummary();
-            renderNotionTasksTable();
-        });
-    });
-    
     // Option checkbox changes
     const optCheckboxes = popover.querySelectorAll(".notion-filter-opt-cb");
     optCheckboxes.forEach(optCb => {
-        optCb.addEventListener("change", (e) => {
-            const grp = optCb.dataset.group;
-            const grpCb = popover.querySelector(`.notion-filter-grp-cb[data-group="${grp}"]`);
-            const siblingOpts = popover.querySelectorAll(`.notion-filter-opt-cb[data-group="${grp}"]`);
-            
-            const allChecked = Array.from(siblingOpts).every(cb => cb.checked);
-            const someChecked = Array.from(siblingOpts).some(cb => cb.checked);
-            
-            if (grpCb) {
-                grpCb.checked = allChecked;
-                grpCb.indeterminate = !allChecked && someChecked;
-            }
-            
+        optCb.addEventListener("change", () => {
             updateFilterSummary();
             renderNotionTasksTable();
         });
@@ -15645,10 +15619,6 @@ function setupNotionFilterPopover() {
         clearBtn.addEventListener("click", (e) => {
             e.stopPropagation();
             optCheckboxes.forEach(cb => cb.checked = false);
-            grpCheckboxes.forEach(cb => {
-                cb.checked = false;
-                cb.indeterminate = false;
-            });
             updateFilterSummary();
             renderNotionTasksTable();
         });
@@ -21305,7 +21275,7 @@ const CHEESEFORK_SEMESTER_SCHEDULE = {
                     courseName: "פיסיקה 2",
                     type: "הרצאה (קבוצה 10)",
                     lecturer: "ד\"ר גדעון אלון",
-                    room: "כיתת טכניון",
+                    room: "",
                     startTime: "08:30",
                     endTime: "10:30",
                     duration: "שעתיים",
@@ -21554,7 +21524,7 @@ function renderTimetableGrid() {
                     <div class="timetable-card ${c.cardClass || ''}" onclick="if (typeof openCourseDetails === 'function') openCourseDetails('${c.courseId}')">
                         <div class="timetable-card-top">
                             <span class="timetable-card-time">⏰ ${c.startTime} - ${c.endTime}${c.duration ? ` (${c.duration})` : ''}</span>
-                            ${c.room ? `<span class="timetable-card-room">${c.room}</span>` : ''}
+                            ${(c.room && c.room !== 'כיתת טכניון') ? `<span class="timetable-card-room">📍 ${c.room}</span>` : ''}
                         </div>
                         <div class="timetable-card-title">${c.courseName} (${c.courseId})</div>
                         <div class="timetable-card-meta">
@@ -22311,7 +22281,7 @@ async function trigger10MinClassAlert(classItem, isTest = false) {
     const typeShort = (type.split(' ')[0] || '').replace(/[()]/g, '');
     const startTime = classItem.startTime || '';
     const endTime = classItem.endTime || '';
-    const room = classItem.room ? `📍 כיתה: ${classItem.room}` : '📍 מיקום: כיתת טכניון';
+    const room = (classItem.room && classItem.room !== 'כיתת טכניון') ? `📍 כיתה: ${classItem.room}` : '';
     const lecturer = classItem.lecturer ? `👨‍🏫 מרצה: ${classItem.lecturer}` : '';
 
     // Calculate real-time relative difference to actual current clock time

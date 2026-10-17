@@ -1372,52 +1372,29 @@
                                         <span style="color: #666; font-size: 1rem; cursor: pointer;">···</span>
                                     </div>
                                     <div class="notion-filter-popover-body">
-                                        <!-- To-do Group -->
-                                        <div class="notion-filter-group-header" data-group="todo">
-                                            <input type="checkbox" id="filter-grp-todo" class="notion-filter-cb notion-filter-grp-cb" data-group="todo" checked>
-                                            <label for="filter-grp-todo" style="cursor: pointer; display: flex; align-items: center; gap: 6px;">
-                                                <span style="font-size: 0.9rem; opacity: 0.7;">◌</span> To-do
+                                        <div class="notion-filter-item-row flat" data-status="not_started">
+                                            <label for="filter-opt-not_started" style="cursor: pointer; display: flex; align-items: center; gap: 8px; flex: 1;">
+                                                <span class="notion-status-pill not_started" style="pointer-events: none;">Not Started</span>
                                             </label>
+                                            <input type="checkbox" id="filter-opt-not_started" class="notion-filter-cb notion-filter-opt-cb" data-status="not_started" checked>
                                         </div>
-                                        <div class="notion-filter-item-row" data-status="not_started">
-                                            <input type="checkbox" id="filter-opt-not_started" class="notion-filter-cb notion-filter-opt-cb" data-group="todo" data-status="not_started" checked>
-                                            <label for="filter-opt-not_started" style="cursor: pointer;">
-                                                <span class="notion-status-pill not_started" style="pointer-events: none;">not started</span>
+                                        <div class="notion-filter-item-row flat" data-status="in_progress">
+                                            <label for="filter-opt-in_progress" style="cursor: pointer; display: flex; align-items: center; gap: 8px; flex: 1;">
+                                                <span class="notion-status-pill in_progress" style="pointer-events: none;">In Progress</span>
                                             </label>
+                                            <input type="checkbox" id="filter-opt-in_progress" class="notion-filter-cb notion-filter-opt-cb" data-status="in_progress" checked>
                                         </div>
-
-                                        <!-- In progress Group -->
-                                        <div class="notion-filter-group-header" data-group="inprogress">
-                                            <input type="checkbox" id="filter-grp-inprogress" class="notion-filter-cb notion-filter-grp-cb" data-group="inprogress" checked>
-                                            <label for="filter-grp-inprogress" style="cursor: pointer; display: flex; align-items: center; gap: 6px;">
-                                                <span style="font-size: 0.9rem; color: #38bdf8;">▷</span> In progress
+                                        <div class="notion-filter-item-row flat" data-status="done">
+                                            <label for="filter-opt-done" style="cursor: pointer; display: flex; align-items: center; gap: 8px; flex: 1;">
+                                                <span class="notion-status-pill done" style="pointer-events: none;">Done</span>
                                             </label>
+                                            <input type="checkbox" id="filter-opt-done" class="notion-filter-cb notion-filter-opt-cb" data-status="done" checked>
                                         </div>
-                                        <div class="notion-filter-item-row" data-status="in_progress">
-                                            <input type="checkbox" id="filter-opt-in_progress" class="notion-filter-cb notion-filter-opt-cb" data-group="inprogress" data-status="in_progress" checked>
-                                            <label for="filter-opt-in_progress" style="cursor: pointer;">
-                                                <span class="notion-status-pill in_progress" style="pointer-events: none;">In progress</span>
-                                            </label>
-                                        </div>
-
-                                        <!-- Complete Group -->
-                                        <div class="notion-filter-group-header" data-group="complete">
-                                            <input type="checkbox" id="filter-grp-complete" class="notion-filter-cb notion-filter-grp-cb" data-group="complete" checked>
-                                            <label for="filter-grp-complete" style="cursor: pointer; display: flex; align-items: center; gap: 6px;">
-                                                <span style="font-size: 0.9rem; color: #34d399;">✓</span> Complete
-                                            </label>
-                                        </div>
-                                        <div class="notion-filter-item-row" data-status="done">
-                                            <input type="checkbox" id="filter-opt-done" class="notion-filter-cb notion-filter-opt-cb" data-group="complete" data-status="done" checked>
-                                            <label for="filter-opt-done" style="cursor: pointer;">
-                                                <span class="notion-status-pill done" style="pointer-events: none;">done</span>
-                                            </label>
-                                        </div>
-                                        <div class="notion-filter-item-row" data-status="submitted">
-                                            <input type="checkbox" id="filter-opt-submitted" class="notion-filter-cb notion-filter-opt-cb" data-group="complete" data-status="submitted" checked>
-                                            <label for="filter-opt-submitted" style="cursor: pointer;">
+                                        <div class="notion-filter-item-row flat" data-status="submitted">
+                                            <label for="filter-opt-submitted" style="cursor: pointer; display: flex; align-items: center; gap: 8px; flex: 1;">
                                                 <span class="notion-status-pill submitted" style="pointer-events: none;">Submitted</span>
                                             </label>
+                                            <input type="checkbox" id="filter-opt-submitted" class="notion-filter-cb notion-filter-opt-cb" data-status="submitted" checked>
                                         </div>
                                     </div>
                                     <div class="notion-filter-popover-footer">
@@ -2244,6 +2221,65 @@
                         <span style="font-size: 0.72rem; color: #64748b;">(סמן/הסר קורסים כדי לבחון תרחישי עומס שונים)</span>
                     </div>
                     <div id="ttg-courses-chips" style="display: flex; gap: 8px; flex-wrap: wrap;"></div>
+                </div>
+
+                <!-- Pre-Anchoring Hub (שלב 1: בחירת עוגנים ומרצים נעולים לפני החילול) -->
+                <div id="ttg-pre-anchor-hub" class="ttg-pre-anchor-hub" style="background: rgba(15, 23, 42, 0.75); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 10px; padding: 12px 16px; margin: 2px 0 6px 0; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 12px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 10px;">
+                        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                            <span style="background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%); color: #ffffff; font-weight: 800; font-size: 0.74rem; padding: 3px 10px; border-radius: 6px; letter-spacing: 0.5px;">
+                                שלב 1
+                            </span>
+                            <div>
+                                <h3 style="font-size: 0.94rem; font-weight: 800; color: #f8fafc; margin: 0; display: flex; align-items: center; gap: 6px;">
+                                    <span>⚓</span> <span>בחירת עוגנים ומרצים נעולים לפני החילול</span>
+                                </h3>
+                                <p style="font-size: 0.74rem; color: #94a3b8; margin: 2px 0 0 0;">
+                                    קבע מראש אילו מרצים וקבוצות חובה לנעול (למשל: פרופ' גבלי, ד"ר אלון, יוגה בחמישי). האלגוריתם ירכיב את כל המערכות סביבם!
+                                </p>
+                            </div>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span id="ttg-pre-anchor-summary-badge" style="font-size: 0.74rem; font-weight: 700; color: #38bdf8; background: rgba(56, 189, 248, 0.12); border: 1px solid rgba(56, 189, 248, 0.35); padding: 3px 10px; border-radius: 6px;">
+                                1 עוגן פעיל (יוגה)
+                            </span>
+                            <button type="button" class="btn btn-sm btn-outline" id="ttg-btn-toggle-pre-anchor" style="font-size: 0.72rem; padding: 3px 9px; height: 26px; border-color: rgba(255, 255, 255, 0.15); color: #cbd5e1;" title="הסתר/הצג פנל בחירת עוגנים">
+                                <span id="ttg-toggle-pre-anchor-text">צמצם פנל ▴</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Hub Body (Grid of Course Anchors + Generate CTA) -->
+                    <div id="ttg-pre-anchor-body" style="transition: max-height 0.3s ease;">
+                        <div id="ttg-pre-anchor-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 10px; margin-bottom: 12px;"></div>
+
+                        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; padding-top: 10px; border-top: 1px solid rgba(255, 255, 255, 0.06);">
+                            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                                <button type="button" class="btn btn-primary" id="ttg-btn-run-generate" style="background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%); border-color: #38bdf8; font-weight: 800; font-size: 0.92rem; padding: 8px 22px; box-shadow: 0 4px 15px rgba(2, 132, 199, 0.35); border-radius: 8px; display: inline-flex; align-items: center; gap: 8px; cursor: pointer;">
+                                    <span>⚡</span> <span>חולל מערכות לפי העוגנים שבחרתי</span>
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline" id="ttg-btn-reset-pre-anchors" style="font-size: 0.74rem; padding: 6px 12px; height: 34px; color: #94a3b8; border-color: rgba(255, 255, 255, 0.15);" title="בטל את כל הנעילות והשאר את כל הקבוצות על גמיש">
+                                    <span>↺</span> <span>השאר הכל גמיש</span>
+                                </button>
+                            </div>
+                            <div style="font-size: 0.72rem; color: #64748b; display: flex; align-items: center; gap: 5px;">
+                                <span>💡</span> <span>טיפ: קורס שמוגדר ״גמיש״ מאפשר לאלגוריתם למקסם ימי חופש ולמזער חלונות</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 2 Divider -->
+                <div style="display: flex; align-items: center; justify-content: space-between; margin: 4px 0 2px 0;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span style="background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); font-weight: 800; font-size: 0.74rem; padding: 2px 8px; border-radius: 5px;">
+                            שלב 2
+                        </span>
+                        <span style="font-size: 0.82rem; font-weight: 700; color: #cbd5e1;">
+                            תוצאות החילול &amp; סטודיו קומבינציות
+                        </span>
+                    </div>
+                    <span id="ttg-results-count-preview" style="font-size: 0.74rem; color: #94a3b8;"></span>
                 </div>
 
                 <!-- Sorting and Metrics Filter -->
