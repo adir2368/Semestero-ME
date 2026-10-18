@@ -8618,6 +8618,334 @@ const PRELOADED_USER_STATE = {
 const AUGUST_2026_SCHEDULE = [];
 const AUGUST_2026_PERSONAL_EVENTS = [];
 
+// ==============================================================================
+// Daily Timetable & CheeseFork Auto-Sync System (Authentic Technion S3 תשפ״ז)
+// ==============================================================================
+const CHEESEFORK_SEMESTER_SCHEDULE = {
+    semester: "202601",
+    name: "סמסטר חורף 2026/2027",
+    freeDays: [5, 6], // Fri, Sat (Sunday has classes)
+    dayNames: ["ראשון", "שני", "שלישי", "רביעי", "חמישי", "שישי", "שבת"],
+    days: [
+        {
+            dayIndex: 0,
+            name: "ראשון",
+            fullName: "יום ראשון",
+            isFree: false,
+            classes: [
+                {
+                    courseId: "104228",
+                    courseName: "משוואות דיפרנציאליות חלקיות מ'",
+                    type: "תרגול 22",
+                    lecturer: "אמתי אלפרין",
+                    room: "אולמן 506",
+                    startTime: "11:30",
+                    endTime: "13:30",
+                    duration: "שעתיים",
+                    cardClass: "timetable-card-pde"
+                },
+                {
+                    courseId: "034053",
+                    courseName: "מכניקת מוצקים 2מ'",
+                    type: "הרצאה 20",
+                    lecturer: "פרופ' דן מרדכי",
+                    room: "הנדסה כימית 1",
+                    startTime: "14:30",
+                    endTime: "17:30",
+                    duration: "3 שעות",
+                    cardClass: "timetable-card-solids"
+                }
+            ]
+        },
+        {
+            dayIndex: 1,
+            name: "שני",
+            fullName: "יום שני",
+            isFree: false,
+            classes: [
+                {
+                    courseId: "114052",
+                    courseName: "פיסיקה 2",
+                    type: "הרצאה 10",
+                    lecturer: "ד\"ר גדעון אלון",
+                    room: "טאוב - מדמ\"ח 1",
+                    startTime: "08:30",
+                    endTime: "10:30",
+                    duration: "שעתיים",
+                    cardClass: "timetable-card-physics"
+                },
+                {
+                    courseId: "104228",
+                    courseName: "משוואות דיפרנציאליות חלקיות מ'",
+                    type: "הרצאה 30",
+                    lecturer: "ד\"ר שלומי גובר",
+                    room: "שרמן - חינוך למדע וטכנולוגיה 107",
+                    startTime: "12:30",
+                    endTime: "14:30",
+                    duration: "שעתיים",
+                    cardClass: "timetable-card-pde"
+                },
+                {
+                    courseId: "034053",
+                    courseName: "מכניקת מוצקים 2מ'",
+                    type: "תרגול 20",
+                    lecturer: "מר מירון דואר",
+                    room: "אולמן 602",
+                    startTime: "14:30",
+                    endTime: "16:30",
+                    duration: "שעתיים",
+                    cardClass: "timetable-card-solids"
+                }
+            ]
+        },
+        {
+            dayIndex: 2,
+            name: "שלישי",
+            fullName: "יום שלישי",
+            isFree: false,
+            classes: [
+                {
+                    courseId: "034035",
+                    courseName: "תרמודינמיקה 1",
+                    type: "הרצאה 10",
+                    lecturer: "פרופ' לאוניד טרטקובסקי",
+                    room: "הנדסה כימית 1",
+                    startTime: "08:30",
+                    endTime: "11:30",
+                    duration: "3 שעות",
+                    cardClass: "timetable-card-thermo"
+                },
+                {
+                    courseId: "034035",
+                    courseName: "תרמודינמיקה 1",
+                    type: "תרגול 11",
+                    lecturer: "גב' עומר גזית אורולוב",
+                    room: "אולמן 101",
+                    startTime: "12:30",
+                    endTime: "14:30",
+                    duration: "שעתיים",
+                    cardClass: "timetable-card-thermo"
+                },
+                {
+                    courseId: "034056",
+                    courseName: "מבוא לחישוב מדעי והנדסי",
+                    type: "תרגול 11",
+                    lecturer: "מר גיא ארבר",
+                    room: "אולמן 501",
+                    startTime: "14:30",
+                    endTime: "16:30",
+                    duration: "שעתיים",
+                    cardClass: "timetable-card-computing"
+                }
+            ]
+        },
+        {
+            dayIndex: 3,
+            name: "רביעי",
+            fullName: "יום רביעי",
+            isFree: false,
+            classes: [
+                {
+                    courseId: "114052",
+                    courseName: "פיסיקה 2",
+                    type: "הרצאה 10",
+                    lecturer: "ד\"ר גדעון אלון",
+                    room: "פיזיקה 1",
+                    startTime: "08:30",
+                    endTime: "09:30",
+                    duration: "שעה",
+                    cardClass: "timetable-card-physics"
+                },
+                {
+                    courseId: "114052",
+                    courseName: "פיסיקה 2",
+                    type: "תרגול 13",
+                    lecturer: "גב' נעם חגי גמליאל",
+                    room: "שרמן - חינוך למדע וטכנולוגיה 107",
+                    startTime: "09:30",
+                    endTime: "10:30",
+                    duration: "שעה",
+                    cardClass: "timetable-card-physics"
+                },
+                {
+                    courseId: "034056",
+                    courseName: "מבוא לחישוב מדעי והנדסי",
+                    type: "הרצאה 10",
+                    lecturer: "ד\"ר דניאל הקסנר",
+                    room: "הנדסה כימית 1",
+                    startTime: "14:30",
+                    endTime: "16:30",
+                    duration: "שעתיים",
+                    cardClass: "timetable-card-computing"
+                }
+            ]
+        },
+        {
+            dayIndex: 4,
+            name: "חמישי",
+            fullName: "יום חמישי",
+            isFree: false,
+            classes: [
+                {
+                    courseId: "03940805",
+                    courseName: "חינוך גופני - אתלטיקה קלה",
+                    type: "יוגה 24",
+                    lecturer: "שלומית בן-איש",
+                    room: "חינוך גופני - אתלטיקה קלה",
+                    startTime: "07:30",
+                    endTime: "08:30",
+                    duration: "שעה",
+                    cardClass: "timetable-card-yoga",
+                    isAnchor: true
+                }
+            ]
+        }
+    ]
+};
+
+// ==============================================================================
+// Master Authentic Technion Rooms & Lecturers Directory (Winter 2026/27 תשפ״ז)
+// ==============================================================================
+const AUTHENTIC_TIMETABLE_METADATA = {
+    // Sunday (ראשון - dayIndex 0)
+    '104228_0_11:30': { room: 'אולמן 506', lecturer: 'אמתי אלפרין', duration: 'שעתיים', type: 'תרגול 22', startTime: '11:30', endTime: '13:30' },
+    '104228_0':       { room: 'אולמן 506', lecturer: 'אמתי אלפרין', duration: 'שעתיים', type: 'תרגול 22', startTime: '11:30', endTime: '13:30' },
+    '034053_0_14:30': { room: 'הנדסה כימית 1', lecturer: "פרופ' דן מרדכי", duration: '3 שעות', type: 'הרצאה 20', startTime: '14:30', endTime: '17:30' },
+    '34053_0_14:30':  { room: 'הנדסה כימית 1', lecturer: "פרופ' דן מרדכי", duration: '3 שעות', type: 'הרצאה 20', startTime: '14:30', endTime: '17:30' },
+    '034053_0':       { room: 'הנדסה כימית 1', lecturer: "פרופ' דן מרדכי", duration: '3 שעות', type: 'הרצאה 20', startTime: '14:30', endTime: '17:30' },
+    '34053_0':        { room: 'הנדסה כימית 1', lecturer: "פרופ' דן מרדכי", duration: '3 שעות', type: 'הרצאה 20', startTime: '14:30', endTime: '17:30' },
+
+    // Monday (שני - dayIndex 1)
+    '114052_1_08:30': { room: 'טאוב - מדמ"ח 1', lecturer: 'ד"ר גדעון אלון', duration: 'שעתיים', type: 'הרצאה 10', startTime: '08:30', endTime: '10:30' },
+    '114052_1':       { room: 'טאוב - מדמ"ח 1', lecturer: 'ד"ר גדעון אלון', duration: 'שעתיים', type: 'הרצאה 10', startTime: '08:30', endTime: '10:30' },
+    '104228_1_12:30': { room: 'שרמן - חינוך למדע וטכנולוגיה 107', lecturer: 'ד"ר שלומי גובר', duration: 'שעתיים', type: 'הרצאה 30', startTime: '12:30', endTime: '14:30' },
+    '104228_1':       { room: 'שרמן - חינוך למדע וטכנולוגיה 107', lecturer: 'ד"ר שלומי גובר', duration: 'שעתיים', type: 'הרצאה 30', startTime: '12:30', endTime: '14:30' },
+    '034053_1_14:30': { room: 'אולמן 602', lecturer: 'מר מירון דואר', duration: 'שעתיים', type: 'תרגול 20', startTime: '14:30', endTime: '16:30' },
+    '034053_1_13:30': { room: 'אולמן 602', lecturer: 'מר מירון דואר', duration: 'שעתיים', type: 'תרגול 20', startTime: '14:30', endTime: '16:30' },
+    '34053_1_14:30':  { room: 'אולמן 602', lecturer: 'מר מירון דואר', duration: 'שעתיים', type: 'תרגול 20', startTime: '14:30', endTime: '16:30' },
+    '34053_1_13:30':  { room: 'אולמן 602', lecturer: 'מר מירון דואר', duration: 'שעתיים', type: 'תרגול 20', startTime: '14:30', endTime: '16:30' },
+    '034053_1':       { room: 'אולמן 602', lecturer: 'מר מירון דואר', duration: 'שעתיים', type: 'תרגול 20', startTime: '14:30', endTime: '16:30' },
+    '34053_1':        { room: 'אולמן 602', lecturer: 'מר מירון דואר', duration: 'שעתיים', type: 'תרגול 20', startTime: '14:30', endTime: '16:30' },
+
+    // Tuesday (שלישי - dayIndex 2)
+    '034035_2_08:30': { room: 'הנדסה כימית 1', lecturer: "פרופ' לאוניד טרטקובסקי", duration: '3 שעות', type: 'הרצאה 10', startTime: '08:30', endTime: '11:30' },
+    '34035_2_08:30':  { room: 'הנדסה כימית 1', lecturer: "פרופ' לאוניד טרטקובסקי", duration: '3 שעות', type: 'הרצאה 10', startTime: '08:30', endTime: '11:30' },
+    '034035_2_12:30': { room: 'אולמן 101', lecturer: "גב' עומר גזית אורולוב", duration: 'שעתיים', type: 'תרגול 11', startTime: '12:30', endTime: '14:30' },
+    '34035_2_12:30':  { room: 'אולמן 101', lecturer: "גב' עומר גזית אורולוב", duration: 'שעתיים', type: 'תרגול 11', startTime: '12:30', endTime: '14:30' },
+    '034056_2_14:30': { room: 'אולמן 501', lecturer: 'מר גיא ארבר', duration: 'שעתיים', type: 'תרגול 11', startTime: '14:30', endTime: '16:30' },
+    '34056_2_14:30':  { room: 'אולמן 501', lecturer: 'מר גיא ארבר', duration: 'שעתיים', type: 'תרגול 11', startTime: '14:30', endTime: '16:30' },
+    '034056_2':       { room: 'אולמן 501', lecturer: 'מר גיא ארבר', duration: 'שעתיים', type: 'תרגול 11', startTime: '14:30', endTime: '16:30' },
+    '34056_2':        { room: 'אולמן 501', lecturer: 'מר גיא ארבר', duration: 'שעתיים', type: 'תרגול 11', startTime: '14:30', endTime: '16:30' },
+
+    // Wednesday (רביעי - dayIndex 3)
+    '114052_3_08:30': { room: 'פיזיקה 1', lecturer: 'ד"ר גדעון אלון', duration: 'שעה', type: 'הרצאה 10', startTime: '08:30', endTime: '09:30' },
+    '114052_3_09:30': { room: 'שרמן - חינוך למדע וטכנולוגיה 107', lecturer: "גב' נעם חגי גמליאל", duration: 'שעה', type: 'תרגול 13', startTime: '09:30', endTime: '10:30' },
+    '034056_3_14:30': { room: 'הנדסה כימית 1', lecturer: 'ד"ר דניאל הקסנר', duration: 'שעתיים', type: 'הרצאה 10', startTime: '14:30', endTime: '16:30' },
+    '34056_3_14:30':  { room: 'הנדסה כימית 1', lecturer: 'ד"ר דניאל הקסנר', duration: 'שעתיים', type: 'הרצאה 10', startTime: '14:30', endTime: '16:30' },
+    '034056_3':       { room: 'הנדסה כימית 1', lecturer: 'ד"ר דניאל הקסנר', duration: 'שעתיים', type: 'הרצאה 10', startTime: '14:30', endTime: '16:30' },
+    '34056_3':        { room: 'הנדסה כימית 1', lecturer: 'ד"ר דניאל הקסנר', duration: 'שעתיים', type: 'הרצאה 10', startTime: '14:30', endTime: '16:30' },
+
+    // Thursday (חמישי - dayIndex 4)
+    '03940805_4_07:30': { room: 'חינוך גופני - אתלטיקה קלה', lecturer: 'שלומית בן-איש', duration: 'שעה', type: 'יוגה 24', startTime: '07:30', endTime: '08:30' },
+    '3940805_4_07:30':  { room: 'חינוך גופני - אתלטיקה קלה', lecturer: 'שלומית בן-איש', duration: 'שעה', type: 'יוגה 24', startTime: '07:30', endTime: '08:30' },
+    '03940805_4':       { room: 'חינוך גופני - אתלטיקה קלה', lecturer: 'שלומית בן-איש', duration: 'שעה', type: 'יוגה 24', startTime: '07:30', endTime: '08:30' },
+    '3940805_4':        { room: 'חינוך גופני - אתלטיקה קלה', lecturer: 'שלומית בן-איש', duration: 'שעה', type: 'יוגה 24', startTime: '07:30', endTime: '08:30' }
+};
+
+function enrichTimetableWithAuthenticRooms(timetable) {
+    if (!timetable || !Array.isArray(timetable.days)) return 0;
+    let enrichedCount = 0;
+    timetable.days.forEach(day => {
+        if (!Array.isArray(day.classes)) return;
+        day.classes.forEach(c => {
+            const rawId = (c.courseId || '').trim();
+            const cleanCode = rawId.replace(/^0+/, '');
+            
+            // 1. Try exact match by ID + Day + StartTime
+            let meta = AUTHENTIC_TIMETABLE_METADATA[`${rawId}_${day.dayIndex}_${c.startTime}`] ||
+                       AUTHENTIC_TIMETABLE_METADATA[`${cleanCode}_${day.dayIndex}_${c.startTime}`];
+
+            // 2. Fallback: match by courseId + dayIndex + type or dayIndex
+            if (!meta) {
+                if (day.dayIndex === 3 && (cleanCode === '114052' || rawId === '114052')) {
+                    if (c.type && c.type.includes('13')) {
+                        meta = AUTHENTIC_TIMETABLE_METADATA['114052_3_09:30'];
+                    } else {
+                        meta = AUTHENTIC_TIMETABLE_METADATA['114052_3_08:30'];
+                    }
+                } else if (day.dayIndex === 2 && (cleanCode === '034035' || cleanCode === '34035')) {
+                    if (c.type && c.type.includes('11')) {
+                        meta = AUTHENTIC_TIMETABLE_METADATA['034035_2_12:30'];
+                    } else {
+                        meta = AUTHENTIC_TIMETABLE_METADATA['034035_2_08:30'];
+                    }
+                } else {
+                    meta = AUTHENTIC_TIMETABLE_METADATA[`${rawId}_${day.dayIndex}`] ||
+                           AUTHENTIC_TIMETABLE_METADATA[`${cleanCode}_${day.dayIndex}`];
+                }
+            }
+
+            if (meta) {
+                // If room is missing, blank, or placeholder
+                const isOutdatedRoom = !c.room || !c.room.trim() || 
+                    c.room === 'כיתת טכניון' || 
+                    c.room === 'מרכז ספורט טכניון' || 
+                    c.room === 'הנדסה כימית' || 
+                    c.room === 'אולמן' || 
+                    (day.dayIndex === 3 && c.startTime === '08:30' && c.room.includes('טאוב'));
+
+                if (isOutdatedRoom || c.room !== meta.room) {
+                    c.room = meta.room;
+                    enrichedCount++;
+                }
+
+                // If lecturer is missing or outdated
+                if (!c.lecturer || !c.lecturer.trim() || c.lecturer.includes('קקסנר') || c.lecturer.includes('רן מרדכי') || c.lecturer !== meta.lecturer) {
+                    c.lecturer = meta.lecturer;
+                    enrichedCount++;
+                }
+
+                // If duration or time is outdated or missing
+                if (meta.duration && c.duration !== meta.duration) {
+                    c.duration = meta.duration;
+                    enrichedCount++;
+                }
+                if (meta.endTime && c.endTime !== meta.endTime) {
+                    c.endTime = meta.endTime;
+                    enrichedCount++;
+                }
+                if (meta.startTime && c.startTime !== meta.startTime) {
+                    c.startTime = meta.startTime;
+                    enrichedCount++;
+                }
+                if (meta.type && (!c.type || !c.type.includes(meta.type))) {
+                    c.type = meta.type;
+                    enrichedCount++;
+                }
+            }
+        });
+    });
+    return enrichedCount;
+}
+window.enrichTimetableWithAuthenticRooms = enrichTimetableWithAuthenticRooms;
+
+function resetToAuthenticSchedule() {
+    if (typeof CHEESEFORK_SEMESTER_SCHEDULE === 'undefined') return;
+    const curState = (window.getGlobalGameState ? window.getGlobalGameState() : window.gameState);
+    if (!curState) return;
+
+    curState.timetable = JSON.parse(JSON.stringify(CHEESEFORK_SEMESTER_SCHEDULE));
+    if (typeof saveState === 'function') saveState();
+    if (typeof updateDailyTimetableFocus === 'function') updateDailyTimetableFocus();
+    if (typeof renderTimetableGrid === 'function') renderTimetableGrid();
+    if (typeof renderGcalManagerClassList === 'function') renderGcalManagerClassList();
+
+    if (typeof showToastNotification === 'function') {
+        showToastNotification('✓ שוחזרה מערכת השעות המקורית עם כלל המיקומים והחדרים המדויקים!', 'success');
+    }
+}
+window.resetToAuthenticSchedule = resetToAuthenticSchedule;
+
 // Load state from local storage or AuthSync
 function loadSavedState() {
     let loadedFromAuthSync = false;
@@ -9286,6 +9614,11 @@ function loadSavedState() {
                 }
             }
         });
+    }
+
+    // Auto-migrate & enrich authentic Technion timetable rooms
+    if (gameState && gameState.timetable && typeof enrichTimetableWithAuthenticRooms === 'function') {
+        enrichTimetableWithAuthenticRooms(gameState.timetable);
     }
 
     recalculateCourseStates();
@@ -13677,9 +14010,13 @@ window.syncLiveCheeseForkData = async function(customUrl = null, isManual = fals
             days: timetableDays
         };
 
+        if (typeof enrichTimetableWithAuthenticRooms === 'function') {
+            enrichTimetableWithAuthenticRooms(newTimetable);
+        }
+
         gameState.timetable = newTimetable;
         if (typeof CHEESEFORK_SEMESTER_SCHEDULE !== 'undefined') {
-            CHEESEFORK_SEMESTER_SCHEDULE.days = timetableDays;
+            CHEESEFORK_SEMESTER_SCHEDULE.days = newTimetable.days;
             CHEESEFORK_SEMESTER_SCHEDULE.freeDays = freeDayIndices;
         }
 
@@ -22038,188 +22375,8 @@ setTimeout(() => {
 
 // =======================================================
 // Daily Timetable & CheeseFork Auto-Sync System
+// (CHEESEFORK_SEMESTER_SCHEDULE & AUTHENTIC_TIMETABLE_METADATA defined globally above)
 // =======================================================
-const CHEESEFORK_SEMESTER_SCHEDULE = {
-    semester: "202601",
-    name: "סמסטר חורף 2026/2027",
-    freeDays: [5, 6], // Fri, Sat (Sunday has classes)
-    dayNames: ["ראשון", "שני", "שלישי", "רביעי", "חמישי", "שישי", "שבת"],
-    days: [
-        {
-            dayIndex: 0,
-            name: "ראשון",
-            fullName: "יום ראשון",
-            isFree: false,
-            classes: [
-                {
-                    courseId: "104228",
-                    courseName: "משוואות דיפרנציאליות חלקיות מ'",
-                    type: "תרגול 22",
-                    lecturer: "אמתי אלפרין",
-                    room: "אולמן 506",
-                    startTime: "11:30",
-                    endTime: "13:30",
-                    duration: "שעתיים",
-                    cardClass: "timetable-card-pde"
-                },
-                {
-                    courseId: "034053",
-                    courseName: "מכניקת מוצקים 2מ'",
-                    type: "הרצאה 20",
-                    lecturer: "פרופ' רן מרדכי",
-                    room: "הנדסה כימית 1",
-                    startTime: "14:30",
-                    endTime: "17:30",
-                    duration: "3 שעות",
-                    cardClass: "timetable-card-solids"
-                }
-            ]
-        },
-        {
-            dayIndex: 1,
-            name: "שני",
-            fullName: "יום שני",
-            isFree: false,
-            classes: [
-                {
-                    courseId: "114052",
-                    courseName: "פיסיקה 2",
-                    type: "הרצאה 10",
-                    lecturer: "ד\"ר גדעון אלון",
-                    room: "טאוב - מדמ\"ח 1",
-                    startTime: "08:30",
-                    endTime: "10:30",
-                    duration: "שעתיים",
-                    cardClass: "timetable-card-physics"
-                },
-                {
-                    courseId: "104228",
-                    courseName: "משוואות דיפרנציאליות חלקיות מ'",
-                    type: "הרצאה 30",
-                    lecturer: "ד\"ר שלומי גובר",
-                    room: "שרמן - חינוך למדע וטכנולוגיה 107",
-                    startTime: "12:30",
-                    endTime: "13:30",
-                    duration: "שעה",
-                    cardClass: "timetable-card-pde"
-                },
-                {
-                    courseId: "034053",
-                    courseName: "מכניקת מוצקים 2מ'",
-                    type: "תרגול 20",
-                    lecturer: "מר מירון דואר",
-                    room: "אולמן 602",
-                    startTime: "13:30",
-                    endTime: "15:30",
-                    duration: "שעתיים",
-                    cardClass: "timetable-card-solids"
-                }
-            ]
-        },
-        {
-            dayIndex: 2,
-            name: "שלישי",
-            fullName: "יום שלישי",
-            isFree: false,
-            classes: [
-                {
-                    courseId: "034035",
-                    courseName: "תרמודינמיקה 1",
-                    type: "הרצאה 10",
-                    lecturer: "פרופ' לאוניד טרטקובסקי",
-                    room: "הנדסה כימית 1",
-                    startTime: "08:30",
-                    endTime: "10:30",
-                    duration: "שעתיים",
-                    cardClass: "timetable-card-thermo"
-                },
-                {
-                    courseId: "034035",
-                    courseName: "תרמודינמיקה 1",
-                    type: "תרגול 11",
-                    lecturer: "גב' עומר גזית אורולוב",
-                    room: "אולמן 101",
-                    startTime: "12:30",
-                    endTime: "14:30",
-                    duration: "שעתיים",
-                    cardClass: "timetable-card-thermo"
-                },
-                {
-                    courseId: "034056",
-                    courseName: "מבוא לחישוב מדעי והנדסי",
-                    type: "תרגול 11",
-                    lecturer: "מר גיא ארבר",
-                    room: "אולמן 501",
-                    startTime: "14:30",
-                    endTime: "16:30",
-                    duration: "שעתיים",
-                    cardClass: "timetable-card-computing"
-                }
-            ]
-        },
-        {
-            dayIndex: 3,
-            name: "רביעי",
-            fullName: "יום רביעי",
-            isFree: false,
-            classes: [
-                {
-                    courseId: "114052",
-                    courseName: "פיסיקה 2",
-                    type: "הרצאה 10",
-                    lecturer: "ד\"ר גדעון אלון",
-                    room: "טאוב - מדמ\"ח 1",
-                    startTime: "08:30",
-                    endTime: "09:30",
-                    duration: "שעה",
-                    cardClass: "timetable-card-physics"
-                },
-                {
-                    courseId: "114052",
-                    courseName: "פיסיקה 2",
-                    type: "תרגול 13",
-                    lecturer: "גב' נעם חגי גמליאל",
-                    room: "שרמן - חינוך למדע וטכנולוגיה 107",
-                    startTime: "09:30",
-                    endTime: "10:30",
-                    duration: "שעה",
-                    cardClass: "timetable-card-physics"
-                },
-                {
-                    courseId: "034056",
-                    courseName: "מבוא לחישוב מדעי והנדסי",
-                    type: "הרצאה 10",
-                    lecturer: "ד\"ר דניאל קקסנר",
-                    room: "הנדסה כימית 1",
-                    startTime: "14:30",
-                    endTime: "16:30",
-                    duration: "שעתיים",
-                    cardClass: "timetable-card-computing"
-                }
-            ]
-        },
-        {
-            dayIndex: 4,
-            name: "חמישי",
-            fullName: "יום חמישי",
-            isFree: false,
-            classes: [
-                {
-                    courseId: "03940805",
-                    courseName: "חינוך גופני - אתלטיקה קלה",
-                    type: "יוגה 24",
-                    lecturer: "שלומית בן-איש",
-                    room: "מרכז ספורט טכניון",
-                    startTime: "07:30",
-                    endTime: "08:30",
-                    duration: "שעה",
-                    cardClass: "timetable-card-yoga",
-                    isAnchor: true
-                }
-            ]
-        }
-    ]
-};
 
 let currentMobileDayFilter = 'today';
 
@@ -22248,10 +22405,20 @@ function getLiveClassStatus(startTime, endTime) {
 function getActiveTimetableSchedule() {
     const isAdir = (window.AuthSync && typeof window.AuthSync.isAdirActive === 'function') && window.AuthSync.isAdirActive();
     const curState = (window.getGlobalGameState ? window.getGlobalGameState() : window.gameState);
+
     if (curState && curState.timetable && curState.timetable.days && curState.timetable.days.length > 0) {
+        const enriched = enrichTimetableWithAuthenticRooms(curState.timetable);
+        if (enriched > 0 && typeof saveState === 'function') {
+            saveState();
+        }
         return curState.timetable;
     }
-    if (isAdir && typeof CHEESEFORK_SEMESTER_SCHEDULE !== 'undefined' && CHEESEFORK_SEMESTER_SCHEDULE && CHEESEFORK_SEMESTER_SCHEDULE.days && CHEESEFORK_SEMESTER_SCHEDULE.days.length > 0) {
+
+    if (typeof CHEESEFORK_SEMESTER_SCHEDULE !== 'undefined' && CHEESEFORK_SEMESTER_SCHEDULE && CHEESEFORK_SEMESTER_SCHEDULE.days && CHEESEFORK_SEMESTER_SCHEDULE.days.length > 0) {
+        if (isAdir && curState) {
+            curState.timetable = JSON.parse(JSON.stringify(CHEESEFORK_SEMESTER_SCHEDULE));
+            if (typeof saveState === 'function') saveState();
+        }
         return CHEESEFORK_SEMESTER_SCHEDULE;
     }
     return null;

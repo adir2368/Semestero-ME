@@ -23,9 +23,9 @@
                         {
                             groupId: '10',
                             lecturer: 'ד"ר דניאל הקסנר',
-                            room: 'אודיטוריום',
+                            room: 'הנדסה כימית 1',
                             meetings: [
-                                { dayIndex: 3, dayName: 'רביעי', startTime: '14:30', endTime: '17:30', duration: '3 שעות' }
+                                { dayIndex: 3, dayName: 'רביעי', startTime: '14:30', endTime: '16:30', duration: 'שעתיים', room: 'הנדסה כימית 1' }
                             ]
                         },
                         {
@@ -43,19 +43,19 @@
                     slotName: 'תרגול',
                     options: [
                         {
+                            groupId: '11',
+                            lecturer: 'מר גיא ארבר',
+                            room: 'אולמן 501',
+                            meetings: [
+                                { dayIndex: 2, dayName: 'שלישי', startTime: '14:30', endTime: '16:30', duration: 'שעתיים', room: 'אולמן 501' }
+                            ]
+                        },
+                        {
                             groupId: '14',
                             lecturer: 'איליה קופמן',
                             room: 'חוות מחשבים',
                             meetings: [
                                 { dayIndex: 1, dayName: 'שני', startTime: '14:30', endTime: '16:30', duration: 'שעתיים' }
-                            ]
-                        },
-                        {
-                            groupId: '11',
-                            lecturer: 'מיכל אטיאס',
-                            room: 'חוות מחשבים',
-                            meetings: [
-                                { dayIndex: 1, dayName: 'שני', startTime: '12:30', endTime: '14:30', duration: 'שעתיים' }
                             ]
                         },
                         {
@@ -89,11 +89,19 @@
                     slotName: 'הרצאה',
                     options: [
                         {
-                            groupId: '10',
-                            lecturer: 'פרופ\' רן מרדכי',
+                            groupId: '20',
+                            lecturer: 'פרופ\' דן מרדכי',
                             room: 'הנדסה כימית 1',
                             meetings: [
-                                { dayIndex: 0, dayName: 'ראשון', startTime: '14:30', endTime: '17:30', duration: '3 שעות' }
+                                { dayIndex: 0, dayName: 'ראשון', startTime: '14:30', endTime: '17:30', duration: '3 שעות', room: 'הנדסה כימית 1' }
+                            ]
+                        },
+                        {
+                            groupId: '10',
+                            lecturer: 'פרופ\' דן מרדכי',
+                            room: 'הנדסה כימית 1',
+                            meetings: [
+                                { dayIndex: 0, dayName: 'ראשון', startTime: '14:30', endTime: '17:30', duration: '3 שעות', room: 'הנדסה כימית 1' }
                             ]
                         },
                         {
@@ -115,7 +123,7 @@
                             lecturer: 'מר מירון דואר',
                             room: 'אולמן 602',
                             meetings: [
-                                { dayIndex: 1, dayName: 'שני', startTime: '13:30', endTime: '15:30', duration: 'שעתיים' }
+                                { dayIndex: 1, dayName: 'שני', startTime: '14:30', endTime: '16:30', duration: 'שעתיים', room: 'אולמן 602' }
                             ]
                         },
                         {
@@ -153,7 +161,7 @@
                             lecturer: 'פרופ\' לאוניד טרטקובסקי',
                             room: 'הנדסה כימית 1',
                             meetings: [
-                                { dayIndex: 2, dayName: 'שלישי', startTime: '08:30', endTime: '10:30', duration: 'שעתיים' }
+                                { dayIndex: 2, dayName: 'שלישי', startTime: '08:30', endTime: '11:30', duration: '3 שעות', room: 'הנדסה כימית 1' }
                             ]
                         },
                         {
@@ -213,7 +221,7 @@
                             lecturer: 'ד"ר שלומי גובר',
                             room: 'שרמן - חינוך למדע וטכנולוגיה 107',
                             meetings: [
-                                { dayIndex: 1, dayName: 'שני', startTime: '12:30', endTime: '13:30', duration: 'שעה' }
+                                { dayIndex: 1, dayName: 'שני', startTime: '12:30', endTime: '14:30', duration: 'שעתיים', room: 'שרמן - חינוך למדע וטכנולוגיה 107' }
                             ]
                         },
                         {
@@ -235,7 +243,7 @@
                             lecturer: 'אמתי אלפרין',
                             room: 'אולמן 506',
                             meetings: [
-                                { dayIndex: 0, dayName: 'ראשון', startTime: '11:30', endTime: '13:30', duration: 'שעתיים' }
+                                { dayIndex: 0, dayName: 'ראשון', startTime: '11:30', endTime: '13:30', duration: 'שעתיים', room: 'אולמן 506' }
                             ]
                         },
                         {
@@ -273,8 +281,8 @@
                             lecturer: 'ד"ר גדעון אלון',
                             room: 'טאוב - מדמ"ח 1',
                             meetings: [
-                                { dayIndex: 1, dayName: 'שני', startTime: '08:30', endTime: '10:30', duration: 'שעתיים' },
-                                { dayIndex: 3, dayName: 'רביעי', startTime: '08:30', endTime: '09:30', duration: 'שעה' }
+                                { dayIndex: 1, dayName: 'שני', startTime: '08:30', endTime: '10:30', duration: 'שעתיים', room: 'טאוב - מדמ"ח 1' },
+                                { dayIndex: 3, dayName: 'רביעי', startTime: '08:30', endTime: '09:30', duration: 'שעה', room: 'פיזיקה 1' }
                             ]
                         },
                         {
@@ -297,7 +305,7 @@
                             lecturer: 'גב\' נעם חגי גמליאל',
                             room: 'שרמן - חינוך למדע וטכנולוגיה 107',
                             meetings: [
-                                { dayIndex: 3, dayName: 'רביעי', startTime: '09:30', endTime: '10:30', duration: 'שעה' }
+                                { dayIndex: 3, dayName: 'רביעי', startTime: '09:30', endTime: '10:30', duration: 'שעה', room: 'שרמן - חינוך למדע וטכנולוגיה 107' }
                             ]
                         },
                         {
@@ -347,10 +355,10 @@
                             groupId: '24',
                             sportName: 'יוגה',
                             lecturer: 'שלומית בן-איש',
-                            room: 'מרכז ספורט טכניון',
+                            room: 'חינוך גופני - אתלטיקה קלה',
                             isAnchor: true,
                             meetings: [
-                                { dayIndex: 4, dayName: 'חמישי', startTime: '07:30', endTime: '08:30', duration: 'שעה' }
+                                { dayIndex: 4, dayName: 'חמישי', startTime: '07:30', endTime: '08:30', duration: 'שעה', room: 'חינוך גופני - אתלטיקה קלה' }
                             ]
                         },
                         {
@@ -624,7 +632,7 @@
                         type: `${item.slotName} (קבוצה ${opt.groupId})`,
                         group: opt.groupId,
                         lecturer: opt.lecturer || '',
-                        room: (opt.room && opt.room !== 'כיתת טכניון') ? opt.room : '',
+                        room: ((m.room || opt.room) && (m.room || opt.room) !== 'כיתת טכניון') ? (m.room || opt.room) : '',
                         startTime: m.startTime,
                         endTime: m.endTime,
                         duration: m.duration || `${(dur / 60).toFixed(1)} שעות`,

@@ -1562,6 +1562,9 @@
                         <button type="button" class="btn-sync-action" id="btn-export-timetable-png" title="שמור את מערכת השעות כתמונה (PNG)">
                             <span>📸</span> <span>שמור כתמונה</span>
                         </button>
+                        <button type="button" class="btn-sync-action" id="btn-reset-authentic-timetable" onclick="resetToAuthenticSchedule()" title="רענן ושחזר את מיקומי החדרים והמרצים הרשמיים המדויקים של הטכניון" style="background: rgba(168, 85, 247, 0.15); border-color: rgba(168, 85, 247, 0.4); color: #c084fc;">
+                            <span>🏢</span> <span>רענן מיקומים רשמיים</span>
+                        </button>
                         <button type="button" class="btn-sync-action" id="btn-sync-cheesefork-now" title="סנכרן מחדש ועדכן נתונים">
                             <span>🔄</span> <span id="btn-sync-text">סנכרן להיום</span>
                         </button>
@@ -2279,9 +2282,14 @@
                         <div style="font-weight: 700; color: #f8fafc; font-size: 0.95rem; display: flex; align-items: center; gap: 6px;">
                             <span>✏️</span> <span>עריכת ומחיקת שיעורים במערכת (לפני ייצוא חוזר)</span>
                         </div>
-                        <button type="button" class="btn btn-xs btn-outline" onclick="addNewCustomClassPrompt()" style="border-color: #38bdf8; color: #38bdf8;">
-                            ➕ הוסף שיעור / פעילות חדשה
-                        </button>
+                        <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                            <button type="button" class="btn btn-xs btn-outline" onclick="resetToAuthenticSchedule()" style="border-color: #c084fc; color: #c084fc;" title="שחזר את מערכת השעות המקורית עם כלל החדרים והמרצים של הטכניון">
+                                🏢 שחזר מיקומי חדרים רשמיים
+                            </button>
+                            <button type="button" class="btn btn-xs btn-outline" onclick="addNewCustomClassPrompt()" style="border-color: #38bdf8; color: #38bdf8;">
+                                ➕ הוסף שיעור / פעילות חדשה
+                            </button>
+                        </div>
                     </div>
                     <div class="gcal-classes-container" id="gcal-manager-classes-list">
                         <!-- Populated dynamically by renderGcalManagerClassList() -->
