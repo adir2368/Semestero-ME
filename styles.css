@@ -5508,12 +5508,20 @@ label[for="new-task-xp-input"],
 
     /* Maximize vertical workspace height on mobile when top header is hidden */
     body:not([data-active-tab="curriculum"]) .hud-workspace {
-        padding-top: max(8px, env(safe-area-inset-top, 8px)) !important;
+        padding-top: max(16px, env(safe-area-inset-top, 16px)) !important;
     }
 
     html.is-iphone body:not([data-active-tab="curriculum"]) .hud-workspace,
     .is-iphone body:not([data-active-tab="curriculum"]) .hud-workspace {
         padding-top: max(env(safe-area-inset-top, 0px), 44px) !important;
+    }
+
+    /* Android Native & Capacitor Safe Insets to prevent status bar collision */
+    html.is-android-native body:not([data-active-tab="curriculum"]) .hud-workspace,
+    body.is-android-native:not([data-active-tab="curriculum"]) .hud-workspace,
+    html.is-capacitor body:not([data-active-tab="curriculum"]) .hud-workspace,
+    body.is-capacitor:not([data-active-tab="curriculum"]) .hud-workspace {
+        padding-top: max(36px, env(safe-area-inset-top, 36px)) !important;
     }
 
     .hud-header {
@@ -5524,7 +5532,7 @@ label[for="new-task-xp-input"],
         flex-direction: column !important;
         align-items: stretch !important;
         gap: 4px !important;
-        padding: max(8px, env(safe-area-inset-top)) max(8px, env(safe-area-inset-right)) 4px max(8px, env(safe-area-inset-left)) !important;
+        padding: max(12px, env(safe-area-inset-top, 12px)) max(8px, env(safe-area-inset-right)) 4px max(8px, env(safe-area-inset-left)) !important;
         height: auto !important;
         min-height: auto !important;
         flex-shrink: 0 !important;
@@ -5536,6 +5544,14 @@ label[for="new-task-xp-input"],
     body.is-iphone .hud-header,
     .is-iphone .hud-header {
         padding-top: max(env(safe-area-inset-top, 0px), 52px) !important;
+    }
+
+    /* Android Native & Capacitor Header Inset */
+    html.is-android-native .hud-header,
+    body.is-android-native .hud-header,
+    html.is-capacitor .hud-header,
+    body.is-capacitor .hud-header {
+        padding-top: max(34px, env(safe-area-inset-top, 34px)) !important;
     }
 
     @supports (-webkit-touch-callout: none) {

@@ -19496,7 +19496,7 @@ function exportTimetableToICS() {
 window.exportTimetableToICS = exportTimetableToICS;
 
 // =========================================================================
-// GOOGLE CALENDAR MANAGEMENT, CLEANUP & IN-APP TIMETABLE EDITING (v2.4.20)
+// GOOGLE CALENDAR MANAGEMENT, CLEANUP & IN-APP TIMETABLE EDITING (v2.4.21)
 // =========================================================================
 
 // Exports an RFC 5545 cancellation .ics file (METHOD:CANCEL, STATUS:CANCELLED)
@@ -20561,13 +20561,13 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.10.18-v2.4.20",
-    version: "2.4.20",
+    code: "REV-2026.10.18-v2.4.21",
+    version: "2.4.21",
     build: "20261018_08",
     date: "2026-10-18 16:45",
     description: "גרסה 2.4.20: מבנה כרטיסיית שיעור ב-4 שורות מוגדרות, מנהל מחיקה ועריכה מלא ליומן גוגל (כולל קובץ ביטול ICS CANCEL), וטיהור מוחלט של 'כיתת טכניון'"
 };
-window.APP_VERSION = "2.4.20";
+window.APP_VERSION = "2.4.21";
 
 function ensureBaselineRevisions() {
     if (!gameState.revisions || !Array.isArray(gameState.revisions) || gameState.revisions.length === 0) {
@@ -23266,8 +23266,102 @@ function closeNotificationDrawer() {
     }
 }
 
-// Helper: Show native notification via Service Worker (with fallback)
+// Capacitor Native Notification Helpers & Polyfill
+function isCapacitorPlatform() {
+    return typeof window !== 'undefined' && !!(window.Capacitor && (
+        (typeof window.Capacitor.isNativePlatform === 'function' && window.Capacitor.isNativePlatform()) ||
+        (window.Capacitor.Plugins && window.Capacitor.Plugins.LocalNotifications)
+    ));
+}
+
+let _capChannelInitialized = false;
+async function ensureCapacitorNotificationChannel() {
+    if (_capChannelInitialized) return;
+    if (isCapacitorPlatform() && window.Capacitor?.Plugins?.LocalNotifications) {
+        try {
+            await window.Capacitor.Plugins.LocalNotifications.createChannel({
+                id: 'semestero_alerts',
+                name: 'התראות סמסטרו (לו״ז ומשימות)',
+                description: 'התראות 10 דקות לפני שיעור, לו״ז יומי ומשימות',
+                importance: 5, // IMPORTANCE_HIGH: heads-up notification banner
+                visibility: 1, // VISIBILITY_PUBLIC
+                vibration: true,
+                lights: true,
+                lightColor: '#0ea5e9'
+            });
+            _capChannelInitialized = true;
+            console.log('[Notifications] Native Semestero notification channel ready');
+        } catch (e) {
+            console.warn('[Notifications] Channel setup error:', e);
+        }
+    }
+}
+
+// Polyfill window.Notification for Android WebView
+if (typeof window !== 'undefined') {
+    if (isCapacitorPlatform() && !('Notification' in window)) {
+        window.Notification = class NativeNotificationPolyfill {
+            constructor(title, options) {
+                showNativeNotification(title, options);
+            }
+            static get permission() {
+                return 'granted';
+            }
+            static async requestPermission() {
+                if (window.Capacitor?.Plugins?.LocalNotifications) {
+                    const res = await window.Capacitor.Plugins.LocalNotifications.requestPermissions();
+                    return (res && res.display === 'granted') ? 'granted' : 'denied';
+                }
+                return 'granted';
+            }
+        };
+        window.Notification.permission = 'granted';
+    }
+}
+
+// Helper: Show native notification via Capacitor LocalNotifications or Service Worker (with fallback)
 async function showNativeNotification(title, options = {}) {
+    // 1. Capacitor Native Android Push / Local Notifications
+    if (isCapacitorPlatform()) {
+        try {
+            const localNotifs = window.Capacitor?.Plugins?.LocalNotifications;
+            if (localNotifs) {
+                await ensureCapacitorNotificationChannel();
+                let perm = await localNotifs.checkPermissions();
+                if (perm.display !== 'granted') {
+                    perm = await localNotifs.requestPermissions();
+                }
+                if (perm.display !== 'granted') {
+                    if (typeof showToastNotification === 'function') {
+                        showToastNotification('יש לאשר הרשאות התראה בהגדרות הטלפון 🔔', 'warning');
+                    }
+                    return false;
+                }
+
+                const rawTag = options.tag || title;
+                const notifId = Math.abs(rawTag.split('').reduce((acc, c) => ((acc << 5) - acc) + c.charCodeAt(0), 0) % 2000000) + 1;
+                const scheduleAt = options.scheduleAt ? new Date(options.scheduleAt) : undefined;
+
+                await localNotifs.schedule({
+                    notifications: [{
+                        id: notifId,
+                        title: title,
+                        body: options.body || '',
+                        channelId: 'semestero_alerts',
+                        schedule: scheduleAt ? { at: scheduleAt } : undefined,
+                        smallIcon: 'ic_launcher_round',
+                        iconColor: '#0ea5e9',
+                        extra: options.data || {}
+                    }]
+                });
+                console.log(`[Notifications] Native Capacitor notification scheduled (ID: ${notifId}):`, title);
+                return true;
+            }
+        } catch (capErr) {
+            console.error('[Notifications] Capacitor notification error:', capErr);
+        }
+    }
+
     if (!('Notification' in window)) return false;
 
     // Ensure Android status bar uses the dedicated monochrome gear badge
@@ -23506,9 +23600,27 @@ function scheduleTodayClassTimeouts() {
         const delayMs = reminderTimeMs - nowMs;
         const reminderKey = `ast_reminded_10m_${todayDateStr}_${c.courseId}_${c.startTime}`;
 
-        // 1. Register modern OS-level NotificationTrigger (TimestampTrigger) for Android Chrome
+        // 1. Register modern OS-level NotificationTrigger (TimestampTrigger) for Android Chrome / Capacitor
         if (delayMs > 0) {
             scheduleNativeTimestampTrigger(c, reminderTimeMs);
+            if (isCapacitorPlatform() && window.Capacitor?.Plugins?.LocalNotifications) {
+                ensureCapacitorNotificationChannel().then(() => {
+                    const rawTag = `ast-alarm-${c.courseId || 'c'}-${(c.startTime || '0000').replace(':', '')}`;
+                    const notifId = Math.abs(rawTag.split('').reduce((acc, ch) => ((acc << 5) - acc) + ch.charCodeAt(0), 0) % 2000000) + 1;
+                    window.Capacitor.Plugins.LocalNotifications.schedule({
+                        notifications: [{
+                            id: notifId,
+                            title: `⏰ בעוד כ-10 דק׳: ${c.courseName || 'שיעור אקדמי'}`,
+                            body: `📚 ${c.type || 'הרצאה / תרגול'}\n⏰ שעות: ${c.startTime} - ${c.endTime}\n📍 ${c.room || 'טכניון'}`,
+                            channelId: 'semestero_alerts',
+                            schedule: { at: new Date(reminderTimeMs) },
+                            smallIcon: 'ic_launcher_round',
+                            iconColor: '#0ea5e9',
+                            extra: { tab: 'timetable' }
+                        }]
+                    }).catch(e => console.warn('[Notifications] Error scheduling native alarm:', e));
+                });
+            }
         }
 
         // 2. Schedule in-memory timeout (fires at T-10m)
@@ -23535,16 +23647,30 @@ function scheduleTodayClassTimeouts() {
 
 // 11. Dispatch Native System Notifications (Device-Aware: Mobile vs Desktop)
 async function dispatchNativeMobileNotifications() {
-    if (!('Notification' in window)) {
+    const isCap = isCapacitorPlatform();
+    if (!('Notification' in window) && !isCap) {
         if (typeof showToastNotification === 'function') {
             showToastNotification('הדפדפן אינו תומך בהתראות Push', 'warning');
         }
         return;
     }
 
-    let permission = Notification.permission;
-    if (permission !== 'granted') {
-        permission = await Notification.requestPermission();
+    let permission = 'granted';
+    if (isCap) {
+        const localNotifs = window.Capacitor?.Plugins?.LocalNotifications;
+        if (localNotifs) {
+            await ensureCapacitorNotificationChannel();
+            let perm = await localNotifs.checkPermissions();
+            if (perm.display !== 'granted') {
+                perm = await localNotifs.requestPermissions();
+            }
+            permission = (perm && perm.display === 'granted') ? 'granted' : 'denied';
+        }
+    } else {
+        permission = Notification.permission;
+        if (permission !== 'granted') {
+            permission = await Notification.requestPermission();
+        }
     }
 
     const isMobile = (typeof isMobileView === 'function') ? isMobileView() : (window.innerWidth <= 768);
@@ -23552,11 +23678,16 @@ async function dispatchNativeMobileNotifications() {
     if (permission !== 'granted') {
         if (typeof showToastNotification === 'function') {
             if (permission === 'denied') {
-                showToastNotification('ההתראות חסומות בדפדפן. לחץ על סמל ההגדרות ⚙️ / המנעול ליד כתובת האתר -> הרשאות -> אפשר התראות', 'warning');
+                const promptMsg = isCap
+                    ? 'ההתראות חסומות בהגדרות הטלפון. אפשר התראות עבור סמסטרו בהגדרות המכשיר ⚙️'
+                    : 'ההתראות חסומות בדפדפן. לחץ על סמל ההגדרות ⚙️ / המנעול ליד כתובת האתר -> הרשאות -> אפשר התראות';
+                showToastNotification(promptMsg, 'warning');
             } else {
-                const promptMsg = isMobile
-                    ? 'יש לאשר הרשאות התראה בחלון הדפדפן כדי לקבל עדכונים בנייד'
-                    : 'יש לאשר הרשאות התראה בחלון הדפדפן כדי לקבל עדכונים במחשב זה';
+                const promptMsg = isCap
+                    ? 'יש לאשר הרשאות התראה באפליקציה לקבלת עדכונים בנייד 🔔'
+                    : (isMobile
+                        ? 'יש לאשר הרשאות התראה בחלון הדפדפן כדי לקבל עדכונים בנייד'
+                        : 'יש לאשר הרשאות התראה בחלון הדפדפן כדי לקבל עדכונים במחשב זה');
                 showToastNotification(promptMsg, 'warning');
             }
         }

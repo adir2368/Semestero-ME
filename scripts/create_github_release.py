@@ -4,11 +4,18 @@ import json
 import urllib.request
 import urllib.error
 import subprocess
+import re
 
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 REPO = "adir2368/Semestero-ME"
-TAG = "v2.4.20"
-NAME = "Semestero ME v2.4.20 - Android Native Release"
-APK_PATH = r"C:\Users\user\.gemini\antigravity\scratch\academic-skill-tree\Semestero-ME.apk"
+APK_PATH = os.path.join(ROOT, "Semestero-ME.apk")
+
+# Read version from package.json
+with open(os.path.join(ROOT, "package.json"), "r", encoding="utf-8") as f:
+    pkg = json.load(f)
+VERSION = pkg.get("version", "2.4.21")
+TAG = f"v{VERSION}"
+NAME = f"Semestero ME v{VERSION} - Android Native Release"
 
 def get_github_token():
     try:
@@ -33,17 +40,18 @@ def create_release():
         "User-Agent": "Semestero-ME-Release-Bot"
     }
 
-    body_desc = """### 🚀 Semestero ME v2.4.20 - Official Android Native Release
+    body_desc = f"""### 🚀 Semestero ME {TAG} - Official Android Native Release
 
 **Download the APK directly to your phone:**
-👉 **[Semestero-ME.apk](https://github.com/adir2368/Semestero-ME/releases/download/v2.4.20/Semestero-ME.apk)**
+👉 **[Semestero-ME.apk](https://github.com/{REPO}/releases/download/{TAG}/Semestero-ME.apk)**
 
-#### ✨ Highlights in v2.4.20:
-- **Cloud Auto-Sync (Option 1):** The native app automatically updates with live changes pushed to GitHub Pages — zero APK reinstalls required in the future!
-- **Pure AMOLED Dark Splash & Brand Icon:** Official Semestero ME mechanical gear & flask branding.
-- **Native 100% TextZoom Lock:** Prevents Android system display scale from inflating app buttons and fonts.
-- **Privacy Hardening:** Clean login modal without testing/QA buttons.
-- **Full Offline PWA Support:** Built-in Service Worker cache.
+#### ✨ Highlights in {TAG}:
+- **Native Push & Local Notifications:** Full Android OS heads-up notifications with vibration, sound, and high-importance channel (`semestero_alerts`) via `@capacitor/local-notifications`.
+- **Proactive 10-Minute Class Alarms (AlarmManager):** Scheduled native OS alarms wake up the device and alert 10 minutes prior to lectures even when the screen is locked or app is closed.
+- **Top Border & Status Bar Collision Fix:** Android system window insets (`fitsSystemWindows="true"` & `is-android-native` safe-area padding) guarantee zero overlap with the Android status bar icons across Calendar, Tasks, Planner, and Timetable tabs.
+- **Clean "What's New" Settings Card:** Preserves strictly the single latest release note in the visible card, with older versions neatly archived in the collapsible history list.
+- **Cloud Auto-Sync:** Live updates sync seamlessly from GitHub Pages with zero APK reinstall overhead.
+- **TextZoom & AMOLED Dark Branding:** Authentic mechanical gear branding with 100% zoom lock.
 """
 
     payload = {
@@ -59,6 +67,7 @@ def create_release():
     create_url = f"https://api.github.com/repos/{REPO}/releases"
     req = urllib.request.Request(create_url, data=json.dumps(payload).encode('utf-8'), headers=headers, method="POST")
 
+    upload_url = None
     try:
         with urllib.request.urlopen(req) as resp:
             data = json.loads(resp.read().decode('utf-8'))
@@ -66,7 +75,7 @@ def create_release():
             print(f"[OK] Release created: {data.get('html_url')}")
     except urllib.error.HTTPError as e:
         err_body = e.read().decode('utf-8')
-        print(f"[!] Release error: {e.code} - {err_body}")
+        print(f"[!] Release request status: {e.code}")
         # If tag already exists, find existing release
         req_get = urllib.request.Request(f"https://api.github.com/repos/{REPO}/releases/tags/{TAG}", headers=headers)
         with urllib.request.urlopen(req_get) as resp_get:

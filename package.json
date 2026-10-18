@@ -1,7 +1,7 @@
 {
   "name": "semestero-me",
   "productName": "Semestero ME",
-  "version": "2.4.20",
+  "version": "2.4.21",
   "description": "Semestero ME - Academic Skill Tree and Degree Orchestration System",
   "main": "main.js",
   "scripts": {
@@ -28,6 +28,7 @@
   "dependencies": {
     "@capacitor/android": "^8.5.3",
     "@capacitor/cli": "^8.5.3",
-    "@capacitor/core": "^8.5.3"
+    "@capacitor/core": "^8.5.3",
+    "@capacitor/local-notifications": "^8.3.1"
   }
 }
