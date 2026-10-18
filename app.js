@@ -2626,6 +2626,9 @@ document.addEventListener("DOMContentLoaded", () => {
     renderUI();
     setupDailyTimetable();
     setupMobileNotifications();
+    if (typeof syncNativeAndroidWidgets === 'function') {
+        setTimeout(syncNativeAndroidWidgets, 500);
+    }
     if (window.MiluimRightsAdvisor && typeof window.MiluimRightsAdvisor.init === 'function') {
         window.MiluimRightsAdvisor.init();
     }
@@ -19496,7 +19499,7 @@ function exportTimetableToICS() {
 window.exportTimetableToICS = exportTimetableToICS;
 
 // =========================================================================
-// GOOGLE CALENDAR MANAGEMENT, CLEANUP & IN-APP TIMETABLE EDITING (v2.4.21)
+// GOOGLE CALENDAR MANAGEMENT, CLEANUP & IN-APP TIMETABLE EDITING (v2.4.22)
 // =========================================================================
 
 // Exports an RFC 5545 cancellation .ics file (METHOD:CANCEL, STATUS:CANCELLED)
@@ -20561,13 +20564,13 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.10.18-v2.4.21",
-    version: "2.4.21",
+    code: "REV-2026.10.18-v2.4.22",
+    version: "2.4.22",
     build: "20261018_08",
     date: "2026-10-18 16:45",
     description: "גרסה 2.4.20: מבנה כרטיסיית שיעור ב-4 שורות מוגדרות, מנהל מחיקה ועריכה מלא ליומן גוגל (כולל קובץ ביטול ICS CANCEL), וטיהור מוחלט של 'כיתת טכניון'"
 };
-window.APP_VERSION = "2.4.21";
+window.APP_VERSION = "2.4.22";
 
 function ensureBaselineRevisions() {
     if (!gameState.revisions || !Array.isArray(gameState.revisions) || gameState.revisions.length === 0) {
@@ -22978,22 +22981,147 @@ function getUpcomingPriorityTasks(limit = 8) {
     };
 }
 
-// 3. Update the Bell Badge counter
-function updateNotificationBadge() {
-    const badge = document.getElementById('bell-badge-count');
-    if (!badge) return;
+// 3. Update the Bell Badge counter & Native Android Home Screen Widgets
+function syncNativeAndroidWidgets(classData, tasksData) {
+    if (!window.SemesteroWidgetBridge) return;
 
-    const remainingLectures = getRemainingClassesToday();
-    const priorityTasks = getUpcomingPriorityTasks();
+    try {
+        const cData = classData || (typeof getRemainingClassesToday === 'function' ? getRemainingClassesToday() : null);
+        let classTitle = "אין שיעורים קרובים היום";
+        let classTime = "--:--";
+        let classDetails = "יום חופשי או שהסתיימו השיעורים להיום 🎉";
+        let classLecturer = "סמסטרו ME • הנדסת מכונות";
+        let classStatus = "חופשי";
 
-    const totalUrgent = remainingLectures.count + priorityTasks.totalDueSoon;
+        if (cData && cData.nextClass) {
+            const nc = cData.nextClass;
+            classTitle = nc.name || nc.courseName || nc.title || "הרצאה";
+            classTime = (nc.startTime && nc.endTime) ? `${nc.startTime} - ${nc.endTime}` : (nc.time || "--:--");
+            const roomStr = nc.room ? `📍 ${nc.room}` : "📍 טכניון";
+            const typeStr = nc.type ? ` • ${nc.type}` : "";
+            classDetails = `${roomStr}${typeStr}`;
+            classLecturer = nc.lecturer ? `👨‍🏫 ${nc.lecturer}` : "טכניון • סמסטר חורף";
 
-    if (totalUrgent > 0) {
-        badge.innerText = totalUrgent > 99 ? '99+' : String(totalUrgent);
-        badge.style.display = 'flex';
-    } else {
-        badge.style.display = 'none';
+            const now = new Date();
+            const curMin = now.getHours() * 60 + now.getMinutes();
+            if (nc.startTime) {
+                const parts = nc.startTime.split(':');
+                const startMin = parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
+                const diffMin = startMin - curMin;
+                if (diffMin > 0 && diffMin <= 60) {
+                    classStatus = `⏰ מתחיל בעוד ${diffMin} דקות`;
+                } else if (diffMin <= 0) {
+                    classStatus = `🟢 מתקיים כעת!`;
+                } else {
+                    classStatus = `⏳ השיעור הבא היום`;
+                }
+            } else {
+                classStatus = `⏳ שיעור קרוב`;
+            }
+        } else if (cData && cData.isFree) {
+            classTitle = "יום חופשי! 🏖️";
+            classTime = "סופ״ש / יום ללא שיעורים";
+            classDetails = "זמן מצוין למנוחה, חזרות ופרויקטים";
+            classLecturer = "סמסטרו ME • הנדסת מכונות";
+            classStatus = "חופשי";
+        }
+
+        if (window.SemesteroWidgetBridge.updateClassWidget) {
+            window.SemesteroWidgetBridge.updateClassWidget(
+                classTitle,
+                classTime,
+                classDetails,
+                classLecturer,
+                classStatus
+            );
+        }
+
+        const tData = tasksData || (typeof getUpcomingPriorityTasks === 'function' ? getUpcomingPriorityTasks(5) : null);
+        let examDays = "--";
+        let examTitle = "אין בחינות קרובות";
+        let examSub = "סמסטר חורף תשפ״ז";
+
+        if (typeof gameState !== 'undefined' && gameState && gameState.courses) {
+            const allExams = [];
+            Object.values(gameState.courses).forEach(c => {
+                if (c.status !== 'active') return;
+                (c.tasks || []).forEach(t => {
+                    if (t.type === 'exam' && t.dueDate && (typeof isCurrentOrUpcomingDate !== 'function' || isCurrentOrUpcomingDate(t.dueDate))) {
+                        allExams.push({
+                            title: c.name || t.title,
+                            dueDate: t.dueDate,
+                            isMoedB: (t.title || '').includes("מועד ב")
+                        });
+                    }
+                });
+            });
+            allExams.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
+            if (allExams.length > 0) {
+                const nextExam = allExams[0];
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                const exDate = new Date(nextExam.dueDate);
+                exDate.setHours(0, 0, 0, 0);
+                const diff = Math.ceil((exDate - today) / (1000 * 60 * 60 * 24));
+                examDays = String(Math.max(0, diff));
+                examTitle = nextExam.title;
+                const dStr = exDate.toLocaleDateString('he-IL', { day: '2-digit', month: '2-digit', year: 'numeric' });
+                examSub = (nextExam.isMoedB ? "מועד ב'" : "מועד א'") + ` • ${dStr}`;
+            }
+        }
+
+        const tList = (tData && tData.tasks) ? tData.tasks : [];
+        let task1 = "אין משימות פתוחות 🎉";
+        let task2 = "";
+        let tasksSummary = "הכל מעודכן!";
+
+        if (tList.length > 0) {
+            const t1 = tList[0];
+            task1 = `📌 [${t1.courseShortName || t1.courseName}] ${t1.title} (${t1.timingText || ''})`;
+            if (tList.length > 1) {
+                const t2 = tList[1];
+                task2 = `⚡ [${t2.courseShortName || t2.courseName}] ${t2.title} (${t2.timingText || ''})`;
+            }
+            const remainingCount = Math.max(0, (tData.totalOpen || tList.length) - 2);
+            tasksSummary = remainingCount > 0 
+                ? `עוד ${remainingCount} משימות פתוחות בלוח`
+                : (tList.length === 2 ? `2 משימות פתוחות בסך הכל` : `משימה אחת פתוחה בסך הכל`);
+        }
+
+        if (window.SemesteroWidgetBridge.updateTasksWidget) {
+            window.SemesteroWidgetBridge.updateTasksWidget(
+                examDays,
+                examTitle,
+                examSub,
+                task1,
+                task2,
+                tasksSummary
+            );
+        }
+    } catch (err) {
+        console.warn("[Semestero Native Widgets] Sync failed:", err);
     }
+}
+window.syncNativeAndroidWidgets = syncNativeAndroidWidgets;
+
+function updateNotificationBadge() {
+    const remainingLectures = (typeof getRemainingClassesToday === 'function') ? getRemainingClassesToday() : null;
+    const priorityTasks = (typeof getUpcomingPriorityTasks === 'function') ? getUpcomingPriorityTasks() : null;
+
+    const totalUrgent = (remainingLectures ? remainingLectures.count : 0) + (priorityTasks ? priorityTasks.totalDueSoon : 0);
+
+    const badge = document.getElementById('bell-badge-count');
+    if (badge) {
+        if (totalUrgent > 0) {
+            badge.innerText = totalUrgent > 99 ? '99+' : String(totalUrgent);
+            badge.style.display = 'flex';
+        } else {
+            badge.style.display = 'none';
+        }
+    }
+
+    // Live Native Android Widget synchronization
+    syncNativeAndroidWidgets(remainingLectures, priorityTasks);
 }
 
 // 4. Toggle Expand / Collapse for individual cards

@@ -122,6 +122,16 @@ def bump(target_version=None, changelog_text=None):
         f.write(idx_content)
     print(f"Updated index.html to {next_version} (single latest item in whats-new-list)")
 
+    # 6. widgets.html
+    w_path = os.path.join(ROOT, "widgets.html")
+    if os.path.exists(w_path):
+        with open(w_path, "r", encoding="utf-8") as f:
+            w_content = f.read()
+        w_content = w_content.replace(f"v={cur_version}", f"v={next_version}")
+        with open(w_path, "w", encoding="utf-8") as f:
+            f.write(w_content)
+        print("Updated widgets.html")
+
 if __name__ == "__main__":
     v = sys.argv[1] if len(sys.argv) > 1 else None
     c = sys.argv[2] if len(sys.argv) > 2 else None

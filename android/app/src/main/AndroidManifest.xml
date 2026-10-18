@@ -33,6 +33,31 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths"></meta-data>
         </provider>
+
+        <!-- Native Home Screen Widgets (Zero 3rd-party apps required) -->
+        <receiver
+            android:name=".SemesteroNextClassWidget"
+            android:label="השיעור הבא ומערכת שעות"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_next_class_info" />
+        </receiver>
+
+        <receiver
+            android:name=".SemesteroTasksExamWidget"
+            android:label="מטלות ובחינות קרובות"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_tasks_exam_info" />
+        </receiver>
     </application>
 
     <!-- Permissions -->

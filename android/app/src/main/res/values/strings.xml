@@ -4,4 +4,6 @@
     <string name="title_activity_main">Semestero ME</string>
     <string name="package_name">com.technion.semestero</string>
     <string name="custom_url_scheme">com.technion.semestero</string>
+    <string name="widget_next_class_desc">מציג את השיעור הבא של היום, חדר, מרצה וספירה לאחור</string>
+    <string name="widget_tasks_exam_desc">מציג ספירה לאחור לבחינה הבאה ורשימת מטלות דחופות</string>
 </resources>

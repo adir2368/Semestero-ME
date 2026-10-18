@@ -46,12 +46,13 @@ def create_release():
 👉 **[Semestero-ME.apk](https://github.com/{REPO}/releases/download/{TAG}/Semestero-ME.apk)**
 
 #### ✨ Highlights in {TAG}:
+- **Native Android Home-Screen Widgets (Zero External Apps Needed!):** Built-in native Android `AppWidgetProvider` widgets added directly to the APK.
+  1. **Next Class & Schedule Widget (`SemesteroNextClassWidget`):** Shows today's upcoming lecture/recitation, time badge, room/location, lecturer, and real-time countdown status ("מתחיל בעוד 10 דקות" / "מתקיים כעת!"). Tapping opens the Timetable tab.
+  2. **Tasks & Exam Countdown Widget (`SemesteroTasksExamWidget`):** Displays countdown days to the next exam, exam title/moed/date, top 2 urgent tasks, and total open tasks. Tapping opens the Tasks tab.
+- **Bi-Directional JavaScript-to-Android Bridge:** `SemesteroWidgetBridge` (`@JavascriptInterface`) in `MainActivity.java` continuously syncs schedules and tasks directly to Android `SharedPreferences` and broadcasts widget updates immediately.
 - **Native Push & Local Notifications:** Full Android OS heads-up notifications with vibration, sound, and high-importance channel (`semestero_alerts`) via `@capacitor/local-notifications`.
 - **Proactive 10-Minute Class Alarms (AlarmManager):** Scheduled native OS alarms wake up the device and alert 10 minutes prior to lectures even when the screen is locked or app is closed.
-- **Top Border & Status Bar Collision Fix:** Android system window insets (`fitsSystemWindows="true"` & `is-android-native` safe-area padding) guarantee zero overlap with the Android status bar icons across Calendar, Tasks, Planner, and Timetable tabs.
-- **Clean "What's New" Settings Card:** Preserves strictly the single latest release note in the visible card, with older versions neatly archived in the collapsible history list.
-- **Cloud Auto-Sync:** Live updates sync seamlessly from GitHub Pages with zero APK reinstall overhead.
-- **TextZoom & AMOLED Dark Branding:** Authentic mechanical gear branding with 100% zoom lock.
+- **Single NTFY Updates Stream:** Guaranteed 1 clean notification per release to `adir-semestero-me-updates`.
 """
 
     payload = {

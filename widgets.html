@@ -11,7 +11,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
-    <link rel="manifest" href="manifest.json?v=2.4.21">
+    <link rel="manifest" href="manifest.json?v=2.4.22">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;500;600;700;800;900&family=Rubik:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -891,20 +891,32 @@
                 <button type="button" class="tecme-modal-close" onclick="closeInstallGuide()">&times;</button>
             </div>
             
-            <div class="tecme-step-item">
-                <div class="tecme-step-badge">1</div>
+            <div class="tecme-step-item" style="border: 1px solid rgba(56, 189, 248, 0.4); background: rgba(56, 189, 248, 0.08); border-radius: 14px; padding: 12px;">
+                <div class="tecme-step-badge" style="background: #38bdf8; color: #000;">✨</div>
                 <div class="tecme-step-text">
-                    <strong>אפשרות א׳ — אפליקציית Web Widget (מומלץ):</strong><br>
-                    התקן מ-Google Play את האפליקציה החינמית <strong>Web Widget</strong> או <strong>KWGT</strong>. הוסף וויג'ט 4x4 או 4x2 למסך הבית שלך והדבק את הכתובת:<br>
-                    <code style="display: block; background: #1c1e24; padding: 6px 10px; border-radius: 8px; margin-top: 6px; font-size: 0.76rem; color: #38bdf8; word-break: break-all; direction: ltr;" id="code-widget-url">https://adir2368.github.io/Semestero-ME/widgets.html?view=l</code>
+                    <strong style="color: #38bdf8; font-size: 0.95rem;">ווידג'ט אנדרואיד אמיתי ומובנה (ללא שום אפליקציה נוספת!):</strong><br>
+                    אם התקנת את אפליקציית <strong>Semestero ME</strong> באנדרואיד (קובץ ה-APK):<br>
+                    1. לחץ לחיצה ארוכה על מקום פנוי במסך הבית של הטלפון.<br>
+                    2. בחר <strong>ווידג'טים (Widgets)</strong> וחפש <strong>סמסטרו ME</strong>.<br>
+                    3. גרור למסך הבית את <strong>שיעור קרוב ומערכת שעות</strong> או <strong>משימות ובחינות</strong>.<br>
+                    הווידג'טים מתעדכנים חי ולחיצה עליהם פותחת ישירות את האפליקציה!
                 </div>
             </div>
 
-            <div class="tecme-step-item">
+            <div class="tecme-step-item" style="margin-top: 12px;">
                 <div class="tecme-step-badge">2</div>
                 <div class="tecme-step-text">
-                    <strong>אפשרות ב׳ — סנכרון ישיר לוויג'ט היומן של סמסונג / גוגל:</strong><br>
+                    <strong>סנכרון ישיר לוויג'ט היומן של סמסונג / גוגל:</strong><br>
                     העתק את כתובת ה-iCal של סמסטרו ME והוסף אותה כיומן רשתי ב-Google Calendar. כל הבחינות, המועדים והמטלות יופיעו ישירות בתוך וויג'ט לוח השנה הרשמי שבתמונה שלך!
+                </div>
+            </div>
+
+            <div class="tecme-step-item" style="margin-top: 12px; opacity: 0.85;">
+                <div class="tecme-step-badge">3</div>
+                <div class="tecme-step-text">
+                    <strong>למשתמשי דפדפן Web / PWA (חלופה):</strong><br>
+                    אם אתה גולש דרך הדפדפן ורוצה וויג'ט אינטרנטי, ניתן להשתמש ב-Web Widget ולהדביק את הקישור:<br>
+                    <code style="display: block; background: #1c1e24; padding: 6px 10px; border-radius: 8px; margin-top: 6px; font-size: 0.76rem; color: #38bdf8; word-break: break-all; direction: ltr;" id="code-widget-url">https://adir2368.github.io/Semestero-ME/widgets.html?view=l</code>
                 </div>
             </div>
 
