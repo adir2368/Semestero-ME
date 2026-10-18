@@ -250,6 +250,12 @@ test('Notification Hub Drawer differentiates between Desktop and Mobile modes', 
     assert(indexHtml.includes('סקירה לנייד') || appJs.includes('סקירה לנייד'), 'Must support Mobile review mode ("סקירה לנייד")');
 });
 
+test('Notification Hub Drawer and expanded card bodies support vertical scrolling', () => {
+    assert(stylesCss.includes('.notif-cards-container') && stylesCss.includes('min-height: 0'), 'notif-cards-container must have min-height: 0 to allow flex overflow scrolling');
+    assert(stylesCss.includes('.notif-card-body') && stylesCss.includes('overflow-y: auto'), 'notif-card-body must support overflow-y: auto for expanding lists');
+    assert(stylesCss.includes('.notif-drawer-overlay') && stylesCss.includes('overflow-y: auto'), 'notif-drawer-overlay must support overflow-y: auto');
+});
+
 // -------------------------------------------------------------
 // DOMAIN 9: Settings & Version Management
 // -------------------------------------------------------------

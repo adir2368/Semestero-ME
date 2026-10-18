@@ -7899,6 +7899,9 @@ html.is-iphone .app-global-footer {
     justify-content: center;
     align-items: flex-start;
     padding: 16px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
     opacity: 1 !important;
 }
 
@@ -7911,10 +7914,13 @@ html.is-iphone .app-global-footer {
     width: 100%;
     max-width: 540px;
     max-height: 88vh;
+    max-height: 88dvh;
     display: flex;
     flex-direction: column;
+    min-height: 0;
     overflow: hidden;
     opacity: 1 !important;
+    margin: auto 0;
 }
 
 .notif-drawer-header {
@@ -7924,6 +7930,7 @@ html.is-iphone .app-global-footer {
     justify-content: space-between;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     background: rgba(15, 23, 42, 0.85);
+    flex-shrink: 0;
 }
 
 .notif-drawer-title-group {
@@ -7989,9 +7996,23 @@ html.is-iphone .app-global-footer {
     display: flex;
     flex-direction: column;
     gap: 12px;
+    flex: 1 1 auto;
+    min-height: 0;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
     touch-action: pan-y;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(56, 189, 248, 0.4) transparent;
+}
+
+.notif-cards-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+.notif-cards-container::-webkit-scrollbar-thumb {
+    background: rgba(56, 189, 248, 0.4);
+    border-radius: 3px;
 }
 
 .notif-card {
@@ -8000,6 +8021,7 @@ html.is-iphone .app-global-footer {
     border-radius: 12px;
     overflow: hidden;
     transition: border-color 0.2s, box-shadow 0.2s;
+    flex-shrink: 0;
 }
 
 .notif-card:hover {
@@ -8098,6 +8120,22 @@ html.is-iphone .app-global-footer {
     padding: 12px 14px;
     border-top: 1px solid rgba(255, 255, 255, 0.06);
     background: rgba(10, 14, 26, 0.6);
+    max-height: 52vh;
+    max-height: 52dvh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(56, 189, 248, 0.4) transparent;
+}
+
+.notif-card-body::-webkit-scrollbar {
+    width: 5px;
+}
+
+.notif-card-body::-webkit-scrollbar-thumb {
+    background: rgba(56, 189, 248, 0.4);
+    border-radius: 3px;
 }
 
 .notif-card-items-list {
@@ -8296,11 +8334,33 @@ html.is-iphone .app-global-footer {
     
     .notif-drawer-overlay {
         padding: 8px 6px calc(65px + env(safe-area-inset-bottom)) 6px;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior-y: contain;
     }
     
     .notif-drawer-panel {
         max-height: calc(100vh - 85px - env(safe-area-inset-bottom));
+        max-height: calc(100dvh - 85px - env(safe-area-inset-bottom));
         border-radius: 12px;
+        min-height: 0;
+    }
+
+    .notif-cards-container {
+        padding: 10px 8px;
+        flex: 1 1 auto;
+        min-height: 0;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior-y: contain;
+    }
+
+    .notif-card-body {
+        max-height: 46vh;
+        max-height: 46dvh;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior-y: contain;
     }
 }
 
@@ -10484,6 +10544,7 @@ html.is-iphone .app-global-footer {
     border-radius: 10px;
     padding: 10px 12px;
     margin-bottom: 12px;
+    flex-shrink: 0;
 }
 
 .drawer-phone-bar-top {
