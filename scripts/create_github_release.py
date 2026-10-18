@@ -98,7 +98,7 @@ def create_release():
         with urllib.request.urlopen(req_upload) as resp:
             asset_data = json.loads(resp.read().decode('utf-8'))
             dl_url = asset_data.get('browser_download_url')
-            print(f"✅ APK uploaded successfully!")
+            print("[OK] APK uploaded successfully!")
             print(f"Direct Download URL: {dl_url}")
             return dl_url
     except urllib.error.HTTPError as e:
