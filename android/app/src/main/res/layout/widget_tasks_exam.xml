@@ -21,16 +21,17 @@
             android:text="SEMESTERO ME • משימות ובחינות"
             android:textColor="#38bdf8"
             android:textSize="11sp"
-            android:textStyle="bold"
-            android:letterSpacing="0.05" />
+            android:textStyle="bold" />
 
         <TextView
             android:id="@+id/widget_exam_countdown_badge"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@drawable/widget_badge_bg"
-            android:paddingHorizontal="6dp"
-            android:paddingVertical="2dp"
+            android:paddingLeft="8dp"
+            android:paddingRight="8dp"
+            android:paddingTop="3dp"
+            android:paddingBottom="3dp"
             android:text="מבחן ראשון"
             android:textColor="#fbbf24"
             android:textSize="10sp"
@@ -91,11 +92,12 @@
         </LinearLayout>
     </LinearLayout>
 
-    <!-- Divider -->
-    <View
+    <!-- Divider (FrameLayout with background, RemoteViews-safe) -->
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:layout_marginVertical="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
         android:background="#1e293b" />
 
     <!-- Tasks List Container -->
@@ -127,8 +129,8 @@
             android:ellipsize="end" />
     </LinearLayout>
 
-    <!-- Spacer -->
-    <View
+    <!-- Spacer (FrameLayout, RemoteViews-safe) -->
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1" />

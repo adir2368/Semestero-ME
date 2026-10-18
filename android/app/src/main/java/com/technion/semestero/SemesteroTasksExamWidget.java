@@ -34,8 +34,13 @@ public class SemesteroTasksExamWidget extends AppWidgetProvider {
         views.setTextViewText(R.id.widget_exam_huge_days, examDays);
         views.setTextViewText(R.id.widget_exam_title, examTitle);
         views.setTextViewText(R.id.widget_exam_sub, examSub);
-        views.setTextViewText(R.id.widget_task_item_1, task1);
-        views.setTextViewText(R.id.widget_task_item_2, task2);
+        views.setTextViewText(R.id.widget_task_item_1, (task1 != null && !task1.isEmpty()) ? task1 : "אין משימות פתוחות 🎉");
+        if (task2 != null && !task2.trim().isEmpty()) {
+            views.setTextViewText(R.id.widget_task_item_2, task2);
+            views.setViewVisibility(R.id.widget_task_item_2, android.view.View.VISIBLE);
+        } else {
+            views.setViewVisibility(R.id.widget_task_item_2, android.view.View.GONE);
+        }
         views.setTextViewText(R.id.widget_tasks_count_summary, tasksSummary);
 
         // Tap to open application in Tasks tab

@@ -19499,7 +19499,7 @@ function exportTimetableToICS() {
 window.exportTimetableToICS = exportTimetableToICS;
 
 // =========================================================================
-// GOOGLE CALENDAR MANAGEMENT, CLEANUP & IN-APP TIMETABLE EDITING (v2.4.22)
+// GOOGLE CALENDAR MANAGEMENT, CLEANUP & IN-APP TIMETABLE EDITING (v2.4.23)
 // =========================================================================
 
 // Exports an RFC 5545 cancellation .ics file (METHOD:CANCEL, STATUS:CANCELLED)
@@ -20564,13 +20564,13 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.10.18-v2.4.22",
-    version: "2.4.22",
+    code: "REV-2026.10.18-v2.4.23",
+    version: "2.4.23",
     build: "20261018_08",
     date: "2026-10-18 16:45",
     description: "גרסה 2.4.20: מבנה כרטיסיית שיעור ב-4 שורות מוגדרות, מנהל מחיקה ועריכה מלא ליומן גוגל (כולל קובץ ביטול ICS CANCEL), וטיהור מוחלט של 'כיתת טכניון'"
 };
-window.APP_VERSION = "2.4.22";
+window.APP_VERSION = "2.4.23";
 
 function ensureBaselineRevisions() {
     if (!gameState.revisions || !Array.isArray(gameState.revisions) || gameState.revisions.length === 0) {
@@ -23477,8 +23477,8 @@ async function showNativeNotification(title, options = {}) {
                         body: options.body || '',
                         channelId: 'semestero_alerts',
                         schedule: scheduleAt ? { at: scheduleAt } : undefined,
-                        smallIcon: 'ic_launcher_round',
-                        iconColor: '#0ea5e9',
+                        smallIcon: 'ic_stat_notification',
+                        iconColor: '#38bdf8',
                         extra: options.data || {}
                     }]
                 });
@@ -23742,8 +23742,8 @@ function scheduleTodayClassTimeouts() {
                             body: `📚 ${c.type || 'הרצאה / תרגול'}\n⏰ שעות: ${c.startTime} - ${c.endTime}\n📍 ${c.room || 'טכניון'}`,
                             channelId: 'semestero_alerts',
                             schedule: { at: new Date(reminderTimeMs) },
-                            smallIcon: 'ic_launcher_round',
-                            iconColor: '#0ea5e9',
+                            smallIcon: 'ic_stat_notification',
+                            iconColor: '#38bdf8',
                             extra: { tab: 'timetable' }
                         }]
                     }).catch(e => console.warn('[Notifications] Error scheduling native alarm:', e));

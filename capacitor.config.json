@@ -15,6 +15,10 @@
     "webContentsDebuggingEnabled": true
   },
   "plugins": {
+    "LocalNotifications": {
+      "smallIcon": "ic_stat_notification",
+      "iconColor": "#38bdf8"
+    },
     "SplashScreen": {
       "launchShowDuration": 1500,
       "backgroundColor": "#020617",
