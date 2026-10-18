@@ -9055,27 +9055,31 @@ function loadSavedState() {
                 }
             }
 
-            // Ensure official exam dates are strictly synchronized to the August 2026 calendar
-            if (gameState.courses['104043']) {
-                const ex = gameState.courses['104043'].tasks.find(t => t.type === 'exam');
-                if (ex) { ex.dueDate = '2026-08-05'; ex.title = 'מועד א חדו״א 1pm'; }
-            }
-            if (gameState.courses['314533']) {
-                const ex = gameState.courses['314533'].tasks.find(t => t.type === 'exam');
-                if (ex) { ex.dueDate = '2026-08-11'; ex.title = 'מועד א הנדסת חומרים 9am'; }
-            }
-            if (gameState.courses['104131']) {
-                const ex = gameState.courses['104131'].tasks.find(t => t.type === 'exam');
-                if (ex) { ex.dueDate = '2026-08-13'; ex.title = 'מועד א מד״ר 9am'; }
-            }
-            if (gameState.courses['034028']) {
-                const ex = gameState.courses['034028'].tasks.find(t => t.type === 'exam');
-                if (ex) { ex.dueDate = '2026-08-19'; ex.title = 'מועד א מכניקת מוצקים 9am'; }
-            }
-            if (gameState.courses['034061']) {
-                const proj = gameState.courses['034061'].tasks.find(t => t.title && t.title.includes('הגנה'));
-                if (proj) { proj.dueDate = '2026-08-27'; }
-            }
+            // Ensure completed courses have their historic exams marked completed and not pending
+            const pastCompletedExams = ['104043', '314533', '104131', '034028'];
+            pastCompletedExams.forEach(code => {
+                if (gameState.courses[code] && gameState.courses[code].status === 'mastered') {
+                    const ex = (gameState.courses[code].tasks || []).find(t => t.type === 'exam');
+                    if (ex) {
+                        ex.completed = true;
+                        ex.status = 'done';
+                    }
+                    gameState.courses[code].moedA = '';
+                    gameState.courses[code].moedB = '';
+                }
+            });
+
+            // Temporal Sanitization: Purge stale exam dates (< October 2026) across all courses
+            Object.values(gameState.courses || {}).forEach(c => {
+                if (!c) return;
+                if (c.status === 'mastered' || (c.grade !== null && c.grade !== undefined && Number(c.grade) >= 55) || c.isExempt) {
+                    c.moedA = '';
+                    c.moedB = '';
+                } else {
+                    if (c.moedA && !isCurrentOrUpcomingDate(c.moedA)) c.moedA = '';
+                    if (c.moedB && !isCurrentOrUpcomingDate(c.moedB)) c.moedB = '';
+                }
+            });
 
             // Synchronize August 2026 schedule from Google Calendar if available
             if (typeof AUGUST_2026_SCHEDULE !== 'undefined' && Array.isArray(AUGUST_2026_SCHEDULE) && AUGUST_2026_SCHEDULE.length > 0) {
@@ -9787,14 +9791,92 @@ let cheeseForkMap = null;
 let cheeseForkList = null;
 window._currentCheeseForkData = null;
 
+// Technion Academic Exam Dates Dictionary (Authoritative 202601 / Winter 2026/27 & Spring 2027)
+const CHEESEFORK_EXAM_DATES = {
+    // Active Winter 2026/27 (Semester 3) Courses for Mechanical Engineering (from raw_cheesefork.json)
+    "114052": { moedA: "2027-02-01", moedB: "2027-03-02", name: "פיסיקה 2" },
+    "01140052": { moedA: "2027-02-01", moedB: "2027-03-02", name: "פיסיקה 2" },
+    "034035": { moedA: "2027-02-07", moedB: "2027-03-05", name: "תרמודינמיקה 1" },
+    "00340035": { moedA: "2027-02-07", moedB: "2027-03-05", name: "תרמודינמיקה 1" },
+    "034056": { moedA: "2027-02-11", moedB: "2027-03-10", name: "מבוא לחישוב מדעי והנדסי" },
+    "00340056": { moedA: "2027-02-11", moedB: "2027-03-10", name: "מבוא לחישוב מדעי והנדסי" },
+    "034053": { moedA: "2027-02-18", moedB: "2027-03-18", name: "מכניקת מוצקים 2מ" },
+    "00340053": { moedA: "2027-02-18", moedB: "2027-03-18", name: "מכניקת מוצקים 2מ" },
+    "104228": { moedA: "2027-02-24", moedB: "2027-03-26", name: "משוואות דיפרנציאליות חלקיות מ'" },
+    "01040228": { moedA: "2027-02-24", moedB: "2027-03-26", name: "משוואות דיפרנציאליות חלקיות מ'" },
+
+    // Foundation and Core Engineering / Math (Winter 2026/27 official schedule)
+    "104131": { moedA: "2027-02-09", moedB: "2027-03-12", name: "משוואות דיפרנציאליות רגילות" },
+    "01040131": { moedA: "2027-02-09", moedB: "2027-03-12", name: "משוואות דיפרנציאליות רגילות" },
+    "104043": { moedA: "2027-02-15", moedB: "2027-03-16", name: "חשבון אינפיניטסימלי 2" },
+    "01040043": { moedA: "2027-02-15", moedB: "2027-03-16", name: "חשבון אינפיניטסימלי 2" },
+    "034061": { moedA: "2027-02-04", moedB: "2027-03-08", name: "תכן וגרפיקה הנדסית" },
+    "00340061": { moedA: "2027-02-04", moedB: "2027-03-08", name: "תכן וגרפיקה הנדסית" }
+};
+window.CHEESEFORK_EXAM_DATES = CHEESEFORK_EXAM_DATES;
+
 function parseDateToIso(str) {
-    if (!str) return null;
-    const match = str.match(/(\d{2})-(\d{2})-(\d{4})/);
-    if (match) {
-        return `${match[3]}-${match[2]}-${match[1]}`;
+    if (!str || typeof str !== 'string') return null;
+    const clean = str.trim();
+    // 1. ISO: YYYY-MM-DD
+    const isoMatch = clean.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+    if (isoMatch) {
+        return `${isoMatch[1]}-${isoMatch[2].padStart(2, '0')}-${isoMatch[3].padStart(2, '0')}`;
+    }
+    // 2. Israeli / Technion: DD-MM-YYYY or DD/MM/YYYY
+    const dmyMatch = clean.match(/^(\d{1,2})[-/](\d{1,2})[-/](\d{4})/);
+    if (dmyMatch) {
+        return `${dmyMatch[3]}-${dmyMatch[2].padStart(2, '0')}-${dmyMatch[1].padStart(2, '0')}`;
     }
     return null;
 }
+window.parseDateToIso = parseDateToIso;
+
+// Strictly validates that a date belongs to the current academic semester (Winter 2026/27 תשפ״ז)
+// or an upcoming semester (Spring 2027 תשפ״ז / later), and strictly rejects stale past dates (< October 1, 2026).
+function isCurrentOrUpcomingDate(dateStr) {
+    if (!dateStr || typeof dateStr !== 'string') return false;
+    const clean = dateStr.trim();
+    if (!clean) return false;
+    const iso = parseDateToIso(clean);
+    if (!iso) return false;
+    const parts = iso.split('-');
+    const year = parseInt(parts[0], 10);
+    const month = parseInt(parts[1], 10);
+    if (year < 2026) return false;
+    if (year === 2026 && month < 10) return false; // Stale past semester before Winter 2026/27
+    return true;
+}
+window.isCurrentOrUpcomingDate = isCurrentOrUpcomingDate;
+
+function formatAcademicTermForDate(dateStr) {
+    if (!dateStr) return '';
+    const iso = parseDateToIso(dateStr);
+    if (!iso) return '';
+    const parts = iso.split('-');
+    const year = parseInt(parts[0], 10);
+    const month = parseInt(parts[1], 10);
+    if ((year === 2026 && month >= 10) || (year === 2027 && month <= 4)) return 'חורף תשפ״ז';
+    if (year === 2027 && month >= 5 && month <= 9) return 'אביב תשפ״ז';
+    if ((year === 2027 && month >= 10) || (year === 2028 && month <= 4)) return 'חורף תשפ״ח';
+    return 'תשפ״ז';
+}
+window.formatAcademicTermForDate = formatAcademicTermForDate;
+
+function getCourseCheeseforkExamDates(code) {
+    if (!code || typeof CHEESEFORK_EXAM_DATES === 'undefined') return null;
+    const str = String(code).trim();
+    const clean = str.replace(/^0+/, '');
+    const entry = CHEESEFORK_EXAM_DATES[str] ||
+                  CHEESEFORK_EXAM_DATES[clean] ||
+                  CHEESEFORK_EXAM_DATES['0' + clean] ||
+                  CHEESEFORK_EXAM_DATES['00' + clean];
+    if (entry && (isCurrentOrUpcomingDate(entry.moedA) || isCurrentOrUpcomingDate(entry.moedB))) {
+        return entry;
+    }
+    return null;
+}
+window.getCourseCheeseforkExamDates = getCourseCheeseforkExamDates;
 
 function initCheeseForkDatabase() {
     if (cheeseForkMap && cheeseForkMap.size > 0) return;
@@ -10397,11 +10479,11 @@ function applyCheeseForkCourse(entry) {
     }
     setPrereqChips(relevantPrereqs);
 
-    // Register exam dates in CHEESEFORK_EXAM_DATES
-    const isoA = parseDateToIso(entry.moedA);
-    const isoB = parseDateToIso(entry.moedB);
+    // Register exam dates in CHEESEFORK_EXAM_DATES ONLY if valid current or upcoming semester
+    const isoA = isCurrentOrUpcomingDate(entry.moedA) ? parseDateToIso(entry.moedA) : null;
+    const isoB = isCurrentOrUpcomingDate(entry.moedB) ? parseDateToIso(entry.moedB) : null;
     const effectiveCode = entry.code6 || entry.rawNum;
-    if (typeof CHEESEFORK_EXAM_DATES !== 'undefined' && effectiveCode) {
+    if (typeof CHEESEFORK_EXAM_DATES !== 'undefined' && effectiveCode && (isoA || isoB)) {
         CHEESEFORK_EXAM_DATES[effectiveCode] = {
             moedA: isoA,
             moedB: isoB,
@@ -10411,6 +10493,7 @@ function applyCheeseForkCourse(entry) {
 
     if (banner) {
         banner.style.display = "block";
+        const hasValidExams = Boolean(isoA || isoB);
         banner.innerHTML = `
             <div class="cf-match-banner-header">
                 <span>✨ זוהה ב-CheeseFork: ${entry.name}</span>
@@ -10419,8 +10502,9 @@ function applyCheeseForkCourse(entry) {
             <div class="cf-match-banner-details">
                 <span>🏛️ ${entry.faculty || 'הטכניון'}</span>
                 <span>⚖️ ${entry.credits} נק״ז</span>
-                ${entry.moedA ? `<span>📅 מועד א׳: ${entry.moedA}</span>` : ''}
-                ${entry.moedB ? `<span>📅 מועד ב׳: ${entry.moedB}</span>` : ''}
+                ${isoA ? `<span>📅 מועד א׳: ${isoA} (חורף תשפ״ז)</span>` : ''}
+                ${isoB ? `<span>📅 מועד ב׳: ${isoB} (חורף תשפ״ז)</span>` : ''}
+                ${!hasValidExams ? `<span style="color: #94a3b8;">📅 מועדי בחינות תשפ״ז: טרם פורסמו רשמית</span>` : ''}
             </div>
             ${entry.syllabus ? `<div style="font-size: 0.72rem; color: #94a3b8; margin-top: 5px; line-height: 1.3;">${entry.syllabus.slice(0, 160)}...</div>` : ''}
         `;
@@ -11104,8 +11188,8 @@ function handleAddCourseSubmit(e) {
         // Default tasks for custom course
         const isMastered = (initialStatus === 'mastered');
         const cfData = window._currentCheeseForkData;
-        const examDateA = cfData ? parseDateToIso(cfData.moedA) : null;
-        const examDateB = cfData ? parseDateToIso(cfData.moedB) : null;
+        const examDateA = (cfData && isCurrentOrUpcomingDate(cfData.moedA)) ? parseDateToIso(cfData.moedA) : null;
+        const examDateB = (cfData && isCurrentOrUpcomingDate(cfData.moedB)) ? parseDateToIso(cfData.moedB) : null;
 
         const isSportCourse = (type === 'sports' || type === 'sport' || name.includes('חינוך גופני') || name.includes('ספורט'));
         const tasks = isSportCourse ? [
@@ -11520,6 +11604,12 @@ function openCourseDetails(code) {
 
         if (catalogCourse || cfCourse) {
             const resolvedCode = (catalogCourse && catalogCourse.code) || (cfCourse && (cfCourse.code6 || cfCourse.rawNum)) || code;
+            const authDates = (typeof getCourseCheeseforkExamDates === 'function') ? (getCourseCheeseforkExamDates(resolvedCode) || getCourseCheeseforkExamDates(code)) : null;
+            const validMoedA = (authDates && authDates.moedA && isCurrentOrUpcomingDate(authDates.moedA)) ? authDates.moedA :
+                               ((cfCourse && isCurrentOrUpcomingDate(cfCourse.moedA)) ? cfCourse.moedA : '');
+            const validMoedB = (authDates && authDates.moedB && isCurrentOrUpcomingDate(authDates.moedB)) ? authDates.moedB :
+                               ((cfCourse && isCurrentOrUpcomingDate(cfCourse.moedB)) ? cfCourse.moedB : '');
+
             course = {
                 id: resolvedCode,
                 code: resolvedCode,
@@ -11531,8 +11621,8 @@ function openCourseDetails(code) {
                 type: (catalogCourse && catalogCourse.list) ? 'elective' : 'mandatory',
                 faculty: (cfCourse && cfCourse.faculty) || (catalogCourse && catalogCourse.faculty) || 'הנדסת מכונות',
                 schedule: (cfCourse && cfCourse.schedule) || [],
-                moedA: (cfCourse && cfCourse.moedA) || '',
-                moedB: (cfCourse && cfCourse.moedB) || '',
+                moedA: validMoedA,
+                moedB: validMoedB,
                 syllabus: (cfCourse && cfCourse.syllabus) || (catalogCourse && catalogCourse.syllabus) || '',
                 prerequisites: (catalogCourse && (catalogCourse.prereqs || catalogCourse.prerequisites)) || [],
                 tasks: []
@@ -12742,21 +12832,44 @@ function openCourseDetails(code) {
         const cleanCode = (course.code || '').replace(/^0+/, '');
         const fullCode = course.code || '';
         const cfUrl = `https://cheesefork.cf/course/${cleanCode || fullCode}`;
+        const isMasteredCourse = Boolean(course.status === 'mastered' || (course.grade !== null && course.grade !== undefined && Number(course.grade) >= 55) || course.isExempt);
 
-        // Auto-populate from CheeseFork database if schedule or exam info is absent
-        if ((!course.schedule || course.schedule.length === 0) && window.CHEESEFORK_DB && Array.isArray(window.CHEESEFORK_DB)) {
+        // Auto-populate from CheeseFork database if schedule or syllabus is absent
+        if (window.CHEESEFORK_DB && Array.isArray(window.CHEESEFORK_DB)) {
             const cfMatch = window.CHEESEFORK_DB.find(c => c.code6 === cleanCode || c.rawNum === cleanCode || c.code6 === fullCode || c.rawNum === fullCode);
             if (cfMatch) {
-                if (cfMatch.schedule && cfMatch.schedule.length > 0) course.schedule = cfMatch.schedule;
-                if (cfMatch.moedA && !course.moedA) course.moedA = cfMatch.moedA;
-                if (cfMatch.moedB && !course.moedB) course.moedB = cfMatch.moedB;
+                if ((!course.schedule || course.schedule.length === 0) && cfMatch.schedule && cfMatch.schedule.length > 0 && !isMasteredCourse) {
+                    course.schedule = cfMatch.schedule;
+                }
                 if (cfMatch.syllabus && !course.syllabus) course.syllabus = cfMatch.syllabus;
                 if (cfMatch.faculty && !course.faculty) course.faculty = cfMatch.faculty;
+
+                // STRICT TEMPORAL FILTER: NEVER copy stale dates from past semesters (< October 2026)
+                if (!isMasteredCourse) {
+                    if (cfMatch.moedA && !course.moedA && isCurrentOrUpcomingDate(cfMatch.moedA)) course.moedA = cfMatch.moedA;
+                    if (cfMatch.moedB && !course.moedB && isCurrentOrUpcomingDate(cfMatch.moedB)) course.moedB = cfMatch.moedB;
+                }
             }
         }
 
-        const hasSchedule = Array.isArray(course.schedule) && course.schedule.length > 0;
-        const hasExams = Boolean(course.moedA || course.moedB);
+        // Check authoritative current/upcoming exam dates (Winter 2026/27 תשפ״ז)
+        if (!isMasteredCourse) {
+            const authDates = (typeof getCourseCheeseforkExamDates === 'function') ? (getCourseCheeseforkExamDates(course.code) || getCourseCheeseforkExamDates(cleanCode)) : null;
+            if (authDates) {
+                if (authDates.moedA && isCurrentOrUpcomingDate(authDates.moedA)) course.moedA = authDates.moedA;
+                if (authDates.moedB && isCurrentOrUpcomingDate(authDates.moedB)) course.moedB = authDates.moedB;
+            }
+        }
+
+        // PURGE STALE EXAM DATES: If course.moedA or moedB is from a past semester (< Oct 2026), purge it immediately
+        if (isMasteredCourse || (course.moedA && !isCurrentOrUpcomingDate(course.moedA))) {
+            course.moedA = '';
+        }
+        if (isMasteredCourse || (course.moedB && !isCurrentOrUpcomingDate(course.moedB))) {
+            course.moedB = '';
+        }
+
+        const hasSchedule = !isMasteredCourse && Array.isArray(course.schedule) && course.schedule.length > 0;
         const hasSyllabus = Boolean(course.syllabus);
 
         let scheduleItemsHtml = "";
@@ -12771,13 +12884,37 @@ function openCourseDetails(code) {
         }
 
         let examsHtml = "";
-        if (hasExams) {
+        if (isMasteredCourse) {
+            const finalGradeText = course.isExempt 
+                ? 'פטור' 
+                : (course.isBinaryPass ? 'עובר' : (course.grade ? `ציון ${course.grade}` : 'הושלם'));
             examsHtml = `
-                <div class="modal-exam-dates-strip">
-                    ${course.moedA ? `<span class="modal-exam-date-badge">🎓 מועד א': ${course.moedA}</span>` : ''}
-                    ${course.moedB ? `<span class="modal-exam-date-badge">🎓 מועד ב': ${course.moedB}</span>` : ''}
+                <div class="modal-exam-dates-strip" style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 6px; padding: 8px 12px; color: #34d399; font-size: 0.82rem; font-weight: 600; display: flex; align-items: center; gap: 8px;">
+                    <span>✓</span>
+                    <span>קורס זה הושלם בהצלחה בסמסטר עבר (${finalGradeText}) — אין מועדי בחינה פעילים</span>
                 </div>
             `;
+        } else {
+            const validMoedA = isCurrentOrUpcomingDate(course.moedA) ? course.moedA : null;
+            const validMoedB = isCurrentOrUpcomingDate(course.moedB) ? course.moedB : null;
+
+            if (validMoedA || validMoedB) {
+                const termA = validMoedA ? formatAcademicTermForDate(validMoedA) : '';
+                const termB = validMoedB ? formatAcademicTermForDate(validMoedB) : '';
+                examsHtml = `
+                    <div class="modal-exam-dates-strip">
+                        ${validMoedA ? `<span class="modal-exam-date-badge" title="${termA}">🎓 מועד א': ${validMoedA} (${termA})</span>` : ''}
+                        ${validMoedB ? `<span class="modal-exam-date-badge" title="${termB}">🎓 מועד ב': ${validMoedB} (${termB})</span>` : ''}
+                    </div>
+                `;
+            } else {
+                examsHtml = `
+                    <div class="modal-exam-dates-strip" style="background: rgba(148, 163, 184, 0.08); border: 1px solid rgba(148, 163, 184, 0.2); border-radius: 6px; padding: 8px 12px; color: #94a3b8; font-size: 0.8rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+                        <span>📅 מועדי בחינות (סמסטר חורף תשפ״ז 2026/27): טרם פורסמו רשמית בטכניון</span>
+                        <a href="${cfUrl}" target="_blank" rel="noopener noreferrer" style="color: #fbbf24; text-decoration: none; font-size: 0.78rem; font-weight: 600;">בדוק עדכונים ב-CheeseFork ↗</a>
+                    </div>
+                `;
+            }
         }
 
         let syllabusHtml = "";
@@ -12788,6 +12925,13 @@ function openCourseDetails(code) {
                     ${course.syllabus}
                 </div>
             `;
+        }
+
+        let scheduleStatusNotice = "";
+        if (isMasteredCourse) {
+            scheduleStatusNotice = `<div style="font-size: 0.78rem; color: #94a3b8; padding: 4px 0 8px;">הקורס הושלם בסמסטר קודם. לביקורות סטודנטים, דירוגי הוראה והיסטוגרמות ציונים ב-CheeseFork לחץ על הכפתור למעלה.</div>`;
+        } else if (!hasSchedule) {
+            scheduleStatusNotice = `<div style="font-size: 0.78rem; color: #94a3b8; padding: 4px 0 8px;">לוח שעות רשמי טרם פורסם לקורס זה בסמסטר חורף תשפ״ז. לעיון בסילבוס, ביקורות סטודנטים עדכניות והיסטוגרמות ציונים לחץ על הכפתור למעלה.</div>`;
         }
 
         cfContainer.innerHTML = `
@@ -12804,7 +12948,7 @@ function openCourseDetails(code) {
                     </a>
                 </div>
                 ${course.faculty ? `<div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 6px;">פקולטה: ${course.faculty}</div>` : ''}
-                ${hasSchedule ? `<div class="modal-cheesefork-grid">${scheduleItemsHtml}</div>` : `<div style="font-size: 0.78rem; color: #94a3b8; padding: 4px 0 8px;">לוח שעות טרם פורסם לסמסטר זה. לעיון בסילבוס, ביקורות סטודנטים עדכניות והיסטוגרמות ציונים היסטוריות לחץ על הכפתור למעלה.</div>`}
+                ${hasSchedule ? `<div class="modal-cheesefork-grid">${scheduleItemsHtml}</div>` : scheduleStatusNotice}
                 ${examsHtml}
                 ${syllabusHtml}
             </div>
@@ -16733,17 +16877,8 @@ function clearSemesterOrbitHighlight() {
 
 let currentRunwayMoedFilter = 'a'; // 'a' | 'b' | 'all'
 
-// Built-in Cheesefork Technion Exam Dates Dictionary (from raw_cheesefork.json)
-const CHEESEFORK_EXAM_DATES = {
-    "114052": { moedA: "2027-02-01", moedB: "2027-03-02", name: "פיזיקה 2" },
-    "034035": { moedA: "2027-02-07", moedB: "2027-03-05", name: "תרמודינמיקה 1" },
-    "034056": { moedA: "2027-02-11", moedB: "2027-03-10", name: "שיטות ייצור" },
-    "034053": { moedA: "2027-02-18", moedB: "2027-03-18", name: "מוצקים 2" },
-    "104228": { moedA: "2027-02-24", moedB: "2027-03-26", name: "שיטות נומריות" },
-    "104131": { moedA: "2026-10-17", moedB: "2026-11-12", name: "מד\"ר" },
-    "104043": { moedA: "2026-10-20", moedB: "2026-11-15", name: "חדו\"א 2" },
-    "034061": { moedA: "2026-12-20", moedB: "2027-01-15", name: "גרפיקה ותכן" }
-};
+// Reference to consolidated Technion Exam Dates Dictionary (declared above)
+// Window global window.CHEESEFORK_EXAM_DATES is active.
 
 function setupStudyRunway() {
     // 1. Hook Moed filter buttons
@@ -16778,7 +16913,7 @@ function setupStudyRunway() {
             syncCheeseforkExamDates();
             renderStudyRunway();
             renderNotionTasksTable();
-            alert("🧀 סונכרנו בהצלחה תאריכי מבחנים מקובץ צ'יזפורק עבור הקורסים הפעילים!");
+            alert("🧀 סונכרנו בהצלחה תאריכי מבחנים מקובץ צ'יזפורק עבור הקורסים הפעילים (חורף תשפ״ז)!");
         });
     }
 
@@ -16788,7 +16923,7 @@ function setupStudyRunway() {
     }
 }
 
-// Syncs official Technion Cheesefork exam dates into gameState.courses
+// Syncs official Technion Cheesefork exam dates into gameState.courses (strictly current semester)
 function syncCheeseforkExamDates(forceNotify = true) {
     const isAdir = (window.AuthSync && typeof window.AuthSync.isAdirActive === 'function') ? window.AuthSync.isAdirActive() : false;
     if (!isAdir && !forceNotify) return;
@@ -16796,51 +16931,63 @@ function syncCheeseforkExamDates(forceNotify = true) {
     let syncedCount = 0;
     Object.keys(CHEESEFORK_EXAM_DATES).forEach(code => {
         const course = gameState.courses[code];
+        // NEVER sync active exam dates onto completed/mastered courses from previous semesters!
+        if (!course || course.status === 'mastered') return;
+
         // For non-Adir students, ONLY sync onto courses that are actively enrolled/studied this semester
         if (course && course.tasks && (isAdir || course.status === 'active')) {
             const data = CHEESEFORK_EXAM_DATES[code];
+            if (!data) return;
+
+            // Strict temporal validation: ONLY attach dates >= October 2026 (Winter 2026/27)
+            const validDateA = isCurrentOrUpcomingDate(data.moedA) ? parseDateToIso(data.moedA) : null;
+            const validDateB = isCurrentOrUpcomingDate(data.moedB) ? parseDateToIso(data.moedB) : null;
             
-            // Moed A Exam Task
-            let examA = course.tasks.find(t => t.type === 'exam' && !t.title.includes("מועד ב") && !t.title.includes("מועד ג"));
-            if (!examA) {
-                examA = {
-                    id: `task-${code}-exam-a`,
-                    title: `מועד א`,
-                    type: "exam",
-                    completed: false,
-                    status: "not_started",
-                    xp: 500,
-                    dueDate: data.moedA
-                };
-                course.tasks.push(examA);
-                syncedCount++;
-            } else if (!examA.dueDate || forceNotify) {
-                examA.dueDate = data.moedA;
-                if (examA.title.includes("מבחן סופי") || examA.title.includes("מבחן סוף")) {
-                    examA.title = "מועד א";
+            if (validDateA) {
+                // Moed A Exam Task
+                let examA = course.tasks.find(t => t.type === 'exam' && !t.title.includes("מועד ב") && !t.title.includes("מועד ג"));
+                if (!examA) {
+                    examA = {
+                        id: `task-${code}-exam-a`,
+                        title: `מועד א`,
+                        type: "exam",
+                        completed: false,
+                        status: "not_started",
+                        xp: 500,
+                        dueDate: validDateA
+                    };
+                    course.tasks.push(examA);
+                    syncedCount++;
+                } else if (!examA.dueDate || forceNotify) {
+                    examA.dueDate = validDateA;
+                    if (examA.title.includes("מבחן סופי") || examA.title.includes("מבחן סוף")) {
+                        examA.title = "מועד א";
+                    }
+                    syncedCount++;
                 }
-                syncedCount++;
             }
 
-            // Moed B Exam Task
-            let examB = course.tasks.find(t => t.type === 'exam' && t.title.includes("מועד ב"));
-            if (!examB && data.moedB) {
-                course.tasks.push({
-                    id: `task-${code}-exam-b`,
-                    title: `מועד ב'`,
-                    type: "exam",
-                    completed: false,
-                    status: "not_started",
-                    xp: 500,
-                    dueDate: data.moedB
-                });
-                syncedCount++;
-            } else if (examB && (!examB.dueDate || forceNotify)) {
-                examB.dueDate = data.moedB;
-                if (examB.title.includes("מבחן סופי") || examB.title.includes("מבחן סוף")) {
-                    examB.title = "מועד ב'";
+            if (validDateB) {
+                // Moed B Exam Task
+                let examB = course.tasks.find(t => t.type === 'exam' && t.title.includes("מועד ב"));
+                if (!examB) {
+                    course.tasks.push({
+                        id: `task-${code}-exam-b`,
+                        title: `מועד ב'`,
+                        type: "exam",
+                        completed: false,
+                        status: "not_started",
+                        xp: 500,
+                        dueDate: validDateB
+                    });
+                    syncedCount++;
+                } else if (!examB.dueDate || forceNotify) {
+                    examB.dueDate = validDateB;
+                    if (examB.title.includes("מבחן סופי") || examB.title.includes("מבחן סוף")) {
+                        examB.title = "מועד ב'";
+                    }
+                    syncedCount++;
                 }
-                syncedCount++;
             }
         }
     });
@@ -16869,6 +17016,7 @@ function renderStudyRunway() {
         course.tasks.forEach(task => {
             if (task.type !== 'exam') return;
             if (!task.dueDate) return; // Only show exams that have a scheduled date
+            if (!isCurrentOrUpcomingDate(task.dueDate)) return; // Strictly ignore stale/expired exam dates (< Oct 2026)
 
             const isMoedB = task.title.includes("מועד ב") || task.title.toLowerCase().includes("moed b");
             const moedType = isMoedB ? 'b' : 'a';
@@ -19649,13 +19797,13 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.10.18-v2.4.15",
-    version: "2.4.15",
-    build: "20261018_05",
-    date: "2026-10-18 13:10",
-    description: "גרסה 2.4.15: זכויות מילואים והסרת אחריות מוחלטת: הטמעת הצהרת סטודנט בשירות מילואים פעיל (חובת סימון להפעלת מחשבון הזכויות וסימולטור הציונים), סנכרון רב-מודאלי מלא מול הגדרות הפרופיל ותכנון התואר, והוספת כתב ויתור והבהרה משפטית מחייבת המדגישה שאיננו מקושרים רשמית לטכניון וכל מקרה נבחן לגופו."
+    code: "REV-2026.10.18-v2.4.16",
+    version: "2.4.16",
+    build: "20261018_06",
+    date: "2026-10-18 15:00",
+    description: "גרסה 2.4.16: סינון טמפורלי קפדני לסמסטר הנוכחי/הבא (חורף תשפ״ז 2026/27): טיהור תאריכי בחינות שפג תוקפם מסמסטרים קודמים (2025/קיץ 2026), מניעת הצגת מועדי מבחן לקורסים שהושלמו בעבר, ואכיפת מועדי בחינות רשמיים מפברואר-מרץ 2027 בלבד."
 };
-window.APP_VERSION = "2.4.15";
+window.APP_VERSION = "2.4.16";
 
 function ensureBaselineRevisions() {
     if (!gameState.revisions || !Array.isArray(gameState.revisions) || gameState.revisions.length === 0) {

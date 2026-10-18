@@ -63,6 +63,41 @@ test('Technion++ action bar has responsive wrapping for mobile screens', () => {
     assert(indexHtml.includes('flex-wrap: wrap') || stylesCss.includes('flex-wrap: wrap'), 'Technion++ bar must wrap gracefully on narrow viewports');
 });
 
+test('Temporal filter strictly rejects stale past dates (< October 2026) and accepts current/upcoming semester dates', () => {
+    assert(appJs.includes('function isCurrentOrUpcomingDate'), 'app.js must define isCurrentOrUpcomingDate');
+    assert(appJs.includes('function formatAcademicTermForDate'), 'app.js must define formatAcademicTermForDate');
+    assert(appJs.includes('function getCourseCheeseforkExamDates'), 'app.js must define getCourseCheeseforkExamDates');
+    
+    // Evaluate logic in isolated vm
+    const parseFn = appJs.match(/function parseDateToIso\([\s\S]*?\n\}/)[0];
+    const isCurrentFn = appJs.match(/function isCurrentOrUpcomingDate\([\s\S]*?\n\}/)[0];
+    const isCurrentOrUpcomingDate = new Function('dateStr', `
+        ${parseFn}
+        ${isCurrentFn}
+        return isCurrentOrUpcomingDate(dateStr);
+    `);
+
+    // Stale dates from past semesters (must be rejected)
+    assert.strictEqual(isCurrentOrUpcomingDate('07-08-2025 09:00 - 12:00'), false, 'Must reject August 2025 date');
+    assert.strictEqual(isCurrentOrUpcomingDate('27-07-2025'), false, 'Must reject July 2025 date');
+    assert.strictEqual(isCurrentOrUpcomingDate('2025-08-19'), false, 'Must reject 2025 ISO date');
+    assert.strictEqual(isCurrentOrUpcomingDate('2026-08-05'), false, 'Must reject Summer 2026 date');
+    assert.strictEqual(isCurrentOrUpcomingDate(''), false, 'Empty date must be false');
+    assert.strictEqual(isCurrentOrUpcomingDate(null), false, 'Null date must be false');
+
+    // Valid current semester (Winter 2026/27 תשפ״ז) and upcoming (Spring 2027) dates
+    assert.strictEqual(isCurrentOrUpcomingDate('2027-02-01'), true, 'Must accept Feb 2027 Moed A');
+    assert.strictEqual(isCurrentOrUpcomingDate('18-02-2027'), true, 'Must accept Feb 2027 Israeli format');
+    assert.strictEqual(isCurrentOrUpcomingDate('2027-03-02'), true, 'Must accept March 2027 Moed B');
+    assert.strictEqual(isCurrentOrUpcomingDate('2027-07-15'), true, 'Must accept Spring 2027 date');
+});
+
+test('Completed/mastered courses display completion notice and never render stale exam dates', () => {
+    assert(appJs.includes('isMasteredCourse'), 'openCourseDetails must check isMasteredCourse');
+    assert(appJs.includes('אין מועדי בחינה פעילים'), 'Must render "אין מועדי בחינה פעילים" for completed courses');
+    assert(appJs.includes('הקורס הושלם בסמסטר קודם'), 'Must render completed notice instead of obsolete schedule');
+});
+
 // -------------------------------------------------------------
 // DOMAIN 2: Degree Planner & Summer Logic
 // -------------------------------------------------------------
@@ -220,12 +255,15 @@ test('Notification Hub Drawer differentiates between Desktop and Mobile modes', 
 // -------------------------------------------------------------
 console.log('\n--- 9. Settings, Profile & Release Management ---');
 
-test('System version is strictly unified at v2.4.15 across all manifests and scripts', () => {
-    assert.strictEqual(packageJson.version, '2.4.15', 'package.json version must be 2.4.15');
-    assert(appJs.includes('window.APP_VERSION = "2.4.15"'), 'app.js APP_VERSION must be 2.4.15');
-    assert(appJs.includes('REV-2026.10.18-v2.4.15'), 'app.js revision must be REV-2026.10.18-v2.4.15');
-    assert(indexHtml.includes('גרסה אחרונה v2.4.15'), 'index.html changelog must show v2.4.15');
-    assert(indexHtml.includes('v2.4.15 ✨'), 'index.html footer must display v2.4.15 ✨');
+test('System version is strictly unified at v2.4.16 across all manifests and scripts', () => {
+    const pkg = JSON.parse(fs.readFileSync(path.join(ROOT, 'package.json'), 'utf8'));
+    const swJs = fs.readFileSync(path.join(ROOT, 'sw.js'), 'utf8');
+    assert.strictEqual(pkg.version, '2.4.16', 'package.json version must be 2.4.16');
+    assert(appJs.includes('window.APP_VERSION = "2.4.16"'), 'app.js APP_VERSION must be 2.4.16');
+    assert(appJs.includes('REV-2026.10.18-v2.4.16'), 'app.js revision must be REV-2026.10.18-v2.4.16');
+    assert(indexHtml.includes('גרסה אחרונה v2.4.16'), 'index.html changelog must show v2.4.16');
+    assert(indexHtml.includes('v2.4.16 ✨'), 'index.html footer must display v2.4.16 ✨');
+    assert(swJs.includes('semestero-me-v2.4.16'), 'sw.js cache name must be semestero-me-v2.4.16');
 });
 
 // -------------------------------------------------------------
