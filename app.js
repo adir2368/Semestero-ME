@@ -19496,7 +19496,7 @@ function exportTimetableToICS() {
 window.exportTimetableToICS = exportTimetableToICS;
 
 // =========================================================================
-// GOOGLE CALENDAR MANAGEMENT, CLEANUP & IN-APP TIMETABLE EDITING (v2.4.19)
+// GOOGLE CALENDAR MANAGEMENT, CLEANUP & IN-APP TIMETABLE EDITING (v2.4.20)
 // =========================================================================
 
 // Exports an RFC 5545 cancellation .ics file (METHOD:CANCEL, STATUS:CANCELLED)
@@ -20561,13 +20561,13 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.10.18-v2.4.19",
-    version: "2.4.19",
+    code: "REV-2026.10.18-v2.4.20",
+    version: "2.4.20",
     build: "20261018_08",
     date: "2026-10-18 16:45",
-    description: "גרסה 2.4.19: מבנה כרטיסיית שיעור ב-4 שורות מוגדרות, מנהל מחיקה ועריכה מלא ליומן גוגל (כולל קובץ ביטול ICS CANCEL), וטיהור מוחלט של 'כיתת טכניון'"
+    description: "גרסה 2.4.20: מבנה כרטיסיית שיעור ב-4 שורות מוגדרות, מנהל מחיקה ועריכה מלא ליומן גוגל (כולל קובץ ביטול ICS CANCEL), וטיהור מוחלט של 'כיתת טכניון'"
 };
-window.APP_VERSION = "2.4.19";
+window.APP_VERSION = "2.4.20";
 
 function ensureBaselineRevisions() {
     if (!gameState.revisions || !Array.isArray(gameState.revisions) || gameState.revisions.length === 0) {
