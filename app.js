@@ -19158,6 +19158,317 @@ function exportTimetableToICS() {
 }
 window.exportTimetableToICS = exportTimetableToICS;
 
+// =========================================================================
+// GOOGLE CALENDAR MANAGEMENT, CLEANUP & IN-APP TIMETABLE EDITING (v2.4.19)
+// =========================================================================
+
+// Exports an RFC 5545 cancellation .ics file (METHOD:CANCEL, STATUS:CANCELLED)
+// When imported into Google Calendar or Apple Calendar, it deletes all previously exported classes matching the exact UIDs.
+function exportTimetableCancellationICS() {
+    const schedule = getActiveTimetableSchedule();
+    if (!schedule || !schedule.days || schedule.days.length === 0) {
+        if (typeof showToastNotification === 'function') {
+            showToastNotification('לא נמצאה מערכת שעות פעילה לביטול 📅', 'warning');
+        }
+        return;
+    }
+
+    const hebrewToIcsDay = {
+        0: 'SU', 1: 'MO', 2: 'TU', 3: 'WE', 4: 'TH', 5: 'FR', 6: 'SA'
+    };
+
+    const semStart = new Date(2026, 9, 25);
+    const semEndStr = '20270215T235959Z';
+
+    let icsLines = [
+        'BEGIN:VCALENDAR',
+        'VERSION:2.0',
+        'PRODID:-//Semestero ME//Technion Timetable Cancellation//HE',
+        'CALSCALE:GREGORIAN',
+        'METHOD:CANCEL',
+        'X-WR-CALNAME:Semestero ME - ביטול ומחיקת שיעורים',
+        'X-WR-TIMEZONE:Asia/Jerusalem'
+    ];
+
+    let totalCancelled = 0;
+    schedule.days.forEach(day => {
+        if (!day.classes || day.classes.length === 0) return;
+        const icsDay = hebrewToIcsDay[day.dayIndex] || 'SU';
+
+        const firstDate = new Date(semStart);
+        const dayDiff = (day.dayIndex - semStart.getDay() + 7) % 7;
+        firstDate.setDate(semStart.getDate() + dayDiff);
+        const datePrefix = firstDate.toISOString().split('T')[0].replace(/-/g, '');
+
+        day.classes.forEach(c => {
+            if (!c.startTime || !c.endTime) return;
+            totalCancelled++;
+
+            const startClean = c.startTime.replace(':', '') + '00';
+            const endClean = c.endTime.replace(':', '') + '00';
+            const uid = `class-${c.courseId || 'c'}-${day.dayIndex}-${startClean}@semesterome.local`;
+
+            icsLines.push(
+                'BEGIN:VEVENT',
+                `UID:${uid}`,
+                `DTSTAMP:${datePrefix}T000000Z`,
+                `DTSTART;TZID=Asia/Jerusalem:${datePrefix}T${startClean}`,
+                `DTEND;TZID=Asia/Jerusalem:${datePrefix}T${endClean}`,
+                `RRULE:FREQ=WEEKLY;BYDAY=${icsDay};UNTIL=${semEndStr}`,
+                `SUMMARY:${c.courseName} (${c.type || 'שיעור'}) - בוטל`,
+                'STATUS:CANCELLED',
+                'SEQUENCE:1',
+                'END:VEVENT'
+            );
+        });
+    });
+
+    icsLines.push('END:VCALENDAR');
+
+    const icsContent = icsLines.join('\r\n');
+    downloadICSFile(icsContent, 'Semestero_ME_Cancel_And_Delete_Classes.ics');
+
+    if (typeof showToastNotification === 'function') {
+        showToastNotification(`🗑️ הורד קובץ מחיקה ואיפוס עבור ${totalCancelled} שיעורים! פתח/ייבא אותו ביומן Google להסרת כל השיעורים אוטומטית`, 'success');
+    }
+}
+window.exportTimetableCancellationICS = exportTimetableCancellationICS;
+
+function ensureMutableTimetable() {
+    if (!gameState.timetable || !gameState.timetable.days || gameState.timetable.days.length === 0) {
+        const active = getActiveTimetableSchedule();
+        if (active) {
+            gameState.timetable = JSON.parse(JSON.stringify(active));
+        } else {
+            const dayNames = ["ראשון", "שני", "שלישי", "רביעי", "חמישי", "שישי", "שבת"];
+            gameState.timetable = {
+                semester: "202601",
+                name: "סמסטר חורף 2026/2027",
+                freeDays: [5, 6],
+                dayNames: dayNames,
+                days: [0, 1, 2, 3, 4].map(idx => ({
+                    dayIndex: idx,
+                    name: dayNames[idx],
+                    fullName: `יום ${dayNames[idx]}`,
+                    isFree: false,
+                    classes: []
+                }))
+            };
+        }
+    }
+    return gameState.timetable;
+}
+
+function openGoogleCalendarManagerModal() {
+    const modal = document.getElementById('modal-gcal-sync-manager');
+    if (!modal) return;
+    renderGcalManagerClassList();
+    modal.style.display = 'flex';
+}
+window.openGoogleCalendarManagerModal = openGoogleCalendarManagerModal;
+
+function closeGoogleCalendarManagerModal() {
+    const modal = document.getElementById('modal-gcal-sync-manager');
+    if (modal) modal.style.display = 'none';
+}
+window.closeGoogleCalendarManagerModal = closeGoogleCalendarManagerModal;
+
+function renderGcalManagerClassList() {
+    const container = document.getElementById('gcal-manager-classes-list');
+    if (!container) return;
+    const schedule = getActiveTimetableSchedule();
+    if (!schedule || !schedule.days) {
+        container.innerHTML = '<div style="color: #94a3b8; text-align: center; padding: 24px;">לא נמצאה מערכת שעות פעילה.</div>';
+        return;
+    }
+
+    const dayNames = ["ראשון", "שני", "שלישי", "רביעי", "חמישי", "שישי", "שבת"];
+    let html = '';
+    let totalClasses = 0;
+
+    schedule.days.forEach((d, dayIdx) => {
+        if (!d.classes || d.classes.length === 0) return;
+        d.classes.forEach((c, classIdx) => {
+            totalClasses++;
+            const roomClean = (c.room && c.room.trim() && c.room !== 'כיתת טכניון') ? c.room : '';
+            html += `
+                <div class="gcal-class-edit-row" id="gcal-row-${dayIdx}-${classIdx}">
+                    <div class="gcal-class-edit-main">
+                        <div class="gcal-class-edit-header">
+                            <span class="day-badge">יום ${dayNames[d.dayIndex] || d.name}</span>
+                            <span class="time-badge">⏰ ${c.startTime} - ${c.endTime}</span>
+                            <span class="type-badge">${c.type}</span>
+                        </div>
+                        <div class="gcal-class-edit-title">${c.courseName} <span class="code-dim">(${c.courseId})</span></div>
+                        <div class="gcal-class-edit-details">
+                            ${roomClean ? `<span class="room-chip">📍 <strong>${roomClean}</strong></span>` : '<span class="room-chip dim">📍 ללא מיקום</span>'}
+                            ${c.lecturer ? `<span class="lecturer-chip">👨‍🏫 <strong>${c.lecturer}</strong></span>` : ''}
+                        </div>
+                    </div>
+                    <div class="gcal-class-edit-actions">
+                        <button type="button" class="btn btn-xs btn-outline gcal-btn-edit" onclick="toggleEditClassForm(${dayIdx}, ${classIdx})" title="ערוך שיעור זה">
+                            ✏️ ערוך
+                        </button>
+                        <button type="button" class="btn btn-xs gcal-btn-delete" onclick="deleteClassFromSchedule(${dayIdx}, ${classIdx})" title="מחק שיעור זה">
+                            🗑️ מחק
+                        </button>
+                    </div>
+                    <!-- Inline Edit Form (Hidden by default) -->
+                    <div class="gcal-class-inline-form" id="gcal-form-${dayIdx}-${classIdx}" style="display: none;">
+                        <div class="gcal-form-grid">
+                            <div class="gcal-form-field">
+                                <label>שם הקורס:</label>
+                                <input type="text" id="edit-cname-${dayIdx}-${classIdx}" value="${(c.courseName || '').replace(/"/g, '&quot;')}">
+                            </div>
+                            <div class="gcal-form-field">
+                                <label>סוג וקבוצה (למשל הרצאה 10):</label>
+                                <input type="text" id="edit-type-${dayIdx}-${classIdx}" value="${(c.type || '').replace(/"/g, '&quot;')}">
+                            </div>
+                            <div class="gcal-form-field">
+                                <label>חדר או מיקום (בניין ומספר חדר):</label>
+                                <input type="text" id="edit-room-${dayIdx}-${classIdx}" value="${roomClean.replace(/"/g, '&quot;')}" placeholder="למשל: הנדסה כימית 1, אולמן 506">
+                            </div>
+                            <div class="gcal-form-field">
+                                <label>מרצה או מתרגל:</label>
+                                <input type="text" id="edit-lecturer-${dayIdx}-${classIdx}" value="${(c.lecturer || '').replace(/"/g, '&quot;')}" placeholder="שם המרצה/מתרגל">
+                            </div>
+                            <div class="gcal-form-field">
+                                <label>שעת התחלה (HH:MM):</label>
+                                <input type="text" id="edit-start-${dayIdx}-${classIdx}" value="${c.startTime || '08:30'}">
+                            </div>
+                            <div class="gcal-form-field">
+                                <label>שעת סיום (HH:MM):</label>
+                                <input type="text" id="edit-end-${dayIdx}-${classIdx}" value="${c.endTime || '10:30'}">
+                            </div>
+                        </div>
+                        <div class="gcal-form-actions-bar">
+                            <button type="button" class="btn btn-xs btn-primary" onclick="saveEditedClass(${dayIdx}, ${classIdx})">💾 שמור עדכון לשיעור זה</button>
+                            <button type="button" class="btn btn-xs btn-outline" onclick="toggleEditClassForm(${dayIdx}, ${classIdx})">ביטול</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+    });
+
+    if (totalClasses === 0) {
+        html = '<div style="color: #94a3b8; text-align: center; padding: 24px;">אין שיעורים במערכת כרגע. תוכל להוסיף שיעורים באמצעות הכפתור למטה.</div>';
+    }
+
+    container.innerHTML = html;
+}
+window.renderGcalManagerClassList = renderGcalManagerClassList;
+
+function toggleEditClassForm(dayIdx, classIdx) {
+    const form = document.getElementById(`gcal-form-${dayIdx}-${classIdx}`);
+    if (!form) return;
+    const isHidden = form.style.display === 'none' || !form.style.display;
+    form.style.display = isHidden ? 'block' : 'none';
+}
+window.toggleEditClassForm = toggleEditClassForm;
+
+function saveEditedClass(dayIdx, classIdx) {
+    const tt = ensureMutableTimetable();
+    const day = tt.days[dayIdx];
+    if (!day || !day.classes || !day.classes[classIdx]) return;
+
+    const cName = document.getElementById(`edit-cname-${dayIdx}-${classIdx}`)?.value.trim();
+    const cType = document.getElementById(`edit-type-${dayIdx}-${classIdx}`)?.value.trim();
+    let cRoom = document.getElementById(`edit-room-${dayIdx}-${classIdx}`)?.value.trim();
+    if (cRoom === 'כיתת טכניון') cRoom = '';
+    const cLect = document.getElementById(`edit-lecturer-${dayIdx}-${classIdx}`)?.value.trim();
+    const cStart = document.getElementById(`edit-start-${dayIdx}-${classIdx}`)?.value.trim();
+    const cEnd = document.getElementById(`edit-end-${dayIdx}-${classIdx}`)?.value.trim();
+
+    if (cName) day.classes[classIdx].courseName = cName;
+    if (cType) day.classes[classIdx].type = cType;
+    day.classes[classIdx].room = cRoom || '';
+    day.classes[classIdx].lecturer = cLect || '';
+    if (cStart) day.classes[classIdx].startTime = cStart;
+    if (cEnd) day.classes[classIdx].endTime = cEnd;
+
+    if (typeof saveState === 'function') saveState();
+    if (typeof renderTimetableGrid === 'function') renderTimetableGrid();
+    if (typeof renderTodayTimetableBanner === 'function') renderTodayTimetableBanner();
+    renderGcalManagerClassList();
+
+    if (typeof showToastNotification === 'function') {
+        showToastNotification(`💾 פרטי השיעור עודכנו בהצלחה במערכת! ניתן לייצא מחדש ליומן`, 'success');
+    }
+}
+window.saveEditedClass = saveEditedClass;
+
+function deleteClassFromSchedule(dayIdx, classIdx) {
+    const tt = ensureMutableTimetable();
+    const day = tt.days[dayIdx];
+    if (!day || !day.classes || !day.classes[classIdx]) return;
+
+    const targetClass = day.classes[classIdx];
+    const confirmMsg = `האם אתה בטוח שברצונך למחוק את ${targetClass.courseName} (${targetClass.type}) מיום ${day.name}?`;
+    if (!confirm(confirmMsg)) return;
+
+    day.classes.splice(classIdx, 1);
+    if (day.classes.length === 0) day.isFree = true;
+
+    if (typeof saveState === 'function') saveState();
+    if (typeof renderTimetableGrid === 'function') renderTimetableGrid();
+    if (typeof renderTodayTimetableBanner === 'function') renderTodayTimetableBanner();
+    renderGcalManagerClassList();
+
+    if (typeof showToastNotification === 'function') {
+        showToastNotification(`🗑️ השיעור נמחק מהמערכת בהצלחה`, 'info');
+    }
+}
+window.deleteClassFromSchedule = deleteClassFromSchedule;
+
+function addNewCustomClassPrompt() {
+    const cName = prompt('שם הקורס (למשל: פיסיקה 2, מבוא לחישוב):');
+    if (!cName) return;
+    const cCode = prompt('מספר קורס (6-8 ספרות):', '034000') || '034000';
+    const dayChoice = prompt('יום בשבוע (0=ראשון, 1=שני, 2=שלישי, 3=רביעי, 4=חמישי):', '0');
+    const dayIdx = parseInt(dayChoice, 10);
+    if (isNaN(dayIdx) || dayIdx < 0 || dayIdx > 4) {
+        alert('יום לא תקין. יש לבחור ספרה בין 0 ל-4.');
+        return;
+    }
+    const cType = prompt('סוג וקבוצה (למשל: הרצאה 10, תרגול 11):', 'הרצאה 10') || 'הרצאה';
+    const cRoom = prompt('חדר או מיקום (בניין ומספר חדר, למשל: אולמן 506):', '') || '';
+    const cLect = prompt('מרצה או מתרגל:', '') || '';
+    const cStart = prompt('שעת התחלה (HH:MM):', '08:30') || '08:30';
+    const cEnd = prompt('שעת סיום (HH:MM):', '10:30') || '10:30';
+
+    const tt = ensureMutableTimetable();
+    const day = tt.days.find(d => d.dayIndex === dayIdx) || tt.days[dayIdx];
+    if (!day) return;
+    if (!day.classes) day.classes = [];
+    day.isFree = false;
+
+    day.classes.push({
+        courseId: cCode,
+        courseName: cName,
+        type: cType,
+        lecturer: cLect,
+        room: (cRoom === 'כיתת טכניון') ? '' : cRoom,
+        startTime: cStart,
+        endTime: cEnd,
+        duration: '',
+        cardClass: 'timetable-card-default'
+    });
+
+    // Sort classes by startTime
+    day.classes.sort((a, b) => (a.startTime || '').localeCompare(b.startTime || ''));
+
+    if (typeof saveState === 'function') saveState();
+    if (typeof renderTimetableGrid === 'function') renderTimetableGrid();
+    if (typeof renderTodayTimetableBanner === 'function') renderTodayTimetableBanner();
+    renderGcalManagerClassList();
+
+    if (typeof showToastNotification === 'function') {
+        showToastNotification(`✨ שיעור חדש נוסף בהצלחה למערכת!`, 'success');
+    }
+}
+window.addNewCustomClassPrompt = addNewCustomClassPrompt;
+
 // Formats tasks with due dates to easily paste into Google Tasks
 function copyScheduleToGoogleTasks() {
     if (gameState.isFinalsMode) {
@@ -19913,13 +20224,13 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.10.18-v2.4.18",
-    version: "2.4.18",
-    build: "20261018_07",
-    date: "2026-10-18 16:15",
-    description: "גרסה 2.4.18: שדרוג מקיף להתראות נייד (סנכרון מערכת שעות מובנה ליומן הטלפון עם התראות 10 דק׳ VALARM, הרחבת חלון ההתראה הפרואקטיבי ל-15 דק׳ ומניעת ביטול שיעורים ב-Wakeup)"
+    code: "REV-2026.10.18-v2.4.19",
+    version: "2.4.19",
+    build: "20261018_08",
+    date: "2026-10-18 16:45",
+    description: "גרסה 2.4.19: מבנה כרטיסיית שיעור ב-4 שורות מוגדרות, מנהל מחיקה ועריכה מלא ליומן גוגל (כולל קובץ ביטול ICS CANCEL), וטיהור מוחלט של 'כיתת טכניון'"
 };
-window.APP_VERSION = "2.4.18";
+window.APP_VERSION = "2.4.19";
 
 function ensureBaselineRevisions() {
     if (!gameState.revisions || !Array.isArray(gameState.revisions) || gameState.revisions.length === 0) {
@@ -21731,15 +22042,38 @@ setTimeout(() => {
 const CHEESEFORK_SEMESTER_SCHEDULE = {
     semester: "202601",
     name: "סמסטר חורף 2026/2027",
-    freeDays: [0, 5, 6], // Sun, Fri, Sat
+    freeDays: [5, 6], // Fri, Sat (Sunday has classes)
     dayNames: ["ראשון", "שני", "שלישי", "רביעי", "חמישי", "שישי", "שבת"],
     days: [
         {
             dayIndex: 0,
             name: "ראשון",
             fullName: "יום ראשון",
-            isFree: true,
-            classes: []
+            isFree: false,
+            classes: [
+                {
+                    courseId: "104228",
+                    courseName: "משוואות דיפרנציאליות חלקיות מ'",
+                    type: "תרגול 22",
+                    lecturer: "אמתי אלפרין",
+                    room: "אולמן 506",
+                    startTime: "11:30",
+                    endTime: "13:30",
+                    duration: "שעתיים",
+                    cardClass: "timetable-card-pde"
+                },
+                {
+                    courseId: "034053",
+                    courseName: "מכניקת מוצקים 2מ'",
+                    type: "הרצאה 20",
+                    lecturer: "פרופ' רן מרדכי",
+                    room: "הנדסה כימית 1",
+                    startTime: "14:30",
+                    endTime: "17:30",
+                    duration: "3 שעות",
+                    cardClass: "timetable-card-solids"
+                }
+            ]
         },
         {
             dayIndex: 1,
@@ -21750,35 +22084,35 @@ const CHEESEFORK_SEMESTER_SCHEDULE = {
                 {
                     courseId: "114052",
                     courseName: "פיסיקה 2",
-                    type: "הרצאה (קבוצה 10)",
+                    type: "הרצאה 10",
                     lecturer: "ד\"ר גדעון אלון",
-                    room: "",
+                    room: "טאוב - מדמ\"ח 1",
                     startTime: "08:30",
                     endTime: "10:30",
                     duration: "שעתיים",
                     cardClass: "timetable-card-physics"
                 },
                 {
-                    courseId: "034053",
-                    courseName: "מכניקת מוצקים 2מ",
-                    type: "הרצאה (קבוצה 10)",
-                    lecturer: "פרופ' יוסף גבלי",
-                    room: "הנדסת מכונות",
-                    startTime: "10:30",
-                    endTime: "14:30",
-                    duration: "4 שעות",
-                    cardClass: "timetable-card-solids"
+                    courseId: "104228",
+                    courseName: "משוואות דיפרנציאליות חלקיות מ'",
+                    type: "הרצאה 30",
+                    lecturer: "ד\"ר שלומי גובר",
+                    room: "שרמן - חינוך למדע וטכנולוגיה 107",
+                    startTime: "12:30",
+                    endTime: "13:30",
+                    duration: "שעה",
+                    cardClass: "timetable-card-pde"
                 },
                 {
-                    courseId: "034056",
-                    courseName: "מבוא לחישוב מדעי והנדסי",
-                    type: "תרגול (קבוצה 14)",
-                    lecturer: "",
-                    room: "חוות מחשבים",
-                    startTime: "14:30",
-                    endTime: "16:30",
+                    courseId: "034053",
+                    courseName: "מכניקת מוצקים 2מ'",
+                    type: "תרגול 20",
+                    lecturer: "מר מירון דואר",
+                    room: "אולמן 602",
+                    startTime: "13:30",
+                    endTime: "15:30",
                     duration: "שעתיים",
-                    cardClass: "timetable-card-computing"
+                    cardClass: "timetable-card-solids"
                 }
             ]
         },
@@ -21791,24 +22125,35 @@ const CHEESEFORK_SEMESTER_SCHEDULE = {
                 {
                     courseId: "034035",
                     courseName: "תרמודינמיקה 1",
-                    type: "הרצאה (קבוצה 10)",
+                    type: "הרצאה 10",
                     lecturer: "פרופ' לאוניד טרטקובסקי",
-                    room: "אולם הרצאות",
+                    room: "הנדסה כימית 1",
                     startTime: "08:30",
-                    endTime: "11:30",
-                    duration: "3 שעות",
+                    endTime: "10:30",
+                    duration: "שעתיים",
                     cardClass: "timetable-card-thermo"
                 },
                 {
                     courseId: "034035",
                     courseName: "תרמודינמיקה 1",
-                    type: "תרגול (קבוצה 11)",
-                    lecturer: "",
-                    room: "כיתת תרגול",
+                    type: "תרגול 11",
+                    lecturer: "גב' עומר גזית אורולוב",
+                    room: "אולמן 101",
                     startTime: "12:30",
                     endTime: "14:30",
                     duration: "שעתיים",
                     cardClass: "timetable-card-thermo"
+                },
+                {
+                    courseId: "034056",
+                    courseName: "מבוא לחישוב מדעי והנדסי",
+                    type: "תרגול 11",
+                    lecturer: "מר גיא ארבר",
+                    room: "אולמן 501",
+                    startTime: "14:30",
+                    endTime: "16:30",
+                    duration: "שעתיים",
+                    cardClass: "timetable-card-computing"
                 }
             ]
         },
@@ -21821,9 +22166,9 @@ const CHEESEFORK_SEMESTER_SCHEDULE = {
                 {
                     courseId: "114052",
                     courseName: "פיסיקה 2",
-                    type: "הרצאה (קבוצה 10)",
+                    type: "הרצאה 10",
                     lecturer: "ד\"ר גדעון אלון",
-                    room: "אולם פיסיקה",
+                    room: "טאוב - מדמ\"ח 1",
                     startTime: "08:30",
                     endTime: "09:30",
                     duration: "שעה",
@@ -21832,34 +22177,23 @@ const CHEESEFORK_SEMESTER_SCHEDULE = {
                 {
                     courseId: "114052",
                     courseName: "פיסיקה 2",
-                    type: "תרגול (קבוצה 13)",
-                    lecturer: "",
-                    room: "כיתת תרגול",
+                    type: "תרגול 13",
+                    lecturer: "גב' נעם חגי גמליאל",
+                    room: "שרמן - חינוך למדע וטכנולוגיה 107",
                     startTime: "09:30",
                     endTime: "10:30",
                     duration: "שעה",
                     cardClass: "timetable-card-physics"
                 },
                 {
-                    courseId: "104228",
-                    courseName: "משוואות דיפרנציאליות חלקיות מ'",
-                    type: "תרגול (קבוצה 21)",
-                    lecturer: "",
-                    room: "כיתת תרגול",
-                    startTime: "10:30",
-                    endTime: "12:30",
-                    duration: "שעתיים",
-                    cardClass: "timetable-card-pde"
-                },
-                {
                     courseId: "034056",
                     courseName: "מבוא לחישוב מדעי והנדסי",
-                    type: "הרצאה (קבוצה 10)",
-                    lecturer: "ד\"ר דניאל הקסנר",
-                    room: "אודיטוריום",
+                    type: "הרצאה 10",
+                    lecturer: "ד\"ר דניאל קקסנר",
+                    room: "הנדסה כימית 1",
                     startTime: "14:30",
-                    endTime: "17:30",
-                    duration: "3 שעות",
+                    endTime: "16:30",
+                    duration: "שעתיים",
                     cardClass: "timetable-card-computing"
                 }
             ]
@@ -21872,37 +22206,15 @@ const CHEESEFORK_SEMESTER_SCHEDULE = {
             classes: [
                 {
                     courseId: "03940805",
-                    courseName: "חינוך גופני - יוגה",
-                    type: "יוגה (קבוצה 24)",
+                    courseName: "חינוך גופני - אתלטיקה קלה",
+                    type: "יוגה 24",
                     lecturer: "שלומית בן-איש",
-                    room: "אולם ספורט",
+                    room: "מרכז ספורט טכניון",
                     startTime: "07:30",
-                    endTime: "09:00",
-                    duration: "שעה וחצי",
+                    endTime: "08:30",
+                    duration: "שעה",
                     cardClass: "timetable-card-yoga",
                     isAnchor: true
-                },
-                {
-                    courseId: "104228",
-                    courseName: "משוואות דיפרנציאליות חלקיות מ'",
-                    type: "הרצאה (קבוצה 20)",
-                    lecturer: "",
-                    room: "אולם מתמטיקה",
-                    startTime: "10:30",
-                    endTime: "12:30",
-                    duration: "שעתיים",
-                    cardClass: "timetable-card-pde"
-                },
-                {
-                    courseId: "034053",
-                    courseName: "מכניקת מוצקים 2מ",
-                    type: "תרגול (קבוצה 21)",
-                    lecturer: "",
-                    room: "כיתת תרגול",
-                    startTime: "12:30",
-                    endTime: "14:30",
-                    duration: "שעתיים",
-                    cardClass: "timetable-card-solids"
                 }
             ]
         }
@@ -22000,15 +22312,27 @@ function renderTimetableGrid() {
 
                 bodyHtml += `
                     <div class="timetable-card ${c.cardClass || ''}" onclick="if (typeof openCourseDetails === 'function') openCourseDetails('${c.courseId}')">
+                        <!-- שורה 1: מספר הרצאה / תרגול + שעה -->
                         <div class="timetable-card-top">
-                            <span class="timetable-card-time">⏰ ${c.startTime} - ${c.endTime}${c.duration ? ` (${c.duration})` : ''}</span>
-                            ${(c.room && c.room !== 'כיתת טכניון') ? `<span class="timetable-card-room">📍 ${c.room}</span>` : ''}
-                        </div>
-                        <div class="timetable-card-title">${c.courseName} (${c.courseId})</div>
-                        <div class="timetable-card-meta">
                             <span class="timetable-tag">${c.type}</span>
+                            <span class="timetable-card-time">⏰ ${c.startTime} - ${c.endTime}${c.duration ? ` (${c.duration})` : ''}</span>
                         </div>
-                        ${c.lecturer ? `<div class="timetable-lecturer ${instructorClass}"><span>${instructorIcon} ${instructorRole}:</span> <strong>${c.lecturer}</strong></div>` : ''}
+                        <!-- שורה 2: חדר או מיקום (רק אם קיים, לעולם לא כיתת טכניון) -->
+                        ${(c.room && c.room.trim() && c.room !== 'כיתת טכניון') ? `
+                            <div class="timetable-card-room-bar">
+                                <span class="room-icon">📍</span>
+                                <span class="room-text">${c.room}</span>
+                            </div>
+                        ` : ''}
+                        <!-- שורה 3: מרצה / מתרגל -->
+                        ${c.lecturer ? `
+                            <div class="timetable-lecturer ${instructorClass}">
+                                <span>${instructorIcon} ${instructorRole}:</span>
+                                <strong>${c.lecturer}</strong>
+                            </div>
+                        ` : ''}
+                        <!-- שורה 4: קורס -->
+                        <div class="timetable-card-title">${c.courseName} <span class="course-code-dim">(${c.courseId})</span></div>
                     </div>
                 `;
             });

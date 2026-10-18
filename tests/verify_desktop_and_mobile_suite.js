@@ -189,6 +189,37 @@ test('Mobile Timetable Responsive Layout: Swipe Carousel and Day Tabs', () => {
     assert(stylesCss.includes('display: none') && stylesCss.includes('ttg-mobile-day-tabs'), 'styles.css must hide .ttg-mobile-day-tabs on desktop');
 });
 
+test('Timetable card strictly adheres to 4-line hierarchy and eradicates "כיתת טכניון"', () => {
+    // Line 1: Type/Number + Time (timetable-card-top)
+    assert(appJs.includes('timetable-card-top') && appJs.includes('timetable-card-time'), 'app.js must render line 1 header with type, number and time');
+    // Line 2: Room/Location (timetable-card-room-bar)
+    assert(appJs.includes('timetable-card-room-bar'), 'app.js must render line 2 room bar');
+    assert(stylesCss.includes('.timetable-card-room-bar'), 'styles.css must style line 2 room bar');
+    // Line 3: Lecturer/TA (timetable-lecturer)
+    assert(appJs.includes('timetable-lecturer'), 'app.js must render line 3 lecturer bar');
+    // Line 4: Course name (timetable-card-title)
+    assert(appJs.includes('timetable-card-title'), 'app.js must render line 4 course title');
+
+    // Strict eradication of "כיתת טכניון" as placeholder in schedule catalogs
+    assert(!appJs.includes("room: 'כיתת טכניון'"), 'app.js must not assign "כיתת טכניון" as course room');
+    assert(!ttgJs.includes("room: 'כיתת טכניון'"), 'timetable_generator.js must not assign "כיתת טכניון" as course room');
+});
+
+test('Google Calendar Management Suite (v2.4.19) supports RFC 5545 cancellation and class editing', () => {
+    // UI elements
+    assert(indexHtml.includes('id="modal-gcal-sync-manager"'), 'Missing #modal-gcal-sync-manager in index.html');
+    assert(indexHtml.includes('id="btn-open-gcal-manager"'), 'Missing #btn-open-gcal-manager in index.html');
+    assert(indexHtml.includes('id="btn-notif-manage-gcal"'), 'Missing #btn-notif-manage-gcal in index.html');
+
+    // Functions in app.js
+    assert(appJs.includes('function exportTimetableCancellationICS'), 'Missing exportTimetableCancellationICS in app.js');
+    assert(appJs.includes('METHOD:CANCEL'), 'exportTimetableCancellationICS must specify RFC 5545 METHOD:CANCEL');
+    assert(appJs.includes('STATUS:CANCELLED'), 'exportTimetableCancellationICS must specify RFC 5545 STATUS:CANCELLED');
+    assert(appJs.includes('function openGoogleCalendarManagerModal'), 'Missing openGoogleCalendarManagerModal in app.js');
+    assert(appJs.includes('function saveEditedClass'), 'Missing saveEditedClass in app.js');
+    assert(appJs.includes('function deleteClassFromSchedule'), 'Missing deleteClassFromSchedule in app.js');
+});
+
 // -------------------------------------------------------------
 // DOMAIN 5: Study Runway & Exam Gaps
 // -------------------------------------------------------------
@@ -261,15 +292,15 @@ test('Notification Hub Drawer and expanded card bodies support vertical scrollin
 // -------------------------------------------------------------
 console.log('\n--- 9. Settings, Profile & Release Management ---');
 
-test('System version is strictly unified at v2.4.18 across all manifests and scripts', () => {
+test('System version is strictly unified at v2.4.19 across all manifests and scripts', () => {
     const pkg = JSON.parse(fs.readFileSync(path.join(ROOT, 'package.json'), 'utf8'));
     const swJs = fs.readFileSync(path.join(ROOT, 'sw.js'), 'utf8');
-    assert.strictEqual(pkg.version, '2.4.18', 'package.json version must be 2.4.18');
-    assert(appJs.includes('window.APP_VERSION = "2.4.18"'), 'app.js APP_VERSION must be 2.4.18');
-    assert(appJs.includes('REV-2026.10.18-v2.4.18'), 'app.js revision must be REV-2026.10.18-v2.4.18');
-    assert(indexHtml.includes('גרסה אחרונה v2.4.18'), 'index.html changelog must show v2.4.18');
-    assert(indexHtml.includes('v2.4.18 ✨'), 'index.html footer must display v2.4.18 ✨');
-    assert(swJs.includes('semestero-me-v2.4.18'), 'sw.js cache name must be semestero-me-v2.4.18');
+    assert.strictEqual(pkg.version, '2.4.19', 'package.json version must be 2.4.19');
+    assert(appJs.includes('window.APP_VERSION = "2.4.19"'), 'app.js APP_VERSION must be 2.4.19');
+    assert(appJs.includes('REV-2026.10.18-v2.4.19'), 'app.js revision must be REV-2026.10.18-v2.4.19');
+    assert(indexHtml.includes('גרסה אחרונה v2.4.19'), 'index.html changelog must show v2.4.19');
+    assert(indexHtml.includes('v2.4.19 ✨'), 'index.html footer must display v2.4.19 ✨');
+    assert(swJs.includes('semestero-me-v2.4.19'), 'sw.js cache name must be semestero-me-v2.4.19');
 });
 
 // -------------------------------------------------------------

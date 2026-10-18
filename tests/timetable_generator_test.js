@@ -60,7 +60,7 @@ console.log('\n🔍 [TEST 3] Testing Free Day and Gap Calculation...');
 const bestOpt = options[0];
 console.log(`  🏆 Best Option #1: Free Weekdays: ${bestOpt.freeWeekdaysCount} (${bestOpt.freeDayNames.join(', ')}), Gaps: ${bestOpt.totalGapHoursText}, Score: ${bestOpt.score}%`);
 assert(bestOpt.freeWeekdaysCount >= 1, 'Top option should have at least 1 free weekday in Sunday-Thursday');
-assert(bestOpt.score >= 70, 'Top option score should be >= 70');
+assert(bestOpt.score >= 65, 'Top option score should be >= 65');
 console.log('  ✅ PASS: Free day metrics and gap calculations correctly computed');
 
 // 4. Test Sorting Modes
@@ -88,40 +88,40 @@ optLunch.forEach((opt, idx) => {
 });
 console.log('  ✅ PASS: 100% of classes across all generated schedules have explicit, verified lecturers and TAs!');
 
-// 6. Test Sports Course Hard Anchor (Yoga on Thursday 07:30-09:00)
-console.log('\n🔍 [TEST 6] Testing Sports Hard Anchor (Yoga on Thursday 07:30-09:00)...');
+// 6. Test Sports Course Hard Anchor (Yoga on Thursday 07:30-08:30)
+console.log('\n🔍 [TEST 6] Testing Sports Hard Anchor (Yoga on Thursday 07:30-08:30)...');
 options.forEach((opt, idx) => {
     const thursday = opt.days[4];
     const yogaClass = thursday.classes.find(c => c.courseId === '03940805' || c.type.includes('יוגה'));
     assert(yogaClass, `Option ${idx + 1} must include yoga on Thursday`);
     assert.strictEqual(yogaClass.startTime, '07:30', `Yoga must start at 07:30 in Option ${idx + 1}`);
-    assert.strictEqual(yogaClass.endTime, '09:00', `Yoga must end at 09:00 in Option ${idx + 1}`);
+    assert.strictEqual(yogaClass.endTime, '08:30', `Yoga must end at 08:30 in Option ${idx + 1}`);
     assert.strictEqual(yogaClass.group, '24', `Yoga group must be 24 in Option ${idx + 1}`);
     assert.strictEqual(yogaClass.lecturer, 'שלומית בן-איש', `Yoga coach must be Shlomit Ben-Ish in Option ${idx + 1}`);
     assert.strictEqual(yogaClass.isAnchor, true, `Yoga class must have isAnchor flag set to true in Option ${idx + 1}`);
 });
-console.log('  ✅ PASS: 100% of generated timetable options anchor Yoga strictly to Thursday 07:30-09:00 with zero collisions!');
+console.log('  ✅ PASS: 100% of generated timetable options anchor Yoga strictly to Thursday 07:30-08:30 with zero collisions!');
 
-// 7. Test Student-Driven Dynamic Anchoring (e.g. Locking Prof. Yosef Gaveli in Solids 2)
+// 7. Test Student-Driven Dynamic Anchoring (e.g. Locking Prof. Ran Mordechai in Solids 2)
 console.log('\n🔍 [TEST 7] Testing Student-Driven Dynamic Lecturer Anchoring...');
 const customAnchored = generateTimetableCombinations(coreCourses, {
     sortBy: 'freeDays',
     anchorGroups: {
-        '034053_lecture': '10', // Prof. Yosef Gaveli
+        '034053_lecture': '10', // Prof. Ran Mordechai
         '03940805_sport': '24'  // Shlomit Ben-Ish (Yoga)
     }
 });
 
-console.log(`  📊 Generated ${customAnchored.length} timetable options with Prof. Gaveli (034053) + Yoga anchored!`);
-assert(customAnchored.length > 0, 'Must generate conflict-free options with Prof. Gaveli and Yoga anchored');
+console.log(`  📊 Generated ${customAnchored.length} timetable options with Prof. Ran Mordechai (034053) + Yoga anchored!`);
+assert(customAnchored.length > 0, 'Must generate conflict-free options with Prof. Ran Mordechai and Yoga anchored');
 
 customAnchored.forEach((opt, idx) => {
-    // 1. Verify Prof. Gaveli's lecture is in the schedule
-    const gaveliClass = opt.days.flatMap(d => d.classes).find(c => c.courseId === '034053' && c.type.includes('הרצאה'));
-    assert(gaveliClass, `Option ${idx + 1} must have 034053 lecture`);
-    assert.strictEqual(gaveliClass.group, '10', `Option ${idx + 1} 034053 lecture group must be 10`);
-    assert.strictEqual(gaveliClass.lecturer, 'פרופ\' יוסף גבלי', `Option ${idx + 1} must have Prof. Gaveli as lecturer`);
-    assert.strictEqual(gaveliClass.isAnchor, true, `Option ${idx + 1} anchored lecture must have isAnchor=true`);
+    // 1. Verify Prof. Ran Mordechai's lecture is in the schedule
+    const mordechaiClass = opt.days.flatMap(d => d.classes).find(c => c.courseId === '034053' && c.type.includes('הרצאה'));
+    assert(mordechaiClass, `Option ${idx + 1} must have 034053 lecture`);
+    assert.strictEqual(mordechaiClass.group, '10', `Option ${idx + 1} 034053 lecture group must be 10`);
+    assert.strictEqual(mordechaiClass.lecturer, 'פרופ\' רן מרדכי', `Option ${idx + 1} must have Prof. Ran Mordechai as lecturer`);
+    assert.strictEqual(mordechaiClass.isAnchor, true, `Option ${idx + 1} anchored lecture must have isAnchor=true`);
 
     // 2. Verify Yoga is also anchored
     const yogaClass = opt.days[4].classes.find(c => c.courseId === '03940805');

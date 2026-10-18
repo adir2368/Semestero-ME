@@ -13195,3 +13195,323 @@ tr.is-task-pinned {
         justify-content: center !important;
     }
 }
+
+/* =========================================================================
+   4-LINE TIMETABLE CARD DESIGN & GOOGLE CALENDAR MANAGER MODAL (v2.4.19)
+   ========================================================================= */
+
+/* 4-Line Class Card Components */
+.timetable-card-room-bar {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #38bdf8;
+    background: rgba(56, 189, 248, 0.12);
+    border: 1px solid rgba(56, 189, 248, 0.28);
+    border-radius: 6px;
+    padding: 3px 8px;
+    margin: 5px 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    line-height: 1.25;
+}
+
+.timetable-card-room-bar .room-icon {
+    font-size: 0.88rem;
+    line-height: 1;
+}
+
+.timetable-card-room-bar .room-text {
+    letter-spacing: 0.2px;
+}
+
+.course-code-dim {
+    font-size: 0.74rem;
+    color: #94a3b8;
+    font-weight: normal;
+}
+
+/* Google Calendar Manager Modal */
+.gcal-manager-modal-content {
+    background: linear-gradient(180deg, #111827 0%, #0b0f19 100%);
+    border-radius: 16px;
+    animation: fadeIn 0.2s ease-out;
+}
+
+.gcal-guide-card {
+    background: rgba(15, 23, 42, 0.75);
+    border: 1px solid rgba(56, 189, 248, 0.25);
+    border-radius: 12px;
+    padding: 14px;
+}
+
+.gcal-guide-title {
+    font-size: 0.95rem;
+    color: #f8fafc;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.gcal-methods-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+}
+
+.gcal-method-box {
+    background: rgba(30, 41, 59, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 8px;
+    transition: all 0.2s ease;
+}
+
+.gcal-method-box:hover {
+    border-color: rgba(56, 189, 248, 0.4);
+    background: rgba(30, 41, 59, 0.75);
+}
+
+.gcal-method-box.highlight-gold {
+    border-color: rgba(251, 191, 36, 0.4);
+    background: linear-gradient(135deg, rgba(251, 191, 36, 0.1) 0%, rgba(15, 23, 42, 0.6) 100%);
+}
+
+.gcal-method-box.highlight-gold:hover {
+    border-color: #fbbf24;
+    box-shadow: 0 0 12px rgba(251, 191, 36, 0.2);
+}
+
+.method-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.86rem;
+    color: #f8fafc;
+}
+
+.method-num {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #38bdf8;
+    color: #0b0f19;
+    font-weight: 800;
+    font-size: 0.74rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.highlight-gold .method-num {
+    background: #fbbf24;
+}
+
+.method-desc {
+    font-size: 0.76rem;
+    color: #94a3b8;
+    line-height: 1.45;
+    margin: 0;
+    flex-grow: 1;
+}
+
+.btn-danger-outline {
+    background: rgba(239, 68, 68, 0.12);
+    border: 1px solid rgba(239, 68, 68, 0.4);
+    color: #f87171;
+    font-weight: 700;
+    transition: all 0.2s ease;
+}
+
+.btn-danger-outline:hover {
+    background: rgba(239, 68, 68, 0.25);
+    border-color: #ef4444;
+    color: #ffffff;
+}
+
+/* In-App Timetable Class Editor */
+.gcal-editor-section {
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: 14px;
+}
+
+.gcal-classes-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-height: 340px;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+.gcal-class-edit-row {
+    background: rgba(30, 41, 59, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    transition: border-color 0.15s ease;
+}
+
+.gcal-class-edit-row:hover {
+    border-color: rgba(56, 189, 248, 0.35);
+}
+
+.gcal-class-edit-main {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.gcal-class-edit-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.gcal-class-edit-header .day-badge {
+    background: rgba(56, 189, 248, 0.15);
+    color: #38bdf8;
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-size: 0.72rem;
+    font-weight: 700;
+}
+
+.gcal-class-edit-header .time-badge {
+    color: #cbd5e1;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.gcal-class-edit-header .type-badge {
+    background: rgba(255, 255, 255, 0.08);
+    color: #e2e8f0;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.72rem;
+}
+
+.gcal-class-edit-title {
+    font-size: 0.88rem;
+    font-weight: 800;
+    color: #f8fafc;
+}
+
+.gcal-class-edit-title .code-dim {
+    font-size: 0.75rem;
+    color: #94a3b8;
+    font-weight: normal;
+}
+
+.gcal-class-edit-details {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 0.78rem;
+    flex-wrap: wrap;
+    color: #cbd5e1;
+}
+
+.gcal-class-edit-details .room-chip {
+    color: #38bdf8;
+}
+
+.gcal-class-edit-details .room-chip.dim {
+    color: #64748b;
+}
+
+.gcal-class-edit-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    align-self: flex-end;
+}
+
+.gcal-btn-edit {
+    border-color: rgba(56, 189, 248, 0.35);
+    color: #38bdf8;
+}
+
+.gcal-btn-delete {
+    background: rgba(239, 68, 68, 0.12);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    color: #f87171;
+}
+
+.gcal-btn-delete:hover {
+    background: rgba(239, 68, 68, 0.25);
+    color: #ffffff;
+}
+
+.gcal-class-inline-form {
+    margin-top: 8px;
+    padding: 10px;
+    background: rgba(15, 23, 42, 0.85);
+    border: 1px dashed rgba(56, 189, 248, 0.35);
+    border-radius: 8px;
+}
+
+.gcal-form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 8px;
+}
+
+.gcal-form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.gcal-form-field label {
+    font-size: 0.72rem;
+    color: #94a3b8;
+    font-weight: 600;
+}
+
+.gcal-form-field input {
+    background: #0f172a;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 5px;
+    padding: 5px 8px;
+    color: #f8fafc;
+    font-size: 0.78rem;
+    outline: none;
+    transition: border-color 0.2s ease;
+}
+
+.gcal-form-field input:focus {
+    border-color: #38bdf8;
+}
+
+.gcal-form-actions-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+    justify-content: flex-end;
+}
+
+@media (max-width: 768px) {
+    .gcal-methods-grid {
+        grid-template-columns: 1fr;
+    }
+    .gcal-form-grid {
+        grid-template-columns: 1fr;
+    }
+    .gcal-class-edit-actions {
+        width: 100%;
+        justify-content: flex-end;
+    }
+}

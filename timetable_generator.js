@@ -90,18 +90,18 @@
                     options: [
                         {
                             groupId: '10',
-                            lecturer: 'פרופ\' יוסף גבלי',
-                            room: 'הנדסת מכונות 250',
+                            lecturer: 'פרופ\' רן מרדכי',
+                            room: 'הנדסה כימית 1',
                             meetings: [
-                                { dayIndex: 1, dayName: 'שני', startTime: '10:30', endTime: '14:30', duration: '4 שעות' }
+                                { dayIndex: 0, dayName: 'ראשון', startTime: '14:30', endTime: '17:30', duration: '3 שעות' }
                             ]
                         },
                         {
                             groupId: '11',
-                            lecturer: 'פרופ\' דוד דורפמן',
-                            room: 'הנדסת מכונות 250',
+                            lecturer: 'פרופ\' יוסף גבלי',
+                            room: 'הנדסה כימית 1',
                             meetings: [
-                                { dayIndex: 3, dayName: 'רביעי', startTime: '08:30', endTime: '12:30', duration: '4 שעות' }
+                                { dayIndex: 1, dayName: 'שני', startTime: '10:30', endTime: '14:30', duration: '4 שעות' }
                             ]
                         }
                     ]
@@ -111,9 +111,17 @@
                     slotName: 'תרגול',
                     options: [
                         {
+                            groupId: '20',
+                            lecturer: 'מר מירון דואר',
+                            room: 'אולמן 602',
+                            meetings: [
+                                { dayIndex: 1, dayName: 'שני', startTime: '13:30', endTime: '15:30', duration: 'שעתיים' }
+                            ]
+                        },
+                        {
                             groupId: '21',
-                            lecturer: 'רועי לוי',
-                            room: 'כיתת תרגול',
+                            lecturer: 'מר מירון דואר',
+                            room: 'אולמן 602',
                             meetings: [
                                 { dayIndex: 4, dayName: 'חמישי', startTime: '12:30', endTime: '14:30', duration: 'שעתיים' }
                             ]
@@ -121,17 +129,9 @@
                         {
                             groupId: '22',
                             lecturer: 'דנה פלד',
-                            room: 'כיתת תרגול',
+                            room: 'אולמן 602',
                             meetings: [
                                 { dayIndex: 2, dayName: 'שלישי', startTime: '10:30', endTime: '12:30', duration: 'שעתיים' }
-                            ]
-                        },
-                        {
-                            groupId: '23',
-                            lecturer: 'רועי לוי',
-                            room: 'כיתת תרגול',
-                            meetings: [
-                                { dayIndex: 4, dayName: 'חמישי', startTime: '14:30', endTime: '16:30', duration: 'שעתיים' }
                             ]
                         }
                     ]
@@ -151,15 +151,15 @@
                         {
                             groupId: '10',
                             lecturer: 'פרופ\' לאוניד טרטקובסקי',
-                            room: 'אולם הרצאות',
+                            room: 'הנדסה כימית 1',
                             meetings: [
-                                { dayIndex: 2, dayName: 'שלישי', startTime: '08:30', endTime: '11:30', duration: '3 שעות' }
+                                { dayIndex: 2, dayName: 'שלישי', startTime: '08:30', endTime: '10:30', duration: 'שעתיים' }
                             ]
                         },
                         {
                             groupId: '11',
                             lecturer: 'פרופ\' לאוניד טרטקובסקי',
-                            room: 'אולם הרצאות',
+                            room: 'הנדסה כימית 1',
                             meetings: [
                                 { dayIndex: 0, dayName: 'ראשון', startTime: '09:30', endTime: '12:30', duration: '3 שעות' }
                             ]
@@ -172,8 +172,8 @@
                     options: [
                         {
                             groupId: '11',
-                            lecturer: 'אלכס גורביץ\'',
-                            room: 'כיתת תרגול',
+                            lecturer: 'גב\' עומר גזית אורולוב',
+                            room: 'אולמן 101',
                             meetings: [
                                 { dayIndex: 2, dayName: 'שלישי', startTime: '12:30', endTime: '14:30', duration: 'שעתיים' }
                             ]
@@ -181,7 +181,7 @@
                         {
                             groupId: '12',
                             lecturer: 'מיכל שטרן',
-                            room: 'כיתת תרגול',
+                            room: 'אולמן 101',
                             meetings: [
                                 { dayIndex: 0, dayName: 'ראשון', startTime: '13:30', endTime: '15:30', duration: 'שעתיים' }
                             ]
@@ -189,7 +189,7 @@
                         {
                             groupId: '13',
                             lecturer: 'אלכס גורביץ\'',
-                            room: 'כיתת תרגול',
+                            room: 'אולמן 101',
                             meetings: [
                                 { dayIndex: 3, dayName: 'רביעי', startTime: '12:30', endTime: '14:30', duration: 'שעתיים' }
                             ]
@@ -209,19 +209,19 @@
                     slotName: 'הרצאה',
                     options: [
                         {
-                            groupId: '20',
-                            lecturer: 'פרופ\' אלי לוין',
-                            room: 'אולם מתמטיקה',
+                            groupId: '30',
+                            lecturer: 'ד"ר שלומי גובר',
+                            room: 'שרמן - חינוך למדע וטכנולוגיה 107',
                             meetings: [
-                                { dayIndex: 4, dayName: 'חמישי', startTime: '10:30', endTime: '12:30', duration: 'שעתיים' }
+                                { dayIndex: 1, dayName: 'שני', startTime: '12:30', endTime: '13:30', duration: 'שעה' }
                             ]
                         },
                         {
-                            groupId: '10',
-                            lecturer: 'פרופ\' בוריס מירמן',
-                            room: 'אולם מתמטיקה',
+                            groupId: '20',
+                            lecturer: 'ד"ר שלומי גובר',
+                            room: 'שרמן - חינוך למדע וטכנולוגיה 107',
                             meetings: [
-                                { dayIndex: 2, dayName: 'שלישי', startTime: '10:30', endTime: '12:30', duration: 'שעתיים' }
+                                { dayIndex: 4, dayName: 'חמישי', startTime: '10:30', endTime: '12:30', duration: 'שעתיים' }
                             ]
                         }
                     ]
@@ -231,25 +231,25 @@
                     slotName: 'תרגול',
                     options: [
                         {
+                            groupId: '22',
+                            lecturer: 'אמתי אלפרין',
+                            room: 'אולמן 506',
+                            meetings: [
+                                { dayIndex: 0, dayName: 'ראשון', startTime: '11:30', endTime: '13:30', duration: 'שעתיים' }
+                            ]
+                        },
+                        {
                             groupId: '21',
-                            lecturer: 'יבגני קגן',
-                            room: 'כיתת תרגול',
+                            lecturer: 'אמתי אלפרין',
+                            room: 'אולמן 506',
                             meetings: [
                                 { dayIndex: 3, dayName: 'רביעי', startTime: '10:30', endTime: '12:30', duration: 'שעתיים' }
                             ]
                         },
                         {
-                            groupId: '22',
-                            lecturer: 'תמר כהן',
-                            room: 'כיתת תרגול',
-                            meetings: [
-                                { dayIndex: 1, dayName: 'שני', startTime: '12:30', endTime: '14:30', duration: 'שעתיים' }
-                            ]
-                        },
-                        {
                             groupId: '23',
                             lecturer: 'יבגני קגן',
-                            room: 'כיתת תרגול',
+                            room: 'אולמן 506',
                             meetings: [
                                 { dayIndex: 4, dayName: 'חמישי', startTime: '14:30', endTime: '16:30', duration: 'שעתיים' }
                             ]
@@ -271,7 +271,7 @@
                         {
                             groupId: '10',
                             lecturer: 'ד"ר גדעון אלון',
-                            room: 'אולם פיסיקה',
+                            room: 'טאוב - מדמ"ח 1',
                             meetings: [
                                 { dayIndex: 1, dayName: 'שני', startTime: '08:30', endTime: '10:30', duration: 'שעתיים' },
                                 { dayIndex: 3, dayName: 'רביעי', startTime: '08:30', endTime: '09:30', duration: 'שעה' }
@@ -280,7 +280,7 @@
                         {
                             groupId: '20',
                             lecturer: 'פרופ\' אורי שפירא',
-                            room: 'אולם פיסיקה',
+                            room: 'טאוב - מדמ"ח 1',
                             meetings: [
                                 { dayIndex: 2, dayName: 'שלישי', startTime: '12:30', endTime: '14:30', duration: 'שעתיים' },
                                 { dayIndex: 4, dayName: 'חמישי', startTime: '10:30', endTime: '11:30', duration: 'שעה' }
@@ -294,8 +294,8 @@
                     options: [
                         {
                             groupId: '13',
-                            lecturer: 'אורי ברקת',
-                            room: 'כיתת תרגול',
+                            lecturer: 'גב\' נעם חגי גמליאל',
+                            room: 'שרמן - חינוך למדע וטכנולוגיה 107',
                             meetings: [
                                 { dayIndex: 3, dayName: 'רביעי', startTime: '09:30', endTime: '10:30', duration: 'שעה' }
                             ]
@@ -303,7 +303,7 @@
                         {
                             groupId: '14',
                             lecturer: 'נועם שפירא',
-                            room: 'כיתת תרגול',
+                            room: 'שרמן - חינוך למדע וטכנולוגיה 107',
                             meetings: [
                                 { dayIndex: 1, dayName: 'שני', startTime: '10:30', endTime: '11:30', duration: 'שעה' }
                             ]
@@ -311,7 +311,7 @@
                         {
                             groupId: '15',
                             lecturer: 'אורי ברקת',
-                            room: 'כיתת תרגול',
+                            room: 'אולמן 101',
                             meetings: [
                                 { dayIndex: 2, dayName: 'שלישי', startTime: '14:30', endTime: '15:30', duration: 'שעה' }
                             ]
@@ -319,7 +319,7 @@
                         {
                             groupId: '16',
                             lecturer: 'דניאל סגל',
-                            room: 'כיתת תרגול',
+                            room: 'אולמן 101',
                             meetings: [
                                 { dayIndex: 4, dayName: 'חמישי', startTime: '11:30', endTime: '12:30', duration: 'שעה' }
                             ]
@@ -335,7 +335,7 @@
             cardClass: 'timetable-card-yoga',
             isAnchor: true,
             anchorGroupId: '24',
-            anchorNote: 'עוגן במערכת: יוגה (יום חמישי 07:30-09:00)',
+            anchorNote: 'עוגן במערכת: יוגה (יום חמישי 07:30-08:30)',
             slots: [
                 {
                     slotType: 'sport',
@@ -347,10 +347,10 @@
                             groupId: '24',
                             sportName: 'יוגה',
                             lecturer: 'שלומית בן-איש',
-                            room: 'אולם ספורט (יוגה)',
+                            room: 'מרכז ספורט טכניון',
                             isAnchor: true,
                             meetings: [
-                                { dayIndex: 4, dayName: 'חמישי', startTime: '07:30', endTime: '09:00', duration: 'שעה וחצי' }
+                                { dayIndex: 4, dayName: 'חמישי', startTime: '07:30', endTime: '08:30', duration: 'שעה' }
                             ]
                         },
                         {
@@ -1529,21 +1529,29 @@
 
                             classesHtml += `
                                 <div class="timetable-card ${c.cardClass}" style="margin-bottom: 8px;">
+                                    <!-- שורה 1: סוג/קבוצה ושעה -->
                                     <div class="timetable-card-top">
+                                        <div style="display: flex; align-items: center; gap: 4px; flex-wrap: wrap;">
+                                            <span class="timetable-tag" style="background: rgba(255, 255, 255, 0.08); padding: 2px 6px; border-radius: 4px; font-weight: 700;">${c.type}</span>
+                                            ${anchorBadgeHtml}
+                                        </div>
                                         <span class="timetable-card-time">⏰ ${c.startTime} - ${c.endTime}</span>
-                                        ${(c.room && c.room !== 'כיתת טכניון') ? `<span class="timetable-card-room">📍 ${c.room}</span>` : ''}
                                     </div>
-                                    <div class="timetable-card-name" style="font-size: 0.88rem; font-weight: 800;">${c.courseName}</div>
-                                    <div class="timetable-card-sub" style="font-size: 0.74rem; color: #cbd5e1; margin-top: 3px; display: flex; gap: 4px; align-items: center; flex-wrap: wrap;">
-                                        <span class="timetable-tag" style="background: rgba(255, 255, 255, 0.08); padding: 2px 6px; border-radius: 4px; font-weight: 600;">${c.type}</span>
-                                        ${anchorBadgeHtml}
-                                    </div>
+                                    <!-- שורה 2: חדר או מיקום (רק אם קיים) -->
+                                    ${(c.room && c.room.trim() && c.room !== 'כיתת טכניון') ? `
+                                        <div class="timetable-card-room-bar" style="margin: 4px 0; font-size: 0.82rem; color: #38bdf8; font-weight: 700; display: flex; align-items: center; gap: 5px;">
+                                            <span>📍</span> <span>${c.room}</span>
+                                        </div>
+                                    ` : ''}
+                                    <!-- שורה 3: מרצה או מתרגל -->
                                     ${c.lecturer ? `
-                                        <div class="ttg-card-instructor" style="margin-top: 6px; padding: 4px 8px; border-radius: 6px; background: ${instructorBg}; border: 1px solid ${instructorBorder}; display: flex; align-items: center; justify-content: space-between; font-size: 0.76rem;">
+                                        <div class="ttg-card-instructor" style="margin-top: 4px; margin-bottom: 4px; padding: 4px 8px; border-radius: 6px; background: ${instructorBg}; border: 1px solid ${instructorBorder}; display: flex; align-items: center; justify-content: space-between; font-size: 0.76rem;">
                                             <span style="color: ${instructorColor}; font-weight: 700;">${instructorLabel}</span>
                                             <span style="color: #ffffff; font-weight: 800;">${c.lecturer}</span>
                                         </div>
                                     ` : ''}
+                                    <!-- שורה 4: שם הקורס -->
+                                    <div class="timetable-card-name" style="font-size: 0.88rem; font-weight: 800; color: #f8fafc; margin-top: 2px;">${c.courseName}</div>
                                     ${cardAnchorAction}
                                 </div>
                             `;
