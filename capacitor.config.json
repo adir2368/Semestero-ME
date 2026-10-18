@@ -1,0 +1,20 @@
+{
+  "appId": "com.technion.semestero",
+  "appName": "Semestero ME",
+  "webDir": "www",
+  "bundledWebRuntime": false,
+  "backgroundColor": "#020617",
+  "android": {
+    "backgroundColor": "#020617",
+    "allowMixedContent": true,
+    "webContentsDebuggingEnabled": true
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 1500,
+      "backgroundColor": "#020617",
+      "showSpinner": false,
+      "androidSplashResourceName": "splash"
+    }
+  }
+}

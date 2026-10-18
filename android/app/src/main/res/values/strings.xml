@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Semestero ME</string>
+    <string name="title_activity_main">Semestero ME</string>
+    <string name="package_name">com.technion.semestero</string>
+    <string name="custom_url_scheme">com.technion.semestero</string>
+</resources>
