@@ -255,15 +255,15 @@ test('Notification Hub Drawer differentiates between Desktop and Mobile modes', 
 // -------------------------------------------------------------
 console.log('\n--- 9. Settings, Profile & Release Management ---');
 
-test('System version is strictly unified at v2.4.16 across all manifests and scripts', () => {
+test('System version is strictly unified at v2.4.17 across all manifests and scripts', () => {
     const pkg = JSON.parse(fs.readFileSync(path.join(ROOT, 'package.json'), 'utf8'));
     const swJs = fs.readFileSync(path.join(ROOT, 'sw.js'), 'utf8');
-    assert.strictEqual(pkg.version, '2.4.16', 'package.json version must be 2.4.16');
-    assert(appJs.includes('window.APP_VERSION = "2.4.16"'), 'app.js APP_VERSION must be 2.4.16');
-    assert(appJs.includes('REV-2026.10.18-v2.4.16'), 'app.js revision must be REV-2026.10.18-v2.4.16');
-    assert(indexHtml.includes('גרסה אחרונה v2.4.16'), 'index.html changelog must show v2.4.16');
-    assert(indexHtml.includes('v2.4.16 ✨'), 'index.html footer must display v2.4.16 ✨');
-    assert(swJs.includes('semestero-me-v2.4.16'), 'sw.js cache name must be semestero-me-v2.4.16');
+    assert.strictEqual(pkg.version, '2.4.17', 'package.json version must be 2.4.17');
+    assert(appJs.includes('window.APP_VERSION = "2.4.17"'), 'app.js APP_VERSION must be 2.4.17');
+    assert(appJs.includes('REV-2026.10.18-v2.4.17'), 'app.js revision must be REV-2026.10.18-v2.4.17');
+    assert(indexHtml.includes('גרסה אחרונה v2.4.17'), 'index.html changelog must show v2.4.17');
+    assert(indexHtml.includes('v2.4.17 ✨'), 'index.html footer must display v2.4.17 ✨');
+    assert(swJs.includes('semestero-me-v2.4.17'), 'sw.js cache name must be semestero-me-v2.4.17');
 });
 
 // -------------------------------------------------------------

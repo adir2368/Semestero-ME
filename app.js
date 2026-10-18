@@ -19797,13 +19797,13 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.10.18-v2.4.16",
-    version: "2.4.16",
-    build: "20261018_06",
-    date: "2026-10-18 15:00",
-    description: "גרסה 2.4.16: סינון טמפורלי קפדני לסמסטר הנוכחי/הבא (חורף תשפ״ז 2026/27): טיהור תאריכי בחינות שפג תוקפם מסמסטרים קודמים (2025/קיץ 2026), מניעת הצגת מועדי מבחן לקורסים שהושלמו בעבר, ואכיפת מועדי בחינות רשמיים מפברואר-מרץ 2027 בלבד."
+    code: "REV-2026.10.18-v2.4.17",
+    version: "2.4.17",
+    build: "20261018_07",
+    date: "2026-10-18 16:15",
+    description: "גרסה 2.4.17: תיקון מקיף לקטיעת מסך בדסקטופ RTL (ביטול 100vw לטובת רוחב 100% קונטיינר, מניעת גלילת פוקוס מ-side-peek וסגירת גלישה אופקית ב-clip), ושדרוג מרכז ההתראות המקומי עם הכוונה מיידית להגדרת מערכת שעות פעילה לתזכורות הרצאות אוטומטיות."
 };
-window.APP_VERSION = "2.4.16";
+window.APP_VERSION = "2.4.17";
 
 function ensureBaselineRevisions() {
     if (!gameState.revisions || !Array.isArray(gameState.revisions) || gameState.revisions.length === 0) {
@@ -22229,6 +22229,7 @@ function getRemainingClassesToday() {
     const curMin = now.getHours() * 60 + now.getMinutes();
     
     const schedule = getActiveTimetableSchedule();
+    const hasSchedule = !!(schedule && schedule.days && schedule.days.length > 0);
     const dayConfig = (schedule && schedule.days)
         ? schedule.days.find(d => d.dayIndex === dayOfWeek)
         : null;
@@ -22237,12 +22238,24 @@ function getRemainingClassesToday() {
     const isFree = isWeekend || (dayConfig && dayConfig.isFree) || (!dayConfig);
     const allClasses = (dayConfig && dayConfig.classes) ? dayConfig.classes : [];
 
+    if (!hasSchedule) {
+        return {
+            count: 0,
+            classes: [],
+            nextClass: null,
+            isFree: false,
+            hasSchedule: false,
+            totalToday: 0
+        };
+    }
+
     if (isFree || allClasses.length === 0) {
         return {
             count: 0,
             classes: [],
             nextClass: null,
             isFree: true,
+            hasSchedule: true,
             totalToday: 0
         };
     }
@@ -22262,6 +22275,7 @@ function getRemainingClassesToday() {
         classes: remaining,
         nextClass,
         isFree: false,
+        hasSchedule: true,
         totalToday: allClasses.length
     };
 }
@@ -22473,7 +22487,22 @@ function renderInAppNotificationHub() {
         countLectures.innerText = String(remainingLectures.count);
     }
 
-    if (remainingLectures.isFree || remainingLectures.totalToday === 0) {
+    if (!remainingLectures.hasSchedule) {
+        if (summaryLectures) {
+            summaryLectures.innerText = 'טרם הוגדרה מערכת שעות אישית';
+        }
+        if (listLectures) {
+            listLectures.innerHTML = `
+                <div class="notif-card-empty-msg" style="text-align: right; line-height: 1.5; padding: 14px;">
+                    <div style="font-weight: 700; color: #38bdf8; margin-bottom: 6px; font-size: 0.95rem;">📅 לא נמצאה מערכת שעות פעילה</div>
+                    <div style="font-size: 0.82rem; color: #cbd5e1; margin-bottom: 10px;">תזכורות אוטומטיות (10 דק׳ לפני הרצאה/תרגול) פועלות ברגע שתגדיר או תייבא את מערכת השעות שלך בלשונית מערכת שעות.</div>
+                    <button type="button" class="btn btn-sm btn-primary" onclick="if (typeof setActiveMainTab === 'function') setActiveMainTab('timetable'); closeNotificationDrawer();" style="cursor: pointer; width: 100%; justify-content: center; font-size: 0.82rem;">
+                        🕒 מעבר להגדרת מערכת שעות
+                    </button>
+                </div>
+            `;
+        }
+    } else if (remainingLectures.isFree || remainingLectures.totalToday === 0) {
         if (summaryLectures) {
             summaryLectures.innerText = 'יום חופשי מלימודים פרונטליים! 🏖️';
         }
@@ -22937,7 +22966,12 @@ async function dispatchNativeMobileNotifications() {
     let lectureBody = '';
 
     if (sendLectures) {
-        if (remainingLectures.isFree || remainingLectures.totalToday === 0) {
+        if (!remainingLectures.hasSchedule) {
+            lectureTitle = isMobile
+                ? '🎓 מערכת שעות: טרם הוגדרה מערכת'
+                : '💻 מערכת שעות במחשב: טרם הוגדרה מערכת';
+            lectureBody = '📅 כדי לקבל תזכורות להרצאות, סנכרן או בחר מערכת שעות פעילה בלשונית מערכת שעות.';
+        } else if (remainingLectures.isFree || remainingLectures.totalToday === 0) {
             lectureTitle = isMobile
                 ? '🎓 מערכת שעות: יום חופשי מלימודים'
                 : '💻 מערכת שעות במחשב: יום חופשי מלימודים';
