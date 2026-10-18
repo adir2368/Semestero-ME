@@ -55,6 +55,7 @@ test('Course Details Modal contains Technion++ Action Bar with all external link
     assert(appJs.includes('panopto.technion.ac.il'), 'Quick bar must support Panopto');
     assert(appJs.includes('asat.org.il/past-exams'), 'Quick bar must support ASAT past exams');
     assert(appJs.includes('cheesefork.cf'), 'Quick bar must support CheeseFork');
+    assert(appJs.includes('grades.technion.ac.il'), 'Quick bar must support Technion Grades & Scans portal');
 });
 
 test('Technion++ action bar has responsive wrapping for mobile screens', () => {

@@ -11475,6 +11475,9 @@ function renderTechnionPlusQuickBar(course) {
         <a href="${driveUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-xs technion-link-btn" style="background: rgba(168, 85, 247, 0.18); border: 1px solid #a855f7; color: #c084fc; text-decoration: none; padding: 4px 10px; border-radius: 6px; font-size: 0.76rem; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;" title="חיפוש תיקיות Google Drive, סיכומים וחומרי עזר">
             <span>🔍</span> דרייב וסיכומים ↗
         </a>
+        <a href="https://grades.technion.ac.il/" target="_blank" rel="noopener noreferrer" class="btn btn-xs technion-link-btn" style="background: rgba(147, 51, 234, 0.22); border: 1px solid #9333ea; color: #d8b4fe; text-decoration: none; padding: 4px 10px; border-radius: 6px; font-size: 0.76rem; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;" title="פורטל הציונים, סריקות מחברות בחינה וערעורים בטכניון (grades.technion.ac.il)">
+            <span>📝</span> ציונים וסריקות ↗
+        </a>
     `;
 }
 
