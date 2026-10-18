@@ -50,5 +50,35 @@
       "sizes": "180x180",
       "type": "image/png"
     }
+  ],
+  "shortcuts": [
+    {
+      "name": "וויג'טים למסך הבית",
+      "short_name": "וויג'טים",
+      "description": "תצוגת וויג'טים אינטראקטיביים למסך הבית (S / M / L)",
+      "url": "./widgets.html",
+      "icons": [{ "src": "shortcut-semester-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "מערכת שעות",
+      "short_name": "מערכת שעות",
+      "description": "צפייה בלו״ז ושיעורי היום",
+      "url": "./index.html?tab=timetable",
+      "icons": [{ "src": "shortcut-schedule-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "לוח מטלות",
+      "short_name": "מטלות",
+      "description": "לוח משימות דחופות והגשות",
+      "url": "./index.html?tab=tasks",
+      "icons": [{ "src": "shortcut-tasks-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "ספירה למבחנים",
+      "short_name": "מבחנים",
+      "description": "לוח בחינות וספירה לאחור",
+      "url": "./index.html?tab=runway",
+      "icons": [{ "src": "shortcut-exam-192.png", "sizes": "192x192" }]
+    }
   ]
 }
