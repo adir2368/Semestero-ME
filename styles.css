@@ -10479,6 +10479,19 @@ html.is-iphone .app-global-footer {
     color: #34d399;
 }
 
+.drawer-desktop-badge {
+    font-size: 0.70rem;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 6px;
+    background: rgba(56, 189, 248, 0.15);
+    color: #38bdf8;
+    border: 1px solid rgba(56, 189, 248, 0.35);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
 .drawer-toggle-prefs-btn {
     background: rgba(30, 41, 59, 0.8);
     border: 1px solid rgba(56, 189, 248, 0.3);

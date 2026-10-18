@@ -19493,13 +19493,13 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.10.18-v2.4.11",
-    version: "2.4.11",
-    build: "20261018_01",
-    date: "2026-10-18 02:45",
-    description: "גרסה 2.4.11: אבטחת פרטיות ובידוד מוחלט של נתוני משתמש: כאשר לא מחוברים (אורח), מערכת השעות, לוח המטלות והציונים נותרים מבודדים; שלב 1 במחולל שעות: בחירת עוגנים ונעילת מרצים/קבוצות טרם החילול; ביטול מחרוזות ברירת מחדל 'כיתת טכניון'; שיטוח פילטר הסטטוסים בלוח המטלות ל-4 שורות נקיות."
+    code: "REV-2026.10.18-v2.4.12",
+    version: "2.4.12",
+    build: "20261018_02",
+    date: "2026-10-18 11:45",
+    description: "גרסה 2.4.12: הפרדה והתאמה דינמית של מנוע ההתראות בין מחשב (שולחן עבודה / Desktop) לבין מכשיר נייד (טלפון חכם): כפתורים וטקסטים מותאמים אישית (💻 סקירה למחשב / ⏰ בדיקת 10 דק׳ במחשב לעומת 📲 סקירה לנייד), תגיות סטטוס מופרדות, והתראות מערכת מותאמות לשולחן העבודה של Windows/Mac."
 };
-window.APP_VERSION = "2.4.11";
+window.APP_VERSION = "2.4.12";
 
 function ensureBaselineRevisions() {
     if (!gameState.revisions || !Array.isArray(gameState.revisions) || gameState.revisions.length === 0) {
@@ -19878,6 +19878,11 @@ function renderPhoneAndNotificationPreferences() {
     if (drawerBrief) drawerBrief.checked = prefs.dailyBrief !== false;
     if (drawerTasks) drawerTasks.checked = prefs.taskDeadlines !== false;
     if (drawerGrades) drawerGrades.checked = prefs.academicGrades === true;
+
+    // Synchronize dynamic device separation mode (desktop vs mobile)
+    if (typeof updateNotificationDrawerDeviceMode === 'function') {
+        updateNotificationDrawerDeviceMode();
+    }
 }
 
 function savePhoneAndNotificationPreferences(source = 'settings') {
@@ -22029,9 +22034,75 @@ function toggleNotificationCard(cardType) {
     }
 }
 
+// 4b. Dynamic Device Mode Synchronization (Desktop PC vs Mobile Phone)
+function updateNotificationDrawerDeviceMode() {
+    const isMobile = (typeof isMobileView === 'function') ? isMobileView() : (window.innerWidth <= 768);
+
+    const btnDispatchText = document.getElementById('btn-dispatch-text');
+    const btnDispatch = document.getElementById('btn-dispatch-native-notifs');
+    const btnTest10MinText = document.getElementById('btn-test-10min-text');
+    const btnTest10Min = document.getElementById('btn-test-10min-alert');
+    const subtitle = document.getElementById('notif-drawer-subtitle');
+    const deviceIcon = document.getElementById('drawer-device-icon');
+    const deviceTitle = document.getElementById('drawer-device-title');
+    const desktopBadge = document.getElementById('drawer-desktop-badge');
+    const phoneBadge = document.getElementById('drawer-phone-badge');
+
+    let phone = (gameState && gameState.userProfile && gameState.userProfile.phone) || "";
+    if (!phone && window.AuthSync && typeof AuthSync.getActiveUser === 'function') {
+        const u = AuthSync.getActiveUser();
+        if (u && u.phone) phone = u.phone;
+    }
+
+    if (isMobile) {
+        // Mobile Mode (Phone)
+        if (btnDispatchText) btnDispatchText.innerText = '📲 סקירה לנייד';
+        if (btnDispatch) btnDispatch.title = 'שלח סקירת שיעורים ומשימות למכשיר הנייד';
+        if (btnTest10MinText) btnTest10MinText.innerText = '⏰ בדיקת 10 דק׳';
+        if (btnTest10Min) btnTest10Min.title = 'בדוק כיצד נראית התראת 10 הדקות בנייד שלך';
+        if (subtitle) subtitle.innerText = '⏰ תזכורות אוטומטיות: 10 דק׳ לפני כל שיעור';
+        if (deviceIcon) deviceIcon.innerText = '📱';
+        if (deviceTitle) deviceTitle.innerText = 'טלפון להתראות:';
+        if (desktopBadge) desktopBadge.style.display = 'none';
+        if (phoneBadge) {
+            phoneBadge.style.display = 'inline-flex';
+            if (phone) {
+                phoneBadge.className = 'drawer-phone-badge has-phone';
+                phoneBadge.innerText = `✓ ${phone}`;
+            } else {
+                phoneBadge.className = 'drawer-phone-badge';
+                phoneBadge.innerText = '⚠️ לא הוגדר';
+            }
+        }
+    } else {
+        // Desktop / Computer Mode (PC)
+        if (btnDispatchText) btnDispatchText.innerText = '💻 סקירה למחשב';
+        if (btnDispatch) btnDispatch.title = 'שלח סקירת שיעורים ומשימות לשולחן העבודה במחשב זה';
+        if (btnTest10MinText) btnTest10MinText.innerText = '⏰ בדיקת 10 דק׳ במחשב';
+        if (btnTest10Min) btnTest10Min.title = 'בדוק כיצד נראית התראת 10 הדקות במחשב זה';
+        if (subtitle) subtitle.innerText = '💻 תזכורות שולחן עבודה: 10 דק׳ לפני כל שיעור במחשב זה';
+        if (deviceIcon) deviceIcon.innerText = '💻';
+        if (deviceTitle) deviceTitle.innerText = 'התראות מחשב:';
+        if (desktopBadge) {
+            desktopBadge.style.display = 'inline-flex';
+            desktopBadge.innerText = 'פעיל במחשב זה ✓';
+        }
+        if (phoneBadge) {
+            if (phone) {
+                phoneBadge.style.display = 'inline-flex';
+                phoneBadge.className = 'drawer-phone-badge has-phone';
+                phoneBadge.innerText = `📱 נייד: ${phone}`;
+            } else {
+                phoneBadge.style.display = 'none';
+            }
+        }
+    }
+}
+
 // 5. Render dynamic contents into In-App Notification Hub
 function renderInAppNotificationHub() {
     updateNotificationBadge();
+    updateNotificationDrawerDeviceMode();
 
     const remainingLectures = getRemainingClassesToday();
     const priorityTasks = getUpcomingPriorityTasks();
@@ -22278,6 +22349,8 @@ async function trigger10MinClassAlert(classItem, isTest = false) {
         return false;
     }
 
+    const isMobile = (typeof isMobileView === 'function') ? isMobileView() : (window.innerWidth <= 768);
+
     const courseName = classItem.courseName || 'שיעור אקדמי';
     const type = classItem.type || 'הרצאה / תרגול';
     const typeShort = (type.split(' ')[0] || '').replace(/[()]/g, '');
@@ -22304,8 +22377,8 @@ async function trigger10MinClassAlert(classItem, isTest = false) {
     }
 
     const title = isTest 
-        ? `⏰ [בדיקה] בעוד 10 דק׳: ${courseName}`
-        : `⏰ בעוד 10 דק׳: ${courseName}${typeShort ? ' (' + typeShort + ')' : ''}`;
+        ? (isMobile ? `⏰ [בדיקה] בעוד 10 דק׳: ${courseName}` : `💻 [בדיקת מחשב] בעוד 10 דק׳: ${courseName}`)
+        : (isMobile ? `⏰ בעוד 10 דק׳: ${courseName}${typeShort ? ' (' + typeShort + ')' : ''}` : `💻 תזכורת שיעור בעוד 10 דק׳: ${courseName}${typeShort ? ' (' + typeShort + ')' : ''}`);
 
     const bodyLines = [
         `📚 ${type}`,
@@ -22331,7 +22404,7 @@ async function trigger10MinClassAlert(classItem, isTest = false) {
         badge: 'icon.png',
         tag,
         renotify: true,
-        vibrate: [250, 100, 250, 100, 250],
+        vibrate: isMobile ? [250, 100, 250, 100, 250] : undefined,
         data: { tab: 'timetable' },
         actions: [
             { action: 'open-timetable', title: '📍 פתח מערכת שעות' }
@@ -22339,7 +22412,10 @@ async function trigger10MinClassAlert(classItem, isTest = false) {
     });
 
     if (sent && isTest && typeof showToastNotification === 'function') {
-        showToastNotification(`התראת 10 דקות עבור [${courseName}] נשלחה בהצלחה!`, 'success');
+        const toastMsg = isMobile
+            ? `התראת 10 דקות עבור [${courseName}] נשלחה בהצלחה! 📲`
+            : `התראת 10 דקות עבור [${courseName}] נשלחה בהצלחה למחשב זה! 💻`;
+        showToastNotification(toastMsg, 'success');
     }
 
     return sent;
@@ -22446,7 +22522,7 @@ function scheduleTodayClassTimeouts() {
     });
 }
 
-// 11. Dispatch Native Mobile System Notifications (Dual Summary Notifications with clear dividers)
+// 11. Dispatch Native System Notifications (Device-Aware: Mobile vs Desktop)
 async function dispatchNativeMobileNotifications() {
     if (!('Notification' in window)) {
         if (typeof showToastNotification === 'function') {
@@ -22460,12 +22536,17 @@ async function dispatchNativeMobileNotifications() {
         permission = await Notification.requestPermission();
     }
 
+    const isMobile = (typeof isMobileView === 'function') ? isMobileView() : (window.innerWidth <= 768);
+
     if (permission !== 'granted') {
         if (typeof showToastNotification === 'function') {
             if (permission === 'denied') {
                 showToastNotification('ההתראות חסומות בדפדפן. לחץ על סמל ההגדרות ⚙️ / המנעול ליד כתובת האתר -> הרשאות -> אפשר התראות', 'warning');
             } else {
-                showToastNotification('יש לאשר הרשאות התראה בחלון הדפדפן כדי לקבל עדכונים בנייד', 'warning');
+                const promptMsg = isMobile
+                    ? 'יש לאשר הרשאות התראה בחלון הדפדפן כדי לקבל עדכונים בנייד'
+                    : 'יש לאשר הרשאות התראה בחלון הדפדפן כדי לקבל עדכונים במחשב זה';
+                showToastNotification(promptMsg, 'warning');
             }
         }
         return;
@@ -22494,13 +22575,19 @@ async function dispatchNativeMobileNotifications() {
 
     if (sendLectures) {
         if (remainingLectures.isFree || remainingLectures.totalToday === 0) {
-            lectureTitle = '🎓 מערכת שעות: יום חופשי מלימודים';
+            lectureTitle = isMobile
+                ? '🎓 מערכת שעות: יום חופשי מלימודים'
+                : '💻 מערכת שעות במחשב: יום חופשי מלימודים';
             lectureBody = '🏖️ אין שיעורים מתוכננים להיום. יום נעים, פורה ומנוחה טובה!';
         } else if (remainingLectures.count === 0) {
-            lectureTitle = '🎓 מערכת שעות: השיעורים הסתיימו';
+            lectureTitle = isMobile
+                ? '🎓 מערכת שעות: השיעורים הסתיימו'
+                : '💻 מערכת שעות במחשב: השיעורים להיום הסתיימו';
             lectureBody = `✔️ כל ${remainingLectures.totalToday} השיעורים להיום הושלמו בהצלחה!`;
         } else {
-            lectureTitle = `🎓 לו״ז היום (${remainingLectures.count} שיעורים נותרו)`;
+            lectureTitle = isMobile
+                ? `🎓 לו״ז היום (${remainingLectures.count} שיעורים נותרו)`
+                : `💻 לו״ז היום במחשב (${remainingLectures.count} שיעורים נותרו)`;
 
             const classBlocks = remainingLectures.classes.map((c, idx) => {
                 const isNext = (idx === 0);
@@ -22521,6 +22608,7 @@ async function dispatchNativeMobileNotifications() {
             badge: 'icon.png',
             tag: 'ast-today-lectures',
             renotify: true,
+            vibrate: isMobile ? [250, 100, 250, 100, 250] : undefined,
             data: { tab: 'timetable' },
             actions: [
                 { action: 'open-timetable', title: '📅 פתח מערכת שעות' }
@@ -22536,10 +22624,14 @@ async function dispatchNativeMobileNotifications() {
         let taskBody = '';
 
         if (priorityTasks.tasks.length === 0) {
-            taskTitle = '📋 משימות אקדמיות: הכל הושלם!';
+            taskTitle = isMobile
+                ? '📋 משימות אקדמיות: הכל הושלם!'
+                : '💻 משימות אקדמיות במחשב: הכל הושלם!';
             taskBody = '✨ אין משימות ממתינות להגשה. כל הכבוד!';
         } else {
-            taskTitle = `📋 משימות דחופות (${priorityTasks.tasks.length} פתוחות)`;
+            taskTitle = isMobile
+                ? `📋 משימות דחופות (${priorityTasks.tasks.length} פתוחות)`
+                : `💻 משימות דחופות במחשב (${priorityTasks.tasks.length} פתוחות)`;
 
             const taskBlocks = priorityTasks.tasks.slice(0, 5).map(t => {
                 const icon = t.diffDays < 0 ? '🚨' : (t.diffDays <= 1 ? '🔥' : '⚡');
@@ -22564,6 +22656,7 @@ async function dispatchNativeMobileNotifications() {
                 badge: 'icon.png',
                 tag: 'ast-upcoming-tasks',
                 renotify: true,
+                vibrate: isMobile ? [250, 100, 250, 100, 250] : undefined,
                 data: { tab: 'tasks' },
                 actions: [
                     { action: 'open-tasks', title: '📋 פתח משימות' }
@@ -22571,12 +22664,18 @@ async function dispatchNativeMobileNotifications() {
             });
 
             if (typeof showToastNotification === 'function') {
-                showToastNotification('התראות סקירה נשלחו בהצלחה למכשיר הנייד!', 'success');
+                const toastMsg = isMobile
+                    ? 'התראות סקירה נשלחו בהצלחה למכשיר הנייד! 📲'
+                    : 'התראות שולחן עבודה נשלחו בהצלחה למחשב זה! 💻';
+                showToastNotification(toastMsg, 'success');
             }
         }, delay);
     } else if (sendLectures) {
         if (typeof showToastNotification === 'function') {
-            showToastNotification('התראת לו״ז יומי נשלחה בהצלחה למכשיר הנייד!', 'success');
+            const toastMsg = isMobile
+                ? 'התראת לו״ז יומי נשלחה בהצלחה למכשיר הנייד! 📲'
+                : 'התראת שולחן עבודה נשלחה בהצלחה למחשב זה! 💻';
+            showToastNotification(toastMsg, 'success');
         }
     }
 }
@@ -22760,6 +22859,11 @@ function setupMobileNotifications() {
 
     // Periodic badge update every 60 seconds
     setInterval(updateNotificationBadge, 60000);
+
+    // J. Dynamic Drawer Device Mode on Resize/Orientation
+    window.addEventListener('resize', updateNotificationDrawerDeviceMode);
+    window.addEventListener('orientationchange', updateNotificationDrawerDeviceMode);
+    updateNotificationDrawerDeviceMode();
 }
 
 // ==============================================================================
