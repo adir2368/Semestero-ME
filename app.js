@@ -19493,13 +19493,13 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.10.18-v2.4.13",
-    version: "2.4.13",
-    build: "20261018_03",
-    date: "2026-10-18 12:15",
-    description: "גרסה 2.4.13: הוספת סמל גלגל שיניים מכני ייעודי (Mechanical Gear Badge) מותאם לשורת הסטטוס באנדרואיד (notification-badge.png) המחליף את הריבוע הלבן הסתמי בסמל הנדסי שקוף ומלוטש; סנכרון נכסי PWA וזיכרון מטמון Service Worker."
+    code: "REV-2026.10.18-v2.4.14",
+    version: "2.4.14",
+    build: "20261018_04",
+    date: "2026-10-18 12:45",
+    description: "גרסה 2.4.14: שילוב סמל מבחנה הנדסית עם גלגל שיניים (Science Flask & Gear Badge) לשורת הסטטוס באנדרואיד למניעת בלבול עם סמל הגדרות המערכת של הטלפון; דיוק ועידון הצללית בהתאם לאיור המקורי עם בועות מעבדה וחלל מרכזי נקי."
 };
-window.APP_VERSION = "2.4.13";
+window.APP_VERSION = "2.4.14";
 
 function ensureBaselineRevisions() {
     if (!gameState.revisions || !Array.isArray(gameState.revisions) || gameState.revisions.length === 0) {
