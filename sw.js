@@ -1,5 +1,5 @@
-// Service Worker for Academic Skill Tree (Semestero ME) - v2.4.12
-const CACHE_NAME = 'semestero-me-v2.4.12';
+// Service Worker for Academic Skill Tree (Semestero ME) - v2.4.13
+const CACHE_NAME = 'semestero-me-v2.4.13';
 
 const STATIC_ASSETS = [
     './',
@@ -37,6 +37,8 @@ const STATIC_ASSETS = [
     './adir_avatar.png',
     './adir_avatar_small.png',
     './adir_avatar_small.webp',
+    './notification-badge.png',
+    './notification-badge-96.png',
     './user_saved_state.json'
 ];
 
@@ -173,7 +175,7 @@ self.addEventListener('push', (event) => {
     const options = {
         body: data.body || 'יש לך אירוע קרוב במערכת השעות',
         icon: 'icon.png',
-        badge: 'icon.png',
+        badge: 'notification-badge.png',
         tag: data.tag || 'ast-push-reminder',
         renotify: true,
         vibrate: [250, 100, 250, 100, 250],

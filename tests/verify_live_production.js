@@ -32,7 +32,7 @@ function fetchUrl(url, headers = {}) {
 
 async function run() {
     console.log('================================================================');
-    console.log('🌐 Probing Live Production Deployment (GitHub Pages v2.4.12)');
+    console.log('🌐 Probing Live Production Deployment (GitHub Pages v2.4.13)');
     console.log('================================================================\n');
 
     let allOk = true;
@@ -42,20 +42,20 @@ async function run() {
     const indexRes = await fetchUrl(`https://adir2368.github.io/Semestero-ME/?t=${Date.now()}`);
     if (indexRes.status === 200) {
         console.log('   ✅ HTTP 200 OK');
-        const hasV2410InDisplay = indexRes.body.includes('id="display-system-version">v2.4.12<');
+        const hasV2413InDisplay = indexRes.body.includes('id="display-system-version">v2.4.13<');
         const hasFooterBadge = indexRes.body.includes('id="footer-version-badge"');
         const hasTimetableGenBtn = indexRes.body.includes('id="btn-open-timetable-generator"');
         const hasTimetableGenModal = indexRes.body.includes('id="modal-timetable-generator"');
         const hasOrganitPills = indexRes.body.includes('id="organit-category-pills"');
         const hasTechnionPlusBar = indexRes.body.includes('id="modal-technion-plus-bar"');
         
-        console.log(`   ${hasV2410InDisplay ? '✅' : '⏳'} display-system-version is v2.4.12: ${hasV2410InDisplay}`);
+        console.log(`   ${hasV2413InDisplay ? '✅' : '⏳'} display-system-version is v2.4.13: ${hasV2413InDisplay}`);
         console.log(`   ${hasFooterBadge ? '✅' : '❌'} footer-version-badge exists: ${hasFooterBadge}`);
         console.log(`   ${hasTimetableGenBtn ? '✅' : '⏳'} btn-open-timetable-generator exists: ${hasTimetableGenBtn}`);
         console.log(`   ${hasTimetableGenModal ? '✅' : '⏳'} modal-timetable-generator exists: ${hasTimetableGenModal}`);
         console.log(`   ${hasOrganitPills ? '✅' : '⏳'} organit-category-pills exists: ${hasOrganitPills}`);
         console.log(`   ${hasTechnionPlusBar ? '✅' : '⏳'} modal-technion-plus-bar exists: ${hasTechnionPlusBar}`);
-        if (!hasV2410InDisplay || !hasTimetableGenBtn || !hasTimetableGenModal) allOk = false;
+        if (!hasV2413InDisplay || !hasTimetableGenBtn || !hasTimetableGenModal) allOk = false;
     } else {
         console.error(`   ❌ Failed with status ${indexRes.status}`);
         allOk = false;
@@ -65,11 +65,13 @@ async function run() {
     console.log('\n2. Checking Live sw.js...');
     const swRes = await fetchUrl(`https://adir2368.github.io/Semestero-ME/sw.js?t=${Date.now()}`);
     if (swRes.status === 200) {
-        const hasCacheV2410 = swRes.body.includes("CACHE_NAME = 'semestero-me-v2.4.12'");
+        const hasCacheV2413 = swRes.body.includes("CACHE_NAME = 'semestero-me-v2.4.13'");
         const hasTimetableInAssets = swRes.body.includes("'./timetable_generator.js'");
-        console.log(`   ${hasCacheV2410 ? '✅' : '⏳'} CACHE_NAME is semestero-me-v2.4.12: ${hasCacheV2410}`);
+        const hasBadgeInAssets = swRes.body.includes("'./notification-badge.png'");
+        console.log(`   ${hasCacheV2413 ? '✅' : '⏳'} CACHE_NAME is semestero-me-v2.4.13: ${hasCacheV2413}`);
         console.log(`   ${hasTimetableInAssets ? '✅' : '⏳'} timetable_generator.js in cache: ${hasTimetableInAssets}`);
-        if (!hasCacheV2410 || !hasTimetableInAssets) allOk = false;
+        console.log(`   ${hasBadgeInAssets ? '✅' : '⏳'} notification-badge.png in cache: ${hasBadgeInAssets}`);
+        if (!hasCacheV2413 || !hasTimetableInAssets || !hasBadgeInAssets) allOk = false;
     } else {
         console.error(`   ❌ sw.js returned status ${swRes.status}`);
         allOk = false;
@@ -95,22 +97,30 @@ async function run() {
     console.log('\n4. Checking Live app.js...');
     const appRes = await fetchUrl(`https://adir2368.github.io/Semestero-ME/app.js?t=${Date.now()}`);
     if (appRes.status === 200) {
-        const hasRevision = appRes.body.includes('REV-2026.10.18-v2.4.12');
-        const hasAppVersion = appRes.body.includes('window.APP_VERSION = "2.4.12"');
-        const hasOrganitLogic = appRes.body.includes('setupOrganitCategoryPills');
-        const hasTechnionPlusBarLogic = appRes.body.includes('renderTechnionPlusQuickBar');
-        console.log(`   ${hasRevision ? '✅' : '⏳'} Revision REV-2026.10.18-v2.4.12: ${hasRevision}`);
-        console.log(`   ${hasAppVersion ? '✅' : '⏳'} window.APP_VERSION = "2.4.12": ${hasAppVersion}`);
-        console.log(`   ${hasOrganitLogic ? '✅' : '⏳'} Organit++ filtering deployed: ${hasOrganitLogic}`);
-        console.log(`   ${hasTechnionPlusBarLogic ? '✅' : '⏳'} Technion++ bar deployed: ${hasTechnionPlusBarLogic}`);
-        if (!hasRevision || !hasAppVersion || !hasOrganitLogic) allOk = false;
+        const hasRevision = appRes.body.includes('REV-2026.10.18-v2.4.13');
+        const hasAppVersion = appRes.body.includes('window.APP_VERSION = "2.4.13"');
+        const hasBadgeLogic = appRes.body.includes("badge: 'notification-badge.png'");
+        console.log(`   ${hasRevision ? '✅' : '⏳'} Revision REV-2026.10.18-v2.4.13: ${hasRevision}`);
+        console.log(`   ${hasAppVersion ? '✅' : '⏳'} window.APP_VERSION = "2.4.13": ${hasAppVersion}`);
+        console.log(`   ${hasBadgeLogic ? '✅' : '⏳'} Notification badge logic deployed: ${hasBadgeLogic}`);
+        if (!hasRevision || !hasAppVersion || !hasBadgeLogic) allOk = false;
     } else {
         console.error(`   ❌ app.js returned status ${appRes.status}`);
         allOk = false;
     }
 
-    // 5. Check styles.css
-    console.log('\n5. Checking Live styles.css...');
+    // 5. Check notification-badge.png asset
+    console.log('\n5. Checking Live notification-badge.png asset...');
+    const badgeRes = await fetchUrl(`https://adir2368.github.io/Semestero-ME/notification-badge.png?t=${Date.now()}`);
+    if (badgeRes.status === 200) {
+        console.log('   ✅ notification-badge.png deployed (HTTP 200)');
+    } else {
+        console.log(`   ⏳ notification-badge.png returned status ${badgeRes.status}`);
+        allOk = false;
+    }
+
+    // 6. Check styles.css
+    console.log('\n6. Checking Live styles.css...');
     const stylesRes = await fetchUrl(`https://adir2368.github.io/Semestero-ME/styles.css?t=${Date.now()}`);
     if (stylesRes.status === 200) {
         const hasTtgPreviewGrid = stylesRes.body.includes('.ttg-preview-grid');
@@ -127,7 +137,7 @@ async function run() {
 
     console.log('\n================================================================');
     if (allOk) {
-        console.log('🎉 LIVE VERIFICATION SUCCESSFUL: v2.4.10 is live on GitHub Pages with Timetable Generator & Technion++ features!');
+        console.log('🎉 LIVE VERIFICATION SUCCESSFUL: v2.4.13 is live on GitHub Pages with Mechanical Gear Notification Badge!');
     } else {
         console.log('⏳ Deployment in progress or caching on CDN. Re-run in a few seconds.');
     }

@@ -19493,13 +19493,13 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.10.18-v2.4.12",
-    version: "2.4.12",
-    build: "20261018_02",
-    date: "2026-10-18 11:45",
-    description: "גרסה 2.4.12: הפרדה והתאמה דינמית של מנוע ההתראות בין מחשב (שולחן עבודה / Desktop) לבין מכשיר נייד (טלפון חכם): כפתורים וטקסטים מותאמים אישית (💻 סקירה למחשב / ⏰ בדיקת 10 דק׳ במחשב לעומת 📲 סקירה לנייד), תגיות סטטוס מופרדות, והתראות מערכת מותאמות לשולחן העבודה של Windows/Mac."
+    code: "REV-2026.10.18-v2.4.13",
+    version: "2.4.13",
+    build: "20261018_03",
+    date: "2026-10-18 12:15",
+    description: "גרסה 2.4.13: הוספת סמל גלגל שיניים מכני ייעודי (Mechanical Gear Badge) מותאם לשורת הסטטוס באנדרואיד (notification-badge.png) המחליף את הריבוע הלבן הסתמי בסמל הנדסי שקוף ומלוטש; סנכרון נכסי PWA וזיכרון מטמון Service Worker."
 };
-window.APP_VERSION = "2.4.12";
+window.APP_VERSION = "2.4.13";
 
 function ensureBaselineRevisions() {
     if (!gameState.revisions || !Array.isArray(gameState.revisions) || gameState.revisions.length === 0) {
@@ -19991,7 +19991,7 @@ function testSendPhoneNotification() {
         showNativeNotification(`📱 התראת בדיקה למספר ${phone}`, {
             body: `מערכת ההתראות של Semestero ME מחוברת למספרך (${phone}).\nתקבל תזכורות לפי ההעדפות שהגדרת.`,
             icon: 'icon.png',
-            badge: 'icon.png',
+            badge: 'notification-badge.png',
             tag: 'ast-phone-test',
             renotify: true
         });
@@ -22276,8 +22276,16 @@ function closeNotificationDrawer() {
 }
 
 // Helper: Show native notification via Service Worker (with fallback)
-async function showNativeNotification(title, options) {
+async function showNativeNotification(title, options = {}) {
     if (!('Notification' in window)) return false;
+
+    // Ensure Android status bar uses the dedicated monochrome gear badge
+    if (!options.badge || options.badge === 'icon.png') {
+        options.badge = 'notification-badge.png';
+    }
+    if (!options.icon) {
+        options.icon = 'icon.png';
+    }
     
     let permission = Notification.permission;
     if (permission !== 'granted') {
@@ -22327,7 +22335,7 @@ async function scheduleNativeTimestampTrigger(classItem, timestampMs) {
             await reg.showNotification(`⏰ בעוד כ-10 דק׳: ${courseName} (${typeShort})`, {
                 body: `📚 ${type}\n⏰ שעות: ${classItem.startTime} - ${classItem.endTime}\n📍 ${classItem.room || 'טכניון'}`,
                 icon: 'icon.png',
-                badge: 'icon.png',
+                badge: 'notification-badge.png',
                 tag: tag,
                 showTrigger: new TimestampTrigger(timestampMs),
                 vibrate: [250, 100, 250, 100, 250],
@@ -22401,7 +22409,7 @@ async function trigger10MinClassAlert(classItem, isTest = false) {
     const sent = await showNativeNotification(title, {
         body,
         icon: 'icon.png',
-        badge: 'icon.png',
+        badge: 'notification-badge.png',
         tag,
         renotify: true,
         vibrate: isMobile ? [250, 100, 250, 100, 250] : undefined,
@@ -22605,7 +22613,7 @@ async function dispatchNativeMobileNotifications() {
         await showNativeNotification(lectureTitle, {
             body: lectureBody,
             icon: 'icon.png',
-            badge: 'icon.png',
+            badge: 'notification-badge.png',
             tag: 'ast-today-lectures',
             renotify: true,
             vibrate: isMobile ? [250, 100, 250, 100, 250] : undefined,
@@ -22653,7 +22661,7 @@ async function dispatchNativeMobileNotifications() {
             await showNativeNotification(taskTitle, {
                 body: taskBody,
                 icon: 'icon.png',
-                badge: 'icon.png',
+                badge: 'notification-badge.png',
                 tag: 'ast-upcoming-tasks',
                 renotify: true,
                 vibrate: isMobile ? [250, 100, 250, 100, 250] : undefined,

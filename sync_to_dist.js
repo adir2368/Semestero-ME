@@ -52,7 +52,9 @@ const filesToCopy = [
     'icon.ico',
     'adir_avatar.png',
     'adir_avatar_small.png',
-    'adir_avatar_small.webp'
+    'adir_avatar_small.webp',
+    'notification-badge.png',
+    'notification-badge-96.png'
 ];
 
 for (const targetDir of targetDirs) {
