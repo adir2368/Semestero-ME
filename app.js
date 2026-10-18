@@ -8654,7 +8654,8 @@ function loadSavedState() {
 
     if (!loadedFromAuthSync) {
         const isAdir = (window.AuthSync && typeof window.AuthSync.isAdirActive === 'function' && window.AuthSync.isAdirActive());
-        const saved = localStorage.getItem("academic_skill_tree_save");
+        const storageKey = isAdir ? "academic_skill_tree_save" : "ast_user_state_guest";
+        const saved = localStorage.getItem(storageKey);
         if (saved) {
             try {
                 const parsed = JSON.parse(saved);
@@ -14960,7 +14961,7 @@ function getDegreeExamDates(filterPast = true) {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    const isAdir = (window.AuthSync && typeof window.AuthSync.isAdirActive === 'function') ? window.AuthSync.isAdirActive() : true;
+    const isAdir = (window.AuthSync && typeof window.AuthSync.isAdirActive === 'function') ? window.AuthSync.isAdirActive() : false;
 
     // 1. Check pastExamsBank (only for Adir Moshe or active courses)
     if (gameState.pastExamsBank && isAdir) {
@@ -16633,7 +16634,7 @@ function setupStudyRunway() {
 
 // Syncs official Technion Cheesefork exam dates into gameState.courses
 function syncCheeseforkExamDates(forceNotify = true) {
-    const isAdir = (window.AuthSync && typeof window.AuthSync.isAdirActive === 'function') ? window.AuthSync.isAdirActive() : true;
+    const isAdir = (window.AuthSync && typeof window.AuthSync.isAdirActive === 'function') ? window.AuthSync.isAdirActive() : false;
     if (!isAdir && !forceNotify) return;
 
     let syncedCount = 0;
@@ -18827,7 +18828,7 @@ function renderFinalsCalendar() {
 
     // Map scheduled items by date string (YYYY-MM-DD)
     const itemsByDate = {};
-    const isAdir = (window.AuthSync && typeof window.AuthSync.isAdirActive === 'function') ? window.AuthSync.isAdirActive() : true;
+    const isAdir = (window.AuthSync && typeof window.AuthSync.isAdirActive === 'function') ? window.AuthSync.isAdirActive() : false;
     if (isAdir) {
         (gameState.pastExamSchedule || []).forEach(item => {
             if (!itemsByDate[item.date]) itemsByDate[item.date] = [];
@@ -19492,13 +19493,13 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.10.17-v2.4.10",
-    version: "2.4.10",
-    build: "20261017_03",
-    date: "2026-10-17 12:45",
-    description: "גרסה 2.4.10: מחולל מערכות שעות אלגוריתמי מבוסס CheeseFork המחשב את כל הקומבינציות האפשריות ללא התנגשויות (מיון לפי מקסימום ימי חופש, מינימום חלונות והתחלה מאוחרת), שילוב פיצ'רים של תוסף Technion++ (סרגלי קישורים ישירים למודל 26, Panopto, מבחני עבר וצ'יזפורק), סינון משימות לפי קטגוריות Organit++ ונעיצת משימות חשובות (📌)."
+    code: "REV-2026.10.18-v2.4.11",
+    version: "2.4.11",
+    build: "20261018_01",
+    date: "2026-10-18 02:45",
+    description: "גרסה 2.4.11: אבטחת פרטיות ובידוד מוחלט של נתוני משתמש: כאשר לא מחוברים (אורח), מערכת השעות, לוח המטלות והציונים נותרים מבודדים; שלב 1 במחולל שעות: בחירת עוגנים ונעילת מרצים/קבוצות טרם החילול; ביטול מחרוזות ברירת מחדל 'כיתת טכניון'; שיטוח פילטר הסטטוסים בלוח המטלות ל-4 שורות נקיות."
 };
-window.APP_VERSION = "2.4.10";
+window.APP_VERSION = "2.4.11";
 
 function ensureBaselineRevisions() {
     if (!gameState.revisions || !Array.isArray(gameState.revisions) || gameState.revisions.length === 0) {
@@ -21457,11 +21458,12 @@ function getLiveClassStatus(startTime, endTime) {
 }
 
 function getActiveTimetableSchedule() {
+    const isAdir = (window.AuthSync && typeof window.AuthSync.isAdirActive === 'function') && window.AuthSync.isAdirActive();
     const curState = (window.getGlobalGameState ? window.getGlobalGameState() : window.gameState);
     if (curState && curState.timetable && curState.timetable.days && curState.timetable.days.length > 0) {
         return curState.timetable;
     }
-    if (typeof CHEESEFORK_SEMESTER_SCHEDULE !== 'undefined' && CHEESEFORK_SEMESTER_SCHEDULE && CHEESEFORK_SEMESTER_SCHEDULE.days && CHEESEFORK_SEMESTER_SCHEDULE.days.length > 0) {
+    if (isAdir && typeof CHEESEFORK_SEMESTER_SCHEDULE !== 'undefined' && CHEESEFORK_SEMESTER_SCHEDULE && CHEESEFORK_SEMESTER_SCHEDULE.days && CHEESEFORK_SEMESTER_SCHEDULE.days.length > 0) {
         return CHEESEFORK_SEMESTER_SCHEDULE;
     }
     return null;

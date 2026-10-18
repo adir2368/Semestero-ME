@@ -32,7 +32,7 @@ function fetchUrl(url, headers = {}) {
 
 async function run() {
     console.log('================================================================');
-    console.log('🌐 Probing Live Production Deployment (GitHub Pages v2.4.10)');
+    console.log('🌐 Probing Live Production Deployment (GitHub Pages v2.4.11)');
     console.log('================================================================\n');
 
     let allOk = true;
@@ -42,14 +42,14 @@ async function run() {
     const indexRes = await fetchUrl(`https://adir2368.github.io/Semestero-ME/?t=${Date.now()}`);
     if (indexRes.status === 200) {
         console.log('   ✅ HTTP 200 OK');
-        const hasV2410InDisplay = indexRes.body.includes('id="display-system-version">v2.4.10<');
+        const hasV2410InDisplay = indexRes.body.includes('id="display-system-version">v2.4.11<');
         const hasFooterBadge = indexRes.body.includes('id="footer-version-badge"');
         const hasTimetableGenBtn = indexRes.body.includes('id="btn-open-timetable-generator"');
         const hasTimetableGenModal = indexRes.body.includes('id="modal-timetable-generator"');
         const hasOrganitPills = indexRes.body.includes('id="organit-category-pills"');
         const hasTechnionPlusBar = indexRes.body.includes('id="modal-technion-plus-bar"');
         
-        console.log(`   ${hasV2410InDisplay ? '✅' : '⏳'} display-system-version is v2.4.10: ${hasV2410InDisplay}`);
+        console.log(`   ${hasV2410InDisplay ? '✅' : '⏳'} display-system-version is v2.4.11: ${hasV2410InDisplay}`);
         console.log(`   ${hasFooterBadge ? '✅' : '❌'} footer-version-badge exists: ${hasFooterBadge}`);
         console.log(`   ${hasTimetableGenBtn ? '✅' : '⏳'} btn-open-timetable-generator exists: ${hasTimetableGenBtn}`);
         console.log(`   ${hasTimetableGenModal ? '✅' : '⏳'} modal-timetable-generator exists: ${hasTimetableGenModal}`);
@@ -65,9 +65,9 @@ async function run() {
     console.log('\n2. Checking Live sw.js...');
     const swRes = await fetchUrl(`https://adir2368.github.io/Semestero-ME/sw.js?t=${Date.now()}`);
     if (swRes.status === 200) {
-        const hasCacheV2410 = swRes.body.includes("CACHE_NAME = 'semestero-me-v2.4.10'");
+        const hasCacheV2410 = swRes.body.includes("CACHE_NAME = 'semestero-me-v2.4.11'");
         const hasTimetableInAssets = swRes.body.includes("'./timetable_generator.js'");
-        console.log(`   ${hasCacheV2410 ? '✅' : '⏳'} CACHE_NAME is semestero-me-v2.4.10: ${hasCacheV2410}`);
+        console.log(`   ${hasCacheV2410 ? '✅' : '⏳'} CACHE_NAME is semestero-me-v2.4.11: ${hasCacheV2410}`);
         console.log(`   ${hasTimetableInAssets ? '✅' : '⏳'} timetable_generator.js in cache: ${hasTimetableInAssets}`);
         if (!hasCacheV2410 || !hasTimetableInAssets) allOk = false;
     } else {
@@ -95,12 +95,12 @@ async function run() {
     console.log('\n4. Checking Live app.js...');
     const appRes = await fetchUrl(`https://adir2368.github.io/Semestero-ME/app.js?t=${Date.now()}`);
     if (appRes.status === 200) {
-        const hasRevision = appRes.body.includes('REV-2026.10.17-v2.4.10');
-        const hasAppVersion = appRes.body.includes('window.APP_VERSION = "2.4.10"');
+        const hasRevision = appRes.body.includes('REV-2026.10.17-v2.4.11');
+        const hasAppVersion = appRes.body.includes('window.APP_VERSION = "2.4.11"');
         const hasOrganitLogic = appRes.body.includes('setupOrganitCategoryPills');
         const hasTechnionPlusBarLogic = appRes.body.includes('renderTechnionPlusQuickBar');
-        console.log(`   ${hasRevision ? '✅' : '⏳'} Revision REV-2026.10.17-v2.4.10: ${hasRevision}`);
-        console.log(`   ${hasAppVersion ? '✅' : '⏳'} window.APP_VERSION = "2.4.10": ${hasAppVersion}`);
+        console.log(`   ${hasRevision ? '✅' : '⏳'} Revision REV-2026.10.17-v2.4.11: ${hasRevision}`);
+        console.log(`   ${hasAppVersion ? '✅' : '⏳'} window.APP_VERSION = "2.4.11": ${hasAppVersion}`);
         console.log(`   ${hasOrganitLogic ? '✅' : '⏳'} Organit++ filtering deployed: ${hasOrganitLogic}`);
         console.log(`   ${hasTechnionPlusBarLogic ? '✅' : '⏳'} Technion++ bar deployed: ${hasTechnionPlusBarLogic}`);
         if (!hasRevision || !hasAppVersion || !hasOrganitLogic) allOk = false;
