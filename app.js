@@ -15928,6 +15928,7 @@ window.MiluimRightsAdvisor = {
         const daysInput = document.getElementById("miluim-days-input");
         const quickDayBtns = document.querySelectorAll(".miluim-quick-day-btn");
         const filterTasksBtn = document.getElementById("btn-filter-miluim-tasks-from-advisor");
+        const activeToggle = document.getElementById("miluim-active-status-toggle");
 
         if (!modal) return;
 
@@ -15937,6 +15938,45 @@ window.MiluimRightsAdvisor = {
         modal.onclick = (e) => {
             if (e.target === modal) this.closeModal();
         };
+
+        if (activeToggle) {
+            const isSavedActive = (localStorage.getItem('semestero_is_active_reservist') === 'true') ||
+                                  Boolean(window.gameState && window.gameState.isReservist) ||
+                                  (localStorage.getItem('semestero_reservist_deduction_active') === 'true');
+            activeToggle.checked = isSavedActive;
+            activeToggle.onchange = (e) => {
+                const checked = e.target.checked;
+                try {
+                    localStorage.setItem('semestero_is_active_reservist', checked ? 'true' : 'false');
+                } catch (err) {}
+                if (window.gameState) {
+                    window.gameState.isReservist = checked;
+                    if (!window.gameState.userProfile) window.gameState.userProfile = {};
+                    window.gameState.userProfile.isReservist = checked;
+                }
+                const settingsToggle = document.getElementById("setting-is-reservist");
+                if (settingsToggle) settingsToggle.checked = checked;
+
+                const plannerToggle = document.getElementById("toggle-planner-reservist");
+                if (plannerToggle && plannerToggle.checked !== checked) {
+                    plannerToggle.checked = checked;
+                    try {
+                        localStorage.setItem('semestero_reservist_deduction_active', checked ? 'true' : 'false');
+                    } catch (err) {}
+                    if (window.PlannerModule && typeof window.PlannerModule.renderDegreePlanner === 'function') {
+                        window.PlannerModule.renderDegreePlanner();
+                    }
+                }
+
+                this.render();
+                if (typeof showToastNotification === 'function') {
+                    showToastNotification(
+                        checked ? '🇮🇱 הופעל סטטוס שירות מילואים פעיל: מחשבון הזכויות וסימולטור המרת הציונים פתוחים.' : 'הושבת סטטוס שירות מילואים פעיל.',
+                        checked ? 'success' : 'info'
+                    );
+                }
+            };
+        }
 
         if (daysInput) {
             daysInput.oninput = () => this.render();
@@ -15978,6 +16018,35 @@ window.MiluimRightsAdvisor = {
     },
 
     render() {
+        const activeToggle = document.getElementById("miluim-active-status-toggle");
+        const isActive = activeToggle ? activeToggle.checked : (
+            (localStorage.getItem('semestero_is_active_reservist') === 'true') ||
+            Boolean(window.gameState && window.gameState.isReservist) ||
+            (localStorage.getItem('semestero_reservist_deduction_active') === 'true')
+        );
+
+        const inactiveNotice = document.getElementById("miluim-inactive-notice");
+        const activeContent = document.getElementById("miluim-active-content-section");
+        const activeBadge = document.getElementById("miluim-status-active-badge");
+
+        if (activeToggle && activeToggle.checked !== isActive) {
+            activeToggle.checked = isActive;
+        }
+
+        if (activeBadge) {
+            activeBadge.style.display = isActive ? "inline-block" : "none";
+        }
+
+        if (!isActive) {
+            if (inactiveNotice) inactiveNotice.style.display = "block";
+            if (activeContent) activeContent.style.display = "none";
+            this.updateKpis([], 0);
+            return;
+        }
+
+        if (inactiveNotice) inactiveNotice.style.display = "none";
+        if (activeContent) activeContent.style.display = "flex";
+
         const daysInput = document.getElementById("miluim-days-input");
         const days = daysInput ? Math.max(0, parseInt(daysInput.value, 10) || 0) : 21;
 
@@ -19493,13 +19562,13 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.10.18-v2.4.14",
-    version: "2.4.14",
-    build: "20261018_04",
-    date: "2026-10-18 12:45",
-    description: "גרסה 2.4.14: שילוב סמל מבחנה הנדסית עם גלגל שיניים (Science Flask & Gear Badge) לשורת הסטטוס באנדרואיד למניעת בלבול עם סמל הגדרות המערכת של הטלפון; דיוק ועידון הצללית בהתאם לאיור המקורי עם בועות מעבדה וחלל מרכזי נקי."
+    code: "REV-2026.10.18-v2.4.15",
+    version: "2.4.15",
+    build: "20261018_05",
+    date: "2026-10-18 13:10",
+    description: "גרסה 2.4.15: זכויות מילואים והסרת אחריות מוחלטת: הטמעת הצהרת סטודנט בשירות מילואים פעיל (חובת סימון להפעלת מחשבון הזכויות וסימולטור הציונים), סנכרון רב-מודאלי מלא מול הגדרות הפרופיל ותכנון התואר, והוספת כתב ויתור והבהרה משפטית מחייבת המדגישה שאיננו מקושרים רשמית לטכניון וכל מקרה נבחן לגופו."
 };
-window.APP_VERSION = "2.4.14";
+window.APP_VERSION = "2.4.15";
 
 function ensureBaselineRevisions() {
     if (!gameState.revisions || !Array.isArray(gameState.revisions) || gameState.revisions.length === 0) {
@@ -19538,6 +19607,7 @@ function renderSettingsPage() {
     const guardModeSelect = document.getElementById("setting-semester-guard-mode");
     const charClassInput = document.getElementById("setting-character-class");
     const intlCheckbox = document.getElementById("setting-is-international");
+    const reservistCheckbox = document.getElementById("setting-is-reservist");
 
     if (displayVersion) displayVersion.textContent = `v${APP_CURRENT_REVISION.version} (${APP_CURRENT_REVISION.code})`;
     if (activeSemSelect) activeSemSelect.value = gameState.currentActiveSemester || 3;
@@ -19549,6 +19619,44 @@ function renderSettingsPage() {
             (gameState.userProfile && gameState.userProfile.isInternationalStudent) ||
             (window.AuthSync && window.AuthSync.getActiveUser && window.AuthSync.getActiveUser().isInternationalStudent)
         );
+    }
+    if (reservistCheckbox) {
+        const isRes = Boolean(
+            gameState.isReservist ||
+            (gameState.userProfile && gameState.userProfile.isReservist) ||
+            (localStorage.getItem('semestero_is_active_reservist') === 'true') ||
+            (localStorage.getItem('semestero_reservist_deduction_active') === 'true')
+        );
+        reservistCheckbox.checked = isRes;
+        reservistCheckbox.onchange = (e) => {
+            const checked = e.target.checked;
+            try {
+                localStorage.setItem('semestero_is_active_reservist', checked ? 'true' : 'false');
+            } catch (err) {}
+            if (window.gameState) {
+                window.gameState.isReservist = checked;
+                if (!window.gameState.userProfile) window.gameState.userProfile = {};
+                window.gameState.userProfile.isReservist = checked;
+            }
+            const miluimModalToggle = document.getElementById("miluim-active-status-toggle");
+            if (miluimModalToggle) miluimModalToggle.checked = checked;
+            const plannerToggle = document.getElementById("toggle-planner-reservist");
+            if (plannerToggle && plannerToggle.checked !== checked) {
+                plannerToggle.checked = checked;
+                try {
+                    localStorage.setItem('semestero_reservist_deduction_active', checked ? 'true' : 'false');
+                } catch (err) {}
+                if (window.PlannerModule && typeof window.PlannerModule.renderDegreePlanner === 'function') {
+                    window.PlannerModule.renderDegreePlanner();
+                }
+            }
+            if (typeof showToastNotification === 'function') {
+                showToastNotification(
+                    checked ? '🇮🇱 הופעל סטטוס שירות מילואים פעיל בהגדרות.' : 'בוטל סטטוס שירות מילואים פעיל.',
+                    checked ? 'success' : 'info'
+                );
+            }
+        };
     }
 
     // 2. Populate Section 3: Google Calendar IDs & Sync
@@ -19721,6 +19829,18 @@ function saveRevisionSection() {
                 } catch (e) {}
             }
         }
+    }
+    const reservistCheckbox = document.getElementById("setting-is-reservist");
+    if (reservistCheckbox) {
+        const isRes = Boolean(reservistCheckbox.checked);
+        gameState.isReservist = isRes;
+        if (!gameState.userProfile) gameState.userProfile = {};
+        gameState.userProfile.isReservist = isRes;
+        try {
+            localStorage.setItem('semestero_is_active_reservist', isRes ? 'true' : 'false');
+        } catch (e) {}
+        const miluimModalToggle = document.getElementById("miluim-active-status-toggle");
+        if (miluimModalToggle) miluimModalToggle.checked = isRes;
     }
 
     notifyStateChanged({ tab: 'settings' });

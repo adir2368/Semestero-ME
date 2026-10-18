@@ -1,5 +1,5 @@
 /**
- * Semestero ME - Algorithmic Timetable Generator & Combinations Studio (v2.4.14)
+ * Semestero ME - Algorithmic Timetable Generator & Combinations Studio (v2.4.15)
  * 
  * Automatically generates, scores, and browses all conflict-free timetable combinations
  * based on CheeseFork and Technion faculty catalogs for students to find their optimal schedule.
