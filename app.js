@@ -19042,6 +19042,122 @@ function downloadICSFile(content, fileName) {
     document.body.removeChild(link);
 }
 
+// Exports the weekly timetable to a standard .ics calendar file with native 10-min alarms for mobile (Apple & Google Calendar)
+function exportTimetableToICS() {
+    const schedule = getActiveTimetableSchedule();
+    if (!schedule || !schedule.days || schedule.days.length === 0) {
+        if (typeof showToastNotification === 'function') {
+            showToastNotification('לא נמצאה מערכת שעות פעילה לייצוא. יש להזין או לבחור מערכת שעות תחילה 📅', 'warning');
+        } else {
+            alert('לא נמצאה מערכת שעות פעילה לייצוא. יש להזין או לבחור מערכת שעות תחילה 📅');
+        }
+        return;
+    }
+
+    const hebrewToIcsDay = {
+        0: 'SU', // Sunday
+        1: 'MO', // Monday
+        2: 'TU', // Tuesday
+        3: 'WE', // Wednesday
+        4: 'TH', // Thursday
+        5: 'FR', // Friday
+        6: 'SA'  // Saturday
+    };
+
+    // Calculate current semester dates (Winter 2026/2027)
+    const semStart = new Date(2026, 9, 25); // Sunday Oct 25, 2026
+    const semEndStr = '20270215T235959Z'; // Until mid-February 2027
+
+    let icsLines = [
+        'BEGIN:VCALENDAR',
+        'VERSION:2.0',
+        'PRODID:-//Semestero ME//Technion Timetable Alarms//HE',
+        'CALSCALE:GREGORIAN',
+        'METHOD:PUBLISH',
+        'X-WR-CALNAME:מערכת שעות - Semestero ME (התראות 10 דק׳)',
+        'X-WR-TIMEZONE:Asia/Jerusalem',
+        'BEGIN:VTIMEZONE',
+        'TZID:Asia/Jerusalem',
+        'X-LIC-LOCATION:Asia/Jerusalem',
+        'BEGIN:STANDARD',
+        'DTSTART:20261025T020000',
+        'RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU',
+        'TZOFFSETFROM:+0300',
+        'TZOFFSETTO:+0200',
+        'TZNAME:IST',
+        'END:STANDARD',
+        'BEGIN:DAYLIGHT',
+        'DTSTART:20270326T020000',
+        'RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1FR',
+        'TZOFFSETFROM:+0200',
+        'TZOFFSETTO:+0300',
+        'TZNAME:IDT',
+        'END:DAYLIGHT',
+        'END:VTIMEZONE'
+    ];
+
+    let totalClasses = 0;
+    schedule.days.forEach(day => {
+        if (day.isFree || !day.classes || day.classes.length === 0) return;
+        const icsDay = hebrewToIcsDay[day.dayIndex] || 'SU';
+
+        // Find the first occurrence of this day of week on or after semStart
+        const firstDate = new Date(semStart);
+        const dayDiff = (day.dayIndex - semStart.getDay() + 7) % 7;
+        firstDate.setDate(semStart.getDate() + dayDiff);
+        const datePrefix = firstDate.toISOString().split('T')[0].replace(/-/g, '');
+
+        day.classes.forEach(c => {
+            if (!c.startTime || !c.endTime) return;
+            totalClasses++;
+
+            const startClean = c.startTime.replace(':', '') + '00';
+            const endClean = c.endTime.replace(':', '') + '00';
+            const uid = `class-${c.courseId || 'c'}-${day.dayIndex}-${startClean}@semesterome.local`;
+
+            const summary = `${c.courseName} (${c.type || 'שיעור'})`;
+            const desc = `קורס: ${c.courseName} (${c.courseId})\nסוג: ${c.type || 'שיעור'}${c.lecturer ? '\nמרצה: ' + c.lecturer : ''}${c.room ? '\nכיתה: ' + c.room : ''}\n\nנוצר אוטומטית ע״י סמסטרו ME עם התראה מובנית 10 דקות לפני כל שיעור.`;
+            const location = c.room || 'הטכניון, חיפה';
+
+            icsLines.push(
+                'BEGIN:VEVENT',
+                `UID:${uid}`,
+                `DTSTAMP:${datePrefix}T000000Z`,
+                `DTSTART;TZID=Asia/Jerusalem:${datePrefix}T${startClean}`,
+                `DTEND;TZID=Asia/Jerusalem:${datePrefix}T${endClean}`,
+                `RRULE:FREQ=WEEKLY;BYDAY=${icsDay};UNTIL=${semEndStr}`,
+                `SUMMARY:${summary}`,
+                `DESCRIPTION:${desc.replace(/\n/g, '\\n')}`,
+                `LOCATION:${location}`,
+                'STATUS:CONFIRMED',
+                'BEGIN:VALARM',
+                'ACTION:DISPLAY',
+                `DESCRIPTION:⏰ בעוד 10 דקות: ${summary}`,
+                'TRIGGER:-PT10M',
+                'END:VALARM',
+                'END:VEVENT'
+            );
+        });
+    });
+
+    icsLines.push('END:VCALENDAR');
+
+    if (totalClasses === 0) {
+        if (typeof showToastNotification === 'function') {
+            showToastNotification('לא נמצאו שיעורים פעילים במערכת השעות לייצוא 📅', 'warning');
+        }
+        return;
+    }
+
+    const icsContent = icsLines.join('\r\n');
+    downloadICSFile(icsContent, 'Semestero_ME_Timetable_Schedule.ics');
+
+    if (typeof showToastNotification === 'function') {
+        showToastNotification(`📅 הורד קובץ מערכת שעות עם התראות 10 דק׳ עבור ${totalClasses} שיעורים! פתח להוספה ליומן הטלפון`, 'success');
+    }
+}
+window.exportTimetableToICS = exportTimetableToICS;
+
 // Formats tasks with due dates to easily paste into Google Tasks
 function copyScheduleToGoogleTasks() {
     if (gameState.isFinalsMode) {
@@ -19797,13 +19913,13 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.10.18-v2.4.17",
-    version: "2.4.17",
+    code: "REV-2026.10.18-v2.4.18",
+    version: "2.4.18",
     build: "20261018_07",
     date: "2026-10-18 16:15",
-    description: "גרסה 2.4.17: תיקון מקיף לקטיעת מסך בדסקטופ RTL (ביטול 100vw לטובת רוחב 100% קונטיינר, מניעת גלילת פוקוס מ-side-peek וסגירת גלישה אופקית ב-clip), ושדרוג מרכז ההתראות המקומי עם הכוונה מיידית להגדרת מערכת שעות פעילה לתזכורות הרצאות אוטומטיות."
+    description: "גרסה 2.4.18: שדרוג מקיף להתראות נייד (סנכרון מערכת שעות מובנה ליומן הטלפון עם התראות 10 דק׳ VALARM, הרחבת חלון ההתראה הפרואקטיבי ל-15 דק׳ ומניעת ביטול שיעורים ב-Wakeup)"
 };
-window.APP_VERSION = "2.4.17";
+window.APP_VERSION = "2.4.18";
 
 function ensureBaselineRevisions() {
     if (!gameState.revisions || !Array.isArray(gameState.revisions) || gameState.revisions.length === 0) {
@@ -22761,16 +22877,28 @@ async function trigger10MinClassAlert(classItem, isTest = false) {
         diffMinutes = Math.round((classDate.getTime() - now.getTime()) / 60000);
     }
 
-    // Strict user preference: Only deliver strictly prior to class (~8-12m).
-    // If less than 6 minutes left or class already started, discard completely!
-    if (!isTest && diffMinutes < 6) {
-        console.log(`[Notifications] Discarding late notification for [${courseName}] (${diffMinutes}m remaining). User requested strict 10-min alerts only.`);
+    // If class already ended more than 30m ago, discard
+    if (!isTest && diffMinutes < -30) {
+        console.log(`[Notifications] Skipping reminder for [${courseName}]: class ended (${diffMinutes}m).`);
         return false;
     }
 
-    const title = isTest 
-        ? (isMobile ? `⏰ [בדיקה] בעוד 10 דק׳: ${courseName}` : `💻 [בדיקת מחשב] בעוד 10 דק׳: ${courseName}`)
-        : (isMobile ? `⏰ בעוד 10 דק׳: ${courseName}${typeShort ? ' (' + typeShort + ')' : ''}` : `💻 תזכורת שיעור בעוד 10 דק׳: ${courseName}${typeShort ? ' (' + typeShort + ')' : ''}`);
+    let title = '';
+    if (isTest) {
+        title = isMobile ? `⏰ [בדיקה] בעוד 10 דק׳: ${courseName}` : `💻 [בדיקת מחשב] בעוד 10 דק׳: ${courseName}`;
+    } else if (diffMinutes > 1) {
+        title = isMobile
+            ? `⏰ בעוד כ-${diffMinutes} דק׳: ${courseName}${typeShort ? ' (' + typeShort + ')' : ''}`
+            : `💻 תזכורת שיעור בעוד ${diffMinutes} דק׳: ${courseName}${typeShort ? ' (' + typeShort + ')' : ''}`;
+    } else if (diffMinutes >= -15) {
+        title = isMobile
+            ? `🟢 השיעור מתחיל כעת: ${courseName}${typeShort ? ' (' + typeShort + ')' : ''}`
+            : `💻 שיעור מתחיל כעת: ${courseName}${typeShort ? ' (' + typeShort + ')' : ''}`;
+    } else {
+        title = isMobile
+            ? `🕒 שיעור פעיל: ${courseName}${typeShort ? ' (' + typeShort + ')' : ''}`
+            : `💻 שיעור פעיל כרגע: ${courseName}${typeShort ? ' (' + typeShort + ')' : ''}`;
+    }
 
     const bodyLines = [
         `📚 ${type}`,
@@ -22813,7 +22941,7 @@ async function trigger10MinClassAlert(classItem, isTest = false) {
     return sent;
 }
 
-// 9. Automated 10-Minute Class Reminder Engine (Strict window: 8 to 12 minutes prior)
+// 9. Automated Class Reminder Engine (Proactive window: starting soon in next 15m or active)
 function checkAndTrigger10MinReminders() {
     ensureNotificationPreferencesDefaults();
     if (gameState.notificationPreferences && gameState.notificationPreferences.class10Min === false) {
@@ -22846,11 +22974,11 @@ function checkAndTrigger10MinReminders() {
         const startMin = parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
         const diffMinutes = startMin - curMin;
 
-        // Target: strictly 8 to 12 minutes prior to class start
-        if (diffMinutes >= 8 && diffMinutes <= 12) {
+        // Proactive alert window: any class starting in the next 15 minutes, or started within last 15 minutes
+        if (diffMinutes >= -15 && diffMinutes <= 15) {
             const reminderKey = `ast_reminded_10m_${todayDateStr}_${c.courseId}_${c.startTime}`;
             if (!localStorage.getItem(reminderKey)) {
-                console.log(`[Notifications] Triggering 10-min reminder for ${c.courseName} at ${c.startTime} (diff: ${diffMinutes}m)`);
+                console.log(`[Notifications] Triggering reminder for ${c.courseName} at ${c.startTime} (diff: ${diffMinutes}m)`);
                 localStorage.setItem(reminderKey, new Date().toISOString());
                 trigger10MinClassAlert(c, false);
             }
@@ -22898,9 +23026,9 @@ function scheduleTodayClassTimeouts() {
                 const checkNow = new Date();
                 const minutesLeft = Math.round((classDate.getTime() - checkNow.getTime()) / 60000);
 
-                // If device woke up late (less than 6m before class or already started), discard!
-                if (minutesLeft < 6) {
-                    console.log(`[Notifications] Skipping reminder for ${c.courseName}, only ${minutesLeft}m left (strictly 10-min prior requested).`);
+                // If device woke up late and class already ended more than 20 minutes ago, discard
+                if (minutesLeft < -20) {
+                    console.log(`[Notifications] Skipping reminder for ${c.courseName}: class ended.`);
                     localStorage.setItem(reminderKey, 'expired');
                     return;
                 }
