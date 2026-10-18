@@ -14,4 +14,8 @@ github_token.secret
 cheesefork_courses_2025_200.min.js
 *.zip
 /www/
-
+*.apk
+android/local.properties
+android/.gradle/
+android/app/build/
+android/build/
