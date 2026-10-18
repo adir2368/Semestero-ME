@@ -82,6 +82,17 @@ def create_release():
             data = json.loads(resp_get.read().decode('utf-8'))
             upload_url = data['upload_url'].split('{')[0]
             print(f"[OK] Found existing release: {data.get('html_url')}")
+            # If asset already exists, delete it first to overwrite
+            for asset in data.get('assets', []):
+                if asset.get('name') == 'Semestero-ME.apk':
+                    asset_id = asset['id']
+                    del_url = f"https://api.github.com/repos/{REPO}/releases/assets/{asset_id}"
+                    del_req = urllib.request.Request(del_url, headers=headers, method="DELETE")
+                    try:
+                        with urllib.request.urlopen(del_req) as del_resp:
+                            print(f"[OK] Deleted previous APK asset (id: {asset_id})")
+                    except Exception as del_err:
+                        print(f"[!] Warning deleting asset: {del_err}")
 
     # Upload APK asset
     if not os.path.exists(APK_PATH):
