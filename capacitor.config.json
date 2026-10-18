@@ -4,6 +4,11 @@
   "webDir": "www",
   "bundledWebRuntime": false,
   "backgroundColor": "#020617",
+  "server": {
+    "url": "https://adir2368.github.io/Semestero-ME/",
+    "cleartext": false,
+    "androidScheme": "https"
+  },
   "android": {
     "backgroundColor": "#020617",
     "allowMixedContent": true,

@@ -1345,10 +1345,6 @@
                                 <button type="submit" class="btn btn-primary btn-block" style="width: 100%; padding: 10px; font-weight: 700; font-size: 0.95rem;">
                                     🚀 התחבר עכשיו
                                 </button>
-                                <div style="margin-top: 14px; padding: 10px 12px; background: rgba(56, 189, 248, 0.08); border: 1px dashed rgba(56, 189, 248, 0.35); border-radius: 8px; text-align: center;">
-                                    <div style="font-size: 0.78rem; color: #94a3b8; margin-bottom: 6px;">🧪 סביבת בדיקות ייעודית (User Isolation):</div>
-                                    <button type="button" class="btn btn-xs btn-outline" style="font-size: 0.80rem; padding: 4px 12px; border-color: #38bdf8; color: #38bdf8; font-weight: 700;" onclick="AuthSync.loginAsQA()">התחבר כ-בודק איכות QA</button>
-                                </div>
                                 <div style="text-align: center; margin-top: 12px;">
                                     <a href="javascript:void(0)" onclick="AuthSync.renderAuthModal('reset_password')" style="color: #38bdf8; font-size: 0.82rem; text-decoration: underline; cursor: pointer;">
                                         שכחת סיסמה? / אפס סיסמה
