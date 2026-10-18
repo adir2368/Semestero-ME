@@ -45,8 +45,6 @@ html {
     max-width: 100%;
     overflow-x: clip;
     overscroll-behavior-x: none;
-    -webkit-text-size-adjust: 100%;
-    text-size-adjust: 100%;
 }
 
 body {
@@ -5482,22 +5480,13 @@ label[for="new-task-xp-input"],
    Mobile Responsive Styles (Smartphone & PWA Optimization)
    ========================================================================== */
 @media (max-width: 768px), screen and (max-device-width: 768px) {
-    html {
-        font-size: 13.5px !important;
-        -webkit-text-size-adjust: 100% !important;
-        text-size-adjust: 100% !important;
-    }
-
     /* Base Body & Container for Mobile */
     body {
         overflow: hidden !important;
         height: 100vh !important;
         height: 100dvh !important;
-        width: 100% !important;
-        max-width: 100% !important;
+        width: 100vw !important;
         padding-bottom: 0 !important;
-        -webkit-text-size-adjust: 100% !important;
-        text-size-adjust: 100% !important;
     }
 
     .hud-container {
@@ -5505,8 +5494,7 @@ label[for="new-task-xp-input"],
         height: 100dvh !important;
         max-height: 100vh !important;
         max-height: 100dvh !important;
-        width: 100% !important;
-        max-width: 100% !important;
+        width: 100vw !important;
         display: flex !important;
         flex-direction: column !important;
         overflow: hidden !important;
@@ -5536,7 +5524,7 @@ label[for="new-task-xp-input"],
         flex-direction: column !important;
         align-items: stretch !important;
         gap: 4px !important;
-        padding: max(26px, env(safe-area-inset-top, 26px)) max(10px, env(safe-area-inset-right, 10px)) 4px max(10px, env(safe-area-inset-left, 10px)) !important;
+        padding: max(8px, env(safe-area-inset-top)) max(8px, env(safe-area-inset-right)) 4px max(8px, env(safe-area-inset-left)) !important;
         height: auto !important;
         min-height: auto !important;
         flex-shrink: 0 !important;
@@ -5561,7 +5549,7 @@ label[for="new-task-xp-input"],
         justify-content: space-between !important;
         align-items: center !important;
         width: 100% !important;
-        padding: 2px 4px 5px 4px !important;
+        padding: 2px 2px 5px 2px !important;
         border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
         margin-bottom: 2px !important;
     }
@@ -5569,17 +5557,16 @@ label[for="new-task-xp-input"],
     .hud-top-right-bar .hud-logo {
         display: flex !important;
         align-items: center !important;
-        gap: 6px !important;
-        flex-shrink: 0 !important;
+        gap: 8px !important;
     }
 
     .hud-top-right-bar .hud-logo img {
-        width: 24px !important;
-        height: 24px !important;
+        width: 26px !important;
+        height: 26px !important;
     }
 
     .hud-top-right-bar .degree-title-text {
-        font-size: 0.90rem !important;
+        font-size: 0.96rem !important;
         line-height: 1.1 !important;
     }
 
@@ -5595,9 +5582,9 @@ label[for="new-task-xp-input"],
     }
 
     .btn-hud-login-top {
-        padding: 4px 10px !important;
-        font-size: 0.76rem !important;
-        min-height: 32px !important;
+        padding: 6px 14px !important;
+        font-size: 0.80rem !important;
+        min-height: 36px !important;
         display: inline-flex !important;
         align-items: center !important;
         justify-content: center !important;
@@ -5770,20 +5757,20 @@ label[for="new-task-xp-input"],
         display: flex !important;
         justify-content: space-around !important;
         align-items: center !important;
-        padding: 3px 2px calc(4px + env(safe-area-inset-bottom, 0px)) !important;
+        padding: 4px 4px calc(6px + env(safe-area-inset-bottom)) !important;
         gap: 2px !important;
-        height: calc(52px + env(safe-area-inset-bottom, 0px)) !important;
+        height: calc(56px + env(safe-area-inset-bottom)) !important;
     }
 
     .nav-tab {
-        flex: 1 1 0 !important;
+        flex: 1 !important;
         display: flex !important;
         flex-direction: column !important;
         align-items: center !important;
         justify-content: center !important;
-        padding: 2px 1px !important;
-        font-size: 0.60rem !important;
-        border-radius: 6px !important;
+        padding: 4px 2px !important;
+        font-size: 0.68rem !important;
+        border-radius: 8px !important;
         min-width: 0 !important;
         white-space: nowrap !important;
         gap: 1px !important;
@@ -5802,23 +5789,14 @@ label[for="new-task-xp-input"],
     }
 
     .nav-tab-icon {
-        font-size: 1.10rem !important;
+        font-size: 1.25rem !important;
         line-height: 1 !important;
     }
 
     .nav-tab-label {
-        font-size: 0.60rem !important;
+        font-size: 0.68rem !important;
         font-weight: 700 !important;
         white-space: nowrap !important;
-        overflow: hidden !important;
-        text-overflow: ellipsis !important;
-        max-width: 100% !important;
-        line-height: 1.1 !important;
-    }
-
-    /* Never stack fixed footer over navigation tabs on mobile screens */
-    .app-global-footer {
-        display: none !important;
     }
 
     /* Workspaces on Mobile */
@@ -5827,7 +5805,7 @@ label[for="new-task-xp-input"],
         min-height: 0;
         display: flex;
         flex-direction: column;
-        padding: 4px 4px calc(58px + env(safe-area-inset-bottom, 0px)) 4px !important;
+        padding: 4px 4px calc(86px + env(safe-area-inset-bottom, 0px)) 4px !important;
         overflow: hidden !important;
         position: relative !important;
     }
@@ -6557,7 +6535,29 @@ html.is-iphone .flowchart-hint {
 
 html.is-mobile-device .app-global-footer,
 html.is-iphone .app-global-footer {
-    display: none !important;
+    position: fixed !important;
+    bottom: calc(56px + env(safe-area-inset-bottom, 0px)) !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    height: 28px !important;
+    min-height: 28px !important;
+    margin: 0 !important;
+    padding: 0 10px !important;
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    direction: rtl !important;
+    z-index: 999 !important;
+    background: rgba(10, 15, 29, 0.96) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+    border-top: 1px solid rgba(56, 189, 248, 0.25) !important;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.6) !important;
+    box-sizing: border-box !important;
+    font-size: 0.68rem !important;
+    pointer-events: auto !important;
 }
 
 /* ==========================================================================
@@ -8468,7 +8468,51 @@ html.is-iphone .app-global-footer {
 
 @media (max-width: 768px), screen and (max-device-width: 768px) {
     .app-global-footer {
-        display: none !important;
+        position: fixed !important;
+        bottom: calc(56px + env(safe-area-inset-bottom, 0px)) !important;
+        left: 0 !important;
+        right: 0 !important;
+        width: 100% !important;
+        height: 28px !important;
+        min-height: 28px !important;
+        margin: 0 !important;
+        padding: 0 10px !important;
+        display: flex !important;
+        flex-direction: row !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        direction: rtl !important; /* Right: Credit, Left: Version */
+        z-index: 999 !important; /* Above canvas, below nav tabs (1000) */
+        background: rgba(10, 15, 29, 0.96) !important;
+        backdrop-filter: blur(12px) !important;
+        -webkit-backdrop-filter: blur(12px) !important;
+        border-top: 1px solid rgba(56, 189, 248, 0.25) !important;
+        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.6) !important;
+        box-sizing: border-box !important;
+        font-size: 0.68rem !important;
+        pointer-events: auto !important;
+    }
+    .footer-left-version {
+        position: static !important;
+        transform: none !important;
+        flex-shrink: 0 !important;
+        display: flex !important;
+        align-items: center !important;
+    }
+    .footer-credit-content {
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 6px !important;
+        direction: ltr !important;
+        flex-shrink: 0 !important;
+    }
+    .footer-credit-content .credit-text {
+        font-size: 0.68rem !important;
+    }
+    .app-version-badge {
+        font-size: 0.62rem !important;
+        padding: 1px 6px !important;
+        white-space: nowrap !important;
     }
 }
 
