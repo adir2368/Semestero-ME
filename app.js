@@ -11484,7 +11484,62 @@ function renderTechnionPlusQuickBar(course) {
 // Open and load details into Course Details Modal
 function openCourseDetails(code) {
     window.openCourseDetails = openCourseDetails;
-    const course = gameState.courses[code];
+    if (!code) return;
+    let course = gameState.courses[code];
+    if (!course) {
+        const clean = String(code).replace(/^0+/, '');
+        course = gameState.courses[clean] || gameState.courses['0' + clean];
+    }
+    if (!course) {
+        // Try looking up in PLANNER_CATALOG or CHEESEFORK_DB
+        let catalogCourse = null;
+        if (window.PLANNER_CATALOG) {
+            const checkLists = [
+                ...(window.PLANNER_CATALOG.MANDATORY_COURSES_2024 || []),
+                ...(window.PLANNER_CATALOG.MANDATORY_COURSES_2027 || [])
+            ];
+            for (const sem of checkLists) {
+                const found = (sem.courses || []).find(c => c.code === code || c.altCode === code || String(c.code).replace(/^0+/, '') === String(code).replace(/^0+/, ''));
+                if (found) { catalogCourse = found; break; }
+            }
+            if (!catalogCourse && window.PLANNER_CATALOG.ELECTIVE_CATALOG) {
+                const cats = ['A', 'B', 'C', 'D', 'E'];
+                for (const cat of cats) {
+                    const list = window.PLANNER_CATALOG.ELECTIVE_CATALOG[cat] || [];
+                    const found = list.find(c => c.code === code || c.altCode === code || String(c.code).replace(/^0+/, '') === String(code).replace(/^0+/, ''));
+                    if (found) { catalogCourse = found; break; }
+                }
+            }
+        }
+
+        let cfCourse = null;
+        if (window.CHEESEFORK_DB && Array.isArray(window.CHEESEFORK_DB)) {
+            const clean = String(code).replace(/^0+/, '');
+            cfCourse = window.CHEESEFORK_DB.find(c => c.code6 === clean || c.rawNum === clean || c.code6 === code || c.rawNum === code);
+        }
+
+        if (catalogCourse || cfCourse) {
+            const resolvedCode = (catalogCourse && catalogCourse.code) || (cfCourse && (cfCourse.code6 || cfCourse.rawNum)) || code;
+            course = {
+                id: resolvedCode,
+                code: resolvedCode,
+                altCode: (catalogCourse && catalogCourse.altCode) || (cfCourse && cfCourse.rawNum) || '',
+                name: (catalogCourse && catalogCourse.name) || (cfCourse && cfCourse.name) || resolvedCode,
+                credits: Number((catalogCourse && catalogCourse.credits) || (cfCourse && cfCourse.credits) || 3.0),
+                semester: 0,
+                status: 'available',
+                type: (catalogCourse && catalogCourse.list) ? 'elective' : 'mandatory',
+                faculty: (cfCourse && cfCourse.faculty) || (catalogCourse && catalogCourse.faculty) || 'הנדסת מכונות',
+                schedule: (cfCourse && cfCourse.schedule) || [],
+                moedA: (cfCourse && cfCourse.moedA) || '',
+                moedB: (cfCourse && cfCourse.moedB) || '',
+                syllabus: (cfCourse && cfCourse.syllabus) || (catalogCourse && catalogCourse.syllabus) || '',
+                prerequisites: (catalogCourse && (catalogCourse.prereqs || catalogCourse.prerequisites)) || [],
+                tasks: []
+            };
+            gameState.courses[resolvedCode] = course;
+        }
+    }
     if (!course) return;
 
     currentSelectedCourse = course;
@@ -12684,56 +12739,76 @@ function openCourseDetails(code) {
     const cfContainer = document.getElementById("modal-cheesefork-container");
     if (cfContainer) {
         cfContainer.innerHTML = "";
+        const cleanCode = (course.code || '').replace(/^0+/, '');
+        const fullCode = course.code || '';
+        const cfUrl = `https://cheesefork.cf/course/${cleanCode || fullCode}`;
+
+        // Auto-populate from CheeseFork database if schedule or exam info is absent
+        if ((!course.schedule || course.schedule.length === 0) && window.CHEESEFORK_DB && Array.isArray(window.CHEESEFORK_DB)) {
+            const cfMatch = window.CHEESEFORK_DB.find(c => c.code6 === cleanCode || c.rawNum === cleanCode || c.code6 === fullCode || c.rawNum === fullCode);
+            if (cfMatch) {
+                if (cfMatch.schedule && cfMatch.schedule.length > 0) course.schedule = cfMatch.schedule;
+                if (cfMatch.moedA && !course.moedA) course.moedA = cfMatch.moedA;
+                if (cfMatch.moedB && !course.moedB) course.moedB = cfMatch.moedB;
+                if (cfMatch.syllabus && !course.syllabus) course.syllabus = cfMatch.syllabus;
+                if (cfMatch.faculty && !course.faculty) course.faculty = cfMatch.faculty;
+            }
+        }
+
         const hasSchedule = Array.isArray(course.schedule) && course.schedule.length > 0;
         const hasExams = Boolean(course.moedA || course.moedB);
         const hasSyllabus = Boolean(course.syllabus);
 
-        if (hasSchedule || hasExams || hasSyllabus) {
-            let scheduleItemsHtml = "";
-            if (hasSchedule) {
-                scheduleItemsHtml = course.schedule.map(s => `
-                    <div class="modal-schedule-item">
-                        <div class="modal-schedule-item-time">⏰ יום ${s.day} | ${s.hours}</div>
-                        <div class="modal-schedule-item-desc">${s.type} ${s.group ? `(קבוצה ${s.group})` : ''} ${s.room ? `• ${s.room}` : ''}</div>
-                        ${s.lecturer ? `<div class="modal-schedule-item-lecturer">מרצה: ${s.lecturer}</div>` : ''}
-                    </div>
-                `).join("");
-            }
+        let scheduleItemsHtml = "";
+        if (hasSchedule) {
+            scheduleItemsHtml = course.schedule.map(s => `
+                <div class="modal-schedule-item">
+                    <div class="modal-schedule-item-time">⏰ יום ${s.day} | ${s.hours}</div>
+                    <div class="modal-schedule-item-desc">${s.type} ${s.group ? `(קבוצה ${s.group})` : ''} ${s.room ? `• ${s.room}` : ''}</div>
+                    ${s.lecturer ? `<div class="modal-schedule-item-lecturer">מרצה: ${s.lecturer}</div>` : ''}
+                </div>
+            `).join("");
+        }
 
-            let examsHtml = "";
-            if (hasExams) {
-                examsHtml = `
-                    <div class="modal-exam-dates-strip">
-                        ${course.moedA ? `<span class="modal-exam-date-badge">🎓 מועד א': ${course.moedA}</span>` : ''}
-                        ${course.moedB ? `<span class="modal-exam-date-badge">🎓 מועד ב': ${course.moedB}</span>` : ''}
-                    </div>
-                `;
-            }
-
-            let syllabusHtml = "";
-            if (hasSyllabus) {
-                syllabusHtml = `
-                    <div style="margin-top: 10px; font-size: 0.78rem; color: #94a3b8; line-height: 1.45; max-height: 85px; overflow-y: auto; background: rgba(0,0,0,0.2); padding: 8px 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.05);">
-                        <strong style="color: #cbd5e1; display: block; margin-bottom: 2px;">📖 תקציר סילבוס (ספר הקורסים):</strong>
-                        ${course.syllabus}
-                    </div>
-                `;
-            }
-
-            cfContainer.innerHTML = `
-                <div class="modal-cheesefork-section">
-                    <div class="modal-cheesefork-header">
-                        <div class="modal-cheesefork-title">
-                            <span>🧀 מערכת שעות ופרטי קורס (CheeseFork)</span>
-                        </div>
-                        ${course.faculty ? `<span style="font-size: 0.75rem; color: var(--text-muted);">${course.faculty}</span>` : ''}
-                    </div>
-                    ${hasSchedule ? `<div class="modal-cheesefork-grid">${scheduleItemsHtml}</div>` : ''}
-                    ${examsHtml}
-                    ${syllabusHtml}
+        let examsHtml = "";
+        if (hasExams) {
+            examsHtml = `
+                <div class="modal-exam-dates-strip">
+                    ${course.moedA ? `<span class="modal-exam-date-badge">🎓 מועד א': ${course.moedA}</span>` : ''}
+                    ${course.moedB ? `<span class="modal-exam-date-badge">🎓 מועד ב': ${course.moedB}</span>` : ''}
                 </div>
             `;
         }
+
+        let syllabusHtml = "";
+        if (hasSyllabus) {
+            syllabusHtml = `
+                <div style="margin-top: 10px; font-size: 0.78rem; color: #94a3b8; line-height: 1.45; max-height: 85px; overflow-y: auto; background: rgba(0,0,0,0.2); padding: 8px 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.05);">
+                    <strong style="color: #cbd5e1; display: block; margin-bottom: 2px;">📖 תקציר סילבוס (ספר הקורסים):</strong>
+                    ${course.syllabus}
+                </div>
+            `;
+        }
+
+        cfContainer.innerHTML = `
+            <div class="modal-cheesefork-section">
+                <div class="modal-cheesefork-header" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+                    <div class="modal-cheesefork-title">
+                        <span>🧀 מערכת שעות ופרטי קורס (CheeseFork)</span>
+                    </div>
+                    <a href="${cfUrl}" target="_blank" rel="noopener noreferrer" 
+                       class="btn btn-xs" 
+                       style="background: rgba(245, 158, 11, 0.22); border: 1px solid #f59e0b; color: #fbbf24; text-decoration: none; padding: 5px 12px; border-radius: 6px; font-size: 0.78rem; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s;" 
+                       title="פתח את דף הקורס ב-CheeseFork לצפייה בביקורות סטודנטים, דירוגי הוראה והיסטוגרמות ציונים">
+                        <span>🧀</span> צפה בביקורות והיסטוגרמות ב-CheeseFork ↗
+                    </a>
+                </div>
+                ${course.faculty ? `<div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 6px;">פקולטה: ${course.faculty}</div>` : ''}
+                ${hasSchedule ? `<div class="modal-cheesefork-grid">${scheduleItemsHtml}</div>` : `<div style="font-size: 0.78rem; color: #94a3b8; padding: 4px 0 8px;">לוח שעות טרם פורסם לסמסטר זה. לעיון בסילבוס, ביקורות סטודנטים עדכניות והיסטוגרמות ציונים היסטוריות לחץ על הכפתור למעלה.</div>`}
+                ${examsHtml}
+                ${syllabusHtml}
+            </div>
+        `;
     }
 
     // UW Flow-style Peer Difficulty & Workload Consensus Section

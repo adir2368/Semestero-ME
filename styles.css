@@ -9685,7 +9685,7 @@ html.is-iphone .app-global-footer {
     align-items: center;
     justify-content: space-between;
     gap: 6px;
-    cursor: grab;
+    cursor: pointer;
     transition: all 0.15s ease;
 }
 
@@ -9744,7 +9744,7 @@ html.is-iphone .app-global-footer {
 .planner-course-card.course-card-completed {
     border-color: rgba(16, 185, 129, 0.45) !important;
     background: rgba(16, 185, 129, 0.08) !important;
-    cursor: default !important;
+    cursor: pointer !important;
 }
 
 .planner-course-card.course-card-completed:hover {

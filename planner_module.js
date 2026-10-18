@@ -1723,7 +1723,8 @@
                          draggable="${canDrag ? 'true' : 'false'}" 
                          data-code="${escapeHtml(course.code)}" 
                          data-alt-code="${escapeHtml(course.altCode || '')}" 
-                         data-semester="${semNum}">
+                         data-semester="${semNum}"
+                         title="לחץ לצפייה בסילבוס, מערכת שעות, היסטוגרמות וביקורות ב-CheeseFork 🧀">
                         <div class="course-card-top">
                             <span class="course-card-code">${escapeHtml(course.code)}</span>
                             <div style="display: flex; align-items: center; gap: 4px; flex-wrap: wrap;">
@@ -1970,7 +1971,7 @@
                     : (course.list ? `רשימה ${course.list}׳` : 'חובה');
 
                 return `
-                    <div class="planner-pool-item" draggable="true" data-code="${escapeHtml(course.code)}" data-alt-code="${escapeHtml(course.altCode || '')}">
+                    <div class="planner-pool-item" draggable="true" data-code="${escapeHtml(course.code)}" data-alt-code="${escapeHtml(course.altCode || '')}" title="לחץ לצפייה בסילבוס, ביקורות והיסטוגרמות ב-CheeseFork 🧀">
                         <div class="pool-item-info">
                             <span class="pool-item-title">${escapeHtml(course.name)}</span>
                             <div class="pool-item-meta">
@@ -2248,22 +2249,18 @@
                 return;
             }
 
-            // Course card tap -> Mobile tap-to-move action sheet
+            // Course card click/tap -> Open Course Details Modal (CheeseFork info, reviews, histograms & Technion++ resources)
             const card = e.target.closest('.planner-course-card, .planner-pool-item');
             if (card) {
-                if (e.target.closest('.course-card-whatif-input, .btn-card-remove, .btn-add-to-plan, .btn-course-workload')) return;
+                if (e.target.closest('.course-card-whatif-input, .btn-card-remove, .btn-add-to-plan, .btn-course-workload, [data-action="cycle-list"]')) return;
 
                 const code = card.getAttribute('data-code');
                 const altCode = card.getAttribute('data-alt-code');
-                const semAttr = card.getAttribute('data-semester');
-                const semNum = semAttr ? parseFloat(semAttr) : null;
+                const targetCode = code || altCode;
 
-                if (isCourseCompleted(code, altCode)) {
-                    showPlannerToast('✓ קורס זה הושלם כבר בהצלחה - אינו ניתן להזזה.', false);
-                    return;
+                if (targetCode && typeof window.openCourseDetails === 'function') {
+                    window.openCourseDetails(targetCode);
                 }
-
-                openCourseActionSheet(code, semNum);
                 return;
             }
         });

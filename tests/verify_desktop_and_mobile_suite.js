@@ -92,6 +92,13 @@ test('Graduation Clearance audit triggers and checks 157.5 total credits', () =>
     assert(plannerJs.includes('157.5') || indexHtml.includes('157.5'), '157.5 total credits requirement must be present in code or UI');
 });
 
+test('Degree Planner course card click opens Course Details modal with CheeseFork reviews link', () => {
+    assert(plannerJs.includes('window.openCourseDetails(targetCode)'), 'planner_module.js must call openCourseDetails on course card click');
+    assert(appJs.includes('cheesefork.cf/course/'), 'app.js must provide direct course URL to CheeseFork');
+    assert(appJs.includes('צפה בביקורות והיסטוגרמות ב-CheeseFork'), 'app.js must include prominent CheeseFork reviews and histograms button');
+    assert(appJs.includes('PLANNER_CATALOG') && appJs.includes('CHEESEFORK_DB'), 'openCourseDetails must support fallback lookup from catalog and CheeseFork DB');
+});
+
 // -------------------------------------------------------------
 // DOMAIN 3: Notion Tasks & Organit++
 // -------------------------------------------------------------
