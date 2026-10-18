@@ -93,7 +93,7 @@
                             lecturer: 'פרופ\' דן מרדכי',
                             room: 'הנדסה כימית 1',
                             meetings: [
-                                { dayIndex: 0, dayName: 'ראשון', startTime: '14:30', endTime: '17:30', duration: '3 שעות', room: 'הנדסה כימית 1' }
+                                { dayIndex: 0, dayName: 'ראשון', startTime: '14:30', endTime: '18:30', duration: '4 שעות', room: 'הנדסה כימית 1' }
                             ]
                         },
                         {
@@ -101,7 +101,7 @@
                             lecturer: 'פרופ\' דן מרדכי',
                             room: 'הנדסה כימית 1',
                             meetings: [
-                                { dayIndex: 0, dayName: 'ראשון', startTime: '14:30', endTime: '17:30', duration: '3 שעות', room: 'הנדסה כימית 1' }
+                                { dayIndex: 0, dayName: 'ראשון', startTime: '14:30', endTime: '18:30', duration: '4 שעות', room: 'הנדסה כימית 1' }
                             ]
                         },
                         {

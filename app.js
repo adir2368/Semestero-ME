@@ -8651,8 +8651,8 @@ const CHEESEFORK_SEMESTER_SCHEDULE = {
                     lecturer: "פרופ' דן מרדכי",
                     room: "הנדסה כימית 1",
                     startTime: "14:30",
-                    endTime: "17:30",
-                    duration: "3 שעות",
+                    endTime: "18:30",
+                    duration: "4 שעות",
                     cardClass: "timetable-card-solids"
                 }
             ]
@@ -8810,10 +8810,10 @@ const AUTHENTIC_TIMETABLE_METADATA = {
     // Sunday (ראשון - dayIndex 0)
     '104228_0_11:30': { room: 'אולמן 506', lecturer: 'אמתי אלפרין', duration: 'שעתיים', type: 'תרגול 22', startTime: '11:30', endTime: '13:30' },
     '104228_0':       { room: 'אולמן 506', lecturer: 'אמתי אלפרין', duration: 'שעתיים', type: 'תרגול 22', startTime: '11:30', endTime: '13:30' },
-    '034053_0_14:30': { room: 'הנדסה כימית 1', lecturer: "פרופ' דן מרדכי", duration: '3 שעות', type: 'הרצאה 20', startTime: '14:30', endTime: '17:30' },
-    '34053_0_14:30':  { room: 'הנדסה כימית 1', lecturer: "פרופ' דן מרדכי", duration: '3 שעות', type: 'הרצאה 20', startTime: '14:30', endTime: '17:30' },
-    '034053_0':       { room: 'הנדסה כימית 1', lecturer: "פרופ' דן מרדכי", duration: '3 שעות', type: 'הרצאה 20', startTime: '14:30', endTime: '17:30' },
-    '34053_0':        { room: 'הנדסה כימית 1', lecturer: "פרופ' דן מרדכי", duration: '3 שעות', type: 'הרצאה 20', startTime: '14:30', endTime: '17:30' },
+    '034053_0_14:30': { room: 'הנדסה כימית 1', lecturer: "פרופ' דן מרדכי", duration: '4 שעות', type: 'הרצאה 20', startTime: '14:30', endTime: '18:30' },
+    '34053_0_14:30':  { room: 'הנדסה כימית 1', lecturer: "פרופ' דן מרדכי", duration: '4 שעות', type: 'הרצאה 20', startTime: '14:30', endTime: '18:30' },
+    '034053_0':       { room: 'הנדסה כימית 1', lecturer: "פרופ' דן מרדכי", duration: '4 שעות', type: 'הרצאה 20', startTime: '14:30', endTime: '18:30' },
+    '34053_0':        { room: 'הנדסה כימית 1', lecturer: "פרופ' דן מרדכי", duration: '4 שעות', type: 'הרצאה 20', startTime: '14:30', endTime: '18:30' },
 
     // Monday (שני - dayIndex 1)
     '114052_1_08:30': { room: 'טאוב - מדמ"ח 1', lecturer: 'ד"ר גדעון אלון', duration: 'שעתיים', type: 'הרצאה 10', startTime: '08:30', endTime: '10:30' },
