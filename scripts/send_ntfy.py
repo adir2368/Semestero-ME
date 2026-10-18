@@ -4,10 +4,10 @@ import base64
 import urllib.request
 import urllib.error
 
-DONE_TOPIC = "adir-antigravity-done"
+DEFAULT_TOPIC = "adir-semestero-me-updates"
 
-def send_ntfy(title: str, message: str, priority: str = "default", tags: str = "tada,smartphone"):
-    url = f"https://ntfy.sh/{DONE_TOPIC}"
+def send_ntfy(title: str, message: str, priority: str = "default", tags: str = "tada,smartphone", topic: str = DEFAULT_TOPIC):
+    url = f"https://ntfy.sh/{topic}"
     encoded_title = "=?UTF-8?B?" + base64.b64encode(title.encode("utf-8")).decode("ascii") + "?="
     headers = {
         "Title": encoded_title,
@@ -32,6 +32,7 @@ if __name__ == "__main__":
     parser.add_argument("--message", required=True, help="Notification message body")
     parser.add_argument("--priority", default="default", help="Priority (min, low, default, high, urgent)")
     parser.add_argument("--tags", default="tada,smartphone", help="Comma-separated emoji tags")
+    parser.add_argument("--topic", default=DEFAULT_TOPIC, help="NTFY topic name")
     args = parser.parse_args()
 
-    send_ntfy(args.title, args.message, args.priority, args.tags)
+    send_ntfy(args.title, args.message, args.priority, args.tags, args.topic)
