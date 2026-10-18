@@ -3049,6 +3049,7 @@
             const summerCheck = isSummer && global.PLANNER_CATALOG && global.PLANNER_CATALOG.isCourseOfferedInSummer
                 ? global.PLANNER_CATALOG.isCourseOfferedInSummer(course.code, course)
                 : { offered: true, note: '' };
+            const isSummerBlocked = isSummer && !summerCheck.offered;
             const isIntl = !!(global.gameState && global.gameState.isInternationalStudent);
             const termCheck = (global.PLANNER_CATALOG && global.PLANNER_CATALOG.isCourseOfferedInSemester)
                 ? global.PLANNER_CATALOG.isCourseOfferedInSemester(course.code, course, semNum, isIntl)

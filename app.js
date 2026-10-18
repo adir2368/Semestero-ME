@@ -15576,7 +15576,11 @@ function handleCreateTaskSubmit() {
         dueDate: eventDate
     });
 
-    notifyStateChanged();
+    saveState();
+    notifyStateChanged({ tab: 'tasks' });
+    if (typeof renderNotionTasksTable === 'function') {
+        renderNotionTasksTable();
+    }
 
     if (modal) modal.style.display = "none";
     showToastNotification(`🚀 המשימה "${title}" נוספה בהצלחה!`, 'success');
