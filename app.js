@@ -15576,6 +15576,11 @@ function handleCreateTaskSubmit() {
         dueDate: eventDate
     });
 
+    // Auto-promote course to active so it immediately appears in Notion Tasks table
+    if (course.status !== 'mastered' && course.status !== 'active') {
+        course.status = 'active';
+    }
+
     saveState();
     notifyStateChanged({ tab: 'tasks' });
     if (typeof renderNotionTasksTable === 'function') {
