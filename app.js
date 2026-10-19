@@ -17584,7 +17584,7 @@ function setupFlowchartViewMode() {
         zoomResetBtn.addEventListener("click", () => {
             isFlowchartFitWidth = false;
             if (toggleFitBtn) toggleFitBtn.classList.remove("active");
-            setFlowchartZoom(1.0);
+            setFlowchartZoom(0.80);
         });
     }
 
@@ -17595,7 +17595,7 @@ function setupFlowchartViewMode() {
                 fitFlowchartToWidth();
             } else {
                 toggleFitBtn.classList.remove("active");
-                setFlowchartZoom(1.0);
+                setFlowchartZoom(0.80);
             }
         });
     }
@@ -17630,13 +17630,14 @@ function setupFlowchartViewMode() {
 }
 
 function initFlowchartZoom() {
-    if (isMobileView()) {
-        fitFlowchartToWidth();
-    } else {
-        setFlowchartZoom(1.0);
-        isFlowchartFitWidth = false;
-        const toggleFitBtn = document.getElementById("btn-fc-toggle-fit");
-        if (toggleFitBtn) toggleFitBtn.classList.remove("active");
+    // User directive: Default zoom on opening is comfortable 80% (0.80) rather than cramped 13% fit
+    setFlowchartZoom(0.80);
+    isFlowchartFitWidth = false;
+    const toggleFitBtn = document.getElementById("btn-fc-toggle-fit");
+    if (toggleFitBtn) toggleFitBtn.classList.remove("active");
+    const scrollWrap = document.getElementById("flowchart-scroll-wrapper");
+    if (scrollWrap) {
+        scrollWrap.scrollTop = 0;
     }
 }
 
@@ -18195,11 +18196,11 @@ function renderFlowchartTree() {
         nodesGroup.appendChild(g);
     });
 
-    if (isMobileView() && !window.flowchartInitialMobileFitDone) {
-        window.flowchartInitialMobileFitDone = true;
+    if (!window.flowchartInitialZoomDone) {
+        window.flowchartInitialZoomDone = true;
         setTimeout(() => {
-            fitFlowchartToWidth();
-        }, 60);
+            initFlowchartZoom();
+        }, 50);
     }
 }
 
@@ -20612,9 +20613,9 @@ function initCalendarDayModal() {
 const APP_CURRENT_REVISION = {
     code: "REV-2026.10.20-v2.5.0",
     version: "2.5.0",
-    build: "20261020_02",
-    date: "2026-10-20 01:15",
-    description: "גרסה 2.5.0: התאמה מוביילית מושלמת לתרשים זרימת הקורסים (Flowchart DAG), ביטול הרווח האנכי הריק (xMidYMin), שמירת טאב אחרון פעיל, ומנוע עדכונים אוטונומי בזמן אמת"
+    build: "20261020_03",
+    date: "2026-10-20 01:20",
+    description: "גרסה 2.5.0 (עדכון זום 80%): פתיחה מוביילית נוחה וברורה ב-80% הגדלה במקום התכווצות ל-13%, ביטול הרווח האנכי הריק, שמירת טאב אחרון פעיל, ומנוע עדכונים אוטונומי"
 };
 window.APP_VERSION = "2.5.0";
 
