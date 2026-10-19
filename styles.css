@@ -4665,7 +4665,9 @@ label[for="new-task-xp-input"],
     min-width: 0 !important;
     max-width: 100% !important;
     height: auto !important;
-    display: block;
+    display: block !important;
+    vertical-align: top !important;
+    margin: 0 auto !important;
 }
 
 .flowchart-viewport.full-size-mode .flowchart-scroll-wrapper {
@@ -4813,6 +4815,7 @@ label[for="new-task-xp-input"],
 .flowchart-svg {
     display: block;
     margin: 0 auto;
+    vertical-align: top;
     transform-origin: 50% 0%;
     will-change: transform;
     background: radial-gradient(circle at 50% 15%, rgba(30, 41, 69, 0.4) 0%, #0a0d17 100%);

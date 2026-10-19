@@ -14466,6 +14466,9 @@ function setupNotionDashboard() {
     function setActiveMainTab(activeTabId) {
         window.setActiveMainTab = setActiveMainTab;
         window.currentActiveTab = activeTabId;
+        try {
+            localStorage.setItem('semestero_last_active_tab', activeTabId);
+        } catch (e) {}
         if (document.body) document.body.setAttribute('data-active-tab', activeTabId);
         if (document.documentElement) document.documentElement.setAttribute('data-active-tab', activeTabId);
         if (tabCurriculum) tabCurriculum.classList.toggle("active", activeTabId === 'curriculum');
@@ -14575,6 +14578,13 @@ function setupNotionDashboard() {
     
     setupNotionFilterPopover();
     setupFlowchartViewMode();
+
+    try {
+        const lastActiveTab = localStorage.getItem('semestero_last_active_tab');
+        if (lastActiveTab && ['curriculum', 'planner', 'tasks', 'calendar', 'timetable', 'settings'].includes(lastActiveTab)) {
+            setActiveMainTab(lastActiveTab);
+        }
+    } catch (e) {}
 
     // 4. Tasks Collapsible Filters Toggle
     const toggleTaskFiltersBtn = document.getElementById("btn-toggle-task-filters");
@@ -17612,18 +17622,22 @@ function setupFlowchartViewMode() {
     // Pan & Mouse Wheel
     setupFlowchartPanAndWheel();
 
-    // Default to flowchart view state without duplicate SVG compilation (renderUI handles initial paint)
+    // Default to flowchart view state
     currentViewMode = 'flowchart';
     if (btnFlowchart) btnFlowchart.classList.add("active");
     if (fcViewport) fcViewport.style.display = 'flex';
+    initFlowchartZoom();
 }
 
 function initFlowchartZoom() {
-    // User directive: Default zoom on opening is comfortable 100%
-    setFlowchartZoom(1.0);
-    isFlowchartFitWidth = false;
-    const toggleFitBtn = document.getElementById("btn-fc-toggle-fit");
-    if (toggleFitBtn) toggleFitBtn.classList.remove("active");
+    if (isMobileView()) {
+        fitFlowchartToWidth();
+    } else {
+        setFlowchartZoom(1.0);
+        isFlowchartFitWidth = false;
+        const toggleFitBtn = document.getElementById("btn-fc-toggle-fit");
+        if (toggleFitBtn) toggleFitBtn.classList.remove("active");
+    }
 }
 
 function fitFlowchartToWidth() {
@@ -17640,6 +17654,7 @@ function fitFlowchartToWidth() {
         isFlowchartFitWidth = true;
         window.isFlowchartFitWidth = true;
         if (toggleFitBtn) toggleFitBtn.classList.add("active");
+        scrollWrap.scrollTop = 0;
     });
 }
 
@@ -17890,6 +17905,7 @@ function renderFlowchartTree() {
     const nodeHeight = 84;
 
     svgEl.setAttribute("viewBox", `0 0 ${TOTAL_WIDTH} ${TOTAL_HEIGHT}`);
+    svgEl.setAttribute("preserveAspectRatio", "xMidYMin meet");
 
     // 2. Draw Semester Background Bands & Labels (Never cut off in RTL or LTR)
     let bgHtml = "";
@@ -18178,6 +18194,13 @@ function renderFlowchartTree() {
 
         nodesGroup.appendChild(g);
     });
+
+    if (isMobileView() && !window.flowchartInitialMobileFitDone) {
+        window.flowchartInitialMobileFitDone = true;
+        setTimeout(() => {
+            fitFlowchartToWidth();
+        }, 60);
+    }
 }
 
 // Normalizes any course code to standard 6-digit root for flowchart operations
@@ -20587,13 +20610,13 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.10.20-v2.4.31",
-    version: "2.4.31",
-    build: "20261020_01",
-    date: "2026-10-20 01:00",
-    description: "גרסה 2.4.31: מנוע עדכונים אוטונומי בזמן אמת לווב, PWA ו-Capacitor Android, רענון שקט ומניעת לולאות, ועדכוני APK בנגיעה אחת"
+    code: "REV-2026.10.20-v2.5.0",
+    version: "2.5.0",
+    build: "20261020_02",
+    date: "2026-10-20 01:15",
+    description: "גרסה 2.5.0: התאמה מוביילית מושלמת לתרשים זרימת הקורסים (Flowchart DAG), ביטול הרווח האנכי הריק (xMidYMin), שמירת טאב אחרון פעיל, ומנוע עדכונים אוטונומי בזמן אמת"
 };
-window.APP_VERSION = "2.4.31";
+window.APP_VERSION = "2.5.0";
 
 function ensureBaselineRevisions() {
     if (!gameState.revisions || !Array.isArray(gameState.revisions) || gameState.revisions.length === 0) {
