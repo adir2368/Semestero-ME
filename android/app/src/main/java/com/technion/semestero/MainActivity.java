@@ -39,15 +39,24 @@ public class MainActivity extends BridgeActivity {
     }
 
     private void handleWidgetIntent(android.content.Intent intent) {
-        if (intent != null && intent.hasExtra("target_tab")) {
+        if (intent != null) {
+            String action = intent.getStringExtra("widget_action");
             String tab = intent.getStringExtra("target_tab");
-            String tabId = "timetable".equals(tab) ? "timetable" : "tasks";
+            String tabId = "timetable".equals(tab) ? "timetable" : ("tasks".equals(tab) ? "tasks" : null);
+
             if (getBridge() != null && getBridge().getWebView() != null) {
                 getBridge().getWebView().postDelayed(() -> {
-                    getBridge().getWebView().evaluateJavascript(
-                        "if (typeof window.setActiveMainTab === 'function') { window.setActiveMainTab('" + tabId + "'); }",
-                        null
-                    );
+                    if ("add_task".equals(action)) {
+                        getBridge().getWebView().evaluateJavascript(
+                            "if (typeof window.setActiveMainTab === 'function') { window.setActiveMainTab('tasks'); } if (typeof window.openAddCustomTaskModal === 'function') { window.openAddCustomTaskModal('', 'course'); }",
+                            null
+                        );
+                    } else if (tabId != null) {
+                        getBridge().getWebView().evaluateJavascript(
+                            "if (typeof window.setActiveMainTab === 'function') { window.setActiveMainTab('" + tabId + "'); }",
+                            null
+                        );
+                    }
                 }, 450);
             }
         }
@@ -71,7 +80,7 @@ public class MainActivity extends BridgeActivity {
         }
 
         @JavascriptInterface
-        public void updateClassWidget(String title, String time, String details, String lecturer, String status) {
+        public void updateClassWidget(String title, String time, String details, String lecturer, String status, int totalClasses, String classesJson) {
             SharedPreferences prefs = context.getSharedPreferences(SemesteroNextClassWidget.PREFS_NAME, Context.MODE_PRIVATE);
             prefs.edit()
                 .putString("class_title", title)
@@ -79,24 +88,38 @@ public class MainActivity extends BridgeActivity {
                 .putString("class_details", details)
                 .putString("class_lecturer", lecturer)
                 .putString("class_status", status)
+                .putInt("all_classes_count", Math.max(1, totalClasses))
+                .putString("all_classes_json", classesJson != null ? classesJson : "")
                 .apply();
 
             SemesteroNextClassWidget.pushUpdate(context);
         }
 
         @JavascriptInterface
-        public void updateTasksWidget(String examDays, String examTitle, String examSub, String task1, String task2, String tasksSummary) {
+        public void updateTasksWidget(String examDays, String examTitle, String examSub, String task1, String task1Id, String task2, String task2Id, String tasksSummary) {
             SharedPreferences prefs = context.getSharedPreferences(SemesteroTasksExamWidget.PREFS_NAME, Context.MODE_PRIVATE);
             prefs.edit()
                 .putString("exam_days", examDays)
                 .putString("exam_title", examTitle)
                 .putString("exam_sub", examSub)
                 .putString("task_1", task1)
+                .putString("task_1_id", task1Id != null ? task1Id : "")
                 .putString("task_2", task2)
+                .putString("task_2_id", task2Id != null ? task2Id : "")
                 .putString("tasks_summary", tasksSummary)
                 .apply();
 
             SemesteroTasksExamWidget.pushUpdate(context);
+        }
+
+        @JavascriptInterface
+        public String getPendingCompletedTaskIds() {
+            SharedPreferences prefs = context.getSharedPreferences(SemesteroTasksExamWidget.PREFS_NAME, Context.MODE_PRIVATE);
+            String completed = prefs.getString("completed_from_widget_ids", "");
+            if (!completed.isEmpty()) {
+                prefs.edit().remove("completed_from_widget_ids").apply();
+            }
+            return completed;
         }
     }
 }

@@ -12,6 +12,40 @@ import android.widget.RemoteViews;
 public class SemesteroTasksExamWidget extends AppWidgetProvider {
 
     public static final String PREFS_NAME = "SemesteroWidgetPrefs";
+    public static final String ACTION_COMPLETE_TASK_1 = "com.technion.semestero.ACTION_COMPLETE_TASK_1";
+    public static final String ACTION_COMPLETE_TASK_2 = "com.technion.semestero.ACTION_COMPLETE_TASK_2";
+
+    @Override
+    public void onReceive(Context context, Intent intent) {
+        super.onReceive(context, intent);
+
+        String action = intent != null ? intent.getAction() : null;
+        if (ACTION_COMPLETE_TASK_1.equals(action)) {
+            markTaskComplete(context, 1);
+        } else if (ACTION_COMPLETE_TASK_2.equals(action)) {
+            markTaskComplete(context, 2);
+        }
+    }
+
+    private void markTaskComplete(Context context, int taskNum) {
+        SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        String taskIdKey = taskNum == 1 ? "task_1_id" : "task_2_id";
+        String taskKey = taskNum == 1 ? "task_1" : "task_2";
+        String taskId = prefs.getString(taskIdKey, "");
+
+        if (!taskId.isEmpty()) {
+            String pending = prefs.getString("completed_from_widget_ids", "");
+            String updatedPending = pending.isEmpty() ? taskId : pending + "," + taskId;
+            prefs.edit()
+                .putString("completed_from_widget_ids", updatedPending)
+                .putString(taskKey, "✓ הושלם בהצלחה!")
+                .apply();
+        } else {
+            prefs.edit().putString(taskKey, "✓ סומן כהושלם!").apply();
+        }
+
+        pushUpdate(context);
+    }
 
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
@@ -35,27 +69,48 @@ public class SemesteroTasksExamWidget extends AppWidgetProvider {
         views.setTextViewText(R.id.widget_exam_title, examTitle);
         views.setTextViewText(R.id.widget_exam_sub, examSub);
         views.setTextViewText(R.id.widget_task_item_1, (task1 != null && !task1.isEmpty()) ? task1 : "אין משימות פתוחות 🎉");
+
         if (task2 != null && !task2.trim().isEmpty()) {
             views.setTextViewText(R.id.widget_task_item_2, task2);
-            views.setViewVisibility(R.id.widget_task_item_2, android.view.View.VISIBLE);
+            views.setViewVisibility(R.id.widget_task_row_2, android.view.View.VISIBLE);
         } else {
-            views.setViewVisibility(R.id.widget_task_item_2, android.view.View.GONE);
+            views.setViewVisibility(R.id.widget_task_row_2, android.view.View.GONE);
         }
         views.setTextViewText(R.id.widget_tasks_count_summary, tasksSummary);
-
-        // Tap to open application in Tasks tab
-        Intent intent = new Intent(context, MainActivity.class);
-        intent.setAction(Intent.ACTION_VIEW);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        intent.putExtra("target_tab", "tasks");
 
         int flags = PendingIntent.FLAG_UPDATE_CURRENT;
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
             flags |= PendingIntent.FLAG_IMMUTABLE;
         }
 
-        PendingIntent pendingIntent = PendingIntent.getActivity(context, 102, intent, flags);
-        views.setOnClickPendingIntent(R.id.widget_tasks_root, pendingIntent);
+        // Tap root to open Tasks tab
+        Intent openTasksIntent = new Intent(context, MainActivity.class);
+        openTasksIntent.setAction(Intent.ACTION_VIEW);
+        openTasksIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        openTasksIntent.putExtra("target_tab", "tasks");
+        PendingIntent pendingOpenTasks = PendingIntent.getActivity(context, 102, openTasksIntent, flags);
+        views.setOnClickPendingIntent(R.id.widget_tasks_root, pendingOpenTasks);
+
+        // Tap "+ הוסף משימה" to open app directly into Add Task modal
+        Intent addTaskIntent = new Intent(context, MainActivity.class);
+        addTaskIntent.setAction(Intent.ACTION_VIEW);
+        addTaskIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        addTaskIntent.putExtra("target_tab", "tasks");
+        addTaskIntent.putExtra("widget_action", "add_task");
+        PendingIntent pendingAddTask = PendingIntent.getActivity(context, 103, addTaskIntent, flags);
+        views.setOnClickPendingIntent(R.id.btn_widget_add_task, pendingAddTask);
+
+        // Tap checkmark 1 to complete task 1 directly from home screen
+        Intent complete1Intent = new Intent(context, SemesteroTasksExamWidget.class);
+        complete1Intent.setAction(ACTION_COMPLETE_TASK_1);
+        PendingIntent pendingComplete1 = PendingIntent.getBroadcast(context, 104, complete1Intent, flags);
+        views.setOnClickPendingIntent(R.id.btn_complete_task_1, pendingComplete1);
+
+        // Tap checkmark 2 to complete task 2 directly from home screen
+        Intent complete2Intent = new Intent(context, SemesteroTasksExamWidget.class);
+        complete2Intent.setAction(ACTION_COMPLETE_TASK_2);
+        PendingIntent pendingComplete2 = PendingIntent.getBroadcast(context, 105, complete2Intent, flags);
+        views.setOnClickPendingIntent(R.id.btn_complete_task_2, pendingComplete2);
 
         appWidgetManager.updateAppWidget(appWidgetId, views);
     }

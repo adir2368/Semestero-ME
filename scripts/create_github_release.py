@@ -46,13 +46,14 @@ def create_release():
 👉 **[Semestero-ME.apk](https://github.com/{REPO}/releases/download/{TAG}/Semestero-ME.apk)**
 
 #### ✨ Highlights in {TAG}:
-- **RemoteViews Home Screen Widget Inflation Fix ("Couldn't add widget" Resolved):** Replaced non-supported base `<View>` tags with RemoteViews-safe `<FrameLayout>` tags in `widget_next_class.xml` and `widget_tasks_exam.xml`. The widgets now inflate and place cleanly on Samsung One UI and all Android launchers.
-- **Authentic Notification Badge Icon (Science Flask & Gear):** Replaced the generic app circle icon with the official Technion Mechanical Engineering emblem (`ic_stat_notification.png` - Science Flask + Mechanical Gear) across all Android drawable densities (`mdpi`, `hdpi`, `xhdpi`, `xxhdpi`, `xxxhdpi`). Notification status bar icons and heads-up alerts now render the crisp faculty emblem with cyan `#38bdf8` accent.
-- **Native Android Home-Screen Widgets (Zero External Apps Needed!):** Built-in native Android `AppWidgetProvider` widgets added directly to the APK.
-  1. **Next Class & Schedule Widget (`SemesteroNextClassWidget`):** Shows today's upcoming lecture/recitation, time badge, room/location, lecturer, and real-time countdown status ("מתחיל בעוד 10 דקות" / "מתקיים כעת!"). Tapping opens the Timetable tab.
-  2. **Tasks & Exam Countdown Widget (`SemesteroTasksExamWidget`):** Displays countdown days to the next exam, exam title/moed/date, top 2 urgent tasks, and total open tasks. Tapping opens the Tasks tab.
-- **Bi-Directional JavaScript-to-Android Bridge:** `SemesteroWidgetBridge` (`@JavascriptInterface`) in `MainActivity.java` continuously syncs schedules and tasks directly to Android `SharedPreferences` and broadcasts widget updates immediately.
-- **Single NTFY Updates Stream:** Guaranteed 1 clean notification per release to `adir-semestero-me-updates`.
+- **Fully Interactive Home-Screen Widgets:**
+  1. **Tasks & Exam Countdown Widget (`SemesteroTasksExamWidget`):** Added direct task completion! Tap the checkmark (`✓`) button right on the home screen to instantly complete tasks without opening the app, with immediate visual feedback (`✓ הושלם בהצלחה!`) and two-way sync back to your courses database. Plus a dedicated `＋ הוסף משימה` quick-action button that launches straight into the custom task modal.
+  2. **Next Class & Schedule Carousel (`SemesteroNextClassWidget`):** Added interactive carousel controls (`◀`, `▶`) and page counter (`1/N`) to flip through all classes scheduled for today directly from the widget, plus a 1-tap manual refresh button.
+- **Full Authentic Semestero Faculty Emblem for Notifications:**
+  Re-engineered the Android notification icon (`ic_stat_notification.png`) across all densities (`mdpi`, `hdpi`, `xhdpi`, `xxhdpi`, `xxxhdpi`) to feature the complete, authentic Semestero emblem: the science laboratory flask filled with the internal robotic arm mechanism and rising vapor bubbles, framed inside the mechanical engineering gear.
+- **Proposed Native Widgets Gallery for Approval (`widgets.html`):**
+  Added an interactive showcase gallery of 4 new native widget concepts for user review and approval: Quick Technion Launchpad Dock (4x1), Miluim & Reservist Academic Rights Tracker (2x2), Weekly Schedule & Windows Heatmap (4x4), and Finals Runway & GPA Target Gauge (4x2).
+- **Rock-Solid RemoteViews Inflation:** 100% compliant with Android RemoteViews specifications for Samsung One UI and all modern Android launchers.
 """
 
     payload = {

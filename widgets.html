@@ -11,7 +11,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
-    <link rel="manifest" href="manifest.json?v=2.4.23">
+    <link rel="manifest" href="manifest.json?v=2.4.24">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;500;600;700;800;900&family=Rubik:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -757,6 +757,136 @@
         .tecme-step-text strong {
             color: #fff;
         }
+
+        /* Proposed Widgets Showcase & Approval Gallery */
+        .tecme-approval-banner {
+            background: linear-gradient(135deg, rgba(56, 189, 248, 0.12), rgba(99, 102, 241, 0.08));
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            border-radius: 18px;
+            padding: 16px 20px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+
+        .tecme-approval-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .tecme-approval-title h2 {
+            font-size: 1.05rem;
+            font-weight: 800;
+            color: #fff;
+        }
+
+        .tecme-approval-title span {
+            font-size: 0.76rem;
+            color: var(--accent-cyan);
+            font-weight: 600;
+        }
+
+        .tecme-proposed-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .tecme-proposed-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-card);
+            border-radius: var(--radius-widget);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
+            position: relative;
+            transition: all 0.2s ease;
+        }
+
+        .tecme-proposed-card:hover {
+            border-color: rgba(56, 189, 248, 0.35);
+            transform: translateY(-2px);
+        }
+
+        .tecme-proposed-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .tecme-proposed-tag {
+            font-size: 0.68rem;
+            font-weight: 800;
+            padding: 3px 8px;
+            border-radius: 12px;
+            background: rgba(56, 189, 248, 0.15);
+            color: var(--accent-cyan);
+            border: 1px solid rgba(56, 189, 248, 0.3);
+        }
+
+        .tecme-proposed-body {
+            flex: 1;
+            margin-bottom: 16px;
+        }
+
+        .tecme-proposed-name {
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: #fff;
+            margin-bottom: 6px;
+        }
+
+        .tecme-proposed-desc {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            line-height: 1.45;
+            margin-bottom: 14px;
+        }
+
+        .tecme-proposed-mockup {
+            background: rgba(19, 21, 27, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            border-radius: 14px;
+            padding: 12px;
+            margin-bottom: 14px;
+        }
+
+        .tecme-vote-btn {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: #fff;
+            font-size: 0.8rem;
+            font-weight: 700;
+            padding: 8px 14px;
+            border-radius: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            transition: all 0.2s ease;
+        }
+
+        .tecme-vote-btn:hover {
+            background: rgba(56, 189, 248, 0.2);
+            border-color: rgba(56, 189, 248, 0.4);
+            color: var(--accent-cyan);
+        }
+
+        .tecme-vote-btn.voted {
+            background: rgba(52, 211, 153, 0.2);
+            border-color: rgba(52, 211, 153, 0.5);
+            color: #34d399;
+        }
     </style>
 </head>
 <body>
@@ -868,6 +998,168 @@
                 <div class="tecme-card tecme-card-l" id="widget-upnext-l">
                     <!-- Dynamic content rendered by JS -->
                 </div>
+            </div>
+        </div>
+
+        <!-- ================= SECTION 4: PROPOSED NATIVE WIDGETS GALLERY (לאישור) ================= -->
+        <div class="tecme-section-wrap" id="section-proposed-widgets" data-section-size="all" style="margin-top: 10px;">
+            <div class="tecme-approval-banner">
+                <div class="tecme-approval-title">
+                    <span style="font-size: 1.3rem;">💡</span>
+                    <div>
+                        <h2>גלריית ווידג'טים חדשים לאישור המשתמש</h2>
+                        <span>קונספטים מתקדמים לווידג'טים מובנים נוספים במסך הבית (One UI / Android)</span>
+                    </div>
+                </div>
+                <div style="font-size: 0.78rem; color: #94a3b8;">לחץ על "אשר לפיתוח" כדי לתעדף את הווידג'ט בגרסה הבאה</div>
+            </div>
+
+            <div class="tecme-proposed-grid">
+                
+                <!-- 1. Quick Technion Launchpad Dock -->
+                <div class="tecme-proposed-card">
+                    <div class="tecme-proposed-header">
+                        <span class="tecme-proposed-tag">4x1 או 2x1 · קיצורי דרך מהירים</span>
+                        <span style="font-size: 0.76rem; color: #94a3b8;">בלחיצה אחת</span>
+                    </div>
+                    <div class="tecme-proposed-body">
+                        <div class="tecme-proposed-name">🚀 דוק השקה מהיר לטכניון (Quick Launchpad)</div>
+                        <div class="tecme-proposed-desc">
+                            סרגל קיצורי דרך מהיר ישירות ממסך הבית לכל הפלטפורמות האקדמיות שסטודנט צריך 20 פעמים ביום, בלי להיכנס לדפדפן ולחפש לינקים.
+                        </div>
+                        <div class="tecme-proposed-mockup">
+                            <div style="display: flex; justify-content: space-around; align-items: center; gap: 8px;">
+                                <div style="display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer;">
+                                    <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.4); display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">🎓</div>
+                                    <span style="font-size: 0.7rem; font-weight: 700; color: #fff;">מודל 26</span>
+                                </div>
+                                <div style="display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer;">
+                                    <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(248, 113, 113, 0.15); border: 1px solid rgba(248, 113, 113, 0.4); display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">🎥</div>
+                                    <span style="font-size: 0.7rem; font-weight: 700; color: #fff;">פנופטו</span>
+                                </div>
+                                <div style="display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer;">
+                                    <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(52, 211, 153, 0.15); border: 1px solid rgba(52, 211, 153, 0.4); display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">✨</div>
+                                    <span style="font-size: 0.7rem; font-weight: 700; color: #fff;">מחולל מערכות</span>
+                                </div>
+                                <div style="display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer;">
+                                    <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(251, 191, 36, 0.15); border: 1px solid rgba(251, 191, 36, 0.4); display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">➕</div>
+                                    <span style="font-size: 0.7rem; font-weight: 700; color: #fff;">משימה חדשה</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" class="tecme-vote-btn" onclick="toggleWidgetApproval('launchpad', this)">
+                        <span>👍 אשר לפיתוח בגרסה הבאה</span>
+                    </button>
+                </div>
+
+                <!-- 2. Miluim Academic Rights Tracker -->
+                <div class="tecme-proposed-card">
+                    <div class="tecme-proposed-header">
+                        <span class="tecme-proposed-tag" style="background: rgba(52, 211, 153, 0.15); color: #34d399; border-color: rgba(52, 211, 153, 0.3);">2x2 או 4x2 · זכויות מילואים</span>
+                        <span style="font-size: 0.76rem; color: #34d399; font-weight: 700;">🇮🇱 צו 8 פעיל</span>
+                    </div>
+                    <div class="tecme-proposed-body">
+                        <div class="tecme-proposed-name">🎖️ מעקב זכויות מילואים אקדמיות</div>
+                        <div class="tecme-proposed-desc">
+                            מעקב בזמן אמת אחר ימי שמ"פ בסמסטר, סטטוס הפשרת 2 נק"ז אקדמיות, זכאות מובטחת למועד ג' / מיוחד, ופטור מחובת נוכחות והקלטות.
+                        </div>
+                        <div class="tecme-proposed-mockup">
+                            <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px;">
+                                <span style="font-size: 0.76rem; color: #94a3b8;">שירות מצטבר בסמסטר:</span>
+                                <span style="font-size: 1.2rem; font-weight: 900; color: #fff;">34 ימים</span>
+                            </div>
+                            <div style="display: flex; flex-direction: column; gap: 4px; font-size: 0.74rem;">
+                                <div style="display: flex; align-items: center; gap: 6px; color: #34d399;">
+                                    <span>✓</span> <span>זכאות ל-2 נק"ז אקדמיות (הופשרו לקורסי בחירה)</span>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 6px; color: #34d399;">
+                                    <span>✓</span> <span>מועד בחינה מיוחד מובטח (סמסטר חורף תשפ"ז)</span>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 6px; color: #38bdf8;">
+                                    <span>●</span> <span>התאמות הגשה: הארכה אוטומטית של 14 יום במטלות</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" class="tecme-vote-btn" onclick="toggleWidgetApproval('miluim', this)">
+                        <span>👍 אשר לפיתוח בגרסה הבאה</span>
+                    </button>
+                </div>
+
+                <!-- 3. Weekly Schedule & Windows Heatmap -->
+                <div class="tecme-proposed-card">
+                    <div class="tecme-proposed-header">
+                        <span class="tecme-proposed-tag" style="background: rgba(168, 85, 247, 0.15); color: #c084fc; border-color: rgba(168, 85, 247, 0.3);">4x2 או 4x4 · שבוע במבט על</span>
+                        <span style="font-size: 0.76rem; color: #94a3b8;">5 ימי לימוד</span>
+                    </div>
+                    <div class="tecme-proposed-body">
+                        <div class="tecme-proposed-name">🗓️ מפת שעות שבועית ומעקב חלונות</div>
+                        <div class="tecme-proposed-desc">
+                            מפת חום מוקטנת של כל השבוע האקדמי: מזהה ימים חופשיים, מסמנת חלונות בין הרצאות לתרגולים, ומדגישה את היום הנוכחי עם שעות פעילות.
+                        </div>
+                        <div class="tecme-proposed-mockup">
+                            <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; text-align: center;">
+                                <div style="background: rgba(255, 255, 255, 0.05); border-radius: 8px; padding: 6px 2px;">
+                                    <div style="font-size: 0.68rem; font-weight: 800; color: #94a3b8;">א'</div>
+                                    <div style="height: 24px; background: rgba(56, 189, 248, 0.3); border-radius: 4px; margin: 3px 0; font-size: 0.6rem; line-height: 24px; color: #fff;">08:30-14:30</div>
+                                </div>
+                                <div style="background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.4); border-radius: 8px; padding: 6px 2px;">
+                                    <div style="font-size: 0.68rem; font-weight: 900; color: #38bdf8;">ב' (היום)</div>
+                                    <div style="height: 24px; background: rgba(56, 189, 248, 0.6); border-radius: 4px; margin: 3px 0; font-size: 0.6rem; line-height: 24px; color: #fff; font-weight: 800;">10:30-17:30</div>
+                                </div>
+                                <div style="background: rgba(255, 255, 255, 0.05); border-radius: 8px; padding: 6px 2px;">
+                                    <div style="font-size: 0.68rem; font-weight: 800; color: #94a3b8;">ג'</div>
+                                    <div style="height: 24px; background: rgba(52, 211, 153, 0.2); border-radius: 4px; margin: 3px 0; font-size: 0.58rem; line-height: 24px; color: #34d399;">🏖️ חופשי!</div>
+                                </div>
+                                <div style="background: rgba(255, 255, 255, 0.05); border-radius: 8px; padding: 6px 2px;">
+                                    <div style="font-size: 0.68rem; font-weight: 800; color: #94a3b8;">ד'</div>
+                                    <div style="height: 24px; background: rgba(56, 189, 248, 0.3); border-radius: 4px; margin: 3px 0; font-size: 0.6rem; line-height: 24px; color: #fff;">08:30-16:30</div>
+                                </div>
+                                <div style="background: rgba(255, 255, 255, 0.05); border-radius: 8px; padding: 6px 2px;">
+                                    <div style="font-size: 0.68rem; font-weight: 800; color: #94a3b8;">ה'</div>
+                                    <div style="height: 24px; background: rgba(251, 191, 36, 0.3); border-radius: 4px; margin: 3px 0; font-size: 0.6rem; line-height: 24px; color: #fff;">07:30 🧘 יוגה</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" class="tecme-vote-btn" onclick="toggleWidgetApproval('schedule', this)">
+                        <span>👍 אשר לפיתוח בגרסה הבאה</span>
+                    </button>
+                </div>
+
+                <!-- 4. Finals Runway & GPA Target Gauge -->
+                <div class="tecme-proposed-card">
+                    <div class="tecme-proposed-header">
+                        <span class="tecme-proposed-tag" style="background: rgba(251, 191, 36, 0.15); color: #fbbf24; border-color: rgba(251, 191, 36, 0.3);">4x2 · יעדי הצטיינות ומבחנים</span>
+                        <span style="font-size: 0.76rem; color: #fbbf24; font-weight: 700;">🎯 יעד: 88.0</span>
+                    </div>
+                    <div class="tecme-proposed-body">
+                        <div class="tecme-proposed-name">📊 מד מסלול בחינות וממוצע יעד (GPA Runway)</div>
+                        <div class="tecme-proposed-desc">
+                            מעקב רציף לקראת מועדי א' וב': מונה ימים לספתח תקופת המבחנים, חישוב ממוצע יעד אינטראקטיבי וקצב שעות למידה שבועי (Streak).
+                        </div>
+                        <div class="tecme-proposed-mockup">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                <div>
+                                    <span style="font-size: 0.72rem; color: #94a3b8;">ממוצע מצטבר קיים:</span>
+                                    <div style="font-size: 1.4rem; font-weight: 900; color: #fff;">85.9 <span style="font-size: 0.76rem; color: #34d399; font-weight: 700;">+2.1 ליעד</span></div>
+                                </div>
+                                <div style="text-align: left;">
+                                    <span style="font-size: 0.72rem; color: #94a3b8;">מועד א' מוצקים 2:</span>
+                                    <div style="font-size: 1.4rem; font-weight: 900; color: #38bdf8;">115 <span style="font-size: 0.76rem; color: #94a3b8;">ימים</span></div>
+                                </div>
+                            </div>
+                            <div style="height: 6px; background: rgba(255, 255, 255, 0.1); border-radius: 6px; overflow: hidden; margin-top: 6px;">
+                                <div style="width: 78%; height: 100%; background: linear-gradient(90deg, #38bdf8, #34d399); border-radius: 6px;"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" class="tecme-vote-btn" onclick="toggleWidgetApproval('finals_gpa', this)">
+                        <span>👍 אשר לפיתוח בגרסה הבאה</span>
+                    </button>
+                </div>
+
             </div>
         </div>
 
@@ -1296,9 +1588,39 @@
             window.location.href = `index.html?tab=${type === 'exam' ? 'calendar' : (type === 'semester' ? 'planner' : 'tasks')}`;
         }
 
+        function toggleWidgetApproval(id, btn) {
+            let approved = JSON.parse(localStorage.getItem('semestero_approved_widgets') || '{}');
+            approved[id] = !approved[id];
+            localStorage.setItem('semestero_approved_widgets', JSON.stringify(approved));
+            updateApprovalButtons();
+        }
+
+        function updateApprovalButtons() {
+            const approved = JSON.parse(localStorage.getItem('semestero_approved_widgets') || '{}');
+            const map = {
+                launchpad: 'דוק השקה מהיר לטכניון',
+                miluim: 'מעקב זכויות מילואים אקדמיות',
+                schedule: 'מפת שעות שבועית ומעקב חלונות',
+                finals_gpa: 'מד מסלול בחינות וממוצע יעד'
+            };
+            for (const [id, name] of Object.entries(map)) {
+                const btn = document.querySelector(`button[onclick*="'${id}'"]`);
+                if (btn) {
+                    if (approved[id]) {
+                        btn.classList.add('voted');
+                        btn.innerHTML = `<span>✓ אושר לפיתוח בגרסה הבאה! (${name})</span>`;
+                    } else {
+                        btn.classList.remove('voted');
+                        btn.innerHTML = `<span>👍 אשר לפיתוח בגרסה הבאה</span>`;
+                    }
+                }
+            }
+        }
+
         // Initialize
         initParams();
         renderAllWidgets();
+        updateApprovalButtons();
     </script>
 </body>
 </html>

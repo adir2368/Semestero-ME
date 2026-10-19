@@ -15987,6 +15987,7 @@ function setTaskModalCategory(category) {
 }
 
 function openAddCustomTaskModal(prefilledDate = "", defaultCategory = "personal") {
+    window.openAddCustomTaskModal = openAddCustomTaskModal;
     const modal = document.getElementById("modal-add-custom-task");
     const courseSelect = document.getElementById("new-task-course-select");
     const dateInput = document.getElementById("new-task-due-date");
@@ -19499,7 +19500,7 @@ function exportTimetableToICS() {
 window.exportTimetableToICS = exportTimetableToICS;
 
 // =========================================================================
-// GOOGLE CALENDAR MANAGEMENT, CLEANUP & IN-APP TIMETABLE EDITING (v2.4.23)
+// GOOGLE CALENDAR MANAGEMENT, CLEANUP & IN-APP TIMETABLE EDITING (v2.4.24)
 // =========================================================================
 
 // Exports an RFC 5545 cancellation .ics file (METHOD:CANCEL, STATUS:CANCELLED)
@@ -20564,13 +20565,13 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.10.18-v2.4.23",
-    version: "2.4.23",
+    code: "REV-2026.10.18-v2.4.24",
+    version: "2.4.24",
     build: "20261018_08",
     date: "2026-10-18 16:45",
     description: "גרסה 2.4.20: מבנה כרטיסיית שיעור ב-4 שורות מוגדרות, מנהל מחיקה ועריכה מלא ליומן גוגל (כולל קובץ ביטול ICS CANCEL), וטיהור מוחלט של 'כיתת טכניון'"
 };
-window.APP_VERSION = "2.4.23";
+window.APP_VERSION = "2.4.24";
 
 function ensureBaselineRevisions() {
     if (!gameState.revisions || !Array.isArray(gameState.revisions) || gameState.revisions.length === 0) {
@@ -23026,13 +23027,23 @@ function syncNativeAndroidWidgets(classData, tasksData) {
             classStatus = "חופשי";
         }
 
+        const allClassesList = (cData && cData.classes) ? cData.classes.map(c => ({
+            title: c.name || c.courseName || c.title || "הרצאה",
+            time: (c.startTime && c.endTime) ? `${c.startTime} - ${c.endTime}` : (c.time || "--:--"),
+            details: `${c.room ? '📍 ' + c.room : '📍 טכניון'}${c.type ? ' • ' + c.type : ''}`,
+            lecturer: c.lecturer ? `👨‍🏫 ${c.lecturer}` : "טכניון • סמסטר חורף",
+            status: "שיעור אקדמי"
+        })) : [];
+
         if (window.SemesteroWidgetBridge.updateClassWidget) {
             window.SemesteroWidgetBridge.updateClassWidget(
                 classTitle,
                 classTime,
                 classDetails,
                 classLecturer,
-                classStatus
+                classStatus,
+                allClassesList.length,
+                JSON.stringify(allClassesList)
             );
         }
 
@@ -23072,15 +23083,19 @@ function syncNativeAndroidWidgets(classData, tasksData) {
 
         const tList = (tData && tData.tasks) ? tData.tasks : [];
         let task1 = "אין משימות פתוחות 🎉";
+        let task1Id = "";
         let task2 = "";
+        let task2Id = "";
         let tasksSummary = "הכל מעודכן!";
 
         if (tList.length > 0) {
             const t1 = tList[0];
             task1 = `📌 [${t1.courseShortName || t1.courseName}] ${t1.title} (${t1.timingText || ''})`;
+            task1Id = t1.id || "";
             if (tList.length > 1) {
                 const t2 = tList[1];
                 task2 = `⚡ [${t2.courseShortName || t2.courseName}] ${t2.title} (${t2.timingText || ''})`;
+                task2Id = t2.id || "";
             }
             const remainingCount = Math.max(0, (tData.totalOpen || tList.length) - 2);
             tasksSummary = remainingCount > 0 
@@ -23094,9 +23109,37 @@ function syncNativeAndroidWidgets(classData, tasksData) {
                 examTitle,
                 examSub,
                 task1,
+                task1Id,
                 task2,
+                task2Id,
                 tasksSummary
             );
+        }
+
+        // Two-way synchronization: Check if any tasks were marked done directly on the widget
+        if (window.SemesteroWidgetBridge.getPendingCompletedTaskIds) {
+            const completedIdsStr = window.SemesteroWidgetBridge.getPendingCompletedTaskIds();
+            if (completedIdsStr) {
+                const completedIds = completedIdsStr.split(',').filter(Boolean);
+                let changed = false;
+                completedIds.forEach(id => {
+                    Object.values(gameState.courses || {}).forEach(course => {
+                        (course.tasks || []).forEach(task => {
+                            if (task.id === id && !task.completed) {
+                                task.completed = true;
+                                task.status = 'done';
+                                changed = true;
+                            }
+                        });
+                    });
+                });
+                if (changed) {
+                    saveState();
+                    if (typeof showHudToast === 'function') {
+                        showHudToast('✓ משימות סומנו כהושלמו ישירות מהווידג\'ט במסך הבית!', 'success');
+                    }
+                }
+            }
         }
     } catch (err) {
         console.warn("[Semestero Native Widgets] Sync failed:", err);
