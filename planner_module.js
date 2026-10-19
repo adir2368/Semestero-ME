@@ -11,7 +11,7 @@
     // Module State & Configuration
     // --------------------------------------------------------------------------
     let currentMode = 'custom'; // 'custom' | 'suggested'
-    let selectedTrack = 'year_2027'; // 'year_2027' | 'year_2025' | 'year_2024' | 'barak'
+    let selectedTrack = 'year_2026'; // 'year_2026' | 'year_2027' | 'year_2025' | 'year_2024' | 'barak'
     let isReservistDeduction = false;
     let isEnglishExemption = false;
     let englishLevel = 'none'; // 'exempt_all' | 'exempt_a' | 'none'
@@ -32,6 +32,7 @@
     const PLANNER_TRACK_KEY = 'semestero_planner_selected_track';
 
     function getActiveUserId() {
+        if (typeof window !== 'undefined' && (window.Capacitor || window.location.protocol === 'capacitor:')) return 'adir_moshe';
         if (global.AuthSync && typeof global.AuthSync.getActiveUser === 'function') {
             const u = global.AuthSync.getActiveUser();
             return (u && u.id) ? u.id : 'guest';
@@ -40,6 +41,7 @@
     }
 
     function isAdirAuthenticated() {
+        if (typeof window !== 'undefined' && (window.Capacitor || window.location.protocol === 'capacitor:')) return true;
         return !!(global.AuthSync && typeof global.AuthSync.isAdirActive === 'function' && global.AuthSync.isAdirActive());
     }
 
@@ -503,58 +505,49 @@
         const isAdir = isAdirAuthenticated();
         const v2Key = getPlannerStorageKeyV2();
         const v1Key = getPlannerStorageKeyV1();
+        const preloadedState = (typeof window !== 'undefined' && window.PRELOADED_USER_STATE) || (typeof global !== 'undefined' && global.PRELOADED_USER_STATE) || (typeof PRELOADED_USER_STATE !== 'undefined' ? PRELOADED_USER_STATE : null);
 
-        // Helper to detect Adir's custom degree plan (Python in semester 1 without Physics 1)
+        // Helper to detect Adir's custom degree plan
         function isAdirCustomPlan(plan) {
-            if (!plan || !Array.isArray(plan) || plan.length === 0) return false;
-            const sem1 = plan.find(s => s.semester === 1);
-            if (!sem1 || !Array.isArray(sem1.courses)) return false;
-            const hasPhysics1 = sem1.courses.some(c => c.code === '01140051' || c.code === '114051' || c.altCode === '114051');
-            const hasPython = sem1.courses.some(c => c.code === '02340128' || c.code === '234128' || c.altCode === '234128');
-            return hasPython && !hasPhysics1 && sem1.courses.length <= 4;
+            return false; // Disabled heuristic to prevent accidental user plan purging
         }
 
-        // For non-Adir users: aggressively purge any leaked/contaminated plan from storage & gameState
-        if (!isAdir) {
-            ['atlas_me_custom_degree_plan_v2_guest', 'atlas_me_custom_degree_plan_v1_guest', v2Key, v1Key, PLANNER_STORAGE_KEY_V2, PLANNER_STORAGE_KEY_V1].forEach(k => {
-                try {
-                    const raw = localStorage.getItem(k);
-                    if (raw) {
-                        const p = JSON.parse(raw);
-                        const semCandidate = Array.isArray(p.semesters) ? p.semesters : (Array.isArray(p) ? p : null);
-                        if (isAdirCustomPlan(semCandidate)) {
-                            console.warn(`[Planner] Purging leaked Adir plan from ${k} for non-Adir user.`);
-                            localStorage.removeItem(k);
-                        }
-                    }
-                } catch (e) {}
-            });
-
-            if (global.gameState && isAdirCustomPlan(global.gameState.degreePlan)) {
-                console.warn('[Planner] Purging leaked Adir plan from global gameState.degreePlan for non-Adir user.');
-                delete global.gameState.degreePlan;
-                delete global.gameState.degreePlanUnassigned;
-            }
+        // Helper to check if a loaded plan has the required authentic baseline for Adir
+        function isAdirPlanAuthentic(plan) {
+            if (!plan || !Array.isArray(plan) || plan.length < 3) return false;
+            const sem1 = plan.find(s => s.semester === 1);
+            const sem2 = plan.find(s => s.semester === 2);
+            const sem3 = plan.find(s => s.semester === 3);
+            if (!sem1 || !sem2 || !sem3) return false;
+            const s1 = (sem1.courses || []).map(c => c.code || c.altCode);
+            const s2 = (sem2.courses || []).map(c => c.code || c.altCode);
+            const s3 = (sem3.courses || []).map(c => c.code || c.altCode);
+            const hasPhys1InS1 = s1.some(c => c === '01140051' || c === '114051');
+            const hasChemLabInS2 = s2.some(c => c === '01250013' || c === '125013');
+            const hasYogaInS3 = s3.some(c => c === '03940805');
+            return hasPhys1InS1 && hasChemLabInS2 && hasYogaInS3;
         }
 
         // 1. First priority: cloud-synced degreePlan from global gameState
         if (global.gameState && Array.isArray(global.gameState.degreePlan) && global.gameState.degreePlan.length > 0) {
-            if (isAdir || !isAdirCustomPlan(global.gameState.degreePlan)) {
-                try {
+            try {
+                if (!isAdir || isAdirPlanAuthentic(global.gameState.degreePlan)) {
                     loadedPlan = JSON.parse(JSON.stringify(global.gameState.degreePlan));
                     loadedUnassigned = Array.isArray(global.gameState.degreePlanUnassigned) ? JSON.parse(JSON.stringify(global.gameState.degreePlanUnassigned)) : [];
                     console.log('[Planner] Initialized plan from gameState.degreePlan');
-                } catch (e) {
-                    console.error('[Planner] Error cloning gameState.degreePlan:', e);
+                } else {
+                    console.warn('[Planner] Existing gameState.degreePlan was out-of-date or incomplete for Adir, preferring authentic preloaded plan.');
                 }
+            } catch (e) {
+                console.error('[Planner] Error cloning gameState.degreePlan:', e);
             }
         }
 
-        // 2. Preloaded authentic degreePlan from PRELOADED_USER_STATE (Adir only)
-        if (!loadedPlan && isAdir && typeof PRELOADED_USER_STATE !== 'undefined' && Array.isArray(PRELOADED_USER_STATE.degreePlan) && PRELOADED_USER_STATE.degreePlan.length > 0) {
+        // 2. Preloaded authentic degreePlan from PRELOADED_USER_STATE (Adir / Capacitor)
+        if (!loadedPlan && (isAdir || (typeof window !== 'undefined' && (window.Capacitor || window.location.protocol === 'capacitor:'))) && preloadedState && Array.isArray(preloadedState.degreePlan) && preloadedState.degreePlan.length > 0) {
             try {
-                loadedPlan = JSON.parse(JSON.stringify(PRELOADED_USER_STATE.degreePlan));
-                loadedUnassigned = Array.isArray(PRELOADED_USER_STATE.degreePlanUnassigned) ? JSON.parse(JSON.stringify(PRELOADED_USER_STATE.degreePlanUnassigned)) : [];
+                loadedPlan = JSON.parse(JSON.stringify(preloadedState.degreePlan));
+                loadedUnassigned = Array.isArray(preloadedState.degreePlanUnassigned) ? JSON.parse(JSON.stringify(preloadedState.degreePlanUnassigned)) : [];
                 console.log('[Planner] Initialized plan from PRELOADED_USER_STATE.degreePlan (Adir authentic)');
             } catch (e) {}
         }
@@ -566,7 +559,7 @@
                 if (savedV2) {
                     const parsed = JSON.parse(savedV2);
                     const semCandidate = Array.isArray(parsed.semesters) ? parsed.semesters : (Array.isArray(parsed) ? parsed : null);
-                    if (isAdir || !isAdirCustomPlan(semCandidate)) {
+                    if (!isAdir || isAdirPlanAuthentic(semCandidate)) {
                         if (parsed && Array.isArray(parsed.semesters) && parsed.semesters.length > 0) {
                             loadedPlan = parsed.semesters;
                             loadedUnassigned = Array.isArray(parsed.unassigned) ? parsed.unassigned : [];
@@ -587,14 +580,23 @@
                 let savedV1 = localStorage.getItem(v1Key) || (isAdir ? localStorage.getItem(PLANNER_STORAGE_KEY_V1) : null);
                 if (savedV1) {
                     const parsedV1 = JSON.parse(savedV1);
-                    if (Array.isArray(parsedV1) && parsedV1.length > 0 && (isAdir || !isAdirCustomPlan(parsedV1))) {
-                        loadedPlan = parsedV1;
-                        loadedUnassigned = [];
+                    const semCandidate = Array.isArray(parsedV1) ? parsedV1 : null;
+                    if (!isAdir || isAdirPlanAuthentic(semCandidate)) {
+                        if (Array.isArray(parsedV1) && parsedV1.length > 0) {
+                            loadedPlan = parsedV1;
+                            loadedUnassigned = [];
+                        }
                     }
                 }
             } catch (e) {
                 console.error('[Planner] Error parsing saved plan V1:', e);
             }
+        }
+
+        // 5. Preloaded authentic degreePlan fallback for Adir
+        if (!loadedPlan && (isAdir || (typeof window !== 'undefined' && (window.Capacitor || window.location.protocol === 'capacitor:'))) && preloadedState && Array.isArray(preloadedState.degreePlan) && preloadedState.degreePlan.length > 0) {
+            loadedPlan = JSON.parse(JSON.stringify(preloadedState.degreePlan));
+            loadedUnassigned = Array.isArray(preloadedState.degreePlanUnassigned) ? JSON.parse(JSON.stringify(preloadedState.degreePlanUnassigned)) : [];
         }
 
         // 5. Initialize from official suggested syllabus ONLY if empty
@@ -875,8 +877,8 @@
                     }
                 }
 
-                // If not in customPlan, only add if the course is ALREADY COMPLETED (has grade or mastered)
-                if (!foundCourse && isDone) {
+                // If not in customPlan, add if completed, active/in_progress, or assigned to current semester
+                if (!foundCourse && (isDone || c.status === 'in_progress' || c.status === 'active' || actualSem === 3)) {
                     const catCourse = (global.PLANNER_CATALOG && global.PLANNER_CATALOG.ALL_COURSES_MAP) ? 
                         (global.PLANNER_CATALOG.ALL_COURSES_MAP[c.code] || (c.altCode && global.PLANNER_CATALOG.ALL_COURSES_MAP[c.altCode])) : null;
                     if (catCourse) {

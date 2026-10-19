@@ -1,0 +1,5834 @@
+// ==========================================================================
+// Preloaded Authentic User State - Adir Moshe (Technion Mechanical Engineering)
+// Provides clean, synchronous global state to AuthSync, PlannerCatalog, DegreePlanner, and App core.
+// ==========================================================================
+
+(function(window) {
+    'use strict';
+
+    const PRELOADED_USER_STATE = {
+  "xp": 1250,
+  "gpa": 86.39240506329114,
+  "level": 6,
+  "courses": {
+    "104041": {
+      "code": "104041",
+      "name": "חדו״א 1מ1",
+      "grade": 84,
+      "tasks": [
+        {
+          "id": "104041_h1",
+          "xp": 50,
+          "type": "hw",
+          "title": "מטלת בית 1: גבולות וסדרות",
+          "status": "done",
+          "dueDate": "",
+          "completed": true
+        },
+        {
+          "id": "104041_h2",
+          "xp": 50,
+          "type": "hw",
+          "title": "מטלת בית 2: רציפות וגזירות",
+          "status": "done",
+          "dueDate": "",
+          "completed": true
+        },
+        {
+          "id": "104041_ex",
+          "xp": 500,
+          "type": "exam",
+          "grade": 84,
+          "title": "מועד א",
+          "status": "done",
+          "dueDate": "",
+          "completed": true
+        },
+        {
+          "id": "task_moodle_11028_1789652686032",
+          "xp": 50,
+          "type": "assignment",
+          "title": "הגשת גיליון 3",
+          "source": "moodle",
+          "status": "done",
+          "dueDate": "2027-07-03 09:00",
+          "completed": true,
+          "moodleUid": "11028@moodle25.technion.ac.il",
+          "dueTimestamp": 1814605200000,
+          "moodleEventId": "11028"
+        }
+      ],
+      "status": "mastered",
+      "credits": 5,
+      "semester": 1,
+      "isBinaryPass": false,
+      "prerequisites": []
+    },
+    "104043": {
+      "code": "104043",
+      "name": "חדו״א 2מ׳",
+      "grade": 70,
+      "tasks": [
+        {
+          "id": "104043_h1",
+          "xp": 50,
+          "type": "hw",
+          "title": "תרגיל בית 1: פונקציות של מספר משתנים וגרדיאנט",
+          "status": "done",
+          "completed": true
+        },
+        {
+          "id": "104043_ex",
+          "xp": 500,
+          "type": "exam",
+          "grade": 65,
+          "title": "מועד א חדו״א 1pm",
+          "status": "done",
+          "dueDate": "2026-08-05",
+          "completed": true
+        },
+        {
+          "id": "task_104043_lectures",
+          "type": "hw",
+          "title": "לצפות בכל ההרצאות של חדו״א",
+          "status": "done",
+          "dueDate": "2026-08-22",
+          "completed": true
+        },
+        {
+          "id": "task-104043-exam-b",
+          "xp": 500,
+          "type": "exam",
+          "grade": 70,
+          "title": "מועד ב'",
+          "status": "done",
+          "dueDate": "2026-11-15",
+          "completed": true
+        },
+        {
+          "id": "task_moodle_126492_1789652686032",
+          "xp": 50,
+          "type": "assignment",
+          "title": "העלאת אישורי זכאות למועד מילואים",
+          "source": "moodle",
+          "status": "done",
+          "dueDate": "2026-09-23 20:59",
+          "completed": true,
+          "moodleUid": "126492@moodle25.technion.ac.il",
+          "dueTimestamp": 1790197140000,
+          "moodleEventId": "126492"
+        }
+      ],
+      "status": "mastered",
+      "credits": 5,
+      "semester": 2,
+      "isBinaryPass": false,
+      "prerequisites": [
+        "104041"
+      ]
+    },
+    "104065": {
+      "code": "104065",
+      "name": "אלגברה ליניארית 1מ",
+      "type": "core",
+      "grade": 87,
+      "tasks": [
+        {
+          "id": "104065_h1",
+          "xp": 50,
+          "type": "hw",
+          "title": "מטלת בית 1: מערכות משוואות ומטריצות",
+          "status": "done",
+          "dueDate": "",
+          "completed": true
+        },
+        {
+          "id": "104065_ex",
+          "xp": 500,
+          "type": "exam",
+          "grade": 87,
+          "title": "מועד א",
+          "status": "done",
+          "dueDate": "",
+          "completed": true
+        }
+      ],
+      "status": "mastered",
+      "credits": 5,
+      "semester": 1,
+      "isBinaryPass": false,
+      "prerequisites": []
+    },
+    "104131": {
+      "code": "104131",
+      "name": "משוואות דיפרנציאליות רגילות",
+      "grade": 74,
+      "tasks": [
+        {
+          "id": "task-dyn-1",
+          "xp": 50,
+          "type": "hw",
+          "title": "תרגיל הגשה 1: מבוא למשוואות דיפרנציאליות רגילות",
+          "status": "done",
+          "dueDate": "",
+          "completed": true
+        },
+        {
+          "id": "task-dyn-2",
+          "xp": 50,
+          "type": "hw",
+          "title": "תרגיל הגשה 2: נושאים מתקדמים במשוואות דיפרנציאליות רגילות",
+          "status": "done",
+          "dueDate": "",
+          "completed": true
+        },
+        {
+          "id": "task-dyn-proj",
+          "xp": 150,
+          "type": "project",
+          "title": "עבודת הגשה מסכמת במשוואות דיפרנציאליות רגילות",
+          "status": "done",
+          "dueDate": "",
+          "completed": true
+        },
+        {
+          "id": "task-dyn-exam",
+          "xp": 500,
+          "type": "exam",
+          "grade": 71,
+          "title": "מועד א מד״ר 9am",
+          "status": "done",
+          "dueDate": "2026-08-13",
+          "completed": true
+        },
+        {
+          "id": "task-104131-exam-b",
+          "xp": 500,
+          "type": "exam",
+          "grade": 74,
+          "title": "מועד ב'",
+          "status": "done",
+          "dueDate": "2026-11-12",
+          "completed": true
+        }
+      ],
+      "status": "mastered",
+      "credits": 2.5,
+      "semester": 2,
+      "isBinaryPass": false,
+      "prerequisites": [
+        "104041",
+        "104065"
+      ]
+    },
+    "104228": {
+      "code": "104228",
+      "name": "משוואות דיפרנציאליות חלקיות מ׳",
+      "moedA": "2027-02-24",
+      "moedB": "2027-03-26",
+      "tasks": [
+        {
+          "id": "104228_h1",
+          "xp": 50,
+          "type": "hw",
+          "title": "תרגיל בית 1: משוואות מסדר ראשון ומאפיינים",
+          "status": "not_started",
+          "dueDate": "",
+          "completed": false
+        },
+        {
+          "id": "104228_ww1",
+          "xp": 40,
+          "type": "webwork",
+          "title": "WebWork 1: משוואת הגלים והפרדת משתנים",
+          "status": "not_started",
+          "dueDate": "",
+          "completed": false
+        },
+        {
+          "id": "104228_ex",
+          "xp": 500,
+          "type": "exam",
+          "title": "מועד א",
+          "status": "not_started",
+          "dueDate": "2027-02-24",
+          "completed": false
+        },
+        {
+          "id": "104228_ex_b",
+          "xp": 500,
+          "type": "exam",
+          "title": "מועד ב'",
+          "status": "not_started",
+          "dueDate": "2027-03-26",
+          "completed": false
+        }
+      ],
+      "status": "available",
+      "credits": 3,
+      "faculty": "הפקולטה למתמטיקה",
+      "schedule": [
+        {
+          "day": "רביעי",
+          "room": "",
+          "type": "תרגול",
+          "group": 21,
+          "hours": "10:30 - 12:30",
+          "lecturer": ""
+        },
+        {
+          "day": "חמישי",
+          "room": "",
+          "type": "הרצאה",
+          "group": 20,
+          "hours": "10:30 - 12:30",
+          "lecturer": ""
+        }
+      ],
+      "semester": 3,
+      "syllabus": "מבוא למשוואות דיפרנציאליות חלקיות מסדר ראשון ושני. מיון משוואות לינאריות וחצי-לינאריות מסדר שני: היפרבוליות, פרבוליות ואליפטיות. משוואת הגלים בממד אחד ובשלושה ממדים (נוסחת דלאמבר, פתרון פואסון). משוואת החום: פתרון בעיית התחלה על הישר, עקרון המקסימום. שיטת הפרדת משתנים וטורי פורייה. משוואת לפלס ופואסון בתחומים שונים.",
+      "lecturers": "פרופ' מתמטיקה",
+      "isBinaryPass": false,
+      "prerequisites": [
+        "104043",
+        "104131"
+      ]
+    },
+    "114032": {
+      "code": "114032",
+      "name": "מעבדה לפיזיקה 1ח׳",
+      "tasks": [
+        {
+          "id": "114032_ex",
+          "xp": 150,
+          "type": "exam",
+          "title": "דו\"ח מעבדה סופי",
+          "status": "not_started",
+          "completed": false
+        }
+      ],
+      "status": "locked",
+      "credits": 1,
+      "semester": 5,
+      "isBinaryPass": false,
+      "prerequisites": [
+        "114052"
+      ]
+    },
+    "114051": {
+      "code": "114051",
+      "name": "פיסיקה 1",
+      "grade": 100,
+      "tasks": [
+        {
+          "id": "114051_h1",
+          "xp": 50,
+          "type": "hw",
+          "title": "תרגיל בית 1: קינמטיקה וחוקי ניוטון",
+          "status": "done",
+          "dueDate": "",
+          "completed": true
+        },
+        {
+          "id": "114051_ex",
+          "xp": 500,
+          "type": "exam",
+          "grade": 100,
+          "title": "מועד א",
+          "status": "done",
+          "dueDate": "",
+          "completed": true
+        }
+      ],
+      "status": "mastered",
+      "credits": 3.5,
+      "semester": 1,
+      "isBinaryPass": false,
+      "prerequisites": []
+    },
+    "114052": {
+      "code": "114052",
+      "name": "פיסיקה 2",
+      "moedA": "2027-02-01",
+      "moedB": "2027-03-02",
+      "tasks": [
+        {
+          "id": "114052_h1",
+          "xp": 50,
+          "type": "hw",
+          "title": "תרגיל בית 1: שדה חשמלי וחוק גאוס",
+          "status": "not_started",
+          "dueDate": "",
+          "completed": false
+        },
+        {
+          "id": "114052_ww1",
+          "xp": 40,
+          "type": "webwork",
+          "title": "WebWork 1: חוק קולון ושדה חשמלי",
+          "status": "not_started",
+          "dueDate": "",
+          "completed": false
+        },
+        {
+          "id": "114052_ex",
+          "xp": 500,
+          "type": "exam",
+          "title": "מועד א",
+          "status": "not_started",
+          "dueDate": "2027-02-01",
+          "completed": false
+        },
+        {
+          "id": "114052_ex_b",
+          "xp": 500,
+          "type": "exam",
+          "title": "מועד ב'",
+          "status": "not_started",
+          "dueDate": "2027-03-02",
+          "completed": false
+        }
+      ],
+      "status": "available",
+      "credits": 3.5,
+      "faculty": "הפקולטה לפיסיקה",
+      "schedule": [
+        {
+          "day": "שני",
+          "room": "",
+          "type": "הרצאה",
+          "group": 10,
+          "hours": "08:30 - 10:30",
+          "lecturer": "ד\"ר גדעון אלון"
+        },
+        {
+          "day": "רביעי",
+          "room": "",
+          "type": "הרצאה",
+          "group": 10,
+          "hours": "08:30 - 09:30",
+          "lecturer": "ד\"ר גדעון אלון"
+        },
+        {
+          "day": "רביעי",
+          "room": "",
+          "type": "תרגול",
+          "group": 13,
+          "hours": "09:30 - 10:30",
+          "lecturer": ""
+        }
+      ],
+      "semester": 3,
+      "syllabus": "חשמל ומגנטיות: חוק קולון, שדה חשמלי, חוק גאוס, פוטנציאל אלקטרוסטטי, קיבול וקבלים, דיאלקטריים, זרם והתנגדות, כוח אלקטרו-מניע ומעגלי זרם ישר. שדה מגנטי, חוק ביו-סבר, חוק אמפר, השראה אלקטרומגנטית, חוק פראדיי, השראות, זרם חילופין, משוואות מקסוול וגלים אלקטרומגנטיים.",
+      "lecturers": "ד\"ר גדעון אלון",
+      "isBinaryPass": false,
+      "prerequisites": [
+        "114051",
+        "104041"
+      ]
+    },
+    "125001": {
+      "code": "125001",
+      "name": "כימיה כללית",
+      "grade": 96,
+      "tasks": [
+        {
+          "id": "125001_h1",
+          "xp": 50,
+          "type": "hw",
+          "title": "מטלת בית 1: מבנה האטום והקשר הכימי",
+          "status": "done",
+          "dueDate": "",
+          "completed": true
+        },
+        {
+          "id": "125001_ex",
+          "xp": 500,
+          "type": "exam",
+          "grade": 96,
+          "title": "מועד א",
+          "status": "done",
+          "dueDate": "",
+          "completed": true
+        }
+      ],
+      "status": "mastered",
+      "credits": 3,
+      "semester": 1,
+      "isBinaryPass": false,
+      "prerequisites": []
+    },
+    "125013": {
+      "code": "125013",
+      "name": "מעבדה בכימיה",
+      "grade": 94,
+      "tasks": [
+        {
+          "id": "task-dyn-1",
+          "xp": 50,
+          "type": "hw",
+          "title": "תרגיל הגשה 1: מבוא למעבדה בכימיה",
+          "status": "done",
+          "dueDate": "",
+          "completed": true
+        },
+        {
+          "id": "task-dyn-2",
+          "xp": 50,
+          "type": "hw",
+          "title": "תרגיל הגשה 2: נושאים מתקדמים במעבדה בכימיה",
+          "status": "done",
+          "dueDate": "",
+          "completed": true
+        },
+        {
+          "id": "task-dyn-proj",
+          "xp": 150,
+          "type": "project",
+          "title": "עבודת הגשה מסכמת במעבדה בכימיה",
+          "status": "done",
+          "dueDate": "",
+          "completed": true
+        },
+        {
+          "id": "task-dyn-exam",
+          "xp": 500,
+          "type": "exam",
+          "grade": 94,
+          "title": "מבחן מסכם במעבדה בכימיה",
+          "status": "done",
+          "dueDate": "",
+          "completed": true
+        }
+      ],
+      "status": "mastered",
+      "credits": 0.5,
+      "semester": 2,
+      "isBinaryPass": false,
+      "prerequisites": [
+        "125001"
+      ]
+    },
+    "234128": {
+      "code": "234128",
+      "name": "מבוא למחשב - שפת פייתון",
+      "grade": 87,
+      "tasks": [
+        {
+          "id": "234128_h1",
+          "xp": 50,
+          "type": "hw",
+          "title": "מטלת תכנות 1: יסודות ולולאות",
+          "status": "done",
+          "dueDate": "",
+          "completed": true
+        },
+        {
+          "id": "234128_p1",
+          "xp": 150,
+          "type": "project",
+          "title": "פרויקט תכנות: עיבוד נתונים מדעיים",
+          "status": "done",
+          "dueDate": "",
+          "completed": true
+        },
+        {
+          "id": "234128_ex",
+          "xp": 500,
+          "type": "exam",
+          "grade": 87,
+          "title": "מועד א",
+          "status": "done",
+          "dueDate": "",
+          "completed": true
+        }
+      ],
+      "status": "mastered",
+      "credits": 4,
+      "semester": 1,
+      "isBinaryPass": false,
+      "prerequisites": []
+    },
+    "314533": {
+      "code": "314533",
+      "name": "מבוא להנדסת חומרים מ׳",
+      "type": "core",
+      "grade": 90,
+      "tasks": [
+        {
+          "id": "314533_h1",
+          "xp": 50,
+          "type": "hw",
+          "title": "תרגיל בית 1: סריגים קריסטלוגרפיים ופגמים",
+          "status": "done",
+          "dueDate": "",
+          "completed": true
+        },
+        {
+          "id": "314533_ex",
+          "xp": 500,
+          "type": "exam",
+          "grade": 90,
+          "title": "מועד א הנדסת חומרים 9am",
+          "status": "done",
+          "dueDate": "2026-08-11",
+          "completed": true
+        },
+        {
+          "id": "task_moodle_45587_1789652686031",
+          "xp": 50,
+          "type": "assignment",
+          "title": "ערעורים - מועד ב'",
+          "source": "moodle",
+          "status": "done",
+          "dueDate": "2026-09-14 20:59",
+          "completed": true,
+          "moodleUid": "45587@moodle25.technion.ac.il",
+          "dueTimestamp": 1789419540000,
+          "moodleEventId": "45587"
+        }
+      ],
+      "status": "mastered",
+      "credits": 3.5,
+      "semester": 2,
+      "isBinaryPass": false,
+      "prerequisites": [
+        "125001"
+      ]
+    },
+    "034010": {
+      "code": "034010",
+      "name": "דינמיקה",
+      "tasks": [
+        {
+          "id": "034010_h1",
+          "xp": 60,
+          "type": "hw",
+          "title": "תרגיל בית 1: קינמטיקה של גוף קשיח בדו-מימד",
+          "status": "not_started",
+          "completed": false
+        },
+        {
+          "id": "034010_ex",
+          "xp": 550,
+          "type": "exam",
+          "title": "מועד א",
+          "status": "not_started",
+          "completed": false
+        }
+      ],
+      "status": "locked",
+      "credits": 5,
+      "semester": 4,
+      "isBinaryPass": false,
+      "prerequisites": [
+        "034028",
+        "114051",
+        "104043",
+        "104131"
+      ]
+    },
+    "034028": {
+      "code": "034028",
+      "name": "מכניקת מוצקים 1",
+      "grade": 82,
+      "tasks": [
+        {
+          "id": "034028_h1",
+          "xp": 50,
+          "type": "hw",
+          "title": "תרגיל בית 1: מאמצים ועיוותים חד-מימדיים",
+          "status": "done",
+          "dueDate": "",
+          "completed": true
+        },
+        {
+          "id": "034028_h2",
+          "xp": 50,
+          "type": "hw",
+          "title": "תרגיל בית 2: מאמצי גזירה ופיתול מוטות",
+          "status": "done",
+          "dueDate": "",
+          "completed": true
+        },
+        {
+          "id": "034028_ex",
+          "xp": 500,
+          "type": "exam",
+          "grade": 79,
+          "title": "מועד א מכניקת מוצקים 9am",
+          "status": "done",
+          "dueDate": "2026-08-19",
+          "completed": true
+        }
+      ],
+      "status": "mastered",
+      "credits": 4,
+      "semester": 2,
+      "isBinaryPass": false,
+      "prerequisites": [
+        "104041",
+        "104065",
+        "114051"
+      ]
+    },
+    "034030": {
+      "code": "034030",
+      "name": "תהליכי ייצור",
+      "tasks": [
+        {
+          "id": "034030_h1",
+          "xp": 50,
+          "type": "hw",
+          "title": "תרגיל בית 1: עיבוד שבבי ויציקה",
+          "status": "not_started",
+          "completed": false
+        },
+        {
+          "id": "034030_ex",
+          "xp": 500,
+          "type": "exam",
+          "title": "מועד א",
+          "status": "not_started",
+          "completed": false
+        }
+      ],
+      "status": "locked",
+      "credits": 3.5,
+      "semester": 4,
+      "isBinaryPass": false,
+      "prerequisites": [
+        "034053",
+        "034061",
+        "314533"
+      ]
+    },
+    "034032": {
+      "code": "034032",
+      "name": "מערכות ליניאריות מ׳",
+      "tasks": [
+        {
+          "id": "034032_h1",
+          "xp": 50,
+          "type": "hw",
+          "title": "תרגיל בית 1: התמרות לפלס ותפקודי תמסורת",
+          "status": "not_started",
+          "completed": false
+        },
+        {
+          "id": "034032_ex",
+          "xp": 500,
+          "type": "exam",
+          "title": "מועד א",
+          "status": "not_started",
+          "completed": false
+        }
+      ],
+      "status": "locked",
+      "credits": 4,
+      "semester": 4,
+      "isBinaryPass": false,
+      "prerequisites": [
+        "104131",
+        "104065"
+      ]
+    },
+    "034035": {
+      "code": "034035",
+      "name": "תרמודינמיקה 1",
+      "moedA": "2027-02-07",
+      "moedB": "2027-03-05",
+      "tasks": [
+        {
+          "id": "034035_h1",
+          "xp": 50,
+          "type": "hw",
+          "title": "תרגיל בית 1: החוק הראשון של התרמודינמיקה",
+          "status": "not_started",
+          "dueDate": "",
+          "completed": false
+        },
+        {
+          "id": "034035_ex",
+          "xp": 500,
+          "type": "exam",
+          "title": "מועד א",
+          "status": "not_started",
+          "dueDate": "2027-02-07",
+          "completed": false
+        },
+        {
+          "id": "034035_ex_b",
+          "xp": 500,
+          "type": "exam",
+          "title": "מועד ב'",
+          "status": "not_started",
+          "dueDate": "2027-03-05",
+          "completed": false
+        }
+      ],
+      "status": "available",
+      "credits": 4,
+      "faculty": "הפקולטה להנדסת מכונות",
+      "schedule": [
+        {
+          "day": "שלישי",
+          "room": "",
+          "type": "הרצאה",
+          "group": 10,
+          "hours": "08:30 - 11:30",
+          "lecturer": "פרופ' לאוניד טרטקובסקי"
+        },
+        {
+          "day": "שלישי",
+          "room": "",
+          "type": "תרגול",
+          "group": 11,
+          "hours": "12:30 - 14:30",
+          "lecturer": ""
+        }
+      ],
+      "semester": 3,
+      "syllabus": "מושגי יסוד, מערכת, תכונות, מצב, תהליך, חוק האפס והחוק הראשון. אנרגיה. אנתלפיה. שינויי פאזה וחומר טהור. משוואות מצב, גז אידיאלי וגז אמיתי. ניתוח נפח בקרה: שימור מסה ושימור אנרגיה. החוק השני של התרמודינמיקה: נצילות קרנו, אי-שוויון קלאוזיוס, אנטרופיה ומאזן אנטרופיה. אקסרגיה, מחזורי כוח וקירור.",
+      "lecturers": "פרופ' לאוניד טרטקובסקי",
+      "isBinaryPass": false,
+      "prerequisites": [
+        "104043",
+        "104041"
+      ]
+    },
+    "034040": {
+      "code": "034040",
+      "name": "מבוא לבקרה",
+      "tasks": [
+        {
+          "id": "034040_h1",
+          "xp": 50,
+          "type": "hw",
+          "title": "תרגיל בית 1: יציבות מערכות דינמיות (הורוויץ)",
+          "status": "not_started",
+          "completed": false
+        },
+        {
+          "id": "034040_ex",
+          "xp": 500,
+          "type": "exam",
+          "title": "מועד א",
+          "status": "not_started",
+          "completed": false
+        }
+      ],
+      "status": "locked",
+      "credits": 3,
+      "semester": 5,
+      "isBinaryPass": false,
+      "prerequisites": [
+        "034032"
+      ]
+    },
+    "034041": {
+      "code": "034041",
+      "name": "מעבר חום",
+      "tasks": [
+        {
+          "id": "034041_h1",
+          "xp": 50,
+          "type": "hw",
+          "title": "תרגיל בית 1: הולכת חום במימד אחד",
+          "status": "not_started",
+          "completed": false
+        },
+        {
+          "id": "034041_ex",
+          "xp": 500,
+          "type": "exam",
+          "title": "מועד א",
+          "status": "not_started",
+          "completed": false
+        }
+      ],
+      "status": "locked",
+      "credits": 4,
+      "semester": 5,
+      "isBinaryPass": false,
+      "prerequisites": [
+        "034035",
+        "034055"
+      ]
+    },
+    "034051": {
+      "code": "034051",
+      "name": "דינמיקה ומכניקה של תנודות",
+      "tasks": [
+        {
+          "id": "034051_h1",
+          "xp": 50,
+          "type": "hw",
+          "title": "תרגיל בית 1: תנודות חופשיות ומאולצות עם ריסון",
+          "status": "not_started",
+          "completed": false
+        },
+        {
+          "id": "034051_ex",
+          "xp": 500,
+          "type": "exam",
+          "title": "מועד א",
+          "status": "not_started",
+          "completed": false
+        }
+      ],
+      "status": "locked",
+      "credits": 3,
+      "semester": 5,
+      "isBinaryPass": false,
+      "prerequisites": [
+        "034010",
+        "034032",
+        "034053",
+        "034056",
+        "104228"
+      ]
+    },
+    "034053": {
+      "code": "034053",
+      "name": "מכניקת מוצקים 2מ",
+      "moedA": "2027-02-18",
+      "moedB": "2027-03-18",
+      "tasks": [
+        {
+          "id": "034053_h1",
+          "xp": 60,
+          "type": "hw",
+          "title": "תרגיל בית 1: כפיפת קורות ומאמצים משולבים",
+          "status": "not_started",
+          "dueDate": "",
+          "completed": false
+        },
+        {
+          "id": "034053_ex",
+          "xp": 550,
+          "type": "exam",
+          "title": "מועד א",
+          "status": "not_started",
+          "dueDate": "2027-02-18",
+          "completed": false
+        },
+        {
+          "id": "034053_ex_b",
+          "xp": 550,
+          "type": "exam",
+          "title": "מועד ב'",
+          "status": "not_started",
+          "dueDate": "2027-03-18",
+          "completed": false
+        }
+      ],
+      "status": "available",
+      "credits": 5,
+      "faculty": "הפקולטה להנדסת מכונות",
+      "schedule": [
+        {
+          "day": "שני",
+          "room": "",
+          "type": "הרצאה",
+          "group": 10,
+          "hours": "10:30 - 14:30",
+          "lecturer": "פרופ' יוסף גבלי"
+        },
+        {
+          "day": "חמישי",
+          "room": "",
+          "type": "תרגול",
+          "group": 21,
+          "hours": "12:30 - 14:30",
+          "lecturer": ""
+        }
+      ],
+      "semester": 3,
+      "syllabus": "מאמצים, עיבורים, קשרי מאמץ-עיבור (חוק הוק המוכלל), קריטריוני כניעה וכשל (פון-מיזס, טרסקה). מבוא לתורת האלסטיות, פונקציית מאמצים של איירי. כפיפת קורות אסימטריות, מרכז גזירה. פיתול של מוטות בעלי חתך לא עגול וחתכים דקי-דופן. קריסת עמודים (אוילר). שיטות אנרגיה: משפט קסטיליאנו, עבודה מדומה.",
+      "lecturers": "פרופ' יוסף גבלי",
+      "isBinaryPass": false,
+      "prerequisites": [
+        "034028",
+        "104043",
+        "104065"
+      ]
+    },
+    "034054": {
+      "code": "034054",
+      "name": "תכן מכני 1 מ׳",
+      "tasks": [
+        {
+          "id": "034054_h1",
+          "xp": 50,
+          "type": "hw",
+          "title": "תרגיל בית 1: חישובי עייפות חומרים (Fatigue)",
+          "status": "not_started",
+          "completed": false
+        },
+        {
+          "id": "034054_p1",
+          "xp": 250,
+          "type": "project",
+          "title": "פרוייקט תכן: תכנון ציר ותמסורת גלגלי שיניים",
+          "status": "not_started",
+          "completed": false
+        },
+        {
+          "id": "034054_ex",
+          "xp": 500,
+          "type": "exam",
+          "title": "מועד א",
+          "status": "not_started",
+          "completed": false
+        }
+      ],
+      "status": "locked",
+      "credits": 4,
+      "semester": 5,
+      "isBinaryPass": false,
+      "prerequisites": [
+        "034053",
+        "034030",
+        "034061",
+        "314533"
+      ]
+    },
+    "034055": {
+      "code": "034055",
+      "name": "תורת הזרימה 1 מורחב",
+      "tasks": [
+        {
+          "id": "034055_h1",
+          "xp": 60,
+          "type": "hw",
+          "title": "תרגיל בית 1: הידרוסטטיקה ושימור מסה",
+          "status": "not_started",
+          "completed": false
+        },
+        {
+          "id": "034055_ex",
+          "xp": 550,
+          "type": "exam",
+          "title": "מועד א",
+          "status": "not_started",
+          "completed": false
+        }
+      ],
+      "status": "locked",
+      "credits": 5,
+      "semester": 4,
+      "isBinaryPass": false,
+      "prerequisites": [
+        "034035",
+        "104131",
+        "104228"
+      ]
+    },
+    "034056": {
+      "code": "034056",
+      "name": "מבוא לחישוב מדעי והנדסי",
+      "moedA": "2027-02-11",
+      "moedB": "2027-03-10",
+      "tasks": [
+        {
+          "id": "034056_h1",
+          "xp": 50,
+          "type": "hw",
+          "title": "תרגיל בית 1: פתרון משוואות לא ליניאריות בפייתון",
+          "status": "not_started",
+          "dueDate": "",
+          "completed": false
+        },
+        {
+          "id": "034056_p1",
+          "xp": 200,
+          "type": "project",
+          "title": "פרוייקט חישובי: אנליזה נומרית של מערכת מכנית",
+          "status": "not_started",
+          "dueDate": "",
+          "completed": false
+        },
+        {
+          "id": "034056_ex",
+          "xp": 500,
+          "type": "exam",
+          "title": "מועד א",
+          "status": "not_started",
+          "dueDate": "2027-02-11",
+          "completed": false
+        },
+        {
+          "id": "034056_ex_b",
+          "xp": 500,
+          "type": "exam",
+          "title": "מועד ב'",
+          "status": "not_started",
+          "dueDate": "2027-03-10",
+          "completed": false
+        }
+      ],
+      "status": "available",
+      "credits": 4,
+      "faculty": "הפקולטה להנדסת מכונות",
+      "schedule": [
+        {
+          "day": "שני",
+          "room": "",
+          "type": "תרגול",
+          "group": 14,
+          "hours": "14:30 - 16:30",
+          "lecturer": ""
+        },
+        {
+          "day": "רביעי",
+          "room": "",
+          "type": "הרצאה",
+          "group": 10,
+          "hours": "14:30 - 17:30",
+          "lecturer": "ד\"ר דניאל הקסנר"
+        }
+      ],
+      "semester": 3,
+      "syllabus": "1. הקדמה לחישוב מדעי ואלגוריתמיקה. 2. שיטות פתרון למשוואות לינאריות: שיטת גאוס, פירוק LU, שיטות איטרטיביות (יעקובי, גאוס-זיידל). 3. שורשים של משוואות לא לינאריות: חצייה, ניוטון-רפסון. 4. אינטרפולציה וקירוב פונקציות. 5. גזירה ואינטגרציה נומרית. 6. פתרון נומרי של משוואות דיפרנציאליות רגילות (ODE) - שיטות אוילר ורונגה-קוטה. יישומים מעשיים בפייתון.",
+      "lecturers": "ד\"ר דניאל הקסנר",
+      "isBinaryPass": false,
+      "prerequisites": [
+        "234128",
+        "104131"
+      ]
+    },
+    "034057": {
+      "code": "034057",
+      "name": "מעבדה מתקדמת בהנדסת מכונות",
+      "tasks": [
+        {
+          "id": "034057_p1",
+          "xp": 150,
+          "type": "project",
+          "title": "ניסוי מעבדה 1: מעבר חום וזורמים",
+          "status": "not_started",
+          "completed": false
+        },
+        {
+          "id": "034057_p2",
+          "xp": 150,
+          "type": "project",
+          "title": "ניסוי מעבדה 2: בקרה ומערכות דינמיות",
+          "status": "not_started",
+          "completed": false
+        },
+        {
+          "id": "034057_ex",
+          "xp": 500,
+          "type": "exam",
+          "title": "דו\"ח מעבדה מסכם",
+          "status": "not_started",
+          "completed": false
+        }
+      ],
+      "status": "locked",
+      "credits": 4,
+      "semester": 6,
+      "isBinaryPass": false,
+      "prerequisites": [
+        "034041",
+        "034040",
+        "034051",
+        "034058",
+        "114032"
+      ]
+    },
+    "034058": {
+      "code": "034058",
+      "name": "הסתברות וסטטיסטיקה להנדסת מכונות",
+      "tasks": [
+        {
+          "id": "034058_h1",
+          "xp": 50,
+          "type": "hw",
+          "title": "תרגיל בית 1: הסתברות מותנית ומשתנים בדידים",
+          "status": "not_started",
+          "completed": false
+        },
+        {
+          "id": "034058_ex",
+          "xp": 500,
+          "type": "exam",
+          "title": "מועד א",
+          "status": "not_started",
+          "completed": false
+        }
+      ],
+      "status": "locked",
+      "credits": 3,
+      "semester": 5,
+      "isBinaryPass": false,
+      "prerequisites": [
+        "104043"
+      ]
+    },
+    "034060": {
+      "code": "034060",
+      "name": "מבוא למכטרוניקה והנע חשמלי",
+      "tasks": [
+        {
+          "id": "034060_h1",
+          "xp": 50,
+          "type": "hw",
+          "title": "תרגיל בית 1: מנועי זרם ישר וצעד",
+          "status": "not_started",
+          "completed": false
+        },
+        {
+          "id": "034060_p1",
+          "xp": 200,
+          "type": "project",
+          "title": "עבודת מעבדה: בקרת מיקום מנוע מבוססת ארדואינו",
+          "status": "not_started",
+          "completed": false
+        },
+        {
+          "id": "034060_ex",
+          "xp": 500,
+          "type": "exam",
+          "title": "מועד א",
+          "status": "not_started",
+          "completed": false
+        }
+      ],
+      "status": "locked",
+      "credits": 4,
+      "semester": 6,
+      "isBinaryPass": false,
+      "prerequisites": [
+        "034032",
+        "114052"
+      ]
+    },
+    "034061": {
+      "code": "034061",
+      "name": "מבוא לגרפיקה ותכנון הנדסי",
+      "grade": 99,
+      "tasks": [
+        {
+          "id": "034061_p1",
+          "xp": 200,
+          "type": "project",
+          "title": "פרויקט SolidWorks: מידול והרכבת מנוע",
+          "status": "done",
+          "dueDate": "",
+          "completed": true
+        },
+        {
+          "id": "034061_ex",
+          "xp": 500,
+          "type": "exam",
+          "grade": 99,
+          "title": "מועד א",
+          "status": "done",
+          "dueDate": "2026-12-20",
+          "completed": true
+        },
+        {
+          "id": "task_034061_defense",
+          "type": "project",
+          "title": "הגנה על פרויקט סוף גרפיקה",
+          "status": "done",
+          "dueDate": "2026-08-27",
+          "completed": true
+        },
+        {
+          "id": "task-034061-exam-b",
+          "xp": 500,
+          "type": "exam",
+          "grade": 99,
+          "title": "מועד ב'",
+          "status": "done",
+          "dueDate": "2027-01-15",
+          "completed": true
+        },
+        {
+          "id": "task_moodle_125471_1789652686032",
+          "xp": 50,
+          "type": "assignment",
+          "title": "תיבת ערעורים - זמינה עד 18.9.26",
+          "source": "moodle",
+          "status": "done",
+          "dueDate": "2026-09-17 21:00",
+          "completed": true,
+          "moodleUid": "125471@moodle25.technion.ac.il",
+          "dueTimestamp": 1789678800000,
+          "moodleEventId": "125471"
+        }
+      ],
+      "status": "mastered",
+      "credits": 3.5,
+      "semester": 2,
+      "isBinaryPass": false,
+      "prerequisites": [],
+      "assignmentsGrade": 99
+    },
+    "034371": {
+      "code": "034371",
+      "name": "פרויקט תכן לייצור",
+      "tasks": [
+        {
+          "id": "034371_p1",
+          "xp": 200,
+          "type": "project",
+          "title": "תכנון חלקים לייצור ממוחשב ו-CNC",
+          "status": "not_started",
+          "completed": false
+        },
+        {
+          "id": "034371_ex",
+          "xp": 500,
+          "type": "exam",
+          "title": "הגשה סופית של תיק ייצור",
+          "status": "not_started",
+          "completed": false
+        }
+      ],
+      "status": "locked",
+      "credits": 2.5,
+      "semester": 6,
+      "isBinaryPass": false,
+      "prerequisites": [
+        "034054",
+        "034030"
+      ]
+    },
+    "034379": {
+      "code": "034379",
+      "name": "פרויקט גמר הנדסי 1",
+      "tasks": [
+        {
+          "id": "034379_p1",
+          "xp": 250,
+          "type": "project",
+          "title": "הגשת ספר פרויקט - שלב תכנון רעיוני",
+          "status": "not_started",
+          "completed": false
+        },
+        {
+          "id": "034379_ex",
+          "xp": 600,
+          "type": "exam",
+          "title": "פרזנטציה שלב א' בפני צוות הפקולטה",
+          "status": "not_started",
+          "completed": false
+        }
+      ],
+      "status": "locked",
+      "credits": 3,
+      "semester": 7,
+      "isBinaryPass": false,
+      "prerequisites": [
+        "034371"
+      ]
+    },
+    "034380": {
+      "code": "034380",
+      "name": "פרויקט גמר הנדסי 2",
+      "tasks": [
+        {
+          "id": "034380_p1",
+          "xp": 350,
+          "type": "project",
+          "title": "בניית אב טיפוס, בדיקות שטח וביצועים",
+          "status": "not_started",
+          "completed": false
+        },
+        {
+          "id": "034380_ex",
+          "xp": 1000,
+          "type": "exam",
+          "title": "יריד פרויקטים סופי והגנה מול בוחנים חיצוניים",
+          "status": "not_started",
+          "completed": false
+        }
+      ],
+      "status": "locked",
+      "credits": 3,
+      "semester": 8,
+      "isBinaryPass": false,
+      "prerequisites": [
+        "034379"
+      ]
+    },
+    "034382": {
+      "code": "034382",
+      "name": "מתודולוגיות פיתוח הנדסי 1",
+      "tasks": [
+        {
+          "id": "034382_ex",
+          "xp": 150,
+          "type": "exam",
+          "title": "הצגת כלי פיתוח הנדסיים מבוססי מערכת",
+          "status": "not_started",
+          "completed": false
+        }
+      ],
+      "status": "locked",
+      "credits": 0.5,
+      "semester": 7,
+      "isBinaryPass": false,
+      "prerequisites": [
+        "034054"
+      ]
+    },
+    "034383": {
+      "code": "034383",
+      "name": "מתודולוגיות פיתוח הנדסי 2",
+      "tasks": [
+        {
+          "id": "034383_ex",
+          "xp": 150,
+          "type": "exam",
+          "title": "הגשת תהליך פיתוח הנדסי רפלקטיבי",
+          "status": "not_started",
+          "completed": false
+        }
+      ],
+      "status": "locked",
+      "credits": 0.5,
+      "semester": 8,
+      "isBinaryPass": false,
+      "prerequisites": [
+        "034382"
+      ]
+    },
+    "03940805": {
+      "code": "03940805",
+      "name": "חינוך גופני - אתלטיקה קלה / יוגה",
+      "type": "sports",
+      "moedA": null,
+      "moedB": null,
+      "tasks": [
+        {
+          "id": "03940805_ex",
+          "xp": 200,
+          "type": "exam",
+          "title": "בחינת סוף",
+          "status": "not_started",
+          "dueDate": "",
+          "completed": false
+        }
+      ],
+      "status": "available",
+      "credits": 1,
+      "faculty": "היחידה ללימודי ספורט",
+      "schedule": [
+        {
+          "day": "חמישי",
+          "room": "אולם ספורט",
+          "type": "יוגה",
+          "group": 24,
+          "hours": "07:30 - 09:00",
+          "lecturer": ""
+        }
+      ],
+      "semester": 3,
+      "syllabus": "תרגול יוגה שבועי: נשימה, גמישות, שיווי משקל וחיזוק שרירי ליבה. חובת נוכחות פעילה בלפחות 80% מהשיעורים לאורך הסמסטר.",
+      "lecturers": "היחידה לחינוך גופני",
+      "isBinaryPass": false,
+      "prerequisites": []
+    }
+  },
+  "credits": 39.5,
+  "openTasks": 0,
+  "revisions": [
+    {
+      "id": "rev-baseline-1",
+      "gpa": 86.26,
+      "name": "רוויזיה 1: סיום שנה א׳ (סמסטרים א׳ ו-ב׳)",
+      "note": "סיום מוצלח של שנה א', 11 קורסים הושלמו, ממוצע כללי 86.26",
+      "credits": 40.5,
+      "timestamp": "2026-08-28T12:00:00.000Z",
+      "stateSnapshot": null,
+      "completedCourses": 11
+    },
+    {
+      "id": "rev-baseline-2",
+      "gpa": 86.26,
+      "name": "רוויזיה 2: פתיחת סמסטר ג׳ ונעילת סמסטר ד׳",
+      "note": "הפעלת 6 קורסי סמסטר ג', חסימת רישום לקורסי סמסטר ד' עד להשלמה, הגדרת סנכרון יומנים",
+      "credits": 40.5,
+      "timestamp": "2026-09-12T18:30:00.000Z",
+      "stateSnapshot": {
+        "xp": 1250,
+        "gpa": 86.39240506329114,
+        "level": 6,
+        "courses": {
+          "104041": {
+            "code": "104041",
+            "name": "חדו״א 1מ1",
+            "grade": 84,
+            "tasks": [
+              {
+                "id": "104041_h1",
+                "xp": 50,
+                "type": "hw",
+                "title": "מטלת בית 1: גבולות וסדרות",
+                "status": "done",
+                "dueDate": "",
+                "completed": true
+              },
+              {
+                "id": "104041_h2",
+                "xp": 50,
+                "type": "hw",
+                "title": "מטלת בית 2: רציפות וגזירות",
+                "status": "done",
+                "dueDate": "",
+                "completed": true
+              },
+              {
+                "id": "104041_ex",
+                "xp": 500,
+                "type": "exam",
+                "grade": 84,
+                "title": "מועד א",
+                "status": "done",
+                "dueDate": "",
+                "completed": true
+              },
+              {
+                "id": "task_moodle_11028_1789652686032",
+                "xp": 50,
+                "type": "assignment",
+                "title": "הגשת גיליון 3",
+                "source": "moodle",
+                "status": "done",
+                "dueDate": "2027-07-03 09:00",
+                "completed": true,
+                "moodleUid": "11028@moodle25.technion.ac.il",
+                "dueTimestamp": 1814605200000,
+                "moodleEventId": "11028"
+              }
+            ],
+            "status": "mastered",
+            "credits": 5,
+            "semester": 1,
+            "isBinaryPass": false,
+            "prerequisites": []
+          },
+          "104043": {
+            "code": "104043",
+            "name": "חדו״א 2מ׳",
+            "grade": 70,
+            "tasks": [
+              {
+                "id": "104043_h1",
+                "xp": 50,
+                "type": "hw",
+                "title": "תרגיל בית 1: פונקציות של מספר משתנים וגרדיאנט",
+                "status": "done",
+                "completed": true
+              },
+              {
+                "id": "104043_ex",
+                "xp": 500,
+                "type": "exam",
+                "grade": 65,
+                "title": "מועד א חדו״א 1pm",
+                "status": "done",
+                "dueDate": "2026-08-05",
+                "completed": true
+              },
+              {
+                "id": "task_104043_lectures",
+                "type": "hw",
+                "title": "לצפות בכל ההרצאות של חדו״א",
+                "status": "done",
+                "dueDate": "2026-08-22",
+                "completed": true
+              },
+              {
+                "id": "task-104043-exam-b",
+                "xp": 500,
+                "type": "exam",
+                "grade": 70,
+                "title": "מועד ב'",
+                "status": "done",
+                "dueDate": "2026-11-15",
+                "completed": true
+              },
+              {
+                "id": "task_moodle_126492_1789652686032",
+                "xp": 50,
+                "type": "assignment",
+                "title": "העלאת אישורי זכאות למועד מילואים",
+                "source": "moodle",
+                "status": "done",
+                "dueDate": "2026-09-23 20:59",
+                "completed": true,
+                "moodleUid": "126492@moodle25.technion.ac.il",
+                "dueTimestamp": 1790197140000,
+                "moodleEventId": "126492"
+              }
+            ],
+            "status": "mastered",
+            "credits": 5,
+            "semester": 2,
+            "isBinaryPass": false,
+            "prerequisites": [
+              "104041"
+            ]
+          },
+          "104065": {
+            "code": "104065",
+            "name": "אלגברה ליניארית 1מ",
+            "type": "core",
+            "grade": 87,
+            "tasks": [
+              {
+                "id": "104065_h1",
+                "xp": 50,
+                "type": "hw",
+                "title": "מטלת בית 1: מערכות משוואות ומטריצות",
+                "status": "done",
+                "dueDate": "",
+                "completed": true
+              },
+              {
+                "id": "104065_ex",
+                "xp": 500,
+                "type": "exam",
+                "grade": 87,
+                "title": "מועד א",
+                "status": "done",
+                "dueDate": "",
+                "completed": true
+              }
+            ],
+            "status": "mastered",
+            "credits": 5,
+            "semester": 1,
+            "isBinaryPass": false,
+            "prerequisites": []
+          },
+          "104131": {
+            "code": "104131",
+            "name": "משוואות דיפרנציאליות רגילות",
+            "grade": 74,
+            "tasks": [
+              {
+                "id": "task-dyn-1",
+                "xp": 50,
+                "type": "hw",
+                "title": "תרגיל הגשה 1: מבוא למשוואות דיפרנציאליות רגילות",
+                "status": "done",
+                "dueDate": "",
+                "completed": true
+              },
+              {
+                "id": "task-dyn-2",
+                "xp": 50,
+                "type": "hw",
+                "title": "תרגיל הגשה 2: נושאים מתקדמים במשוואות דיפרנציאליות רגילות",
+                "status": "done",
+                "dueDate": "",
+                "completed": true
+              },
+              {
+                "id": "task-dyn-proj",
+                "xp": 150,
+                "type": "project",
+                "title": "עבודת הגשה מסכמת במשוואות דיפרנציאליות רגילות",
+                "status": "done",
+                "dueDate": "",
+                "completed": true
+              },
+              {
+                "id": "task-dyn-exam",
+                "xp": 500,
+                "type": "exam",
+                "grade": 71,
+                "title": "מועד א מד״ר 9am",
+                "status": "done",
+                "dueDate": "2026-08-13",
+                "completed": true
+              },
+              {
+                "id": "task-104131-exam-b",
+                "xp": 500,
+                "type": "exam",
+                "grade": 74,
+                "title": "מועד ב'",
+                "status": "done",
+                "dueDate": "2026-11-12",
+                "completed": true
+              }
+            ],
+            "status": "mastered",
+            "credits": 2.5,
+            "semester": 2,
+            "isBinaryPass": false,
+            "prerequisites": [
+              "104041",
+              "104065"
+            ]
+          },
+          "104228": {
+            "code": "104228",
+            "name": "משוואות דיפרנציאליות חלקיות מ׳",
+            "moedA": "2027-02-24",
+            "moedB": "2027-03-26",
+            "tasks": [
+              {
+                "id": "104228_h1",
+                "xp": 50,
+                "type": "hw",
+                "title": "תרגיל בית 1: משוואות מסדר ראשון ומאפיינים",
+                "status": "not_started",
+                "dueDate": "",
+                "completed": false
+              },
+              {
+                "id": "104228_ww1",
+                "xp": 40,
+                "type": "webwork",
+                "title": "WebWork 1: משוואת הגלים והפרדת משתנים",
+                "status": "not_started",
+                "dueDate": "",
+                "completed": false
+              },
+              {
+                "id": "104228_ex",
+                "xp": 500,
+                "type": "exam",
+                "title": "מועד א",
+                "status": "not_started",
+                "dueDate": "2027-02-24",
+                "completed": false
+              },
+              {
+                "id": "104228_ex_b",
+                "xp": 500,
+                "type": "exam",
+                "title": "מועד ב'",
+                "status": "not_started",
+                "dueDate": "2027-03-26",
+                "completed": false
+              }
+            ],
+            "status": "available",
+            "credits": 3,
+            "faculty": "הפקולטה למתמטיקה",
+            "schedule": [
+              {
+                "day": "רביעי",
+                "room": "",
+                "type": "תרגול",
+                "group": 21,
+                "hours": "10:30 - 12:30",
+                "lecturer": ""
+              },
+              {
+                "day": "חמישי",
+                "room": "",
+                "type": "הרצאה",
+                "group": 20,
+                "hours": "10:30 - 12:30",
+                "lecturer": ""
+              }
+            ],
+            "semester": 3,
+            "syllabus": "מבוא למשוואות דיפרנציאליות חלקיות מסדר ראשון ושני. מיון משוואות לינאריות וחצי-לינאריות מסדר שני: היפרבוליות, פרבוליות ואליפטיות. משוואת הגלים בממד אחד ובשלושה ממדים (נוסחת דלאמבר, פתרון פואסון). משוואת החום: פתרון בעיית התחלה על הישר, עקרון המקסימום. שיטת הפרדת משתנים וטורי פורייה. משוואת לפלס ופואסון בתחומים שונים.",
+            "lecturers": "פרופ' מתמטיקה",
+            "isBinaryPass": false,
+            "prerequisites": [
+              "104043",
+              "104131"
+            ]
+          },
+          "114032": {
+            "code": "114032",
+            "name": "מעבדה לפיזיקה 1ח׳",
+            "tasks": [
+              {
+                "id": "114032_ex",
+                "xp": 150,
+                "type": "exam",
+                "title": "דו\"ח מעבדה סופי",
+                "status": "not_started",
+                "completed": false
+              }
+            ],
+            "status": "locked",
+            "credits": 1,
+            "semester": 5,
+            "isBinaryPass": false,
+            "prerequisites": [
+              "114052"
+            ]
+          },
+          "114051": {
+            "code": "114051",
+            "name": "פיסיקה 1",
+            "grade": 100,
+            "tasks": [
+              {
+                "id": "114051_h1",
+                "xp": 50,
+                "type": "hw",
+                "title": "תרגיל בית 1: קינמטיקה וחוקי ניוטון",
+                "status": "done",
+                "dueDate": "",
+                "completed": true
+              },
+              {
+                "id": "114051_ex",
+                "xp": 500,
+                "type": "exam",
+                "grade": 100,
+                "title": "מועד א",
+                "status": "done",
+                "dueDate": "",
+                "completed": true
+              }
+            ],
+            "status": "mastered",
+            "credits": 3.5,
+            "semester": 1,
+            "isBinaryPass": false,
+            "prerequisites": []
+          },
+          "114052": {
+            "code": "114052",
+            "name": "פיסיקה 2",
+            "moedA": "2027-02-01",
+            "moedB": "2027-03-02",
+            "tasks": [
+              {
+                "id": "114052_h1",
+                "xp": 50,
+                "type": "hw",
+                "title": "תרגיל בית 1: שדה חשמלי וחוק גאוס",
+                "status": "not_started",
+                "dueDate": "",
+                "completed": false
+              },
+              {
+                "id": "114052_ww1",
+                "xp": 40,
+                "type": "webwork",
+                "title": "WebWork 1: חוק קולון ושדה חשמלי",
+                "status": "not_started",
+                "dueDate": "",
+                "completed": false
+              },
+              {
+                "id": "114052_ex",
+                "xp": 500,
+                "type": "exam",
+                "title": "מועד א",
+                "status": "not_started",
+                "dueDate": "2027-02-01",
+                "completed": false
+              },
+              {
+                "id": "114052_ex_b",
+                "xp": 500,
+                "type": "exam",
+                "title": "מועד ב'",
+                "status": "not_started",
+                "dueDate": "2027-03-02",
+                "completed": false
+              }
+            ],
+            "status": "available",
+            "credits": 3.5,
+            "faculty": "הפקולטה לפיסיקה",
+            "schedule": [
+              {
+                "day": "שני",
+                "room": "",
+                "type": "הרצאה",
+                "group": 10,
+                "hours": "08:30 - 10:30",
+                "lecturer": "ד\"ר גדעון אלון"
+              },
+              {
+                "day": "רביעי",
+                "room": "",
+                "type": "הרצאה",
+                "group": 10,
+                "hours": "08:30 - 09:30",
+                "lecturer": "ד\"ר גדעון אלון"
+              },
+              {
+                "day": "רביעי",
+                "room": "",
+                "type": "תרגול",
+                "group": 13,
+                "hours": "09:30 - 10:30",
+                "lecturer": ""
+              }
+            ],
+            "semester": 3,
+            "syllabus": "חשמל ומגנטיות: חוק קולון, שדה חשמלי, חוק גאוס, פוטנציאל אלקטרוסטטי, קיבול וקבלים, דיאלקטריים, זרם והתנגדות, כוח אלקטרו-מניע ומעגלי זרם ישר. שדה מגנטי, חוק ביו-סבר, חוק אמפר, השראה אלקטרומגנטית, חוק פראדיי, השראות, זרם חילופין, משוואות מקסוול וגלים אלקטרומגנטיים.",
+            "lecturers": "ד\"ר גדעון אלון",
+            "isBinaryPass": false,
+            "prerequisites": [
+              "114051",
+              "104041"
+            ]
+          },
+          "114071": {
+            "code": "114071",
+            "name": "פיסיקה 1מ׳",
+            "tasks": [
+              {
+                "id": "114071_h1",
+                "xp": 50,
+                "type": "hw",
+                "title": "תרגיל בית 1: מכניקה יחסותית וחוקי שימור",
+                "completed": false
+              },
+              {
+                "id": "114071_ex",
+                "xp": 500,
+                "type": "exam",
+                "title": "מועד א",
+                "completed": false
+              }
+            ],
+            "status": "exempt",
+            "credits": 3.5,
+            "semester": 1,
+            "trackGroup": "physics_1",
+            "prerequisites": [],
+            "mutuallyExclusiveWith": [
+              "114051"
+            ]
+          },
+          "114075": {
+            "code": "114075",
+            "name": "פיסיקה 2ממ׳",
+            "tasks": [
+              {
+                "id": "114075_h1",
+                "xp": 60,
+                "type": "hw",
+                "title": "תרגיל בית 1: שדה חשמלי, מגנטיות וגלי אור",
+                "completed": false
+              },
+              {
+                "id": "114075_ex",
+                "xp": 550,
+                "type": "exam",
+                "title": "מועד א",
+                "completed": false
+              }
+            ],
+            "status": "exempt",
+            "credits": 5,
+            "semester": 3,
+            "trackGroup": "physics_2",
+            "prerequisites": [
+              "114071",
+              "104041"
+            ],
+            "mutuallyExclusiveWith": [
+              "114052"
+            ]
+          },
+          "125001": {
+            "code": "125001",
+            "name": "כימיה כללית",
+            "grade": 96,
+            "tasks": [
+              {
+                "id": "125001_h1",
+                "xp": 50,
+                "type": "hw",
+                "title": "מטלת בית 1: מבנה האטום והקשר הכימי",
+                "status": "done",
+                "dueDate": "",
+                "completed": true
+              },
+              {
+                "id": "125001_ex",
+                "xp": 500,
+                "type": "exam",
+                "grade": 96,
+                "title": "מועד א",
+                "status": "done",
+                "dueDate": "",
+                "completed": true
+              }
+            ],
+            "status": "mastered",
+            "credits": 3,
+            "semester": 1,
+            "isBinaryPass": false,
+            "prerequisites": []
+          },
+          "125013": {
+            "code": "125013",
+            "name": "מעבדה בכימיה",
+            "grade": 94,
+            "tasks": [
+              {
+                "id": "task-dyn-1",
+                "xp": 50,
+                "type": "hw",
+                "title": "תרגיל הגשה 1: מבוא למעבדה בכימיה",
+                "status": "done",
+                "dueDate": "",
+                "completed": true
+              },
+              {
+                "id": "task-dyn-2",
+                "xp": 50,
+                "type": "hw",
+                "title": "תרגיל הגשה 2: נושאים מתקדמים במעבדה בכימיה",
+                "status": "done",
+                "dueDate": "",
+                "completed": true
+              },
+              {
+                "id": "task-dyn-proj",
+                "xp": 150,
+                "type": "project",
+                "title": "עבודת הגשה מסכמת במעבדה בכימיה",
+                "status": "done",
+                "dueDate": "",
+                "completed": true
+              },
+              {
+                "id": "task-dyn-exam",
+                "xp": 500,
+                "type": "exam",
+                "grade": 94,
+                "title": "מבחן מסכם במעבדה בכימיה",
+                "status": "done",
+                "dueDate": "",
+                "completed": true
+              }
+            ],
+            "status": "mastered",
+            "credits": 0.5,
+            "semester": 2,
+            "isBinaryPass": false,
+            "prerequisites": [
+              "125001"
+            ]
+          },
+          "234128": {
+            "code": "234128",
+            "name": "מבוא למחשב - שפת פייתון",
+            "grade": 87,
+            "tasks": [
+              {
+                "id": "234128_h1",
+                "xp": 50,
+                "type": "hw",
+                "title": "מטלת תכנות 1: יסודות ולולאות",
+                "status": "done",
+                "dueDate": "",
+                "completed": true
+              },
+              {
+                "id": "234128_p1",
+                "xp": 150,
+                "type": "project",
+                "title": "פרויקט תכנות: עיבוד נתונים מדעיים",
+                "status": "done",
+                "dueDate": "",
+                "completed": true
+              },
+              {
+                "id": "234128_ex",
+                "xp": 500,
+                "type": "exam",
+                "grade": 87,
+                "title": "מועד א",
+                "status": "done",
+                "dueDate": "",
+                "completed": true
+              }
+            ],
+            "status": "mastered",
+            "credits": 4,
+            "semester": 1,
+            "isBinaryPass": false,
+            "prerequisites": []
+          },
+          "314533": {
+            "code": "314533",
+            "name": "מבוא להנדסת חומרים מ׳",
+            "type": "core",
+            "grade": 90,
+            "tasks": [
+              {
+                "id": "314533_h1",
+                "xp": 50,
+                "type": "hw",
+                "title": "תרגיל בית 1: סריגים קריסטלוגרפיים ופגמים",
+                "status": "done",
+                "dueDate": "",
+                "completed": true
+              },
+              {
+                "id": "314533_ex",
+                "xp": 500,
+                "type": "exam",
+                "grade": 90,
+                "title": "מועד א הנדסת חומרים 9am",
+                "status": "done",
+                "dueDate": "2026-08-11",
+                "completed": true
+              },
+              {
+                "id": "task_moodle_45587_1789652686031",
+                "xp": 50,
+                "type": "assignment",
+                "title": "ערעורים - מועד ב'",
+                "source": "moodle",
+                "status": "done",
+                "dueDate": "2026-09-14 20:59",
+                "completed": true,
+                "moodleUid": "45587@moodle25.technion.ac.il",
+                "dueTimestamp": 1789419540000,
+                "moodleEventId": "45587"
+              }
+            ],
+            "status": "mastered",
+            "credits": 3.5,
+            "semester": 2,
+            "isBinaryPass": false,
+            "prerequisites": [
+              "125001"
+            ]
+          },
+          "034010": {
+            "code": "034010",
+            "name": "דינמיקה",
+            "tasks": [
+              {
+                "id": "034010_h1",
+                "xp": 60,
+                "type": "hw",
+                "title": "תרגיל בית 1: קינמטיקה של גוף קשיח בדו-מימד",
+                "status": "not_started",
+                "completed": false
+              },
+              {
+                "id": "034010_ex",
+                "xp": 550,
+                "type": "exam",
+                "title": "מועד א",
+                "status": "not_started",
+                "completed": false
+              }
+            ],
+            "status": "locked",
+            "credits": 5,
+            "semester": 4,
+            "isBinaryPass": false,
+            "prerequisites": [
+              "034028",
+              "114051",
+              "104043",
+              "104131"
+            ]
+          },
+          "034028": {
+            "code": "034028",
+            "name": "מכניקת מוצקים 1",
+            "grade": 82,
+            "tasks": [
+              {
+                "id": "034028_h1",
+                "xp": 50,
+                "type": "hw",
+                "title": "תרגיל בית 1: מאמצים ועיוותים חד-מימדיים",
+                "status": "done",
+                "dueDate": "",
+                "completed": true
+              },
+              {
+                "id": "034028_h2",
+                "xp": 50,
+                "type": "hw",
+                "title": "תרגיל בית 2: מאמצי גזירה ופיתול מוטות",
+                "status": "done",
+                "dueDate": "",
+                "completed": true
+              },
+              {
+                "id": "034028_ex",
+                "xp": 500,
+                "type": "exam",
+                "grade": 79,
+                "title": "מועד א מכניקת מוצקים 9am",
+                "status": "done",
+                "dueDate": "2026-08-19",
+                "completed": true
+              }
+            ],
+            "status": "mastered",
+            "credits": 4,
+            "semester": 2,
+            "isBinaryPass": false,
+            "prerequisites": [
+              "104041",
+              "104065",
+              "114051"
+            ]
+          },
+          "034030": {
+            "code": "034030",
+            "name": "תהליכי ייצור",
+            "tasks": [
+              {
+                "id": "034030_h1",
+                "xp": 50,
+                "type": "hw",
+                "title": "תרגיל בית 1: עיבוד שבבי ויציקה",
+                "status": "not_started",
+                "completed": false
+              },
+              {
+                "id": "034030_ex",
+                "xp": 500,
+                "type": "exam",
+                "title": "מועד א",
+                "status": "not_started",
+                "completed": false
+              }
+            ],
+            "status": "locked",
+            "credits": 3.5,
+            "semester": 4,
+            "isBinaryPass": false,
+            "prerequisites": [
+              "034053",
+              "034061",
+              "314533"
+            ]
+          },
+          "034032": {
+            "code": "034032",
+            "name": "מערכות ליניאריות מ׳",
+            "tasks": [
+              {
+                "id": "034032_h1",
+                "xp": 50,
+                "type": "hw",
+                "title": "תרגיל בית 1: התמרות לפלס ותפקודי תמסורת",
+                "status": "not_started",
+                "completed": false
+              },
+              {
+                "id": "034032_ex",
+                "xp": 500,
+                "type": "exam",
+                "title": "מועד א",
+                "status": "not_started",
+                "completed": false
+              }
+            ],
+            "status": "locked",
+            "credits": 4,
+            "semester": 4,
+            "isBinaryPass": false,
+            "prerequisites": [
+              "104131",
+              "104065"
+            ]
+          },
+          "034035": {
+            "code": "034035",
+            "name": "תרמודינמיקה 1",
+            "moedA": "2027-02-07",
+            "moedB": "2027-03-05",
+            "tasks": [
+              {
+                "id": "034035_h1",
+                "xp": 50,
+                "type": "hw",
+                "title": "תרגיל בית 1: החוק הראשון של התרמודינמיקה",
+                "status": "not_started",
+                "dueDate": "",
+                "completed": false
+              },
+              {
+                "id": "034035_ex",
+                "xp": 500,
+                "type": "exam",
+                "title": "מועד א",
+                "status": "not_started",
+                "dueDate": "2027-02-07",
+                "completed": false
+              },
+              {
+                "id": "034035_ex_b",
+                "xp": 500,
+                "type": "exam",
+                "title": "מועד ב'",
+                "status": "not_started",
+                "dueDate": "2027-03-05",
+                "completed": false
+              }
+            ],
+            "status": "available",
+            "credits": 4,
+            "faculty": "הפקולטה להנדסת מכונות",
+            "schedule": [
+              {
+                "day": "שלישי",
+                "room": "",
+                "type": "הרצאה",
+                "group": 10,
+                "hours": "08:30 - 11:30",
+                "lecturer": "פרופ' לאוניד טרטקובסקי"
+              },
+              {
+                "day": "שלישי",
+                "room": "",
+                "type": "תרגול",
+                "group": 11,
+                "hours": "12:30 - 14:30",
+                "lecturer": ""
+              }
+            ],
+            "semester": 3,
+            "syllabus": "מושגי יסוד, מערכת, תכונות, מצב, תהליך, חוק האפס והחוק הראשון. אנרגיה. אנתלפיה. שינויי פאזה וחומר טהור. משוואות מצב, גז אידיאלי וגז אמיתי. ניתוח נפח בקרה: שימור מסה ושימור אנרגיה. החוק השני של התרמודינמיקה: נצילות קרנו, אי-שוויון קלאוזיוס, אנטרופיה ומאזן אנטרופיה. אקסרגיה, מחזורי כוח וקירור.",
+            "lecturers": "פרופ' לאוניד טרטקובסקי",
+            "isBinaryPass": false,
+            "prerequisites": [
+              "104043",
+              "104041"
+            ]
+          },
+          "034040": {
+            "code": "034040",
+            "name": "מבוא לבקרה",
+            "tasks": [
+              {
+                "id": "034040_h1",
+                "xp": 50,
+                "type": "hw",
+                "title": "תרגיל בית 1: יציבות מערכות דינמיות (הורוויץ)",
+                "status": "not_started",
+                "completed": false
+              },
+              {
+                "id": "034040_ex",
+                "xp": 500,
+                "type": "exam",
+                "title": "מועד א",
+                "status": "not_started",
+                "completed": false
+              }
+            ],
+            "status": "locked",
+            "credits": 3,
+            "semester": 5,
+            "isBinaryPass": false,
+            "prerequisites": [
+              "034032"
+            ]
+          },
+          "034041": {
+            "code": "034041",
+            "name": "מעבר חום",
+            "tasks": [
+              {
+                "id": "034041_h1",
+                "xp": 50,
+                "type": "hw",
+                "title": "תרגיל בית 1: הולכת חום במימד אחד",
+                "status": "not_started",
+                "completed": false
+              },
+              {
+                "id": "034041_ex",
+                "xp": 500,
+                "type": "exam",
+                "title": "מועד א",
+                "status": "not_started",
+                "completed": false
+              }
+            ],
+            "status": "locked",
+            "credits": 4,
+            "semester": 5,
+            "isBinaryPass": false,
+            "prerequisites": [
+              "034035",
+              "034055"
+            ]
+          },
+          "034051": {
+            "code": "034051",
+            "name": "דינמיקה ומכניקה של תנודות",
+            "tasks": [
+              {
+                "id": "034051_h1",
+                "xp": 50,
+                "type": "hw",
+                "title": "תרגיל בית 1: תנודות חופשיות ומאולצות עם ריסון",
+                "status": "not_started",
+                "completed": false
+              },
+              {
+                "id": "034051_ex",
+                "xp": 500,
+                "type": "exam",
+                "title": "מועד א",
+                "status": "not_started",
+                "completed": false
+              }
+            ],
+            "status": "locked",
+            "credits": 3,
+            "semester": 5,
+            "isBinaryPass": false,
+            "prerequisites": [
+              "034010",
+              "034032",
+              "034053",
+              "034056",
+              "104228"
+            ]
+          },
+          "034053": {
+            "code": "034053",
+            "name": "מכניקת מוצקים 2מ",
+            "moedA": "2027-02-18",
+            "moedB": "2027-03-18",
+            "tasks": [
+              {
+                "id": "034053_h1",
+                "xp": 60,
+                "type": "hw",
+                "title": "תרגיל בית 1: כפיפת קורות ומאמצים משולבים",
+                "status": "not_started",
+                "dueDate": "",
+                "completed": false
+              },
+              {
+                "id": "034053_ex",
+                "xp": 550,
+                "type": "exam",
+                "title": "מועד א",
+                "status": "not_started",
+                "dueDate": "2027-02-18",
+                "completed": false
+              },
+              {
+                "id": "034053_ex_b",
+                "xp": 550,
+                "type": "exam",
+                "title": "מועד ב'",
+                "status": "not_started",
+                "dueDate": "2027-03-18",
+                "completed": false
+              }
+            ],
+            "status": "available",
+            "credits": 5,
+            "faculty": "הפקולטה להנדסת מכונות",
+            "schedule": [
+              {
+                "day": "שני",
+                "room": "",
+                "type": "הרצאה",
+                "group": 10,
+                "hours": "10:30 - 14:30",
+                "lecturer": "פרופ' יוסף גבלי"
+              },
+              {
+                "day": "חמישי",
+                "room": "",
+                "type": "תרגול",
+                "group": 21,
+                "hours": "12:30 - 14:30",
+                "lecturer": ""
+              }
+            ],
+            "semester": 3,
+            "syllabus": "מאמצים, עיבורים, קשרי מאמץ-עיבור (חוק הוק המוכלל), קריטריוני כניעה וכשל (פון-מיזס, טרסקה). מבוא לתורת האלסטיות, פונקציית מאמצים של איירי. כפיפת קורות אסימטריות, מרכז גזירה. פיתול של מוטות בעלי חתך לא עגול וחתכים דקי-דופן. קריסת עמודים (אוילר). שיטות אנרגיה: משפט קסטיליאנו, עבודה מדומה.",
+            "lecturers": "פרופ' יוסף גבלי",
+            "isBinaryPass": false,
+            "prerequisites": [
+              "034028",
+              "104043",
+              "104065"
+            ]
+          },
+          "034054": {
+            "code": "034054",
+            "name": "תכן מכני 1 מ׳",
+            "tasks": [
+              {
+                "id": "034054_h1",
+                "xp": 50,
+                "type": "hw",
+                "title": "תרגיל בית 1: חישובי עייפות חומרים (Fatigue)",
+                "status": "not_started",
+                "completed": false
+              },
+              {
+                "id": "034054_p1",
+                "xp": 250,
+                "type": "project",
+                "title": "פרוייקט תכן: תכנון ציר ותמסורת גלגלי שיניים",
+                "status": "not_started",
+                "completed": false
+              },
+              {
+                "id": "034054_ex",
+                "xp": 500,
+                "type": "exam",
+                "title": "מועד א",
+                "status": "not_started",
+                "completed": false
+              }
+            ],
+            "status": "locked",
+            "credits": 4,
+            "semester": 5,
+            "isBinaryPass": false,
+            "prerequisites": [
+              "034053",
+              "034030",
+              "034061",
+              "314533"
+            ]
+          },
+          "034055": {
+            "code": "034055",
+            "name": "תורת הזרימה 1 מורחב",
+            "tasks": [
+              {
+                "id": "034055_h1",
+                "xp": 60,
+                "type": "hw",
+                "title": "תרגיל בית 1: הידרוסטטיקה ושימור מסה",
+                "status": "not_started",
+                "completed": false
+              },
+              {
+                "id": "034055_ex",
+                "xp": 550,
+                "type": "exam",
+                "title": "מועד א",
+                "status": "not_started",
+                "completed": false
+              }
+            ],
+            "status": "locked",
+            "credits": 5,
+            "semester": 4,
+            "isBinaryPass": false,
+            "prerequisites": [
+              "034035",
+              "104131",
+              "104228"
+            ]
+          },
+          "034056": {
+            "code": "034056",
+            "name": "מבוא לחישוב מדעי והנדסי",
+            "moedA": "2027-02-11",
+            "moedB": "2027-03-10",
+            "tasks": [
+              {
+                "id": "034056_h1",
+                "xp": 50,
+                "type": "hw",
+                "title": "תרגיל בית 1: פתרון משוואות לא ליניאריות בפייתון",
+                "status": "not_started",
+                "dueDate": "",
+                "completed": false
+              },
+              {
+                "id": "034056_p1",
+                "xp": 200,
+                "type": "project",
+                "title": "פרוייקט חישובי: אנליזה נומרית של מערכת מכנית",
+                "status": "not_started",
+                "dueDate": "",
+                "completed": false
+              },
+              {
+                "id": "034056_ex",
+                "xp": 500,
+                "type": "exam",
+                "title": "מועד א",
+                "status": "not_started",
+                "dueDate": "2027-02-11",
+                "completed": false
+              },
+              {
+                "id": "034056_ex_b",
+                "xp": 500,
+                "type": "exam",
+                "title": "מועד ב'",
+                "status": "not_started",
+                "dueDate": "2027-03-10",
+                "completed": false
+              }
+            ],
+            "status": "available",
+            "credits": 4,
+            "faculty": "הפקולטה להנדסת מכונות",
+            "schedule": [
+              {
+                "day": "שני",
+                "room": "",
+                "type": "תרגול",
+                "group": 14,
+                "hours": "14:30 - 16:30",
+                "lecturer": ""
+              },
+              {
+                "day": "רביעי",
+                "room": "",
+                "type": "הרצאה",
+                "group": 10,
+                "hours": "14:30 - 17:30",
+                "lecturer": "ד\"ר דניאל הקסנר"
+              }
+            ],
+            "semester": 3,
+            "syllabus": "1. הקדמה לחישוב מדעי ואלגוריתמיקה. 2. שיטות פתרון למשוואות לינאריות: שיטת גאוס, פירוק LU, שיטות איטרטיביות (יעקובי, גאוס-זיידל). 3. שורשים של משוואות לא לינאריות: חצייה, ניוטון-רפסון. 4. אינטרפולציה וקירוב פונקציות. 5. גזירה ואינטגרציה נומרית. 6. פתרון נומרי של משוואות דיפרנציאליות רגילות (ODE) - שיטות אוילר ורונגה-קוטה. יישומים מעשיים בפייתון.",
+            "lecturers": "ד\"ר דניאל הקסנר",
+            "isBinaryPass": false,
+            "prerequisites": [
+              "234128",
+              "104131"
+            ]
+          },
+          "034057": {
+            "code": "034057",
+            "name": "מעבדה מתקדמת בהנדסת מכונות",
+            "tasks": [
+              {
+                "id": "034057_p1",
+                "xp": 150,
+                "type": "project",
+                "title": "ניסוי מעבדה 1: מעבר חום וזורמים",
+                "status": "not_started",
+                "completed": false
+              },
+              {
+                "id": "034057_p2",
+                "xp": 150,
+                "type": "project",
+                "title": "ניסוי מעבדה 2: בקרה ומערכות דינמיות",
+                "status": "not_started",
+                "completed": false
+              },
+              {
+                "id": "034057_ex",
+                "xp": 500,
+                "type": "exam",
+                "title": "דו\"ח מעבדה מסכם",
+                "status": "not_started",
+                "completed": false
+              }
+            ],
+            "status": "locked",
+            "credits": 4,
+            "semester": 6,
+            "isBinaryPass": false,
+            "prerequisites": [
+              "034041",
+              "034040",
+              "034051",
+              "034058",
+              "114032"
+            ]
+          },
+          "034058": {
+            "code": "034058",
+            "name": "הסתברות וסטטיסטיקה להנדסת מכונות",
+            "tasks": [
+              {
+                "id": "034058_h1",
+                "xp": 50,
+                "type": "hw",
+                "title": "תרגיל בית 1: הסתברות מותנית ומשתנים בדידים",
+                "status": "not_started",
+                "completed": false
+              },
+              {
+                "id": "034058_ex",
+                "xp": 500,
+                "type": "exam",
+                "title": "מועד א",
+                "status": "not_started",
+                "completed": false
+              }
+            ],
+            "status": "locked",
+            "credits": 3,
+            "semester": 5,
+            "isBinaryPass": false,
+            "prerequisites": [
+              "104043"
+            ]
+          },
+          "034060": {
+            "code": "034060",
+            "name": "מבוא למכטרוניקה והנע חשמלי",
+            "tasks": [
+              {
+                "id": "034060_h1",
+                "xp": 50,
+                "type": "hw",
+                "title": "תרגיל בית 1: מנועי זרם ישר וצעד",
+                "status": "not_started",
+                "completed": false
+              },
+              {
+                "id": "034060_p1",
+                "xp": 200,
+                "type": "project",
+                "title": "עבודת מעבדה: בקרת מיקום מנוע מבוססת ארדואינו",
+                "status": "not_started",
+                "completed": false
+              },
+              {
+                "id": "034060_ex",
+                "xp": 500,
+                "type": "exam",
+                "title": "מועד א",
+                "status": "not_started",
+                "completed": false
+              }
+            ],
+            "status": "locked",
+            "credits": 4,
+            "semester": 6,
+            "isBinaryPass": false,
+            "prerequisites": [
+              "034032",
+              "114052"
+            ]
+          },
+          "034061": {
+            "code": "034061",
+            "name": "מבוא לגרפיקה ותכנון הנדסי",
+            "grade": 99,
+            "tasks": [
+              {
+                "id": "034061_p1",
+                "xp": 200,
+                "type": "project",
+                "title": "פרויקט SolidWorks: מידול והרכבת מנוע",
+                "status": "done",
+                "dueDate": "",
+                "completed": true
+              },
+              {
+                "id": "034061_ex",
+                "xp": 500,
+                "type": "exam",
+                "grade": 99,
+                "title": "מועד א",
+                "status": "done",
+                "dueDate": "2026-12-20",
+                "completed": true
+              },
+              {
+                "id": "task_034061_defense",
+                "type": "project",
+                "title": "הגנה על פרויקט סוף גרפיקה",
+                "status": "done",
+                "dueDate": "2026-08-27",
+                "completed": true
+              },
+              {
+                "id": "task-034061-exam-b",
+                "xp": 500,
+                "type": "exam",
+                "grade": 99,
+                "title": "מועד ב'",
+                "status": "done",
+                "dueDate": "2027-01-15",
+                "completed": true
+              },
+              {
+                "id": "task_moodle_125471_1789652686032",
+                "xp": 50,
+                "type": "assignment",
+                "title": "תיבת ערעורים - זמינה עד 18.9.26",
+                "source": "moodle",
+                "status": "done",
+                "dueDate": "2026-09-17 21:00",
+                "completed": true,
+                "moodleUid": "125471@moodle25.technion.ac.il",
+                "dueTimestamp": 1789678800000,
+                "moodleEventId": "125471"
+              }
+            ],
+            "status": "mastered",
+            "credits": 3.5,
+            "semester": 2,
+            "isBinaryPass": false,
+            "prerequisites": [],
+            "assignmentsGrade": 99
+          },
+          "034371": {
+            "code": "034371",
+            "name": "פרויקט תכן לייצור",
+            "tasks": [
+              {
+                "id": "034371_p1",
+                "xp": 200,
+                "type": "project",
+                "title": "תכנון חלקים לייצור ממוחשב ו-CNC",
+                "status": "not_started",
+                "completed": false
+              },
+              {
+                "id": "034371_ex",
+                "xp": 500,
+                "type": "exam",
+                "title": "הגשה סופית של תיק ייצור",
+                "status": "not_started",
+                "completed": false
+              }
+            ],
+            "status": "locked",
+            "credits": 2.5,
+            "semester": 6,
+            "isBinaryPass": false,
+            "prerequisites": [
+              "034054",
+              "034030"
+            ]
+          },
+          "034379": {
+            "code": "034379",
+            "name": "פרויקט גמר הנדסי 1",
+            "tasks": [
+              {
+                "id": "034379_p1",
+                "xp": 250,
+                "type": "project",
+                "title": "הגשת ספר פרויקט - שלב תכנון רעיוני",
+                "status": "not_started",
+                "completed": false
+              },
+              {
+                "id": "034379_ex",
+                "xp": 600,
+                "type": "exam",
+                "title": "פרזנטציה שלב א' בפני צוות הפקולטה",
+                "status": "not_started",
+                "completed": false
+              }
+            ],
+            "status": "locked",
+            "credits": 3,
+            "semester": 7,
+            "isBinaryPass": false,
+            "prerequisites": [
+              "034371"
+            ]
+          },
+          "034380": {
+            "code": "034380",
+            "name": "פרויקט גמר הנדסי 2",
+            "tasks": [
+              {
+                "id": "034380_p1",
+                "xp": 350,
+                "type": "project",
+                "title": "בניית אב טיפוס, בדיקות שטח וביצועים",
+                "status": "not_started",
+                "completed": false
+              },
+              {
+                "id": "034380_ex",
+                "xp": 1000,
+                "type": "exam",
+                "title": "יריד פרויקטים סופי והגנה מול בוחנים חיצוניים",
+                "status": "not_started",
+                "completed": false
+              }
+            ],
+            "status": "locked",
+            "credits": 3,
+            "semester": 8,
+            "isBinaryPass": false,
+            "prerequisites": [
+              "034379"
+            ]
+          },
+          "034382": {
+            "code": "034382",
+            "name": "מתודולוגיות פיתוח הנדסי 1",
+            "tasks": [
+              {
+                "id": "034382_ex",
+                "xp": 150,
+                "type": "exam",
+                "title": "הצגת כלי פיתוח הנדסיים מבוססי מערכת",
+                "status": "not_started",
+                "completed": false
+              }
+            ],
+            "status": "locked",
+            "credits": 0.5,
+            "semester": 7,
+            "isBinaryPass": false,
+            "prerequisites": [
+              "034054"
+            ]
+          },
+          "034383": {
+            "code": "034383",
+            "name": "מתודולוגיות פיתוח הנדסי 2",
+            "tasks": [
+              {
+                "id": "034383_ex",
+                "xp": 150,
+                "type": "exam",
+                "title": "הגשת תהליך פיתוח הנדסי רפלקטיבי",
+                "status": "not_started",
+                "completed": false
+              }
+            ],
+            "status": "locked",
+            "credits": 0.5,
+            "semester": 8,
+            "isBinaryPass": false,
+            "prerequisites": [
+              "034382"
+            ]
+          },
+          "03940805": {
+            "code": "03940805",
+            "name": "חינוך גופני - אתלטיקה קלה / יוגה",
+            "type": "sports",
+            "moedA": null,
+            "moedB": null,
+            "tasks": [
+              {
+                "id": "03940805_ex",
+                "xp": 200,
+                "type": "exam",
+                "title": "בחינת סוף",
+                "status": "not_started",
+                "dueDate": "",
+                "completed": false
+              }
+            ],
+            "status": "available",
+            "credits": 1,
+            "faculty": "היחידה ללימודי ספורט",
+            "schedule": [
+              {
+                "day": "חמישי",
+                "room": "אולם ספורט",
+                "type": "יוגה",
+                "group": 24,
+                "hours": "07:30 - 09:00",
+                "lecturer": ""
+              }
+            ],
+            "semester": 3,
+            "syllabus": "תרגול יוגה שבועי: נשימה, גמישות, שיווי משקל וחיזוק שרירי ליבה. חובת נוכחות פעילה בלפחות 80% מהשיעורים לאורך הסמסטר.",
+            "lecturers": "היחידה לחינוך גופני",
+            "isBinaryPass": false,
+            "prerequisites": []
+          }
+        },
+        "credits": 39.5,
+        "openTasks": 0,
+        "bossesSlain": 11,
+        "userProfile": {},
+        "isFinalsMode": false,
+        "pastExamsBank": {
+          "104043": {
+            "name": "חדו״א 2 (104043)",
+            "exams": [
+              {
+                "id": "exam_104043_2016_40",
+                "moed": "אביב מועד א",
+                "year": "2016",
+                "exists": true,
+                "solution": "פתרון קיים",
+                "completed": true,
+                "scheduledDate": "2026-08-22"
+              },
+              {
+                "id": "exam_104043_2017_41",
+                "moed": "אביב מועד א",
+                "year": "2017",
+                "exists": true,
+                "solution": "פתרון קיים",
+                "completed": true,
+                "scheduledDate": "2026-08-23"
+              },
+              {
+                "id": "exam_104043_2017_42",
+                "moed": "אביב מועד ב",
+                "year": "2017",
+                "exists": true,
+                "solution": "פתרון קיים",
+                "completed": true,
+                "scheduledDate": "2026-08-23"
+              },
+              {
+                "id": "exam_104043_2018_43",
+                "moed": "אביב מועד א",
+                "year": "2018",
+                "exists": true,
+                "solution": "פתרון קיים",
+                "completed": true,
+                "scheduledDate": "2026-08-24"
+              },
+              {
+                "id": "exam_104043_2018_44",
+                "moed": "אביב מועד ב",
+                "year": "2018",
+                "exists": true,
+                "solution": "פתרון קיים",
+                "completed": true,
+                "scheduledDate": "2026-08-24"
+              },
+              {
+                "id": "exam_104043_2019_45",
+                "moed": "אביב מועד א",
+                "year": "2019",
+                "exists": true,
+                "solution": "פתרון קיים",
+                "completed": true,
+                "scheduledDate": "2026-08-25"
+              },
+              {
+                "id": "exam_104043_2019_46",
+                "moed": "אביב מועד ב",
+                "year": "2019",
+                "exists": true,
+                "solution": "פתרון קיים",
+                "completed": true,
+                "scheduledDate": "2026-08-25"
+              },
+              {
+                "id": "exam_104043_2020_47",
+                "moed": "אביב מועד א",
+                "year": "2020",
+                "exists": true,
+                "solution": "פתרון קיים",
+                "completed": true,
+                "scheduledDate": "2026-08-26"
+              },
+              {
+                "id": "exam_104043_2020_48",
+                "moed": "אביב מועד ב",
+                "year": "2020",
+                "exists": true,
+                "solution": "פתרון קיים",
+                "completed": true,
+                "scheduledDate": "2026-08-26"
+              },
+              {
+                "id": "exam_104043_2022_49",
+                "moed": "אביב מועד א",
+                "year": "2022",
+                "exists": true,
+                "solution": "פתרון קיים",
+                "completed": true,
+                "scheduledDate": "2026-08-27"
+              },
+              {
+                "id": "exam_104043_2022_50",
+                "moed": "אביב מועד ב",
+                "year": "2022",
+                "exists": true,
+                "solution": "פתרון קיים",
+                "completed": true,
+                "scheduledDate": "2026-08-27"
+              },
+              {
+                "id": "exam_104043_2024_51",
+                "moed": "אביב מועד א",
+                "year": "2024",
+                "exists": true,
+                "solution": "פתרון קיים",
+                "completed": true,
+                "scheduledDate": "2026-08-28"
+              },
+              {
+                "id": "exam_104043_2024_52",
+                "moed": "אביב מועד ב",
+                "year": "2024",
+                "exists": true,
+                "solution": "פתרון קיים",
+                "completed": true,
+                "scheduledDate": "2026-08-28"
+              },
+              {
+                "id": "exam_104043_2025_53",
+                "moed": "אביב מועד א",
+                "year": "2025",
+                "exists": true,
+                "solution": "פתרון קיים",
+                "completed": true,
+                "scheduledDate": "2026-08-29"
+              },
+              {
+                "id": "exam_104043_2025_54",
+                "moed": "אביב מועד ב",
+                "year": "2025",
+                "exists": true,
+                "solution": "פתרון קיים",
+                "completed": true,
+                "scheduledDate": "2026-08-29"
+              }
+            ],
+            "examDate": "2026-08-05",
+            "earliestYear": 2015,
+            "studyStartDate": "2026-08-05"
+          },
+          "104131": {
+            "name": "מד״ר (104131)",
+            "exams": [
+              {
+                "id": "exam_104131_2020_0",
+                "moed": "חורף מועד א",
+                "year": "2020",
+                "exists": true,
+                "solution": "פתרון קיים",
+                "completed": true,
+                "scheduledDate": "2026-08-05"
+              },
+              {
+                "id": "exam_104131_2023_1",
+                "moed": "אביב מועד א",
+                "year": "2023",
+                "exists": true,
+                "solution": "פתרון קיים",
+                "completed": true,
+                "scheduledDate": "2026-08-06"
+              },
+              {
+                "id": "exam_104131_2015_2",
+                "moed": "חורף מועד א",
+                "year": "2015",
+                "exists": true,
+                "solution": "פתרון קיים",
+                "completed": true,
+                "scheduledDate": "2026-08-06"
+              },
+              {
+                "id": "exam_104131_2022_3",
+                "moed": "חורף מועד ב",
+                "year": "2022",
+                "exists": true,
+                "solution": "פתרון קיים",
+                "completed": true,
+                "scheduledDate": "2026-08-06"
+              },
+              {
+                "id": "exam_104131_2023_4",
+                "moed": "אביב מועד ב",
+                "year": "2023",
+                "exists": true,
+                "solution": "פתרון קיים",
+                "completed": true,
+                "scheduledDate": "2026-08-07"
+              },
+              {
+                "id": "exam_104131_2018_5",
+                "moed": "חורף מועד א",
+                "year": "2018",
+                "exists": true,
+                "solution": "פתרון קיים",
+                "completed": true,
+                "scheduledDate": "2026-08-07"
+              },
+              {
+                "id": "exam_104131_2018_6",
+                "moed": "חורף מועד ב",
+                "year": "2018",
+                "exists": true,
+                "solution": "פתרון קיים",
+                "completed": true,
+                "scheduledDate": "2026-08-07"
+              },
+              {
+                "id": "exam_104131_2024_7",
+                "moed": "אביב מועד ב",
+                "year": "2024",
+                "exists": true,
+                "solution": "פתרון קיים",
+                "completed": true,
+                "scheduledDate": "2026-08-11"
+              },
+              {
+                "id": "exam_104131_2022_8",
+                "moed": "חורף מועד א",
+                "year": "2022",
+                "exists": true,
+                "solution": "פתרון קיים",
+                "completed": true,
+                "scheduledDate": "2026-08-11"
+              },
+              {
+                "id": "exam_104131_2024_9",
+                "moed": "אביב מועד א",
+                "year": "2024",
+                "exists": true,
+                "solution": "פתרון קיים",
+                "completed": true,
+                "scheduledDate": "2026-08-11"
+              },
+              {
+                "id": "exam_104131_2025_10",
+                "moed": "חורף מועד א",
+                "year": "2025",
+                "exists": true,
+                "solution": "פתרון קיים",
+                "completed": true,
+                "scheduledDate": "2026-08-12"
+              },
+              {
+                "id": "exam_104131_2026_11",
+                "moed": "חורף מועד א",
+                "year": "2026",
+                "exists": true,
+                "solution": "פתרון קיים",
+                "completed": true,
+                "scheduledDate": "2026-08-12"
+              },
+              {
+                "id": "exam_104131_2026_12",
+                "moed": "חורף מועד ב",
+                "year": "2026",
+                "exists": true,
+                "solution": "פתרון קיים",
+                "completed": true,
+                "scheduledDate": "2026-08-12"
+              },
+              {
+                "id": "exam_104131_2021_13",
+                "moed": "חורף מועד א",
+                "year": "2021",
+                "exists": true,
+                "solution": "פתרון קיים",
+                "completed": true,
+                "scheduledDate": "2026-08-12"
+              }
+            ],
+            "examDate": "2026-08-13",
+            "earliestYear": 2015,
+            "studyStartDate": "2026-08-05"
+          },
+          "104228": {
+            "name": "משוואות דיפרנציאליות חלקיות מ' (104228)",
+            "exams": [
+              {
+                "id": "exam_104228_2024_1",
+                "moed": "חורף מועד א",
+                "year": "2024",
+                "exists": true,
+                "solution": "פתרון קיים",
+                "completed": false,
+                "scheduledDate": ""
+              },
+              {
+                "id": "exam_104228_2024_2",
+                "moed": "חורף מועד ב",
+                "year": "2024",
+                "exists": true,
+                "solution": "פתרון קיים",
+                "completed": false,
+                "scheduledDate": ""
+              },
+              {
+                "id": "exam_104228_2023_1",
+                "moed": "חורף מועד א",
+                "year": "2023",
+                "exists": true,
+                "solution": "פתרון קיים",
+                "completed": false,
+                "scheduledDate": ""
+              },
+              {
+                "id": "exam_104228_2023_2",
+                "moed": "חורף מועד ב",
+                "year": "2023",
+                "exists": true,
+                "solution": "פתרון קיים",
+                "completed": false,
+                "scheduledDate": ""
+              }
+            ],
+            "examDate": "2027-02-24",
+            "moedBDate": "2027-03-26",
+            "earliestYear": 2018,
+            "studyStartDate": "2027-02-24"
+          },
+          "114052": {
+            "name": "פיסיקה 2 (114052)",
+            "exams": [
+              {
+                "id": "exam_114052_2024_1",
+                "moed": "חורף מועד א",
+                "year": "2024",
+                "exists": true,
+                "solution": "פתרון קיים",
+                "completed": false,
+                "scheduledDate": ""
+              },
+              {
+                "id": "exam_114052_2024_2",
+                "moed": "חורף מועד ב",
+                "year": "2024",
+                "exists": true,
+                "solution": "פתרון קיים",
+                "completed": false,
+                "scheduledDate": ""
+              },
+              {
+                "id": "exam_114052_2023_1",
+                "moed": "חורף מועד א",
+                "year": "2023",
+                "exists": true,
+                "solution": "פתרון קיים",
+                "completed": false,
+                "scheduledDate": ""
+              },
+              {
+                "id": "exam_114052_2023_2",
+                "moed": "חורף מועד ב",
+                "year": "2023",
+                "exists": true,
+                "solution": "פתרון קיים",
+                "completed": false,
+                "scheduledDate": ""
+              }
+            ],
+            "examDate": "2027-02-01",
+            "moedBDate": "2027-03-02",
+            "earliestYear": 2018,
+            "studyStartDate": "2027-02-01"
+          },
+          "314533": {
+            "name": "הנדסת חומרים (314533)",
+            "exams": [
+              {
+                "id": "exam_314533_2019_14",
+                "moed": "קיץ מועד א",
+                "year": "2019",
+                "exists": true,
+                "solution": "פתרון קיים",
+                "completed": true,
+                "scheduledDate": "2026-08-08"
+              },
+              {
+                "id": "exam_314533_2021_15",
+                "moed": "אביב מועד ג",
+                "year": "2021",
+                "exists": true,
+                "solution": "פתרון קיים",
+                "completed": true,
+                "scheduledDate": "2026-08-08"
+              },
+              {
+                "id": "exam_314533_2022_16",
+                "moed": "אביב מועד א",
+                "year": "2022",
+                "exists": true,
+                "solution": "פתרון קיים",
+                "completed": true,
+                "scheduledDate": "2026-08-08"
+              },
+              {
+                "id": "exam_314533_2018_17",
+                "moed": "מועד א (נייר)",
+                "year": "2018",
+                "exists": true,
+                "solution": "פתרון קיים",
+                "completed": true,
+                "scheduledDate": "2026-08-09"
+              },
+              {
+                "id": "exam_314533_2024_18",
+                "moed": "אביב מועד א",
+                "year": "2024",
+                "exists": true,
+                "solution": "פתרון קיים",
+                "completed": true,
+                "scheduledDate": "2026-08-09"
+              },
+              {
+                "id": "exam_314533_2024_19",
+                "moed": "אביב מועד ב",
+                "year": "2024",
+                "exists": true,
+                "solution": "פתרון קיים",
+                "completed": true,
+                "scheduledDate": "2026-08-09"
+              },
+              {
+                "id": "exam_314533_2022_20",
+                "moed": "מאגר שאלות",
+                "year": "2022",
+                "exists": true,
+                "solution": "פתרון קיים",
+                "completed": true,
+                "scheduledDate": "2026-08-09"
+              },
+              {
+                "id": "exam_314533_2022_21",
+                "moed": "מאגר שאלות נוסף",
+                "year": "2022",
+                "exists": true,
+                "solution": "פתרון קיים",
+                "completed": true,
+                "scheduledDate": "2026-08-09"
+              },
+              {
+                "id": "exam_314533_2018_22",
+                "moed": "מועד ב (נייר)",
+                "year": "2018",
+                "exists": true,
+                "solution": "פתרון קיים",
+                "completed": true,
+                "scheduledDate": "2026-08-10"
+              },
+              {
+                "id": "exam_314533_2025_23",
+                "moed": "אביב מועד א",
+                "year": "2025",
+                "exists": true,
+                "solution": "פתרון קיים",
+                "completed": true,
+                "scheduledDate": "2026-08-10"
+              },
+              {
+                "id": "exam_314533_2025_24",
+                "moed": "אביב מועד ב",
+                "year": "2025",
+                "exists": true,
+                "solution": "פתרון קיים",
+                "completed": true,
+                "scheduledDate": "2026-08-10"
+              },
+              {
+                "id": "exam_314533_2021_25",
+                "moed": "מאגר שאלות",
+                "year": "2021",
+                "exists": true,
+                "solution": "פתרון קיים",
+                "completed": true,
+                "scheduledDate": "2026-08-10"
+              },
+              {
+                "id": "exam_314533_2026_26",
+                "moed": "סימולציה מסכמת",
+                "year": "2026",
+                "exists": true,
+                "solution": "פתרון קיים",
+                "completed": true,
+                "scheduledDate": "2026-08-10"
+              }
+            ],
+            "examDate": "2026-08-11",
+            "earliestYear": 2015,
+            "studyStartDate": "2026-08-05"
+          },
+          "034028": {
+            "name": "מכניקת מוצקים 1 (034028)",
+            "exams": [
+              {
+                "id": "exam_034028_2015_27",
+                "moed": "אביב מועד א",
+                "year": "2015",
+                "exists": true,
+                "solution": "פתרון קיים",
+                "completed": true,
+                "scheduledDate": "2026-08-13"
+              },
+              {
+                "id": "exam_034028_2016_28",
+                "moed": "אביב מועד א",
+                "year": "2016",
+                "exists": true,
+                "solution": "פתרון קיים",
+                "completed": true,
+                "scheduledDate": "2026-08-14"
+              },
+              {
+                "id": "exam_034028_2018_29",
+                "moed": "אביב מועד א",
+                "year": "2018",
+                "exists": true,
+                "solution": "פתרון קיים",
+                "completed": true,
+                "scheduledDate": "2026-08-14"
+              },
+              {
+                "id": "exam_034028_2019_30",
+                "moed": "אביב מועד ב",
+                "year": "2019",
+                "exists": true,
+                "solution": "פתרון קיים",
+                "completed": true,
+                "scheduledDate": "2026-08-15"
+              },
+              {
+                "id": "exam_034028_2020_31",
+                "moed": "אביב מועד א",
+                "year": "2020",
+                "exists": true,
+                "solution": "פתרון קיים",
+                "completed": true,
+                "scheduledDate": "2026-08-15"
+              },
+              {
+                "id": "exam_034028_2021_32",
+                "moed": "אביב מועד א",
+                "year": "2021",
+                "exists": true,
+                "solution": "פתרון קיים",
+                "completed": true,
+                "scheduledDate": "2026-08-16"
+              },
+              {
+                "id": "exam_034028_2021_33",
+                "moed": "אביב מועד ב",
+                "year": "2021",
+                "exists": true,
+                "solution": "פתרון קיים",
+                "completed": true,
+                "scheduledDate": "2026-08-16"
+              },
+              {
+                "id": "exam_034028_2022_34",
+                "moed": "אביב מועד א",
+                "year": "2022",
+                "exists": true,
+                "solution": "פתרון קיים",
+                "completed": true,
+                "scheduledDate": "2026-08-17"
+              },
+              {
+                "id": "exam_034028_2022_35",
+                "moed": "אביב מועד ב",
+                "year": "2022",
+                "exists": true,
+                "solution": "פתרון קיים",
+                "completed": true,
+                "scheduledDate": "2026-08-17"
+              },
+              {
+                "id": "exam_034028_2023_36",
+                "moed": "אביב מועד א",
+                "year": "2023",
+                "exists": true,
+                "solution": "פתרון קיים",
+                "completed": true,
+                "scheduledDate": "2026-08-17"
+              },
+              {
+                "id": "exam_034028_2023_37",
+                "moed": "מועד א 2",
+                "year": "2023",
+                "exists": true,
+                "solution": "פתרון קיים",
+                "completed": true,
+                "scheduledDate": "2026-08-18"
+              },
+              {
+                "id": "exam_034028_2024_38",
+                "moed": "אביב מועד א",
+                "year": "2024",
+                "exists": true,
+                "solution": "פתרון קיים",
+                "completed": true,
+                "scheduledDate": "2026-08-18"
+              },
+              {
+                "id": "exam_034028_2025_39",
+                "moed": "אביב מועד א",
+                "year": "2025",
+                "exists": true,
+                "solution": "פתרון קיים",
+                "completed": true,
+                "scheduledDate": "2026-08-18"
+              }
+            ],
+            "examDate": "2026-08-19",
+            "earliestYear": 2015,
+            "studyStartDate": "2026-08-05"
+          },
+          "034035": {
+            "name": "תרמודינמיקה 1 (034035)",
+            "exams": [
+              {
+                "id": "exam_034035_2024_1",
+                "moed": "חורף מועד א",
+                "year": "2024",
+                "exists": true,
+                "solution": "פתרון קיים",
+                "completed": false,
+                "scheduledDate": ""
+              },
+              {
+                "id": "exam_034035_2024_2",
+                "moed": "חורף מועד ב",
+                "year": "2024",
+                "exists": true,
+                "solution": "פתרון קיים",
+                "completed": false,
+                "scheduledDate": ""
+              },
+              {
+                "id": "exam_034035_2023_1",
+                "moed": "חורף מועד א",
+                "year": "2023",
+                "exists": true,
+                "solution": "פתרון קיים",
+                "completed": false,
+                "scheduledDate": ""
+              },
+              {
+                "id": "exam_034035_2023_2",
+                "moed": "חורף מועד ב",
+                "year": "2023",
+                "exists": true,
+                "solution": "פתרון קיים",
+                "completed": false,
+                "scheduledDate": ""
+              }
+            ],
+            "examDate": "2027-02-07",
+            "moedBDate": "2027-03-05",
+            "earliestYear": 2018,
+            "studyStartDate": "2027-02-07"
+          },
+          "034053": {
+            "name": "מכניקת מוצקים 2מ (034053)",
+            "exams": [
+              {
+                "id": "exam_034053_2024_1",
+                "moed": "חורף מועד א",
+                "year": "2024",
+                "exists": true,
+                "solution": "פתרון קיים",
+                "completed": false,
+                "scheduledDate": ""
+              },
+              {
+                "id": "exam_034053_2024_2",
+                "moed": "חורף מועד ב",
+                "year": "2024",
+                "exists": true,
+                "solution": "פתרון קיים",
+                "completed": false,
+                "scheduledDate": ""
+              },
+              {
+                "id": "exam_034053_2023_1",
+                "moed": "חורף מועד א",
+                "year": "2023",
+                "exists": true,
+                "solution": "פתרון קיים",
+                "completed": false,
+                "scheduledDate": ""
+              },
+              {
+                "id": "exam_034053_2023_2",
+                "moed": "חורף מועד ב",
+                "year": "2023",
+                "exists": true,
+                "solution": "פתרון קיים",
+                "completed": false,
+                "scheduledDate": ""
+              }
+            ],
+            "examDate": "2027-02-18",
+            "moedBDate": "2027-03-18",
+            "earliestYear": 2018,
+            "studyStartDate": "2027-02-18"
+          },
+          "034056": {
+            "name": "מבוא לחישוב מדעי והנדסי (034056)",
+            "exams": [
+              {
+                "id": "exam_034056_2024_1",
+                "moed": "חורף מועד א",
+                "year": "2024",
+                "exists": true,
+                "solution": "פתרון קיים",
+                "completed": false,
+                "scheduledDate": ""
+              },
+              {
+                "id": "exam_034056_2024_2",
+                "moed": "חורף מועד ב",
+                "year": "2024",
+                "exists": true,
+                "solution": "פתרון קיים",
+                "completed": false,
+                "scheduledDate": ""
+              },
+              {
+                "id": "exam_034056_2023_1",
+                "moed": "חורף מועד א",
+                "year": "2023",
+                "exists": true,
+                "solution": "פתרון קיים",
+                "completed": false,
+                "scheduledDate": ""
+              },
+              {
+                "id": "exam_034056_2023_2",
+                "moed": "חורף מועד ב",
+                "year": "2023",
+                "exists": true,
+                "solution": "פתרון קיים",
+                "completed": false,
+                "scheduledDate": ""
+              }
+            ],
+            "examDate": "2027-02-11",
+            "moedBDate": "2027-03-10",
+            "earliestYear": 2018,
+            "studyStartDate": "2027-02-11"
+          }
+        },
+        "characterClass": "סטודנט להנדסת מכונות",
+        "removedCourses": [
+          "035044",
+          "324033",
+          "03240033",
+          "035026",
+          "35026"
+        ],
+        "completedCourses": 11,
+        "pastExamSchedule": [
+          {
+            "id": "pe_104131_2026-08-05_0",
+            "date": "2026-08-05",
+            "title": "מד״ר: חורף 2020 מועד א",
+            "completed": true,
+            "courseCode": "104131"
+          },
+          {
+            "id": "pe_104131_2026-08-06_1",
+            "date": "2026-08-06",
+            "title": "מד״ר: אביב 2023 מועד א",
+            "completed": true,
+            "courseCode": "104131"
+          },
+          {
+            "id": "pe_104131_2026-08-06_2",
+            "date": "2026-08-06",
+            "title": "מד״ר: חורף 2015 מועד א",
+            "completed": true,
+            "courseCode": "104131"
+          },
+          {
+            "id": "pe_104131_2026-08-06_3",
+            "date": "2026-08-06",
+            "title": "מד״ר: חורף 2022 מועד ב",
+            "completed": true,
+            "courseCode": "104131"
+          },
+          {
+            "id": "pe_104131_2026-08-07_4",
+            "date": "2026-08-07",
+            "title": "מד״ר: אביב 2023 מועד ב",
+            "completed": true,
+            "courseCode": "104131"
+          },
+          {
+            "id": "pe_104131_2026-08-07_5",
+            "date": "2026-08-07",
+            "title": "מד״ר: חורף 2018 מועד א",
+            "completed": true,
+            "courseCode": "104131"
+          },
+          {
+            "id": "pe_104131_2026-08-07_6",
+            "date": "2026-08-07",
+            "title": "מד״ר: חורף 2018 מועד ב",
+            "completed": true,
+            "courseCode": "104131"
+          },
+          {
+            "id": "pe_104131_2026-08-11_7",
+            "date": "2026-08-11",
+            "title": "מד״ר: אביב 2024 מועד ב",
+            "completed": true,
+            "courseCode": "104131"
+          },
+          {
+            "id": "pe_104131_2026-08-11_8",
+            "date": "2026-08-11",
+            "title": "מד״ר: חורף 2022 מועד א",
+            "completed": true,
+            "courseCode": "104131"
+          },
+          {
+            "id": "pe_104131_2026-08-11_9",
+            "date": "2026-08-11",
+            "title": "מד״ר: אביב 2024 מועד א",
+            "completed": true,
+            "courseCode": "104131"
+          },
+          {
+            "id": "pe_104131_2026-08-12_10",
+            "date": "2026-08-12",
+            "title": "מד״ר: חורף 2025 מועד א",
+            "completed": true,
+            "courseCode": "104131"
+          },
+          {
+            "id": "pe_104131_2026-08-12_11",
+            "date": "2026-08-12",
+            "title": "מד״ר: חורף 2026 מועד א",
+            "completed": true,
+            "courseCode": "104131"
+          },
+          {
+            "id": "pe_104131_2026-08-12_12",
+            "date": "2026-08-12",
+            "title": "מד״ר: חורף 2026 מועד ב",
+            "completed": true,
+            "courseCode": "104131"
+          },
+          {
+            "id": "pe_104131_2026-08-12_13",
+            "date": "2026-08-12",
+            "title": "מד״ר: חורף 2021 מועד א",
+            "completed": true,
+            "courseCode": "104131"
+          },
+          {
+            "id": "pe_314533_2026-08-08_14",
+            "date": "2026-08-08",
+            "title": "חומרים: 2019 קיץ א",
+            "completed": true,
+            "courseCode": "314533"
+          },
+          {
+            "id": "pe_314533_2026-08-08_15",
+            "date": "2026-08-08",
+            "title": "חומרים: אביב 2021 מועד ג",
+            "completed": true,
+            "courseCode": "314533"
+          },
+          {
+            "id": "pe_314533_2026-08-08_16",
+            "date": "2026-08-08",
+            "title": "חומרים: אביב 2022 מועד א",
+            "completed": true,
+            "courseCode": "314533"
+          },
+          {
+            "id": "pe_314533_2026-08-09_17",
+            "date": "2026-08-09",
+            "title": "חומרים: 2018 מועד א (נייר)",
+            "completed": true,
+            "courseCode": "314533"
+          },
+          {
+            "id": "pe_314533_2026-08-09_18",
+            "date": "2026-08-09",
+            "title": "חומרים: אביב 2024 מועד א",
+            "completed": true,
+            "courseCode": "314533"
+          },
+          {
+            "id": "pe_314533_2026-08-09_19",
+            "date": "2026-08-09",
+            "title": "חומרים: אביב 2024 מועד ב",
+            "completed": true,
+            "courseCode": "314533"
+          },
+          {
+            "id": "pe_314533_2026-08-09_20",
+            "date": "2026-08-09",
+            "title": "חומרים: מאגר שאלות 2022",
+            "completed": true,
+            "courseCode": "314533"
+          },
+          {
+            "id": "pe_314533_2026-08-09_21",
+            "date": "2026-08-09",
+            "title": "חומרים: מאגר שאלות נוסף",
+            "completed": true,
+            "courseCode": "314533"
+          },
+          {
+            "id": "pe_314533_2026-08-10_22",
+            "date": "2026-08-10",
+            "title": "חומרים: 2018 מועד ב (נייר)",
+            "completed": true,
+            "courseCode": "314533"
+          },
+          {
+            "id": "pe_314533_2026-08-10_23",
+            "date": "2026-08-10",
+            "title": "חומרים: אביב 2025 מועד א",
+            "completed": true,
+            "courseCode": "314533"
+          },
+          {
+            "id": "pe_314533_2026-08-10_24",
+            "date": "2026-08-10",
+            "title": "חומרים: אביב 2025 מועד ב",
+            "completed": true,
+            "courseCode": "314533"
+          },
+          {
+            "id": "pe_314533_2026-08-10_25",
+            "date": "2026-08-10",
+            "title": "חומרים: מאגר שאלות 2021",
+            "completed": true,
+            "courseCode": "314533"
+          },
+          {
+            "id": "pe_314533_2026-08-10_26",
+            "date": "2026-08-10",
+            "title": "חומרים: סימולציה מסכמת",
+            "completed": true,
+            "courseCode": "314533"
+          },
+          {
+            "id": "pe_034028_2026-08-13_27",
+            "date": "2026-08-13",
+            "title": "מוצקים: אביב 2015 מועד א",
+            "completed": true,
+            "courseCode": "034028"
+          },
+          {
+            "id": "pe_034028_2026-08-14_28",
+            "date": "2026-08-14",
+            "title": "מוצקים: אביב 2016 מועד א",
+            "completed": true,
+            "courseCode": "034028"
+          },
+          {
+            "id": "pe_034028_2026-08-14_29",
+            "date": "2026-08-14",
+            "title": "מוצקים: אביב 2018 מועד א",
+            "completed": true,
+            "courseCode": "034028"
+          },
+          {
+            "id": "pe_034028_2026-08-15_30",
+            "date": "2026-08-15",
+            "title": "מוצקים: אביב 2019 מועד ב",
+            "completed": true,
+            "courseCode": "034028"
+          },
+          {
+            "id": "pe_034028_2026-08-15_31",
+            "date": "2026-08-15",
+            "title": "מוצקים: אביב 2020 מועד א",
+            "completed": true,
+            "courseCode": "034028"
+          },
+          {
+            "id": "pe_034028_2026-08-16_32",
+            "date": "2026-08-16",
+            "title": "מוצקים: אביב 2021 מועד א",
+            "completed": true,
+            "courseCode": "034028"
+          },
+          {
+            "id": "pe_034028_2026-08-16_33",
+            "date": "2026-08-16",
+            "title": "מוצקים: אביב 2021 מועד ב",
+            "completed": true,
+            "courseCode": "034028"
+          },
+          {
+            "id": "pe_034028_2026-08-17_34",
+            "date": "2026-08-17",
+            "title": "מוצקים: אביב 2022 מועד א",
+            "completed": true,
+            "courseCode": "034028"
+          },
+          {
+            "id": "pe_034028_2026-08-17_35",
+            "date": "2026-08-17",
+            "title": "מוצקים: אביב 2022 מועד ב",
+            "completed": true,
+            "courseCode": "034028"
+          },
+          {
+            "id": "pe_034028_2026-08-17_36",
+            "date": "2026-08-17",
+            "title": "מוצקים: אביב 2023 מועד א",
+            "completed": true,
+            "courseCode": "034028"
+          },
+          {
+            "id": "pe_034028_2026-08-18_37",
+            "date": "2026-08-18",
+            "title": "מוצקים: 2023 מועד א 2",
+            "completed": true,
+            "courseCode": "034028"
+          },
+          {
+            "id": "pe_034028_2026-08-18_38",
+            "date": "2026-08-18",
+            "title": "מוצקים: אביב 2024 מועד א",
+            "completed": true,
+            "courseCode": "034028"
+          },
+          {
+            "id": "pe_034028_2026-08-18_39",
+            "date": "2026-08-18",
+            "title": "מוצקים: אביב 2025 מועד א",
+            "completed": true,
+            "courseCode": "034028"
+          },
+          {
+            "id": "pe_104043_2026-08-22_40",
+            "date": "2026-08-22",
+            "title": "חדו״א 2: אביב 2016 מועד א",
+            "completed": true,
+            "courseCode": "104043"
+          },
+          {
+            "id": "pe_104043_2026-08-23_41",
+            "date": "2026-08-23",
+            "title": "חדו״א 2: אביב 2017 מועד א",
+            "completed": true,
+            "courseCode": "104043"
+          },
+          {
+            "id": "pe_104043_2026-08-23_42",
+            "date": "2026-08-23",
+            "title": "חדו״א 2: אביב 2017 מועד ב",
+            "completed": true,
+            "courseCode": "104043"
+          },
+          {
+            "id": "pe_104043_2026-08-24_43",
+            "date": "2026-08-24",
+            "title": "חדו״א 2: אביב 2018 מועד א",
+            "completed": true,
+            "courseCode": "104043"
+          },
+          {
+            "id": "pe_104043_2026-08-24_44",
+            "date": "2026-08-24",
+            "title": "חדו״א 2: אביב 2018 מועד ב",
+            "completed": true,
+            "courseCode": "104043"
+          },
+          {
+            "id": "pe_104043_2026-08-25_45",
+            "date": "2026-08-25",
+            "title": "חדו״א 2: אביב 2019 מועד א",
+            "completed": true,
+            "courseCode": "104043"
+          },
+          {
+            "id": "pe_104043_2026-08-25_46",
+            "date": "2026-08-25",
+            "title": "חדו״א 2: אביב 2019 מועד ב",
+            "completed": true,
+            "courseCode": "104043"
+          },
+          {
+            "id": "pe_104043_2026-08-26_47",
+            "date": "2026-08-26",
+            "title": "חדו״א 2: אביב 2020 מועד א",
+            "completed": true,
+            "courseCode": "104043"
+          },
+          {
+            "id": "pe_104043_2026-08-26_48",
+            "date": "2026-08-26",
+            "title": "חדו״א 2: אביב 2020 מועד ב",
+            "completed": true,
+            "courseCode": "104043"
+          },
+          {
+            "id": "pe_104043_2026-08-27_49",
+            "date": "2026-08-27",
+            "title": "חדו״א 2: אביב 2022 מועד א",
+            "completed": true,
+            "courseCode": "104043"
+          },
+          {
+            "id": "pe_104043_2026-08-27_50",
+            "date": "2026-08-27",
+            "title": "חדו״א 2: אביב 2022 מועד ב",
+            "completed": true,
+            "courseCode": "104043"
+          },
+          {
+            "id": "pe_104043_2026-08-28_51",
+            "date": "2026-08-28",
+            "title": "חדו״א 2: אביב 2024 מועד א",
+            "completed": true,
+            "courseCode": "104043"
+          },
+          {
+            "id": "pe_104043_2026-08-28_52",
+            "date": "2026-08-28",
+            "title": "חדו״א 2: אביב 2024 מועד ב",
+            "completed": true,
+            "courseCode": "104043"
+          },
+          {
+            "id": "pe_104043_2026-08-29_53",
+            "date": "2026-08-29",
+            "title": "חדו״א 2: אביב 2025 מועד א",
+            "completed": true,
+            "courseCode": "104043"
+          },
+          {
+            "id": "pe_104043_2026-08-29_54",
+            "date": "2026-08-29",
+            "title": "חדו״א 2: אביב 2025 מועד ב",
+            "completed": true,
+            "courseCode": "104043"
+          }
+        ],
+        "moodleCalendarUrl": "https://moodle25.technion.ac.il/calendar/export_execute.php?userid=43774&authtoken=a124e33d97c0722e89374bea7fddb03632778eee&preset_what=all&preset_time=custom",
+        "semesterGuardMode": "locked",
+        "customCalendarEvents": [],
+        "currentActiveSemester": 2,
+        "hasLoadedSemesterBExcel": true,
+        "notificationPreferences": {
+          "class10Min": true,
+          "dailyBrief": true,
+          "channelPush": true,
+          "channelPhone": true,
+          "taskDeadlines": true,
+          "academicGrades": false
+        },
+        "hasLoadedGoogleCalendarAugust": true,
+        "hasLoadedGoogleCalendarAugustV3": true
+      },
+      "completedCourses": 11
+    }
+  ],
+  "degreePlan": [
+    {
+      "title": "שנה א׳ - סמסטר א׳",
+      "courses": [
+        {
+          "code": "01040041",
+          "name": "חדו\"א 1מ' 1",
+          "type": "mandatory",
+          "altCode": "104041",
+          "credits": 5,
+          "prereqs": []
+        },
+        {
+          "code": "01040065",
+          "name": "אלגברה 1 מ'",
+          "type": "mandatory",
+          "altCode": "104065",
+          "credits": 5,
+          "prereqs": []
+        },
+        {
+          "code": "01250001",
+          "name": "כימיה כללית",
+          "type": "mandatory",
+          "altCode": "125001",
+          "credits": 3,
+          "prereqs": []
+        },
+        {
+          "code": "02340128",
+          "name": "שפת פייתון",
+          "type": "mandatory",
+          "altCode": "234128",
+          "credits": 4,
+          "prereqs": []
+        },
+        {
+          "code": "01140051",
+          "altCode": "114051",
+          "name": "פיזיקה 1",
+          "credits": 3.5,
+          "type": "mandatory",
+          "variantGroupId": "physics_1",
+          "prereqs": []
+        }
+      ],
+      "semester": 1,
+      "targetCredits": 20.5
+    },
+    {
+      "title": "שנה א׳ - סמסטר ב׳",
+      "courses": [
+        {
+          "code": "00340061",
+          "name": "מבוא לגרפיקה ותכנון הנדסי",
+          "type": "mandatory",
+          "altCode": "034061",
+          "credits": 3.5,
+          "prereqs": []
+        },
+        {
+          "code": "00340028",
+          "name": "מכניקת מוצקים 1",
+          "type": "mandatory",
+          "altCode": "034028",
+          "credits": 4,
+          "prereqs": [
+            "01040041"
+          ]
+        },
+        {
+          "code": "01040043",
+          "name": "חדו\"א 2מ' 1",
+          "type": "mandatory",
+          "altCode": "104043",
+          "credits": 5,
+          "prereqs": [
+            "01040041"
+          ]
+        },
+        {
+          "code": "01040131",
+          "name": "משוואות דיפרנציאליות רגילות/ח",
+          "type": "mandatory",
+          "altCode": "104131",
+          "credits": 2.5,
+          "prereqs": [
+            "01040041",
+            "01040065"
+          ]
+        },
+        {
+          "code": "03140533",
+          "name": "מבוא להנדסת חומרים מ'",
+          "type": "mandatory",
+          "altCode": "314533",
+          "credits": 3.5,
+          "prereqs": [
+            "01250001"
+          ]
+        },
+        {
+          "code": "01250013",
+          "altCode": "125013",
+          "name": "מעבדה בכימיה",
+          "credits": 0.5,
+          "type": "mandatory",
+          "prereqs": [
+            "01250001"
+          ]
+        }
+      ],
+      "semester": 2,
+      "targetCredits": 19
+    },
+    {
+      "title": "שנה ב׳ - סמסטר ג׳ (חורף נוכחי)",
+      "courses": [
+        {
+          "code": "00340053",
+          "name": "מכניקת מוצקים 2 מורחב",
+          "type": "mandatory",
+          "altCode": "034053",
+          "credits": 5,
+          "prereqs": [
+            "00340028"
+          ]
+        },
+        {
+          "code": "01140052",
+          "name": "פיזיקה 2",
+          "type": "mandatory",
+          "altCode": "114052",
+          "credits": 3.5,
+          "prereqs": [
+            "01140051",
+            "01040043"
+          ]
+        },
+        {
+          "code": "00340056",
+          "name": "מבוא לחישוב מדעי והנדסי",
+          "type": "mandatory",
+          "altCode": "034056",
+          "credits": 4,
+          "prereqs": [
+            "02340128",
+            "01040065",
+            "01040043"
+          ]
+        },
+        {
+          "code": "00340035",
+          "name": "תרמודינמיקה 1",
+          "type": "mandatory",
+          "altCode": "034035",
+          "credits": 4,
+          "prereqs": [
+            "01040043"
+          ]
+        },
+        {
+          "code": "01040228",
+          "name": "מד\"ח מ'",
+          "type": "mandatory",
+          "altCode": "104228",
+          "credits": 3,
+          "prereqs": [
+            "01040043",
+            "01040131"
+          ]
+        },
+        {
+          "code": "03940805",
+          "altCode": "03940805",
+          "name": "חינוך גופני - אתלטיקה קלה / יוגה",
+          "credits": 1,
+          "type": "sports",
+          "prereqs": []
+        }
+      ],
+      "semester": 3,
+      "targetCredits": 20.5
+    },
+    {
+      "title": "שנה ב׳ - סמסטר ד׳ (אביב)",
+      "courses": [
+        {
+          "code": "00340030",
+          "name": "תהליכי ייצור",
+          "type": "mandatory",
+          "altCode": "034030",
+          "credits": 3.5,
+          "prereqs": [
+            "00340053",
+            "00340061",
+            "03140533"
+          ]
+        },
+        {
+          "code": "00340010",
+          "name": "דינמיקה",
+          "type": "mandatory",
+          "altCode": "034010",
+          "credits": 5,
+          "prereqs": [
+            "00340028",
+            "01140051",
+            "01040043",
+            "01040131"
+          ]
+        },
+        {
+          "code": "00340055",
+          "name": "תורת הזרימה 1 מורחב",
+          "type": "mandatory",
+          "altCode": "034055",
+          "credits": 5,
+          "prereqs": [
+            "00340035",
+            "01040131",
+            "01040228"
+          ]
+        },
+        {
+          "code": "00340032",
+          "name": "מערכות ליניאריות",
+          "type": "mandatory",
+          "altCode": "034032",
+          "credits": 4,
+          "prereqs": [
+            "01040065",
+            "01040131"
+          ]
+        }
+      ],
+      "semester": 4,
+      "targetCredits": 17.5
+    },
+    {
+      "title": "שנה ג׳ - סמסטר ה׳",
+      "courses": [
+        {
+          "code": "00340041",
+          "name": "מעבר חום",
+          "type": "mandatory",
+          "altCode": "034041",
+          "credits": 4,
+          "prereqs": [
+            "00340035",
+            "00340055",
+            "01040228"
+          ]
+        },
+        {
+          "code": "00340040",
+          "name": "מבוא לבקרה",
+          "type": "mandatory",
+          "altCode": "034040",
+          "credits": 3,
+          "prereqs": [
+            "00340032"
+          ]
+        },
+        {
+          "code": "00340054",
+          "name": "תכן מכני 1 מ'",
+          "type": "mandatory",
+          "altCode": "034054",
+          "credits": 4,
+          "prereqs": [
+            "00340053",
+            "00340061",
+            "03140533"
+          ]
+        },
+        {
+          "code": "00340058",
+          "name": "הסתברות וסטטיסטיקה מה' מכ'",
+          "type": "mandatory",
+          "altCode": "034058",
+          "credits": 3,
+          "prereqs": [
+            "01040043"
+          ]
+        },
+        {
+          "code": "01140032",
+          "name": "מעב' לפיזיקה 1 ח",
+          "type": "mandatory",
+          "altCode": "114032",
+          "credits": 1,
+          "prereqs": [
+            "01140051",
+            "01140052"
+          ]
+        },
+        {
+          "code": "00340051",
+          "name": "דינמיקה ומכניקה של תנודות",
+          "type": "mandatory",
+          "altCode": "034051",
+          "credits": 3,
+          "prereqs": [
+            "00340010",
+            "00340032"
+          ]
+        },
+        {
+          "code": "00350001",
+          "list": "B",
+          "name": "מבוא לרובוטיקה",
+          "altCode": "035001",
+          "credits": 2.5,
+          "prereqs": [
+            "00340010"
+          ]
+        },
+        {
+          "code": "03140309",
+          "list": "E",
+          "name": "תהלכי יצור ועיבוד חומרים",
+          "altCode": "314309",
+          "credits": 2.5,
+          "prereqs": [
+            "03140533"
+          ]
+        }
+      ],
+      "semester": 5,
+      "targetCredits": 18
+    },
+    {
+      "title": "שנה ג׳ - סמסטר ו׳",
+      "courses": [
+        {
+          "code": "00340060",
+          "name": "מבוא למכטרוניקה והנע חשמלי",
+          "type": "mandatory",
+          "altCode": "034060",
+          "credits": 4,
+          "prereqs": [
+            "00340032"
+          ]
+        },
+        {
+          "code": "00340057",
+          "name": "מעבדה מתקדמת הנ. מכונות",
+          "type": "mandatory",
+          "altCode": "034057",
+          "credits": 4,
+          "prereqs": [
+            "00340041",
+            "00340051",
+            "01140032"
+          ]
+        },
+        {
+          "code": "00340371",
+          "name": "פרויקט תכן לייצור",
+          "type": "mandatory",
+          "altCode": "034371",
+          "credits": 2.5,
+          "prereqs": [
+            "00340030",
+            "00340054"
+          ]
+        },
+        {
+          "code": "00340016",
+          "list": "B",
+          "name": "תכן מכני 2",
+          "altCode": "034016",
+          "credits": 3,
+          "prereqs": [
+            "00340054"
+          ]
+        },
+        {
+          "code": "00350188",
+          "list": "B",
+          "name": "תורת הבקרה",
+          "altCode": "035188",
+          "credits": 3.5,
+          "prereqs": [
+            "00340040"
+          ]
+        }
+      ],
+      "semester": 6,
+      "targetCredits": 10.5
+    },
+    {
+      "title": "שנה ד׳ - סמסטר ז׳",
+      "courses": [
+        {
+          "code": "00340379",
+          "name": "פרויקט גמר הנדסי 1",
+          "type": "final_project",
+          "altCode": "034379",
+          "credits": 3,
+          "prereqs": [
+            "00340054",
+            "00340371"
+          ]
+        },
+        {
+          "code": "00340382",
+          "name": "מתודולוגיות פיתוח הנדסי 1",
+          "type": "mandatory",
+          "altCode": "034382",
+          "credits": 0.5,
+          "prereqs": []
+        },
+        {
+          "code": "00340401",
+          "list": "C",
+          "name": "מעבדה מתקדמת לרובוטים",
+          "altCode": "034401",
+          "credits": 2.5,
+          "prereqs": [
+            "00340060"
+          ]
+        },
+        {
+          "code": "00340413",
+          "list": "C",
+          "name": "מעבדה לתכן ייצור",
+          "altCode": "034413",
+          "credits": 2,
+          "prereqs": [
+            "00340371"
+          ]
+        },
+        {
+          "code": "00350022",
+          "list": "A",
+          "name": "אלמנטים סופיים לאנליזה הנדסית",
+          "altCode": "035022",
+          "credits": 3,
+          "prereqs": [
+            "00340053",
+            "00340056"
+          ]
+        },
+        {
+          "code": "00350036",
+          "list": "E",
+          "name": "תכן מערכות בקרה",
+          "altCode": "035036",
+          "credits": 2.5,
+          "prereqs": [
+            "00340040"
+          ]
+        },
+        {
+          "code": "00360093",
+          "list": "E",
+          "name": "מכניקה של חומרים מרוכבים",
+          "altCode": "036093",
+          "credits": 3,
+          "prereqs": [
+            "00340053",
+            "03140533"
+          ]
+        }
+      ],
+      "semester": 7,
+      "targetCredits": 3.5
+    },
+    {
+      "title": "שנה ד׳ - סמסטר ח׳",
+      "courses": [
+        {
+          "code": "00340380",
+          "name": "פרויקט גמר הנדסי 2",
+          "type": "final_project",
+          "altCode": "034380",
+          "credits": 3,
+          "prereqs": [
+            "00340379"
+          ]
+        },
+        {
+          "code": "00340383",
+          "name": "מתודולוגיות פיתוח הנדסי 2",
+          "type": "mandatory",
+          "altCode": "034383",
+          "credits": 0.5,
+          "prereqs": [
+            "00340382"
+          ]
+        },
+        {
+          "code": "00360013",
+          "list": "E",
+          "name": "אופטימיזציה של תהליכים",
+          "altCode": "036013",
+          "credits": 3,
+          "prereqs": [
+            "00340056"
+          ]
+        },
+        {
+          "code": "00360001",
+          "list": "D",
+          "name": "שיטות אנליטיות 1",
+          "altCode": "036001",
+          "credits": 4,
+          "prereqs": [
+            "01040043",
+            "01040131"
+          ]
+        },
+        {
+          "code": "00340406",
+          "list": "C",
+          "name": "מעבדה מתקדמת לבקרה ואוטומציה",
+          "altCode": "034406",
+          "credits": 2.5,
+          "prereqs": [
+            "00340040"
+          ]
+        }
+      ],
+      "semester": 8,
+      "targetCredits": 3.5
+    }
+  ],
+  "bossesSlain": 11,
+  "userProfile": {
+    "phone": "053-6202662"
+  },
+  "isFinalsMode": false,
+  "lastModified": 1789657339323,
+  "pastExamsBank": {
+    "104043": {
+      "name": "חדו״א 2 (104043)",
+      "exams": [
+        {
+          "id": "exam_104043_2016_40",
+          "moed": "אביב מועד א",
+          "year": "2016",
+          "exists": true,
+          "solution": "פתרון קיים",
+          "completed": true,
+          "scheduledDate": "2026-08-22"
+        },
+        {
+          "id": "exam_104043_2017_41",
+          "moed": "אביב מועד א",
+          "year": "2017",
+          "exists": true,
+          "solution": "פתרון קיים",
+          "completed": true,
+          "scheduledDate": "2026-08-23"
+        },
+        {
+          "id": "exam_104043_2017_42",
+          "moed": "אביב מועד ב",
+          "year": "2017",
+          "exists": true,
+          "solution": "פתרון קיים",
+          "completed": true,
+          "scheduledDate": "2026-08-23"
+        },
+        {
+          "id": "exam_104043_2018_43",
+          "moed": "אביב מועד א",
+          "year": "2018",
+          "exists": true,
+          "solution": "פתרון קיים",
+          "completed": true,
+          "scheduledDate": "2026-08-24"
+        },
+        {
+          "id": "exam_104043_2018_44",
+          "moed": "אביב מועד ב",
+          "year": "2018",
+          "exists": true,
+          "solution": "פתרון קיים",
+          "completed": true,
+          "scheduledDate": "2026-08-24"
+        },
+        {
+          "id": "exam_104043_2019_45",
+          "moed": "אביב מועד א",
+          "year": "2019",
+          "exists": true,
+          "solution": "פתרון קיים",
+          "completed": true,
+          "scheduledDate": "2026-08-25"
+        },
+        {
+          "id": "exam_104043_2019_46",
+          "moed": "אביב מועד ב",
+          "year": "2019",
+          "exists": true,
+          "solution": "פתרון קיים",
+          "completed": true,
+          "scheduledDate": "2026-08-25"
+        },
+        {
+          "id": "exam_104043_2020_47",
+          "moed": "אביב מועד א",
+          "year": "2020",
+          "exists": true,
+          "solution": "פתרון קיים",
+          "completed": true,
+          "scheduledDate": "2026-08-26"
+        },
+        {
+          "id": "exam_104043_2020_48",
+          "moed": "אביב מועד ב",
+          "year": "2020",
+          "exists": true,
+          "solution": "פתרון קיים",
+          "completed": true,
+          "scheduledDate": "2026-08-26"
+        },
+        {
+          "id": "exam_104043_2022_49",
+          "moed": "אביב מועד א",
+          "year": "2022",
+          "exists": true,
+          "solution": "פתרון קיים",
+          "completed": true,
+          "scheduledDate": "2026-08-27"
+        },
+        {
+          "id": "exam_104043_2022_50",
+          "moed": "אביב מועד ב",
+          "year": "2022",
+          "exists": true,
+          "solution": "פתרון קיים",
+          "completed": true,
+          "scheduledDate": "2026-08-27"
+        },
+        {
+          "id": "exam_104043_2024_51",
+          "moed": "אביב מועד א",
+          "year": "2024",
+          "exists": true,
+          "solution": "פתרון קיים",
+          "completed": true,
+          "scheduledDate": "2026-08-28"
+        },
+        {
+          "id": "exam_104043_2024_52",
+          "moed": "אביב מועד ב",
+          "year": "2024",
+          "exists": true,
+          "solution": "פתרון קיים",
+          "completed": true,
+          "scheduledDate": "2026-08-28"
+        },
+        {
+          "id": "exam_104043_2025_53",
+          "moed": "אביב מועד א",
+          "year": "2025",
+          "exists": true,
+          "solution": "פתרון קיים",
+          "completed": true,
+          "scheduledDate": "2026-08-29"
+        },
+        {
+          "id": "exam_104043_2025_54",
+          "moed": "אביב מועד ב",
+          "year": "2025",
+          "exists": true,
+          "solution": "פתרון קיים",
+          "completed": true,
+          "scheduledDate": "2026-08-29"
+        }
+      ],
+      "examDate": "2026-08-05",
+      "earliestYear": 2015,
+      "studyStartDate": "2026-08-05"
+    },
+    "104131": {
+      "name": "מד״ר (104131)",
+      "exams": [
+        {
+          "id": "exam_104131_2020_0",
+          "moed": "חורף מועד א",
+          "year": "2020",
+          "exists": true,
+          "solution": "פתרון קיים",
+          "completed": true,
+          "scheduledDate": "2026-08-05"
+        },
+        {
+          "id": "exam_104131_2023_1",
+          "moed": "אביב מועד א",
+          "year": "2023",
+          "exists": true,
+          "solution": "פתרון קיים",
+          "completed": true,
+          "scheduledDate": "2026-08-06"
+        },
+        {
+          "id": "exam_104131_2015_2",
+          "moed": "חורף מועד א",
+          "year": "2015",
+          "exists": true,
+          "solution": "פתרון קיים",
+          "completed": true,
+          "scheduledDate": "2026-08-06"
+        },
+        {
+          "id": "exam_104131_2022_3",
+          "moed": "חורף מועד ב",
+          "year": "2022",
+          "exists": true,
+          "solution": "פתרון קיים",
+          "completed": true,
+          "scheduledDate": "2026-08-06"
+        },
+        {
+          "id": "exam_104131_2023_4",
+          "moed": "אביב מועד ב",
+          "year": "2023",
+          "exists": true,
+          "solution": "פתרון קיים",
+          "completed": true,
+          "scheduledDate": "2026-08-07"
+        },
+        {
+          "id": "exam_104131_2018_5",
+          "moed": "חורף מועד א",
+          "year": "2018",
+          "exists": true,
+          "solution": "פתרון קיים",
+          "completed": true,
+          "scheduledDate": "2026-08-07"
+        },
+        {
+          "id": "exam_104131_2018_6",
+          "moed": "חורף מועד ב",
+          "year": "2018",
+          "exists": true,
+          "solution": "פתרון קיים",
+          "completed": true,
+          "scheduledDate": "2026-08-07"
+        },
+        {
+          "id": "exam_104131_2024_7",
+          "moed": "אביב מועד ב",
+          "year": "2024",
+          "exists": true,
+          "solution": "פתרון קיים",
+          "completed": true,
+          "scheduledDate": "2026-08-11"
+        },
+        {
+          "id": "exam_104131_2022_8",
+          "moed": "חורף מועד א",
+          "year": "2022",
+          "exists": true,
+          "solution": "פתרון קיים",
+          "completed": true,
+          "scheduledDate": "2026-08-11"
+        },
+        {
+          "id": "exam_104131_2024_9",
+          "moed": "אביב מועד א",
+          "year": "2024",
+          "exists": true,
+          "solution": "פתרון קיים",
+          "completed": true,
+          "scheduledDate": "2026-08-11"
+        },
+        {
+          "id": "exam_104131_2025_10",
+          "moed": "חורף מועד א",
+          "year": "2025",
+          "exists": true,
+          "solution": "פתרון קיים",
+          "completed": true,
+          "scheduledDate": "2026-08-12"
+        },
+        {
+          "id": "exam_104131_2026_11",
+          "moed": "חורף מועד א",
+          "year": "2026",
+          "exists": true,
+          "solution": "פתרון קיים",
+          "completed": true,
+          "scheduledDate": "2026-08-12"
+        },
+        {
+          "id": "exam_104131_2026_12",
+          "moed": "חורף מועד ב",
+          "year": "2026",
+          "exists": true,
+          "solution": "פתרון קיים",
+          "completed": true,
+          "scheduledDate": "2026-08-12"
+        },
+        {
+          "id": "exam_104131_2021_13",
+          "moed": "חורף מועד א",
+          "year": "2021",
+          "exists": true,
+          "solution": "פתרון קיים",
+          "completed": true,
+          "scheduledDate": "2026-08-12"
+        }
+      ],
+      "examDate": "2026-08-13",
+      "earliestYear": 2015,
+      "studyStartDate": "2026-08-05"
+    },
+    "104228": {
+      "name": "משוואות דיפרנציאליות חלקיות מ' (104228)",
+      "exams": [
+        {
+          "id": "exam_104228_2024_1",
+          "moed": "חורף מועד א",
+          "year": "2024",
+          "exists": true,
+          "solution": "פתרון קיים",
+          "completed": false,
+          "scheduledDate": ""
+        },
+        {
+          "id": "exam_104228_2024_2",
+          "moed": "חורף מועד ב",
+          "year": "2024",
+          "exists": true,
+          "solution": "פתרון קיים",
+          "completed": false,
+          "scheduledDate": ""
+        },
+        {
+          "id": "exam_104228_2023_1",
+          "moed": "חורף מועד א",
+          "year": "2023",
+          "exists": true,
+          "solution": "פתרון קיים",
+          "completed": false,
+          "scheduledDate": ""
+        },
+        {
+          "id": "exam_104228_2023_2",
+          "moed": "חורף מועד ב",
+          "year": "2023",
+          "exists": true,
+          "solution": "פתרון קיים",
+          "completed": false,
+          "scheduledDate": ""
+        }
+      ],
+      "examDate": "2027-02-24",
+      "moedBDate": "2027-03-26",
+      "earliestYear": 2018,
+      "studyStartDate": "2027-02-24"
+    },
+    "114052": {
+      "name": "פיסיקה 2 (114052)",
+      "exams": [
+        {
+          "id": "exam_114052_2024_1",
+          "moed": "חורף מועד א",
+          "year": "2024",
+          "exists": true,
+          "solution": "פתרון קיים",
+          "completed": false,
+          "scheduledDate": ""
+        },
+        {
+          "id": "exam_114052_2024_2",
+          "moed": "חורף מועד ב",
+          "year": "2024",
+          "exists": true,
+          "solution": "פתרון קיים",
+          "completed": false,
+          "scheduledDate": ""
+        },
+        {
+          "id": "exam_114052_2023_1",
+          "moed": "חורף מועד א",
+          "year": "2023",
+          "exists": true,
+          "solution": "פתרון קיים",
+          "completed": false,
+          "scheduledDate": ""
+        },
+        {
+          "id": "exam_114052_2023_2",
+          "moed": "חורף מועד ב",
+          "year": "2023",
+          "exists": true,
+          "solution": "פתרון קיים",
+          "completed": false,
+          "scheduledDate": ""
+        }
+      ],
+      "examDate": "2027-02-01",
+      "moedBDate": "2027-03-02",
+      "earliestYear": 2018,
+      "studyStartDate": "2027-02-01"
+    },
+    "314533": {
+      "name": "הנדסת חומרים (314533)",
+      "exams": [
+        {
+          "id": "exam_314533_2019_14",
+          "moed": "קיץ מועד א",
+          "year": "2019",
+          "exists": true,
+          "solution": "פתרון קיים",
+          "completed": true,
+          "scheduledDate": "2026-08-08"
+        },
+        {
+          "id": "exam_314533_2021_15",
+          "moed": "אביב מועד ג",
+          "year": "2021",
+          "exists": true,
+          "solution": "פתרון קיים",
+          "completed": true,
+          "scheduledDate": "2026-08-08"
+        },
+        {
+          "id": "exam_314533_2022_16",
+          "moed": "אביב מועד א",
+          "year": "2022",
+          "exists": true,
+          "solution": "פתרון קיים",
+          "completed": true,
+          "scheduledDate": "2026-08-08"
+        },
+        {
+          "id": "exam_314533_2018_17",
+          "moed": "מועד א (נייר)",
+          "year": "2018",
+          "exists": true,
+          "solution": "פתרון קיים",
+          "completed": true,
+          "scheduledDate": "2026-08-09"
+        },
+        {
+          "id": "exam_314533_2024_18",
+          "moed": "אביב מועד א",
+          "year": "2024",
+          "exists": true,
+          "solution": "פתרון קיים",
+          "completed": true,
+          "scheduledDate": "2026-08-09"
+        },
+        {
+          "id": "exam_314533_2024_19",
+          "moed": "אביב מועד ב",
+          "year": "2024",
+          "exists": true,
+          "solution": "פתרון קיים",
+          "completed": true,
+          "scheduledDate": "2026-08-09"
+        },
+        {
+          "id": "exam_314533_2022_20",
+          "moed": "מאגר שאלות",
+          "year": "2022",
+          "exists": true,
+          "solution": "פתרון קיים",
+          "completed": true,
+          "scheduledDate": "2026-08-09"
+        },
+        {
+          "id": "exam_314533_2022_21",
+          "moed": "מאגר שאלות נוסף",
+          "year": "2022",
+          "exists": true,
+          "solution": "פתרון קיים",
+          "completed": true,
+          "scheduledDate": "2026-08-09"
+        },
+        {
+          "id": "exam_314533_2018_22",
+          "moed": "מועד ב (נייר)",
+          "year": "2018",
+          "exists": true,
+          "solution": "פתרון קיים",
+          "completed": true,
+          "scheduledDate": "2026-08-10"
+        },
+        {
+          "id": "exam_314533_2025_23",
+          "moed": "אביב מועד א",
+          "year": "2025",
+          "exists": true,
+          "solution": "פתרון קיים",
+          "completed": true,
+          "scheduledDate": "2026-08-10"
+        },
+        {
+          "id": "exam_314533_2025_24",
+          "moed": "אביב מועד ב",
+          "year": "2025",
+          "exists": true,
+          "solution": "פתרון קיים",
+          "completed": true,
+          "scheduledDate": "2026-08-10"
+        },
+        {
+          "id": "exam_314533_2021_25",
+          "moed": "מאגר שאלות",
+          "year": "2021",
+          "exists": true,
+          "solution": "פתרון קיים",
+          "completed": true,
+          "scheduledDate": "2026-08-10"
+        },
+        {
+          "id": "exam_314533_2026_26",
+          "moed": "סימולציה מסכמת",
+          "year": "2026",
+          "exists": true,
+          "solution": "פתרון קיים",
+          "completed": true,
+          "scheduledDate": "2026-08-10"
+        }
+      ],
+      "examDate": "2026-08-11",
+      "earliestYear": 2015,
+      "studyStartDate": "2026-08-05"
+    },
+    "034028": {
+      "name": "מכניקת מוצקים 1 (034028)",
+      "exams": [
+        {
+          "id": "exam_034028_2015_27",
+          "moed": "אביב מועד א",
+          "year": "2015",
+          "exists": true,
+          "solution": "פתרון קיים",
+          "completed": true,
+          "scheduledDate": "2026-08-13"
+        },
+        {
+          "id": "exam_034028_2016_28",
+          "moed": "אביב מועד א",
+          "year": "2016",
+          "exists": true,
+          "solution": "פתרון קיים",
+          "completed": true,
+          "scheduledDate": "2026-08-14"
+        },
+        {
+          "id": "exam_034028_2018_29",
+          "moed": "אביב מועד א",
+          "year": "2018",
+          "exists": true,
+          "solution": "פתרון קיים",
+          "completed": true,
+          "scheduledDate": "2026-08-14"
+        },
+        {
+          "id": "exam_034028_2019_30",
+          "moed": "אביב מועד ב",
+          "year": "2019",
+          "exists": true,
+          "solution": "פתרון קיים",
+          "completed": true,
+          "scheduledDate": "2026-08-15"
+        },
+        {
+          "id": "exam_034028_2020_31",
+          "moed": "אביב מועד א",
+          "year": "2020",
+          "exists": true,
+          "solution": "פתרון קיים",
+          "completed": true,
+          "scheduledDate": "2026-08-15"
+        },
+        {
+          "id": "exam_034028_2021_32",
+          "moed": "אביב מועד א",
+          "year": "2021",
+          "exists": true,
+          "solution": "פתרון קיים",
+          "completed": true,
+          "scheduledDate": "2026-08-16"
+        },
+        {
+          "id": "exam_034028_2021_33",
+          "moed": "אביב מועד ב",
+          "year": "2021",
+          "exists": true,
+          "solution": "פתרון קיים",
+          "completed": true,
+          "scheduledDate": "2026-08-16"
+        },
+        {
+          "id": "exam_034028_2022_34",
+          "moed": "אביב מועד א",
+          "year": "2022",
+          "exists": true,
+          "solution": "פתרון קיים",
+          "completed": true,
+          "scheduledDate": "2026-08-17"
+        },
+        {
+          "id": "exam_034028_2022_35",
+          "moed": "אביב מועד ב",
+          "year": "2022",
+          "exists": true,
+          "solution": "פתרון קיים",
+          "completed": true,
+          "scheduledDate": "2026-08-17"
+        },
+        {
+          "id": "exam_034028_2023_36",
+          "moed": "אביב מועד א",
+          "year": "2023",
+          "exists": true,
+          "solution": "פתרון קיים",
+          "completed": true,
+          "scheduledDate": "2026-08-17"
+        },
+        {
+          "id": "exam_034028_2023_37",
+          "moed": "מועד א 2",
+          "year": "2023",
+          "exists": true,
+          "solution": "פתרון קיים",
+          "completed": true,
+          "scheduledDate": "2026-08-18"
+        },
+        {
+          "id": "exam_034028_2024_38",
+          "moed": "אביב מועד א",
+          "year": "2024",
+          "exists": true,
+          "solution": "פתרון קיים",
+          "completed": true,
+          "scheduledDate": "2026-08-18"
+        },
+        {
+          "id": "exam_034028_2025_39",
+          "moed": "אביב מועד א",
+          "year": "2025",
+          "exists": true,
+          "solution": "פתרון קיים",
+          "completed": true,
+          "scheduledDate": "2026-08-18"
+        }
+      ],
+      "examDate": "2026-08-19",
+      "earliestYear": 2015,
+      "studyStartDate": "2026-08-05"
+    },
+    "034035": {
+      "name": "תרמודינמיקה 1 (034035)",
+      "exams": [
+        {
+          "id": "exam_034035_2024_1",
+          "moed": "חורף מועד א",
+          "year": "2024",
+          "exists": true,
+          "solution": "פתרון קיים",
+          "completed": false,
+          "scheduledDate": ""
+        },
+        {
+          "id": "exam_034035_2024_2",
+          "moed": "חורף מועד ב",
+          "year": "2024",
+          "exists": true,
+          "solution": "פתרון קיים",
+          "completed": false,
+          "scheduledDate": ""
+        },
+        {
+          "id": "exam_034035_2023_1",
+          "moed": "חורף מועד א",
+          "year": "2023",
+          "exists": true,
+          "solution": "פתרון קיים",
+          "completed": false,
+          "scheduledDate": ""
+        },
+        {
+          "id": "exam_034035_2023_2",
+          "moed": "חורף מועד ב",
+          "year": "2023",
+          "exists": true,
+          "solution": "פתרון קיים",
+          "completed": false,
+          "scheduledDate": ""
+        }
+      ],
+      "examDate": "2027-02-07",
+      "moedBDate": "2027-03-05",
+      "earliestYear": 2018,
+      "studyStartDate": "2027-02-07"
+    },
+    "034053": {
+      "name": "מכניקת מוצקים 2מ (034053)",
+      "exams": [
+        {
+          "id": "exam_034053_2024_1",
+          "moed": "חורף מועד א",
+          "year": "2024",
+          "exists": true,
+          "solution": "פתרון קיים",
+          "completed": false,
+          "scheduledDate": ""
+        },
+        {
+          "id": "exam_034053_2024_2",
+          "moed": "חורף מועד ב",
+          "year": "2024",
+          "exists": true,
+          "solution": "פתרון קיים",
+          "completed": false,
+          "scheduledDate": ""
+        },
+        {
+          "id": "exam_034053_2023_1",
+          "moed": "חורף מועד א",
+          "year": "2023",
+          "exists": true,
+          "solution": "פתרון קיים",
+          "completed": false,
+          "scheduledDate": ""
+        },
+        {
+          "id": "exam_034053_2023_2",
+          "moed": "חורף מועד ב",
+          "year": "2023",
+          "exists": true,
+          "solution": "פתרון קיים",
+          "completed": false,
+          "scheduledDate": ""
+        }
+      ],
+      "examDate": "2027-02-18",
+      "moedBDate": "2027-03-18",
+      "earliestYear": 2018,
+      "studyStartDate": "2027-02-18"
+    },
+    "034056": {
+      "name": "מבוא לחישוב מדעי והנדסי (034056)",
+      "exams": [
+        {
+          "id": "exam_034056_2024_1",
+          "moed": "חורף מועד א",
+          "year": "2024",
+          "exists": true,
+          "solution": "פתרון קיים",
+          "completed": false,
+          "scheduledDate": ""
+        },
+        {
+          "id": "exam_034056_2024_2",
+          "moed": "חורף מועד ב",
+          "year": "2024",
+          "exists": true,
+          "solution": "פתרון קיים",
+          "completed": false,
+          "scheduledDate": ""
+        },
+        {
+          "id": "exam_034056_2023_1",
+          "moed": "חורף מועד א",
+          "year": "2023",
+          "exists": true,
+          "solution": "פתרון קיים",
+          "completed": false,
+          "scheduledDate": ""
+        },
+        {
+          "id": "exam_034056_2023_2",
+          "moed": "חורף מועד ב",
+          "year": "2023",
+          "exists": true,
+          "solution": "פתרון קיים",
+          "completed": false,
+          "scheduledDate": ""
+        }
+      ],
+      "examDate": "2027-02-11",
+      "moedBDate": "2027-03-10",
+      "earliestYear": 2018,
+      "studyStartDate": "2027-02-11"
+    }
+  },
+  "characterClass": "סטודנט להנדסת מכונות",
+  "removedCourses": [
+    "035044",
+    "324033",
+    "03240033",
+    "035026",
+    "35026",
+    "114071",
+    "114075"
+  ],
+  "completedCourses": 11,
+  "pastExamSchedule": [
+    {
+      "id": "pe_104131_2026-08-05_0",
+      "date": "2026-08-05",
+      "title": "מד״ר: חורף 2020 מועד א",
+      "completed": true,
+      "courseCode": "104131"
+    },
+    {
+      "id": "pe_104131_2026-08-06_1",
+      "date": "2026-08-06",
+      "title": "מד״ר: אביב 2023 מועד א",
+      "completed": true,
+      "courseCode": "104131"
+    },
+    {
+      "id": "pe_104131_2026-08-06_2",
+      "date": "2026-08-06",
+      "title": "מד״ר: חורף 2015 מועד א",
+      "completed": true,
+      "courseCode": "104131"
+    },
+    {
+      "id": "pe_104131_2026-08-06_3",
+      "date": "2026-08-06",
+      "title": "מד״ר: חורף 2022 מועד ב",
+      "completed": true,
+      "courseCode": "104131"
+    },
+    {
+      "id": "pe_104131_2026-08-07_4",
+      "date": "2026-08-07",
+      "title": "מד״ר: אביב 2023 מועד ב",
+      "completed": true,
+      "courseCode": "104131"
+    },
+    {
+      "id": "pe_104131_2026-08-07_5",
+      "date": "2026-08-07",
+      "title": "מד״ר: חורף 2018 מועד א",
+      "completed": true,
+      "courseCode": "104131"
+    },
+    {
+      "id": "pe_104131_2026-08-07_6",
+      "date": "2026-08-07",
+      "title": "מד״ר: חורף 2018 מועד ב",
+      "completed": true,
+      "courseCode": "104131"
+    },
+    {
+      "id": "pe_104131_2026-08-11_7",
+      "date": "2026-08-11",
+      "title": "מד״ר: אביב 2024 מועד ב",
+      "completed": true,
+      "courseCode": "104131"
+    },
+    {
+      "id": "pe_104131_2026-08-11_8",
+      "date": "2026-08-11",
+      "title": "מד״ר: חורף 2022 מועד א",
+      "completed": true,
+      "courseCode": "104131"
+    },
+    {
+      "id": "pe_104131_2026-08-11_9",
+      "date": "2026-08-11",
+      "title": "מד״ר: אביב 2024 מועד א",
+      "completed": true,
+      "courseCode": "104131"
+    },
+    {
+      "id": "pe_104131_2026-08-12_10",
+      "date": "2026-08-12",
+      "title": "מד״ר: חורף 2025 מועד א",
+      "completed": true,
+      "courseCode": "104131"
+    },
+    {
+      "id": "pe_104131_2026-08-12_11",
+      "date": "2026-08-12",
+      "title": "מד״ר: חורף 2026 מועד א",
+      "completed": true,
+      "courseCode": "104131"
+    },
+    {
+      "id": "pe_104131_2026-08-12_12",
+      "date": "2026-08-12",
+      "title": "מד״ר: חורף 2026 מועד ב",
+      "completed": true,
+      "courseCode": "104131"
+    },
+    {
+      "id": "pe_104131_2026-08-12_13",
+      "date": "2026-08-12",
+      "title": "מד״ר: חורף 2021 מועד א",
+      "completed": true,
+      "courseCode": "104131"
+    },
+    {
+      "id": "pe_314533_2026-08-08_14",
+      "date": "2026-08-08",
+      "title": "חומרים: 2019 קיץ א",
+      "completed": true,
+      "courseCode": "314533"
+    },
+    {
+      "id": "pe_314533_2026-08-08_15",
+      "date": "2026-08-08",
+      "title": "חומרים: אביב 2021 מועד ג",
+      "completed": true,
+      "courseCode": "314533"
+    },
+    {
+      "id": "pe_314533_2026-08-08_16",
+      "date": "2026-08-08",
+      "title": "חומרים: אביב 2022 מועד א",
+      "completed": true,
+      "courseCode": "314533"
+    },
+    {
+      "id": "pe_314533_2026-08-09_17",
+      "date": "2026-08-09",
+      "title": "חומרים: 2018 מועד א (נייר)",
+      "completed": true,
+      "courseCode": "314533"
+    },
+    {
+      "id": "pe_314533_2026-08-09_18",
+      "date": "2026-08-09",
+      "title": "חומרים: אביב 2024 מועד א",
+      "completed": true,
+      "courseCode": "314533"
+    },
+    {
+      "id": "pe_314533_2026-08-09_19",
+      "date": "2026-08-09",
+      "title": "חומרים: אביב 2024 מועד ב",
+      "completed": true,
+      "courseCode": "314533"
+    },
+    {
+      "id": "pe_314533_2026-08-09_20",
+      "date": "2026-08-09",
+      "title": "חומרים: מאגר שאלות 2022",
+      "completed": true,
+      "courseCode": "314533"
+    },
+    {
+      "id": "pe_314533_2026-08-09_21",
+      "date": "2026-08-09",
+      "title": "חומרים: מאגר שאלות נוסף",
+      "completed": true,
+      "courseCode": "314533"
+    },
+    {
+      "id": "pe_314533_2026-08-10_22",
+      "date": "2026-08-10",
+      "title": "חומרים: 2018 מועד ב (נייר)",
+      "completed": true,
+      "courseCode": "314533"
+    },
+    {
+      "id": "pe_314533_2026-08-10_23",
+      "date": "2026-08-10",
+      "title": "חומרים: אביב 2025 מועד א",
+      "completed": true,
+      "courseCode": "314533"
+    },
+    {
+      "id": "pe_314533_2026-08-10_24",
+      "date": "2026-08-10",
+      "title": "חומרים: אביב 2025 מועד ב",
+      "completed": true,
+      "courseCode": "314533"
+    },
+    {
+      "id": "pe_314533_2026-08-10_25",
+      "date": "2026-08-10",
+      "title": "חומרים: מאגר שאלות 2021",
+      "completed": true,
+      "courseCode": "314533"
+    },
+    {
+      "id": "pe_314533_2026-08-10_26",
+      "date": "2026-08-10",
+      "title": "חומרים: סימולציה מסכמת",
+      "completed": true,
+      "courseCode": "314533"
+    },
+    {
+      "id": "pe_034028_2026-08-13_27",
+      "date": "2026-08-13",
+      "title": "מוצקים: אביב 2015 מועד א",
+      "completed": true,
+      "courseCode": "034028"
+    },
+    {
+      "id": "pe_034028_2026-08-14_28",
+      "date": "2026-08-14",
+      "title": "מוצקים: אביב 2016 מועד א",
+      "completed": true,
+      "courseCode": "034028"
+    },
+    {
+      "id": "pe_034028_2026-08-14_29",
+      "date": "2026-08-14",
+      "title": "מוצקים: אביב 2018 מועד א",
+      "completed": true,
+      "courseCode": "034028"
+    },
+    {
+      "id": "pe_034028_2026-08-15_30",
+      "date": "2026-08-15",
+      "title": "מוצקים: אביב 2019 מועד ב",
+      "completed": true,
+      "courseCode": "034028"
+    },
+    {
+      "id": "pe_034028_2026-08-15_31",
+      "date": "2026-08-15",
+      "title": "מוצקים: אביב 2020 מועד א",
+      "completed": true,
+      "courseCode": "034028"
+    },
+    {
+      "id": "pe_034028_2026-08-16_32",
+      "date": "2026-08-16",
+      "title": "מוצקים: אביב 2021 מועד א",
+      "completed": true,
+      "courseCode": "034028"
+    },
+    {
+      "id": "pe_034028_2026-08-16_33",
+      "date": "2026-08-16",
+      "title": "מוצקים: אביב 2021 מועד ב",
+      "completed": true,
+      "courseCode": "034028"
+    },
+    {
+      "id": "pe_034028_2026-08-17_34",
+      "date": "2026-08-17",
+      "title": "מוצקים: אביב 2022 מועד א",
+      "completed": true,
+      "courseCode": "034028"
+    },
+    {
+      "id": "pe_034028_2026-08-17_35",
+      "date": "2026-08-17",
+      "title": "מוצקים: אביב 2022 מועד ב",
+      "completed": true,
+      "courseCode": "034028"
+    },
+    {
+      "id": "pe_034028_2026-08-17_36",
+      "date": "2026-08-17",
+      "title": "מוצקים: אביב 2023 מועד א",
+      "completed": true,
+      "courseCode": "034028"
+    },
+    {
+      "id": "pe_034028_2026-08-18_37",
+      "date": "2026-08-18",
+      "title": "מוצקים: 2023 מועד א 2",
+      "completed": true,
+      "courseCode": "034028"
+    },
+    {
+      "id": "pe_034028_2026-08-18_38",
+      "date": "2026-08-18",
+      "title": "מוצקים: אביב 2024 מועד א",
+      "completed": true,
+      "courseCode": "034028"
+    },
+    {
+      "id": "pe_034028_2026-08-18_39",
+      "date": "2026-08-18",
+      "title": "מוצקים: אביב 2025 מועד א",
+      "completed": true,
+      "courseCode": "034028"
+    },
+    {
+      "id": "pe_104043_2026-08-22_40",
+      "date": "2026-08-22",
+      "title": "חדו״א 2: אביב 2016 מועד א",
+      "completed": true,
+      "courseCode": "104043"
+    },
+    {
+      "id": "pe_104043_2026-08-23_41",
+      "date": "2026-08-23",
+      "title": "חדו״א 2: אביב 2017 מועד א",
+      "completed": true,
+      "courseCode": "104043"
+    },
+    {
+      "id": "pe_104043_2026-08-23_42",
+      "date": "2026-08-23",
+      "title": "חדו״א 2: אביב 2017 מועד ב",
+      "completed": true,
+      "courseCode": "104043"
+    },
+    {
+      "id": "pe_104043_2026-08-24_43",
+      "date": "2026-08-24",
+      "title": "חדו״א 2: אביב 2018 מועד א",
+      "completed": true,
+      "courseCode": "104043"
+    },
+    {
+      "id": "pe_104043_2026-08-24_44",
+      "date": "2026-08-24",
+      "title": "חדו״א 2: אביב 2018 מועד ב",
+      "completed": true,
+      "courseCode": "104043"
+    },
+    {
+      "id": "pe_104043_2026-08-25_45",
+      "date": "2026-08-25",
+      "title": "חדו״א 2: אביב 2019 מועד א",
+      "completed": true,
+      "courseCode": "104043"
+    },
+    {
+      "id": "pe_104043_2026-08-25_46",
+      "date": "2026-08-25",
+      "title": "חדו״א 2: אביב 2019 מועד ב",
+      "completed": true,
+      "courseCode": "104043"
+    },
+    {
+      "id": "pe_104043_2026-08-26_47",
+      "date": "2026-08-26",
+      "title": "חדו״א 2: אביב 2020 מועד א",
+      "completed": true,
+      "courseCode": "104043"
+    },
+    {
+      "id": "pe_104043_2026-08-26_48",
+      "date": "2026-08-26",
+      "title": "חדו״א 2: אביב 2020 מועד ב",
+      "completed": true,
+      "courseCode": "104043"
+    },
+    {
+      "id": "pe_104043_2026-08-27_49",
+      "date": "2026-08-27",
+      "title": "חדו״א 2: אביב 2022 מועד א",
+      "completed": true,
+      "courseCode": "104043"
+    },
+    {
+      "id": "pe_104043_2026-08-27_50",
+      "date": "2026-08-27",
+      "title": "חדו״א 2: אביב 2022 מועד ב",
+      "completed": true,
+      "courseCode": "104043"
+    },
+    {
+      "id": "pe_104043_2026-08-28_51",
+      "date": "2026-08-28",
+      "title": "חדו״א 2: אביב 2024 מועד א",
+      "completed": true,
+      "courseCode": "104043"
+    },
+    {
+      "id": "pe_104043_2026-08-28_52",
+      "date": "2026-08-28",
+      "title": "חדו״א 2: אביב 2024 מועד ב",
+      "completed": true,
+      "courseCode": "104043"
+    },
+    {
+      "id": "pe_104043_2026-08-29_53",
+      "date": "2026-08-29",
+      "title": "חדו״א 2: אביב 2025 מועד א",
+      "completed": true,
+      "courseCode": "104043"
+    },
+    {
+      "id": "pe_104043_2026-08-29_54",
+      "date": "2026-08-29",
+      "title": "חדו״א 2: אביב 2025 מועד ב",
+      "completed": true,
+      "courseCode": "104043"
+    }
+  ],
+  "moodleCalendarUrl": "https://moodle25.technion.ac.il/calendar/export_execute.php?userid=43774&authtoken=a124e33d97c0722e89374bea7fddb03632778eee&preset_what=all&preset_time=custom",
+  "semesterGuardMode": "locked",
+  "customCalendarEvents": [],
+  "degreePlanUnassigned": [],
+  "currentActiveSemester": 3,
+  "hasLoadedSemesterBExcel": true,
+  "notificationPreferences": {
+    "class10Min": true,
+    "dailyBrief": true,
+    "channelPush": true,
+    "channelPhone": true,
+    "taskDeadlines": true,
+    "academicGrades": false
+  },
+  "hasLoadedGoogleCalendarAugust": true,
+  "hasLoadedGoogleCalendarAugustV3": true
+};
+
+    window.PRELOADED_USER_STATE = PRELOADED_USER_STATE;
+    if (typeof global !== 'undefined') {
+        global.PRELOADED_USER_STATE = PRELOADED_USER_STATE;
+    }
+    if (typeof module !== 'undefined') {
+        module.exports = { PRELOADED_USER_STATE };
+    }
+})(typeof window !== 'undefined' ? window : global);

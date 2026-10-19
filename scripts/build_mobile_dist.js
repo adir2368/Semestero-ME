@@ -19,6 +19,7 @@ fs.mkdirSync(WWW, { recursive: true });
 const FILES_TO_COPY = [
     'index.html',
     'app.js',
+    'preloaded_user_state.js',
     'styles.css',
     'planner_module.js',
     'planner_catalog.js',

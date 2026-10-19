@@ -28,9 +28,14 @@
         }
     };
 
-    // Check if this device already has Adir's personal save file (developer PC only)
+    function isCapacitorOrNative() {
+        return typeof window !== 'undefined' && !!(window.Capacitor || window.location.protocol === 'capacitor:');
+    }
+
+    // Check if this device already has Adir's personal save file (developer PC or native mobile app)
     function hasAdirLocalData() {
         try {
+            if (isCapacitorOrNative()) return true;
             if (localStorage.getItem('ast_profile_adir_moshe')) return true;
             if (localStorage.getItem(SESSION_USER_KEY) === 'adir_moshe') return true;
             if (localStorage.getItem('ast_is_developer_device') === 'true') return true;
@@ -43,6 +48,18 @@
         init() {
             let sessionUser = localStorage.getItem(SESSION_USER_KEY);
 
+            // On native Capacitor APK, ensure Adir Moshe developer session is always initialized
+            if (isCapacitorOrNative()) {
+                try {
+                    localStorage.setItem('ast_is_developer_device', 'true');
+                    localStorage.setItem('ast_profile_adir_moshe', 'true');
+                    if (sessionUser !== 'adir_moshe') {
+                        sessionUser = 'adir_moshe';
+                        localStorage.setItem(SESSION_USER_KEY, 'adir_moshe');
+                    }
+                } catch (e) {}
+            }
+
             // Auto-login on Adir's existing developer PC ONLY if explicit developer marker exists
             if (sessionUser === null && hasAdirLocalData()) {
                 sessionUser = 'adir_moshe';
@@ -50,7 +67,7 @@
             }
 
             // Guard against accidental auto-assignment of adir_moshe to fresh guests
-            if (sessionUser === 'adir_moshe' && !localStorage.getItem('ast_profile_adir_moshe') && !localStorage.getItem('ast_is_developer_device')) {
+            if (sessionUser === 'adir_moshe' && !isCapacitorOrNative() && !localStorage.getItem('ast_profile_adir_moshe') && !localStorage.getItem('ast_is_developer_device')) {
                 if (localStorage.getItem('ast_onboarding_shown') !== 'true') {
                     console.warn('[AuthSync] Resetting accidental developer session to guest for clean visitor.');
                     sessionUser = 'guest';
@@ -159,6 +176,7 @@
 
         // Check if active account is Adir Moshe
         isAdirActive() {
+            if (isCapacitorOrNative()) return true;
             return this.isLoggedIn() && this.getActiveUser().id === 'adir_moshe';
         },
 

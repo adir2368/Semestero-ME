@@ -2809,7 +2809,7 @@ function runMockMoodleSync() {
 }
 
 
-const PRELOADED_USER_STATE = {
+const PRELOADED_USER_STATE = (typeof window !== 'undefined' && window.PRELOADED_USER_STATE) ? window.PRELOADED_USER_STATE : {
   "xp": 1250,
   "gpa": 86.39240506329114,
   "level": 6,
@@ -8618,6 +8618,10 @@ const PRELOADED_USER_STATE = {
   "hasLoadedGoogleCalendarAugustV3": true
 };
 
+if (typeof window !== 'undefined') {
+    window.PRELOADED_USER_STATE = window.PRELOADED_USER_STATE || PRELOADED_USER_STATE;
+}
+
 const AUGUST_2026_SCHEDULE = [];
 const AUGUST_2026_PERSONAL_EVENTS = [];
 
@@ -8962,21 +8966,22 @@ function loadSavedState() {
             console.log("[AuthSync] Loaded active user state successfully for:", window.AuthSync.getActiveUser().name);
 
             // Auto-upgrade if local save is missing courses or removedCourses compared to PRELOADED_USER_STATE (Adir only)
-            const isAdirActiveUser = (window.AuthSync && typeof window.AuthSync.isAdirActive === 'function' && window.AuthSync.isAdirActive());
-            if (isAdirActiveUser && typeof PRELOADED_USER_STATE !== 'undefined' && PRELOADED_USER_STATE.courses) {
-                const preloadedCount = Object.keys(PRELOADED_USER_STATE.courses).length;
+            const preloadedUserState = (typeof window !== 'undefined' && window.PRELOADED_USER_STATE) || (typeof PRELOADED_USER_STATE !== 'undefined' ? PRELOADED_USER_STATE : null);
+            const isAdirActiveUser = (window.AuthSync && typeof window.AuthSync.isAdirActive === 'function' && window.AuthSync.isAdirActive()) || (typeof window !== 'undefined' && (window.Capacitor || window.location.protocol === 'capacitor:'));
+            if (isAdirActiveUser && preloadedUserState && preloadedUserState.courses) {
+                const preloadedCount = Object.keys(preloadedUserState.courses).length;
                 const localCount = Object.keys(gameState.courses || {}).length;
                 if (localCount < preloadedCount) {
                     console.log(`[AuthSync] Upgrading local save from ${localCount} to ${preloadedCount} courses (Adir authentic state)...`);
-                    gameState = JSON.parse(JSON.stringify(PRELOADED_USER_STATE));
+                    gameState = JSON.parse(JSON.stringify(preloadedUserState));
                     saveState();
-                } else if (!gameState.removedCourses && PRELOADED_USER_STATE.removedCourses) {
-                    gameState.removedCourses = JSON.parse(JSON.stringify(PRELOADED_USER_STATE.removedCourses));
+                } else if (!gameState.removedCourses && preloadedUserState.removedCourses) {
+                    gameState.removedCourses = JSON.parse(JSON.stringify(preloadedUserState.removedCourses));
                     saveState();
                 }
-                if ((!gameState.degreePlan || !Array.isArray(gameState.degreePlan) || gameState.degreePlan.length === 0) && PRELOADED_USER_STATE.degreePlan) {
-                    gameState.degreePlan = JSON.parse(JSON.stringify(PRELOADED_USER_STATE.degreePlan));
-                    gameState.degreePlanUnassigned = JSON.parse(JSON.stringify(PRELOADED_USER_STATE.degreePlanUnassigned || []));
+                if ((!gameState.degreePlan || !Array.isArray(gameState.degreePlan) || gameState.degreePlan.length === 0) && preloadedUserState.degreePlan) {
+                    gameState.degreePlan = JSON.parse(JSON.stringify(preloadedUserState.degreePlan));
+                    gameState.degreePlanUnassigned = JSON.parse(JSON.stringify(preloadedUserState.degreePlanUnassigned || []));
                     saveState();
                 }
             }
@@ -8984,31 +8989,15 @@ function loadSavedState() {
     }
 
     if (!loadedFromAuthSync) {
-        const isAdir = (window.AuthSync && typeof window.AuthSync.isAdirActive === 'function' && window.AuthSync.isAdirActive());
+        const preloadedUserState = (typeof window !== 'undefined' && window.PRELOADED_USER_STATE) || (typeof PRELOADED_USER_STATE !== 'undefined' ? PRELOADED_USER_STATE : null);
+        const isAdir = (window.AuthSync && typeof window.AuthSync.isAdirActive === 'function' && window.AuthSync.isAdirActive()) || (typeof window !== 'undefined' && (window.Capacitor || window.location.protocol === 'capacitor:'));
         const storageKey = isAdir ? "academic_skill_tree_save" : "ast_user_state_guest";
         const saved = localStorage.getItem(storageKey);
         if (saved) {
             try {
                 const parsed = JSON.parse(saved);
-                const hasAdirDegreePlan = parsed && parsed.degreePlan && Array.isArray(parsed.degreePlan) && parsed.degreePlan.some(s => s.semester === 1 && (s.courses || []).some(c => c.code === '02340128' || c.code === '234128'));
-                const isContaminated = !isAdir && (
-                    parsed.characterClass === 'סטודנט למדעי המחשב' ||
-                    (parsed.completedCourses >= 10 && (parsed.gpa >= 86 || parsed.credits >= 38)) ||
-                    hasAdirDegreePlan
-                );
-                if (isContaminated) {
-                    console.warn('[app.js] Detected contaminated legacy save for non-Adir user. Purging.');
-                    localStorage.removeItem('academic_skill_tree_save');
-                    localStorage.removeItem('atlas_me_custom_degree_plan_v2_guest');
-                    localStorage.removeItem('atlas_me_custom_degree_plan_v1_guest');
-                    localStorage.removeItem('atlas_me_custom_degree_plan_v2');
-                    localStorage.removeItem('atlas_me_custom_degree_plan_v1');
-                } else if (parsed && parsed.courses && Object.keys(parsed.courses).length > 0) {
+                if (parsed && parsed.courses && Object.keys(parsed.courses).length > 0) {
                     gameState = parsed;
-                    if (!isAdir && gameState.degreePlan && hasAdirDegreePlan) {
-                        delete gameState.degreePlan;
-                        delete gameState.degreePlanUnassigned;
-                    }
                     loadedFromAuthSync = true;
                     Object.values(gameState.courses).forEach(course => {
                         if (course.status === 'mastered' && course.tasks) {
@@ -9020,14 +9009,14 @@ function loadSavedState() {
                     });
                 }
             } catch (e) {
-                console.error("Error parsing academic_skill_tree_save:", e);
+                console.error("Error parsing saved state:", e);
             }
         }
 
-        // If still not loaded, load from authentic PRELOADED_USER_STATE (Adir ONLY)
-        if (!loadedFromAuthSync && isAdir && typeof PRELOADED_USER_STATE !== 'undefined' && PRELOADED_USER_STATE.courses) {
+        // If still not loaded, load from authentic PRELOADED_USER_STATE (Adir / Capacitor)
+        if (!loadedFromAuthSync && isAdir && preloadedUserState && preloadedUserState.courses) {
             console.log("Loading authentic user state from PRELOADED_USER_STATE for Adir...");
-            gameState = JSON.parse(JSON.stringify(PRELOADED_USER_STATE));
+            gameState = JSON.parse(JSON.stringify(preloadedUserState));
             recalculateCourseStates();
             loadedFromAuthSync = true;
         } else if (!loadedFromAuthSync) {
@@ -9042,24 +9031,37 @@ function loadSavedState() {
         }
     }
 
-    // Grade preservation & recovery (Adir developer ONLY):
-    // If courses exist but all grades were wiped, restore authentic grades from PRELOADED_USER_STATE
-    const isAdirForRecovery = (window.AuthSync && typeof window.AuthSync.isAdirActive === 'function' && window.AuthSync.isAdirActive());
-    if (isAdirForRecovery && gameState && gameState.courses && typeof PRELOADED_USER_STATE !== 'undefined' && PRELOADED_USER_STATE.courses) {
-        const completedCount = Object.values(gameState.courses).filter(c => c.status === 'mastered' || (c.grade && Number(c.grade) >= 55)).length;
-        if (completedCount === 0) {
-            console.log('[Recovery] Restoring completed courses and grades from PRELOADED_USER_STATE for Adir...');
-            Object.entries(PRELOADED_USER_STATE.courses).forEach(([code, preloadedCourse]) => {
-                if (preloadedCourse.grade || preloadedCourse.status === 'mastered') {
-                    if (gameState.courses[code]) {
-                        gameState.courses[code].grade = preloadedCourse.grade;
-                        gameState.courses[code].status = preloadedCourse.status;
+    // Grade preservation & recovery (Adir developer / native mobile):
+    // Ensure all 11 completed courses and active semester 3 courses match authentic state
+    const preloadedForRecovery = (typeof window !== 'undefined' && window.PRELOADED_USER_STATE) || (typeof PRELOADED_USER_STATE !== 'undefined' ? PRELOADED_USER_STATE : null);
+    const isAdirForRecovery = (window.AuthSync && typeof window.AuthSync.isAdirActive === 'function' && window.AuthSync.isAdirActive()) || (typeof window !== 'undefined' && (window.Capacitor || window.location.protocol === 'capacitor:'));
+    if (isAdirForRecovery && gameState && gameState.courses && preloadedForRecovery && preloadedForRecovery.courses) {
+        let healed = false;
+        Object.entries(preloadedForRecovery.courses).forEach(([code, preloadedCourse]) => {
+            const existing = gameState.courses[code];
+            if (!existing) {
+                gameState.courses[code] = JSON.parse(JSON.stringify(preloadedCourse));
+                healed = true;
+            } else {
+                if (preloadedCourse.status === 'mastered') {
+                    if (existing.status !== 'mastered' || !existing.grade || Number(existing.grade) !== Number(preloadedCourse.grade)) {
+                        existing.status = 'mastered';
+                        existing.grade = preloadedCourse.grade;
+                        existing.semester = preloadedCourse.semester;
                         if (preloadedCourse.tasks) {
-                            gameState.courses[code].tasks = JSON.parse(JSON.stringify(preloadedCourse.tasks));
+                            existing.tasks = JSON.parse(JSON.stringify(preloadedCourse.tasks));
                         }
+                        healed = true;
                     }
                 }
-            });
+                if (preloadedCourse.semester === 3 && existing.semester !== 3) {
+                    existing.semester = 3;
+                    healed = true;
+                }
+            }
+        });
+        if (healed) {
+            console.log('[Recovery] Healed authentic grades & course status from PRELOADED_USER_STATE for Adir.');
             recalculateCourseStates();
             saveState();
         }
@@ -9106,24 +9108,24 @@ function loadSavedState() {
     });
 
     // Self-healing / Restoration of Authentic State & Degree Plan (Adir ONLY)
-    if (isAdirForRecovery && typeof PRELOADED_USER_STATE !== 'undefined') {
+    if (isAdirForRecovery && preloadedForRecovery) {
         const needsCourseRestore = !gameState.courses || Object.keys(gameState.courses).length < 30;
         const needsPlanRestore = !gameState.degreePlan || !Array.isArray(gameState.degreePlan) || gameState.degreePlan.length === 0;
 
-        if (needsCourseRestore && PRELOADED_USER_STATE.courses) {
+        if (needsCourseRestore && preloadedForRecovery.courses) {
             console.log('[Recovery] Restoring full authentic course state from PRELOADED_USER_STATE for Adir...');
-            gameState.courses = JSON.parse(JSON.stringify(PRELOADED_USER_STATE.courses));
-            gameState.xp = PRELOADED_USER_STATE.xp;
-            gameState.gpa = PRELOADED_USER_STATE.gpa;
-            gameState.level = PRELOADED_USER_STATE.level;
-            gameState.completedCourses = PRELOADED_USER_STATE.completedCourses;
-            gameState.credits = PRELOADED_USER_STATE.credits;
+            gameState.courses = JSON.parse(JSON.stringify(preloadedForRecovery.courses));
+            gameState.xp = preloadedForRecovery.xp;
+            gameState.gpa = preloadedForRecovery.gpa;
+            gameState.level = preloadedForRecovery.level;
+            gameState.completedCourses = preloadedForRecovery.completedCourses;
+            gameState.credits = preloadedForRecovery.credits;
             saveState();
         }
-        if (needsPlanRestore && PRELOADED_USER_STATE.degreePlan) {
+        if (needsPlanRestore && preloadedForRecovery.degreePlan) {
             console.log('[Recovery] Restoring full authentic degreePlan from PRELOADED_USER_STATE for Adir...');
-            gameState.degreePlan = JSON.parse(JSON.stringify(PRELOADED_USER_STATE.degreePlan));
-            gameState.degreePlanUnassigned = JSON.parse(JSON.stringify(PRELOADED_USER_STATE.degreePlanUnassigned || []));
+            gameState.degreePlan = JSON.parse(JSON.stringify(preloadedForRecovery.degreePlan));
+            gameState.degreePlanUnassigned = JSON.parse(JSON.stringify(preloadedForRecovery.degreePlanUnassigned || []));
             saveState();
         }
     } else if (gameState) {

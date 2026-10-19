@@ -275,11 +275,22 @@ var SAMPLE_ME_DEGREE = (typeof window !== 'undefined' && window.SAMPLE_ME_DEGREE
         code: "125013",
         name: "מעבדה בכימיה",
         credits: 0.5,
-        semester: 4,
+        semester: 2,
         prerequisites: ["125001"],
-        status: "locked",
+        status: "available",
         tasks: [
             { id: "125013_ex", title: "דו\"ח מעבדה סופי", type: "exam", xp: 100, completed: false }
+        ]
+    },
+    "03940805": {
+        code: "03940805",
+        name: "חינוך גופני - אתלטיקה קלה / יוגה",
+        credits: 1,
+        semester: 3,
+        prerequisites: [],
+        status: "available",
+        tasks: [
+            { id: "03940805_pass", title: "מעקב נוכחות ופעילות", type: "hw", xp: 100, completed: false }
         ]
     },
     // Semester 5
