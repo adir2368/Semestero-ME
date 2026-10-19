@@ -19500,7 +19500,7 @@ function exportTimetableToICS() {
 window.exportTimetableToICS = exportTimetableToICS;
 
 // =========================================================================
-// GOOGLE CALENDAR MANAGEMENT, CLEANUP & IN-APP TIMETABLE EDITING (v2.4.24)
+// GOOGLE CALENDAR MANAGEMENT, CLEANUP & IN-APP TIMETABLE EDITING (v2.4.25)
 // =========================================================================
 
 // Exports an RFC 5545 cancellation .ics file (METHOD:CANCEL, STATUS:CANCELLED)
@@ -20565,13 +20565,13 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.10.18-v2.4.24",
-    version: "2.4.24",
+    code: "REV-2026.10.18-v2.4.25",
+    version: "2.4.25",
     build: "20261018_08",
     date: "2026-10-18 16:45",
     description: "גרסה 2.4.20: מבנה כרטיסיית שיעור ב-4 שורות מוגדרות, מנהל מחיקה ועריכה מלא ליומן גוגל (כולל קובץ ביטול ICS CANCEL), וטיהור מוחלט של 'כיתת טכניון'"
 };
-window.APP_VERSION = "2.4.24";
+window.APP_VERSION = "2.4.25";
 
 function ensureBaselineRevisions() {
     if (!gameState.revisions || !Array.isArray(gameState.revisions) || gameState.revisions.length === 0) {
@@ -23730,8 +23730,8 @@ function checkAndTrigger10MinReminders() {
         const startMin = parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
         const diffMinutes = startMin - curMin;
 
-        // Proactive alert window: any class starting in the next 15 minutes, or started within last 15 minutes
-        if (diffMinutes >= -15 && diffMinutes <= 15) {
+        // Proactive alert window: trigger strictly within 10 minutes prior to class (0m to 10m), or up to 2m after start
+        if (diffMinutes >= -2 && diffMinutes <= 10) {
             const reminderKey = `ast_reminded_10m_${todayDateStr}_${c.courseId}_${c.startTime}`;
             if (!localStorage.getItem(reminderKey)) {
                 console.log(`[Notifications] Triggering reminder for ${c.courseName} at ${c.startTime} (diff: ${diffMinutes}m)`);
@@ -23781,10 +23781,13 @@ function scheduleTodayClassTimeouts() {
                     window.Capacitor.Plugins.LocalNotifications.schedule({
                         notifications: [{
                             id: notifId,
-                            title: `⏰ בעוד כ-10 דק׳: ${c.courseName || 'שיעור אקדמי'}`,
+                            title: `⏰ בעוד 10 דק׳: ${c.courseName || 'שיעור אקדמי'}`,
                             body: `📚 ${c.type || 'הרצאה / תרגול'}\n⏰ שעות: ${c.startTime} - ${c.endTime}\n📍 ${c.room || 'טכניון'}`,
                             channelId: 'semestero_alerts',
-                            schedule: { at: new Date(reminderTimeMs) },
+                            schedule: {
+                                at: new Date(reminderTimeMs),
+                                allowWhileIdle: true
+                            },
                             smallIcon: 'ic_stat_notification',
                             iconColor: '#38bdf8',
                             extra: { tab: 'timetable' }
@@ -23794,7 +23797,7 @@ function scheduleTodayClassTimeouts() {
             }
         }
 
-        // 2. Schedule in-memory timeout (fires at T-10m)
+        // 2. Schedule in-memory timeout (fires strictly at T-10m)
         if (delayMs > 0 && delayMs < 14 * 60 * 60 * 1000 && !localStorage.getItem(reminderKey)) {
             setTimeout(() => {
                 const checkNow = new Date();
@@ -23814,6 +23817,187 @@ function scheduleTodayClassTimeouts() {
             }, delayMs);
         }
     });
+}
+
+// ==============================================================================
+// 10b. Daily 07:30 AM Morning Briefing Engine (Lectures / Finals Study Plan)
+// ==============================================================================
+
+function generateMorning730BriefingData(targetDate = null) {
+    const now = new Date();
+    let dateToUse = targetDate;
+    if (!dateToUse) {
+        dateToUse = new Date(now);
+        // If past 07:30 today, plan for tomorrow morning at 07:30
+        if (now.getHours() > 7 || (now.getHours() === 7 && now.getMinutes() >= 30)) {
+            dateToUse.setDate(dateToUse.getDate() + 1);
+        }
+    }
+    const dayOfWeek = dateToUse.getDay();
+    const dayNames = ["ראשון", "שני", "שלישי", "רביעי", "חמישי", "שישי", "שבת"];
+    const dayName = dayNames[dayOfWeek] || '';
+    const dateStr = dateToUse.toISOString().split('T')[0];
+
+    // Check if in Finals Period or active finals mode
+    let isFinals = !!(gameState && gameState.isFinalsMode);
+
+    // Scan all exams in courses
+    const allExams = [];
+    const courses = (gameState && gameState.courses) || {};
+    for (const [code, c] of Object.entries(courses)) {
+        if (c.tasks && Array.isArray(c.tasks)) {
+            c.tasks.forEach(t => {
+                if (t.type === 'exam' && t.dueDate) {
+                    allExams.push({
+                        courseId: code,
+                        courseName: c.name || code,
+                        title: t.title || 'מועד בחינה',
+                        date: t.dueDate,
+                        completed: !!t.completed
+                    });
+                }
+            });
+        }
+    }
+    allExams.sort((a, b) => a.date.localeCompare(b.date));
+    const upcomingExams = allExams.filter(e => !e.completed && e.date >= dateStr);
+
+    if (upcomingExams.length > 0) {
+        const nextExamDate = new Date(upcomingExams[0].date);
+        const daysToFirstExam = Math.ceil((nextExamDate.getTime() - dateToUse.getTime()) / (1000 * 60 * 60 * 24));
+        if (daysToFirstExam <= 7) {
+            isFinals = true;
+        }
+    }
+
+    if (isFinals) {
+        const nextExam = upcomingExams[0];
+        let title = `🎯 תוכנית למידה יומית (07:30) • תקופת מבחנים`;
+        const bodyLines = [];
+        if (nextExam) {
+            const nextExamDate = new Date(nextExam.date);
+            const daysLeft = Math.max(0, Math.ceil((nextExamDate.getTime() - dateToUse.getTime()) / (1000 * 60 * 60 * 24)));
+            title = `🎯 תוכנית למידה (07:30): ${nextExam.courseName} בעוד ${daysLeft} ימים`;
+            bodyLines.push(`🗓️ הבחינה הקרובה: [${nextExam.courseName}] ${nextExam.title}`);
+            bodyLines.push(`⏳ מועד: ${nextExam.date} (בעוד ${daysLeft} ימים)`);
+            bodyLines.push('────────────────────');
+            bodyLines.push(`🔥 יעד למידה להיום: 5 שעות מרתון ממוקדות`);
+            bodyLines.push(`📖 מיקוד מומלץ: פתרון 2 מבחני עבר מאס״ט + מעבר על תרגולים וסיכומים`);
+            bodyLines.push(`⚡ שומרים על רצף למידה גבוה לקראת ציון יעד!`);
+        } else {
+            bodyLines.push(`✨ אין בחינות פתוחות בימים הקרובים.`);
+            bodyLines.push(`📖 יום מצוין להשלמת פרויקטים, חזרות וסגירת חובות אקדמיים!`);
+        }
+        return {
+            isFinals: true,
+            title,
+            body: bodyLines.join('\n')
+        };
+    } else {
+        const schedule = getActiveTimetableSchedule();
+        const dayConfig = (schedule && schedule.days) ? schedule.days.find(d => d.dayIndex === dayOfWeek) : null;
+        const classes = (dayConfig && !dayConfig.isFree && dayConfig.classes) ? dayConfig.classes : [];
+
+        let title = '';
+        const bodyLines = [];
+
+        if (classes.length === 0) {
+            title = `🌅 תוכנית הבוקר (07:30) • יום ${dayName}`;
+            bodyLines.push(`🏖️ יום חופשי מלימודים!`);
+            bodyLines.push(`אין היום הרצאות או תרגולים במערכת השעות.`);
+            bodyLines.push(`זמן מצוין למנוחה, שיעורי בית או הכנה להמשך השבוע.`);
+        } else {
+            title = `🌅 תוכנית הבוקר (07:30) • ${classes.length} שיעורים היום`;
+            bodyLines.push(`📚 לו״ז יום ${dayName} (${classes.length} שיעורים):`);
+            classes.forEach((c, idx) => {
+                const star = (idx === 0) ? '⭐' : '🕒';
+                bodyLines.push(`${star} [${c.startTime} - ${c.endTime}] ${c.courseName}`);
+                bodyLines.push(`   📍 ${c.room || 'טכניון'} • ${c.type}${c.lecturer ? ' (' + c.lecturer + ')' : ''}`);
+            });
+        }
+
+        const priorityTasks = getUpcomingPriorityTasks();
+        if (priorityTasks && priorityTasks.tasks && priorityTasks.tasks.length > 0) {
+            bodyLines.push('────────────────────');
+            const firstTask = priorityTasks.tasks[0];
+            bodyLines.push(`📋 בנוסף: ${priorityTasks.tasks.length} מטלות פתוחות להגשה (הקרובה: [${firstTask.courseShortName}] ${firstTask.title})`);
+        }
+
+        return {
+            isFinals: false,
+            title,
+            body: bodyLines.join('\n')
+        };
+    }
+}
+
+async function triggerMorning730BriefingAlert(isTest = false) {
+    const briefing = generateMorning730BriefingData(isTest ? new Date() : null);
+    const isMobile = (typeof isMobileView === 'function') ? isMobileView() : (window.innerWidth <= 768);
+
+    const title = isTest ? `🌅 [בדיקה] ${briefing.title}` : briefing.title;
+
+    await showNativeNotification(title, {
+        body: briefing.body,
+        icon: 'icon.png',
+        badge: 'notification-badge.png',
+        tag: 'ast-morning-730-briefing',
+        renotify: true,
+        vibrate: isMobile ? [300, 150, 300, 150, 300] : undefined,
+        data: { tab: briefing.isFinals ? 'calendar' : 'timetable' },
+        actions: [
+            { action: briefing.isFinals ? 'open-calendar' : 'open-timetable', title: briefing.isFinals ? '🎯 פתח לוח למידה' : '📅 פתח מערכת שעות' }
+        ]
+    });
+
+    if (isTest && typeof showToastNotification === 'function') {
+        showToastNotification(`התראת תוכנית בוקר (07:30) נשלחה בהצלחה! 🌅`, 'success');
+    }
+}
+
+function scheduleDaily730MorningBriefing() {
+    ensureNotificationPreferencesDefaults();
+    if (gameState.notificationPreferences && gameState.notificationPreferences.dailyBrief === false) {
+        return;
+    }
+
+    const now = new Date();
+
+    // 1. Android Native LocalNotifications with repeating 07:30 schedule
+    if (isCapacitorPlatform() && window.Capacitor?.Plugins?.LocalNotifications) {
+        ensureCapacitorNotificationChannel().then(() => {
+            const briefing = generateMorning730BriefingData();
+            window.Capacitor.Plugins.LocalNotifications.schedule({
+                notifications: [{
+                    id: 73000,
+                    title: briefing.title,
+                    body: briefing.body,
+                    channelId: 'semestero_alerts',
+                    schedule: {
+                        on: { hour: 7, minute: 30 },
+                        allowWhileIdle: true
+                    },
+                    smallIcon: 'ic_stat_notification',
+                    iconColor: '#38bdf8',
+                    extra: { tab: briefing.isFinals ? 'calendar' : 'timetable' }
+                }]
+            }).catch(e => console.warn('[Notifications] Error scheduling 7:30 morning briefing:', e));
+        });
+    }
+
+    // 2. In-memory timeout for active web/desktop session
+    const target730 = new Date(now);
+    target730.setHours(7, 30, 0, 0);
+    if (now.getTime() >= target730.getTime()) {
+        target730.setDate(target730.getDate() + 1);
+    }
+    const msUntil730 = target730.getTime() - now.getTime();
+    if (msUntil730 > 0 && msUntil730 < 25 * 60 * 60 * 1000) {
+        setTimeout(() => {
+            triggerMorning730BriefingAlert(false);
+            scheduleDaily730MorningBriefing();
+        }, msUntil730);
+    }
 }
 
 // 11. Dispatch Native System Notifications (Device-Aware: Mobile vs Desktop)
@@ -24110,6 +24294,14 @@ function setupMobileNotifications() {
         });
     }
 
+    // D3. Test 07:30 Morning Briefing button
+    const test730Btn = document.getElementById('btn-test-730-briefing');
+    if (test730Btn) {
+        test730Btn.addEventListener('click', async () => {
+            await triggerMorning730BriefingAlert(true);
+        });
+    }
+
     // E. Navigation buttons inside cards
     const btnGoTimetable = document.getElementById('btn-notif-go-timetable');
     if (btnGoTimetable) {
@@ -24160,8 +24352,9 @@ function setupMobileNotifications() {
     // H. Initial badge update
     updateNotificationBadge();
 
-    // I. Automated 10-Minute Reminder Scheduling
+    // I. Automated 10-Minute Reminder Scheduling & 07:30 Morning Briefing
     scheduleTodayClassTimeouts();
+    scheduleDaily730MorningBriefing();
     checkAndTrigger10MinReminders();
 
     // Interval: Run automated reminder check every 30 seconds

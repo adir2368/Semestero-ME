@@ -46,14 +46,16 @@ def create_release():
 👉 **[Semestero-ME.apk](https://github.com/{REPO}/releases/download/{TAG}/Semestero-ME.apk)**
 
 #### ✨ Highlights in {TAG}:
-- **Fully Interactive Home-Screen Widgets:**
-  1. **Tasks & Exam Countdown Widget (`SemesteroTasksExamWidget`):** Added direct task completion! Tap the checkmark (`✓`) button right on the home screen to instantly complete tasks without opening the app, with immediate visual feedback (`✓ הושלם בהצלחה!`) and two-way sync back to your courses database. Plus a dedicated `＋ הוסף משימה` quick-action button that launches straight into the custom task modal.
-  2. **Next Class & Schedule Carousel (`SemesteroNextClassWidget`):** Added interactive carousel controls (`◀`, `▶`) and page counter (`1/N`) to flip through all classes scheduled for today directly from the widget, plus a 1-tap manual refresh button.
-- **Full Authentic Semestero Faculty Emblem for Notifications:**
-  Re-engineered the Android notification icon (`ic_stat_notification.png`) across all densities (`mdpi`, `hdpi`, `xhdpi`, `xxhdpi`, `xxxhdpi`) to feature the complete, authentic Semestero emblem: the science laboratory flask filled with the internal robotic arm mechanism and rising vapor bubbles, framed inside the mechanical engineering gear.
-- **Proposed Native Widgets Gallery for Approval (`widgets.html`):**
-  Added an interactive showcase gallery of 4 new native widget concepts for user review and approval: Quick Technion Launchpad Dock (4x1), Miluim & Reservist Academic Rights Tracker (2x2), Weekly Schedule & Windows Heatmap (4x4), and Finals Runway & GPA Target Gauge (4x2).
-- **Rock-Solid RemoteViews Inflation:** 100% compliant with Android RemoteViews specifications for Samsung One UI and all modern Android launchers.
+- **Daily 07:30 AM Morning Briefing Engine (לו״ז הרצאות ותרגולים יומי / תוכנית למידה למבחנים):**
+  Added an automated daily morning notification at **07:30 AM**:
+  - **During Semester Classes**: Delivers a full morning rundown of today's classes (times, course names, types, rooms, lecturers) and urgent homework deadlines. Free days are clearly indicated with a restorative message!
+  - **During Finals Period**: Swaps to an academic study accelerator plan: counts down days to the nearest upcoming exam, sets a recommended daily study marathon goal (e.g. 5 hours of ASA past exam questions), and tracks study streaks.
+- **Exact 10-Minute Class Reminder Precision Fix (EXACT_ALARM):**
+  Added `SCHEDULE_EXACT_ALARM` and `USE_EXACT_ALARM` to `AndroidManifest.xml` and configured `allowWhileIdle: true` on native alarms, ensuring Android AlarmManager triggers notifications precisely at T-10m even when the device is locked/sleeping, resolving premature 30-minute shifts.
+- **In-App Notification Hub 07:30 Test Control:**
+  Added a 1-tap `🌅 בדיקת 07:30` test button in the notification drawer allowing instant preview of the morning briefing.
+- **Interactive Home-Screen Widgets & Full Semestero Emblem:**
+  Carries over all v2.4.24 widget capabilities (direct task check-off from home screen, next/prev class carousel, + Add Task shortcut, and full gear & flask emblem).
 """
 
     payload = {
