@@ -46,16 +46,16 @@ def create_release():
 👉 **[Semestero-ME.apk](https://github.com/{REPO}/releases/download/{TAG}/Semestero-ME.apk)**
 
 #### ✨ Highlights in {TAG}:
-- **Daily 07:30 AM Morning Briefing Engine (לו״ז הרצאות ותרגולים יומי / תוכנית למידה למבחנים):**
-  Added an automated daily morning notification at **07:30 AM**:
-  - **During Semester Classes**: Delivers a full morning rundown of today's classes (times, course names, types, rooms, lecturers) and urgent homework deadlines. Free days are clearly indicated with a restorative message!
-  - **During Finals Period**: Swaps to an academic study accelerator plan: counts down days to the nearest upcoming exam, sets a recommended daily study marathon goal (e.g. 5 hours of ASA past exam questions), and tracks study streaks.
-- **Exact 10-Minute Class Reminder Precision Fix (EXACT_ALARM):**
-  Added `SCHEDULE_EXACT_ALARM` and `USE_EXACT_ALARM` to `AndroidManifest.xml` and configured `allowWhileIdle: true` on native alarms, ensuring Android AlarmManager triggers notifications precisely at T-10m even when the device is locked/sleeping, resolving premature 30-minute shifts.
-- **In-App Notification Hub 07:30 Test Control:**
-  Added a 1-tap `🌅 בדיקת 07:30` test button in the notification drawer allowing instant preview of the morning briefing.
-- **Interactive Home-Screen Widgets & Full Semestero Emblem:**
-  Carries over all v2.4.24 widget capabilities (direct task check-off from home screen, next/prev class carousel, + Add Task shortcut, and full gear & flask emblem).
+- **Degree Planner Edge Auto-Scroll Engine (גלילה אוטומטית בקצוות המסך בעת גרירת קורס):**
+  When dragging a course card in Degree Planner (`#tab-planner`), approaching within 110px of the screen or container edges triggers a smooth, continuous velocity-proportional auto-scroll loop (supporting both RTL and LTR). Hovering near the top or bottom of tall semester columns also smoothly auto-scrolls vertically, allowing frictionless course placement anywhere on the board.
+- **Semester Removal & Addition (מחיקת סמסטרים והוספת סמסטרים מעבר ל-8):**
+  Students can now delete unnecessary semesters in custom mode via a `✕` button on each semester header. Safety is guaranteed: courses are automatically evacuated into the unassigned electives pool. In addition, a `+ הוסף סמסטר לתואר ➕` column at the end of the board lets students add Semesters 9, 10, etc. seamlessly.
+- **Full Semestero Emblem Notification Icon (סמל מלא של מבחנה וזרוע רובוטית בסטטוס בר):**
+  Redesigned the Android status bar notification icon generator (`ic_stat_notification.png` across all densities). By filling the science flask body and neck with solid white and carving out the robotic arm as a thick negative space cutout, the icon displays the authentic, full Semestero emblem with crisp high-contrast visibility at 24dp, completely resolving the hollow gear donut effect.
+- **Wave 2 Interactive Widgets - Pomodoro Focus Timer:**
+  Marked and approved Wave 2 Proposal 1: Live Pomodoro & Study Marathon Timer (`pomodoro`) for upcoming widget iterations.
+- **Daily 07:30 AM Briefing & Exact Alarms:**
+  Carries over the morning briefing engine and precision 10-minute class reminders.
 """
 
     payload = {

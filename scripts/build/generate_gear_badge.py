@@ -1,13 +1,13 @@
 # scripts/build/generate_gear_badge.py
 """
 Generates the Semestero ME Android Notification Badge:
-Science Flask integrated with Mechanical Engineering Gear (Option 2 - Clean Flask Silhouette).
-Prevents visual ambiguity with the Android system settings gear icon while maintaining
-high contrast and sharp readability across status bar densities.
+Full Emblem with Filled Science Flask & Robotic Arm Cutout.
+Guarantees bold, crisp, non-hollow visibility on the Android status bar
+across all screen densities (24px to 96px).
 """
 import os
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageDraw
 from scipy import ndimage
 
 def generate_flask_gear_badge(source_path=None):
@@ -18,37 +18,28 @@ def generate_flask_gear_badge(source_path=None):
         raise FileNotFoundError(f"Source artwork not found at {source_path}")
 
     orig = Image.open(source_path).convert('L')
-    arr_orig = np.array(orig)
+    arr = np.array(orig)
+    bin_orig = arr > 90
 
-    # Binarize to isolate distinct components
-    bin_arr = arr_orig > 100
-    labeled_white, num_white = ndimage.label(bin_arr)
+    # Draw filled flask polygon covering neck and triangular base
+    mask_img = Image.new('L', orig.size, 0)
+    draw = ImageDraw.Draw(mask_img)
+    flask_poly = [(225, 215), (370, 115), (460, 240), (740, 540), (350, 760), (280, 340)]
+    draw.polygon(flask_poly, fill=255)
+    flask_mask = np.array(mask_img) > 0
 
-    # Core components to preserve:
-    # 1: Large vapor bubble
-    # 2: Medium vapor bubble
-    # 3: Outer gear sticker contour
-    # 4: Flask lip & rim
-    # 5: Main gear ring & flask neck
-    # 6: Triangular flask boundary outline
-    keep_mask = np.isin(labeled_white, [1, 2, 3, 4, 5, 6])
+    labeled, num = ndimage.label(bin_orig)
+    gear_mask = np.isin(labeled, [3, 5])
+    bubbles_mask = np.isin(labeled, [1, 2, 4])
+    arm_mask = np.isin(labeled, list(range(7, num + 1)))
 
-    # Dilate keep_mask by 2 pixels to capture subpixel anti-aliasing on borders
-    dilated_keep = ndimage.binary_dilation(keep_mask, structure=np.ones((5, 5)))
+    # Dilate robotic arm to ensure high-contrast bold negative cutout inside the filled flask
+    dil_arm = ndimage.binary_dilation(arm_mask, structure=np.ones((9, 9)))
+    solid_flask_with_arm_cutout = (flask_mask & ~dil_arm) | gear_mask | bubbles_mask
 
-    # Strictly exclude internal robotic arm mechanism (components 7..num_white)
-    # This leaves the interior of the flask hollow, providing maximum legibility at 24-48px
-    arm_mask = np.isin(labeled_white, list(range(7, num_white + 1)))
-    dilated_arm = ndimage.binary_dilation(arm_mask, structure=np.ones((3, 3)))
-
-    # Compute final alpha channel with original grayscale gradient
-    final_alpha = np.where(dilated_keep & ~dilated_arm, arr_orig, 0).astype(np.uint8)
-
-    # Construct pure white RGBA icon
     badge_rgba = Image.new('RGBA', orig.size, (255, 255, 255, 0))
-    badge_rgba.putalpha(Image.fromarray(final_alpha))
+    badge_rgba.putalpha(Image.fromarray(np.where(solid_flask_with_arm_cutout, 255, 0).astype(np.uint8)))
 
-    # Crop tightly to content and apply Android Material safe padding (~80% canvas)
     bbox = badge_rgba.getbbox()
     cropped = badge_rgba.crop(bbox)
     cropped.thumbnail((840, 840), Image.Resampling.LANCZOS)
@@ -61,7 +52,7 @@ def generate_flask_gear_badge(source_path=None):
     # Save to root workspace directory for web and app distribution
     root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
     
-    # Standard densities
+    # Standard densities for Web PWA
     badge_96 = canvas.resize((96, 96), Image.Resampling.LANCZOS)
     badge_96.save(os.path.join(root_dir, 'notification-badge.png'), 'PNG')
     badge_96.save(os.path.join(root_dir, 'notification-badge-96.png'), 'PNG')
@@ -75,7 +66,25 @@ def generate_flask_gear_badge(source_path=None):
     badge_192 = canvas.resize((192, 192), Image.Resampling.LANCZOS)
     badge_192.save(os.path.join(root_dir, 'notification-badge-192.png'), 'PNG')
 
-    print("Successfully generated Flask + Gear notification badges at 96x96, 72x72, 48x48, 192x192!")
+    # Save Android drawables across densities
+    android_res = os.path.join(root_dir, 'android', 'app', 'src', 'main', 'res')
+    density_map = {
+        'drawable': (96, 96),
+        'drawable-mdpi': (24, 24),
+        'drawable-hdpi': (36, 36),
+        'drawable-xhdpi': (48, 48),
+        'drawable-xxhdpi': (72, 72),
+        'drawable-xxxhdpi': (96, 96)
+    }
+
+    for folder, size in density_map.items():
+        folder_path = os.path.join(android_res, folder)
+        os.makedirs(folder_path, exist_ok=True)
+        target_path = os.path.join(folder_path, 'ic_stat_notification.png')
+        canvas.resize(size, Image.Resampling.LANCZOS).save(target_path, 'PNG')
+        print(f"Saved {target_path} ({size[0]}x{size[1]})")
+
+    print("Successfully generated all Semestero ME filled flask notification icons!")
 
 if __name__ == '__main__':
     generate_flask_gear_badge()

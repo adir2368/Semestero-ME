@@ -1673,8 +1673,8 @@
                         <div style="display: flex; align-items: center; gap: 6px;">
                             ${isSummer ? '<span style="font-size: 1rem;">☀️</span>' : ''}
                             <span class="semester-col-title">${escapeHtml(semTitle)}</span>
-                            ${isSummer && (sem.courses || []).length === 0 ? `
-                                <button type="button" class="btn-delete-summer-sem" onclick="window.deleteSummerSemester(${semNum})" title="מחק סמסטר קיץ זה">✕</button>
+                            ${currentMode === 'custom' ? `
+                                <button type="button" class="btn-delete-semester" onclick="window.deleteSemester(${semNum})" title="הסר את ${escapeHtml(semTitle)} מהתכנון" aria-label="הסר סמסטר">✕</button>
                             ` : ''}
                         </div>
                         <span class="semester-col-credits">${semCredits.toFixed(1)} נק״ז</span>
@@ -1798,6 +1798,17 @@
                 }
             }
         });
+
+        // Add extra regular semester button at the end in custom mode
+        if (currentMode === 'custom') {
+            chunks.push(`
+                <div class="planner-add-sem-col-wrap">
+                    <button type="button" class="btn-add-regular-sem-col" onclick="window.addNewSemester()" title="הוסף סמסטר נוסף לתואר">
+                        + הוסף סמסטר לתואר ➕
+                    </button>
+                </div>
+            `);
+        }
 
         container.innerHTML = chunks.join('');
     }
@@ -2023,20 +2034,125 @@
             card.classList.add('dragging');
         });
 
+        // ----------------------------------------------------------------------
+        // Edge Auto-Scroll Engine during Drag & Drop
+        // ----------------------------------------------------------------------
+        let autoScrollRaf = null;
+        let autoScrollSpeedX = 0;
+        let autoScrollSpeedY = 0;
+        let autoScrollTargetCol = null;
+
+        function runAutoScrollStep() {
+            if (!activeDragPayload) {
+                stopEdgeAutoScroll();
+                return;
+            }
+
+            const container = document.getElementById('planner-semesters-container');
+            if (autoScrollSpeedX !== 0 && container) {
+                container.scrollBy({ left: autoScrollSpeedX, behavior: 'instant' });
+            }
+            if (autoScrollSpeedY !== 0 && autoScrollTargetCol) {
+                autoScrollTargetCol.scrollBy({ top: autoScrollSpeedY, behavior: 'instant' });
+            }
+
+            if (autoScrollSpeedX !== 0 || autoScrollSpeedY !== 0) {
+                autoScrollRaf = requestAnimationFrame(runAutoScrollStep);
+            } else {
+                autoScrollRaf = null;
+            }
+        }
+
+        function triggerEdgeAutoScroll(clientX, clientY) {
+            const container = document.getElementById('planner-semesters-container');
+            if (!container || !activeDragPayload) {
+                stopEdgeAutoScroll();
+                return;
+            }
+
+            const rect = container.getBoundingClientRect();
+            const threshold = 110; // Trigger distance in pixels from viewport / container edge
+            const maxSpeed = 26;   // Max velocity in px per frame
+
+            // Check horizontal proximity to container edges
+            if (clientX <= rect.left + threshold) {
+                const ratio = Math.max(0, (threshold - (clientX - rect.left)) / threshold);
+                autoScrollSpeedX = -Math.max(6, Math.round(ratio * maxSpeed));
+            } else if (clientX >= rect.right - threshold) {
+                const ratio = Math.max(0, (threshold - (rect.right - clientX)) / threshold);
+                autoScrollSpeedX = Math.max(6, Math.round(ratio * maxSpeed));
+            } else {
+                autoScrollSpeedX = 0;
+            }
+
+            // Check inner vertical proximity inside semester course lists
+            const courseList = document.elementFromPoint(clientX, clientY)?.closest('.planner-course-list');
+            if (courseList) {
+                const listRect = courseList.getBoundingClientRect();
+                const vThresh = 40;
+                if (clientY <= listRect.top + vThresh) {
+                    const ratio = Math.max(0, (vThresh - (clientY - listRect.top)) / vThresh);
+                    autoScrollSpeedY = -Math.max(4, Math.round(ratio * 14));
+                    autoScrollTargetCol = courseList;
+                } else if (clientY >= listRect.bottom - vThresh) {
+                    const ratio = Math.max(0, (vThresh - (listRect.bottom - clientY)) / vThresh);
+                    autoScrollSpeedY = Math.max(4, Math.round(ratio * 14));
+                    autoScrollTargetCol = courseList;
+                } else {
+                    autoScrollSpeedY = 0;
+                    autoScrollTargetCol = null;
+                }
+            } else {
+                autoScrollSpeedY = 0;
+                autoScrollTargetCol = null;
+            }
+
+            if (autoScrollSpeedX !== 0 || autoScrollSpeedY !== 0) {
+                if (!autoScrollRaf) {
+                    autoScrollRaf = requestAnimationFrame(runAutoScrollStep);
+                }
+            } else {
+                stopEdgeAutoScroll();
+            }
+        }
+
+        function stopEdgeAutoScroll() {
+            if (autoScrollRaf) {
+                cancelAnimationFrame(autoScrollRaf);
+                autoScrollRaf = null;
+            }
+            autoScrollSpeedX = 0;
+            autoScrollSpeedY = 0;
+            autoScrollTargetCol = null;
+        }
+
+        // Global dragover fallback to ensure auto-scroll continues smoothly near board borders
+        document.addEventListener('dragover', (e) => {
+            if (activeDragPayload) {
+                triggerEdgeAutoScroll(e.clientX, e.clientY);
+            }
+        });
+
         // 2. Drag End Delegation
         plannerTab.addEventListener('dragend', (e) => {
             const card = e.target.closest('[draggable="true"]');
             if (card) card.classList.remove('dragging');
             activeDragPayload = null;
+            stopEdgeAutoScroll();
             document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
         });
 
         // 3. Drag Over & Drag Leave Delegation
         plannerTab.addEventListener('dragover', (e) => {
-            const dropZone = e.target.closest('.planner-course-list, .planner-semester-col, .planner-sidebar, #planner-unassigned-dropzone');
-            if (dropZone) {
+            const dropZone = e.target.closest('.planner-course-list, .planner-semester-col, .planner-sidebar, #planner-unassigned-dropzone, .planner-board-area, .planner-semesters-scroll');
+            if (dropZone || activeDragPayload) {
                 e.preventDefault();
-                dropZone.classList.add('drag-over');
+                if (dropZone && dropZone.classList.contains('planner-course-list')) {
+                    dropZone.classList.add('drag-over');
+                }
+            }
+            if (activeDragPayload) {
+                triggerEdgeAutoScroll(e.clientX, e.clientY);
             }
         });
 
@@ -2049,6 +2165,7 @@
 
         // 4. Drop Delegation
         plannerTab.addEventListener('drop', (e) => {
+            stopEdgeAutoScroll();
             const semZone = e.target.closest('.planner-course-list, .planner-semester-col');
             const sidebarZone = e.target.closest('.planner-sidebar, #planner-unassigned-dropzone');
 
@@ -3508,18 +3625,42 @@
         showPlannerToast(`סמסטר קיץ ${yearLabel} נוסף בהצלחה! ☀️`, false);
     };
 
-    global.deleteSummerSemester = function(semNum) {
+    global.deleteSemester = function(semNum) {
         if (!customPlan) initPlannerState();
         if (!customPlan) return;
         const semIdx = customPlan.findIndex(s => s.semester === semNum);
         if (semIdx === -1) return;
         const sem = customPlan[semIdx];
-        if (sem.courses && sem.courses.length > 0) {
-            if (!confirm('סמסטר הקיץ מכיל קורסים. האם להעביר אותם לקורסים שלא שובצו ולמחוק את סמסטר הקיץ?')) {
-                return;
-            }
-            sem.courses.forEach(c => unassignedCourses.push(c));
+        const isSummer = sem.isSummer === true || sem.type === 'summer';
+        const semTitle = sem.title || (isSummer ? `סמסטר קיץ ${sem.yearLabel || ''}` : `סמסטר ${semNum}`);
+        const courseCount = (sem.courses || []).length;
+
+        if (customPlan.length <= 1) {
+            showPlannerToast('לא ניתן להסיר את כל הסמסטרים מתכנון התואר.', true);
+            return;
         }
+
+        const confirmMsg = courseCount > 0
+            ? `האם להסיר את ${semTitle}? ${courseCount} קורסים ששובצו בו יועברו חזרה לרשימת הקורסים שלא שובצו.`
+            : `האם להסיר את ${semTitle} מתכנון התואר?`;
+
+        if (!confirm(confirmMsg)) {
+            return;
+        }
+
+        if (sem.courses && sem.courses.length > 0) {
+            sem.courses.forEach(c => {
+                const cKeys = getNormalizedCodes(c.code, c.altCode);
+                const alreadyInUnassigned = unassignedCourses.some(u => {
+                    const uKeys = getNormalizedCodes(u.code, u.altCode);
+                    return uKeys.some(k => cKeys.includes(k));
+                });
+                if (!alreadyInUnassigned) {
+                    unassignedCourses.push({ ...c });
+                }
+            });
+        }
+
         customPlan.splice(semIdx, 1);
         saveCustomPlan(true);
         renderDegreePlanner();
@@ -3529,7 +3670,48 @@
         if (typeof global.notifyStateChanged === 'function') {
             global.notifyStateChanged({ source: 'planner' });
         }
-        showPlannerToast('סמסטר הקיץ נמחק בהצלחה.', false);
+        showPlannerToast(`${semTitle} הוסר בהצלחה.`, false);
+    };
+
+    global.deleteSummerSemester = global.deleteSemester;
+
+    global.addNewSemester = function() {
+        if (!customPlan) initPlannerState();
+        if (!customPlan) return;
+
+        let maxSem = 0;
+        customPlan.forEach(s => {
+            if (!s.isSummer && s.type !== 'summer' && Number.isInteger(s.semester)) {
+                if (s.semester > maxSem) maxSem = s.semester;
+            }
+        });
+        const nextSemNum = maxSem + 1;
+
+        const newSem = {
+            semester: nextSemNum,
+            isSummer: false,
+            title: `סמסטר ${nextSemNum}`,
+            targetCredits: 20.0,
+            courses: []
+        };
+
+        customPlan.push(newSem);
+        saveCustomPlan(true);
+        renderDegreePlanner();
+        if (typeof syncPlannerToTree === 'function') syncPlannerToTree(false);
+        if (typeof global.renderFlowchartTree === 'function') global.renderFlowchartTree();
+        if (typeof global.renderUI === 'function') global.renderUI();
+        if (typeof global.notifyStateChanged === 'function') {
+            global.notifyStateChanged({ source: 'planner' });
+        }
+        showPlannerToast(`סמסטר ${nextSemNum} נוסף בהצלחה לתכנון התואר! ➕`, false);
+
+        setTimeout(() => {
+            const container = document.getElementById('planner-semesters-container');
+            if (container) {
+                container.scrollTo({ left: container.scrollWidth, behavior: 'smooth' });
+            }
+        }, 80);
     };
 
     global.handlePhysicsVariantSelect = function(currentCode, selectedCode, event) {
