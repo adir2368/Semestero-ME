@@ -46,23 +46,18 @@ def create_release():
 👉 **[Semestero-ME.apk](https://github.com/{REPO}/releases/download/{TAG}/Semestero-ME.apk)**
 
 #### ✨ Highlights in {TAG}:
-- 🎖️ **Interactive Miluim Widget (+ / − Controls & Dynamic Rights):**
-  Added live `+` and `−` counter adjustment buttons directly on the home screen widget. Recalculates Technion reserve service rights dynamically (2 credits exemption for ≥21d, 1 credit for ≥14d, Moed C eligibility for ≥10d, Panopto recordings & assignment extensions for >0d) with bi-directional sync to `gameState.miluimDays`.
-- 🛠️ **Fixed "Couldn't add widget" Inflation Error:**
-  Replaced illegal `<View>` divider in `widget_finals_gpa.xml` with `<FrameLayout>`, restoring 100% compliance with Android `RemoteViews` and fixing launcher inflation crashes.
-- ⏳ **Accurate Exam Countdown (חורף תשפ״ז):**
-  Resolved countdown calculation across `CHEESEFORK_EXAM_DATES`, `course.moedA`, `course.moedB`, and tasks, displaying exact days remaining to upcoming Winter 2026/27 exams instead of `--`.
-- 🚀 **Fixed Launchpad Shortcut Links:**
-  Updated all 5 launchpad links with verified, active endpoints and `CATEGORY_BROWSABLE`:
-  - 🎓 Moodle 26: `https://moodle26.technion.ac.il/`
-  - 🎥 Panopto: `https://panopto.technion.ac.il/`
-  - 🧀 CheeseFork: `https://cheesefork.netlify.app/?semester=202601&uid=D4bh8oHO0GQI5Gx1iYAbWsouBVx2`
-  - 🏛️ Campus SAP Portal: `https://portalex.technion.ac.il/irj/portal/external/CampusMob`
-  - 📂 Summaries & Drive: `https://idofangbentov.uk/` (Pangea)
-- 📝 **Task Checkbox State Fix:**
-  Uncompleted tasks on the home screen widget now display clean empty circles (`○`) instead of premature checkmarks (`✓`), only turning into green checkmarks upon actual completion.
-- ➕/➖ **Safe Degree Planner Semester Manager:**
-  Replaced the bottom button and header `✕` buttons with a dedicated, safe Semester Manager modal featuring course counts and safe course evacuation.
+- 🎖️ **Miluim Days Two-Way Live Sync & Larger Touch Targets:**
+  Immediate synchronization between the in-app Miluim Advisor modal and the home screen widget. Increased `+` and `−` touch target size to 30dp x 30dp with crisp centered typography.
+- ⏰ **Proactive "Next Class" Lookahead:**
+  When today's lectures have finished or during weekends, the widget proactively previews the next upcoming school day's schedule (`⏳ השיעור הבא (מחר)`) with a navigable class carousel, instead of staying on empty `--:--`.
+- 🗓️ **100% Dynamic Weekly Schedule Heatmap:**
+  Dynamically calculates weekly class hours, free days (`🏖️`), and daily course time spans directly from `getActiveTimetableSchedule()`.
+- 📝 **Task Checkbox Toggle & Undo Support:**
+  Interactive task completion now supports toggling (`○` ↔ `✓`) to easily undo accidental taps without wiping out the original assignment title. Increased touch targets to 28dp x 28dp.
+- 🎯 **Miluim Direct Navigation:**
+  Tapping the Miluim Academic Rights Tracker widget opens Semestero ME directly with the Miluim category filter active in the Tasks dashboard.
+- 📻 **Full Broadcast Actions Manifest Coverage:**
+  Registered explicit broadcast action intent-filters for all interactive widgets (`ACTION_CLASS_NEXT`, `ACTION_CLASS_PREV`, `ACTION_REFRESH`, `ACTION_COMPLETE_TASK_1`, `ACTION_COMPLETE_TASK_2`, `ACTION_MILUIM_INCREMENT`, `ACTION_MILUIM_DECREMENT`).
 """
 
     payload = {

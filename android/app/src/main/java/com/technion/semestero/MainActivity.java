@@ -42,6 +42,8 @@ public class MainActivity extends BridgeActivity {
         if (intent != null) {
             String action = intent.getStringExtra("widget_action");
             String tab = intent.getStringExtra("target_tab");
+            String filter = intent.getStringExtra("filter");
+            boolean pomodoroActive = intent.getBooleanExtra("pomodoro_active", false);
             String tabId = "timetable".equals(tab) ? "timetable" : ("tasks".equals(tab) ? "tasks" : ("runway".equals(tab) ? "runway" : ("flowchart".equals(tab) ? "flowchart" : null)));
 
             if (getBridge() != null && getBridge().getWebView() != null) {
@@ -49,6 +51,16 @@ public class MainActivity extends BridgeActivity {
                     if ("add_task".equals(action)) {
                         getBridge().getWebView().evaluateJavascript(
                             "if (typeof window.setActiveMainTab === 'function') { window.setActiveMainTab('tasks'); } if (typeof window.openAddCustomTaskModal === 'function') { window.openAddCustomTaskModal('', 'course'); }",
+                            null
+                        );
+                    } else if ("miluim".equals(filter)) {
+                        getBridge().getWebView().evaluateJavascript(
+                            "if (typeof window.setActiveMainTab === 'function') { window.setActiveMainTab('tasks'); } setTimeout(() => { const pill = document.querySelector('.organit-pill[data-category=\"miluim\"]'); if (pill) pill.click(); }, 150);",
+                            null
+                        );
+                    } else if (pomodoroActive) {
+                        getBridge().getWebView().evaluateJavascript(
+                            "if (typeof window.setActiveMainTab === 'function') { window.setActiveMainTab('runway'); }",
                             null
                         );
                     } else if (tabId != null) {

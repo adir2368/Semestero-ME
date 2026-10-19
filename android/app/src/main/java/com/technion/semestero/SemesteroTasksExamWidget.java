@@ -30,23 +30,42 @@ public class SemesteroTasksExamWidget extends AppWidgetProvider {
     private void markTaskComplete(Context context, int taskNum) {
         SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         String taskIdKey = taskNum == 1 ? "task_1_id" : "task_2_id";
-        String taskKey = taskNum == 1 ? "task_1" : "task_2";
         String doneKey = taskNum == 1 ? "task_1_done" : "task_2_done";
         String taskId = prefs.getString(taskIdKey, "");
 
-        if (!taskId.isEmpty()) {
-            String pending = prefs.getString("completed_from_widget_ids", "");
-            String updatedPending = pending.isEmpty() ? taskId : pending + "," + taskId;
-            prefs.edit()
-                .putString("completed_from_widget_ids", updatedPending)
-                .putBoolean(doneKey, true)
-                .putString(taskKey, "✓ הושלם בהצלחה!")
-                .apply();
+        boolean isDone = prefs.getBoolean(doneKey, false);
+        boolean newDone = !isDone;
+
+        if (newDone) {
+            if (!taskId.isEmpty()) {
+                String pending = prefs.getString("completed_from_widget_ids", "");
+                String updatedPending = pending.isEmpty() ? taskId : pending + "," + taskId;
+                prefs.edit()
+                    .putString("completed_from_widget_ids", updatedPending)
+                    .putBoolean(doneKey, true)
+                    .apply();
+            } else {
+                prefs.edit().putBoolean(doneKey, true).apply();
+            }
         } else {
-            prefs.edit()
-                .putBoolean(doneKey, true)
-                .putString(taskKey, "✓ סומן כהושלם!")
-                .apply();
+            // Undo task completion toggle
+            if (!taskId.isEmpty()) {
+                String pending = prefs.getString("completed_from_widget_ids", "");
+                String[] parts = pending.split(",");
+                StringBuilder sb = new StringBuilder();
+                for (String p : parts) {
+                    if (!p.trim().isEmpty() && !p.equals(taskId)) {
+                        if (sb.length() > 0) sb.append(",");
+                        sb.append(p);
+                    }
+                }
+                prefs.edit()
+                    .putString("completed_from_widget_ids", sb.toString())
+                    .putBoolean(doneKey, false)
+                    .apply();
+            } else {
+                prefs.edit().putBoolean(doneKey, false).apply();
+            }
         }
 
         pushUpdate(context);
@@ -62,11 +81,11 @@ public class SemesteroTasksExamWidget extends AppWidgetProvider {
     public static void updateAppWidget(Context context, AppWidgetManager appWidgetManager, int appWidgetId) {
         SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
 
-        String examDays = prefs.getString("exam_days", "115");
-        String examTitle = prefs.getString("exam_title", "מכניקת מוצקים 1");
-        String examSub = prefs.getString("exam_sub", "מועד א' • 02/02/2027");
-        String task1 = prefs.getString("task_1", "🔥 [פיזיקה 2מ] תרגיל בית 3 (נותר יום)");
-        String task2 = prefs.getString("task_2", "⚡ [מכונות 1] דו״ח מעבדה 2 - הגשה (3 ימים)");
+        String examDays = prefs.getString("exam_days", "106");
+        String examTitle = prefs.getString("exam_title", "פיסיקה 2");
+        String examSub = prefs.getString("exam_sub", "מועד א' • 01/02/2027");
+        String task1 = prefs.getString("task_1", "📌 [פיזיקה 2מ] תרגיל בית 3 (נותר יום)");
+        String task2 = prefs.getString("task_2", "⚡ [מוצקים 2] תרגיל 1: כפיפת קורות (3 ימים)");
         String tasksSummary = prefs.getString("tasks_summary", "עוד 4 משימות פתוחות בלוח");
         boolean task1Done = prefs.getBoolean("task_1_done", false);
         boolean task2Done = prefs.getBoolean("task_2_done", false);

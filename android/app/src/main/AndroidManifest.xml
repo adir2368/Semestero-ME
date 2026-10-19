@@ -41,6 +41,9 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="com.technion.semestero.ACTION_CLASS_NEXT" />
+                <action android:name="com.technion.semestero.ACTION_CLASS_PREV" />
+                <action android:name="com.technion.semestero.ACTION_REFRESH" />
             </intent-filter>
             <meta-data
                 android:name="android.appwidget.provider"
@@ -53,6 +56,8 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="com.technion.semestero.ACTION_COMPLETE_TASK_1" />
+                <action android:name="com.technion.semestero.ACTION_COMPLETE_TASK_2" />
             </intent-filter>
             <meta-data
                 android:name="android.appwidget.provider"

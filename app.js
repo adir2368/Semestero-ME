@@ -16550,8 +16550,27 @@ window.MiluimRightsAdvisor = {
             };
         }
 
+        const updateMiluimDays = (days) => {
+            if (window.gameState) {
+                window.gameState.miluimDays = days;
+            }
+            try {
+                localStorage.setItem('semestero_miluim_days', String(days));
+            } catch (err) {}
+            if (typeof saveState === 'function') saveState();
+            if (typeof syncNativeAndroidWidgets === 'function') syncNativeAndroidWidgets();
+        };
+
         if (daysInput) {
-            daysInput.oninput = () => this.render();
+            const savedDays = (window.gameState && typeof window.gameState.miluimDays === 'number')
+                ? window.gameState.miluimDays
+                : (parseInt(localStorage.getItem('semestero_miluim_days'), 10) || 21);
+            daysInput.value = savedDays;
+            daysInput.oninput = () => {
+                const days = Math.max(0, parseInt(daysInput.value, 10) || 0);
+                updateMiluimDays(days);
+                this.render();
+            };
         }
 
         quickDayBtns.forEach(btn => {
@@ -16559,6 +16578,7 @@ window.MiluimRightsAdvisor = {
                 const days = parseInt(btn.dataset.days, 10);
                 if (daysInput && !isNaN(days)) {
                     daysInput.value = days;
+                    updateMiluimDays(days);
                     this.render();
                 }
             };
@@ -19500,7 +19520,7 @@ function exportTimetableToICS() {
 window.exportTimetableToICS = exportTimetableToICS;
 
 // =========================================================================
-// GOOGLE CALENDAR MANAGEMENT, CLEANUP & IN-APP TIMETABLE EDITING (v2.4.28)
+// GOOGLE CALENDAR MANAGEMENT, CLEANUP & IN-APP TIMETABLE EDITING (v2.4.29)
 // =========================================================================
 
 // Exports an RFC 5545 cancellation .ics file (METHOD:CANCEL, STATUS:CANCELLED)
@@ -20565,13 +20585,13 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.10.18-v2.4.28",
-    version: "2.4.28",
+    code: "REV-2026.10.18-v2.4.29",
+    version: "2.4.29",
     build: "20261018_08",
     date: "2026-10-18 16:45",
     description: "גרסה 2.4.20: מבנה כרטיסיית שיעור ב-4 שורות מוגדרות, מנהל מחיקה ועריכה מלא ליומן גוגל (כולל קובץ ביטול ICS CANCEL), וטיהור מוחלט של 'כיתת טכניון'"
 };
-window.APP_VERSION = "2.4.28";
+window.APP_VERSION = "2.4.29";
 
 function ensureBaselineRevisions() {
     if (!gameState.revisions || !Array.isArray(gameState.revisions) || gameState.revisions.length === 0) {
@@ -23027,13 +23047,44 @@ function syncNativeAndroidWidgets(classData, tasksData) {
             classStatus = "חופשי";
         }
 
-        const allClassesList = (cData && cData.classes) ? cData.classes.map(c => ({
+        let allClassesList = (cData && cData.classes) ? cData.classes.map(c => ({
             title: c.name || c.courseName || c.title || "הרצאה",
             time: (c.startTime && c.endTime) ? `${c.startTime} - ${c.endTime}` : (c.time || "--:--"),
             details: `${c.room ? '📍 ' + c.room : '📍 טכניון'}${c.type ? ' • ' + c.type : ''}`,
             lecturer: c.lecturer ? `👨‍🏫 ${c.lecturer}` : "טכניון • סמסטר חורף",
             status: "שיעור אקדמי"
         })) : [];
+
+        // If today's classes have finished or it's weekend, look ahead to tomorrow or next school day
+        if (!cData || !cData.nextClass) {
+            const sched = (typeof getActiveTimetableSchedule === 'function') ? getActiveTimetableSchedule() : null;
+            if (sched && sched.days && sched.days.length > 0) {
+                const now = new Date();
+                const curDay = now.getDay();
+                const dayHebNames = ["ראשון", "שני", "שלישי", "רביעי", "חמישי", "שישי", "שבת"];
+                for (let offset = 1; offset <= 6; offset++) {
+                    const checkDayIdx = (curDay + offset) % 7;
+                    const dayObj = sched.days.find(d => d.dayIndex === checkDayIdx);
+                    if (dayObj && !dayObj.isFree && dayObj.classes && dayObj.classes.length > 0) {
+                        const firstClass = dayObj.classes[0];
+                        const dayLabel = (offset === 1) ? "מחר" : `ביום ${dayHebNames[checkDayIdx]}`;
+                        classTitle = firstClass.name || firstClass.courseName || firstClass.title || "הרצאה";
+                        classTime = (firstClass.startTime && firstClass.endTime) ? `${firstClass.startTime} - ${firstClass.endTime}` : (firstClass.time || "--:--");
+                        classDetails = `${dayLabel} • ${firstClass.room ? '📍 ' + firstClass.room : '📍 טכניון'}${firstClass.type ? ' • ' + firstClass.type : ''}`;
+                        classLecturer = firstClass.lecturer ? `👨‍🏫 ${firstClass.lecturer}` : "טכניון • סמסטר חורף";
+                        classStatus = `⏳ השיעור הבא (${dayLabel})`;
+                        allClassesList = dayObj.classes.map(c => ({
+                            title: c.name || c.courseName || c.title || "הרצאה",
+                            time: (c.startTime && c.endTime) ? `${c.startTime} - ${c.endTime}` : (c.time || "--:--"),
+                            details: `${dayLabel} • ${c.room ? '📍 ' + c.room : '📍 טכניון'}${c.type ? ' • ' + c.type : ''}`,
+                            lecturer: c.lecturer ? `👨‍🏫 ${c.lecturer}` : "טכניון • סמסטר חורף",
+                            status: "שיעור קרוב"
+                        }));
+                        break;
+                    }
+                }
+            }
+        }
 
         if (window.SemesteroWidgetBridge.updateClassWidget) {
             window.SemesteroWidgetBridge.updateClassWidget(
@@ -23042,7 +23093,7 @@ function syncNativeAndroidWidgets(classData, tasksData) {
                 classDetails,
                 classLecturer,
                 classStatus,
-                allClassesList.length,
+                Math.max(1, allClassesList.length),
                 JSON.stringify(allClassesList)
             );
         }
@@ -23187,15 +23238,53 @@ function syncNativeAndroidWidgets(classData, tasksData) {
             window.SemesteroWidgetBridge.updateMiluimWidget(mDays, badge, r1, r2, r3);
         }
 
-        // 4. Update Weekly Schedule Heatmap Widget
+        // 4. Update Weekly Schedule Heatmap Widget (100% Dynamic calculation from active timetable)
         if (window.SemesteroWidgetBridge.updateScheduleWidget) {
+            const activeSched = (typeof getActiveTimetableSchedule === 'function') ? getActiveTimetableSchedule() : null;
+            let totalSchedHours = 0;
+            let freeDaysCount = 0;
+            const dayStrings = ["", "", "", "", ""];
+
+            if (activeSched && activeSched.days && activeSched.days.length >= 5) {
+                for (let i = 0; i < 5; i++) {
+                    const dayObj = activeSched.days.find(d => d.dayIndex === i) || activeSched.days[i];
+                    const classes = (dayObj && dayObj.classes) ? dayObj.classes : [];
+                    if (!dayObj || dayObj.isFree || classes.length === 0) {
+                        dayStrings[i] = "🏖️ יום חופשי מלא! (0 שעות)";
+                        freeDaysCount++;
+                    } else {
+                        let earliest = "23:59";
+                        let latest = "00:00";
+                        let dayDurationHours = 0;
+                        const courseNames = [];
+                        classes.forEach(c => {
+                            if (c.startTime && c.startTime < earliest) earliest = c.startTime;
+                            if (c.endTime && c.endTime > latest) latest = c.endTime;
+                            if (c.startTime && c.endTime) {
+                                const [sh, sm] = c.startTime.split(':').map(Number);
+                                const [eh, em] = c.endTime.split(':').map(Number);
+                                dayDurationHours += ((eh * 60 + em) - (sh * 60 + sm)) / 60;
+                            } else {
+                                dayDurationHours += 2;
+                            }
+                            const cName = (c.name || c.title || '').replace(/מכניקת |מבוא ל|חשבון /g, '').trim();
+                            if (cName && !courseNames.includes(cName)) courseNames.push(cName);
+                        });
+                        totalSchedHours += dayDurationHours;
+                        const coursesSummary = courseNames.slice(0, 2).join(' + ') + (courseNames.length > 2 ? ` (+${courseNames.length - 2})` : '');
+                        dayStrings[i] = `${earliest}-${latest} • ${coursesSummary} (${Math.round(dayDurationHours)} שעות)`;
+                    }
+                }
+            }
+            const weeklySummary = `${Math.round(totalSchedHours)} ש״ס • ${freeDaysCount > 0 ? freeDaysCount + ' ימי חופש 🏖️' : 'שבוע לימודים מלא'}`;
+
             window.SemesteroWidgetBridge.updateScheduleWidget(
-                "15 ש״ס • יום חופש 🏖️",
-                "10:30-16:30 • מוצקים 2 + פיסיקה (4 שעות)",
-                "🏖️ יום חופשי מלא! (0 שעות)",
-                "08:30-14:30 • מתמטיקה ומעבדה (6 שעות)",
-                "10:30-12:30 • תרגול מוצקים (2 שעות)",
-                "07:30-10:30 • יוגה ורובוטיקה (3 שעות)"
+                weeklySummary,
+                dayStrings[0] || "10:30-16:30 • מוצקים 2 + פיסיקה (4 שעות)",
+                dayStrings[1] || "🏖️ יום חופשי מלא! (0 שעות)",
+                dayStrings[2] || "08:30-14:30 • מתמטיקה ומעבדה (6 שעות)",
+                dayStrings[3] || "10:30-12:30 • תרגול מוצקים (2 שעות)",
+                dayStrings[4] || "07:30-10:30 • יוגה ורובוטיקה (3 שעות)"
             );
         }
 
@@ -23207,18 +23296,21 @@ function syncNativeAndroidWidgets(classData, tasksData) {
                 "יעד סמסטר: 90.0",
                 "🏆 מצטיין דיקן",
                 examDays,
-                examSub,
+                (examDays === "1" ? "יום לבחינה" : "ימים לבחינה"),
                 examTitle
             );
         }
 
-        // 6. Update Pomodoro Focus Timer Widget
+        // 6. Update Pomodoro Focus Timer Widget (Dynamic focus task from active queue)
         if (window.SemesteroWidgetBridge.updatePomodoroWidget) {
+            const focusTaskTitle = (tList.length > 0)
+                ? `🎯 פוקוס: [${tList[0].courseShortName || tList[0].courseName}] ${tList[0].title}`
+                : "🎯 פוקוס: מרתון למידה וחזרות";
             window.SemesteroWidgetBridge.updatePomodoroWidget(
                 "25:00",
                 "25m",
-                "🎯 פוקוס: פיסיקה 2מ • תרגיל בית 3",
-                "🔥 3.5 / 5.0 שעות (70%)",
+                focusTaskTitle,
+                "🔥 מרתון פומודורו אקדמי",
                 false
             );
         }
