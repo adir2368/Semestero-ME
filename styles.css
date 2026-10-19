@@ -10439,6 +10439,99 @@ html.is-iphone .app-global-footer {
     line-height: 1.35;
 }
 
+/* Degree Planner Semesters Manager Modal */
+.planner-semesters-mgr-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(11, 15, 25, 0.75);
+    backdrop-filter: blur(6px);
+    z-index: 99999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    direction: rtl;
+}
+
+.planner-semesters-mgr-modal-overlay.active {
+    display: flex !important;
+    opacity: 1;
+}
+
+.planner-semesters-mgr-modal {
+    width: 92%;
+    max-width: 520px;
+    background: #0f172a;
+    border: 1px solid rgba(56, 189, 248, 0.35);
+    border-radius: 16px;
+    padding: 22px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.7);
+    transform: scale(0.95);
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.planner-semesters-mgr-modal-overlay.active .planner-semesters-mgr-modal {
+    transform: scale(1);
+}
+
+.btn-sem-mgr-action {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    background: #1e293b;
+    border: 1px solid rgba(56, 189, 248, 0.25);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: #f8fafc;
+}
+
+.btn-sem-mgr-action:hover {
+    background: rgba(56, 189, 248, 0.15);
+    border-color: #38bdf8;
+    transform: translateY(-2px);
+}
+
+.sem-mgr-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    background: rgba(15, 23, 42, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    transition: all 0.15s ease;
+}
+
+.sem-mgr-row:hover {
+    border-color: rgba(239, 68, 68, 0.3);
+    background: rgba(239, 68, 68, 0.04);
+}
+
+.btn-sem-mgr-delete {
+    background: rgba(239, 68, 68, 0.15);
+    border: 1px solid rgba(239, 68, 68, 0.4);
+    color: #f87171;
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-size: 0.76rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.btn-sem-mgr-delete:hover {
+    background: #ef4444;
+    border-color: #ef4444;
+    color: #fff;
+    transform: scale(1.05);
+}
+
 /* =======================================================
    Phone Account & Notification Preferences Styling
    ======================================================= */

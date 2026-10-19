@@ -135,8 +135,8 @@
                 android:layout_height="22dp"
                 android:background="@drawable/widget_badge_bg"
                 android:gravity="center"
-                android:text="✓"
-                android:textColor="#34d399"
+                android:text="○"
+                android:textColor="#94a3b8"
                 android:textSize="12sp"
                 android:textStyle="bold" />
 
@@ -169,8 +169,8 @@
                 android:layout_height="22dp"
                 android:background="@drawable/widget_badge_bg"
                 android:gravity="center"
-                android:text="✓"
-                android:textColor="#34d399"
+                android:text="○"
+                android:textColor="#94a3b8"
                 android:textSize="12sp"
                 android:textStyle="bold" />
 

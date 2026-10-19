@@ -104,8 +104,10 @@ public class MainActivity extends BridgeActivity {
                 .putString("exam_sub", examSub)
                 .putString("task_1", task1)
                 .putString("task_1_id", task1Id != null ? task1Id : "")
+                .putBoolean("task_1_done", false)
                 .putString("task_2", task2)
                 .putString("task_2_id", task2Id != null ? task2Id : "")
+                .putBoolean("task_2_done", false)
                 .putString("tasks_summary", tasksSummary)
                 .apply();
 
@@ -120,6 +122,16 @@ public class MainActivity extends BridgeActivity {
                 prefs.edit().remove("completed_from_widget_ids").apply();
             }
             return completed;
+        }
+
+        @JavascriptInterface
+        public int getPendingMiluimDays() {
+            SharedPreferences prefs = context.getSharedPreferences(SemesteroMiluimWidget.PREFS_NAME, Context.MODE_PRIVATE);
+            int days = prefs.getInt("pending_miluim_days_sync", -1);
+            if (days >= 0) {
+                prefs.edit().remove("pending_miluim_days_sync").apply();
+            }
+            return days;
         }
 
         @JavascriptInterface

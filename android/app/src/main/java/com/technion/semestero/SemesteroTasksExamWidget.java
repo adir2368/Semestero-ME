@@ -31,6 +31,7 @@ public class SemesteroTasksExamWidget extends AppWidgetProvider {
         SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         String taskIdKey = taskNum == 1 ? "task_1_id" : "task_2_id";
         String taskKey = taskNum == 1 ? "task_1" : "task_2";
+        String doneKey = taskNum == 1 ? "task_1_done" : "task_2_done";
         String taskId = prefs.getString(taskIdKey, "");
 
         if (!taskId.isEmpty()) {
@@ -38,10 +39,14 @@ public class SemesteroTasksExamWidget extends AppWidgetProvider {
             String updatedPending = pending.isEmpty() ? taskId : pending + "," + taskId;
             prefs.edit()
                 .putString("completed_from_widget_ids", updatedPending)
+                .putBoolean(doneKey, true)
                 .putString(taskKey, "✓ הושלם בהצלחה!")
                 .apply();
         } else {
-            prefs.edit().putString(taskKey, "✓ סומן כהושלם!").apply();
+            prefs.edit()
+                .putBoolean(doneKey, true)
+                .putString(taskKey, "✓ סומן כהושלם!")
+                .apply();
         }
 
         pushUpdate(context);
@@ -63,6 +68,8 @@ public class SemesteroTasksExamWidget extends AppWidgetProvider {
         String task1 = prefs.getString("task_1", "🔥 [פיזיקה 2מ] תרגיל בית 3 (נותר יום)");
         String task2 = prefs.getString("task_2", "⚡ [מכונות 1] דו״ח מעבדה 2 - הגשה (3 ימים)");
         String tasksSummary = prefs.getString("tasks_summary", "עוד 4 משימות פתוחות בלוח");
+        boolean task1Done = prefs.getBoolean("task_1_done", false);
+        boolean task2Done = prefs.getBoolean("task_2_done", false);
 
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.widget_tasks_exam);
         views.setTextViewText(R.id.widget_exam_huge_days, examDays);
@@ -70,9 +77,14 @@ public class SemesteroTasksExamWidget extends AppWidgetProvider {
         views.setTextViewText(R.id.widget_exam_sub, examSub);
         views.setTextViewText(R.id.widget_task_item_1, (task1 != null && !task1.isEmpty()) ? task1 : "אין משימות פתוחות 🎉");
 
+        views.setTextViewText(R.id.btn_complete_task_1, task1Done ? "✓" : "○");
+        views.setTextColor(R.id.btn_complete_task_1, task1Done ? android.graphics.Color.parseColor("#34d399") : android.graphics.Color.parseColor("#94a3b8"));
+
         if (task2 != null && !task2.trim().isEmpty()) {
             views.setTextViewText(R.id.widget_task_item_2, task2);
             views.setViewVisibility(R.id.widget_task_row_2, android.view.View.VISIBLE);
+            views.setTextViewText(R.id.btn_complete_task_2, task2Done ? "✓" : "○");
+            views.setTextColor(R.id.btn_complete_task_2, task2Done ? android.graphics.Color.parseColor("#34d399") : android.graphics.Color.parseColor("#94a3b8"));
         } else {
             views.setViewVisibility(R.id.widget_task_row_2, android.view.View.GONE);
         }

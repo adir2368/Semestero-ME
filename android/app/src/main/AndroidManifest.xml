@@ -77,6 +77,8 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="com.technion.semestero.ACTION_MILUIM_INCREMENT" />
+                <action android:name="com.technion.semestero.ACTION_MILUIM_DECREMENT" />
             </intent-filter>
             <meta-data
                 android:name="android.appwidget.provider"

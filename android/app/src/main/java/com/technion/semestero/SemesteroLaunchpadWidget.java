@@ -35,30 +35,32 @@ public class SemesteroLaunchpadWidget extends AppWidgetProvider {
 
         // 1. Moodle 26 Quick Jump
         Intent moodleIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://moodle26.technion.ac.il/"));
+        moodleIntent.addCategory(Intent.CATEGORY_BROWSABLE);
         moodleIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         views.setOnClickPendingIntent(R.id.btn_launch_moodle, PendingIntent.getActivity(context, 201, moodleIntent, flags));
 
         // 2. Panopto Quick Jump
         Intent panoptoIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://panopto.technion.ac.il/"));
+        panoptoIntent.addCategory(Intent.CATEGORY_BROWSABLE);
         panoptoIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         views.setOnClickPendingIntent(R.id.btn_launch_panopto, PendingIntent.getActivity(context, 202, panoptoIntent, flags));
 
-        // 3. CheeseFork Quick Jump
-        Intent cheeseIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://cheesefork.cf/"));
+        // 3. CheeseFork Quick Jump (live Netlify instance with Adir's schedule)
+        Intent cheeseIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://cheesefork.netlify.app/?semester=202601&uid=D4bh8oHO0GQI5Gx1iYAbWsouBVx2"));
+        cheeseIntent.addCategory(Intent.CATEGORY_BROWSABLE);
         cheeseIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         views.setOnClickPendingIntent(R.id.btn_launch_cheesefork, PendingIntent.getActivity(context, 203, cheeseIntent, flags));
 
-        // 4. Campus SAP Quick Jump
-        Intent campusIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://campus.technion.ac.il/"));
+        // 4. Campus SAP Quick Jump (Official Technion Student Mobile Portal)
+        Intent campusIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://portalex.technion.ac.il/irj/portal/external/CampusMob"));
+        campusIntent.addCategory(Intent.CATEGORY_BROWSABLE);
         campusIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         views.setOnClickPendingIntent(R.id.btn_launch_campus, PendingIntent.getActivity(context, 204, campusIntent, flags));
 
-        // 5. Drive & Summaries Quick Jump
-        Intent driveIntent = new Intent(context, MainActivity.class);
-        driveIntent.setAction(Intent.ACTION_VIEW);
-        driveIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        driveIntent.putExtra("target_tab", "flowchart");
-        driveIntent.putExtra("open_drive", true);
+        // 5. Drive & Summaries Quick Jump (Ido Fang Bentov Pangea Technion ME summaries)
+        Intent driveIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://idofangbentov.uk/"));
+        driveIntent.addCategory(Intent.CATEGORY_BROWSABLE);
+        driveIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         views.setOnClickPendingIntent(R.id.btn_launch_drive, PendingIntent.getActivity(context, 205, driveIntent, flags));
 
         appWidgetManager.updateAppWidget(appWidgetId, views);

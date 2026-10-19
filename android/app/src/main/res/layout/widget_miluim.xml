@@ -46,26 +46,58 @@
         android:orientation="horizontal"
         android:gravity="center_vertical">
 
-        <!-- Big Days Counter -->
+        <!-- Big Days Counter with +/- controls -->
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:gravity="center"
-            android:paddingRight="12dp">
+            android:paddingRight="10dp">
 
-            <TextView
-                android:id="@+id/widget_miluim_days_count"
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="21"
-                android:textColor="#10b981"
-                android:textSize="28sp"
-                android:textStyle="bold" />
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:id="@+id/btn_miluim_minus"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:background="@drawable/widget_badge_bg"
+                    android:gravity="center"
+                    android:text="−"
+                    android:textColor="#94a3b8"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/widget_miluim_days_count"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="6dp"
+                    android:layout_marginRight="6dp"
+                    android:text="21"
+                    android:textColor="#10b981"
+                    android:textSize="26sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/btn_miluim_plus"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:background="@drawable/widget_badge_bg"
+                    android:gravity="center"
+                    android:text="+"
+                    android:textColor="#10b981"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
                 android:text="ימי שמ״פ"
                 android:textColor="#94a3b8"
                 android:textSize="10sp" />

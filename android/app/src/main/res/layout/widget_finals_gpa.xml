@@ -85,8 +85,8 @@
                 android:ellipsize="end" />
         </LinearLayout>
 
-        <!-- Divider -->
-        <View
+        <!-- Divider (FrameLayout RemoteViews-safe) -->
+        <FrameLayout
             android:layout_width="1dp"
             android:layout_height="40dp"
             android:background="#334155" />

@@ -1673,9 +1673,6 @@
                         <div style="display: flex; align-items: center; gap: 6px;">
                             ${isSummer ? '<span style="font-size: 1rem;">☀️</span>' : ''}
                             <span class="semester-col-title">${escapeHtml(semTitle)}</span>
-                            ${currentMode === 'custom' ? `
-                                <button type="button" class="btn-delete-semester" onclick="window.deleteSemester(${semNum})" title="הסר את ${escapeHtml(semTitle)} מהתכנון" aria-label="הסר סמסטר">✕</button>
-                            ` : ''}
                         </div>
                         <span class="semester-col-credits">${semCredits.toFixed(1)} נק״ז</span>
                     </div>
@@ -1798,17 +1795,6 @@
                 }
             }
         });
-
-        // Add extra regular semester button at the end in custom mode
-        if (currentMode === 'custom') {
-            chunks.push(`
-                <div class="planner-add-sem-col-wrap">
-                    <button type="button" class="btn-add-regular-sem-col" onclick="window.addNewSemester()" title="הוסף סמסטר נוסף לתואר">
-                        + הוסף סמסטר לתואר ➕
-                    </button>
-                </div>
-            `);
-        }
 
         container.innerHTML = chunks.join('');
     }
@@ -2233,20 +2219,10 @@
                 return;
             }
 
-            // Add Semester Button
+            // Add/Remove Semester Manager Button
             const addSemBtn = e.target.closest('#btn-planner-add-semester');
             if (addSemBtn) {
-                if (!customPlan) initPlannerState();
-                const nextSemNum = customPlan.length + 1;
-                customPlan.push({
-                    semester: nextSemNum,
-                    title: `סמסטר ${nextSemNum}`,
-                    targetCredits: 18.0,
-                    courses: []
-                });
-                currentMode = 'custom';
-                saveCustomPlan();
-                renderDegreePlanner();
+                openSemesterManagerModal();
                 return;
             }
 
@@ -3671,6 +3647,10 @@
             global.notifyStateChanged({ source: 'planner' });
         }
         showPlannerToast(`${semTitle} הוסר בהצלחה.`, false);
+        const mgrOverlay = document.getElementById('planner-semesters-mgr-modal-overlay');
+        if (mgrOverlay && mgrOverlay.classList.contains('active')) {
+            openSemesterManagerModal();
+        }
     };
 
     global.deleteSummerSemester = global.deleteSemester;
@@ -3713,6 +3693,92 @@
             }
         }, 80);
     };
+
+    function openSemesterManagerModal() {
+        const overlay = document.getElementById('planner-semesters-mgr-modal-overlay');
+        if (!overlay) return;
+        overlay.classList.add('active');
+
+        const plan = getActivePlan();
+        let maxReg = 0;
+        plan.forEach(s => {
+            if (!s.isSummer && s.type !== 'summer' && Number.isInteger(s.semester)) {
+                if (s.semester > maxReg) maxReg = s.semester;
+            }
+        });
+        const nextSemNum = maxReg + 1;
+        const nextLabelEl = document.getElementById('txt-mgr-next-sem-label');
+        if (nextLabelEl) nextLabelEl.textContent = `סמסטר ${nextSemNum} רגיל לתואר`;
+
+        // Populate removable list
+        const listEl = document.getElementById('sem-mgr-removable-list');
+        if (listEl) {
+            let html = '';
+            // Display semesters in reverse order so latest/added semesters appear first
+            const reversed = [...plan].reverse();
+            reversed.forEach(s => {
+                const semNum = s.semester;
+                const isSummer = s.isSummer === true || s.type === 'summer';
+                const semTitle = isSummer ? (s.title || (s.yearLabel ? `סמסטר קיץ ${s.yearLabel} ☀️` : 'סמסטר קיץ ☀️')) : `סמסטר ${semNum}`;
+                const courseCount = (s.courses || []).length;
+                let cr = 0;
+                (s.courses || []).forEach(c => cr += Number(c.credits) || 0);
+
+                html += `
+                    <div class="sem-mgr-row">
+                        <div>
+                            <div style="font-weight: 700; color: #f8fafc; font-size: 0.86rem; display: flex; align-items: center; gap: 6px;">
+                                ${isSummer ? '<span>☀️</span>' : '<span>📅</span>'}
+                                <span>${escapeHtml(semTitle)}</span>
+                            </div>
+                            <div style="font-size: 0.74rem; color: #94a3b8; margin-top: 2px;">
+                                ${courseCount > 0 ? `<span style="color: #38bdf8; font-weight: 600;">${courseCount} קורסים</span> • ${cr.toFixed(1)} נק״ז` : '<span style="color: #10b981;">ריק (0 קורסים)</span>'}
+                            </div>
+                        </div>
+                        <button type="button" class="btn-sem-mgr-delete" onclick="window.deleteSemester(${semNum})">
+                            🗑️ הסר סמסטר
+                        </button>
+                    </div>
+                `;
+            });
+            listEl.innerHTML = html;
+        }
+
+        if (!overlay._isBound) {
+            overlay._isBound = true;
+            const btnClose = document.getElementById('btn-close-sem-mgr-modal');
+            const close = () => overlay.classList.remove('active');
+            if (btnClose) btnClose.onclick = close;
+            overlay.onclick = (e) => {
+                if (e.target === overlay) close();
+            };
+
+            const btnAddReg = document.getElementById('btn-mgr-add-regular-sem');
+            if (btnAddReg) {
+                btnAddReg.onclick = () => {
+                    global.addNewSemester();
+                    openSemesterManagerModal();
+                };
+            }
+
+            const btnAddSummer = document.getElementById('btn-mgr-add-summer-sem');
+            if (btnAddSummer) {
+                btnAddSummer.onclick = () => {
+                    let highestEven = 2;
+                    (customPlan || []).forEach(s => {
+                        if (!s.isSummer && s.type !== 'summer' && s.semester % 2 === 0 && s.semester > highestEven) {
+                            highestEven = s.semester;
+                        }
+                    });
+                    if (typeof global.addNewSummerSemester === 'function') {
+                        global.addNewSummerSemester(highestEven);
+                    }
+                    openSemesterManagerModal();
+                };
+            }
+        }
+    }
+    global.openSemesterManagerModal = openSemesterManagerModal;
 
     global.handlePhysicsVariantSelect = function(currentCode, selectedCode, event) {
         if (event) event.stopPropagation();

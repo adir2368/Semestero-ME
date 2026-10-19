@@ -46,21 +46,23 @@ def create_release():
 👉 **[Semestero-ME.apk](https://github.com/{REPO}/releases/download/{TAG}/Semestero-ME.apk)**
 
 #### ✨ Highlights in {TAG}:
-- **7 Full Native Android Home-Screen Widgets Suite (חבילת 7 וידג'טים מקוריים מלאים למסך הבית של אנדרואיד):**
-  Added all 5 approved native `AppWidgetProvider` widgets, expanding the native widget picker from 2 to **7 full widgets**:
-  1. ⏰ **השיעור הבא ומערכת שעות (Next Class & Day Schedule - 3x2)**: Real-time countdown to next lecture, hall, room, lecturer, and interactive carousel.
-  2. 📝 **מטלות ובחינות קרובות (Tasks & Exam Countdown - 4x2)**: Real-time days countdown to nearest exam, top urgent assignments, 1-tap task completion right from the home screen, and `+ הוסף משימה` shortcut.
-  3. 🚀 **רציף קיצורי דרך טכניון (Technion Quick Launchpad Dock - 4x1)**: 5 direct 1-tap launchers for essential Technion portals: 🎓 Moodle 26, 🎥 Panopto, 🧀 CheeseFork, 🏛️ Campus SAP, and 📂 ME Summaries Drive.
-  4. 🎖️ **מעקב זכויות מילואים (Miluim Academic Rights Tracker - 3x2)**: Live counter of reserve service days (ימי שמ״פ), active exemptions (2 נ״ז פטור אקדמי), guaranteed Moed C rights, and Panopto assistance.
-  5. 🗓️ **לוח שבועי ומפת שעות (Weekly Schedule Heatmap - 4x2)**: Comprehensive weekly load overview for Sunday–Thursday with daily class hours, free day recognition (🏖️), and total weekly hours.
-  6. 📊 **מסלול בחינות וממוצע יעד (Finals Runway & GPA Target Gauge - 3x2)**: Dual metric display tracking days to Moed A, current cumulative GPA vs semester target, and Dean's Honors status.
-  7. ⏱️ **טיימר פומודורו ומרתון למידה (Interactive Pomodoro Focus Timer - 3x2)**: Live focus timer with interactive `▶️ התחל` / `⏸️ השהה` buttons and 25m/50m/90m preset switching directly on the Android home screen!
-- **Real-Time Two-Way Sync Bridge:**
-  Configured `@JavascriptInterface` bridge in `MainActivity.java` and `app.js` to continuously feed live student data into `SharedPreferences` and refresh all 7 widgets simultaneously upon app launch or schedule changes.
-- **Degree Planner Edge Auto-Scroll & Semester Removal/Addition:**
-  Full drag-and-drop edge auto-scrolling engine and semester management with safe course evacuation.
-- **Full Semestero Emblem Notification Mask:**
-  High-contrast solid white flask with dilated robotic arm cutout in the Android status bar.
+- 🎖️ **Interactive Miluim Widget (+ / − Controls & Dynamic Rights):**
+  Added live `+` and `−` counter adjustment buttons directly on the home screen widget. Recalculates Technion reserve service rights dynamically (2 credits exemption for ≥21d, 1 credit for ≥14d, Moed C eligibility for ≥10d, Panopto recordings & assignment extensions for >0d) with bi-directional sync to `gameState.miluimDays`.
+- 🛠️ **Fixed "Couldn't add widget" Inflation Error:**
+  Replaced illegal `<View>` divider in `widget_finals_gpa.xml` with `<FrameLayout>`, restoring 100% compliance with Android `RemoteViews` and fixing launcher inflation crashes.
+- ⏳ **Accurate Exam Countdown (חורף תשפ״ז):**
+  Resolved countdown calculation across `CHEESEFORK_EXAM_DATES`, `course.moedA`, `course.moedB`, and tasks, displaying exact days remaining to upcoming Winter 2026/27 exams instead of `--`.
+- 🚀 **Fixed Launchpad Shortcut Links:**
+  Updated all 5 launchpad links with verified, active endpoints and `CATEGORY_BROWSABLE`:
+  - 🎓 Moodle 26: `https://moodle26.technion.ac.il/`
+  - 🎥 Panopto: `https://panopto.technion.ac.il/`
+  - 🧀 CheeseFork: `https://cheesefork.netlify.app/?semester=202601&uid=D4bh8oHO0GQI5Gx1iYAbWsouBVx2`
+  - 🏛️ Campus SAP Portal: `https://portalex.technion.ac.il/irj/portal/external/CampusMob`
+  - 📂 Summaries & Drive: `https://idofangbentov.uk/` (Pangea)
+- 📝 **Task Checkbox State Fix:**
+  Uncompleted tasks on the home screen widget now display clean empty circles (`○`) instead of premature checkmarks (`✓`), only turning into green checkmarks upon actual completion.
+- ➕/➖ **Safe Degree Planner Semester Manager:**
+  Replaced the bottom button and header `✕` buttons with a dedicated, safe Semester Manager modal featuring course counts and safe course evacuation.
 """
 
     payload = {

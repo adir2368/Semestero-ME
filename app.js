@@ -19500,7 +19500,7 @@ function exportTimetableToICS() {
 window.exportTimetableToICS = exportTimetableToICS;
 
 // =========================================================================
-// GOOGLE CALENDAR MANAGEMENT, CLEANUP & IN-APP TIMETABLE EDITING (v2.4.27)
+// GOOGLE CALENDAR MANAGEMENT, CLEANUP & IN-APP TIMETABLE EDITING (v2.4.28)
 // =========================================================================
 
 // Exports an RFC 5545 cancellation .ics file (METHOD:CANCEL, STATUS:CANCELLED)
@@ -20565,13 +20565,13 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.10.18-v2.4.27",
-    version: "2.4.27",
+    code: "REV-2026.10.18-v2.4.28",
+    version: "2.4.28",
     build: "20261018_08",
     date: "2026-10-18 16:45",
     description: "גרסה 2.4.20: מבנה כרטיסיית שיעור ב-4 שורות מוגדרות, מנהל מחיקה ועריכה מלא ליומן גוגל (כולל קובץ ביטול ICS CANCEL), וטיהור מוחלט של 'כיתת טכניון'"
 };
-window.APP_VERSION = "2.4.27";
+window.APP_VERSION = "2.4.28";
 
 function ensureBaselineRevisions() {
     if (!gameState.revisions || !Array.isArray(gameState.revisions) || gameState.revisions.length === 0) {
@@ -23052,20 +23052,61 @@ function syncNativeAndroidWidgets(classData, tasksData) {
         let examTitle = "אין בחינות קרובות";
         let examSub = "סמסטר חורף תשפ״ז";
 
-        if (typeof gameState !== 'undefined' && gameState && gameState.courses) {
+        if (typeof gameState !== 'undefined' && gameState) {
             const allExams = [];
-            Object.values(gameState.courses).forEach(c => {
-                if (c.status !== 'active') return;
+
+            // 1. Check all courses in gameState.courses
+            Object.values(gameState.courses || {}).forEach(c => {
+                const code = c.code || '';
+                const cleanCode = code.replace(/^0+/, '');
+                
+                const cfEntry = (typeof CHEESEFORK_EXAM_DATES !== 'undefined') ? (CHEESEFORK_EXAM_DATES[code] || CHEESEFORK_EXAM_DATES[cleanCode]) : null;
+                const dateA = (c.moedA && isCurrentOrUpcomingDate(c.moedA)) ? c.moedA : (cfEntry?.moedA);
+                const dateB = (c.moedB && isCurrentOrUpcomingDate(c.moedB)) ? c.moedB : (cfEntry?.moedB);
+
+                const isCompleted = (typeof isCourseCompleted === 'function' && isCourseCompleted(code, c.altCode)) || c.status === 'completed';
+                if (!isCompleted) {
+                    if (dateA && (typeof isCurrentOrUpcomingDate !== 'function' || isCurrentOrUpcomingDate(dateA))) {
+                        allExams.push({
+                            title: c.name || cfEntry?.name || code,
+                            dueDate: (typeof parseDateToIso === 'function') ? parseDateToIso(dateA) : dateA,
+                            isMoedB: false
+                        });
+                    }
+                    if (dateB && (typeof isCurrentOrUpcomingDate !== 'function' || isCurrentOrUpcomingDate(dateB))) {
+                        allExams.push({
+                            title: c.name || cfEntry?.name || code,
+                            dueDate: (typeof parseDateToIso === 'function') ? parseDateToIso(dateB) : dateB,
+                            isMoedB: true
+                        });
+                    }
+                }
+
+                // Check custom exam tasks
                 (c.tasks || []).forEach(t => {
                     if (t.type === 'exam' && t.dueDate && (typeof isCurrentOrUpcomingDate !== 'function' || isCurrentOrUpcomingDate(t.dueDate))) {
                         allExams.push({
                             title: c.name || t.title,
-                            dueDate: t.dueDate,
+                            dueDate: (typeof parseDateToIso === 'function') ? parseDateToIso(t.dueDate) : t.dueDate,
                             isMoedB: (t.title || '').includes("מועד ב")
                         });
                     }
                 });
             });
+
+            // 2. If still empty, check active timetable courses and CHEESEFORK_EXAM_DATES
+            if (allExams.length === 0 && typeof CHEESEFORK_EXAM_DATES !== 'undefined') {
+                Object.entries(CHEESEFORK_EXAM_DATES).forEach(([code, entry]) => {
+                    if (entry.moedA && (typeof isCurrentOrUpcomingDate !== 'function' || isCurrentOrUpcomingDate(entry.moedA))) {
+                        allExams.push({
+                            title: entry.name,
+                            dueDate: (typeof parseDateToIso === 'function') ? parseDateToIso(entry.moedA) : entry.moedA,
+                            isMoedB: false
+                        });
+                    }
+                });
+            }
+
             allExams.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
             if (allExams.length > 0) {
                 const nextExam = allExams[0];
@@ -23118,14 +23159,32 @@ function syncNativeAndroidWidgets(classData, tasksData) {
 
         // 3. Update Miluim Rights Tracker Widget
         if (window.SemesteroWidgetBridge.updateMiluimWidget) {
-            const mDays = (typeof gameState !== 'undefined' && gameState.miluimDays) ? String(gameState.miluimDays) : "21";
-            window.SemesteroWidgetBridge.updateMiluimWidget(
-                mDays,
-                "🎖️ פעיל תשפ״ז",
-                "✓ 2 נ״ז פטור אקדמי (מאושר)",
-                "✓ זכאות למועד ג׳ בכל הקורסים",
-                "✓ הקלטות פנופטו וסיוע חונכות"
-            );
+            const mDaysNum = (typeof gameState !== 'undefined' && typeof gameState.miluimDays === 'number') ? gameState.miluimDays : 21;
+            const mDays = String(mDaysNum);
+            let badge = mDaysNum > 0 ? "🎖️ פעיל תשפ״ז" : "💤 ללא שמ״פ";
+            let r1, r2, r3;
+            if (mDaysNum >= 21) {
+                r1 = "✓ 2 נ״ז פטור אקדמי (מאושר)";
+                r2 = "✓ זכאות למועד ג׳ בכל הקורסים";
+                r3 = "✓ הקלטות פנופטו וסיוע חונכות";
+            } else if (mDaysNum >= 14) {
+                r1 = "✓ 1 נ״ז פטור אקדמי (מאושר)";
+                r2 = "✓ זכאות למועד ג׳ בכל הקורסים";
+                r3 = "✓ הקלטות פנופטו וסיוע חונכות";
+            } else if (mDaysNum >= 10) {
+                r1 = "✓ זכאות למועד ג׳ בכל הקורסים";
+                r2 = "✓ דחיית מטלות והתאמות הגשה";
+                r3 = "✓ פנופטו פתוח וסיוע אקדמי";
+            } else if (mDaysNum > 0) {
+                r1 = "✓ דחיית מועדי הגשת תרגילים";
+                r2 = "✓ פנופטו פתוח לקורסי הסמסטר";
+                r3 = "✓ התאמות היעדרות פרטניות";
+            } else {
+                r1 = "• 0 ימי שמ״פ פעילים";
+                r2 = "• ניתן לעדכן ב- + / -";
+                r3 = "• זכויות יחושבו אוטומטית";
+            }
+            window.SemesteroWidgetBridge.updateMiluimWidget(mDays, badge, r1, r2, r3);
         }
 
         // 4. Update Weekly Schedule Heatmap Widget
@@ -23185,6 +23244,20 @@ function syncNativeAndroidWidgets(classData, tasksData) {
                     saveState();
                     if (typeof showHudToast === 'function') {
                         showHudToast('✓ משימות סומנו כהושלמו ישירות מהווידג\'ט במסך הבית!', 'success');
+                    }
+                }
+            }
+        }
+
+        // Two-way synchronization: Check if Miluim days were adjusted directly on the widget
+        if (window.SemesteroWidgetBridge.getPendingMiluimDays) {
+            const pendingDays = window.SemesteroWidgetBridge.getPendingMiluimDays();
+            if (pendingDays >= 0 && typeof gameState !== 'undefined') {
+                if (gameState.miluimDays !== pendingDays) {
+                    gameState.miluimDays = pendingDays;
+                    saveState();
+                    if (typeof showHudToast === 'function') {
+                        showHudToast(`🎖️ ימי מילואים עודכנו ל-${pendingDays} ימים (סונכרן מהווידג'ט)!`, 'success');
                     }
                 }
             }
