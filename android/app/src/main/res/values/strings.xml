@@ -6,4 +6,9 @@
     <string name="custom_url_scheme">com.technion.semestero</string>
     <string name="widget_next_class_desc">מציג את השיעור הבא של היום, חדר, מרצה וספירה לאחור</string>
     <string name="widget_tasks_exam_desc">מציג ספירה לאחור לבחינה הבאה ורשימת מטלות דחופות</string>
+    <string name="widget_launchpad_desc">רציף גישה מהירה בלחיצה אחת: מודל 26, פנופטו, צ\'יזפורק, פורטל SAP ודרייב</string>
+    <string name="widget_miluim_desc">מעקב ימי שמ״פ, נקודות זיכוי אקדמיות, זכאות למועד ג׳ והקלטות</string>
+    <string name="widget_schedule_desc">מבט שבועי מרוכז: חלוקת שעות הרצאות ותרגולים, ימים חופשיים וחלונות</string>
+    <string name="widget_finals_gpa_desc">מד מרחק לבחינות מועד א\', ממוצע ציונים נוכחי מול יעד מצטיין, וקצב למידה</string>
+    <string name="widget_pomodoro_desc">טיימר פוקוס ומרתון למידה למבחנים ותרגילים, הפעלה והשהיה ישירות ממסך הבית</string>
 </resources>

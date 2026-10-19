@@ -46,16 +46,21 @@ def create_release():
 👉 **[Semestero-ME.apk](https://github.com/{REPO}/releases/download/{TAG}/Semestero-ME.apk)**
 
 #### ✨ Highlights in {TAG}:
-- **Degree Planner Edge Auto-Scroll Engine (גלילה אוטומטית בקצוות המסך בעת גרירת קורס):**
-  When dragging a course card in Degree Planner (`#tab-planner`), approaching within 110px of the screen or container edges triggers a smooth, continuous velocity-proportional auto-scroll loop (supporting both RTL and LTR). Hovering near the top or bottom of tall semester columns also smoothly auto-scrolls vertically, allowing frictionless course placement anywhere on the board.
-- **Semester Removal & Addition (מחיקת סמסטרים והוספת סמסטרים מעבר ל-8):**
-  Students can now delete unnecessary semesters in custom mode via a `✕` button on each semester header. Safety is guaranteed: courses are automatically evacuated into the unassigned electives pool. In addition, a `+ הוסף סמסטר לתואר ➕` column at the end of the board lets students add Semesters 9, 10, etc. seamlessly.
-- **Full Semestero Emblem Notification Icon (סמל מלא של מבחנה וזרוע רובוטית בסטטוס בר):**
-  Redesigned the Android status bar notification icon generator (`ic_stat_notification.png` across all densities). By filling the science flask body and neck with solid white and carving out the robotic arm as a thick negative space cutout, the icon displays the authentic, full Semestero emblem with crisp high-contrast visibility at 24dp, completely resolving the hollow gear donut effect.
-- **Wave 2 Interactive Widgets - Pomodoro Focus Timer:**
-  Marked and approved Wave 2 Proposal 1: Live Pomodoro & Study Marathon Timer (`pomodoro`) for upcoming widget iterations.
-- **Daily 07:30 AM Briefing & Exact Alarms:**
-  Carries over the morning briefing engine and precision 10-minute class reminders.
+- **7 Full Native Android Home-Screen Widgets Suite (חבילת 7 וידג'טים מקוריים מלאים למסך הבית של אנדרואיד):**
+  Added all 5 approved native `AppWidgetProvider` widgets, expanding the native widget picker from 2 to **7 full widgets**:
+  1. ⏰ **השיעור הבא ומערכת שעות (Next Class & Day Schedule - 3x2)**: Real-time countdown to next lecture, hall, room, lecturer, and interactive carousel.
+  2. 📝 **מטלות ובחינות קרובות (Tasks & Exam Countdown - 4x2)**: Real-time days countdown to nearest exam, top urgent assignments, 1-tap task completion right from the home screen, and `+ הוסף משימה` shortcut.
+  3. 🚀 **רציף קיצורי דרך טכניון (Technion Quick Launchpad Dock - 4x1)**: 5 direct 1-tap launchers for essential Technion portals: 🎓 Moodle 26, 🎥 Panopto, 🧀 CheeseFork, 🏛️ Campus SAP, and 📂 ME Summaries Drive.
+  4. 🎖️ **מעקב זכויות מילואים (Miluim Academic Rights Tracker - 3x2)**: Live counter of reserve service days (ימי שמ״פ), active exemptions (2 נ״ז פטור אקדמי), guaranteed Moed C rights, and Panopto assistance.
+  5. 🗓️ **לוח שבועי ומפת שעות (Weekly Schedule Heatmap - 4x2)**: Comprehensive weekly load overview for Sunday–Thursday with daily class hours, free day recognition (🏖️), and total weekly hours.
+  6. 📊 **מסלול בחינות וממוצע יעד (Finals Runway & GPA Target Gauge - 3x2)**: Dual metric display tracking days to Moed A, current cumulative GPA vs semester target, and Dean's Honors status.
+  7. ⏱️ **טיימר פומודורו ומרתון למידה (Interactive Pomodoro Focus Timer - 3x2)**: Live focus timer with interactive `▶️ התחל` / `⏸️ השהה` buttons and 25m/50m/90m preset switching directly on the Android home screen!
+- **Real-Time Two-Way Sync Bridge:**
+  Configured `@JavascriptInterface` bridge in `MainActivity.java` and `app.js` to continuously feed live student data into `SharedPreferences` and refresh all 7 widgets simultaneously upon app launch or schedule changes.
+- **Degree Planner Edge Auto-Scroll & Semester Removal/Addition:**
+  Full drag-and-drop edge auto-scrolling engine and semester management with safe course evacuation.
+- **Full Semestero Emblem Notification Mask:**
+  High-contrast solid white flask with dilated robotic arm cutout in the Android status bar.
 """
 
     payload = {

@@ -58,6 +58,68 @@
                 android:name="android.appwidget.provider"
                 android:resource="@xml/widget_tasks_exam_info" />
         </receiver>
+
+        <receiver
+            android:name=".SemesteroLaunchpadWidget"
+            android:label="רציף קיצורי דרך טכניון"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_launchpad_info" />
+        </receiver>
+
+        <receiver
+            android:name=".SemesteroMiluimWidget"
+            android:label="מעקב זכויות מילואים"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_miluim_info" />
+        </receiver>
+
+        <receiver
+            android:name=".SemesteroScheduleWidget"
+            android:label="לוח שבועי ומפת שעות"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_schedule_info" />
+        </receiver>
+
+        <receiver
+            android:name=".SemesteroFinalsGpaWidget"
+            android:label="מסלול בחינות וממוצע יעד"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_finals_gpa_info" />
+        </receiver>
+
+        <receiver
+            android:name=".SemesteroPomodoroWidget"
+            android:label="טיימר פומודורו ומרתון למידה"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="com.technion.semestero.ACTION_POMODORO_TOGGLE" />
+                <action android:name="com.technion.semestero.ACTION_POMODORO_MODE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_pomodoro_info" />
+        </receiver>
     </application>
 
     <!-- Permissions -->

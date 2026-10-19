@@ -19500,7 +19500,7 @@ function exportTimetableToICS() {
 window.exportTimetableToICS = exportTimetableToICS;
 
 // =========================================================================
-// GOOGLE CALENDAR MANAGEMENT, CLEANUP & IN-APP TIMETABLE EDITING (v2.4.26)
+// GOOGLE CALENDAR MANAGEMENT, CLEANUP & IN-APP TIMETABLE EDITING (v2.4.27)
 // =========================================================================
 
 // Exports an RFC 5545 cancellation .ics file (METHOD:CANCEL, STATUS:CANCELLED)
@@ -20565,13 +20565,13 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.10.18-v2.4.26",
-    version: "2.4.26",
+    code: "REV-2026.10.18-v2.4.27",
+    version: "2.4.27",
     build: "20261018_08",
     date: "2026-10-18 16:45",
     description: "גרסה 2.4.20: מבנה כרטיסיית שיעור ב-4 שורות מוגדרות, מנהל מחיקה ועריכה מלא ליומן גוגל (כולל קובץ ביטול ICS CANCEL), וטיהור מוחלט של 'כיתת טכניון'"
 };
-window.APP_VERSION = "2.4.26";
+window.APP_VERSION = "2.4.27";
 
 function ensureBaselineRevisions() {
     if (!gameState.revisions || !Array.isArray(gameState.revisions) || gameState.revisions.length === 0) {
@@ -23113,6 +23113,54 @@ function syncNativeAndroidWidgets(classData, tasksData) {
                 task2,
                 task2Id,
                 tasksSummary
+            );
+        }
+
+        // 3. Update Miluim Rights Tracker Widget
+        if (window.SemesteroWidgetBridge.updateMiluimWidget) {
+            const mDays = (typeof gameState !== 'undefined' && gameState.miluimDays) ? String(gameState.miluimDays) : "21";
+            window.SemesteroWidgetBridge.updateMiluimWidget(
+                mDays,
+                "🎖️ פעיל תשפ״ז",
+                "✓ 2 נ״ז פטור אקדמי (מאושר)",
+                "✓ זכאות למועד ג׳ בכל הקורסים",
+                "✓ הקלטות פנופטו וסיוע חונכות"
+            );
+        }
+
+        // 4. Update Weekly Schedule Heatmap Widget
+        if (window.SemesteroWidgetBridge.updateScheduleWidget) {
+            window.SemesteroWidgetBridge.updateScheduleWidget(
+                "15 ש״ס • יום חופש 🏖️",
+                "10:30-16:30 • מוצקים 2 + פיסיקה (4 שעות)",
+                "🏖️ יום חופשי מלא! (0 שעות)",
+                "08:30-14:30 • מתמטיקה ומעבדה (6 שעות)",
+                "10:30-12:30 • תרגול מוצקים (2 שעות)",
+                "07:30-10:30 • יוגה ורובוטיקה (3 שעות)"
+            );
+        }
+
+        // 5. Update Finals Runway & GPA Target Widget
+        if (window.SemesteroWidgetBridge.updateFinalsGpaWidget) {
+            const currentGpa = (typeof gameState !== 'undefined' && gameState.calculatedAverage) ? String(gameState.calculatedAverage) : "88.4";
+            window.SemesteroWidgetBridge.updateFinalsGpaWidget(
+                currentGpa,
+                "יעד סמסטר: 90.0",
+                "🏆 מצטיין דיקן",
+                examDays,
+                examSub,
+                examTitle
+            );
+        }
+
+        // 6. Update Pomodoro Focus Timer Widget
+        if (window.SemesteroWidgetBridge.updatePomodoroWidget) {
+            window.SemesteroWidgetBridge.updatePomodoroWidget(
+                "25:00",
+                "25m",
+                "🎯 פוקוס: פיסיקה 2מ • תרגיל בית 3",
+                "🔥 3.5 / 5.0 שעות (70%)",
+                false
             );
         }
 

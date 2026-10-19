@@ -42,7 +42,7 @@ public class MainActivity extends BridgeActivity {
         if (intent != null) {
             String action = intent.getStringExtra("widget_action");
             String tab = intent.getStringExtra("target_tab");
-            String tabId = "timetable".equals(tab) ? "timetable" : ("tasks".equals(tab) ? "tasks" : null);
+            String tabId = "timetable".equals(tab) ? "timetable" : ("tasks".equals(tab) ? "tasks" : ("runway".equals(tab) ? "runway" : ("flowchart".equals(tab) ? "flowchart" : null)));
 
             if (getBridge() != null && getBridge().getWebView() != null) {
                 getBridge().getWebView().postDelayed(() -> {
@@ -120,6 +120,71 @@ public class MainActivity extends BridgeActivity {
                 prefs.edit().remove("completed_from_widget_ids").apply();
             }
             return completed;
+        }
+
+        @JavascriptInterface
+        public void updateMiluimWidget(String days, String badge, String right1, String right2, String right3) {
+            SharedPreferences prefs = context.getSharedPreferences(SemesteroMiluimWidget.PREFS_NAME, Context.MODE_PRIVATE);
+            prefs.edit()
+                .putString("miluim_days", days)
+                .putString("miluim_badge", badge)
+                .putString("miluim_right_1", right1)
+                .putString("miluim_right_2", right2)
+                .putString("miluim_right_3", right3)
+                .apply();
+            SemesteroMiluimWidget.pushUpdate(context);
+        }
+
+        @JavascriptInterface
+        public void updateScheduleWidget(String totalHours, String sun, String mon, String tue, String wed, String thu) {
+            SharedPreferences prefs = context.getSharedPreferences(SemesteroScheduleWidget.PREFS_NAME, Context.MODE_PRIVATE);
+            prefs.edit()
+                .putString("sched_total_hours", totalHours)
+                .putString("sched_sun", sun)
+                .putString("sched_mon", mon)
+                .putString("sched_tue", tue)
+                .putString("sched_wed", wed)
+                .putString("sched_thu", thu)
+                .apply();
+            SemesteroScheduleWidget.pushUpdate(context);
+        }
+
+        @JavascriptInterface
+        public void updateFinalsGpaWidget(String gpaCurrent, String gpaTarget, String badge, String examDays, String examName, String examCourse) {
+            SharedPreferences prefs = context.getSharedPreferences(SemesteroFinalsGpaWidget.PREFS_NAME, Context.MODE_PRIVATE);
+            prefs.edit()
+                .putString("gpa_current", gpaCurrent)
+                .putString("gpa_target", gpaTarget)
+                .putString("gpa_badge", badge)
+                .putString("finals_exam_days", examDays)
+                .putString("finals_exam_name", examName)
+                .putString("finals_exam_course", examCourse)
+                .apply();
+            SemesteroFinalsGpaWidget.pushUpdate(context);
+        }
+
+        @JavascriptInterface
+        public void updatePomodoroWidget(String time, String mode, String task, String goal, boolean isRunning) {
+            SharedPreferences prefs = context.getSharedPreferences(SemesteroPomodoroWidget.PREFS_NAME, Context.MODE_PRIVATE);
+            prefs.edit()
+                .putString("pomodoro_time", time)
+                .putString("pomodoro_mode", mode)
+                .putString("pomodoro_task", task)
+                .putString("pomodoro_goal", goal)
+                .putBoolean("pomodoro_running", isRunning)
+                .apply();
+            SemesteroPomodoroWidget.pushUpdate(context);
+        }
+
+        @JavascriptInterface
+        public void refreshAllWidgets() {
+            SemesteroNextClassWidget.pushUpdate(context);
+            SemesteroTasksExamWidget.pushUpdate(context);
+            SemesteroLaunchpadWidget.pushUpdate(context);
+            SemesteroMiluimWidget.pushUpdate(context);
+            SemesteroScheduleWidget.pushUpdate(context);
+            SemesteroFinalsGpaWidget.pushUpdate(context);
+            SemesteroPomodoroWidget.pushUpdate(context);
         }
     }
 }
