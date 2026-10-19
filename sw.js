@@ -1,5 +1,5 @@
-// Service Worker for Academic Skill Tree (Semestero ME) - v2.4.30
-const CACHE_NAME = 'semestero-me-v2.4.30';
+// Service Worker for Academic Skill Tree (Semestero ME) - v2.4.31
+const CACHE_NAME = 'semestero-me-v2.4.31';
 
 const STATIC_ASSETS = [
     './',

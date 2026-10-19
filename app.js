@@ -20587,13 +20587,13 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.10.18-v2.4.29",
-    version: "2.4.29",
-    build: "20261018_08",
-    date: "2026-10-18 16:45",
-    description: "גרסה 2.4.20: מבנה כרטיסיית שיעור ב-4 שורות מוגדרות, מנהל מחיקה ועריכה מלא ליומן גוגל (כולל קובץ ביטול ICS CANCEL), וטיהור מוחלט של 'כיתת טכניון'"
+    code: "REV-2026.10.20-v2.4.31",
+    version: "2.4.31",
+    build: "20261020_01",
+    date: "2026-10-20 01:00",
+    description: "גרסה 2.4.31: מנוע עדכונים אוטונומי בזמן אמת לווב, PWA ו-Capacitor Android, רענון שקט ומניעת לולאות, ועדכוני APK בנגיעה אחת"
 };
-window.APP_VERSION = "2.4.29";
+window.APP_VERSION = "2.4.31";
 
 function ensureBaselineRevisions() {
     if (!gameState.revisions || !Array.isArray(gameState.revisions) || gameState.revisions.length === 0) {
@@ -22129,6 +22129,46 @@ window.checkRemoteAppVersion = async function(isManualCheck = false) {
                 statusTextEl.innerHTML = `<span style="color: #34d399; font-weight: bold;">🎉 גרסה v${remoteVer} זמינה!</span>`;
             }
 
+            // AUTO-UPDATE ENGINE (Web, PWA, and Capacitor Live Container):
+            // When a new version is detected during automated background checks,
+            // seamlessly refresh the cache and reload to the latest release over the air.
+            // Guarded by sessionStorage to prevent infinite reload loops if CDN lags.
+            if (!isElectron && !isManualCheck) {
+                const autoUpdateKey = `semestero_auto_updated_to_${remoteVer}`;
+                if (!sessionStorage.getItem(autoUpdateKey)) {
+                    sessionStorage.setItem(autoUpdateKey, 'true');
+                    console.log(`[AutoUpdate] New version v${remoteVer} detected. Auto-refreshing cache and reloading...`);
+                    if (typeof showToastNotification === 'function') {
+                        showToastNotification(`🚀 מעדכן אוטומטית לגרסה v${remoteVer}...`, 'info');
+                    }
+                    setTimeout(() => {
+                        if (typeof window.forceAppUpdate === 'function') {
+                            window.forceAppUpdate();
+                        } else {
+                            window.location.reload(true);
+                        }
+                    }, 1400);
+                    return;
+                }
+            }
+
+            // Mobile Native APK notification banner (Capacitor / Android)
+            const isNativeAndroid = (window.Capacitor || window.location.protocol === 'capacitor:' || /Android/i.test(navigator.userAgent));
+            if (isNativeAndroid) {
+                const dismissedApkKey = `dismissed_apk_banner_${remoteVer}`;
+                if (!sessionStorage.getItem(dismissedApkKey) && !document.getElementById('mobile-apk-update-pill')) {
+                    const pill = document.createElement('div');
+                    pill.id = 'mobile-apk-update-pill';
+                    pill.style.cssText = 'position: fixed; top: 16px; left: 50%; transform: translateX(-50%); z-index: 99999; background: linear-gradient(135deg, #0284c7, #0369a1); color: #fff; padding: 10px 16px; border-radius: 9999px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); display: flex; align-items: center; gap: 10px; font-size: 0.85rem; font-weight: 600; font-family: inherit; direction: rtl; border: 1px solid rgba(255,255,255,0.2);';
+                    pill.innerHTML = `
+                        <span>📲 עדכון אפליקציה חדש זמין (v${remoteVer})</span>
+                        <a href="https://github.com/adir2368/Semestero-ME/releases/latest/download/Semestero-ME.apk" target="_blank" rel="noopener noreferrer" style="background: #fff; color: #0284c7; padding: 4px 10px; border-radius: 20px; text-decoration: none; font-weight: 700; font-size: 0.8rem;">התקן עדכון ⬇️</a>
+                        <button type="button" style="background: transparent; border: none; color: #fff; font-size: 1.1rem; cursor: pointer; padding: 0 4px;" onclick="sessionStorage.setItem('${dismissedApkKey}', 'true'); this.parentElement.remove();">✕</button>
+                    `;
+                    document.body.appendChild(pill);
+                }
+            }
+
             // Populate update modal
             const modVerText = document.getElementById("update-modal-version-text");
             const modCurText = document.getElementById("update-modal-current-text");
@@ -22152,6 +22192,9 @@ window.checkRemoteAppVersion = async function(isManualCheck = false) {
             }
         } else {
             // System is up to date
+            const existingPill = document.getElementById('mobile-apk-update-pill');
+            if (existingPill) existingPill.remove();
+
             const updateModal = document.getElementById("version-update-modal");
             if (updateModal) {
                 updateModal.style.display = "none";
@@ -22398,6 +22441,15 @@ setTimeout(() => {
         }
     } catch (e) {}
 }, 3500);
+
+// Periodic background version check every 15 minutes while app is active
+setInterval(() => {
+    try {
+        if (typeof window.checkRemoteAppVersion === 'function') {
+            window.checkRemoteAppVersion(false);
+        }
+    } catch (e) {}
+}, 15 * 60 * 1000);
 
 // =======================================================
 // Daily Timetable & CheeseFork Auto-Sync System

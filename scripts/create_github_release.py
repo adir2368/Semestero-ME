@@ -46,14 +46,18 @@ def create_release():
 👉 **[Semestero-ME.apk](https://github.com/{REPO}/releases/download/{TAG}/Semestero-ME.apk)**
 
 #### ✨ Highlights in {TAG}:
-- 🛡️ **Hermetic Academic Course & Grades Protection (39.5 Credits, 86.39 GPA):**
-  Guaranteed preservation and zero data loss for all 11 completed courses and authentic grades (`104041`: 84, `104065`: 87, `114051`: 100, `125001`: 96, `234128`: 87, `104043`: 70, `104131`: 74, `125013`: 94, `314533`: 90, `034028`: 82, `034061`: 99) with robust self-healing on startup.
-- 📐 **Authentic Technion ME Degree Syllabus Alignment:**
-  Curriculum catalog and degree planner aligned with modern Technion syllabus: Semester 1 features Python `234128` (4 cr) and Physics 1 `114051` (3.5 cr); Semester 2 features Chemistry Lab `125013` (0.5 cr); Semester 3 features Yoga `03940805` (1 cr) and Physics 2 `114052` (3.5 cr); Semester 6 reflects merged Mechatronics & Electric Drive `034060` (4 cr), purging obsolete course codes.
-- ⚡ **Dedicated `preloaded_user_state.js` Module:**
-  Standalone preloaded user state cleanly bound to `window.PRELOADED_USER_STATE`, eliminating script execution race conditions.
-- 📱 **Zero-Data-Loss Android Capacitor Protection:**
-  Native mobile environment automatically authenticates Adir Moshe and permanently locks developer status, eliminating accidental guest heuristic resets on Android.
+- 🔄 **Autonomous Real-Time Over-The-Air Update Engine (Web, PWA & Capacitor):**
+  Seamless automatic cache invalidation and background version updates without requiring manual app reloads or cache clearing.
+- ⏱️ **15-Minute Periodic Background Update Polling:**
+  The app continuously checks for updates every 15 minutes while in use and automatically refreshes to latest release upon detection.
+- 🛡️ **Anti-Loop Session Guard:**
+  Session-scoped guard (`sessionStorage.getItem('semestero_auto_updated_to_' + remoteVer)`) prevents reload loops during CDN edge propagation.
+- 📱 **One-Tap Android APK Update Workflow:**
+  Added direct APK download button to the version modal and non-intrusive floating update notification pill for native mobile devices.
+- 📦 **Native Android Permission:**
+  Included `android.permission.REQUEST_INSTALL_PACKAGES` in `AndroidManifest.xml` for seamless one-tap native package installation.
+- 🔒 **Hermetic Course & Grades Integrity Preserved:**
+  All 11 completed courses (39.5 credits, 86.39 GPA) and 2026 Technion ME syllabus remain fully protected and self-healing.
 """
 
     payload = {
