@@ -153,7 +153,7 @@ var SAMPLE_ME_DEGREE = (typeof window !== 'undefined' && window.SAMPLE_ME_DEGREE
         prerequisites: ["034028","104043","104065"],
         status: "locked",
         tasks: [
-            { id: "034053_h1", title: "תרגיל בית 1: כפיפת קורות מאמצים משולבים", type: "hw", xp: 60, completed: false },
+            { id: "034053_h1", title: "תרגיל בית 1: כפיפת קורות ומאמצים משולבים (הגשת PDF בכתב יד)", type: "hw", xp: 60, completed: false },
             { id: "034053_ex", title: "מבחן סוף", type: "exam", xp: 550, completed: false }
         ]
     },
@@ -193,6 +193,7 @@ var SAMPLE_ME_DEGREE = (typeof window !== 'undefined' && window.SAMPLE_ME_DEGREE
         prerequisites: ["234128","104131"],
         status: "locked",
         tasks: [
+            { id: "034056_matlab_bonus", title: "לומדת MATLAB (בונוס 2 נקודות לציון)", type: "assignment", xp: 75, completed: false },
             { id: "034056_h1", title: "תרגיל בית 1: פתרון משוואות לא ליניאריות בפייתון", type: "hw", xp: 50, completed: false },
             { id: "034056_p1", title: "פרוייקט חישובי: אנליזה של מערכת מכנית מורכבת", type: "project", xp: 200, completed: false },
             { id: "034056_ex", title: "מבחן סוף", type: "exam", xp: 500, completed: false }
@@ -206,6 +207,7 @@ var SAMPLE_ME_DEGREE = (typeof window !== 'undefined' && window.SAMPLE_ME_DEGREE
         prerequisites: ["104043","104041"],
         status: "available",
         tasks: [
+            { id: "034035_midterm", title: "בוחן אמצע מגן (20% מגן)", type: "exam", xp: 150, completed: false },
             { id: "034035_h1", title: "תרגיל בית 1: החוק הראשון של התרמודינמיקה", type: "hw", xp: 50, completed: false },
             { id: "034035_ex", title: "מבחן סוף", type: "exam", xp: 500, completed: false }
         ]

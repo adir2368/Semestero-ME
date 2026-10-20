@@ -740,6 +740,15 @@
       "moedB": "2027-03-05",
       "tasks": [
         {
+          "id": "034035_midterm",
+          "xp": 150,
+          "type": "exam",
+          "title": "בוחן אמצע מגן (20%)",
+          "status": "not_started",
+          "dueDate": "2026-12-16",
+          "completed": false
+        },
+        {
           "id": "034035_h1",
           "xp": 50,
           "type": "hw",
@@ -899,7 +908,7 @@
           "id": "034053_h1",
           "xp": 60,
           "type": "hw",
-          "title": "תרגיל בית 1: כפיפת קורות ומאמצים משולבים",
+          "title": "תרגיל בית 1: כפיפת קורות ומאמצים משולבים (הגשת PDF בכתב יד)",
           "status": "not_started",
           "dueDate": "",
           "completed": false
@@ -1031,6 +1040,15 @@
       "moedA": "2027-02-11",
       "moedB": "2027-03-10",
       "tasks": [
+        {
+          "id": "034056_matlab_bonus",
+          "xp": 75,
+          "type": "assignment",
+          "title": "לומדת MATLAB (בונוס 2 נק׳ לציון הסופי)",
+          "status": "done",
+          "dueDate": "2026-11-19",
+          "completed": true
+        },
         {
           "id": "034056_h1",
           "xp": 50,
