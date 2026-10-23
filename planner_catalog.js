@@ -524,6 +524,43 @@
             { code: "03240032", altCode: "324032", name: "אנגלית - מתקדמים א'", credits: 0.0, list: "E", prereqs: [] },
             { code: "03240033", altCode: "324033", name: "אנגלית טכנית מתקדמים ב'", credits: 3.0, list: "E", prereqs: [] },
             { code: "00350026", altCode: "035026", name: "מבוא יצירתי להנדסת מכונות (רשות)", credits: 2.5, list: "E", prereqs: [] }
+        ],
+
+        // קורסי ספורט וחינוך גופני (Technion Physical Education & Sports)
+        SPORTS: [
+            { code: "03940800", altCode: "394800", name: "חינוך גופני - כושר גופני וחדר כושר", credits: 1.0, type: "sports", list: "SPORTS", prereqs: [] },
+            { code: "03940801", altCode: "394801", name: "חינוך גופני - התעמלות ואימון פונקציונלי", credits: 1.0, type: "sports", list: "SPORTS", prereqs: [] },
+            { code: "03940802", altCode: "394802", name: "חינוך גופני - שחייה (סגנונות ואימון)", credits: 1.0, type: "sports", list: "SPORTS", prereqs: [] },
+            { code: "03940803", altCode: "394803", name: "חינוך גופני - משחקי כדור (כדורסל/כדורגל/כדורעף)", credits: 1.0, type: "sports", list: "SPORTS", prereqs: [] },
+            { code: "03940804", altCode: "394804", name: "חינוך גופני - משחקי מחבט (טניס/טניס שולחן/בדמינטון)", credits: 1.0, type: "sports", list: "SPORTS", prereqs: [] },
+            { code: "03940805", altCode: "394805", name: "חינוך גופני - אתלטיקה קלה / יוגה", credits: 1.0, type: "sports", list: "SPORTS", prereqs: [] },
+            { code: "03940806", altCode: "394806", name: "חינוך גופני - הגנה עצמית וקרב מגע", credits: 1.0, type: "sports", list: "SPORTS", prereqs: [] },
+            { code: "03940807", altCode: "394807", name: "חינוך גופני - כושר גופני מעורב", credits: 1.0, type: "sports", list: "SPORTS", prereqs: [] },
+            { code: "03940808", altCode: "394808", name: "חינוך גופני - פילאטיס ומתיחות", credits: 1.0, type: "sports", list: "SPORTS", prereqs: [] },
+            { code: "03940820", altCode: "394820", name: "חינוך גופני - תנועה, יציבה ומחול", credits: 1.0, type: "sports", list: "SPORTS", prereqs: [] },
+            { code: "03940902", altCode: "394902", name: "נבחרות ספורט אס״א טכניון", credits: 1.5, type: "sports", list: "SPORTS", prereqs: [] }
+        ],
+
+        // קורסי מל״ג ולימודים הומניסטיים (Technion Humanities & Social Sciences)
+        MALAG: [
+            { code: "03240262", altCode: "324262", name: "מל״ג - תולדות הפילוסופיה והמדע בעת החדשה", credits: 2.0, type: "humanities", list: "MALAG", prereqs: [] },
+            { code: "03240265", altCode: "324265", name: "מל״ג - אקו-פילוסופיה: חשיבה סביבתית", credits: 2.0, type: "humanities", list: "MALAG", prereqs: [] },
+            { code: "03240269", altCode: "324269", name: "מל״ג - אתיקה בפעולה", credits: 2.0, type: "humanities", list: "MALAG", prereqs: [] },
+            { code: "03240292", altCode: "324292", name: "מל״ג - משפט, שוויון וצדק חברתי", credits: 2.0, type: "humanities", list: "MALAG", prereqs: [] },
+            { code: "03240305", altCode: "324305", name: "מל״ג - היסטוריה של המדע והטכנולוגיה", credits: 2.0, type: "humanities", list: "MALAG", prereqs: [] },
+            { code: "03240442", altCode: "324442", name: "מל״ג - משפט העבודה בישראל", credits: 2.0, type: "humanities", list: "MALAG", prereqs: [] },
+            { code: "03240445", altCode: "324445", name: "מל״ג - הסתגלות למצבי לחץ וקבלת החלטות", credits: 2.0, type: "humanities", list: "MALAG", prereqs: [] },
+            { code: "03240452", altCode: "324452", name: "מל״ג - מעקב וטכנולוגיה: תיאוריה ואתיקה", credits: 2.0, type: "humanities", list: "MALAG", prereqs: [] },
+            { code: "03240454", altCode: "324454", name: "מל״ג - מבוא לפילוסופיה של המדע", credits: 2.0, type: "humanities", list: "MALAG", prereqs: [] },
+            { code: "03240463", altCode: "324463", name: "מל״ג - היסטוריה של המזרח התיכון", credits: 2.0, type: "humanities", list: "MALAG", prereqs: [] },
+            { code: "03240473", altCode: "324473", name: "מל״ג - מבנה חדשנות מדעית ושינוי פרדיגמה", credits: 2.0, type: "humanities", list: "MALAG", prereqs: [] },
+            { code: "03240474", altCode: "324474", name: "מל״ג - אתיקה: יסודות, נורמה ויישום", credits: 2.0, type: "humanities", list: "MALAG", prereqs: [] },
+            { code: "03240478", altCode: "324478", name: "מל״ג - תכנון וניהול קריירה למהנדסים", credits: 2.0, type: "humanities", list: "MALAG", prereqs: [] },
+            { code: "03240250", altCode: "324250", name: "מל״ג - עיצוב גרפי ותקשורת חזותית", credits: 2.0, type: "humanities", list: "MALAG", prereqs: [] },
+            { code: "03240235", altCode: "324235", name: "מל״ג - תקשורת בין-אישית באמצעי תיאטרון", credits: 1.5, type: "humanities", list: "MALAG", prereqs: [] },
+            { code: "03240446", altCode: "324446", name: "מל״ג - מבוא להיסטוריה של מוזיקת הג'אז", credits: 2.0, type: "humanities", list: "MALAG", prereqs: [] },
+            { code: "03240282", altCode: "324282", name: "מל״ג - פוליטיקה של זהויות בישראל", credits: 2.0, type: "humanities", list: "MALAG", prereqs: [] },
+            { code: "03240299", altCode: "324299", name: "מל״ג - טרור, ג'יהאד ותגובה מדינית", credits: 2.0, type: "humanities", list: "MALAG", prereqs: [] }
         ]
     };
 
@@ -836,7 +873,7 @@
         }
 
         // 4. MALAG / Humanities / Free Electives
-        if (courseObj && (courseObj.type === 'malag' || courseObj.type === 'free' || courseObj.isMalag)) {
+        if (courseObj && (courseObj.type === 'malag' || courseObj.type === 'humanities' || courseObj.type === 'free' || courseObj.isMalag || courseObj.list === 'MALAG' || keys.some(k => k.startsWith('324') || k.startsWith('0324')))) {
             return { offered: true, note: 'קורסי מל״ג ובחירה חופשית מוצעים בסמסטר קיץ' };
         }
 

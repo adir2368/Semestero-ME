@@ -1255,14 +1255,14 @@
             const nameStr = String(c.name || '');
             const creds = Number(c.credits) || 0;
 
-            // Malag / Humanities (dept 324, list E, or name contains מל"ג)
-            if (c.list === 'E' || codeStr.startsWith('324') || nameStr.includes('מל"ג') || nameStr.includes('מלג')) {
+            // Malag / Humanities (dept 324, list E/MALAG, type humanities, or name contains מל"ג)
+            if (c.list === 'E' || c.list === 'MALAG' || c.type === 'humanities' || codeStr.startsWith('324') || nameStr.includes('מל"ג') || nameStr.includes('מלג')) {
                 countMalag++;
                 creditsMalag += creds;
             }
 
-            // Sport / Physical Education (dept 394 or 0394)
-            if (codeStr.startsWith('394') || nameStr.includes('ספורט') || nameStr.includes('חינוך גופני')) {
+            // Sport / Physical Education (dept 394 or 0394, list SPORTS, type sports)
+            if (c.list === 'SPORTS' || c.type === 'sports' || codeStr.startsWith('394') || nameStr.includes('ספורט') || nameStr.includes('חינוך גופני')) {
                 countSport++;
             }
 
@@ -1689,8 +1689,10 @@
                 const prereqStatus = checkPrerequisites(course, semNum, courseSemMap);
                 const courseWl = calculateCourseWorkload(course);
 
-                const tagClass = completed ? 'tag-completed' : (course.list ? `tag-list-${course.list}` : (course.type ? `tag-${course.type}` : 'tag-mandatory'));
-                const tagLabel = completed ? (grade ? `✓ הושלם [${grade}]` : '✓ הושלם') : (course.list ? `בחירה ${course.list}׳` : (course.type === 'final_project' ? 'פרויקט גמר' : 'חובה'));
+                const isSportCourse = course.list === 'SPORTS' || course.type === 'sports';
+                const isMalagCourse = course.list === 'MALAG' || course.type === 'humanities';
+                const tagClass = completed ? 'tag-completed' : (isSportCourse ? 'tag-sports' : (isMalagCourse ? 'tag-malag' : (course.list ? `tag-list-${course.list}` : (course.type ? `tag-${course.type}` : 'tag-mandatory'))));
+                const tagLabel = completed ? (grade ? `✓ הושלם [${grade}]` : '✓ הושלם') : (isSportCourse ? '🏃 ספורט' : (isMalagCourse ? '🎭 מל״ג' : (course.list ? `בחירה ${course.list}׳` : (course.type === 'final_project' ? 'פרויקט גמר' : 'חובה'))));
 
                 const canDrag = currentMode === 'custom' && !completed;
                 const canRemove = currentMode === 'custom' && !completed;
@@ -1839,7 +1841,7 @@
         const readyContainer = document.getElementById('planner-ready-electives-list');
         const readyCourses = [];
 
-        ['A', 'B', 'C', 'D', 'E'].forEach(cat => {
+        ['A', 'B', 'C', 'D', 'E', 'SPORTS', 'MALAG'].forEach(cat => {
             (global.PLANNER_CATALOG.ELECTIVE_CATALOG[cat] || []).forEach(course => {
                 const keys = getNormalizedCodes(course.code, course.altCode);
                 if (keys.some(k => placedCodes.has(k))) return;
@@ -1868,7 +1870,13 @@
                         <div class="pool-item-info">
                             <span class="pool-item-title">${escapeHtml(course.name)}</span>
                             <div class="pool-item-meta">
-                                <span class="course-card-tag tag-list-${course.list}">רשימה ${course.list}׳</span>
+                                ${
+                                    course.list === "SPORTS" || course.type === "sports"
+                                        ? '<span class="course-card-tag tag-sports">🏃 ספורט</span>'
+                                        : (course.list === "MALAG" || course.type === "humanities"
+                                            ? '<span class="course-card-tag tag-malag">🎭 מל״ג</span>'
+                                            : `<span class="course-card-tag tag-list-${course.list}">רשימה ${course.list}׳</span>`)
+                                }
                                 <span>${course.credits} נק״ז</span>
                             </div>
                         </div>
@@ -1915,7 +1923,7 @@
         } else if (selectedCategory === 'SUMMER') {
             const allCandidates = [];
             (unassignedCourses || []).forEach(c => allCandidates.push({ ...c, isUnassignedItem: true }));
-            ['A', 'B', 'C', 'D', 'E'].forEach(cat => {
+            ['A', 'B', 'C', 'D', 'E', 'SPORTS', 'MALAG'].forEach(cat => {
                 (global.PLANNER_CATALOG.ELECTIVE_CATALOG[cat] || []).forEach(c => allCandidates.push(c));
             });
             allCandidates.forEach(course => {
@@ -1941,7 +1949,7 @@
                 });
             }
 
-            const cats = selectedCategory === 'ALL' ? ['A', 'B', 'C', 'D', 'E'] : [selectedCategory];
+            const cats = selectedCategory === 'ALL' ? ['A', 'B', 'C', 'D', 'E', 'SPORTS', 'MALAG'] : [selectedCategory];
             cats.forEach(cat => {
                 (global.PLANNER_CATALOG.ELECTIVE_CATALOG[cat] || []).forEach(course => {
                     const keys = getNormalizedCodes(course.code, course.altCode);
@@ -1962,12 +1970,14 @@
             poolContainer.innerHTML = `<div style="font-size: 0.76rem; color: #94a3b8; text-align: center; padding: 16px;">${emptyMsg}</div>`;
         } else {
             poolContainer.innerHTML = coursesToShow.map(course => {
+                const isSportItem = course.list === 'SPORTS' || course.type === 'sports';
+                const isMalagItem = course.list === 'MALAG' || course.type === 'humanities';
                 const tagClass = course.isUnassignedItem 
                     ? 'tag-mandatory' 
-                    : (course.list ? `tag-list-${course.list}` : 'tag-mandatory');
+                    : (isSportItem ? 'tag-sports' : (isMalagItem ? 'tag-malag' : (course.list ? `tag-list-${course.list}` : 'tag-mandatory')));
                 const tagLabel = course.isUnassignedItem 
                     ? 'שלא שובץ' 
-                    : (course.list ? `רשימה ${course.list}׳` : 'חובה');
+                    : (isSportItem ? '🏃 ספורט' : (isMalagItem ? '🎭 מל״ג' : (course.list ? `רשימה ${course.list}׳` : 'חובה')));
 
                 return `
                     <div class="planner-pool-item" draggable="true" data-code="${escapeHtml(course.code)}" data-alt-code="${escapeHtml(course.altCode || '')}" title="לחץ לצפייה בסילבוס, ביקורות והיסטוגרמות ב-CheeseFork 🧀">

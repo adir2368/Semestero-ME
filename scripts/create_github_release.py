@@ -13,7 +13,7 @@ APK_PATH = os.path.join(ROOT, "Semestero-ME.apk")
 # Read version from package.json
 with open(os.path.join(ROOT, "package.json"), "r", encoding="utf-8") as f:
     pkg = json.load(f)
-VERSION = pkg.get("version", "2.4.21")
+VERSION = pkg.get("version", "2.5.3")
 TAG = f"v{VERSION}"
 NAME = f"Semestero ME v{VERSION} - Android Native Release"
 
@@ -49,13 +49,15 @@ def create_release():
 🍏 Open **[https://adir2368.github.io/Semestero-ME/](https://adir2368.github.io/Semestero-ME/)** in **Safari** ➔ Tap **Share** ➔ Tap **Add to Home Screen**. Full-screen native experience!
 
 #### ✨ Highlights in {TAG}:
-- 🛑 **Permanent Infinite Reload Loop Resolution:**
-  Fixed the version divergence where `window.APP_VERSION` lagged behind `APP_CURRENT_REVISION`, eliminating circular updates.
-- 🛡️ **Persistent LocalStorage Auto-Update Throttle:**
-  Added a 10-minute cooldown and per-version persistent guard across sessions so mobile browsers and PWAs never get trapped in reload loops.
-- 📲 **Direct Download Links & Modal:**
-  Added a direct download button and modal on the website, settings page, and README with one-tap downloads for Android and iOS installation guides.
-- 🔒 **Full Student Data & Academic Integrity:**
+- 🏃 **Technion Sports & Physical Education Electives Support:**
+  Added complete catalog and interactive support for 11 Technion sports courses (gym, swimming, ball games, racket sports, athletics/yoga, martial arts, functional fitness, pilates, movement/dance, ASA teams).
+- 🎭 **Malag & Humanities (מדעי הרוח וחברה) Support:**
+  Integrated 18 humanities/Malag electives (philosophy of science, environmental ethics, ethics in action, law & justice, history of technology, labor law, stress adaptation, surveillance ethics, middle eastern history, etc.).
+- 🏷️ **Dedicated Filter Pills & Styling:**
+  Added fast filter pills (`🏃 ספורט`, `🎭 מל״ג`) to the elective pool with distinctive emerald-green (`.tag-sports`) and royal-purple (`.tag-malag`) badges.
+- 🎓 **Graduation Audit Rules Engine Integration:**
+  Dynamically tracks and updates physical education requirements (2 courses) and humanities requirements (6-10 credits) in both the sidebar summary and the comprehensive Graduation Clearance Audit modal.
+- 🔒 **Full Student Academic Integrity:**
   Adir Moshe's 11 completed courses (39.5 credits, 86.39 GPA) and 2026 Technion ME syllabus remain fully protected and self-healing.
 """
 
