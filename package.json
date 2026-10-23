@@ -9,7 +9,10 @@
     "pack": "electron-packager . \"Semestero ME\" --platform=win32 --arch=x64 --icon=icon.ico --out=dist --overwrite --ignore=\"^(dist|backups|_backup_widgets|graphify-out)\"",
     "build:mobile": "node scripts/build_mobile_dist.js && npx cap sync android",
     "build:apk": "node scripts/build_mobile_dist.js && npx cap sync android && cd android && gradlew.bat assembleDebug && cd .. && powershell -Command \"Copy-Item -Path 'android/app/build/outputs/apk/debug/app-debug.apk' -Destination 'Semestero-ME.apk'\"",
-    "open:android": "npx cap open android"
+    "open:android": "npx cap open android",
+    "build:ios": "node scripts/build_mobile_dist.js && npx cap sync ios",
+    "build:all": "node scripts/build_mobile_dist.js && npx cap sync",
+    "open:ios": "npx cap open ios"
   },
   "keywords": [
     "academic",
@@ -29,6 +32,7 @@
     "@capacitor/android": "^8.5.3",
     "@capacitor/cli": "^8.5.3",
     "@capacitor/core": "^8.5.3",
+    "@capacitor/ios": "^8.5.3",
     "@capacitor/local-notifications": "^8.3.1"
   }
 }

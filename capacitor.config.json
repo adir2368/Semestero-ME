@@ -14,6 +14,13 @@
     "allowMixedContent": true,
     "webContentsDebuggingEnabled": true
   },
+  "ios": {
+    "backgroundColor": "#020617",
+    "contentInset": "automatic",
+    "preferredContentMode": "mobile",
+    "allowsLinkPreview": false,
+    "scrollEnabled": true
+  },
   "plugins": {
     "LocalNotifications": {
       "smallIcon": "ic_stat_notification",
