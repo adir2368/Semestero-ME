@@ -3,11 +3,25 @@
 > **מערכת ניווט ותכנון תואר אקדמי, מחשבון ממוצע משוקלל ומרכז משימות - הפקולטה להנדסת מכונות בטכניון**  
 > *Personal Academic Operating System, Degree Planner & Technion GPA Simulator*
 
-[![Version](https://img.shields.io/badge/version-2.5.1-blue.svg)](https://adir2368.github.io/Semestero-ME/)
+[![Version](https://img.shields.io/badge/version-2.5.2-blue.svg)](https://adir2368.github.io/Semestero-ME/)
 [![Live Web App](https://img.shields.io/badge/סמסטרו_ME-כניסה_לאפליקציה-brightgreen.svg)](https://adir2368.github.io/Semestero-ME/)
+[![Android APK Download](https://img.shields.io/badge/Android-APK_הורדה_ישירה-success.svg)](https://github.com/adir2368/Semestero-ME/releases/latest/download/Semestero-ME.apk)
+[![iOS Safari PWA](https://img.shields.io/badge/iOS_iPhone-התקנה_מהירה-black.svg?logo=apple)](https://adir2368.github.io/Semestero-ME/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Sitemap](https://img.shields.io/badge/Sitemap-sitemap.xml-orange.svg)](https://adir2368.github.io/Semestero-ME/sitemap.xml)
 [![LLMs Ready](https://img.shields.io/badge/AI_Discoverability-llms.txt-purple.svg)](https://adir2368.github.io/Semestero-ME/llms.txt)
+
+---
+
+## 📥 הורדה ישירה לכל המכשירים והטלפונים (Direct App Downloads)
+
+| פלטפורמה / מכשיר | סוג התקנה | קישור ישיר להורדה | הוראות הפעלה מהירות |
+| :--- | :--- | :--- | :--- |
+| **🤖 טלפונים - אנדרואיד (Android)** | **קובץ APK ישיר** | [📲 **הורד Semestero-ME.apk**](https://github.com/adir2368/Semestero-ME/releases/latest/download/Semestero-ME.apk) | הורידו ישירות לטלפון, פתחו את הקובץ ואשרו התקנה (ללא צורך בחנות Google Play). |
+| **🍏 טלפונים - אייפון (iOS / iPhone)** | **Web App / PWA ללא חנות** | [🍏 **פתח ב-Safari להתקנה מהירה**](https://adir2368.github.io/Semestero-ME/) | פתחו ב-Safari ➔ לחצו על כפתור השיתוף (ריבוע עם חץ) ➔ בחרו **"הוסף למסך הבית" (Add to Home Screen)**. האפליקציה פועלת במסך מלא כ-Native App! |
+| **🍎 אייפון - פרויקט Xcode למפתחים** | **iOS Native Workspace** | [`ios/App/App.xcodeproj`](ios/App/App.xcodeproj) | פרויקט Xcode מלא ב-Capacitor 8 מוכן לקומפילציה, סימולטור והפצה. |
+| **💻 מחשב (Windows / Mac / Linux)** | **הפצות שולחניות** | [💻 **GitHub Releases**](https://github.com/adir2368/Semestero-ME/releases) | הורדת קובץ הפעלה שולחני (.exe / packaged) או הרצה מקומית. |
+| **🌐 דפדפן (כל מכשיר)** | **Live Web App** | [🚀 **כניסה ישירה לאפליקציה**](https://adir2368.github.io/Semestero-ME/) | כניסה מיידית דרך הדפדפן ללא צורך בהתקנה כלל. |
 
 ---
 

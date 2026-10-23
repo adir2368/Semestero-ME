@@ -20678,13 +20678,13 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.10.24-v2.5.1",
-    version: "2.5.1",
+    code: "REV-2026.10.24-v2.5.2",
+    version: "2.5.2",
     build: "20261020_03",
     date: "2026-10-20 01:20",
-    description: "גרסה 2.5.0 (עדכון זום 80%): פתיחה מוביילית נוחה וברורה ב-80% הגדלה במקום התכווצות ל-13%, ביטול הרווח האנכי הריק, שמירת טאב אחרון פעיל, ומנוע עדכונים אוטונומי"
+    description: "גרסה 2.5.2: פתרון מוחלט ללולאת העדכון במובייל וספארי, מנגנון אנטי-רילואד עמיד ב-localStorage, סנכרון גרסאות מלא וקישורי הורדה ישירים לטלפונים"
 };
-window.APP_VERSION = "2.5.0";
+window.APP_VERSION = APP_CURRENT_REVISION.version;
 
 function ensureBaselineRevisions() {
     if (!gameState.revisions || !Array.isArray(gameState.revisions) || gameState.revisions.length === 0) {
@@ -21521,6 +21521,8 @@ async function triggerManualCalendarPull() {
 
     const footerVerBadge = document.getElementById("footer-version-badge");
     if (footerVerBadge) {
+        footerVerBadge.innerText = `v${APP_CURRENT_REVISION.version} ✨`;
+        footerVerBadge.title = `לחץ לבדיקת עדכוני גרסה (v${APP_CURRENT_REVISION.version})`;
         const handleFooterVersionCheck = (e) => {
             if (e && e.type === 'touchend') e.preventDefault();
             window.checkRemoteAppVersion(true);
@@ -22178,12 +22180,12 @@ function compareSemver(v1, v2) {
 window.checkRemoteAppVersion = async function(isManualCheck = false) {
     const isElectron = Boolean(window.electronAPI || (window.process && window.process.type === 'renderer') || (navigator.userAgent && navigator.userAgent.includes('Electron')));
     const domVerEl = document.getElementById("display-system-version");
-    let currentVer = (window.APP_VERSION) || (typeof APP_CURRENT_REVISION !== 'undefined' && APP_CURRENT_REVISION && APP_CURRENT_REVISION.version);
+    let currentVer = (typeof APP_CURRENT_REVISION !== 'undefined' && APP_CURRENT_REVISION && APP_CURRENT_REVISION.version) || window.APP_VERSION;
     if (!currentVer && domVerEl && domVerEl.innerText) {
         const match = domVerEl.innerText.match(/(?:^|\bv|\s)(\d+\.\d+\.\d+)\b/);
         if (match) currentVer = match[1];
     }
-    currentVer = currentVer || "2.4.9";
+    currentVer = currentVer || "2.5.2";
     const statusTextEl = document.getElementById("version-check-status-text");
     const footerBadgeEl = document.getElementById("footer-version-badge");
     const checkBtn = document.getElementById("btn-check-version-updates");
@@ -22223,24 +22225,39 @@ window.checkRemoteAppVersion = async function(isManualCheck = false) {
             // AUTO-UPDATE ENGINE (Web, PWA, and Capacitor Live Container):
             // When a new version is detected during automated background checks,
             // seamlessly refresh the cache and reload to the latest release over the air.
-            // Guarded by sessionStorage to prevent infinite reload loops if CDN lags.
+            // Guarded by BOTH localStorage & sessionStorage with a 10-minute timestamp throttle to eliminate reload loops.
             if (!isElectron && !isManualCheck) {
                 const autoUpdateKey = `semestero_auto_updated_to_${remoteVer}`;
-                if (!sessionStorage.getItem(autoUpdateKey)) {
-                    sessionStorage.setItem(autoUpdateKey, 'true');
-                    console.log(`[AutoUpdate] New version v${remoteVer} detected. Auto-refreshing cache and reloading...`);
-                    if (typeof showToastNotification === 'function') {
-                        showToastNotification(`🚀 מעדכן אוטומטית לגרסה v${remoteVer}...`, 'info');
-                    }
-                    setTimeout(() => {
-                        if (typeof window.forceAppUpdate === 'function') {
-                            window.forceAppUpdate();
-                        } else {
-                            window.location.reload(true);
-                        }
-                    }, 1400);
+                const lastAutoReloadTs = Number(localStorage.getItem('semestero_last_auto_update_ts') || 0);
+                const timeSinceLastAutoReload = Date.now() - lastAutoReloadTs;
+                const alreadyUpdatedForVersion = localStorage.getItem(autoUpdateKey) || sessionStorage.getItem(autoUpdateKey);
+
+                // If this version was already targeted by an auto-reload, OR if an auto-reload ran in the last 10 minutes:
+                // NEVER reload automatically again! Prevent infinite loops completely.
+                if (alreadyUpdatedForVersion || timeSinceLastAutoReload < 10 * 60 * 1000) {
+                    console.warn(`[AutoUpdate] Loop guard active for v${remoteVer}. Already attempted (${alreadyUpdatedForVersion}) or throttled (${Math.round(timeSinceLastAutoReload / 1000)}s ago). Suppressing auto-reload.`);
                     return;
                 }
+
+                // First time detecting this new version: mark keys BEFORE reloading
+                try {
+                    localStorage.setItem(autoUpdateKey, 'true');
+                    sessionStorage.setItem(autoUpdateKey, 'true');
+                    localStorage.setItem('semestero_last_auto_update_ts', String(Date.now()));
+                } catch (e) {}
+
+                console.log(`[AutoUpdate] New version v${remoteVer} detected. Auto-refreshing cache and reloading...`);
+                if (typeof showToastNotification === 'function') {
+                    showToastNotification(`🚀 מעדכן אוטומטית לגרסה v${remoteVer}...`, 'info');
+                }
+                setTimeout(() => {
+                    if (typeof window.forceAppUpdate === 'function') {
+                        window.forceAppUpdate();
+                    } else {
+                        window.location.reload(true);
+                    }
+                }, 1400);
+                return;
             }
 
             // Mobile Native APK notification banner (Capacitor / Android)
@@ -22332,6 +22349,11 @@ window.forceAppUpdate = async function() {
         updateModal.classList.remove("active");
     }
 
+    // Record reload timestamp so post-reload auto-check is throttled
+    try {
+        localStorage.setItem('semestero_last_auto_update_ts', String(Date.now()));
+    } catch (e) {}
+
     try {
         sessionStorage.removeItem("dismissed_update");
         localStorage.removeItem("semestero_dismissed_update");
@@ -22362,6 +22384,22 @@ window.forceAppUpdate = async function() {
     // 3. Force hard navigation reload with cache buster
     const cleanUrl = window.location.origin + window.location.pathname + '?v_app=' + Date.now() + window.location.hash;
     window.location.replace(cleanUrl);
+};
+
+window.openDownloadModal = function() {
+    const modal = document.getElementById("direct-download-modal");
+    if (modal) {
+        modal.style.display = "flex";
+        modal.classList.add("active");
+    }
+};
+
+window.closeDownloadModal = function() {
+    const modal = document.getElementById("direct-download-modal");
+    if (modal) {
+        modal.style.display = "none";
+        modal.classList.remove("active");
+    }
 };
 
 window.openSmartScreenGuideModal = function() {
