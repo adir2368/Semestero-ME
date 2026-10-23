@@ -3194,7 +3194,17 @@ body {
     font-family: 'Assistant', 'Rubik', 'Segoe UI', system-ui, sans-serif;
     pointer-events: none;
     letter-spacing: 0;
-    text-anchor: middle;
+    text-anchor: middle !important;
+    direction: rtl !important;
+    unicode-bidi: isolate !important;
+    white-space: nowrap !important;
+}
+
+.fc-node-sub, .fc-node-badge {
+    direction: rtl !important;
+    unicode-bidi: isolate !important;
+    text-anchor: middle !important;
+    white-space: nowrap !important;
 }
 
 .fc-node-title.multi-line {
@@ -5675,7 +5685,7 @@ label[for="new-task-xp-input"],
     }
 
     .char-title {
-        font-size: 0.8rem !important;
+        font-size: 0.74rem !important;
         white-space: nowrap !important;
         overflow: hidden !important;
         text-overflow: ellipsis !important;

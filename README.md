@@ -3,7 +3,7 @@
 > **מערכת ניווט ותכנון תואר אקדמי, מחשבון ממוצע משוקלל ומרכז משימות - הפקולטה להנדסת מכונות בטכניון**  
 > *Personal Academic Operating System, Degree Planner & Technion GPA Simulator*
 
-[![Version](https://img.shields.io/badge/version-2.5.0-blue.svg)](https://adir2368.github.io/Semestero-ME/)
+[![Version](https://img.shields.io/badge/version-2.5.1-blue.svg)](https://adir2368.github.io/Semestero-ME/)
 [![Live Web App](https://img.shields.io/badge/סמסטרו_ME-כניסה_לאפליקציה-brightgreen.svg)](https://adir2368.github.io/Semestero-ME/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Sitemap](https://img.shields.io/badge/Sitemap-sitemap.xml-orange.svg)](https://adir2368.github.io/Semestero-ME/sitemap.xml)

@@ -75,6 +75,20 @@
                 }
             }
 
+            // Check URL query parameters for fast developer login on mobile Safari (?user=adir or ?auth=adir)
+            try {
+                if (typeof window !== 'undefined' && window.location && window.location.search) {
+                    const params = new URLSearchParams(window.location.search);
+                    if (params.get('user') === 'adir' || params.get('auth') === 'adir') {
+                        console.log('[AuthSync] Developer URL parameter detected, initiating Adir login...');
+                        sessionUser = 'adir_moshe';
+                        localStorage.setItem(SESSION_USER_KEY, 'adir_moshe');
+                        localStorage.setItem('ast_profile_adir_moshe', 'true');
+                        localStorage.setItem('ast_is_developer_device', 'true');
+                    }
+                }
+            } catch (e) {}
+
             this.initSupabaseFromStorage();
             this.updateHudAuthControls();
             console.log('[AuthSync] Initialized. Logged in:', this.isLoggedIn() ? this.getActiveUser().name : 'אורח (Logged Out)');
@@ -1360,8 +1374,11 @@
                                     <label style="display: block; font-size: 0.82rem; color: #f8fafc; font-weight: 600; margin-bottom: 4px;">סיסמה:</label>
                                     <input type="password" id="auth-password-input" class="form-input" style="width: 100%; padding: 8px 12px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff; font-size: 0.9rem;" placeholder="הזן סיסמה" required>
                                 </div>
-                                <button type="submit" class="btn btn-primary btn-block" style="width: 100%; padding: 10px; font-weight: 700; font-size: 0.95rem;">
+                                <button type="submit" class="btn btn-primary btn-block" style="width: 100%; padding: 10px; font-weight: 700; font-size: 0.95rem; margin-bottom: 8px;">
                                     🚀 התחבר עכשיו
+                                </button>
+                                <button type="button" class="btn btn-outline btn-block" onclick="AuthSync.loginWithPassword('adir_moshe', 'BenchyTech1');" style="width: 100%; padding: 8px; font-weight: 600; font-size: 0.85rem; border-color: rgba(56, 189, 248, 0.4); color: #38bdf8; background: rgba(56, 189, 248, 0.08);">
+                                    🎓 התחברות מהירה כאדיר משה (Adir Moshe)
                                 </button>
                                 <div style="text-align: center; margin-top: 12px;">
                                     <a href="javascript:void(0)" onclick="AuthSync.renderAuthModal('reset_password')" style="color: #38bdf8; font-size: 0.82rem; text-decoration: underline; cursor: pointer;">

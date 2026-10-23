@@ -1766,7 +1766,7 @@ function splitCourseTitleForCard(title) {
         }
     }
 
-    if (cleanTitle.length <= 15) {
+    if (cleanTitle.length <= 18) {
         return { isMulti: false, line1: cleanTitle, line2: '' };
     }
 
@@ -2217,7 +2217,7 @@ var SAMPLE_ME_DEGREE = (typeof window !== 'undefined' && window.SAMPLE_ME_DEGREE
     },
     "104065": {
         code: "104065",
-        name: "אלגברה ליניארית 1מ5",
+        name: "אלגברה ליניארית מ׳",
         credits: 5,
         semester: 1,
         prerequisites: [],
@@ -2932,7 +2932,7 @@ const PRELOADED_USER_STATE = (typeof window !== 'undefined' && window.PRELOADED_
     },
     "104065": {
       "code": "104065",
-      "name": "אלגברה ליניארית 1מ",
+      "name": "אלגברה ליניארית מ׳",
       "type": "core",
       "grade": 87,
       "tasks": [
@@ -4382,7 +4382,7 @@ const PRELOADED_USER_STATE = (typeof window !== 'undefined' && window.PRELOADED_
           },
           "104065": {
             "code": "104065",
-            "name": "אלגברה ליניארית 1מ",
+            "name": "אלגברה ליניארית מ׳",
             "type": "core",
             "grade": 87,
             "tasks": [
@@ -13295,7 +13295,7 @@ function openCourseDetails(code) {
             }
         }
 
-        const moodleSyllabus = (typeof OFFICIAL_MOODLE26_SYLLABUS_DATA !== 'undefined') ? (OFFICIAL_MOODLE26_SYLLABUS_DATA[cleanCode] || OFFICIAL_MOODLE26_SYLLABUS_DATA[fullCode]) : null;
+        const moodleSyllabus = (typeof OFFICIAL_MOODLE26_SYLLABUS_DATA !== 'undefined') ? (OFFICIAL_MOODLE26_SYLLABUS_DATA[cleanCode] || OFFICIAL_MOODLE26_SYLLABUS_DATA[fullCode] || OFFICIAL_MOODLE26_SYLLABUS_DATA['0' + cleanCode] || OFFICIAL_MOODLE26_SYLLABUS_DATA[code]) : null;
         let moodleSyllabusHtml = "";
         if (moodleSyllabus) {
             moodleSyllabusHtml = `
@@ -18227,26 +18227,24 @@ function renderFlowchartTree() {
         const badgeColor = isMastered ? '#34d399' : (isActive ? '#38bdf8' : '#64748b');
 
         if (!split.isMulti) {
-            titleSvg = `<text x="${pos.x}" y="${topY + 28}" text-anchor="middle" fill="#f8fafc" style="fill: #f8fafc !important; font-weight: 700;" class="fc-node-title single-line">${split.line1}</text>`;
+            titleSvg = `<text x="${pos.x}" y="${topY + 28}" text-anchor="middle" direction="rtl" fill="#f8fafc" style="fill: #f8fafc !important; font-weight: 700; direction: rtl; unicode-bidi: isolate; white-space: nowrap;" class="fc-node-title single-line">${split.line1}</text>`;
         } else {
             titleSvg = `
-                <text x="${pos.x}" y="${topY + 21}" text-anchor="middle" fill="#f8fafc" style="fill: #f8fafc !important; font-weight: 700;" class="fc-node-title multi-line">
-                    <tspan x="${pos.x}" dy="0" fill="#f8fafc">${split.line1}</tspan>
-                    <tspan x="${pos.x}" dy="15" fill="#f8fafc">${split.line2}</tspan>
-                </text>
+                <text x="${pos.x}" y="${topY + 20}" text-anchor="middle" direction="rtl" fill="#f8fafc" style="fill: #f8fafc !important; font-weight: 700; direction: rtl; unicode-bidi: isolate; white-space: nowrap;" class="fc-node-title multi-line line-1">${split.line1}</text>
+                <text x="${pos.x}" y="${topY + 36}" text-anchor="middle" direction="rtl" fill="#f8fafc" style="fill: #f8fafc !important; font-weight: 700; direction: rtl; unicode-bidi: isolate; white-space: nowrap;" class="fc-node-title multi-line line-2">${split.line2}</text>
             `;
-            subY = topY + 53;
-            badgeY = topY + 71;
+            subY = topY + 54;
+            badgeY = topY + 72;
         }
 
         g.innerHTML = `
             <rect x="${leftX}" y="${topY}" width="${pos.w}" height="${pos.h}" rx="8" fill="${rectFill}" stroke="${rectStroke}" class="fc-node-rect" />
-            <!-- Line 1: Course Title (High contrast white text, never white-on-white) -->
+            <!-- Line 1: Course Title (Isolated independent text nodes for flawless WebKit/iOS Safari BiDi) -->
             ${titleSvg}
             <!-- Line 2: Subtitle: Code + Credits -->
-            <text x="${pos.x}" y="${subY}" text-anchor="middle" fill="#94a3b8" style="fill: #94a3b8 !important;" class="fc-node-sub">${course.code} • ${course.credits} נק״ז</text>
+            <text x="${pos.x}" y="${subY}" text-anchor="middle" direction="rtl" fill="#94a3b8" style="fill: #94a3b8 !important; direction: rtl; unicode-bidi: isolate; white-space: nowrap;" class="fc-node-sub">${course.code} • ${course.credits} נק״ז</text>
             <!-- Line 3: Status Badge -->
-            <text x="${pos.x}" y="${badgeY}" text-anchor="middle" fill="${badgeColor}" style="fill: ${badgeColor} !important; font-weight: 700;" class="fc-node-badge">${badgeText}</text>
+            <text x="${pos.x}" y="${badgeY}" text-anchor="middle" direction="rtl" fill="${badgeColor}" style="fill: ${badgeColor} !important; font-weight: 700; direction: rtl; unicode-bidi: isolate; white-space: nowrap;" class="fc-node-badge">${badgeText}</text>
         `;
 
         // Hover effect: highlight incoming prerequisites AND outgoing dependents
@@ -20680,8 +20678,8 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.10.20-v2.5.0",
-    version: "2.5.0",
+    code: "REV-2026.10.24-v2.5.1",
+    version: "2.5.1",
     build: "20261020_03",
     date: "2026-10-20 01:20",
     description: "גרסה 2.5.0 (עדכון זום 80%): פתיחה מוביילית נוחה וברורה ב-80% הגדלה במקום התכווצות ל-13%, ביטול הרווח האנכי הריק, שמירת טאב אחרון פעיל, ומנוע עדכונים אוטונומי"

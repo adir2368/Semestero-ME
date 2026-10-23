@@ -18,7 +18,7 @@ var SAMPLE_ME_DEGREE = (typeof window !== 'undefined' && window.SAMPLE_ME_DEGREE
     },
     "104065": {
         code: "104065",
-        name: "אלגברה ליניארית 1מ5",
+        name: "אלגברה ליניארית מ׳",
         credits: 5,
         semester: 1,
         prerequisites: [],
