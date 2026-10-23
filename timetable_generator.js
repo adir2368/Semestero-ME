@@ -391,7 +391,172 @@
                     ]
                 }
             ]
-        }
+        },
+        '03940808': {
+            code: '03940808',
+            name: 'חינוך גופני (פילאטיס ומתיחות)',
+            credits: 1.0,
+            cardClass: 'timetable-card-sport',
+            slots: [
+                {
+                    slotType: 'sport',
+                    slotName: 'אימון',
+                    options: [
+                        {
+                            groupId: '11',
+                            sportName: 'פילאטיס מכשירים',
+                            lecturer: 'שרון אלון',
+                            room: 'מרכז הספורט - חדר מכשירים',
+                            meetings: [
+                                { dayIndex: 3, dayName: 'רביעי', startTime: '12:30', endTime: '14:00', duration: 'שעה וחצי', room: 'מרכז הספורט - מכשירים' }
+                            ]
+                        },
+                        {
+                            groupId: '12',
+                            sportName: 'פילאטיס מזרן',
+                            lecturer: 'נועה לוי',
+                            room: 'אולם סטודיו קנדה',
+                            meetings: [
+                                { dayIndex: 1, dayName: 'שני', startTime: '10:30', endTime: '12:00', duration: 'שעה וחצי', room: 'אולם סטודיו קנדה' }
+                            ]
+                        },
+                        {
+                            groupId: '13',
+                            sportName: 'פילאטיס דינמי ועיצוב',
+                            lecturer: 'דנה שפירא',
+                            room: 'סטודיו 2',
+                            meetings: [
+                                { dayIndex: 4, dayName: 'חמישי', startTime: '08:30', endTime: '10:00', duration: 'שעה וחצי', room: 'סטודיו 2' }
+                            ]
+                        },
+                        {
+                            groupId: '14',
+                            sportName: 'מתיחות וגמישות',
+                            lecturer: 'קרן כהן',
+                            room: 'מרכז הספורט',
+                            meetings: [
+                                { dayIndex: 0, dayName: 'ראשון', startTime: '14:30', endTime: '16:00', duration: 'שעה וחצי', room: 'מרכז הספורט' }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        '03940800': {
+            code: '03940800',
+            name: 'חינוך גופני (כושר גופני וחדר כושר)',
+            credits: 1.0,
+            cardClass: 'timetable-card-sport',
+            slots: [
+                {
+                    slotType: 'sport',
+                    slotName: 'אימון',
+                    options: [
+                        {
+                            groupId: '10',
+                            sportName: 'אימון TRX',
+                            lecturer: 'רונן מזרחי',
+                            room: 'סטודיו כושר',
+                            meetings: [
+                                { dayIndex: 1, dayName: 'שני', startTime: '12:30', endTime: '14:00', duration: 'שעה וחצי', room: 'סטודיו כושר' }
+                            ]
+                        },
+                        {
+                            groupId: '11',
+                            sportName: 'ספינינג',
+                            lecturer: 'עידו לוי',
+                            room: 'אולם ספינינג',
+                            meetings: [
+                                { dayIndex: 3, dayName: 'רביעי', startTime: '18:00', endTime: '19:30', duration: 'שעה וחצי', room: 'אולם ספינינג' }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        '03940803': {
+            code: '03940803',
+            name: 'חינוך גופני (משחקי כדור)',
+            credits: 1.0,
+            cardClass: 'timetable-card-sport',
+            slots: [
+                {
+                    slotType: 'sport',
+                    slotName: 'אימון',
+                    options: [
+                        {
+                            groupId: '11',
+                            sportName: 'כדורסל',
+                            lecturer: 'איתי ברקוביץ',
+                            room: 'אולם קנדה',
+                            meetings: [
+                                { dayIndex: 0, dayName: 'ראשון', startTime: '16:30', endTime: '18:00', duration: 'שעה וחצי', room: 'אולם קנדה' }
+                            ]
+                        },
+                        {
+                            groupId: '12',
+                            sportName: 'כדורעף',
+                            lecturer: 'מאיה שטרן',
+                            room: 'אולם מרכזי',
+                            meetings: [
+                                { dayIndex: 3, dayName: 'רביעי', startTime: '14:30', endTime: '16:00', duration: 'שעה וחצי', room: 'אולם מרכזי' }
+                            ]
+                        },
+                        {
+                            groupId: '13',
+                            sportName: 'כדורגל / קטרגל',
+                            lecturer: 'יניב קורן',
+                            room: 'מגרש עליון',
+                            meetings: [
+                                { dayIndex: 2, dayName: 'שלישי', startTime: '18:30', endTime: '20:00', duration: 'שעה וחצי', room: 'מגרש עליון' }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        '03940804': {
+            code: '03940804',
+            name: 'חינוך גופני (משחקי מחבט)',
+            credits: 1.0,
+            cardClass: 'timetable-card-sport',
+            slots: [
+                {
+                    slotType: 'sport',
+                    slotName: 'אימון',
+                    options: [
+                        {
+                            groupId: '11',
+                            sportName: 'טניס',
+                            lecturer: 'יואב רז',
+                            room: 'מגרשי טניס',
+                            meetings: [
+                                { dayIndex: 1, dayName: 'שני', startTime: '14:30', endTime: '16:00', duration: 'שעה וחצי', room: 'מגרשי טניס' }
+                            ]
+                        },
+                        {
+                            groupId: '12',
+                            sportName: 'טניס שולחן',
+                            lecturer: 'דני רוזן',
+                            room: 'אולם טניס שולחן',
+                            meetings: [
+                                { dayIndex: 3, dayName: 'רביעי', startTime: '16:30', endTime: '18:00', duration: 'שעה וחצי', room: 'אולם טניס שולחן' }
+                            ]
+                        },
+                        {
+                            groupId: '13',
+                            sportName: 'בדמינטון',
+                            lecturer: 'מיכל פרידמן',
+                            room: 'אולם קנדה',
+                            meetings: [
+                                { dayIndex: 4, dayName: 'חמישי', startTime: '10:30', endTime: '12:00', duration: 'שעה וחצי', room: 'אולם קנדה' }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+
     };
 
     // Master System Anchors (Fixed institutional requirements, e.g. dedicated Sport section)

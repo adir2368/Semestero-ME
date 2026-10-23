@@ -11965,7 +11965,7 @@ function openCourseDetails(code) {
                 if (found) { catalogCourse = found; break; }
             }
             if (!catalogCourse && window.PLANNER_CATALOG.ELECTIVE_CATALOG) {
-                const cats = ['A', 'B', 'C', 'D', 'E'];
+                const cats = Object.keys(window.PLANNER_CATALOG.ELECTIVE_CATALOG);
                 for (const cat of cats) {
                     const list = window.PLANNER_CATALOG.ELECTIVE_CATALOG[cat] || [];
                     const found = list.find(c => c.code === code || c.altCode === code || String(c.code).replace(/^0+/, '') === String(code).replace(/^0+/, ''));
@@ -12148,6 +12148,202 @@ function openCourseDetails(code) {
             });
         } else {
             physicsVariantsContainer.innerHTML = '';
+        }
+    }
+
+    // Sports Clubs & Malag Schedule Chooser (Rendered if course is Sports or Malag)
+    const sportsClubsContainer = document.getElementById("modal-sports-clubs-container");
+    if (sportsClubsContainer) {
+        const isSport = course.type === "sports" || course.list === "SPORTS";
+        const isMalag = course.type === "humanities" || course.list === "MALAG";
+
+        if (isSport) {
+            const sportsList = (window.PLANNER_CATALOG && window.PLANNER_CATALOG.ELECTIVE_CATALOG && window.PLANNER_CATALOG.ELECTIVE_CATALOG.SPORTS) || [];
+            const catCourse = sportsList.find(c => c.code === course.code || c.altCode === course.code)
+                || (window.PLANNER_CATALOG && window.PLANNER_CATALOG.ALL_COURSES_MAP && (window.PLANNER_CATALOG.ALL_COURSES_MAP[course.code] || window.PLANNER_CATALOG.ALL_COURSES_MAP[String(course.code).replace(/^0+/, '')]))
+                || course;
+            const clubs = (catCourse && catCourse.clubs) || [];
+
+            let semCourses = [];
+            const targetSem = Number(course.semester || 1);
+            if (window.DegreePlanner && typeof window.DegreePlanner.getActivePlan === 'function') {
+                const plan = window.DegreePlanner.getActivePlan();
+                const sem = plan.find(s => s.semester === targetSem);
+                if (sem) semCourses = sem.courses || [];
+            }
+            if (semCourses.length === 0 && gameState.courses) {
+                semCourses = Object.values(gameState.courses).filter(c => Number(c.semester) === targetSem && c.code !== course.code);
+            }
+
+            const clubsHtml = clubs.length === 0
+                ? '<div style="font-size: 0.8rem; color: #94a3b8;">הרישום לקורס מתבצע ישירות בפורטל הטכניון.</div>'
+                : clubs.map(club => {
+                    const conflict = (window.PLANNER_CATALOG && typeof window.PLANNER_CATALOG.checkMeetingConflict === 'function')
+                        ? window.PLANNER_CATALOG.checkMeetingConflict({ ...club, courseCode: course.code }, semCourses)
+                        : { hasConflict: false };
+                    const isSelected = (course.selectedClubId && course.selectedClubId === club.id)
+                        || (course.selectedClub && (course.selectedClub === club.name || course.name.includes(club.name)));
+
+                    let conflictBadge = '';
+                    if (conflict.hasConflict && conflict.isDefinite) {
+                        conflictBadge = `<div class="club-conflict-badge conflict-busy" style="margin-top: 4px; font-size: 0.72rem;">⚠️ התנגשות ודאית: חופף ל-${escapeHtml(conflict.conflictingCourse)} (${escapeHtml(conflict.conflictingTime)})</div>`;
+                    } else if (conflict.hasConflict && !conflict.isDefinite) {
+                        conflictBadge = `<div class="club-conflict-badge conflict-warning" style="margin-top: 4px; font-size: 0.72rem;">🟡 חפיפה אפשרית: ${escapeHtml(conflict.conflictingCourse)} (קיימת חלופה)</div>`;
+                    } else {
+                        conflictBadge = `<div class="club-conflict-badge conflict-free" style="margin-top: 4px; font-size: 0.72rem;">🟢 פנוי במערכת השעות בסמסטר ${targetSem}</div>`;
+                    }
+
+                    return `
+                        <div class="sport-club-card ${isSelected ? 'is-selected-card' : ''}" style="background: rgba(15, 23, 42, 0.6); border: 1px solid ${isSelected ? '#10b981' : 'rgba(255,255,255,0.1)'}; border-radius: 8px; padding: 10px; margin-bottom: 8px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span style="font-weight: 700; font-size: 0.88rem; color: #f8fafc;">🏃 ${escapeHtml(club.name)}</span>
+                                ${isSelected ? '<span style="font-size: 0.7rem; color: #34d399; font-weight: 700; background: rgba(52, 211, 153, 0.15); padding: 1px 6px; border-radius: 8px;">משובץ כעת ✓</span>' : ''}
+                            </div>
+                            <div style="font-size: 0.78rem; color: #cbd5e1; margin-top: 3px;">
+                                📅 יום ${escapeHtml(club.day)} • 🕒 ${escapeHtml(club.time)} • 📍 ${escapeHtml(club.room || 'מרכז הספורט')}
+                            </div>
+                            ${conflictBadge}
+                            <div style="display: flex; justify-content: flex-end; margin-top: 6px;">
+                                <button type="button" class="btn btn-sm ${isSelected ? 'btn-success' : 'btn-outline-primary'} btn-modal-choose-club"
+                                        data-club-id="${escapeHtml(club.id)}"
+                                        style="font-size: 0.76rem; padding: 3px 10px; border-radius: 6px; cursor: pointer;">
+                                    ${isSelected ? '✓ חוג נבחר' : 'שבץ חוג זה'}
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+            sportsClubsContainer.innerHTML = `
+                <div style="background: rgba(34, 197, 94, 0.08); border: 1px solid rgba(34, 197, 94, 0.25); border-radius: 8px; padding: 12px; margin-bottom: 12px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                        <span style="font-size: 0.85rem; font-weight: 700; color: #4ade80;">🏃 חוגי ספורט ואימון זמינים ברישום:</span>
+                        <span style="font-size: 0.72rem; color: #94a3b8;">חובת נוכחות בשעה קבועה</span>
+                    </div>
+                    <div style="font-size: 0.76rem; color: #94a3b8; margin-bottom: 10px;">
+                        רישום לקורס ספורט מחייב נוכחות בחוג ובשעה הספציפית. בחר חוג כדי לבדוק התנגשויות מול מערכת השעות בסמסטר ${targetSem}.
+                    </div>
+                    <div>
+                        ${clubsHtml}
+                    </div>
+                    <div style="display: flex; justify-content: flex-end; margin-top: 6px;">
+                        <button type="button" id="btn-modal-open-timetable" style="background: transparent; border: 1px solid #38bdf8; color: #38bdf8; font-size: 0.76rem; padding: 4px 10px; border-radius: 6px; cursor: pointer;">
+                            📅 פתח במערכת השעות (Timetable Studio)
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            sportsClubsContainer.querySelectorAll('.btn-modal-choose-club').forEach(btn => {
+                btn.onclick = () => {
+                    const clubId = btn.getAttribute('data-club-id');
+                    const chosen = clubs.find(c => c.id === clubId);
+                    if (!chosen) return;
+
+                    course.selectedClub = chosen.name;
+                    course.selectedClubId = chosen.id;
+                    course.scheduleSlot = {
+                        day: chosen.day,
+                        time: chosen.time,
+                        dayIndex: chosen.dayIndex,
+                        startTime: chosen.startTime,
+                        endTime: chosen.endTime,
+                        room: chosen.room
+                    };
+                    course.name = `חינוך גופני - ${chosen.name}`;
+
+                    if (window.DegreePlanner && typeof window.DegreePlanner.getActivePlan === 'function') {
+                        const plan = window.DegreePlanner.getActivePlan();
+                        const sObj = plan.find(s => s.semester === targetSem);
+                        if (sObj) {
+                            const cInSem = sObj.courses.find(c => c.code === course.code || c.altCode === course.code);
+                            if (cInSem) {
+                                cInSem.selectedClub = chosen.name;
+                                cInSem.selectedClubId = chosen.id;
+                                cInSem.scheduleSlot = course.scheduleSlot;
+                                cInSem.name = course.name;
+                                if (typeof window.DegreePlanner.saveCustomPlan === 'function') {
+                                    window.DegreePlanner.saveCustomPlan();
+                                }
+                                if (typeof window.DegreePlanner.renderDegreePlanner === 'function') {
+                                    window.DegreePlanner.renderDegreePlanner();
+                                }
+                            }
+                        }
+                    }
+
+                    saveState();
+                    renderUI();
+                    openCourseDetails(course.code);
+                };
+            });
+
+            const ttLink = sportsClubsContainer.querySelector('#btn-modal-open-timetable');
+            if (ttLink) {
+                ttLink.onclick = () => {
+                    closeCourseDetails();
+                    if (window.TimetableGenerator && typeof window.TimetableGenerator.open === 'function') {
+                        window.TimetableGenerator.open();
+                    } else if (window.TimetableStudio && typeof window.TimetableStudio.open === 'function') {
+                        window.TimetableStudio.open();
+                    }
+                };
+            }
+        } else if (isMalag && course.scheduleSlot) {
+            const targetSem = Number(course.semester || 1);
+            let semCourses = [];
+            if (window.DegreePlanner && typeof window.DegreePlanner.getActivePlan === 'function') {
+                const plan = window.DegreePlanner.getActivePlan();
+                const sem = plan.find(s => s.semester === targetSem);
+                if (sem) semCourses = sem.courses || [];
+            }
+            if (semCourses.length === 0 && gameState.courses) {
+                semCourses = Object.values(gameState.courses).filter(c => Number(c.semester) === targetSem && c.code !== course.code);
+            }
+
+            const conflict = (window.PLANNER_CATALOG && typeof window.PLANNER_CATALOG.checkMeetingConflict === 'function')
+                ? window.PLANNER_CATALOG.checkMeetingConflict({ ...course.scheduleSlot, courseCode: course.code }, semCourses)
+                : { hasConflict: false };
+
+            let conflictBadge = '';
+            if (conflict.hasConflict && conflict.isDefinite) {
+                conflictBadge = `<div class="club-conflict-badge conflict-busy" style="margin-top: 6px; font-size: 0.74rem;">⚠️ התנגשות ודאית: חופף ל-${escapeHtml(conflict.conflictingCourse)} (${escapeHtml(conflict.conflictingTime)})</div>`;
+            } else if (conflict.hasConflict && !conflict.isDefinite) {
+                conflictBadge = `<div class="club-conflict-badge conflict-warning" style="margin-top: 6px; font-size: 0.74rem;">🟡 חפיפה אפשרית: ${escapeHtml(conflict.conflictingCourse)} (קיימת קבוצה חלופית)</div>`;
+            } else {
+                conflictBadge = `<div class="club-conflict-badge conflict-free" style="margin-top: 6px; font-size: 0.74rem;">🟢 פנוי במערכת השעות בסמסטר ${targetSem} (ללא התנגשויות)</div>`;
+            }
+
+            sportsClubsContainer.innerHTML = `
+                <div style="background: rgba(168, 85, 247, 0.08); border: 1px solid rgba(168, 85, 247, 0.25); border-radius: 8px; padding: 12px; margin-bottom: 12px;">
+                    <div style="font-size: 0.85rem; font-weight: 700; color: #c084fc; margin-bottom: 4px;">
+                        🎭 מועד קורס מל״ג - חובת נוכחות קבועה
+                    </div>
+                    <div style="font-size: 0.78rem; color: #cbd5e1;">
+                        📅 <strong>מועד:</strong> יום ${escapeHtml(course.scheduleSlot.day)} • 🕒 ${escapeHtml(course.scheduleSlot.time)} • 📍 ${escapeHtml(course.scheduleSlot.room || 'הטכניון')}
+                    </div>
+                    ${conflictBadge}
+                    <div style="display: flex; justify-content: flex-end; margin-top: 8px;">
+                        <button type="button" id="btn-modal-malag-timetable" style="background: transparent; border: 1px solid #c084fc; color: #c084fc; font-size: 0.76rem; padding: 4px 10px; border-radius: 6px; cursor: pointer;">
+                            📅 פתח במערכת השעות (Timetable Studio)
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            const ttLink = sportsClubsContainer.querySelector('#btn-modal-malag-timetable');
+            if (ttLink) {
+                ttLink.onclick = () => {
+                    closeCourseDetails();
+                    if (window.TimetableGenerator && typeof window.TimetableGenerator.open === 'function') {
+                        window.TimetableGenerator.open();
+                    } else if (window.TimetableStudio && typeof window.TimetableStudio.open === 'function') {
+                        window.TimetableStudio.open();
+                    }
+                };
+            }
+        } else {
+            sportsClubsContainer.innerHTML = '';
         }
     }
 
@@ -20678,8 +20874,8 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.10.24-v2.5.3",
-    version: "2.5.3",
+    code: "REV-2026.10.24-v2.5.4",
+    version: "2.5.4",
     build: "20261020_03",
     date: "2026-10-20 01:20",
     description: "גרסה 2.5.2: פתרון מוחלט ללולאת העדכון במובייל וספארי, מנגנון אנטי-רילואד עמיד ב-localStorage, סנכרון גרסאות מלא וקישורי הורדה ישירים לטלפונים"
@@ -22185,7 +22381,7 @@ window.checkRemoteAppVersion = async function(isManualCheck = false) {
         const match = domVerEl.innerText.match(/(?:^|\bv|\s)(\d+\.\d+\.\d+)\b/);
         if (match) currentVer = match[1];
     }
-    currentVer = currentVer || "2.5.3";
+    currentVer = currentVer || "2.5.4";
     const statusTextEl = document.getElementById("version-check-status-text");
     const footerBadgeEl = document.getElementById("footer-version-badge");
     const checkBtn = document.getElementById("btn-check-version-updates");

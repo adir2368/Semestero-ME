@@ -1478,6 +1478,196 @@
     // --------------------------------------------------------------------------
     // Rendering Sub-systems
     // --------------------------------------------------------------------------
+    // --------------------------------------------------------------------------
+    // Technion Sports Club & Schedule Conflict Selector Modal
+    // --------------------------------------------------------------------------
+    function openSportClubSelectorModal(courseCode, semNum) {
+        const plan = getActivePlan();
+        const sem = plan.find(s => s.semester === semNum);
+        if (!sem) return;
+        const courseInSem = sem.courses.find(c => c.code === courseCode || c.altCode === courseCode);
+        if (!courseInSem) return;
+
+        const sportsList = (window.PLANNER_CATALOG && window.PLANNER_CATALOG.ELECTIVE_CATALOG && window.PLANNER_CATALOG.ELECTIVE_CATALOG.SPORTS) || [];
+        const catCourse = sportsList.find(c => c.code === courseCode || c.altCode === courseCode)
+            || (window.PLANNER_CATALOG && window.PLANNER_CATALOG.ALL_COURSES_MAP && (window.PLANNER_CATALOG.ALL_COURSES_MAP[courseCode] || window.PLANNER_CATALOG.ALL_COURSES_MAP[String(courseCode).replace(/^0+/, '')]))
+            || courseInSem;
+
+        const clubs = (catCourse && catCourse.clubs) || [];
+
+        let modal = document.getElementById('planner-sport-club-modal');
+        if (modal) modal.remove();
+
+        modal = document.createElement('div');
+        modal.id = 'planner-sport-club-modal';
+        modal.className = 'modal-backdrop active';
+        modal.style.cssText = 'position: fixed; inset: 0; background: rgba(10, 15, 29, 0.88); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 100000; padding: 16px;';
+
+        const clubsWithStatus = clubs.map(club => {
+            const conflict = (window.PLANNER_CATALOG && typeof window.PLANNER_CATALOG.checkMeetingConflict === 'function')
+                ? window.PLANNER_CATALOG.checkMeetingConflict({ ...club, courseCode: courseCode }, sem.courses)
+                : { hasConflict: false };
+            const isSelected = (courseInSem.selectedClubId && courseInSem.selectedClubId === club.id)
+                || (courseInSem.selectedClub && (courseInSem.selectedClub === club.name || courseInSem.name.includes(club.name)));
+            return { club, conflict, isSelected };
+        });
+
+        const renderedClubsHtml = clubsWithStatus.length === 0 
+            ? `<div style="text-align: center; color: #94a3b8; padding: 20px;">אין חוגים ספציפיים מוגדרים לקורס זה. הרישום מתבצע ישירות בפורטל הטכניון.</div>`
+            : clubsWithStatus.map(({ club, conflict, isSelected }) => {
+                let conflictBadgeHtml = '';
+                if (conflict.hasConflict && conflict.isDefinite) {
+                    conflictBadgeHtml = `<div class="club-conflict-badge conflict-busy">⚠️ התנגשות ודאית: חופף ל-${escapeHtml(conflict.conflictingCourse)} ${escapeHtml(conflict.conflictingSlot || '')} (${escapeHtml(conflict.conflictingTime)})</div>`;
+                } else if (conflict.hasConflict && !conflict.isDefinite) {
+                    conflictBadgeHtml = `<div class="club-conflict-badge conflict-warning">🟡 חפיפה אפשרית: ${escapeHtml(conflict.conflictingCourse)} ${escapeHtml(conflict.conflictingSlot || '')} (${escapeHtml(conflict.note || 'קיימת קבוצה חלופית')})</div>`;
+                } else {
+                    conflictBadgeHtml = `<div class="club-conflict-badge conflict-free">🟢 פנוי במערכת השעות (ללא התנגשויות)</div>`;
+                }
+
+                return `
+                    <div class="sport-club-card ${isSelected ? 'is-selected-card' : ''}" data-club-id="${escapeHtml(club.id)}">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;">
+                            <div style="font-size: 0.95rem; font-weight: 700; color: #f8fafc;">
+                                🏃 ${escapeHtml(club.name)}
+                            </div>
+                            ${isSelected ? '<span style="font-size: 0.72rem; color: #34d399; font-weight: 700; background: rgba(52, 211, 153, 0.15); border: 1px solid #34d399; padding: 2px 8px; border-radius: 10px;">משובץ כעת ✓</span>' : ''}
+                        </div>
+                        <div style="margin-top: 6px; font-size: 0.82rem; color: #cbd5e1; display: flex; flex-direction: column; gap: 3px;">
+                            <div>📅 <strong>מועד:</strong> יום ${escapeHtml(club.day)} • 🕒 ${escapeHtml(club.time)}</div>
+                            <div>📍 <strong>מיקום:</strong> ${escapeHtml(club.room || 'מרכז הספורט הטכניוני')}</div>
+                            ${club.note ? `<div style="font-size: 0.75rem; color: #94a3b8;">ℹ️ ${escapeHtml(club.note)}</div>` : ''}
+                        </div>
+                        <div style="margin-top: 8px;">
+                            ${conflictBadgeHtml}
+                        </div>
+                        <div style="margin-top: 10px; display: flex; gap: 8px; justify-content: flex-end;">
+                            <button type="button" class="btn-choose-club ${isSelected ? 'btn-selected' : ''}" 
+                                    data-club-id="${escapeHtml(club.id)}"
+                                    data-code="${escapeHtml(courseCode)}" 
+                                    data-sem="${semNum}">
+                                ${isSelected ? '✓ חוג זה משובץ' : 'בחר חוג וסנכרן לתכנון'}
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+        modal.innerHTML = `
+            <div class="modal-card" style="background: #0f172a; border: 1px solid #22c55e; border-radius: 16px; padding: 24px; width: 100%; max-width: 620px; max-height: 90vh; overflow-y: auto; direction: rtl; box-shadow: 0 15px 40px rgba(0,0,0,0.8);">
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 12px; margin-bottom: 16px;">
+                    <div>
+                        <div style="font-size: 1.15rem; font-weight: 800; color: #4ade80; display: flex; align-items: center; gap: 8px;">
+                            🏃 בחירת חוג ומועד - ${escapeHtml(catCourse.name || courseInSem.name)}
+                        </div>
+                        <div style="font-size: 0.78rem; color: #94a3b8; margin-top: 4px;">
+                            קוד קורס: ${escapeHtml(courseCode)} • סמסטר מתוכנן: ${semNum}
+                        </div>
+                    </div>
+                    <button type="button" id="btn-close-sport-modal" style="background: none; border: none; font-size: 1.4rem; color: #94a3b8; cursor: pointer; padding: 4px 8px;">✕</button>
+                </div>
+
+                <div style="background: rgba(34, 197, 94, 0.08); border: 1px solid rgba(34, 197, 94, 0.25); border-radius: 8px; padding: 10px 12px; margin-bottom: 16px; font-size: 0.8rem; color: #bbf7d0; line-height: 1.4;">
+                    ⚠️ <strong>חובת נוכחות במועד קבוע:</strong><br>
+                    בניגוד לקורסים עיוניים (בהם ניתן להגיע להרצאות או תרגולים מקבילים), רישום לקורס חינוך גופני או מל״ג מחייב הגעה לקבוצה ולשעות שבחרתם. המערכת בודקת באופן אוטומטי חפיפות עם יתר הקורסים המשובצים בסמסטר ${semNum}.
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px;">
+                    ${renderedClubsHtml}
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 14px; flex-wrap: wrap;">
+                    <button type="button" id="btn-open-timetable-from-sport" class="btn-club-timetable-link" title="פתח את מערכת השעות המלאה לבדיקת שיבוץ">
+                        📅 פתח במערכת השעות (Timetable Studio)
+                    </button>
+                    <button type="button" id="btn-close-sport-modal-footer" style="background: #334155; color: #f8fafc; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; font-weight: 600;">
+                        סגור
+                    </button>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        const closeModal = () => modal.remove();
+        const closeBtn1 = modal.querySelector('#btn-close-sport-modal');
+        if (closeBtn1) closeBtn1.onclick = closeModal;
+        const closeBtn2 = modal.querySelector('#btn-close-sport-modal-footer');
+        if (closeBtn2) closeBtn2.onclick = closeModal;
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) closeModal();
+        });
+
+        const ttBtn = modal.querySelector('#btn-open-timetable-from-sport');
+        if (ttBtn) {
+            ttBtn.onclick = () => {
+                closeModal();
+                if (window.TimetableGenerator && typeof window.TimetableGenerator.open === 'function') {
+                    window.TimetableGenerator.open();
+                } else if (window.TimetableStudio && typeof window.TimetableStudio.open === 'function') {
+                    window.TimetableStudio.open();
+                }
+            };
+        }
+
+        modal.querySelectorAll('.btn-choose-club').forEach(btn => {
+            btn.onclick = (e) => {
+                e.stopPropagation();
+                const clubId = btn.getAttribute('data-club-id');
+                const chosenClub = clubs.find(c => c.id === clubId);
+                if (!chosenClub) return;
+
+                courseInSem.selectedClub = chosenClub.name;
+                courseInSem.selectedClubId = chosenClub.id;
+                courseInSem.scheduleSlot = {
+                    day: chosenClub.day,
+                    time: chosenClub.time,
+                    dayIndex: chosenClub.dayIndex,
+                    startTime: chosenClub.startTime,
+                    endTime: chosenClub.endTime,
+                    room: chosenClub.room
+                };
+                courseInSem.name = `חינוך גופני - ${chosenClub.name}`;
+
+                saveCustomPlan();
+
+                try {
+                    const stored = localStorage.getItem('ast_timetable_user_anchors');
+                    const anchors = stored ? JSON.parse(stored) : {};
+                    const cleanCode = String(courseCode).replace(/^0+/, '');
+                    const slotKey = `${courseCode}_sport`;
+                    anchors[slotKey] = {
+                        slotKey: slotKey,
+                        courseCode: courseCode,
+                        courseName: courseInSem.name,
+                        slotType: 'sport',
+                        groupId: chosenClub.groupId || '11',
+                        sportName: chosenClub.name,
+                        dayIndex: chosenClub.dayIndex,
+                        startTime: chosenClub.startTime,
+                        endTime: chosenClub.endTime,
+                        room: chosenClub.room,
+                        isFixed: true
+                    };
+                    anchors[`${cleanCode}_sport`] = anchors[slotKey];
+                    localStorage.setItem('ast_timetable_user_anchors', JSON.stringify(anchors));
+                } catch (err) {
+                    console.warn('[Planner] Failed to save sport anchor:', err);
+                }
+
+                saveCustomPlan();
+                renderDegreePlanner();
+                if (typeof global.saveState === 'function') global.saveState();
+                if (typeof global.renderUI === 'function') global.renderUI();
+
+                closeModal();
+
+                if (typeof window.showToast === 'function') {
+                    window.showToast(`חוג "${chosenClub.name}" (${chosenClub.day} ${chosenClub.time}) שובץ בהצלחה לסמסטר ${semNum}!`);
+                }
+            };
+        });
+    }
+
     function renderDegreePlanner() {
         if (!customPlan) {
             initPlannerState();
@@ -1739,6 +1929,33 @@
                             </div>
                         </div>
                         <div class="course-card-title">${escapeHtml(course.name)}</div>
+                        ${(() => {
+                            const isSport = course.type === 'sports' || course.list === 'SPORTS';
+                            const isMalag = course.type === 'humanities' || course.list === 'MALAG';
+                            if (isSport && !completed) {
+                                const hasClub = !!course.selectedClub;
+                                const btnLabel = hasClub 
+                                    ? `🏃 ${escapeHtml(course.selectedClub)}${course.scheduleSlot && course.scheduleSlot.time ? ` (${escapeHtml(course.scheduleSlot.day || '')} ${escapeHtml(course.scheduleSlot.time)})` : ''} ▾`
+                                    : '🏃 בחר חוג ולו״ז במערכת... ▾';
+                                const btnCls = hasClub ? 'btn-select-sport-club has-club' : 'btn-select-sport-club need-club';
+                                return `
+                                    <div style="margin-top: 4px;">
+                                        <button type="button" class="${btnCls}" data-code="${escapeHtml(course.code)}" data-semester="${semNum}" title="בחר חוג ספורט וודא תאימות למערכת השעות">
+                                            ${btnLabel}
+                                        </button>
+                                    </div>
+                                `;
+                            } else if (isMalag && !completed && course.scheduleSlot) {
+                                return `
+                                    <div style="margin-top: 4px;">
+                                        <span class="badge-malag-schedule" title="חובת נוכחות בשעה קבועה בטכניון">
+                                            🕒 יום ${escapeHtml(course.scheduleSlot.day)} ${escapeHtml(course.scheduleSlot.time)}
+                                        </span>
+                                    </div>
+                                `;
+                            }
+                            return '';
+                        })()}
                         <div class="course-card-bottom">
                             <div style="display: flex; align-items: center; gap: 5px;">
                                 <span class="course-card-credits">${course.credits} נק״ז</span>
@@ -1879,6 +2096,13 @@
                                 }
                                 <span>${course.credits} נק״ז</span>
                             </div>
+                            ${
+                                (course.list === "SPORTS" || course.type === "sports") && course.clubs && course.clubs.length > 0
+                                    ? `<div class="pool-clubs-preview">🏃 ${escapeHtml(course.clubs.map(c => c.name.replace('חינוך גופני - ', '')).slice(0, 2).join(' • '))}${course.clubs.length > 2 ? '...' : ''}</div>`
+                                    : ((course.list === "MALAG" || course.type === "humanities") && course.scheduleSlot
+                                        ? `<div class="pool-schedule-preview">🕒 יום ${escapeHtml(course.scheduleSlot.day)} ${escapeHtml(course.scheduleSlot.time)}</div>`
+                                        : '')
+                            }
                         </div>
                         <button type="button" class="btn-add-to-plan" data-code="${escapeHtml(course.code)}" title="הוסף קורס זה לסמסטר">+</button>
                     </div>
@@ -1988,6 +2212,16 @@
                                 <span>${escapeHtml(course.code)}</span>
                                 <span>• ${course.credits} נק״ז</span>
                             </div>
+                            ${(() => {
+                                if (isSportItem && course.clubs && course.clubs.length > 0) {
+                                    const clubNames = course.clubs.map(c => c.name.replace('חינוך גופני - ', '')).slice(0, 3).join(' • ');
+                                    const extra = course.clubs.length > 3 ? '...' : '';
+                                    return `<div class="pool-clubs-preview" title="חוגים זמינים ברישום">🏃 ${escapeHtml(clubNames + extra)}</div>`;
+                                } else if (isMalagItem && course.scheduleSlot) {
+                                    return `<div class="pool-schedule-preview" title="חובת נוכחות במועד קבוע">🕒 יום ${escapeHtml(course.scheduleSlot.day)} ${escapeHtml(course.scheduleSlot.time)}</div>`;
+                                }
+                                return '';
+                            })()}
                         </div>
                         <button type="button" class="btn-add-to-plan" data-code="${escapeHtml(course.code)}" title="הוסף קורס זה לסמסטר">+</button>
                     </div>
@@ -2305,7 +2539,10 @@
                 whatIfBtn.style.background = isWhatIfMode ? '#ca8a04' : '';
                 whatIfBtn.style.color = isWhatIfMode ? '#ffffff' : '#fde047';
                 renderWhatIfBanner();
-                renderSemesterColumns(getActivePlan(), buildCourseSemesterMap(getActivePlan()));
+                saveCustomPlan();
+                renderDegreePlanner();
+                if (typeof global.saveState === 'function') global.saveState();
+                if (typeof global.renderUI === 'function') global.renderUI();
                 return;
             }
 
@@ -2324,7 +2561,10 @@
                     }
                 }
                 renderWhatIfBanner();
-                renderSemesterColumns(getActivePlan(), buildCourseSemesterMap(getActivePlan()));
+                saveCustomPlan();
+                renderDegreePlanner();
+                if (typeof global.saveState === 'function') global.saveState();
+                if (typeof global.renderUI === 'function') global.renderUI();
                 return;
             }
 
@@ -2354,10 +2594,20 @@
                 return;
             }
 
+            // Sport Club Selector Button Click
+            const sportClubBtn = e.target.closest('.btn-select-sport-club');
+            if (sportClubBtn) {
+                e.stopPropagation();
+                const code = sportClubBtn.getAttribute('data-code');
+                const semNum = parseFloat(sportClubBtn.getAttribute('data-semester'));
+                openSportClubSelectorModal(code, semNum);
+                return;
+            }
+
             // Course card click/tap -> Open Course Details Modal (CheeseFork info, reviews, histograms & Technion++ resources)
             const card = e.target.closest('.planner-course-card, .planner-pool-item');
             if (card) {
-                if (e.target.closest('.course-card-whatif-input, .btn-card-remove, .btn-add-to-plan, .btn-course-workload, [data-action="cycle-list"]')) return;
+                if (e.target.closest('.course-card-whatif-input, .btn-card-remove, .btn-add-to-plan, .btn-course-workload, .btn-select-sport-club, [data-action="cycle-list"]')) return;
 
                 const code = card.getAttribute('data-code');
                 const altCode = card.getAttribute('data-alt-code');
@@ -3226,6 +3476,8 @@
     // Public API
     // --------------------------------------------------------------------------
     global.DegreePlanner = {
+        saveCustomPlan: saveCustomPlan,
+        openSportClubSelectorModal: openSportClubSelectorModal,
         init: initPlannerState,
         renderDegreePlanner: renderDegreePlanner,
         evaluateDegreeRules: evaluateDegreeRules,
@@ -3864,6 +4116,7 @@
     };
 
     // Public API for English Level State
+    global.openSportClubSelectorModal = openSportClubSelectorModal;
     global.applyEnglishLevelState = applyEnglishLevelState;
     global.getEnglishLevel = () => englishLevel;
 

@@ -526,41 +526,116 @@
             { code: "00350026", altCode: "035026", name: "מבוא יצירתי להנדסת מכונות (רשות)", credits: 2.5, list: "E", prereqs: [] }
         ],
 
-        // קורסי ספורט וחינוך גופני (Technion Physical Education & Sports)
+                // קורסי ספורט וחינוך גופני (Technion Physical Education & Sports)
         SPORTS: [
-            { code: "03940800", altCode: "394800", name: "חינוך גופני - כושר גופני וחדר כושר", credits: 1.0, type: "sports", list: "SPORTS", prereqs: [] },
-            { code: "03940801", altCode: "394801", name: "חינוך גופני - התעמלות ואימון פונקציונלי", credits: 1.0, type: "sports", list: "SPORTS", prereqs: [] },
-            { code: "03940802", altCode: "394802", name: "חינוך גופני - שחייה (סגנונות ואימון)", credits: 1.0, type: "sports", list: "SPORTS", prereqs: [] },
-            { code: "03940803", altCode: "394803", name: "חינוך גופני - משחקי כדור (כדורסל/כדורגל/כדורעף)", credits: 1.0, type: "sports", list: "SPORTS", prereqs: [] },
-            { code: "03940804", altCode: "394804", name: "חינוך גופני - משחקי מחבט (טניס/טניס שולחן/בדמינטון)", credits: 1.0, type: "sports", list: "SPORTS", prereqs: [] },
-            { code: "03940805", altCode: "394805", name: "חינוך גופני - אתלטיקה קלה / יוגה", credits: 1.0, type: "sports", list: "SPORTS", prereqs: [] },
-            { code: "03940806", altCode: "394806", name: "חינוך גופני - הגנה עצמית וקרב מגע", credits: 1.0, type: "sports", list: "SPORTS", prereqs: [] },
-            { code: "03940807", altCode: "394807", name: "חינוך גופני - כושר גופני מעורב", credits: 1.0, type: "sports", list: "SPORTS", prereqs: [] },
-            { code: "03940808", altCode: "394808", name: "חינוך גופני - פילאטיס ומתיחות", credits: 1.0, type: "sports", list: "SPORTS", prereqs: [] },
-            { code: "03940820", altCode: "394820", name: "חינוך גופני - תנועה, יציבה ומחול", credits: 1.0, type: "sports", list: "SPORTS", prereqs: [] },
-            { code: "03940902", altCode: "394902", name: "נבחרות ספורט אס״א טכניון", credits: 1.5, type: "sports", list: "SPORTS", prereqs: [] }
+            {
+                code: "03940808", altCode: "394808", name: "חינוך גופני - פילאטיס ומתיחות", credits: 1.0, type: "sports", list: "SPORTS", prereqs: [],
+                clubs: [
+                    { id: "pilates_reformer", name: "פילאטיס מכשירים", day: "רביעי", time: "12:30 - 14:00", dayIndex: 3, startTime: "12:30", endTime: "14:00", room: "מרכז הספורט - חדר מכשירים", note: "חובת נוכחות • רישום מראש" },
+                    { id: "pilates_mat", name: "פילאטיס מזרן", day: "שני", time: "10:30 - 12:00", dayIndex: 1, startTime: "10:30", endTime: "12:00", room: "אולם סטודיו קנדה", note: "חובת נוכחות" },
+                    { id: "pilates_dynamic", name: "פילאטיס דינמי ועיצוב", day: "חמישי", time: "08:30 - 10:00", dayIndex: 4, startTime: "08:30", endTime: "10:00", room: "סטודיו 2", note: "חובת נוכחות" },
+                    { id: "pilates_mobility", name: "מתיחות וגמישות", day: "ראשון", time: "14:30 - 16:00", dayIndex: 0, startTime: "14:30", endTime: "16:00", room: "מרכז הספורט", note: "חובת נוכחות" }
+                ]
+            },
+            {
+                code: "03940805", altCode: "394805", name: "חינוך גופני - אתלטיקה קלה / יוגה", credits: 1.0, type: "sports", list: "SPORTS", prereqs: [],
+                clubs: [
+                    { id: "yoga_vinyasa", name: "יוגה ויניאסה", day: "שני", time: "08:30 - 10:00", dayIndex: 1, startTime: "08:30", endTime: "10:00", room: "סטודיו דשא", note: "חובת נוכחות" },
+                    { id: "yoga_hatha", name: "האטה יוגה", day: "שלישי", time: "12:30 - 14:00", dayIndex: 2, startTime: "12:30", endTime: "14:00", room: "אולם קנדה", note: "חובת נוכחות" },
+                    { id: "yoga_ashtanga", name: "אשטנגה יוגה", day: "רביעי", time: "16:30 - 18:00", dayIndex: 3, startTime: "16:30", endTime: "18:00", room: "סטודיו מרכזי", note: "חובת נוכחות" },
+                    { id: "yoga_track", name: "אתלטיקה קלה וריצה", day: "ראשון", time: "18:30 - 20:00", dayIndex: 0, startTime: "18:30", endTime: "20:00", room: "אצטדיון הטכניון", note: "חובת נוכחות" }
+                ]
+            },
+            {
+                code: "03940800", altCode: "394800", name: "חינוך גופני - כושר גופני וחדר כושר", credits: 1.0, type: "sports", list: "SPORTS", prereqs: [],
+                clubs: [
+                    { id: "gym_general", name: "אימון חדר כושר כללי", day: "א'/ג'/ה'", time: "חלונות גמישים", room: "מרכז הכושר הטכניוני", isFlexible: true, note: "נוכחות נמדדת בצ'ק-אין בקבלה" },
+                    { id: "gym_trx", name: "אימון TRX ורצועות", day: "שני", time: "12:30 - 14:00", dayIndex: 1, startTime: "12:30", endTime: "14:00", room: "סטודיו כושר", note: "חובת נוכחות" },
+                    { id: "gym_spinning", name: "ספינינג ורכיבה", day: "רביעי", time: "18:00 - 19:30", dayIndex: 3, startTime: "18:00", endTime: "19:30", room: "אולם ספינינג", note: "חובת נוכחות" }
+                ]
+            },
+            {
+                code: "03940801", altCode: "394801", name: "חינוך גופני - התעמלות ואימון פונקציונלי", credits: 1.0, type: "sports", list: "SPORTS", prereqs: [],
+                clubs: [
+                    { id: "func_cross", name: "אימון פונקציונלי וקרוספיט", day: "שלישי", time: "16:30 - 18:00", dayIndex: 2, startTime: "16:30", endTime: "18:00", room: "מתחם פונקציונלי", note: "חובת נוכחות" },
+                    { id: "func_sculpt", name: "עיצוב וחיטוב הגוף", day: "שני", time: "14:30 - 16:00", dayIndex: 1, startTime: "14:30", endTime: "16:00", room: "סטודיו 1", note: "חובת נוכחות" },
+                    { id: "func_aerobic", name: "אירובי ואימון מדרגה", day: "חמישי", time: "12:30 - 14:00", dayIndex: 4, startTime: "12:30", endTime: "14:00", room: "סטודיו מרכזי", note: "חובת נוכחות" }
+                ]
+            },
+            {
+                code: "03940803", altCode: "394803", name: "חינוך גופני - משחקי כדור (כדורסל/כדורגל/כדורעף)", credits: 1.0, type: "sports", list: "SPORTS", prereqs: [],
+                clubs: [
+                    { id: "ball_basketball", name: "כדורסל", day: "ראשון", time: "16:30 - 18:00", dayIndex: 0, startTime: "16:30", endTime: "18:00", room: "אולם קנדה", note: "חובת נוכחות" },
+                    { id: "ball_volleyball", name: "כדורעף", day: "רביעי", time: "14:30 - 16:00", dayIndex: 3, startTime: "14:30", endTime: "16:00", room: "אולם מרכזי", note: "חובת נוכחות" },
+                    { id: "ball_soccer", name: "כדורגל / קטרגל", day: "שלישי", time: "18:30 - 20:00", dayIndex: 2, startTime: "18:30", endTime: "20:00", room: "מגרש עליון", note: "חובת נוכחות" }
+                ]
+            },
+            {
+                code: "03940804", altCode: "394804", name: "חינוך גופני - משחקי מחבט (טניס/טניס שולחן/בדמינטון)", credits: 1.0, type: "sports", list: "SPORTS", prereqs: [],
+                clubs: [
+                    { id: "racket_tennis", name: "טניס", day: "שני", time: "14:30 - 16:00", dayIndex: 1, startTime: "14:30", endTime: "16:00", room: "מגרשי טניס עליונים", note: "חובת נוכחות" },
+                    { id: "racket_table_tennis", name: "טניס שולחן", day: "רביעי", time: "16:30 - 18:00", dayIndex: 3, startTime: "16:30", endTime: "18:00", room: "אולם טניס שולחן", note: "חובת נוכחות" },
+                    { id: "racket_badminton", name: "בדמינטון", day: "חמישי", time: "10:30 - 12:00", dayIndex: 4, startTime: "10:30", endTime: "12:00", room: "אולם קנדה", note: "חובת נוכחות" }
+                ]
+            },
+            {
+                code: "03940802", altCode: "394802", name: "חינוך גופני - שחייה (סגנונות ואימון)", credits: 1.0, type: "sports", list: "SPORTS", prereqs: [],
+                clubs: [
+                    { id: "swim_styles", name: "לימוד ושיפור סגנון שחייה", day: "שני", time: "08:30 - 10:00", dayIndex: 1, startTime: "08:30", endTime: "10:00", room: "בריכת הטכניון", note: "חובת נוכחות" },
+                    { id: "swim_advanced", name: "אימון שחייה מתקדם", day: "רביעי", time: "07:00 - 08:30", dayIndex: 3, startTime: "07:00", endTime: "08:30", room: "בריכת הטכניון", note: "חובת נוכחות" },
+                    { id: "swim_waterpolo", name: "כדורמים", day: "חמישי", time: "16:30 - 18:00", dayIndex: 4, startTime: "16:30", endTime: "18:00", room: "בריכת הטכניון", note: "חובת נוכחות" }
+                ]
+            },
+            {
+                code: "03940806", altCode: "394806", name: "חינוך גופני - הגנה עצמית וקרב מגע", credits: 1.0, type: "sports", list: "SPORTS", prereqs: [],
+                clubs: [
+                    { id: "krav_maga", name: "קרב מגע והגנה עצמית", day: "שלישי", time: "18:30 - 20:00", dayIndex: 2, startTime: "18:30", endTime: "20:00", room: "דוג'ו אמנויות לחימה", note: "חובת נוכחות" },
+                    { id: "bjj", name: "ג'ו-ג'יטסו ברזילאי (BJJ)", day: "חמישי", time: "18:30 - 20:00", dayIndex: 4, startTime: "18:30", endTime: "20:00", room: "אולם מרכזי", note: "חובת נוכחות" }
+                ]
+            },
+            {
+                code: "03940807", altCode: "394807", name: "חינוך גופני - כושר גופני מעורב", credits: 1.0, type: "sports", list: "SPORTS", prereqs: [],
+                clubs: [
+                    { id: "mixed_fitness", name: "כושר גופני מעורב", day: "ראשון", time: "12:30 - 14:00", dayIndex: 0, startTime: "12:30", endTime: "14:00", room: "מרכז הספורט", note: "חובת נוכחות" },
+                    { id: "mixed_core", name: "אימון Core וחיזוק", day: "רביעי", time: "10:30 - 12:00", dayIndex: 3, startTime: "10:30", endTime: "12:00", room: "סטודיו 2", note: "חובת נוכחות" }
+                ]
+            },
+            {
+                code: "03940820", altCode: "394820", name: "חינוך גופני - תנועה, יציבה ומחול", credits: 1.0, type: "sports", list: "SPORTS", prereqs: [],
+                clubs: [
+                    { id: "dance_modern", name: "מחול מודרני ועכשווי", day: "רביעי", time: "14:30 - 16:00", dayIndex: 3, startTime: "14:30", endTime: "16:00", room: "סטודיו מחול", note: "חובת נוכחות" },
+                    { id: "dance_salsa", name: "סלסה וריקודי עמים", day: "שני", time: "20:00 - 21:30", dayIndex: 1, startTime: "20:00", endTime: "21:30", room: "אודיטוריום קנדה", note: "חובת נוכחות" },
+                    { id: "dance_posture", name: "תנועה ויציבה טיפולית", day: "שלישי", time: "10:30 - 12:00", dayIndex: 2, startTime: "10:30", endTime: "12:00", room: "סטודיו 2", note: "חובת נוכחות" }
+                ]
+            },
+            {
+                code: "03940902", altCode: "394902", name: "נבחרות ספורט אס״א טכניון", credits: 1.5, type: "sports", list: "SPORTS", prereqs: [],
+                clubs: [
+                    { id: "asa_varsity", name: "נבחרות אס״א טכניון", day: "לפי ענף", time: "אימונים שבועיים", room: "מרכז הספורט הטכניוני", note: "חובת נוכחות והשתתפות בתחרויות אס״א" }
+                ]
+            }
         ],
 
         // קורסי מל״ג ולימודים הומניסטיים (Technion Humanities & Social Sciences)
         MALAG: [
-            { code: "03240262", altCode: "324262", name: "מל״ג - תולדות הפילוסופיה והמדע בעת החדשה", credits: 2.0, type: "humanities", list: "MALAG", prereqs: [] },
-            { code: "03240265", altCode: "324265", name: "מל״ג - אקו-פילוסופיה: חשיבה סביבתית", credits: 2.0, type: "humanities", list: "MALAG", prereqs: [] },
-            { code: "03240269", altCode: "324269", name: "מל״ג - אתיקה בפעולה", credits: 2.0, type: "humanities", list: "MALAG", prereqs: [] },
-            { code: "03240292", altCode: "324292", name: "מל״ג - משפט, שוויון וצדק חברתי", credits: 2.0, type: "humanities", list: "MALAG", prereqs: [] },
-            { code: "03240305", altCode: "324305", name: "מל״ג - היסטוריה של המדע והטכנולוגיה", credits: 2.0, type: "humanities", list: "MALAG", prereqs: [] },
-            { code: "03240442", altCode: "324442", name: "מל״ג - משפט העבודה בישראל", credits: 2.0, type: "humanities", list: "MALAG", prereqs: [] },
-            { code: "03240445", altCode: "324445", name: "מל״ג - הסתגלות למצבי לחץ וקבלת החלטות", credits: 2.0, type: "humanities", list: "MALAG", prereqs: [] },
-            { code: "03240452", altCode: "324452", name: "מל״ג - מעקב וטכנולוגיה: תיאוריה ואתיקה", credits: 2.0, type: "humanities", list: "MALAG", prereqs: [] },
-            { code: "03240454", altCode: "324454", name: "מל״ג - מבוא לפילוסופיה של המדע", credits: 2.0, type: "humanities", list: "MALAG", prereqs: [] },
-            { code: "03240463", altCode: "324463", name: "מל״ג - היסטוריה של המזרח התיכון", credits: 2.0, type: "humanities", list: "MALAG", prereqs: [] },
-            { code: "03240473", altCode: "324473", name: "מל״ג - מבנה חדשנות מדעית ושינוי פרדיגמה", credits: 2.0, type: "humanities", list: "MALAG", prereqs: [] },
-            { code: "03240474", altCode: "324474", name: "מל״ג - אתיקה: יסודות, נורמה ויישום", credits: 2.0, type: "humanities", list: "MALAG", prereqs: [] },
-            { code: "03240478", altCode: "324478", name: "מל״ג - תכנון וניהול קריירה למהנדסים", credits: 2.0, type: "humanities", list: "MALAG", prereqs: [] },
-            { code: "03240250", altCode: "324250", name: "מל״ג - עיצוב גרפי ותקשורת חזותית", credits: 2.0, type: "humanities", list: "MALAG", prereqs: [] },
-            { code: "03240235", altCode: "324235", name: "מל״ג - תקשורת בין-אישית באמצעי תיאטרון", credits: 1.5, type: "humanities", list: "MALAG", prereqs: [] },
-            { code: "03240446", altCode: "324446", name: "מל״ג - מבוא להיסטוריה של מוזיקת הג'אז", credits: 2.0, type: "humanities", list: "MALAG", prereqs: [] },
-            { code: "03240282", altCode: "324282", name: "מל״ג - פוליטיקה של זהויות בישראל", credits: 2.0, type: "humanities", list: "MALAG", prereqs: [] },
-            { code: "03240299", altCode: "324299", name: "מל״ג - טרור, ג'יהאד ותגובה מדינית", credits: 2.0, type: "humanities", list: "MALAG", prereqs: [] }
+            { code: "03240262", altCode: "324262", name: "מל״ג - תולדות הפילוסופיה והמדע בעת החדשה", credits: 2.0, type: "humanities", list: "MALAG", prereqs: [], scheduleSlot: { day: "שני", time: "16:30 - 18:30", dayIndex: 1, startTime: "16:30", endTime: "18:30", room: "טאוב 1" } },
+            { code: "03240265", altCode: "324265", name: "מל״ג - אקו-פילוסופיה: חשיבה סביבתית", credits: 2.0, type: "humanities", list: "MALAG", prereqs: [], scheduleSlot: { day: "שני", time: "14:30 - 16:30", dayIndex: 1, startTime: "14:30", endTime: "16:30", room: "אולמן 302" } },
+            { code: "03240269", altCode: "324269", name: "מל״ג - אתיקה בפעולה", credits: 2.0, type: "humanities", list: "MALAG", prereqs: [], scheduleSlot: { day: "שלישי", time: "16:30 - 18:30", dayIndex: 2, startTime: "16:30", endTime: "18:30", room: "אולמן 502" } },
+            { code: "03240292", altCode: "324292", name: "מל״ג - משפט, שוויון וצדק חברתי", credits: 2.0, type: "humanities", list: "MALAG", prereqs: [], scheduleSlot: { day: "רביעי", time: "14:30 - 16:30", dayIndex: 3, startTime: "14:30", endTime: "16:30", room: "סגו 201" } },
+            { code: "03240305", altCode: "324305", name: "מל״ג - היסטוריה של המדע והטכנולוגיה", credits: 2.0, type: "humanities", list: "MALAG", prereqs: [], scheduleSlot: { day: "חמישי", time: "10:30 - 12:30", dayIndex: 4, startTime: "10:30", endTime: "12:30", room: "טאוב 2" } },
+            { code: "03240442", altCode: "324442", name: "מל״ג - משפט העבודה בישראל", credits: 2.0, type: "humanities", list: "MALAG", prereqs: [], scheduleSlot: { day: "ראשון", time: "14:30 - 16:30", dayIndex: 0, startTime: "14:30", endTime: "16:30", room: "אולמן 401" } },
+            { code: "03240445", altCode: "324445", name: "מל״ג - הסתגלות למצבי לחץ וקבלת החלטות", credits: 2.0, type: "humanities", list: "MALAG", prereqs: [], scheduleSlot: { day: "חמישי", time: "12:30 - 14:30", dayIndex: 4, startTime: "12:30", endTime: "14:30", room: "אולמן 301" } },
+            { code: "03240452", altCode: "324452", name: "מל״ג - מעקב וטכנולוגיה: תיאוריה ואתיקה", credits: 2.0, type: "humanities", list: "MALAG", prereqs: [], scheduleSlot: { day: "שלישי", time: "14:30 - 16:30", dayIndex: 2, startTime: "14:30", endTime: "16:30", room: "אולמן 304" } },
+            { code: "03240454", altCode: "324454", name: "מל״ג - מבוא לפילוסופיה של המדע", credits: 2.0, type: "humanities", list: "MALAG", prereqs: [], scheduleSlot: { day: "ראשון", time: "16:30 - 18:30", dayIndex: 0, startTime: "16:30", endTime: "18:30", room: "טאוב 3" } },
+            { code: "03240463", altCode: "324463", name: "מל״ג - היסטוריה של המזרח התיכון", credits: 2.0, type: "humanities", list: "MALAG", prereqs: [], scheduleSlot: { day: "שני", time: "12:30 - 14:30", dayIndex: 1, startTime: "12:30", endTime: "14:30", room: "סגו 302" } },
+            { code: "03240473", altCode: "324473", name: "מל״ג - מבנה חדשנות מדעית ושינוי פרדיגמה", credits: 2.0, type: "humanities", list: "MALAG", prereqs: [], scheduleSlot: { day: "רביעי", time: "16:30 - 18:30", dayIndex: 3, startTime: "16:30", endTime: "18:30", room: "טאוב 1" } },
+            { code: "03240474", altCode: "324474", name: "מל״ג - אתיקה: יסודות, נורמה ויישום", credits: 2.0, type: "humanities", list: "MALAG", prereqs: [], scheduleSlot: { day: "חמישי", time: "14:30 - 16:30", dayIndex: 4, startTime: "14:30", endTime: "16:30", room: "אולמן 502" } },
+            { code: "03240478", altCode: "324478", name: "מל״ג - תכנון וניהול קריירה למהנדסים", credits: 2.0, type: "humanities", list: "MALAG", prereqs: [], scheduleSlot: { day: "ראשון", time: "12:30 - 14:30", dayIndex: 0, startTime: "12:30", endTime: "14:30", room: "סגו 101" } },
+            { code: "03240250", altCode: "324250", name: "מל״ג - עיצוב גרפי ותקשורת חזותית", credits: 2.0, type: "humanities", list: "MALAG", prereqs: [], scheduleSlot: { day: "שלישי", time: "10:30 - 12:30", dayIndex: 2, startTime: "10:30", endTime: "12:30", room: "ארכיטקטורה 2" } },
+            { code: "03240235", altCode: "324235", name: "מל״ג - תקשורת בין-אישית באמצעי תיאטרון", credits: 1.5, type: "humanities", list: "MALAG", prereqs: [], scheduleSlot: { day: "שני", time: "18:30 - 20:00", dayIndex: 1, startTime: "18:30", endTime: "20:00", room: "אודיטוריום קנדה" } },
+            { code: "03240446", altCode: "324446", name: "מל״ג - מבוא להיסטוריה של מוזיקת הג'אז", credits: 2.0, type: "humanities", list: "MALAG", prereqs: [], scheduleSlot: { day: "רביעי", time: "18:30 - 20:30", dayIndex: 3, startTime: "18:30", endTime: "20:30", room: "קנדה 1" } },
+            { code: "03240282", altCode: "324282", name: "מל״ג - פוליטיקה של זהויות בישראל", credits: 2.0, type: "humanities", list: "MALAG", prereqs: [], scheduleSlot: { day: "חמישי", time: "16:30 - 18:30", dayIndex: 4, startTime: "16:30", endTime: "18:30", room: "טאוב 2" } },
+            { code: "03240299", altCode: "324299", name: "מל״ג - טרור, ג'יהאד ותגובה מדינית", credits: 2.0, type: "humanities", list: "MALAG", prereqs: [], scheduleSlot: { day: "שלישי", time: "18:30 - 20:30", dayIndex: 2, startTime: "18:30", endTime: "20:30", room: "סגו 201" } }
         ]
     };
 
@@ -965,6 +1040,118 @@
     }
 
     // Expose to window / global
+    
+    // Helper: Check schedule conflict between a candidate meeting and active semester courses
+    function checkMeetingConflict(candidateMeeting, semesterCourses) {
+        if (!candidateMeeting || !candidateMeeting.startTime || !candidateMeeting.endTime || candidateMeeting.dayIndex === undefined) {
+            return { hasConflict: false };
+        }
+
+        const candDay = candidateMeeting.dayIndex;
+        const parseMins = (t) => {
+            if (!t) return 0;
+            const p = t.split(':').map(Number);
+            return (p[0] || 0) * 60 + (p[1] || 0);
+        };
+        const candStart = parseMins(candidateMeeting.startTime);
+        const candEnd = parseMins(candidateMeeting.endTime);
+
+        const groupsCatalog = (global.TimetableGenerator && global.TimetableGenerator.catalog) || {};
+
+        let userAnchors = {};
+        try {
+            if (typeof localStorage !== 'undefined') {
+                const stored = localStorage.getItem('ast_timetable_user_anchors');
+                if (stored) userAnchors = JSON.parse(stored);
+            }
+        } catch (e) {}
+
+        let potentialConflict = null;
+
+        for (const c of (semesterCourses || [])) {
+            const code = c.code || c.id;
+            if (candidateMeeting.courseCode && (code === candidateMeeting.courseCode || String(code).replace(/^0+/, '') === String(candidateMeeting.courseCode).replace(/^0+/, ''))) {
+                continue;
+            }
+
+            const clean = String(code).replace(/^0+/, '');
+            const cInfo = groupsCatalog[code] || groupsCatalog[clean];
+            if (cInfo && cInfo.slots) {
+                for (const slot of cInfo.slots) {
+                    const slotKey = `${code}_${slot.slotType || 'slot'}`;
+                    const slotKeyClean = `${clean}_${slot.slotType || 'slot'}`;
+                    const anchor = userAnchors[slotKey] || userAnchors[slotKeyClean];
+
+                    let optionsToCheck = slot.options || [];
+                    let isAnchored = false;
+                    if (anchor && anchor.groupId) {
+                        const anchoredOpt = optionsToCheck.find(o => String(o.groupId) === String(anchor.groupId));
+                        if (anchoredOpt) {
+                            optionsToCheck = [anchoredOpt];
+                            isAnchored = true;
+                        }
+                    }
+
+                    let allOptionsConflict = true;
+                    let conflictingMeetingInfo = null;
+
+                    for (const opt of optionsToCheck) {
+                        let optConflicts = false;
+                        for (const m of (opt.meetings || [])) {
+                            if (m.dayIndex === candDay) {
+                                const mStart = parseMins(m.startTime);
+                                const mEnd = parseMins(m.endTime);
+                                if (Math.max(candStart, mStart) < Math.min(candEnd, mEnd)) {
+                                    optConflicts = true;
+                                    conflictingMeetingInfo = {
+                                        courseName: c.name || cInfo.name || code,
+                                        slotName: slot.slotName || '',
+                                        groupId: opt.groupId,
+                                        time: `${m.dayName || ''} ${m.startTime}-${m.endTime}`,
+                                        room: m.room || opt.room || ''
+                                    };
+                                    break;
+                                }
+                            }
+                        }
+                        if (!optConflicts) {
+                            allOptionsConflict = false;
+                        }
+                    }
+
+                    if (conflictingMeetingInfo) {
+                        if (isAnchored || allOptionsConflict) {
+                            return {
+                                hasConflict: true,
+                                isDefinite: true,
+                                conflictingCourse: conflictingMeetingInfo.courseName,
+                                conflictingSlot: `${conflictingMeetingInfo.slotName} (קבוצה ${conflictingMeetingInfo.groupId})`,
+                                conflictingTime: conflictingMeetingInfo.time,
+                                room: conflictingMeetingInfo.room
+                            };
+                        } else if (!potentialConflict) {
+                            potentialConflict = {
+                                hasConflict: true,
+                                isDefinite: false,
+                                conflictingCourse: conflictingMeetingInfo.courseName,
+                                conflictingSlot: `${conflictingMeetingInfo.slotName} (קבוצה ${conflictingMeetingInfo.groupId})`,
+                                conflictingTime: conflictingMeetingInfo.time,
+                                room: conflictingMeetingInfo.room,
+                                note: 'קיימת קבוצה חלופית שאינה מתנגשת'
+                            };
+                        }
+                    }
+                }
+            }
+        }
+
+        if (potentialConflict) {
+            return potentialConflict;
+        }
+
+        return { hasConflict: false };
+    }
+
     global.PLANNER_CATALOG = {
         DEGREE_RULES: DEGREE_RULES,
         SUGGESTED_MANDATORY_SYLLABUS: SUGGESTED_MANDATORY_SYLLABUS,
@@ -979,6 +1166,7 @@
         COURSE_TERM_OFFERINGS: COURSE_TERM_OFFERINGS,
         SUMMER_CONFIRMED_COURSES: SUMMER_CONFIRMED_COURSES,
         isCourseOfferedInSummer: isCourseOfferedInSummer,
+        checkMeetingConflict: checkMeetingConflict,
         isCourseOfferedInSemester: isCourseOfferedInSemester
     };
 
