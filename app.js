@@ -20889,8 +20889,8 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.10.24-v2.5.5",
-    version: "2.5.5",
+    code: "REV-2026.10.24-v2.5.6",
+    version: "2.5.6",
     build: "20261020_03",
     date: "2026-10-20 01:20",
     description: "גרסה 2.5.2: פתרון מוחלט ללולאת העדכון במובייל וספארי, מנגנון אנטי-רילואד עמיד ב-localStorage, סנכרון גרסאות מלא וקישורי הורדה ישירים לטלפונים"
@@ -22388,6 +22388,125 @@ function compareSemver(v1, v2) {
     return 0;
 }
 
+// Zero-Lag Multi-Tier Remote Version Resolver (Bypasses Fastly raw CDN caching)
+async function fetchLatestRemoteVersion() {
+    // Priority 1: GitHub Releases API (Instantaneous upon release publish, zero Fastly CDN cache delay)
+    try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 3500);
+        const resp = await fetch(`https://api.github.com/repos/adir2368/Semestero-ME/releases/latest?_nc=${Date.now()}`, {
+            cache: 'no-store',
+            headers: { 'Accept': 'application/vnd.github.v3+json' },
+            signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+        if (resp.ok) {
+            const data = await resp.json();
+            if (data && data.tag_name) {
+                const tagMatch = data.tag_name.match(/(\d+\.\d+\.\d+)/);
+                if (tagMatch) {
+                    const ver = tagMatch[1];
+                    console.log(`[VersionCheck] Source 1 (GitHub Releases API) returned v${ver}`);
+                    return { version: ver, notes: data.name || data.body || '', source: 'github_releases' };
+                }
+            }
+        }
+    } catch (e) {
+        console.warn('[VersionCheck] Source 1 (GitHub Releases) error:', e);
+    }
+
+    // Priority 2: GitHub Tags API (Immediate git tag index)
+    try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 3500);
+        const resp = await fetch(`https://api.github.com/repos/adir2368/Semestero-ME/tags?per_page=1&_nc=${Date.now()}`, {
+            cache: 'no-store',
+            headers: { 'Accept': 'application/vnd.github.v3+json' },
+            signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+        if (resp.ok) {
+            const tags = await resp.json();
+            if (Array.isArray(tags) && tags.length > 0 && tags[0].name) {
+                const tagMatch = tags[0].name.match(/(\d+\.\d+\.\d+)/);
+                if (tagMatch) {
+                    const ver = tagMatch[1];
+                    console.log(`[VersionCheck] Source 2 (GitHub Tags API) returned v${ver}`);
+                    return { version: ver, notes: '', source: 'github_tags' };
+                }
+            }
+        }
+    } catch (e) {
+        console.warn('[VersionCheck] Source 2 (GitHub Tags) error:', e);
+    }
+
+    // Priority 3: GitHub Contents API for package.json (Live git repo contents, not Fastly raw CDN)
+    try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 3500);
+        const resp = await fetch(`https://api.github.com/repos/adir2368/Semestero-ME/contents/package.json?ref=main&_nc=${Date.now()}`, {
+            cache: 'no-store',
+            headers: { 'Accept': 'application/vnd.github.v3.raw' },
+            signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+        if (resp.ok) {
+            const pkg = await resp.json();
+            if (pkg && pkg.version) {
+                const ver = pkg.version.trim();
+                console.log(`[VersionCheck] Source 3 (GitHub Contents API) returned v${ver}`);
+                return { version: ver, notes: pkg.description || '', source: 'github_contents' };
+            }
+        }
+    } catch (e) {
+        console.warn('[VersionCheck] Source 3 (GitHub Contents) error:', e);
+    }
+
+    // Priority 4: Origin package.json (Direct local origin fetch)
+    try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 3000);
+        const resp = await fetch(`./package.json?_nc=${Date.now()}`, {
+            cache: 'no-store',
+            signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+        if (resp.ok) {
+            const pkg = await resp.json();
+            if (pkg && pkg.version) {
+                const ver = pkg.version.trim();
+                console.log(`[VersionCheck] Source 4 (Origin package.json) returned v${ver}`);
+                return { version: ver, notes: pkg.description || '', source: 'origin_pkg' };
+            }
+        }
+    } catch (e) {
+        console.warn('[VersionCheck] Source 4 (Origin package.json) error:', e);
+    }
+
+    // Priority 5: raw.githubusercontent.com fallback
+    try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 3500);
+        const resp = await fetch(`https://raw.githubusercontent.com/adir2368/Semestero-ME/main/package.json?_nc=${Date.now()}`, {
+            cache: 'no-store',
+            signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+        if (resp.ok) {
+            const pkg = await resp.json();
+            if (pkg && pkg.version) {
+                const ver = pkg.version.trim();
+                console.log(`[VersionCheck] Source 5 (raw.githubusercontent) returned v${ver}`);
+                return { version: ver, notes: pkg.description || '', source: 'github_raw' };
+            }
+        }
+    } catch (e) {
+        console.warn('[VersionCheck] Source 5 (raw.githubusercontent) error:', e);
+    }
+
+    return null;
+}
+
 window.checkRemoteAppVersion = async function(isManualCheck = false) {
     const isElectron = Boolean(window.electronAPI || (window.process && window.process.type === 'renderer') || (navigator.userAgent && navigator.userAgent.includes('Electron')));
     const domVerEl = document.getElementById("display-system-version");
@@ -22396,79 +22515,78 @@ window.checkRemoteAppVersion = async function(isManualCheck = false) {
         const match = domVerEl.innerText.match(/(?:^|\bv|\s)(\d+\.\d+\.\d+)\b/);
         if (match) currentVer = match[1];
     }
-    currentVer = currentVer || "2.5.5";
+    currentVer = currentVer || "2.5.6";
     const statusTextEl = document.getElementById("version-check-status-text");
     const footerBadgeEl = document.getElementById("footer-version-badge");
     const checkBtn = document.getElementById("btn-check-version-updates");
 
     if (checkBtn) {
         checkBtn.disabled = true;
-        checkBtn.innerText = "🔄 בודק...";
+        checkBtn.innerText = "🔄 בודק מול GitHub...";
+    }
+    if (footerBadgeEl && isManualCheck) {
+        footerBadgeEl.innerText = `v${currentVer} ⏳`;
+        footerBadgeEl.title = "בודק עדכוני גרסה מול שרתי GitHub...";
     }
     if (statusTextEl && isManualCheck) {
-        statusTextEl.innerText = "בודק מול GitHub...";
+        statusTextEl.innerText = "בודק מול GitHub (Releases & Tags)...";
     }
 
+    // Trigger Service Worker update check in background if supported
     try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 5000);
-        const resp = await fetch(`https://raw.githubusercontent.com/adir2368/Semestero-ME/main/package.json?t=${Date.now()}`, {
-            cache: 'no-cache',
-            signal: controller.signal
-        });
-        clearTimeout(timeoutId);
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistration().then(reg => {
+                if (reg) reg.update().catch(() => {});
+            }).catch(() => {});
+        }
+    } catch (e) {}
 
-        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-        const remotePkg = await resp.json();
-        const remoteVer = remotePkg && remotePkg.version ? remotePkg.version.trim() : null;
+    try {
+        const remoteInfo = await fetchLatestRemoteVersion();
+        const remoteVer = remoteInfo && remoteInfo.version ? remoteInfo.version.trim() : null;
 
-        if (remoteVer && compareSemver(remoteVer, currentVer) > 0) {
-            // New version detected!
+        if (!remoteVer) {
+            throw new Error("לא התקבלה תשובת גרסה מאף אחד משרתי GitHub");
+        }
+
+        const isNewer = compareSemver(remoteVer, currentVer) > 0;
+
+        if (isNewer) {
+            // A truly newer version is available on GitHub!
             if (footerBadgeEl) {
                 footerBadgeEl.classList.add("has-update");
                 footerBadgeEl.innerText = `v${currentVer} ⬆️ (חדש: v${remoteVer})`;
-                footerBadgeEl.title = `קיימת גרסה חדשה להורדה (v${remoteVer})! לחץ כאן`;
+                footerBadgeEl.title = `קיימת גרסה חדשה ב-GitHub (v${remoteVer})! לחץ כאן לשדרוג`;
             }
             if (statusTextEl) {
-                statusTextEl.innerHTML = `<span style="color: #34d399; font-weight: bold;">🎉 גרסה v${remoteVer} זמינה!</span>`;
+                statusTextEl.innerHTML = `<span style="color: #34d399; font-weight: bold;">🎉 גרסה v${remoteVer} זמינה ב-GitHub!</span>`;
             }
 
-            // AUTO-UPDATE ENGINE (Web, PWA, and Capacitor Live Container):
-            // When a new version is detected during automated background checks,
-            // seamlessly refresh the cache and reload to the latest release over the air.
-            // Guarded by BOTH localStorage & sessionStorage with a 10-minute timestamp throttle to eliminate reload loops.
-            if (!isElectron && !isManualCheck) {
-                const autoUpdateKey = `semestero_auto_updated_to_${remoteVer}`;
-                const lastAutoReloadTs = Number(localStorage.getItem('semestero_last_auto_update_ts') || 0);
-                const timeSinceLastAutoReload = Date.now() - lastAutoReloadTs;
-                const alreadyUpdatedForVersion = localStorage.getItem(autoUpdateKey) || sessionStorage.getItem(autoUpdateKey);
+            if (isManualCheck && typeof showToastNotification === 'function') {
+                showToastNotification(`🚀 קיימת גרסה חדשה: v${remoteVer} (גרסה מותקנת: v${currentVer})!`, 'info');
+            }
 
-                // If this version was already targeted by an auto-reload, OR if an auto-reload ran in the last 10 minutes:
-                // NEVER reload automatically again! Prevent infinite loops completely.
-                if (alreadyUpdatedForVersion || timeSinceLastAutoReload < 10 * 60 * 1000) {
-                    console.warn(`[AutoUpdate] Loop guard active for v${remoteVer}. Already attempted (${alreadyUpdatedForVersion}) or throttled (${Math.round(timeSinceLastAutoReload / 1000)}s ago). Suppressing auto-reload.`);
-                    return;
-                }
+            // Populate update modal
+            const modVerText = document.getElementById("update-modal-version-text");
+            const modCurText = document.getElementById("update-modal-current-text");
+            const modDesc = document.getElementById("update-modal-description");
+            if (modVerText) modVerText.innerText = `גרסה חדשה זמינה: v${remoteVer}`;
+            if (modCurText) modCurText.innerText = `גרסה מותקנת אצלך: v${currentVer}`;
+            if (modDesc) {
+                modDesc.innerText = remoteInfo.notes || `שוחררה גרסה חדשה v${remoteVer} ב-GitHub! לחץ למטה לרענון המטמון וטעינת הגרסה העדכנית.`;
+            }
 
-                // First time detecting this new version: mark keys BEFORE reloading
-                try {
-                    localStorage.setItem(autoUpdateKey, 'true');
-                    sessionStorage.setItem(autoUpdateKey, 'true');
-                    localStorage.setItem('semestero_last_auto_update_ts', String(Date.now()));
-                } catch (e) {}
+            // In Electron desktop, hide the web refresh button and emphasize the desktop release download
+            const refreshBtn = document.getElementById("btn-force-refresh-app");
+            if (refreshBtn) {
+                refreshBtn.style.display = isElectron ? "none" : "flex";
+            }
 
-                console.log(`[AutoUpdate] New version v${remoteVer} detected. Auto-refreshing cache and reloading...`);
-                if (typeof showToastNotification === 'function') {
-                    showToastNotification(`🚀 מעדכן אוטומטית לגרסה v${remoteVer}...`, 'info');
-                }
-                setTimeout(() => {
-                    if (typeof window.forceAppUpdate === 'function') {
-                        window.forceAppUpdate();
-                    } else {
-                        window.location.reload(true);
-                    }
-                }, 1400);
-                return;
+            // Open modal on manual check
+            const updateModal = document.getElementById("version-update-modal");
+            if (isManualCheck && updateModal) {
+                updateModal.style.display = "flex";
+                updateModal.classList.add("active");
             }
 
             // Mobile Native APK notification banner (Capacitor / Android)
@@ -22488,29 +22606,38 @@ window.checkRemoteAppVersion = async function(isManualCheck = false) {
                 }
             }
 
-            // Populate update modal
-            const modVerText = document.getElementById("update-modal-version-text");
-            const modCurText = document.getElementById("update-modal-current-text");
-            const modDesc = document.getElementById("update-modal-description");
-            if (modVerText) modVerText.innerText = `גרסה חדשה זמינה: v${remoteVer}`;
-            if (modCurText) modCurText.innerText = `גרסה מותקנת אצלך: v${currentVer}`;
-            if (modDesc && remotePkg.description) modDesc.innerText = remotePkg.description;
+            // AUTO-UPDATE for background checks only (unattended)
+            if (!isElectron && !isManualCheck) {
+                const autoUpdateKey = `semestero_auto_updated_to_${remoteVer}`;
+                const lastAutoReloadTs = Number(localStorage.getItem('semestero_last_auto_update_ts') || 0);
+                const timeSinceLastAutoReload = Date.now() - lastAutoReloadTs;
+                const alreadyUpdatedForVersion = localStorage.getItem(autoUpdateKey) || sessionStorage.getItem(autoUpdateKey);
 
-            // In Electron desktop, hide the web refresh button and emphasize the desktop release download
-            const refreshBtn = document.getElementById("btn-force-refresh-app");
-            if (refreshBtn) {
-                refreshBtn.style.display = isElectron ? "none" : "flex";
-            }
+                if (alreadyUpdatedForVersion || timeSinceLastAutoReload < 10 * 60 * 1000) {
+                    console.warn(`[AutoUpdate] Loop guard active for v${remoteVer}. Suppressing auto-reload.`);
+                    return;
+                }
 
-            // CRITICAL: NEVER automatically open the blocking modal on startup or background checks!
-            // Only open the modal if the user explicitly clicked to check for updates (isManualCheck === true).
-            const updateModal = document.getElementById("version-update-modal");
-            if (isManualCheck && updateModal) {
-                updateModal.style.display = "flex";
-                updateModal.classList.add("active");
+                try {
+                    localStorage.setItem(autoUpdateKey, 'true');
+                    sessionStorage.setItem(autoUpdateKey, 'true');
+                    localStorage.setItem('semestero_last_auto_update_ts', String(Date.now()));
+                } catch (e) {}
+
+                console.log(`[AutoUpdate] New version v${remoteVer} detected. Auto-refreshing cache and reloading...`);
+                if (typeof showToastNotification === 'function') {
+                    showToastNotification(`🚀 מעדכן אוטומטית לגרסה v${remoteVer}...`, 'info');
+                }
+                setTimeout(() => {
+                    if (typeof window.forceAppUpdate === 'function') {
+                        window.forceAppUpdate();
+                    } else {
+                        window.location.reload(true);
+                    }
+                }, 1400);
             }
         } else {
-            // System is up to date
+            // Truly up to date
             const existingPill = document.getElementById('mobile-apk-update-pill');
             if (existingPill) existingPill.remove();
 
@@ -22524,10 +22651,11 @@ window.checkRemoteAppVersion = async function(isManualCheck = false) {
             }
             if (footerBadgeEl) {
                 footerBadgeEl.classList.remove("has-update");
-                footerBadgeEl.innerText = `v${currentVer} 🔄`;
+                footerBadgeEl.innerText = `v${currentVer} ✓`;
+                footerBadgeEl.title = `המערכת מעודכנת לגרסה האחרונה (v${currentVer}) - נבדק מול GitHub v${remoteVer}`;
             }
             if (isManualCheck && typeof showToastNotification === 'function') {
-                showToastNotification(`✅ אתה משתמש בגרסה העדכנית ביותר (v${currentVer}).`, 'success');
+                showToastNotification(`✅ אתה משתמש בגרסה העדכנית ביותר (v${currentVer}). נבדק מול GitHub (v${remoteVer}).`, 'success');
             }
         }
     } catch (err) {
@@ -22535,8 +22663,12 @@ window.checkRemoteAppVersion = async function(isManualCheck = false) {
         if (statusTextEl) {
             statusTextEl.innerText = isManualCheck ? "לא ניתן להתחבר ל-GitHub כרגע" : `גרסה v${currentVer}`;
         }
+        if (footerBadgeEl) {
+            footerBadgeEl.innerText = `v${currentVer} 🔄`;
+            footerBadgeEl.title = `לחץ לבדיקת עדכוני גרסה (v${currentVer})`;
+        }
         if (isManualCheck && typeof showToastNotification === 'function') {
-            showToastNotification("⚠️ לא ניתן היה לבדוק עדכונים כעת (אין חיבור לרשת)", "warning");
+            showToastNotification("⚠️ לא ניתן היה לבדוק עדכונים כעת (שגיאת רשת מול GitHub)", "warning");
         }
     } finally {
         if (checkBtn) {
