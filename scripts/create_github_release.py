@@ -10,128 +10,140 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 REPO = "adir2368/Semestero-ME"
 APK_PATH = os.path.join(ROOT, "Semestero-ME.apk")
 
-# Read version from package.json
 with open(os.path.join(ROOT, "package.json"), "r", encoding="utf-8") as f:
     pkg = json.load(f)
-VERSION = pkg.get("version", "2.5.3")
+VERSION = pkg.get("version", "2.5.4")
 TAG = f"v{VERSION}"
-NAME = f"Semestero ME v{VERSION} - Android Native Release"
+NAME = f"Semestero ME v{VERSION} - Sports Sub-Tracks & Schedule Conflict Engine"
 
 def get_github_token():
     try:
-        p = subprocess.Popen(['git', 'credential', 'fill'], stdin=subprocess.PIPE, stdout=subprocess.PIPE, text=True)
-        out, _ = p.communicate('protocol=https\nhost=github.com\n\n')
-        for line in out.splitlines():
-            if line.startswith('password='):
-                return line.split('=', 1)[1].strip()
+        p = subprocess.Popen(['git', 'credential', 'fill'], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        out, _ = p.communicate(input="protocol=https\nhost=github.com\n\n")
+        m = re.search(r'password=(.+)', out)
+        if m:
+            return m.group(1).strip()
     except Exception as e:
-        print(f"[Error] Failed to read git credential: {e}")
-    return None
+        print("[Release] Error getting credentials from git:", e)
+    token = os.environ.get("GITHUB_TOKEN")
+    if token:
+        return token
+    print("[Release] Error: No GitHub token found.")
+    sys.exit(1)
 
-def create_release():
+def main():
     token = get_github_token()
-    if not token:
-        print("[Error] No GitHub token found in credentials.")
-        sys.exit(1)
-
     headers = {
-        "Authorization": f"token {token}",
-        "Accept": "application/vnd.github.v3+json",
-        "User-Agent": "Semestero-ME-Release-Bot"
+        "Authorization": f"Bearer {token}",
+        "Accept": "application/vnd.github+json",
+        "X-GitHub-Api-Version": "2022-11-28",
+        "User-Agent": "Semestero-ME-Release-Agent"
     }
 
-    body_desc = f"""### 🚀 Semestero ME {TAG} - Official Mobile & Desktop Release
+    body_notes = f"""## מה חדש בגרסה v{VERSION} 🏃📅
 
-**Download the APK directly to your Android phone:**
-👉 **[Semestero-ME.apk](https://github.com/{REPO}/releases/download/{TAG}/Semestero-ME.apk)**
+### 1. בחירת חוגים ותתי-מסלולים בספורט (Approach A)
+- תמיכה מלאה בפיצול קורסי חינוך גופני כלליים לחוגים מעשיים ספציפיים:
+  - **פילאטיס ומתיחות (03940808)**: פילאטיס מכשירים, פילאטיס מזרן, פילאטיס דינמי ועיצוב, מתיחות וגמישות.
+  - **חדר כושר ו-TRX (03940800)**: אימון חדר כושר, רצועות TRX, ספינינג ורכיבה.
+  - **משחקי כדור (03940803)**: כדורסל, כדורעף, כדורגל / קטרגל.
+  - **משחקי מחבט (03940804)**: טניס, טניס שולחן, בדמינטון.
+  - **יוגה ואתלטיקה (03940805)**: ויניאסה יוגה, האטה יוגה, אשטנגה, אתלטיקה.
+  - **שחייה (03940802)**, **קרב מגע (03940806)**, **תנועה ומחול (03940820)**, **נבחרות אס״א (03940902)**.
 
-**For iPhone / iOS users:**
-🍏 Open **[https://adir2368.github.io/Semestero-ME/](https://adir2368.github.io/Semestero-ME/)** in **Safari** ➔ Tap **Share** ➔ Tap **Add to Home Screen**. Full-screen native experience!
+### 2. מנוע בדיקת התנגשויות לו״ז חי (Live Timetable Conflict Checker)
+- **חובת נוכחות מובנית**: זיהוי אוטומטי של שעות החוג מול כל קורסי הסמסטר המשובצים.
+- **חיווי גרפי מיידי**:
+  - 🟢 **פנוי במערכת השעות** (ללא התנגשויות)
+  - 🟡 **חפיפה אפשרית** (קיימת קבוצה חלופית בקורס)
+  - ⚠️ **התנגשות ודאית** (חופף לקבוצה מעוגנת או קורס חד-קבוצתי)
+- **קישור ישיר לסטודיו מערכת השעות**: מעבר בלחיצה אחת ל-Timetable Studio.
 
-#### ✨ Highlights in {TAG}:
-- 🏃 **Technion Sports & Physical Education Electives Support:**
-  Added complete catalog and interactive support for 11 Technion sports courses (gym, swimming, ball games, racket sports, athletics/yoga, martial arts, functional fitness, pilates, movement/dance, ASA teams).
-- 🎭 **Malag & Humanities (מדעי הרוח וחברה) Support:**
-  Integrated 18 humanities/Malag electives (philosophy of science, environmental ethics, ethics in action, law & justice, history of technology, labor law, stress adaptation, surveillance ethics, middle eastern history, etc.).
-- 🏷️ **Dedicated Filter Pills & Styling:**
-  Added fast filter pills (`🏃 ספורט`, `🎭 מל״ג`) to the elective pool with distinctive emerald-green (`.tag-sports`) and royal-purple (`.tag-malag`) badges.
-- 🎓 **Graduation Audit Rules Engine Integration:**
-  Dynamically tracks and updates physical education requirements (2 courses) and humanities requirements (6-10 credits) in both the sidebar summary and the comprehensive Graduation Clearance Audit modal.
-- 🔒 **Full Student Academic Integrity:**
-  Adir Moshe's 11 completed courses (39.5 credits, 86.39 GPA) and 2026 Technion ME syllabus remain fully protected and self-healing.
+### 3. קורסי מל״ג (מדעי הרוח והחברה)
+- חיווי מועד קבוע עם חובת נוכחות (יום, שעות וחדר) בכרטיס הקורס ובמאגר הבחירה.
+
+---
+### 📲 הורדה ישירה לאנדרואיד (Direct APK Download):
+הקובץ `Semestero-ME.apk` מצורף להלן להורדה והתקנה ישירה.
 """
 
-    payload = {
-        "tag_name": TAG,
-        "target_commitish": "main",
-        "name": NAME,
-        "body": body_desc,
-        "draft": False,
-        "prerelease": False
-    }
-
-    print(f"[*] Creating GitHub release {TAG}...")
-    create_url = f"https://api.github.com/repos/{REPO}/releases"
-    req = urllib.request.Request(create_url, data=json.dumps(payload).encode('utf-8'), headers=headers, method="POST")
-
-    upload_url = None
+    # Check existing release
+    url_tag = f"https://api.github.com/repos/{REPO}/releases/tags/{TAG}"
+    req_tag = urllib.request.Request(url_tag, headers=headers)
+    release = None
     try:
-        with urllib.request.urlopen(req) as resp:
-            data = json.loads(resp.read().decode('utf-8'))
-            upload_url = data['upload_url'].split('{')[0]
-            print(f"[OK] Release created: {data.get('html_url')}")
+        with urllib.request.urlopen(req_tag) as res:
+            if res.status == 200:
+                release = json.loads(res.read().decode('utf-8'))
+                print(f"[Release] Found existing release for tag {TAG}")
     except urllib.error.HTTPError as e:
-        err_body = e.read().decode('utf-8')
-        print(f"[!] Release request status: {e.code}")
-        # If tag already exists, find existing release
-        req_get = urllib.request.Request(f"https://api.github.com/repos/{REPO}/releases/tags/{TAG}", headers=headers)
-        with urllib.request.urlopen(req_get) as resp_get:
-            data = json.loads(resp_get.read().decode('utf-8'))
-            upload_url = data['upload_url'].split('{')[0]
-            print(f"[OK] Found existing release: {data.get('html_url')}")
-            # If asset already exists, delete it first to overwrite
-            for asset in data.get('assets', []):
-                if asset.get('name') == 'Semestero-ME.apk':
-                    asset_id = asset['id']
-                    del_url = f"https://api.github.com/repos/{REPO}/releases/assets/{asset_id}"
-                    del_req = urllib.request.Request(del_url, headers=headers, method="DELETE")
-                    try:
-                        with urllib.request.urlopen(del_req) as del_resp:
-                            print(f"[OK] Deleted previous APK asset (id: {asset_id})")
-                    except Exception as del_err:
-                        print(f"[!] Warning deleting asset: {del_err}")
+        if e.code != 404:
+            print(f"[Release] Error checking existing release: {e}")
+
+    if not release:
+        print(f"[Release] Creating new release for tag {TAG}...")
+        url_create = f"https://api.github.com/repos/{REPO}/releases"
+        payload = {
+            "tag_name": TAG,
+            "target_commitish": "main",
+            "name": NAME,
+            "body": body_notes,
+            "draft": False,
+            "prerelease": False
+        }
+        data = json.dumps(payload).encode('utf-8')
+        req_create = urllib.request.Request(url_create, data=data, headers=headers, method="POST")
+        try:
+            with urllib.request.urlopen(req_create) as res:
+                release = json.loads(res.read().decode('utf-8'))
+                print(f"[Release] Created release ID: {release['id']}")
+        except urllib.error.HTTPError as e:
+            print(f"[Release] Error creating release: {e.code} - {e.read().decode('utf-8')}")
+            sys.exit(1)
 
     # Upload APK asset
     if not os.path.exists(APK_PATH):
-        print(f"[Error] APK not found at {APK_PATH}")
+        print(f"[Release] Error: APK not found at {APK_PATH}")
         sys.exit(1)
 
     apk_size = os.path.getsize(APK_PATH)
-    print(f"[*] Uploading Semestero-ME.apk ({apk_size} bytes)...")
+    print(f"[Release] Uploading Semestero-ME.apk ({apk_size:,} bytes)...")
 
-    asset_url = f"{upload_url}?name=Semestero-ME.apk"
-    upload_headers = {
-        "Authorization": f"token {token}",
-        "Content-Type": "application/vnd.android.package-archive",
-        "Content-Length": str(apk_size),
-        "User-Agent": "Semestero-ME-Release-Bot"
-    }
+    # Delete existing asset if present
+    for asset in release.get("assets", []):
+        if asset["name"] == "Semestero-ME.apk":
+            print(f"[Release] Deleting old asset ID: {asset['id']}...")
+            del_req = urllib.request.Request(asset["url"], headers=headers, method="DELETE")
+            try:
+                with urllib.request.urlopen(del_req) as res:
+                    print(f"[Release] Old asset deleted.")
+            except Exception as e:
+                print(f"[Release] Warning deleting old asset: {e}")
 
-    with open(APK_PATH, 'rb') as f:
+    upload_url_template = release["upload_url"]
+    upload_url = upload_url_template.split("{")[0] + "?name=Semestero-ME.apk"
+
+    with open(APK_PATH, "rb") as f:
         apk_data = f.read()
 
-    req_upload = urllib.request.Request(asset_url, data=apk_data, headers=upload_headers, method="POST")
+    upload_headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/vnd.android.package-archive",
+        "Content-Length": str(len(apk_data)),
+        "User-Agent": "Semestero-ME-Release-Agent"
+    }
+
+    req_upload = urllib.request.Request(upload_url, data=apk_data, headers=upload_headers, method="POST")
     try:
-        with urllib.request.urlopen(req_upload) as resp:
-            asset_data = json.loads(resp.read().decode('utf-8'))
-            dl_url = asset_data.get('browser_download_url')
-            print("[OK] APK uploaded successfully!")
-            print(f"Direct Download URL: {dl_url}")
-            return dl_url
+        with urllib.request.urlopen(req_upload) as res:
+            asset_info = json.loads(res.read().decode('utf-8'))
+            print(f"[Release] Successfully uploaded APK asset ID: {asset_info['id']}")
+            print(f"[Release] Download URL: {asset_info['browser_download_url']}")
     except urllib.error.HTTPError as e:
-        err_body = e.read().decode('utf-8')
-        print(f"[!] Upload error: {e.code} - {err_body}")
+        print(f"[Release] Error uploading APK asset: {e.code} - {e.read().decode('utf-8')}")
         sys.exit(1)
 
+    print(f"\nSUCCESS: Release {TAG} published and APK uploaded!")
+
 if __name__ == "__main__":
-    create_release()
+    main()

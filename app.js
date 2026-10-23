@@ -8953,6 +8953,21 @@ function resetToAuthenticSchedule() {
 }
 window.resetToAuthenticSchedule = resetToAuthenticSchedule;
 
+function openCheeseFork(event) {
+    const savedUrl = localStorage.getItem('ast_cheesefork_url');
+    const defaultUrl = "https://cheesefork.netlify.app/?semester=202601&uid=D4bh8oHO0GQI5Gx1iYAbWsouBVx2";
+    const targetUrl = savedUrl || defaultUrl;
+    if (event && event.currentTarget && event.currentTarget.tagName === 'A') {
+        event.currentTarget.href = targetUrl;
+    } else {
+        if (event && typeof event.preventDefault === 'function') {
+            event.preventDefault();
+        }
+        window.open(targetUrl, '_blank', 'noopener,noreferrer');
+    }
+}
+window.openCheeseFork = openCheeseFork;
+
 // Load state from local storage or AuthSync
 function loadSavedState() {
     let loadedFromAuthSync = false;
@@ -20874,8 +20889,8 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.10.24-v2.5.4",
-    version: "2.5.4",
+    code: "REV-2026.10.24-v2.5.5",
+    version: "2.5.5",
     build: "20261020_03",
     date: "2026-10-20 01:20",
     description: "גרסה 2.5.2: פתרון מוחלט ללולאת העדכון במובייל וספארי, מנגנון אנטי-רילואד עמיד ב-localStorage, סנכרון גרסאות מלא וקישורי הורדה ישירים לטלפונים"
@@ -22381,7 +22396,7 @@ window.checkRemoteAppVersion = async function(isManualCheck = false) {
         const match = domVerEl.innerText.match(/(?:^|\bv|\s)(\d+\.\d+\.\d+)\b/);
         if (match) currentVer = match[1];
     }
-    currentVer = currentVer || "2.5.4";
+    currentVer = currentVer || "2.5.5";
     const statusTextEl = document.getElementById("version-check-status-text");
     const footerBadgeEl = document.getElementById("footer-version-badge");
     const checkBtn = document.getElementById("btn-check-version-updates");
@@ -23164,28 +23179,54 @@ function setupDailyTimetable() {
         });
     });
 
-    // 3. Manual Sync Button
+    // 3. Manual Sync Button (Syncs timetable & refreshes authentic locations/rooms)
     const syncBtn = document.getElementById('btn-sync-cheesefork-now');
     if (syncBtn) {
         syncBtn.addEventListener('click', async () => {
             syncBtn.disabled = true;
             const btnText = document.getElementById('btn-sync-text');
-            if (btnText) btnText.innerText = 'מתחבר ל-CheeseFork...';
+            if (btnText) btnText.innerText = 'מסנכרן...';
 
+            let updatedRoomsCount = 0;
             try {
                 if (typeof window.syncLiveCheeseForkData === 'function') {
                     await window.syncLiveCheeseForkData(null, true);
                 } else {
                     updateDailyTimetableFocus();
                 }
+
+                // Explicitly update and enrich authentic locations and rooms
+                if (typeof enrichTimetableWithAuthenticRooms === 'function') {
+                    const curState = (window.getGlobalGameState ? window.getGlobalGameState() : window.gameState);
+                    if (curState && curState.timetable) {
+                        updatedRoomsCount = enrichTimetableWithAuthenticRooms(curState.timetable);
+                        if (typeof saveState === 'function') saveState();
+                        if (typeof updateDailyTimetableFocus === 'function') updateDailyTimetableFocus();
+                        if (typeof renderTimetableGrid === 'function') renderTimetableGrid();
+                        if (typeof renderGcalManagerClassList === 'function') renderGcalManagerClassList();
+                    }
+                }
             } catch (err) {
                 console.error('[Timetable] Sync button error:', err);
-                if (typeof showToastNotification === 'function') {
+                // Even on network error, update locations locally from authentic Technion metadata
+                if (typeof enrichTimetableWithAuthenticRooms === 'function') {
+                    const curState = (window.getGlobalGameState ? window.getGlobalGameState() : window.gameState);
+                    if (curState && curState.timetable) {
+                        updatedRoomsCount = enrichTimetableWithAuthenticRooms(curState.timetable);
+                        if (typeof saveState === 'function') saveState();
+                        if (typeof updateDailyTimetableFocus === 'function') updateDailyTimetableFocus();
+                        if (typeof renderTimetableGrid === 'function') renderTimetableGrid();
+                        if (typeof renderGcalManagerClassList === 'function') renderGcalManagerClassList();
+                        if (typeof showToastNotification === 'function') {
+                            showToastNotification(`✓ מיקומי החדרים עודכנו בהצלחה (${updatedRoomsCount} מיקומים רועננו)!`, 'success');
+                        }
+                    }
+                } else if (typeof showToastNotification === 'function') {
                     showToastNotification('שגיאה בסנכרון מול CheeseFork: ' + (err.message || err), 'error');
                 }
             } finally {
                 syncBtn.disabled = false;
-                if (btnText) btnText.innerText = 'סנכרן להיום';
+                if (btnText) btnText.innerText = 'סנכרון';
             }
         });
     }
