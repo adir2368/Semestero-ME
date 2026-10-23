@@ -3,7 +3,7 @@
 > **מערכת ניווט ותכנון תואר אקדמי, מחשבון ממוצע משוקלל ומרכז משימות - הפקולטה להנדסת מכונות בטכניון**  
 > *Personal Academic Operating System, Degree Planner & Technion GPA Simulator*
 
-[![Version](https://img.shields.io/badge/version-2.2.6-blue.svg)](https://adir2368.github.io/Semestero-ME/)
+[![Version](https://img.shields.io/badge/version-2.5.0-blue.svg)](https://adir2368.github.io/Semestero-ME/)
 [![Live Web App](https://img.shields.io/badge/סמסטרו_ME-כניסה_לאפליקציה-brightgreen.svg)](https://adir2368.github.io/Semestero-ME/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Sitemap](https://img.shields.io/badge/Sitemap-sitemap.xml-orange.svg)](https://adir2368.github.io/Semestero-ME/sitemap.xml)
@@ -65,6 +65,30 @@ npm start
 לבניית קובץ התקנה ל-Windows:
 ```bash
 npm run pack
+```
+
+---
+
+## 📱 פיתוח ובנייה למובייל (iOS & Android Native)
+האפליקציה פועלת כאפליקציית מובייל היברידית מלאה באמצעות **Capacitor 8**:
+
+### 🍎 iPhone & iOS (Xcode Workspace)
+```bash
+# סנכרון נכסי הווב לפרויקט iOS
+npm run build:ios
+
+# פתיחת הפרויקט ב-Xcode (במערכת macOS)
+npm run open:ios
+# או פתיחה ישירה של הקובץ ios/App/App.xcodeproj
+```
+
+### 🤖 Android
+```bash
+# סנכרון ובניית APK
+npm run build:apk
+
+# פתיחה ישירה ב-Android Studio
+npm run open:android
 ```
 
 ---
