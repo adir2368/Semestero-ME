@@ -40,22 +40,23 @@ def create_release():
         "User-Agent": "Semestero-ME-Release-Bot"
     }
 
-    body_desc = f"""### 🚀 Semestero ME {TAG} - Official Android Native Release
+    body_desc = f"""### 🚀 Semestero ME {TAG} - Official Mobile & Desktop Release
 
-**Download the APK directly to your phone:**
+**Download the APK directly to your Android phone:**
 👉 **[Semestero-ME.apk](https://github.com/{REPO}/releases/download/{TAG}/Semestero-ME.apk)**
 
+**For iPhone / iOS users:**
+🍏 Open **[https://adir2368.github.io/Semestero-ME/](https://adir2368.github.io/Semestero-ME/)** in **Safari** ➔ Tap **Share** ➔ Tap **Add to Home Screen**. Full-screen native experience!
+
 #### ✨ Highlights in {TAG}:
-- 📱 **Mobile Flowchart DAG Zero-Gap Layout:**
-  Eliminated the empty vertical void on mobile screens by switching SVG `preserveAspectRatio` to `xMidYMin meet`, anchoring Semester 1 cleanly right beneath the toolbar.
-- 📐 **Responsive Fit-to-Width Default on Mobile:**
-  Flowchart DAG now automatically activates `fitFlowchartToWidth()` on mobile viewports so all semester columns scale neatly into view.
-- 💾 **Persistent Last Active Tab:**
-  Preserves and restores the user's last visited workspace via `semestero_last_active_tab`, resuming right where they left off.
-- 🔄 **Autonomous Real-Time Over-The-Air Update Engine:**
-  Over-the-air version detection for Web, PWA, and Capacitor Android with periodic background polling and anti-loop safety guards.
-- 🔒 **Hermetic Course & Grades Integrity Preserved:**
-  All 11 completed courses (39.5 credits, 86.39 GPA) and 2026 Technion ME syllabus remain fully protected and self-healing.
+- 🛑 **Permanent Infinite Reload Loop Resolution:**
+  Fixed the version divergence where `window.APP_VERSION` lagged behind `APP_CURRENT_REVISION`, eliminating circular updates.
+- 🛡️ **Persistent LocalStorage Auto-Update Throttle:**
+  Added a 10-minute cooldown and per-version persistent guard across sessions so mobile browsers and PWAs never get trapped in reload loops.
+- 📲 **Direct Download Links & Modal:**
+  Added a direct download button and modal on the website, settings page, and README with one-tap downloads for Android and iOS installation guides.
+- 🔒 **Full Student Data & Academic Integrity:**
+  Adir Moshe's 11 completed courses (39.5 credits, 86.39 GPA) and 2026 Technion ME syllabus remain fully protected and self-healing.
 """
 
     payload = {
