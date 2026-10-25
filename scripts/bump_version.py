@@ -91,7 +91,8 @@ def bump(target_version=None, changelog_text=None):
         if not changelog_text:
             changelog_text = f"עדכוני מערכת, ביצועים ותיקוני תאימות לגרסה v{next_version}."
 
-        today_hebrew = "19/10/2026"
+        from datetime import datetime
+        today_hebrew = datetime.now().strftime("%d/%m/%Y")
         new_single_li = f'                        <li><strong>v{next_version} ({today_hebrew}):</strong> {changelog_text}</li>'
 
         # All previous items move to older-versions-list

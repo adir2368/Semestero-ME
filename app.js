@@ -14899,6 +14899,10 @@ function setupNotionDashboard() {
         if (window.ModalHelp && typeof window.ModalHelp.setupAllModalHelpTriggers === 'function') {
             window.ModalHelp.setupAllModalHelpTriggers();
         }
+
+        if (typeof window.updateBackToTopVisibility === 'function') {
+            window.updateBackToTopVisibility();
+        }
     }
 
     window.setActiveMainTab = setActiveMainTab;
@@ -20953,8 +20957,8 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.10.25-v2.6.2",
-    version: "2.6.2",
+    code: "REV-2026.10.25-v2.6.3",
+    version: "2.6.3",
     build: "20261020_03",
     date: "2026-10-20 01:20",
     description: "גרסה 2.5.2: פתרון מוחלט ללולאת העדכון במובייל וספארי, מנגנון אנטי-רילואד עמיד ב-localStorage, סנכרון גרסאות מלא וקישורי הורדה ישירים לטלפונים"
@@ -22579,7 +22583,7 @@ window.checkRemoteAppVersion = async function(isManualCheck = false) {
         const match = domVerEl.innerText.match(/(?:^|\bv|\s)(\d+\.\d+\.\d+)\b/);
         if (match) currentVer = match[1];
     }
-    currentVer = currentVer || "2.6.2";
+    currentVer = currentVer || "2.6.3";
     const statusTextEl = document.getElementById("version-check-status-text");
     const footerBadgeEl = document.getElementById("footer-version-badge");
     const checkBtn = document.getElementById("btn-check-version-updates");

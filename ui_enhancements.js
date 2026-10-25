@@ -134,11 +134,8 @@
                 const ws = document.getElementById('planner-workspace');
                 if (ws && ws.style.display !== 'none') {
                     // Only check the main planner page viewport (NOT inner semester lists or course drawers)
-                    const pContent = ws.querySelector('.planner-content');
-                    if (pContent && pContent.scrollHeight > pContent.clientHeight + 80) {
-                        return pContent;
-                    }
-                    return ws;
+                    const wrapper = ws.querySelector('.planner-wrapper') || ws;
+                    return (wrapper && wrapper.scrollHeight > wrapper.clientHeight) ? wrapper : ws;
                 }
                 return null;
             }
@@ -185,9 +182,9 @@
             }
 
             if (isScrolled) {
-                btn.classList.add('visible');
+                if (!btn.classList.contains('visible')) btn.classList.add('visible');
             } else {
-                btn.classList.remove('visible');
+                if (btn.classList.contains('visible')) btn.classList.remove('visible');
             }
         }
 
@@ -213,23 +210,15 @@
         document.addEventListener('scroll', updateVisibility, { capture: true, passive: true });
         window.addEventListener('resize', updateVisibility, { passive: true });
 
-        // Instant update on tab switching
-        document.querySelectorAll('.nav-tab').forEach(t => {
-            t.addEventListener('click', () => {
+        // Update when user switches tabs or closes/opens modals
+        document.addEventListener('click', (e) => {
+            if (e.target && e.target.closest && e.target.closest('.nav-tab, .tab-btn, [data-tab], .modal-overlay, .modal-backdrop, [data-action="close"], .btn-close, [id$="-modal"]')) {
                 setTimeout(updateVisibility, 50);
-            });
-        });
+                setTimeout(updateVisibility, 250);
+            }
+        }, { passive: true });
 
         window.updateBackToTopVisibility = updateVisibility;
-
-        // MutationObserver to immediately update when modals open/close or tabs switch
-        try {
-            const observer = new MutationObserver(() => {
-                updateVisibility();
-            });
-            observer.observe(document.body, { attributes: true, subtree: true, attributeFilter: ['class', 'style', 'data-active-tab'] });
-        } catch (e) {}
-
         updateVisibility();
     }
 
@@ -239,10 +228,13 @@
     function attachModalScrollProgress(modalBodyEl, progressEl) {
         if (!modalBodyEl || !progressEl) return;
         const handler = () => {
-            const scrollTop = modalBodyEl.scrollTop;
-            const scrollHeight = modalBodyEl.scrollHeight - modalBodyEl.clientHeight;
+            const scrollTop = modalBodyEl.scrollTop || 0;
+            const scrollHeight = (modalBodyEl.scrollHeight || 0) - (modalBodyEl.clientHeight || 0);
             const progress = scrollHeight > 0 ? (scrollTop / scrollHeight) * 100 : 0;
-            progressEl.style.width = `${Math.min(100, Math.max(0, progress))}%`;
+            const newWidth = `${Math.min(100, Math.max(0, Math.round(progress)))}%`;
+            if (progressEl.style.width !== newWidth) {
+                progressEl.style.width = newWidth;
+            }
         };
         modalBodyEl.removeEventListener('scroll', modalBodyEl._progressHandler);
         modalBodyEl._progressHandler = handler;
@@ -1164,11 +1156,13 @@
     let currentFontScaleIndex = 1; // default 1.0
 
     function initFontScaling() {
-        const saved = localStorage.getItem(STORAGE_KEYS.FONT_SCALE);
-        if (saved) {
-            const idx = FONT_SCALES.indexOf(parseFloat(saved));
-            if (idx >= 0) currentFontScaleIndex = idx;
-        }
+        try {
+            const saved = localStorage.getItem(STORAGE_KEYS.FONT_SCALE);
+            if (saved) {
+                const idx = FONT_SCALES.indexOf(parseFloat(saved));
+                if (idx >= 0) currentFontScaleIndex = idx;
+            }
+        } catch (e) {}
         applyFontScale();
     }
 
@@ -1179,7 +1173,9 @@
             currentFontScaleIndex = Math.min(FONT_SCALES.length - 1, Math.max(0, currentFontScaleIndex + delta));
         }
         const scale = FONT_SCALES[currentFontScaleIndex];
-        localStorage.setItem(STORAGE_KEYS.FONT_SCALE, String(scale));
+        try {
+            localStorage.setItem(STORAGE_KEYS.FONT_SCALE, String(scale));
+        } catch (e) {}
         applyFontScale();
         if (typeof window.showHudToast === 'function') {
             window.showHudToast(`גודל טקסט עודכן: ${Math.round(scale * 100)}% 🔤`, 'info');
@@ -1205,22 +1201,28 @@
         RecentlyViewed.renderRecentChips();
 
         // Monitor any opening modals to attach reading progress bar if long
+        let modalObserverRaf = null;
         const observer = new MutationObserver(() => {
-            const openModals = document.querySelectorAll('.modal-overlay.active, .modal-overlay[style*="display: flex"]');
-            openModals.forEach(modal => {
-                const body = modal.querySelector('.modal-body');
-                let progress = modal.querySelector('.modal-reading-progress-bar');
-                if (body && !progress) {
-                    progress = document.createElement('div');
-                    progress.className = 'modal-reading-progress-bar';
-                    modal.querySelector('.modal-content')?.prepend(progress);
-                }
-                if (body && progress) {
-                    attachModalScrollProgress(body, progress);
-                }
+            if (modalObserverRaf) return;
+            modalObserverRaf = requestAnimationFrame(() => {
+                modalObserverRaf = null;
+                const openModals = document.querySelectorAll('.modal-overlay.active, .modal-overlay[style*="display: flex"], [id$="-modal"].active');
+                openModals.forEach(modal => {
+                    const body = modal.querySelector('.modal-body');
+                    let progress = modal.querySelector('.modal-reading-progress-bar');
+                    if (body && !progress) {
+                        progress = document.createElement('div');
+                        progress.className = 'modal-reading-progress-bar';
+                        modal.querySelector('.modal-content')?.prepend(progress);
+                    }
+                    if (body && progress && !body._hasProgressHandler) {
+                        body._hasProgressHandler = true;
+                        attachModalScrollProgress(body, progress);
+                    }
+                });
             });
         });
-        observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['style', 'class'] });
+        observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] });
     }
 
     if (document.readyState === 'loading') {

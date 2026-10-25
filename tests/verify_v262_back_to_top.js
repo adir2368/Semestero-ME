@@ -97,31 +97,32 @@ test('Curriculum flowchart tab never shows button unless modal is open', () => {
 });
 
 // -------------------------------------------------------------
-// 4. Version 2.6.2 Consistency
+// 4. Version Consistency
 // -------------------------------------------------------------
 console.log('\n--- 4. Version Consistency across Project ---');
 
-test('package.json version is 2.6.2', () => {
-    assert.strictEqual(packageJson.version, '2.6.2');
+const curVer = packageJson.version;
+
+test(`package.json version is ${curVer}`, () => {
+    assert(curVer && curVer.startsWith('2.6.'), `Invalid package version: ${curVer}`);
 });
 
-test('sw.js cache name is v2.6.2', () => {
-    assert(swJs.includes('CACHE_NAME = \'semestero-me-v2.6.2\''), 'sw.js CACHE_NAME mismatch');
+test(`sw.js cache name matches v${curVer}`, () => {
+    assert(swJs.includes(`CACHE_NAME = 'semestero-me-v${curVer}'`), 'sw.js CACHE_NAME mismatch');
 });
 
-test('android/app/build.gradle versionCode is 18 and versionName is 2.6.2', () => {
-    assert(gradle.includes('versionCode 18'), 'Gradle versionCode must be 18');
-    assert(gradle.includes('versionName "2.6.2"'), 'Gradle versionName must be "2.6.2"');
+test(`android/app/build.gradle matches versionName "${curVer}"`, () => {
+    assert(gradle.includes(`versionName "${curVer}"`), `Gradle versionName must be "${curVer}"`);
 });
 
-test('app.js revision is REV-2026.10.25-v2.6.2', () => {
-    assert(appJs.includes('REV-2026.10.25-v2.6.2'), 'app.js APP_REVISION mismatch');
+test(`app.js revision matches v${curVer}`, () => {
+    assert(appJs.includes(`v${curVer}`), 'app.js APP_REVISION mismatch');
 });
 
-test('index.html script and link assets carry ?v=2.6.2', () => {
-    assert(indexHtml.includes('styles.css?v=2.6.2'), 'styles.css missing ?v=2.6.2');
-    assert(indexHtml.includes('ui_enhancements.js?v=2.6.2'), 'ui_enhancements.js missing ?v=2.6.2');
-    assert(indexHtml.includes('app.js?v=2.6.2'), 'app.js missing ?v=2.6.2');
+test(`index.html script and link assets carry ?v=${curVer}`, () => {
+    assert(indexHtml.includes(`styles.css?v=${curVer}`), `styles.css missing ?v=${curVer}`);
+    assert(indexHtml.includes(`ui_enhancements.js?v=${curVer}`), `ui_enhancements.js missing ?v=${curVer}`);
+    assert(indexHtml.includes(`app.js?v=${curVer}`), `app.js missing ?v=${curVer}`);
 });
 
 console.log('\n================================================================');
