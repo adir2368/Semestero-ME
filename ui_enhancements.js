@@ -70,7 +70,7 @@
     };
 
     // =========================================================================
-    // 3. Floating Back to Top Button
+    // 3. Floating Back to Top Button (Strict Main Screen Only - Purple Semi-Transparent)
     // =========================================================================
     function initBackToTop() {
         let btn = document.getElementById('btn-back-to-top');
@@ -82,7 +82,7 @@
             btn.title = 'חזרה לראש העמוד (Top) 🔝';
             btn.setAttribute('aria-label', 'חזרה לראש העמוד');
             btn.innerHTML = `
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e9d5ff" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
                     <line x1="12" y1="19" x2="12" y2="5"></line>
                     <polyline points="5 12 12 5 19 12"></polyline>
                 </svg>
@@ -90,50 +90,97 @@
             document.body.appendChild(btn);
         }
 
-        btn.addEventListener('click', () => {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-            if (document.documentElement) document.documentElement.scrollTo({ top: 0, behavior: 'smooth' });
-            if (document.body) document.body.scrollTo({ top: 0, behavior: 'smooth' });
-
-            // Also smoothly scroll any open modal and scrollable viewports
-            const scrollContainers = document.querySelectorAll(
-                '#settings-workspace, #planner-workspace, #timetable-workspace, #tasks-workspace, #calendar-workspace, ' +
-                '.planner-content, .planner-course-list, .timetable-container, .tasks-scroll, .tasks-list-container, ' +
-                '.flowchart-scroll-wrapper, .modal-body, .modal-overlay.active .modal-body, .modal.active .modal-body, ' +
-                '.active-tab-content'
+        // Return strictly the MAIN SCREEN scrollable viewport (NEVER inner semester cards, course lists, or dropdowns)
+        function getActiveMainScrollContainer() {
+            // 1. Foreground active modal dialogs (FAQ, downloads, settings modals)
+            const activeModal = document.querySelector(
+                '.modal-overlay.active:not([style*="display: none"]), ' +
+                '.modal-backdrop.active:not([style*="display: none"]), ' +
+                '.modal.active:not([style*="display: none"]), ' +
+                '[id$="-modal"].active:not([style*="display: none"])'
             );
-            scrollContainers.forEach(el => {
-                if (el && typeof el.scrollTo === 'function') {
-                    el.scrollTo({ top: 0, behavior: 'smooth' });
+            if (activeModal) {
+                const modalBody = activeModal.querySelector('.modal-body');
+                return modalBody || activeModal;
+            }
+
+            // 2. Identify active tab
+            const activeTab = window.currentActiveTab || 
+                              (document.body && document.body.getAttribute('data-active-tab')) || 
+                              'curriculum';
+
+            // Flowchart DAG has its own interactive zoom/pan controls; never show document back-to-top
+            if (activeTab === 'curriculum') {
+                return null;
+            }
+
+            // 3. Top-level main workspaces ONLY
+            if (activeTab === 'settings') {
+                const ws = document.getElementById('settings-workspace');
+                return (ws && ws.style.display !== 'none') ? ws : null;
+            }
+
+            if (activeTab === 'tasks' || activeTab === 'calendar') {
+                const ws = document.getElementById('notion-tasks-workspace');
+                return (ws && ws.style.display !== 'none') ? ws : null;
+            }
+
+            if (activeTab === 'timetable') {
+                const ws = document.getElementById('timetable-workspace');
+                return (ws && ws.style.display !== 'none') ? ws : null;
+            }
+
+            if (activeTab === 'planner') {
+                const ws = document.getElementById('planner-workspace');
+                if (ws && ws.style.display !== 'none') {
+                    // Only check the main planner page viewport (NOT inner semester lists or course drawers)
+                    const pContent = ws.querySelector('.planner-content');
+                    if (pContent && pContent.scrollHeight > pContent.clientHeight + 80) {
+                        return pContent;
+                    }
+                    return ws;
                 }
-            });
-        });
+                return null;
+            }
 
-        const toggleVisibility = () => {
-            let isScrolled = (window.scrollY > 150) || 
-                             (document.documentElement && document.documentElement.scrollTop > 150) || 
-                             (document.body && document.body.scrollTop > 150);
+            return null;
+        }
 
-            if (!isScrolled) {
-                // Check if any open modal is scrolled
-                const activeModal = document.querySelector('.modal-overlay.active .modal-body, .modal.active .modal-body, [id$="-modal"].active .modal-body');
-                if (activeModal && activeModal.scrollTop > 150) {
+        function updateVisibility() {
+            const activeTab = window.currentActiveTab || 
+                              (document.body && document.body.getAttribute('data-active-tab')) || 
+                              'curriculum';
+
+            const activeModal = document.querySelector(
+                '.modal-overlay.active:not([style*="display: none"]), ' +
+                '.modal-backdrop.active:not([style*="display: none"]), ' +
+                '.modal.active:not([style*="display: none"])'
+            );
+
+            // Never show on flowchart unless a modal is open
+            if (activeTab === 'curriculum' && !activeModal) {
+                btn.classList.remove('visible');
+                return;
+            }
+
+            const container = getActiveMainScrollContainer();
+            let isScrolled = false;
+
+            if (container) {
+                // Must be scrolled down at least 220px in the MAIN SCREEN viewport
+                const scrollTop = container.scrollTop || 0;
+                if (scrollTop > 220) {
                     isScrolled = true;
                 }
             }
 
-            if (!isScrolled) {
-                // Check visible scrollable workspaces and viewports
-                const scrollableElements = document.querySelectorAll(
-                    '#settings-workspace, #planner-workspace, #timetable-workspace, #tasks-workspace, #calendar-workspace, ' +
-                    '.planner-content, .planner-course-list, .flowchart-scroll-wrapper, .timetable-container, .tasks-scroll, .tasks-list-container'
-                );
-                for (let i = 0; i < scrollableElements.length; i++) {
-                    const el = scrollableElements[i];
-                    if (el && el.offsetParent !== null && el.scrollTop > 150) {
-                        isScrolled = true;
-                        break;
-                    }
+            // Fallback for document-level window scroll if container is document/window
+            if (!isScrolled && activeTab !== 'curriculum') {
+                const winScroll = window.scrollY || 
+                                  (document.documentElement ? document.documentElement.scrollTop : 0) || 
+                                  (document.body ? document.body.scrollTop : 0);
+                if (winScroll > 220) {
+                    isScrolled = true;
                 }
             }
 
@@ -142,13 +189,48 @@
             } else {
                 btn.classList.remove('visible');
             }
-        };
+        }
 
-        // Capture scroll events anywhere in the DOM (scroll events don't bubble, so capture phase is required)
-        document.addEventListener('scroll', toggleVisibility, { capture: true, passive: true });
-        window.addEventListener('resize', toggleVisibility, { passive: true });
-        // Initial visibility check
-        toggleVisibility();
+        // On click, scroll ONLY the active main viewport to top
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const container = getActiveMainScrollContainer();
+            if (container && typeof container.scrollTo === 'function') {
+                container.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+
+            // Universal fallback
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            if (document.documentElement) document.documentElement.scrollTo({ top: 0, behavior: 'smooth' });
+            if (document.body) document.body.scrollTo({ top: 0, behavior: 'smooth' });
+
+            setTimeout(updateVisibility, 350);
+        });
+
+        // Capture scroll events anywhere in document
+        document.addEventListener('scroll', updateVisibility, { capture: true, passive: true });
+        window.addEventListener('resize', updateVisibility, { passive: true });
+
+        // Instant update on tab switching
+        document.querySelectorAll('.nav-tab').forEach(t => {
+            t.addEventListener('click', () => {
+                setTimeout(updateVisibility, 50);
+            });
+        });
+
+        window.updateBackToTopVisibility = updateVisibility;
+
+        // MutationObserver to immediately update when modals open/close or tabs switch
+        try {
+            const observer = new MutationObserver(() => {
+                updateVisibility();
+            });
+            observer.observe(document.body, { attributes: true, subtree: true, attributeFilter: ['class', 'style', 'data-active-tab'] });
+        } catch (e) {}
+
+        updateVisibility();
     }
 
     // =========================================================================

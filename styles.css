@@ -5210,7 +5210,7 @@ label[for="new-task-xp-input"],
     display: flex;
     flex-direction: column;
     scroll-behavior: smooth;
-    padding: 24px 32px;
+    padding: 24px 32px 100px 32px;
     background: #080c14;
 }
 
@@ -5961,7 +5961,7 @@ label[for="new-task-xp-input"],
         -webkit-overflow-scrolling: touch !important;
         touch-action: pan-y !important;
         overscroll-behavior-y: contain;
-        padding: 6px 6px calc(75px + env(safe-area-inset-bottom)) 6px !important;
+        padding: 6px 6px calc(130px + env(safe-area-inset-bottom, 0px)) 6px !important;
     }
 
     .notion-tasks-container {
@@ -13927,18 +13927,20 @@ tr.is-task-pinned {
    UI ENHANCEMENTS SUITE (Inspired by Top Student Web App Features)
    ========================================================================== */
 
-/* 1. Floating Back to Top Button */
+/* 1. Floating Back to Top Button (Purple Semi-Transparent, Bottom-Right) */
 .btn-back-to-top {
     position: fixed;
-    bottom: 24px;
-    left: 24px;
+    bottom: 30px;
+    right: 28px;
+    left: auto !important;
     width: 44px;
     height: 44px;
     border-radius: 50%;
-    background: rgba(15, 23, 42, 0.88);
-    backdrop-filter: blur(8px);
-    border: 1.5px solid rgba(16, 185, 129, 0.45);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5), 0 0 12px rgba(16, 185, 129, 0.25);
+    background: rgba(139, 92, 246, 0.35); /* Purple semi-transparent */
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1.5px solid rgba(192, 132, 252, 0.5);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4), 0 0 14px rgba(168, 85, 247, 0.35);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -13957,25 +13959,32 @@ tr.is-task-pinned {
 }
 
 .btn-back-to-top:hover {
-    background: rgba(16, 185, 129, 0.2);
-    border-color: #10b981;
-    box-shadow: 0 6px 22px rgba(16, 185, 129, 0.55);
+    background: rgba(168, 85, 247, 0.55);
+    border-color: #c084fc;
+    box-shadow: 0 6px 22px rgba(168, 85, 247, 0.65);
     transform: translateY(-2px) scale(1.05);
 }
 
 .btn-back-to-top:active {
     transform: translateY(0) scale(0.96);
 }
-/* Floating Back to Top Button Mobile Optimization */
+
 @media (max-width: 768px), screen and (max-device-width: 768px) {
     .btn-back-to-top {
-        bottom: calc(72px + env(safe-area-inset-bottom, 0px)) !important;
-        left: 16px !important;
+        bottom: calc(88px + env(safe-area-inset-bottom, 0px)) !important;
+        right: 18px !important;
+        left: auto !important;
         width: 42px !important;
         height: 42px !important;
     }
-} /* .btn-back-to-top-mobile-fix */
 
+    #notion-tasks-workspace,
+    #timetable-workspace,
+    #settings-workspace,
+    #planner-workspace {
+        padding-bottom: calc(140px + env(safe-area-inset-bottom, 0px)) !important;
+    }
+}
 
 /* 2. Modal Reading & Scroll Progress Bar */
 .modal-reading-progress-bar {

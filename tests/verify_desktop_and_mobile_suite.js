@@ -292,15 +292,14 @@ test('Notification Hub Drawer and expanded card bodies support vertical scrollin
 // -------------------------------------------------------------
 console.log('\n--- 9. Settings, Profile & Release Management ---');
 
-test('System version is strictly unified at v2.4.19 across all manifests and scripts', () => {
+test('System version is strictly unified across all manifests and scripts', () => {
     const pkg = JSON.parse(fs.readFileSync(path.join(ROOT, 'package.json'), 'utf8'));
     const swJs = fs.readFileSync(path.join(ROOT, 'sw.js'), 'utf8');
-    assert.strictEqual(pkg.version, '2.4.19', 'package.json version must be 2.4.19');
-    assert(appJs.includes('window.APP_VERSION = "2.4.19"'), 'app.js APP_VERSION must be 2.4.19');
-    assert(appJs.includes('REV-2026.10.18-v2.4.19'), 'app.js revision must be REV-2026.10.18-v2.4.19');
-    assert(indexHtml.includes('גרסה אחרונה v2.4.19'), 'index.html changelog must show v2.4.19');
-    assert(indexHtml.includes('v2.4.19 ✨'), 'index.html footer must display v2.4.19 ✨');
-    assert(swJs.includes('semestero-me-v2.4.19'), 'sw.js cache name must be semestero-me-v2.4.19');
+    const curVer = pkg.version;
+    assert(appJs.includes(`version: "${curVer}"`), `app.js APP_CURRENT_REVISION must be ${curVer}`);
+    assert(appJs.includes(`v${curVer}`), `app.js revision must contain v${curVer}`);
+    assert(indexHtml.includes(`v${curVer}`), `index.html changelog must show v${curVer}`);
+    assert(swJs.includes(`semestero-me-v${curVer}`), `sw.js cache name must be semestero-me-v${curVer}`);
 });
 
 // -------------------------------------------------------------

@@ -20953,8 +20953,8 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.10.25-v2.6",
-    version: "2.6",
+    code: "REV-2026.10.25-v2.6.2",
+    version: "2.6.2",
     build: "20261020_03",
     date: "2026-10-20 01:20",
     description: "גרסה 2.5.2: פתרון מוחלט ללולאת העדכון במובייל וספארי, מנגנון אנטי-רילואד עמיד ב-localStorage, סנכרון גרסאות מלא וקישורי הורדה ישירים לטלפונים"
@@ -22579,7 +22579,7 @@ window.checkRemoteAppVersion = async function(isManualCheck = false) {
         const match = domVerEl.innerText.match(/(?:^|\bv|\s)(\d+\.\d+\.\d+)\b/);
         if (match) currentVer = match[1];
     }
-    currentVer = currentVer || "2.6";
+    currentVer = currentVer || "2.6.2";
     const statusTextEl = document.getElementById("version-check-status-text");
     const footerBadgeEl = document.getElementById("footer-version-badge");
     const checkBtn = document.getElementById("btn-check-version-updates");
@@ -22810,6 +22810,16 @@ window.forceAppUpdate = async function() {
 
 window.getFormattedChangelogHTML = function() {
     return `<div style="display: flex; flex-direction: column; gap: 10px;">
+        <div style="background: rgba(139, 92, 246, 0.12); border: 1px solid rgba(168, 85, 247, 0.4); border-radius: 10px; padding: 12px;">
+            <div style="font-weight: 700; color: #c084fc; display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                <span>🔝</span> <span>גרסה 2.6.2: כפתור חזרה למעלה סגול חצי-שקוף במיקום ימני אופטימלי</span>
+            </div>
+            <ul style="margin: 0; padding-right: 20px; font-size: 0.82rem; color: #cbd5e1; line-height: 1.55;">
+                <li><strong>מיקום ימני תחתון וסגנון סגול חצי-שקוף:</strong> הכפתור ממוקם בצד ימין למטה ומעוצב בזכוכית סגולה שקופה (Purple Glass) עם אפקט טשטוש ואפס הסתרה של טקסטים או כפתורים.</li>
+                <li><strong>מנגנון גלילה קפדני למסך המרכזי:</strong> הכפתור מופיע אך ורק בעת גלילה במסך המרכזי (הגדרות, משימות, מערכת שעות ומודאלים) ומתעלם לחלוטין מגלילות קטנות פנימיות (כגון כרטיסיות סמסטר בתכנון תואר או רשימות קורסים).</li>
+                <li><strong>מרווח תחתון מוגדל (140px):</strong> מאפשר גלילה חופשית עד סוף הדף כך שכל כרטיס וטקסט נשארים גלויים לחלוטין מעל הכפתור.</li>
+            </ul>
+        </div>
         <div style="background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.4); border-radius: 10px; padding: 12px;">
             <div style="font-weight: 700; color: #34d399; display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
                 <span>🔝</span> <span>גרסה 2.6: כפתור חזרה למעלה, שחזור סמל הפקולטה ועידון HUD מלא</span>
