@@ -3,9 +3,9 @@ import zipfile
 import shutil
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-SRC_DIR = os.path.join(ROOT, "dist_build", "Semestero ME-win32-x64")
-if not os.path.exists(SRC_DIR):
-    SRC_DIR = os.path.join(ROOT, "dist", "Semestero ME-win32-x64")
+SRC_DIR = os.path.join(ROOT, "dist", "Semestero ME-win32-x64")
+if not os.path.exists(os.path.join(SRC_DIR, "Semestero ME.exe")):
+    SRC_DIR = os.path.join(ROOT, "dist_build", "Semestero ME-win32-x64")
 
 OUT_ZIP = os.path.join(ROOT, "Semestero-ME-Windows-x64.zip")
 EXE_SRC = os.path.join(SRC_DIR, "Semestero ME.exe")

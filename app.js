@@ -15067,12 +15067,11 @@ window.switchTab = function(tabNameOrNumber) {
                 return;
             }
 
-            // 1. Checkbox click -> surgical status toggle with zero latency
+            // 1. Checkbox click -> selection toggle for bulk/parallel actions (Duplicate, Move to, Move to Trash)
             if (e.target.classList.contains("notion-row-checkbox")) {
                 e.stopPropagation();
                 const checked = e.target.checked;
-                toggleTaskStatusInState(courseCode, taskId, checked ? 'done' : 'not_started', true);
-                notifyStateChanged({ tab: 'tasks' });
+                handleTaskRowCheckboxChange(tr, courseCode, taskId, checked, e.shiftKey);
                 return;
             }
 
@@ -15139,24 +15138,135 @@ window.switchTab = function(tabNameOrNumber) {
         });
     }
 
-    // Select all checkbox listener
+    // Context menu on task row (Duplicate, Move to, Move to Trash matching screenshot)
+    tableBody.addEventListener("contextmenu", (e) => {
+        const tr = e.target.closest("tr[data-task-id]");
+        if (!tr) return;
+        e.preventDefault();
+        const courseCode = tr.dataset.courseCode;
+        const taskId = tr.dataset.taskId;
+        showTaskContextMenu(e, courseCode, taskId);
+    });
+
+    // Select all checkbox listener -> bulk selection
     const selectAllCheckbox = document.getElementById("select-all-tasks-checkbox");
     if (selectAllCheckbox) {
         selectAllCheckbox.addEventListener("change", (e) => {
             const checked = e.target.checked;
-            const rows = document.querySelectorAll("#notion-tasks-table-body tr");
+            if (!window.selectedTasksMap) window.selectedTasksMap = new Map();
+            const rows = document.querySelectorAll("#notion-tasks-table-body tr[data-task-id]");
             rows.forEach(row => {
+                const courseCode = row.dataset.courseCode;
+                const taskId = row.dataset.taskId;
+                if (!courseCode || !taskId) return;
+                const key = `${courseCode}:::${taskId}`;
                 const cb = row.querySelector(".notion-row-checkbox");
-                if (cb && cb.checked !== checked) {
-                    cb.checked = checked;
-                    const courseCode = row.dataset.courseCode;
-                    const taskId = row.dataset.taskId;
-                    toggleTaskStatusInState(courseCode, taskId, checked ? 'done' : 'not_started', true);
+                if (checked) {
+                    window.selectedTasksMap.set(key, { courseCode, taskId });
+                    if (cb) cb.checked = true;
+                    row.classList.add("is-row-selected");
+                } else {
+                    window.selectedTasksMap.delete(key);
+                    if (cb) cb.checked = false;
+                    row.classList.remove("is-row-selected");
                 }
             });
-            notifyStateChanged({ tab: 'tasks' });
+            updateTasksBulkToolbar();
         });
     }
+
+    // Wire Floating Bulk Toolbar Buttons
+    const btnBulkDup = document.getElementById("btn-bulk-duplicate-tasks");
+    if (btnBulkDup) btnBulkDup.onclick = duplicateSelectedTasks;
+
+    const btnBulkMove = document.getElementById("btn-bulk-move-tasks");
+    if (btnBulkMove) btnBulkMove.onclick = () => openMoveTasksModal();
+
+    const btnBulkDel = document.getElementById("btn-bulk-delete-tasks");
+    if (btnBulkDel) btnBulkDel.onclick = deleteSelectedTasks;
+
+    const btnBulkDone = document.getElementById("btn-bulk-mark-done");
+    if (btnBulkDone) btnBulkDone.onclick = () => bulkSetTasksStatus('done');
+
+    const btnBulkCancel = document.getElementById("btn-bulk-clear-selection");
+    if (btnBulkCancel) btnBulkCancel.onclick = clearTasksSelection;
+
+    // Wire Context Menu Actions
+    const ctxDup = document.getElementById("ctx-task-duplicate");
+    if (ctxDup) ctxDup.onclick = () => {
+        duplicateSelectedTasks();
+        hideTaskContextMenu();
+    };
+
+    const ctxMove = document.getElementById("ctx-task-move");
+    if (ctxMove) ctxMove.onclick = () => {
+        openMoveTasksModal();
+        hideTaskContextMenu();
+    };
+
+    const ctxDel = document.getElementById("ctx-task-delete");
+    if (ctxDel) ctxDel.onclick = () => {
+        deleteSelectedTasks();
+        hideTaskContextMenu();
+    };
+
+    // Wire Move Modal Close
+    const btnMoveClose = document.getElementById("task-move-modal-close");
+    if (btnMoveClose) btnMoveClose.onclick = closeTaskMoveModal;
+
+    // Close Context Menu on outside mousedown
+    document.addEventListener("mousedown", (e) => {
+        const menu = document.getElementById("task-context-menu");
+        if (menu && menu.style.display === "flex") {
+            if (!menu.contains(e.target)) {
+                hideTaskContextMenu();
+            }
+        }
+    });
+
+    // Global keyboard shortcuts for tasks
+    document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+            const menu = document.getElementById("task-context-menu");
+            if (menu && menu.style.display === "flex") {
+                hideTaskContextMenu();
+                return;
+            }
+            if (window.selectedTasksMap && window.selectedTasksMap.size > 0) {
+                clearTasksSelection();
+            }
+            return;
+        }
+
+        // Ctrl+D / Ctrl+ג: Duplicate selected tasks
+        if ((e.ctrlKey || e.metaKey) && (e.code === 'KeyD' || e.key === 'd' || e.key === 'ג')) {
+            if (window.selectedTasksMap && window.selectedTasksMap.size > 0) {
+                e.preventDefault();
+                duplicateSelectedTasks();
+            }
+            return;
+        }
+
+        // Ctrl+Shift+P / Ctrl+Shift+פ: Move selected tasks to course
+        if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.code === 'KeyP' || e.key === 'p' || e.key === 'P' || e.key === 'פ')) {
+            if (window.selectedTasksMap && window.selectedTasksMap.size > 0) {
+                e.preventDefault();
+                openMoveTasksModal();
+            }
+            return;
+        }
+
+        // Delete: Delete selected tasks (only when not typing in text inputs)
+        if (e.key === "Delete") {
+            const tag = document.activeElement ? document.activeElement.tagName.toLowerCase() : '';
+            const isEditing = tag === 'input' || tag === 'textarea' || (document.activeElement && document.activeElement.isContentEditable);
+            if (!isEditing && window.selectedTasksMap && window.selectedTasksMap.size > 0) {
+                e.preventDefault();
+                deleteSelectedTasks();
+            }
+            return;
+        }
+    });
     
     // 4. Subviews & Custom Task Modal Setup
     setupNotionWorkspaceSubviews();
@@ -15300,6 +15410,384 @@ function updateOrganitCategoryCounts(allTasks) {
 }
 
 // Renders the Notion Tasks Table body dynamically
+
+// ==========================================================================
+// Tasks Selection, Bulk Actions & Notion Context Menu (v2.6.5)
+// ==========================================================================
+window.selectedTasksMap = new Map();
+let lastCheckedTaskIndex = -1;
+let activeTaskContextMenu = null;
+
+function updateTasksBulkToolbar() {
+    const count = window.selectedTasksMap ? window.selectedTasksMap.size : 0;
+    const bar = document.getElementById("tasks-bulk-actions-bar");
+    const countText = document.getElementById("bulk-selected-count-text");
+    if (countText) {
+        countText.innerText = count === 1 ? "נבחרה משימה אחת" : `נבחרו ${count} משימות`;
+    }
+    if (bar) {
+        if (count > 0) {
+            bar.classList.add("active");
+        } else {
+            bar.classList.remove("active");
+        }
+    }
+
+    // Update the master select-all checkbox
+    const selectAllCb = document.getElementById("select-all-tasks-checkbox");
+    if (selectAllCb) {
+        const rows = document.querySelectorAll("#notion-tasks-table-body tr[data-task-id]");
+        const total = rows.length;
+        let selectedInView = 0;
+        rows.forEach(r => {
+            const key = `${r.dataset.courseCode}:::${r.dataset.taskId}`;
+            if (window.selectedTasksMap && window.selectedTasksMap.has(key)) selectedInView++;
+        });
+        if (total > 0 && selectedInView === total) {
+            selectAllCb.checked = true;
+            selectAllCb.indeterminate = false;
+        } else if (selectedInView > 0) {
+            selectAllCb.checked = false;
+            selectAllCb.indeterminate = true;
+        } else {
+            selectAllCb.checked = false;
+            selectAllCb.indeterminate = false;
+        }
+    }
+}
+
+function handleTaskRowCheckboxChange(tr, courseCode, taskId, checked, isShift) {
+    if (!window.selectedTasksMap) window.selectedTasksMap = new Map();
+    const rows = Array.from(document.querySelectorAll("#notion-tasks-table-body tr[data-task-id]"));
+    const currentIndex = rows.indexOf(tr);
+
+    if (isShift && lastCheckedTaskIndex !== -1 && currentIndex !== -1) {
+        const start = Math.min(lastCheckedTaskIndex, currentIndex);
+        const end = Math.max(lastCheckedTaskIndex, currentIndex);
+        for (let i = start; i <= end; i++) {
+            const row = rows[i];
+            const cCode = row.dataset.courseCode;
+            const tId = row.dataset.taskId;
+            const cb = row.querySelector(".notion-row-checkbox");
+            const key = `${cCode}:::${tId}`;
+            if (checked) {
+                window.selectedTasksMap.set(key, { courseCode: cCode, taskId: tId });
+                if (cb) cb.checked = true;
+                row.classList.add("is-row-selected");
+            } else {
+                window.selectedTasksMap.delete(key);
+                if (cb) cb.checked = false;
+                row.classList.remove("is-row-selected");
+            }
+        }
+    } else {
+        const key = `${courseCode}:::${taskId}`;
+        if (checked) {
+            window.selectedTasksMap.set(key, { courseCode, taskId });
+            tr.classList.add("is-row-selected");
+        } else {
+            window.selectedTasksMap.delete(key);
+            tr.classList.remove("is-row-selected");
+        }
+    }
+
+    lastCheckedTaskIndex = currentIndex;
+    updateTasksBulkToolbar();
+}
+
+function duplicateSingleTask(courseCode, taskId) {
+    const course = gameState.courses[courseCode];
+    if (!course || !Array.isArray(course.tasks)) return;
+    const task = course.tasks.find(t => t.id === taskId);
+    if (!task) return;
+
+    const clone = JSON.parse(JSON.stringify(task));
+    clone.id = `task-${Date.now()}-${Math.floor(Math.random() * 100000)}`;
+    clone.title = clone.title.includes('(העתק)') ? `${clone.title} 2` : `${clone.title} (העתק)`;
+    clone.completed = false;
+    clone.status = 'not_started';
+    clone.pinned = false;
+
+    course.tasks.push(clone);
+    saveState();
+    recalculateCourseStates();
+    renderNotionTasksTable();
+    renderTasksReminderBanner();
+    renderUI();
+    showToastNotification(`👥 משימה שוכפלה בהצלחה: "${clone.title}"`, 'success');
+}
+
+function duplicateSelectedTasks() {
+    if (!window.selectedTasksMap || window.selectedTasksMap.size === 0) return;
+    const items = Array.from(window.selectedTasksMap.values());
+    let duplicatedCount = 0;
+
+    items.forEach(({ courseCode, taskId }) => {
+        const course = gameState.courses[courseCode];
+        if (!course || !Array.isArray(course.tasks)) return;
+        const task = course.tasks.find(t => t.id === taskId);
+        if (!task) return;
+
+        const clone = JSON.parse(JSON.stringify(task));
+        clone.id = `task-${Date.now()}-${Math.floor(Math.random() * 100000)}`;
+        clone.title = clone.title.includes('(העתק)') ? `${clone.title} 2` : `${clone.title} (העתק)`;
+        clone.completed = false;
+        clone.status = 'not_started';
+        clone.pinned = false;
+
+        course.tasks.push(clone);
+        duplicatedCount++;
+    });
+
+    window.selectedTasksMap.clear();
+    saveState();
+    recalculateCourseStates();
+    renderNotionTasksTable();
+    renderTasksReminderBanner();
+    renderUI();
+    showToastNotification(`👥 ${duplicatedCount} משימות שוכפלו במקביל בהצלחה!`, 'success');
+}
+
+function deleteSingleTask(courseCode, taskId) {
+    const course = gameState.courses[courseCode];
+    if (!course || !Array.isArray(course.tasks)) return;
+    const task = course.tasks.find(t => t.id === taskId);
+    const title = task ? task.title : 'המשימה';
+
+    if (!confirm(`האם אתה בטוח שברצונך למחוק את "${title}"?`)) return;
+
+    course.tasks = course.tasks.filter(t => t.id !== taskId);
+    if (window.selectedTasksMap) window.selectedTasksMap.delete(`${courseCode}:::${taskId}`);
+
+    saveState();
+    recalculateCourseStates();
+    renderNotionTasksTable();
+    renderTasksReminderBanner();
+    renderUI();
+    showToastNotification(`🗑️ המשימה "${title}" נמחקה בהצלחה!`, 'success');
+}
+
+function deleteSelectedTasks() {
+    if (!window.selectedTasksMap || window.selectedTasksMap.size === 0) return;
+    const items = Array.from(window.selectedTasksMap.values());
+    const count = items.length;
+
+    const msg = count === 1
+        ? 'האם אתה בטוח שברצונך למחוק את המשימה שנבחרה?'
+        : `האם אתה בטוח שברצונך למחוק ${count} משימות שנבחרו במקביל? פעולה זו תסיר אותן מהמערכת.`;
+
+    if (!confirm(msg)) return;
+
+    const byCourse = {};
+    items.forEach(({ courseCode, taskId }) => {
+        if (!byCourse[courseCode]) byCourse[courseCode] = new Set();
+        byCourse[courseCode].add(taskId);
+    });
+
+    let deletedCount = 0;
+    Object.keys(byCourse).forEach(cCode => {
+        const course = gameState.courses[cCode];
+        if (!course || !Array.isArray(course.tasks)) return;
+        const set = byCourse[cCode];
+        const prevLen = course.tasks.length;
+        course.tasks = course.tasks.filter(t => !set.has(t.id));
+        deletedCount += (prevLen - course.tasks.length);
+    });
+
+    window.selectedTasksMap.clear();
+    saveState();
+    recalculateCourseStates();
+    renderNotionTasksTable();
+    renderTasksReminderBanner();
+    renderUI();
+    showToastNotification(`🗑️ ${deletedCount} משימות נמחקו בהצלחה!`, 'success');
+}
+
+function bulkSetTasksStatus(newStatus) {
+    if (!window.selectedTasksMap || window.selectedTasksMap.size === 0) return;
+    const items = Array.from(window.selectedTasksMap.values());
+
+    items.forEach(({ courseCode, taskId }) => {
+        toggleTaskStatusInState(courseCode, taskId, newStatus, true);
+    });
+
+    window.selectedTasksMap.clear();
+    saveState();
+    recalculateCourseStates();
+    renderNotionTasksTable();
+    renderTasksReminderBanner();
+    renderUI();
+    const statusName = newStatus === 'done' ? 'כהושלמו' : 'בביצוע';
+    showToastNotification(`✅ ${items.length} משימות סומנו ${statusName}!`, 'success');
+}
+
+function clearTasksSelection() {
+    if (window.selectedTasksMap) window.selectedTasksMap.clear();
+    const rows = document.querySelectorAll("#notion-tasks-table-body tr.is-row-selected");
+    rows.forEach(r => {
+        r.classList.remove("is-row-selected");
+        const cb = r.querySelector(".notion-row-checkbox");
+        if (cb) cb.checked = false;
+    });
+    updateTasksBulkToolbar();
+    hideTaskContextMenu();
+}
+
+function openMoveTasksModal(singleCourseCode = null, singleTaskId = null) {
+    const modal = document.getElementById("task-move-modal");
+    const list = document.getElementById("task-move-courses-list");
+    const desc = document.getElementById("task-move-modal-desc");
+    if (!modal || !list) return;
+
+    if (singleCourseCode && singleTaskId) {
+        if (!window.selectedTasksMap) window.selectedTasksMap = new Map();
+        window.selectedTasksMap.clear();
+        window.selectedTasksMap.set(`${singleCourseCode}:::${singleTaskId}`, { courseCode: singleCourseCode, taskId: singleTaskId });
+    }
+
+    const count = window.selectedTasksMap ? window.selectedTasksMap.size : 0;
+    if (count === 0) {
+        showToastNotification("בחר תחילה משימה אחת לפחות להעברה", "warning");
+        return;
+    }
+
+    if (desc) {
+        desc.innerText = count === 1
+            ? "בחר את קורס היעד שאליו תרצה להעביר את המשימה:"
+            : `בחר את קורס היעד שאליו תרצה להעביר ${count} משימות:`;
+    }
+
+    list.innerHTML = "";
+    const courses = Object.values(gameState.courses || {})
+        .filter(c => c.status === 'active' || c.status === 'available' || c.status === 'mastered')
+        .sort((a, b) => a.name.localeCompare(b.name, 'he'));
+
+    courses.forEach(c => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "task-move-course-btn";
+        btn.innerHTML = `
+            <span style="font-size: 1.1rem;">📘</span>
+            <span style="font-weight: 700; color: #38bdf8;">[${c.code}]</span>
+            <span style="flex: 1; text-align: right;">${c.name}</span>
+        `;
+        btn.onclick = () => {
+            executeMoveTasksToCourse(c.code);
+        };
+        list.appendChild(btn);
+    });
+
+    modal.style.display = "flex";
+    modal.classList.add("active");
+    hideTaskContextMenu();
+}
+
+function closeTaskMoveModal() {
+    const modal = document.getElementById("task-move-modal");
+    if (modal) {
+        modal.style.display = "none";
+        modal.classList.remove("active");
+    }
+}
+
+function executeMoveTasksToCourse(targetCourseCode) {
+    if (!window.selectedTasksMap || window.selectedTasksMap.size === 0) return;
+    const destCourse = gameState.courses[targetCourseCode];
+    if (!destCourse) return;
+    if (!Array.isArray(destCourse.tasks)) destCourse.tasks = [];
+
+    const items = Array.from(window.selectedTasksMap.values());
+    let movedCount = 0;
+
+    items.forEach(({ courseCode, taskId }) => {
+        if (courseCode === targetCourseCode) return; // already in destination course
+        const srcCourse = gameState.courses[courseCode];
+        if (!srcCourse || !Array.isArray(srcCourse.tasks)) return;
+        const idx = srcCourse.tasks.findIndex(t => t.id === taskId);
+        if (idx !== -1) {
+            const [task] = srcCourse.tasks.splice(idx, 1);
+            destCourse.tasks.push(task);
+            movedCount++;
+        }
+    });
+
+    window.selectedTasksMap.clear();
+    closeTaskMoveModal();
+    saveState();
+    recalculateCourseStates();
+    renderNotionTasksTable();
+    renderTasksReminderBanner();
+    renderUI();
+    showToastNotification(`🚚 ${movedCount} משימות הועברו בהצלחה לקורס [${destCourse.name}]!`, 'success');
+}
+
+function showTaskContextMenu(e, courseCode, taskId) {
+    const menu = document.getElementById("task-context-menu");
+    if (!menu) return;
+
+    if (!window.selectedTasksMap) window.selectedTasksMap = new Map();
+    const key = `${courseCode}:::${taskId}`;
+
+    // If the right-clicked row is not already part of selected tasks, make it the sole selection
+    if (!window.selectedTasksMap.has(key)) {
+        window.selectedTasksMap.clear();
+        window.selectedTasksMap.set(key, { courseCode, taskId });
+        const rows = document.querySelectorAll("#notion-tasks-table-body tr");
+        rows.forEach(r => {
+            const isMatch = r.dataset.courseCode === courseCode && r.dataset.taskId === taskId;
+            r.classList.toggle("is-row-selected", isMatch);
+            const cb = r.querySelector(".notion-row-checkbox");
+            if (cb) cb.checked = isMatch;
+        });
+        updateTasksBulkToolbar();
+    }
+
+    const count = window.selectedTasksMap.size;
+    const header = document.getElementById("ctx-task-header");
+    const headerText = document.getElementById("ctx-task-header-text");
+    if (header && headerText) {
+        if (count > 1) {
+            header.style.display = "block";
+            headerText.innerText = `${count} משימות נבחרו`;
+        } else {
+            header.style.display = "none";
+        }
+    }
+
+    // Position context menu at mouse coordinates with boundary checks
+    menu.style.display = "flex";
+    const menuWidth = 220;
+    const menuHeight = 150;
+    let x = e.clientX;
+    let y = e.clientY;
+
+    if (x + menuWidth > window.innerWidth) x = window.innerWidth - menuWidth - 10;
+    if (y + menuHeight > window.innerHeight) y = window.innerHeight - menuHeight - 10;
+
+    menu.style.left = `${Math.max(10, x)}px`;
+    menu.style.top = `${Math.max(10, y)}px`;
+
+    activeTaskContextMenu = { courseCode, taskId };
+}
+
+function hideTaskContextMenu() {
+    const menu = document.getElementById("task-context-menu");
+    if (menu) menu.style.display = "none";
+    activeTaskContextMenu = null;
+}
+
+window.duplicateSelectedTasks = duplicateSelectedTasks;
+window.deleteSelectedTasks = deleteSelectedTasks;
+window.duplicateSingleTask = duplicateSingleTask;
+window.deleteSingleTask = deleteSingleTask;
+window.openMoveTasksModal = openMoveTasksModal;
+window.closeTaskMoveModal = closeTaskMoveModal;
+window.clearTasksSelection = clearTasksSelection;
+window.showTaskContextMenu = showTaskContextMenu;
+window.hideTaskContextMenu = hideTaskContextMenu;
+window.updateTasksBulkToolbar = updateTasksBulkToolbar;
+
+
 function renderNotionTasksTable() {
     const tableBody = document.getElementById("notion-tasks-table-body");
     if (!tableBody) return;
@@ -15445,9 +15933,10 @@ function renderNotionTasksTable() {
             </a>
         ` : '';
 
+        const isSelected = window.selectedTasksMap && window.selectedTasksMap.has(`${c.code}:::${t.id}`);
         rowsHtml += `
-            <tr data-course-code="${c.code}" data-task-id="${t.id}" class="${isPinned ? 'is-task-pinned' : ''}">
-                <td><input type="checkbox" class="notion-row-checkbox" ${isDone ? 'checked' : ''}></td>
+            <tr data-course-code="${c.code}" data-task-id="${t.id}" class="${isPinned ? 'is-task-pinned' : ''} ${isSelected ? 'is-row-selected' : ''}">
+                <td class="notion-table-select-cell"><input type="checkbox" class="notion-row-checkbox" data-course-code="${c.code}" data-task-id="${t.id}" title="בחר משימה לפעולות מרובות" ${isSelected ? 'checked' : ''}></td>
                 <td>
                     <div class="notion-title-cell">
                         ${pinBtnHtml}
@@ -15477,6 +15966,7 @@ function renderNotionTasksTable() {
         `;
     });
     tableBody.innerHTML = rowsHtml;
+    if (typeof updateTasksBulkToolbar === 'function') updateTasksBulkToolbar();
 }
 
 // Global Notion Status Dropdown Menu Component
@@ -15846,6 +16336,22 @@ function openTaskSidePeek(courseCode, taskId) {
             task.miluim = e.target.checked;
             renderNotionTasksTable();
             saveState();
+        };
+    }
+
+    // Direct Side Peek Duplicate & Delete
+    const peekDupBtn = document.getElementById("peek-btn-duplicate-task");
+    if (peekDupBtn) {
+        peekDupBtn.onclick = () => {
+            duplicateSingleTask(courseCode, taskId);
+            closeTaskSidePeek();
+        };
+    }
+    const peekDelBtn = document.getElementById("peek-btn-delete-task");
+    if (peekDelBtn) {
+        peekDelBtn.onclick = () => {
+            deleteSingleTask(courseCode, taskId);
+            closeTaskSidePeek();
         };
     }
     
@@ -21010,8 +21516,8 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.10.25-v2.6.4",
-    version: "2.6.4",
+    code: "REV-2026.10.25-v2.6.5",
+    version: "2.6.5",
     build: "20261020_03",
     date: "2026-10-20 01:20",
     description: "גרסה 2.5.2: פתרון מוחלט ללולאת העדכון במובייל וספארי, מנגנון אנטי-רילואד עמיד ב-localStorage, סנכרון גרסאות מלא וקישורי הורדה ישירים לטלפונים"
@@ -22639,7 +23145,7 @@ window.checkRemoteAppVersion = async function(isManualCheck = false) {
         const match = domVerEl.innerText.match(/(?:^|\bv|\s)(\d+\.\d+\.\d+)\b/);
         if (match) currentVer = match[1];
     }
-    currentVer = currentVer || "2.6.4";
+    currentVer = currentVer || "2.6.5";
     const statusTextEl = document.getElementById("version-check-status-text");
     const footerBadgeEl = document.getElementById("footer-version-badge");
     const checkBtn = document.getElementById("btn-check-version-updates");

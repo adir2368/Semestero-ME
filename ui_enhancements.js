@@ -691,8 +691,27 @@
                 return;
             }
 
-            // 2. Global Escape: Close any open modal or Command Palette, or blur input
+            // 2. Global Escape: Close any open modal, context menu, Command Palette, or blur input
             if (e.key === 'Escape' || code === 'Escape') {
+                const ctxMenu = document.getElementById('task-context-menu');
+                if (ctxMenu && ctxMenu.style.display === 'flex') {
+                    e.preventDefault();
+                    if (typeof window.hideTaskContextMenu === 'function') window.hideTaskContextMenu();
+                    return;
+                }
+                const moveModal = document.getElementById('task-move-modal');
+                if (moveModal && moveModal.style.display !== 'none' && moveModal.classList.contains('active')) {
+                    e.preventDefault();
+                    if (typeof window.closeTaskMoveModal === 'function') window.closeTaskMoveModal();
+                    return;
+                }
+                if (window.selectedTasksMap && window.selectedTasksMap.size > 0 && !isTyping) {
+                    if (typeof window.clearTasksSelection === 'function') {
+                        e.preventDefault();
+                        window.clearTasksSelection();
+                        return;
+                    }
+                }
                 const cmdModal = document.getElementById('command-palette-modal');
                 if (cmdModal && (cmdModal.classList.contains('active') || cmdModal.style.display !== 'none')) {
                     e.preventDefault();
@@ -762,13 +781,38 @@
                 return;
             }
 
-            // 4. Ctrl+D / Cmd+D: Direct Downloads Modal
+            // 4. Ctrl+D / Cmd+D: Duplicate selected tasks (if tasks are selected) OR Direct Downloads Modal
             const isKeyD = code === 'KeyD' || keyLower === 'd' || e.key === 'ג';
             if (isCtrlOrMeta && isKeyD && !e.shiftKey && !e.altKey) {
                 e.preventDefault();
                 e.stopPropagation();
+                if (window.selectedTasksMap && window.selectedTasksMap.size > 0 && typeof window.duplicateSelectedTasks === 'function') {
+                    window.duplicateSelectedTasks();
+                    return;
+                }
                 if (window.openDownloadModal) window.openDownloadModal();
                 return;
+            }
+
+            // 4b. Ctrl+Shift+P / Cmd+Shift+P: Move selected tasks to course
+            const isKeyP = code === 'KeyP' || keyLower === 'p' || e.key === 'פ';
+            if (isCtrlOrMeta && e.shiftKey && !e.altKey && isKeyP) {
+                if (window.selectedTasksMap && window.selectedTasksMap.size > 0 && typeof window.openMoveTasksModal === 'function') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    window.openMoveTasksModal();
+                    return;
+                }
+            }
+
+            // 4c. Delete: Delete / Move to Trash selected tasks (when not typing in fields)
+            if ((e.key === 'Delete' || code === 'Delete') && !isTyping) {
+                if (window.selectedTasksMap && window.selectedTasksMap.size > 0 && typeof window.deleteSelectedTasks === 'function') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    window.deleteSelectedTasks();
+                    return;
+                }
             }
 
             // 5. Ctrl+G / Cmd+G: Graduation Audit / Clearance Modal
