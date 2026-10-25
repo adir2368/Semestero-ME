@@ -15,9 +15,9 @@ ZIP_PATH = os.path.join(ROOT, "Semestero-ME-Windows-x64.zip")
 
 with open(os.path.join(ROOT, "package.json"), "r", encoding="utf-8") as f:
     pkg = json.load(f)
-VERSION = pkg.get("version", "2.5.9")
+VERSION = pkg.get("version", "2.6")
 TAG = f"v{VERSION}"
-NAME = f"Semestero ME v{VERSION} - HUD Minimalist Refinement, Tutorial Academy & UX Suite"
+NAME = f"Semestero ME v{VERSION} - Responsive Back-to-Top, HUD Avatar & Expanded Completion Gauge"
 
 def get_github_token():
     try:

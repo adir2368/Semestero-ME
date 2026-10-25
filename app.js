@@ -20953,8 +20953,8 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.10.25-v2.5.9",
-    version: "2.5.9",
+    code: "REV-2026.10.25-v2.6",
+    version: "2.6",
     build: "20261020_03",
     date: "2026-10-20 01:20",
     description: "גרסה 2.5.2: פתרון מוחלט ללולאת העדכון במובייל וספארי, מנגנון אנטי-רילואד עמיד ב-localStorage, סנכרון גרסאות מלא וקישורי הורדה ישירים לטלפונים"
@@ -22579,7 +22579,7 @@ window.checkRemoteAppVersion = async function(isManualCheck = false) {
         const match = domVerEl.innerText.match(/(?:^|\bv|\s)(\d+\.\d+\.\d+)\b/);
         if (match) currentVer = match[1];
     }
-    currentVer = currentVer || "2.5.9";
+    currentVer = currentVer || "2.6";
     const statusTextEl = document.getElementById("version-check-status-text");
     const footerBadgeEl = document.getElementById("footer-version-badge");
     const checkBtn = document.getElementById("btn-check-version-updates");
@@ -22810,6 +22810,18 @@ window.forceAppUpdate = async function() {
 
 window.getFormattedChangelogHTML = function() {
     return `<div style="display: flex; flex-direction: column; gap: 10px;">
+        <div style="background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.4); border-radius: 10px; padding: 12px;">
+            <div style="font-weight: 700; color: #34d399; display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                <span>🔝</span> <span>גרסה 2.6: כפתור חזרה למעלה, שחזור סמל הפקולטה ועידון HUD מלא</span>
+            </div>
+            <ul style="margin: 0; padding-right: 20px; font-size: 0.82rem; color: #cbd5e1; line-height: 1.55;">
+                <li>כפתור צף אינטליגנטי "חזרה למעלה" (Back to Top) פעיל ומגיב לגלילה בכל מסכי המערכת (הגדרות, תכנון תואר, מערכת שעות ומודאלים).</li>
+                <li>שחזור סמל הפקולטה (הכובע/מבחנה וגלגל שיניים) בסרגל ה-HUD העליון.</li>
+                <li>הרחבת מד אחוז השלמת התואר (0.0% הושלמו) לרוחב מלא זהה למד הנק"ז למראה הרמוני ומדויק.</li>
+                <li>התאמת כפתור ההורדה לסגנון שאר כפתורי הזכוכית ב-HUD עם חץ ירוק אלגנטי.</li>
+            </ul>
+        </div>
+
         <div style="background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.4); border-radius: 10px; padding: 12px;">
             <div style="font-weight: 700; color: #34d399; display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
                 <span>✨</span> <span>עידון ופינוי סרגל הכלים העליון (HUD Clean & Minimalist)</span>

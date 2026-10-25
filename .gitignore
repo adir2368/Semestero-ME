@@ -15,6 +15,7 @@ cheesefork_courses_2025_200.min.js
 *.zip
 /www/
 *.apk
+*.exe
 android/local.properties
 android/.gradle/
 android/app/build/

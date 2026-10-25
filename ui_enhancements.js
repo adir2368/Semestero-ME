@@ -82,7 +82,7 @@
             btn.title = 'חזרה לראש העמוד (Top) 🔝';
             btn.setAttribute('aria-label', 'חזרה לראש העמוד');
             btn.innerHTML = `
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
                     <line x1="12" y1="19" x2="12" y2="5"></line>
                     <polyline points="5 12 12 5 19 12"></polyline>
                 </svg>
@@ -92,21 +92,62 @@
 
         btn.addEventListener('click', () => {
             window.scrollTo({ top: 0, behavior: 'smooth' });
-            // Also scroll active tab view if scrollable container exists
-            const scrollContainers = document.querySelectorAll('.planner-content, .timetable-container, .tasks-scroll, .active-tab-content');
-            scrollContainers.forEach(el => el.scrollTo({ top: 0, behavior: 'smooth' }));
+            if (document.documentElement) document.documentElement.scrollTo({ top: 0, behavior: 'smooth' });
+            if (document.body) document.body.scrollTo({ top: 0, behavior: 'smooth' });
+
+            // Also smoothly scroll any open modal and scrollable viewports
+            const scrollContainers = document.querySelectorAll(
+                '#settings-workspace, #planner-workspace, #timetable-workspace, #tasks-workspace, #calendar-workspace, ' +
+                '.planner-content, .planner-course-list, .timetable-container, .tasks-scroll, .tasks-list-container, ' +
+                '.flowchart-scroll-wrapper, .modal-body, .modal-overlay.active .modal-body, .modal.active .modal-body, ' +
+                '.active-tab-content'
+            );
+            scrollContainers.forEach(el => {
+                if (el && typeof el.scrollTo === 'function') {
+                    el.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+            });
         });
 
         const toggleVisibility = () => {
-            const scrolled = window.scrollY > 300 || document.documentElement.scrollTop > 300;
-            if (scrolled) {
+            let isScrolled = (window.scrollY > 150) || 
+                             (document.documentElement && document.documentElement.scrollTop > 150) || 
+                             (document.body && document.body.scrollTop > 150);
+
+            if (!isScrolled) {
+                // Check if any open modal is scrolled
+                const activeModal = document.querySelector('.modal-overlay.active .modal-body, .modal.active .modal-body, [id$="-modal"].active .modal-body');
+                if (activeModal && activeModal.scrollTop > 150) {
+                    isScrolled = true;
+                }
+            }
+
+            if (!isScrolled) {
+                // Check visible scrollable workspaces and viewports
+                const scrollableElements = document.querySelectorAll(
+                    '#settings-workspace, #planner-workspace, #timetable-workspace, #tasks-workspace, #calendar-workspace, ' +
+                    '.planner-content, .planner-course-list, .flowchart-scroll-wrapper, .timetable-container, .tasks-scroll, .tasks-list-container'
+                );
+                for (let i = 0; i < scrollableElements.length; i++) {
+                    const el = scrollableElements[i];
+                    if (el && el.offsetParent !== null && el.scrollTop > 150) {
+                        isScrolled = true;
+                        break;
+                    }
+                }
+            }
+
+            if (isScrolled) {
                 btn.classList.add('visible');
             } else {
                 btn.classList.remove('visible');
             }
         };
 
-        window.addEventListener('scroll', toggleVisibility, { passive: true });
+        // Capture scroll events anywhere in the DOM (scroll events don't bubble, so capture phase is required)
+        document.addEventListener('scroll', toggleVisibility, { capture: true, passive: true });
+        window.addEventListener('resize', toggleVisibility, { passive: true });
+        // Initial visibility check
         toggleVisibility();
     }
 

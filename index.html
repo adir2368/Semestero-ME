@@ -64,7 +64,7 @@
     <!-- Resource Hints & Critical Asset Preload for High Performance (LCP & Latency Optimization) -->
     <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
     <link rel="dns-prefetch" href="https://asxpbepuvhbafsjlogag.supabase.co">
-    <link rel="preload" as="image" href="icon_small.webp?v=2.5.9" type="image/webp" fetchpriority="high">
+    <link rel="preload" as="image" href="icon_small.webp?v=2.6" type="image/webp" fetchpriority="high">
 
     <link rel="stylesheet" href="styles.css?v=2.5.9">
     <link rel="stylesheet" href="accessibility.css?v=2.5.9">
@@ -187,8 +187,8 @@
             <div class="hud-top-right-bar" id="hud-top-right-bar">
                 <div class="hud-logo" style="display: flex; align-items: center; gap: 10px;">
                     <picture>
-                        <source srcset="icon_small.webp?v=2.5.9" type="image/webp">
-                        <img src="icon_small.png?v=2.5.9" alt="סמסטרו ME - סמל המערכת" class="hud-brand-logo-img" width="54" height="54" style="width: 54px; height: 54px; object-fit: contain; filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.5)); border-radius: 12px; flex-shrink: 0;" loading="eager" fetchpriority="high">
+                        <source srcset="icon_small.webp?v=2.6" type="image/webp">
+                        <img src="icon_small.png?v=2.6" alt="סמסטרו ME - סמל המערכת" class="hud-brand-logo-img" width="54" height="54" style="width: 54px; height: 54px; object-fit: contain; filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.5)); border-radius: 12px; flex-shrink: 0;" loading="eager" fetchpriority="high">
                     </picture>
                     <div class="hud-logo-text-col" style="display: flex; flex-direction: column; justify-content: center;">
                         <span class="degree-title-text" style="font-size: 1.28rem; font-weight: 900; letter-spacing: 1px; color: #f8fafc; font-family: 'Orbitron', sans-serif; line-height: 1.15;">Se<span style="color: #38bdf8; text-shadow: 0 0 14px rgba(56, 189, 248, 0.95); font-weight: 900;">ME</span>stero</span>
@@ -199,7 +199,7 @@
             </div>
             
             <div class="character-card">
-                <div class="char-avatar" id="hud-char-avatar" onclick="if (window.AuthSync && AuthSync.openAuthModal) AuthSync.openAuthModal();" title="לחץ לשינוי סמל / עריכת פרטי חשבון" style="cursor: pointer; display: none;">
+                <div class="char-avatar" id="hud-char-avatar" onclick="if (window.AuthSync && AuthSync.openAuthModal) AuthSync.openAuthModal();" title="לחץ לשינוי סמל / עריכת פרטי חשבון" style="cursor: pointer;">
                     🎓
                 </div>
                 <div class="char-info">
@@ -217,7 +217,7 @@
                         <span class="bell-icon">🔍</span>
                     </button>
                     <button type="button" class="btn-hud-bell" id="btn-open-downloads-modal" onclick="window.openDownloadModal()" title="הורדה ישירה לטלפון ולמחשב ⬇️" aria-label="הורדה ישירה לטלפון ולמחשב">
-                        <span class="bell-icon">⬇️</span>
+                        <span class="bell-icon" style="color: #10b981; display: inline-flex; align-items: center; justify-content: center;"><svg width="17" height="17" viewBox="0 0 24 24" fill="#10b981" style="display: block;"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg></span>
                     </button>
                     <button type="button" class="btn-hud-bell" id="btn-open-analytics" title="מרכז ביצועים, ממוצעים ונתוני תואר (לחץ לפתיחה) 📊" aria-label="מרכז נתונים וביצועים">
                         <span class="bell-icon">📊</span>
@@ -707,7 +707,7 @@
                     <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; padding: 10px 14px; background: rgba(56, 189, 248, 0.08); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 8px;">
                         <div style="display: flex; align-items: center; gap: 8px;">
                             <span style="font-size: 0.82rem; color: #94a3b8;">גרסת מערכת פעילה:</span>
-                            <span style="font-weight: 700; color: #38bdf8; font-family: monospace; font-size: 0.88rem;" id="display-system-version">v2.5.9</span>
+                            <span style="font-weight: 700; color: #38bdf8; font-family: monospace; font-size: 0.88rem;" id="display-system-version">v2.6</span>
                         </div>
                         <span class="app-version-badge" style="font-size: 0.66rem; background: rgba(15, 23, 42, 0.6); border-color: rgba(56, 189, 248, 0.35); color: #7dd3fc;">🔒 נעול לעריכה</span>
                     </div>
@@ -771,6 +771,8 @@
                         <span class="app-version-badge" style="font-size: 0.65rem; border-color: rgba(56, 189, 248, 0.4); color: #38bdf8;">גרסה אחרונה v2.5.2</span>
                     </div>
                     <ul class="whats-new-list" style="list-style-type: disc; padding-right: 22px; margin: 0; color: #e2e8f0; font-size: 0.88rem; line-height: 1.85;">
+                        <li><strong>v2.6 (25/10/2026):</strong> כפתור צף חכם "חזרה למעלה" (Back to Top) פעיל בכל חלקי המערכת והמודאלים, עידון סרגל הכלים העליון (HUD) עם שחזור סמל הפקולטה והרחבת מד השלמת התואר לרוחב מלא, כפתור הורדה מעודן עם חץ ירוק תואם, שורת פקודות חכמה (Ctrl+K), והשוואת קורסים צד-מול-צד.</li>
+
                         <li><strong>v2.5.2 (24/10/2026):</strong> מניעת לולאת עדכונים (Infinite Reload Loop) במובייל וספארי באמצעות מנגנון אנטי-רילואד עמיד ב-localStorage, סנכרון גרסאות מלא, וקישורי הורדה ישירים לטלפונים (Android APK ו-iOS Safari Add to Home Screen).</li>
                         <li><strong>v2.5.1 (20/10/2026):</strong> גרסת ציון דרך 2.5.0! התאמה מוביילית מושלמת למפת הקורסים (Flowchart DAG): ביטול מוחלט של הרווח האנכי הריק בראש המסך (xMidYMin Meet), התאמה אוטומטית נוחה לרוחב מסכי טלפון (Fit-to-Width), שחזור וזכירת הטאב האחרון הפעיל בעת פתיחת האפליקציה, ומנוע עדכונים אוטונומי בזמן אמת (Seamless Over-The-Air Engine).</li>
                     </ul>
@@ -3750,16 +3752,16 @@
                             <span style="font-size: 1.3rem;">💻</span>
                             <span style="font-weight: 700; color: #f1f5f9; font-size: 0.95rem;">גרסת שולחן עבודה למחשב (Windows)</span>
                         </div>
-                        <span class="analytics-badge-v2" style="font-size: 0.65rem; border-color: rgba(56, 189, 248, 0.4); color: #38bdf8;">v2.5.9 • x64</span>
+                        <span class="analytics-badge-v2" style="font-size: 0.65rem; border-color: rgba(56, 189, 248, 0.4); color: #38bdf8;">v2.6 • x64</span>
                     </div>
                     <p style="font-size: 0.8rem; color: #94a3b8; margin: 0 0 10px 0;">
                         הורדה ישירה של האפליקציה השולחנית למחשב. ניתן להוריד את קובץ ההרצה הישיר (Semestero-ME.exe) או את החבילה המלאה (ZIP).
                     </p>
                     <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                        <a href="https://github.com/adir2368/Semestero-ME/releases/download/v2.5.9/Semestero-ME-Windows-x64.zip" target="_blank" rel="noopener noreferrer" class="btn btn-primary" style="flex: 1; min-width: 170px; display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 700; padding: 9px 12px; background: linear-gradient(135deg, #0284c7, #2563eb); text-decoration: none; color: #fff; border-radius: 8px; font-size: 0.82rem; border: none;">
+                        <a href="https://github.com/adir2368/Semestero-ME/releases/download/v2.6/Semestero-ME-Windows-x64.zip" target="_blank" rel="noopener noreferrer" class="btn btn-primary" style="flex: 1; min-width: 170px; display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 700; padding: 9px 12px; background: linear-gradient(135deg, #0284c7, #2563eb); text-decoration: none; color: #fff; border-radius: 8px; font-size: 0.82rem; border: none;">
                             <span>📦</span> <span>הורדת חבילה מלאה (ZIP)</span>
                         </a>
-                        <a href="https://github.com/adir2368/Semestero-ME/releases/download/v2.5.9/Semestero-ME.exe" target="_blank" rel="noopener noreferrer" class="btn btn-outline" style="flex: 1; min-width: 170px; display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 700; padding: 9px 12px; border: 1px solid #38bdf8; text-decoration: none; color: #38bdf8; border-radius: 8px; font-size: 0.82rem;">
+                        <a href="https://github.com/adir2368/Semestero-ME/releases/download/v2.6/Semestero-ME.exe" target="_blank" rel="noopener noreferrer" class="btn btn-outline" style="flex: 1; min-width: 170px; display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 700; padding: 9px 12px; border: 1px solid #38bdf8; text-decoration: none; color: #38bdf8; border-radius: 8px; font-size: 0.82rem;">
                             <span>⚡</span> <span>קובץ הרצה (Semestero-ME.exe)</span>
                         </a>
                     </div>

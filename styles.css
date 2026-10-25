@@ -314,10 +314,11 @@ body {
 
 .char-name-row {
     display: flex;
-    justify-content: space-between;
+    justify-content: stretch;
     align-items: center;
     margin-bottom: 2px;
     min-width: 0;
+    width: 100%;
 }
 
 .char-title {
@@ -342,7 +343,13 @@ body {
     letter-spacing: 0.3px;
     white-space: nowrap;
     flex-shrink: 0;
-    margin-right: 8px;
+    margin-right: 0 !important;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    box-sizing: border-box;
 }
 
 .hud-card-actions {
@@ -13908,18 +13915,7 @@ tr.is-task-pinned {
     background: rgba(56, 189, 248, 0.15);
 }
 
-/* Green Download Arrow Button Styling */
-#btn-open-downloads-modal {
-    background: rgba(16, 185, 129, 0.22) !important;
-    border: 1.5px solid #10b981 !important;
-    box-shadow: 0 0 12px rgba(16, 185, 129, 0.5) !important;
-}
-#btn-open-downloads-modal:hover {
-    background: rgba(16, 185, 129, 0.38) !important;
-    border-color: #34d399 !important;
-    box-shadow: 0 0 16px rgba(16, 185, 129, 0.75) !important;
-    transform: translateY(-1px);
-}
+/* Green Download Arrow Button Styling Harmonized with .btn-hud-bell */
 #card-btn-direct-downloads:hover {
     border-color: #10b981 !important;
     background: rgba(16, 185, 129, 0.12) !important;
@@ -13947,7 +13943,7 @@ tr.is-task-pinned {
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    z-index: 990;
+    z-index: 10000;
     opacity: 0;
     pointer-events: none;
     transform: translateY(16px);
@@ -13970,6 +13966,16 @@ tr.is-task-pinned {
 .btn-back-to-top:active {
     transform: translateY(0) scale(0.96);
 }
+/* Floating Back to Top Button Mobile Optimization */
+@media (max-width: 768px), screen and (max-device-width: 768px) {
+    .btn-back-to-top {
+        bottom: calc(72px + env(safe-area-inset-bottom, 0px)) !important;
+        left: 16px !important;
+        width: 42px !important;
+        height: 42px !important;
+    }
+} /* .btn-back-to-top-mobile-fix */
+
 
 /* 2. Modal Reading & Scroll Progress Bar */
 .modal-reading-progress-bar {
@@ -14485,8 +14491,7 @@ tr.is-task-pinned {
 
 
 /* Clean Minimalist HUD: Hide Right Avatar Icon and Redundant Degree Subtitle */
-.hud-header .char-avatar,
-#hud-char-avatar,
+/* Clean Minimalist HUD: Keep Redundant Degree Subtitle Hidden */
 #char-title {
     display: none !important;
 }
