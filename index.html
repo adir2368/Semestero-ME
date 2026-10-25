@@ -213,12 +213,10 @@
                     </div>
                 </div>
                 <div class="hud-card-actions">
-                    <button type="button" class="btn-hud-bell" id="btn-open-downloads-modal" onclick="window.openDownloadModal()" title="הורדת האפליקציה ישירות לטלפונים (Android APK / iOS) ולמחשב ⬇️" aria-label="הורדת האפליקציה">
+                    <button type="button" class="btn-hud-bell" id="btn-open-downloads-modal" onclick="window.openDownloadModal()" title="הורדה ישירה לטלפון ולמחשב (חץ ירוק) ⬇️" aria-label="הורדה ישירה לטלפון ולמחשב" style="background: rgba(16, 185, 129, 0.22) !important; border: 1.5px solid #10b981 !important; box-shadow: 0 0 12px rgba(16, 185, 129, 0.5) !important;">
                         <span class="bell-icon" style="color: #10b981; display: inline-flex; align-items: center; justify-content: center;">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" style="display: block;">
-                                <line x1="12" y1="3" x2="12" y2="17"></line>
-                                <polyline points="6 11 12 17 18 11"></polyline>
-                                <line x1="5" y1="21" x2="19" y2="21"></line>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="#10b981" style="filter: drop-shadow(0 0 4px rgba(16,185,129,0.8)); display: block;">
+                                <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
                             </svg>
                         </span>
                     </button>
@@ -911,17 +909,21 @@
                     </p>
 
                     <div class="bug-report-grid">
-                        <div class="bug-report-card-btn" id="card-btn-direct-downloads" style="border-color: rgba(16, 185, 129, 0.45); background: rgba(16, 185, 129, 0.05);">
+                        <div class="bug-report-card-btn" id="card-btn-direct-downloads" onclick="window.openDownloadModal()" style="border-color: rgba(16, 185, 129, 0.6); background: rgba(16, 185, 129, 0.08); cursor: pointer; transition: all 0.2s ease;">
                             <div class="btn-title">
-                                <span>📲 הורדה ישירה לטלפון ולמחשב</span>
-                                <span class="analytics-badge-v2" style="font-size: 0.6rem; padding: 2px 6px; background: rgba(16, 185, 129, 0.2); color: #34d399; border-color: rgba(16, 185, 129, 0.4);">APK & iOS</span>
+                                <span style="display: inline-flex; align-items: center; gap: 8px;">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="#10b981" style="filter: drop-shadow(0 0 4px rgba(16,185,129,0.8)); flex-shrink: 0; display: block;"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+                                    <span style="color: #34d399; font-weight: 800;">הורדה ישירה לטלפון ולמחשב</span>
+                                </span>
+                                <span class="analytics-badge-v2" style="font-size: 0.62rem; padding: 3px 8px; background: rgba(16, 185, 129, 0.25); color: #34d399; border-color: rgba(16, 185, 129, 0.5); font-weight: 700;">חץ ירוק • APK & iOS</span>
                             </div>
                             <div class="btn-desc">
-                                הורדת קובץ APK ישיר לאנדרואיד, מדריך הוספה מהירה למסך הבית באייפון (iOS Safari), והפצות שולחניות.
+                                הורדת קובץ APK ישיר לאנדרואיד (Semestero-ME.apk), מדריך הוספה מהירה למסך הבית באייפון (iOS Safari), והפצות שולחניות.
                             </div>
-                            <div style="margin-top: 8px;">
-                                <button type="button" class="btn btn-xs btn-primary" onclick="window.openDownloadModal()" style="background: linear-gradient(135deg, #10b981, #059669); font-weight: 600; width: 100%; justify-content: center;">
-                                    📥 פתח מרכז הורדות
+                            <div style="margin-top: 10px;">
+                                <button type="button" class="btn btn-xs btn-primary" onclick="event.stopPropagation(); window.openDownloadModal();" style="background: linear-gradient(135deg, #10b981, #059669); border: 1px solid #34d399; font-weight: 700; width: 100%; justify-content: center; display: inline-flex; align-items: center; gap: 8px; font-size: 0.88rem; box-shadow: 0 4px 14px rgba(16,185,129,0.45); padding: 8px 12px; border-radius: 8px;">
+                                    <svg width="17" height="17" viewBox="0 0 24 24" fill="#ffffff" style="display: block;"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+                                    <span>הורדה ישירה לטלפון ולמחשב (חץ ירוק)</span>
                                 </button>
                             </div>
                         </div>
@@ -3603,7 +3605,8 @@
         <div class="modal-content" style="max-width: 580px; background: #0f172a; border: 1px solid rgba(56, 189, 248, 0.4); box-shadow: 0 20px 50px rgba(0,0,0,0.8); border-radius: 16px; direction: rtl;">
             <div class="modal-header" style="border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
                 <h2 style="display: flex; align-items: center; gap: 10px; margin: 0; font-size: 1.25rem; color: #f8fafc; font-weight: 800;">
-                    <span>📲</span> <span>הורדה ישירה לטלפון ולמחשב</span>
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="#10b981" style="filter: drop-shadow(0 0 5px rgba(16,185,129,0.8)); display: block;"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+                    <span>הורדה ישירה לטלפון ולמחשב</span>
                 </h2>
                 <button type="button" class="modal-close" onclick="window.closeDownloadModal()" style="background: transparent; border: none; font-size: 1.4rem; color: #94a3b8; cursor: pointer;">&times;</button>
             </div>
@@ -3617,8 +3620,9 @@
                     <p style="font-size: 0.82rem; color: #94a3b8; margin: 0 0 10px 0;">
                         הורדה ישירה של קובץ ההתקנה (<code>Semestero-ME.apk</code>) למכשיר, לחיצה על הקובץ והתקנה מיידית ללא צורך בחנות Google Play.
                     </p>
-                    <a href="https://github.com/adir2368/Semestero-ME/releases/latest/download/Semestero-ME.apk" download="Semestero-ME.apk" target="_blank" rel="noopener noreferrer" class="btn btn-primary" style="display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 700; padding: 10px 16px; background: linear-gradient(135deg, #0284c7, #0369a1); text-decoration: none; color: #fff; border-radius: 8px; border: none; font-size: 0.88rem;">
-                        <span>⬇️</span> <span>הורד קובץ APK ישירות למכשיר</span>
+                    <a href="https://github.com/adir2368/Semestero-ME/releases/latest/download/Semestero-ME.apk" download="Semestero-ME.apk" target="_blank" rel="noopener noreferrer" class="btn btn-primary" style="display: flex; align-items: center; justify-content: center; gap: 10px; font-weight: 700; padding: 12px 18px; background: linear-gradient(135deg, #10b981, #059669); border: 1px solid #34d399; text-decoration: none; color: #fff; border-radius: 8px; font-size: 0.92rem; box-shadow: 0 4px 15px rgba(16,185,129,0.45);">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="#ffffff" style="display: block;"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+                        <span>הורדה ישירה של קובץ APK (Semestero-ME.apk)</span>
                     </a>
                 </div>
 
@@ -3828,8 +3832,9 @@
                     <button type="button" class="btn btn-primary w-full" id="btn-force-refresh-app" onclick="if (window.forceAppUpdate) window.forceAppUpdate(); else window.location.reload(true);" style="display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 700; padding: 12px; background: linear-gradient(135deg, #10b981, #059669); font-size: 0.92rem; border: none; cursor: pointer;">
                         <span>🔄</span> <span>רענן מטמון וטען גרסה חדשה עכשיו (מומלץ לווב/נייד)</span>
                     </button>
-                    <a href="https://github.com/adir2368/Semestero-ME/releases/latest/download/Semestero-ME.apk" target="_blank" rel="noopener noreferrer" class="btn btn-primary w-full" id="btn-download-apk-update" style="display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 700; padding: 11px; background: linear-gradient(135deg, #0284c7, #0369a1); font-size: 0.9rem; border: none; text-decoration: none; color: #fff;">
-                        <span>📱</span> <span>הורדת עדכון APK לאנדרואיד (Semestero-ME.apk)</span>
+                    <a href="https://github.com/adir2368/Semestero-ME/releases/latest/download/Semestero-ME.apk" target="_blank" rel="noopener noreferrer" class="btn btn-primary w-full" id="btn-download-apk-update" style="display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 700; padding: 11px; background: linear-gradient(135deg, #10b981, #059669); border: 1px solid #34d399; font-size: 0.9rem; text-decoration: none; color: #fff; box-shadow: 0 4px 14px rgba(16,185,129,0.35);">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="#ffffff" style="display: block;"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+                        <span>הורדה ישירה לאנדרואיד (Semestero-ME.apk)</span>
                     </a>
                     <a href="https://github.com/adir2368/Semestero-ME/releases" target="_blank" rel="noopener noreferrer" class="btn btn-outline w-full" style="display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 600; text-decoration: none; padding: 9px; font-size: 0.82rem; color: #94a3b8; border-color: rgba(255,255,255,0.15);">
                         <span>💻</span> <span>הורדת קובץ התקנה למחשב (Windows) מ-GitHub Releases</span>

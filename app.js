@@ -22649,10 +22649,10 @@ window.checkRemoteAppVersion = async function(isManualCheck = false) {
                 if (!sessionStorage.getItem(dismissedApkKey) && !document.getElementById('mobile-apk-update-pill')) {
                     const pill = document.createElement('div');
                     pill.id = 'mobile-apk-update-pill';
-                    pill.style.cssText = 'position: fixed; top: 16px; left: 50%; transform: translateX(-50%); z-index: 99999; background: linear-gradient(135deg, #0284c7, #0369a1); color: #fff; padding: 10px 16px; border-radius: 9999px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); display: flex; align-items: center; gap: 10px; font-size: 0.85rem; font-weight: 600; font-family: inherit; direction: rtl; border: 1px solid rgba(255,255,255,0.2);';
+                    pill.style.cssText = 'position: fixed; top: 16px; left: 50%; transform: translateX(-50%); z-index: 99999; background: linear-gradient(135deg, #10b981, #059669); color: #fff; padding: 10px 16px; border-radius: 9999px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); display: flex; align-items: center; gap: 10px; font-size: 0.85rem; font-weight: 600; font-family: inherit; direction: rtl; border: 1px solid rgba(255,255,255,0.25);';
                     pill.innerHTML = `
-                        <span>📲 עדכון אפליקציה חדש זמין (v${remoteVer})</span>
-                        <a href="https://github.com/adir2368/Semestero-ME/releases/latest/download/Semestero-ME.apk" target="_blank" rel="noopener noreferrer" style="background: #fff; color: #0284c7; padding: 4px 10px; border-radius: 20px; text-decoration: none; font-weight: 700; font-size: 0.8rem;">התקן עדכון ⬇️</a>
+                        <span>⬇️ עדכון אפליקציה חדש זמין (v${remoteVer})</span>
+                        <a href="https://github.com/adir2368/Semestero-ME/releases/latest/download/Semestero-ME.apk" target="_blank" rel="noopener noreferrer" style="background: #fff; color: #059669; padding: 4px 10px; border-radius: 20px; text-decoration: none; font-weight: 700; font-size: 0.8rem; display: inline-flex; align-items: center; gap: 4px;">הורדה ישירה ⬇️</a>
                         <button type="button" style="background: transparent; border: none; color: #fff; font-size: 1.1rem; cursor: pointer; padding: 0 4px;" onclick="sessionStorage.setItem('${dismissedApkKey}', 'true'); this.parentElement.remove();">✕</button>
                     `;
                     document.body.appendChild(pill);
