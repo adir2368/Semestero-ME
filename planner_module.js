@@ -1327,8 +1327,8 @@
                 hasScienceElective = true;
             }
 
-            // Capstone / Final Project (034045, 035045, or title contains פרויקט גמר)
-            if (codeStr === '34045' || codeStr === '35045' || nameStr.includes('פרויקט גמר')) {
+            // Capstone / Final Project (034045, 035045, Formula Capstone 00340384/00340385, or title contains פרויקט גמר)
+            if (codeStr === '34045' || codeStr === '35045' || codeStr === '340384' || codeStr === '340385' || nameStr.includes('פרויקט גמר') || nameStr.includes('פורמולה - פרויקט') || c.hasCapstone === true) {
                 hasCapstone = true;
             }
         };
@@ -1377,7 +1377,19 @@
         }
 
         // Atuda Tironut: gives 2.0 binary credits towards degree total and free electives
-        const hasAtudaCardInPlan = (allCoursesInPlan || []).some(c => {
+        const allPlanCourses = [];
+        plan.forEach(sem => (sem.courses || []).forEach(c => allPlanCourses.push(c)));
+        if (unassignedCourses) {
+            unassignedCourses.forEach(c => allPlanCourses.push(c));
+        }
+        if (global.gameState && global.gameState.courses) {
+            Object.values(global.gameState.courses).forEach(c => {
+                if (isCourseCompleted(c.code, c.altCode)) {
+                    allPlanCourses.push(c);
+                }
+            });
+        }
+        const hasAtudaCardInPlan = allPlanCourses.some(c => {
             const name = (c.name || '').toLowerCase();
             return c.code === '00920001' || c.code === '920001' || name.includes('טירונות');
         });

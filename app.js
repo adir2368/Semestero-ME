@@ -22624,7 +22624,9 @@ window.checkRemoteAppVersion = async function(isManualCheck = false) {
             if (modVerText) modVerText.innerText = `גרסה חדשה זמינה: v${remoteVer}`;
             if (modCurText) modCurText.innerText = `גרסה מותקנת אצלך: v${currentVer}`;
             if (modDesc) {
-                modDesc.innerText = remoteInfo.notes || `שוחררה גרסה חדשה v${remoteVer} ב-GitHub! לחץ למטה לרענון המטמון וטעינת הגרסה העדכנית.`;
+                modDesc.innerHTML = (typeof window.getFormattedChangelogHTML === 'function') 
+                    ? window.getFormattedChangelogHTML() 
+                    : (remoteInfo.notes || `שוחררה גרסה חדשה v${remoteVer} ב-GitHub!`);
             }
 
             // In Electron desktop, hide the web refresh button and emphasize the desktop release download
@@ -22692,11 +22694,6 @@ window.checkRemoteAppVersion = async function(isManualCheck = false) {
             const existingPill = document.getElementById('mobile-apk-update-pill');
             if (existingPill) existingPill.remove();
 
-            const updateModal = document.getElementById("version-update-modal");
-            if (updateModal) {
-                updateModal.style.display = "none";
-                updateModal.classList.remove("active");
-            }
             if (statusTextEl) {
                 statusTextEl.innerText = `המערכת מעודכנת (v${currentVer}) ✓`;
             }
@@ -22705,8 +22702,25 @@ window.checkRemoteAppVersion = async function(isManualCheck = false) {
                 footerBadgeEl.innerText = `v${currentVer} ✓`;
                 footerBadgeEl.title = `המערכת מעודכנת לגרסה האחרונה (v${currentVer}) - נבדק מול GitHub v${remoteVer}`;
             }
-            if (isManualCheck && typeof showToastNotification === 'function') {
-                showToastNotification(`✅ אתה משתמש בגרסה העדכנית ביותר (v${currentVer}). נבדק מול GitHub (v${remoteVer}).`, 'success');
+            if (isManualCheck) {
+                if (typeof window.openChangelogModal === 'function') {
+                    window.openChangelogModal(currentVer);
+                } else {
+                    const updateModal = document.getElementById("version-update-modal");
+                    if (updateModal) {
+                        updateModal.style.display = "flex";
+                        updateModal.classList.add("active");
+                    }
+                }
+                if (typeof showToastNotification === 'function') {
+                    showToastNotification(`✅ אתה משתמש בגרסה העדכנית ביותר (v${currentVer}). נבדק מול GitHub.`, 'success');
+                }
+            } else {
+                const updateModal = document.getElementById("version-update-modal");
+                if (updateModal) {
+                    updateModal.style.display = "none";
+                    updateModal.classList.remove("active");
+                }
             }
         }
     } catch (err) {
@@ -22778,6 +22792,78 @@ window.forceAppUpdate = async function() {
     // 3. Force hard navigation reload with cache buster
     const cleanUrl = window.location.origin + window.location.pathname + '?v_app=' + Date.now() + window.location.hash;
     window.location.replace(cleanUrl);
+};
+
+
+window.getFormattedChangelogHTML = function() {
+    return `<div style="display: flex; flex-direction: column; gap: 10px;">
+        <div style="background: rgba(2, 132, 199, 0.1); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 10px; padding: 12px;">
+            <div style="font-weight: 700; color: #38bdf8; display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                <span>🧲</span> <span>מסלולי פיזיקה 1 ופיזיקה 2 מכל הסוגים (2.5 נק״ז)</span>
+            </div>
+            <ul style="margin: 0; padding-right: 20px; font-size: 0.82rem; color: #cbd5e1; line-height: 1.55;">
+                <li>תמיכה מלאה במסלול פיזיקה 1 (114051 / 114071) בסמסטר 1 ופיזיקה 2 (114052 / 114075) בסמסטר 2.</li>
+                <li>עדכון משקל פיזיקה 1 ל-<strong>2.5 נק״ז</strong> מדויקות בכל חלקי המערכת ותכנון התואר.</li>
+                <li>ביטול חסימות והתנגשויות הדדיות בין הווריאנטים ואפשרות גמישה להזנת ציונים ושיבוץ.</li>
+            </ul>
+        </div>
+
+        <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 10px; padding: 12px;">
+            <div style="font-weight: 700; color: #34d399; display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                <span>🪖</span> <span>טירונות עתודאים (2 נק״ז בינארי)</span>
+            </div>
+            <ul style="margin: 0; padding-right: 20px; font-size: 0.82rem; color: #cbd5e1; line-height: 1.55;">
+                <li>הכרה אוטומטית בטירונות עתודאים הנעשית במהלך התואר כשתי נקודות זכות בינאריות (ציון ״עובר״).</li>
+                <li>שקלול ישיר במכסת הנק״ז לתואר (157.5) ובסל הבחירה החופשית, עם מתג ייעודי בביקורת תואר.</li>
+            </ul>
+        </div>
+
+        <div style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 10px; padding: 12px;">
+            <div style="font-weight: 700; color: #fbbf24; display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                <span>🏎️</span> <span>נבחרת הפורמולה של הטכניון (Formula SAE)</span>
+            </div>
+            <ul style="margin: 0; padding-right: 20px; font-size: 0.82rem; color: #cbd5e1; line-height: 1.55;">
+                <li><strong>מסלול בחירה חופשית (סמסטר 1 ואילך):</strong> 1 נק״ז בינארית (עובר) לסמסטר פעיל כבחירה חופשית.</li>
+                <li><strong>מסלול פרויקט תכן גמר (שנה ד׳):</strong> 6 נק״ז סה״כ (3 בסמסטר א׳ + 3 בסמסטר ב׳) עם ציון מספרי המשוקלל בממוצע וסוגר במלואו את חובת פרויקט הגמר הפקולטי במכונות.</li>
+            </ul>
+        </div>
+
+        <div style="background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.3); border-radius: 10px; padding: 12px;">
+            <div style="font-weight: 700; color: #a78bfa; display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                <span>⚡</span> <span>תכנון תואר והורדה ישירה</span>
+            </div>
+            <ul style="margin: 0; padding-right: 20px; font-size: 0.82rem; color: #cbd5e1; line-height: 1.55;">
+                <li>תיקון מנוע ביקורת התואר (Degree Planner Audit) ושיבוץ קורסים יציב ומדויק.</li>
+                <li>כפתור הורדה ישיר בעיצוב חץ ירוק מהיר (⬇️) להורדת ה-APK לאנדרואיד והתקנה במחשב.</li>
+            </ul>
+        </div>
+    </div>`;
+};
+
+window.openChangelogModal = function(ver) {
+    const currentVer = ver || (typeof APP_CURRENT_REVISION !== 'undefined' && APP_CURRENT_REVISION && APP_CURRENT_REVISION.version) || "2.5.7";
+    const updateModal = document.getElementById("version-update-modal");
+    if (!updateModal) return;
+    const modTitle = document.getElementById("update-modal-title");
+    const modVerText = document.getElementById("update-modal-version-text");
+    const modCurText = document.getElementById("update-modal-current-text");
+    const modDesc = document.getElementById("update-modal-description");
+    
+    if (modTitle) {
+        modTitle.innerHTML = `<span>🚀</span> <span>מה חדש ב-Semestero ME? (עדכון מערכת)</span>`;
+    }
+    if (modVerText) {
+        modVerText.innerText = `גרסה נוכחית: v${currentVer} ✓`;
+    }
+    if (modCurText) {
+        modCurText.innerText = `כל השדרוגים והשינויים נכנסו לתוקף מיידית`;
+    }
+    if (modDesc) {
+        modDesc.innerHTML = window.getFormattedChangelogHTML();
+    }
+    
+    updateModal.style.display = "flex";
+    updateModal.classList.add("active");
 };
 
 window.openDownloadModal = function() {
