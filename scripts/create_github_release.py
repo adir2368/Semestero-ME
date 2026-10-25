@@ -3,12 +3,15 @@ import sys
 import json
 import urllib.request
 import urllib.error
+import urllib.parse
 import subprocess
 import re
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 REPO = "adir2368/Semestero-ME"
 APK_PATH = os.path.join(ROOT, "Semestero-ME.apk")
+EXE_PATH = os.path.join(ROOT, "dist", "Semestero ME-win32-x64", "Semestero ME.exe")
+ZIP_PATH = os.path.join(ROOT, "Semestero-ME-Windows-x64.zip")
 
 with open(os.path.join(ROOT, "package.json"), "r", encoding="utf-8") as f:
     pkg = json.load(f)
@@ -31,6 +34,54 @@ def get_github_token():
     print("[Release] Error: No GitHub token found.")
     sys.exit(1)
 
+def upload_asset(release, token, file_path, asset_name, content_type):
+    if not os.path.exists(file_path):
+        print(f"[Release] Warning: File {file_path} not found. Skipping.")
+        return None
+
+    file_size = os.path.getsize(file_path)
+    print(f"[Release] Uploading {asset_name} ({file_size / (1024*1024):.2f} MB)...")
+
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Accept": "application/vnd.github+json",
+        "X-GitHub-Api-Version": "2022-11-28",
+        "User-Agent": "Semestero-ME-Release-Agent"
+    }
+
+    # Delete existing asset if present
+    for asset in release.get("assets", []):
+        if asset["name"] == asset_name:
+            print(f"[Release] Deleting old asset {asset_name} (id={asset['id']})...")
+            del_req = urllib.request.Request(asset["url"], headers=headers, method="DELETE")
+            try:
+                with urllib.request.urlopen(del_req) as del_res:
+                    print(f"[Release] Old asset {asset_name} deleted.")
+            except Exception as e:
+                print(f"[Release] Warning: Could not delete old asset {asset_name}:", e)
+
+    upload_url = release["upload_url"].split("{")[0] + f"?name={urllib.parse.quote(asset_name)}"
+    upload_headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": content_type,
+        "Content-Length": str(file_size),
+        "User-Agent": "Semestero-ME-Release-Agent"
+    }
+
+    with open(file_path, "rb") as f:
+        data = f.read()
+
+    req_upload = urllib.request.Request(upload_url, data=data, headers=upload_headers, method="POST")
+    try:
+        with urllib.request.urlopen(req_upload) as res:
+            uploaded = json.loads(res.read().decode())
+            print(f"[Release] {asset_name} uploaded successfully! URL: {uploaded.get('browser_download_url')}")
+            return uploaded.get("browser_download_url")
+    except urllib.error.HTTPError as e:
+        print(f"[Release] Error uploading {asset_name}: {e.code} {e.reason}")
+        print(e.read().decode())
+        return None
+
 def main():
     token = get_github_token()
     headers = {
@@ -49,7 +100,7 @@ def main():
 
 ### 2. אקדמיית הדרכה וסיור מודרך (Tutorial Academy & Interactive Tour)
 - **סיור אינטראקטיבי בן 10 שלבים**: מעבר אוטומטי חי בין כל מסכי המערכת (עץ קורסים, תכנון תואר, מערכת שעות, משימות, חיפוש חכם, השוואת קורסים ועוד).
-- **כפתורי התנסות ישירה**: כל שלב בסיור כולל כפתור פעולה אינטראקטיבי (פתיחת בדיקת זכאות, השוואה, מדריך זכויות וכדומה).
+- **כפתורי התנסות ישירה בחזית**: תיקון מלא של שכבות התצוגה (z-index 100050+) כך שכל חלונות ההתנסות מופיעים בצורה ברורה בחזית המסך.
 - **אקדמיית הדרכה לפי נושא (Tutorial Hub)**: חלון הדרכה מודולרי המאפשר קפיצה ישירה לכל שלב ומדריך בנפרד. נגיש דרך ההגדרות, שורת הפקודות ובקיצור מקלדת `T`.
 
 ### 3. שורת פקודות חכמה (Global Command Palette - Ctrl+K / ⌘K)
@@ -60,13 +111,13 @@ def main():
 - **מדריך זכויות סטודנטים**: מילואים, טירונות עתודה, פורמולה SAE, קורסי מל״ג וספורט, ופרויקטי גמר.
 
 ---
-### 📲 הורדה ישירה לאנדרואיד (Direct APK Download):
-הקובץ `Semestero-ME.apk` מצורף להלן להורדה והתקנה ישירה.
+### 📲 הורדות ישירות (Direct Downloads):
+- 🤖 **Android APK:** [Semestero-ME.apk](https://github.com/adir2368/Semestero-ME/releases/download/v{VERSION}/Semestero-ME.apk)
+- 💻 **Windows Desktop (חבילה ניידת מלאה - מומלץ):** [Semestero-ME-Windows-x64.zip](https://github.com/adir2368/Semestero-ME/releases/download/v{VERSION}/Semestero-ME-Windows-x64.zip)
+- 🖥️ **Windows Executable:** [Semestero-ME.exe](https://github.com/adir2368/Semestero-ME/releases/download/v{VERSION}/Semestero-ME.exe)
 """
 
-    # Check existing release
-    url_tag = f"https://api.github.com/repos/{REPO}/releases/tags/{TAG}"
-    req_tag = urllib.request.Request(url_tag, headers=headers)
+    req_tag = urllib.request.Request(f"https://api.github.com/repos/{REPO}/releases/tags/{TAG}", headers=headers)
     release = None
     try:
         with urllib.request.urlopen(req_tag) as res:
@@ -98,47 +149,28 @@ def main():
             print(f"[Release] Error creating release: {e.code} {e.reason}")
             print(e.read().decode())
             sys.exit(1)
+    else:
+        # Update existing release body notes to include desktop links
+        update_url = f"https://api.github.com/repos/{REPO}/releases/{release['id']}"
+        payload = {
+            "name": NAME,
+            "body": body_notes
+        }
+        req_update = urllib.request.Request(update_url, data=json.dumps(payload).encode("utf-8"), headers=headers, method="PATCH")
+        try:
+            with urllib.request.urlopen(req_update) as res:
+                release = json.loads(res.read().decode())
+                print(f"[Release] Updated release notes for {TAG} (id={release['id']})")
+        except urllib.error.HTTPError as e:
+            print(f"[Release] Error updating release notes: {e.code} {e.reason}")
 
-    # Upload APK asset
-    if not os.path.exists(APK_PATH):
-        print(f"[Release] Warning: APK file {APK_PATH} not found. Skipping APK upload.")
-        return
+    # Upload all assets
+    print("\n--- Uploading Release Assets ---")
+    upload_asset(release, token, APK_PATH, "Semestero-ME.apk", "application/vnd.android.package-archive")
+    upload_asset(release, token, ZIP_PATH, "Semestero-ME-Windows-x64.zip", "application/zip")
+    upload_asset(release, token, EXE_PATH, "Semestero-ME.exe", "application/vnd.microsoft.portable-executable")
 
-    apk_size = os.path.getsize(APK_PATH)
-    apk_name = "Semestero-ME.apk"
-    print(f"[Release] Uploading {apk_name} ({apk_size / (1024*1024):.2f} MB)...")
-
-    # Check existing assets to delete if already present
-    for asset in release.get("assets", []):
-        if asset["name"] == apk_name:
-            print(f"[Release] Deleting old asset {asset['id']}...")
-            del_req = urllib.request.Request(asset["url"], headers=headers, method="DELETE")
-            try:
-                with urllib.request.urlopen(del_req) as del_res:
-                    print("[Release] Old asset deleted.")
-            except Exception as e:
-                print("[Release] Could not delete old asset:", e)
-
-    upload_url = release["upload_url"].split("{")[0] + f"?name={apk_name}"
-    upload_headers = {
-        "Authorization": f"Bearer {token}",
-        "Content-Type": "application/vnd.android.package-archive",
-        "Content-Length": str(apk_size),
-        "User-Agent": "Semestero-ME-Release-Agent"
-    }
-
-    with open(APK_PATH, "rb") as f:
-        apk_bytes = f.read()
-
-    req_upload = urllib.request.Request(upload_url, data=apk_bytes, headers=upload_headers, method="POST")
-    try:
-        with urllib.request.urlopen(req_upload) as res:
-            uploaded = json.loads(res.read().decode())
-            print(f"[Release] APK uploaded successfully! Browser download url: {uploaded.get('browser_download_url')}")
-    except urllib.error.HTTPError as e:
-        print(f"[Release] Error uploading APK: {e.code} {e.reason}")
-        print(e.read().decode())
-        sys.exit(1)
+    print("\nAll assets processed successfully!")
 
 if __name__ == "__main__":
     main()

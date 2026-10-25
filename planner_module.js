@@ -3574,6 +3574,8 @@
     // Public API
     // --------------------------------------------------------------------------
     global.DegreePlanner = {
+        openGraduationClearanceModal: openGraduationClearanceModal,
+        openGraduationAuditModal: openGraduationClearanceModal,
         saveCustomPlan: saveCustomPlan,
         openSportClubSelectorModal: openSportClubSelectorModal,
         init: initPlannerState,

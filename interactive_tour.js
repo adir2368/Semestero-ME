@@ -69,12 +69,12 @@
             actionBtn: {
                 label: '🎓 פתח בדיקת זכאות לתואר',
                 onClick: () => {
-                    if (window.DegreePlanner) {
-                        if (typeof window.DegreePlanner.openGraduationClearanceModal === 'function') {
-                            window.DegreePlanner.openGraduationClearanceModal();
-                        } else if (typeof window.DegreePlanner.openGraduationAuditModal === 'function') {
-                            window.DegreePlanner.openGraduationAuditModal();
-                        }
+                    if (typeof window.openGraduationClearanceModal === 'function') {
+                        window.openGraduationClearanceModal();
+                    } else if (window.DegreePlanner && typeof window.DegreePlanner.openGraduationClearanceModal === 'function') {
+                        window.DegreePlanner.openGraduationClearanceModal();
+                    } else if (window.DegreePlanner && typeof window.DegreePlanner.openGraduationAuditModal === 'function') {
+                        window.DegreePlanner.openGraduationAuditModal();
                     } else {
                         const btn = document.getElementById('btn-open-graduation-clearance');
                         if (btn) btn.click();

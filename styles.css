@@ -14483,3 +14483,10 @@ tr.is-task-pinned {
     line-height: 1.4;
 }
 
+
+/* Clean Minimalist HUD: Hide Right Avatar Icon and Redundant Degree Subtitle */
+.hud-header .char-avatar,
+#hud-char-avatar,
+#char-title {
+    display: none !important;
+}
