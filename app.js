@@ -2294,7 +2294,7 @@ var SAMPLE_ME_DEGREE = (typeof window !== 'undefined' && window.SAMPLE_ME_DEGREE
     "114051": {
         code: "114051",
         name: "פיסיקה 1",
-        credits: 3.5,
+        credits: 2.5,
         semester: 1,
         prerequisites: [],
         status: "available",
@@ -9938,11 +9938,17 @@ function recalculateCourseStates() {
     const p2 = gameState.courses['114052'];
     const p2mm = gameState.courses['114075'];
 
+    // Physics 1 track (114051 vs 114071)
     if (p1 && p1.status === 'mastered') {
         if (p1m && p1m.status !== 'mastered') p1m.status = 'exempt';
-        if (p2mm && p2mm.status !== 'mastered') p2mm.status = 'exempt';
     } else if (p1m && p1m.status === 'mastered') {
         if (p1 && p1.status !== 'mastered') p1.status = 'exempt';
+    }
+
+    // Physics 2 track (114052 vs 114075)
+    if (p2 && p2.status === 'mastered') {
+        if (p2mm && p2mm.status !== 'mastered') p2mm.status = 'exempt';
+    } else if (p2mm && p2mm.status === 'mastered') {
         if (p2 && p2.status !== 'mastered') p2.status = 'exempt';
     }
 
@@ -11523,7 +11529,52 @@ function handleAddCourseSubmit(e) {
     } else {
         // Normal Add logic
         if (gameState.courses[code]) {
-            alert("קוד קורס זה כבר קיים בעץ!");
+            // Course already exists in tree (e.g. from degree template like Physics 2 in Semester 3)
+            // Update it with the user's custom semester, status, and grade!
+            const existingCourse = gameState.courses[code];
+            existingCourse.semester = semester;
+            if (name) existingCourse.name = name;
+            if (credits) existingCourse.credits = credits;
+
+            let finalGrade = null;
+            let isBinaryCourse = false;
+            if (initialStatus === 'mastered') {
+                if (isBinaryPass) {
+                    isBinaryCourse = true;
+                    finalGrade = 'עובר';
+                } else {
+                    finalGrade = (!isNaN(initialGrade) && initialGrade >= 55 && initialGrade <= 100) ? initialGrade : null;
+                }
+                existingCourse.status = 'mastered';
+                existingCourse.completed = true;
+                existingCourse.grade = finalGrade;
+                existingCourse.isBinaryPass = isBinaryCourse;
+                if (existingCourse.tasks) {
+                    existingCourse.tasks.forEach(t => {
+                        t.completed = true;
+                        t.status = 'done';
+                        if (t.type === 'exam' && finalGrade !== null) {
+                            t.grade = finalGrade;
+                        }
+                    });
+                }
+            } else {
+                existingCourse.status = initialStatus;
+            }
+
+            if (window.DegreePlanner && typeof window.DegreePlanner.setCourseSemester === 'function') {
+                window.DegreePlanner.setCourseSemester(code, semester);
+            }
+
+            closeModal('modal-add-course');
+            updateStats();
+            renderUI();
+            if (typeof renderFlowchartTree === 'function') renderFlowchartTree();
+            saveState();
+
+            if (typeof showToastNotification === 'function') {
+                showToastNotification(`✓ קורס "${existingCourse.name}" עודכן בהצלחה בסמסטר ${semester}!`, 'success');
+            }
             return;
         }
 
@@ -12105,7 +12156,7 @@ function openCourseDetails(code) {
     const physicsVariantsContainer = document.getElementById("modal-physics-variants-container");
     if (physicsVariantsContainer) {
         const phys1Family = [
-            { code: "01140051", altCode: "114051", name: "פיזיקה 1", credits: 3.5 },
+            { code: "01140051", altCode: "114051", name: "פיזיקה 1", credits: 2.5 },
             { code: "01140071", altCode: "114071", name: "פיזיקה 1מ'", credits: 3.5 },
             { code: "01140077", altCode: "114077", name: "פיזיקה 1פ'", credits: 4.0 },
             { code: "01140055", altCode: "114055", name: "פיזיקה 1ת'", credits: 3.5 }
@@ -20889,8 +20940,8 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.10.24-v2.5.6",
-    version: "2.5.6",
+    code: "REV-2026.10.25-v2.5.7",
+    version: "2.5.7",
     build: "20261020_03",
     date: "2026-10-20 01:20",
     description: "גרסה 2.5.2: פתרון מוחלט ללולאת העדכון במובייל וספארי, מנגנון אנטי-רילואד עמיד ב-localStorage, סנכרון גרסאות מלא וקישורי הורדה ישירים לטלפונים"
@@ -22515,7 +22566,7 @@ window.checkRemoteAppVersion = async function(isManualCheck = false) {
         const match = domVerEl.innerText.match(/(?:^|\bv|\s)(\d+\.\d+\.\d+)\b/);
         if (match) currentVer = match[1];
     }
-    currentVer = currentVer || "2.5.6";
+    currentVer = currentVer || "2.5.7";
     const statusTextEl = document.getElementById("version-check-status-text");
     const footerBadgeEl = document.getElementById("footer-version-badge");
     const checkBtn = document.getElementById("btn-check-version-updates");

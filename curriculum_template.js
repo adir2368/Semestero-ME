@@ -95,7 +95,7 @@ var SAMPLE_ME_DEGREE = (typeof window !== 'undefined' && window.SAMPLE_ME_DEGREE
     "114051": {
         code: "114051",
         name: "פיסיקה 1",
-        credits: 3.5,
+        credits: 2.5,
         semester: 1,
         prerequisites: [],
         status: "available",
@@ -474,6 +474,10 @@ function getCleanCurriculumState(startingSemester = 1, priorCompletedCourses = {
         if (isPriorCompleted) {
             c.status = 'mastered';
             c.completed = true;
+            // If Physics 2 completed prior to starting semester, set semester to 2
+            if (['114052', '114075', '114078'].includes(c.code) && targetSem >= 2 && c.semester > 2) {
+                c.semester = 2;
+            }
             totalCredits += (c.credits || 0);
             completedCount++;
             
@@ -513,12 +517,46 @@ function getCleanCurriculumState(startingSemester = 1, priorCompletedCourses = {
     });
 
     // Physics track mutual exclusion resolution in clean state
+    // Physics 1 track (114051 vs 114071 / 114077)
     if (courses["114051"] && courses["114051"].status === 'mastered') {
         if (courses["114071"]) courses["114071"].status = 'exempt';
-        if (courses["114075"]) courses["114075"].status = 'exempt';
+        if (courses["114077"]) courses["114077"].status = 'exempt';
     } else if (courses["114071"] && courses["114071"].status === 'mastered') {
         if (courses["114051"]) courses["114051"].status = 'exempt';
+        if (courses["114077"]) courses["114077"].status = 'exempt';
+    } else if (courses["114077"] && courses["114077"].status === 'mastered') {
+        if (courses["114051"]) courses["114051"].status = 'exempt';
+        if (courses["114071"]) courses["114071"].status = 'exempt';
+    }
+
+    // Physics 2 track (114052 vs 114075 / 114078)
+    if (courses["114052"] && courses["114052"].status === 'mastered') {
+        if (courses["114075"]) courses["114075"].status = 'exempt';
+        if (courses["114078"]) courses["114078"].status = 'exempt';
+    } else if (courses["114075"] && courses["114075"].status === 'mastered') {
         if (courses["114052"]) courses["114052"].status = 'exempt';
+        if (courses["114078"]) courses["114078"].status = 'exempt';
+    } else if (courses["114078"] && courses["114078"].status === 'mastered') {
+        if (courses["114052"]) courses["114052"].status = 'exempt';
+        if (courses["114075"]) courses["114075"].status = 'exempt';
+    }
+
+    // If Atuda Tironut was completed, ensure it exists in courses
+    if (priorCompletedCourses['00920001'] || priorCompletedCourses['920001']) {
+        courses['00920001'] = {
+            code: '00920001',
+            altCode: '920001',
+            name: 'טירונות עתודאים',
+            credits: 2.0,
+            semester: 1,
+            status: 'mastered',
+            completed: true,
+            isBinaryPass: true,
+            grade: 'עובר',
+            prerequisites: []
+        };
+        totalCredits += 2.0;
+        completedCount++;
     }
 
     const initialGpa = totalGradedCredits > 0 ? parseFloat((totalWeightedPoints / totalGradedCredits).toFixed(2)) : 0;

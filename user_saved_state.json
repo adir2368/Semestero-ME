@@ -1,6 +1,6 @@
 {
   "xp": 1250,
-  "gpa": 86.39240506329114,
+  "gpa": 86.03896103896103,
   "level": 6,
   "courses": {
     "104041": {
@@ -333,7 +333,7 @@
         }
       ],
       "status": "mastered",
-      "credits": 3.5,
+      "credits": 2.5,
       "semester": 1,
       "isBinaryPass": false,
       "prerequisites": []
@@ -1439,7 +1439,7 @@
       "prerequisites": []
     }
   },
-  "credits": 39.5,
+  "credits": 38.5,
   "openTasks": 0,
   "revisions": [
     {
@@ -1461,7 +1461,7 @@
       "timestamp": "2026-09-12T18:30:00.000Z",
       "stateSnapshot": {
         "xp": 1250,
-        "gpa": 86.39240506329114,
+        "gpa": 86.03896103896103,
         "level": 6,
         "courses": {
           "104041": {
@@ -1794,7 +1794,7 @@
               }
             ],
             "status": "mastered",
-            "credits": 3.5,
+            "credits": 2.5,
             "semester": 1,
             "isBinaryPass": false,
             "prerequisites": []
@@ -2948,7 +2948,7 @@
             "prerequisites": []
           }
         },
-        "credits": 39.5,
+        "credits": 38.5,
         "openTasks": 0,
         "bossesSlain": 11,
         "userProfile": {},
@@ -4157,6 +4157,15 @@
           "altCode": "234128",
           "credits": 4,
           "prereqs": []
+        },
+        {
+          "code": "01140051",
+          "altCode": "114051",
+          "name": "פיזיקה 1",
+          "credits": 2.5,
+          "type": "mandatory",
+          "variantGroupId": "physics_1",
+          "prereqs": []
         }
       ],
       "semester": 1,
@@ -4192,14 +4201,6 @@
           "prereqs": [
             "01040041"
           ]
-        },
-        {
-          "code": "01140051",
-          "name": "פיזיקה 1",
-          "type": "mandatory",
-          "altCode": "114051",
-          "credits": 2.5,
-          "prereqs": []
         },
         {
           "code": "01040131",

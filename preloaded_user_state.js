@@ -8,7 +8,7 @@
 
     const PRELOADED_USER_STATE = {
   "xp": 1250,
-  "gpa": 86.39240506329114,
+  "gpa": 86.03896103896103,
   "level": 6,
   "courses": {
     "104041": {
@@ -341,7 +341,7 @@
         }
       ],
       "status": "mastered",
-      "credits": 3.5,
+      "credits": 2.5,
       "semester": 1,
       "isBinaryPass": false,
       "prerequisites": []
@@ -1454,7 +1454,7 @@
       "prerequisites": []
     }
   },
-  "credits": 39.5,
+  "credits": 38.5,
   "openTasks": 0,
   "revisions": [
     {
@@ -1476,7 +1476,7 @@
       "timestamp": "2026-09-12T18:30:00.000Z",
       "stateSnapshot": {
         "xp": 1250,
-        "gpa": 86.39240506329114,
+        "gpa": 86.03896103896103,
         "level": 6,
         "courses": {
           "104041": {
@@ -1809,7 +1809,7 @@
               }
             ],
             "status": "mastered",
-            "credits": 3.5,
+            "credits": 2.5,
             "semester": 1,
             "isBinaryPass": false,
             "prerequisites": []
@@ -2963,7 +2963,7 @@
             "prerequisites": []
           }
         },
-        "credits": 39.5,
+        "credits": 38.5,
         "openTasks": 0,
         "bossesSlain": 11,
         "userProfile": {},
@@ -4177,7 +4177,7 @@
           "code": "01140051",
           "altCode": "114051",
           "name": "פיזיקה 1",
-          "credits": 3.5,
+          "credits": 2.5,
           "type": "mandatory",
           "variantGroupId": "physics_1",
           "prereqs": []

@@ -12,9 +12,9 @@ APK_PATH = os.path.join(ROOT, "Semestero-ME.apk")
 
 with open(os.path.join(ROOT, "package.json"), "r", encoding="utf-8") as f:
     pkg = json.load(f)
-VERSION = pkg.get("version", "2.5.4")
+VERSION = pkg.get("version", "2.5.7")
 TAG = f"v{VERSION}"
-NAME = f"Semestero ME v{VERSION} - Sports Sub-Tracks & Schedule Conflict Engine"
+NAME = f"Semestero ME v{VERSION} - Physics Tracks, Formula SAE & Atuda Tironut"
 
 def get_github_token():
     try:
@@ -40,27 +40,29 @@ def main():
         "User-Agent": "Semestero-ME-Release-Agent"
     }
 
-    body_notes = f"""## מה חדש בגרסה v{VERSION} 🏃📅
+    body_notes = f"""## מה חדש בגרסה v{VERSION} 🚀🏎️🪖
 
-### 1. בחירת חוגים ותתי-מסלולים בספורט (Approach A)
-- תמיכה מלאה בפיצול קורסי חינוך גופני כלליים לחוגים מעשיים ספציפיים:
-  - **פילאטיס ומתיחות (03940808)**: פילאטיס מכשירים, פילאטיס מזרן, פילאטיס דינמי ועיצוב, מתיחות וגמישות.
-  - **חדר כושר ו-TRX (03940800)**: אימון חדר כושר, רצועות TRX, ספינינג ורכיבה.
-  - **משחקי כדור (03940803)**: כדורסל, כדורעף, כדורגל / קטרגל.
-  - **משחקי מחבט (03940804)**: טניס, טניס שולחן, בדמינטון.
-  - **יוגה ואתלטיקה (03940805)**: ויניאסה יוגה, האטה יוגה, אשטנגה, אתלטיקה.
-  - **שחייה (03940802)**, **קרב מגע (03940806)**, **תנועה ומחול (03940820)**, **נבחרות אס״א (03940902)**.
+### 1. מסלולי פיזיקה 1 ופיזיקה 2 (Physics 1 & 2 Flexibility)
+- **עדכון נק״ז פיזיקה 1 (114051)**: עודכן ל-**2.5 נק״ז** מדויק ותקני בכל חלקי המערכת, קטלוגי התואר ומאגרי הקורסים.
+- **הקדמת פיזיקה 2 לסמסטר 2**: תמיכה מלאה בסטודנטים שעושים פיסיקה 1 בסמסטר 1 ופיסיקה 2 (114052 / 114075) בסמסטר 2:
+  - זמין לסימון כבר במסך ההרשמה (Onboarding) עבור סמסטרים מתקדמים.
+  - כפתור "הוסף קורס" מאפשר עדכון חלק של קורסים קיימים בעץ ושיוכם לסמסטר מוקדם ללא שגיאת כפילות.
+  - תיקון מנגנון ה-Mutual Exclusion (ביטול החסימה ההדדית השגויה בין פיזיקה 1 לפיזיקה 2).
+  - שחזור וסנכרון קבוע של פיזיקה 1 בסמסטר 1 ופיזיקה 2 בסמסטר 3 בתכנון התואר.
 
-### 2. מנוע בדיקת התנגשויות לו״ז חי (Live Timetable Conflict Checker)
-- **חובת נוכחות מובנית**: זיהוי אוטומטי של שעות החוג מול כל קורסי הסמסטר המשובצים.
-- **חיווי גרפי מיידי**:
-  - 🟢 **פנוי במערכת השעות** (ללא התנגשויות)
-  - 🟡 **חפיפה אפשרית** (קיימת קבוצה חלופית בקורס)
-  - ⚠️ **התנגשות ודאית** (חופף לקבוצה מעוגנת או קורס חד-קבוצתי)
-- **קישור ישיר לסטודיו מערכת השעות**: מעבר בלחיצה אחת ל-Timetable Studio.
+### 2. עתודאים - הכרה בטירונות (2 נק״ז בינארי לתואר)
+- **מתג ייעודי בתכנון התואר**: הוספת מתג `🪖 טירונות עתודאים` המזכה ב-2 נק״ז בינאריות (ציון עובר) כבחירה חופשית/מל״ג שאינן משפיעות על הממוצע.
+- **צ'קבוקס עתודאי מהיר בהרשמה**: מאפשר לסטודנטים עתודאים להזין את הטירונות באופן מיידי בעת יצירת החשבון.
+- **קורס רשמי במאגר**: קורס `00920001` / `920001` במאגר ובקטלוג הקיץ.
 
-### 3. קורסי מל״ג (מדעי הרוח והחברה)
-- חיווי מועד קבוע עם חובת נוכחות (יום, שעות וחדר) בכרטיס הקורס ובמאגר הבחירה.
+### 3. נבחרת הפורמולה של הטכניון (Technion Formula SAE)
+הכרה אקדמית מלאה בשני מסלולי הפעילות בנבחרת:
+- **מסלול בחירה חופשית (סמסטר 1 ואילך)**:
+  - היקף: 1 נק״ז לסמסטר פעיל כבחירה חופשית (`00340091`, `00340092`, `00340093`).
+  - פתוח לסטודנטים בכל השלבים, כולל סמסטרים 1 ו-2 (ציון בינארי).
+- **מסלול פרויקט תכן הנדסי (שנה ד׳)**:
+  - היקף: 6 נק״ז סה״כ בחלוקה של 3 בסמסטר א׳ ו-3 בסמסטר ב׳ (`00340384`, `00340385`).
+  - סוגר במלואו את חובת פרויקט הגמר הפקולטי במכונות (ציון מספרי לתואר).
 
 ---
 ### 📲 הורדה ישירה לאנדרואיד (Direct APK Download):
@@ -73,16 +75,17 @@ def main():
     release = None
     try:
         with urllib.request.urlopen(req_tag) as res:
-            if res.status == 200:
-                release = json.loads(res.read().decode('utf-8'))
-                print(f"[Release] Found existing release for tag {TAG}")
+            release = json.loads(res.read().decode())
+            print(f"[Release] Found existing release for {TAG} (id={release['id']})")
     except urllib.error.HTTPError as e:
-        if e.code != 404:
-            print(f"[Release] Error checking existing release: {e}")
+        if e.code == 404:
+            print(f"[Release] Release {TAG} does not exist yet. Creating...")
+        else:
+            print(f"[Release] Error checking release: {e.code} {e.reason}")
+            sys.exit(1)
 
     if not release:
-        print(f"[Release] Creating new release for tag {TAG}...")
-        url_create = f"https://api.github.com/repos/{REPO}/releases"
+        create_url = f"https://api.github.com/repos/{REPO}/releases"
         payload = {
             "tag_name": TAG,
             "target_commitish": "main",
@@ -91,59 +94,56 @@ def main():
             "draft": False,
             "prerelease": False
         }
-        data = json.dumps(payload).encode('utf-8')
-        req_create = urllib.request.Request(url_create, data=data, headers=headers, method="POST")
+        req_create = urllib.request.Request(create_url, data=json.dumps(payload).encode("utf-8"), headers=headers, method="POST")
         try:
             with urllib.request.urlopen(req_create) as res:
-                release = json.loads(res.read().decode('utf-8'))
-                print(f"[Release] Created release ID: {release['id']}")
+                release = json.loads(res.read().decode())
+                print(f"[Release] Created release {TAG} successfully (id={release['id']})")
         except urllib.error.HTTPError as e:
-            print(f"[Release] Error creating release: {e.code} - {e.read().decode('utf-8')}")
+            print(f"[Release] Error creating release: {e.code} {e.reason}")
+            print(e.read().decode())
             sys.exit(1)
 
     # Upload APK asset
     if not os.path.exists(APK_PATH):
-        print(f"[Release] Error: APK not found at {APK_PATH}")
-        sys.exit(1)
+        print(f"[Release] Warning: APK file {APK_PATH} not found. Skipping APK upload.")
+        return
 
     apk_size = os.path.getsize(APK_PATH)
-    print(f"[Release] Uploading Semestero-ME.apk ({apk_size:,} bytes)...")
+    apk_name = "Semestero-ME.apk"
+    print(f"[Release] Uploading {apk_name} ({apk_size / (1024*1024):.2f} MB)...")
 
-    # Delete existing asset if present
+    # Check existing assets to delete if already present
     for asset in release.get("assets", []):
-        if asset["name"] == "Semestero-ME.apk":
-            print(f"[Release] Deleting old asset ID: {asset['id']}...")
+        if asset["name"] == apk_name:
+            print(f"[Release] Deleting old asset {asset['id']}...")
             del_req = urllib.request.Request(asset["url"], headers=headers, method="DELETE")
             try:
-                with urllib.request.urlopen(del_req) as res:
-                    print(f"[Release] Old asset deleted.")
+                with urllib.request.urlopen(del_req) as del_res:
+                    print("[Release] Old asset deleted.")
             except Exception as e:
-                print(f"[Release] Warning deleting old asset: {e}")
+                print("[Release] Could not delete old asset:", e)
 
-    upload_url_template = release["upload_url"]
-    upload_url = upload_url_template.split("{")[0] + "?name=Semestero-ME.apk"
-
-    with open(APK_PATH, "rb") as f:
-        apk_data = f.read()
-
+    upload_url = release["upload_url"].split("{")[0] + f"?name={apk_name}"
     upload_headers = {
         "Authorization": f"Bearer {token}",
         "Content-Type": "application/vnd.android.package-archive",
-        "Content-Length": str(len(apk_data)),
+        "Content-Length": str(apk_size),
         "User-Agent": "Semestero-ME-Release-Agent"
     }
 
-    req_upload = urllib.request.Request(upload_url, data=apk_data, headers=upload_headers, method="POST")
+    with open(APK_PATH, "rb") as f:
+        apk_bytes = f.read()
+
+    req_upload = urllib.request.Request(upload_url, data=apk_bytes, headers=upload_headers, method="POST")
     try:
         with urllib.request.urlopen(req_upload) as res:
-            asset_info = json.loads(res.read().decode('utf-8'))
-            print(f"[Release] Successfully uploaded APK asset ID: {asset_info['id']}")
-            print(f"[Release] Download URL: {asset_info['browser_download_url']}")
+            uploaded = json.loads(res.read().decode())
+            print(f"[Release] APK uploaded successfully! Browser download url: {uploaded.get('browser_download_url')}")
     except urllib.error.HTTPError as e:
-        print(f"[Release] Error uploading APK asset: {e.code} - {e.read().decode('utf-8')}")
+        print(f"[Release] Error uploading APK: {e.code} {e.reason}")
+        print(e.read().decode())
         sys.exit(1)
-
-    print(f"\nSUCCESS: Release {TAG} published and APK uploaded!")
 
 if __name__ == "__main__":
     main()

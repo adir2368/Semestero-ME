@@ -13,6 +13,8 @@
     let currentMode = 'custom'; // 'custom' | 'suggested'
     let selectedTrack = 'year_2026'; // 'year_2026' | 'year_2027' | 'year_2025' | 'year_2024' | 'barak'
     let isReservistDeduction = false;
+    let isAtudaTironut = false;
+    const PLANNER_ATUDA_KEY = 'ast_planner_atuda_tironut';
     let isEnglishExemption = false;
     let englishLevel = 'none'; // 'exempt_all' | 'exempt_a' | 'none'
     let selectedCategory = 'ALL'; // 'ALL' | 'A' | 'B' | 'C' | 'D' | 'E' | 'UNASSIGNED'
@@ -89,6 +91,11 @@
                 codes.push(c6);
                 const strippedC6 = c6.replace(/^0+/, '');
                 if (strippedC6 !== c6) codes.push(strippedC6);
+            }
+            // 6-digit Technion code to 8-digit Moodle code (e.g., 114051 -> 01140051 or 034028 -> 00340028)
+            if (/^\d{6}$/.test(clean)) {
+                const c8 = '0' + clean.slice(0, 3) + '0' + clean.slice(3);
+                codes.push(c8);
             }
         };
         process(code);
@@ -467,6 +474,52 @@
     // --------------------------------------------------------------------------
     // State Initialization & Persistence
     // --------------------------------------------------------------------------
+    
+    // Helper: Ensure essential foundational courses (Physics 1 & Physics 2) exist in degree plan
+    function ensureEssentialCoursesInPlan(plan) {
+        if (!plan || !Array.isArray(plan)) return;
+        const allCodes = new Set();
+        plan.forEach(s => (s.courses || []).forEach(c => {
+            getNormalizedCodes(c.code, c.altCode).forEach(k => allCodes.add(k));
+        }));
+
+        const hasPhys1 = ['01140051', '114051', '01140071', '114071', '01140077', '114077'].some(k => allCodes.has(k));
+        if (!hasPhys1) {
+            const sem1 = plan.find(s => s.semester === 1) || plan[0];
+            if (sem1) {
+                sem1.courses = sem1.courses || [];
+                sem1.courses.push({
+                    code: "01140051",
+                    altCode: "114051",
+                    name: "פיזיקה 1",
+                    credits: 2.5,
+                    type: "mandatory",
+                    variantGroupId: "physics_1",
+                    prereqs: []
+                });
+                console.log('[Planner] Restored Physics 1 to Semester 1');
+            }
+        }
+
+        const hasPhys2 = ['01140052', '114052', '01140075', '114075', '01140078', '114078'].some(k => allCodes.has(k));
+        if (!hasPhys2) {
+            const sem3 = plan.find(s => s.semester === 3) || plan[2] || plan[plan.length - 1];
+            if (sem3) {
+                sem3.courses = sem3.courses || [];
+                sem3.courses.push({
+                    code: "01140052",
+                    altCode: "114052",
+                    name: "פיזיקה 2",
+                    credits: 3.5,
+                    type: "mandatory",
+                    variantGroupId: "physics_2",
+                    prereqs: ["01140051", "01040041"]
+                });
+                console.log('[Planner] Restored Physics 2 to Semester 3');
+            }
+        }
+    }
+
     function initPlannerState(force = false) {
         if (!force && customPlan && Array.isArray(customPlan) && customPlan.length > 0) {
             return;
@@ -479,6 +532,7 @@
 
         try {
             isReservistDeduction = localStorage.getItem(PLANNER_RESERVIST_KEY) === 'true';
+            isAtudaTironut = localStorage.getItem(PLANNER_ATUDA_KEY) === 'true';
             const savedLevel = localStorage.getItem(PLANNER_ENGLISH_LEVEL_KEY);
             if (savedLevel === 'exempt_all' || savedLevel === 'exempt_a' || savedLevel === 'none') {
                 englishLevel = savedLevel;
@@ -635,6 +689,7 @@
 
         // 3. Synchronize courses from gameState into their exact semester
         syncCompletedCoursesFromGameState();
+        ensureEssentialCoursesInPlan(customPlan);
 
         // 4. Persist clean state
         saveCustomPlan(true);
@@ -1321,6 +1376,15 @@
             });
         }
 
+        // Atuda Tironut: gives 2.0 binary credits towards degree total and free electives
+        const hasAtudaCardInPlan = (allCoursesInPlan || []).some(c => {
+            const name = (c.name || '').toLowerCase();
+            return c.code === '00920001' || c.code === '920001' || name.includes('טירונות');
+        });
+        const atudaBonus = (isAtudaTironut && !hasAtudaCardInPlan) ? 2.0 : 0.0;
+        totalDegreeCredits += atudaBonus;
+        creditsMalag += atudaBonus;
+
         const requiredDegreeCredits = isReservistDeduction ? 155.5 : 157.5;
         const requiredElectiveCredits = 32.5;
 
@@ -1339,7 +1403,7 @@
         const ruleCapstone_met = hasCapstone === true;
 
         const clearanceRules = [
-            { id: 'degreeTotal', name: 'סה״כ נק״ז לתואר', score: `${totalDegreeCredits.toFixed(1)} / ${requiredDegreeCredits.toFixed(1)} נק״ז`, isMet: ruleDegreeTotal_met, hint: 'מינימום 157.5 נק״ז (155.5 למשרתי מילואים)' },
+            { id: 'degreeTotal', name: 'סה״כ נק״ז לתואר', score: `${totalDegreeCredits.toFixed(1)} / ${requiredDegreeCredits.toFixed(1)} נק״ז`, isMet: ruleDegreeTotal_met, hint: `מינימום 157.5 נק״ז (${isReservistDeduction ? '155.5 למשרתי מילואים' : '155.5 למילואים'}${isAtudaTironut ? ' • כולל 2 נק״ז טירונות עתודאים' : ''})` },
             { id: 'totalElectives', name: 'נקודות בחירה פקולטיות', score: `${totalElectiveCredits.toFixed(1)} / ${requiredElectiveCredits.toFixed(1)} נק״ז`, isMet: ruleTotalElectives_met, hint: 'לפחות 32.5 נק״ז מרשימות הבחירה' },
             { id: 'creditsBCD', name: 'סל רשימות ב׳+ג׳+ד׳', score: `${creditsBCD.toFixed(1)} / 14.0 נק״ז`, isMet: ruleBCD_met, hint: 'חובת עומק והתמחות הנדסית' },
             { id: 'facultyLists', name: 'חלוקת רשימות (א׳, ב׳, ג׳, ד׳)', score: `א׳: ${countA}/1 • ב׳: ${countB}/2 • ג׳: ${countC}/2 • ד׳: ${countD}/1`, isMet: ruleFacultyLists_met, hint: '1 חישובי, 2 ליבה, 2 יישומי, 1 סמינר' },
@@ -1843,6 +1907,12 @@
         const reservistBadge = document.getElementById('planner-reservist-badge');
         if (reservistToggle) reservistToggle.checked = isReservistDeduction;
         if (reservistBadge) reservistBadge.style.display = isReservistDeduction ? 'inline-block' : 'none';
+
+        // Atuda Tironut toggle state
+        const atudaToggle = document.getElementById('toggle-planner-atuda');
+        const atudaBadge = document.getElementById('planner-atuda-badge');
+        if (atudaToggle) atudaToggle.checked = isAtudaTironut;
+        if (atudaBadge) atudaBadge.style.display = isAtudaTironut ? 'inline-block' : 'none';
     }
 
     function renderSemesterColumns(plan, courseSemMap) {
@@ -2681,7 +2751,8 @@
 
         // 8. Reservist Credit Deduction Toggle Listener
         const reservistToggle = document.getElementById('toggle-planner-reservist');
-        if (reservistToggle) {
+        if (reservistToggle && !reservistToggle.dataset.bound) {
+            reservistToggle.dataset.bound = 'true';
             reservistToggle.addEventListener('change', (e) => {
                 isReservistDeduction = e.target.checked;
                 try {
@@ -2689,6 +2760,20 @@
                 } catch (err) {}
                 renderDegreePlanner();
                 showPlannerToast(isReservistDeduction ? 'הופעל פטור מילואים: הופחתו 2 נק״ז מדרישות התואר! 🎖️' : 'בוטל פטור מילואים: דרישות התואר חזרו ל-157.5 נק״ז.', true);
+            });
+        }
+
+        // 8.b Atuda Tironut Toggle Listener
+        const atudaToggle = document.getElementById('toggle-planner-atuda');
+        if (atudaToggle && !atudaToggle.dataset.bound) {
+            atudaToggle.dataset.bound = 'true';
+            atudaToggle.addEventListener('change', (e) => {
+                isAtudaTironut = e.target.checked;
+                try {
+                    localStorage.setItem(PLANNER_ATUDA_KEY, isAtudaTironut ? 'true' : 'false');
+                } catch (err) {}
+                renderDegreePlanner();
+                showPlannerToast(isAtudaTironut ? 'הופעלה הכרה בטירונות עתודאים: נוספו 2 נק״ז בינארי לתואר! 🪖' : 'בוטלה הכרה בטירונות עתודאים.', true);
             });
         }
 
@@ -4067,7 +4152,7 @@
         if (!foundCourse) return;
 
         const variantMeta = {
-            '01140051': { name: 'פיזיקה 1', credits: 3.5, altCode: '114051' },
+            '01140051': { name: 'פיזיקה 1', credits: 2.5, altCode: '114051' },
             '01140071': { name: "פיזיקה 1מ'", credits: 3.5, altCode: '114071' },
             '01140077': { name: "פיזיקה 1פ'", credits: 4.0, altCode: '114077' },
             '01140055': { name: "פיזיקה 1ת'", credits: 3.5, altCode: '114055' },

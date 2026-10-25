@@ -1440,9 +1440,24 @@
 
             // Get curriculum courses from window.SAMPLE_ME_DEGREE
             const allCourses = window.SAMPLE_ME_DEGREE || {};
-            const priorCourses = Object.values(allCourses)
-                .filter(c => (c.semester || 1) < sem)
-                .sort((a, b) => (a.semester - b.semester) || a.code.localeCompare(b.code));
+            let priorCourses = Object.values(allCourses)
+                .filter(c => (c.semester || 1) < sem);
+
+            // Special support: Physics 2 variants (114052, 114075) can be completed in Semester 2!
+            // When student starts semester >= 2, make sure Physics 1 variants and Physics 2 variants are available in prior courses!
+            if (sem >= 2) {
+                const hasP2 = priorCourses.some(c => c.code === '114052' || c.code === '114075');
+                if (!hasP2) {
+                    if (allCourses['114052']) {
+                        priorCourses.push({ ...allCourses['114052'], semester: 2, name: allCourses['114052'].name + ' (במידה והוקדם לסמ׳ 2)' });
+                    }
+                    if (allCourses['114075']) {
+                        priorCourses.push({ ...allCourses['114075'], semester: 2, name: allCourses['114075'].name + ' (במידה והוקדם לסמ׳ 2)' });
+                    }
+                }
+            }
+
+            priorCourses.sort((a, b) => (a.semester - b.semester) || a.code.localeCompare(b.code));
 
             if (priorCourses.length === 0) {
                 container.style.display = 'none';
@@ -1462,6 +1477,14 @@
                     </div>
                     <div style="font-size: 0.76rem; color: #94a3b8; margin-bottom: 8px; line-height: 1.4;">
                         סמן את הקורסים שהשלמת והקלד את ציונם הסופי (0-100). אנו נחשב עבורך ממוצע ונק״ז התחלתיים!
+                    </div>
+                    <!-- Atuda Tironut option during onboarding -->
+                    <div style="background: rgba(56, 189, 248, 0.12); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 6px; padding: 7px 10px; margin-bottom: 8px;">
+                        <label style="display: flex; align-items: center; gap: 8px; margin: 0; cursor: pointer; font-size: 0.78rem; color: #f8fafc; font-weight: 600;">
+                            <input type="checkbox" class="prior-course-check" data-code="00920001" id="prior_chk_00920001" onchange="AuthSync.togglePriorGradeInput('00920001', this.checked)" style="cursor: pointer; accent-color: #38bdf8; width: 15px; height: 15px;">
+                            <span>🪖 עתודאי? השלמת טירונות (2 נק״ז בינארי לתואר)</span>
+                        </label>
+                        <input type="hidden" id="prior_grade_00920001" value="עובר">
                     </div>
                     <div style="max-height: 200px; overflow-y: auto; padding-right: 4px; display: flex; flex-direction: column; gap: 6px;">
             `;
