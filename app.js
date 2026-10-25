@@ -20953,8 +20953,8 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.10.25-v2.5.8",
-    version: "2.5.8",
+    code: "REV-2026.10.25-v2.5.9",
+    version: "2.5.9",
     build: "20261020_03",
     date: "2026-10-20 01:20",
     description: "גרסה 2.5.2: פתרון מוחלט ללולאת העדכון במובייל וספארי, מנגנון אנטי-רילואד עמיד ב-localStorage, סנכרון גרסאות מלא וקישורי הורדה ישירים לטלפונים"
@@ -22579,7 +22579,7 @@ window.checkRemoteAppVersion = async function(isManualCheck = false) {
         const match = domVerEl.innerText.match(/(?:^|\bv|\s)(\d+\.\d+\.\d+)\b/);
         if (match) currentVer = match[1];
     }
-    currentVer = currentVer || "2.5.8";
+    currentVer = currentVer || "2.5.9";
     const statusTextEl = document.getElementById("version-check-status-text");
     const footerBadgeEl = document.getElementById("footer-version-badge");
     const checkBtn = document.getElementById("btn-check-version-updates");
@@ -22810,54 +22810,50 @@ window.forceAppUpdate = async function() {
 
 window.getFormattedChangelogHTML = function() {
     return `<div style="display: flex; flex-direction: column; gap: 10px;">
-        <div style="background: rgba(2, 132, 199, 0.12); border: 1px solid rgba(56, 189, 248, 0.35); border-radius: 10px; padding: 12px;">
-            <div style="font-weight: 700; color: #38bdf8; display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
-                <span>🔍</span> <span>חיפוש חכם ופקודות מהירות (Ctrl+K / ⌘K / /)</span>
+        <div style="background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.4); border-radius: 10px; padding: 12px;">
+            <div style="font-weight: 700; color: #34d399; display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                <span>✨</span> <span>עידון ופינוי סרגל הכלים העליון (HUD Clean & Minimalist)</span>
             </div>
             <ul style="margin: 0; padding-right: 20px; font-size: 0.82rem; color: #cbd5e1; line-height: 1.55;">
-                <li>שורת פקודות חכמה (Command Palette) לחיפוש מיידי וניווט מהיר בכל 350+ הקורסים האקדמיים, משימות, טאבים ופעולות מערכת.</li>
-                <li>תמיכה מלאה בניווט מקלדת (חצים ↑/↓, בחירה ב-Enter, סגירה ב-Esc) וחיפוש קל לפי קוד או שם קורס.</li>
+                <li>הסרת כפתורי הקיצור העודפים (ווידג'טים וסיור) מסרגל הכלים העליון למניעת עומס וצפיפות, ומעבר למראה נקי ומרווח.</li>
+                <li>מרכז הווידג'טים האינטראקטיביים למסך הבית מרוכז וזמין תמיד ישירות בהגדרות המערכת (Settings ⚙️).</li>
             </ul>
         </div>
 
-        <div style="background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.35); border-radius: 10px; padding: 12px;">
-            <div style="font-weight: 700; color: #34d399; display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
-                <span>⚖️</span> <span>כלי השוואת קורסי בחירה צד-מול-צד (Course Comparator)</span>
+        <div style="background: rgba(2, 132, 199, 0.12); border: 1px solid rgba(56, 189, 248, 0.35); border-radius: 10px; padding: 12px;">
+            <div style="font-weight: 700; color: #38bdf8; display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                <span>🧭</span> <span>מרכז הדרכה וסיור אינטראקטיבי חדש (Tutorial Academy)</span>
             </div>
             <ul style="margin: 0; padding-right: 20px; font-size: 0.82rem; color: #cbd5e1; line-height: 1.55;">
-                <li>השוואה מקיפה בין שני קורסים: נק״ז, סיווג רשימה פקולטית, דרישות קדם, וסילבוס.</li>
-                <li><strong>זיהוי אוטומטי של התנגשויות בחינה:</strong> סימון אדום בולט בעת התנגשות תאריכי מועד א׳ או מועד ב׳.</li>
+                <li>סיור מודרך בן 10 שלבים עם מעבר אוטומטי חי בין כל מסכי המערכת: עץ קורסים, תכנון תואר, מערכת שעות, משימות, חיפוש חכם והשוואת קורסים.</li>
+                <li>כפתורי התנסות אינטראקטיביים ישירות מתוך כרטיסי הסיור (בדיקת זכאות לתואר, חיפוש חכם, השוואה ומדריך זכויות).</li>
+                <li>זמין להפעלה בכל עת דרך ההגדרות (Settings), שורת הפקודות (Ctrl+K -> "סיור") ובקיצור מקלדת <kbd>T</kbd>.</li>
             </ul>
         </div>
 
         <div style="background: rgba(245, 158, 11, 0.12); border: 1px solid rgba(245, 158, 11, 0.35); border-radius: 10px; padding: 12px;">
             <div style="font-weight: 700; color: #fbbf24; display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
-                <span>📖</span> <span>מדריך זכויות, נהלים ושאלות נפוצות בטכניון (Technion FAQ)</span>
+                <span>🔍</span> <span>שורת פקודות וחיפוש חכם מהיר (Ctrl+K / ⌘K)</span>
             </div>
             <ul style="margin: 0; padding-right: 20px; font-size: 0.82rem; color: #cbd5e1; line-height: 1.55;">
-                <li>מאגר מקיף ומסונן: מילואים (הפחתת 2 נק״ז ומועדי ג׳), טירונות עתודה (2 נק״ז בינארי), נבחרת פורמולה SAE (2 נק״ז לסמסטר או 6 נק״ז תכן גמר).</li>
-                <li>חובת קורסי אנגלית, מכסת מל״ג וספורט, תנאי סף לפרויקט גמר ונהלי ערעורי בחינות.</li>
+                <li>חיפוש מיידי וניווט מהיר בכל 350+ הקורסים האקדמיים, משימות, טאבים ופעולות מערכת עם תמיכה מלאה בחצים ו-Enter.</li>
             </ul>
         </div>
 
         <div style="background: rgba(139, 92, 246, 0.12); border: 1px solid rgba(139, 92, 246, 0.35); border-radius: 10px; padding: 12px;">
             <div style="font-weight: 700; color: #a78bfa; display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
-                <span>✨</span> <span>חבילת נגישות ושיפורי ממשק (UI/UX Supercharge)</span>
+                <span>⚖️</span> <span>השוואת קורסי בחירה צד-מול-צד ומדריך זכויות בטכניון</span>
             </div>
             <ul style="margin: 0; padding-right: 20px; font-size: 0.82rem; color: #cbd5e1; line-height: 1.55;">
-                <li><strong>מקשי קיצור גלובליים:</strong> 1-6 למעבר בין טאבים, Esc לסגירת כל מודאל, Ctrl+S לסנכרון מיידי, ומקש '?' ללוח מקשים.</li>
-                <li><strong>כפתור חזרה לראש העמוד (🔝):</strong> כפתור צף חלק שמופיע בגלילה מעל 300px.</li>
-                <li><strong>העתקה בלחיצה אחת (📋):</strong> העתקת קודי קורסים, משימות ותשובות נהלים ישירות ללוח עם Toast.</li>
-                <li><strong>קורסים שנצפו לאחרונה ומועדפים:</strong> רצועת 7 הקורסים האחרונים שנפתחו וסימון כוכב (⭐) עם מונה בסרגל.</li>
-                <li><strong>בקר נגישות לגודל טקסט:</strong> התאמת זום וגודל פונט (A- / 100% / A+) נשמרת אוטומטית.</li>
-                <li><strong>איחוד כפתורי הורדה ישירה:</strong> חץ ירוק מואר (⬇️) להורדת APK נייד והתקנה במחשב.</li>
+                <li>השוואה מקיפה בין קורסים וזיהוי אוטומטי של התנגשויות תאריכי בחינה (מועד א׳ ו-ב׳).</li>
+                <li>מדריך זכויות מסונן: מילואים (הפחתת 2 נק״ז), טירונות עתודה (2 נק״ז בינארי), ופורמולה SAE (2 נק״ז לסמסטר או 6 נק״ז פרויקט גמר).</li>
             </ul>
         </div>
     </div>`;
 };
 
 window.openChangelogModal = function(ver) {
-    const currentVer = ver || (typeof APP_CURRENT_REVISION !== 'undefined' && APP_CURRENT_REVISION && APP_CURRENT_REVISION.version) || "2.5.8";
+    const currentVer = ver || (typeof APP_CURRENT_REVISION !== 'undefined' && APP_CURRENT_REVISION && APP_CURRENT_REVISION.version) || "2.5.9";
     const updateModal = document.getElementById("version-update-modal");
     if (!updateModal) return;
     const modTitle = document.getElementById("update-modal-title");
