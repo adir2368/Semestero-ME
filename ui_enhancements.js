@@ -238,6 +238,7 @@
 
         // 2. Global Actions
         const actions = [
+            { id: 'act-tour', title: 'מדריך מערכת וסיור אינטראקטיבי (Tutorial Academy)', icon: '🧭', shortcut: 'T', action: () => (window.openTutorialHubModal ? window.openTutorialHubModal() : window.startInteractiveTour && window.startInteractiveTour()) },
             { id: 'act-audit', title: 'בדיקת זכאות לתואר ודרישות סיום (Graduation Audit)', icon: '🎓', shortcut: 'Ctrl+G', action: () => window.DegreePlanner && window.DegreePlanner.openGraduationAuditModal && window.DegreePlanner.openGraduationAuditModal() },
             { id: 'act-faq', title: 'מרכז זכויות ושאלות נפוצות (Technion FAQ & Rights)', icon: '📖', shortcut: 'Ctrl+H', action: () => window.openFaqModal() },
             { id: 'act-compare', title: 'השוואת קורסי בחירה צד-מול-צד (Course Comparator)', icon: '⚖️', shortcut: '', action: () => window.openCourseComparisonModal() },
@@ -519,6 +520,7 @@
                     if (window.closeCourseComparisonModal) window.closeCourseComparisonModal();
                     if (window.closeFaqModal) window.closeFaqModal();
                     if (window.closeKeyboardShortcutsModal) window.closeKeyboardShortcutsModal();
+                    if (window.closeTutorialHubModal) window.closeTutorialHubModal();
                     if (window.closeDownloadModal) window.closeDownloadModal();
                     const btnCloseUpdate = document.getElementById('btn-close-version-update-modal');
                     if (btnCloseUpdate) btnCloseUpdate.click();
@@ -532,6 +534,14 @@
             if (e.key === '?' && !isTyping && !e.ctrlKey && !e.metaKey) {
                 e.preventDefault();
                 window.openKeyboardShortcutsModal();
+                return;
+            }
+
+            // 3b. Interactive Tutorial Hub: 'T' key when not typing
+            if ((e.key === 't' || e.key === 'T' || e.key === 'א') && !isTyping && !e.ctrlKey && !e.metaKey && !e.altKey) {
+                e.preventDefault();
+                if (window.openTutorialHubModal) window.openTutorialHubModal();
+                else if (window.startInteractiveTour) window.startInteractiveTour();
                 return;
             }
 

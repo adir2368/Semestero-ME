@@ -2628,14 +2628,7 @@ document.addEventListener("DOMContentLoaded", () => {
             (window.location && (window.location.protocol === 'capacitor:' || window.location.protocol === 'ionic:'))
         )
     );
-    const btnWidgetsEl = document.getElementById('btn-open-widgets');
-    if (btnWidgetsEl) {
-        btnWidgetsEl.style.display = isDirectPhoneApp ? 'inline-flex' : 'none';
-    }
-    const cardWidgetsEl = document.getElementById('settings-card-widgets');
-    if (cardWidgetsEl) {
-        cardWidgetsEl.style.display = isDirectPhoneApp ? 'block' : 'none';
-    }
+    const btnWidgetsEl = document.getElementById('btn-open-widgets'); if (btnWidgetsEl) btnWidgetsEl.style.display = 'none'; const cardWidgetsEl = document.getElementById('settings-card-widgets'); if (cardWidgetsEl) cardWidgetsEl.style.display = 'block';
 
     loadSavedState();
     setupEventListeners();
