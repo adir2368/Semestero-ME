@@ -37,6 +37,13 @@ with zipfile.ZipFile(OUT_ZIP, 'w', zipfile.ZIP_DEFLATED) as zipf:
 
 print(f"Zip created successfully! Size: {os.path.getsize(OUT_ZIP) / (1024*1024):.2f} MB")
 
+# Close running instances on local computer if open, so file locks do not block updates
+try:
+    import subprocess
+    subprocess.run(["powershell", "-Command", "Stop-Process -Name 'Semestero ME', 'electron' -Force -ErrorAction SilentlyContinue"], capture_output=True)
+except Exception:
+    pass
+
 try:
     shutil.copy2(EXE_SRC, EXE_DST)
     print(f"Updated root Semestero-ME.exe successfully ({os.path.getsize(EXE_DST)} bytes)")
