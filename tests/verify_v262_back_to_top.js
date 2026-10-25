@@ -14,7 +14,7 @@ console.log('================================================================\n'
 const ROOT = path.resolve(__dirname, '..');
 const indexHtml = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
 const stylesCss = fs.readFileSync(path.join(ROOT, 'styles.css'), 'utf8');
-const uiJs = fs.readFileSync(path.join(ROOT, 'ui_enhancements.js'), 'utf8');
+const uiJs = fs.readFileSync(path.join(ROOT, 'ui_enhancements.js'), 'utf8').replace(/\r\n/g, '\n');
 const packageJson = JSON.parse(fs.readFileSync(path.join(ROOT, 'package.json'), 'utf8'));
 const swJs = fs.readFileSync(path.join(ROOT, 'sw.js'), 'utf8');
 const gradle = fs.readFileSync(path.join(ROOT, 'android/app/build.gradle'), 'utf8');

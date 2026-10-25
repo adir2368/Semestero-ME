@@ -30,13 +30,18 @@
             this.loadConfig();
             this.bindUI();
             
-            // Background auto-sync on app launch if URL is configured and running in Electron (where CORS is bypassed via IPC)
-            const isElectron = !!(window.electronAPI && window.electronAPI.isElectron);
-            if (this.config.url && this.config.autoSync && isElectron) {
+            // Background auto-sync on app launch if URL is configured and running in native app (Electron or Android phone)
+            const isNative = !!(
+                (window.electronAPI && window.electronAPI.isElectron) ||
+                (window.SemesteroWidgetBridge && typeof window.SemesteroWidgetBridge.fetchMoodleIcs === 'function') ||
+                (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) ||
+                (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.CapacitorHttp)
+            );
+            if (this.config.url && this.config.autoSync && isNative) {
                 setTimeout(() => {
-                    console.log('[MoodleSync] Triggering background auto-sync on startup (Electron IPC)...');
+                    console.log('[MoodleSync] Triggering background auto-sync on startup (native mobile/desktop bridge)...');
                     this.sync({ isSilent: true });
-                }, 2000);
+                }, 2500);
             }
         },
 
@@ -282,7 +287,7 @@
                 throw new Error('כתובת ה-URL של המודל אינה תקינה.');
             }
 
-            // Method 1: Native Electron Bridge (100% reliable, zero CORS restrictions)
+            // Method 1: Native Electron Bridge (100% reliable on Desktop, zero CORS restrictions)
             if (window.electronAPI && typeof window.electronAPI.fetchMoodleFeed === 'function') {
                 console.log('[MoodleSync] Fetching via Electron native IPC bridge:', cleanUrl);
                 const res = await window.electronAPI.fetchMoodleFeed(cleanUrl);
@@ -292,6 +297,61 @@
                 if (res && !res.success) {
                     console.warn('[MoodleSync] Electron native fetch error:', res.error);
                     throw new Error(res.error || 'שגיאת התחברות ב-Electron');
+                }
+            }
+
+            // Method 1b: Android Native Phone App Bridge (100% reliable on Phone, zero CORS restrictions)
+            if (window.SemesteroWidgetBridge && typeof window.SemesteroWidgetBridge.fetchMoodleIcs === 'function') {
+                console.log('[MoodleSync] Fetching via Android native SemesteroWidgetBridge on phone:', cleanUrl);
+                try {
+                    const icsData = window.SemesteroWidgetBridge.fetchMoodleIcs(cleanUrl);
+                    if (icsData && icsData.includes('BEGIN:VCALENDAR')) {
+                        console.log('[MoodleSync] Android native bridge fetch succeeded! Length:', icsData.length);
+                        return icsData;
+                    }
+                    if (icsData && icsData.startsWith('ERROR:')) {
+                        console.warn('[MoodleSync] Android bridge returned error:', icsData);
+                        if (icsData.includes('401') || icsData.includes('403') || icsData.includes('Invalid authentication')) {
+                            throw new Error('אימות שגוי מול מודל (טוקן פג תוקף). הפק קישור חדש במודל.');
+                        }
+                        throw new Error(icsData);
+                    }
+                } catch (bridgeErr) {
+                    console.warn('[MoodleSync] SemesteroWidgetBridge error, trying CapacitorHttp fallback:', bridgeErr);
+                }
+            }
+
+            // Method 1c: Capacitor Native HTTP Plugin (zero CORS on Android/iOS)
+            const cap = window.Capacitor;
+            if (cap && (
+                (typeof cap.isNativePlatform === 'function' && cap.isNativePlatform()) ||
+                (cap.Plugins && cap.Plugins.CapacitorHttp) ||
+                (cap.CapacitorHttp) ||
+                (typeof cap.getPlatform === 'function' && (cap.getPlatform() === 'android' || cap.getPlatform() === 'ios'))
+            )) {
+                const httpPlugin = (cap.Plugins && cap.Plugins.CapacitorHttp) || cap.CapacitorHttp;
+                if (httpPlugin && typeof httpPlugin.get === 'function') {
+                    try {
+                        console.log('[MoodleSync] Fetching via Capacitor native HTTP plugin (zero CORS)...');
+                        const response = await httpPlugin.get({
+                            url: cleanUrl,
+                            headers: {
+                                'Accept': 'text/calendar, text/plain, */*'
+                            },
+                            connectTimeout: 15000,
+                            readTimeout: 20000
+                        });
+                        const data = response && response.data;
+                        if (typeof data === 'string' && data.includes('BEGIN:VCALENDAR')) {
+                            console.log('[MoodleSync] CapacitorHttp fetch succeeded! Length:', data.length);
+                            return data;
+                        }
+                        if (typeof data === 'string' && data.includes('Invalid authentication')) {
+                            throw new Error('אימות שגוי מול מודל (טוקן פג תוקף). הפק קישור חדש במודל.');
+                        }
+                    } catch (capErr) {
+                        console.warn('[MoodleSync] CapacitorHttp.get failed, trying direct fetch:', capErr);
+                    }
                 }
             }
 

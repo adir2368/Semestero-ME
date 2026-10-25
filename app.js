@@ -14807,6 +14807,59 @@ function setupNotionDashboard() {
     const tablePane = document.getElementById("tasks-table-view-pane");
     const calPane = document.getElementById("tasks-calendar-view-pane");
 
+    // Global Tab Switcher helper
+window.switchTab = function(tabNameOrNumber) {
+    if (!tabNameOrNumber) return;
+    const str = String(tabNameOrNumber).trim().toLowerCase();
+    
+    const tabMapping = {
+        '1': 'tab-curriculum',
+        'tree': 'tab-curriculum',
+        'curriculum': 'tab-curriculum',
+        'skill-tree': 'tab-curriculum',
+
+        '2': 'tab-planner',
+        'planner': 'tab-planner',
+
+        '3': 'tab-timetable',
+        'timetable': 'tab-timetable',
+        'schedule': 'tab-timetable',
+
+        '4': 'tab-tasks',
+        'tasks': 'tab-tasks',
+        'kanban': 'tab-tasks',
+
+        '5': 'tab-calendar',
+        'calendar': 'tab-calendar',
+        'exams': 'tab-calendar',
+
+        '6': 'tab-settings',
+        'settings': 'tab-settings'
+    };
+
+    const targetElementId = tabMapping[str];
+    if (targetElementId) {
+        const btn = document.getElementById(targetElementId);
+        if (btn) {
+            btn.click();
+            return;
+        }
+    }
+
+    const directMap = {
+        '1': 'curriculum', 'tree': 'curriculum', 'curriculum': 'curriculum',
+        '2': 'planner', 'planner': 'planner',
+        '3': 'timetable', 'timetable': 'timetable',
+        '4': 'tasks', 'tasks': 'tasks',
+        '5': 'calendar', 'calendar': 'calendar', 'exams': 'calendar',
+        '6': 'settings', 'settings': 'settings'
+    };
+    const mainTab = directMap[str] || str;
+    if (typeof window.setActiveMainTab === 'function') {
+        window.setActiveMainTab(mainTab);
+    }
+};
+
     function setActiveMainTab(activeTabId) {
         window.setActiveMainTab = setActiveMainTab;
         window.currentActiveTab = activeTabId;
@@ -20957,8 +21010,8 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.10.25-v2.6.3",
-    version: "2.6.3",
+    code: "REV-2026.10.25-v2.6.4",
+    version: "2.6.4",
     build: "20261020_03",
     date: "2026-10-20 01:20",
     description: "גרסה 2.5.2: פתרון מוחלט ללולאת העדכון במובייל וספארי, מנגנון אנטי-רילואד עמיד ב-localStorage, סנכרון גרסאות מלא וקישורי הורדה ישירים לטלפונים"
@@ -20995,6 +21048,9 @@ function ensureBaselineRevisions() {
 // Render Settings & Revisions Workspace (Fully Editable)
 function renderSettingsPage() {
     ensureBaselineRevisions();
+    if (window.SiteAnalytics && typeof window.SiteAnalytics.updateSettingsPills === 'function') {
+        window.SiteAnalytics.updateSettingsPills();
+    }
 
     // 1. Populate Section 1: Semester & System Control
     const displayVersion = document.getElementById("display-system-version");
@@ -22583,7 +22639,7 @@ window.checkRemoteAppVersion = async function(isManualCheck = false) {
         const match = domVerEl.innerText.match(/(?:^|\bv|\s)(\d+\.\d+\.\d+)\b/);
         if (match) currentVer = match[1];
     }
-    currentVer = currentVer || "2.6.3";
+    currentVer = currentVer || "2.6.4";
     const statusTextEl = document.getElementById("version-check-status-text");
     const footerBadgeEl = document.getElementById("footer-version-badge");
     const checkBtn = document.getElementById("btn-check-version-updates");

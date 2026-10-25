@@ -188,10 +188,11 @@
             };
         },
 
-        // Check if active account is Adir Moshe
+        // Check if active account is Adir Moshe (strictly verified)
         isAdirActive() {
-            if (isCapacitorOrNative()) return true;
-            return this.isLoggedIn() && this.getActiveUser().id === 'adir_moshe';
+            if (!this.isLoggedIn()) return false;
+            const user = this.getActiveUser();
+            return !!(user && (user.id === 'adir_moshe' || user.id === 'adir' || user.name === 'אדיר משה'));
         },
 
         // Get storage key for active user
@@ -320,11 +321,21 @@
             // 1. Check Master Password for Developer Adir Moshe ONLY if identifier is Adir
             if (MASTER_PASSWORDS.includes(cleanPass) && isAdirIdentifier) {
                 localStorage.setItem(SESSION_USER_KEY, 'adir_moshe');
+                try {
+                    localStorage.setItem('ast_profile_adir_moshe', 'true');
+                    localStorage.setItem('ast_is_developer_device', 'true');
+                } catch (e) {}
                 this.setupRealtimeSubscription();
                 await this.pullLatestStateFromCloud(true);
                 this.refreshAllAppViews();
                 this.updateHudAuthControls();
                 this.closeAuthModal();
+                if (window.SiteAnalytics && typeof window.SiteAnalytics.updateSettingsPills === 'function') {
+                    window.SiteAnalytics.updateSettingsPills();
+                    if (typeof window.SiteAnalytics.fetchStats === 'function') {
+                        window.SiteAnalytics.fetchStats();
+                    }
+                }
                 if (typeof showHudToast === 'function') {
                     showHudToast('שלום אדיר! התחברת בהצלחה 🎓', 'success');
                 } else {
@@ -549,6 +560,9 @@
             this.refreshAllAppViews();
             this.updateHudAuthControls();
             this.closeAuthModal();
+            if (window.SiteAnalytics && typeof window.SiteAnalytics.updateSettingsPills === 'function') {
+                window.SiteAnalytics.updateSettingsPills();
+            }
             if (typeof showHudToast === 'function') {
                 showHudToast('מחובר כעת כ-בודק איכות QA 🧪 (סביבת בדיקות מבודדת ובטוחה)', 'success');
             }
@@ -727,6 +741,9 @@
             this.refreshAllAppViews();
             this.updateHudAuthControls();
             this.closeAuthModal();
+            if (window.SiteAnalytics && typeof window.SiteAnalytics.updateSettingsPills === 'function') {
+                window.SiteAnalytics.updateSettingsPills();
+            }
 
             if (typeof showHudToast === 'function') {
                 showHudToast('ברוך הבא ל-Semestero ME, ' + name + '! 🎉', 'success');
@@ -770,6 +787,9 @@
             this.refreshAllAppViews();
             this.updateHudAuthControls();
             this.closeAuthModal();
+            if (window.SiteAnalytics && typeof window.SiteAnalytics.updateSettingsPills === 'function') {
+                window.SiteAnalytics.updateSettingsPills();
+            }
 
             if (typeof showHudToast === 'function') {
                 showHudToast('התנתקת בהצלחה. להתחברות מחדש לחץ על "התחברות". 👋', 'info');
@@ -960,6 +980,9 @@
             this.refreshAllAppViews();
             this.updateHudAuthControls();
             this.closeAuthModal();
+            if (window.SiteAnalytics && typeof window.SiteAnalytics.updateSettingsPills === 'function') {
+                window.SiteAnalytics.updateSettingsPills();
+            }
 
             if (typeof showHudToast === 'function') {
                 showHudToast('החשבון נמחק לצמיתות. המערכת אופסה 🗑️', 'info');
@@ -1188,6 +1211,23 @@
                         </div>
                     </div>
                     <div class="modal-body" style="padding-top: 14px; max-height: 75vh; overflow-y: auto;">
+                        <!-- Admin Telemetry & User Stats (Adir Moshe Only) -->
+                        ${isDev ? `
+                        <div style="background: rgba(14, 165, 233, 0.08); border: 1px solid rgba(56, 189, 248, 0.4); border-radius: 8px; padding: 10px 14px; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                            <div>
+                                <div style="font-weight: 700; color: #38bdf8; font-size: 0.88rem; display: flex; align-items: center; gap: 6px;">
+                                    <span>👥</span> <span>סטטיסטיקת שימוש, משתמשים וכניסות</span>
+                                </div>
+                                <div style="font-size: 0.74rem; color: #94a3b8; margin-top: 2px;">
+                                    צפייה בזמן אמת בכמות משתמשי האפליקציה, כניסות אופליין ואורחים
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-xs btn-primary" onclick="AuthSync.closeAuthModal(); if (window.SiteAnalytics) SiteAnalytics.openModal();" style="background: linear-gradient(135deg, #0284c7, #2563eb); font-weight: 700; padding: 6px 12px; border-radius: 6px;">
+                                🔍 פתח לוח סטטיסטיקה
+                            </button>
+                        </div>
+                        ` : ''}
+
                         <!-- Overview Card -->
                         <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 8px; padding: 12px 14px; margin-bottom: 14px;">
                             <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 10px;">
@@ -1376,9 +1416,6 @@
                                 </div>
                                 <button type="submit" class="btn btn-primary btn-block" style="width: 100%; padding: 10px; font-weight: 700; font-size: 0.95rem; margin-bottom: 8px;">
                                     🚀 התחבר עכשיו
-                                </button>
-                                <button type="button" class="btn btn-outline btn-block" onclick="AuthSync.loginWithPassword('adir_moshe', 'BenchyTech1');" style="width: 100%; padding: 8px; font-weight: 600; font-size: 0.85rem; border-color: rgba(56, 189, 248, 0.4); color: #38bdf8; background: rgba(56, 189, 248, 0.08);">
-                                    🎓 התחברות מהירה כאדיר משה (Adir Moshe)
                                 </button>
                                 <div style="text-align: center; margin-top: 12px;">
                                     <a href="javascript:void(0)" onclick="AuthSync.renderAuthModal('reset_password')" style="color: #38bdf8; font-size: 0.82rem; text-decoration: underline; cursor: pointer;">

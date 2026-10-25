@@ -210,5 +210,42 @@ public class MainActivity extends BridgeActivity {
             SemesteroFinalsGpaWidget.pushUpdate(context);
             SemesteroPomodoroWidget.pushUpdate(context);
         }
+
+        @JavascriptInterface
+        public String fetchMoodleIcs(String targetUrl) {
+            java.net.HttpURLConnection conn = null;
+            java.io.BufferedReader reader = null;
+            try {
+                java.net.URL url = new java.net.URL(targetUrl);
+                conn = (java.net.HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("GET");
+                conn.setConnectTimeout(15000);
+                conn.setReadTimeout(20000);
+                conn.setRequestProperty("Accept", "text/calendar, text/plain, */*");
+                conn.setRequestProperty("User-Agent", "SemesteroME-Android/2.6.4");
+                conn.setInstanceFollowRedirects(true);
+                int code = conn.getResponseCode();
+                if (code >= 200 && code < 300) {
+                    reader = new java.io.BufferedReader(new java.io.InputStreamReader(conn.getInputStream(), java.nio.charset.StandardCharsets.UTF_8));
+                    StringBuilder sb = new StringBuilder();
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        sb.append(line).append("\n");
+                    }
+                    return sb.toString();
+                } else {
+                    return "ERROR: HTTP " + code;
+                }
+            } catch (Exception e) {
+                return "ERROR: " + e.getMessage();
+            } finally {
+                if (reader != null) {
+                    try { reader.close(); } catch (Exception ignored) {}
+                }
+                if (conn != null) {
+                    try { conn.disconnect(); } catch (Exception ignored) {}
+                }
+            }
+        }
     }
 }

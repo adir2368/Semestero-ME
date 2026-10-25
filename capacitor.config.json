@@ -22,6 +22,9 @@
     "scrollEnabled": true
   },
   "plugins": {
+    "CapacitorHttp": {
+      "enabled": true
+    },
     "LocalNotifications": {
       "smallIcon": "ic_stat_notification",
       "iconColor": "#38bdf8"

@@ -43,11 +43,17 @@
                 this.syncPendingOfflineVisits();
             });
 
-            // Update stats badge in Settings once idle
+            // Update stats badge in Settings once idle and fetch stats if Adir is active
+            const refreshPills = () => {
+                this.updateSettingsPills();
+                if (window.AuthSync && typeof window.AuthSync.isAdirActive === 'function' && window.AuthSync.isAdirActive()) {
+                    this.fetchStats();
+                }
+            };
             if (typeof window.requestIdleCallback === 'function') {
-                window.requestIdleCallback(() => this.updateSettingsPills(), { timeout: 5000 });
+                window.requestIdleCallback(refreshPills, { timeout: 2000 });
             } else {
-                setTimeout(() => this.updateSettingsPills(), 3500);
+                setTimeout(refreshPills, 1200);
             }
         },
 
@@ -398,18 +404,15 @@
         },
 
         async openModal() {
-            // Restrict access: Developer Adir only, or require master password
+            // Restrict access: Strictly Developer Adir Moshe account only
             const isAdir = window.AuthSync && typeof window.AuthSync.isAdirActive === 'function' && window.AuthSync.isAdirActive();
             if (!isAdir) {
-                const pass = prompt('🔒 גישה לנתוני משתמשים וכניסות מוגבלת למנהל המערכת בלבד.\nאנא הזן סיסמת מפתח:');
-                if (pass !== 'BenchyTech1' && pass !== 'adir2368') {
-                    if (typeof showToastNotification === 'function') {
-                        showToastNotification('⛔ סיסמה שגויה - גישה נדחתה', 'error');
-                    } else {
-                        alert('⛔ סיסמה שגויה - גישה נדחתה');
-                    }
-                    return;
+                if (typeof showToastNotification === 'function') {
+                    showToastNotification('⛔ גישה חסומה - נתוני משתמשים וכניסות מוגבלים לחשבון מנהל המערכת (אדיר משה) בלבד', 'error');
+                } else {
+                    alert('⛔ גישה חסומה - נתוני משתמשים וכניסות מוגבלים לחשבון מנהל המערכת (אדיר משה) בלבד');
                 }
+                return;
             }
 
             let modal = document.getElementById('site-analytics-modal');

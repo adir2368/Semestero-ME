@@ -10,14 +10,16 @@ import re
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 REPO = "adir2368/Semestero-ME"
 APK_PATH = os.path.join(ROOT, "Semestero-ME.apk")
-EXE_PATH = os.path.join(ROOT, "dist", "Semestero ME-win32-x64", "Semestero ME.exe")
+EXE_PATH = os.path.join(ROOT, "dist_build", "Semestero ME-win32-x64", "Semestero ME.exe")
+if not os.path.exists(EXE_PATH):
+    EXE_PATH = os.path.join(ROOT, "dist", "Semestero ME-win32-x64", "Semestero ME.exe")
 ZIP_PATH = os.path.join(ROOT, "Semestero-ME-Windows-x64.zip")
 
 with open(os.path.join(ROOT, "package.json"), "r", encoding="utf-8") as f:
     pkg = json.load(f)
 VERSION = pkg.get("version", "2.6.2")
 TAG = f"v{VERSION}"
-NAME = f"Semestero ME v{VERSION} - Critical Performance Fix, UI Unfreeze & Precision Floating Back-to-Top"
+NAME = f"Semestero ME v{VERSION} - Keyboard Shortcuts Engine (Hebrew Layout), Native Mobile Moodle Sync & Admin Telemetry"
 
 def get_github_token():
     try:

@@ -30,6 +30,7 @@ const FILES_TO_COPY = [
     'interactive_tour.js',
     'accessibility.js',
     'accessibility.css',
+    'ui_enhancements.js',
     'site_analytics.js',
     'technion_academic_calendar.js',
     'curriculum_template.js',
