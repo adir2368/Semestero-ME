@@ -12,7 +12,7 @@ APK_PATH = os.path.join(ROOT, "Semestero-ME.apk")
 
 with open(os.path.join(ROOT, "package.json"), "r", encoding="utf-8") as f:
     pkg = json.load(f)
-VERSION = pkg.get("version", "2.5.7")
+VERSION = pkg.get("version", "2.5.8")
 TAG = f"v{VERSION}"
 NAME = f"Semestero ME v{VERSION} - Physics Tracks, Formula SAE & Atuda Tironut"
 

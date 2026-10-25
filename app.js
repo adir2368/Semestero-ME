@@ -20960,8 +20960,8 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.10.25-v2.5.7",
-    version: "2.5.7",
+    code: "REV-2026.10.25-v2.5.8",
+    version: "2.5.8",
     build: "20261020_03",
     date: "2026-10-20 01:20",
     description: "גרסה 2.5.2: פתרון מוחלט ללולאת העדכון במובייל וספארי, מנגנון אנטי-רילואד עמיד ב-localStorage, סנכרון גרסאות מלא וקישורי הורדה ישירים לטלפונים"
@@ -22586,7 +22586,7 @@ window.checkRemoteAppVersion = async function(isManualCheck = false) {
         const match = domVerEl.innerText.match(/(?:^|\bv|\s)(\d+\.\d+\.\d+)\b/);
         if (match) currentVer = match[1];
     }
-    currentVer = currentVer || "2.5.7";
+    currentVer = currentVer || "2.5.8";
     const statusTextEl = document.getElementById("version-check-status-text");
     const footerBadgeEl = document.getElementById("footer-version-badge");
     const checkBtn = document.getElementById("btn-check-version-updates");
@@ -22817,51 +22817,54 @@ window.forceAppUpdate = async function() {
 
 window.getFormattedChangelogHTML = function() {
     return `<div style="display: flex; flex-direction: column; gap: 10px;">
-        <div style="background: rgba(2, 132, 199, 0.1); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 10px; padding: 12px;">
+        <div style="background: rgba(2, 132, 199, 0.12); border: 1px solid rgba(56, 189, 248, 0.35); border-radius: 10px; padding: 12px;">
             <div style="font-weight: 700; color: #38bdf8; display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
-                <span>🧲</span> <span>מסלולי פיזיקה 1 ופיזיקה 2 מכל הסוגים (2.5 נק״ז)</span>
+                <span>🔍</span> <span>חיפוש חכם ופקודות מהירות (Ctrl+K / ⌘K / /)</span>
             </div>
             <ul style="margin: 0; padding-right: 20px; font-size: 0.82rem; color: #cbd5e1; line-height: 1.55;">
-                <li>תמיכה מלאה במסלול פיזיקה 1 (114051 / 114071) בסמסטר 1 ופיזיקה 2 (114052 / 114075) בסמסטר 2.</li>
-                <li>עדכון משקל פיזיקה 1 ל-<strong>2.5 נק״ז</strong> מדויקות בכל חלקי המערכת ותכנון התואר.</li>
-                <li>ביטול חסימות והתנגשויות הדדיות בין הווריאנטים ואפשרות גמישה להזנת ציונים ושיבוץ.</li>
+                <li>שורת פקודות חכמה (Command Palette) לחיפוש מיידי וניווט מהיר בכל 350+ הקורסים האקדמיים, משימות, טאבים ופעולות מערכת.</li>
+                <li>תמיכה מלאה בניווט מקלדת (חצים ↑/↓, בחירה ב-Enter, סגירה ב-Esc) וחיפוש קל לפי קוד או שם קורס.</li>
             </ul>
         </div>
 
-        <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 10px; padding: 12px;">
+        <div style="background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.35); border-radius: 10px; padding: 12px;">
             <div style="font-weight: 700; color: #34d399; display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
-                <span>🪖</span> <span>טירונות עתודאים (2 נק״ז בינארי)</span>
+                <span>⚖️</span> <span>כלי השוואת קורסי בחירה צד-מול-צד (Course Comparator)</span>
             </div>
             <ul style="margin: 0; padding-right: 20px; font-size: 0.82rem; color: #cbd5e1; line-height: 1.55;">
-                <li>הכרה אוטומטית בטירונות עתודאים הנעשית במהלך התואר כשתי נקודות זכות בינאריות (ציון ״עובר״).</li>
-                <li>שקלול ישיר במכסת הנק״ז לתואר (157.5) ובסל הבחירה החופשית, עם מתג ייעודי בביקורת תואר.</li>
+                <li>השוואה מקיפה בין שני קורסים: נק״ז, סיווג רשימה פקולטית, דרישות קדם, וסילבוס.</li>
+                <li><strong>זיהוי אוטומטי של התנגשויות בחינה:</strong> סימון אדום בולט בעת התנגשות תאריכי מועד א׳ או מועד ב׳.</li>
             </ul>
         </div>
 
-        <div style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 10px; padding: 12px;">
+        <div style="background: rgba(245, 158, 11, 0.12); border: 1px solid rgba(245, 158, 11, 0.35); border-radius: 10px; padding: 12px;">
             <div style="font-weight: 700; color: #fbbf24; display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
-                <span>🏎️</span> <span>נבחרת הפורמולה של הטכניון (Formula SAE)</span>
+                <span>📖</span> <span>מדריך זכויות, נהלים ושאלות נפוצות בטכניון (Technion FAQ)</span>
             </div>
             <ul style="margin: 0; padding-right: 20px; font-size: 0.82rem; color: #cbd5e1; line-height: 1.55;">
-                <li><strong>מסלול בחירה חופשית (סמסטר 1 ואילך):</strong> 2 נק״ז בינאריות (עובר) לסמסטר פעיל כבחירה חופשית.</li>
-                <li><strong>מסלול פרויקט תכן גמר (שנה ד׳):</strong> 6 נק״ז סה״כ (3 בסמסטר א׳ + 3 בסמסטר ב׳) עם ציון מספרי המשוקלל בממוצע וסוגר במלואו את חובת פרויקט הגמר הפקולטי במכונות.</li>
+                <li>מאגר מקיף ומסונן: מילואים (הפחתת 2 נק״ז ומועדי ג׳), טירונות עתודה (2 נק״ז בינארי), נבחרת פורמולה SAE (2 נק״ז לסמסטר או 6 נק״ז תכן גמר).</li>
+                <li>חובת קורסי אנגלית, מכסת מל״ג וספורט, תנאי סף לפרויקט גמר ונהלי ערעורי בחינות.</li>
             </ul>
         </div>
 
-        <div style="background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.3); border-radius: 10px; padding: 12px;">
+        <div style="background: rgba(139, 92, 246, 0.12); border: 1px solid rgba(139, 92, 246, 0.35); border-radius: 10px; padding: 12px;">
             <div style="font-weight: 700; color: #a78bfa; display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
-                <span>⚡</span> <span>תכנון תואר והורדה ישירה</span>
+                <span>✨</span> <span>חבילת נגישות ושיפורי ממשק (UI/UX Supercharge)</span>
             </div>
             <ul style="margin: 0; padding-right: 20px; font-size: 0.82rem; color: #cbd5e1; line-height: 1.55;">
-                <li>תיקון מנוע ביקורת התואר (Degree Planner Audit) ושיבוץ קורסים יציב ומדויק.</li>
-                <li>כפתור הורדה ישיר בעיצוב חץ ירוק מהיר (⬇️) להורדת ה-APK לאנדרואיד והתקנה במחשב.</li>
+                <li><strong>מקשי קיצור גלובליים:</strong> 1-6 למעבר בין טאבים, Esc לסגירת כל מודאל, Ctrl+S לסנכרון מיידי, ומקש '?' ללוח מקשים.</li>
+                <li><strong>כפתור חזרה לראש העמוד (🔝):</strong> כפתור צף חלק שמופיע בגלילה מעל 300px.</li>
+                <li><strong>העתקה בלחיצה אחת (📋):</strong> העתקת קודי קורסים, משימות ותשובות נהלים ישירות ללוח עם Toast.</li>
+                <li><strong>קורסים שנצפו לאחרונה ומועדפים:</strong> רצועת 7 הקורסים האחרונים שנפתחו וסימון כוכב (⭐) עם מונה בסרגל.</li>
+                <li><strong>בקר נגישות לגודל טקסט:</strong> התאמת זום וגודל פונט (A- / 100% / A+) נשמרת אוטומטית.</li>
+                <li><strong>איחוד כפתורי הורדה ישירה:</strong> חץ ירוק מואר (⬇️) להורדת APK נייד והתקנה במחשב.</li>
             </ul>
         </div>
     </div>`;
 };
 
 window.openChangelogModal = function(ver) {
-    const currentVer = ver || (typeof APP_CURRENT_REVISION !== 'undefined' && APP_CURRENT_REVISION && APP_CURRENT_REVISION.version) || "2.5.7";
+    const currentVer = ver || (typeof APP_CURRENT_REVISION !== 'undefined' && APP_CURRENT_REVISION && APP_CURRENT_REVISION.version) || "2.5.8";
     const updateModal = document.getElementById("version-update-modal");
     if (!updateModal) return;
     const modTitle = document.getElementById("update-modal-title");
