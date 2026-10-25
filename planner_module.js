@@ -1478,7 +1478,7 @@
         modal = document.createElement('div');
         modal.id = 'planner-graduation-clearance-modal';
         modal.className = 'modal-backdrop active';
-        modal.style.cssText = 'position: fixed; inset: 0; background: rgba(10, 15, 29, 0.88); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 100000; padding: 16px;';
+        modal.style.cssText = 'position: fixed; inset: 0; background: rgba(10, 15, 29, 0.88); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 100050; padding: 16px;';
 
         const statusColor = rulesEval.isClearanceReady ? '#10b981' : '#38bdf8';
         const statusTitle = rulesEval.isClearanceReady 
@@ -1550,6 +1550,7 @@
 
     global.DegreePlanner = global.DegreePlanner || {};
     global.DegreePlanner.openGraduationClearanceModal = openGraduationClearanceModal;
+    global.DegreePlanner.openGraduationAuditModal = openGraduationClearanceModal;
 
     // --------------------------------------------------------------------------
     // Rendering Sub-systems
@@ -1577,7 +1578,7 @@
         modal = document.createElement('div');
         modal.id = 'planner-sport-club-modal';
         modal.className = 'modal-backdrop active';
-        modal.style.cssText = 'position: fixed; inset: 0; background: rgba(10, 15, 29, 0.88); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 100000; padding: 16px;';
+        modal.style.cssText = 'position: fixed; inset: 0; background: rgba(10, 15, 29, 0.88); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 100050; padding: 16px;';
 
         const clubsWithStatus = clubs.map(club => {
             const conflict = (window.PLANNER_CATALOG && typeof window.PLANNER_CATALOG.checkMeetingConflict === 'function')

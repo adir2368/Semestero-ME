@@ -69,8 +69,15 @@
             actionBtn: {
                 label: '🎓 פתח בדיקת זכאות לתואר',
                 onClick: () => {
-                    if (window.DegreePlanner && window.DegreePlanner.openGraduationAuditModal) {
-                        window.DegreePlanner.openGraduationAuditModal();
+                    if (window.DegreePlanner) {
+                        if (typeof window.DegreePlanner.openGraduationClearanceModal === 'function') {
+                            window.DegreePlanner.openGraduationClearanceModal();
+                        } else if (typeof window.DegreePlanner.openGraduationAuditModal === 'function') {
+                            window.DegreePlanner.openGraduationAuditModal();
+                        }
+                    } else {
+                        const btn = document.getElementById('btn-open-graduation-clearance');
+                        if (btn) btn.click();
                     }
                 }
             }
@@ -195,7 +202,7 @@
                 <br><br>
                 • <strong>הורדה ישירה (חץ ירוק ⬇️):</strong> לחץ על כפתור ההורדה הירוק בראש המסך להורדת אפליקציית אנדרואיד רשמית (APK) או הפצה שולחנית למחשב (Windows .exe).<br>
                 • <strong>מרכז הווידג'טים למסך הבית:</strong> זמין ישירות בהגדרות המערכת (Settings ⚙️) לצפייה מקדימה והוספה למסך הבית.<br>
-                • <strong>צריך שוב רענון?</strong> תוכל לפתוח את המדריך והסיור הזה בכל רגע בלחיצה על סמל המצפן (🧭) בסרגל העליון!
+                • <strong>צריך שוב רענון?</strong> תוכל לפתוח את המדריך והסיור הזה בכל רגע דרך ההגדרות (Settings ⚙️), שורת הפקודות (Ctrl+K) או במקש T במקלדת!
             `,
             tab: 'curriculum',
             actionBtn: {

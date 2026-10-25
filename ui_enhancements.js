@@ -239,7 +239,7 @@
         // 2. Global Actions
         const actions = [
             { id: 'act-tour', title: 'מדריך מערכת וסיור אינטראקטיבי (Tutorial Academy)', icon: '🧭', shortcut: 'T', action: () => (window.openTutorialHubModal ? window.openTutorialHubModal() : window.startInteractiveTour && window.startInteractiveTour()) },
-            { id: 'act-audit', title: 'בדיקת זכאות לתואר ודרישות סיום (Graduation Audit)', icon: '🎓', shortcut: 'Ctrl+G', action: () => window.DegreePlanner && window.DegreePlanner.openGraduationAuditModal && window.DegreePlanner.openGraduationAuditModal() },
+            { id: 'act-audit', title: 'בדיקת זכאות לתואר ודרישות סיום (Graduation Audit)', icon: '🎓', shortcut: 'Ctrl+G', action: () => window.DegreePlanner && (window.DegreePlanner.openGraduationClearanceModal ? window.DegreePlanner.openGraduationClearanceModal() : window.DegreePlanner.openGraduationAuditModal && window.DegreePlanner.openGraduationAuditModal()) },
             { id: 'act-faq', title: 'מרכז זכויות ושאלות נפוצות (Technion FAQ & Rights)', icon: '📖', shortcut: 'Ctrl+H', action: () => window.openFaqModal() },
             { id: 'act-compare', title: 'השוואת קורסי בחירה צד-מול-צד (Course Comparator)', icon: '⚖️', shortcut: '', action: () => window.openCourseComparisonModal() },
             { id: 'act-downloads', title: 'מרכז הורדה ישירה (Android APK / מחשב)', icon: '⬇️', shortcut: 'Ctrl+D', action: () => window.openDownloadModal() },
@@ -621,6 +621,7 @@
         div.id = 'course-comparison-modal';
         div.className = 'modal-overlay';
         div.style.display = 'none';
+        div.style.zIndex = '100050';
         div.innerHTML = `
             <div class="modal-content comparison-modal-content" onclick="event.stopPropagation()">
                 <div class="modal-header">
@@ -879,6 +880,7 @@
         div.id = 'academic-faq-modal';
         div.className = 'modal-overlay';
         div.style.display = 'none';
+        div.style.zIndex = '100050';
         div.innerHTML = `
             <div class="modal-content faq-modal-content" onclick="event.stopPropagation()">
                 <div class="modal-header">
@@ -984,6 +986,7 @@
         div.id = 'keyboard-shortcuts-modal';
         div.className = 'modal-overlay';
         div.style.display = 'none';
+        div.style.zIndex = '100050';
         div.innerHTML = `
             <div class="modal-content shortcuts-modal-content" onclick="event.stopPropagation()">
                 <div class="modal-header">

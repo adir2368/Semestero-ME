@@ -881,6 +881,34 @@ body {
 
 .modal-overlay.active {
     display: flex !important;
+    z-index: 100050 !important;
+}
+
+/* High-Priority Active Modals (Ensures all dialogs always appear in front of tours, overlays, and sidebars) */
+.modal-overlay.active,
+.modal-overlay[style*="display: flex"],
+.modal-overlay[style*="display: block"],
+.modal-backdrop.active,
+.modal-backdrop[style*="display: flex"],
+#direct-download-modal.active,
+#direct-download-modal[style*="display: flex"],
+#course-comparison-modal.active,
+#course-comparison-modal[style*="display: flex"],
+#academic-faq-modal.active,
+#academic-faq-modal[style*="display: flex"],
+#keyboard-shortcuts-modal.active,
+#keyboard-shortcuts-modal[style*="display: flex"],
+#planner-graduation-clearance-modal,
+#tutorial-hub-modal.active,
+#tutorial-hub-modal[style*="display: flex"] {
+    z-index: 100050 !important;
+}
+
+.command-palette-overlay.active,
+.command-palette-overlay[style*="display: flex"],
+#command-palette-modal.active,
+#command-palette-modal[style*="display: flex"] {
+    z-index: 100060 !important;
 }
 
 .modal-content {
