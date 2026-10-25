@@ -2617,6 +2617,26 @@ let editingCourseCode = null;
 
 // Initialize app
 document.addEventListener("DOMContentLoaded", () => {
+    // Hide widgets unless running in native phone app directly downloaded to device
+    const isDirectPhoneApp = Boolean(
+        typeof window !== 'undefined' && (
+            (window.Capacitor && (
+                (typeof window.Capacitor.isNativePlatform === 'function' && window.Capacitor.isNativePlatform()) ||
+                window.Capacitor.platform === 'android' ||
+                window.Capacitor.platform === 'ios'
+            )) ||
+            (window.location && (window.location.protocol === 'capacitor:' || window.location.protocol === 'ionic:'))
+        )
+    );
+    const btnWidgetsEl = document.getElementById('btn-open-widgets');
+    if (btnWidgetsEl) {
+        btnWidgetsEl.style.display = isDirectPhoneApp ? 'inline-flex' : 'none';
+    }
+    const cardWidgetsEl = document.getElementById('settings-card-widgets');
+    if (cardWidgetsEl) {
+        cardWidgetsEl.style.display = isDirectPhoneApp ? 'block' : 'none';
+    }
+
     loadSavedState();
     setupEventListeners();
     setupNotionDashboard();
@@ -22823,7 +22843,7 @@ window.getFormattedChangelogHTML = function() {
                 <span>🏎️</span> <span>נבחרת הפורמולה של הטכניון (Formula SAE)</span>
             </div>
             <ul style="margin: 0; padding-right: 20px; font-size: 0.82rem; color: #cbd5e1; line-height: 1.55;">
-                <li><strong>מסלול בחירה חופשית (סמסטר 1 ואילך):</strong> 1 נק״ז בינארית (עובר) לסמסטר פעיל כבחירה חופשית.</li>
+                <li><strong>מסלול בחירה חופשית (סמסטר 1 ואילך):</strong> 2 נק״ז בינאריות (עובר) לסמסטר פעיל כבחירה חופשית.</li>
                 <li><strong>מסלול פרויקט תכן גמר (שנה ד׳):</strong> 6 נק״ז סה״כ (3 בסמסטר א׳ + 3 בסמסטר ב׳) עם ציון מספרי המשוקלל בממוצע וסוגר במלואו את חובת פרויקט הגמר הפקולטי במכונות.</li>
             </ul>
         </div>

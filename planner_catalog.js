@@ -620,9 +620,9 @@
         MALAG: [
             // פעילות צבאית ונבחרות ייצוגיות (טירונות עתודאים ופורמולה טכניון)
             { code: "00920001", altCode: "920001", name: "טירונות עתודאים", credits: 2.0, type: "free", list: "MALAG", isBinaryPass: true, prereqs: [], note: "מוכר לעתודאים כ-2 נק״ז בינארי לתואר כבחירה חופשית" },
-            { code: "00340091", altCode: "034091", name: "פעילות בנבחרת פורמולה א'", credits: 1.0, type: "free", list: "MALAG", isBinaryPass: true, prereqs: [], note: "מסלול בחירה חופשית - 1 נק״ז בינארי לסמסטר פעיל בנבחרת הפורמולה (שנה א׳ ואילך)" },
-            { code: "00340092", altCode: "034092", name: "פעילות בנבחרת פורמולה ב'", credits: 1.0, type: "free", list: "MALAG", isBinaryPass: true, prereqs: [], note: "מסלול בחירה חופשית - 1 נק״ז בינארי לסמסטר פעיל בנבחרת הפורמולה" },
-            { code: "00340093", altCode: "034093", name: "פעילות בנבחרת פורמולה ג'", credits: 1.0, type: "free", list: "MALAG", isBinaryPass: true, prereqs: [], note: "מסלול בחירה חופשית - 1 נק״ז בינארי לסמסטר פעיל בנבחרת הפורמולה" },
+            { code: "00340091", altCode: "034091", name: "פעילות בנבחרת פורמולה א'", credits: 2.0, type: "free", list: "MALAG", isBinaryPass: true, prereqs: [], note: "מסלול בחירה חופשית - 2 נק״ז בינארי לסמסטר פעיל בנבחרת הפורמולה (שנה א׳ ואילך)" },
+            { code: "00340092", altCode: "034092", name: "פעילות בנבחרת פורמולה ב'", credits: 2.0, type: "free", list: "MALAG", isBinaryPass: true, prereqs: [], note: "מסלול בחירה חופשית - 2 נק״ז בינארי לסמסטר פעיל בנבחרת הפורמולה" },
+            { code: "00340093", altCode: "034093", name: "פעילות בנבחרת פורמולה ג'", credits: 2.0, type: "free", list: "MALAG", isBinaryPass: true, prereqs: [], note: "מסלול בחירה חופשית - 2 נק״ז בינארי לסמסטר פעיל בנבחרת הפורמולה" },
             { code: "00340384", altCode: "034384", name: "פרויקט גמר - פורמולה SAE 1", credits: 3.0, type: "final_project", prereqs: ["00340054", "00340371"], note: "מסלול פרויקט תכן הנדסי שנה ד׳ בנבחרת הפורמולה (סמסטר א׳ - 3 נק״ז)" },
             { code: "00340385", altCode: "034385", name: "פרויקט גמר - פורמולה SAE 2", credits: 3.0, type: "final_project", prereqs: ["00340384"], note: "מסלול פרויקט תכן הנדסי שנה ד׳ בנבחרת הפורמולה (סמסטר ב׳ - 3 נק״ז)" },
             { code: "03240262", altCode: "324262", name: "מל״ג - תולדות הפילוסופיה והמדע בעת החדשה", credits: 2.0, type: "humanities", list: "MALAG", prereqs: [], scheduleSlot: { day: "שני", time: "16:30 - 18:30", dayIndex: 1, startTime: "16:30", endTime: "18:30", room: "טאוב 1" } },
