@@ -9280,6 +9280,10 @@ function loadSavedState() {
                     delete t.dueDate;
                 }
             });
+            // Automatically clean any duplicate tasks and consolidate modified information
+            if (window.MoodleSync && typeof window.MoodleSync.deduplicateCourseTasks === 'function') {
+                window.MoodleSync.deduplicateCourseTasks(c);
+            }
         });
     }
 
@@ -15429,7 +15433,7 @@ function updateOrganitCategoryCounts(allTasks) {
 // Renders the Notion Tasks Table body dynamically
 
 // ==========================================================================
-// Tasks Selection, Bulk Actions & Notion Context Menu (v2.6.8)
+// Tasks Selection, Bulk Actions & Notion Context Menu (v2.6.9)
 // ==========================================================================
 window.selectedTasksMap = new Map();
 let lastCheckedTaskIndex = -1;
@@ -15805,6 +15809,58 @@ window.hideTaskContextMenu = hideTaskContextMenu;
 window.updateTasksBulkToolbar = updateTasksBulkToolbar;
 
 
+// Unified Task Refresh & Stale Data Sanitization Engine
+window.refreshTasks = function(options = {}) {
+    const isSilent = options.isSilent === true;
+    const btn = document.getElementById("btn-refresh-tasks");
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<span>⏳</span> <span>מרענן...</span>';
+    }
+
+    try {
+        // 1. Run comprehensive deduplication and merge stale copies across all courses
+        let totalDeduplicated = 0;
+        if (window.MoodleSync && typeof window.MoodleSync.deduplicateAllTasks === 'function') {
+            const res = window.MoodleSync.deduplicateAllTasks();
+            totalDeduplicated = res.removedCount || 0;
+        }
+
+        // 2. If Moodle is connected and configured, trigger full live sync (which matches, updates changed dates/titles, and deduplicates)
+        if (window.MoodleSync && window.MoodleSync.config && window.MoodleSync.config.url) {
+            window.MoodleSync.sync({ isSilent: isSilent }).finally(() => {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<span>🔄</span> <span>רענן משימות</span>';
+                }
+            });
+            return;
+        }
+
+        // 3. If Moodle is not configured with URL, re-calculate states, save state and render views
+        if (typeof recalculateCourseStates === 'function') recalculateCourseStates();
+        if (typeof saveState === 'function') saveState();
+        if (typeof renderNotionTasksTable === 'function') renderNotionTasksTable();
+        if (typeof renderTasksReminderBanner === 'function') renderTasksReminderBanner();
+        if (typeof renderExamGapRunway === 'function') renderExamGapRunway();
+        if (typeof renderUI === 'function') renderUI();
+
+        if (!isSilent && typeof showHudToast === 'function') {
+            const msg = totalDeduplicated > 0
+                ? `✓ המשימות רועננו: הוסרו ${totalDeduplicated} כפילויות ועודכן מידע ששונה 🎯`
+                : `✓ המשימות רועננו בהצלחה: כל המשימות מעודכנות וללא כפילויות 🎯`;
+            showHudToast(msg, 'success');
+        }
+    } finally {
+        if (btn && (!window.MoodleSync || !window.MoodleSync.config || !window.MoodleSync.config.url)) {
+            setTimeout(() => {
+                btn.disabled = false;
+                btn.innerHTML = '<span>🔄</span> <span>רענן משימות</span>';
+            }, 300);
+        }
+    }
+};
+
 function renderNotionTasksTable() {
     const tableBody = document.getElementById("notion-tasks-table-body");
     if (!tableBody) return;
@@ -15829,6 +15885,9 @@ function renderNotionTasksTable() {
         if (course.status !== 'active' && course.status !== 'mastered') return;
         if (courseFilter !== 'all' && course.code !== courseFilter) return;
         if (!Array.isArray(course.tasks)) course.tasks = [];
+        if (window.MoodleSync && typeof window.MoodleSync.deduplicateCourseTasks === 'function') {
+            window.MoodleSync.deduplicateCourseTasks(course);
+        }
         course.tasks.forEach(task => {
             const dueTime = task.dueDate ? (Date.parse(task.dueDate) || Infinity) : Infinity;
             allTasks.push({
@@ -16787,10 +16846,21 @@ function setupAddCustomTaskModal() {
         });
     }
 
+    const refreshTasksBtn = document.getElementById("btn-refresh-tasks");
+    if (refreshTasksBtn) {
+        refreshTasksBtn.addEventListener("click", () => {
+            if (typeof window.refreshTasks === 'function') {
+                window.refreshTasks({ isSilent: false });
+            }
+        });
+    }
+
     const moodleSyncTasksBtn = document.getElementById("btn-sync-moodle-tasks");
     if (moodleSyncTasksBtn) {
         moodleSyncTasksBtn.addEventListener("click", () => {
-            if (window.MoodleSync) {
+            if (typeof window.refreshTasks === 'function') {
+                window.refreshTasks({ isSilent: false });
+            } else if (window.MoodleSync) {
                 if (window.MoodleSync.config && window.MoodleSync.config.url) {
                     window.MoodleSync.sync({ isSilent: false });
                 } else if (typeof window.MoodleSync.openModal === 'function') {
@@ -21539,8 +21609,8 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.10.25-v2.6.8",
-    version: "2.6.8",
+    code: "REV-2026.10.25-v2.6.9",
+    version: "2.6.9",
     build: "20261020_03",
     date: "2026-10-20 01:20",
     description: "גרסה 2.5.2: פתרון מוחלט ללולאת העדכון במובייל וספארי, מנגנון אנטי-רילואד עמיד ב-localStorage, סנכרון גרסאות מלא וקישורי הורדה ישירים לטלפונים"
@@ -23164,7 +23234,7 @@ window.checkRemoteAppVersion = async function(isManualCheck = false) {
         const match = domVerEl.innerText.match(/(?:^|\bv|\s)(\d+\.\d+\.\d+)\b/);
         if (match) currentVer = match[1];
     }
-    currentVer = currentVer || "2.6.8";
+    currentVer = currentVer || "2.6.9";
     const statusTextEl = document.getElementById("version-check-status-text");
     const footerBadgeEl = document.getElementById("footer-version-badge");
     const checkBtn = document.getElementById("btn-check-version-updates");

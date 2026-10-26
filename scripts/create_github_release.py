@@ -17,9 +17,9 @@ ZIP_PATH = os.path.join(ROOT, "Semestero-ME-Windows-x64.zip")
 
 with open(os.path.join(ROOT, "package.json"), "r", encoding="utf-8") as f:
     pkg = json.load(f)
-VERSION = pkg.get("version", "2.6.2")
+VERSION = pkg.get("version", "2.6.9")
 TAG = f"v{VERSION}"
-NAME = f"Semestero ME v{VERSION} - Main Windows First Tour, Transition Delay, Bottom Bar Protection & Guest Privacy"
+NAME = f"Semestero ME v{VERSION} - Task Deduplication Engine, Stale Data Overwrite & Instant Refresh"
 
 def get_github_token():
     try:
@@ -58,24 +58,20 @@ def upload_asset(release, token, file_path, asset_name, content_type):
             del_req = urllib.request.Request(asset["url"], headers=headers, method="DELETE")
             try:
                 with urllib.request.urlopen(del_req) as del_res:
-                    print(f"[Release] Old asset {asset_name} deleted.")
+                    print(f"[Release] Deleted old asset {asset_name}.")
             except Exception as e:
-                print(f"[Release] Warning: Could not delete old asset {asset_name}:", e)
+                print(f"[Release] Error deleting asset {asset_name}:", e)
 
     upload_url = release["upload_url"].split("{")[0] + f"?name={urllib.parse.quote(asset_name)}"
-    upload_headers = {
-        "Authorization": f"Bearer {token}",
-        "Content-Type": content_type,
-        "Content-Length": str(file_size),
-        "User-Agent": "Semestero-ME-Release-Agent"
-    }
-
     with open(file_path, "rb") as f:
         data = f.read()
 
-    req_upload = urllib.request.Request(upload_url, data=data, headers=upload_headers, method="POST")
+    headers["Content-Type"] = content_type
+    headers["Content-Length"] = str(len(data))
+
+    req = urllib.request.Request(upload_url, data=data, headers=headers, method="POST")
     try:
-        with urllib.request.urlopen(req_upload) as res:
+        with urllib.request.urlopen(req) as res:
             uploaded = json.loads(res.read().decode())
             print(f"[Release] {asset_name} uploaded successfully! URL: {uploaded.get('browser_download_url')}")
             return uploaded.get("browser_download_url")
@@ -93,37 +89,28 @@ def main():
         "User-Agent": "Semestero-ME-Release-Agent"
     }
 
-    body_notes = f"""## מה חדש בגרסה v{VERSION} 🚀🧭🛡️
+    body_notes = f"""## מה חדש בגרסה v{VERSION} 🚀🧹🎯
     
-### 1. הצגת כל 6 החלונות המרכזיים תחילה בסיור המודרך (Main Windows First Tour)
-- **סדר מסלול לוגי ומקיף**: הסיור פותח במעבר שלב-אחר-שלב בין כל ששת חלונות הליבה של סמסטרו לפי הסדר הטבעי:
-  1. **מפת קורסים (Curriculum Tree)** - עץ הקדמים הפקולטי והארת שרשרת דרישות.
-  2. **תכנון תואר (Degree Planner)** - שיבוץ רב-סמסטריאלי, ניהול עומסים ובדיקת זכאות ל-157.5 נק״ז.
-  3. **לוח משימות (Tasks Board)** - ניהול מטלות בסגנון Notion, בחירה מרובה וסנכרון Moodle.
-  4. **לוח שנה אקדמי (Academic Calendar)** - לוח מועדי בחינות, זמני סמסטר ומעקב חופשות.
-  5. **מערכת שעות שבועית (Timetable Studio)** - מחולל קומבינציות וסנכרון CheeseFork.
-  6. **הגדרות וגיבוי (Settings & Cloud Backup)** - הורדות למחשב ולנייד, גיבוי מקומי וענן.
-  - בסיום 6 החלונות המרכזיים מודגמים כלי העל: **שורת פקודות חכמה (Ctrl+K)** ו**מדריך זכויות אקדמיות ויועץ מילואים**.
+### 1. מנוע מניעת כפילויות במשימות (Task Deduplication Engine)
+- **זיהוי ומיזוג כפילויות חכם**: בעת רענון או סנכרון המשימות, המערכת מזהה כפילויות לפי:
+  - מזהה אירוע מודל ייחודי (`moodleEventId` / `moodleUid`).
+  - קישור ישיר למטלה במודל (`mod/assign/view.php?id=...`).
+  - כותרת מנורמלת ומועדי בחינה זהים (מועד א' / מועד ב') בתוך אותו הקורס.
+- **שימור התקדמות הסטודנט**: אם אחד מהעותקים סומן כהושלם (`completed === true`), הסטטוס נשמר בקפידה ולא הולך לאיבוד.
+- **שימור שכפולים יזומים**: שכפולים ידניים שבוצעו על ידי המשתמש (המכילים `(העתק)`) נשמרים ולא נמחקים.
 
-### 2. השהיית מעבר מודעת (750ms Transition HUD) והארת טאב פעיל
-- **השהיית מעבר מכוונת**: בעת מעבר בין חלונות, המערכת מציגה באנר HUD צף יוקרתי (`🧭 עובר לחלון: ...`) וממתינה 750ms כדי שהסטודנט ישים לב בדיוק לאיזה עמוד הוא הגיע.
-- **הדגשת טאב בסרגל הניווט (`tour-nav-tab-active-glow`)**: הטאב של החלון הנוכחי בסרגל מקבל פעימת ניאון זוהרת כדי שהסטודנטים יקשרו מיד בין התוכן למיקומו בסרגל.
+### 2. דריסת מידע ישן ששונה (Stale Information Overwrite)
+- **עדכון דחיות והארכות מועדים**: בעת דחיית מועד הגשה על ידי המרצה במודל, המערכת מעדכנת אוטומטית את תאריך היעד הישן לחדש ומוחקת עותקים ישנים בעלי תאריכים שגויים.
+- **עדכון שינויי כותרות ותיאורים**: תיקוני שמות מטלות שהמרצה עדכן במודל מוחלים מיד על המשימה הקיימת במקום יצירת משימה כפולה.
+- **סנכרון קישורי הגשה**: עדכון מיידי של כתובת ה-URL במודל עבור כל מטלה.
 
-### 3. הגנה מפני הסתרת סרגל החלונות (Bottom Bar Collision Protection)
-- חישוב גובה סרגל הניווט התחתון (`.nav-tabs-left`) בזמן אמת והגדרת מרווח ביטחון קפדני (`safeBottomClearance = 76px+`).
-- היפוך אוטומטי של בועת הטקסט כלפי מעלה (`placement: 'top'`) כאשר יש חשש להסתרה.
-- סרגל החלונות שומר על נראות ואינטראקטיביות 100% לאורך כל הסיור (`z-index: 99998`).
-- תג כותרת ייעודי בבועה: `📍 חלון נוכחי: [שם החלון] ([מספר] מתוך 6)`.
+### 3. כפתור רענון משימות ייעודי (Dedicated Tasks Refresh)
+- כפתור **"🔄 רענן משימות"** נוסף בסרגל העליון של לוח המשימות (`btn-refresh-tasks`).
+- לחיצה עליו מנקה כפילויות בכל הקורסים, מסנכרנת מול המודל ומעדכנת את התצוגה, הבאנר ורצועת המבחנים.
 
-### 4. פרטיות והסרת קישורים אישיים עבור אורחים (Guest Privacy Sanitization)
-- ביקורת עומק וטיהור כל הקישורים והטוקנים של אדיר עבור משתמשי אורח ולא מחוברים:
-  - הקישור ל-CheeseFork פותח סמסטר גנרי נקי (`?semester=202601`) ללא ה-UID האישי.
-  - סנכרון לוח שנה Webcal Gist נשאר חסוי ואינו מוצג או מועתק כלל למשתמשים שאינם אדיר.
-  - הסרת טוקנים וכתובות Moodle אישיות מקבצי ה-JSON ומצב המערכת.
-
-### 5. הפעלת סיור אך ורק בסיום הרשמה או דרך הגדרות
-- הסיור לעולם אינו קופץ אוטומטית בהפעלת האפליקציה למשתמשים מחוברים.
-- מופעל אך ורק בסיום תהליך ההרשמה (Onboarding) או בלחיצה ידנית על כפתור הסיור בהגדרות/מרכז ההדרכה (או מקש T)."""
+### 4. בידוד מלא של נתוני אורח ואבטחת פרטיות
+- הפרדה מלאה של משתמשי אורח מנתוני מפתח בכל הפלטפורמות.
+- מערכת שעות, יומני Google וקישורי CheeseFork נקיים וגנריים עבור כל משתמש חדש."""
 
     req_tag = urllib.request.Request(f"https://api.github.com/repos/{REPO}/releases/tags/{TAG}", headers=headers)
     release = None
@@ -158,7 +145,6 @@ def main():
             print(e.read().decode())
             sys.exit(1)
     else:
-        # Update existing release body notes to include desktop links
         update_url = f"https://api.github.com/repos/{REPO}/releases/{release['id']}"
         payload = {
             "name": NAME,

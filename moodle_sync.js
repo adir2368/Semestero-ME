@@ -394,6 +394,208 @@
         },
 
         /**
+         * Normalizes task title for robust duplicate detection and matching across edits.
+         * Preserves explicit user clones "(העתק)".
+         */
+        normalizeTaskTitle(title, courseName) {
+            if (!title) return '';
+            let t = String(title).trim().toLowerCase();
+            if (courseName) {
+                const cClean = String(courseName).trim().toLowerCase().replace(/[\s\-_:.,()״'"׳]+/g, ' ');
+                t = t.replace(cClean, ' ');
+            }
+            // Remove Moodle boilerplate
+            t = t.replace(/^יש להגיש את\s*['"״׳]?/i, '');
+            t = t.replace(/['"״׳]$/, '');
+            // Remove generic prefixes
+            t = t.replace(/^(מטלת בית|תרגיל בית|תרגיל|מטלה|שיעורי בית|hw|assignment|task|דו"ח|דוח מעבדה|דוח|מבחן|בחינה)\s*[:#-]?\s*/i, '');
+            // Remove update/extension notes that professors append
+            t = t.replace(/\(בונוס.*?\)/g, '');
+            t = t.replace(/\(הארכה.*?\)/g, '');
+            t = t.replace(/\(מתוקן.*?\)/g, '');
+            t = t.replace(/\(הגשה.*?\)/g, '');
+            // Strip punctuation and extra spaces
+            t = t.replace(/[\s\-_:.,()״'"׳]+/g, ' ').trim();
+            return t;
+        },
+
+        extractMoodleId(task) {
+            if (!task) return null;
+            if (task.moodleEventId && /^\d+$/.test(String(task.moodleEventId).trim())) {
+                return String(task.moodleEventId).trim();
+            }
+            if (task.moodleUid) {
+                const m = String(task.moodleUid).match(/^(\d+)/);
+                if (m) return m[1];
+            }
+            if (task.moodleUrl) {
+                const m = String(task.moodleUrl).match(/[?&]id=(\d+)/);
+                if (m) return m[1];
+            }
+            return null;
+        },
+
+        detectTaskType(title) {
+            const t = (title || '').toLowerCase();
+            if (/מועד\s*[אב]|מבחן|בחינה|exam|midterm/i.test(t)) return 'exam';
+            if (/פרויקט|דוח מעבדה|מעבדה|lab|project/i.test(t)) return 'project';
+            if (/בוחן|quiz/i.test(t)) return 'quiz';
+            return 'hw';
+        },
+
+        areTasksDuplicates(t1, t2, courseName) {
+            if (!t1 || !t2) return false;
+            if (t1.id && t2.id && t1.id === t2.id) return true;
+
+            // Never deduplicate explicit user copies
+            const title1 = t1.title || '';
+            const title2 = t2.title || '';
+            if (title1.includes('(העתק)') || title2.includes('(העתק)')) {
+                return title1 === title2 && t1.id === t2.id;
+            }
+
+            // Check Moodle IDs (numeric event ID or assignment ID)
+            const mId1 = this.extractMoodleId(t1);
+            const mId2 = this.extractMoodleId(t2);
+            if (mId1 && mId2 && mId1 === mId2) return true;
+
+            // Check exact Moodle URLs
+            if (t1.moodleUrl && t2.moodleUrl && t1.moodleUrl.trim().toLowerCase() === t2.moodleUrl.trim().toLowerCase()) {
+                return true;
+            }
+
+            // Check Exam Moed match within same course
+            const isExam1 = t1.type === 'exam' || /מועד\s*[אב]/i.test(title1);
+            const isExam2 = t2.type === 'exam' || /מועד\s*[אב]/i.test(title2);
+            if (isExam1 && isExam2) {
+                const isMoedA1 = /מועד\s*א/i.test(title1) || (t1.id && t1.id.endsWith('_ex'));
+                const isMoedA2 = /מועד\s*א/i.test(title2) || (t2.id && t2.id.endsWith('_ex'));
+                if (isMoedA1 && isMoedA2) return true;
+
+                const isMoedB1 = /מועד\s*ב/i.test(title1) || (t1.id && t1.id.endsWith('_ex_b'));
+                const isMoedB2 = /מועד\s*ב/i.test(title2) || (t2.id && t2.id.endsWith('_ex_b'));
+                if (isMoedB1 && isMoedB2) return true;
+            }
+
+            // Check Normalized Titles
+            const norm1 = this.normalizeTaskTitle(title1, courseName);
+            const norm2 = this.normalizeTaskTitle(title2, courseName);
+            if (norm1 && norm2 && norm1 === norm2) {
+                return true;
+            }
+
+            return false;
+        },
+
+        mergeTaskPair(primary, secondary) {
+            // Keep most detailed/up-to-date title
+            const t1 = primary.title || '';
+            const t2 = secondary.title || '';
+            let chosenTitle = t1;
+            if (t2.length > t1.length && !t1.includes('בונוס') && !t1.includes('(העתק)')) {
+                chosenTitle = t2;
+            } else if (t2.includes('בונוס') && !t1.includes('בונוס')) {
+                chosenTitle = t2;
+            }
+
+            // Date resolution: prefer non-empty date, or later date if both exist (extension/postponement)
+            let chosenDate = primary.dueDate || secondary.dueDate || '';
+            let chosenTimestamp = primary.dueTimestamp || secondary.dueTimestamp || 0;
+            if (primary.dueDate && secondary.dueDate && primary.dueDate !== secondary.dueDate) {
+                const d1 = Date.parse(primary.dueDate) || 0;
+                const d2 = Date.parse(secondary.dueDate) || 0;
+                if (d2 > d1) {
+                    chosenDate = secondary.dueDate;
+                    chosenTimestamp = secondary.dueTimestamp || d2;
+                } else {
+                    chosenDate = primary.dueDate;
+                    chosenTimestamp = primary.dueTimestamp || d1;
+                }
+            }
+
+            // Completed status: completed progress is strictly preserved
+            const isDone = primary.completed === true || primary.status === 'done' || 
+                           secondary.completed === true || secondary.status === 'done';
+
+            return {
+                id: primary.id || secondary.id,
+                title: chosenTitle,
+                type: primary.type || secondary.type || 'hw',
+                dueDate: chosenDate,
+                dueTimestamp: chosenTimestamp,
+                xp: Math.max(primary.xp || 50, secondary.xp || 50),
+                completed: isDone,
+                status: isDone ? 'done' : (primary.status !== 'not_started' ? primary.status : secondary.status),
+                grade: (primary.grade !== undefined && primary.grade !== null) ? primary.grade : secondary.grade,
+                moodleEventId: primary.moodleEventId || secondary.moodleEventId || this.extractMoodleId(secondary) || this.extractMoodleId(primary),
+                moodleUid: primary.moodleUid || secondary.moodleUid,
+                moodleUrl: primary.moodleUrl || secondary.moodleUrl,
+                source: primary.source || secondary.source || (this.extractMoodleId(primary) ? 'moodle' : undefined),
+                pinned: !!(primary.pinned || secondary.pinned),
+                notes: primary.notes || secondary.notes || undefined,
+                comments: (Array.isArray(primary.comments) || Array.isArray(secondary.comments))
+                    ? Array.from(new Set([...(primary.comments || []), ...(secondary.comments || [])]))
+                    : undefined
+            };
+        },
+
+        deduplicateCourseTasks(course) {
+            if (!course || !Array.isArray(course.tasks) || course.tasks.length <= 1) {
+                return { tasks: course ? (course.tasks || []) : [], removedCount: 0 };
+            }
+
+            const deduped = [];
+            let removedCount = 0;
+
+            for (let i = 0; i < course.tasks.length; i++) {
+                const candidate = course.tasks[i];
+                let mergedIndex = -1;
+
+                for (let j = 0; j < deduped.length; j++) {
+                    if (this.areTasksDuplicates(deduped[j], candidate, course.name)) {
+                        mergedIndex = j;
+                        break;
+                    }
+                }
+
+                if (mergedIndex >= 0) {
+                    deduped[mergedIndex] = this.mergeTaskPair(deduped[mergedIndex], candidate);
+                    removedCount++;
+                } else {
+                    deduped.push(candidate);
+                }
+            }
+
+            course.tasks = deduped;
+            return { tasks: deduped, removedCount };
+        },
+
+        deduplicateAllTasks() {
+            if (!window.gameState || !window.gameState.courses) {
+                return { totalCourses: 0, removedCount: 0 };
+            }
+
+            let totalRemoved = 0;
+            let affectedCourses = 0;
+
+            Object.values(window.gameState.courses).forEach(course => {
+                if (course && Array.isArray(course.tasks) && course.tasks.length > 1) {
+                    const res = this.deduplicateCourseTasks(course);
+                    if (res.removedCount > 0) {
+                        totalRemoved += res.removedCount;
+                        affectedCourses++;
+                    }
+                }
+            });
+
+            if (totalRemoved > 0) {
+                console.log(`[MoodleSync] Deduplicated ${totalRemoved} tasks across ${affectedCourses} courses.`);
+            }
+
+            return { totalCourses: affectedCourses, removedCount: totalRemoved };
+        },
+
+        /**
          * Main Sync execution
          */
         async sync(options = {}) {
@@ -427,11 +629,16 @@
                 this.config.lastSyncCount = result.syncedTotal;
                 this.saveConfig();
 
-                const successMsg = `⚡ סונכרן בהצלחה! ${result.newCount} מטלות חדשות, ${result.updatedCount} תאריכים עודכנו (${result.syncedTotal} סה״כ ביומן).`;
+                const successMsg = result.removedDuplicatesCount > 0
+                    ? `⚡ סונכרן בהצלחה! ${result.newCount} חדשות, ${result.updatedCount} עודכנו, ${result.removedDuplicatesCount} כפילויות נוקו (${result.syncedTotal} סה״כ ביומן).`
+                    : `⚡ סונכרן בהצלחה! ${result.newCount} חדשות, ${result.updatedCount} עודכנו (${result.syncedTotal} סה״כ ביומן).`;
                 this.setStatus(successMsg, 'success');
 
                 if (!isSilent && typeof showHudToast === 'function') {
-                    showHudToast(`מודל סונכרן: ${result.newCount} מטלות חדשות נוספו 🎓`, 'success');
+                    const toastMsg = result.removedDuplicatesCount > 0
+                        ? `מודל סונכרן: ${result.newCount} חדשות, ${result.updatedCount} עודכנו, ${result.removedDuplicatesCount} כפילויות נוקו 🎓`
+                        : `מודל סונכרן: ${result.newCount} חדשות, ${result.updatedCount} עודכנו 🎓`;
+                    showHudToast(toastMsg, 'success');
                 }
 
                 // If new tasks were found, trigger an NTFY notification
@@ -500,7 +707,10 @@
                 try {
                     const content = e.target.result;
                     const result = this.parseAndApplyIcs(content);
-                    this.setStatus(`⚡ נטען בהצלחה מקובץ! ${result.newCount} חדשות, ${result.updatedCount} עודכנו (${result.syncedTotal} סה״כ).`, 'success');
+                    const fileStatus = result.removedDuplicatesCount > 0
+                        ? `⚡ נטען מקובץ! ${result.newCount} חדשות, ${result.updatedCount} עודכנו, ${result.removedDuplicatesCount} כפילויות נוקו (${result.syncedTotal} סה״כ).`
+                        : `⚡ נטען מקובץ! ${result.newCount} חדשות, ${result.updatedCount} עודכנו (${result.syncedTotal} סה״כ).`;
+                    this.setStatus(fileStatus, 'success');
                     if (typeof showHudToast === 'function') {
                         showHudToast(`יומן מודל יובא מקובץ בהצלחה (${result.syncedTotal} אירועים) 🎓`, 'success');
                     }
@@ -536,6 +746,7 @@
             const PAST_LOOKBACK_MS = 180 * 24 * 60 * 60 * 1000;
             let newCount = 0;
             let updatedCount = 0;
+            let removedDuplicatesCount = 0;
             let syncedTotal = 0;
 
             if (!window.gameState || !window.gameState.courses) {
@@ -636,31 +847,74 @@
                     }
                 }
 
-                // Check if task already exists
-                const existingTask = targetCourse.tasks.find(t => 
-                    t.moodleUid === uid || 
-                    t.moodleEventId === eventId || 
-                    (t.title && t.title.trim().toLowerCase() === cleanTitle.toLowerCase())
-                );
+                const incomingMock = {
+                    title: cleanTitle,
+                    moodleUid: uid,
+                    moodleEventId: eventId,
+                    moodleUrl: moodleUrl,
+                    dueDate: formattedDate,
+                    dueTimestamp: dueDateObj.getTime()
+                };
 
-                if (existingTask) {
-                    // Update due date if changed by lecturer
-                    if (existingTask.dueDate !== formattedDate || existingTask.dueTimestamp !== dueDateObj.getTime()) {
-                        existingTask.dueDate = formattedDate;
-                        existingTask.dueTimestamp = dueDateObj.getTime();
+                // Find ALL existing tasks matching this incoming Moodle event (handling duplicates & title edits)
+                const matchingIndices = [];
+                for (let j = 0; j < targetCourse.tasks.length; j++) {
+                    if (this.areTasksDuplicates(targetCourse.tasks[j], incomingMock, targetCourse.name)) {
+                        matchingIndices.push(j);
+                    }
+                }
+
+                if (matchingIndices.length > 0) {
+                    const primary = targetCourse.tasks[matchingIndices[0]];
+                    let modified = false;
+
+                    // Update due date if changed or postponed by lecturer
+                    if (primary.dueDate !== formattedDate || primary.dueTimestamp !== dueDateObj.getTime()) {
+                        primary.dueDate = formattedDate;
+                        primary.dueTimestamp = dueDateObj.getTime();
+                        modified = true;
+                    }
+
+                    // Update title if changed or clarified by lecturer
+                    if (primary.title !== cleanTitle && cleanTitle) {
+                        primary.title = cleanTitle;
+                        modified = true;
+                    }
+
+                    if (moodleUrl && primary.moodleUrl !== moodleUrl) {
+                        primary.moodleUrl = moodleUrl;
+                        modified = true;
+                    }
+
+                    primary.moodleUid = uid;
+                    primary.moodleEventId = eventId;
+                    primary.source = 'moodle';
+
+                    if (modified) {
                         updatedCount++;
                     }
-                    existingTask.moodleUid = uid;
-                    existingTask.moodleEventId = eventId;
-                    if (moodleUrl) {
-                        existingTask.moodleUrl = moodleUrl;
+
+                    // If multiple duplicate tasks matched this event, merge & purge redundant copies!
+                    if (matchingIndices.length > 1) {
+                        for (let k = 1; k < matchingIndices.length; k++) {
+                            const duplicate = targetCourse.tasks[matchingIndices[k]];
+                            if (duplicate.completed || duplicate.status === 'done') {
+                                primary.completed = true;
+                                primary.status = 'done';
+                            }
+                            if (duplicate.pinned) primary.pinned = true;
+                            if (duplicate.notes && !primary.notes) primary.notes = duplicate.notes;
+                            removedDuplicatesCount++;
+                        }
+                        const removeSet = new Set(matchingIndices.slice(1));
+                        targetCourse.tasks = targetCourse.tasks.filter((_, idx) => !removeSet.has(idx));
                     }
                 } else {
-                    // Create new task
+                    // Create new task with properly detected type
                     const newTask = {
                         id: `task_moodle_${eventId}_${Date.now()}`,
                         title: cleanTitle,
-                        type: 'assignment',
+                        type: this.detectTaskType(cleanTitle),
                         dueDate: formattedDate,
                         dueTimestamp: dueDateObj.getTime(),
                         xp: 50,
@@ -676,8 +930,12 @@
                 }
             }
 
+            // Global course-wide deduplication pass across all courses in gameState
+            const dedupReport = this.deduplicateAllTasks();
+            removedDuplicatesCount += dedupReport.removedCount;
+
             // If changes were made, re-evaluate app state and render UI
-            if (newCount > 0 || updatedCount > 0) {
+            if (newCount > 0 || updatedCount > 0 || removedDuplicatesCount > 0) {
                 if (typeof window.recalculateCourseStates === 'function') {
                     window.recalculateCourseStates();
                 }
@@ -689,7 +947,7 @@
                 }
             }
 
-            return { newCount, updatedCount, syncedTotal };
+            return { newCount, updatedCount, removedDuplicatesCount, syncedTotal };
         },
 
         /**
