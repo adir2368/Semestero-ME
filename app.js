@@ -11268,21 +11268,44 @@ function setupEventListeners() {
                     window.MoodleSync.saveConfig();
                     window.MoodleSync.sync({ isSilent: false });
                 } else {
-                    window.MoodleSync.runMockSync();
+                    if (typeof showToastNotification === 'function') {
+                        showToastNotification('⚠️ אינך מחובר למודל הטכניון! נא להזין קישור יומן תחילה.', 'warning');
+                    }
+                    if (typeof window.MoodleSync.setStatus === 'function') {
+                        window.MoodleSync.setStatus('⚠️ אינך מחובר למודל הטכניון! נא להזין קישור יומן תחילה.', 'error');
+                    }
+                    if (typeof window.MoodleSync.openModal === 'function') {
+                        window.MoodleSync.openModal();
+                    }
                 }
             }
         });
     }
 
     // Cheesefork Import Button
-    document.getElementById("btn-cheesefork-import").addEventListener("click", () => {
-        const url = document.getElementById("cheesefork-url").value.trim();
-        if (!url) {
-            alert("נא להזין קישור שיתוף של CheeseFork!");
-            return;
-        }
-        importFromCheesefork(url);
-    });
+    const btnCfImport = document.getElementById("btn-cheesefork-import");
+    if (btnCfImport) {
+        btnCfImport.addEventListener("click", () => {
+            const urlInput = document.getElementById("cheesefork-url");
+            const url = (urlInput && urlInput.value.trim()) || localStorage.getItem('ast_cheesefork_url') || "";
+            if (!url) {
+                const msg = "⚠️ אינך מחובר ל-CheeseFork! נא להזין קישור שיתוף של CheeseFork כדי לסנכרן.";
+                if (typeof showToastNotification === 'function') {
+                    showToastNotification(msg, 'warning');
+                } else {
+                    alert(msg);
+                }
+                const statusDiv = document.getElementById("cheesefork-import-status");
+                if (statusDiv) {
+                    statusDiv.style.color = "#ef4444";
+                    statusDiv.innerText = msg;
+                }
+                if (urlInput) urlInput.focus();
+                return;
+            }
+            importFromCheesefork(url);
+        });
+    }
 }
 
 // Toggle display of inline task forms in modal
@@ -15847,9 +15870,9 @@ window.refreshTasks = function(options = {}) {
 
         if (!isSilent && typeof showHudToast === 'function') {
             const msg = totalDeduplicated > 0
-                ? `✓ המשימות רועננו: הוסרו ${totalDeduplicated} כפילויות ועודכן מידע ששונה 🎯`
-                : `✓ המשימות רועננו בהצלחה: כל המשימות מעודכנות וללא כפילויות 🎯`;
-            showHudToast(msg, 'success');
+                ? `✓ משימות מקומיות רועננו: הוסרו ${totalDeduplicated} כפילויות (מודל אינו מחובר) 🎯`
+                : `✓ משימות מקומיות רועננו בהצלחה (מודל הטכניון אינו מחובר — ניתן לחבר בסרגל) 🎯`;
+            showHudToast(msg, 'info');
         }
     } finally {
         if (btn && (!window.MoodleSync || !window.MoodleSync.config || !window.MoodleSync.config.url)) {
@@ -16858,16 +16881,22 @@ function setupAddCustomTaskModal() {
     const moodleSyncTasksBtn = document.getElementById("btn-sync-moodle-tasks");
     if (moodleSyncTasksBtn) {
         moodleSyncTasksBtn.addEventListener("click", () => {
+            const hasMoodle = !!(window.MoodleSync && window.MoodleSync.config && window.MoodleSync.config.url);
+            if (!hasMoodle) {
+                if (typeof showHudToast === 'function') {
+                    showHudToast('⚠️ אינך מחובר למודל הטכניון! יש להזין קישור לוח שנה כדי לסנכרן.', 'warning');
+                } else if (typeof showToastNotification === 'function') {
+                    showToastNotification('⚠️ אינך מחובר למודל הטכניון! יש להזין קישור לוח שנה כדי לסנכרן.', 'warning');
+                }
+                if (window.MoodleSync && typeof window.MoodleSync.openModal === 'function') {
+                    window.MoodleSync.openModal();
+                }
+                return;
+            }
             if (typeof window.refreshTasks === 'function') {
                 window.refreshTasks({ isSilent: false });
             } else if (window.MoodleSync) {
-                if (window.MoodleSync.config && window.MoodleSync.config.url) {
-                    window.MoodleSync.sync({ isSilent: false });
-                } else if (typeof window.MoodleSync.openModal === 'function') {
-                    window.MoodleSync.openModal();
-                }
-            } else if (typeof showHudToast === 'function') {
-                showHudToast('מודול סנכרון מודל אינו זמין כרגע', 'info');
+                window.MoodleSync.sync({ isSilent: false });
             }
         });
     }
@@ -20253,21 +20282,54 @@ function openCalendarSyncModal() {
     const copyBtn = document.getElementById("btn-copy-webcal-url");
     const input = document.getElementById("sync-webcal-url-input");
     const hint = document.getElementById("copy-webcal-url-hint");
+    const statusBadge = document.getElementById("calendar-sync-status-badge");
+    const statusDesc = document.getElementById("calendar-sync-status-desc");
     const isAdir = (window.AuthSync && typeof window.AuthSync.isAdirActive === 'function' && window.AuthSync.isAdirActive());
+    const isConnected = !!(isAdir && CLOUD_GIST_SYNC.token && CLOUD_GIST_SYNC.webcalUrl);
+
+    if (statusBadge) {
+        if (isConnected) {
+            statusBadge.innerText = "🟢 מחובר ומסונכרן לענן (Google Calendar)";
+            statusBadge.style.background = "rgba(16, 185, 129, 0.15)";
+            statusBadge.style.color = "#34d399";
+            statusBadge.style.borderColor = "rgba(16, 185, 129, 0.4)";
+        } else {
+            statusBadge.innerText = "⚪ אינו מחובר לסנכרון ענן (Google Calendar)";
+            statusBadge.style.background = "rgba(148, 163, 184, 0.15)";
+            statusBadge.style.color = "#94a3b8";
+            statusBadge.style.borderColor = "rgba(148, 163, 184, 0.4)";
+        }
+    }
+
+    if (statusDesc) {
+        if (isConnected) {
+            statusDesc.innerText = "היומן שלך מחובר ומסונכרן אוטומטית ל-Google Calendar / Apple Calendar בכל שינוי ובכל לילה בחצות (00:00).";
+        } else {
+            statusDesc.innerText = "סנכרון ענן אוטומטי (Google Calendar Webcal) אינו מחובר. באפשרותך להתחבר לחשבונך או להוריד קובץ יומן מקומי (ICS).";
+        }
+    }
 
     if (input) {
-        if (isAdir) {
+        if (isConnected) {
             input.value = CLOUD_GIST_SYNC.webcalUrl;
             if (hint) hint.innerText = "💡 קישור זה מזין ישירות את Apple Calendar (iPhone/Mac), Google Calendar (Android/Web), ו-Outlook.";
         } else {
             input.value = "";
-            input.placeholder = "סנכרון ענן אישי מופעל עבור חשבונות מחוברים בלבד";
-            if (hint) hint.innerText = "💡 באפשרותך להוריד קובץ .ics מקומי של המערכת שלך באמצעות הכפתור מטה.";
+            input.placeholder = "אינך מחובר לסנכרון ענן — התחבר לחשבונך לקבלת קישור אישי";
+            if (hint) hint.innerText = "💡 אינך מחובר לחשבון סנכרון ענן. באפשרותך להוריד קובץ .ics מקומי של המערכת שלך באמצעות הכפתור מטה.";
         }
     }
 
     if (copyBtn && input) {
         copyBtn.onclick = () => {
+            if (!input.value) {
+                if (typeof showToastNotification === 'function') {
+                    showToastNotification("⚠️ אינך מחובר לסנכרון ענן. התחבר לחשבונך כדי לקבל קישור יומן אישי.", 'warning');
+                } else {
+                    alert("⚠️ אינך מחובר לסנכרון ענן. התחבר לחשבונך כדי לקבל קישור יומן אישי.");
+                }
+                return;
+            }
             navigator.clipboard.writeText(input.value).then(() => {
                 copyBtn.innerText = "✓ הועתק!";
                 if (hint) hint.innerText = "✓ קישור ה-Webcal הועתק ללוח! הדבק אותו באפליקציית היומן במכשיר שלך.";
@@ -20286,7 +20348,7 @@ function openCalendarSyncModal() {
 
     const triggerBtn = document.getElementById("btn-trigger-cloud-sync");
     if (triggerBtn) {
-        if (!isAdir) {
+        if (!isConnected) {
             triggerBtn.style.display = "none";
         } else {
             triggerBtn.style.display = "inline-flex";
@@ -21609,8 +21671,8 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.10.25-v2.6.9",
-    version: "2.6.9",
+    code: "REV-2026.10.26-v2.7.0",
+    version: "2.7.0",
     build: "20261020_03",
     date: "2026-10-20 01:20",
     description: "גרסה 2.5.2: פתרון מוחלט ללולאת העדכון במובייל וספארי, מנגנון אנטי-רילואד עמיד ב-localStorage, סנכרון גרסאות מלא וקישורי הורדה ישירים לטלפונים"
@@ -22334,9 +22396,35 @@ function setupSettingsPageButtons() {
     }
 
 async function triggerManualCalendarPull() {
+    const webhookInput = document.getElementById("input-apps-script-webhook");
+    const webhookUrl = (webhookInput && webhookInput.value.trim()) || (window.gameState && window.gameState.appsScriptWebhook) || "";
+    const examsInput = document.getElementById("setting-cal-id-exams");
+    const hwInput = document.getElementById("setting-cal-id-hw");
+    const practiceInput = document.getElementById("setting-cal-id-practice");
+    const examsCal = (examsInput && examsInput.value.trim()) || (window.gameState && window.gameState.googleCalendarIds && window.gameState.googleCalendarIds.exams) || "";
+    const hwCal = (hwInput && hwInput.value.trim()) || (window.gameState && window.gameState.googleCalendarIds && window.gameState.googleCalendarIds.hw) || "";
+    const practiceCal = (practiceInput && practiceInput.value.trim()) || (window.gameState && window.gameState.googleCalendarIds && window.gameState.googleCalendarIds.practice) || "";
+    const isGoogleConnected = !!(webhookUrl || examsCal || hwCal || practiceCal);
+
+    if (!isGoogleConnected) {
+        const msg = '⚠️ אינך מחובר ליומני Google! לא הוגדרו מזהי יומן או כתובת Webhook לסנכרון.';
+        if (typeof showToastNotification === 'function') {
+            showToastNotification(msg, 'warning');
+        } else {
+            alert(msg);
+        }
+        const statusDiv = document.getElementById("webhook-save-status");
+        if (statusDiv) {
+            statusDiv.style.color = "#f59e0b";
+            statusDiv.innerText = "⚠️ אינו מחובר ליומני Google";
+        }
+        if (webhookInput) webhookInput.focus();
+        return;
+    }
+
     try {
         if (typeof showToastNotification === 'function') {
-            showToastNotification('🔄 מרענן יומן ומערכת שעות...', 'info');
+            showToastNotification('🔄 מרענן יומן ומערכת שעות מ-Google...', 'info');
         }
         if (typeof renderFinalsCalendar === 'function') {
             renderFinalsCalendar();
@@ -22345,7 +22433,7 @@ async function triggerManualCalendarPull() {
             renderTimetableGrid();
         }
         if (typeof showToastNotification === 'function') {
-            showToastNotification('✓ לוח השנה ומערכת השעות רועננו בהצלחה', 'success');
+            showToastNotification('✓ לוח השנה ומערכת השעות רועננו בהצלחה מיומני Google', 'success');
         }
     } catch (e) {
         console.warn("[CalendarPull] Error during calendar refresh:", e);
@@ -23234,7 +23322,7 @@ window.checkRemoteAppVersion = async function(isManualCheck = false) {
         const match = domVerEl.innerText.match(/(?:^|\bv|\s)(\d+\.\d+\.\d+)\b/);
         if (match) currentVer = match[1];
     }
-    currentVer = currentVer || "2.6.9";
+    currentVer = currentVer || "2.7.0";
     const statusTextEl = document.getElementById("version-check-status-text");
     const footerBadgeEl = document.getElementById("footer-version-badge");
     const checkBtn = document.getElementById("btn-check-version-updates");
@@ -24036,10 +24124,10 @@ function updateDailyTimetableFocus() {
     // 3. Update sync bar text
     const syncText = document.getElementById('timetable-sync-text');
     if (syncText) {
-        const isAdir = (window.AuthSync && typeof window.AuthSync.isAdirActive === 'function' && window.AuthSync.isAdirActive());
-        syncText.innerText = isAdir
-            ? `מתעדכן אוטומטית כל יום מ-CheeseFork | עודכן להיום (${dateFormatted})`
-            : `מערכת שעות אישית | עודכן להיום (${dateFormatted})`;
+        const hasCheeseFork = !!localStorage.getItem('ast_cheesefork_url');
+        syncText.innerText = hasCheeseFork
+            ? `🟢 מחובר ל-CheeseFork | עודכן להיום (${dateFormatted})`
+            : `מערכת שעות מקומית | CheeseFork אינו מחובר`;
     }
 
     // 3.5. Update Timetable Header Card dynamically
@@ -24054,9 +24142,10 @@ function updateDailyTimetableFocus() {
             : '🕒 מערכת שעות שבועית אישית';
     }
     if (headerSub) {
-        headerSub.innerText = isAdirAcc
+        const hasCheeseFork = !!localStorage.getItem('ast_cheesefork_url');
+        headerSub.innerText = hasCheeseFork
             ? 'סנכרון מלא מחשבון CheeseFork | שנה ב׳ סמסטר א׳ (סמסטר 3) | הנדסת מכונות הטכניון'
-            : 'לו״ז שבועי מותאם אישית | הנדסת מכונות הטכניון';
+            : 'לו״ז שבועי מקומי (CheeseFork אינו מחובר) | הנדסת מכונות הטכניון';
     }
     if (statsStrip) {
         if (isAdirAcc) {
@@ -24141,6 +24230,22 @@ function setupDailyTimetable() {
     const syncBtn = document.getElementById('btn-sync-cheesefork-now');
     if (syncBtn) {
         syncBtn.addEventListener('click', async () => {
+            const hasCheeseFork = !!localStorage.getItem('ast_cheesefork_url');
+            if (!hasCheeseFork) {
+                const msg = '⚠️ אינך מחובר ל-CheeseFork! נא להזין קישור שיתוף של מערכת השעות תחילה.';
+                if (typeof showToastNotification === 'function') {
+                    showToastNotification(msg, 'warning');
+                } else {
+                    alert(msg);
+                }
+                const cfInput = document.getElementById('cheesefork-url');
+                if (cfInput) {
+                    cfInput.focus();
+                    cfInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+                return;
+            }
+
             syncBtn.disabled = true;
             const btnText = document.getElementById('btn-sync-text');
             if (btnText) btnText.innerText = 'מסנכרן...';

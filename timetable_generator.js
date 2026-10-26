@@ -2013,6 +2013,16 @@
             // Sync from CheeseFork Live button
             if (syncCfBtn) {
                 syncCfBtn.onclick = async () => {
+                    const hasCheeseFork = !!localStorage.getItem('ast_cheesefork_url');
+                    if (!hasCheeseFork) {
+                        const msg = '⚠️ אינך מחובר ל-CheeseFork! לא הוגדר קישור מערכת שעות אישי לסנכרון.';
+                        if (typeof showToastNotification === 'function') {
+                            showToastNotification(msg, 'warning');
+                        } else if (typeof alert === 'function') {
+                            alert(msg);
+                        }
+                        return;
+                    }
                     syncCfBtn.disabled = true;
                     syncCfBtn.innerHTML = '<span>⏳</span> מסנכרן מ-CheeseFork...';
                     try {

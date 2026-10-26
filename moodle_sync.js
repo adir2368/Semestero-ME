@@ -204,13 +204,31 @@
                     this.saveConfig();
                     this.sync({ isSilent: false });
                 } else {
-                    this.runMockSync();
+                    const modal = document.getElementById('moodle-sync-modal');
+                    const isModalOpen = modal && (modal.style.display === 'flex' || modal.classList.contains('active'));
+                    if (!isModalOpen) {
+                        this.openModal();
+                    }
+                    this.setStatus('⚠️ אינך מחובר למודל הטכניון! נא להזין קישור לוח שנה כדי לסנכרן.', 'error');
+                    if (typeof showHudToast === 'function') {
+                        showHudToast('⚠️ אינך מחובר למודל הטכניון! נא להזין קישור לוח שנה תחילה.', 'warning');
+                    } else if (typeof showToastNotification === 'function') {
+                        showToastNotification('⚠️ אינך מחובר למודל הטכניון! נא להזין קישור לוח שנה תחילה.', 'warning');
+                    }
+                    if (modalUrlInput) modalUrlInput.focus();
                 }
             };
 
             if (syncBtn) syncBtn.addEventListener('click', triggerSyncAction);
             if (modalSyncBtn) modalSyncBtn.addEventListener('click', triggerSyncAction);
             if (modalMockBtn) modalMockBtn.addEventListener('click', () => this.runMockSync());
+
+            // Initialize status display based on actual connection state
+            if (this.config.url) {
+                this.setStatus('🟢 מחובר למודל הטכניון (קישור מוגדר)', 'success');
+            } else {
+                this.setStatus('⚪ מודל אינו מחובר — הדבק קישור יומן כדי לסנכרן', 'info');
+            }
 
             if (modalOverlay) {
                 modalOverlay.addEventListener('click', (e) => {
@@ -244,6 +262,11 @@
                 if (modalUrlInput) {
                     modalUrlInput.value = this.config.url || '';
                     setTimeout(() => modalUrlInput.focus(), 150);
+                }
+                if (this.config.url) {
+                    this.setStatus('🟢 מחובר למודל הטכניון (קישור מוגדר)', 'success');
+                } else {
+                    this.setStatus('⚪ מודל אינו מחובר — הדבק קישור יומן מודל כדי לסנכרן', 'info');
                 }
             }
         },
