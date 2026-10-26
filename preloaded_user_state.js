@@ -4118,7 +4118,7 @@
             "courseCode": "104043"
           }
         ],
-        "moodleCalendarUrl": "https://moodle25.technion.ac.il/calendar/export_execute.php?userid=43774&authtoken=a124e33d97c0722e89374bea7fddb03632778eee&preset_what=all&preset_time=custom",
+        "moodleCalendarUrl": "",
         "semesterGuardMode": "locked",
         "customCalendarEvents": [],
         "currentActiveSemester": 2,
@@ -5824,7 +5824,7 @@
       "courseCode": "104043"
     }
   ],
-  "moodleCalendarUrl": "https://moodle25.technion.ac.il/calendar/export_execute.php?userid=43774&authtoken=a124e33d97c0722e89374bea7fddb03632778eee&preset_what=all&preset_time=custom",
+  "moodleCalendarUrl": "",
   "semesterGuardMode": "locked",
   "customCalendarEvents": [],
   "degreePlanUnassigned": [],

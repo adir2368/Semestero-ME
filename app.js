@@ -6916,7 +6916,7 @@ const PRELOADED_USER_STATE = (typeof window !== 'undefined' && window.PRELOADED_
             "courseCode": "104043"
           }
         ],
-        "moodleCalendarUrl": "https://moodle25.technion.ac.il/calendar/export_execute.php?userid=43774&authtoken=a124e33d97c0722e89374bea7fddb03632778eee&preset_what=all&preset_time=custom",
+        "moodleCalendarUrl": "",
         "semesterGuardMode": "locked",
         "customCalendarEvents": [],
         "currentActiveSemester": 2,
@@ -8613,7 +8613,7 @@ const PRELOADED_USER_STATE = (typeof window !== 'undefined' && window.PRELOADED_
       "courseCode": "104043"
     }
   ],
-  "moodleCalendarUrl": "https://moodle25.technion.ac.il/calendar/export_execute.php?userid=43774&authtoken=a124e33d97c0722e89374bea7fddb03632778eee&preset_what=all&preset_time=custom",
+  "moodleCalendarUrl": "",
   "semesterGuardMode": "locked",
   "customCalendarEvents": [],
   "degreePlanUnassigned": [],
@@ -8968,7 +8968,10 @@ window.resetToAuthenticSchedule = resetToAuthenticSchedule;
 
 function openCheeseFork(event) {
     const savedUrl = localStorage.getItem('ast_cheesefork_url');
-    const defaultUrl = "https://cheesefork.netlify.app/?semester=202601&uid=D4bh8oHO0GQI5Gx1iYAbWsouBVx2";
+    const isAdir = (window.AuthSync && typeof window.AuthSync.isAdirActive === 'function' && window.AuthSync.isAdirActive());
+    const defaultUrl = isAdir 
+        ? "https://cheesefork.netlify.app/?semester=202601&uid=D4bh8oHO0GQI5Gx1iYAbWsouBVx2" 
+        : "https://cheesefork.netlify.app/?semester=202601";
     const targetUrl = savedUrl || defaultUrl;
     if (event && event.currentTarget && event.currentTarget.tagName === 'A') {
         event.currentTarget.href = targetUrl;
@@ -14105,8 +14108,28 @@ window.syncLiveCheeseForkData = async function(customUrl = null, isManual = fals
         statusDiv.innerText = "מתחבר לשרת CheeseFork...";
     }
 
-    const defaultUrl = "https://cheesefork.netlify.app/?semester=202601&uid=D4bh8oHO0GQI5Gx1iYAbWsouBVx2";
+    const isAdir = (window.AuthSync && typeof window.AuthSync.isAdirActive === 'function' && window.AuthSync.isAdirActive());
+    const defaultUrl = isAdir 
+        ? "https://cheesefork.netlify.app/?semester=202601&uid=D4bh8oHO0GQI5Gx1iYAbWsouBVx2" 
+        : null;
     const targetUrl = customUrl || localStorage.getItem('ast_cheesefork_url') || defaultUrl;
+
+    if (!targetUrl) {
+        const errMsg = "כדי לסנכרן מערכת שעות, אנא הזן תחילה את קישור ה-CheeseFork האישי שלך (כולל uid וסמסטר).";
+        if (statusDiv) {
+            statusDiv.style.color = "#f59e0b";
+            statusDiv.innerText = errMsg;
+        }
+        if (typeof showToastNotification === 'function') {
+            showToastNotification(`ℹ️ ${errMsg}`, 'info');
+        }
+        const cfInput = document.getElementById("cheesefork-url");
+        if (cfInput) {
+            cfInput.focus();
+            cfInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        return;
+    }
     const parsed = parseCheeseForkUrl(targetUrl);
 
     if (!parsed) {
@@ -15412,7 +15435,7 @@ function updateOrganitCategoryCounts(allTasks) {
 // Renders the Notion Tasks Table body dynamically
 
 // ==========================================================================
-// Tasks Selection, Bulk Actions & Notion Context Menu (v2.6.6)
+// Tasks Selection, Bulk Actions & Notion Context Menu (v2.6.7)
 // ==========================================================================
 window.selectedTasksMap = new Map();
 let lastCheckedTaskIndex = -1;
@@ -20169,8 +20192,14 @@ function openCalendarSyncModal() {
     const isAdir = (window.AuthSync && typeof window.AuthSync.isAdirActive === 'function' && window.AuthSync.isAdirActive());
 
     if (input) {
-        input.value = CLOUD_GIST_SYNC.webcalUrl;
-        if (hint) hint.innerText = "💡 קישור זה מזין ישירות את Apple Calendar (iPhone/Mac), Google Calendar (Android/Web), ו-Outlook.";
+        if (isAdir) {
+            input.value = CLOUD_GIST_SYNC.webcalUrl;
+            if (hint) hint.innerText = "💡 קישור זה מזין ישירות את Apple Calendar (iPhone/Mac), Google Calendar (Android/Web), ו-Outlook.";
+        } else {
+            input.value = "";
+            input.placeholder = "סנכרון ענן אישי מופעל עבור חשבונות מחוברים בלבד";
+            if (hint) hint.innerText = "💡 באפשרותך להוריד קובץ .ics מקומי של המערכת שלך באמצעות הכפתור מטה.";
+        }
     }
 
     if (copyBtn && input) {
@@ -21516,8 +21545,8 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.10.25-v2.6.6",
-    version: "2.6.6",
+    code: "REV-2026.10.25-v2.6.7",
+    version: "2.6.7",
     build: "20261020_03",
     date: "2026-10-20 01:20",
     description: "גרסה 2.5.2: פתרון מוחלט ללולאת העדכון במובייל וספארי, מנגנון אנטי-רילואד עמיד ב-localStorage, סנכרון גרסאות מלא וקישורי הורדה ישירים לטלפונים"
@@ -23145,7 +23174,7 @@ window.checkRemoteAppVersion = async function(isManualCheck = false) {
         const match = domVerEl.innerText.match(/(?:^|\bv|\s)(\d+\.\d+\.\d+)\b/);
         if (match) currentVer = match[1];
     }
-    currentVer = currentVer || "2.6.6";
+    currentVer = currentVer || "2.6.7";
     const statusTextEl = document.getElementById("version-check-status-text");
     const footerBadgeEl = document.getElementById("footer-version-badge");
     const checkBtn = document.getElementById("btn-check-version-updates");

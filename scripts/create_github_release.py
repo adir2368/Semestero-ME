@@ -19,7 +19,7 @@ with open(os.path.join(ROOT, "package.json"), "r", encoding="utf-8") as f:
     pkg = json.load(f)
 VERSION = pkg.get("version", "2.6.2")
 TAG = f"v{VERSION}"
-NAME = f"Semestero ME v{VERSION} - In-Situ Spotlight Guided Walkthrough, Live Multi-Tab Journey & SVG Cutout Mask"
+NAME = f"Semestero ME v{VERSION} - Main Windows First Tour, Transition Delay, Bottom Bar Protection & Guest Privacy"
 
 def get_github_token():
     try:
@@ -93,34 +93,37 @@ def main():
         "User-Agent": "Semestero-ME-Release-Agent"
     }
 
-    body_notes = f"""## מה חדש בגרסה v{VERSION} 🚀⚡🎯
+    body_notes = f"""## מה חדש בגרסה v{VERSION} 🚀🧭🛡️
     
-### 1. שדרוג מהפכני: סיור מודרך מבוסס זרקור חי (In-Situ Spotlight Guided Walkthrough)
-- **סיום עידן כרטיסיות הטקסט המשעממות**: במקום כרטיסיות מודאל מרכזיות שחוסמות את המסך ומעמיסות מלל, הסיור החדש עובד בשיטת In-Situ Spotlight (בדומה ל-Driver.js / Shepherd.js) ומלווה את הסטודנטים בתוך המערכת עצמה!
-- **מסכת חיתוך SVG דינמית (Spotlight Cutout Mask)**: מחשיכה את הרקע בצורה חלקה ויוצרת "חור מואר" מדויק ברמת הפיקסל סביב האלמנט הפעיל, כך שהסטודנט רואה בדיוק על מה מדובר.
-- **מסגרת ניאון זוהרת עם נקודת מוקד (Pulsing Beacon & Cyan Halo)**: הדגשה מונפשת ומדויקת סביב הכפתור או הרכיב שצריך להכיר או ללחוץ עליו.
-- **בועת הסבר צפה ומכוונת (Contextual Directional Popover)**: חלון צף הצמוד לאלמנט עם חץ המצביע ישירות עליו, חישוב גבולות מסך חכם, ומלל קצר וממוקד בגובה העיניים של 1-2 משפטים המראה "איפה ללחוץ ומה זה עושה".
-- **מעבר חי בין עמודים וטאבים (Live Workspace Journey)**:
-  - מעביר את הסטודנט אוטומטית בין הטאבים האמיתיים: **סילבוס עץ תואר** -> **חיפוש פקודות מהיר** -> **מתכנן תואר ומסלולי סיום** -> **מערכת שעות ו-CheeseFork** -> **לוח משימות ובחירה מרובה** -> **זכויות אקדמיות ומילואים** -> **הגדרות והורדות**.
-  - גלילה חלקה (Smooth Scroll) שממקמת את האלמנט במרכז שדה הראייה.
-  - תמיכה מלאה בניווט מקלדת (`Esc` ליציאה, חיצי מקלדת/Enter לדפדוף) והתאמה רספונסיבית לשינוי גודל חלון וגלילה.
+### 1. הצגת כל 6 החלונות המרכזיים תחילה בסיור המודרך (Main Windows First Tour)
+- **סדר מסלול לוגי ומקיף**: הסיור פותח במעבר שלב-אחר-שלב בין כל ששת חלונות הליבה של סמסטרו לפי הסדר הטבעי:
+  1. **מפת קורסים (Curriculum Tree)** - עץ הקדמים הפקולטי והארת שרשרת דרישות.
+  2. **תכנון תואר (Degree Planner)** - שיבוץ רב-סמסטריאלי, ניהול עומסים ובדיקת זכאות ל-157.5 נק״ז.
+  3. **לוח משימות (Tasks Board)** - ניהול מטלות בסגנון Notion, בחירה מרובה וסנכרון Moodle.
+  4. **לוח שנה אקדמי (Academic Calendar)** - לוח מועדי בחינות, זמני סמסטר ומעקב חופשות.
+  5. **מערכת שעות שבועית (Timetable Studio)** - מחולל קומבינציות וסנכרון CheeseFork.
+  6. **הגדרות וגיבוי (Settings & Cloud Backup)** - הורדות למחשב ולנייד, גיבוי מקומי וענן.
+  - בסיום 6 החלונות המרכזיים מודגמים כלי העל: **שורת פקודות חכמה (Ctrl+K)** ו**מדריך זכויות אקדמיות ויועץ מילואים**.
 
-### 2. שיפורי בחירה מרובה בלוח המשימות (Tasks Multi-Selection Checkbox & Bulk Actions)
-- תיבת סימון לבחירת שורות מרובות בלוח המשימות, תמיכה ב-Shift+Click לבחירת טווח, ו-Select All בכותרת.
-- סרגל פעולות צף יוקרתי לשכפול במקביל, מחיקה מרוכזת, העברה בין קורסים וסימון כהושלם.
-- תפריט Notion Context Menu מקצועי בלחיצה ימנית וקיצורי מקלדת עולמיים (`Ctrl+D`, `Ctrl+Shift+P`, `Delete`).
+### 2. השהיית מעבר מודעת (750ms Transition HUD) והארת טאב פעיל
+- **השהיית מעבר מכוונת**: בעת מעבר בין חלונות, המערכת מציגה באנר HUD צף יוקרתי (`🧭 עובר לחלון: ...`) וממתינה 750ms כדי שהסטודנט ישים לב בדיוק לאיזה עמוד הוא הגיע.
+- **הדגשת טאב בסרגל הניווט (`tour-nav-tab-active-glow`)**: הטאב של החלון הנוכחי בסרגל מקבל פעימת ניאון זוהרת כדי שהסטודנטים יקשרו מיד בין התוכן למיקומו בסרגל.
 
-### 3. שדרוגי מובייל, סנכרון מודל ואלקטרון (Mobile & Desktop Baseline)
-- עדכון סגירה אוטומטית של האפליקציה במחשב בעת קימפול ובנייה מחדש למניעת נעילת קבצים.
-- תמיכה מלאה בסנכרון מטלות מודל מובייל ודסקטופ ללא חסימות CORS.
-- חבילות עדכניות להפצה מיידית למובייל (APK) ולמחשב (Windows x64).
+### 3. הגנה מפני הסתרת סרגל החלונות (Bottom Bar Collision Protection)
+- חישוב גובה סרגל הניווט התחתון (`.nav-tabs-left`) בזמן אמת והגדרת מרווח ביטחון קפדני (`safeBottomClearance = 76px+`).
+- היפוך אוטומטי של בועת הטקסט כלפי מעלה (`placement: 'top'`) כאשר יש חשש להסתרה.
+- סרגל החלונות שומר על נראות ואינטראקטיביות 100% לאורך כל הסיור (`z-index: 99998`).
+- תג כותרת ייעודי בבועה: `📍 חלון נוכחי: [שם החלון] ([מספר] מתוך 6)`.
 
----
-### 📲 הורדות ישירות (Direct Downloads):
-- 🤖 **Android APK:** [Semestero-ME.apk](https://github.com/adir2368/Semestero-ME/releases/download/v{VERSION}/Semestero-ME.apk)
-- 💻 **Windows Desktop (חבילה ניידת מלאה - מומלץ):** [Semestero-ME-Windows-x64.zip](https://github.com/adir2368/Semestero-ME/releases/download/v{VERSION}/Semestero-ME-Windows-x64.zip)
-- 🖥️ **Windows Executable:** [Semestero-ME.exe](https://github.com/adir2368/Semestero-ME/releases/download/v{VERSION}/Semestero-ME.exe)
-"""
+### 4. פרטיות והסרת קישורים אישיים עבור אורחים (Guest Privacy Sanitization)
+- ביקורת עומק וטיהור כל הקישורים והטוקנים של אדיר עבור משתמשי אורח ולא מחוברים:
+  - הקישור ל-CheeseFork פותח סמסטר גנרי נקי (`?semester=202601`) ללא ה-UID האישי.
+  - סנכרון לוח שנה Webcal Gist נשאר חסוי ואינו מוצג או מועתק כלל למשתמשים שאינם אדיר.
+  - הסרת טוקנים וכתובות Moodle אישיות מקבצי ה-JSON ומצב המערכת.
+
+### 5. הפעלת סיור אך ורק בסיום הרשמה או דרך הגדרות
+- הסיור לעולם אינו קופץ אוטומטית בהפעלת האפליקציה למשתמשים מחוברים.
+- מופעל אך ורק בסיום תהליך ההרשמה (Onboarding) או בלחיצה ידנית על כפתור הסיור בהגדרות/מרכז ההדרכה (או מקש T)."""
 
     req_tag = urllib.request.Request(f"https://api.github.com/repos/{REPO}/releases/tags/{TAG}", headers=headers)
     release = None
