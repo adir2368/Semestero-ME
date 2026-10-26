@@ -1,12 +1,12 @@
 {
   "name": "semestero-me",
   "productName": "Semestero ME",
-  "version": "2.6.5",
+  "version": "2.6.6",
   "description": "Semestero ME - Academic Skill Tree and Degree Orchestration System",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "prepack": "powershell -Command \"Stop-Process -Name 'Semestero ME', 'electron' -Force -ErrorAction SilentlyContinue\"",
+    "prepack": "powershell -Command \"Get-Process -Name 'Semestero ME' -ErrorAction SilentlyContinue | Stop-Process -Force; exit 0\"",
     "pack": "electron-packager . \"Semestero ME\" --platform=win32 --arch=x64 --icon=icon.ico --out=dist --overwrite --ignore=\"^(dist|backups|_backup_widgets|graphify-out|android|ios|tests|scripts|\\.git)\"",
     "build:mobile": "node scripts/build_mobile_dist.js && npx cap sync android",
     "build:apk": "node scripts/build_mobile_dist.js && npx cap sync android && cd android && gradlew.bat assembleDebug && cd .. && powershell -Command \"Copy-Item -Path 'android/app/build/outputs/apk/debug/app-debug.apk' -Destination 'Semestero-ME.apk'\"",

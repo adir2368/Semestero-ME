@@ -1,21 +1,24 @@
 /**
- * Semestero ME - Interactive Guided Tour & Tutorial Hub Engine (v2.5.8 Supercharge)
+ * Semestero ME - In-Situ Spotlight Guided Walkthrough & Tutorial Academy Engine (v2.6.5)
  * 
  * Provides:
- * 1. Step-by-Step Guided Live Tour with real-time workspace switching
- * 2. Visual Tutorial Hub Modal for on-demand feature discovery
- * 3. Interactive tool triggers directly within tour cards
- * 4. Full accessibility and keyboard navigation
+ * 1. Driver.js / Shepherd.js style in-situ spotlight cutout (SVG mask + pulsing beacon)
+ * 2. Floating directional popover anchored right next to live UI elements
+ * 3. Automated tab-by-tab walkthrough journey (Curriculum -> Planner -> Timetable -> Tasks -> Rights -> Settings)
+ * 4. Active interaction ("Show & Do") letting students click and test the real interface
+ * 5. Visual Tutorial Academy Hub modal on-demand
  */
 
 (function(window, document) {
     'use strict';
 
-    const TOUR_STORAGE_KEY = 'ast_interactive_tour_completed_v258';
+    const TOUR_STORAGE_KEY = 'ast_interactive_tour_completed_v265';
 
     function switchAppTab(tabKey) {
         if (typeof window.setActiveMainTab === 'function') {
             window.setActiveMainTab(tabKey);
+        } else if (typeof window.switchTab === 'function') {
+            window.switchTab(tabKey);
         } else {
             const btn = document.getElementById(`tab-${tabKey}`);
             if (btn) btn.click();
@@ -24,193 +27,110 @@
 
     const TOUR_STEPS = [
         {
-            icon: '🧭',
-            tag: 'היכרות',
-            title: 'ברוכים הבאים ל-Semestero ME 2.5!',
-            subtitle: 'מרכז הפיקוד האקדמי שלך להנדסת מכונות בטכניון',
-            content: `
-                שמחים שהצטרפת! המערכת פותחה במיוחד כדי לעשות לך סדר מוחלט בכל חובות התואר, לוחות הזמנים, המשימות והמבחנים.
-                <br><br>
-                • <strong>ארכיטקטורת Local-First:</strong> הנתונים שלך נשמרים מקומית במכשירך בלבד, בפרטיות מוחלטת וללא מעקב פרסומי.<br>
-                • <strong>סנכרון ענן מאובטח:</strong> אפשרות לגיבוי והמשכיות בין המחשב לטלפון הנייד.<br><br>
-                בוא נעבור סיור מודרך מהיר שיחשוף בפניך את כל הפיצ'רים המרכזיים של המערכת!
-            `,
+            id: 'step-curriculum',
             tab: 'curriculum',
-            actionBtn: null
-        },
-        {
+            target: ['.course-card.active', '.course-card.available', '.course-card', '#flowchart-tree-container'],
             icon: '🌳',
             tag: 'ליבה אקדמית',
-            title: 'עץ מיומנויות ותרשים קדמים (Skill Tree)',
-            subtitle: 'מפת הלימודים הפקולטית המלאה',
-            content: `
-                כל קורסי התואר מסודרים לפי סמסטרים רשמיים א׳ עד ח׳, עם תמיכה מלאה בכל שנתוני הלימודים (תשפ״ד, תשפ״ה, תשפ״ו, ותשפ״ז):
-                <br><br>
-                • <strong>הארת שרשרת קדמים:</strong> לחיצה על כל קורס מאירה מיידית את כל קורסי הקדם שלו בכחול/זהב, ואת הקורסים העתידיים שהוא פותח בירוק!<br>
-                • <strong>כרטיס קורס מורחב:</strong> צפייה בסילבוס, מועדי בחינות, קישור להקלטות פנופטו, ומחשבון יעד לציון סופי במועד ב׳.<br>
-                • <strong>גמישות מלאה:</strong> בחירת חלופות פיזיקה 1 ו-2 (2.5 נק״ז), מעבדת כימיה, וקורסי קיץ.
-            `,
-            tab: 'curriculum',
-            actionBtn: null
+            title: 'עץ מיומנויות והארת שרשרת קדמים',
+            text: 'זהו עץ הקורסים הפקולטי המלא. לחיצה על כל קורס מאירה מיידית את קורסי הקדם שלו בכחול, ואת הקורסים העתידיים שהוא פותח בירוק!',
+            actionTip: 'נסה עכשיו: לחץ על הקורס המואר כדי לראות את הקדמים נדלקים בזמן אמת.',
+            actionBtn: null,
+            placement: 'bottom'
         },
         {
+            id: 'step-command-search',
+            tab: 'curriculum',
+            target: ['#btn-open-command-palette', '.search-container', '.header-actions'],
+            icon: '🔍',
+            tag: 'חיפוש חכם',
+            title: 'שורת פקודות וחיפוש חכם (Ctrl+K)',
+            text: 'לחץ כאן (או על המקשים Ctrl+K בכל מקום) לאיתור מהיר של כל קורס, משימה פתוחה או פעולת מערכת ללא עכבר!',
+            actionTip: 'הקש Ctrl+K (או מקש /) כדי להתרשם מחלון הפקודות החכם.',
+            actionBtn: {
+                label: '🔍 נסה לפתוח כעת',
+                onClick: () => {
+                    if (window.openCommandPalette) window.openCommandPalette();
+                }
+            },
+            placement: 'bottom'
+        },
+        {
+            id: 'step-planner',
+            tab: 'planner',
+            target: ['#btn-open-graduation-clearance', '.planner-header-actions', '#planner-workspace .semester-column', '#planner-workspace'],
             icon: '🎯',
             tag: 'תכנון תואר',
-            title: 'מתכנן התואר הרב-סמסטריאלי (Degree Planner)',
-            subtitle: 'גרירה, שיבוץ חופשי ובדיקת זכאות לסיום תואר',
-            content: `
-                מתכנן התואר מאפשר לך לבנות תוכנית לימודים אישית ומותאמת לקצב שלך:
-                <br><br>
-                • <strong>גרירה ושחרור (Drag & Drop):</strong> גרירת קורסי חובה ובחירה בין סמסטרים, הוספת סמסטרי קיץ, והסרת קורסים למאגר.<br>
-                • <strong>מדדי עומס חיים:</strong> סרגל עומס שבועי, שעות הרצאה ותרגול, ושעות מעבדה ודוחות המתעדכנים בזמן אמת.<br>
-                • <strong>בדיקת זכאות לתואר (Graduation Audit 🎓):</strong> בדיקה אוטומטית של כל 157.5 הנק״ז, מילואים (155.5), טירונות עתודה (2 נק״ז), פורמולה SAE, שני קורסי אנגלית, מל״ג וספורט.
-            `,
-            tab: 'planner',
+            title: 'מתכנן תואר רב-סמסטריאלי ובדיקת זכאות',
+            text: 'כאן תוכל לגרור ולשבץ קורסים בין סמסטרים, לנהל עומס שבועי, וללחוץ על "בדיקת זכאות" כדי לוודא שאתה עומד בכל 157.5 הנק״ז!',
+            actionTip: 'בדיקת הזכאות כוללת חישוב מילואים (155.5 נק״ז), טירונות עתודה (2 נק״ז), פורמולה SAE ואנגלית.',
             actionBtn: {
-                label: '🎓 פתח בדיקת זכאות לתואר',
+                label: '🎓 פתח בדיקת זכאות',
                 onClick: () => {
                     if (typeof window.openGraduationClearanceModal === 'function') {
                         window.openGraduationClearanceModal();
-                    } else if (window.DegreePlanner && typeof window.DegreePlanner.openGraduationClearanceModal === 'function') {
-                        window.DegreePlanner.openGraduationClearanceModal();
-                    } else if (window.DegreePlanner && typeof window.DegreePlanner.openGraduationAuditModal === 'function') {
-                        window.DegreePlanner.openGraduationAuditModal();
                     } else {
                         const btn = document.getElementById('btn-open-graduation-clearance');
                         if (btn) btn.click();
                     }
                 }
-            }
+            },
+            placement: 'bottom'
         },
         {
+            id: 'step-timetable',
+            tab: 'timetable',
+            target: ['#btn-sync-cheesefork-now', '.timetable-actions-bar', '#timetable-workspace'],
             icon: '🕒',
             tag: 'מערכת שעות',
-            title: 'מחולל מערכות שעות אלגוריתמי (Timetable Studio)',
-            subtitle: 'שילוב כל הקומבינציות מ-CheeseFork ללא התנגשויות',
-            content: `
-                נמאס לבנות מערכת שעות ידנית? הסטודיו האלגוריתמי עושה הכל בשבילך:
-                <br><br>
-                • <strong>סנכרון ישיר מ-CheeseFork:</strong> משיכת כל קבוצות ההרצאה, התרגול והמעבדה ישירות מהשרתים.<br>
-                • <strong>עוגנים ונעילת מרצים (Pre-Anchoring):</strong> בחר מראש את המרצים והמתרגלים המועדפים עליך ונעל אותם.<br>
-                • <strong>חילול קומבינציות חכם:</strong> המערכת מחשבת אלפי שילובים ומדרגת לפי מקסימום ימי חופש, מינימום חלונות והתחלה מאוחרת!
-            `,
-            tab: 'timetable',
-            actionBtn: null
+            title: 'סנכרון שעות מ-CheeseFork ומחולל קומבינציות',
+            text: 'משיכת שעות ההרצאה, התרגול והמעבדה ישירות משרתי CheeseFork. נעל את המרצים המועדפים עליך וחלץ אלפי שילובים ללא חלונות!',
+            actionTip: 'לחץ על כפתור הסנכרון כדי לרענן את כל מערכות השעות ברגע.',
+            actionBtn: null,
+            placement: 'bottom'
         },
         {
+            id: 'step-tasks',
+            tab: 'tasks',
+            target: ['#select-all-tasks-checkbox', '#notion-tasks-table-body tr[data-task-id]', '.tasks-bulk-actions-bar', '#notion-tasks-workspace'],
             icon: '📋',
             tag: 'משימות ומודל',
-            title: 'לוח משימות, סנכרון Moodle ומסלול מבחנים',
-            subtitle: 'כל שיעורי הבית והמטלות במקום אחד',
-            content: `
-                • <strong>סנכרון חי ממודל 26 (Moodle iCal):</strong> משיכת כל שיעורי הבית ומטלות ההגשה ישירות מהמודל בלחיצה אחת.<br>
-                • <strong>לוח קנבן אינטראקטיבי:</strong> ניהול משימות בסטטוסים (טרם התחיל, בתהליך, הושלם), סינון קורסים, ונעיצת משימות דחופות (📌).<br>
-                • <strong>Study Runway:</strong> ספירה לאחור של ימים שנותרו עד למועדי א׳ ומועדי ב׳ של כל הקורסים הפעילים.
-            `,
-            tab: 'tasks',
-            actionBtn: null
+            title: 'לוח משימות, בחירה מרובה וסנכרון Moodle',
+            text: 'סמן משימות בתיבות הסימון לשכפול או מחיקה במקביל (כולל Shift+Click לבחירת טווח), לחץ קליק ימני לתפריט Notion, וסנכרן מטלות ישירות מהטכניון!',
+            actionTip: 'סימון משימות מקפיץ אוטומטית סרגל פעולות צף בתחתית המסך.',
+            actionBtn: null,
+            placement: 'bottom'
         },
         {
-            icon: '🔍',
-            tag: 'חיפוש חכם',
-            title: 'שורת פקודות וחיפוש חכם מהיר (Ctrl+K / ⌘K)',
-            subtitle: 'הסיידקיק של הסטודנט החרוץ',
-            content: `
-                לחץ בכל עת על <kbd>Ctrl+K</kbd> (או מקש <kbd>/</kbd>) לפתיחת שורת הפקודות החכמה:
-                <br><br>
-                • <strong>חיפוש מיידי:</strong> חפש כל קורס לפי מספר (למשל: <code>114051</code>) או שם, משימות פתוחות, טאבים ופעולות מערכת.<br>
-                • <strong>ניווט מקלדת מלא:</strong> דפדף בתוצאות עם חצים <kbd>↑</kbd> <kbd>↓</kbd>, בחר ב-<kbd>Enter</kbd>, וסגור ב-<kbd>Esc</kbd>.<br>
-                • <strong>זמין מכל מקום:</strong> ניתן לפתוח גם בלחיצה על כפתור הזכוכית המגדלת (🔍) בראש המסך.
-            `,
+            id: 'step-rights',
             tab: 'curriculum',
-            actionBtn: {
-                label: '🔍 נסה את החיפוש החכם עכשיו',
-                onClick: () => {
-                    if (window.openCommandPalette) window.openCommandPalette();
-                }
-            }
-        },
-        {
-            icon: '⚖️',
-            tag: 'השוואה חכמה',
-            title: 'השוואת קורסי בחירה צד-מול-צד (Course Comparator)',
-            subtitle: 'בחירה מושכלת ומניעת התנגשויות בחינה',
-            content: `
-                מתלבט בין שני קורסי בחירה פקולטיים? כלי ההשוואה מאפשר לך לבדוק אותם ראש בראש:
-                <br><br>
-                • <strong>השוואת נתונים מלאה:</strong> נק״ז, סיווג רשימה פקולטית, פקולטה מלמדת, דרישות קדם וסילבוס.<br>
-                • <strong>זיהוי התנגשויות אוטומטי (Exam Clash):</strong> המערכת בודקת אוטומטית אם יש התנגשות בתאריכי מועד א׳ או מועד ב׳ ומציגה התראה אדומה בולטת!<br>
-                • <strong>פעולות מהירות:</strong> שמירה לרשימת מועדפים (⭐) והעתקת קוד קורס בלחיצה.
-            `,
-            tab: 'curriculum',
-            actionBtn: {
-                label: '⚖️ פתח כלי השוואת קורסים',
-                onClick: () => {
-                    if (window.openCourseComparisonModal) window.openCourseComparisonModal();
-                }
-            }
-        },
-        {
-            icon: '📖',
+            target: ['#btn-open-miluim-advisor', '#btn-sync-moodle-tasks', '.technion-ecosystem-bar', '.top-nav'],
+            icon: '🛡️',
             tag: 'זכויות ונהלים',
-            title: 'מדריך זכויות, נהלים ושאלות נפוצות (Technion FAQ)',
-            subtitle: 'כל מה שמותר ומגיע לך כסטודנט בטכניון',
-            content: `
-                מאגר מידע מקיף המרכז את כל ההנחיות והתקנונים הרשמיים:
-                <br><br>
-                • <strong>משרתי מילואים:</strong> זכאות להפחתת 2 נק״ז בחירה (155.5 נק״ז במקום 157.5), מועדי ג׳ מיוחדים והתאמות.<br>
-                • <strong>עתודאים:</strong> הכרה רשמית בטירונות כ-2.0 נק״ז בינאריות (ציון ״עובר״).<br>
-                • <strong>נבחרת פורמולה טכניון (Formula SAE):</strong> 2.0 נק״ז לסמסטר בבחירה חופשית, או 6.0 נק״ז פרויקט גמר שנתי.<br>
-                • <strong>אנגלית, מל״ג וספורט:</strong> חובת 2 קורסי תוכן באנגלית, 6 נק״ז מל״ג ו-2 קורסי ספורט.
-            `,
-            tab: 'curriculum',
+            title: 'מדריך זכויות אקדמיות ויועץ מילואים',
+            text: 'ריכוז התקנונים וההטבות הרשמיות: פטור 2 נק״ז בחירה למשרתי מילואים, מועדי ג׳ מיוחדים, הכרה בטירונות עתודה (2 נק״ז) ופורמולה טכניון.',
+            actionTip: 'לחץ לפתיחת יועץ זכויות המילואים המלא.',
             actionBtn: {
-                label: '📖 פתח מדריך זכויות אקדמיות',
+                label: '🛡️ פתח יועץ מילואים',
                 onClick: () => {
-                    if (window.openFaqModal) window.openFaqModal();
+                    const btn = document.getElementById('btn-open-miluim-advisor');
+                    if (btn) btn.click();
+                    else if (window.openMiluimModal) window.openMiluimModal();
                 }
-            }
+            },
+            placement: 'bottom'
         },
         {
-            icon: '⌨️',
-            tag: 'קיצורים ונגישות',
-            title: 'מקשי קיצור גלובליים, כפתור ציפה ובקר נגישות',
-            subtitle: 'עבודה מהירה ומקצועית כמו מתכנת אמיתי',
-            content: `
-                שדרגנו את חוויית השימוש עם מגוון כלי נוחות מתקדמים:
-                <br><br>
-                • <strong>מעבר מהיר בין טאבים:</strong> מקשים <kbd>1</kbd> עד <kbd>6</kbd> במקלדת.<br>
-                • <strong>סגירה ושמירה מהירה:</strong> <kbd>Esc</kbd> לסגירת כל מודאל, <kbd>Ctrl+S</kbd> לשמירה מיידית.<br>
-                • <strong>כפתור חזרה לראש העמוד (🔝):</strong> כפתור ירוק צף שמופיע בגלילה ארוכה ומחזיר אותך למעלה בצורה חלקה.<br>
-                • <strong>בקר נגישות לגודל טקסט:</strong> התאמת גודל פונט (A- / 100% / A+) בהגדרות לנוחות קריאה מרבית.
-            `,
+            id: 'step-settings',
             tab: 'settings',
-            actionBtn: {
-                label: '⌨️ פתח לוח מקשי קיצור (?)',
-                onClick: () => {
-                    if (window.openKeyboardShortcutsModal) window.openKeyboardShortcutsModal();
-                }
-            }
-        },
-        {
-            icon: '🚀',
-            tag: 'סיום והפצה',
-            title: 'הורדה ישירה לטלפון ולמחשב (Desktop & APK)',
-            subtitle: 'האפליקציה איתך בכל מקום',
-            content: `
-                עכשיו אתה מכיר את כל סודות המערכת!
-                <br><br>
-                • <strong>הורדה ישירה (חץ ירוק ⬇️):</strong> לחץ על כפתור ההורדה הירוק בראש המסך להורדת אפליקציית אנדרואיד רשמית (APK) או הפצה שולחנית למחשב (Windows .exe).<br>
-                • <strong>מרכז הווידג'טים למסך הבית:</strong> זמין ישירות בהגדרות המערכת (Settings ⚙️) לצפייה מקדימה והוספה למסך הבית.<br>
-                • <strong>צריך שוב רענון?</strong> תוכל לפתוח את המדריך והסיור הזה בכל רגע דרך ההגדרות (Settings ⚙️), שורת הפקודות (Ctrl+K) או במקש T במקלדת!
-            `,
-            tab: 'curriculum',
-            actionBtn: {
-                label: '⬇️ פתח מרכז הורדה ישירה',
-                onClick: () => {
-                    if (window.openDownloadModal) window.openDownloadModal();
-                }
-            }
+            target: ['#card-btn-interactive-tour', '#btn-settings-header-tour', '.settings-group', '#settings-workspace'],
+            icon: '⚙️',
+            tag: 'הגדרות והורדה',
+            title: 'התאמה אישית, סנכרון ענן והורדה למחשב ולטלפון',
+            text: 'כאן תוכל להתאים את גודל הטקסט והניגודיות, לגבות לענן, ולהוריד את האפליקציה השולחנית והניידת. תוכל להפעיל את הסיור בכל עת בלחיצה על מקש T!',
+            actionTip: 'מקשי קיצור מהירים: 1-6 למעבר בין מסכים, Ctrl+S לשמירה, ו-Esc לסגירת חלונות.',
+            actionBtn: null,
+            placement: 'top'
         }
     ];
 
@@ -220,6 +140,14 @@
             icon: '🌳',
             title: 'עץ מיומנויות ושרשראות קדמים',
             desc: 'ניווט בתרשים הפקולטי, הארת קדמים בכחול וקורסים עתידיים בירוק, וצפייה בסילבוס.',
+            tab: 'curriculum',
+            stepIndex: 0
+        },
+        {
+            id: 'mod-search',
+            icon: '🔍',
+            title: 'חיפוש חכם ופקודות מהירות (Ctrl+K)',
+            desc: 'איתור מהיר של כל קורס, משימה, טאב או פעולה במערכת בעזרת שורת הפקודות החכמה.',
             tab: 'curriculum',
             stepIndex: 1
         },
@@ -242,53 +170,40 @@
         {
             id: 'mod-tasks',
             icon: '📋',
-            title: 'משימות, סנכרון Moodle ומבחנים',
-            desc: 'סנכרון מטלות אוטומטי מיומן מודל 26, קנבן אינטראקטיבי, וספירה לאחור למועדי בחינות.',
+            title: 'משימות, סנכרון Moodle ובחירה מרובה',
+            desc: 'סנכרון מטלות ממודל 26, בחירת שורות מרובות במקביל, העברה לקורס ותפריט Notion.',
             tab: 'tasks',
             stepIndex: 4
         },
         {
-            id: 'mod-search',
-            icon: '🔍',
-            title: 'חיפוש חכם ופקודות מהירות (Ctrl+K)',
-            desc: 'איתור מהיר של כל קורס, משימה, טאב או פעולה במערכת בעזרת שורת הפקודות החכמה.',
+            id: 'mod-faq',
+            icon: '🛡️',
+            title: 'מדריך זכויות, נהלים ומילואים',
+            desc: 'כל מה שחשוב לדעת: פטור 2 נק״ז מילואים, טירונות עתודה, פורמולה טכניון ואנגלית.',
             tab: 'curriculum',
             stepIndex: 5
         },
         {
-            id: 'mod-compare',
-            icon: '⚖️',
-            title: 'השוואת קורסים צד-מול-צד',
-            desc: 'השוואת קורסי בחירה, סילבוס, נק״ז ודרישות קדם, וזיהוי אוטומטי של התנגשויות בחינה.',
-            tab: 'curriculum',
-            stepIndex: 6
-        },
-        {
-            id: 'mod-faq',
-            icon: '📖',
-            title: 'מדריך זכויות, נהלים ושאלות נפוצות',
-            desc: 'כל מה שחשוב לדעת: מילואים, עתודה, פורמולה טכניון, קורסי אנגלית, מל״ג וספורט.',
-            tab: 'curriculum',
-            stepIndex: 7
-        },
-        {
-            id: 'mod-shortcuts',
-            icon: '⌨️',
-            title: 'מקשי קיצור וכלי פרו מתקדמים',
-            desc: 'מעבר מהיר עם מקשים 1-6, כפתור חזרה לראש העמוד (🔝), והעתקה בלחיצה אחת.',
+            id: 'mod-settings',
+            icon: '⚙️',
+            title: 'הגדרות, מקשי קיצור והורדה ישירה',
+            desc: 'מעבר מהיר עם מקשים 1-6, גודל פונט, סנכרון ענן והורדה ל-Windows ולאנדרואיד.',
             tab: 'settings',
-            stepIndex: 8
+            stepIndex: 6
         }
     ];
 
     const InteractiveTour = {
         currentStep: 0,
         active: false,
+        activeTargetEl: null,
+        repositionHandler: null,
+        keyHandler: null,
 
         init() {
             this.injectStyles();
 
-            // Auto-prompt tour on launch ONLY if initial data entry (onboarding) was ALREADY completed
+            // Auto-prompt on launch if fresh user
             setTimeout(() => {
                 const tourDone = localStorage.getItem(TOUR_STORAGE_KEY);
                 const onboardingDone = localStorage.getItem('ast_onboarding_shown') === 'true';
@@ -306,194 +221,303 @@
         },
 
         injectStyles() {
-            if (document.getElementById('tour-custom-styles')) return;
+            if (document.getElementById('tour-spotlight-styles')) return;
             const style = document.createElement('style');
-            style.id = 'tour-custom-styles';
+            style.id = 'tour-spotlight-styles';
             style.textContent = `
-                .tour-backdrop {
+                /* Fullscreen SVG Spotlight Overlay Mask */
+                .tour-spotlight-svg {
+                    position: fixed;
+                    inset: 0;
+                    width: 100vw;
+                    height: 100vh;
+                    z-index: 99990;
+                    pointer-events: none;
+                    transition: opacity 0.25s ease;
+                }
+                
+                /* Backdrop Click Interceptor for closing/advancing */
+                .tour-backdrop-layer {
+                    position: fixed;
+                    inset: 0;
+                    z-index: 99989;
+                    background: transparent;
+                }
+
+                /* Glowing Outline Ring over the Target Element */
+                .tour-spotlight-frame {
+                    position: fixed;
+                    z-index: 99995;
+                    border: 2px solid #38bdf8;
+                    border-radius: 12px;
+                    pointer-events: none;
+                    box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.3), 0 0 35px rgba(56, 189, 248, 0.45);
+                    transition: all 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+                    animation: tourSpotlightPulse 2.4s infinite ease-in-out;
+                }
+                @keyframes tourSpotlightPulse {
+                    0%, 100% {
+                        box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.35), 0 0 30px rgba(56, 189, 248, 0.45);
+                        border-color: #38bdf8;
+                    }
+                    50% {
+                        box-shadow: 0 0 0 8px rgba(56, 189, 248, 0.15), 0 0 50px rgba(56, 189, 248, 0.65);
+                        border-color: #7dd3fc;
+                    }
+                }
+
+                /* Target element highlighted state */
+                .tour-target-elevated {
+                    position: relative !important;
+                    z-index: 99994 !important;
+                    transition: box-shadow 0.3s ease !important;
+                }
+
+                /* Floating Anchored Popover Tooltip */
+                .tour-popover {
+                    position: fixed;
+                    z-index: 100000;
+                    background: rgba(15, 23, 42, 0.96);
+                    backdrop-filter: blur(20px);
+                    -webkit-backdrop-filter: blur(20px);
+                    border: 1px solid rgba(56, 189, 248, 0.45);
+                    border-radius: 16px;
+                    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.85), 0 0 25px rgba(56, 189, 248, 0.25);
+                    width: 380px;
+                    max-width: 92vw;
+                    direction: rtl;
+                    text-align: right;
+                    color: #f8fafc;
+                    padding: 16px 18px;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 12px;
+                    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+                    animation: tourPopoverPop 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+                    transition: top 0.25s cubic-bezier(0.16, 1, 0.3, 1), left 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+                }
+                @keyframes tourPopoverPop {
+                    from { transform: scale(0.92); opacity: 0; }
+                    to { transform: scale(1); opacity: 1; }
+                }
+
+                /* Popover Directional Arrow Pointer */
+                .tour-popover-arrow {
+                    position: absolute;
+                    width: 14px;
+                    height: 14px;
+                    background: #0f172a;
+                    border: 1px solid rgba(56, 189, 248, 0.45);
+                    transform: rotate(45deg);
+                }
+                .tour-popover[data-placement="bottom"] .tour-popover-arrow {
+                    top: -8px;
+                    border-bottom: none;
+                    border-right: none;
+                }
+                .tour-popover[data-placement="top"] .tour-popover-arrow {
+                    bottom: -8px;
+                    border-top: none;
+                    border-left: none;
+                }
+                .tour-popover[data-placement="left"] .tour-popover-arrow {
+                    right: -8px;
+                    border-bottom: none;
+                    border-left: none;
+                }
+                .tour-popover[data-placement="right"] .tour-popover-arrow {
+                    left: -8px;
+                    border-top: none;
+                    border-right: none;
+                }
+
+                /* Popover Header */
+                .tour-popover-header {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+                    padding-bottom: 10px;
+                }
+                .tour-popover-title-row {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                }
+                .tour-popover-icon {
+                    font-size: 1.35rem;
+                }
+                .tour-popover-title {
+                    font-size: 0.98rem;
+                    font-weight: 800;
+                    color: #38bdf8;
+                    margin: 0;
+                    line-height: 1.25;
+                }
+                .tour-popover-tag {
+                    font-size: 0.68rem;
+                    background: rgba(16, 185, 129, 0.16);
+                    color: #34d399;
+                    border: 1px solid rgba(16, 185, 129, 0.4);
+                    padding: 2px 7px;
+                    border-radius: 8px;
+                    font-weight: 700;
+                    white-space: nowrap;
+                }
+                .tour-popover-meta {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                }
+                .tour-step-counter {
+                    font-size: 0.72rem;
+                    font-weight: 700;
+                    color: #94a3b8;
+                    background: rgba(255, 255, 255, 0.06);
+                    padding: 3px 8px;
+                    border-radius: 10px;
+                    border: 1px solid rgba(255, 255, 255, 0.1);
+                    white-space: nowrap;
+                }
+                .tour-popover-close {
+                    background: none;
+                    border: none;
+                    color: #94a3b8;
+                    cursor: pointer;
+                    font-size: 1.2rem;
+                    padding: 0 4px;
+                    line-height: 1;
+                    transition: color 0.15s ease;
+                }
+                .tour-popover-close:hover {
+                    color: #f8fafc;
+                }
+
+                /* Popover Body */
+                .tour-popover-body {
+                    font-size: 0.88rem;
+                    color: #e2e8f0;
+                    line-height: 1.6;
+                }
+                .tour-action-callout {
+                    margin-top: 10px;
+                    padding: 9px 12px;
+                    background: rgba(56, 189, 248, 0.08);
+                    border: 1px dashed rgba(56, 189, 248, 0.4);
+                    border-radius: 9px;
+                    font-size: 0.82rem;
+                    color: #7dd3fc;
+                    display: flex;
+                    align-items: flex-start;
+                    gap: 8px;
+                    font-weight: 600;
+                }
+                .tour-action-callout-btn {
+                    margin-top: 8px;
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 6px;
+                    background: linear-gradient(135deg, #0284c7, #2563eb);
+                    color: #ffffff;
+                    border: none;
+                    border-radius: 7px;
+                    padding: 5px 12px;
+                    font-size: 0.8rem;
+                    font-weight: 700;
+                    cursor: pointer;
+                    transition: transform 0.15s ease;
+                }
+                .tour-action-callout-btn:hover {
+                    transform: translateY(-1px);
+                    box-shadow: 0 3px 10px rgba(2, 132, 199, 0.4);
+                }
+
+                /* Popover Footer */
+                .tour-popover-footer {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    border-top: 1px solid rgba(255, 255, 255, 0.08);
+                    padding-top: 10px;
+                    margin-top: 2px;
+                }
+                .tour-skip-link {
+                    background: none;
+                    border: none;
+                    color: #94a3b8;
+                    font-size: 0.78rem;
+                    cursor: pointer;
+                    padding: 4px;
+                    text-decoration: underline;
+                }
+                .tour-skip-link:hover {
+                    color: #f1f5f9;
+                }
+                .tour-nav-btns {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                }
+                .btn-tour-action {
+                    padding: 6px 14px;
+                    border-radius: 8px;
+                    font-size: 0.82rem;
+                    font-weight: 700;
+                    cursor: pointer;
+                    transition: all 0.18s ease;
+                    font-family: inherit;
+                }
+                .btn-tour-prev {
+                    background: rgba(30, 41, 59, 0.7);
+                    color: #cbd5e1;
+                    border: 1px solid rgba(255, 255, 255, 0.12);
+                }
+                .btn-tour-prev:hover {
+                    background: rgba(51, 65, 85, 0.8);
+                    color: #ffffff;
+                }
+                .btn-tour-next {
+                    background: linear-gradient(135deg, #0284c7, #2563eb);
+                    color: #ffffff;
+                    border: 1px solid rgba(56, 189, 248, 0.4);
+                    box-shadow: 0 2px 10px rgba(2, 132, 199, 0.3);
+                }
+                .btn-tour-next:hover {
+                    transform: translateY(-1px);
+                    box-shadow: 0 4px 14px rgba(2, 132, 199, 0.45);
+                }
+
+                /* Welcome Prompt Modal */
+                .tour-prompt-backdrop {
                     position: fixed;
                     inset: 0;
                     background: rgba(2, 6, 23, 0.82);
                     backdrop-filter: blur(8px);
-                    z-index: 99998;
+                    z-index: 100005;
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    animation: tourFadeIn 0.22s ease-out;
                     padding: 16px;
                 }
-                @keyframes tourFadeIn {
-                    from { opacity: 0; }
-                    to { opacity: 1; }
-                }
-                .tour-card {
+                .tour-prompt-card {
                     background: #0f172a;
                     border: 1px solid rgba(56, 189, 248, 0.45);
                     box-shadow: 0 25px 65px rgba(0, 0, 0, 0.9), 0 0 30px rgba(56, 189, 248, 0.2);
                     border-radius: 16px;
-                    max-width: 560px;
+                    max-width: 480px;
                     width: 100%;
                     direction: rtl;
                     text-align: right;
                     overflow: hidden;
-                    animation: tourCardSlideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-                    z-index: 99999;
-                    display: flex;
-                    flex-direction: column;
-                }
-                @keyframes tourCardSlideUp {
-                    from { transform: translateY(20px) scale(0.96); opacity: 0; }
-                    to { transform: translateY(0) scale(1); opacity: 1; }
-                }
-                .tour-card-header {
-                    background: linear-gradient(135deg, rgba(14, 165, 233, 0.2), rgba(37, 99, 235, 0.12));
-                    border-bottom: 1px solid rgba(56, 189, 248, 0.25);
-                    padding: 16px 20px;
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                }
-                .tour-step-badge {
-                    font-size: 0.72rem;
-                    background: rgba(56, 189, 248, 0.2);
-                    color: #38bdf8;
-                    border: 1px solid #38bdf8;
-                    padding: 3px 10px;
-                    border-radius: 12px;
-                    font-weight: 700;
-                    letter-spacing: 0.3px;
-                }
-                .tour-tag-pill {
-                    font-size: 0.68rem;
-                    background: rgba(16, 185, 129, 0.2);
-                    color: #34d399;
-                    border: 1px solid #10b981;
-                    padding: 2px 8px;
-                    border-radius: 10px;
-                    font-weight: 700;
-                    margin-right: 6px;
-                }
-                .tour-card-body {
-                    padding: 20px 24px;
+                    padding: 20px;
                     color: #e2e8f0;
-                    font-size: 0.9rem;
-                    line-height: 1.65;
-                    max-height: 60vh;
-                    overflow-y: auto;
-                }
-                .tour-card-body kbd {
-                    background: #1e293b;
-                    border: 1px solid #475569;
-                    color: #38bdf8;
-                    padding: 1px 6px;
-                    border-radius: 4px;
-                    font-size: 0.78rem;
-                    font-family: inherit;
-                    font-weight: 700;
-                }
-                .tour-action-row {
-                    margin-top: 14px;
-                    padding: 10px 14px;
-                    background: rgba(15, 23, 42, 0.65);
-                    border: 1px dashed rgba(56, 189, 248, 0.35);
-                    border-radius: 10px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: space-between;
-                    gap: 10px;
-                }
-                .tour-progress-bar {
-                    height: 4px;
-                    background: rgba(255, 255, 255, 0.08);
-                    width: 100%;
-                }
-                .tour-progress-fill {
-                    height: 100%;
-                    background: linear-gradient(90deg, #10b981, #38bdf8);
-                    transition: width 0.25s ease;
-                }
-                .tour-card-footer {
-                    padding: 14px 20px;
-                    border-top: 1px solid rgba(255, 255, 255, 0.08);
-                    background: rgba(15, 23, 42, 0.75);
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                }
-                .btn-tour-nav {
-                    padding: 8px 18px;
-                    border-radius: 8px;
-                    font-size: 0.86rem;
-                    font-weight: 700;
-                    cursor: pointer;
-                    font-family: inherit;
-                    transition: all 0.2s ease;
-                }
-                .btn-tour-skip {
-                    background: transparent;
-                    border: none;
-                    color: #94a3b8;
-                    cursor: pointer;
-                    font-size: 0.82rem;
-                    padding: 6px 10px;
-                    font-family: inherit;
-                }
-                .btn-tour-skip:hover {
-                    color: #f1f5f9;
-                    text-decoration: underline;
-                }
-
-                /* Tutorial Hub Modal */
-                .tutorial-hub-modal {
-                    max-width: 800px;
-                    width: 95%;
-                    max-height: 88vh;
-                }
-                .tutorial-hub-grid {
-                    display: grid;
-                    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-                    gap: 12px;
-                    margin-top: 14px;
-                }
-                .tutorial-hub-card {
-                    background: rgba(15, 23, 42, 0.75);
-                    border: 1px solid rgba(56, 189, 248, 0.22);
-                    border-radius: 12px;
-                    padding: 14px 16px;
-                    cursor: pointer;
-                    transition: all 0.2s ease;
-                    display: flex;
-                    flex-direction: column;
-                    justify-content: space-between;
-                }
-                .tutorial-hub-card:hover {
-                    background: rgba(30, 41, 59, 0.75);
-                    border-color: #38bdf8;
-                    box-shadow: 0 4px 16px rgba(56, 189, 248, 0.2);
-                    transform: translateY(-2px);
-                }
-                .tutorial-hub-card-header {
-                    display: flex;
-                    align-items: center;
-                    gap: 10px;
-                    margin-bottom: 6px;
-                }
-                .tutorial-hub-card-title {
-                    font-weight: 800;
-                    color: #f8fafc;
-                    font-size: 0.95rem;
-                }
-                .tutorial-hub-card-desc {
-                    font-size: 0.8rem;
-                    color: #94a3b8;
-                    line-height: 1.5;
                 }
             `;
             document.head.appendChild(style);
         },
 
         showWelcomeTourPrompt() {
-            if (document.getElementById('tour-welcome-prompt') || document.getElementById('interactive-tour-container')) return;
+            if (document.getElementById('tour-welcome-prompt') || this.active) return;
             const onboardingModal = document.getElementById('onboarding-wizard-modal');
             if (onboardingModal && (
                 onboardingModal.classList.contains('active') || 
@@ -505,32 +529,32 @@
 
             const promptEl = document.createElement('div');
             promptEl.id = 'tour-welcome-prompt';
-            promptEl.className = 'tour-backdrop';
+            promptEl.className = 'tour-prompt-backdrop';
             promptEl.innerHTML = `
-                <div class="tour-card" style="max-width: 480px;">
-                    <div class="tour-card-header">
-                        <div style="display: flex; align-items: center; gap: 10px;">
-                            <span style="font-size: 1.6rem;">🧭</span>
-                            <span style="font-weight: 800; color: #38bdf8; font-size: 1.15rem;">סיור היכרות והדרכה ב-Semestero ME</span>
+                <div class="tour-prompt-card">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 14px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 10px;">
+                        <span style="font-size: 1.6rem;">🧭</span>
+                        <div>
+                            <h3 style="margin: 0; color: #38bdf8; font-size: 1.15rem; font-weight: 800;">
+                                סיור מודרך חי ב-Semestero ME
+                            </h3>
+                            <div style="font-size: 0.78rem; color: #94a3b8; margin-top: 2px;">
+                                הכר את כל הכלים הפקולטיים במקומם הטבעי
+                            </div>
                         </div>
                     </div>
-                    <div class="tour-card-body">
-                        שלום! המערכת כוללת מגוון כלים מתקדמים: עץ מיומנויות, מתכנן תואר עם בדיקת זכאות לסיום, מחולל שעות מ-CheeseFork, שורת פקודות (Ctrl+K), והשוואת קורסים צד-מול-צד.
-                        <br><br>
-                        רוצה סיור מודרך מהיר של 60 שניות שיעשה לך סדר בהכל?
-                        <div style="margin-top: 10px; font-size: 0.78rem; color: #94a3b8;">
-                            תוכל לפתוח את הסיור בכל עת באמצעות סמל המצפן (🧭) בסרגל העליון או דרך ההגדרות.
-                        </div>
+                    <div style="font-size: 0.9rem; line-height: 1.65; color: #cbd5e1;">
+                        במקום לקרוא כרטיסיות ארוכות, הסיור המודרך יעביר אותך שלב-אחר-שלב בין מסכי המערכת האמיתיים, יאיר את הכפתורים החשובים וידגים לך איפה ללחוץ!
                     </div>
-                    <div class="tour-card-footer">
-                        <button type="button" class="btn-tour-skip" id="btn-prompt-skip-tour">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 18px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 14px;">
+                        <button type="button" class="tour-skip-link" id="btn-prompt-skip-tour">
                             דלג בינתיים
                         </button>
                         <div style="display: flex; gap: 8px;">
-                            <button type="button" class="btn btn-outline btn-tour-nav" id="btn-prompt-open-hub" style="border-color: #38bdf8; color: #38bdf8;">
+                            <button type="button" class="btn-tour-action btn-tour-prev" id="btn-prompt-open-hub">
                                 📚 מרכז ההדרכה
                             </button>
-                            <button type="button" class="btn btn-primary btn-tour-nav" id="btn-prompt-start-tour" style="background: linear-gradient(135deg, #0284c7, #2563eb); border: none;">
+                            <button type="button" class="btn-tour-action btn-tour-next" id="btn-prompt-start-tour">
                                 🚀 התחל סיור מודרך
                             </button>
                         </div>
@@ -553,7 +577,7 @@
                 localStorage.setItem(TOUR_STORAGE_KEY, 'true');
                 promptEl.remove();
                 if (typeof window.showHudToast === 'function') {
-                    window.showHudToast('הסיור דולג. ניתן להפעילו בכל עת באמצעות כפתור המצפן 🧭 בראש המסך', 'info');
+                    window.showHudToast('הסיור דולג. ניתן להפעילו בכל עת במקש T או דרך ההגדרות', 'info');
                 }
             };
         },
@@ -561,130 +585,365 @@
         startTour(startIndex = 0) {
             this.currentStep = Math.max(0, Math.min(TOUR_STEPS.length - 1, startIndex));
             this.active = true;
+
+            // Remove welcome prompt if open
+            const welcomePrompt = document.getElementById('tour-welcome-prompt');
+            if (welcomePrompt) welcomePrompt.remove();
+
+            // Setup DOM layers
+            this.createOverlayLayers();
+
+            // Global reposition listeners
+            this.repositionHandler = () => {
+                if (this.active) this.updateSpotlightPosition();
+            };
+            window.addEventListener('resize', this.repositionHandler, { passive: true });
+            window.addEventListener('scroll', this.repositionHandler, { passive: true });
+
+            // Keyboard navigation
+            this.keyHandler = (e) => {
+                if (!this.active) return;
+                if (e.key === 'Escape') {
+                    e.preventDefault();
+                    this.endTour(true);
+                } else if (e.key === 'ArrowRight' || e.key === 'Enter') {
+                    if (this.currentStep < TOUR_STEPS.length - 1) {
+                        e.preventDefault();
+                        this.nextStep();
+                    }
+                } else if (e.key === 'ArrowLeft') {
+                    if (this.currentStep > 0) {
+                        e.preventDefault();
+                        this.prevStep();
+                    }
+                }
+            };
+            window.addEventListener('keydown', this.keyHandler);
+
             this.renderStep();
         },
 
+        createOverlayLayers() {
+            // Remove existing
+            const oldSvg = document.getElementById('tour-spotlight-svg');
+            if (oldSvg) oldSvg.remove();
+            const oldFrame = document.getElementById('tour-spotlight-frame');
+            if (oldFrame) oldFrame.remove();
+            const oldPopover = document.getElementById('tour-popover');
+            if (oldPopover) oldPopover.remove();
+
+            // 1. SVG Cutout Mask
+            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.id = 'tour-spotlight-svg';
+            svg.setAttribute('class', 'tour-spotlight-svg');
+            svg.innerHTML = `
+                <defs>
+                    <mask id="tour-cutout-mask" maskUnits="userSpaceOnUse">
+                        <rect x="0" y="0" width="100%" height="100%" fill="white" />
+                        <rect id="tour-cutout-rect" x="0" y="0" width="0" height="0" rx="12" ry="12" fill="black" />
+                    </mask>
+                </defs>
+                <rect x="0" y="0" width="100%" height="100%" fill="rgba(6, 10, 22, 0.78)" mask="url(#tour-cutout-mask)" />
+            `;
+            document.body.appendChild(svg);
+
+            // 2. Animated Outline Frame
+            const frame = document.createElement('div');
+            frame.id = 'tour-spotlight-frame';
+            frame.className = 'tour-spotlight-frame';
+            frame.style.display = 'none';
+            document.body.appendChild(frame);
+
+            // 3. Anchored Popover
+            const popover = document.createElement('div');
+            popover.id = 'tour-popover';
+            popover.className = 'tour-popover';
+            popover.style.display = 'none';
+            document.body.appendChild(popover);
+        },
+
         renderStep() {
-            let container = document.getElementById('interactive-tour-container');
-            if (!container) {
-                container = document.createElement('div');
-                container.id = 'interactive-tour-container';
-                container.className = 'tour-backdrop';
-                document.body.appendChild(container);
+            if (!this.active) return;
+            const step = TOUR_STEPS[this.currentStep];
+            if (!step) return;
+
+            // Clean elevation on previous target
+            if (this.activeTargetEl) {
+                this.activeTargetEl.classList.remove('tour-target-elevated');
+                this.activeTargetEl = null;
             }
 
-            const step = TOUR_STEPS[this.currentStep];
-            const totalSteps = TOUR_STEPS.length;
-            const progressPercent = Math.round(((this.currentStep + 1) / totalSteps) * 100);
-
-            // Switch workspace tab so the student views the live UI!
+            // 1. Switch Tab to the workspace
             if (step.tab) {
                 switchAppTab(step.tab);
             }
 
-            const isLast = this.currentStep === totalSteps - 1;
-            const isFirst = this.currentStep === 0;
+            // 2. Wait for workspace layout to render before measuring target
+            setTimeout(() => {
+                if (!this.active) return;
 
-            let actionHtml = '';
+                // Find target element with fallback
+                let targetEl = null;
+                const targets = Array.isArray(step.target) ? step.target : [step.target];
+                for (const selector of targets) {
+                    const found = document.querySelector(selector);
+                    if (found && found.offsetParent !== null) { // visible
+                        targetEl = found;
+                        break;
+                    }
+                }
+
+                // If still not found, try any element on that tab or default fallback
+                if (!targetEl) {
+                    targetEl = document.getElementById(`${step.tab}-workspace`) || 
+                               document.querySelector('.app-main-content') || 
+                               document.body;
+                }
+
+                this.activeTargetEl = targetEl;
+                if (targetEl && targetEl !== document.body) {
+                    targetEl.classList.add('tour-target-elevated');
+                    try {
+                        targetEl.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+                    } catch (e) {}
+                }
+
+                // Delay slightly after scroll starts to compute final bounding rect
+                setTimeout(() => {
+                    if (!this.active) return;
+                    this.updateSpotlightPosition();
+                    this.renderPopoverContent(step);
+                }, 160);
+
+            }, 260);
+        },
+
+        updateSpotlightPosition() {
+            const frame = document.getElementById('tour-spotlight-frame');
+            const cutout = document.getElementById('tour-cutout-rect');
+            const popover = document.getElementById('tour-popover');
+            if (!frame || !cutout || !this.activeTargetEl) return;
+
+            let rect = this.activeTargetEl.getBoundingClientRect();
+
+            // Guard against zero-dimension elements
+            if (rect.width === 0 || rect.height === 0) {
+                const parent = this.activeTargetEl.parentElement;
+                if (parent) rect = parent.getBoundingClientRect();
+            }
+
+            // Add pleasant spotlight padding around the element
+            const pad = 8;
+            const x = Math.max(0, rect.left - pad);
+            const y = Math.max(0, rect.top - pad);
+            const width = Math.min(window.innerWidth - x, rect.width + (pad * 2));
+            const height = Math.min(window.innerHeight - y, rect.height + (pad * 2));
+            const radius = 12;
+
+            // Update SVG cutout hole
+            cutout.setAttribute('x', String(x));
+            cutout.setAttribute('y', String(y));
+            cutout.setAttribute('width', String(width));
+            cutout.setAttribute('height', String(height));
+            cutout.setAttribute('rx', String(radius));
+            cutout.setAttribute('ry', String(radius));
+
+            // Update Glowing Outline Frame
+            frame.style.display = 'block';
+            frame.style.left = `${x}px`;
+            frame.style.top = `${y}px`;
+            frame.style.width = `${width}px`;
+            frame.style.height = `${height}px`;
+
+            // Position popover relative to spotlight
+            if (popover && popover.style.display !== 'none') {
+                this.positionPopover(rect, x, y, width, height);
+            }
+        },
+
+        positionPopover(targetRect, spotX, spotY, spotW, spotH) {
+            const popover = document.getElementById('tour-popover');
+            if (!popover) return;
+
+            const step = TOUR_STEPS[this.currentStep];
+            const popW = popover.offsetWidth || 380;
+            const popH = popover.offsetHeight || 220;
+            const winW = window.innerWidth;
+            const winH = window.innerHeight;
+            const margin = 14;
+
+            let placement = step.placement || 'bottom';
+
+            // Auto-detect optimal placement based on available viewport space
+            const spaceBelow = winH - (spotY + spotH);
+            const spaceAbove = spotY;
+
+            if (placement === 'bottom' && spaceBelow < popH + margin && spaceAbove >= popH + margin) {
+                placement = 'top';
+            } else if (placement === 'top' && spaceAbove < popH + margin && spaceBelow >= popH + margin) {
+                placement = 'bottom';
+            }
+
+            popover.setAttribute('data-placement', placement);
+
+            let popX = spotX + (spotW / 2) - (popW / 2);
+            let popY = 0;
+
+            if (placement === 'bottom') {
+                popY = spotY + spotH + margin;
+            } else if (placement === 'top') {
+                popY = spotY - popH - margin;
+            } else if (placement === 'left') {
+                popX = spotX - popW - margin;
+                popY = spotY + (spotH / 2) - (popH / 2);
+            } else if (placement === 'right') {
+                popX = spotX + spotW + margin;
+                popY = spotY + (spotH / 2) - (popH / 2);
+            }
+
+            // Viewport clamping
+            popX = Math.max(12, Math.min(winW - popW - 12, popX));
+            popY = Math.max(12, Math.min(winH - popH - 12, popY));
+
+            popover.style.left = `${Math.round(popX)}px`;
+            popover.style.top = `${Math.round(popY)}px`;
+
+            // Align arrow with target center
+            const arrow = popover.querySelector('.tour-popover-arrow');
+            if (arrow) {
+                const targetCenterX = spotX + (spotW / 2);
+                const arrowRelativeX = targetCenterX - popX - 7;
+                const clampedArrowX = Math.max(20, Math.min(popW - 34, arrowRelativeX));
+                arrow.style.left = `${Math.round(clampedArrowX)}px`;
+            }
+        },
+
+        renderPopoverContent(step) {
+            const popover = document.getElementById('tour-popover');
+            if (!popover) return;
+
+            const total = TOUR_STEPS.length;
+            const isFirst = this.currentStep === 0;
+            const isLast = this.currentStep === total - 1;
+
+            let actionBtnHtml = '';
             if (step.actionBtn) {
-                actionHtml = `
-                    <div class="tour-action-row">
-                        <span style="font-size: 0.8rem; color: #94a3b8;">נסה כעת ישירות מהסיור:</span>
-                        <button type="button" class="btn btn-xs btn-outline" id="btn-tour-step-action" style="border-color: #38bdf8; color: #38bdf8; font-weight: 700; padding: 4px 12px; border-radius: 6px;">
-                            ${step.actionBtn.label}
-                        </button>
-                    </div>
+                actionBtnHtml = `
+                    <button type="button" class="tour-action-callout-btn" id="tour-step-interactive-btn">
+                        ${step.actionBtn.label}
+                    </button>
                 `;
             }
 
-            container.innerHTML = `
-                <div class="tour-card">
-                    <div class="tour-progress-bar">
-                        <div class="tour-progress-fill" style="width: ${progressPercent}%;"></div>
+            popover.innerHTML = `
+                <div class="tour-popover-arrow"></div>
+                <div class="tour-popover-header">
+                    <div class="tour-popover-title-row">
+                        <span class="tour-popover-icon">${step.icon}</span>
+                        <div>
+                            <h4 class="tour-popover-title">${step.title}</h4>
+                        </div>
                     </div>
-                    <div class="tour-card-header">
-                        <div style="display: flex; align-items: center; gap: 10px;">
-                            <span style="font-size: 1.6rem;">${step.icon}</span>
+                    <div class="tour-popover-meta">
+                        <span class="tour-popover-tag">${step.tag}</span>
+                        <span class="tour-step-counter">${this.currentStep + 1} / ${total}</span>
+                        <button type="button" class="tour-popover-close" id="tour-btn-close" aria-label="סגור">&times;</button>
+                    </div>
+                </div>
+
+                <div class="tour-popover-body">
+                    <div style="margin-bottom: 6px;">${step.text}</div>
+                    ${step.actionTip ? `
+                        <div class="tour-action-callout">
+                            <span>💡</span>
                             <div>
-                                <div style="display: flex; align-items: center; gap: 6px;">
-                                    <h3 style="margin: 0; color: #38bdf8; font-size: 1.05rem; font-weight: 800;">
-                                        ${step.title}
-                                    </h3>
-                                    ${step.tag ? `<span class="tour-tag-pill">${step.tag}</span>` : ''}
-                                </div>
-                                <div style="font-size: 0.76rem; color: #94a3b8; margin-top: 2px;">
-                                    ${step.subtitle}
-                                </div>
+                                <span>${step.actionTip}</span>
+                                ${actionBtnHtml}
                             </div>
                         </div>
-                        <span class="tour-step-badge">שלב ${this.currentStep + 1} / ${totalSteps}</span>
-                    </div>
+                    ` : ''}
+                </div>
 
-                    <div class="tour-card-body">
-                        ${step.content}
-                        ${actionHtml}
-                    </div>
-
-                    <div class="tour-card-footer">
-                        <button type="button" class="btn-tour-skip" id="btn-tour-skip-all">
-                            דלג על הסיור
+                <div class="tour-popover-footer">
+                    <button type="button" class="tour-skip-link" id="tour-btn-skip">דלג על הסיור</button>
+                    <div class="tour-nav-btns">
+                        ${!isFirst ? `<button type="button" class="btn-tour-action btn-tour-prev" id="tour-btn-prev">הקודם</button>` : ''}
+                        <button type="button" class="btn-tour-action btn-tour-next" id="tour-btn-next">
+                            ${isLast ? 'סיום והתחלת עבודה 🚀' : 'הבא ➔'}
                         </button>
-                        <div style="display: flex; gap: 8px;">
-                            <button type="button" class="btn btn-outline btn-tour-nav" id="btn-tour-open-hub" style="border-color: #475569; color: #94a3b8;">
-                                📚 כל הנושאים
-                            </button>
-                            ${!isFirst ? `<button type="button" class="btn btn-outline btn-tour-nav" id="btn-tour-prev" style="border-color: #334155; color: #cbd5e1;">הקודם</button>` : ''}
-                            <button type="button" class="btn btn-primary btn-tour-nav" id="btn-tour-next" style="background: linear-gradient(135deg, #0284c7, #2563eb); border: none;">
-                                ${isLast ? 'סיום והתחלת שימוש 🚀' : 'הבא ➔'}
-                            </button>
-                        </div>
                     </div>
                 </div>
             `;
 
+            popover.style.display = 'flex';
+
+            // Now that popover has dimensions, position it
+            this.updateSpotlightPosition();
+
             // Bind listeners
-            document.getElementById('btn-tour-skip-all').onclick = () => this.endTour(true);
-            document.getElementById('btn-tour-open-hub').onclick = () => {
-                const tourEl = document.getElementById('interactive-tour-container');
-                if (tourEl) tourEl.remove();
-                window.openTutorialHubModal();
+            document.getElementById('tour-btn-close').onclick = () => this.endTour(true);
+            document.getElementById('tour-btn-skip').onclick = () => this.endTour(true);
+
+            const prevBtn = document.getElementById('tour-btn-prev');
+            if (prevBtn) prevBtn.onclick = () => this.prevStep();
+
+            document.getElementById('tour-btn-next').onclick = () => {
+                if (isLast) this.endTour(false);
+                else this.nextStep();
             };
 
-            const actionBtnEl = document.getElementById('btn-tour-step-action');
-            if (actionBtnEl && step.actionBtn && typeof step.actionBtn.onClick === 'function') {
-                actionBtnEl.onclick = () => step.actionBtn.onClick();
+            const actionBtn = document.getElementById('tour-step-interactive-btn');
+            if (actionBtn && step.actionBtn && typeof step.actionBtn.onClick === 'function') {
+                actionBtn.onclick = () => step.actionBtn.onClick();
             }
+        },
 
-            const prevBtn = document.getElementById('btn-tour-prev');
-            if (prevBtn) {
-                prevBtn.onclick = () => {
-                    if (this.currentStep > 0) {
-                        this.currentStep--;
-                        this.renderStep();
-                    }
-                };
+        nextStep() {
+            if (this.currentStep < TOUR_STEPS.length - 1) {
+                this.currentStep++;
+                this.renderStep();
             }
+        },
 
-            document.getElementById('btn-tour-next').onclick = () => {
-                if (isLast) {
-                    this.endTour(false);
-                } else {
-                    this.currentStep++;
-                    this.renderStep();
-                }
-            };
+        prevStep() {
+            if (this.currentStep > 0) {
+                this.currentStep--;
+                this.renderStep();
+            }
         },
 
         endTour(skipped = false) {
             this.active = false;
-            const container = document.getElementById('interactive-tour-container');
-            if (container) container.remove();
+
+            if (this.activeTargetEl) {
+                this.activeTargetEl.classList.remove('tour-target-elevated');
+                this.activeTargetEl = null;
+            }
+
+            // Remove layers
+            const svg = document.getElementById('tour-spotlight-svg');
+            if (svg) svg.remove();
+            const frame = document.getElementById('tour-spotlight-frame');
+            if (frame) frame.remove();
+            const popover = document.getElementById('tour-popover');
+            if (popover) popover.remove();
+
+            // Unbind listeners
+            if (this.repositionHandler) {
+                window.removeEventListener('resize', this.repositionHandler);
+                window.removeEventListener('scroll', this.repositionHandler);
+                this.repositionHandler = null;
+            }
+            if (this.keyHandler) {
+                window.removeEventListener('keydown', this.keyHandler);
+                this.keyHandler = null;
+            }
 
             localStorage.setItem(TOUR_STORAGE_KEY, 'true');
 
             if (typeof window.showHudToast === 'function') {
                 if (skipped) {
-                    window.showHudToast('הסיור דולג. תוכל להפעילו מחדש בכל עת דרך סמל המצפן 🧭', 'info');
+                    window.showHudToast('הסיור דולג. תוכל להפעילו מחדש בכל עת במקש T או דרך ההגדרות', 'info');
                 } else {
                     window.showHudToast('סיימת את הסיור המודרך בהצלחה! בהצלחה בתואר 🎓🚀', 'success');
                 }
@@ -742,14 +1001,14 @@
                     <div style="background: linear-gradient(135deg, rgba(2, 132, 199, 0.15), rgba(16, 185, 129, 0.15)); border: 1px solid rgba(56, 189, 248, 0.35); border-radius: 12px; padding: 14px 18px; display: flex; justify-content: space-between; align-items: center; gap: 14px; flex-wrap: wrap;">
                         <div>
                             <div style="font-weight: 800; color: #38bdf8; font-size: 1rem;">
-                                🚀 סיור מודרך מלא של 60 שניות
+                                🚀 סיור מודרך חי (In-Situ Spotlight Walkthrough)
                             </div>
                             <div style="font-size: 0.8rem; color: #cbd5e1; margin-top: 3px;">
-                                סיור שלב-אחר-שלב המעביר אותך אוטומטית בין כל מסכי המערכת עם הסבר מפורט.
+                                סיור שלב-אחר-שלב המעביר אותך בין מסכי המערכת, מאיר את הכפתורים ומדגים איפה ללחוץ.
                             </div>
                         </div>
                         <button type="button" class="btn btn-primary" onclick="window.closeTutorialHubModal(); window.startInteractiveTour(0);" style="background: linear-gradient(135deg, #0284c7, #2563eb); border: none; font-weight: 700; padding: 8px 18px; border-radius: 8px;">
-                            ▶️ הפעל סיור מלא
+                            ▶️ הפעל סיור חי
                         </button>
                     </div>
 
@@ -774,7 +1033,7 @@
 
                 <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center;">
                     <div style="font-size: 0.78rem; color: #94a3b8;">
-                        💡 טיפ: תוכל לפתוח את מרכז ההדרכה בכל עת בלחיצה על <kbd style="background: #1e293b; border: 1px solid #334155; padding: 1px 5px; border-radius: 4px; color: #38bdf8;">Ctrl+K</kbd> וכתיבת "סיור"
+                        💡 טיפ: תוכל לפתוח את מרכז ההדרכה והסיור בכל עת בלחיצה על מקש <kbd style="background: #1e293b; border: 1px solid #334155; padding: 1px 5px; border-radius: 4px; color: #38bdf8;">T</kbd> או דרך <kbd style="background: #1e293b; border: 1px solid #334155; padding: 1px 5px; border-radius: 4px; color: #38bdf8;">Ctrl+K</kbd>
                     </div>
                     <button type="button" class="btn btn-secondary btn-sm" onclick="window.closeTutorialHubModal()">סגור</button>
                 </div>
