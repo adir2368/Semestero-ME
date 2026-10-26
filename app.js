@@ -20228,7 +20228,11 @@ function generateFullICSString() {
 // Asynchronous background update to GitHub Gist
 async function syncScheduleToCloudGist(showToast = true) {
     if (!CLOUD_GIST_SYNC.token || !CLOUD_GIST_SYNC.token.trim()) {
-        // No personal access token configured - gracefully skip cloud gist update without throwing 401
+        const indicator = document.getElementById("sync-status-indicator");
+        if (indicator) indicator.innerText = "⚪ אינו מחובר לסנכרון ענן";
+        if (showToast) {
+            showToastNotification("⚠️ אינך מחובר לסנכרון ענן (Google Calendar)! לא הוגדר טוקן סנכרון פעיל.", 'warning');
+        }
         return false;
     }
     const indicator = document.getElementById("sync-status-indicator");
@@ -20348,10 +20352,14 @@ function openCalendarSyncModal() {
 
     const triggerBtn = document.getElementById("btn-trigger-cloud-sync");
     if (triggerBtn) {
+        triggerBtn.style.display = "inline-flex";
         if (!isConnected) {
-            triggerBtn.style.display = "none";
+            triggerBtn.onclick = () => {
+                showToastNotification("⚠️ אינך מחובר לסנכרון ענן (Google Calendar). התחבר לחשבונך תחילה.", "warning");
+                const indicator = document.getElementById("sync-status-indicator");
+                if (indicator) indicator.innerText = "⚪ אינו מחובר לסנכרון ענן";
+            };
         } else {
-            triggerBtn.style.display = "inline-flex";
             triggerBtn.onclick = () => {
                 triggerBtn.disabled = true;
                 triggerBtn.innerText = "🔄 מסנכרן...";
@@ -20671,6 +20679,13 @@ function exportTimetableCancellationICS() {
     });
 
     icsLines.push('END:VCALENDAR');
+
+    if (totalCancelled === 0) {
+        if (typeof showToastNotification === 'function') {
+            showToastNotification('לא נמצאו שיעורים פעילים במערכת השעות לביטול ביומן 📅', 'warning');
+        }
+        return;
+    }
 
     const icsContent = icsLines.join('\r\n');
     downloadICSFile(icsContent, 'Semestero_ME_Cancel_And_Delete_Classes.ics');
@@ -21671,8 +21686,8 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.10.26-v2.7.0",
-    version: "2.7.0",
+    code: "REV-2026.10.26-v2.7.1",
+    version: "2.7.1",
     build: "20261020_03",
     date: "2026-10-20 01:20",
     description: "גרסה 2.5.2: פתרון מוחלט ללולאת העדכון במובייל וספארי, מנגנון אנטי-רילואד עמיד ב-localStorage, סנכרון גרסאות מלא וקישורי הורדה ישירים לטלפונים"
@@ -21795,6 +21810,28 @@ function renderSettingsPage() {
 
     if (webhookInput) webhookInput.value = gameState.googleAppsScriptWebhookUrl || "";
     if (syncFreqSelect) syncFreqSelect.value = gameState.syncFrequencyHours || 1;
+
+    // Update settings Google Calendar status badge truthfully
+    const gcalStatusBadge = document.getElementById("settings-gcal-status-badge");
+    const examsVal = calExamsInput ? calExamsInput.value.trim() : "";
+    const hwVal = calHwInput ? calHwInput.value.trim() : "";
+    const practiceVal = calPracticeInput ? calPracticeInput.value.trim() : "";
+    const webhookVal = webhookInput ? webhookInput.value.trim() : "";
+    const isGcalConnected = !!(examsVal || hwVal || practiceVal || webhookVal);
+
+    if (gcalStatusBadge) {
+        if (isGcalConnected) {
+            gcalStatusBadge.innerText = "🟢 מחובר ליומני Google (מזהים או Webhook מוגדרים)";
+            gcalStatusBadge.style.background = "rgba(16, 185, 129, 0.15)";
+            gcalStatusBadge.style.color = "#34d399";
+            gcalStatusBadge.style.borderColor = "rgba(16, 185, 129, 0.4)";
+        } else {
+            gcalStatusBadge.innerText = "⚪ אינו מחובר ליומני Google — הזן מזהי יומן או Webhook לסנכרון";
+            gcalStatusBadge.style.background = "rgba(148, 163, 184, 0.15)";
+            gcalStatusBadge.style.color = "#94a3b8";
+            gcalStatusBadge.style.borderColor = "rgba(148, 163, 184, 0.4)";
+        }
+    }
 
     // 3. Populate Section 4: Academic Goals & Reminders
     const degreeCreditsInput = document.getElementById("setting-degree-credits");
@@ -21983,12 +22020,38 @@ function saveCalendarsSection() {
     }
 
     notifyStateChanged({ tab: 'settings' });
+
+    const isGcalConnected = !!(
+        (gameState.calendarIds && (gameState.calendarIds.exams || gameState.calendarIds.hw || gameState.calendarIds.practice)) ||
+        gameState.googleAppsScriptWebhookUrl
+    );
+
+    const gcalStatusBadge = document.getElementById("settings-gcal-status-badge");
+    if (gcalStatusBadge) {
+        if (isGcalConnected) {
+            gcalStatusBadge.innerText = "🟢 מחובר ליומני Google (מזהים או Webhook מוגדרים)";
+            gcalStatusBadge.style.background = "rgba(16, 185, 129, 0.15)";
+            gcalStatusBadge.style.color = "#34d399";
+            gcalStatusBadge.style.borderColor = "rgba(16, 185, 129, 0.4)";
+        } else {
+            gcalStatusBadge.innerText = "⚪ אינו מחובר ליומני Google — הזן מזהי יומן או Webhook לסנכרון";
+            gcalStatusBadge.style.background = "rgba(148, 163, 184, 0.15)";
+            gcalStatusBadge.style.color = "#94a3b8";
+            gcalStatusBadge.style.borderColor = "rgba(148, 163, 184, 0.4)";
+        }
+    }
+
     const statusDiv = document.getElementById("webhook-save-status");
     if (statusDiv) {
-        statusDiv.innerText = "✓ הגדרות יומנים נשמרו!";
+        statusDiv.innerText = isGcalConnected ? "✓ הגדרות יומנים נשמרו!" : "⚠️ נשמר (אינו מחובר ליומני Google)";
         setTimeout(() => { statusDiv.innerText = ""; }, 3000);
     }
-    showToastNotification("✅ הגדרות יומני Google נשמרו בהצלחה!", "success");
+
+    if (!isGcalConnected) {
+        showToastNotification("⚠️ הגדרות נשמרו (שימו לב: אינך מחובר ליומני Google — טרם הוגדרו מזהים)", "info");
+    } else {
+        showToastNotification("✅ מחובר! הגדרות יומני Google נשמרו בהצלחה.", "success");
+    }
 }
 
 // Save Section 4: Academic Goals
@@ -22066,13 +22129,22 @@ function renderPhoneAndNotificationPreferences() {
     const chanPhone = document.getElementById("pref-channel-phone");
 
     if (phoneInput && document.activeElement !== phoneInput) phoneInput.value = phone;
+    const phoneDesc = document.getElementById("phone-status-desc");
+    const isCloudUser = window.AuthSync && typeof window.AuthSync.isLoggedIn === 'function' && window.AuthSync.isLoggedIn();
     if (phoneStatus) {
         if (phone) {
             phoneStatus.className = "phone-status-badge badge-verified";
-            phoneStatus.innerText = `✓ מספר מעודכן (${phone})`;
+            phoneStatus.innerText = isCloudUser ? `🟢 מחובר לענן (${phone})` : `📱 מוגדר מקומית (${phone})`;
         } else {
             phoneStatus.className = "phone-status-badge badge-pending";
-            phoneStatus.innerText = "⚠️ לא הוגדר מספר";
+            phoneStatus.innerText = "⚪ אינו מחובר — לא הוגדר מספר";
+        }
+    }
+    if (phoneDesc) {
+        if (phone) {
+            phoneDesc.innerText = isCloudUser ? "מספר הטלפון מוגדר ומאובטח בפרטי החשבון ומסונכרן לענן" : "מספר הטלפון שמור במכשיר המקומי (אינך מחובר לחשבון ענן)";
+        } else {
+            phoneDesc.innerText = "ערוץ התראות אינו מחובר — הזן מספר טלפון להפעלת התראות";
         }
     }
 
@@ -22098,7 +22170,7 @@ function renderPhoneAndNotificationPreferences() {
             drawerPhoneBadge.innerText = `✓ ${phone}`;
         } else {
             drawerPhoneBadge.className = "drawer-phone-badge";
-            drawerPhoneBadge.innerText = "⚠️ לא הוגדר";
+            drawerPhoneBadge.innerText = "⚪ לא מחובר";
         }
     }
 
@@ -22128,6 +22200,8 @@ function savePhoneAndNotificationPreferences(source = 'settings') {
         const settingsInput = document.getElementById("setting-phone-number");
         if (settingsInput) {
             rawPhone = settingsInput.value.trim();
+            hasPhoneInput = true;
+        } else if (rawPhone) {
             hasPhoneInput = true;
         }
     }
@@ -22208,13 +22282,15 @@ function testSendPhoneNotification() {
     ensureNotificationPreferencesDefaults();
     const phone = (gameState.userProfile && gameState.userProfile.phone) || "";
     if (!phone) {
-        showToastNotification("אנא הזן ושמור מספר טלפון תחילה כדי לבצע בדיקה.", "warning");
+        showToastNotification("⚠️ אינך מחובר לערוץ התראות טלפון! אנא הזן ושמור מספר טלפון תחילה כדי לבצע בדיקה.", "warning");
         const phoneInput = document.getElementById("setting-phone-number");
         if (phoneInput) phoneInput.focus();
         return;
     }
 
-    showToastNotification(`📲 נשלחה התראת בדיקה למספר ${phone}! ערוץ הנייד מחובר בהצלחה.`, "success");
+    const isCloudUser = window.AuthSync && typeof window.AuthSync.isLoggedIn === 'function' && window.AuthSync.isLoggedIn();
+    const statusNote = isCloudUser ? "ערוץ הנייד מחובר ומסונכרן לענן" : "ערוץ הנייד מוגדר מקומית";
+    showToastNotification(`📲 נשלחה התראת בדיקה למספר ${phone}! ${statusNote}.`, "success");
     if (typeof showNativeNotification === 'function') {
         showNativeNotification(`📱 התראת בדיקה למספר ${phone}`, {
             body: `מערכת ההתראות של Semestero ME מחוברת למספרך (${phone}).\nתקבל תזכורות לפי ההעדפות שהגדרת.`,
@@ -25591,13 +25667,18 @@ function generateMorning730BriefingData(targetDate = null) {
         };
     } else {
         const schedule = getActiveTimetableSchedule();
+        const hasAnyClasses = schedule && schedule.days && schedule.days.some(d => d.classes && d.classes.length > 0);
         const dayConfig = (schedule && schedule.days) ? schedule.days.find(d => d.dayIndex === dayOfWeek) : null;
         const classes = (dayConfig && !dayConfig.isFree && dayConfig.classes) ? dayConfig.classes : [];
 
         let title = '';
         const bodyLines = [];
 
-        if (classes.length === 0) {
+        if (!hasAnyClasses) {
+            title = `🌅 תוכנית הבוקר (07:30) • יום ${dayName}`;
+            bodyLines.push(`📅 טרם הוגדרה או סונכרנה מערכת שעות פעילה.`);
+            bodyLines.push(`כדי לקבל תוכנית בוקר עם הרצאות ותרגולים, סנכרן את מערכת השעות מ-CheeseFork בלשונית מערכת שעות.`);
+        } else if (classes.length === 0) {
             title = `🌅 תוכנית הבוקר (07:30) • יום ${dayName}`;
             bodyLines.push(`🏖️ יום חופשי מלימודים!`);
             bodyLines.push(`אין היום הרצאות או תרגולים במערכת השעות.`);

@@ -789,6 +789,9 @@
                     </div>
                     <div id="older-versions-list" style="display: none; margin-top: 12px; border-top: 1px dashed rgba(56, 189, 248, 0.25); padding-top: 10px;">
                         <ul style="list-style-type: disc; padding-right: 22px; margin: 0; color: #94a3b8; font-size: 0.84rem; line-height: 1.75;">
+                            <li><strong>v2.7.1 (26/10/2026):</strong> ביקורת חיבורים מקיפה וחסימת סנכרון לכל שירותי המערכת: אינדיקטורים דינמיים אמיתיים למצב חיבור ערוץ הטלפון ויומני Google, חסימת סנכרון ענן שקט ללא טוקן, מניעת ייצוא קבצי ביטול ריקים, והודעות התרעה בעת ניסיון סנכרון ללא חיבור פעיל.</li>
+                            <li><strong>v2.7.0 (26/10/2026):</strong> חסימת הדמיית סנכרון שקטה (No Fake Mock Sync) עבור מודל, יומני Google ו-CheeseFork: הצגת סטטוס אמיתי "אינו מחובר" כאשר אין קישור פעיל והתרעה ברורה בכל ניסיון סנכרון.</li>
+                            <li><strong>v2.6.9 (26/10/2026):</strong> מנוע ניקוי כפילויות חכם למטלות, עדכון נתונים שהשתנו, וכפתור רענון ייעודי בטבלת המשימות.</li>
                             <li><strong>v2.6.8 (26/10/2026):</strong> v2.6.8 - Complete External Guest Data Isolation, Personal Link & Calendar ID Sanitization</li>
                             <li><strong>v2.6.7 (26/10/2026):</strong> סיור מודרך מקיף המציג תחילה את כל 6 החלונות המרכזיים עם השהיית מעבר מודעת (750ms), מניעת הסתרת סרגל החלונות, ופרטיות מלאה למשתמשי אורח.</li>
                             <li><strong>v2.6.6 (26/10/2026):</strong> סיור מודרך אינטראקטיבי מבוסס זרקור (In-Situ Spotlight Walkthrough) במקום כרטיסיות טקסט: מעבר חי בין דפים, הארת אלמנטים מדויקת בחיתוך SVG, מסגרת זוהרת ופופאובר חכם צמוד המדגים לסטודנט איפה ללחוץ.</li>
@@ -1143,9 +1146,14 @@
 
                 <!-- Section 3: Editable Google Calendar 2-Way Sync -->
                 <div class="settings-card">
-                    <div class="settings-card-header">
-                        <div class="settings-card-title">
-                            <span>📅 הגדרות סנכרון יומני Google (Editable Calendar IDs & Webhook)</span>
+                    <div class="settings-card-header" style="flex-wrap: wrap; gap: 8px;">
+                        <div>
+                            <div class="settings-card-title">
+                                <span>📅 הגדרות סנכרון יומני Google (Editable Calendar IDs & Webhook)</span>
+                            </div>
+                            <div id="settings-gcal-status-badge" style="font-size: 0.76rem; font-weight: 700; padding: 2px 8px; border-radius: 6px; border: 1px solid rgba(148, 163, 184, 0.4); background: rgba(148, 163, 184, 0.1); color: #94a3b8; display: inline-flex; align-items: center; gap: 5px; margin-top: 4px;">
+                                ⚪ אינו מחובר ליומני Google — הזן מזהי יומן או Webhook לסנכרון
+                            </div>
                         </div>
                         <button type="button" class="btn btn-xs btn-outline" id="btn-save-section-calendars" style="border-color: #38bdf8; color: #38bdf8;">
                             💾 שמור הגדרות יומנים
@@ -1272,10 +1280,10 @@
                                     <div>
                                         <div style="font-size: 0.88rem; font-weight: 700; color: #f8fafc; display: flex; align-items: center; gap: 8px;">
                                             <span>מספר טלפון מקושר:</span>
-                                            <span class="phone-status-badge badge-pending" id="phone-status-indicator">⚠️ לא הוגדר מספר</span>
+                                            <span class="phone-status-badge badge-pending" id="phone-status-indicator">⚪ ערוץ טלפון אינו מחובר</span>
                                         </div>
-                                        <div style="font-size: 0.74rem; color: #94a3b8; margin-top: 2px;">
-                                            מספר הטלפון מוגדר ומאובטח בפרטי החשבון ומסונכרן לענן
+                                        <div style="font-size: 0.74rem; color: #94a3b8; margin-top: 2px;" id="phone-status-desc">
+                                            ערוץ התראות אינו מחובר — לא הוגדר מספר טלפון
                                         </div>
                                     </div>
                                 </div>
