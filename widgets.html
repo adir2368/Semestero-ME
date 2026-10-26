@@ -1746,7 +1746,7 @@
         function copyCalendarFeed() {
             const isAdir = (window.AuthSync && typeof window.AuthSync.isAdirActive === 'function' && window.AuthSync.isAdirActive());
             if (isAdir) {
-                const icsUrl = 'https://gist.githubusercontent.com/adir2368/71ec3efb9e46b0abafa44532f0e2aab1/raw/technion_schedule.ics';
+                const icsUrl = localStorage.getItem('academic_skill_tree_github_raw_url') || '';
                 navigator.clipboard.writeText(icsUrl).then(() => {
                     alert(`כתובת יומן הבחינות והמטלות (Webcal) הועתקה! הוסף אותה ב-Google Calendar או Samsung Calendar.`);
                 });

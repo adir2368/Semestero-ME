@@ -9,7 +9,7 @@ const http = require('http');
 const USER_LINKS = [
     {
         name: 'CheeseFork Live Schedule (Adir Profile)',
-        url: 'https://cheesefork.netlify.app/?semester=202601&uid=D4bh8oHO0GQI5Gx1iYAbWsouBVx2',
+        url: 'https://cheesefork.netlify.app/?semester=202601',
         expected: [200, 301, 302],
         category: 'CheeseFork'
     },
@@ -21,7 +21,7 @@ const USER_LINKS = [
     },
     {
         name: 'CheeseFork Firestore REST API (Schedule Data)',
-        url: 'https://firestore.googleapis.com/v1/projects/cheesefork-de9af/databases/(default)/documents/users/D4bh8oHO0GQI5Gx1iYAbWsouBVx2/semesters/202601',
+        url: 'https://firestore.googleapis.com/v1/projects/cheesefork-de9af/databases/(default)/documents/users/GENERIC_USER/semesters/202601',
         expected: [200],
         category: 'CheeseFork'
     },

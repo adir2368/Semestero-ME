@@ -8968,10 +8968,7 @@ window.resetToAuthenticSchedule = resetToAuthenticSchedule;
 
 function openCheeseFork(event) {
     const savedUrl = localStorage.getItem('ast_cheesefork_url');
-    const isAdir = (window.AuthSync && typeof window.AuthSync.isAdirActive === 'function' && window.AuthSync.isAdirActive());
-    const defaultUrl = isAdir 
-        ? "https://cheesefork.netlify.app/?semester=202601&uid=D4bh8oHO0GQI5Gx1iYAbWsouBVx2" 
-        : "https://cheesefork.netlify.app/?semester=202601";
+    const defaultUrl = "https://cheesefork.netlify.app/?semester=202601";
     const targetUrl = savedUrl || defaultUrl;
     if (event && event.currentTarget && event.currentTarget.tagName === 'A') {
         event.currentTarget.href = targetUrl;
@@ -8998,7 +8995,7 @@ function loadSavedState() {
 
             // Auto-upgrade if local save is missing courses or removedCourses compared to PRELOADED_USER_STATE (Adir only)
             const preloadedUserState = (typeof window !== 'undefined' && window.PRELOADED_USER_STATE) || (typeof PRELOADED_USER_STATE !== 'undefined' ? PRELOADED_USER_STATE : null);
-            const isAdirActiveUser = (window.AuthSync && typeof window.AuthSync.isAdirActive === 'function' && window.AuthSync.isAdirActive()) || (typeof window !== 'undefined' && (window.Capacitor || window.location.protocol === 'capacitor:'));
+            const isAdirActiveUser = (window.AuthSync && typeof window.AuthSync.isAdirActive === "function" && window.AuthSync.isAdirActive());
             if (isAdirActiveUser && preloadedUserState && preloadedUserState.courses) {
                 const preloadedCount = Object.keys(preloadedUserState.courses).length;
                 const localCount = Object.keys(gameState.courses || {}).length;
@@ -9021,7 +9018,7 @@ function loadSavedState() {
 
     if (!loadedFromAuthSync) {
         const preloadedUserState = (typeof window !== 'undefined' && window.PRELOADED_USER_STATE) || (typeof PRELOADED_USER_STATE !== 'undefined' ? PRELOADED_USER_STATE : null);
-        const isAdir = (window.AuthSync && typeof window.AuthSync.isAdirActive === 'function' && window.AuthSync.isAdirActive()) || (typeof window !== 'undefined' && (window.Capacitor || window.location.protocol === 'capacitor:'));
+        const isAdir = (window.AuthSync && typeof window.AuthSync.isAdirActive === "function" && window.AuthSync.isAdirActive());
         const storageKey = isAdir ? "academic_skill_tree_save" : "ast_user_state_guest";
         const saved = localStorage.getItem(storageKey);
         if (saved) {
@@ -9065,7 +9062,7 @@ function loadSavedState() {
     // Grade preservation & recovery (Adir developer / native mobile):
     // Ensure all 11 completed courses and active semester 3 courses match authentic state
     const preloadedForRecovery = (typeof window !== 'undefined' && window.PRELOADED_USER_STATE) || (typeof PRELOADED_USER_STATE !== 'undefined' ? PRELOADED_USER_STATE : null);
-    const isAdirForRecovery = (window.AuthSync && typeof window.AuthSync.isAdirActive === 'function' && window.AuthSync.isAdirActive()) || (typeof window !== 'undefined' && (window.Capacitor || window.location.protocol === 'capacitor:'));
+    const isAdirForRecovery = (window.AuthSync && typeof window.AuthSync.isAdirActive === "function" && window.AuthSync.isAdirActive());
     if (isAdirForRecovery && gameState && gameState.courses && preloadedForRecovery && preloadedForRecovery.courses) {
         let healed = false;
         Object.entries(preloadedForRecovery.courses).forEach(([code, preloadedCourse]) => {
@@ -14108,10 +14105,7 @@ window.syncLiveCheeseForkData = async function(customUrl = null, isManual = fals
         statusDiv.innerText = "מתחבר לשרת CheeseFork...";
     }
 
-    const isAdir = (window.AuthSync && typeof window.AuthSync.isAdirActive === 'function' && window.AuthSync.isAdirActive());
-    const defaultUrl = isAdir 
-        ? "https://cheesefork.netlify.app/?semester=202601&uid=D4bh8oHO0GQI5Gx1iYAbWsouBVx2" 
-        : null;
+    const defaultUrl = null;
     const targetUrl = customUrl || localStorage.getItem('ast_cheesefork_url') || defaultUrl;
 
     if (!targetUrl) {
@@ -15435,7 +15429,7 @@ function updateOrganitCategoryCounts(allTasks) {
 // Renders the Notion Tasks Table body dynamically
 
 // ==========================================================================
-// Tasks Selection, Bulk Actions & Notion Context Menu (v2.6.7)
+// Tasks Selection, Bulk Actions & Notion Context Menu (v2.6.8)
 // ==========================================================================
 window.selectedTasksMap = new Map();
 let lastCheckedTaskIndex = -1;
@@ -20027,10 +20021,10 @@ function addCustomExamToBank(courseCode) {
 
 // Automated Cloud Calendar Sync (Google Calendar Webcal via GitHub Gist)
 const CLOUD_GIST_SYNC = {
-    gistId: "71ec3efb9e46b0abafa44532f0e2aab1",
+    gistId: localStorage.getItem("academic_skill_tree_github_gist_id") || "",
     token: localStorage.getItem("academic_skill_tree_github_token") || "",
-    rawUrl: "https://gist.githubusercontent.com/adir2368/71ec3efb9e46b0abafa44532f0e2aab1/raw/technion_schedule.ics",
-    webcalUrl: "webcal://gist.githubusercontent.com/adir2368/71ec3efb9e46b0abafa44532f0e2aab1/raw/technion_schedule.ics"
+    rawUrl: localStorage.getItem("academic_skill_tree_github_raw_url") || "",
+    webcalUrl: localStorage.getItem("academic_skill_tree_github_webcal_url") || ""
 };
 
 let cloudSyncDebounceTimer = null;
@@ -21545,8 +21539,8 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.10.25-v2.6.7",
-    version: "2.6.7",
+    code: "REV-2026.10.25-v2.6.8",
+    version: "2.6.8",
     build: "20261020_03",
     date: "2026-10-20 01:20",
     description: "גרסה 2.5.2: פתרון מוחלט ללולאת העדכון במובייל וספארי, מנגנון אנטי-רילואד עמיד ב-localStorage, סנכרון גרסאות מלא וקישורי הורדה ישירים לטלפונים"
@@ -21652,14 +21646,10 @@ function renderSettingsPage() {
     const webhookInput = document.getElementById("input-apps-script-webhook");
     const syncFreqSelect = document.getElementById("setting-sync-frequency");
     const isAdirSettings = (window.AuthSync && typeof window.AuthSync.isAdirActive === 'function' && window.AuthSync.isAdirActive());
-    const defaultCals = isAdirSettings ? {
-        exams: "f04b545847cb46d2694500ffc3ac3378bd9005e125ae4a59c2caea5a5f32725c@group.calendar.google.com",
-        hw: "a887c830cc1a7b0ca4f97d1751bcf02477d837dd4ca9cf5de8385871f44a6c4d@group.calendar.google.com",
-        practice: "d707cbfa99ea0f68a0a31ebc42cb4cd35eae834770a5a118051727eb0c1afdd5@group.calendar.google.com"
-    } : {
-        exams: "",
-        hw: "",
-        practice: ""
+    const defaultCals = {
+        exams: (gameState.calendarIds && gameState.calendarIds.exams) || (isAdirSettings ? (localStorage.getItem('ast_cal_exams') || '') : ''),
+        hw: (gameState.calendarIds && gameState.calendarIds.hw) || (isAdirSettings ? (localStorage.getItem('ast_cal_hw') || '') : ''),
+        practice: (gameState.calendarIds && gameState.calendarIds.practice) || (isAdirSettings ? (localStorage.getItem('ast_cal_practice') || '') : '')
     };
 
     if (calExamsInput) calExamsInput.value = (gameState.calendarIds && gameState.calendarIds.exams !== undefined) ? gameState.calendarIds.exams : defaultCals.exams;
@@ -23174,7 +23164,7 @@ window.checkRemoteAppVersion = async function(isManualCheck = false) {
         const match = domVerEl.innerText.match(/(?:^|\bv|\s)(\d+\.\d+\.\d+)\b/);
         if (match) currentVer = match[1];
     }
-    currentVer = currentVer || "2.6.7";
+    currentVer = currentVer || "2.6.8";
     const statusTextEl = document.getElementById("version-check-status-text");
     const footerBadgeEl = document.getElementById("footer-version-badge");
     const checkBtn = document.getElementById("btn-check-version-updates");
@@ -23730,8 +23720,8 @@ function getActiveTimetableSchedule() {
         return curState.timetable;
     }
 
-    if (typeof CHEESEFORK_SEMESTER_SCHEDULE !== 'undefined' && CHEESEFORK_SEMESTER_SCHEDULE && CHEESEFORK_SEMESTER_SCHEDULE.days && CHEESEFORK_SEMESTER_SCHEDULE.days.length > 0) {
-        if (isAdir && curState) {
+    if (isAdir && typeof CHEESEFORK_SEMESTER_SCHEDULE !== 'undefined' && CHEESEFORK_SEMESTER_SCHEDULE && CHEESEFORK_SEMESTER_SCHEDULE.days && CHEESEFORK_SEMESTER_SCHEDULE.days.length > 0) {
+        if (curState) {
             curState.timetable = JSON.parse(JSON.stringify(CHEESEFORK_SEMESTER_SCHEDULE));
             if (typeof saveState === 'function') saveState();
         }
@@ -24013,7 +24003,7 @@ function updateDailyTimetableFocus() {
                     <span>🏖️</span>
                     <span>ימים חופשיים: <strong>ראשון ושישי</strong></span>
                 </div>
-                <a href="https://cheesefork.netlify.app/?semester=202601&uid=D4bh8oHO0GQI5Gx1iYAbWsouBVx2" target="_blank" rel="noopener" class="btn btn-sm btn-outline" style="border-color: #f59e0b; color: #fbbf24; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+                <a href="https://cheesefork.netlify.app/?semester=202601" target="_blank" rel="noopener" class="btn btn-sm btn-outline" style="border-color: #f59e0b; color: #fbbf24; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
                     🧀 פתח ב-CheeseFork
                 </a>
             `;
