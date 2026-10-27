@@ -254,6 +254,30 @@ async function run() {
             assert.strictEqual(fnType, 'function', 'window.forceUpdateApp is not defined');
         });
 
+        // Test 8: Pangea course mapping covers all 34 courses with at least 100 aliases
+        await test('Pangea course map contains exhaustive coverage of all 34 courses', async () => {
+            const mapStats = await cdp.eval(`(() => {
+                const map = window.PANGEA_COURSE_MAP;
+                if (!map || typeof map !== 'object') return null;
+                const keys = Object.keys(map);
+                const uniqueUrls = new Set(Object.values(map));
+                return {
+                    totalKeys: keys.length,
+                    uniqueHubs: uniqueUrls.size,
+                    hasDynamics: Boolean(map['034010']),
+                    hasFluids: Boolean(map['034055']),
+                    hasManufacture: Boolean(map['034030']),
+                    hasCalculus1: Boolean(map['104041']),
+                    hasPhysicsLab: Boolean(map['114032']),
+                    hasMaterials: Boolean(map['314533'])
+                };
+            })()`);
+            assert(mapStats, 'window.PANGEA_COURSE_MAP is not defined on window');
+            assert(mapStats.totalKeys >= 100, `Expected at least 100 aliases in PANGEA_COURSE_MAP, got ${mapStats?.totalKeys}`);
+            assert.strictEqual(mapStats.uniqueHubs, 34, `Expected 34 unique Pangea course hubs, got ${mapStats?.uniqueHubs}`);
+            assert(mapStats.hasDynamics && mapStats.hasFluids && mapStats.hasManufacture && mapStats.hasCalculus1 && mapStats.hasPhysicsLab && mapStats.hasMaterials, 'Key mandatory courses missing from Pangea course map');
+        });
+
     } finally {
         console.log(`\n========================================================================`);
         console.log(`SUMMARY: ${passed} passed, ${failed} failed.`);

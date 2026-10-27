@@ -17,9 +17,9 @@ ZIP_PATH = os.path.join(ROOT, "Semestero-ME-Windows-x64.zip")
 
 with open(os.path.join(ROOT, "package.json"), "r", encoding="utf-8") as f:
     pkg = json.load(f)
-VERSION = pkg.get("version", "2.7.4")
+VERSION = pkg.get("version", "2.7.5")
 TAG = f"v{VERSION}"
-NAME = f"Semestero ME v{VERSION} - Codebase Optimization, Health Suite & Complete Integrity"
+NAME = f"Semestero ME v{VERSION} - Complete 34-Course Pangea Direct Integration & Extended Health Suite"
 
 def get_github_token():
     try:
@@ -89,15 +89,15 @@ def main():
         "User-Agent": "Semestero-ME-Release-Agent"
     }
 
-    body_notes = f"""## מה חדש בגרסה v{VERSION} 🛡️⚡🎯
+    body_notes = f"""## מה חדש בגרסה v{VERSION} 🌐⚡🎯
 
-### 1. ביקורת תקינות קוד וארכוב תסריטי תחזוקה (Code Integrity & Optimization)
-- ארכוב מלא של מעל 130 תסריטי ad-hoc ישנים לתיקיית `scripts/archive/` ייעודית, תוך פינוי סביבת העבודה.
-- סריקת שלמות רכיבי DOM וזיהוי תגיות גרסה ישנות (`v2.5.8`) והחלפתן בתגיות חיות ומעודכנות.
-- הוספת מנגנון הגנה מלא לכפתורי רישום קורסים (`btn-register-course`) למניעת שגיאות הרצה בלתי צפויות.
+### 1. חיבור ישיר ומלא לכל 34 הקורסים בפנגיה (Exhaustive Pangea Integration)
+- סריקה מלאה ומקיפה של הגן הדיגיטלי "פנגיה" (Pangea של עידו פנג בנטוב - `idofangbentov.uk`).
+- מיפוי ישיר של כל 34 קורסי הטכניון הקיימים באתר מול מעל 100 וריאציות וכינויי קורסים (קודים בני 6 ספרות, 8 ספרות וריפודים).
+- פתיחה ישירה ומדויקת מתוך כרטיסיית הקורס לעמודי המאגר הייעודיים (DYN1, FLD1, MNF1, LSY1, THE1, CAL1, PHY1, LPH1 ועוד) במקום חיפוש כללי.
 
-### 2. ערכת בדיקות בריאות ורגרסיה אוטומטית (Automated Health Test Suite)
-- הוטמעה פקודת `npm test` המריצה באופן אוטומטי מול headless Chrome (CDP) בדיקות חיוניות ב-7 מישורים:
+### 2. הרחבת סוויטת בדיקות הבריאות האוטומטית (Automated Health Suite - 8 Gates)
+- פקודת `npm test` הורחבה וכעת מוודאת באופן אוטומטי 8 מישורים קריטיים:
   1. היעדר שגיאות JavaScript בלתי מטופלות בטעינת האפליקציה.
   2. הגדרה תקינה ומלאה של פונקציית הסינון `escapeHtml`.
   3. תאימות מלאה של תגיות הגרסה ב-DOM מול `window.APP_VERSION`.
@@ -105,12 +105,10 @@ def main():
   5. וידוא קיומם של 4 קורסי החובה בלבד בסמסטר 4 והיעדר קורסי ספורט זרים.
   6. קיבוע מעבדה לפיזיקה 1ח׳ (`114032`) בסמסטר 5 (חורף תשפ"ז).
   7. קיומה ופעולתה של פונקציית Force Update.
+  8. וידוא תקינות ושלמות מיפוי פנגיה (כל 34 הקורסים ומעל 100 כינויים) ב-`window.PANGEA_COURSE_MAP`.
 
-### 3. נעילת שמירת תוכנית לימודים (saveCustomPlan Sanitizer)
-- נוסף פילטר הגנה פנימי ב-`planner_module.js` בעת שמירת תוכנית הלימודים (`saveCustomPlan`), החוסם באופן הרמטי חדירת קורסי ספורט לסמסטר 4.
-
-### 4. חבילות הפצה מעודכנות
-- חבילת Android APK מעודכנת (v{VERSION}, versionCode 30).
+### 3. חבילות הפצה מעודכנות
+- חבילת Android APK מעודכנת (v{VERSION}, versionCode 31).
 - חבילת Windows שולחנית עצמאית (Semestero-ME.exe + ZIP).
 - סנכרון מלא ל-GitHub Pages."""
 
