@@ -21,7 +21,7 @@ with open(os.path.join(ROOT, "package.json"), "r", encoding="utf-8") as f:
     pkg = json.load(f)
 VERSION = pkg.get("version", "2.7.9")
 TAG = f"v{VERSION}"
-NAME = f"Semestero ME v{VERSION} - Session Persistence Fix, Guest Purge Shield & Zero-State Cloud Protection"
+NAME = f"Semestero ME v{VERSION} - Unified Integrations Hub & Seamless Auto-Jump"
 
 def get_github_token():
     try:
@@ -96,25 +96,29 @@ def main():
         "User-Agent": "Semestero-ME-Release-Agent"
     }
 
-    body_notes = f"""## מה חדש בגרסה v{VERSION} 🚀🛡️💎
+    body_notes = f"""## מה חדש בגרסה v{VERSION} 🚀🧀🎓
 
-### 1. תיקון קריטי להתמדת הסשן ומניעת התנתקות ברענון (Session Persistence)
-- ביטול מנגנון האיפוס השגוי ב-`auth_sync.js::init()` שגרם למשתמש המפתח להתנתק בכל רענון עמוד (Page Refresh).
-- הבטחת שמירת הדגלים והסשן של אדיר משה (`adir_moshe`) בכל המכשירים (מובייל ודפדפן) ללא איבוד התחברות.
+### 1. מרכז אינטגרציות מרוכז בפרטי החשבון המחובר (Integrations Center inside Connected Profile)
+- ריכוז כל 4 חיבורי המערכות החיצוניות במקום אחד נגיש ואינטואיטיבי בתוך מודאל פרטי החשבון (`auth-modal`).
+- עיצוב כחלונית נפתחת נקייה (Collapsible Accordion Drawer) שסגורה כברירת מחדל כדי לשמור על עיצוב נקי ומינימליסטי ללא עומס ויזואלי.
+- תגית מונה חכמה בראש החלונית (`X/4 מחוברים`) המציגה במבט מהיר את כמות השירותים המחוברים.
 
-### 2. הגנה מוחלטת על קובץ השמירה של אדיר (Save Shield)
-- הסרת פקודת המחיקה השגויה של `LEGACY_SAVE_KEY` מתוך מנגנון ניקוי האורחים (`loadActiveUserState`).
-- נעילת `saveState()` ב-`app.js` כך שאינה דורסת את `academic_skill_tree_save` במצב אורח.
-- תמיכה מלאה בהתחברות באמצעות אימייל `adir.m.2368@gmail.com`.
+### 2. ניווט אוטומטי חכם ומיקוד שדות (Seamless Auto-Jump & Focus)
+- לחיצה על כפתור סנכרון של שירות שאינו מחובר (כמו כפתורי CheeseFork במערכת השעות או בלשונית הבית) אינה מציגה רק הודעת שגיאה חסומה, אלא מקפיצה אוטומטית ישירות למרכז האינטגרציות.
+- החלונית נפתחת אוטומטית, גוללת במדויק לכרטיס השירות הרלוונטי, ממקדת את שדה ההזנה ומפעילה אנימציית פעימה זוהרת (Cyan Pulse).
 
-### 3. מגן ענן וסנכרון ריפוי עצמי (Zero-State Cloud Protection)
-- חסימה הרמטית ב-`syncToCloud()` המונעת העלאת נתוני 0-GPA או קורסים ריקים לענן עבור אדיר משה.
-- מנגנון זיהוי ודחייה ב-`pullLatestStateFromCloud()` המשחזר אוטומטית מ-`PRELOADED_USER_STATE` אם מתקבל מידע לא תקין.
-- שחזור מלא של ציוני המפתח בענן Supabase (ממוצע 86.04 נק״ז וכל 11 הקורסים המושלמים).
+### 3. כרטיסי שירות ייעודיים לכל האינטגרציות
+- **CheeseFork 🧀**: הגדרת קישור שיתוף, שמירה מהירה וסנכרון ישיר למערכת השעות ולוח המבחנים.
+- **Moodle Technion 🎓**: הגדרת קישור יומן iCal / טוקן, שמירה אוטומטית וסנכרון מטלות שוטף.
+- **Google Calendar 📅**: כפתור יצוא ישיר לסנכרון לוח השעות מול גוגל קלנדר בלחיצה אחת.
+- **התראות טלפון (SMS / WhatsApp) 📱**: הגדרת מספר טלפון לקבלת תזכורות למטלות והתראות קריטיות.
 
-### 4. חבילות התקנה ועדכון
-- קימפול קובץ APK מעודכן (`Semestero-ME.apk`, versionCode 35, 7.84 MB).
-- עדכון גרסאות והפצה לכלל הפלטפורמות (Web, Mobile APK, Desktop).
+### 4. תמיכה היברידית באורחים (Guest Mode)
+- שירותים וקישורים מותאמים אישית נשמרים לוקאלית גם במצב אורח, עם הזמנה להתחברות לענן לצורך סנכרון בין כלל המכשירים.
+
+### 5. קימפול חבילות והפצה
+- קימפול קובץ APK מעודכן (`Semestero-ME.apk`, versionCode 36, 7.85 MB).
+- עדכון גרסאות לכלל הפלטפורמות (Web, Mobile APK, Desktop).
 """
 
     req_tag = urllib.request.Request(f"https://api.github.com/repos/{REPO}/releases/tags/{TAG}", headers=headers)
