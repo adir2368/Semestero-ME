@@ -11420,7 +11420,11 @@ function setupEventListeners() {
                     statusDiv.style.color = "#ef4444";
                     statusDiv.innerText = msg;
                 }
-                if (urlInput) urlInput.focus();
+                if (typeof window.openConnectModal === 'function') {
+                    window.openConnectModal('cheesefork');
+                } else if (urlInput) {
+                    urlInput.focus();
+                }
                 return;
             }
             importFromCheesefork(url);
@@ -14373,10 +14377,14 @@ window.syncLiveCheeseForkData = async function(customUrl = null, isManual = fals
         if (typeof showToastNotification === 'function') {
             showToastNotification(`ℹ️ ${errMsg}`, 'info');
         }
-        const cfInput = document.getElementById("cheesefork-url");
-        if (cfInput) {
-            cfInput.focus();
-            cfInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        if (typeof window.openConnectModal === 'function') {
+            window.openConnectModal('cheesefork');
+        } else {
+            const cfInput = document.getElementById("cheesefork-url");
+            if (cfInput) {
+                cfInput.focus();
+                cfInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
         }
         return;
     }
@@ -21943,8 +21951,8 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.10.27-v2.7.9",
-    version: "2.7.9",
+    code: "REV-2026.10.27-v2.8.0",
+    version: "2.8.0",
     build: "20261020_03",
     date: "2026-10-20 01:20",
     description: "גרסה 2.5.2: פתרון מוחלט ללולאת העדכון במובייל וספארי, מנגנון אנטי-רילואד עמיד ב-localStorage, סנכרון גרסאות מלא וקישורי הורדה ישירים לטלפונים"
@@ -23951,7 +23959,7 @@ window.getFormattedChangelogHTML = function() {
 };
 
 window.openChangelogModal = function(ver) {
-    const currentVer = ver || (typeof APP_CURRENT_REVISION !== 'undefined' && APP_CURRENT_REVISION && APP_CURRENT_REVISION.version) || "2.7.9";
+    const currentVer = ver || (typeof APP_CURRENT_REVISION !== 'undefined' && APP_CURRENT_REVISION && APP_CURRENT_REVISION.version) || "2.8.0";
     const updateModal = document.getElementById("version-update-modal");
     if (!updateModal) return;
     const modTitle = document.getElementById("update-modal-title");
@@ -24571,10 +24579,14 @@ function setupDailyTimetable() {
                 } else {
                     alert(msg);
                 }
-                const cfInput = document.getElementById('cheesefork-url');
-                if (cfInput) {
-                    cfInput.focus();
-                    cfInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                if (typeof window.openConnectModal === 'function') {
+                    window.openConnectModal('cheesefork');
+                } else {
+                    const cfInput = document.getElementById('cheesefork-url');
+                    if (cfInput) {
+                        cfInput.focus();
+                        cfInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
                 }
                 return;
             }

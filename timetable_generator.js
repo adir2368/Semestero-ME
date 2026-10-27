@@ -2021,6 +2021,9 @@
                         } else if (typeof alert === 'function') {
                             alert(msg);
                         }
+                        if (typeof window.openConnectModal === 'function') {
+                            window.openConnectModal('cheesefork');
+                        }
                         return;
                     }
                     syncCfBtn.disabled = true;
