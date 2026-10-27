@@ -17,9 +17,9 @@ ZIP_PATH = os.path.join(ROOT, "Semestero-ME-Windows-x64.zip")
 
 with open(os.path.join(ROOT, "package.json"), "r", encoding="utf-8") as f:
     pkg = json.load(f)
-VERSION = pkg.get("version", "2.7.5")
+VERSION = pkg.get("version", "2.7.6")
 TAG = f"v{VERSION}"
-NAME = f"Semestero ME v{VERSION} - Complete 34-Course Pangea Direct Integration & Extended Health Suite"
+NAME = f"Semestero ME v{VERSION} - Entrance Auth Prompt, Registration Flow & Auto-Tour Launch"
 
 def get_github_token():
     try:
@@ -89,28 +89,26 @@ def main():
         "User-Agent": "Semestero-ME-Release-Agent"
     }
 
-    body_notes = f"""## מה חדש בגרסה v{VERSION} 🌐⚡🎯
+    body_notes = f"""## מה חדש בגרסה v{VERSION} 🚀🧭✨
 
-### 1. חיבור ישיר ומלא לכל 34 הקורסים בפנגיה (Exhaustive Pangea Integration)
-- סריקה מלאה ומקיפה של הגן הדיגיטלי "פנגיה" (Pangea של עידו פנג בנטוב - `idofangbentov.uk`).
-- מיפוי ישיר של כל 34 קורסי הטכניון הקיימים באתר מול מעל 100 וריאציות וכינויי קורסים (קודים בני 6 ספרות, 8 ספרות וריפודים).
-- פתיחה ישירה ומדויקת מתוך כרטיסיית הקורס לעמודי המאגר הייעודיים (DYN1, FLD1, MNF1, LSY1, THE1, CAL1, PHY1, LPH1 ועוד) במקום חיפוש כללי.
+### 1. זרימת Onboarding והתחברות אוטומטית בכניסה (Entrance Auth Prompt)
+- עבור משתמשים חדשים ואורחים שאינם מחוברים, המערכת מציגה אוטומטית עם כניסתם חלונית התחברות ידידותית ומעוצבת.
+- אפשרות כניסה מהירה, מעבר בלחיצה אחת להרשמה, או המשך שיטוט חופשי כאורח ללא כפייה.
 
-### 2. הרחבת סוויטת בדיקות הבריאות האוטומטית (Automated Health Suite - 8 Gates)
-- פקודת `npm test` הורחבה וכעת מוודאת באופן אוטומטי 8 מישורים קריטיים:
-  1. היעדר שגיאות JavaScript בלתי מטופלות בטעינת האפליקציה.
-  2. הגדרה תקינה ומלאה של פונקציית הסינון `escapeHtml`.
-  3. תאימות מלאה של תגיות הגרסה ב-DOM מול `window.APP_VERSION`.
-  4. פתיחה חלקה של חלונית פרטי קורס (`course-modal`) בעת לחיצה בעץ.
-  5. וידוא קיומם של 4 קורסי החובה בלבד בסמסטר 4 והיעדר קורסי ספורט זרים.
-  6. קיבוע מעבדה לפיזיקה 1ח׳ (`114032`) בסמסטר 5 (חורף תשפ"ז).
-  7. קיומה ופעולתה של פונקציית Force Update.
-  8. וידוא תקינות ושלמות מיפוי פנגיה (כל 34 הקורסים ומעל 100 כינויים) ב-`window.PANGEA_COURSE_MAP`.
+### 2. מעבר חלק להרשמה אישית (Seamless Registration Flow)
+- לחיצה על כפתור ההרשמה מובילה ישירות לטופס יצירת חשבון סטודנט:
+  - הזנת שם מלא / כינוי, סיסמה ואימייל אישי/טכניוני.
+  - בחירת סמסטר פתיחה וסימון קורסים שכבר הושלמו בעבר (עם ציונים אופציונליים) לחישוב ממוצע ונק"ז התחלתיים.
+  - סנכרון מיידי ומאובטח לענן Supabase Cloud ולמכשיר המקומי.
 
-### 3. חבילות הפצה מעודכנות
-- חבילת Android APK מעודכנת (v{VERSION}, versionCode 31).
+### 3. הפעלה אוטומטית של הסיור המודרך (Auto Interactive Tour Launch)
+- מיד עם סיום ההרשמה, המערכת מברכת את הסטודנט ומפעילה אוטומטית את הסיור האינטראקטיבי החי (`InteractiveTour`).
+- הסיור מנחה את הסטודנט צעד-אחר-צעד בעץ הקורסים, סרגל הניווט, מתכנן התואר, סנכרון המודל ומחשבון הציונים.
+
+### 4. חבילות הפצה מעודכנות
+- חבילת Android APK מעודכנת (v{VERSION}, versionCode 32).
 - חבילת Windows שולחנית עצמאית (Semestero-ME.exe + ZIP).
-- סנכרון מלא ל-GitHub Pages."""
+- סנכרון מלא ל-GitHub Pages ולדומיין `semestero.me`."""
 
     req_tag = urllib.request.Request(f"https://api.github.com/repos/{REPO}/releases/tags/{TAG}", headers=headers)
     release = None
