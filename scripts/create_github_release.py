@@ -19,9 +19,9 @@ ZIP_PATH = os.path.join(ROOT, "Semestero-ME-Windows-x64.zip")
 
 with open(os.path.join(ROOT, "package.json"), "r", encoding="utf-8") as f:
     pkg = json.load(f)
-VERSION = pkg.get("version", "2.7.9")
+VERSION = pkg.get("version", "2.8.2")
 TAG = f"v{VERSION}"
-NAME = f"Semestero ME v{VERSION} - Integrations Hub Flexbox Layout Fix & Timetable Quick Access"
+NAME = f"Semestero ME v{VERSION} - CheeseFork Precision Group Matching & Safe Room Enrichment"
 
 def get_github_token():
     try:
@@ -98,20 +98,21 @@ def main():
 
     body_notes = f"""## מה חדש בגרסה v{VERSION} 🚀🧀⚡
 
-### 1. תיקון פריסת Flexbox קריטי בתוך מודאל פרטי חשבון (Flexbox Layout Fix)
-- תיקון באג שבו מנוע ה-Flexbox בדפדפן כיווץ את `#integrations-hub-container` לגובה של פיקסל בודד (בשל שילוב של `overflow: hidden` בתוך `.modal-body` בעל גובה מרבי).
-- הוספת `flex-shrink: 0 !important; min-height: fit-content !important;` מבטיחה נראות מלאה, ברורה ויציבה של מרכז החיבורים והאינטגרציות בכל מצב.
+### 1. סנכרון מושלם ומדויק מול CheeseFork (Precision Group Matching)
+- **פענוח מפתחות בחירה ייעודיים**: CheeseFork מקודד מפתחות קבוצה בפורמט hex UTF-16 (כגון `05d405e805e605d005d4` עבור "הרצאה", `05ea05e805d205d505dc` עבור "תרגול", ו-`sport` עבור מקצועות ספורט). המערכת מפענחת כעת את המפתחות ומצליבה כל שיעור ישירות מול הקבוצה שנבחרה עבור אותו סוג שיעור ספציפי.
+- **מניעת תרגולים שלא נבחרו**: שיעור מתווסף אך ורק אם מספר הקבוצה שלו תואם לסוג השיעור שנבחר. נמנע ייבוא של קבוצות תרגול שלא נבחרו בקורסים מרובי קבוצות (כמו מכניקת מוצקים או מבוא לחישוב).
+- **הגנה מלאה על הרצאות (Zero Missing Lectures)**: כלל ההרצאות שנבחרו (ובפרט הרצאת מכניקת מוצקים ביום שני 10:30-14:30) נשמרות ומסונכרנות במלואן.
 
-### 2. מיקום פרונטלי בולט בתוך מודאל החשבון
-- מרכז האינטגרציות ממוקם כעת ישירות מתחת לכרטיס הפרופיל ולפני לוח הסטטיסטיקה, כך שהוא מופיע בחלק העליון והנגיש ביותר של המודאל ללא צורך בגלילה עמוקה.
+### 2. העשרת חדרים בטוחה ללא דריסת שעות או סוג שיעור (Safe Room Enrichment)
+- פונקציית `enrichTimetableWithAuthenticRooms` עודכנה כך שהיא משלימה אך ורק שמות חדרים ומרצים חסרים או זמניים, ומעולם לא דורסת את סוג השיעור (`type`), שעת ההתחלה (`startTime`) או שעת הסיום (`endTime`).
+- הצלבת החדרים מתבצעת על פי מפתח שעה ויום מדויק (`courseId_dayIndex_startTime`), מה שמונע המרה שגויה של הרצאה לתרגול.
 
-### 3. כפתור "חיבורים" (⚙️) מהיר בסרגל מערכת השעות
-- הוספת כפתור ייעודי בסרגל הפעולות של מערכת השעות לצד "סנכרון" ו-"פתח cheesefork".
-- לחיצה עליו פותחת מיד את מרכז האינטגרציות, מרחיבה את החלונית וממקדת את שדה הזנת הקישור של CheeseFork.
+### 3. עדכון מערכת ברירת מחדל וטעינת נתונים
+- עדכון מלא של `CHEESEFORK_SEMESTER_SCHEDULE` ו-`AUTHENTIC_TIMETABLE_METADATA` עם 12 השיעורים האותנטיים של סמסטר חורף תשפ״ז (כולל תרגול ומרצה במכניקת מוצקים, תרמודינמיקה, פיסיקה 2, מד"ח מ', מבוא לחישוב מדעי ויוגה).
 
 ### 4. קימפול חבילות והפצה
-- קימפול קובץ APK מעודכן (`Semestero-ME.apk`, versionCode 37, 7.85 MB).
-- עדכון גרסאות והפצה לכלל הפלטפורמות (Web, Mobile APK, Desktop).
+- קימפול קובץ APK מעודכן (`Semestero-ME.apk`, versionCode 38).
+- בדיקות יחידה אוטומטיות מושלמות ב-`tests/cheesefork_precision_sync.test.js`.
 """
 
     req_tag = urllib.request.Request(f"https://api.github.com/repos/{REPO}/releases/tags/{TAG}", headers=headers)

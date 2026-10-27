@@ -8663,17 +8663,6 @@ const CHEESEFORK_SEMESTER_SCHEDULE = {
                     endTime: "13:30",
                     duration: "שעתיים",
                     cardClass: "timetable-card-pde"
-                },
-                {
-                    courseId: "034053",
-                    courseName: "מכניקת מוצקים 2מ'",
-                    type: "הרצאה 20",
-                    lecturer: "פרופ' דן מרדכי",
-                    room: "הנדסה כימית 1",
-                    startTime: "14:30",
-                    endTime: "18:30",
-                    duration: "4 שעות",
-                    cardClass: "timetable-card-solids"
                 }
             ]
         },
@@ -8695,25 +8684,14 @@ const CHEESEFORK_SEMESTER_SCHEDULE = {
                     cardClass: "timetable-card-physics"
                 },
                 {
-                    courseId: "104228",
-                    courseName: "משוואות דיפרנציאליות חלקיות מ'",
-                    type: "הרצאה 30",
-                    lecturer: "ד\"ר שלומי גובר",
-                    room: "שרמן - חינוך למדע וטכנולוגיה 107",
-                    startTime: "12:30",
-                    endTime: "14:30",
-                    duration: "שעתיים",
-                    cardClass: "timetable-card-pde"
-                },
-                {
                     courseId: "034053",
                     courseName: "מכניקת מוצקים 2מ'",
-                    type: "תרגול 20",
-                    lecturer: "מר מירון דואר",
-                    room: "אולמן 602",
-                    startTime: "14:30",
-                    endTime: "16:30",
-                    duration: "שעתיים",
+                    type: "הרצאה 10",
+                    lecturer: "פרופ' יוסף גבלי",
+                    room: "הנדסה כימית 1",
+                    startTime: "10:30",
+                    endTime: "14:30",
+                    duration: "4 שעות",
                     cardClass: "timetable-card-solids"
                 }
             ]
@@ -8739,7 +8717,7 @@ const CHEESEFORK_SEMESTER_SCHEDULE = {
                     courseId: "034035",
                     courseName: "תרמודינמיקה 1",
                     type: "תרגול 11",
-                    lecturer: "גב' עומר גזית אורולוב",
+                    lecturer: "גב' עומר גזית אורלוב",
                     room: "אולמן 101",
                     startTime: "12:30",
                     endTime: "14:30",
@@ -8747,15 +8725,15 @@ const CHEESEFORK_SEMESTER_SCHEDULE = {
                     cardClass: "timetable-card-thermo"
                 },
                 {
-                    courseId: "034056",
-                    courseName: "מבוא לחישוב מדעי והנדסי",
+                    courseId: "034053",
+                    courseName: "מכניקת מוצקים 2מ'",
                     type: "תרגול 11",
-                    lecturer: "מר גיא ארבר",
-                    room: "אולמן 501",
+                    lecturer: "מר מירון דואר",
+                    room: "אולמן 602",
                     startTime: "14:30",
                     endTime: "16:30",
                     duration: "שעתיים",
-                    cardClass: "timetable-card-computing"
+                    cardClass: "timetable-card-solids"
                 }
             ]
         },
@@ -8794,8 +8772,8 @@ const CHEESEFORK_SEMESTER_SCHEDULE = {
                     lecturer: "ד\"ר דניאל הקסנר",
                     room: "הנדסה כימית 1",
                     startTime: "14:30",
-                    endTime: "16:30",
-                    duration: "שעתיים",
+                    endTime: "17:30",
+                    duration: "3 שעות",
                     cardClass: "timetable-card-computing"
                 }
             ]
@@ -8811,12 +8789,34 @@ const CHEESEFORK_SEMESTER_SCHEDULE = {
                     courseName: "חינוך גופני - אתלטיקה קלה",
                     type: "יוגה 24",
                     lecturer: "שלומית בן-איש",
-                    room: "חינוך גופני - אתלטיקה קלה",
+                    room: "מרכז ספורט - אתלטיקה קלה",
                     startTime: "07:30",
-                    endTime: "08:30",
-                    duration: "שעה",
+                    endTime: "09:00",
+                    duration: "שעה וחצי",
                     cardClass: "timetable-card-yoga",
                     isAnchor: true
+                },
+                {
+                    courseId: "104228",
+                    courseName: "משוואות דיפרנציאליות חלקיות מ'",
+                    type: "הרצאה 20",
+                    lecturer: "ד\"ר שלומי גובר",
+                    room: "שרמן - חינוך למדע וטכנולוגיה 107",
+                    startTime: "10:30",
+                    endTime: "12:30",
+                    duration: "שעתיים",
+                    cardClass: "timetable-card-pde"
+                },
+                {
+                    courseId: "034056",
+                    courseName: "מבוא לחישוב מדעי והנדסי",
+                    type: "תרגול 15",
+                    lecturer: "מר גיא ארבר",
+                    room: "אולמן 501",
+                    startTime: "12:30",
+                    endTime: "14:30",
+                    duration: "שעתיים",
+                    cardClass: "timetable-card-computing"
                 }
             ]
         }
@@ -8828,48 +8828,33 @@ const CHEESEFORK_SEMESTER_SCHEDULE = {
 // ==============================================================================
 const AUTHENTIC_TIMETABLE_METADATA = {
     // Sunday (ראשון - dayIndex 0)
-    '104228_0_11:30': { room: 'אולמן 506', lecturer: 'אמתי אלפרין', duration: 'שעתיים', type: 'תרגול 22', startTime: '11:30', endTime: '13:30' },
-    '104228_0':       { room: 'אולמן 506', lecturer: 'אמתי אלפרין', duration: 'שעתיים', type: 'תרגול 22', startTime: '11:30', endTime: '13:30' },
-    '034053_0_14:30': { room: 'הנדסה כימית 1', lecturer: "פרופ' דן מרדכי", duration: '4 שעות', type: 'הרצאה 20', startTime: '14:30', endTime: '18:30' },
-    '34053_0_14:30':  { room: 'הנדסה כימית 1', lecturer: "פרופ' דן מרדכי", duration: '4 שעות', type: 'הרצאה 20', startTime: '14:30', endTime: '18:30' },
-    '034053_0':       { room: 'הנדסה כימית 1', lecturer: "פרופ' דן מרדכי", duration: '4 שעות', type: 'הרצאה 20', startTime: '14:30', endTime: '18:30' },
-    '34053_0':        { room: 'הנדסה כימית 1', lecturer: "פרופ' דן מרדכי", duration: '4 שעות', type: 'הרצאה 20', startTime: '14:30', endTime: '18:30' },
+    '104228_0_11:30': { room: 'אולמן 506', lecturer: 'אמתי אלפרין' },
 
     // Monday (שני - dayIndex 1)
-    '114052_1_08:30': { room: 'טאוב - מדמ"ח 1', lecturer: 'ד"ר גדעון אלון', duration: 'שעתיים', type: 'הרצאה 10', startTime: '08:30', endTime: '10:30' },
-    '114052_1':       { room: 'טאוב - מדמ"ח 1', lecturer: 'ד"ר גדעון אלון', duration: 'שעתיים', type: 'הרצאה 10', startTime: '08:30', endTime: '10:30' },
-    '104228_1_12:30': { room: 'שרמן - חינוך למדע וטכנולוגיה 107', lecturer: 'ד"ר שלומי גובר', duration: 'שעתיים', type: 'הרצאה 30', startTime: '12:30', endTime: '14:30' },
-    '104228_1':       { room: 'שרמן - חינוך למדע וטכנולוגיה 107', lecturer: 'ד"ר שלומי גובר', duration: 'שעתיים', type: 'הרצאה 30', startTime: '12:30', endTime: '14:30' },
-    '034053_1_14:30': { room: 'אולמן 602', lecturer: 'מר מירון דואר', duration: 'שעתיים', type: 'תרגול 20', startTime: '14:30', endTime: '16:30' },
-    '034053_1_13:30': { room: 'אולמן 602', lecturer: 'מר מירון דואר', duration: 'שעתיים', type: 'תרגול 20', startTime: '14:30', endTime: '16:30' },
-    '34053_1_14:30':  { room: 'אולמן 602', lecturer: 'מר מירון דואר', duration: 'שעתיים', type: 'תרגול 20', startTime: '14:30', endTime: '16:30' },
-    '34053_1_13:30':  { room: 'אולמן 602', lecturer: 'מר מירון דואר', duration: 'שעתיים', type: 'תרגול 20', startTime: '14:30', endTime: '16:30' },
-    '034053_1':       { room: 'אולמן 602', lecturer: 'מר מירון דואר', duration: 'שעתיים', type: 'תרגול 20', startTime: '14:30', endTime: '16:30' },
-    '34053_1':        { room: 'אולמן 602', lecturer: 'מר מירון דואר', duration: 'שעתיים', type: 'תרגול 20', startTime: '14:30', endTime: '16:30' },
+    '114052_1_08:30': { room: 'טאוב - מדמ"ח 1', lecturer: 'ד"ר גדעון אלון' },
+    '034053_1_10:30': { room: 'הנדסה כימית 1', lecturer: "פרופ' יוסף גבלי" },
+    '34053_1_10:30':  { room: 'הנדסה כימית 1', lecturer: "פרופ' יוסף גבלי" },
 
     // Tuesday (שלישי - dayIndex 2)
-    '034035_2_08:30': { room: 'הנדסה כימית 1', lecturer: "פרופ' לאוניד טרטקובסקי", duration: '3 שעות', type: 'הרצאה 10', startTime: '08:30', endTime: '11:30' },
-    '34035_2_08:30':  { room: 'הנדסה כימית 1', lecturer: "פרופ' לאוניד טרטקובסקי", duration: '3 שעות', type: 'הרצאה 10', startTime: '08:30', endTime: '11:30' },
-    '034035_2_12:30': { room: 'אולמן 101', lecturer: "גב' עומר גזית אורולוב", duration: 'שעתיים', type: 'תרגול 11', startTime: '12:30', endTime: '14:30' },
-    '34035_2_12:30':  { room: 'אולמן 101', lecturer: "גב' עומר גזית אורולוב", duration: 'שעתיים', type: 'תרגול 11', startTime: '12:30', endTime: '14:30' },
-    '034056_2_14:30': { room: 'אולמן 501', lecturer: 'מר גיא ארבר', duration: 'שעתיים', type: 'תרגול 11', startTime: '14:30', endTime: '16:30' },
-    '34056_2_14:30':  { room: 'אולמן 501', lecturer: 'מר גיא ארבר', duration: 'שעתיים', type: 'תרגול 11', startTime: '14:30', endTime: '16:30' },
-    '034056_2':       { room: 'אולמן 501', lecturer: 'מר גיא ארבר', duration: 'שעתיים', type: 'תרגול 11', startTime: '14:30', endTime: '16:30' },
-    '34056_2':        { room: 'אולמן 501', lecturer: 'מר גיא ארבר', duration: 'שעתיים', type: 'תרגול 11', startTime: '14:30', endTime: '16:30' },
+    '034035_2_08:30': { room: 'הנדסה כימית 1', lecturer: "פרופ' לאוניד טרטקובסקי" },
+    '34035_2_08:30':  { room: 'הנדסה כימית 1', lecturer: "פרופ' לאוניד טרטקובסקי" },
+    '034035_2_12:30': { room: 'אולמן 101', lecturer: "גב' עומר גזית אורלוב" },
+    '34035_2_12:30':  { room: 'אולמן 101', lecturer: "גב' עומר גזית אורלוב" },
+    '034053_2_14:30': { room: 'אולמן 602', lecturer: 'מר מירון דואר' },
+    '34053_2_14:30':  { room: 'אולמן 602', lecturer: 'מר מירון דואר' },
 
     // Wednesday (רביעי - dayIndex 3)
-    '114052_3_08:30': { room: 'פיזיקה 1', lecturer: 'ד"ר גדעון אלון', duration: 'שעה', type: 'הרצאה 10', startTime: '08:30', endTime: '09:30' },
-    '114052_3_09:30': { room: 'שרמן - חינוך למדע וטכנולוגיה 107', lecturer: "גב' נעם חגי גמליאל", duration: 'שעה', type: 'תרגול 13', startTime: '09:30', endTime: '10:30' },
-    '034056_3_14:30': { room: 'הנדסה כימית 1', lecturer: 'ד"ר דניאל הקסנר', duration: 'שעתיים', type: 'הרצאה 10', startTime: '14:30', endTime: '16:30' },
-    '34056_3_14:30':  { room: 'הנדסה כימית 1', lecturer: 'ד"ר דניאל הקסנר', duration: 'שעתיים', type: 'הרצאה 10', startTime: '14:30', endTime: '16:30' },
-    '034056_3':       { room: 'הנדסה כימית 1', lecturer: 'ד"ר דניאל הקסנר', duration: 'שעתיים', type: 'הרצאה 10', startTime: '14:30', endTime: '16:30' },
-    '34056_3':        { room: 'הנדסה כימית 1', lecturer: 'ד"ר דניאל הקסנר', duration: 'שעתיים', type: 'הרצאה 10', startTime: '14:30', endTime: '16:30' },
+    '114052_3_08:30': { room: 'פיזיקה 1', lecturer: 'ד"ר גדעון אלון' },
+    '114052_3_09:30': { room: 'שרמן - חינוך למדע וטכנולוגיה 107', lecturer: "גב' נעם חגי גמליאל" },
+    '034056_3_14:30': { room: 'הנדסה כימית 1', lecturer: 'ד"ר דניאל הקסנר' },
+    '34056_3_14:30':  { room: 'הנדסה כימית 1', lecturer: 'ד"ר דניאל הקסנר' },
 
     // Thursday (חמישי - dayIndex 4)
-    '03940805_4_07:30': { room: 'חינוך גופני - אתלטיקה קלה', lecturer: 'שלומית בן-איש', duration: 'שעה', type: 'יוגה 24', startTime: '07:30', endTime: '08:30' },
-    '3940805_4_07:30':  { room: 'חינוך גופני - אתלטיקה קלה', lecturer: 'שלומית בן-איש', duration: 'שעה', type: 'יוגה 24', startTime: '07:30', endTime: '08:30' },
-    '03940805_4':       { room: 'חינוך גופני - אתלטיקה קלה', lecturer: 'שלומית בן-איש', duration: 'שעה', type: 'יוגה 24', startTime: '07:30', endTime: '08:30' },
-    '3940805_4':        { room: 'חינוך גופני - אתלטיקה קלה', lecturer: 'שלומית בן-איש', duration: 'שעה', type: 'יוגה 24', startTime: '07:30', endTime: '08:30' }
+    '03940805_4_07:30': { room: 'מרכז ספורט - אתלטיקה קלה', lecturer: 'שלומית בן-איש' },
+    '3940805_4_07:30':  { room: 'מרכז ספורט - אתלטיקה קלה', lecturer: 'שלומית בן-איש' },
+    '104228_4_10:30':   { room: 'שרמן - חינוך למדע וטכנולוגיה 107', lecturer: 'ד"ר שלומי גובר' },
+    '034056_4_12:30':   { room: 'אולמן 501', lecturer: 'מר גיא ארבר' },
+    '34056_4_12:30':    { room: 'אולמן 501', lecturer: 'מר גיא ארבר' }
 };
 
 function enrichTimetableWithAuthenticRooms(timetable) {
@@ -8881,65 +8866,25 @@ function enrichTimetableWithAuthenticRooms(timetable) {
             const rawId = (c.courseId || '').trim();
             const cleanCode = rawId.replace(/^0+/, '');
             
-            // 1. Try exact match by ID + Day + StartTime
-            let meta = AUTHENTIC_TIMETABLE_METADATA[`${rawId}_${day.dayIndex}_${c.startTime}`] ||
-                       AUTHENTIC_TIMETABLE_METADATA[`${cleanCode}_${day.dayIndex}_${c.startTime}`];
-
-            // 2. Fallback: match by courseId + dayIndex + type or dayIndex
-            if (!meta) {
-                if (day.dayIndex === 3 && (cleanCode === '114052' || rawId === '114052')) {
-                    if (c.type && c.type.includes('13')) {
-                        meta = AUTHENTIC_TIMETABLE_METADATA['114052_3_09:30'];
-                    } else {
-                        meta = AUTHENTIC_TIMETABLE_METADATA['114052_3_08:30'];
-                    }
-                } else if (day.dayIndex === 2 && (cleanCode === '034035' || cleanCode === '34035')) {
-                    if (c.type && c.type.includes('11')) {
-                        meta = AUTHENTIC_TIMETABLE_METADATA['034035_2_12:30'];
-                    } else {
-                        meta = AUTHENTIC_TIMETABLE_METADATA['034035_2_08:30'];
-                    }
-                } else {
-                    meta = AUTHENTIC_TIMETABLE_METADATA[`${rawId}_${day.dayIndex}`] ||
-                           AUTHENTIC_TIMETABLE_METADATA[`${cleanCode}_${day.dayIndex}`];
-                }
-            }
+            // Match strictly by ID + Day + StartTime
+            const meta = AUTHENTIC_TIMETABLE_METADATA[`${rawId}_${day.dayIndex}_${c.startTime}`] ||
+                         AUTHENTIC_TIMETABLE_METADATA[`${cleanCode}_${day.dayIndex}_${c.startTime}`];
 
             if (meta) {
-                // If room is missing, blank, or placeholder
+                // Only enrich room if missing, blank, or placeholder
                 const isOutdatedRoom = !c.room || !c.room.trim() || 
                     c.room === 'כיתת טכניון' || 
                     c.room === 'מרכז ספורט טכניון' || 
-                    c.room === 'הנדסה כימית' || 
-                    c.room === 'אולמן' || 
-                    (day.dayIndex === 3 && c.startTime === '08:30' && c.room.includes('טאוב'));
+                    c.room === '0';
 
-                if (isOutdatedRoom || c.room !== meta.room) {
+                if (isOutdatedRoom && meta.room) {
                     c.room = meta.room;
                     enrichedCount++;
                 }
 
-                // If lecturer is missing or outdated
-                if (!c.lecturer || !c.lecturer.trim() || c.lecturer.includes('קקסנר') || c.lecturer.includes('רן מרדכי') || c.lecturer !== meta.lecturer) {
+                // Only enrich lecturer if missing or blank
+                if ((!c.lecturer || !c.lecturer.trim() || c.lecturer === '0') && meta.lecturer) {
                     c.lecturer = meta.lecturer;
-                    enrichedCount++;
-                }
-
-                // If duration or time is outdated or missing
-                if (meta.duration && c.duration !== meta.duration) {
-                    c.duration = meta.duration;
-                    enrichedCount++;
-                }
-                if (meta.endTime && c.endTime !== meta.endTime) {
-                    c.endTime = meta.endTime;
-                    enrichedCount++;
-                }
-                if (meta.startTime && c.startTime !== meta.startTime) {
-                    c.startTime = meta.startTime;
-                    enrichedCount++;
-                }
-                if (meta.type && (!c.type || !c.type.includes(meta.type))) {
-                    c.type = meta.type;
                     enrichedCount++;
                 }
             }
@@ -14293,6 +14238,22 @@ function saveQuest() {
 // CheeseFork Live Synchronization Engine (v2.4.4)
 // =======================================================
 
+function decodeCheeseForkHexKey(k) {
+    if (!k || typeof k !== 'string') return '';
+    if (k.length >= 4 && k.length % 4 === 0) {
+        try {
+            let res = '';
+            for (let i = 0; i < k.length; i += 4) {
+                const code = parseInt(k.substring(i, i + 4), 16);
+                if (isNaN(code)) return k;
+                res += String.fromCharCode(code);
+            }
+            return res;
+        } catch (_) {}
+    }
+    return k;
+}
+
 function parseCheeseForkUrl(url) {
     if (!url || typeof url !== 'string') return null;
     try {
@@ -14453,13 +14414,18 @@ window.syncLiveCheeseForkData = async function(customUrl = null, isManual = fals
             const groupKey = `${semester}_${rawCode}`;
             const metaKey = `${semester}_metadata_${rawCode}`;
 
-            // 1. Extract chosen groups
-            const chosenGroups = new Set();
+                        // 1. Extract chosen groups mapped by decoded lesson type (הרצאה, תרגול, מעבדה, sport)
+            const chosenGroupsByType = {};
+            const allChosenNumbers = new Set();
             if (fields[groupKey] && fields[groupKey].mapValue && fields[groupKey].mapValue.fields) {
-                Object.values(fields[groupKey].mapValue.fields).forEach(valObj => {
+                Object.entries(fields[groupKey].mapValue.fields).forEach(([gk, valObj]) => {
                     const gVal = valObj.integerValue || valObj.stringValue;
                     if (gVal !== undefined && gVal !== null && gVal !== '') {
-                        chosenGroups.add(String(gVal));
+                        const gStr = String(gVal).trim();
+                        allChosenNumbers.add(gStr);
+                        const decodedType = decodeCheeseForkHexKey(gk).trim();
+                        chosenGroupsByType[decodedType] = gStr;
+                        chosenGroupsByType[decodedType.toLowerCase()] = gStr;
                     }
                 });
             }
@@ -14489,46 +14455,77 @@ window.syncLiveCheeseForkData = async function(customUrl = null, isManual = fals
                     }
                 }
 
-                // Parse schedule classes
+                // Parse schedule classes with precision group matching
                 if (meta.schedule && meta.schedule.arrayValue && meta.schedule.arrayValue.values) {
                     meta.schedule.arrayValue.values.forEach(it => {
                         if (!it.mapValue || !it.mapValue.fields) return;
                         const f = it.mapValue.fields;
-                        const itemGroup = String(f['מס.']?.integerValue || f['קבוצה']?.integerValue || f['קבוצה']?.stringValue || '');
+                        const itemNumber = String(f['מס.']?.integerValue || f['מס.']?.stringValue || '').trim();
+                        const itemGroup = String(f['קבוצה']?.integerValue || f['קבוצה']?.stringValue || '').trim();
                         const itemDay = f['יום']?.stringValue;
                         const itemTime = f['שעה']?.stringValue;
-                        const itemType = f['סוג']?.stringValue || 'הרצאה';
-                        const itemLecturer = f['מרצה/מתרגל']?.stringValue || '';
-                        const itemRoom = f['חדר']?.stringValue || f['כיתה']?.stringValue || '';
-                        const itemBuilding = f['בניין']?.stringValue || '';
+                        const itemType = (f['סוג']?.stringValue || 'הרצאה').trim();
+                        const itemLecturer = (f['מרצה/מתרגל']?.stringValue || '').trim();
+                        let itemRoom = String(f['חדר']?.stringValue || f['חדר']?.integerValue || f['כיתה']?.stringValue || '').trim();
+                        if (itemRoom === '0' || itemRoom === 'None') itemRoom = '';
+                        const itemBuilding = String(f['בניין']?.stringValue || '').trim();
                         const roomCombined = [itemBuilding, itemRoom].filter(Boolean).join(' ');
 
-                        // Check if item belongs to student (matches selected group, or single group in sports/seminar)
-                        const isMatch = chosenGroups.has(itemGroup) || chosenGroups.size === 0;
+                        // Precise matching logic by lesson type
+                        let isMatch = false;
+                        if (Object.keys(chosenGroupsByType).length > 0) {
+                            // 1. Match by specific type if type exists in chosenGroupsByType
+                            let targetGroup = chosenGroupsByType[itemType] || chosenGroupsByType[itemType.toLowerCase()];
+                            // For sport courses, type might be 'יוגה' or 'ספורט' but key in CheeseFork is 'sport'
+                            if (!targetGroup && (chosenGroupsByType['sport'] || chosenGroupsByType['ספורט'])) {
+                                targetGroup = chosenGroupsByType['sport'] || chosenGroupsByType['ספורט'];
+                            }
+
+                            if (targetGroup) {
+                                isMatch = (itemNumber === targetGroup) || (itemGroup === targetGroup);
+                            } else {
+                                // Type not explicitly recorded in selections, check if either itemNumber or itemGroup is in allChosenNumbers
+                                isMatch = allChosenNumbers.has(itemNumber) || allChosenNumbers.has(itemGroup);
+                            }
+                        } else {
+                            // No groups chosen in CheeseFork for this course:
+                            // Only match if there is a single group in the entire schedule (e.g. specialized workshop/seminar)
+                            const uniqueGroups = new Set();
+                            meta.schedule.arrayValue.values.forEach(sIt => {
+                                const sF = sIt.mapValue?.fields;
+                                const g = String(sF?.['מס.']?.integerValue || sF?.['קבוצה']?.integerValue || '').trim();
+                                if (g) uniqueGroups.add(g);
+                            });
+                            if (uniqueGroups.size <= 1) {
+                                isMatch = true;
+                            }
+                        }
+
                         if (isMatch && itemDay && itemTime) {
                             const dayIdx = dayMap[itemDay];
                             if (dayIdx !== undefined && dayIdx >= 0 && dayIdx <= 4) {
                                 const parts = itemTime.split('-').map(s => s.trim());
                                 const startTime = parts[0] || '08:30';
                                 const endTime = parts[1] || '10:30';
+                                const displayGroup = itemNumber || itemGroup;
                                 
-                                const sig = `${dayIdx}_${cleanCode}_${startTime}_${endTime}_${itemType}_${itemGroup}`;
+                                const sig = `${dayIdx}_${cleanCode}_${startTime}_${endTime}_${itemType}_${displayGroup}`;
                                 if (!seenClassSignatures.has(sig)) {
                                     seenClassSignatures.add(sig);
 
                                     // Pick aesthetic card class
                                     let cardClass = 'timetable-card-default';
                                     if (cleanCode.includes('114052') || cleanCode.includes('114051')) cardClass = 'timetable-card-physics';
-                                    else if (cleanCode.includes('034053') || cleanCode.includes('034028')) cardClass = 'timetable-card-solids';
-                                    else if (cleanCode.includes('034035') || cleanCode.includes('034033')) cardClass = 'timetable-card-thermo';
+                                    else if (cleanCode.includes('034053') || cleanCode.includes('034028') || cleanCode.includes('34053')) cardClass = 'timetable-card-solids';
+                                    else if (cleanCode.includes('034035') || cleanCode.includes('034033') || cleanCode.includes('34035')) cardClass = 'timetable-card-thermo';
                                     else if (cleanCode.includes('104228') || cleanCode.includes('104131')) cardClass = 'timetable-card-pde';
-                                    else if (cleanCode.includes('034056')) cardClass = 'timetable-card-computing';
+                                    else if (cleanCode.includes('034056') || cleanCode.includes('34056')) cardClass = 'timetable-card-computing';
                                     else if (cleanCode.includes('394') || cleanCode.includes('0394')) cardClass = 'timetable-card-yoga';
 
                                     timetableDays[dayIdx].classes.push({
                                         courseId: cleanCode,
                                         courseName: courseName,
-                                        type: itemGroup ? `${itemType} (קבוצה ${itemGroup})` : itemType,
+                                        type: displayGroup ? `${itemType} ${displayGroup}` : itemType,
                                         lecturer: itemLecturer,
                                         room: roomCombined,
                                         startTime: startTime,
@@ -14544,7 +14541,7 @@ window.syncLiveCheeseForkData = async function(customUrl = null, isManual = fals
                 }
             }
 
-            // 3. Sync into gameState.courses
+// 3. Sync into gameState.courses
             if (!gameState.courses) gameState.courses = {};
             let course = gameState.courses[cleanCode];
             if (!course) {
@@ -21951,8 +21948,8 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.10.28-v2.8.1",
-    version: "2.8.1",
+    code: "REV-2026.10.28-v2.8.2",
+    version: "2.8.2",
     build: "20261020_03",
     date: "2026-10-20 01:20",
     description: "גרסה 2.5.2: פתרון מוחלט ללולאת העדכון במובייל וספארי, מנגנון אנטי-רילואד עמיד ב-localStorage, סנכרון גרסאות מלא וקישורי הורדה ישירים לטלפונים"
@@ -23959,7 +23956,7 @@ window.getFormattedChangelogHTML = function() {
 };
 
 window.openChangelogModal = function(ver) {
-    const currentVer = ver || (typeof APP_CURRENT_REVISION !== 'undefined' && APP_CURRENT_REVISION && APP_CURRENT_REVISION.version) || "2.8.1";
+    const currentVer = ver || (typeof APP_CURRENT_REVISION !== 'undefined' && APP_CURRENT_REVISION && APP_CURRENT_REVISION.version) || "2.8.2";
     const updateModal = document.getElementById("version-update-modal");
     if (!updateModal) return;
     const modTitle = document.getElementById("update-modal-title");
