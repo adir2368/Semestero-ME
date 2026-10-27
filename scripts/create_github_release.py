@@ -21,7 +21,7 @@ with open(os.path.join(ROOT, "package.json"), "r", encoding="utf-8") as f:
     pkg = json.load(f)
 VERSION = pkg.get("version", "2.7.9")
 TAG = f"v{VERSION}"
-NAME = f"Semestero ME v{VERSION} - Unified Integrations Hub & Seamless Auto-Jump"
+NAME = f"Semestero ME v{VERSION} - Integrations Hub Flexbox Layout Fix & Timetable Quick Access"
 
 def get_github_token():
     try:
@@ -96,29 +96,22 @@ def main():
         "User-Agent": "Semestero-ME-Release-Agent"
     }
 
-    body_notes = f"""## מה חדש בגרסה v{VERSION} 🚀🧀🎓
+    body_notes = f"""## מה חדש בגרסה v{VERSION} 🚀🧀⚡
 
-### 1. מרכז אינטגרציות מרוכז בפרטי החשבון המחובר (Integrations Center inside Connected Profile)
-- ריכוז כל 4 חיבורי המערכות החיצוניות במקום אחד נגיש ואינטואיטיבי בתוך מודאל פרטי החשבון (`auth-modal`).
-- עיצוב כחלונית נפתחת נקייה (Collapsible Accordion Drawer) שסגורה כברירת מחדל כדי לשמור על עיצוב נקי ומינימליסטי ללא עומס ויזואלי.
-- תגית מונה חכמה בראש החלונית (`X/4 מחוברים`) המציגה במבט מהיר את כמות השירותים המחוברים.
+### 1. תיקון פריסת Flexbox קריטי בתוך מודאל פרטי חשבון (Flexbox Layout Fix)
+- תיקון באג שבו מנוע ה-Flexbox בדפדפן כיווץ את `#integrations-hub-container` לגובה של פיקסל בודד (בשל שילוב של `overflow: hidden` בתוך `.modal-body` בעל גובה מרבי).
+- הוספת `flex-shrink: 0 !important; min-height: fit-content !important;` מבטיחה נראות מלאה, ברורה ויציבה של מרכז החיבורים והאינטגרציות בכל מצב.
 
-### 2. ניווט אוטומטי חכם ומיקוד שדות (Seamless Auto-Jump & Focus)
-- לחיצה על כפתור סנכרון של שירות שאינו מחובר (כמו כפתורי CheeseFork במערכת השעות או בלשונית הבית) אינה מציגה רק הודעת שגיאה חסומה, אלא מקפיצה אוטומטית ישירות למרכז האינטגרציות.
-- החלונית נפתחת אוטומטית, גוללת במדויק לכרטיס השירות הרלוונטי, ממקדת את שדה ההזנה ומפעילה אנימציית פעימה זוהרת (Cyan Pulse).
+### 2. מיקום פרונטלי בולט בתוך מודאל החשבון
+- מרכז האינטגרציות ממוקם כעת ישירות מתחת לכרטיס הפרופיל ולפני לוח הסטטיסטיקה, כך שהוא מופיע בחלק העליון והנגיש ביותר של המודאל ללא צורך בגלילה עמוקה.
 
-### 3. כרטיסי שירות ייעודיים לכל האינטגרציות
-- **CheeseFork 🧀**: הגדרת קישור שיתוף, שמירה מהירה וסנכרון ישיר למערכת השעות ולוח המבחנים.
-- **Moodle Technion 🎓**: הגדרת קישור יומן iCal / טוקן, שמירה אוטומטית וסנכרון מטלות שוטף.
-- **Google Calendar 📅**: כפתור יצוא ישיר לסנכרון לוח השעות מול גוגל קלנדר בלחיצה אחת.
-- **התראות טלפון (SMS / WhatsApp) 📱**: הגדרת מספר טלפון לקבלת תזכורות למטלות והתראות קריטיות.
+### 3. כפתור "חיבורים" (⚙️) מהיר בסרגל מערכת השעות
+- הוספת כפתור ייעודי בסרגל הפעולות של מערכת השעות לצד "סנכרון" ו-"פתח cheesefork".
+- לחיצה עליו פותחת מיד את מרכז האינטגרציות, מרחיבה את החלונית וממקדת את שדה הזנת הקישור של CheeseFork.
 
-### 4. תמיכה היברידית באורחים (Guest Mode)
-- שירותים וקישורים מותאמים אישית נשמרים לוקאלית גם במצב אורח, עם הזמנה להתחברות לענן לצורך סנכרון בין כלל המכשירים.
-
-### 5. קימפול חבילות והפצה
-- קימפול קובץ APK מעודכן (`Semestero-ME.apk`, versionCode 36, 7.85 MB).
-- עדכון גרסאות לכלל הפלטפורמות (Web, Mobile APK, Desktop).
+### 4. קימפול חבילות והפצה
+- קימפול קובץ APK מעודכן (`Semestero-ME.apk`, versionCode 37, 7.85 MB).
+- עדכון גרסאות והפצה לכלל הפלטפורמות (Web, Mobile APK, Desktop).
 """
 
     req_tag = urllib.request.Request(f"https://api.github.com/repos/{REPO}/releases/tags/{TAG}", headers=headers)

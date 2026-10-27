@@ -1742,7 +1742,7 @@
 
                 const integrationsCollapsibleHtml = `
                     <!-- Collapsible Integrations Center (חלונית נפתחת לאינטגרציות ושירותים) -->
-                    <div id="integrations-hub-container" style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(56, 189, 248, 0.35); border-radius: 8px; margin-bottom: 14px; overflow: hidden; transition: all 0.25s ease;">
+                    <div id="integrations-hub-container" style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(56, 189, 248, 0.35); border-radius: 8px; margin-bottom: 14px; overflow: hidden; transition: all 0.25s ease; flex-shrink: 0; min-height: fit-content; width: 100%; box-sizing: border-box;">
                         <div onclick="AuthSync.toggleIntegrationsHub();" style="padding: 12px 14px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; background: rgba(56, 189, 248, 0.08); user-select: none;">
                             <div style="display: flex; align-items: center; gap: 10px;">
                                 <span style="font-size: 1.2rem;">🔗</span>
@@ -1764,7 +1764,7 @@
                             </div>
                         </div>
 
-                        <div id="integrations-hub-content" style="display: none; padding: 14px; border-top: 1px solid rgba(56, 189, 248, 0.15); background: rgba(10, 15, 30, 0.5);">
+                        <div id="integrations-hub-content" style="display: none; padding: 14px; border-top: 1px solid rgba(56, 189, 248, 0.15); background: rgba(10, 15, 30, 0.5); flex-shrink: 0; min-height: fit-content;">
                             ${this.getIntegrationsHubCardsHtml(hasCheeseFork, cfUrl, hasMoodle, moodleUrl, hasPhone, userPhone)}
                         </div>
                     </div>
@@ -1779,22 +1779,7 @@
                         </div>
                     </div>
                     <div class="modal-body" style="padding-top: 14px; max-height: 75vh; overflow-y: auto;">
-                        <!-- Admin Telemetry & User Stats (Adir Moshe Only) -->
-                        ${isDev ? `
-                        <div style="background: rgba(14, 165, 233, 0.08); border: 1px solid rgba(56, 189, 248, 0.4); border-radius: 8px; padding: 10px 14px; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
-                            <div>
-                                <div style="font-weight: 700; color: #38bdf8; font-size: 0.88rem; display: flex; align-items: center; gap: 6px;">
-                                    <span>👥</span> <span>סטטיסטיקת שימוש, משתמשים וכניסות</span>
-                                </div>
-                                <div style="font-size: 0.74rem; color: #94a3b8; margin-top: 2px;">
-                                    צפייה בזמן אמת בכמות משתמשי האפליקציה, כניסות אופליין ואורחים
-                                </div>
-                            </div>
-                            <button type="button" class="btn btn-xs btn-primary" onclick="AuthSync.closeAuthModal(); if (window.SiteAnalytics) SiteAnalytics.openModal();" style="background: linear-gradient(135deg, #0284c7, #2563eb); font-weight: 700; padding: 6px 12px; border-radius: 6px;">
-                                🔍 פתח לוח סטטיסטיקה
-                            </button>
-                        </div>
-                        ` : ''}
+
 
                         <!-- Overview Card -->
                         <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 8px; padding: 12px 14px; margin-bottom: 14px;">
@@ -1829,6 +1814,23 @@
                         </div>
 
                         ${integrationsCollapsibleHtml}
+
+                        <!-- Admin Telemetry & User Stats (Adir Moshe Only) -->
+                        ${isDev ? `
+                        <div style="background: rgba(14, 165, 233, 0.08); border: 1px solid rgba(56, 189, 248, 0.4); border-radius: 8px; padding: 10px 14px; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                            <div>
+                                <div style="font-weight: 700; color: #38bdf8; font-size: 0.88rem; display: flex; align-items: center; gap: 6px;">
+                                    <span>👥</span> <span>סטטיסטיקת שימוש, משתמשים וכניסות</span>
+                                </div>
+                                <div style="font-size: 0.74rem; color: #94a3b8; margin-top: 2px;">
+                                    צפייה בזמן אמת בכמות משתמשי האפליקציה, כניסות אופליין ואורחים
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-xs btn-primary" onclick="AuthSync.closeAuthModal(); if (window.SiteAnalytics) SiteAnalytics.openModal();" style="background: linear-gradient(135deg, #0284c7, #2563eb); font-weight: 700; padding: 6px 12px; border-radius: 6px;">
+                                🔍 פתח לוח סטטיסטיקה
+                            </button>
+                        </div>
+                        ` : ''}
 
                         <!-- Edit Account Form -->
                         <div style="background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px; padding: 12px 14px; margin-bottom: 14px;">
