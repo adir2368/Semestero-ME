@@ -63,6 +63,13 @@
         '035044'
     ]);
 
+    // Test Infiltrator Courses (Accidental QA additions / invalid sports / malag in semester 4)
+    const QA_INFILTRATOR_CODES = new Set([
+        '03240269', '3240269',
+        '03940800', '3940800', '0394800', '394800',
+        '03940808', '3940808', '0394808', '394808'
+    ]);
+
     // Active drag tracking object
     let activeDragPayload = null;
 
@@ -673,6 +680,59 @@
             unassignedCourses = unassignedCourses.filter(c => !isPurgedCourse(c.code, c.altCode));
         }
 
+        // Ensure Physics Lab (114032) belongs strictly to Semester 5 (not Semester 4)
+        if (isAdir && customPlan) {
+            const isLab = c => c && (c.code === '01140032' || c.altCode === '114032' || c.code === '114032');
+            const sem4 = customPlan.find(s => s.semester === 4);
+            const sem5 = customPlan.find(s => s.semester === 5);
+            if (sem4 && Array.isArray(sem4.courses)) {
+                const labIdx = sem4.courses.findIndex(isLab);
+                if (labIdx !== -1) {
+                    const labItem = sem4.courses.splice(labIdx, 1)[0];
+                    if (sem5 && Array.isArray(sem5.courses) && !sem5.courses.some(isLab)) {
+                        sem5.courses.push(labItem);
+                    }
+                }
+            }
+            if (global.gameState && global.gameState.courses && global.gameState.courses['114032']) {
+                global.gameState.courses['114032'].semester = 5;
+            }
+        }
+
+        // 1b. Unconditional purge of accidental test infiltrator courses & sports from semester 4
+        if (customPlan && Array.isArray(customPlan)) {
+            let touchedPlan = false;
+            customPlan.forEach(sem => {
+                if (sem.semester === 4) {
+                    const origLen = (sem.courses || []).length;
+                    sem.courses = (sem.courses || []).filter(c => {
+                        if (!c) return false;
+                        const keys = getNormalizedCodes(c.code, c.altCode);
+                        if (keys.some(k => QA_INFILTRATOR_CODES.has(k))) return false;
+                        if (c.type === 'sports' || c.list === 'SPORTS') return false;
+                        const codeStr = String(c.code || '');
+                        if (codeStr.startsWith('0394') || codeStr.startsWith('394')) return false;
+                        if (codeStr.startsWith('0324') || codeStr.startsWith('324')) return false;
+                        return true;
+                    });
+                    if (sem.courses.length !== origLen) touchedPlan = true;
+                }
+            });
+            if (touchedPlan) {
+                try {
+                    this.saveCustomPlan();
+                } catch (e) {}
+            }
+            if (global.gameState && global.gameState.courses) {
+                QA_INFILTRATOR_CODES.forEach(code => {
+                    const c = global.gameState.courses[code];
+                    if (c && !c.grade && (c.semester === 4 || !c.semester)) {
+                        delete global.gameState.courses[code];
+                    }
+                });
+            }
+        }
+
         // 2. Ensure unassigned courses do not appear inside semesters
         if (unassignedCourses && unassignedCourses.length > 0) {
             const unassignedCodes = new Set();
@@ -750,8 +810,9 @@
         try {
             let changed = false;
 
-            // 1. Purge accidental 8-digit duplicate courses and purged courses from gameState.courses
+            // 1. Purge accidental duplicate courses and purged courses from gameState.courses
             const PURGED_TREE_CODES = new Set(['035044', '035026', '35026', '01140071', '114071']);
+            QA_INFILTRATOR_CODES.forEach(code => PURGED_TREE_CODES.add(code));
             Object.keys(global.gameState.courses).forEach(key => {
                 if (PURGED_TREE_CODES.has(key)) {
                     delete global.gameState.courses[key];
@@ -774,6 +835,14 @@
                 (sem.courses || []).forEach(c => {
                     if (!c || !c.code) return;
                     if (isPurgedCourse(c.code, c.altCode)) return;
+                    if (semNum === 4) {
+                        const cKeys = getNormalizedCodes(c.code, c.altCode);
+                        if (cKeys.some(k => QA_INFILTRATOR_CODES.has(k))) return;
+                        if (c.type === 'sports' || c.list === 'SPORTS') return;
+                        const codeStr = String(c.code || '');
+                        if (codeStr.startsWith('0394') || codeStr.startsWith('394')) return;
+                        if (codeStr.startsWith('0324') || codeStr.startsWith('324')) return;
+                    }
 
                     const keys = getNormalizedCodes(c.code, c.altCode);
                     let foundKey = null;
@@ -1218,6 +1287,8 @@
     }
 
     function escapeHtml(str) {
+        if (typeof global !== 'undefined') global.escapeHtml = escapeHtml;
+        if (typeof window !== 'undefined') window.escapeHtml = escapeHtml;
         if (!str) return '';
         return String(str)
             .replace(/&/g, '&amp;')

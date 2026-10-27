@@ -45,11 +45,19 @@ const server = http.createServer((req, res) => {
         const ext = path.extname(filePath).toLowerCase();
         const contentType = MIME_TYPES[ext] || 'application/octet-stream';
 
-        res.writeHead(200, {
+        const headers = {
             'Content-Type': contentType,
             'Content-Length': stats.size,
             'Access-Control-Allow-Origin': '*'
-        });
+        };
+
+        if (ext === '.html' || ext === '.js' || ext === '.css' || ext === '.json' || reqPath === '/sw.js') {
+            headers['Cache-Control'] = 'no-cache, no-store, must-revalidate';
+            headers['Pragma'] = 'no-cache';
+            headers['Expires'] = '0';
+        }
+
+        res.writeHead(200, headers);
 
         const readStream = fs.createReadStream(filePath);
         readStream.pipe(res);

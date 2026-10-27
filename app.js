@@ -8985,6 +8985,85 @@ window.openCheeseFork = openCheeseFork;
 function loadSavedState() {
     let loadedFromAuthSync = false;
 
+    // Comprehensive self-healing cleanup for accidental QA test courses across ALL storage keys
+    try {
+        const INFILTRATORS = [
+            '03240269', '3240269',
+            '03940800', '3940800', '0394800', '394800',
+            '03940808', '3940808', '0394808', '394808'
+        ];
+        const isForbiddenSem4 = (c) => {
+            if (!c) return false;
+            const code = String(c.code || '');
+            const alt = String(c.altCode || '');
+            if (INFILTRATORS.includes(code) || INFILTRATORS.includes(alt)) return true;
+            if (c.type === 'sports' || c.list === 'SPORTS') return true;
+            if (code.startsWith('0394') || code.startsWith('394')) return true;
+            if (code.startsWith('0324') || code.startsWith('324')) return true;
+            return false;
+        };
+
+        for (let i = 0; i < localStorage.length; i++) {
+            const k = localStorage.key(i);
+            if (!k) continue;
+            const raw = localStorage.getItem(k);
+            if (raw && (raw.includes('03240269') || raw.includes('03940800') || raw.includes('03940808') || raw.includes('394800') || raw.includes('394808'))) {
+                try {
+                    const parsed = JSON.parse(raw);
+                    let touched = false;
+
+                    // Case A: parsed is directly an Array of semesters (e.g. DegreePlanner customPlan)
+                    if (Array.isArray(parsed)) {
+                        parsed.forEach(s => {
+                            if (s && s.semester === 4 && Array.isArray(s.courses)) {
+                                const origLen = s.courses.length;
+                                s.courses = s.courses.filter(c => !isForbiddenSem4(c));
+                                if (s.courses.length !== origLen) touched = true;
+                            }
+                        });
+                    }
+
+                    // Case B: parsed has semesters array
+                    if (parsed && Array.isArray(parsed.semesters)) {
+                        parsed.semesters.forEach(s => {
+                            if (s && s.semester === 4 && Array.isArray(s.courses)) {
+                                const origLen = s.courses.length;
+                                s.courses = s.courses.filter(c => !isForbiddenSem4(c));
+                                if (s.courses.length !== origLen) touched = true;
+                            }
+                        });
+                    }
+
+                    // Case C: parsed has degreePlan array
+                    if (parsed && Array.isArray(parsed.degreePlan)) {
+                        parsed.degreePlan.forEach(s => {
+                            if (s && s.semester === 4 && Array.isArray(s.courses)) {
+                                const origLen = s.courses.length;
+                                s.courses = s.courses.filter(c => !isForbiddenSem4(c));
+                                if (s.courses.length !== origLen) touched = true;
+                            }
+                        });
+                    }
+
+                    // Case D: parsed has courses object
+                    if (parsed && parsed.courses) {
+                        INFILTRATORS.forEach(c => {
+                            if (parsed.courses[c] && !parsed.courses[c].grade) {
+                                delete parsed.courses[c];
+                                touched = true;
+                            }
+                        });
+                    }
+
+                    if (touched) {
+                        localStorage.setItem(k, JSON.stringify(parsed));
+                        console.log(`[StorageSelfHeal] Purged infiltrators from localStorage key: ${k}`);
+                    }
+                } catch (e) {}
+            }
+        }
+    } catch (e) {}
+
     if (window.AuthSync && typeof window.AuthSync.init === 'function') {
         window.AuthSync.init();
         const userState = window.AuthSync.loadActiveUserState();
@@ -9035,6 +9114,27 @@ function loadSavedState() {
                             });
                         }
                     });
+
+                    // Ensure Physics Lab 1H (114032) belongs strictly to Semester 5
+                    if (isAdir && gameState && gameState.courses && gameState.courses['114032']) {
+                        gameState.courses['114032'].semester = 5;
+                    }
+
+                    // Purge accidental QA test infiltrator courses for Adir
+                    if (isAdir && gameState && gameState.courses) {
+                        ['03240269', '03940800', '03940808'].forEach(code => {
+                            if (gameState.courses[code] && !gameState.courses[code].grade && (gameState.courses[code].semester === 4 || !gameState.courses[code].semester)) {
+                                delete gameState.courses[code];
+                            }
+                        });
+                        if (Array.isArray(gameState.degreePlan)) {
+                            gameState.degreePlan.forEach(sem => {
+                                if (sem.semester === 4 && Array.isArray(sem.courses)) {
+                                    sem.courses = sem.courses.filter(c => !['03240269', '03940800', '03940808'].includes(c.code) && !['03240269', '03940800', '03940808'].includes(c.altCode));
+                                }
+                            });
+                        }
+                    }
                 }
             } catch (e) {
                 console.error("Error parsing saved state:", e);
@@ -9065,6 +9165,22 @@ function loadSavedState() {
     const isAdirForRecovery = (window.AuthSync && typeof window.AuthSync.isAdirActive === "function" && window.AuthSync.isAdirActive());
     if (isAdirForRecovery && gameState && gameState.courses && preloadedForRecovery && preloadedForRecovery.courses) {
         let healed = false;
+        // Purge accidental QA test infiltrator courses for Adir
+        ['03240269', '03940800', '03940808'].forEach(code => {
+            if (gameState.courses[code] && !gameState.courses[code].grade && (gameState.courses[code].semester === 4 || !gameState.courses[code].semester)) {
+                delete gameState.courses[code];
+                healed = true;
+            }
+        });
+        if (Array.isArray(gameState.degreePlan)) {
+            gameState.degreePlan.forEach(sem => {
+                if (sem.semester === 4 && Array.isArray(sem.courses)) {
+                    const origLen = sem.courses.length;
+                    sem.courses = sem.courses.filter(c => !['03240269', '03940800', '03940808'].includes(c.code) && !['03240269', '03940800', '03940808'].includes(c.altCode));
+                    if (sem.courses.length !== origLen) healed = true;
+                }
+            });
+        }
         Object.entries(preloadedForRecovery.courses).forEach(([code, preloadedCourse]) => {
             const existing = gameState.courses[code];
             if (!existing) {
@@ -12049,6 +12165,17 @@ function renderTechnionPlusQuickBar(course) {
     `;
 }
 
+function escapeHtml(str) {
+    if (str === null || str === undefined) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+if (typeof window !== 'undefined') window.escapeHtml = escapeHtml;
+
 // Open and load details into Course Details Modal
 function openCourseDetails(code) {
     window.openCourseDetails = openCourseDetails;
@@ -12116,8 +12243,14 @@ function openCourseDetails(code) {
     }
     if (!course) return;
 
+    // Defensive initialization of collections to prevent any downstream TypeError
+    course.tasks = Array.isArray(course.tasks) ? course.tasks : [];
+    course.prerequisites = Array.isArray(course.prerequisites) ? course.prerequisites : [];
+    course.schedule = Array.isArray(course.schedule) ? course.schedule : [];
+
     currentSelectedCourse = course;
 
+    try {
     // Header values
     document.getElementById("modal-course-name").innerText = course.name;
     document.getElementById("modal-course-code").innerText = course.code.toUpperCase();
@@ -13669,9 +13802,13 @@ function openCourseDetails(code) {
 
     // Render task items
     renderModalTaskList(course);
-
-    // Show modal
-    document.getElementById("course-modal").classList.add("active");
+    } catch (err) {
+        console.error("[openCourseDetails] Handled error rendering modal content:", err);
+    } finally {
+        // Show modal (guaranteed to execute even if sub-component has minor errors)
+        const modal = document.getElementById("course-modal");
+        if (modal) modal.classList.add("active");
+    }
 }
 
 const PEER_CONSENSUS_DATA = {
@@ -14481,35 +14618,49 @@ async function importFromCheesefork(url) {
 }
 
 function deleteCourse(code) {
-    const course = gameState.courses[code];
-    if (!course) return;
+    if (!code) return;
+    const clean = String(code).replace(/^0+/, '');
+    const course = gameState.courses[code] || gameState.courses[clean] || gameState.courses['0' + clean];
 
     let xpRefund = 0;
-    course.tasks.forEach(task => {
-        if (task.completed) {
-            xpRefund += task.xp;
-        }
-    });
+    if (course && course.tasks && Array.isArray(course.tasks)) {
+        course.tasks.forEach(task => {
+            if (task.completed) {
+                xpRefund += task.xp;
+            }
+        });
+    }
 
-    // Delete from tree
+    // Delete from tree under all possible code representations
     delete gameState.courses[code];
+    delete gameState.courses[clean];
+    delete gameState.courses['0' + clean];
+    if (course && course.altCode) {
+        delete gameState.courses[course.altCode];
+        delete gameState.courses[String(course.altCode).replace(/^0+/, '')];
+    }
     
     // Explicitly track in removedCourses so it is NEVER restored by curriculum templates!
     if (!gameState.removedCourses) gameState.removedCourses = [];
     if (!gameState.removedCourses.includes(code)) {
         gameState.removedCourses.push(code);
     }
+    if (clean && !gameState.removedCourses.includes(clean)) {
+        gameState.removedCourses.push(clean);
+    }
 
     // Also remove from Degree Planner
     if (typeof DegreePlanner !== 'undefined' && DegreePlanner.removeCourse) {
         DegreePlanner.removeCourse(code);
+        if (clean !== code) DegreePlanner.removeCourse(clean);
+        if (course && course.altCode) DegreePlanner.removeCourse(course.altCode);
     }
 
     // Remove from prerequisites of all other courses
     Object.keys(gameState.courses).forEach(cCode => {
         const c = gameState.courses[cCode];
-        if (c.prerequisites) {
-            c.prerequisites = c.prerequisites.filter(p => p !== code);
+        if (c && c.prerequisites) {
+            c.prerequisites = c.prerequisites.filter(p => p !== code && p !== clean);
         }
     });
 
@@ -18882,11 +19033,16 @@ function renderFlowchartTree() {
         semesterCourses[r.sem] = [];
     });
 
-    const PURGED_FLOWCHART_CODES = new Set(['035026', '35026', '035044', '01140071', '114071']);
+    const PURGED_FLOWCHART_CODES = new Set([
+        '035026', '35026', '035044', '01140071', '114071',
+        '03240269', '3240269',
+        '03940800', '3940800', '0394800', '394800',
+        '03940808', '3940808', '0394808', '394808'
+    ]);
     const seenRootsInTree = new Set();
     Object.values(gameState.courses || {}).forEach(course => {
         if (!course || !course.code) return;
-        if (PURGED_FLOWCHART_CODES.has(course.code)) return;
+        if (PURGED_FLOWCHART_CODES.has(course.code) || (course.altCode && PURGED_FLOWCHART_CODES.has(course.altCode))) return;
         if (course.semester === 0 || course.semester === '0') return;
 
         // Deduplication root check: avoid rendering two cards for the same course!
@@ -18907,6 +19063,15 @@ function renderFlowchartTree() {
             sem = Math.max(1, Math.min(8, sem));
         }
         if (!semesterCourses[sem]) semesterCourses[sem] = [];
+        // Strict guard: sports courses or Malag infiltrators must NEVER enter semester 4 in flowchart!
+        if (sem === 4) {
+            const cKeys = [course.code, course.altCode, String(course.code).replace(/^0+/, '')];
+            if (cKeys.some(k => PURGED_FLOWCHART_CODES.has(k))) return;
+            if (course.type === 'sports' || course.list === 'SPORTS') return;
+            const cStr = String(course.code || '');
+            if (cStr.startsWith('0394') || cStr.startsWith('394')) return;
+            if (cStr.startsWith('0324') || cStr.startsWith('324')) return;
+        }
         semesterCourses[sem].push(course);
     });
 
@@ -21686,8 +21851,8 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.10.26-v2.7.1",
-    version: "2.7.1",
+    code: "REV-2026.10.27-v2.7.3",
+    version: "2.7.3",
     build: "20261020_03",
     date: "2026-10-20 01:20",
     description: "גרסה 2.5.2: פתרון מוחלט ללולאת העדכון במובייל וספארי, מנגנון אנטי-רילואד עמיד ב-localStorage, סנכרון גרסאות מלא וקישורי הורדה ישירים לטלפונים"
@@ -23694,7 +23859,7 @@ window.getFormattedChangelogHTML = function() {
 };
 
 window.openChangelogModal = function(ver) {
-    const currentVer = ver || (typeof APP_CURRENT_REVISION !== 'undefined' && APP_CURRENT_REVISION && APP_CURRENT_REVISION.version) || "2.5.9";
+    const currentVer = ver || (typeof APP_CURRENT_REVISION !== 'undefined' && APP_CURRENT_REVISION && APP_CURRENT_REVISION.version) || "2.7.3";
     const updateModal = document.getElementById("version-update-modal");
     if (!updateModal) return;
     const modTitle = document.getElementById("update-modal-title");
@@ -26492,3 +26657,28 @@ window.exportTimetableToCanvasPNG = exportTimetableToCanvasPNG;
 
 
 
+
+window.forceUpdateApp = async function() {
+    if (typeof showToastNotification === 'function') {
+        showToastNotification('מנקה מטמון וטוען גרסה עדכנית...', 'info');
+    }
+    try {
+        if ('serviceWorker' in navigator) {
+            const regs = await navigator.serviceWorker.getRegistrations();
+            for (const r of regs) {
+                await r.unregister();
+            }
+        }
+        if ('caches' in window) {
+            const keys = await caches.keys();
+            for (const k of keys) {
+                await caches.delete(k);
+            }
+        }
+    } catch (e) {
+        console.warn('Cache clearing notice:', e);
+    }
+    setTimeout(() => {
+        window.location.reload(true);
+    }, 250);
+};

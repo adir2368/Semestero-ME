@@ -66,8 +66,8 @@
     <link rel="dns-prefetch" href="https://asxpbepuvhbafsjlogag.supabase.co">
     <link rel="preload" as="image" href="icon_small.webp?v=2.7.0" type="image/webp" fetchpriority="high">
 
-    <link rel="stylesheet" href="styles.css?v=2.7.0">
-    <link rel="stylesheet" href="accessibility.css?v=2.7.0">
+    <link rel="stylesheet" href="styles.css?v=2.7.3">
+    <link rel="stylesheet" href="accessibility.css?v=2.7.3">
 
     <!-- Schema.org Structured Data for Google Search Site Name & WebApplication -->
     <script type="application/ld+json">
@@ -707,9 +707,14 @@
                     <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; padding: 10px 14px; background: rgba(56, 189, 248, 0.08); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 8px;">
                         <div style="display: flex; align-items: center; gap: 8px;">
                             <span style="font-size: 0.82rem; color: #94a3b8;">גרסת מערכת פעילה:</span>
-                            <span style="font-weight: 700; color: #38bdf8; font-family: monospace; font-size: 0.88rem;" id="display-system-version">v2.7.0</span>
+                            <span style="font-weight: 700; color: #38bdf8; font-family: monospace; font-size: 0.88rem;" id="display-system-version">v2.7.3</span>
                         </div>
-                        <span class="app-version-badge" style="font-size: 0.66rem; background: rgba(15, 23, 42, 0.6); border-color: rgba(56, 189, 248, 0.35); color: #7dd3fc;">🔒 נעול לעריכה</span>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <button type="button" class="btn btn-xs" id="btn-force-update-app" onclick="if(window.forceUpdateApp) { window.forceUpdateApp(); } else { window.location.reload(true); }" style="background: rgba(56, 189, 248, 0.2); border: 1px solid #38bdf8; color: #38bdf8; padding: 4px 10px; border-radius: 6px; cursor: pointer; font-size: 0.76rem; font-weight: 700;">
+                                🔄 רענן גרסה ונקה מטמון
+                            </button>
+                            <span class="app-version-badge" style="font-size: 0.66rem; background: rgba(15, 23, 42, 0.6); border-color: rgba(56, 189, 248, 0.35); color: #7dd3fc;">v2.7.3 פעילה</span>
+                        </div>
                     </div>
 
                     <div class="settings-form-grid">
@@ -768,10 +773,10 @@
                         <div class="settings-card-title" style="color: #38bdf8; font-size: 1.15rem; font-weight: 800; display: flex; align-items: center; gap: 8px;">
                             <span>✨</span> <span>מה חדש?</span>
                         </div>
-                        <span class="app-version-badge" style="font-size: 0.65rem; border-color: rgba(56, 189, 248, 0.4); color: #38bdf8;">גרסה אחרונה v2.5.2</span>
+                        <span class="app-version-badge" style="font-size: 0.65rem; border-color: rgba(56, 189, 248, 0.4); color: #38bdf8;">גרסה אחרונה v2.7.3</span>
                     </div>
                     <ul class="whats-new-list" style="list-style-type: disc; padding-right: 22px; margin: 0; color: #e2e8f0; font-size: 0.88rem; line-height: 1.85;">
-                        <li><strong>v2.6.9 (26/10/2026):</strong> v2.6.9 - Task Deduplication Engine, Refresh Stale Information Overwrite & Multi-Course Merge</li>
+                        <li><strong>v2.7.3 (27/10/2026):</strong> טיהור מלא של קורסי הספורט מסמסטר 4, תיקון פתיחת חלונית פרטי קורס לספורט ומל״ג (escapeHtml), סנכרון הרמטי לענן Supabase ומניעת מטמון שגוי.</li>
                     </ul>
                     <div style="margin-top: 12px; text-align: center;">
                         <button type="button" class="btn btn-xs btn-outline" id="btn-toggle-older-versions" onclick="
@@ -789,6 +794,7 @@
                     </div>
                     <div id="older-versions-list" style="display: none; margin-top: 12px; border-top: 1px dashed rgba(56, 189, 248, 0.25); padding-top: 10px;">
                         <ul style="list-style-type: disc; padding-right: 22px; margin: 0; color: #94a3b8; font-size: 0.84rem; line-height: 1.75;">
+                            <li><strong>v2.7.2 (27/10/2026):</strong> טיהור מלא של קורסי בדיקות מסמסטר 4 (אתיקה בפעולה, כושר גופני ופילאטיס ומתיחות) מעץ הזרימה ומכל מפתחות ה-LocalStorage, חסימת רינדור הרמטית ב-DAG Flowchart, ועדכון גרסת Service Worker עם ניקוי מטמון כפוי.</li>
                             <li><strong>v2.7.1 (26/10/2026):</strong> ביקורת חיבורים מקיפה וחסימת סנכרון לכל שירותי המערכת: אינדיקטורים דינמיים אמיתיים למצב חיבור ערוץ הטלפון ויומני Google, חסימת סנכרון ענן שקט ללא טוקן, מניעת ייצוא קבצי ביטול ריקים, והודעות התרעה בעת ניסיון סנכרון ללא חיבור פעיל.</li>
                             <li><strong>v2.7.0 (26/10/2026):</strong> חסימת הדמיית סנכרון שקטה (No Fake Mock Sync) עבור מודל, יומני Google ו-CheeseFork: הצגת סטטוס אמיתי "אינו מחובר" כאשר אין קישור פעיל והתרעה ברורה בכל ניסיון סנכרון.</li>
                             <li><strong>v2.6.9 (26/10/2026):</strong> מנוע ניקוי כפילויות חכם למטלות, עדכון נתונים שהשתנו, וכפתור רענון ייעודי בטבלת המשימות.</li>
@@ -1885,7 +1891,7 @@
             <div class="footer-left-version" style="display: inline-flex; align-items: center; gap: 8px;">
                 <button type="button" class="app-version-badge" onclick="window.openPrivacyPolicyModal()" title="מדיניות פרטיות והגנת מידע" style="cursor: pointer; background: rgba(16, 185, 129, 0.15); border-color: rgba(16, 185, 129, 0.4); color: #34d399;">🔒 פרטיות</button>
                 <button type="button" class="app-version-badge" id="btn-accessibility-trigger" onclick="window.openAccessibilityModal()" title="הצהרת נגישות והתאמות" aria-label="פתח תפריט נגישות והתאמות" style="cursor: pointer; background: rgba(2, 132, 199, 0.2); border-color: rgba(56, 189, 248, 0.4); color: #38bdf8;">♿ נגישות</button>
-                <button type="button" class="app-version-badge" id="footer-version-badge" title="לחץ לבדיקת עדכונים ורענון המערכת (v2.5.9)" aria-label="בדיקת עדכוני גרסה ורענון המערכת" style="cursor: pointer;">v2.5.9 ✨</button>
+                <button type="button" class="app-version-badge" id="footer-version-badge" title="לחץ לבדיקת עדכונים ורענון המערכת (v2.7.3)" aria-label="בדיקת עדכוני גרסה ורענון המערכת" style="cursor: pointer;">v2.7.3 ✨</button>
             </div>
         </footer>
 
@@ -4019,27 +4025,27 @@
     <!-- Supabase JS Client for Cloud Sync -->
     <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <!-- Preloaded Authentic User State (Adir Moshe) -->
-    <script defer src="preloaded_user_state.js?v=2.7.0"></script>
+    <script defer src="preloaded_user_state.js?v=2.7.3"></script>
     <!-- Clean Curriculum Template -->
-    <script defer src="curriculum_template.js?v=2.7.0"></script>
+    <script defer src="curriculum_template.js?v=2.7.3"></script>
     <!-- Multi-User Identity & Sync Engine -->
-    <script defer src="auth_sync.js?v=2.7.0"></script>
+    <script defer src="auth_sync.js?v=2.7.3"></script>
     <!-- Site Telemetry & Audience Analytics Engine -->
-    <script defer src="site_analytics.js?v=2.7.0"></script>
+    <script defer src="site_analytics.js?v=2.7.3"></script>
     <!-- Modal & Feature Interactive Help Guide Engine -->
-    <script defer src="modal_help.js?v=2.7.0"></script>
+    <script defer src="modal_help.js?v=2.7.3"></script>
     <!-- Interactive Guided Tour Engine -->
-    <script defer src="interactive_tour.js?v=2.7.0"></script>
+    <script defer src="interactive_tour.js?v=2.7.3"></script>
     <!-- Moodle Live Calendar & Tasks Sync Engine -->
-    <script defer src="moodle_sync.js?v=2.7.0"></script>
+    <script defer src="moodle_sync.js?v=2.7.3"></script>
     <!-- Technion ME 2025/2026 Catalog & Electives Database -->
-    <script defer src="planner_catalog.js?v=2.7.0"></script>
+    <script defer src="planner_catalog.js?v=2.7.3"></script>
     <!-- Degree Planner Drag & Drop Engine -->
-    <script defer src="planner_module.js?v=2.7.0"></script>
+    <script defer src="planner_module.js?v=2.7.3"></script>
     <!-- Technion Official Academic Calendar & Holidays Engine -->
-    <script defer src="technion_academic_calendar.js?v=2.7.0"></script>
+    <script defer src="technion_academic_calendar.js?v=2.7.3"></script>
     <!-- Algorithmic Timetable Generator & Combinations Studio -->
-    <script defer src="timetable_generator.js?v=2.7.0"></script>
+    <script defer src="timetable_generator.js?v=2.7.3"></script>
     <!-- Core Application Logic -->
 
     <!-- Accessibility Modal (הצהרת נגישות ותפריט התאמות) -->
@@ -4169,9 +4175,9 @@
         </svg>
     </button>
 
-    <script defer src="ui_enhancements.js?v=2.7.0"></script>
-    <script defer src="accessibility.js?v=2.7.0"></script>
-    <script defer src="app.js?v=2.7.0"></script>
+    <script defer src="ui_enhancements.js?v=2.7.3"></script>
+    <script defer src="accessibility.js?v=2.7.3"></script>
+    <script defer src="app.js?v=2.7.3"></script>
     <!-- PWA Service Worker Registration & Live Auto-Update -->
     <script>
         if ('serviceWorker' in navigator && window.location.protocol.startsWith('http')) {

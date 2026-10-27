@@ -17,9 +17,9 @@ ZIP_PATH = os.path.join(ROOT, "Semestero-ME-Windows-x64.zip")
 
 with open(os.path.join(ROOT, "package.json"), "r", encoding="utf-8") as f:
     pkg = json.load(f)
-VERSION = pkg.get("version", "2.7.1")
+VERSION = pkg.get("version", "2.7.3")
 TAG = f"v{VERSION}"
-NAME = f"Semestero ME v{VERSION} - Exhaustive Connection Auditing & Strict Unconnected Sync Guards"
+NAME = f"Semestero ME v{VERSION} - Course Modal & Tree Infiltrators Fix, Supabase Cloud Sync"
 
 def get_github_token():
     try:
@@ -89,30 +89,22 @@ def main():
         "User-Agent": "Semestero-ME-Release-Agent"
     }
 
-    body_notes = f"""## מה חדש בגרסה v{VERSION} 🛡️🔗🎯
-    
-### 1. ביקורת חיבורים מקיפה וסטטוסים דינמיים אמיתיים (Exhaustive Connection Auditing)
-- **ערוץ התראות טלפון (Phone & Mobile Alerts Channel)**:
-  - תגית הסטטוס ותיאור הכרטיסייה מתעדכנים דינמית לחלוטין: `⚪ ערוץ טלפון אינו מחובר — לא הוגדר מספר` כאשר לא הוגדר מספר טלפון, `📱 מוגדר מקומית` באורח מקומי, ו-`🟢 מחובר ומסונכרן לענן` בחשבון מחובר.
-  - כפתור "שלח בדיקה" (`#btn-test-phone-alert`) חוסם שליחה ומתריע באזהרה ברורה (`⚠️ אינך מחובר לערוץ התראות טלפון!`) כאשר לא הוגדר מספר.
-- **יומני Google בכרטיסיית הגדרות (Google Calendar in Settings)**:
-  - נוספה תגית סטטוס חיה בכותרת הכרטיסייה: `⚪ אינו מחובר ליומני Google — הזן מזהי יומן או Webhook לסנכרון`.
-  - שמירת הגדרות ללא מזהי יומן מציגה התרעה מדויקת המבהירה שהמערכת אינה מחוברת ליומני Google.
-- **סנכרון ענן (Cloud Gist Sync)**:
-  - לחיצה על "סנכרן עכשיו לענן" ללא טוקן סנכרון פעיל מציגה התראת אזהרה שקופה (`⚠️ אינך מחובר לסנכרון ענן (Google Calendar)!`) ומעדכנת את תגית הסטטוס ל-`⚪ אינו מחובר לסנכרון ענן`.
-- **ייצוא קובץ ביטול שיעורים (Timetable Cancellation ICS)**:
-  - חסימת הורדת קובץ ביטול ריק כאשר אין שיעורים פעילים במערכת, והצגת התרעה מסודרת למשתמש.
-- **תוכנית הבוקר (Morning 07:30 Briefing Alert)**:
-  - כאשר טרם סונכרנה מערכת שעות מ-CheeseFork, התראת הבוקר אינה מציגה מצג שווא של "יום חופשי מלימודים", אלא מנחה בשקיפות מלאה לחבר ולסנכרן את המערכת.
+    body_notes = f"""## מה חדש בגרסה v{VERSION} 🛡️✨🎯
 
-### 2. אכיפת חיבורים הרמטית עבור מודל, צ'יזפורק ולוח השנה
-- סטטוס "⚪ מודל אינו מחובר" ו-"⚪ CheeseFork אינו מחובר" בכל רחבי האפליקציה.
-- חסימת סנכרון שקט ופתיחה ישירה של מודאל ההגדרה עם פוקוס בלחיצה על סנכרון ללא חיבור פעיל.
+### 1. טיהור קורסי ספורט זרים וחסימת סנכרון ענן (Tree & Cloud Purge)
+- קורסי ספורט ניסיוניים (כושר גופני וחדר כושר `03940800`, פילאטיס ומתיחות `03940808`) סולקו לחלוטין מסמסטר 4 ומעץ התואר.
+- סנכרון ענן Supabase נוקה ישירות בטבלת `user_states`, ונחסמה כל חדירה חוזרת ממקורות חיצוניים באמצעות `sanitizeInboundState`.
+- מעבדה לפיזיקה 1ח׳ (`114032`) מקובעת במדויק בסמסטר 5 (חורף תשפ"ז).
 
-### 3. חבילות הפצה ואימות איכות אוטומטי
-- עמידה מלאה ב-10/10 בדיקות אוטומטיות ב-Chrome DevTools Protocol (CDP).
-- חבילת Android APK רשמית (v2.7.1, versionCode 27).
-- אפליקציית Windows שולחנית עצמאית מעודכנת (Semestero-ME.exe + ZIP)."""
+### 2. תיקון קריסת חלונית פרטי קורס (escapeHtml Fix)
+- תוקנה שגיאת `ReferenceError: escapeHtml is not defined` שהתרחשה בעת לחיצה על כרטיסיות קורסים בעץ או במערכת.
+- כל פתיחת חלונית עטופה כעת בבלוק הגנה מלא למניעת שגיאות UI.
+
+### 3. כפתור רענון גרסה וניקוי מטמון בדפדפן (Force Update)
+- נוסף כפתור מהיר בהגדרות: `🔄 רענן גרסה ונקה מטמון` לניקוי Service Worker ומטמון הדפדפן בלחיצה אחת.
+
+### 4. סנכרון גרסאות מלא
+- סנכרון אחיד של גרסה v{VERSION} בכל רכיבי המערכת, בסיסי הנתונים וממשקי המשתמש."""
 
     req_tag = urllib.request.Request(f"https://api.github.com/repos/{REPO}/releases/tags/{TAG}", headers=headers)
     release = None

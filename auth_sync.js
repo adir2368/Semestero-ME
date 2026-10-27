@@ -28,6 +28,41 @@
         }
     };
 
+        // Inbound state sanitization against accidental test infiltrators
+    function sanitizeInboundState(state) {
+        if (!state) return state;
+        const targets = [
+            '03240269', '3240269',
+            '03940800', '3940800', '0394800', '394800',
+            '03940808', '3940808', '0394808', '394808'
+        ];
+        if (state.courses) {
+            targets.forEach(t => {
+                const c = state.courses[t];
+                if (c && !c.grade && (c.semester === 4 || !c.semester)) {
+                    delete state.courses[t];
+                }
+            });
+        }
+        if (Array.isArray(state.degreePlan)) {
+            state.degreePlan.forEach(s => {
+                if (s && s.semester === 4 && Array.isArray(s.courses)) {
+                    s.courses = s.courses.filter(c => {
+                        if (!c) return false;
+                        const code = String(c.code || '');
+                        const alt = String(c.altCode || '');
+                        if (targets.includes(code) || targets.includes(alt)) return false;
+                        if (c.type === 'sports' || c.list === 'SPORTS') return false;
+                        if (code.startsWith('0394') || code.startsWith('394')) return false;
+                        if (code.startsWith('0324') || code.startsWith('324')) return false;
+                        return true;
+                    });
+                }
+            });
+        }
+        return state;
+    }
+
     function isCapacitorOrNative() {
         return typeof window !== 'undefined' && !!(window.Capacitor || window.location.protocol === 'capacitor:');
     }
@@ -143,7 +178,8 @@
             try {
                 const saved = localStorage.getItem('ast_profile_' + uid);
                 if (saved) {
-                    const parsed = JSON.parse(saved);
+                    let parsed = JSON.parse(saved);
+                    parsed = sanitizeInboundState(parsed);
                     if (window.gameState && window.gameState.currentActiveSemester) {
                         parsed.startingSemester = window.gameState.currentActiveSemester;
                     }
@@ -1615,7 +1651,7 @@
                         (payload) => {
                             console.log('[AuthSync Realtime] Remote update received:', payload);
                             if (payload && payload.new && payload.new.state_json) {
-                                const remoteState = payload.new.state_json;
+                                const remoteState = sanitizeInboundState(payload.new.state_json);
                                 const remoteJson = JSON.stringify(remoteState);
 
                                 // Avoid echoing our own state that was just uploaded
@@ -1726,7 +1762,7 @@
                 }
 
                 if (data && data.state_json) {
-                    const remoteState = data.state_json;
+                    const remoteState = sanitizeInboundState(data.state_json);
                     const key = this.getUserStorageKey(user.id);
                     const localRaw = localStorage.getItem(key);
                     let localState = null;
