@@ -13290,7 +13290,9 @@ function openCourseDetails(code) {
                 <p style="margin-bottom: 10px;">דרישות הקדם מולאו! הירשם לקורס כדי לפתוח את רשימת המשימות שלו.</p>
                 <button class="btn btn-primary" id="btn-register-course">📖 הירשם והתחל קורס</button>
             `;
-            document.getElementById("btn-register-course").addEventListener("click", () => {
+            const btnRegister = document.getElementById("btn-register-course");
+            if (btnRegister) {
+                btnRegister.addEventListener("click", () => {
                 if (!isPriorSemCompleted) {
                     alert(`לא ניתן להתחיל קורסים מסמסטר ${courseSem} עד להשלמת כל קורסי סמסטר ${prevSemNumber}!`);
                     return;
@@ -13298,7 +13300,8 @@ function openCourseDetails(code) {
                 course.status = 'active';
                 notifyStateChanged();
                 openCourseDetails(code); // refresh view
-            });
+                });
+            }
         }
     } else if (course.status === 'active') {
         actionBox.innerHTML = `
@@ -21851,8 +21854,8 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.10.27-v2.7.3",
-    version: "2.7.3",
+    code: "REV-2026.10.27-v2.7.4",
+    version: "2.7.4",
     build: "20261020_03",
     date: "2026-10-20 01:20",
     description: "גרסה 2.5.2: פתרון מוחלט ללולאת העדכון במובייל וספארי, מנגנון אנטי-רילואד עמיד ב-localStorage, סנכרון גרסאות מלא וקישורי הורדה ישירים לטלפונים"
@@ -23859,7 +23862,7 @@ window.getFormattedChangelogHTML = function() {
 };
 
 window.openChangelogModal = function(ver) {
-    const currentVer = ver || (typeof APP_CURRENT_REVISION !== 'undefined' && APP_CURRENT_REVISION && APP_CURRENT_REVISION.version) || "2.7.3";
+    const currentVer = ver || (typeof APP_CURRENT_REVISION !== 'undefined' && APP_CURRENT_REVISION && APP_CURRENT_REVISION.version) || "2.7.4";
     const updateModal = document.getElementById("version-update-modal");
     if (!updateModal) return;
     const modTitle = document.getElementById("update-modal-title");

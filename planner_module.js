@@ -1053,6 +1053,20 @@
 
         const performSave = () => {
             try {
+                if (Array.isArray(customPlan)) {
+                    customPlan.forEach(sem => {
+                        if (sem && sem.semester === 4 && Array.isArray(sem.courses)) {
+                            sem.courses = sem.courses.filter(c => {
+                                if (!c || !c.code) return false;
+                                const codeStr = String(c.code);
+                                if (QA_INFILTRATOR_CODES.has(codeStr) || (c.altCode && QA_INFILTRATOR_CODES.has(c.altCode))) return false;
+                                if (c.type === 'sports' || c.list === 'SPORTS') return false;
+                                if (codeStr.startsWith('0394') || codeStr.startsWith('394')) return false;
+                                return true;
+                            });
+                        }
+                    });
+                }
                 const dataToSave = {
                     semesters: customPlan,
                     unassigned: unassignedCourses
