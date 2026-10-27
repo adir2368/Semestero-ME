@@ -89,7 +89,7 @@ def main():
         "User-Agent": "Semestero-ME-Release-Agent"
     }
 
-        body_notes = f"""## מה חדש בגרסה v{VERSION} 🚀📱🛡️
+    body_notes = f"""## מה חדש בגרסה v{VERSION} 🚀📱🛡️
 
 ### 1. תיקון קריטי לאפליקציית המובייל (Android Native APK & PWA Navigation Fix)
 - תיקון הפניית ה-Redirect שגרמה לאפליקציה לצאת לדפדפן החיצוני:
