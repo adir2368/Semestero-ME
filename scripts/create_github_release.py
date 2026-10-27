@@ -17,9 +17,9 @@ ZIP_PATH = os.path.join(ROOT, "Semestero-ME-Windows-x64.zip")
 
 with open(os.path.join(ROOT, "package.json"), "r", encoding="utf-8") as f:
     pkg = json.load(f)
-VERSION = pkg.get("version", "2.7.8")
+VERSION = pkg.get("version", "2.7.9")
 TAG = f"v{VERSION}"
-NAME = f"Semestero ME v{VERSION} - Native Mobile Browser Redirect Fix, Custom Domain Routing & Developer Profile Auto-Heal"
+NAME = f"Semestero ME v{VERSION} - Session Persistence Fix, Guest Purge Shield & Zero-State Cloud Protection"
 
 def get_github_token():
     try:
@@ -29,56 +29,61 @@ def get_github_token():
         if m:
             return m.group(1).strip()
     except Exception as e:
-        print("[Release] Error getting credentials from git:", e)
-    token = os.environ.get("GITHUB_TOKEN")
-    if token:
-        return token
-    print("[Release] Error: No GitHub token found.")
-    sys.exit(1)
+        print(f"Error getting git credential: {e}")
+    token = os.environ.get("GITHUB_TOKEN") or os.environ.get("GH_TOKEN")
+    return token
 
-def upload_asset(release, token, file_path, asset_name, content_type):
+def upload_asset(upload_url_template, file_path, content_type, headers):
     if not os.path.exists(file_path):
-        print(f"[Release] Warning: File {file_path} not found. Skipping.")
-        return None
-
+        print(f"[Upload] File not found: {file_path}")
+        return False
+    
+    file_name = os.path.basename(file_path)
     file_size = os.path.getsize(file_path)
-    print(f"[Release] Uploading {asset_name} ({file_size / (1024*1024):.2f} MB)...")
+    print(f"[Upload] Uploading {file_name} ({file_size / (1024*1024):.2f} MB)...")
+    
+    clean_upload_url = upload_url_template.split("{")[0]
+    upload_url = f"{clean_upload_url}?name={urllib.parse.quote(file_name)}"
+    
+    upload_headers = dict(headers)
+    upload_headers["Content-Type"] = content_type
+    upload_headers["Content-Length"] = str(file_size)
+    
+    try:
+        with open(file_path, "rb") as f:
+            req = urllib.request.Request(upload_url, data=f, headers=upload_headers, method="POST")
+            with urllib.request.urlopen(req) as res:
+                if res.status in (200, 201):
+                    print(f"[Upload] Successfully uploaded {file_name}")
+                    return True
+                else:
+                    print(f"[Upload] Upload returned status {res.status}")
+                    return False
+    except urllib.error.HTTPError as e:
+        print(f"[Upload] HTTPError during upload of {file_name}: {e.code} {e.reason}")
+        try:
+            print(e.read().decode())
+        except:
+            pass
+        return False
+    except Exception as e:
+        print(f"[Upload] Exception during upload of {file_name}: {e}")
+        return False
 
-    headers = {
-        "Authorization": f"Bearer {token}",
-        "Accept": "application/vnd.github+json",
-        "X-GitHub-Api-Version": "2022-11-28",
-        "User-Agent": "Semestero-ME-Release-Agent"
-    }
-
-    # Delete existing asset if present
-    for asset in release.get("assets", []):
-        if asset["name"] == asset_name:
-            print(f"[Release] Deleting old asset {asset_name} (id={asset['id']})...")
-            del_req = urllib.request.Request(asset["url"], headers=headers, method="DELETE")
-            try:
-                with urllib.request.urlopen(del_req) as del_res:
-                    print(f"[Release] Deleted old asset {asset_name}.")
-            except Exception as e:
-                print(f"[Release] Error deleting asset {asset_name}:", e)
-
-    upload_url = release["upload_url"].split("{")[0] + f"?name={urllib.parse.quote(asset_name)}"
-    with open(file_path, "rb") as f:
-        data = f.read()
-
-    headers["Content-Type"] = content_type
-    headers["Content-Length"] = str(len(data))
-
-    req = urllib.request.Request(upload_url, data=data, headers=headers, method="POST")
+def delete_existing_asset_if_any(release_id, file_name, headers):
+    url = f"https://api.github.com/repos/{REPO}/releases/{release_id}/assets"
+    req = urllib.request.Request(url, headers=headers)
     try:
         with urllib.request.urlopen(req) as res:
-            uploaded = json.loads(res.read().decode())
-            print(f"[Release] {asset_name} uploaded successfully! URL: {uploaded.get('browser_download_url')}")
-            return uploaded.get("browser_download_url")
-    except urllib.error.HTTPError as e:
-        print(f"[Release] Error uploading {asset_name}: {e.code} {e.reason}")
-        print(e.read().decode())
-        return None
+            assets = json.loads(res.read().decode())
+            for a in assets:
+                if a["name"] == file_name:
+                    print(f"[Release] Found existing asset {file_name} (id={a['id']}). Deleting for clean re-upload...")
+                    del_req = urllib.request.Request(f"https://api.github.com/repos/{REPO}/releases/assets/{a['id']}", headers=headers, method="DELETE")
+                    urllib.request.urlopen(del_req)
+                    print(f"[Release] Deleted asset {file_name}")
+    except Exception as e:
+        print(f"[Release] Notice while checking assets: {e}")
 
 def main():
     token = get_github_token()
@@ -89,21 +94,25 @@ def main():
         "User-Agent": "Semestero-ME-Release-Agent"
     }
 
-    body_notes = f"""## מה חדש בגרסה v{VERSION} 🚀📱🛡️
+    body_notes = f"""## מה חדש בגרסה v{VERSION} 🚀🛡️💎
 
-### 1. תיקון קריטי לאפליקציית המובייל (Android Native APK & PWA Navigation Fix)
-- תיקון הפניית ה-Redirect שגרמה לאפליקציה לצאת לדפדפן החיצוני:
-  - עדכון `server.url` ב-`capacitor.config.json` לדומיין הישיר החדש `https://semestero.me/Semestero-ME/`.
-  - הוספת כללי `allowNavigation` עבור `semestero.me`, `*.semestero.me`, ו-`*.github.io` המונעים יציאה מהאפליקציה ושומרים את הניווט תמיד בתוך ה-WebView המקורי.
-  - קימפול קובץ APK מעודכן (`Semestero-ME.apk`, versionCode 34).
+### 1. תיקון קריטי להתמדת הסשן ומניעת התנתקות ברענון (Session Persistence)
+- ביטול מנגנון האיפוס השגוי ב-`auth_sync.js::init()` שגרם למשתמש המפתח להתנתק בכל רענון עמוד (Page Refresh).
+- הבטחת שמירת הדגלים והסשן של אדיר משה (`adir_moshe`) בכל המכשירים (מובייל ודפדפן) ללא איבוד התחברות.
 
-### 2. שחזור מלא והגנת ריפוי עצמי לפרופיל המפתח (Adir Moshe Auto-Heal & Save Guard)
-- שחזור מלא של ציוני המפתח בענן Supabase לממוצע 86.04 נק״ז וכל 11 הקורסים המושלמים.
-- הוספת מנגנון ריפוי עצמי (Auto-Heal) ב-`app.js` וב-`auth_sync.js` המזהה איפוס בשוגג ומשחזר אוטומטית מ-`PRELOADED_USER_STATE`.
-- נעילת שמירת נתוני מפתח (`LEGACY_SAVE_KEY`) כך שאינה נדרסת לעולם על ידי אורחים או בדיקות הרשמה.
+### 2. הגנה מוחלטת על קובץ השמירה של אדיר (Save Shield)
+- הסרת פקודת המחיקה השגויה של `LEGACY_SAVE_KEY` מתוך מנגנון ניקוי האורחים (`loadActiveUserState`).
+- נעילת `saveState()` ב-`app.js` כך שאינה דורסת את `academic_skill_tree_save` במצב אורח.
+- תמיכה מלאה בהתחברות באמצעות אימייל `adir.m.2368@gmail.com`.
 
-### 3. עדכון כתובות קנוניות ו-OpenGraph
-- כל הקישורים הפנימיים, התגיות הקנוניות ותגיות השיתוף עודכנו רשמית לדומיין `https://semestero.me/Semestero-ME/`.
+### 3. מגן ענן וסנכרון ריפוי עצמי (Zero-State Cloud Protection)
+- חסימה הרמטית ב-`syncToCloud()` המונעת העלאת נתוני 0-GPA או קורסים ריקים לענן עבור אדיר משה.
+- מנגנון זיהוי ודחייה ב-`pullLatestStateFromCloud()` המשחזר אוטומטית מ-`PRELOADED_USER_STATE` אם מתקבל מידע לא תקין.
+- שחזור מלא של ציוני המפתח בענן Supabase (ממוצע 86.04 נק״ז וכל 11 הקורסים המושלמים).
+
+### 4. חבילות התקנה ועדכון
+- קימפול קובץ APK מעודכן (`Semestero-ME.apk`, versionCode 35, 7.84 MB).
+- עדכון גרסאות והפצה לכלל הפלטפורמות (Web, Mobile APK, Desktop).
 """
 
     req_tag = urllib.request.Request(f"https://api.github.com/repos/{REPO}/releases/tags/{TAG}", headers=headers)
@@ -120,45 +129,54 @@ def main():
             sys.exit(1)
 
     if not release:
-        create_url = f"https://api.github.com/repos/{REPO}/releases"
-        payload = {
+        create_payload = json.dumps({
             "tag_name": TAG,
             "target_commitish": "main",
             "name": NAME,
             "body": body_notes,
             "draft": False,
             "prerelease": False
-        }
-        req_create = urllib.request.Request(create_url, data=json.dumps(payload).encode("utf-8"), headers=headers, method="POST")
+        }).encode("utf-8")
+        
+        req_create = urllib.request.Request(
+            f"https://api.github.com/repos/{REPO}/releases",
+            data=create_payload,
+            headers=headers,
+            method="POST"
+        )
         try:
             with urllib.request.urlopen(req_create) as res:
                 release = json.loads(res.read().decode())
-                print(f"[Release] Created release {TAG} successfully (id={release['id']})")
+                print(f"[Release] Created release {TAG} (id={release['id']})")
         except urllib.error.HTTPError as e:
-            print(f"[Release] Error creating release: {e.code} {e.reason}")
-            print(e.read().decode())
+            print(f"[Release] Failed to create release: {e.code} {e.reason}")
+            try:
+                print(e.read().decode())
+            except:
+                pass
             sys.exit(1)
-    else:
-        update_url = f"https://api.github.com/repos/{REPO}/releases/{release['id']}"
-        payload = {
-            "name": NAME,
-            "body": body_notes
-        }
-        req_update = urllib.request.Request(update_url, data=json.dumps(payload).encode("utf-8"), headers=headers, method="PATCH")
-        try:
-            with urllib.request.urlopen(req_update) as res:
-                release = json.loads(res.read().decode())
-                print(f"[Release] Updated release notes for {TAG} (id={release['id']})")
-        except urllib.error.HTTPError as e:
-            print(f"[Release] Error updating release notes: {e.code} {e.reason}")
 
-    # Upload all assets
-    print("\n--- Uploading Release Assets ---")
-    upload_asset(release, token, APK_PATH, "Semestero-ME.apk", "application/vnd.android.package-archive")
-    upload_asset(release, token, ZIP_PATH, "Semestero-ME-Windows-x64.zip", "application/zip")
-    upload_asset(release, token, EXE_PATH, "Semestero-ME.exe", "application/vnd.microsoft.portable-executable")
+    upload_url_template = release.get("upload_url")
+    if not upload_url_template:
+        print("[Release] Missing upload_url in release object")
+        sys.exit(1)
 
-    print("\nAll assets processed successfully!")
+    # Assets to upload
+    assets = [
+        (APK_PATH, "application/vnd.android.package-archive"),
+        (ZIP_PATH, "application/zip"),
+        (EXE_PATH, "application/octet-stream")
+    ]
+
+    for fpath, ctype in assets:
+        fname = os.path.basename(fpath)
+        if os.path.exists(fpath):
+            delete_existing_asset_if_any(release["id"], fname, headers)
+            upload_asset(upload_url_template, fpath, ctype, headers)
+        else:
+            print(f"[Release] Skipping missing asset: {fpath}")
+
+    print(f"\n🎉 Release {TAG} is live at {release.get('html_url')}!")
 
 if __name__ == "__main__":
     main()

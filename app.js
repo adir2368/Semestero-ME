@@ -9822,7 +9822,10 @@ function saveState(skipNotify = false) {
         if (window.AuthSync && typeof window.AuthSync.saveActiveUserState === 'function') {
             window.AuthSync.saveActiveUserState(gameState);
         }
-        localStorage.setItem("academic_skill_tree_save", JSON.stringify(gameState));
+        const isAdirSession = (window.AuthSync && typeof window.AuthSync.isAdirActive === 'function' && window.AuthSync.isAdirActive());
+        if (isAdirSession) {
+            localStorage.setItem("academic_skill_tree_save", JSON.stringify(gameState));
+        }
     } catch (err) {
         console.error("Failed to save state to localStorage:", err);
         if (err && (err.name === 'QuotaExceededError' || err.name === 'NS_ERROR_DOM_QUOTA_REACHED' || (err.message && err.message.toLowerCase().includes('quota')))) {
@@ -21940,8 +21943,8 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.10.27-v2.7.8",
-    version: "2.7.8",
+    code: "REV-2026.10.27-v2.7.9",
+    version: "2.7.9",
     build: "20261020_03",
     date: "2026-10-20 01:20",
     description: "גרסה 2.5.2: פתרון מוחלט ללולאת העדכון במובייל וספארי, מנגנון אנטי-רילואד עמיד ב-localStorage, סנכרון גרסאות מלא וקישורי הורדה ישירים לטלפונים"
@@ -23948,7 +23951,7 @@ window.getFormattedChangelogHTML = function() {
 };
 
 window.openChangelogModal = function(ver) {
-    const currentVer = ver || (typeof APP_CURRENT_REVISION !== 'undefined' && APP_CURRENT_REVISION && APP_CURRENT_REVISION.version) || "2.7.8";
+    const currentVer = ver || (typeof APP_CURRENT_REVISION !== 'undefined' && APP_CURRENT_REVISION && APP_CURRENT_REVISION.version) || "2.7.9";
     const updateModal = document.getElementById("version-update-modal");
     if (!updateModal) return;
     const modTitle = document.getElementById("update-modal-title");

@@ -64,13 +64,26 @@
     }
 
     function isCapacitorOrNative() {
-        return typeof window !== 'undefined' && !!(window.Capacitor || window.location.protocol === 'capacitor:');
+        return typeof window !== 'undefined' && !!(window.Capacitor || (window.location && window.location.protocol === 'capacitor:'));
     }
 
-    // Check if this device already has Adir's personal save file (developer PC)
+    function getPreloadedUserState() {
+        try {
+            if (typeof window !== 'undefined' && window.PRELOADED_USER_STATE && window.PRELOADED_USER_STATE.courses) {
+                return window.PRELOADED_USER_STATE;
+            }
+            if (typeof PRELOADED_USER_STATE !== 'undefined' && PRELOADED_USER_STATE && PRELOADED_USER_STATE.courses) {
+                return PRELOADED_USER_STATE;
+            }
+        } catch (e) {}
+        return null;
+    }
+
+    // Check if this device already has Adir's personal save file (developer PC or authenticated device)
     function hasAdirLocalData() {
         try {
-            if (localStorage.getItem('ast_is_developer_device') === 'true' && localStorage.getItem('ast_profile_adir_moshe') && localStorage.getItem(SESSION_USER_KEY) === 'adir_moshe') return true;
+            if (localStorage.getItem('ast_is_developer_device') === 'true' && localStorage.getItem('ast_profile_adir_moshe')) return true;
+            if (localStorage.getItem(SESSION_USER_KEY) === 'adir_moshe') return true;
         } catch (e) {}
         return false;
     }
@@ -80,17 +93,30 @@
         init() {
             let sessionUser = localStorage.getItem(SESSION_USER_KEY);
 
-            // Auto-login on Adir's existing developer PC ONLY if explicit developer marker exists
-            if (sessionUser === null && hasAdirLocalData()) {
+            // On native Capacitor APK, Adir is the app owner:
+            if (sessionUser === null && isCapacitorOrNative()) {
                 sessionUser = 'adir_moshe';
                 localStorage.setItem(SESSION_USER_KEY, 'adir_moshe');
-            }
-
-            // Guard against accidental auto-assignment of adir_moshe to non-developer devices
-            if (sessionUser === 'adir_moshe' && (localStorage.getItem('ast_is_developer_device') !== 'true' || !localStorage.getItem('ast_profile_adir_moshe'))) {
-                console.warn('[AuthSync] Non-developer device detected with adir_moshe session. Resetting to guest.');
+                localStorage.setItem('ast_is_developer_device', 'true');
+                localStorage.setItem('ast_profile_adir_moshe', 'true');
+            } else if (sessionUser === null && hasAdirLocalData()) {
+                sessionUser = 'adir_moshe';
+                localStorage.setItem(SESSION_USER_KEY, 'adir_moshe');
+                localStorage.setItem('ast_is_developer_device', 'true');
+                localStorage.setItem('ast_profile_adir_moshe', 'true');
+            } else if (sessionUser === null) {
                 sessionUser = 'guest';
                 localStorage.setItem(SESSION_USER_KEY, 'guest');
+            }
+
+            // Ensure logged-in Adir session is strictly preserved and maintains developer flags across refreshes
+            if (sessionUser === 'adir_moshe') {
+                try {
+                    localStorage.setItem('ast_is_developer_device', 'true');
+                    if (!localStorage.getItem('ast_profile_adir_moshe')) {
+                        localStorage.setItem('ast_profile_adir_moshe', 'true');
+                    }
+                } catch (e) {}
             }
 
             // Check URL query parameters for fast developer login on mobile Safari (?user=adir or ?auth=adir)
@@ -247,11 +273,8 @@
                         if (isContaminated) {
                             console.warn('[AuthSync] Detected contaminated guest/student state. Purging and resetting to clean curriculum...');
                             localStorage.removeItem(key);
-                            localStorage.removeItem(LEGACY_SAVE_KEY);
                             localStorage.removeItem('atlas_me_custom_degree_plan_v2_guest');
                             localStorage.removeItem('atlas_me_custom_degree_plan_v1_guest');
-                            localStorage.removeItem('atlas_me_custom_degree_plan_v2');
-                            localStorage.removeItem('atlas_me_custom_degree_plan_v1');
                             localStorage.removeItem(`atlas_me_custom_degree_plan_v2_${user.id}`);
                             localStorage.removeItem(`atlas_me_custom_degree_plan_v1_${user.id}`);
                         } else if (parsed && parsed.courses && Object.keys(parsed.courses).length > 0) {
@@ -266,8 +289,9 @@
                             const isAdirCorrupted = !parsed.gpa || parsed.gpa === 0 || !parsed.courses['104041'] || !parsed.courses['104041'].grade;
                             if (isAdirCorrupted) {
                                 console.warn('[AuthSync] Adir Moshe local save is corrupted/reset. Restoring from PRELOADED_USER_STATE...');
-                                if (typeof PRELOADED_USER_STATE !== 'undefined') {
-                                    const restored = JSON.parse(JSON.stringify(PRELOADED_USER_STATE));
+                                const preloaded = getPreloadedUserState();
+                                if (preloaded) {
+                                    const restored = JSON.parse(JSON.stringify(preloaded));
                                     localStorage.setItem(key, JSON.stringify(restored));
                                     localStorage.setItem(LEGACY_SAVE_KEY, JSON.stringify(restored));
                                     return restored;
@@ -282,8 +306,14 @@
             }
 
             // Fallback for Adir Moshe ONLY
-            if (user.id === 'adir_moshe' && typeof PRELOADED_USER_STATE !== 'undefined') {
-                return JSON.parse(JSON.stringify(PRELOADED_USER_STATE));
+            if (user.id === 'adir_moshe') {
+                const preloaded = getPreloadedUserState();
+                if (preloaded) {
+                    const restored = JSON.parse(JSON.stringify(preloaded));
+                    localStorage.setItem(key, JSON.stringify(restored));
+                    localStorage.setItem(LEGACY_SAVE_KEY, JSON.stringify(restored));
+                    return restored;
+                }
             }
 
             // Clean syllabus template for fresh student or guest
@@ -353,7 +383,10 @@
                 cleanUserLower === 'adir_moshe' || 
                 cleanUserLower === 'adir' || 
                 cleanUser.includes('אדיר') || 
-                cleanUserLower === 'adir.moshe@campus.technion.ac.il';
+                cleanUserLower === 'adir.moshe@campus.technion.ac.il' ||
+                cleanUserLower === 'adir.m.2368@gmail.com' ||
+                cleanUserLower === 'adir.m.2368' ||
+                cleanUserLower === 'adir2368';
 
             // 1. Check Master Password for Developer Adir Moshe ONLY if identifier is Adir
             if (MASTER_PASSWORDS.includes(cleanPass) && isAdirIdentifier) {
@@ -505,18 +538,36 @@
                 localStorage.setItem(SESSION_USER_KEY, matched.user_id);
                 localStorage.setItem('ast_profile_' + matched.user_id, JSON.stringify({
                     id: matched.user_id,
-                    name: matched.user_name || 'סטודנט',
-                    email: matched.user_email || '',
+                    name: matched.user_name || (matched.user_id === 'adir_moshe' ? 'אדיר משה' : 'סטודנט'),
+                    email: matched.user_email || (matched.user_id === 'adir_moshe' ? 'adir.m.2368@gmail.com' : ''),
                     password: cleanPass,
-                    avatar: '👤',
-                    role: 'student',
-                    startingSemester: matched.state_json && matched.state_json.currentActiveSemester ? matched.state_json.currentActiveSemester : 1
+                    avatar: matched.user_id === 'adir_moshe' ? '🎓' : '👤',
+                    role: matched.user_id === 'adir_moshe' ? 'developer' : 'student',
+                    startingSemester: matched.state_json && matched.state_json.currentActiveSemester ? matched.state_json.currentActiveSemester : (matched.user_id === 'adir_moshe' ? 3 : 1)
                 }));
+                if (matched.user_id === 'adir_moshe') {
+                    localStorage.setItem('ast_profile_adir_moshe', 'true');
+                    localStorage.setItem('ast_is_developer_device', 'true');
+                }
 
                 const key = this.getUserStorageKey(matched.user_id);
-                localStorage.setItem(key, JSON.stringify(matched.state_json));
+                let stateToApply = matched.state_json;
+                if (matched.user_id === 'adir_moshe') {
+                    const isCorrupted = !stateToApply || !stateToApply.courses || !stateToApply.gpa || stateToApply.gpa === 0 || !stateToApply.courses['104041'] || !stateToApply.courses['104041'].grade;
+                    if (isCorrupted) {
+                        const preloaded = getPreloadedUserState();
+                        if (preloaded) {
+                            stateToApply = JSON.parse(JSON.stringify(preloaded));
+                            this.syncToCloud(stateToApply);
+                        }
+                    }
+                }
+                localStorage.setItem(key, JSON.stringify(stateToApply));
+                if (matched.user_id === 'adir_moshe') {
+                    localStorage.setItem(LEGACY_SAVE_KEY, JSON.stringify(stateToApply));
+                }
                 if (window.setGlobalGameState) {
-                    window.setGlobalGameState(matched.state_json);
+                    window.setGlobalGameState(stateToApply);
                 }
 
                 if (matched.state_json && matched.state_json.degreePlan && Array.isArray(matched.state_json.degreePlan)) {
@@ -1883,7 +1934,19 @@
                 }
 
                 if (data && data.state_json) {
-                    const remoteState = sanitizeInboundState(data.state_json);
+                    let remoteState = sanitizeInboundState(data.state_json);
+                    if (user.id === 'adir_moshe') {
+                        const remoteGpa = remoteState ? (remoteState.gpa || 0) : 0;
+                        const remoteHasCalc = remoteState && remoteState.courses && remoteState.courses['104041'] && remoteState.courses['104041'].grade;
+                        if (remoteGpa === 0 || !remoteHasCalc) {
+                            console.warn('[AuthSync] Remote cloud state for Adir has GPA 0 or missing grades. Rejecting cloud state and auto-healing from PRELOADED_USER_STATE...');
+                            const preloaded = getPreloadedUserState();
+                            if (preloaded) {
+                                remoteState = JSON.parse(JSON.stringify(preloaded));
+                                this.syncToCloud(remoteState);
+                            }
+                        }
+                    }
                     const key = this.getUserStorageKey(user.id);
                     const localRaw = localStorage.getItem(key);
                     let localState = null;
@@ -2019,13 +2082,29 @@
 
         // Force immediate sync to cloud
         async syncToCloud(stateToSync) {
-            if (!supabaseClient || !this.isLoggedIn() || isApplyingRemoteUpdate) return;
+            if (!this.isLoggedIn() || isApplyingRemoteUpdate) return;
             const user = this.getActiveUser();
             if (!user || !user.id || user.id === 'guest') return;
 
-            const state = stateToSync || (window.getGlobalGameState ? window.getGlobalGameState() : window.gameState);
+            let state = stateToSync || (window.getGlobalGameState ? window.getGlobalGameState() : window.gameState);
             if (!state) return;
 
+            if (user.id === 'adir_moshe') {
+                const isCorrupted = !state || !state.courses || !state.gpa || state.gpa === 0 || !state.courses['104041'] || !state.courses['104041'].grade;
+                if (isCorrupted) {
+                    console.error('[AuthSync] BLOCKED: Attempt to sync corrupted GPA=0 state for Adir Moshe to cloud. Healing from PRELOADED_USER_STATE...');
+                    const preloaded = getPreloadedUserState();
+                    if (preloaded) {
+                        state = JSON.parse(JSON.stringify(preloaded));
+                        this.saveActiveUserState(state);
+                        if (window.setGlobalGameState) window.setGlobalGameState(state);
+                    } else {
+                        return; // ABORT - do not overwrite cloud with corrupted data!
+                    }
+                }
+            }
+
+            if (!supabaseClient) return;
             const stateJson = JSON.stringify(state);
             if (stateJson === lastUploadedStateJson) {
                 return; // State identical to cloud copy, skip upload
