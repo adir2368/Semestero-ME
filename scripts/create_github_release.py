@@ -17,9 +17,9 @@ ZIP_PATH = os.path.join(ROOT, "Semestero-ME-Windows-x64.zip")
 
 with open(os.path.join(ROOT, "package.json"), "r", encoding="utf-8") as f:
     pkg = json.load(f)
-VERSION = pkg.get("version", "2.7.6")
+VERSION = pkg.get("version", "2.7.7")
 TAG = f"v{VERSION}"
-NAME = f"Semestero ME v{VERSION} - Entrance Auth Prompt, Registration Flow & Auto-Tour Launch"
+NAME = f"Semestero ME v{VERSION} - Complete Onboarding Wizard Integration, Registration & Tour Flow"
 
 def get_github_token():
     try:
@@ -89,26 +89,25 @@ def main():
         "User-Agent": "Semestero-ME-Release-Agent"
     }
 
-    body_notes = f"""## מה חדש בגרסה v{VERSION} 🚀🧭✨
+        body_notes = f"""## מה חדש בגרסה v{VERSION} 🚀🎓✨
 
-### 1. זרימת Onboarding והתחברות אוטומטית בכניסה (Entrance Auth Prompt)
-- עבור משתמשים חדשים ואורחים שאינם מחוברים, המערכת מציגה אוטומטית עם כניסתם חלונית התחברות ידידותית ומעוצבת.
-- אפשרות כניסה מהירה, מעבר בלחיצה אחת להרשמה, או המשך שיטוט חופשי כאורח ללא כפייה.
+### 1. שילוב מלא של אשף ההרשמה העשיר (3-Step Onboarding Wizard)
+- חיבור ישיר של כפתורי "הרשמה (סטודנט חדש)" בחלונית הכניסה ישירות לאשף ההרשמה המלא והמקיף.
+- כולל את כל שלושת השלבים:
+  1. הגדרת שם מלא + אפשרות להזנת אימייל וסיסמה אישית לסנכרון ענן (Supabase Cloud Sync).
+  2. בחירת סמסטר פתיחה מדויק.
+  3. צ'קליסט קורסים קודמים לפי סמסטרים (1 עד 4) עם כרטיסי קורס מעוצבים, נק״ז, ושדה הזנת ציון סופי חכם.
+  - תיבת טיפים לשימוש מהיר: עץ דרישות קדומות, מתכנן תואר, ולוח שנה אקדמי.
 
-### 2. מעבר חלק להרשמה אישית (Seamless Registration Flow)
-- לחיצה על כפתור ההרשמה מובילה ישירות לטופס יצירת חשבון סטודנט:
-  - הזנת שם מלא / כינוי, סיסמה ואימייל אישי/טכניוני.
-  - בחירת סמסטר פתיחה וסימון קורסים שכבר הושלמו בעבר (עם ציונים אופציונליים) לחישוב ממוצע ונק"ז התחלתיים.
-  - סנכרון מיידי ומאובטח לענן Supabase Cloud ולמכשיר המקומי.
+### 2. מעבר נוח בחזרה להתחברות (Return to Login)
+- נוספו קישורים וכפתורי מעבר ברורים ("🔑 יש לי חשבון" / "כבר יש לך חשבון קיים? לחץ כאן להתחברות ←") בראש ובתחתית אשף ההרשמה.
 
-### 3. הפעלה אוטומטית של הסיור המודרך (Auto Interactive Tour Launch)
-- מיד עם סיום ההרשמה, המערכת מברכת את הסטודנט ומפעילה אוטומטית את הסיור האינטראקטיבי החי (`InteractiveTour`).
-- הסיור מנחה את הסטודנט צעד-אחר-צעד בעץ הקורסים, סרגל הניווט, מתכנן התואר, סנכרון המודל ומחשבון הציונים.
+### 3. הפעלה אוטומטית של הסיור המודרך (Interactive Tour Launch)
+- לחיצה על "סיום והתחלת שימוש 🚀" או "דלג והתחל" שומרת את תוכנית הלימודים ומפעילה מיד את הסיור האינטראקטיבי להכרת המערכת.
 
-### 4. חבילות הפצה מעודכנות
-- חבילת Android APK מעודכנת (v{VERSION}, versionCode 32).
-- חבילת Windows שולחנית עצמאית (Semestero-ME.exe + ZIP).
-- סנכרון מלא ל-GitHub Pages ולדומיין `semestero.me`."""
+### 4. אימות מלא ומבחני אוטומציה
+- עמידה בכל מבחני הרגרסיה והבריאות המלאים (8/8) ובדיקת תהליך ההרשמה המלא (5/5).
+"""
 
     req_tag = urllib.request.Request(f"https://api.github.com/repos/{REPO}/releases/tags/{TAG}", headers=headers)
     release = None

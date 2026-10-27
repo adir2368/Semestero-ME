@@ -1180,8 +1180,14 @@
         finishOnboarding() {
             const nameInput = document.getElementById('onboarding-student-name-input');
             const semSelect = document.getElementById('onboarding-current-sem-select');
-            const name = (nameInput && nameInput.value.trim()) || 'סטודנט אורח';
+            const emailInput = document.getElementById('onboarding-student-email-input');
+            const passInput = document.getElementById('onboarding-student-pass-input');
+
+            const name = (nameInput && nameInput.value.trim()) || 'סטודנט חדש';
             const semester = parseInt(semSelect && semSelect.value) || 1;
+            const email = (emailInput && emailInput.value.trim()) || '';
+            const password = (passInput && passInput.value.trim()) || '';
+
             const priorCompleted = {};
             document.querySelectorAll('#onboarding-courses-checklist input[type="checkbox"]:checked').forEach(chk => {
                 const card = chk.closest('.onboarding-course-chip');
@@ -1192,6 +1198,22 @@
                     grade: (gVal !== null && !isNaN(gVal) && gVal >= 0 && gVal <= 100) ? gVal : null
                 };
             });
+
+            // If user supplied email & password, register account with cloud sync
+            if (email && email.includes('@') && password && password.length >= 4) {
+                this.registerStudent({
+                    name: name,
+                    password: password,
+                    startingSemester: semester,
+                    email: email,
+                    priorCompleted: priorCompleted
+                });
+                const modal = document.getElementById('onboarding-wizard-modal');
+                if (modal) modal.classList.remove('active');
+                localStorage.setItem('ast_onboarding_shown', 'true');
+                return;
+            }
+
             if (typeof window.getCleanCurriculumState === 'function') {
                 const newState = window.getCleanCurriculumState(semester, priorCompleted);
                 newState.student_name = name;
@@ -1207,14 +1229,18 @@
             if (modal) modal.classList.remove('active');
             if (typeof showToastNotification === 'function') {
                 showToastNotification(`🎓 ברוך הבא ${name}! מסלול הלימודים הוגדר בהצלחה.`, 'success');
+            } else if (typeof showHudToast === 'function') {
+                showHudToast(`🎓 ברוך הבא ${name}! מסלול הלימודים הוגדר בהצלחה.`, 'success');
             }
 
-            // Trigger the interactive tour gently only after completing initial data entry
-            if (window.InteractiveTour && localStorage.getItem('ast_interactive_tour_completed') !== 'true') {
-                setTimeout(() => {
-                    window.InteractiveTour.showWelcomeTourPrompt();
-                }, 900);
-            }
+            // Immediately launch the interactive tour after registration / onboarding!
+            setTimeout(() => {
+                if (window.InteractiveTour && typeof window.InteractiveTour.startTour === 'function') {
+                    window.InteractiveTour.startTour(0);
+                } else if (typeof window.startInteractiveTour === 'function') {
+                    window.startInteractiveTour(0);
+                }
+            }, 600);
         },
 
         // Backward compatibility: alias openAccountsModal to openAuthModal
@@ -1224,6 +1250,11 @@
 
         // Render Auth Modal Content dynamically based on auth state
         renderAuthModal(activeTab) {
+            if (activeTab === 'register') {
+                this.closeAuthModal();
+                this.openOnboardingWizard();
+                return;
+            }
             const container = document.getElementById('auth-modal-content-container');
             if (this.isLoggedIn() && activeTab !== 'register' && activeTab !== 'reset_password') {
                 // Render Logged-In User Profile View
@@ -1409,7 +1440,7 @@
                             <button type="button" class="btn btn-sm ${(!isRegister && !isReset) ? 'btn-primary' : 'btn-outline'}" onclick="AuthSync.renderAuthModal('login')" style="flex: 1;">
                                 🔑 התחברות
                             </button>
-                            <button type="button" class="btn btn-sm ${isRegister ? 'btn-primary' : 'btn-outline'}" onclick="AuthSync.renderAuthModal('register')" style="flex: 1;">
+                            <button type="button" class="btn btn-sm btn-outline" onclick="AuthSync.closeAuthModal(); AuthSync.openOnboardingWizard();" style="flex: 1;">
                                 ✨ הרשמה (סטודנט חדש)
                             </button>
                         </div>
@@ -1458,7 +1489,7 @@
                                     <div style="font-size: 0.84rem; color: #94a3b8; margin-bottom: 8px;">
                                         עדיין אין לך חשבון ב-Semestero ME?
                                     </div>
-                                    <button type="button" class="btn btn-outline" id="btn-switch-to-register" onclick="AuthSync.renderAuthModal('register')" style="width: 100%; border-color: #38bdf8; color: #38bdf8; font-weight: 700; padding: 9px; border-radius: 6px; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer;">
+                                    <button type="button" class="btn btn-outline" id="btn-switch-to-register" onclick="AuthSync.closeAuthModal(); AuthSync.openOnboardingWizard();" style="width: 100%; border-color: #38bdf8; color: #38bdf8; font-weight: 700; padding: 9px; border-radius: 6px; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer;">
                                         <span>✨</span> <span>הרשמה מהירה (סטודנט חדש) ←</span>
                                     </button>
                                 </div>

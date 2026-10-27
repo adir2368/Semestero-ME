@@ -56,6 +56,11 @@ class CDPClient {
             this.ws.onerror = (err) => reject(err);
             this.ws.onmessage = (event) => {
                 const msg = JSON.parse(event.data);
+                if (msg.method === 'Runtime.consoleAPICalled') {
+                    console.log('[BROWSER CONSOLE]', msg.params.type, msg.params.args.map(a => a.value || a.description).join(' '));
+                } else if (msg.method === 'Runtime.exceptionThrown') {
+                    console.error('[BROWSER EXCEPTION]', msg.params.exceptionDetails);
+                }
                 if (msg.id && this.callbacks.has(msg.id)) {
                     const cb = this.callbacks.get(msg.id);
                     this.callbacks.delete(msg.id);
@@ -107,6 +112,7 @@ async function run() {
             '--headless=new',
             '--disable-gpu',
             '--no-first-run',
+            '--disable-features=ServiceWorker',
             TARGET_URL
         ]);
 
@@ -116,18 +122,22 @@ async function run() {
         const cdp = new CDPClient(target.webSocketDebuggerUrl);
         await cdp.connect();
 
-        // Wait for page ready
-        await delay(2500);
+        await cdp.send('Runtime.enable');
 
-        // 1. Verify that auth modal opened automatically for unauthenticated guest
-        const modalActive = await cdp.eval(`(() => {
-            const modal = document.getElementById('auth-modal');
-            return modal && modal.classList.contains('active');
-        })()`);
+        // Wait for page ready and for auth modal to trigger (allowing for PWA service worker refresh if any)
+        let modalActive = false;
+        for (let i = 0; i < 20; i++) {
+            await delay(500);
+            modalActive = await cdp.eval(`(() => {
+                const modal = document.getElementById('auth-modal');
+                return modal && modal.classList.contains('active');
+            })()`);
+            if (modalActive) break;
+        }
         console.log('1. Auth Modal opened automatically on entrance:', modalActive ? '✅ YES' : '❌ NO');
         assert(modalActive, 'Auth modal should open on entrance for fresh guest');
 
-        // 2. Verify switch to Register form
+        // 2. Verify switch to full Onboarding & Registration Wizard
         const switchSuccess = await cdp.eval(`(() => {
             const btn = document.getElementById('btn-switch-to-register');
             if (btn) {
@@ -135,22 +145,27 @@ async function run() {
                 return true;
             }
             if (window.AuthSync) {
-                window.AuthSync.renderAuthModal('register');
+                window.AuthSync.openOnboardingWizard();
                 return true;
             }
             return false;
         })()`);
-        console.log('2. Switched to Registration form:', switchSuccess ? '✅ YES' : '❌ NO');
-        assert(switchSuccess, 'Should switch to registration form');
+        console.log('2. Switched to Onboarding & Registration Wizard:', switchSuccess ? '✅ YES' : '❌ NO');
+        assert(switchSuccess, 'Should switch to registration wizard');
 
-        // Check registration form fields
-        const hasRegFields = await cdp.eval(`(() => {
-            const nameInput = document.getElementById('reg-name-input');
-            const semSelect = document.getElementById('reg-sem-select');
-            return Boolean(nameInput && semSelect);
+        await delay(500);
+
+        // Check full onboarding wizard visibility and fields
+        const hasWizardFields = await cdp.eval(`(() => {
+            const wizard = document.getElementById('onboarding-wizard-modal');
+            const isVisible = wizard && wizard.classList.contains('active');
+            const nameInput = document.getElementById('onboarding-student-name-input');
+            const semSelect = document.getElementById('onboarding-current-sem-select');
+            const checklist = document.getElementById('onboarding-courses-checklist');
+            return Boolean(isVisible && nameInput && semSelect && checklist);
         })()`);
-        console.log('3. Registration fields rendered:', hasRegFields ? '✅ YES' : '❌ NO');
-        assert(hasRegFields, 'Registration fields must be present');
+        console.log('3. Full 3-step Onboarding Wizard fields rendered and active:', hasWizardFields ? '✅ YES' : '❌ NO');
+        assert(hasWizardFields, 'Full 3-step Onboarding Wizard must be active with all fields');
 
         // 4. Test tour trigger
         const tourAvailable = await cdp.eval(`(() => {
@@ -159,7 +174,20 @@ async function run() {
         console.log('4. Interactive Tour engine available:', tourAvailable ? '✅ YES' : '❌ NO');
         assert(tourAvailable, 'Interactive tour engine must be available');
 
-        console.log('\n✅ All onboarding and authentication flow assertions passed!');
+        // 5. Test finish onboarding launches tour automatically
+        const tourLaunched = await cdp.eval(`(async () => {
+            const nameInput = document.getElementById('onboarding-student-name-input');
+            if (nameInput) nameInput.value = 'סטודנט בדיקה';
+            if (window.AuthSync?.finishOnboarding) {
+                window.AuthSync.finishOnboarding();
+            }
+            await new Promise(r => setTimeout(r, 1000));
+            return Boolean(window.InteractiveTour && window.InteractiveTour.active);
+        })()`);
+        console.log('5. Interactive Tour auto-launched after onboarding completion:', tourLaunched ? '✅ YES' : '❌ NO');
+        assert(tourLaunched, 'Tour must launch automatically after finishing onboarding');
+
+        console.log('\n✅ All onboarding, registration and tour launch assertions passed!');
 
     } finally {
         if (chrome) try { chrome.kill('SIGKILL'); } catch (e) {}
