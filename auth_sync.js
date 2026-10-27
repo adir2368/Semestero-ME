@@ -262,6 +262,18 @@
                             return parsed;
                         }
                     } else if (parsed && parsed.courses && Object.keys(parsed.courses).length > 0) {
+                        if (user.id === 'adir_moshe') {
+                            const isAdirCorrupted = !parsed.gpa || parsed.gpa === 0 || !parsed.courses['104041'] || !parsed.courses['104041'].grade;
+                            if (isAdirCorrupted) {
+                                console.warn('[AuthSync] Adir Moshe local save is corrupted/reset. Restoring from PRELOADED_USER_STATE...');
+                                if (typeof PRELOADED_USER_STATE !== 'undefined') {
+                                    const restored = JSON.parse(JSON.stringify(PRELOADED_USER_STATE));
+                                    localStorage.setItem(key, JSON.stringify(restored));
+                                    localStorage.setItem(LEGACY_SAVE_KEY, JSON.stringify(restored));
+                                    return restored;
+                                }
+                            }
+                        }
                         return parsed;
                     }
                 } catch (e) {
@@ -309,7 +321,9 @@
                     }
                 }
                 localStorage.setItem(key, JSON.stringify(state));
-                localStorage.setItem(LEGACY_SAVE_KEY, JSON.stringify(state));
+                if (user.id === 'adir_moshe') {
+                    localStorage.setItem(LEGACY_SAVE_KEY, JSON.stringify(state));
+                }
                 if (this.isLoggedIn()) {
                     this.triggerDebouncedCloudSync(state);
                 }
@@ -1178,6 +1192,46 @@
 
         // Finish Onboarding Wizard
         finishOnboarding() {
+            // Guard: If developer Adir tests onboarding, do NOT overwrite his authentic degree data
+            if (this.isAdirActive() || (this.getActiveUser && this.getActiveUser().id === 'adir_moshe')) {
+                console.log('[AuthSync] Developer Adir testing onboarding: preserving authentic state');
+                localStorage.setItem('ast_onboarding_shown', 'true');
+                const modal = document.getElementById('onboarding-wizard-modal');
+                if (modal) modal.classList.remove('active');
+                if (typeof showToastNotification === 'function') {
+                    showToastNotification('🎓 ברוך הבא אדיר משה! (מצב מפתח - נתוני התואר המקוריים נשמרו)', 'success');
+                } else if (typeof showHudToast === 'function') {
+                    showHudToast('🎓 ברוך הבא אדיר משה! (מצב מפתח - נתוני התואר המקוריים נשמרו)', 'success');
+                }
+                setTimeout(() => {
+                    if (window.InteractiveTour && typeof window.InteractiveTour.startTour === 'function') {
+                        window.InteractiveTour.startTour(0);
+                    } else if (typeof window.startInteractiveTour === 'function') {
+                        window.startInteractiveTour(0);
+                    }
+                }, 600);
+                return;
+            }
+            // Guard: If developer Adir tests onboarding, do NOT overwrite his authentic degree data
+            if (this.isAdirActive() || (this.getActiveUser && this.getActiveUser().id === 'adir_moshe')) {
+                console.log('[AuthSync] Developer Adir testing onboarding: preserving authentic state');
+                localStorage.setItem('ast_onboarding_shown', 'true');
+                const modal = document.getElementById('onboarding-wizard-modal');
+                if (modal) modal.classList.remove('active');
+                if (typeof showToastNotification === 'function') {
+                    showToastNotification('🎓 ברוך הבא אדיר משה! (מצב מפתח - נתוני התואר המקוריים נשמרו)', 'success');
+                } else if (typeof showHudToast === 'function') {
+                    showHudToast('🎓 ברוך הבא אדיר משה! (מצב מפתח - נתוני התואר המקוריים נשמרו)', 'success');
+                }
+                setTimeout(() => {
+                    if (window.InteractiveTour && typeof window.InteractiveTour.startTour === 'function') {
+                        window.InteractiveTour.startTour(0);
+                    } else if (typeof window.startInteractiveTour === 'function') {
+                        window.startInteractiveTour(0);
+                    }
+                }, 600);
+                return;
+            }
             const nameInput = document.getElementById('onboarding-student-name-input');
             const semSelect = document.getElementById('onboarding-current-sem-select');
             const emailInput = document.getElementById('onboarding-student-email-input');

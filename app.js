@@ -9078,7 +9078,8 @@ function loadSavedState() {
             if (isAdirActiveUser && preloadedUserState && preloadedUserState.courses) {
                 const preloadedCount = Object.keys(preloadedUserState.courses).length;
                 const localCount = Object.keys(gameState.courses || {}).length;
-                if (localCount < preloadedCount) {
+                const isAdirCorrupted = !gameState.gpa || gameState.gpa === 0 || !gameState.courses || !gameState.courses['104041'] || !gameState.courses['104041'].grade;
+                if (localCount < preloadedCount || isAdirCorrupted) {
                     console.log(`[AuthSync] Upgrading local save from ${localCount} to ${preloadedCount} courses (Adir authentic state)...`);
                     gameState = JSON.parse(JSON.stringify(preloadedUserState));
                     saveState();
@@ -21939,8 +21940,8 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.10.27-v2.7.7",
-    version: "2.7.7",
+    code: "REV-2026.10.27-v2.7.8",
+    version: "2.7.8",
     build: "20261020_03",
     date: "2026-10-20 01:20",
     description: "גרסה 2.5.2: פתרון מוחלט ללולאת העדכון במובייל וספארי, מנגנון אנטי-רילואד עמיד ב-localStorage, סנכרון גרסאות מלא וקישורי הורדה ישירים לטלפונים"
@@ -23947,7 +23948,7 @@ window.getFormattedChangelogHTML = function() {
 };
 
 window.openChangelogModal = function(ver) {
-    const currentVer = ver || (typeof APP_CURRENT_REVISION !== 'undefined' && APP_CURRENT_REVISION && APP_CURRENT_REVISION.version) || "2.7.7";
+    const currentVer = ver || (typeof APP_CURRENT_REVISION !== 'undefined' && APP_CURRENT_REVISION && APP_CURRENT_REVISION.version) || "2.7.8";
     const updateModal = document.getElementById("version-update-modal");
     if (!updateModal) return;
     const modTitle = document.getElementById("update-modal-title");

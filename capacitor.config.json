@@ -5,7 +5,13 @@
   "bundledWebRuntime": false,
   "backgroundColor": "#020617",
   "server": {
-    "url": "https://adir2368.github.io/Semestero-ME/",
+    "url": "https://semestero.me/Semestero-ME/",
+    "allowNavigation": [
+      "semestero.me",
+      "*.semestero.me",
+      "adir2368.github.io",
+      "*.github.io"
+    ],
     "cleartext": false,
     "androidScheme": "https"
   },

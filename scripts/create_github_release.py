@@ -17,9 +17,9 @@ ZIP_PATH = os.path.join(ROOT, "Semestero-ME-Windows-x64.zip")
 
 with open(os.path.join(ROOT, "package.json"), "r", encoding="utf-8") as f:
     pkg = json.load(f)
-VERSION = pkg.get("version", "2.7.7")
+VERSION = pkg.get("version", "2.7.8")
 TAG = f"v{VERSION}"
-NAME = f"Semestero ME v{VERSION} - Complete Onboarding Wizard Integration, Registration & Tour Flow"
+NAME = f"Semestero ME v{VERSION} - Native Mobile Browser Redirect Fix, Custom Domain Routing & Developer Profile Auto-Heal"
 
 def get_github_token():
     try:
@@ -89,24 +89,21 @@ def main():
         "User-Agent": "Semestero-ME-Release-Agent"
     }
 
-        body_notes = f"""## מה חדש בגרסה v{VERSION} 🚀🎓✨
+        body_notes = f"""## מה חדש בגרסה v{VERSION} 🚀📱🛡️
 
-### 1. שילוב מלא של אשף ההרשמה העשיר (3-Step Onboarding Wizard)
-- חיבור ישיר של כפתורי "הרשמה (סטודנט חדש)" בחלונית הכניסה ישירות לאשף ההרשמה המלא והמקיף.
-- כולל את כל שלושת השלבים:
-  1. הגדרת שם מלא + אפשרות להזנת אימייל וסיסמה אישית לסנכרון ענן (Supabase Cloud Sync).
-  2. בחירת סמסטר פתיחה מדויק.
-  3. צ'קליסט קורסים קודמים לפי סמסטרים (1 עד 4) עם כרטיסי קורס מעוצבים, נק״ז, ושדה הזנת ציון סופי חכם.
-  - תיבת טיפים לשימוש מהיר: עץ דרישות קדומות, מתכנן תואר, ולוח שנה אקדמי.
+### 1. תיקון קריטי לאפליקציית המובייל (Android Native APK & PWA Navigation Fix)
+- תיקון הפניית ה-Redirect שגרמה לאפליקציה לצאת לדפדפן החיצוני:
+  - עדכון `server.url` ב-`capacitor.config.json` לדומיין הישיר החדש `https://semestero.me/Semestero-ME/`.
+  - הוספת כללי `allowNavigation` עבור `semestero.me`, `*.semestero.me`, ו-`*.github.io` המונעים יציאה מהאפליקציה ושומרים את הניווט תמיד בתוך ה-WebView המקורי.
+  - קימפול קובץ APK מעודכן (`Semestero-ME.apk`, versionCode 34).
 
-### 2. מעבר נוח בחזרה להתחברות (Return to Login)
-- נוספו קישורים וכפתורי מעבר ברורים ("🔑 יש לי חשבון" / "כבר יש לך חשבון קיים? לחץ כאן להתחברות ←") בראש ובתחתית אשף ההרשמה.
+### 2. שחזור מלא והגנת ריפוי עצמי לפרופיל המפתח (Adir Moshe Auto-Heal & Save Guard)
+- שחזור מלא של ציוני המפתח בענן Supabase לממוצע 86.04 נק״ז וכל 11 הקורסים המושלמים.
+- הוספת מנגנון ריפוי עצמי (Auto-Heal) ב-`app.js` וב-`auth_sync.js` המזהה איפוס בשוגג ומשחזר אוטומטית מ-`PRELOADED_USER_STATE`.
+- נעילת שמירת נתוני מפתח (`LEGACY_SAVE_KEY`) כך שאינה נדרסת לעולם על ידי אורחים או בדיקות הרשמה.
 
-### 3. הפעלה אוטומטית של הסיור המודרך (Interactive Tour Launch)
-- לחיצה על "סיום והתחלת שימוש 🚀" או "דלג והתחל" שומרת את תוכנית הלימודים ומפעילה מיד את הסיור האינטראקטיבי להכרת המערכת.
-
-### 4. אימות מלא ומבחני אוטומציה
-- עמידה בכל מבחני הרגרסיה והבריאות המלאים (8/8) ובדיקת תהליך ההרשמה המלא (5/5).
+### 3. עדכון כתובות קנוניות ו-OpenGraph
+- כל הקישורים הפנימיים, התגיות הקנוניות ותגיות השיתוף עודכנו רשמית לדומיין `https://semestero.me/Semestero-ME/`.
 """
 
     req_tag = urllib.request.Request(f"https://api.github.com/repos/{REPO}/releases/tags/{TAG}", headers=headers)
