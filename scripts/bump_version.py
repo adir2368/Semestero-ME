@@ -4,10 +4,10 @@ import re
 sys.stdout.reconfigure(encoding='utf-8')
 
 def bump_version():
-    old_ver = "2.8.2"
-    new_ver = "2.8.3"
-    old_code = 38
-    new_code = 39
+    old_ver = "2.8.3"
+    new_ver = "2.8.4"
+    old_code = 39
+    new_code = 40
 
     # 1. package.json
     with open('package.json', 'r', encoding='utf-8') as f:
@@ -30,7 +30,6 @@ def bump_version():
     with open('app.js', 'r', encoding='utf-8') as f:
         app = f.read()
     app = app.replace(f'REV-2026.10.28-v{old_ver}', f'REV-2026.10.28-v{new_ver}')
-    app = app.replace(f'REV-2026.10.27-v{old_ver}', f'REV-2026.10.28-v{new_ver}')
     app = app.replace(f'version: "{old_ver}"', f'version: "{new_ver}"')
     app = app.replace(f'APP_CURRENT_REVISION.version) || "{old_ver}"', f'APP_CURRENT_REVISION.version) || "{new_ver}"')
     with open('app.js', 'w', encoding='utf-8') as f:
@@ -54,8 +53,8 @@ def bump_version():
     html = html.replace(f'(v{old_ver})"', f'(v{new_ver})"')
     html = html.replace(f'>v{old_ver} 🚀</button>', f'>v{new_ver} 🚀</button>')
 
-    # Add changelog item for v2.8.3
-    changelog_entry = f'''                            <li><strong>v{new_ver} (28/10/2026):</strong> קישורים ישירים לסיכומי פנגיה (Ido Fang Bentov) ברמת מסמך השורש (כגון פיזיקה 2 וכל 34 הקורסים) במקום תיקיות, לצד היררכיה ויזואלית פרופורציונלית למערכת השעות: כרטיסי שיעור מותאמים לפי משך הזמן (גובה פרופורציונלי לשיעורים של 4, 3, 2 ושעה אחת) ותגיות משך שיעור מובלטות (⏱️ 4 שעות, ⏱️ 3 שעות, ⏱️ שעתיים).</li>
+    # Add changelog item for v2.8.4
+    changelog_entry = f'''                            <li><strong>v{new_ver} (28/10/2026):</strong> שדרוג חבילת הסמלים של כלל השירותים האקדמיים החיצוניים (Moodle 26, Panopto, בחינות אס״ט, CheeseFork, Google Drive, Google Calendar ופורטל ציונים) מסמלי אימוג'י לסמלי מותג וקטוריים אותנטיים וחדים (SVG/PNG) המשתלבים בעיצוב האפליקציה.</li>
 '''
     old_changelog_anchor = f'<li><strong>v{old_ver}'
     if old_changelog_anchor in html:

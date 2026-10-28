@@ -18,9 +18,9 @@ ZIP_PATH = os.path.join(ROOT, "Semestero-ME-Windows-x64.zip")
 
 with open(os.path.join(ROOT, "package.json"), "r", encoding="utf-8") as f:
     pkg = json.load(f)
-VERSION = pkg.get("version", "2.8.3")
+VERSION = pkg.get("version", "2.8.4")
 TAG = f"v{VERSION}"
-NAME = f"Semestero ME v{VERSION} - Direct Pangea Summaries & Proportional Timetable Visuals"
+NAME = f"Semestero ME v{VERSION} - Authentic Brand Icons Suite for Academic Services"
 
 def get_github_token():
     try:
@@ -95,20 +95,27 @@ def main():
         "User-Agent": "Semestero-ME-Release-Agent"
     }
 
-    body_notes = f"""## מה חדש בגרסה v{VERSION} 🚀💧⏱️
+    body_notes = f"""## מה חדש בגרסה v{VERSION} 🚀🎨🎓
 
-### 1. קישורים ישירים לסיכומי פנגייה ברמת מסמך השורש (Direct Pangea Summaries Integration)
-- **פתיחה ישירה של סיכומי הקורס**: במקום הובלה לתיקייה כללית (`/Technion/PHY2/`), כל 100 כינויי הקורסים ו-34 הקורסים מנווטים כעת ישירות למסמך השורש והסיכומים המלאים של הקורס (כגון `https://idofangbentov.uk/Technion/PHY2/PHY2_000-114052-%D7%A4%D7%99%D7%96%D7%99%D7%A7%D7%94-2` עבור פיזיקה 2).
-- **בדיקת שלמות מקוונת (HTTP 200)**: כל 34 הקישורים הישירים נבדקו ואומתו מקוונת מול ה-Sitemap של האתר.
-- **שדרוג סרגל הגישה המהירה**: כפתור `💧 פנגייה ↗` במודל פרטי הקורס מוביל מידית לסיכומים ולדפי הנוסחאות.
+### 1. שדרוג חבילת הסמלים של כלל השירותים האקדמיים החיצוניים (Authentic Academic Brand Icons Suite)
+- **החלפת כלל סמלי האימוג'י הגנריים**: שודרגו כל הלחצנים בסרגל הגישה המהירה של הקורסים (`renderTechnionPlusQuickBar`), במרכז האינטגרציות (`auth_sync.js`), ובסרגלי מערכת השעות ומחולל המערכות (`index.html`).
+- **סמלי מותג רשמיים ווקטוריים באיכות גבוהה (SVG / PNG)**:
+  - **Moodle 26**: הלוגו הרשמי של מודל הטכניון עם כובע בוגרים שחור ואות 'm' כתומה (`moodle_icon.svg`).
+  - **Panopto Video**: סמל וידאו גיאומטרי ירוק רשמי של פנופטו (`panopto_icon.svg`).
+  - **בחינות אס״ט**: סמל חותם אגודת הסטודנטים בטכניון (`asat_icon.png`).
+  - **CheeseFork**: סמל המזלג והגבינה הרשמי של מערכת צ'יזפורק הטכניונית (`cheesefork_icon.png`).
+  - **סיכומי פנגייה (Ido Fang Bentov)**: סמל הגלימה והגלגל-שיניים הרשמי מתוך אתר הסיכומים של פנג (`pangea_icon.png`).
+  - **Google Drive**: סמל וקטורי מלא ומקורי של דרייב (`drive_icon.svg`).
+  - **פורטל ציונים**: סמל הטכניון הרשמי לגיליונות וציונים (`grades_icon.png`).
+  - **Google Calendar**: סמל וקטורי מלא של יומן גוגל (`gcal_icon.svg`).
+- **אחידות עיצובית ואנימציית מיקרו-אינטראקציה**: מחלקת CSS ייעודית `.technion-btn-brand-icon` עם התאמת גודל אחידה (`15px` / `20px`), צל היקפי עדין, והגדלה חלקה (`scale(1.15)`) בריחוף (hover).
 
-### 2. היררכיה ויזואלית פרופורציונלית למערכת השעות (Proportional Visual Hierarchy)
-- **גובה כרטיס פרופורציונלי לאורך השיעור**: ביטול האשליה האופטית שבה כל השיעורים נראו באותו הגובה. כרטיסי השיעור מתנשאים כעת לגובה המותאם למשך הזמן (`140px` לשיעורי 4 שעות, `120px` ל-3 שעות, `100px` לשעתיים, ו-`80px` לשעה).
-- **תגיות משך שיעור מובלטות (Prominent Duration Badges)**: הוספת תגית מעוצבת וברורה בראש כל כרטיס (`⏱️ 4 שעות` בגוון צהוב/ענבר, `⏱️ 3 שעות` בתכלת, `⏱️ שעתיים` בסגול, ו-`⏱️ שעה` בסילבר).
-- **ריפוי אוטומטי של זמני עבר מקוצרים**: מערכת ה-Timetable מעדכנת ומיישרת אוטומטית נתונים מקומיים ישנים.
+### 2. תמיכה מלאה ב-Offline וב-PWA
+- עדכון ה-Service Worker (`sw.js`) להורדה ומטמון מקומי מיידי של כלל קובצי הסמלים החדשים.
+- סנכרון מלא לקובצי ה-Dist של אפליקציית ה-Mobile Android.
 
 ### 3. קימפול חבילות והפצה
-- קימפול קובץ APK מעודכן (`Semestero-ME.apk`, versionCode 39).
+- קימפול קובץ APK מעודכן (`Semestero-ME.apk`, versionCode 40).
 - מעבר מלא של כל סוויטות הבדיקות האוטומטיות (System Health, Auth Persistence, Integrations Hub, CheeseFork Precision).
 """
 

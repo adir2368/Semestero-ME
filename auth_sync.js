@@ -1593,7 +1593,7 @@
                 <div id="integration-card-cheesefork" style="background: rgba(30, 41, 59, 0.55); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 7px; padding: 12px; margin-bottom: 12px; transition: box-shadow 0.3s, border-color 0.3s;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                         <div style="display: flex; align-items: center; gap: 8px;">
-                            <span style="font-size: 1.15rem;">🧀</span>
+                            <img src="cheesefork_icon.png" alt="CheeseFork" style="width: 20px; height: 20px; object-fit: contain; vertical-align: middle; border-radius: 4px;">
                             <strong style="color: #f8fafc; font-size: 0.88rem;">צ'יזפורק הטכניון (CheeseFork)</strong>
                         </div>
                         <span id="badge-status-cheesefork" style="font-size: 0.72rem; font-weight: 600; padding: 2px 8px; border-radius: 10px; background: ${hasCheeseFork ? 'rgba(16, 185, 129, 0.15)' : 'rgba(148, 163, 184, 0.12)'}; color: ${hasCheeseFork ? '#10b981' : '#94a3b8'}; border: 1px solid ${hasCheeseFork ? '#10b981' : 'rgba(148, 163, 184, 0.3)'};">
@@ -1628,7 +1628,7 @@
                 <div id="integration-card-moodle" style="background: rgba(30, 41, 59, 0.55); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 7px; padding: 12px; margin-bottom: 12px; transition: box-shadow 0.3s, border-color 0.3s;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                         <div style="display: flex; align-items: center; gap: 8px;">
-                            <span style="font-size: 1.15rem;">🎓</span>
+                            <img src="moodle_icon.svg" alt="Moodle" style="width: 20px; height: 20px; object-fit: contain; vertical-align: middle;">
                             <strong style="color: #f8fafc; font-size: 0.88rem;">מודל הטכניון (Moodle Technion)</strong>
                         </div>
                         <span id="badge-status-moodle" style="font-size: 0.72rem; font-weight: 600; padding: 2px 8px; border-radius: 10px; background: ${hasMoodle ? 'rgba(16, 185, 129, 0.15)' : 'rgba(148, 163, 184, 0.12)'}; color: ${hasMoodle ? '#10b981' : '#94a3b8'}; border: 1px solid ${hasMoodle ? '#10b981' : 'rgba(148, 163, 184, 0.3)'};">
@@ -1663,7 +1663,7 @@
                 <div id="integration-card-gcal" style="background: rgba(30, 41, 59, 0.55); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 7px; padding: 12px; margin-bottom: 12px; transition: box-shadow 0.3s, border-color 0.3s;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                         <div style="display: flex; align-items: center; gap: 8px;">
-                            <span style="font-size: 1.15rem;">📅</span>
+                            <img src="gcal_icon.svg" alt="Google Calendar" style="width: 20px; height: 20px; object-fit: contain; vertical-align: middle;">
                             <strong style="color: #f8fafc; font-size: 0.88rem;">יומן גוגל (Google Calendar / Apple)</strong>
                         </div>
                         <span style="font-size: 0.72rem; font-weight: 600; padding: 2px 8px; border-radius: 10px; background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid #10b981;">
