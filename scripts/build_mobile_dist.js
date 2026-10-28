@@ -42,6 +42,7 @@ const FILES_TO_COPY = [
     'adir_avatar.png',
     'adir_avatar_small.png',
     'adir_avatar_small.webp',
+    'pangea_icon.png',
     'faculty_emblem_clean.png',
     'notification-badge.png',
     'widgets.html',

@@ -12266,8 +12266,8 @@ function renderTechnionPlusQuickBar(course) {
         <a href="${cfUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-xs technion-link-btn" style="background: rgba(245, 158, 11, 0.18); border: 1px solid #f59e0b; color: #fbbf24; text-decoration: none; padding: 4px 10px; border-radius: 6px; font-size: 0.76rem; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;" title="דף הקורס ומערכת שעות ב-CheeseFork">
             <span>🧀</span> צ'יזפורק ↗
         </a>
-        <a href="${pangeaUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-xs technion-link-btn" style="background: rgba(14, 165, 233, 0.18); border: 1px solid #0284c7; color: #38bdf8; text-decoration: none; padding: 4px 10px; border-radius: 6px; font-size: 0.76rem; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;" title="קישור ישיר לסיכומי הקורס ודפי נוסחאות בפנגייה (Ido Fang Bentov)">
-            <span>💧</span> פנגייה ↗
+        <a href="${pangeaUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-xs technion-link-btn" style="background: rgba(14, 165, 233, 0.18); border: 1px solid #0284c7; color: #38bdf8; text-decoration: none; padding: 4px 10px; border-radius: 6px; font-size: 0.76rem; font-weight: 700; display: inline-flex; align-items: center; gap: 5px;" title="קישור ישיר לסיכומי הקורס ודפי נוסחאות בפנגייה (Ido Fang Bentov)">
+            <img src="pangea_icon.png" alt="Fangia" class="pangea-btn-icon" style="width: 15px; height: 15px; object-fit: contain; vertical-align: -2px; border-radius: 2px; display: inline-block; filter: drop-shadow(0 0 3px rgba(56, 189, 248, 0.4)); flex-shrink: 0;"> פנגייה ↗
         </a>
         <a href="${driveUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-xs technion-link-btn" style="background: rgba(168, 85, 247, 0.18); border: 1px solid #a855f7; color: #c084fc; text-decoration: none; padding: 4px 10px; border-radius: 6px; font-size: 0.76rem; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;" title="חיפוש תיקיות Google Drive, סיכומים וחומרי עזר">
             <span>🔍</span> דרייב וסיכומים ↗

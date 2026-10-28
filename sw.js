@@ -38,6 +38,7 @@ const STATIC_ASSETS = [
     './adir_avatar.png',
     './adir_avatar_small.png',
     './adir_avatar_small.webp',
+    './pangea_icon.png',
     './notification-badge.png',
     './notification-badge-96.png',
     './user_saved_state.json'
