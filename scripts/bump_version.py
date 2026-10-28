@@ -4,10 +4,10 @@ import re
 sys.stdout.reconfigure(encoding='utf-8')
 
 def bump_version():
-    old_ver = "2.8.1"
-    new_ver = "2.8.2"
-    old_code = 37
-    new_code = 38
+    old_ver = "2.8.2"
+    new_ver = "2.8.3"
+    old_code = 38
+    new_code = 39
 
     # 1. package.json
     with open('package.json', 'r', encoding='utf-8') as f:
@@ -54,11 +54,14 @@ def bump_version():
     html = html.replace(f'(v{old_ver})"', f'(v{new_ver})"')
     html = html.replace(f'>v{old_ver} 🚀</button>', f'>v{new_ver} 🚀</button>')
 
-    # Add changelog item for v2.8.2
-    changelog_entry = f'''                            <li><strong>v{new_ver} (28/10/2026):</strong> סנכרון מושלם ומדויק מול CheeseFork: פענוח מפתחות בחירת קבוצות לפי סוג שיעור (הרצאה, תרגול, מעבדה, ספורט), מניעת כפילויות ותרגולים שלא נבחרו, ביטול דריסת הרצאות על ידי העשרת חדרים, וטעינת מערכת השעות האותנטית של סמסטר חורף תשפ״ז במלואה.</li>
+    # Add changelog item for v2.8.3
+    changelog_entry = f'''                            <li><strong>v{new_ver} (28/10/2026):</strong> קישורים ישירים לסיכומי פנגיה (Ido Fang Bentov) ברמת מסמך השורש (כגון פיזיקה 2 וכל 34 הקורסים) במקום תיקיות, לצד היררכיה ויזואלית פרופורציונלית למערכת השעות: כרטיסי שיעור מותאמים לפי משך הזמן (גובה פרופורציונלי לשיעורים של 4, 3, 2 ושעה אחת) ותגיות משך שיעור מובלטות (⏱️ 4 שעות, ⏱️ 3 שעות, ⏱️ שעתיים).</li>
 '''
     old_changelog_anchor = f'<li><strong>v{old_ver}'
-    html = html.replace(old_changelog_anchor, changelog_entry + '                            ' + old_changelog_anchor)
+    if old_changelog_anchor in html:
+        html = html.replace(old_changelog_anchor, changelog_entry + '                            ' + old_changelog_anchor, 1)
+    else:
+        print("Warning: old changelog anchor not found")
 
     with open('index.html', 'w', encoding='utf-8') as f:
         f.write(html)

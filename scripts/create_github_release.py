@@ -1,7 +1,6 @@
 import sys
 sys.stdout.reconfigure(encoding='utf-8')
 import os
-import sys
 import json
 import urllib.request
 import urllib.error
@@ -19,9 +18,9 @@ ZIP_PATH = os.path.join(ROOT, "Semestero-ME-Windows-x64.zip")
 
 with open(os.path.join(ROOT, "package.json"), "r", encoding="utf-8") as f:
     pkg = json.load(f)
-VERSION = pkg.get("version", "2.8.2")
+VERSION = pkg.get("version", "2.8.3")
 TAG = f"v{VERSION}"
-NAME = f"Semestero ME v{VERSION} - CheeseFork Precision Group Matching & Safe Room Enrichment"
+NAME = f"Semestero ME v{VERSION} - Direct Pangea Summaries & Proportional Timetable Visuals"
 
 def get_github_token():
     try:
@@ -96,23 +95,21 @@ def main():
         "User-Agent": "Semestero-ME-Release-Agent"
     }
 
-    body_notes = f"""## מה חדש בגרסה v{VERSION} 🚀🧀⚡
+    body_notes = f"""## מה חדש בגרסה v{VERSION} 🚀💧⏱️
 
-### 1. סנכרון מושלם ומדויק מול CheeseFork (Precision Group Matching)
-- **פענוח מפתחות בחירה ייעודיים**: CheeseFork מקודד מפתחות קבוצה בפורמט hex UTF-16 (כגון `05d405e805e605d005d4` עבור "הרצאה", `05ea05e805d205d505dc` עבור "תרגול", ו-`sport` עבור מקצועות ספורט). המערכת מפענחת כעת את המפתחות ומצליבה כל שיעור ישירות מול הקבוצה שנבחרה עבור אותו סוג שיעור ספציפי.
-- **מניעת תרגולים שלא נבחרו**: שיעור מתווסף אך ורק אם מספר הקבוצה שלו תואם לסוג השיעור שנבחר. נמנע ייבוא של קבוצות תרגול שלא נבחרו בקורסים מרובי קבוצות (כמו מכניקת מוצקים או מבוא לחישוב).
-- **הגנה מלאה על הרצאות (Zero Missing Lectures)**: כלל ההרצאות שנבחרו (ובפרט הרצאת מכניקת מוצקים ביום שני 10:30-14:30) נשמרות ומסונכרנות במלואן.
+### 1. קישורים ישירים לסיכומי פנגייה ברמת מסמך השורש (Direct Pangea Summaries Integration)
+- **פתיחה ישירה של סיכומי הקורס**: במקום הובלה לתיקייה כללית (`/Technion/PHY2/`), כל 100 כינויי הקורסים ו-34 הקורסים מנווטים כעת ישירות למסמך השורש והסיכומים המלאים של הקורס (כגון `https://idofangbentov.uk/Technion/PHY2/PHY2_000-114052-%D7%A4%D7%99%D7%96%D7%99%D7%A7%D7%94-2` עבור פיזיקה 2).
+- **בדיקת שלמות מקוונת (HTTP 200)**: כל 34 הקישורים הישירים נבדקו ואומתו מקוונת מול ה-Sitemap של האתר.
+- **שדרוג סרגל הגישה המהירה**: כפתור `💧 פנגייה ↗` במודל פרטי הקורס מוביל מידית לסיכומים ולדפי הנוסחאות.
 
-### 2. העשרת חדרים בטוחה ללא דריסת שעות או סוג שיעור (Safe Room Enrichment)
-- פונקציית `enrichTimetableWithAuthenticRooms` עודכנה כך שהיא משלימה אך ורק שמות חדרים ומרצים חסרים או זמניים, ומעולם לא דורסת את סוג השיעור (`type`), שעת ההתחלה (`startTime`) או שעת הסיום (`endTime`).
-- הצלבת החדרים מתבצעת על פי מפתח שעה ויום מדויק (`courseId_dayIndex_startTime`), מה שמונע המרה שגויה של הרצאה לתרגול.
+### 2. היררכיה ויזואלית פרופורציונלית למערכת השעות (Proportional Visual Hierarchy)
+- **גובה כרטיס פרופורציונלי לאורך השיעור**: ביטול האשליה האופטית שבה כל השיעורים נראו באותו הגובה. כרטיסי השיעור מתנשאים כעת לגובה המותאם למשך הזמן (`140px` לשיעורי 4 שעות, `120px` ל-3 שעות, `100px` לשעתיים, ו-`80px` לשעה).
+- **תגיות משך שיעור מובלטות (Prominent Duration Badges)**: הוספת תגית מעוצבת וברורה בראש כל כרטיס (`⏱️ 4 שעות` בגוון צהוב/ענבר, `⏱️ 3 שעות` בתכלת, `⏱️ שעתיים` בסגול, ו-`⏱️ שעה` בסילבר).
+- **ריפוי אוטומטי של זמני עבר מקוצרים**: מערכת ה-Timetable מעדכנת ומיישרת אוטומטית נתונים מקומיים ישנים.
 
-### 3. עדכון מערכת ברירת מחדל וטעינת נתונים
-- עדכון מלא של `CHEESEFORK_SEMESTER_SCHEDULE` ו-`AUTHENTIC_TIMETABLE_METADATA` עם 12 השיעורים האותנטיים של סמסטר חורף תשפ״ז (כולל תרגול ומרצה במכניקת מוצקים, תרמודינמיקה, פיסיקה 2, מד"ח מ', מבוא לחישוב מדעי ויוגה).
-
-### 4. קימפול חבילות והפצה
-- קימפול קובץ APK מעודכן (`Semestero-ME.apk`, versionCode 38).
-- בדיקות יחידה אוטומטיות מושלמות ב-`tests/cheesefork_precision_sync.test.js`.
+### 3. קימפול חבילות והפצה
+- קימפול קובץ APK מעודכן (`Semestero-ME.apk`, versionCode 39).
+- מעבר מלא של כל סוויטות הבדיקות האוטומטיות (System Health, Auth Persistence, Integrations Hub, CheeseFork Precision).
 """
 
     req_tag = urllib.request.Request(f"https://api.github.com/repos/{REPO}/releases/tags/{TAG}", headers=headers)
@@ -120,15 +117,17 @@ def main():
     try:
         with urllib.request.urlopen(req_tag) as res:
             release = json.loads(res.read().decode())
-            print(f"[Release] Found existing release for {TAG} (id={release['id']})")
+            print(f"[Release] Found existing release for tag {TAG} (id={release['id']})")
     except urllib.error.HTTPError as e:
         if e.code == 404:
-            print(f"[Release] Release {TAG} does not exist yet. Creating...")
+            print(f"[Release] No release found for tag {TAG}. Will create a new one.")
         else:
-            print(f"[Release] Error checking release: {e.code} {e.reason}")
-            sys.exit(1)
+            print(f"[Release] HTTPError checking tag: {e.code} {e.reason}")
+    except Exception as e:
+        print(f"[Release] Exception checking tag: {e}")
 
     if not release:
+        print(f"[Release] Creating release for {TAG}...")
         create_payload = json.dumps({
             "tag_name": TAG,
             "target_commitish": "main",
@@ -137,46 +136,49 @@ def main():
             "draft": False,
             "prerelease": False
         }).encode("utf-8")
-        
-        req_create = urllib.request.Request(
-            f"https://api.github.com/repos/{REPO}/releases",
-            data=create_payload,
-            headers=headers,
-            method="POST"
-        )
+        create_req = urllib.request.Request(f"https://api.github.com/repos/{REPO}/releases", data=create_payload, headers=headers, method="POST")
         try:
-            with urllib.request.urlopen(req_create) as res:
+            with urllib.request.urlopen(create_req) as res:
                 release = json.loads(res.read().decode())
-                print(f"[Release] Created release {TAG} (id={release['id']})")
-        except urllib.error.HTTPError as e:
-            print(f"[Release] Failed to create release: {e.code} {e.reason}")
-            try:
-                print(e.read().decode())
-            except:
-                pass
-            sys.exit(1)
+                print(f"[Release] Successfully created release id={release['id']}")
+        except Exception as e:
+            print(f"[Release] Failed to create release: {e}")
+            return
+    else:
+        print(f"[Release] Updating release notes for id={release['id']}...")
+        update_payload = json.dumps({
+            "name": NAME,
+            "body": body_notes
+        }).encode("utf-8")
+        update_req = urllib.request.Request(f"https://api.github.com/repos/{REPO}/releases/{release['id']}", data=update_payload, headers=headers, method="PATCH")
+        try:
+            with urllib.request.urlopen(update_req) as res:
+                release = json.loads(res.read().decode())
+                print(f"[Release] Successfully updated release id={release['id']}")
+        except Exception as e:
+            print(f"[Release] Failed to update release: {e}")
 
-    upload_url_template = release.get("upload_url")
+    upload_url_template = release.get("upload_url", "")
     if not upload_url_template:
-        print("[Release] Missing upload_url in release object")
-        sys.exit(1)
+        print("[Release] Error: No upload_url in release data")
+        return
 
-    # Assets to upload
-    assets = [
-        (APK_PATH, "application/vnd.android.package-archive"),
-        (ZIP_PATH, "application/zip"),
-        (EXE_PATH, "application/octet-stream")
-    ]
+    # Delete old assets if re-uploading
+    delete_existing_asset_if_any(release["id"], "Semestero-ME.apk", headers)
 
-    for fpath, ctype in assets:
-        fname = os.path.basename(fpath)
-        if os.path.exists(fpath):
-            delete_existing_asset_if_any(release["id"], fname, headers)
-            upload_asset(upload_url_template, fpath, ctype, headers)
-        else:
-            print(f"[Release] Skipping missing asset: {fpath}")
+    # 1. Upload APK
+    if os.path.exists(APK_PATH):
+        upload_asset(upload_url_template, APK_PATH, "application/vnd.android.package-archive", headers)
+    else:
+        print(f"[Release] APK file not found at {APK_PATH}")
 
-    print(f"\n🎉 Release {TAG} is live at {release.get('html_url')}!")
+    # 2. Upload Windows ZIP if exists
+    if os.path.exists(ZIP_PATH):
+        delete_existing_asset_if_any(release["id"], "Semestero-ME-Windows-x64.zip", headers)
+        upload_asset(upload_url_template, ZIP_PATH, "application/zip", headers)
+
+    print(f"\n🎉 Release process finished for {TAG}!")
+    print(f"URL: {release.get('html_url')}")
 
 if __name__ == "__main__":
     main()

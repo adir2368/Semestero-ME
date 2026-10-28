@@ -8857,6 +8857,50 @@ const AUTHENTIC_TIMETABLE_METADATA = {
     '34056_4_12:30':    { room: 'אולמן 501', lecturer: 'מר גיא ארבר' }
 };
 
+function formatClassDuration(startTime, endTime) {
+    if (!startTime || !endTime) return '';
+    const [sh, sm] = startTime.split(':').map(Number);
+    const [eh, em] = endTime.split(':').map(Number);
+    if (isNaN(sh) || isNaN(eh)) return '';
+    const diff = (eh * 60 + (em || 0)) - (sh * 60 + (sm || 0));
+    if (diff <= 0) return '';
+    if (diff === 60) return 'שעה';
+    if (diff === 90) return 'שעה וחצי';
+    if (diff === 120) return 'שעתיים';
+    if (diff === 150) return 'שעתיים וחצי';
+    if (diff === 180) return '3 שעות';
+    if (diff === 210) return '3.5 שעות';
+    if (diff === 240) return '4 שעות';
+    const h = Math.floor(diff / 60);
+    const m = diff % 60;
+    return m === 0 ? `${h} שעות` : `${h}:${m < 10 ? '0' : ''}${m} שעות`;
+}
+window.formatClassDuration = formatClassDuration;
+
+function getClassDurationMetadata(startTime, endTime) {
+    if (!startTime || !endTime) {
+        return { text: 'שעתיים', blockClass: 'duration-block-2h', pillClass: 'is-standard' };
+    }
+    const [sh, sm] = startTime.split(':').map(Number);
+    const [eh, em] = endTime.split(':').map(Number);
+    const diff = (eh * 60 + (em || 0)) - (sh * 60 + (sm || 0));
+    
+    let text = formatClassDuration(startTime, endTime);
+    if (!text) text = 'שעתיים';
+
+    if (diff >= 210) { // 3.5h - 4h
+        return { text, blockClass: 'duration-block-4h', pillClass: 'is-long' };
+    }
+    if (diff >= 150) { // 2.5h - 3h
+        return { text, blockClass: 'duration-block-3h', pillClass: 'is-medium' };
+    }
+    if (diff >= 90) {  // 1.5h - 2h
+        return { text, blockClass: 'duration-block-2h', pillClass: 'is-standard' };
+    }
+    return { text, blockClass: 'duration-block-1h', pillClass: 'is-short' };
+}
+window.getClassDurationMetadata = getClassDurationMetadata;
+
 function enrichTimetableWithAuthenticRooms(timetable) {
     if (!timetable || !Array.isArray(timetable.days)) return 0;
     let enrichedCount = 0;
@@ -8866,6 +8910,37 @@ function enrichTimetableWithAuthenticRooms(timetable) {
             const rawId = (c.courseId || '').trim();
             const cleanCode = rawId.replace(/^0+/, '');
             
+            // Auto-heal any stale shortened end-times from older revisions
+            if (cleanCode === '034056' || cleanCode === '34056') {
+                if (day.dayIndex === 3 && c.startTime === '14:30' && c.endTime === '16:30') {
+                    c.endTime = '17:30';
+                    enrichedCount++;
+                }
+            }
+            if (cleanCode === '03940805' || cleanCode === '3940805') {
+                if (day.dayIndex === 4 && c.startTime === '07:30' && c.endTime === '08:30') {
+                    c.endTime = '09:00';
+                    enrichedCount++;
+                }
+            }
+            if (cleanCode === '034053' || cleanCode === '34053') {
+                if (day.dayIndex === 1 && c.startTime === '14:30' && c.endTime === '16:30') {
+                    c.startTime = '10:30';
+                    c.endTime = '14:30';
+                    c.type = 'הרצאה 10';
+                    c.lecturer = "פרופ' יוסף גבלי";
+                    c.room = 'הנדסה כימית 1';
+                    enrichedCount++;
+                }
+            }
+
+            // Always ensure duration reflects accurate time difference
+            const calcDur = formatClassDuration(c.startTime, c.endTime);
+            if (calcDur && c.duration !== calcDur) {
+                c.duration = calcDur;
+                enrichedCount++;
+            }
+
             // Match strictly by ID + Day + StartTime
             const meta = AUTHENTIC_TIMETABLE_METADATA[`${rawId}_${day.dayIndex}_${c.startTime}`] ||
                          AUTHENTIC_TIMETABLE_METADATA[`${cleanCode}_${day.dayIndex}_${c.startTime}`];
@@ -12017,106 +12092,106 @@ const MOODLE26_COURSE_MAP = {
 };
 
 const PANGEA_COURSE_MAP = {
-    '00340010': 'https://idofangbentov.uk/Technion/DYN1/',
-    '00340022': 'https://idofangbentov.uk/Technion/IME1/',
-    '00340028': 'https://idofangbentov.uk/Technion/SLD1/',
-    '00340030': 'https://idofangbentov.uk/Technion/MNF1/',
-    '00340032': 'https://idofangbentov.uk/Technion/LSY1/',
-    '00340034': 'https://idofangbentov.uk/Technion/ELM1/',
-    '00340035': 'https://idofangbentov.uk/Technion/THE1/',
-    '00340040': 'https://idofangbentov.uk/Technion/ICT1/',
-    '00340041': 'https://idofangbentov.uk/Technion/HTF1/',
-    '00340051': 'https://idofangbentov.uk/Technion/DVI1/',
-    '00340053': 'https://idofangbentov.uk/Technion/SLD2/',
-    '00340054': 'https://idofangbentov.uk/Technion/MDN1/',
-    '00340055': 'https://idofangbentov.uk/Technion/FLD1/',
-    '00340056': 'https://idofangbentov.uk/Technion/NUM1/',
-    '00340057': 'https://idofangbentov.uk/Technion/LMA1/',
-    '00340058': 'https://idofangbentov.uk/Technion/PSM1/',
-    '00340371': 'https://idofangbentov.uk/Technion/PDM1/',
-    '00350001': 'https://idofangbentov.uk/Technion/IRB1/',
-    '00350022': 'https://idofangbentov.uk/Technion/FEM1/',
-    '00350041': 'https://idofangbentov.uk/Technion/MCS1/',
-    '00360087': 'https://idofangbentov.uk/Technion/HDY1/',
-    '00380800': 'https://idofangbentov.uk/Technion/MCS2/',
-    '01040016': 'https://idofangbentov.uk/Technion/ALG1/',
-    '01040041': 'https://idofangbentov.uk/Technion/CAL1/',
-    '01040043': 'https://idofangbentov.uk/Technion/CAL2/',
-    '01040065': 'https://idofangbentov.uk/Technion/ALG1/',
-    '01040131': 'https://idofangbentov.uk/Technion/DEQ1/',
-    '01040228': 'https://idofangbentov.uk/Technion/PDE1/',
-    '01140032': 'https://idofangbentov.uk/Technion/LPH1/',
-    '01140051': 'https://idofangbentov.uk/Technion/PHY1/',
-    '01140052': 'https://idofangbentov.uk/Technion/PHY2/',
-    '01140054': 'https://idofangbentov.uk/Technion/PHY3/',
-    '01140071': 'https://idofangbentov.uk/Technion/PHY1/',
-    '01140075': 'https://idofangbentov.uk/Technion/PHY2/',
-    '01250001': 'https://idofangbentov.uk/Technion/GCH1/',
-    '02340128': 'https://idofangbentov.uk/Technion/IPY1/',
-    '0314533': 'https://idofangbentov.uk/Technion/IMT1/',
-    '034010': 'https://idofangbentov.uk/Technion/DYN1/',
-    '034013': 'https://idofangbentov.uk/Technion/SLD1/',
-    '034015': 'https://idofangbentov.uk/Technion/DYN1/',
-    '034022': 'https://idofangbentov.uk/Technion/IME1/',
-    '034028': 'https://idofangbentov.uk/Technion/SLD1/',
-    '034030': 'https://idofangbentov.uk/Technion/MNF1/',
-    '034032': 'https://idofangbentov.uk/Technion/LSY1/',
-    '034033': 'https://idofangbentov.uk/Technion/FLD1/',
-    '034034': 'https://idofangbentov.uk/Technion/ELM1/',
-    '034035': 'https://idofangbentov.uk/Technion/THE1/',
-    '034040': 'https://idofangbentov.uk/Technion/ICT1/',
-    '034041': 'https://idofangbentov.uk/Technion/HTF1/',
-    '034051': 'https://idofangbentov.uk/Technion/DVI1/',
-    '034053': 'https://idofangbentov.uk/Technion/SLD2/',
-    '034054': 'https://idofangbentov.uk/Technion/MDN1/',
-    '034055': 'https://idofangbentov.uk/Technion/FLD1/',
-    '034056': 'https://idofangbentov.uk/Technion/NUM1/',
-    '034057': 'https://idofangbentov.uk/Technion/LMA1/',
-    '034058': 'https://idofangbentov.uk/Technion/PSM1/',
-    '034371': 'https://idofangbentov.uk/Technion/PDM1/',
-    '035001': 'https://idofangbentov.uk/Technion/IRB1/',
-    '035022': 'https://idofangbentov.uk/Technion/FEM1/',
-    '035041': 'https://idofangbentov.uk/Technion/MCS1/',
-    '036087': 'https://idofangbentov.uk/Technion/HDY1/',
-    '038800': 'https://idofangbentov.uk/Technion/MCS2/',
-    '104016': 'https://idofangbentov.uk/Technion/ALG1/',
-    '104041': 'https://idofangbentov.uk/Technion/CAL1/',
-    '104043': 'https://idofangbentov.uk/Technion/CAL2/',
-    '104065': 'https://idofangbentov.uk/Technion/ALG1/',
-    '104131': 'https://idofangbentov.uk/Technion/DEQ1/',
-    '104228': 'https://idofangbentov.uk/Technion/PDE1/',
-    '114032': 'https://idofangbentov.uk/Technion/LPH1/',
-    '114051': 'https://idofangbentov.uk/Technion/PHY1/',
-    '114052': 'https://idofangbentov.uk/Technion/PHY2/',
-    '114054': 'https://idofangbentov.uk/Technion/PHY3/',
-    '114071': 'https://idofangbentov.uk/Technion/PHY1/',
-    '114075': 'https://idofangbentov.uk/Technion/PHY2/',
-    '125001': 'https://idofangbentov.uk/Technion/GCH1/',
-    '234128': 'https://idofangbentov.uk/Technion/IPY1/',
-    '314533': 'https://idofangbentov.uk/Technion/IMT1/',
-    '34010': 'https://idofangbentov.uk/Technion/DYN1/',
-    '34013': 'https://idofangbentov.uk/Technion/SLD1/',
-    '34015': 'https://idofangbentov.uk/Technion/DYN1/',
-    '34022': 'https://idofangbentov.uk/Technion/IME1/',
-    '34028': 'https://idofangbentov.uk/Technion/SLD1/',
-    '34030': 'https://idofangbentov.uk/Technion/MNF1/',
-    '34032': 'https://idofangbentov.uk/Technion/LSY1/',
-    '34033': 'https://idofangbentov.uk/Technion/FLD1/',
-    '34034': 'https://idofangbentov.uk/Technion/ELM1/',
-    '34035': 'https://idofangbentov.uk/Technion/THE1/',
-    '34040': 'https://idofangbentov.uk/Technion/ICT1/',
-    '34041': 'https://idofangbentov.uk/Technion/HTF1/',
-    '34051': 'https://idofangbentov.uk/Technion/DVI1/',
-    '34053': 'https://idofangbentov.uk/Technion/SLD2/',
-    '34054': 'https://idofangbentov.uk/Technion/MDN1/',
-    '34055': 'https://idofangbentov.uk/Technion/FLD1/',
-    '34056': 'https://idofangbentov.uk/Technion/NUM1/',
-    '34057': 'https://idofangbentov.uk/Technion/LMA1/',
-    '34058': 'https://idofangbentov.uk/Technion/PSM1/',
-    '34371': 'https://idofangbentov.uk/Technion/PDM1/',
-    '35001': 'https://idofangbentov.uk/Technion/IRB1/',
-    '35022': 'https://idofangbentov.uk/Technion/FEM1/',
-    '35041': 'https://idofangbentov.uk/Technion/MCS1/',
+    '00340010': 'https://idofangbentov.uk/Technion/DYN1/DYN1_000-034010-%D7%93%D7%99%D7%A0%D7%9E%D7%99%D7%A7%D7%94',
+    '00340022': 'https://idofangbentov.uk/Technion/IME1/IME1_000-00340022-%D7%9E%D7%91%D7%95%D7%90-%D7%9C%D7%9E%D7%9B%D7%98%D7%A8%D7%95%D7%A0%D7%99%D7%A7%D7%94',
+    '00340028': 'https://idofangbentov.uk/Technion/SLD1/SLD1_000-034028-%D7%9E%D7%9B%D7%A0%D7%99%D7%A7%D7%AA-%D7%9E%D7%95%D7%A6%D7%A7%D7%99%D7%9D-1',
+    '00340030': 'https://idofangbentov.uk/Technion/MNF1/MNF1_000-034030-Manufacturing-Processes',
+    '00340032': 'https://idofangbentov.uk/Technion/LSY1/LSY1_000-034032-Linear-Systems-E',
+    '00340034': 'https://idofangbentov.uk/Technion/ELM1/ELM1_000-00340034-%D7%94%D7%A0%D7%A2-%D7%97%D7%A9%D7%9E%D7%9C%D7%99',
+    '00340035': 'https://idofangbentov.uk/Technion/THE1/THE1_000-034035-%D7%AA%D7%A8%D7%9E%D7%95%D7%93%D7%99%D7%A0%D7%9E%D7%99%D7%A7%D7%94-1',
+    '00340040': 'https://idofangbentov.uk/Technion/ICT1/ICT1_000-00340040-%D7%9E%D7%91%D7%95%D7%90-%D7%9C%D7%91%D7%A7%D7%A8%D7%94',
+    '00340041': 'https://idofangbentov.uk/Technion/HTF1/HTF1_000-00340041-%D7%9E%D7%A2%D7%91%D7%A8-%D7%97%D7%95%D7%9E',
+    '00340051': 'https://idofangbentov.uk/Technion/DVI1/DVI1_000-00340051-%D7%93%D7%99%D7%A0%D7%9E%D7%99%D7%A7%D7%94-%D7%95%D7%AA%D7%A0%D7%95%D7%93%D7%95%D7%AA',
+    '00340053': 'https://idofangbentov.uk/Technion/SLD2/SLD2_000-034053-%D7%9E%D7%9B%D7%A0%D7%99%D7%A7%D7%AA-%D7%9E%D7%95%D7%A6%D7%A7%D7%99%D7%9D-2%D7%9E',
+    '00340054': 'https://idofangbentov.uk/Technion/MDN1/MDN1_000-00340054-%D7%AA%D7%9B%D7%9F-%D7%9E%D7%9B%D7%A0%D7%99-1%D7%9E',
+    '00340055': 'https://idofangbentov.uk/Technion/FLD1/FLD1_000-034055-%D7%AA%D7%95%D7%A8%D7%AA-%D7%94%D7%96%D7%A8%D7%99%D7%9E%D7%94-1%D7%9E',
+    '00340056': 'https://idofangbentov.uk/Technion/NUM1/NUM1_000-034056-%D7%9E%D7%91%D7%95%D7%90-%D7%9C%D7%97%D7%99%D7%A9%D7%95%D7%91-%D7%9E%D7%93%D7%A2%D7%99-%D7%95%D7%94%D7%A0%D7%93%D7%A1%D7%99',
+    '00340057': 'https://idofangbentov.uk/Technion/LMA1/LMA1_000-00340057-%D7%9E%D7%A2%D7%91%D7%93%D7%94-%D7%9E%D7%AA%D7%A7%D7%93%D7%9E%D7%AA-%D7%91%D7%94%D7%A0%D7%93%D7%A1%D7%AA-%D7%9E%D7%9B%D7%95%D7%A0%D7%95%D7%AA',
+    '00340058': 'https://idofangbentov.uk/Technion/PSM1/PSM1_000-00340058-Probability-and-Statistics-for-Mechanical-Engineers',
+    '00340371': 'https://idofangbentov.uk/Technion/PDM1/PDM1_000-00340371-%D7%A4%D7%A8%D7%95%D7%99%D7%A7%D7%98-%D7%AA%D7%9B%D7%9F-%D7%9C%D7%99%D7%99%D7%A6%D7%95%D7%A8',
+    '00350001': 'https://idofangbentov.uk/Technion/IRB1/IRB1_000-00350001-%D7%9E%D7%91%D7%95%D7%90-%D7%9C%D7%A8%D7%95%D7%91%D7%95%D7%98%D7%99%D7%A7%D7%94',
+    '00350022': 'https://idofangbentov.uk/Technion/FEM1/FEM1_000-00350022-%D7%90%D7%9C%D7%9E%D7%A0%D7%98%D7%99%D7%9D-%D7%A1%D7%95%D7%A4%D7%99%D7%99%D7%9D-%D7%9C%D7%90%D7%A0%D7%9C%D7%99%D7%96%D7%94-%D7%94%D7%A0%D7%93%D7%A1%D7%99%D7%AA',
+    '00350041': 'https://idofangbentov.uk/Technion/MCS1/MCS1_000-00350041-%D7%9E%D7%9B%D7%A0%D7%99%D7%A7%D7%AA-%D7%9E%D7%99%D7%A7%D7%A8%D7%95-%D7%9E%D7%A2%D7%A8%D7%9B%D7%95%D7%AA',
+    '00360087': 'https://idofangbentov.uk/Technion/HDY1/HDY1_000-00360087-Hybrid-Dynamics-in-Mechanical-Systems',
+    '00380800': 'https://idofangbentov.uk/Technion/MCS2/MCS2_000-00380800-Advanced-Modeling-in-MEMS',
+    '01040016': 'https://idofangbentov.uk/Technion/ALG1/ALG1_000-104016-%D7%90%D7%9C%D7%92%D7%91%D7%A8%D7%94-1%D7%9E',
+    '01040041': 'https://idofangbentov.uk/Technion/CAL1/CAL1_000-104041-%D7%97%D7%93%D7%95%D7%90-1%D7%9E',
+    '01040043': 'https://idofangbentov.uk/Technion/CAL2/CAL2_000-104043-%D7%97%D7%93%D7%95%D7%90-2%D7%9E',
+    '01040065': 'https://idofangbentov.uk/Technion/ALG1/ALG1_000-104016-%D7%90%D7%9C%D7%92%D7%91%D7%A8%D7%94-1%D7%9E',
+    '01040131': 'https://idofangbentov.uk/Technion/DEQ1/DEQ1_000-104131-%D7%9E%D7%93%D7%A8-%D7%97',
+    '01040228': 'https://idofangbentov.uk/Technion/PDE1/PDE1_000-104228-%D7%9E%D7%93%D7%97-%D7%9E',
+    '01140032': 'https://idofangbentov.uk/Technion/LPH1/LPH1_000-01140032-%D7%9E%D7%A2%D7%91%D7%93%D7%94-%D7%9C%D7%A4%D7%99%D7%96%D7%99%D7%A7%D7%94-1%D7%97',
+    '01140051': 'https://idofangbentov.uk/Technion/PHY1/PHY1_000-114051-%D7%A4%D7%99%D7%96%D7%99%D7%A7%D7%94-1',
+    '01140052': 'https://idofangbentov.uk/Technion/PHY2/PHY2_000-114052-%D7%A4%D7%99%D7%96%D7%99%D7%A7%D7%94-2',
+    '01140054': 'https://idofangbentov.uk/Technion/PHY3/PHY3_000-%D7%A4%D7%99%D7%96%D7%99%D7%A7%D7%94-3-01140054',
+    '01140071': 'https://idofangbentov.uk/Technion/PHY1/PHY1_000-114051-%D7%A4%D7%99%D7%96%D7%99%D7%A7%D7%94-1',
+    '01140075': 'https://idofangbentov.uk/Technion/PHY2/PHY2_000-114052-%D7%A4%D7%99%D7%96%D7%99%D7%A7%D7%94-2',
+    '01250001': 'https://idofangbentov.uk/Technion/GCH1/GCH1_000-125001-%D7%9B%D7%99%D7%9E%D7%99%D7%94-%D7%9B%D7%9C%D7%9C%D7%99%D7%AA',
+    '02340128': 'https://idofangbentov.uk/Technion/IPY1/IPY1_000-234128-%D7%9E%D7%91%D7%95%D7%90-%D7%9C%D7%A4%D7%99%D7%99%D7%AA%D7%95%D7%9F',
+    '0314533': 'https://idofangbentov.uk/Technion/IMT1/IMT1_000-314533-%D7%9E%D7%91%D7%95%D7%90-%D7%9C%D7%94%D7%A0%D7%93%D7%A1%D7%AA-%D7%97%D7%95%D7%9E%D7%A8%D7%99%D7%9D-1%D7%9E',
+    '034010': 'https://idofangbentov.uk/Technion/DYN1/DYN1_000-034010-%D7%93%D7%99%D7%A0%D7%9E%D7%99%D7%A7%D7%94',
+    '034013': 'https://idofangbentov.uk/Technion/SLD1/SLD1_000-034028-%D7%9E%D7%9B%D7%A0%D7%99%D7%A7%D7%AA-%D7%9E%D7%95%D7%A6%D7%A7%D7%99%D7%9D-1',
+    '034015': 'https://idofangbentov.uk/Technion/DYN1/DYN1_000-034010-%D7%93%D7%99%D7%A0%D7%9E%D7%99%D7%A7%D7%94',
+    '034022': 'https://idofangbentov.uk/Technion/IME1/IME1_000-00340022-%D7%9E%D7%91%D7%95%D7%90-%D7%9C%D7%9E%D7%9B%D7%98%D7%A8%D7%95%D7%A0%D7%99%D7%A7%D7%94',
+    '034028': 'https://idofangbentov.uk/Technion/SLD1/SLD1_000-034028-%D7%9E%D7%9B%D7%A0%D7%99%D7%A7%D7%AA-%D7%9E%D7%95%D7%A6%D7%A7%D7%99%D7%9D-1',
+    '034030': 'https://idofangbentov.uk/Technion/MNF1/MNF1_000-034030-Manufacturing-Processes',
+    '034032': 'https://idofangbentov.uk/Technion/LSY1/LSY1_000-034032-Linear-Systems-E',
+    '034033': 'https://idofangbentov.uk/Technion/FLD1/FLD1_000-034055-%D7%AA%D7%95%D7%A8%D7%AA-%D7%94%D7%96%D7%A8%D7%99%D7%9E%D7%94-1%D7%9E',
+    '034034': 'https://idofangbentov.uk/Technion/ELM1/ELM1_000-00340034-%D7%94%D7%A0%D7%A2-%D7%97%D7%A9%D7%9E%D7%9C%D7%99',
+    '034035': 'https://idofangbentov.uk/Technion/THE1/THE1_000-034035-%D7%AA%D7%A8%D7%9E%D7%95%D7%93%D7%99%D7%A0%D7%9E%D7%99%D7%A7%D7%94-1',
+    '034040': 'https://idofangbentov.uk/Technion/ICT1/ICT1_000-00340040-%D7%9E%D7%91%D7%95%D7%90-%D7%9C%D7%91%D7%A7%D7%A8%D7%94',
+    '034041': 'https://idofangbentov.uk/Technion/HTF1/HTF1_000-00340041-%D7%9E%D7%A2%D7%91%D7%A8-%D7%97%D7%95%D7%9E',
+    '034051': 'https://idofangbentov.uk/Technion/DVI1/DVI1_000-00340051-%D7%93%D7%99%D7%A0%D7%9E%D7%99%D7%A7%D7%94-%D7%95%D7%AA%D7%A0%D7%95%D7%93%D7%95%D7%AA',
+    '034053': 'https://idofangbentov.uk/Technion/SLD2/SLD2_000-034053-%D7%9E%D7%9B%D7%A0%D7%99%D7%A7%D7%AA-%D7%9E%D7%95%D7%A6%D7%A7%D7%99%D7%9D-2%D7%9E',
+    '034054': 'https://idofangbentov.uk/Technion/MDN1/MDN1_000-00340054-%D7%AA%D7%9B%D7%9F-%D7%9E%D7%9B%D7%A0%D7%99-1%D7%9E',
+    '034055': 'https://idofangbentov.uk/Technion/FLD1/FLD1_000-034055-%D7%AA%D7%95%D7%A8%D7%AA-%D7%94%D7%96%D7%A8%D7%99%D7%9E%D7%94-1%D7%9E',
+    '034056': 'https://idofangbentov.uk/Technion/NUM1/NUM1_000-034056-%D7%9E%D7%91%D7%95%D7%90-%D7%9C%D7%97%D7%99%D7%A9%D7%95%D7%91-%D7%9E%D7%93%D7%A2%D7%99-%D7%95%D7%94%D7%A0%D7%93%D7%A1%D7%99',
+    '034057': 'https://idofangbentov.uk/Technion/LMA1/LMA1_000-00340057-%D7%9E%D7%A2%D7%91%D7%93%D7%94-%D7%9E%D7%AA%D7%A7%D7%93%D7%9E%D7%AA-%D7%91%D7%94%D7%A0%D7%93%D7%A1%D7%AA-%D7%9E%D7%9B%D7%95%D7%A0%D7%95%D7%AA',
+    '034058': 'https://idofangbentov.uk/Technion/PSM1/PSM1_000-00340058-Probability-and-Statistics-for-Mechanical-Engineers',
+    '034371': 'https://idofangbentov.uk/Technion/PDM1/PDM1_000-00340371-%D7%A4%D7%A8%D7%95%D7%99%D7%A7%D7%98-%D7%AA%D7%9B%D7%9F-%D7%9C%D7%99%D7%99%D7%A6%D7%95%D7%A8',
+    '035001': 'https://idofangbentov.uk/Technion/IRB1/IRB1_000-00350001-%D7%9E%D7%91%D7%95%D7%90-%D7%9C%D7%A8%D7%95%D7%91%D7%95%D7%98%D7%99%D7%A7%D7%94',
+    '035022': 'https://idofangbentov.uk/Technion/FEM1/FEM1_000-00350022-%D7%90%D7%9C%D7%9E%D7%A0%D7%98%D7%99%D7%9D-%D7%A1%D7%95%D7%A4%D7%99%D7%99%D7%9D-%D7%9C%D7%90%D7%A0%D7%9C%D7%99%D7%96%D7%94-%D7%94%D7%A0%D7%93%D7%A1%D7%99%D7%AA',
+    '035041': 'https://idofangbentov.uk/Technion/MCS1/MCS1_000-00350041-%D7%9E%D7%9B%D7%A0%D7%99%D7%A7%D7%AA-%D7%9E%D7%99%D7%A7%D7%A8%D7%95-%D7%9E%D7%A2%D7%A8%D7%9B%D7%95%D7%AA',
+    '036087': 'https://idofangbentov.uk/Technion/HDY1/HDY1_000-00360087-Hybrid-Dynamics-in-Mechanical-Systems',
+    '038800': 'https://idofangbentov.uk/Technion/MCS2/MCS2_000-00380800-Advanced-Modeling-in-MEMS',
+    '104016': 'https://idofangbentov.uk/Technion/ALG1/ALG1_000-104016-%D7%90%D7%9C%D7%92%D7%91%D7%A8%D7%94-1%D7%9E',
+    '104041': 'https://idofangbentov.uk/Technion/CAL1/CAL1_000-104041-%D7%97%D7%93%D7%95%D7%90-1%D7%9E',
+    '104043': 'https://idofangbentov.uk/Technion/CAL2/CAL2_000-104043-%D7%97%D7%93%D7%95%D7%90-2%D7%9E',
+    '104065': 'https://idofangbentov.uk/Technion/ALG1/ALG1_000-104016-%D7%90%D7%9C%D7%92%D7%91%D7%A8%D7%94-1%D7%9E',
+    '104131': 'https://idofangbentov.uk/Technion/DEQ1/DEQ1_000-104131-%D7%9E%D7%93%D7%A8-%D7%97',
+    '104228': 'https://idofangbentov.uk/Technion/PDE1/PDE1_000-104228-%D7%9E%D7%93%D7%97-%D7%9E',
+    '114032': 'https://idofangbentov.uk/Technion/LPH1/LPH1_000-01140032-%D7%9E%D7%A2%D7%91%D7%93%D7%94-%D7%9C%D7%A4%D7%99%D7%96%D7%99%D7%A7%D7%94-1%D7%97',
+    '114051': 'https://idofangbentov.uk/Technion/PHY1/PHY1_000-114051-%D7%A4%D7%99%D7%96%D7%99%D7%A7%D7%94-1',
+    '114052': 'https://idofangbentov.uk/Technion/PHY2/PHY2_000-114052-%D7%A4%D7%99%D7%96%D7%99%D7%A7%D7%94-2',
+    '114054': 'https://idofangbentov.uk/Technion/PHY3/PHY3_000-%D7%A4%D7%99%D7%96%D7%99%D7%A7%D7%94-3-01140054',
+    '114071': 'https://idofangbentov.uk/Technion/PHY1/PHY1_000-114051-%D7%A4%D7%99%D7%96%D7%99%D7%A7%D7%94-1',
+    '114075': 'https://idofangbentov.uk/Technion/PHY2/PHY2_000-114052-%D7%A4%D7%99%D7%96%D7%99%D7%A7%D7%94-2',
+    '125001': 'https://idofangbentov.uk/Technion/GCH1/GCH1_000-125001-%D7%9B%D7%99%D7%9E%D7%99%D7%94-%D7%9B%D7%9C%D7%9C%D7%99%D7%AA',
+    '234128': 'https://idofangbentov.uk/Technion/IPY1/IPY1_000-234128-%D7%9E%D7%91%D7%95%D7%90-%D7%9C%D7%A4%D7%99%D7%99%D7%AA%D7%95%D7%9F',
+    '314533': 'https://idofangbentov.uk/Technion/IMT1/IMT1_000-314533-%D7%9E%D7%91%D7%95%D7%90-%D7%9C%D7%94%D7%A0%D7%93%D7%A1%D7%AA-%D7%97%D7%95%D7%9E%D7%A8%D7%99%D7%9D-1%D7%9E',
+    '34010': 'https://idofangbentov.uk/Technion/DYN1/DYN1_000-034010-%D7%93%D7%99%D7%A0%D7%9E%D7%99%D7%A7%D7%94',
+    '34013': 'https://idofangbentov.uk/Technion/SLD1/SLD1_000-034028-%D7%9E%D7%9B%D7%A0%D7%99%D7%A7%D7%AA-%D7%9E%D7%95%D7%A6%D7%A7%D7%99%D7%9D-1',
+    '34015': 'https://idofangbentov.uk/Technion/DYN1/DYN1_000-034010-%D7%93%D7%99%D7%A0%D7%9E%D7%99%D7%A7%D7%94',
+    '34022': 'https://idofangbentov.uk/Technion/IME1/IME1_000-00340022-%D7%9E%D7%91%D7%95%D7%90-%D7%9C%D7%9E%D7%9B%D7%98%D7%A8%D7%95%D7%A0%D7%99%D7%A7%D7%94',
+    '34028': 'https://idofangbentov.uk/Technion/SLD1/SLD1_000-034028-%D7%9E%D7%9B%D7%A0%D7%99%D7%A7%D7%AA-%D7%9E%D7%95%D7%A6%D7%A7%D7%99%D7%9D-1',
+    '34030': 'https://idofangbentov.uk/Technion/MNF1/MNF1_000-034030-Manufacturing-Processes',
+    '34032': 'https://idofangbentov.uk/Technion/LSY1/LSY1_000-034032-Linear-Systems-E',
+    '34033': 'https://idofangbentov.uk/Technion/FLD1/FLD1_000-034055-%D7%AA%D7%95%D7%A8%D7%AA-%D7%94%D7%96%D7%A8%D7%99%D7%9E%D7%94-1%D7%9E',
+    '34034': 'https://idofangbentov.uk/Technion/ELM1/ELM1_000-00340034-%D7%94%D7%A0%D7%A2-%D7%97%D7%A9%D7%9E%D7%9C%D7%99',
+    '34035': 'https://idofangbentov.uk/Technion/THE1/THE1_000-034035-%D7%AA%D7%A8%D7%9E%D7%95%D7%93%D7%99%D7%A0%D7%9E%D7%99%D7%A7%D7%94-1',
+    '34040': 'https://idofangbentov.uk/Technion/ICT1/ICT1_000-00340040-%D7%9E%D7%91%D7%95%D7%90-%D7%9C%D7%91%D7%A7%D7%A8%D7%94',
+    '34041': 'https://idofangbentov.uk/Technion/HTF1/HTF1_000-00340041-%D7%9E%D7%A2%D7%91%D7%A8-%D7%97%D7%95%D7%9E',
+    '34051': 'https://idofangbentov.uk/Technion/DVI1/DVI1_000-00340051-%D7%93%D7%99%D7%A0%D7%9E%D7%99%D7%A7%D7%94-%D7%95%D7%AA%D7%A0%D7%95%D7%93%D7%95%D7%AA',
+    '34053': 'https://idofangbentov.uk/Technion/SLD2/SLD2_000-034053-%D7%9E%D7%9B%D7%A0%D7%99%D7%A7%D7%AA-%D7%9E%D7%95%D7%A6%D7%A7%D7%99%D7%9D-2%D7%9E',
+    '34054': 'https://idofangbentov.uk/Technion/MDN1/MDN1_000-00340054-%D7%AA%D7%9B%D7%9F-%D7%9E%D7%9B%D7%A0%D7%99-1%D7%9E',
+    '34055': 'https://idofangbentov.uk/Technion/FLD1/FLD1_000-034055-%D7%AA%D7%95%D7%A8%D7%AA-%D7%94%D7%96%D7%A8%D7%99%D7%9E%D7%94-1%D7%9E',
+    '34056': 'https://idofangbentov.uk/Technion/NUM1/NUM1_000-034056-%D7%9E%D7%91%D7%95%D7%90-%D7%9C%D7%97%D7%99%D7%A9%D7%95%D7%91-%D7%9E%D7%93%D7%A2%D7%99-%D7%95%D7%94%D7%A0%D7%93%D7%A1%D7%99',
+    '34057': 'https://idofangbentov.uk/Technion/LMA1/LMA1_000-00340057-%D7%9E%D7%A2%D7%91%D7%93%D7%94-%D7%9E%D7%AA%D7%A7%D7%93%D7%9E%D7%AA-%D7%91%D7%94%D7%A0%D7%93%D7%A1%D7%AA-%D7%9E%D7%9B%D7%95%D7%A0%D7%95%D7%AA',
+    '34058': 'https://idofangbentov.uk/Technion/PSM1/PSM1_000-00340058-Probability-and-Statistics-for-Mechanical-Engineers',
+    '34371': 'https://idofangbentov.uk/Technion/PDM1/PDM1_000-00340371-%D7%A4%D7%A8%D7%95%D7%99%D7%A7%D7%98-%D7%AA%D7%9B%D7%9F-%D7%9C%D7%99%D7%99%D7%A6%D7%95%D7%A8',
+    '35001': 'https://idofangbentov.uk/Technion/IRB1/IRB1_000-00350001-%D7%9E%D7%91%D7%95%D7%90-%D7%9C%D7%A8%D7%95%D7%91%D7%95%D7%98%D7%99%D7%A7%D7%94',
+    '35022': 'https://idofangbentov.uk/Technion/FEM1/FEM1_000-00350022-%D7%90%D7%9C%D7%9E%D7%A0%D7%98%D7%99%D7%9D-%D7%A1%D7%95%D7%A4%D7%99%D7%99%D7%9D-%D7%9C%D7%90%D7%A0%D7%9C%D7%99%D7%96%D7%94-%D7%94%D7%A0%D7%93%D7%A1%D7%99%D7%AA',
+    '35041': 'https://idofangbentov.uk/Technion/MCS1/MCS1_000-00350041-%D7%9E%D7%9B%D7%A0%D7%99%D7%A7%D7%AA-%D7%9E%D7%99%D7%A7%D7%A8%D7%95-%D7%9E%D7%A2%D7%A8%D7%9B%D7%95%D7%AA',
 };
 if (typeof window !== 'undefined') {
     window.PANGEA_COURSE_MAP = PANGEA_COURSE_MAP;
@@ -12191,7 +12266,7 @@ function renderTechnionPlusQuickBar(course) {
         <a href="${cfUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-xs technion-link-btn" style="background: rgba(245, 158, 11, 0.18); border: 1px solid #f59e0b; color: #fbbf24; text-decoration: none; padding: 4px 10px; border-radius: 6px; font-size: 0.76rem; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;" title="דף הקורס ומערכת שעות ב-CheeseFork">
             <span>🧀</span> צ'יזפורק ↗
         </a>
-        <a href="${pangeaUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-xs technion-link-btn" style="background: rgba(14, 165, 233, 0.18); border: 1px solid #0284c7; color: #38bdf8; text-decoration: none; padding: 4px 10px; border-radius: 6px; font-size: 0.76rem; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;" title="סיכומים ודפי נוסחאות בפנגייה (Ido Fang Bentov)">
+        <a href="${pangeaUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-xs technion-link-btn" style="background: rgba(14, 165, 233, 0.18); border: 1px solid #0284c7; color: #38bdf8; text-decoration: none; padding: 4px 10px; border-radius: 6px; font-size: 0.76rem; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;" title="קישור ישיר לסיכומי הקורס ודפי נוסחאות בפנגייה (Ido Fang Bentov)">
             <span>💧</span> פנגייה ↗
         </a>
         <a href="${driveUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-xs technion-link-btn" style="background: rgba(168, 85, 247, 0.18); border: 1px solid #a855f7; color: #c084fc; text-decoration: none; padding: 4px 10px; border-radius: 6px; font-size: 0.76rem; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;" title="חיפוש תיקיות Google Drive, סיכומים וחומרי עזר">
@@ -14522,6 +14597,7 @@ window.syncLiveCheeseForkData = async function(customUrl = null, isManual = fals
                                     else if (cleanCode.includes('034056') || cleanCode.includes('34056')) cardClass = 'timetable-card-computing';
                                     else if (cleanCode.includes('394') || cleanCode.includes('0394')) cardClass = 'timetable-card-yoga';
 
+                                    const durMeta = getClassDurationMetadata(startTime, endTime);
                                     timetableDays[dayIdx].classes.push({
                                         courseId: cleanCode,
                                         courseName: courseName,
@@ -14530,7 +14606,7 @@ window.syncLiveCheeseForkData = async function(customUrl = null, isManual = fals
                                         room: roomCombined,
                                         startTime: startTime,
                                         endTime: endTime,
-                                        duration: '',
+                                        duration: durMeta.text,
                                         cardClass: cardClass
                                     });
                                     totalClassesCount++;
@@ -21948,8 +22024,8 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.10.28-v2.8.2",
-    version: "2.8.2",
+    code: "REV-2026.10.28-v2.8.3",
+    version: "2.8.3",
     build: "20261020_03",
     date: "2026-10-20 01:20",
     description: "גרסה 2.5.2: פתרון מוחלט ללולאת העדכון במובייל וספארי, מנגנון אנטי-רילואד עמיד ב-localStorage, סנכרון גרסאות מלא וקישורי הורדה ישירים לטלפונים"
@@ -23956,7 +24032,7 @@ window.getFormattedChangelogHTML = function() {
 };
 
 window.openChangelogModal = function(ver) {
-    const currentVer = ver || (typeof APP_CURRENT_REVISION !== 'undefined' && APP_CURRENT_REVISION && APP_CURRENT_REVISION.version) || "2.8.2";
+    const currentVer = ver || (typeof APP_CURRENT_REVISION !== 'undefined' && APP_CURRENT_REVISION && APP_CURRENT_REVISION.version) || "2.8.3";
     const updateModal = document.getElementById("version-update-modal");
     if (!updateModal) return;
     const modTitle = document.getElementById("update-modal-title");
@@ -24279,28 +24355,35 @@ function renderTimetableGrid() {
                 const instructorClass = isTut ? 'is-tutorial' : (isSport ? 'is-sport' : 'is-lecture');
                 const instructorIcon = isTut ? '🧑‍🏫' : (isSport ? '🏃' : '👨‍🏫');
 
+                const durMeta = getClassDurationMetadata(c.startTime, c.endTime);
+                if (!c.duration || c.duration.trim() === '') {
+                    c.duration = durMeta.text;
+                }
+
                 bodyHtml += `
-                    <div class="timetable-card ${c.cardClass || ''}" onclick="if (typeof openCourseDetails === 'function') openCourseDetails('${c.courseId}')">
-                        <!-- שורה 1: מספר הרצאה / תרגול + שעה -->
+                    <div class="timetable-card ${c.cardClass || ''} ${durMeta.blockClass}" onclick="if (typeof openCourseDetails === 'function') openCourseDetails('${c.courseId}')">
+                        <!-- שורה 1: תגית סוג שיעור + תגית משך זמן שיעור מובלטת -->
                         <div class="timetable-card-top">
                             <span class="timetable-tag">${c.type}</span>
-                            <span class="timetable-card-time">⏰ ${c.startTime} - ${c.endTime}${c.duration ? ` (${c.duration})` : ''}</span>
+                            <span class="timetable-duration-pill ${durMeta.pillClass}">⏱️ ${durMeta.text}</span>
                         </div>
-                        <!-- שורה 2: חדר או מיקום (רק אם קיים, לעולם לא כיתת טכניון) -->
+                        <!-- שורה 2: שעות השיעור -->
+                        <div class="timetable-card-time">⏰ ${c.startTime} - ${c.endTime}</div>
+                        <!-- שורה 3: חדר / מיקום -->
                         ${(c.room && c.room.trim() && c.room !== 'כיתת טכניון') ? `
                             <div class="timetable-card-room-bar">
                                 <span class="room-icon">📍</span>
                                 <span class="room-text">${c.room}</span>
                             </div>
                         ` : ''}
-                        <!-- שורה 3: מרצה / מתרגל -->
+                        <!-- שורה 4: מרצה / מתרגל -->
                         ${c.lecturer ? `
                             <div class="timetable-lecturer ${instructorClass}">
                                 <span>${instructorIcon} ${instructorRole}:</span>
                                 <strong>${c.lecturer}</strong>
                             </div>
                         ` : ''}
-                        <!-- שורה 4: קורס -->
+                        <!-- שורה 5: קורס -->
                         <div class="timetable-card-title">${c.courseName} <span class="course-code-dim">(${c.courseId})</span></div>
                     </div>
                 `;
@@ -24405,10 +24488,11 @@ function renderTodayTimetableBanner() {
             if (status.code === 'live') itemClass += ' current-live';
             else if (status.code === 'next') itemClass += ' next-upcoming';
 
+            const durMeta = getClassDurationMetadata(c.startTime, c.endTime);
             bodyHtml += `
                 <div class="${itemClass}" onclick="openCourseDetails('${c.courseId}')">
                     <div class="today-class-top">
-                        <span class="today-class-time">⏰ ${c.startTime} - ${c.endTime} (${c.duration})</span>
+                        <span class="today-class-time">⏰ ${c.startTime} - ${c.endTime} (${durMeta.text})</span>
                         <span class="today-class-status ${status.code}">${status.text}</span>
                     </div>
                     <div class="today-class-name">${c.courseName} (${c.courseId})</div>
