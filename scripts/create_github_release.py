@@ -18,9 +18,9 @@ ZIP_PATH = os.path.join(ROOT, "Semestero-ME-Windows-x64.zip")
 
 with open(os.path.join(ROOT, "package.json"), "r", encoding="utf-8") as f:
     pkg = json.load(f)
-VERSION = pkg.get("version", "2.8.5")
+VERSION = pkg.get("version", "2.8.6")
 TAG = f"v{VERSION}"
-NAME = f"Semestero ME v{VERSION} - Streamlined Quick Access Bar & ASAT Grades Integration"
+NAME = f"Semestero ME v{VERSION} - Moodle Sync Intelligence & Zoom Link Filter"
 
 def get_github_token():
     try:
@@ -95,19 +95,20 @@ def main():
         "User-Agent": "Semestero-ME-Release-Agent"
     }
 
-    body_notes = f"""## מה חדש בגרסה v{VERSION} 🚀🎯🏛️
+    body_notes = f"""## מה חדש בגרסה v{VERSION} 🚀🧹🎓
 
-### 1. ייעול סרגל הגישה המהירה של הקורסים (Streamlined Quick Access Bar)
-- **איחוד שירותי אס״ט עם כפתור 'ציונים וסריקות'**: העברת סמל חותם אס״ט הרשמי (`asat_icon.png`) אל כפתור הציונים והסריקות בפורטל הטכניוני (`grades.technion.ac.il`), המרכז את הבחינות, הסריקות ומחברות המבחן.
-- **הסרת כפתור מאגר הבחינות הנפרד**: פישוט סרגל הקישורים המהירים מ-7 כפתורים ל-6 כפתורים ממוקדים, ללא כפילות מיותרת, תוך שיפור שטח הפנים והקריאות במובייל ובדסקטופ.
+### 1. סינון וטיהור חכם של סנכרון מודל (Moodle Sync Intelligence & Zoom Filter)
+- **חסימה מוחלטת של קישורי זום (Zoom)**: קישורי מפגשי זום, הרצאות מקוונות וחדרי הרצאה (`zoom.us`) אינם נחשבים למטלות והם נחסמים כעת באופן מוחלט מכניסה ללוח המשימות של הקורסים.
+- **טיהור אוטומטי של לוח המשימות**: מנגנון ה-`deduplicateCourseTasks` מנקה אוטומטית קישורי זום קיימים שנסחפו ללוח המשימות בסנכרונים קודמים.
+- **סינון הודעות פתיחה ללא דדליין**: הודעות פתיחת שאלון (`תאריך תחילת שאלון`, `נפתח ב`) מסוננות החוצה, כך שרק מטלות עם מועד הגשה סופי נשמרות.
+- **ניקוי תחיליות מיותרות**: הסרת `תאריך הגשה` ו-`יש להגיש את` משם המשימה, להצגה נקייה וממוקדת.
 
-### 2. תמיכה מלאה ב-Offline וב-PWA
-- עדכון ה-Service Worker (`sw.js`) לקאש `semestero-me-v2.8.5` לרענון מהיר וחלק.
-- עדכון חבילת ה-Dist של אפליקציית ה-Mobile Android.
+### 2. חידוד חוויית ההגשה במודל (Moodle Calendar & Activity Deep Links)
+- הבהרת זרימת ההגשה: חידוד ה-Tooltip בכפתור המודל בלוח המשימות למעבר ישיר לכרטיס האירוע במודל, בו מוצג כפתור "עבור לפעילות" לפתיחת טופס ההגשה.
 
 ### 3. קימפול חבילות והפצה
-- קימפול קובץ APK מעודכן (`Semestero-ME.apk`, versionCode 41).
-- מעבר מלא של כל סוויטות הבדיקות האוטומטיות (System Health, Auth Persistence, Integrations Hub, CheeseFork Precision, Dual-Mode Suite).
+- קימפול קובץ APK מעודכן (`Semestero-ME.apk`, versionCode 42).
+- מעבר מלא של כל סוויטות הבדיקות האוטומטיות (System Health, Auth Persistence, Integrations Hub, CheeseFork Precision, Dual-Mode Suite, Zoom Filter Suite).
 """
 
     req_tag = urllib.request.Request(f"https://api.github.com/repos/{REPO}/releases/tags/{TAG}", headers=headers)

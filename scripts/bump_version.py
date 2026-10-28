@@ -4,10 +4,10 @@ import re
 sys.stdout.reconfigure(encoding='utf-8')
 
 def bump_version():
-    old_ver = "2.8.4"
-    new_ver = "2.8.5"
-    old_code = 40
-    new_code = 41
+    old_ver = "2.8.5"
+    new_ver = "2.8.6"
+    old_code = 41
+    new_code = 42
 
     # 1. package.json
     with open('package.json', 'r', encoding='utf-8') as f:
@@ -53,8 +53,8 @@ def bump_version():
     html = html.replace(f'(v{old_ver})"', f'(v{new_ver})"')
     html = html.replace(f'>v{old_ver} 🚀</button>', f'>v{new_ver} 🚀</button>')
 
-    # Add changelog item for v2.8.5
-    changelog_entry = f'''                            <li><strong>v{new_ver} (28/10/2026):</strong> ייעול סרגל הגישה המהירה של הקורסים: איחוד שירותי אס״ט עם כפתור 'ציונים וסריקות' (הצגת סמל אס״ט הרשמי על פורטל הציונים והמחברות הסרוקות) והסרת כפתור מאגר הבחינות הנפרד לחוויית משתמש ממוקדת ונקייה יותר.</li>
+    # Add changelog item for v2.8.6
+    changelog_entry = f'''                            <li><strong>v{new_ver} (28/10/2026):</strong> סינון וטיהור חכם של סנכרון מודל: חסימה מוחלטת של קישורי מפגשי זום (Zoom) והודעות פתיחה מכניסה ללוח המשימות, לצד ניקוי רטרואקטיבי אוטומטי של קישורי זום קיימים וחידוד ההפניה לאירועי הגשה במודל.</li>
 '''
     old_changelog_anchor = f'<li><strong>v{old_ver}'
     if old_changelog_anchor in html:

@@ -413,7 +413,8 @@
             if (prefixMatch) {
                 return prefixMatch[1].trim();
             }
-            return clean.replace(/^יש להגיש את\s+/i, '').trim();
+            clean = clean.replace(/^(יש להגיש את|תאריך הגשה:?|מועד הגשה:?)\s*/i, '').trim();
+            return clean;
         },
 
         /**
@@ -563,7 +564,7 @@
         },
 
         deduplicateCourseTasks(course) {
-            if (!course || !Array.isArray(course.tasks) || course.tasks.length <= 1) {
+            if (!course || !Array.isArray(course.tasks) || course.tasks.length === 0) {
                 return { tasks: course ? (course.tasks || []) : [], removedCount: 0 };
             }
 
@@ -572,8 +573,25 @@
 
             for (let i = 0; i < course.tasks.length; i++) {
                 const candidate = course.tasks[i];
-                let mergedIndex = -1;
+                if (!candidate) continue;
 
+                // Purge non-task items (Zoom links, virtual sessions, opening notices)
+                const isNonTask = (
+                    /(זום|zoom)/i.test(candidate.title || '') ||
+                    (candidate.moodleUrl && /(זום|zoom)/i.test(candidate.moodleUrl)) ||
+                    (candidate.title && (
+                        candidate.title.startsWith('נפתח ב') ||
+                        candidate.title.startsWith('נפתח:') ||
+                        candidate.title.includes('תאריך תחילת') ||
+                        candidate.title.endsWith('opens')
+                    ))
+                );
+                if (isNonTask) {
+                    removedCount++;
+                    continue;
+                }
+
+                let mergedIndex = -1;
                 for (let j = 0; j < deduped.length; j++) {
                     if (this.areTasksDuplicates(deduped[j], candidate, course.name)) {
                         mergedIndex = j;
@@ -789,10 +807,30 @@
                 const summaryMatch = block.match(/SUMMARY:([^\r\n]+)/);
                 let summary = summaryMatch ? summaryMatch[1].trim() : '';
 
-                // Filtering non-actionable events (skip opening notices and zoom sessions)
+                // Filtering non-actionable events (skip opening notices, Zoom links/meetings, attendance)
                 if (!summary) continue;
-                if (summary.endsWith('opens') || summary.endsWith('opens)')) continue;
-                if (/(הרצאת זום|נוכחות בזום|נוכחות|attendance)/i.test(summary)) {
+
+                // 1. Strict Zoom meetings & lecture links filter (Zoom links are NOT tasks):
+                if (/(זום|zoom)/i.test(summary) || /(zoom\.us|technion\.zoom)/i.test(block)) {
+                    continue;
+                }
+
+                // 2. Attendance / non-task notices:
+                if (/(נוכחות|attendance)/i.test(summary)) {
+                    continue;
+                }
+
+                // 3. Opening date announcements (Moodle generates opening AND closing events for every item)
+                if (
+                    summary.endsWith('opens') || 
+                    summary.endsWith('opens)') ||
+                    summary.startsWith('נפתח ב') ||
+                    summary.startsWith('נפתח:') ||
+                    summary.startsWith('פתיחת') ||
+                    summary.includes('תאריך תחילת') ||
+                    summary.includes('מועד פתיחת') ||
+                    summary.includes('תחילת שאלון')
+                ) {
                     continue;
                 }
 

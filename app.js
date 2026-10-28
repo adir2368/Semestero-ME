@@ -16347,7 +16347,7 @@ function renderNotionTasksTable() {
             }
         }
         const moodleLinkHtml = moodleUrl ? `
-            <a href="${moodleUrl}" target="_blank" rel="noopener noreferrer" class="notion-moodle-link-btn" title="פתח דף הגשה במודל הטכניון" onclick="event.stopPropagation();">
+            <a href="${moodleUrl}" target="_blank" rel="noopener noreferrer" class="notion-moodle-link-btn" title="מעבר לכרטיס המטלה במודל (לחץ 'עבור לפעילות' להגשה ישירה)" onclick="event.stopPropagation();">
                 <span>🎓 הגשה במודל ↗</span>
             </a>
         ` : '';
@@ -22020,8 +22020,8 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.10.28-v2.8.5",
-    version: "2.8.5",
+    code: "REV-2026.10.28-v2.8.6",
+    version: "2.8.6",
     build: "20261020_03",
     date: "2026-10-20 01:20",
     description: "גרסה 2.5.2: פתרון מוחלט ללולאת העדכון במובייל וספארי, מנגנון אנטי-רילואד עמיד ב-localStorage, סנכרון גרסאות מלא וקישורי הורדה ישירים לטלפונים"
@@ -24028,7 +24028,7 @@ window.getFormattedChangelogHTML = function() {
 };
 
 window.openChangelogModal = function(ver) {
-    const currentVer = ver || (typeof APP_CURRENT_REVISION !== 'undefined' && APP_CURRENT_REVISION && APP_CURRENT_REVISION.version) || "2.8.5";
+    const currentVer = ver || (typeof APP_CURRENT_REVISION !== 'undefined' && APP_CURRENT_REVISION && APP_CURRENT_REVISION.version) || "2.8.6";
     const updateModal = document.getElementById("version-update-modal");
     if (!updateModal) return;
     const modTitle = document.getElementById("update-modal-title");
