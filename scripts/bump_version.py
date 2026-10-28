@@ -4,10 +4,10 @@ import re
 sys.stdout.reconfigure(encoding='utf-8')
 
 def bump_version():
-    old_ver = "2.8.3"
-    new_ver = "2.8.4"
-    old_code = 39
-    new_code = 40
+    old_ver = "2.8.4"
+    new_ver = "2.8.5"
+    old_code = 40
+    new_code = 41
 
     # 1. package.json
     with open('package.json', 'r', encoding='utf-8') as f:
@@ -15,7 +15,7 @@ def bump_version():
     pkg = pkg.replace(f'"version": "{old_ver}"', f'"version": "{new_ver}"')
     with open('package.json', 'w', encoding='utf-8') as f:
         f.write(pkg)
-    print(f"✓ Bumped package.json to {new_ver}")
+    print(f"Bumped package.json to {new_ver}")
 
     # 2. sw.js
     with open('sw.js', 'r', encoding='utf-8') as f:
@@ -24,7 +24,7 @@ def bump_version():
     sw = sw.replace(f'semestero-me-v{old_ver}', f'semestero-me-v{new_ver}')
     with open('sw.js', 'w', encoding='utf-8') as f:
         f.write(sw)
-    print(f"✓ Bumped sw.js to {new_ver}")
+    print(f"Bumped sw.js to {new_ver}")
 
     # 3. app.js
     with open('app.js', 'r', encoding='utf-8') as f:
@@ -34,7 +34,7 @@ def bump_version():
     app = app.replace(f'APP_CURRENT_REVISION.version) || "{old_ver}"', f'APP_CURRENT_REVISION.version) || "{new_ver}"')
     with open('app.js', 'w', encoding='utf-8') as f:
         f.write(app)
-    print(f"✓ Bumped app.js to {new_ver}")
+    print(f"Bumped app.js to {new_ver}")
 
     # 4. android/app/build.gradle
     with open('android/app/build.gradle', 'r', encoding='utf-8') as f:
@@ -43,7 +43,7 @@ def bump_version():
     gradle = gradle.replace(f'versionName "{old_ver}"', f'versionName "{new_ver}"')
     with open('android/app/build.gradle', 'w', encoding='utf-8') as f:
         f.write(gradle)
-    print(f"✓ Bumped build.gradle to versionCode {new_code}, versionName {new_ver}")
+    print(f"Bumped build.gradle to versionCode {new_code}, versionName {new_ver}")
 
     # 5. index.html
     with open('index.html', 'r', encoding='utf-8') as f:
@@ -53,8 +53,8 @@ def bump_version():
     html = html.replace(f'(v{old_ver})"', f'(v{new_ver})"')
     html = html.replace(f'>v{old_ver} 🚀</button>', f'>v{new_ver} 🚀</button>')
 
-    # Add changelog item for v2.8.4
-    changelog_entry = f'''                            <li><strong>v{new_ver} (28/10/2026):</strong> שדרוג חבילת הסמלים של כלל השירותים האקדמיים החיצוניים (Moodle 26, Panopto, בחינות אס״ט, CheeseFork, Google Drive, Google Calendar ופורטל ציונים) מסמלי אימוג'י לסמלי מותג וקטוריים אותנטיים וחדים (SVG/PNG) המשתלבים בעיצוב האפליקציה.</li>
+    # Add changelog item for v2.8.5
+    changelog_entry = f'''                            <li><strong>v{new_ver} (28/10/2026):</strong> ייעול סרגל הגישה המהירה של הקורסים: איחוד שירותי אס״ט עם כפתור 'ציונים וסריקות' (הצגת סמל אס״ט הרשמי על פורטל הציונים והמחברות הסרוקות) והסרת כפתור מאגר הבחינות הנפרד לחוויית משתמש ממוקדת ונקייה יותר.</li>
 '''
     old_changelog_anchor = f'<li><strong>v{old_ver}'
     if old_changelog_anchor in html:
@@ -64,7 +64,7 @@ def bump_version():
 
     with open('index.html', 'w', encoding='utf-8') as f:
         f.write(html)
-    print(f"✓ Bumped index.html to {new_ver}")
+    print(f"Bumped index.html to {new_ver}")
 
 if __name__ == '__main__':
     bump_version()

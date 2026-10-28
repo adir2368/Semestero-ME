@@ -12247,7 +12247,6 @@ function renderTechnionPlusQuickBar(course) {
         ? `https://moodle26.technion.ac.il/course/view.php?id=${moodleCourseId}`
         : `https://moodle26.technion.ac.il/course/search.php?search=${encodeURIComponent(cleanCode || fullCode)}`;
     const panoptoUrl = `https://panopto.technion.ac.il/Panopto/Pages/Sessions/List.aspx#query=${encodeURIComponent(cleanCode || fullCode)}`;
-    const asatUrl = `https://asat.org.il/past-exams`;
     const cfUrl = `https://cheesefork.cf/course/${cleanCode || fullCode}`;
     const pangeaDirectUrl = PANGEA_COURSE_MAP[fullCode] || PANGEA_COURSE_MAP[cleanCode];
     const pangeaUrl = pangeaDirectUrl || `https://idofangbentov.uk/?q=${encodeURIComponent(cleanCode || fullCode)}`;
@@ -12260,9 +12259,6 @@ function renderTechnionPlusQuickBar(course) {
         <a href="${panoptoUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-xs technion-link-btn" style="background: rgba(244, 63, 94, 0.18); border: 1px solid #f43f5e; color: #fb7185; text-decoration: none; padding: 4px 10px; border-radius: 6px; font-size: 0.76rem; font-weight: 700; display: inline-flex; align-items: center; gap: 5px;" title="חיפוש הקלטות הקורס בפנופטו הטכניון">
             <img src="panopto_icon.svg" alt="Panopto" class="technion-btn-brand-icon" style="width: 15px; height: 15px; object-fit: contain; vertical-align: -2px; flex-shrink: 0;"> פנופטו ↗
         </a>
-        <a href="${asatUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-xs technion-link-btn" style="background: rgba(16, 185, 129, 0.18); border: 1px solid #10b981; color: #34d399; text-decoration: none; padding: 4px 10px; border-radius: 6px; font-size: 0.76rem; font-weight: 700; display: inline-flex; align-items: center; gap: 5px;" title="מאגר בחינות וסיכומים של אס״ט">
-            <img src="asat_icon.png" alt="ASAT" class="technion-btn-brand-icon" style="width: 15px; height: 15px; object-fit: contain; vertical-align: -2px; border-radius: 2px; flex-shrink: 0;"> בחינות אס״ט ↗
-        </a>
         <a href="${cfUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-xs technion-link-btn" style="background: rgba(245, 158, 11, 0.18); border: 1px solid #f59e0b; color: #fbbf24; text-decoration: none; padding: 4px 10px; border-radius: 6px; font-size: 0.76rem; font-weight: 700; display: inline-flex; align-items: center; gap: 5px;" title="דף הקורס ומערכת שעות ב-CheeseFork">
             <img src="cheesefork_icon.png" alt="CheeseFork" class="technion-btn-brand-icon" style="width: 15px; height: 15px; object-fit: contain; vertical-align: -2px; border-radius: 2px; flex-shrink: 0;"> צ'יזפורק ↗
         </a>
@@ -12272,8 +12268,8 @@ function renderTechnionPlusQuickBar(course) {
         <a href="${driveUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-xs technion-link-btn" style="background: rgba(168, 85, 247, 0.18); border: 1px solid #a855f7; color: #c084fc; text-decoration: none; padding: 4px 10px; border-radius: 6px; font-size: 0.76rem; font-weight: 700; display: inline-flex; align-items: center; gap: 5px;" title="חיפוש תיקיות Google Drive, סיכומים וחומרי עזר">
             <img src="drive_icon.svg" alt="Google Drive" class="technion-btn-brand-icon" style="width: 15px; height: 15px; object-fit: contain; vertical-align: -2px; flex-shrink: 0;"> דרייב וסיכומים ↗
         </a>
-        <a href="https://grades.technion.ac.il/" target="_blank" rel="noopener noreferrer" class="btn btn-xs technion-link-btn" style="background: rgba(147, 51, 234, 0.22); border: 1px solid #9333ea; color: #d8b4fe; text-decoration: none; padding: 4px 10px; border-radius: 6px; font-size: 0.76rem; font-weight: 700; display: inline-flex; align-items: center; gap: 5px;" title="פורטל הציונים, סריקות מחברות בחינה וערעורים בטכניון (grades.technion.ac.il)">
-            <img src="grades_icon.png" alt="Technion Grades" class="technion-btn-brand-icon" style="width: 15px; height: 15px; object-fit: contain; vertical-align: -2px; border-radius: 2px; flex-shrink: 0;"> ציונים וסריקות ↗
+        <a href="https://grades.technion.ac.il/" target="_blank" rel="noopener noreferrer" class="btn btn-xs technion-link-btn" style="background: rgba(147, 51, 234, 0.22); border: 1px solid #9333ea; color: #d8b4fe; text-decoration: none; padding: 4px 10px; border-radius: 6px; font-size: 0.76rem; font-weight: 700; display: inline-flex; align-items: center; gap: 5px;" title="פורטל הציונים, סריקות מחברות בחינה וערעורים באס״ט ובטכניון (grades.technion.ac.il)">
+            <img src="asat_icon.png" alt="ASAT" class="technion-btn-brand-icon" style="width: 15px; height: 15px; object-fit: contain; vertical-align: -2px; border-radius: 2px; flex-shrink: 0;"> ציונים וסריקות ↗
         </a>
     `;
 }
@@ -22024,8 +22020,8 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.10.28-v2.8.4",
-    version: "2.8.4",
+    code: "REV-2026.10.28-v2.8.5",
+    version: "2.8.5",
     build: "20261020_03",
     date: "2026-10-20 01:20",
     description: "גרסה 2.5.2: פתרון מוחלט ללולאת העדכון במובייל וספארי, מנגנון אנטי-רילואד עמיד ב-localStorage, סנכרון גרסאות מלא וקישורי הורדה ישירים לטלפונים"
@@ -24032,7 +24028,7 @@ window.getFormattedChangelogHTML = function() {
 };
 
 window.openChangelogModal = function(ver) {
-    const currentVer = ver || (typeof APP_CURRENT_REVISION !== 'undefined' && APP_CURRENT_REVISION && APP_CURRENT_REVISION.version) || "2.8.4";
+    const currentVer = ver || (typeof APP_CURRENT_REVISION !== 'undefined' && APP_CURRENT_REVISION && APP_CURRENT_REVISION.version) || "2.8.5";
     const updateModal = document.getElementById("version-update-modal");
     if (!updateModal) return;
     const modTitle = document.getElementById("update-modal-title");

@@ -53,7 +53,7 @@ test('Course Details Modal contains Technion++ Action Bar with all external link
     assert(appJs.includes('renderTechnionPlusQuickBar'), 'app.js must define renderTechnionPlusQuickBar');
     assert(appJs.includes('moodle26.technion.ac.il'), 'Quick bar must support Moodle 26');
     assert(appJs.includes('panopto.technion.ac.il'), 'Quick bar must support Panopto');
-    assert(appJs.includes('asat.org.il/past-exams'), 'Quick bar must support ASAT past exams');
+    assert(appJs.includes('asat_icon.png'), 'Quick bar must feature ASAT icon for grades and exam scans');
     assert(appJs.includes('cheesefork.cf'), 'Quick bar must support CheeseFork');
     assert(appJs.includes('grades.technion.ac.il'), 'Quick bar must support Technion Grades & Scans portal');
 });
