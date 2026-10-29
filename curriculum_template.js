@@ -72,7 +72,7 @@ var SAMPLE_ME_DEGREE = (typeof window !== 'undefined' && window.SAMPLE_ME_DEGREE
         name: "מכניקת מוצקים 1",
         credits: 4,
         semester: 2,
-        prerequisites: ["104041","104065","114071","114051"],
+        prerequisites: ["104041","104065"],
         status: "locked",
         tasks: [
             { id: "034028_h1", title: "תרגיל בית 1: מאמצים ועיוותים חד-מימדיים", type: "hw", xp: 50, completed: false },
@@ -96,7 +96,7 @@ var SAMPLE_ME_DEGREE = (typeof window !== 'undefined' && window.SAMPLE_ME_DEGREE
         code: "114051",
         name: "פיסיקה 1",
         credits: 2.5,
-        semester: 1,
+        semester: 2,
         prerequisites: [],
         status: "available",
         trackGroup: "physics_1",
@@ -110,7 +110,7 @@ var SAMPLE_ME_DEGREE = (typeof window !== 'undefined' && window.SAMPLE_ME_DEGREE
         code: "114071",
         name: "פיסיקה 1מ'",
         credits: 3.5,
-        semester: 1,
+        semester: 2,
         prerequisites: [],
         status: "available",
         trackGroup: "physics_1",
@@ -277,22 +277,11 @@ var SAMPLE_ME_DEGREE = (typeof window !== 'undefined' && window.SAMPLE_ME_DEGREE
         code: "125013",
         name: "מעבדה בכימיה",
         credits: 0.5,
-        semester: 2,
+        semester: 4,
         prerequisites: ["125001"],
         status: "available",
         tasks: [
             { id: "125013_ex", title: "דו\"ח מעבדה סופי", type: "exam", xp: 100, completed: false }
-        ]
-    },
-    "03940805": {
-        code: "03940805",
-        name: "חינוך גופני - אתלטיקה קלה / יוגה",
-        credits: 1,
-        semester: 3,
-        prerequisites: [],
-        status: "available",
-        tasks: [
-            { id: "03940805_pass", title: "מעקב נוכחות ופעילות", type: "hw", xp: 100, completed: false }
         ]
     },
     // Semester 5

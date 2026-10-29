@@ -43,8 +43,30 @@
     }
 
     function isAdirAuthenticated() {
-        if (typeof window !== 'undefined' && (window.Capacitor || window.location.protocol === 'capacitor:')) return true;
-        return !!(global.AuthSync && typeof global.AuthSync.isAdirActive === 'function' && global.AuthSync.isAdirActive());
+        if (global.AuthSync && typeof global.AuthSync.isAdirActive === 'function') {
+            return !!global.AuthSync.isAdirActive();
+        }
+        const uid = getActiveUserId();
+        return uid === 'adir_moshe' || uid === 'adir';
+    }
+
+    // Helper to check if a degree plan contains Adir Moshe's specific personal schedule modifications:
+    // 1. Physics 1 moved forward from Semester 2 to Semester 1
+    // 2. Chemistry Lab moved forward from Semester 4 to Semester 2
+    // 3. Yoga added voluntarily to Semester 3
+    function isAdirPlanAuthentic(plan) {
+        if (!plan || !Array.isArray(plan) || plan.length < 3) return false;
+        const sem1 = plan.find(s => s.semester === 1);
+        const sem2 = plan.find(s => s.semester === 2);
+        const sem3 = plan.find(s => s.semester === 3);
+        if (!sem1 || !sem2 || !sem3) return false;
+        const s1 = (sem1.courses || []).map(c => c.code || c.altCode);
+        const s2 = (sem2.courses || []).map(c => c.code || c.altCode);
+        const s3 = (sem3.courses || []).map(c => c.code || c.altCode);
+        const hasPhys1InS1 = s1.some(c => c === '01140051' || c === '114051');
+        const hasChemLabInS2 = s2.some(c => c === '01250013' || c === '125013');
+        const hasYogaInS3 = s3.some(c => c === '03940805');
+        return hasPhys1InS1 && hasChemLabInS2 && hasYogaInS3;
     }
 
     function getPlannerStorageKeyV2() {
@@ -573,29 +595,18 @@
             return false; // Disabled heuristic to prevent accidental user plan purging
         }
 
-        // Helper to check if a loaded plan has the required authentic baseline for Adir
-        function isAdirPlanAuthentic(plan) {
-            if (!plan || !Array.isArray(plan) || plan.length < 3) return false;
-            const sem1 = plan.find(s => s.semester === 1);
-            const sem2 = plan.find(s => s.semester === 2);
-            const sem3 = plan.find(s => s.semester === 3);
-            if (!sem1 || !sem2 || !sem3) return false;
-            const s1 = (sem1.courses || []).map(c => c.code || c.altCode);
-            const s2 = (sem2.courses || []).map(c => c.code || c.altCode);
-            const s3 = (sem3.courses || []).map(c => c.code || c.altCode);
-            const hasPhys1InS1 = s1.some(c => c === '01140051' || c === '114051');
-            const hasChemLabInS2 = s2.some(c => c === '01250013' || c === '125013');
-            const hasYogaInS3 = s3.some(c => c === '03940805');
-            return hasPhys1InS1 && hasChemLabInS2 && hasYogaInS3;
-        }
-
         // 1. First priority: cloud-synced degreePlan from global gameState
         if (global.gameState && Array.isArray(global.gameState.degreePlan) && global.gameState.degreePlan.length > 0) {
             try {
-                if (!isAdir || isAdirPlanAuthentic(global.gameState.degreePlan)) {
+                const matchesAdirSignature = isAdirPlanAuthentic(global.gameState.degreePlan);
+                if (isAdir ? matchesAdirSignature : !matchesAdirSignature) {
                     loadedPlan = JSON.parse(JSON.stringify(global.gameState.degreePlan));
                     loadedUnassigned = Array.isArray(global.gameState.degreePlanUnassigned) ? JSON.parse(JSON.stringify(global.gameState.degreePlanUnassigned)) : [];
                     console.log('[Planner] Initialized plan from gameState.degreePlan');
+                } else if (!isAdir && matchesAdirSignature) {
+                    console.warn('[Planner] Detected contaminated Adir plan in non-Adir gameState.degreePlan, rejecting and purging.');
+                    delete global.gameState.degreePlan;
+                    delete global.gameState.degreePlanUnassigned;
                 } else {
                     console.warn('[Planner] Existing gameState.degreePlan was out-of-date or incomplete for Adir, preferring authentic preloaded plan.');
                 }
@@ -604,8 +615,8 @@
             }
         }
 
-        // 2. Preloaded authentic degreePlan from PRELOADED_USER_STATE (Adir / Capacitor)
-        if (!loadedPlan && (isAdir || (typeof window !== 'undefined' && (window.Capacitor || window.location.protocol === 'capacitor:'))) && preloadedState && Array.isArray(preloadedState.degreePlan) && preloadedState.degreePlan.length > 0) {
+        // 2. Preloaded authentic degreePlan from PRELOADED_USER_STATE (Adir ONLY)
+        if (!loadedPlan && isAdir && preloadedState && Array.isArray(preloadedState.degreePlan) && preloadedState.degreePlan.length > 0) {
             try {
                 loadedPlan = JSON.parse(JSON.stringify(preloadedState.degreePlan));
                 loadedUnassigned = Array.isArray(preloadedState.degreePlanUnassigned) ? JSON.parse(JSON.stringify(preloadedState.degreePlanUnassigned)) : [];
@@ -620,7 +631,8 @@
                 if (savedV2) {
                     const parsed = JSON.parse(savedV2);
                     const semCandidate = Array.isArray(parsed.semesters) ? parsed.semesters : (Array.isArray(parsed) ? parsed : null);
-                    if (!isAdir || isAdirPlanAuthentic(semCandidate)) {
+                    const matchesAdirSignature = isAdirPlanAuthentic(semCandidate);
+                    if (isAdir ? matchesAdirSignature : !matchesAdirSignature) {
                         if (parsed && Array.isArray(parsed.semesters) && parsed.semesters.length > 0) {
                             loadedPlan = parsed.semesters;
                             loadedUnassigned = Array.isArray(parsed.unassigned) ? parsed.unassigned : [];
@@ -628,6 +640,9 @@
                             loadedPlan = parsed;
                             loadedUnassigned = [];
                         }
+                    } else if (!isAdir && matchesAdirSignature) {
+                        console.warn('[Planner] Purging contaminated Adir plan from non-Adir V2 storage');
+                        localStorage.removeItem(v2Key);
                     }
                 }
             } catch (e) {
@@ -642,11 +657,15 @@
                 if (savedV1) {
                     const parsedV1 = JSON.parse(savedV1);
                     const semCandidate = Array.isArray(parsedV1) ? parsedV1 : null;
-                    if (!isAdir || isAdirPlanAuthentic(semCandidate)) {
+                    const matchesAdirSignature = isAdirPlanAuthentic(semCandidate);
+                    if (isAdir ? matchesAdirSignature : !matchesAdirSignature) {
                         if (Array.isArray(parsedV1) && parsedV1.length > 0) {
                             loadedPlan = parsedV1;
                             loadedUnassigned = [];
                         }
+                    } else if (!isAdir && matchesAdirSignature) {
+                        console.warn('[Planner] Purging contaminated Adir plan from non-Adir V1 storage');
+                        localStorage.removeItem(v1Key);
                     }
                 }
             } catch (e) {
@@ -654,8 +673,8 @@
             }
         }
 
-        // 5. Preloaded authentic degreePlan fallback for Adir
-        if (!loadedPlan && (isAdir || (typeof window !== 'undefined' && (window.Capacitor || window.location.protocol === 'capacitor:'))) && preloadedState && Array.isArray(preloadedState.degreePlan) && preloadedState.degreePlan.length > 0) {
+        // 5. Preloaded authentic degreePlan fallback for Adir ONLY
+        if (!loadedPlan && isAdir && preloadedState && Array.isArray(preloadedState.degreePlan) && preloadedState.degreePlan.length > 0) {
             loadedPlan = JSON.parse(JSON.stringify(preloadedState.degreePlan));
             loadedUnassigned = Array.isArray(preloadedState.degreePlanUnassigned) ? JSON.parse(JSON.stringify(preloadedState.degreePlanUnassigned)) : [];
         }
@@ -3674,16 +3693,7 @@
         getCourseGrade: getCourseGrade,
         adoptPlanFromState: function(plan, unassigned) {
             const isAdir = isAdirAuthenticated();
-            function isAdirPlan(p) {
-                if (!p || !Array.isArray(p) || p.length === 0) return false;
-                const sem1 = p.find(s => s.semester === 1);
-                if (!sem1 || !Array.isArray(sem1.courses)) return false;
-                const hasPhysics1 = sem1.courses.some(c => c.code === '01140051' || c.code === '114051' || c.altCode === '114051');
-                const hasPython = sem1.courses.some(c => c.code === '02340128' || c.code === '234128' || c.altCode === '234128');
-                return hasPython && !hasPhysics1 && sem1.courses.length <= 4;
-            }
-
-            if (Array.isArray(plan) && plan.length > 0 && (isAdir || !isAdirPlan(plan))) {
+            if (Array.isArray(plan) && plan.length > 0 && (isAdir || !isAdirPlanAuthentic(plan))) {
                 customPlan = JSON.parse(JSON.stringify(plan));
                 unassignedCourses = Array.isArray(unassigned) ? JSON.parse(JSON.stringify(unassigned)) : [];
                 if (customPlan) {

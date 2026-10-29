@@ -18,9 +18,9 @@ ZIP_PATH = os.path.join(ROOT, "Semestero-ME-Windows-x64.zip")
 
 with open(os.path.join(ROOT, "package.json"), "r", encoding="utf-8") as f:
     pkg = json.load(f)
-VERSION = pkg.get("version", "2.8.6")
+VERSION = pkg.get("version", "2.8.7")
 TAG = f"v{VERSION}"
-NAME = f"Semestero ME v{VERSION} - Moodle Sync Intelligence & Zoom Link Filter"
+NAME = f"Semestero ME v{VERSION} - Curriculum Isolation & Recommended Tracks Integrity"
 
 def get_github_token():
     try:
@@ -97,18 +97,21 @@ def main():
 
     body_notes = f"""## מה חדש בגרסה v{VERSION} 🚀🧹🎓
 
-### 1. סינון וטיהור חכם של סנכרון מודל (Moodle Sync Intelligence & Zoom Filter)
-- **חסימה מוחלטת של קישורי זום (Zoom)**: קישורי מפגשי זום, הרצאות מקוונות וחדרי הרצאה (`zoom.us`) אינם נחשבים למטלות והם נחסמים כעת באופן מוחלט מכניסה ללוח המשימות של הקורסים.
-- **טיהור אוטומטי של לוח המשימות**: מנגנון ה-`deduplicateCourseTasks` מנקה אוטומטית קישורי זום קיימים שנסחפו ללוח המשימות בסנכרונים קודמים.
-- **סינון הודעות פתיחה ללא דדליין**: הודעות פתיחת שאלון (`תאריך תחילת שאלון`, `נפתח ב`) מסוננות החוצה, כך שרק מטלות עם מועד הגשה סופי נשמרות.
-- **ניקוי תחיליות מיותרות**: הסרת `תאריך הגשה` ו-`יש להגיש את` משם המשימה, להצגה נקייה וממוקדת.
+### 1. הפרדה הרמטית של סילבוס המפתח ממערכת המערכת המומלצת (Curriculum Isolation)
+- **פיזיקה 1 (114051 / 114071)**: הוחזרה לסמסטר 2 בכל הסילבוסים המומלצים (2024, 2026, 2027) ולמשתמשי אורח/סטודנטים חדשים. ההקדמה לסמסטר 1 שמורה באופן בלעדי למשתמש המפתח (אדיר משה).
+- **מעבדה בכימיה (125013)**: הוחזרה לסמסטר 4 (0.5 נק"ז) כברירת מחדל תקנית. ההקדמה לסמסטר 2 שמורה לאדיר משה בלבד.
+- **הסרת שריון יוגה/ספורט בסמסטר 3**: קורס יוגה הוסר מסמסטר 3 בכל סילבוסי ברירת המחדל, ונשאר זמין לבחירה וולונטרית מתוך קטלוג קורסי הספורט והמל\"ג.
+- **מכניקת מוצקים 1 (034028)**: דרישות הקדם עודכנו לחדו\"א 1מ' ואלגברה 1מ' בלבד (פיזיקה 1 נלמדת במקביל בצמוד בסמסטר 2 ואינה חוסמת את הרישום).
 
-### 2. חידוד חוויית ההגשה במודל (Moodle Calendar & Activity Deep Links)
-- הבהרת זרימת ההגשה: חידוד ה-Tooltip בכפתור המודל בלוח המשימות למעבר ישיר לכרטיס האירוע במודל, בו מוצג כפתור "עבור לפעילות" לפתיחת טופס ההגשה.
+### 2. מנגנון טיהור אוטומטי מבוסס חתימה (Signature-Based Contamination Purge)
+- זיהוי חתימת התוכנית האישית של אדיר משה (`isAdirPlanAuthentic`: פיזיקה 1 בסמסטר 1 + מעבדה בכימיה בסמסטר 2 + יוגה בסמסטר 3).
+- אם אורח או סטודנט אחר נחשף בטעות לחתימה זו ב-localStorage או ב-Capacitor, המערכת מזהה זאת, מטהרת את הנתונים ומאפסת לסילבוס התקני הנקי.
+- ביטול הזדהות שגויה ב-Capacitor: מכשירי מובייל שאינם מחוברים לאדיר משה אינם נחשבים אוטומטית למשתמש אדיר משה.
 
-### 3. קימפול חבילות והפצה
-- קימפול קובץ APK מעודכן (`Semestero-ME.apk`, versionCode 42).
-- מעבר מלא של כל סוויטות הבדיקות האוטומטיות (System Health, Auth Persistence, Integrations Hub, CheeseFork Precision, Dual-Mode Suite, Zoom Filter Suite).
+### 3. בדיקות מקיפות וקימפול גרסה
+- סוויטת בדיקות ייעודית חדשה: `tests/curriculum_isolation_and_recommended_tracks.test.js`.
+- קימפול קובץ APK מעודכן (`Semestero-ME.apk`, versionCode 43).
+- מעבר מלא של כל בדיקות הבריאות (`npm test`).
 """
 
     req_tag = urllib.request.Request(f"https://api.github.com/repos/{REPO}/releases/tags/{TAG}", headers=headers)

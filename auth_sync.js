@@ -264,11 +264,24 @@
                     // Contamination purge for guest / non-developer:
                     // If a guest state contains developer's old test signature or contaminated preloaded data:
                     if (user.id === 'guest' || user.id !== 'adir_moshe') {
-                        const hasAdirPlan = parsed && parsed.degreePlan && Array.isArray(parsed.degreePlan) && parsed.degreePlan.some(s => s.semester === 1 && (s.courses || []).some(c => c.code === '02340128' || c.code === '234128'));
+                        const hasAdirPlan = parsed && parsed.degreePlan && Array.isArray(parsed.degreePlan) && (
+                            parsed.degreePlan.some(s => s.semester === 1 && (s.courses || []).some(c => c.code === '02340128' || c.code === '234128')) ||
+                            (
+                                parsed.degreePlan.some(s => s.semester === 1 && (s.courses || []).some(c => c.code === '01140051' || c.code === '114051')) &&
+                                parsed.degreePlan.some(s => s.semester === 2 && (s.courses || []).some(c => c.code === '01250013' || c.code === '125013')) &&
+                                parsed.degreePlan.some(s => s.semester === 3 && (s.courses || []).some(c => c.code === '03940805'))
+                            )
+                        );
+                        const hasAdirGradesOrCourses = parsed && parsed.courses && (
+                            (parsed.courses['114051'] && parsed.courses['114051'].semester === 1 && parsed.courses['114051'].grade === 100) ||
+                            (parsed.courses['125013'] && parsed.courses['125013'].semester === 2 && parsed.courses['125013'].grade === 94) ||
+                            (parsed.courses['03940805'] && parsed.courses['03940805'].grade === 98)
+                        );
                         const isContaminated = (
                             parsed.characterClass === 'סטודנט למדעי המחשב' ||
                             (parsed.completedCourses >= 10 && (parsed.gpa >= 86 || parsed.credits >= 38)) ||
-                            hasAdirPlan
+                            hasAdirPlan ||
+                            hasAdirGradesOrCourses
                         );
                         if (isContaminated) {
                             console.warn('[AuthSync] Detected contaminated guest/student state. Purging and resetting to clean curriculum...');

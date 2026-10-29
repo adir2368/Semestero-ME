@@ -2271,7 +2271,7 @@ var SAMPLE_ME_DEGREE = (typeof window !== 'undefined' && window.SAMPLE_ME_DEGREE
         name: "מכניקת מוצקים 1",
         credits: 4,
         semester: 2,
-        prerequisites: ["104041","104065","114071","114051"],
+        prerequisites: ["104041","104065"],
         status: "locked",
         tasks: [
             { id: "034028_h1", title: "תרגיל בית 1: מאמצים ועיוותים חד-מימדיים", type: "hw", xp: 50, completed: false },
@@ -2295,7 +2295,7 @@ var SAMPLE_ME_DEGREE = (typeof window !== 'undefined' && window.SAMPLE_ME_DEGREE
         code: "114051",
         name: "פיסיקה 1",
         credits: 2.5,
-        semester: 1,
+        semester: 2,
         prerequisites: [],
         status: "available",
         tasks: [
@@ -9657,8 +9657,7 @@ function loadSavedState() {
           "034061": [],
           "034028": [
                     "104041",
-                    "104065",
-                    "114051"
+                    "104065"
           ],
           "034053": [
                     "034028",
@@ -22020,8 +22019,8 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.10.28-v2.8.6",
-    version: "2.8.6",
+    code: "REV-2026.10.29-v2.8.7",
+    version: "2.8.7",
     build: "20261020_03",
     date: "2026-10-20 01:20",
     description: "גרסה 2.5.2: פתרון מוחלט ללולאת העדכון במובייל וספארי, מנגנון אנטי-רילואד עמיד ב-localStorage, סנכרון גרסאות מלא וקישורי הורדה ישירים לטלפונים"
@@ -24028,7 +24027,7 @@ window.getFormattedChangelogHTML = function() {
 };
 
 window.openChangelogModal = function(ver) {
-    const currentVer = ver || (typeof APP_CURRENT_REVISION !== 'undefined' && APP_CURRENT_REVISION && APP_CURRENT_REVISION.version) || "2.8.6";
+    const currentVer = ver || (typeof APP_CURRENT_REVISION !== 'undefined' && APP_CURRENT_REVISION && APP_CURRENT_REVISION.version) || "2.8.7";
     const updateModal = document.getElementById("version-update-modal");
     if (!updateModal) return;
     const modTitle = document.getElementById("update-modal-title");
