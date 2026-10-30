@@ -9119,7 +9119,8 @@ function loadSavedState() {
     if (!loadedFromAuthSync) {
         const preloadedUserState = (typeof window !== 'undefined' && window.PRELOADED_USER_STATE) || (typeof PRELOADED_USER_STATE !== 'undefined' ? PRELOADED_USER_STATE : null);
         const isAdir = (window.AuthSync && typeof window.AuthSync.isAdirActive === "function" && window.AuthSync.isAdirActive());
-        const storageKey = isAdir ? "academic_skill_tree_save" : "ast_user_state_guest";
+        const activeFallbackUid = (window.AuthSync && typeof window.AuthSync.getActiveUser === "function") ? window.AuthSync.getActiveUser().id : "guest";
+        const storageKey = isAdir ? "academic_skill_tree_save" : ("ast_user_state_" + activeFallbackUid);
         const saved = localStorage.getItem(storageKey);
         if (saved) {
             try {
@@ -20577,7 +20578,8 @@ function generateFullICSString() {
 
 // Asynchronous background update to GitHub Gist
 async function syncScheduleToCloudGist(showToast = true) {
-    if (!CLOUD_GIST_SYNC.token || !CLOUD_GIST_SYNC.token.trim()) {
+    const isAdir = (window.AuthSync && typeof window.AuthSync.isAdirActive === 'function' && window.AuthSync.isAdirActive());
+    if (!isAdir || !CLOUD_GIST_SYNC.token || !CLOUD_GIST_SYNC.token.trim()) {
         const indicator = document.getElementById("sync-status-indicator");
         if (indicator) indicator.innerText = "⚪ אינו מחובר לסנכרון ענן";
         if (showToast) {

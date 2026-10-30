@@ -417,7 +417,12 @@ async function run() {
             const wrongAdirPass = await window.AuthSync.loginWithPassword('adir_moshe', 'WrongPass999');
             const weakGithubPass = await window.AuthSync.loginWithPassword('adir2368', 'adir2368');
             const resetAdirAttempt = await window.AuthSync.resetPassword('adir_moshe', 'NewPass123!', 'adir.m.2368@gmail.com');
-            const hijackAdirReg = await window.AuthSync.registerStudent('Hacker', 'adir.m.2368@gmail.com', 'Pass123456', 3);
+            const hijackAdirReg = await window.AuthSync.registerStudent({
+                name: 'Hacker',
+                email: 'adir.m.2368@gmail.com',
+                password: 'Pass123456',
+                startingSemester: 3
+            });
 
             return {
                 urlBackdoorUser,
@@ -525,6 +530,144 @@ async function run() {
         assert.strictEqual(afterLogout.chemLabSem, 4, 'Logout must reset Chem Lab back to Sem 4');
         assert(afterLogout.widgetClearDelta >= 1, 'Logout must clear native Android widgets');
         console.log('  ✓ PASS: Developer login, reload persistence, and zero-trace logout verified!\n');
+
+        // -------------------------------------------------------------------------
+        // SCENARIO 6: Multi-Tenant Student A <-> Student B <-> Guest Isolation
+        // -------------------------------------------------------------------------
+        console.log('[Scenario 6] Verifying Student A <-> Student B <-> Guest Shared-Device Isolation...');
+        const multiTenant = await cdp.eval(`(async () => {
+            window.alert = () => {};
+            window.confirm = () => true;
+            const ts = Date.now();
+            const emailA = 'qa.alpha.' + ts + '@technion.test';
+            const emailB = 'qa.beta.' + ts + '@technion.test';
+
+            // 0. Seed temporary Guest noise before Student A/B register
+            localStorage.setItem('ast_user_state_guest', JSON.stringify({
+                gpa: 77.7,
+                courses: { '104041': { grade: 77, status: 'mastered' } }
+            }));
+
+            // 1. Register Student A with Grade 95 in 104041 + scoped integrations
+            const regA = await window.AuthSync.registerStudent({
+                name: 'QA Student Alpha',
+                email: emailA,
+                password: 'AlphaPass1!',
+                startingSemester: 2,
+                priorCompleted: { '104041': { completed: true, grade: 95 } }
+            });
+            const uidA = localStorage.getItem('ast_logged_in_user');
+            await window.AuthSync.updateUserProfile({
+                name: 'QA Student Alpha',
+                email: emailA,
+                phone: '0541111111',
+                semester: 2
+            });
+            await window.AuthSync.saveCheeseForkUrl('https://cheesefork.cf/?semester=202601&uid=alpha_only_uid');
+            localStorage.setItem('ast_moodle_calendar_url_' + uidA, 'https://moodle25.technion.ac.il/calendar/export_execute.php?userid=11111&authtoken=alpha_tok');
+            localStorage.setItem('ast_moodle_calendar_url', 'https://moodle25.technion.ac.il/calendar/export_execute.php?userid=11111&authtoken=alpha_tok');
+
+            // Verify duplicate email registration block & single-factor reset block
+            const dupRegBlocked = !(await window.AuthSync.registerStudent({
+                name: 'Impersonator',
+                email: emailA,
+                password: 'HackPass9!',
+                startingSemester: 1
+            }));
+            const wrongNameResetBlocked = !(await window.AuthSync.resetPassword('Wrong Name', 'HackPass9!', emailA));
+
+            // 2. Logout Student A -> check Guest clean state
+            window.AuthSync.logout(true);
+            const guestSnap = {
+                uid: localStorage.getItem('ast_logged_in_user'),
+                gpa: Number(window.gameState.gpa || 0),
+                cf: localStorage.getItem('ast_cheesefork_url'),
+                moodle: localStorage.getItem('ast_moodle_calendar_url'),
+                phone: (window.gameState.userProfile && window.gameState.userProfile.phone) || ''
+            };
+
+            // 3. Register Student B (0 completed courses) -> ensure ZERO inheritance from Student A or Guest!
+            const regB = await window.AuthSync.registerStudent({
+                name: 'QA Student Beta',
+                email: emailB,
+                password: 'BetaPass2!',
+                startingSemester: 1,
+                priorCompleted: {}
+            });
+            const uidB = localStorage.getItem('ast_logged_in_user');
+            const profBRaw = localStorage.getItem('ast_profile_' + uidB) || '{}';
+            const stateBRaw = localStorage.getItem('ast_user_state_' + uidB) || '{}';
+            const profB = JSON.parse(profBRaw);
+            const stateB = JSON.parse(stateBRaw);
+            const betaSnap = {
+                uid: uidB,
+                gpa: Number(window.gameState.gpa || 0),
+                cf: localStorage.getItem('ast_cheesefork_url'),
+                moodle: localStorage.getItem('ast_moodle_calendar_url'),
+                phone: (window.gameState.userProfile && window.gameState.userProfile.phone) || '',
+                hasHash: typeof profB.passwordHash === 'string' && profB.passwordHash.length === 64,
+                noPlaintextProf: !profB.password,
+                noPlaintextState: !stateB.account_password
+            };
+
+            // 4. Switch back to Student A via password login -> verify Student A's data & integrations restore cleanly!
+            window.AuthSync.logout(true);
+            const loginA = await window.AuthSync.loginWithPassword(emailA, 'AlphaPass1!');
+            const alphaRestored = {
+                loginA,
+                uid: localStorage.getItem('ast_logged_in_user'),
+                gpa: Number(window.gameState.gpa || 0),
+                phone: localStorage.getItem('ast_user_phone_' + uidA),
+                cf: localStorage.getItem('ast_cheesefork_url'),
+                moodle: localStorage.getItem('ast_moodle_calendar_url')
+            };
+
+            // 5. Clean up both temporary test accounts from Supabase & localStorage via deleteAccount()
+            const delA = await window.AuthSync.deleteAccount();
+            const loginB = await window.AuthSync.loginWithPassword(emailB, 'BetaPass2!');
+            const delB = await window.AuthSync.deleteAccount();
+
+            return {
+                regA,
+                regB,
+                dupRegBlocked,
+                wrongNameResetBlocked,
+                guestSnap,
+                betaSnap,
+                alphaRestored,
+                delA,
+                loginB,
+                delB,
+                finalUid: localStorage.getItem('ast_logged_in_user')
+            };
+        })()`);
+
+        assert.strictEqual(multiTenant.regA, true, 'Student A registration must succeed');
+        assert.strictEqual(multiTenant.regB, true, 'Student B registration must succeed');
+        assert.strictEqual(multiTenant.dupRegBlocked, true, 'Duplicate email registration must be blocked');
+        assert.strictEqual(multiTenant.wrongNameResetBlocked, true, 'Password reset with wrong full name must be blocked');
+        assert.strictEqual(multiTenant.guestSnap.uid, 'guest');
+        assert.strictEqual(multiTenant.guestSnap.gpa, 0);
+        assert.strictEqual(multiTenant.guestSnap.cf, null);
+        assert.strictEqual(multiTenant.guestSnap.moodle, null);
+        assert.strictEqual(multiTenant.guestSnap.phone, '');
+        assert.strictEqual(multiTenant.betaSnap.gpa, 0, 'Student B must have 0 GPA (no leak from Student A or Guest)');
+        assert.strictEqual(multiTenant.betaSnap.cf, null, 'Student B must not inherit Student A CheeseFork URL');
+        assert.strictEqual(multiTenant.betaSnap.moodle, null, 'Student B must not inherit Student A Moodle URL');
+        assert.strictEqual(multiTenant.betaSnap.phone, '', 'Student B must not inherit Student A phone');
+        assert.strictEqual(multiTenant.betaSnap.hasHash, true, 'Student B password must be stored as 64-char SHA-256 hash');
+        assert.strictEqual(multiTenant.betaSnap.noPlaintextProf, true, 'No plaintext password in ast_profile_<uid>');
+        assert.strictEqual(multiTenant.betaSnap.noPlaintextState, true, 'No plaintext account_password in ast_user_state_<uid>');
+        assert.strictEqual(multiTenant.alphaRestored.loginA, true, 'Student A re-login must succeed');
+        assert.strictEqual(multiTenant.alphaRestored.gpa, 95, 'Student A GPA (95) must restore cleanly');
+        assert.strictEqual(multiTenant.alphaRestored.phone, '054-1111111', 'Student A phone must restore cleanly');
+        assert(String(multiTenant.alphaRestored.cf).includes('alpha_only_uid'), 'Student A CheeseFork URL must restore cleanly');
+        assert(String(multiTenant.alphaRestored.moodle).includes('alpha_tok'), 'Student A Moodle URL must restore cleanly');
+        assert.strictEqual(multiTenant.delA, true, 'Student A cleanup deleteAccount() must succeed');
+        assert.strictEqual(multiTenant.loginB, true, 'Student B re-login must succeed');
+        assert.strictEqual(multiTenant.delB, true, 'Student B cleanup deleteAccount() must succeed');
+        assert.strictEqual(multiTenant.finalUid, 'guest', 'Final session after deletions must be guest');
+        console.log('  ✓ PASS: Student A <-> Student B <-> Guest multi-tenant isolation & cloud cleanup verified!\n');
 
         await cdp.send('Page.removeScriptToEvaluateOnNewDocument', { identifier: capScript.identifier });
 

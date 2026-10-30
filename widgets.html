@@ -1400,7 +1400,7 @@
         function getTecMeData() {
             let savedState = null;
             try {
-                const raw = localStorage.getItem('academicSkillTreeState_v1');
+                const uid = localStorage.getItem('ast_logged_in_user') || 'guest'; const hasProof = !!localStorage.getItem('ast_auth_verified_v3'); const raw = localStorage.getItem((uid === 'adir_moshe' && hasProof) ? 'academic_skill_tree_save' : ('ast_user_state_' + uid));
                 if (raw) savedState = JSON.parse(raw);
             } catch (e) {}
 
@@ -1410,8 +1410,8 @@
                 termSub: 'Finals start in 10 weeks',
                 finalsSub: 'The last sitting is in 6 weeks',
                 breakSub: 'SEMESTER C starts in 18 days',
-                semesterGpa: (savedState && savedState.recentSemesterGpa) ? Number(savedState.recentSemesterGpa).toFixed(1) : '87.4',
-                overallGpa: (savedState && savedState.overallGpa) ? Number(savedState.overallGpa).toFixed(1) : '85.9',
+                semesterGpa: (savedState && (savedState.recentSemesterGpa || savedState.gpa)) ? Number(savedState.recentSemesterGpa || savedState.gpa).toFixed(1) : '0.0',
+                overallGpa: (savedState && (savedState.overallGpa || savedState.gpa)) ? Number(savedState.overallGpa || savedState.gpa).toFixed(1) : '0.0',
                 nextExam: {
                     daysLeft: 115,
                     courseName: 'מכניקת מוצקים 1',
