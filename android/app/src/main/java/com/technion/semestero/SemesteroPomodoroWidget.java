@@ -72,8 +72,8 @@ public class SemesteroPomodoroWidget extends AppWidgetProvider {
         boolean isRunning = prefs.getBoolean("pomodoro_running", false);
         String timeDisplay = prefs.getString("pomodoro_time", "25:00");
         String mode = prefs.getString("pomodoro_mode", "25m");
-        String taskTitle = prefs.getString("pomodoro_task", "🎯 פוקוס: פיסיקה 2מ • תרגיל בית 3");
-        String dailyGoal = prefs.getString("pomodoro_goal", "🔥 3.5 / 5.0 שעות (70%)");
+        String taskTitle = prefs.getString("pomodoro_task", "🎯 פוקוס: מרתון למידה וחזרות");
+        String dailyGoal = prefs.getString("pomodoro_goal", "🔥 מרתון פומודורו אקדמי");
 
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.widget_pomodoro);
         views.setTextViewText(R.id.widget_pomodoro_time, timeDisplay);

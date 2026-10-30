@@ -23,12 +23,12 @@ public class SemesteroFinalsGpaWidget extends AppWidgetProvider {
     public static void updateAppWidget(Context context, AppWidgetManager appWidgetManager, int appWidgetId) {
         SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
 
-        String currentGpa = prefs.getString("gpa_current", "88.4");
-        String targetGpa = prefs.getString("gpa_target", "יעד סמסטר: 90.0");
-        String badge = prefs.getString("gpa_badge", "🏆 מצטיין דיקן");
-        String examDays = prefs.getString("finals_exam_days", "106");
+        String currentGpa = prefs.getString("gpa_current", "0.0");
+        String targetGpa = prefs.getString("gpa_target", "יעד סמסטר: --");
+        String badge = prefs.getString("gpa_badge", "✨ מצב התחלתי");
+        String examDays = prefs.getString("finals_exam_days", "--");
         String examName = prefs.getString("finals_exam_name", "ימים לבחינה");
-        String examCourse = prefs.getString("finals_exam_course", "פיסיקה 2");
+        String examCourse = prefs.getString("finals_exam_course", "אין בחינות קרובות");
 
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.widget_finals_gpa);
         views.setTextViewText(R.id.widget_gpa_current, currentGpa);

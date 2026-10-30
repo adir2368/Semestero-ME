@@ -21,8 +21,8 @@ public class SemesteroMiluimWidget extends AppWidgetProvider {
         String action = intent != null ? intent.getAction() : null;
         if (ACTION_MILUIM_INCREMENT.equals(action) || ACTION_MILUIM_DECREMENT.equals(action)) {
             SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-            String daysStr = prefs.getString("miluim_days", "21");
-            int days = 21;
+            String daysStr = prefs.getString("miluim_days", "0");
+            int days = 0;
             try {
                 days = Integer.parseInt(daysStr.trim());
             } catch (Exception ignored) {}
@@ -81,11 +81,11 @@ public class SemesteroMiluimWidget extends AppWidgetProvider {
     public static void updateAppWidget(Context context, AppWidgetManager appWidgetManager, int appWidgetId) {
         SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
 
-        String days = prefs.getString("miluim_days", "21");
-        String badge = prefs.getString("miluim_badge", "🎖️ פעיל תשפ״ז");
-        String right1 = prefs.getString("miluim_right_1", "✓ 2 נ״ז פטור אקדמי (מאושר)");
-        String right2 = prefs.getString("miluim_right_2", "✓ זכאות למועד ג׳ בכל הקורסים");
-        String right3 = prefs.getString("miluim_right_3", "✓ הקלטות פנופטו וסיוע חונכות");
+        String days = prefs.getString("miluim_days", "0");
+        String badge = prefs.getString("miluim_badge", "💤 ללא שמ״פ");
+        String right1 = prefs.getString("miluim_right_1", "• 0 ימי שמ״פ פעילים");
+        String right2 = prefs.getString("miluim_right_2", "• ניתן לעדכן ב- + / -");
+        String right3 = prefs.getString("miluim_right_3", "• זכויות יחושבו אוטומטית");
 
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.widget_miluim);
         views.setTextViewText(R.id.widget_miluim_days_count, days);

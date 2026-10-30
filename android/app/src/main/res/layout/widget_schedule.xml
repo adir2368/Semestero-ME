@@ -32,7 +32,7 @@
             android:paddingRight="6dp"
             android:paddingTop="2dp"
             android:paddingBottom="2dp"
-            android:text="15 ש״ס • יום חופש 🏖️"
+            android:text="0 ש״ס • טרם הוגדרה מערכת"
             android:textColor="#94a3b8"
             android:textSize="10sp"
             android:textStyle="bold" />
@@ -64,14 +64,14 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="10:30-16:30 • מוצקים 2 + פיסיקה (4 שעות)"
+                android:text="אין שיעורים מתוזמנים"
                 android:textColor="#f8fafc"
                 android:textSize="10sp"
                 android:maxLines="1"
                 android:ellipsize="end" />
         </LinearLayout>
 
-        <!-- Day 2: Monday (Free Day!) -->
+        <!-- Day 2: Monday -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -82,7 +82,7 @@
                 android:layout_width="22dp"
                 android:layout_height="wrap_content"
                 android:text="ב׳"
-                android:textColor="#10b981"
+                android:textColor="#38bdf8"
                 android:textSize="10sp"
                 android:textStyle="bold" />
             <TextView
@@ -90,11 +90,11 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="🏖️ יום חופשי מלא! (0 שעות)"
-                android:textColor="#10b981"
+                android:text="אין שיעורים מתוזמנים"
+                android:textColor="#f8fafc"
                 android:textSize="10sp"
-                android:textStyle="bold"
-                android:maxLines="1" />
+                android:maxLines="1"
+                android:ellipsize="end" />
         </LinearLayout>
 
         <!-- Day 3: Tuesday -->
@@ -116,7 +116,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="08:30-14:30 • מתמטיקה ומעבדה (6 שעות)"
+                android:text="אין שיעורים מתוזמנים"
                 android:textColor="#f8fafc"
                 android:textSize="10sp"
                 android:maxLines="1"
@@ -142,7 +142,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="10:30-12:30 • תרגול מוצקים (2 שעות)"
+                android:text="אין שיעורים מתוזמנים"
                 android:textColor="#f8fafc"
                 android:textSize="10sp"
                 android:maxLines="1"
@@ -167,7 +167,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="07:30-10:30 • יוגה ורובוטיקה (3 שעות)"
+                android:text="אין שיעורים מתוזמנים"
                 android:textColor="#f8fafc"
                 android:textSize="10sp"
                 android:maxLines="1"

@@ -4668,7 +4668,7 @@
   ],
   "bossesSlain": 11,
   "userProfile": {
-    "phone": "053-6202662"
+    "phone": ""
   },
   "isFinalsMode": false,
   "lastModified": 1789657339323,

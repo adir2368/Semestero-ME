@@ -6,10 +6,13 @@ import android.appwidget.AppWidgetProvider;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.widget.RemoteViews;
 
 public class SemesteroLaunchpadWidget extends AppWidgetProvider {
+
+    public static final String PREFS_NAME = "SemesteroWidgetPrefs";
 
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
@@ -45,8 +48,13 @@ public class SemesteroLaunchpadWidget extends AppWidgetProvider {
         panoptoIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         views.setOnClickPendingIntent(R.id.btn_launch_panopto, PendingIntent.getActivity(context, 202, panoptoIntent, flags));
 
-        // 3. CheeseFork Quick Jump (live Netlify instance with Adir's schedule)
-        Intent cheeseIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://cheesefork.netlify.app/?semester=202601&uid=D4bh8oHO0GQI5Gx1iYAbWsouBVx2"));
+        // 3. CheeseFork Quick Jump (User-scoped CheeseFork URL or default generic portal)
+        SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        String cfUrl = prefs.getString("launchpad_cheesefork_url", "https://cheesefork.cf/");
+        if (cfUrl == null || !cfUrl.trim().startsWith("http")) {
+            cfUrl = "https://cheesefork.cf/";
+        }
+        Intent cheeseIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(cfUrl.trim()));
         cheeseIntent.addCategory(Intent.CATEGORY_BROWSABLE);
         cheeseIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         views.setOnClickPendingIntent(R.id.btn_launch_cheesefork, PendingIntent.getActivity(context, 203, cheeseIntent, flags));

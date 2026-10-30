@@ -32,7 +32,7 @@
             android:paddingRight="8dp"
             android:paddingTop="2dp"
             android:paddingBottom="2dp"
-            android:text="🔥 3.5 / 5.0 שעות (70%)"
+            android:text="🔥 מרתון פומודורו אקדמי"
             android:textColor="#f59e0b"
             android:textSize="10sp"
             android:textStyle="bold" />
@@ -66,7 +66,7 @@
                 android:id="@+id/widget_pomodoro_task_title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="🎯 פוקוס: פיסיקה 2מ • תרגיל בית 3"
+                android:text="🎯 פוקוס: מרתון למידה וחזרות"
                 android:textColor="#cbd5e1"
                 android:textSize="10sp"
                 android:textStyle="bold"

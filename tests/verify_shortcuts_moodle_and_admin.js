@@ -29,7 +29,8 @@ const buildMobileDist = fs.readFileSync(path.join(ROOT, 'scripts/build_mobile_di
 
 // Quick login check
 assert(!authSync.includes('התחברות מהירה כאדיר משה'), 'ERROR: Quick login button text still present in auth_sync.js');
-assert(authSync.includes("const MASTER_PASSWORDS = ['BenchyTech1', 'adir2368'];"), 'ERROR: MASTER_PASSWORDS missing in auth_sync.js');
+assert(authSync.includes('const MASTER_PASSWORD_HASHES = ['), 'ERROR: MASTER_PASSWORD_HASHES missing in auth_sync.js');
+assert(!authSync.includes('BenchyTech1') && !authSync.includes('MASTER_PASSWORDS'), 'ERROR: Plaintext master passwords leaked in auth_sync.js');
 console.log('  ✓ PASS: Quick login button is completely removed.');
 
 // Admin telemetry check

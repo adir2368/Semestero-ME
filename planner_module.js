@@ -34,7 +34,6 @@
     const PLANNER_TRACK_KEY = 'semestero_planner_selected_track';
 
     function getActiveUserId() {
-        if (typeof window !== 'undefined' && (window.Capacitor || window.location.protocol === 'capacitor:')) return 'adir_moshe';
         if (global.AuthSync && typeof global.AuthSync.getActiveUser === 'function') {
             const u = global.AuthSync.getActiveUser();
             return (u && u.id) ? u.id : 'guest';
@@ -46,8 +45,15 @@
         if (global.AuthSync && typeof global.AuthSync.isAdirActive === 'function') {
             return !!global.AuthSync.isAdirActive();
         }
-        const uid = getActiveUserId();
-        return uid === 'adir_moshe' || uid === 'adir';
+        return false;
+    }
+
+    function getScopedPlannerKey(baseKey) {
+        return `${baseKey}_${getActiveUserId()}`;
+    }
+
+    function getScopedTimetableAnchorsKey() {
+        return `ast_timetable_user_anchors_${getActiveUserId()}`;
     }
 
     // Helper to check if a degree plan contains Adir Moshe's specific personal schedule modifications:
@@ -236,8 +242,8 @@
         englishLevel = level;
         isEnglishExemption = (level === 'exempt_all');
         try {
-            localStorage.setItem(PLANNER_ENGLISH_LEVEL_KEY, level);
-            localStorage.setItem(PLANNER_ENGLISH_EXEMPTION_KEY, isEnglishExemption ? 'true' : 'false');
+            localStorage.setItem(getScopedPlannerKey(PLANNER_ENGLISH_LEVEL_KEY), level);
+            localStorage.setItem(getScopedPlannerKey(PLANNER_ENGLISH_EXEMPTION_KEY), isEnglishExemption ? 'true' : 'false');
         } catch (e) {}
 
         if (global.gameState) {
@@ -560,23 +566,25 @@
         }
 
         try {
-            isReservistDeduction = localStorage.getItem(PLANNER_RESERVIST_KEY) === 'true';
-            isAtudaTironut = localStorage.getItem(PLANNER_ATUDA_KEY) === 'true';
-            const savedLevel = localStorage.getItem(PLANNER_ENGLISH_LEVEL_KEY);
+            isReservistDeduction = localStorage.getItem(getScopedPlannerKey(PLANNER_RESERVIST_KEY)) === 'true';
+            isAtudaTironut = localStorage.getItem(getScopedPlannerKey(PLANNER_ATUDA_KEY)) === 'true';
+            const savedLevel = localStorage.getItem(getScopedPlannerKey(PLANNER_ENGLISH_LEVEL_KEY));
             if (savedLevel === 'exempt_all' || savedLevel === 'exempt_a' || savedLevel === 'none') {
                 englishLevel = savedLevel;
             } else {
-                const oldExemption = localStorage.getItem(PLANNER_ENGLISH_EXEMPTION_KEY);
+                const oldExemption = localStorage.getItem(getScopedPlannerKey(PLANNER_ENGLISH_EXEMPTION_KEY));
                 englishLevel = (oldExemption === 'true') ? 'exempt_all' : 'none';
             }
             applyEnglishLevelState(englishLevel);
-            const savedTrack = localStorage.getItem(PLANNER_TRACK_KEY);
+            const savedTrack = localStorage.getItem(getScopedPlannerKey(PLANNER_TRACK_KEY));
             if (savedTrack) {
                 if (savedTrack === 'year_2025' || savedTrack === 'year_2024' || savedTrack === 'year_2027' || savedTrack === 'year_2026' || savedTrack === 'barak') {
                     selectedTrack = savedTrack;
                 } else if (savedTrack === 'regular_2026') {
                     selectedTrack = 'year_2027';
                 }
+            } else {
+                selectedTrack = 'year_2026';
             }
         } catch (e) {
             console.warn('[Planner] Could not read preferences from localStorage:', e);
@@ -627,7 +635,7 @@
         // 3. User-Scoped Local Storage V2
         if (!loadedPlan) {
             try {
-                let savedV2 = localStorage.getItem(v2Key) || (isAdir ? localStorage.getItem(PLANNER_STORAGE_KEY_V2) : null);
+                let savedV2 = localStorage.getItem(v2Key);
                 if (savedV2) {
                     const parsed = JSON.parse(savedV2);
                     const semCandidate = Array.isArray(parsed.semesters) ? parsed.semesters : (Array.isArray(parsed) ? parsed : null);
@@ -653,7 +661,7 @@
         // 4. User-Scoped Local Storage V1
         if (!loadedPlan) {
             try {
-                let savedV1 = localStorage.getItem(v1Key) || (isAdir ? localStorage.getItem(PLANNER_STORAGE_KEY_V1) : null);
+                let savedV1 = localStorage.getItem(v1Key);
                 if (savedV1) {
                     const parsedV1 = JSON.parse(savedV1);
                     const semCandidate = Array.isArray(parsedV1) ? parsedV1 : null;
@@ -1095,11 +1103,6 @@
                 const v1Key = getPlannerStorageKeyV1();
                 localStorage.setItem(v2Key, jsonStr);
                 localStorage.setItem(v1Key, JSON.stringify(customPlan));
-
-                if (isAdirAuthenticated()) {
-                    localStorage.setItem(PLANNER_STORAGE_KEY_V2, jsonStr);
-                    localStorage.setItem(PLANNER_STORAGE_KEY_V1, JSON.stringify(customPlan));
-                }
 
                 if (global.gameState) {
                     global.gameState.degreePlan = customPlan;
@@ -1812,7 +1815,8 @@
                 saveCustomPlan();
 
                 try {
-                    const stored = localStorage.getItem('ast_timetable_user_anchors');
+                    const anchorsKey = getScopedTimetableAnchorsKey();
+                    const stored = localStorage.getItem(anchorsKey);
                     const anchors = stored ? JSON.parse(stored) : {};
                     const cleanCode = String(courseCode).replace(/^0+/, '');
                     const slotKey = `${courseCode}_sport`;
@@ -1830,7 +1834,7 @@
                         isFixed: true
                     };
                     anchors[`${cleanCode}_sport`] = anchors[slotKey];
-                    localStorage.setItem('ast_timetable_user_anchors', JSON.stringify(anchors));
+                    localStorage.setItem(anchorsKey, JSON.stringify(anchors));
                 } catch (err) {
                     console.warn('[Planner] Failed to save sport anchor:', err);
                 }
@@ -2840,7 +2844,7 @@
             trackSelect.addEventListener('change', (e) => {
                 selectedTrack = e.target.value;
                 try {
-                    localStorage.setItem(PLANNER_TRACK_KEY, selectedTrack);
+                    localStorage.setItem(getScopedPlannerKey(PLANNER_TRACK_KEY), selectedTrack);
                 } catch (err) {}
 
                 // Automatically update and align degree plan to new track syllabus
@@ -2873,7 +2877,7 @@
             reservistToggle.addEventListener('change', (e) => {
                 isReservistDeduction = e.target.checked;
                 try {
-                    localStorage.setItem(PLANNER_RESERVIST_KEY, isReservistDeduction ? 'true' : 'false');
+                    localStorage.setItem(getScopedPlannerKey(PLANNER_RESERVIST_KEY), isReservistDeduction ? 'true' : 'false');
                 } catch (err) {}
                 renderDegreePlanner();
                 showPlannerToast(isReservistDeduction ? 'הופעל פטור מילואים: הופחתו 2 נק״ז מדרישות התואר! 🎖️' : 'בוטל פטור מילואים: דרישות התואר חזרו ל-157.5 נק״ז.', true);
@@ -2887,7 +2891,7 @@
             atudaToggle.addEventListener('change', (e) => {
                 isAtudaTironut = e.target.checked;
                 try {
-                    localStorage.setItem(PLANNER_ATUDA_KEY, isAtudaTironut ? 'true' : 'false');
+                    localStorage.setItem(getScopedPlannerKey(PLANNER_ATUDA_KEY), isAtudaTironut ? 'true' : 'false');
                 } catch (err) {}
                 renderDegreePlanner();
                 showPlannerToast(isAtudaTironut ? 'הופעלה הכרה בטירונות עתודאים: נוספו 2 נק״ז בינארי לתואר! 🪖' : 'בוטלה הכרה בטירונות עתודאים.', true);
@@ -3713,6 +3717,20 @@
         },
         resetToCleanSyllabus: function() {
             if (!global.PLANNER_CATALOG) return;
+            try {
+                isReservistDeduction = localStorage.getItem(getScopedPlannerKey(PLANNER_RESERVIST_KEY)) === 'true';
+                isAtudaTironut = localStorage.getItem(getScopedPlannerKey(PLANNER_ATUDA_KEY)) === 'true';
+                const savedLevel = localStorage.getItem(getScopedPlannerKey(PLANNER_ENGLISH_LEVEL_KEY));
+                applyEnglishLevelState((savedLevel === 'exempt_all' || savedLevel === 'exempt_a') ? savedLevel : 'none');
+                const savedTrack = localStorage.getItem(getScopedPlannerKey(PLANNER_TRACK_KEY));
+                selectedTrack = (savedTrack === 'year_2025' || savedTrack === 'year_2024' || savedTrack === 'year_2027' || savedTrack === 'year_2026' || savedTrack === 'barak') ? savedTrack : 'year_2026';
+            } catch (e) {
+                isReservistDeduction = false;
+                isAtudaTironut = false;
+                englishLevel = 'none';
+                isEnglishExemption = false;
+                selectedTrack = 'year_2026';
+            }
             const targetSyllabus = getSuggestedCatalogForTrack(selectedTrack);
             customPlan = JSON.parse(JSON.stringify(targetSyllabus || global.PLANNER_CATALOG.SUGGESTED_MANDATORY_SYLLABUS));
             unassignedCourses = [];

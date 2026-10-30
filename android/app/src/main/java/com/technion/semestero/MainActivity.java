@@ -201,6 +201,21 @@ public class MainActivity extends BridgeActivity {
         }
 
         @JavascriptInterface
+        public void clearWidgetData() {
+            SharedPreferences prefs = context.getSharedPreferences(SemesteroNextClassWidget.PREFS_NAME, Context.MODE_PRIVATE);
+            prefs.edit().clear().apply();
+            refreshAllWidgets();
+        }
+
+        @JavascriptInterface
+        public void updateLaunchpadCheeseForkUrl(String url) {
+            SharedPreferences prefs = context.getSharedPreferences(SemesteroLaunchpadWidget.PREFS_NAME, Context.MODE_PRIVATE);
+            String safeUrl = (url != null && url.trim().startsWith("http")) ? url.trim() : "https://cheesefork.cf/";
+            prefs.edit().putString("launchpad_cheesefork_url", safeUrl).apply();
+            SemesteroLaunchpadWidget.pushUpdate(context);
+        }
+
+        @JavascriptInterface
         public void refreshAllWidgets() {
             SemesteroNextClassWidget.pushUpdate(context);
             SemesteroTasksExamWidget.pushUpdate(context);
@@ -222,7 +237,7 @@ public class MainActivity extends BridgeActivity {
                 conn.setConnectTimeout(15000);
                 conn.setReadTimeout(20000);
                 conn.setRequestProperty("Accept", "text/calendar, text/plain, */*");
-                conn.setRequestProperty("User-Agent", "SemesteroME-Android/2.6.4");
+                conn.setRequestProperty("User-Agent", "SemesteroME-Android/2.8.8");
                 conn.setInstanceFollowRedirects(true);
                 int code = conn.getResponseCode();
                 if (code >= 200 && code < 300) {

@@ -65,7 +65,7 @@
             android:id="@+id/widget_exam_huge_days"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="115"
+            android:text="--"
             android:textColor="#f8fafc"
             android:textSize="26sp"
             android:textStyle="bold" />
@@ -90,7 +90,7 @@
                 android:id="@+id/widget_exam_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="מכניקת מוצקים 1"
+                android:text="אין בחינות קרובות"
                 android:textColor="#f8fafc"
                 android:textSize="13sp"
                 android:textStyle="bold"
@@ -101,7 +101,7 @@
                 android:id="@+id/widget_exam_sub"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="מועד א' • 02/02/2027"
+                android:text="סמסטר חורף תשפ״ז"
                 android:textColor="#cbd5e1"
                 android:textSize="11sp" />
         </LinearLayout>
@@ -146,7 +146,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:layout_marginLeft="8dp"
-                android:text="🔥 [פיזיקה 2מ] תרגיל בית 3 (נותר יום)"
+                android:text="אין משימות פתוחות 🎉"
                 android:textColor="#f8fafc"
                 android:textSize="12sp"
                 android:textStyle="bold"
@@ -160,6 +160,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="6dp"
+            android:visibility="gone"
             android:gravity="center_vertical"
             android:orientation="horizontal">
 
@@ -180,7 +181,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:layout_marginLeft="8dp"
-                android:text="⚡ [מכונות 1] דו״ח מעבדה 2 - הגשה (3 ימים)"
+                android:text=""
                 android:textColor="#94a3b8"
                 android:textSize="11sp"
                 android:maxLines="1"
@@ -206,7 +207,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="עוד 4 משימות פתוחות"
+            android:text="הכל מעודכן!"
             android:textColor="#64748b"
             android:textSize="10sp"
             android:textStyle="bold" />

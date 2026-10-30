@@ -4,6 +4,8 @@
     'use strict';
 
     const SESSION_USER_KEY = 'ast_logged_in_user';
+    const SESSION_PROOF_KEY = 'ast_auth_verified_v3';
+    const DEVICE_NONCE_KEY = 'ast_device_auth_nonce_v3';
     const LEGACY_SAVE_KEY = 'academic_skill_tree_save';
     const SUPABASE_CONFIG_KEY = 'ast_supabase_config';
 
@@ -11,8 +13,185 @@
     const DEFAULT_SUPABASE_URL = 'https://asxpbepuvhbafsjlogag.supabase.co';
     const DEFAULT_SUPABASE_ANON_KEY = 'sb_publishable_BdrsUJFsNOGssCY7Gv7eNQ_UXkm2zFy';
 
-    // Master Passwords for Developer Adir Moshe
-    const MASTER_PASSWORDS = ['BenchyTech1', 'adir2368'];
+    // Cryptographic SHA-256 Auth Salt & Salted Digests (Zero Plaintext Master Passwords)
+    const AUTH_SALT = 'semestero_me_auth_salt_v3:';
+    const MASTER_PASSWORD_HASHES = [
+        '9fde76d07323ae5ceef210c0bab19469c2100b9d7dc994fe745b9bef54857623'
+    ];
+    const QA_PASSWORD_HASH = '3ed7eda9992687623a8d0074090bf22cd88be50e3f20eba5b086b1e634ff97ed';
+
+    // Synchronous Pure-JS UTF-8 SHA-256 (works identically across HTTPS, HTTP, file://, Capacitor, and Node.js)
+    function sha256Hex(input) {
+        const str = String(input || '');
+        const bytes = [];
+        for (let i = 0; i < str.length; i++) {
+            let code = str.charCodeAt(i);
+            if (code < 0x80) {
+                bytes.push(code);
+            } else if (code < 0x800) {
+                bytes.push(0xc0 | (code >> 6), 0x80 | (code & 0x3f));
+            } else if (code < 0xd800 || code >= 0xe000) {
+                bytes.push(0xe0 | (code >> 12), 0x80 | ((code >> 6) & 0x3f), 0x80 | (code & 0x3f));
+            } else {
+                i++;
+                code = 0x10000 + (((code & 0x3ff) << 10) | (str.charCodeAt(i) & 0x3ff));
+                bytes.push(
+                    0xf0 | (code >> 18),
+                    0x80 | ((code >> 12) & 0x3f),
+                    0x80 | ((code >> 6) & 0x3f),
+                    0x80 | (code & 0x3f)
+                );
+            }
+        }
+
+        const K = [
+            0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
+            0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
+            0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
+            0x983e5152, 0xa831c66d, 0xb00327c8, 0xbf597fc7, 0xc6e00bf3, 0xd5a79147, 0x06ca6351, 0x14292967,
+            0x27b70a85, 0x2e1b2138, 0x4d2c6dfc, 0x53380d13, 0x650a7354, 0x766a0abb, 0x81c2c92e, 0x92722c85,
+            0xa2bfe8a1, 0xa81a664b, 0xc24b8b70, 0xc76c51a3, 0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070,
+            0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
+            0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2
+        ];
+        let H0 = 0x6a09e667, H1 = 0xbb67ae85, H2 = 0x3c6ef372, H3 = 0xa54ff53a;
+        let H4 = 0x510e527f, H5 = 0x9b05688c, H6 = 0x1f83d9ab, H7 = 0x5be0cd19;
+
+        const bitLen = bytes.length * 8;
+        bytes.push(0x80);
+        while ((bytes.length % 64) !== 56) bytes.push(0);
+        const hiLen = Math.floor(bitLen / 0x100000000);
+        const loLen = bitLen >>> 0;
+        bytes.push((hiLen >>> 24) & 0xff, (hiLen >>> 16) & 0xff, (hiLen >>> 8) & 0xff, hiLen & 0xff);
+        bytes.push((loLen >>> 24) & 0xff, (loLen >>> 16) & 0xff, (loLen >>> 8) & 0xff, loLen & 0xff);
+
+        const W = new Array(64);
+        const rotr = (n, x) => (x >>> n) | (x << (32 - n));
+        for (let offset = 0; offset < bytes.length; offset += 64) {
+            for (let i = 0; i < 16; i++) {
+                const j = offset + i * 4;
+                W[i] = ((bytes[j] << 24) | (bytes[j + 1] << 16) | (bytes[j + 2] << 8) | bytes[j + 3]) >>> 0;
+            }
+            for (let i = 16; i < 64; i++) {
+                const s0 = (rotr(7, W[i - 15]) ^ rotr(18, W[i - 15]) ^ (W[i - 15] >>> 3)) >>> 0;
+                const s1 = (rotr(17, W[i - 2]) ^ rotr(19, W[i - 2]) ^ (W[i - 2] >>> 10)) >>> 0;
+                W[i] = (W[i - 16] + s0 + W[i - 7] + s1) >>> 0;
+            }
+            let a = H0, b = H1, c = H2, d = H3, e = H4, f = H5, g = H6, h = H7;
+            for (let i = 0; i < 64; i++) {
+                const S1 = (rotr(6, e) ^ rotr(11, e) ^ rotr(25, e)) >>> 0;
+                const ch = ((e & f) ^ ((~e) & g)) >>> 0;
+                const temp1 = (h + S1 + ch + K[i] + W[i]) >>> 0;
+                const S0 = (rotr(2, a) ^ rotr(13, a) ^ rotr(22, a)) >>> 0;
+                const maj = ((a & b) ^ (a & c) ^ (b & c)) >>> 0;
+                const temp2 = (S0 + maj) >>> 0;
+                h = g; g = f; f = e; e = (d + temp1) >>> 0;
+                d = c; c = b; b = a; a = (temp1 + temp2) >>> 0;
+            }
+            H0 = (H0 + a) >>> 0; H1 = (H1 + b) >>> 0; H2 = (H2 + c) >>> 0; H3 = (H3 + d) >>> 0;
+            H4 = (H4 + e) >>> 0; H5 = (H5 + f) >>> 0; H6 = (H6 + g) >>> 0; H7 = (H7 + h) >>> 0;
+        }
+        return [H0, H1, H2, H3, H4, H5, H6, H7].map(v => v.toString(16).padStart(8, '0')).join('');
+    }
+
+    function isMasterPassword(rawPass) {
+        if (!rawPass) return false;
+        return MASTER_PASSWORD_HASHES.includes(sha256Hex(AUTH_SALT + String(rawPass).trim()));
+    }
+
+    function hashUserPassword(userId, rawPass) {
+        const cleanUid = String(userId || '').trim().toLowerCase();
+        return sha256Hex('semestero_me_pwd_v3:' + cleanUid + ':' + String(rawPass || '').trim());
+    }
+
+    function verifyUserPassword(userId, rawPass, stateOrProfile) {
+        if (!rawPass || !stateOrProfile) return false;
+        const expectedHash = hashUserPassword(userId, rawPass);
+        if (stateOrProfile.account_password_hash || stateOrProfile.passwordHash) {
+            const storedHash = stateOrProfile.account_password_hash || stateOrProfile.passwordHash;
+            return storedHash === expectedHash;
+        }
+        // Legacy plaintext fallback for pre-v2.8.8 registered student records (auto-migrated upon login)
+        return stateOrProfile.account_password === rawPass || stateOrProfile.password === rawPass;
+    }
+
+    function isExactAdirIdentifier(val) {
+        if (!val) return false;
+        const clean = String(val).trim().toLowerCase();
+        return (
+            clean === 'adir_moshe' ||
+            clean === 'adir' ||
+            clean === 'אדיר משה' ||
+            clean === 'adir moshe' ||
+            clean === 'adir.moshe@campus.technion.ac.il' ||
+            clean === 'adir.m.2368@gmail.com' ||
+            clean === 'adir.m.2368' ||
+            clean === 'adir2368'
+        );
+    }
+
+    function generateRandomNonce() {
+        try {
+            if (typeof crypto !== 'undefined' && typeof crypto.getRandomValues === 'function') {
+                const arr = new Uint8Array(16);
+                crypto.getRandomValues(arr);
+                return Array.from(arr).map(b => b.toString(16).padStart(2, '0')).join('');
+            }
+        } catch (e) {}
+        return sha256Hex(Date.now() + ':' + Math.random() + ':' + Math.random()).slice(0, 32);
+    }
+
+    function issueSessionProof(uid) {
+        if (!uid || uid === 'guest') return;
+        try {
+            let nonce = localStorage.getItem(DEVICE_NONCE_KEY);
+            if (!nonce || nonce.length < 16) {
+                nonce = generateRandomNonce();
+                localStorage.setItem(DEVICE_NONCE_KEY, nonce);
+            }
+            const sig = sha256Hex('ast_session_v3:' + uid + ':' + nonce + ':verified_by_auth');
+            localStorage.setItem(SESSION_PROOF_KEY, JSON.stringify({ uid: uid, ts: Date.now(), sig: sig }));
+        } catch (e) {}
+    }
+
+    function hasValidSessionProof(uid) {
+        if (!uid || uid === 'guest') return false;
+        try {
+            const nonce = localStorage.getItem(DEVICE_NONCE_KEY);
+            const rawProof = localStorage.getItem(SESSION_PROOF_KEY);
+            if (!nonce || !rawProof) return false;
+            const parsed = JSON.parse(rawProof);
+            if (!parsed || parsed.uid !== uid || !parsed.sig) return false;
+            const expected = sha256Hex('ast_session_v3:' + uid + ':' + nonce + ':verified_by_auth');
+            return parsed.sig === expected;
+        } catch (e) {
+            return false;
+        }
+    }
+
+    function clearSessionProof() {
+        try {
+            localStorage.removeItem(SESSION_PROOF_KEY);
+            localStorage.removeItem(DEVICE_NONCE_KEY);
+            localStorage.removeItem('ast_is_developer_device');
+            localStorage.removeItem('ast_profile_adir_moshe');
+        } catch (e) {}
+    }
+
+    function getScopedPhoneKey(uid) {
+        const safeId = (uid && uid !== 'guest') ? uid : 'guest';
+        return 'ast_user_phone_' + safeId;
+    }
+
+    function getScopedCheeseForkKey(uid) {
+        const safeId = (uid && uid !== 'guest') ? uid : 'guest';
+        return 'ast_cheesefork_url_' + safeId;
+    }
+
+    function getScopedMoodleKey(uid) {
+        const safeId = (uid && uid !== 'guest') ? uid : 'guest';
+        return 'ast_moodle_calendar_url_' + safeId;
+    }
 
     let supabaseClient = null;
     let realtimeChannel = null;
@@ -28,9 +207,52 @@
         }
     };
 
-        // Inbound state sanitization against accidental test infiltrators
-    function sanitizeInboundState(state) {
+    const DEV_PHONE_HASH = '803f046eaf316ec9592c3adf3ee8c558d5f3606eba5eb9fd9fe9163d4f52a3de';
+    const DEV_CF_UID_HASH = '98e0ab56fa33bdb34895c27d15a7d8d56cd3c9d452c28236d698abd93442598b';
+    const DEV_MOODLE_UID_HASH = '44f90161ef88e264f8983ebb2d800d5ba7ccd0667b314bb89789b88669cc24ef';
+
+    function isDevPhoneDigest(rawPhone) {
+        if (!rawPhone) return false;
+        const digits = String(rawPhone).replace(/\D/g, '');
+        return digits.length > 0 && sha256Hex(digits) === DEV_PHONE_HASH;
+    }
+
+    function hasDevCfUidDigest(url) {
+        if (!url || typeof url !== 'string') return false;
+        const m = url.match(/[?&]uid=([^&#]+)/);
+        return !!(m && m[1] && sha256Hex(m[1]) === DEV_CF_UID_HASH);
+    }
+
+    function hasDevMoodleUidDigest(url) {
+        if (!url || typeof url !== 'string') return false;
+        const m = url.match(/[?&]userid=([^&#]+)/);
+        return !!(m && m[1] && sha256Hex(m[1]) === DEV_MOODLE_UID_HASH);
+    }
+
+    // Inbound state sanitization against accidental test infiltrators & cross-account PII leaks
+    function sanitizeInboundState(state, targetUid) {
         if (!state) return state;
+        const effectiveUid = targetUid || (typeof localStorage !== 'undefined' ? localStorage.getItem(SESSION_USER_KEY) : 'guest') || 'guest';
+        const isAdirTarget = (effectiveUid === 'adir_moshe' && hasValidSessionProof('adir_moshe'));
+
+        if (!isAdirTarget) {
+            // Scrub any accidentally leaked developer PII from non-Adir accounts via zero-plaintext SHA-256 digests
+            if (state.userProfile) {
+                if (isDevPhoneDigest(state.userProfile.phone)) {
+                    state.userProfile.phone = '';
+                }
+                if (hasDevCfUidDigest(state.userProfile.cheeseforkUrl)) {
+                    state.userProfile.cheeseforkUrl = '';
+                }
+            }
+            if (isDevPhoneDigest(state.phone)) {
+                state.phone = '';
+            }
+            if (hasDevMoodleUidDigest(state.moodleCalendarUrl)) {
+                state.moodleCalendarUrl = '';
+            }
+        }
+
         const targets = [
             '03240269', '3240269',
             '03940800', '3940800', '0394800', '394800',
@@ -79,38 +301,127 @@
         return null;
     }
 
-    // Check if this device already has Adir's personal save file (developer PC or authenticated device)
-    function hasAdirLocalData() {
+    function clearNativeWidgetsIfAvailable() {
         try {
-            if (localStorage.getItem('ast_is_developer_device') === 'true' && localStorage.getItem('ast_profile_adir_moshe')) return true;
-            if (localStorage.getItem(SESSION_USER_KEY) === 'adir_moshe') return true;
+            if (typeof window !== 'undefined' && window.SemesteroWidgetBridge) {
+                if (typeof window.SemesteroWidgetBridge.clearWidgetData === 'function') {
+                    window.SemesteroWidgetBridge.clearWidgetData();
+                }
+            }
         } catch (e) {}
-        return false;
     }
 
     const AuthSync = {
-        // Initialize single-user auth & cloud sync
+        // Synchronize active runtime integration keys strictly to the active user (and purge cross-session leaks)
+        syncScopedIntegrationKeys(uid, stateObj) {
+            const safeUid = (uid && uid !== 'guest' && hasValidSessionProof(uid)) ? uid : 'guest';
+            try {
+                // Always remove legacy global unscoped PII keys
+                localStorage.removeItem('ast_persistent_user_phone');
+                localStorage.removeItem('atlas_me_moodle_sync_default');
+
+                if (safeUid === 'guest') {
+                    localStorage.removeItem('ast_cheesefork_url');
+                    localStorage.removeItem('ast_moodle_calendar_url');
+                    localStorage.removeItem('ast_user_phone_guest');
+                    localStorage.removeItem('ast_cheesefork_url_guest');
+                    localStorage.removeItem('ast_moodle_calendar_url_guest');
+                    if (typeof window !== 'undefined' && window.MoodleSync && window.MoodleSync.config) {
+                        window.MoodleSync.config.url = '';
+                    }
+                    clearNativeWidgetsIfAvailable();
+                    return;
+                }
+
+                // Authenticated user: restore only THEIR scoped integration URLs/phone
+                const userCf = (stateObj && stateObj.userProfile && stateObj.userProfile.cheeseforkUrl) || localStorage.getItem(getScopedCheeseForkKey(safeUid)) || '';
+                const userMoodle = (stateObj && stateObj.moodleCalendarUrl) || localStorage.getItem(getScopedMoodleKey(safeUid)) || '';
+                const userPhone = (stateObj && stateObj.userProfile && stateObj.userProfile.phone) || localStorage.getItem(getScopedPhoneKey(safeUid)) || '';
+
+                if (userPhone) {
+                    localStorage.setItem(getScopedPhoneKey(safeUid), userPhone);
+                }
+                if (userCf) {
+                    localStorage.setItem(getScopedCheeseForkKey(safeUid), userCf);
+                    localStorage.setItem('ast_cheesefork_url', userCf);
+                    if (typeof window !== 'undefined' && window.SemesteroWidgetBridge && typeof window.SemesteroWidgetBridge.updateLaunchpadCheeseForkUrl === 'function') {
+                        window.SemesteroWidgetBridge.updateLaunchpadCheeseForkUrl(userCf);
+                    }
+                } else {
+                    localStorage.removeItem('ast_cheesefork_url');
+                    if (typeof window !== 'undefined' && window.SemesteroWidgetBridge && typeof window.SemesteroWidgetBridge.updateLaunchpadCheeseForkUrl === 'function') {
+                        window.SemesteroWidgetBridge.updateLaunchpadCheeseForkUrl('https://cheesefork.cf/');
+                    }
+                }
+
+                if (userMoodle) {
+                    localStorage.setItem(getScopedMoodleKey(safeUid), userMoodle);
+                    localStorage.setItem('ast_moodle_calendar_url', userMoodle);
+                    if (typeof window !== 'undefined' && window.MoodleSync && window.MoodleSync.config) {
+                        window.MoodleSync.config.url = userMoodle;
+                        if (typeof window.MoodleSync.saveConfig === 'function') window.MoodleSync.saveConfig();
+                    }
+                } else {
+                    localStorage.removeItem('ast_moodle_calendar_url');
+                    if (typeof window !== 'undefined' && window.MoodleSync && window.MoodleSync.config) {
+                        window.MoodleSync.config.url = '';
+                    }
+                }
+            } catch (e) {}
+        },
+
+        // Initialize zero-default user auth & cloud sync
         init() {
+            // Always purge legacy unscoped global phone key so it can never leak across accounts
+            try {
+                localStorage.removeItem('ast_persistent_user_phone');
+            } catch (e) {}
+
             let sessionUser = localStorage.getItem(SESSION_USER_KEY);
 
-            // On native Capacitor APK, Adir is the app owner:
-            if (sessionUser === null && isCapacitorOrNative()) {
-                sessionUser = 'adir_moshe';
-                localStorage.setItem(SESSION_USER_KEY, 'adir_moshe');
-                localStorage.setItem('ast_is_developer_device', 'true');
-                localStorage.setItem('ast_profile_adir_moshe', 'true');
-            } else if (sessionUser === null && hasAdirLocalData()) {
-                sessionUser = 'adir_moshe';
-                localStorage.setItem(SESSION_USER_KEY, 'adir_moshe');
-                localStorage.setItem('ast_is_developer_device', 'true');
-                localStorage.setItem('ast_profile_adir_moshe', 'true');
-            } else if (sessionUser === null) {
+            // ZERO-DEFAULT ACCOUNT LAW:
+            // Never auto-login into adir_moshe or any specific user on Web, Capacitor APK, Electron, or via URL query params.
+            // Furthermore, retroactively evict any pre-existing unverified session (e.g. APK installs from v2.7.9-v2.8.7).
+            if (!sessionUser || sessionUser === 'guest') {
                 sessionUser = 'guest';
                 localStorage.setItem(SESSION_USER_KEY, 'guest');
-            }
-
-            // Ensure logged-in Adir session is strictly preserved and maintains developer flags across refreshes
-            if (sessionUser === 'adir_moshe') {
+                clearSessionProof();
+                if (isCapacitorOrNative()) {
+                    try {
+                        localStorage.removeItem(LEGACY_SAVE_KEY);
+                        localStorage.removeItem('atlas_me_custom_degree_plan_v2_adir');
+                        localStorage.removeItem('atlas_me_custom_degree_plan_v1_adir');
+                        localStorage.removeItem('atlas_me_custom_degree_plan_v2');
+                        localStorage.removeItem('atlas_me_custom_degree_plan_v1');
+                    } catch (e) {}
+                    clearNativeWidgetsIfAvailable();
+                }
+            } else if (!hasValidSessionProof(sessionUser)) {
+                console.warn('[AuthSync Security] Evicting unverified session lacking cryptographic auth proof:', sessionUser);
+                const evictedUid = sessionUser;
+                sessionUser = 'guest';
+                localStorage.setItem(SESSION_USER_KEY, 'guest');
+                clearSessionProof();
+                try {
+                    localStorage.removeItem('ast_cheesefork_url');
+                    localStorage.removeItem('ast_moodle_calendar_url');
+                    localStorage.removeItem('atlas_me_moodle_sync_default');
+                    localStorage.removeItem('atlas_me_custom_degree_plan_v2');
+                    localStorage.removeItem('atlas_me_custom_degree_plan_v1');
+                    if (evictedUid === 'adir_moshe') {
+                        localStorage.removeItem('atlas_me_custom_degree_plan_v2_adir');
+                        localStorage.removeItem('atlas_me_custom_degree_plan_v1_adir');
+                        if (isCapacitorOrNative()) {
+                            localStorage.removeItem(LEGACY_SAVE_KEY);
+                        }
+                    }
+                } catch (e) {}
+                if (typeof window !== 'undefined' && window.MoodleSync && window.MoodleSync.config) {
+                    window.MoodleSync.config.url = '';
+                }
+                clearNativeWidgetsIfAvailable();
+            } else if (sessionUser === 'adir_moshe') {
+                // Verified Adir session with valid cryptographic proof
                 try {
                     localStorage.setItem('ast_is_developer_device', 'true');
                     if (!localStorage.getItem('ast_profile_adir_moshe')) {
@@ -118,20 +429,6 @@
                     }
                 } catch (e) {}
             }
-
-            // Check URL query parameters for fast developer login on mobile Safari (?user=adir or ?auth=adir)
-            try {
-                if (typeof window !== 'undefined' && window.location && window.location.search) {
-                    const params = new URLSearchParams(window.location.search);
-                    if (params.get('user') === 'adir' || params.get('auth') === 'adir') {
-                        console.log('[AuthSync] Developer URL parameter detected, initiating Adir login...');
-                        sessionUser = 'adir_moshe';
-                        localStorage.setItem(SESSION_USER_KEY, 'adir_moshe');
-                        localStorage.setItem('ast_profile_adir_moshe', 'true');
-                        localStorage.setItem('ast_is_developer_device', 'true');
-                    }
-                }
-            } catch (e) {}
 
             this.initSupabaseFromStorage();
             this.updateHudAuthControls();
@@ -141,7 +438,7 @@
             try {
                 const isQaTest = typeof window !== 'undefined' && window.location && window.location.search && window.location.search.includes('qa_health_test');
                 const dismissed = sessionStorage.getItem('ast_auth_prompt_dismissed') === 'true';
-                if (!isQaTest && !dismissed && !this.isLoggedIn() && !hasAdirLocalData()) {
+                if (!isQaTest && !dismissed && !this.isLoggedIn()) {
                     setTimeout(() => {
                         this.openAuthModal('login');
                     }, 1000);
@@ -149,10 +446,10 @@
             } catch (e) {}
         },
 
-        // Check if currently authenticated
+        // Check if currently authenticated (requires BOTH non-guest user AND valid cryptographic session proof)
         isLoggedIn() {
             const uid = localStorage.getItem(SESSION_USER_KEY);
-            return !!(uid && uid !== 'guest');
+            return !!(uid && uid !== 'guest' && hasValidSessionProof(uid));
         },
 
         // Get active user object
@@ -173,30 +470,31 @@
             const uid = localStorage.getItem(SESSION_USER_KEY);
             const currentSem = (window.gameState && window.gameState.currentActiveSemester) ? window.gameState.currentActiveSemester : 1;
 
-            let persistentPhone = '';
+            let scopedPhone = '';
             try {
-                persistentPhone = localStorage.getItem('ast_persistent_user_phone') || '';
+                scopedPhone = localStorage.getItem(getScopedPhoneKey(uid)) || '';
             } catch (e) {}
-            const fallbackPhone = persistentPhone || (window.gameState && window.gameState.userProfile && window.gameState.userProfile.phone) || '';
+            const statePhone = (window.gameState && window.gameState.userProfile && window.gameState.userProfile.phone) || '';
+            const fallbackPhone = scopedPhone || (uid !== 'adir_moshe' && isDevPhoneDigest(statePhone) ? '' : statePhone) || '';
 
             if (uid === 'adir_moshe') {
                 let customProfile = null;
                 try {
                     const saved = localStorage.getItem('ast_profile_' + uid);
-                    if (saved) customProfile = JSON.parse(saved);
+                    if (saved && saved !== 'true') customProfile = JSON.parse(saved);
                 } catch (e) {}
 
                 const base = Object.assign({
                     id: 'adir_moshe',
                     name: 'אדיר משה',
                     email: 'adir.moshe@campus.technion.ac.il',
-                    phone: persistentPhone || fallbackPhone,
+                    phone: scopedPhone || fallbackPhone,
                     avatar: '🎓',
                     avatarImg: 'adir_avatar_small.webp?v=2.3.1',
                     role: 'developer',
                     startingSemester: (window.gameState && window.gameState.currentActiveSemester) ? window.gameState.currentActiveSemester : 3
                 }, customProfile || {});
-                if (persistentPhone) base.phone = persistentPhone;
+                if (scopedPhone) base.phone = scopedPhone;
                 else if (!base.phone && fallbackPhone) base.phone = fallbackPhone;
                 base.isInternationalStudent = Boolean(
                     base.isInternationalStudent ||
@@ -209,11 +507,11 @@
                 const saved = localStorage.getItem('ast_profile_' + uid);
                 if (saved) {
                     let parsed = JSON.parse(saved);
-                    parsed = sanitizeInboundState(parsed);
+                    parsed = sanitizeInboundState(parsed, uid);
                     if (window.gameState && window.gameState.currentActiveSemester) {
                         parsed.startingSemester = window.gameState.currentActiveSemester;
                     }
-                    if (persistentPhone) parsed.phone = persistentPhone;
+                    if (scopedPhone) parsed.phone = scopedPhone;
                     else if (!parsed.phone && fallbackPhone) parsed.phone = fallbackPhone;
                     if (!parsed.avatar) parsed.avatar = '🎓';
                     parsed.isInternationalStudent = Boolean(
@@ -237,11 +535,11 @@
             };
         },
 
-        // Check if active account is Adir Moshe (strictly verified)
+        // Check if active account is Adir Moshe (strictly verified via user_id AND cryptographic proof)
         isAdirActive() {
             if (!this.isLoggedIn()) return false;
-            const user = this.getActiveUser();
-            return !!(user && (user.id === 'adir_moshe' || user.id === 'adir' || user.name === 'אדיר משה'));
+            const uid = localStorage.getItem(SESSION_USER_KEY);
+            return uid === 'adir_moshe' && hasValidSessionProof('adir_moshe');
         },
 
         // Get storage key for active user
@@ -345,26 +643,38 @@
             const user = this.getActiveUser();
             const key = this.getUserStorageKey(user.id);
             try {
+                state = sanitizeInboundState(state, user.id);
                 state.lastModified = Math.max(state.lastModified || 0, Date.now());
 
-                const persistentPhone = localStorage.getItem('ast_persistent_user_phone');
-                if (persistentPhone) {
-                    if (!state.userProfile) state.userProfile = {};
-                    if (!state.userProfile.phone) state.userProfile.phone = persistentPhone;
+                if (user.id && user.id !== 'guest') {
+                    const scopedPhone = localStorage.getItem(getScopedPhoneKey(user.id));
+                    if (scopedPhone) {
+                        if (!state.userProfile) state.userProfile = {};
+                        if (!state.userProfile.phone) state.userProfile.phone = scopedPhone;
+                    }
                 }
 
-                // Ensure student state preserves account_password and student_name
+                // Ensure student state preserves hashed password digest and student_name (never plaintext password)
                 if (user.id !== 'adir_moshe' && user.id !== 'guest') {
                     if (!state.student_name && user.name) state.student_name = user.name;
-                    if (!state.account_password) {
+                    if (!state.account_password_hash) {
                         try {
                             const prof = JSON.parse(localStorage.getItem('ast_profile_' + user.id) || '{}');
-                            if (prof.password) state.account_password = prof.password;
+                            if (prof.passwordHash) {
+                                state.account_password_hash = prof.passwordHash;
+                            } else if (prof.password) {
+                                state.account_password_hash = hashUserPassword(user.id, prof.password);
+                            } else if (state.account_password) {
+                                state.account_password_hash = hashUserPassword(user.id, state.account_password);
+                            }
                         } catch (e) {}
+                    }
+                    if (state.account_password_hash && state.account_password) {
+                        delete state.account_password;
                     }
                 }
                 localStorage.setItem(key, JSON.stringify(state));
-                if (user.id === 'adir_moshe') {
+                if (user.id === 'adir_moshe' && this.isAdirActive()) {
                     localStorage.setItem(LEGACY_SAVE_KEY, JSON.stringify(state));
                 }
                 if (this.isLoggedIn()) {
@@ -377,37 +687,36 @@
 
         // Login with Identifier (username/email) and Password
         async loginWithPassword(identifier, password) {
-            let cleanUser = (identifier || '').trim();
-            let cleanPass = (password || '').trim();
+            const cleanUser = (identifier || '').trim();
+            const cleanPass = (password || '').trim();
 
-            // Support either parameter ordering
-            if (!cleanPass && MASTER_PASSWORDS.includes(cleanUser)) {
-                cleanPass = cleanUser;
-                cleanUser = '';
+            if (!cleanUser) {
+                if (typeof alert === 'function') alert('נא להזין שם משתמש או אימייל.');
+                return false;
             }
-
             if (!cleanPass) {
-                alert('נא להזין סיסמה.');
+                if (typeof alert === 'function') alert('נא להזין סיסמה.');
                 return false;
             }
 
             const cleanUserLower = cleanUser.toLowerCase();
-            const isAdirIdentifier = !cleanUser || 
-                cleanUserLower === 'adir_moshe' || 
-                cleanUserLower === 'adir' || 
-                cleanUser.includes('אדיר') || 
-                cleanUserLower === 'adir.moshe@campus.technion.ac.il' ||
-                cleanUserLower === 'adir.m.2368@gmail.com' ||
-                cleanUserLower === 'adir.m.2368' ||
-                cleanUserLower === 'adir2368';
+            const isAdirIdentifier = isExactAdirIdentifier(cleanUser);
 
-            // 1. Check Master Password for Developer Adir Moshe ONLY if identifier is Adir
-            if (MASTER_PASSWORDS.includes(cleanPass) && isAdirIdentifier) {
+            // 1. Check Salted SHA-256 Master Password for Developer Adir Moshe ONLY on exact Adir identifier
+            if (isMasterPassword(cleanPass) && isAdirIdentifier) {
+                issueSessionProof('adir_moshe');
                 localStorage.setItem(SESSION_USER_KEY, 'adir_moshe');
                 try {
                     localStorage.setItem('ast_profile_adir_moshe', 'true');
                     localStorage.setItem('ast_is_developer_device', 'true');
                 } catch (e) {}
+
+                const localState = this.loadActiveUserState();
+                if (window.setGlobalGameState && localState && localState.courses) {
+                    window.setGlobalGameState(localState);
+                }
+                this.syncScopedIntegrationKeys('adir_moshe', localState);
+
                 this.setupRealtimeSubscription();
                 await this.pullLatestStateFromCloud(true);
                 this.refreshAllAppViews();
@@ -421,33 +730,44 @@
                 }
                 if (typeof showHudToast === 'function') {
                     showHudToast('שלום אדיר! התחברת בהצלחה 🎓', 'success');
-                } else {
+                } else if (typeof alert === 'function') {
                     alert('שלום אדיר! התחברת בהצלחה.');
                 }
                 return true;
             }
 
-            // Reject developer passwords for student accounts
-            if (MASTER_PASSWORDS.includes(cleanPass) && !isAdirIdentifier && !cleanUserLower.includes('qa') && !cleanUserLower.includes('בודק')) {
-                alert('סיסמה שגויה לחשבון זה.');
+            // Reject developer master passwords for any non-Adir account
+            if (isMasterPassword(cleanPass) && !isAdirIdentifier) {
+                if (typeof alert === 'function') alert('סיסמה שגויה לחשבון זה.');
                 return false;
             }
 
-            // Dedicated QA tester fast login
-            if (cleanUserLower.includes('qa') || cleanUserLower.includes('בודק איכות') || cleanUserLower === 'qa_tester') {
-                return this.loginAsQA();
+            // Reject wrong password for Adir identifiers immediately (never fall through to student query)
+            if (isAdirIdentifier) {
+                if (typeof alert === 'function') alert('סיסמה שגויה לחשבון זה.');
+                return false;
             }
 
-            // Local fallback if matching student account exists locally
+            // Dedicated QA tester isolated sandbox (requires exact identifier AND QA password hash)
+            if (cleanUserLower === 'qa_tester') {
+                if (sha256Hex(AUTH_SALT + cleanPass) === QA_PASSWORD_HASH) {
+                    return this.loginAsQA(cleanPass);
+                }
+                if (typeof alert === 'function') alert('סיסמה שגויה לחשבון בדיקות QA.');
+                return false;
+            }
+
+            // Local offline fallback if matching student account exists locally
             let localMatch = null;
             try {
                 Object.keys(localStorage).forEach(k => {
-                    if (k.startsWith('ast_profile_') && k !== 'ast_profile_guest') {
+                    if (k.startsWith('ast_profile_') && k !== 'ast_profile_guest' && k !== 'ast_profile_adir_moshe') {
                         const prof = JSON.parse(localStorage.getItem(k) || '{}');
                         const pName = (prof.name || '').trim().toLowerCase();
                         const pEmail = (prof.email || '').trim().toLowerCase();
-                        if (pName === cleanUserLower || pEmail === cleanUserLower || pName.includes(cleanUserLower)) {
-                            if (!cleanPass || prof.password === cleanPass || MASTER_PASSWORDS.includes(cleanPass)) {
+                        const pId = (prof.id || '').trim().toLowerCase();
+                        if (pName === cleanUserLower || pEmail === cleanUserLower || pId === cleanUserLower) {
+                            if (verifyUserPassword(prof.id, cleanPass, prof)) {
                                 localMatch = prof;
                             }
                         }
@@ -456,9 +776,11 @@
             } catch (e) {}
 
             if (localMatch && !supabaseClient) {
+                issueSessionProof(localMatch.id);
                 localStorage.setItem(SESSION_USER_KEY, localMatch.id);
                 const localStateKey = this.getUserStorageKey(localMatch.id);
-                const localState = JSON.parse(localStorage.getItem(localStateKey) || '{}');
+                const localState = sanitizeInboundState(JSON.parse(localStorage.getItem(localStateKey) || '{}'), localMatch.id);
+                this.syncScopedIntegrationKeys(localMatch.id, localState);
                 if (window.setGlobalGameState && localState && localState.courses) {
                     window.setGlobalGameState(localState);
                 }
@@ -471,121 +793,87 @@
                 return true;
             }
 
-            // 2. Check Other Students via Supabase Cloud
+            // 2. Check Registered Students via Supabase Cloud
             if (!supabaseClient) {
-                alert('חיבור הענן אינו זמין כרגע. נסה שוב בעוד מספר שניות.');
+                if (typeof alert === 'function') alert('חיבור הענן אינו זמין כרגע. נסה שוב בעוד מספר שניות.');
                 return false;
             }
 
             try {
-                // Query all user records for resilient matching (handles Hebrew strings & casing)
                 const { data, error } = await supabaseClient.from('user_states').select('*');
                 if (error || !data || data.length === 0) {
-                    alert('לא נמצאו משתמשים בענן. וודא שהפרטים נכונים או הירשם כסטודנט חדש.');
+                    if (typeof alert === 'function') alert('לא נמצאו משתמשים בענן. וודא שהפרטים נכונים או הירשם כסטודנט חדש.');
                     return false;
                 }
 
-                // Filter matching student candidates
-                let matchedRows = [];
-                if (cleanUser) {
-                    matchedRows = data.filter(row => {
-                        if (row.user_id && row.user_id.startsWith('__')) return false;
-                        const rName = (row.user_name || '').trim().toLowerCase();
-                        const rEmail = (row.user_email || '').trim().toLowerCase();
-                        const rId = (row.user_id || '').trim().toLowerCase();
-                        return rName === cleanUserLower ||
-                               rEmail === cleanUserLower ||
-                               rId === cleanUserLower ||
-                               rName.includes(cleanUserLower) ||
-                               cleanUserLower.includes(rName);
-                    });
-                } else {
-                    matchedRows = data.filter(r => r.user_id !== 'adir_moshe' && !(r.user_id && r.user_id.startsWith('__')));
-                }
+                // Exact case-insensitive match ONLY (no substring .includes() matching, no empty wildcard)
+                const matchedRows = data.filter(row => {
+                    if (!row || !row.user_id || row.user_id === 'adir_moshe' || row.user_id.startsWith('__')) return false;
+                    const rName = (row.user_name || '').trim().toLowerCase();
+                    const rEmail = (row.user_email || '').trim().toLowerCase();
+                    const rId = (row.user_id || '').trim().toLowerCase();
+                    return (rName && rName === cleanUserLower) ||
+                           (rEmail && rEmail === cleanUserLower) ||
+                           (rId && rId === cleanUserLower);
+                });
 
                 if (matchedRows.length === 0) {
-                    alert('לא נמצא משתמש תואם לשם או אימייל זה. וודא שהפרטים נכונים או הירשם כסטודנט חדש.');
+                    if (typeof alert === 'function') alert('לא נמצא משתמש תואם לשם או אימייל זה. וודא שהפרטים נכונים או הירשם כסטודנט חדש.');
                     return false;
                 }
 
                 // Sort candidates by most recently updated
                 matchedRows.sort((a, b) => new Date(b.updated_at || 0) - new Date(a.updated_at || 0));
 
-                // 2a. Check for exact password match
-                let matched = matchedRows.find(row => {
-                    const s = row.state_json;
-                    return s && (s.account_password === cleanPass || s.password === cleanPass);
-                });
-
-                // 2b. Auto-claim password on legacy/uninitialized accounts (e.g. Yehonatan)
-                if (!matched) {
-                    const uninitialized = matchedRows.find(row => {
-                        const s = row.state_json;
-                        return s && !s.account_password && !s.password;
-                    });
-
-                    if (uninitialized) {
-                        uninitialized.state_json = uninitialized.state_json || {};
-                        uninitialized.state_json.account_password = cleanPass;
-                        uninitialized.state_json.student_name = uninitialized.user_name;
-
-                        try {
-                            await supabaseClient.from('user_states').update({
-                                state_json: uninitialized.state_json,
-                                updated_at: new Date().toISOString()
-                            }).eq('user_id', uninitialized.user_id);
-                            console.log('[AuthSync] Set initial password for legacy user account:', uninitialized.user_name);
-                        } catch (e) {
-                            console.warn('[AuthSync] Notice updating initial password:', e);
-                        }
-                        matched = uninitialized;
-                    }
-                }
+                // Verify password strictly via salted SHA-256 hash (or legacy plaintext for transparent migration)
+                const matched = matchedRows.find(row => verifyUserPassword(row.user_id, cleanPass, row.state_json));
 
                 if (!matched) {
-                    alert('סיסמה שגויה. נסה שוב, או לחץ על "שכחת סיסמה?" להגדרה מחדש.');
+                    if (typeof alert === 'function') alert('סיסמה שגויה. נסה שוב, או לחץ על "שכחת סיסמה?" להגדרה מחדש.');
                     return false;
                 }
 
-                // Login successful!
+                const computedHash = hashUserPassword(matched.user_id, cleanPass);
+                matched.state_json = sanitizeInboundState(matched.state_json || {}, matched.user_id);
+
+                // Transparent migration from legacy plaintext account_password -> salted SHA-256 digest
+                if (!matched.state_json.account_password_hash || matched.state_json.account_password || matched.state_json.password) {
+                    matched.state_json.account_password_hash = computedHash;
+                    delete matched.state_json.account_password;
+                    delete matched.state_json.password;
+                    try {
+                        await supabaseClient.from('user_states').update({
+                            state_json: matched.state_json,
+                            updated_at: new Date().toISOString()
+                        }).eq('user_id', matched.user_id);
+                    } catch (e) {}
+                }
+
+                // Login successful — issue cryptographic session proof
+                issueSessionProof(matched.user_id);
                 localStorage.setItem(SESSION_USER_KEY, matched.user_id);
                 localStorage.setItem('ast_profile_' + matched.user_id, JSON.stringify({
                     id: matched.user_id,
-                    name: matched.user_name || (matched.user_id === 'adir_moshe' ? 'אדיר משה' : 'סטודנט'),
-                    email: matched.user_email || (matched.user_id === 'adir_moshe' ? 'adir.m.2368@gmail.com' : ''),
-                    password: cleanPass,
-                    avatar: matched.user_id === 'adir_moshe' ? '🎓' : '👤',
-                    role: matched.user_id === 'adir_moshe' ? 'developer' : 'student',
-                    startingSemester: matched.state_json && matched.state_json.currentActiveSemester ? matched.state_json.currentActiveSemester : (matched.user_id === 'adir_moshe' ? 3 : 1)
+                    name: matched.user_name || 'סטודנט',
+                    email: matched.user_email || '',
+                    passwordHash: computedHash,
+                    avatar: (matched.state_json && matched.state_json.avatar) || '👤',
+                    role: 'student',
+                    startingSemester: matched.state_json && matched.state_json.currentActiveSemester ? matched.state_json.currentActiveSemester : 1
                 }));
-                if (matched.user_id === 'adir_moshe') {
-                    localStorage.setItem('ast_profile_adir_moshe', 'true');
-                    localStorage.setItem('ast_is_developer_device', 'true');
-                }
 
                 const key = this.getUserStorageKey(matched.user_id);
-                let stateToApply = matched.state_json;
-                if (matched.user_id === 'adir_moshe') {
-                    const isCorrupted = !stateToApply || !stateToApply.courses || !stateToApply.gpa || stateToApply.gpa === 0 || !stateToApply.courses['104041'] || !stateToApply.courses['104041'].grade;
-                    if (isCorrupted) {
-                        const preloaded = getPreloadedUserState();
-                        if (preloaded) {
-                            stateToApply = JSON.parse(JSON.stringify(preloaded));
-                            this.syncToCloud(stateToApply);
-                        }
-                    }
-                }
+                const stateToApply = matched.state_json;
                 localStorage.setItem(key, JSON.stringify(stateToApply));
-                if (matched.user_id === 'adir_moshe') {
-                    localStorage.setItem(LEGACY_SAVE_KEY, JSON.stringify(stateToApply));
-                }
+                this.syncScopedIntegrationKeys(matched.user_id, stateToApply);
+
                 if (window.setGlobalGameState) {
                     window.setGlobalGameState(stateToApply);
                 }
 
-                if (matched.state_json && matched.state_json.degreePlan && Array.isArray(matched.state_json.degreePlan)) {
+                if (stateToApply && stateToApply.degreePlan && Array.isArray(stateToApply.degreePlan)) {
                     if (window.DegreePlanner && typeof window.DegreePlanner.adoptPlanFromState === 'function') {
-                        window.DegreePlanner.adoptPlanFromState(matched.state_json.degreePlan, matched.state_json.degreePlanUnassigned);
+                        window.DegreePlanner.adoptPlanFromState(stateToApply.degreePlan, stateToApply.degreePlanUnassigned);
                     }
                 } else {
                     if (window.DegreePlanner && typeof window.DegreePlanner.resetToCleanSyllabus === 'function') {
@@ -600,22 +888,28 @@
 
                 if (typeof showHudToast === 'function') {
                     showHudToast('התחברת בהצלחה! שלום ' + matched.user_name + ' 🚀', 'success');
-                } else {
+                } else if (typeof alert === 'function') {
                     alert('התחברת בהצלחה!');
                 }
+                return true;
             } catch (err) {
                 console.error('[AuthSync] Login error:', err);
-                alert('אירעה שגיאה בעת ההתחברות: ' + err.message);
+                if (typeof alert === 'function') alert('אירעה שגיאה בעת ההתחברות: ' + err.message);
                 return false;
             }
         },
 
-        // Dedicated QA user login (Student isolation mode)
-        loginAsQA() {
+        // Dedicated QA user login (Student isolation mode - gated by QA_PASSWORD_HASH)
+        loginAsQA(qaPassword) {
+            if (!qaPassword || sha256Hex(AUTH_SALT + String(qaPassword).trim()) !== QA_PASSWORD_HASH) {
+                console.warn('[AuthSync Security] Blocked unauthorized loginAsQA invocation without valid QA credentials.');
+                return false;
+            }
+
             let qaProfile = null;
             try {
                 Object.keys(localStorage).forEach(k => {
-                    if (k.startsWith('ast_profile_')) {
+                    if (k.startsWith('ast_profile_') && k !== 'ast_profile_adir_moshe' && k !== 'ast_profile_guest') {
                         const prof = JSON.parse(localStorage.getItem(k) || '{}');
                         if (prof.name && prof.name.includes('בודק איכות')) qaProfile = prof;
                     }
@@ -626,6 +920,7 @@
             const qaName = qaProfile ? qaProfile.name : 'בודק איכות QA';
             const qaEmail = qaProfile ? qaProfile.email : 'qa_tester_1792183672290@semestero.local';
 
+            issueSessionProof(qaId);
             localStorage.setItem(SESSION_USER_KEY, qaId);
             localStorage.setItem('ast_profile_' + qaId, JSON.stringify({
                 id: qaId,
@@ -654,6 +949,8 @@
                 localStorage.setItem(key, JSON.stringify(state));
             }
 
+            this.syncScopedIntegrationKeys(qaId, state);
+
             if (window.setGlobalGameState) {
                 window.setGlobalGameState(state);
             }
@@ -670,50 +967,66 @@
             return true;
         },
 
-        // Reset or set password for existing student account by email or username
-        async resetPassword(identifier, newPassword) {
+        // Reset password for existing student account (requires BOTH exact registered name AND exact registered email; developer account is locked)
+        async resetPassword(identifier, newPassword, confirmEmail) {
             const cleanId = (identifier || '').trim().toLowerCase();
+            const cleanEmail = (confirmEmail || '').trim().toLowerCase();
             const cleanPass = (newPassword || '').trim();
 
+            if (isExactAdirIdentifier(cleanId) || isExactAdirIdentifier(cleanEmail)) {
+                if (typeof alert === 'function') alert('לא ניתן לאפס סיסמה לחשבון המפתח הראשי.');
+                return false;
+            }
             if (!cleanId) {
-                alert('נא להזין אימייל או שם משתמש.');
+                if (typeof alert === 'function') alert('נא להזין את השם המלא כפי שנרשם בחשבון.');
+                return false;
+            }
+            if (!cleanEmail || !cleanEmail.includes('@')) {
+                if (typeof alert === 'function') alert('נא להזין את כתובת האימייל הרשומה בחשבון לאימות זהות.');
                 return false;
             }
             if (!cleanPass || cleanPass.length < 4) {
-                alert('נא להזין סיסמה חדשה בת 4 תווים לפחות.');
+                if (typeof alert === 'function') alert('נא להזין סיסמה חדשה בת 4 תווים לפחות.');
                 return false;
             }
             if (!supabaseClient) {
-                alert('חיבור הענן אינו זמין כרגע. נסה שוב בעוד מספר שניות.');
+                if (typeof alert === 'function') alert('חיבור הענן אינו זמין כרגע. נסה שוב בעוד מספר שניות.');
                 return false;
             }
 
             try {
                 const { data, error } = await supabaseClient.from('user_states').select('*');
                 if (error || !data || data.length === 0) {
-                    alert('לא נמצאו משתמשים בענן.');
+                    if (typeof alert === 'function') alert('לא נמצאו משתמשים בענן.');
                     return false;
                 }
 
+                // Dual-factor exact verification: BOTH registered user_name (or user_id) AND registered user_email must match!
                 const userRows = data.filter(row => {
-                    if (row.user_id && row.user_id.startsWith('__')) return false;
+                    if (!row || !row.user_id || row.user_id === 'adir_moshe' || row.user_id.startsWith('__')) return false;
                     const rName = (row.user_name || '').trim().toLowerCase();
                     const rEmail = (row.user_email || '').trim().toLowerCase();
                     const rId = (row.user_id || '').trim().toLowerCase();
-                    return rName === cleanId || rEmail === cleanId || rId === cleanId || rName.includes(cleanId) || cleanId.includes(rName);
+                    if (!rEmail || rEmail !== cleanEmail) return false;
+                    return (rName === cleanId || rId === cleanId);
                 });
 
                 if (userRows.length === 0) {
-                    alert('לא נמצא חשבון המשויך ל: ' + identifier);
+                    if (typeof alert === 'function') alert('פרטי האימות אינם תואמים לחשבון קיים (נדרשת התאמה מלאה של שם ואימייל רשום).');
                     return false;
                 }
 
-                // Pick the most recently updated candidate
                 userRows.sort((a, b) => new Date(b.updated_at || 0) - new Date(a.updated_at || 0));
                 const target = userRows[0];
+                if (target.user_id === 'adir_moshe') {
+                    return false;
+                }
 
-                target.state_json = target.state_json || {};
-                target.state_json.account_password = cleanPass;
+                const newHash = hashUserPassword(target.user_id, cleanPass);
+                target.state_json = sanitizeInboundState(target.state_json || {}, target.user_id);
+                target.state_json.account_password_hash = newHash;
+                delete target.state_json.account_password;
+                delete target.state_json.password;
                 target.state_json.student_name = target.user_name;
 
                 await supabaseClient.from('user_states').update({
@@ -721,20 +1034,22 @@
                     updated_at: new Date().toISOString()
                 }).eq('user_id', target.user_id);
 
-                // Auto-login into this account
+                // Auto-login into verified student account
+                issueSessionProof(target.user_id);
                 localStorage.setItem(SESSION_USER_KEY, target.user_id);
                 localStorage.setItem('ast_profile_' + target.user_id, JSON.stringify({
                     id: target.user_id,
                     name: target.user_name || 'סטודנט',
                     email: target.user_email,
-                    password: cleanPass,
-                    avatar: '👤',
+                    passwordHash: newHash,
+                    avatar: target.state_json.avatar || '👤',
                     role: 'student',
                     startingSemester: target.state_json.currentActiveSemester || 1
                 }));
 
                 const key = this.getUserStorageKey(target.user_id);
                 localStorage.setItem(key, JSON.stringify(target.state_json));
+                this.syncScopedIntegrationKeys(target.user_id, target.state_json);
                 if (window.setGlobalGameState) {
                     window.setGlobalGameState(target.state_json);
                 }
@@ -746,13 +1061,13 @@
 
                 if (typeof showHudToast === 'function') {
                     showHudToast('הסיסמה עודכנה בהצלחה! שלום ' + target.user_name + ' 🚀', 'success');
-                } else {
+                } else if (typeof alert === 'function') {
                     alert('הסיסמה עודכנה בהצלחה!');
                 }
                 return true;
             } catch (e) {
                 console.error('[AuthSync] Reset password error:', e);
-                alert('שגיאה בעדכון הסיסמה: ' + e.message);
+                if (typeof alert === 'function') alert('שגיאה בעדכון הסיסמה: ' + e.message);
                 return false;
             }
         },
@@ -766,27 +1081,33 @@
             const priorCompleted = params.priorCompleted || {};
 
             if (!name) {
-                alert('נא להזין שם מלא.');
+                if (typeof alert === 'function') alert('נא להזין שם מלא.');
                 return false;
             }
             if (!email || !email.includes('@')) {
-                alert('נא להזין כתובת אימייל תקינה (חובה בהרשמה).');
+                if (typeof alert === 'function') alert('נא להזין כתובת אימייל תקינה (חובה בהרשמה).');
+                return false;
+            }
+            if (isExactAdirIdentifier(name) || isExactAdirIdentifier(email)) {
+                if (typeof alert === 'function') alert('שם משתמש או אימייל זה שמורים במערכת. נא להתחבר במסך ההתחברות.');
                 return false;
             }
             if (!password || password.length < 4) {
-                alert('נא להזין סיסמה בת לפחות 4 תווים.');
+                if (typeof alert === 'function') alert('נא להזין סיסמה בת לפחות 4 תווים.');
                 return false;
             }
 
-            let uid = 'student_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 3);
+            const uid = 'student_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 3);
             if (supabaseClient) {
                 try {
                     const { data: existingRows } = await supabaseClient
                         .from('user_states')
-                        .select('user_id')
+                        .select('user_id, user_email')
                         .ilike('user_email', email);
-                    if (existingRows && existingRows.length > 0) {
-                        uid = existingRows[0].user_id;
+                    const exactConflict = (existingRows || []).some(r => (r.user_email || '').trim().toLowerCase() === email.toLowerCase());
+                    if (exactConflict) {
+                        if (typeof alert === 'function') alert('כתובת אימייל זו כבר רשומה במערכת. נא להתחבר לחשבון הקיים או לאפס סיסמה.');
+                        return false;
                     }
                 } catch (e) {}
             }
@@ -797,9 +1118,11 @@
             } else {
                 cleanState = { courses: {}, credits: 0, gpa: 0 };
             }
+            const pwdHash = hashUserPassword(uid, password);
             cleanState.currentActiveSemester = startingSemester;
-            cleanState.account_password = password;
+            cleanState.account_password_hash = pwdHash;
             cleanState.student_name = name;
+            cleanState = sanitizeInboundState(cleanState, uid);
 
             // Push to Supabase Cloud
             if (supabaseClient) {
@@ -816,19 +1139,21 @@
                 }
             }
 
-            // Save locally
+            // Save locally with cryptographic session proof & strictly isolated integration keys
+            issueSessionProof(uid);
             localStorage.setItem(SESSION_USER_KEY, uid);
             localStorage.setItem('ast_profile_' + uid, JSON.stringify({
                 id: uid,
                 name: name,
                 email: email,
-                password: password,
+                passwordHash: pwdHash,
                 avatar: '👤',
                 role: 'student',
                 startingSemester: startingSemester
             }));
             const key = this.getUserStorageKey(uid);
             localStorage.setItem(key, JSON.stringify(cleanState));
+            this.syncScopedIntegrationKeys(uid, cleanState);
 
             if (window.setGlobalGameState) {
                 window.setGlobalGameState(cleanState);
@@ -848,7 +1173,7 @@
 
             if (typeof showHudToast === 'function') {
                 showHudToast('ברוך הבא ל-Semestero ME, ' + name + '! 🎉', 'success');
-            } else {
+            } else if (typeof alert === 'function') {
                 alert('החשבון נוצר בהצלחה!');
             }
 
@@ -864,9 +1189,9 @@
         },
 
         // Logout active user
-        logout() {
-            if (!confirm('האם אתה בטוח שברצונך להתנתק מהחשבון?')) {
-                return;
+        logout(skipConfirm = false) {
+            if (!skipConfirm && typeof confirm === 'function' && !confirm('האם אתה בטוח שברצונך להתנתק מהחשבון?')) {
+                return false;
             }
 
             // 1. Unsubscribe from real-time channel
@@ -877,8 +1202,16 @@
                 realtimeChannel = null;
             }
 
-            // 2. Clear session and set explicit guest state
+            // 2. Clear cryptographic session proof, developer flags, active integration mirrors, and set explicit guest state
+            clearSessionProof();
             localStorage.setItem(SESSION_USER_KEY, 'guest');
+            try {
+                localStorage.removeItem('atlas_me_custom_degree_plan_v2');
+                localStorage.removeItem('atlas_me_custom_degree_plan_v1');
+                localStorage.removeItem('atlas_me_custom_degree_plan_v2_guest');
+                localStorage.removeItem('atlas_me_custom_degree_plan_v1_guest');
+            } catch (e) {}
+            this.syncScopedIntegrationKeys('guest', null);
 
             // 3. Reset to clean empty syllabus
             if (typeof window.getCleanCurriculumState === 'function') {
@@ -903,9 +1236,10 @@
 
             if (typeof showHudToast === 'function') {
                 showHudToast('התנתקת בהצלחה. להתחברות מחדש לחץ על "התחברות". 👋', 'info');
-            } else {
+            } else if (typeof alert === 'function') {
                 alert('התנתקת בהצלחה.');
             }
+            return true;
         },
 
         // Update profile details (Name, Email, Phone, Semester, and optional Password)
@@ -919,11 +1253,11 @@
             const password = (params.password || '').trim();
 
             if (!name) {
-                alert('נא להזין שם מלא.');
+                if (typeof alert === 'function') alert('נא להזין שם מלא.');
                 return false;
             }
             if (email && !email.includes('@')) {
-                alert('נא להזין כתובת אימייל תקינה.');
+                if (typeof alert === 'function') alert('נא להזין כתובת אימייל תקינה.');
                 return false;
             }
 
@@ -939,12 +1273,15 @@
                 cleanPhone = '';
             }
 
-            // Update persistent storage
-            if (cleanPhone) {
-                try {
-                    localStorage.setItem('ast_persistent_user_phone', cleanPhone);
-                } catch (e) {}
-            }
+            // Update strictly user-scoped phone storage (never unscoped global key)
+            try {
+                localStorage.removeItem('ast_persistent_user_phone');
+                if (cleanPhone) {
+                    localStorage.setItem(getScopedPhoneKey(user.id), cleanPhone);
+                } else {
+                    localStorage.removeItem(getScopedPhoneKey(user.id));
+                }
+            } catch (e) {}
 
             // Update in-memory state
             const state = (window.getGlobalGameState ? window.getGlobalGameState() : window.gameState) || {};
@@ -954,13 +1291,19 @@
             if (!state.userProfile) state.userProfile = {};
             state.userProfile.phone = cleanPhone;
 
-            if (password) {
-                state.account_password = password;
-            } else if (!state.account_password) {
-                try {
-                    const prof = JSON.parse(localStorage.getItem('ast_profile_' + user.id) || '{}');
-                    if (prof.password) state.account_password = prof.password;
-                } catch (e) {}
+            if (user.id !== 'adir_moshe') {
+                if (password) {
+                    state.account_password_hash = hashUserPassword(user.id, password);
+                    delete state.account_password;
+                } else if (!state.account_password_hash) {
+                    try {
+                        const prof = JSON.parse(localStorage.getItem('ast_profile_' + user.id) || '{}');
+                        if (prof.passwordHash) state.account_password_hash = prof.passwordHash;
+                        else if (prof.password) state.account_password_hash = hashUserPassword(user.id, prof.password);
+                        else if (state.account_password) state.account_password_hash = hashUserPassword(user.id, state.account_password);
+                    } catch (e) {}
+                    if (state.account_password_hash) delete state.account_password;
+                }
             }
 
             const chosenAvatar = (params.avatar || user.avatar || '🎓').trim();
@@ -973,13 +1316,13 @@
             if (!state.userProfile) state.userProfile = {};
             state.userProfile.isInternationalStudent = isIntl;
 
-            // Update user profile object
+            // Update user profile object (hashed digest only, never plaintext password)
             const updatedProfile = {
                 id: user.id,
                 name: name,
                 email: email,
                 phone: cleanPhone,
-                password: state.account_password || '',
+                passwordHash: state.account_password_hash || '',
                 avatar: chosenAvatar,
                 role: user.role || 'student',
                 startingSemester: semester,
@@ -990,7 +1333,7 @@
             // Save state locally
             const key = this.getUserStorageKey(user.id);
             localStorage.setItem(key, JSON.stringify(state));
-            if (user.id === 'adir_moshe') {
+            if (user.id === 'adir_moshe' && this.isAdirActive()) {
                 localStorage.setItem(LEGACY_SAVE_KEY, JSON.stringify(state));
             }
 
@@ -1021,25 +1364,29 @@
                 showHudToast('פרטי החשבון עודכנו בהצלחה! ✨', 'success');
             } else if (typeof showToastNotification === 'function') {
                 showToastNotification('פרטי החשבון עודכנו בהצלחה! ✨', 'success');
-            } else {
+            } else if (typeof alert === 'function') {
                 alert('פרטי החשבון עודכנו בהצלחה!');
             }
             return true;
         },
 
-        // Permanently delete user account and cloud data
+        // Permanently delete student user account and cloud data (developer account protected)
         async deleteAccount() {
             if (!this.isLoggedIn()) return false;
             const user = this.getActiveUser();
+            if (user.id === 'adir_moshe' || this.isAdirActive()) {
+                if (typeof alert === 'function') alert('לא ניתן למחוק את חשבון המפתח הראשי דרך ממשק הלקוח.');
+                return false;
+            }
 
-            const confirmed = confirm(`⚠️ אזהרה: האם אתה בטוח שברצונך למחוק לצמיתות את החשבון "${user.name}"?\n\nפעולה זו תמחק את כל נתוני הקורסים, הציונים והסנכרון שלך מענן Semestero ME ולא ניתנת לשחזור!`);
+            const confirmed = typeof confirm === 'function' ? confirm(`⚠️ אזהרה: האם אתה בטוח שברצונך למחוק לצמיתות את החשבון "${user.name}"?\n\nפעולה זו תמחק את כל נתוני הקורסים, הציונים והסנכרון שלך מענן Semestero ME ולא ניתנת לשחזור!`) : false;
             if (!confirmed) return false;
 
-            const finalConfirm = confirm(`אישור סופי: למחוק לצמיתות את כל הנתונים של "${user.name}" ולאפס את המערכת?`);
+            const finalConfirm = typeof confirm === 'function' ? confirm(`אישור סופי: למחוק לצמיתות את כל הנתונים של "${user.name}" ולאפס את המערכת?`) : false;
             if (!finalConfirm) return false;
 
             // 1. Delete from Supabase Cloud
-            if (supabaseClient && user.id && user.id !== 'guest') {
+            if (supabaseClient && user.id && user.id !== 'guest' && user.id !== 'adir_moshe') {
                 try {
                     const { error } = await supabaseClient
                         .from('user_states')
@@ -1063,13 +1410,18 @@
                 realtimeChannel = null;
             }
 
-            // 3. Clear local storage keys
-            localStorage.removeItem(SESSION_USER_KEY);
+            // 3. Clear local storage keys & session proof
+            clearSessionProof();
+            localStorage.setItem(SESSION_USER_KEY, 'guest');
             localStorage.removeItem('ast_profile_' + user.id);
             localStorage.removeItem(this.getUserStorageKey(user.id));
-            if (user.id === 'adir_moshe') {
-                localStorage.removeItem(LEGACY_SAVE_KEY);
-            }
+            localStorage.removeItem(getScopedPhoneKey(user.id));
+            localStorage.removeItem(getScopedCheeseForkKey(user.id));
+            localStorage.removeItem(getScopedMoodleKey(user.id));
+            localStorage.removeItem(`atlas_me_custom_degree_plan_v2_${user.id}`);
+            localStorage.removeItem(`atlas_me_custom_degree_plan_v1_${user.id}`);
+            localStorage.removeItem(`atlas_me_moodle_sync_${user.id}`);
+            this.syncScopedIntegrationKeys('guest', null);
 
             // 4. Reset gameState to clean template
             if (typeof window.getCleanCurriculumState === 'function') {
@@ -1098,7 +1450,7 @@
                 showHudToast('החשבון נמחק לצמיתות. המערכת אופסה 🗑️', 'info');
             } else if (typeof showToastNotification === 'function') {
                 showToastNotification('החשבון נמחק לצמיתות. המערכת אופסה 🗑️', 'info');
-            } else {
+            } else if (typeof alert === 'function') {
                 alert('החשבון נמחק לצמיתות.');
             }
             return true;
@@ -1257,27 +1609,7 @@
         // Finish Onboarding Wizard
         finishOnboarding() {
             // Guard: If developer Adir tests onboarding, do NOT overwrite his authentic degree data
-            if (this.isAdirActive() || (this.getActiveUser && this.getActiveUser().id === 'adir_moshe')) {
-                console.log('[AuthSync] Developer Adir testing onboarding: preserving authentic state');
-                localStorage.setItem('ast_onboarding_shown', 'true');
-                const modal = document.getElementById('onboarding-wizard-modal');
-                if (modal) modal.classList.remove('active');
-                if (typeof showToastNotification === 'function') {
-                    showToastNotification('🎓 ברוך הבא אדיר משה! (מצב מפתח - נתוני התואר המקוריים נשמרו)', 'success');
-                } else if (typeof showHudToast === 'function') {
-                    showHudToast('🎓 ברוך הבא אדיר משה! (מצב מפתח - נתוני התואר המקוריים נשמרו)', 'success');
-                }
-                setTimeout(() => {
-                    if (window.InteractiveTour && typeof window.InteractiveTour.startTour === 'function') {
-                        window.InteractiveTour.startTour(0);
-                    } else if (typeof window.startInteractiveTour === 'function') {
-                        window.startInteractiveTour(0);
-                    }
-                }, 600);
-                return;
-            }
-            // Guard: If developer Adir tests onboarding, do NOT overwrite his authentic degree data
-            if (this.isAdirActive() || (this.getActiveUser && this.getActiveUser().id === 'adir_moshe')) {
+            if (this.isAdirActive()) {
                 console.log('[AuthSync] Developer Adir testing onboarding: preserving authentic state');
                 localStorage.setItem('ast_onboarding_shown', 'true');
                 const modal = document.getElementById('onboarding-wizard-modal');
@@ -1400,7 +1732,14 @@
                 return false;
             }
             try {
+                const activeUid = this.isLoggedIn() ? this.getActiveUser().id : 'guest';
                 localStorage.setItem('ast_cheesefork_url', url);
+                if (activeUid !== 'guest') {
+                    localStorage.setItem(getScopedCheeseForkKey(activeUid), url);
+                }
+                if (typeof window !== 'undefined' && window.SemesteroWidgetBridge && typeof window.SemesteroWidgetBridge.updateLaunchpadCheeseForkUrl === 'function') {
+                    window.SemesteroWidgetBridge.updateLaunchpadCheeseForkUrl(url);
+                }
                 const cfInput = document.getElementById('cheesefork-url');
                 if (cfInput) cfInput.value = url;
                 const curState = (window.getGlobalGameState ? window.getGlobalGameState() : window.gameState) || {};
@@ -1465,8 +1804,12 @@
                 return false;
             }
             try {
+                const activeUid = this.isLoggedIn() ? this.getActiveUser().id : 'guest';
                 localStorage.setItem('ast_moodle_calendar_url', url);
-                localStorage.setItem('atlas_me_moodle_sync_default', url);
+                localStorage.removeItem('atlas_me_moodle_sync_default');
+                if (activeUid !== 'guest') {
+                    localStorage.setItem(getScopedMoodleKey(activeUid), url);
+                }
                 if (window.MoodleSync && window.MoodleSync.config) {
                     window.MoodleSync.config.url = url;
                     if (typeof window.MoodleSync.saveConfig === 'function') {
@@ -1925,12 +2268,14 @@
                             </div>
                         </div>
 
-                        <!-- Delete Account Danger Zone -->
+                        <!-- Delete Account Danger Zone (Students Only - Developer Protected) -->
+                        ${!isDev ? `
                         <div style="border-top: 1px solid rgba(239, 68, 68, 0.2); padding-top: 10px; margin-top: 6px;">
                             <button type="button" class="btn btn-danger" id="btn-delete-account" style="width: 100%; padding: 7px; font-size: 0.8rem; background: rgba(239, 68, 68, 0.15); border: 1px solid #ef4444; color: #f87171; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;" onclick="AuthSync.deleteAccount()">
                                 🗑️ מחיקת חשבון לצמיתות
                             </button>
                         </div>
+                        ` : ''}
                     </div>
                 `;
             } else {
@@ -1945,7 +2290,7 @@
                     subText = 'חיבור לענן וסנכרון ההתקדמות שלך';
                 } else if (isReset) {
                     titleText = 'איפוס / הגדרת סיסמה';
-                    subText = 'הזן את פרטי החשבון ובחר סיסמה חדשה';
+                    subText = 'אימות דו-שלבי של שם מלא ואימייל רשום לבחירת סיסמה חדשה';
                 }
 
                 container.innerHTML = `
@@ -1968,20 +2313,24 @@
                         </div>
 
                         ${isReset ? `
-                            <form onsubmit="event.preventDefault(); const id = document.getElementById('reset-ident-input').value; const p = document.getElementById('reset-pass-input').value; AuthSync.resetPassword(id, p);">
+                            <form onsubmit="event.preventDefault(); const id = document.getElementById('reset-ident-input').value; const em = document.getElementById('reset-email-input').value; const p = document.getElementById('reset-pass-input').value; AuthSync.resetPassword(id, p, em);">
                                 <div style="margin-bottom: 12px; font-size: 0.82rem; color: #94a3b8; line-height: 1.4;">
-                                    הזן את כתובת האימייל או שם המשתמש שלך, והגדר סיסמה חדשה להתחברות.
+                                    לאבטחת חשבונך, הזן את השם המלא <strong>וגם</strong> את כתובת האימייל כפי שנרשמו בחשבון, ובחר סיסמה חדשה.
                                 </div>
-                                <div class="form-group" style="margin-bottom: 12px;">
-                                    <label style="display: block; font-size: 0.82rem; color: #f8fafc; font-weight: 600; margin-bottom: 4px;">אימייל או שם משתמש:</label>
-                                    <input type="text" id="reset-ident-input" class="form-input" style="width: 100%; padding: 8px 12px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff; font-size: 0.9rem;" placeholder="למשל: student@gmail.com או טכניוני" required autofocus>
+                                <div class="form-group" style="margin-bottom: 10px;">
+                                    <label style="display: block; font-size: 0.82rem; color: #f8fafc; font-weight: 600; margin-bottom: 4px;">שם מלא (כפי שנרשם בחשבון):</label>
+                                    <input type="text" id="reset-ident-input" class="form-input" style="width: 100%; padding: 8px 12px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff; font-size: 0.9rem;" placeholder="למשל: יוסף כהן" required autofocus>
+                                </div>
+                                <div class="form-group" style="margin-bottom: 10px;">
+                                    <label style="display: block; font-size: 0.82rem; color: #f8fafc; font-weight: 600; margin-bottom: 4px;">כתובת אימייל רשומה לאימות:</label>
+                                    <input type="email" id="reset-email-input" class="form-input" style="width: 100%; padding: 8px 12px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff; font-size: 0.9rem;" placeholder="student@campus.technion.ac.il" required>
                                 </div>
                                 <div class="form-group" style="margin-bottom: 16px;">
                                     <label style="display: block; font-size: 0.82rem; color: #f8fafc; font-weight: 600; margin-bottom: 4px;">סיסמה חדשה:</label>
                                     <input type="password" id="reset-pass-input" class="form-input" style="width: 100%; padding: 8px 12px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff; font-size: 0.9rem;" placeholder="הזן סיסמה חדשה (לפחות 4 תווים)" required minlength="4">
                                 </div>
                                 <button type="submit" class="btn btn-primary btn-block" style="width: 100%; padding: 10px; font-weight: 700; font-size: 0.95rem; margin-bottom: 10px;">
-                                    🔄 עדכן סיסמה והתחבר
+                                    🔄 אמת פרטים ועדכן סיסמה
                                 </button>
                                 <div style="text-align: center;">
                                     <a href="javascript:void(0)" onclick="AuthSync.renderAuthModal('login')" style="color: #94a3b8; font-size: 0.82rem;">
@@ -2240,7 +2589,7 @@
                         (payload) => {
                             console.log('[AuthSync Realtime] Remote update received:', payload);
                             if (payload && payload.new && payload.new.state_json) {
-                                const remoteState = sanitizeInboundState(payload.new.state_json);
+                                const remoteState = sanitizeInboundState(payload.new.state_json, user.id);
                                 const remoteJson = JSON.stringify(remoteState);
 
                                 // Avoid echoing our own state that was just uploaded
@@ -2271,11 +2620,11 @@
                                     return;
                                 }
 
-                                // Always preserve persistent phone number if remote state lacks it
-                                const persistentPhone = localStorage.getItem('ast_persistent_user_phone');
-                                if (persistentPhone && (!remoteState.userProfile || !remoteState.userProfile.phone)) {
+                                // Preserve strictly user-scoped phone number if remote state lacks it
+                                const scopedPhone = localStorage.getItem(getScopedPhoneKey(user.id));
+                                if (scopedPhone && (!remoteState.userProfile || !remoteState.userProfile.phone)) {
                                     if (!remoteState.userProfile) remoteState.userProfile = {};
-                                    remoteState.userProfile.phone = persistentPhone;
+                                    remoteState.userProfile.phone = scopedPhone;
                                 }
 
                                 const mergedRemoteJson = JSON.stringify(remoteState);
@@ -2284,9 +2633,10 @@
                                     try {
                                         lastUploadedStateJson = mergedRemoteJson;
                                         localStorage.setItem(key, mergedRemoteJson);
-                                        if (user.id === 'adir_moshe') {
+                                        if (user.id === 'adir_moshe' && this.isAdirActive()) {
                                             localStorage.setItem(LEGACY_SAVE_KEY, mergedRemoteJson);
                                         }
+                                        this.syncScopedIntegrationKeys(user.id, remoteState);
                                         if (window.setGlobalGameState) {
                                             window.setGlobalGameState(remoteState);
                                         }
@@ -2301,10 +2651,6 @@
                                                 localStorage.setItem(v2Key, planPayload);
                                                 localStorage.setItem(v1Key, JSON.stringify(remoteState.degreePlan));
 
-                                                if (user.id === 'adir_moshe') {
-                                                    localStorage.setItem('atlas_me_custom_degree_plan_v2', planPayload);
-                                                    localStorage.setItem('atlas_me_custom_degree_plan_v1', JSON.stringify(remoteState.degreePlan));
-                                                }
                                                 if (window.DegreePlanner && typeof window.DegreePlanner.adoptPlanFromState === 'function') {
                                                     window.DegreePlanner.adoptPlanFromState(remoteState.degreePlan, remoteState.degreePlanUnassigned);
                                                 }
@@ -2351,8 +2697,8 @@
                 }
 
                 if (data && data.state_json) {
-                    let remoteState = sanitizeInboundState(data.state_json);
-                    if (user.id === 'adir_moshe') {
+                    let remoteState = sanitizeInboundState(data.state_json, user.id);
+                    if (user.id === 'adir_moshe' && this.isAdirActive()) {
                         const remoteGpa = remoteState ? (remoteState.gpa || 0) : 0;
                         const remoteHasCalc = remoteState && remoteState.courses && remoteState.courses['104041'] && remoteState.courses['104041'].grade;
                         if (remoteGpa === 0 || !remoteHasCalc) {
@@ -2371,8 +2717,6 @@
                         localState = localRaw ? JSON.parse(localRaw) : null;
                     } catch (e) {}
 
-
-
                     const localLastMod = (localState && localState.lastModified) || 0;
                     const remoteLastMod = (remoteState && remoteState.lastModified) || (data && data.updated_at ? new Date(data.updated_at).getTime() : 0);
 
@@ -2388,18 +2732,19 @@
                         return localState;
                     }
 
-                    // Always preserve persistent phone number if remote state lacks it
-                    const persistentPhone = localStorage.getItem('ast_persistent_user_phone');
-                    if (persistentPhone && (!remoteState.userProfile || !remoteState.userProfile.phone)) {
+                    // Preserve strictly user-scoped phone number if remote state lacks it
+                    const scopedPhone = localStorage.getItem(getScopedPhoneKey(user.id));
+                    if (scopedPhone && (!remoteState.userProfile || !remoteState.userProfile.phone)) {
                         if (!remoteState.userProfile) remoteState.userProfile = {};
-                        remoteState.userProfile.phone = persistentPhone;
+                        remoteState.userProfile.phone = scopedPhone;
                     }
 
                     // Adopt remote state
                     localStorage.setItem(key, JSON.stringify(remoteState));
-                    if (user.id === 'adir_moshe') {
+                    if (user.id === 'adir_moshe' && this.isAdirActive()) {
                         localStorage.setItem(LEGACY_SAVE_KEY, JSON.stringify(remoteState));
                     }
+                    this.syncScopedIntegrationKeys(user.id, remoteState);
                     if (window.setGlobalGameState) {
                         window.setGlobalGameState(remoteState);
                     }
@@ -2414,10 +2759,6 @@
                             localStorage.setItem(v2Key, planPayload);
                             localStorage.setItem(v1Key, JSON.stringify(remoteState.degreePlan));
 
-                            if (user.id === 'adir_moshe') {
-                                localStorage.setItem('atlas_me_custom_degree_plan_v2', planPayload);
-                                localStorage.setItem('atlas_me_custom_degree_plan_v1', JSON.stringify(remoteState.degreePlan));
-                            }
                             if (window.DegreePlanner && typeof window.DegreePlanner.adoptPlanFromState === 'function') {
                                 window.DegreePlanner.adoptPlanFromState(remoteState.degreePlan, remoteState.degreePlanUnassigned);
                             }
@@ -2426,7 +2767,7 @@
                     this.refreshAllAppViews();
                     console.log('[AuthSync] Pulled remote state for:', user.name);
                     return remoteState;
-                } else if (user.id === 'adir_moshe') {
+                } else if (user.id === 'adir_moshe' && this.isAdirActive()) {
                     // Upload initial local state to cloud if missing
                     this.syncToCloud();
                 }

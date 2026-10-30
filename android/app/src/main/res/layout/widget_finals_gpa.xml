@@ -32,7 +32,7 @@
             android:paddingRight="8dp"
             android:paddingTop="2dp"
             android:paddingBottom="2dp"
-            android:text="🏆 מצטיין דיקן"
+            android:text="✨ מצב התחלתי"
             android:textColor="#fbbf24"
             android:textSize="10sp"
             android:textStyle="bold" />
@@ -58,7 +58,7 @@
                 android:id="@+id/widget_finals_exam_days"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="106"
+                android:text="--"
                 android:textColor="#38bdf8"
                 android:textSize="26sp"
                 android:textStyle="bold" />
@@ -67,7 +67,7 @@
                 android:id="@+id/widget_finals_exam_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="ימים למועד א׳"
+                android:text="ימים לבחינה"
                 android:textColor="#cbd5e1"
                 android:textSize="10sp"
                 android:textStyle="bold"
@@ -78,7 +78,7 @@
                 android:id="@+id/widget_finals_exam_course"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="מכניקת מוצקים 2"
+                android:text="אין בחינות קרובות"
                 android:textColor="#94a3b8"
                 android:textSize="9sp"
                 android:maxLines="1"
@@ -103,7 +103,7 @@
                 android:id="@+id/widget_gpa_current"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="88.4"
+                android:text="0.0"
                 android:textColor="#10b981"
                 android:textSize="26sp"
                 android:textStyle="bold" />
@@ -120,7 +120,7 @@
                 android:id="@+id/widget_gpa_target"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="יעד סמסטר: 90.0"
+                android:text="יעד סמסטר: --"
                 android:textColor="#94a3b8"
                 android:textSize="9sp" />
         </LinearLayout>

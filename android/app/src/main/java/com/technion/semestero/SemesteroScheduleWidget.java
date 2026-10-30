@@ -23,12 +23,12 @@ public class SemesteroScheduleWidget extends AppWidgetProvider {
     public static void updateAppWidget(Context context, AppWidgetManager appWidgetManager, int appWidgetId) {
         SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
 
-        String totalHours = prefs.getString("sched_total_hours", "15 ש״ס • יום חופש 🏖️");
-        String sun = prefs.getString("sched_sun", "10:30-16:30 • מוצקים 2 + פיסיקה (4 שעות)");
-        String mon = prefs.getString("sched_mon", "🏖️ יום חופשי מלא! (0 שעות)");
-        String tue = prefs.getString("sched_tue", "08:30-14:30 • מתמטיקה ומעבדה (6 שעות)");
-        String wed = prefs.getString("sched_wed", "10:30-12:30 • תרגול מוצקים (2 שעות)");
-        String thu = prefs.getString("sched_thu", "07:30-10:30 • יוגה ורובוטיקה (3 שעות)");
+        String totalHours = prefs.getString("sched_total_hours", "0 ש״ס • טרם הוגדרה מערכת");
+        String sun = prefs.getString("sched_sun", "אין שיעורים מתוזמנים");
+        String mon = prefs.getString("sched_mon", "אין שיעורים מתוזמנים");
+        String tue = prefs.getString("sched_tue", "אין שיעורים מתוזמנים");
+        String wed = prefs.getString("sched_wed", "אין שיעורים מתוזמנים");
+        String thu = prefs.getString("sched_thu", "אין שיעורים מתוזמנים");
 
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.widget_schedule);
         views.setTextViewText(R.id.widget_schedule_total_hours, totalHours);

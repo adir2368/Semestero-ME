@@ -111,14 +111,7 @@ async function runTests() {
     console.log('✓ Test 2 Passed: toggleIntegrationsHub works with toggle and forceOpen');
 
     // Test 3: renderAuthModal in logged-in state renders Collapsible Hub
-    global.localStorage.setItem('ast_logged_in_user', 'adir_moshe');
-    global.localStorage.setItem('ast_profile_adir_moshe', JSON.stringify({
-        id: 'adir_moshe',
-        name: 'אדיר משה',
-        email: 'adir.m.2368@gmail.com',
-        phone: '050-1234567',
-        role: 'student'
-    }));
+    await AuthSync.loginWithPassword('adir_moshe', 'BenchyTech1');
 
     const container = global.document.getElementById('auth-modal-content-container');
     AuthSync.renderAuthModal();
@@ -165,7 +158,7 @@ async function runTests() {
     console.log('✓ Test 6 Passed: openConnectModal activates auth modal and expands integrations hub');
 
     // Test 7: Standalone guest integrations modal (activeTab === 'integrations')
-    global.localStorage.removeItem('ast_logged_in_user'); // guest
+    AuthSync.logout(true); // guest
     AuthSync.renderAuthModal('integrations');
     assert(container.innerHTML.includes('מרכז חיבורים ואינטגרציות'), 'Guest modal should render header');
     assert(container.innerHTML.includes('id="integration-card-cheesefork"'), 'Guest modal should render CheeseFork card directly');

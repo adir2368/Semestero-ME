@@ -55,11 +55,11 @@ public class SemesteroNextClassWidget extends AppWidgetProvider {
     public static void updateAppWidget(Context context, AppWidgetManager appWidgetManager, int appWidgetId) {
         SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
 
-        String title = prefs.getString("class_title", "מכניקת מוצקים 2");
-        String time = prefs.getString("class_time", "10:30 - 12:30");
-        String details = prefs.getString("class_details", "📍 דנציגר 102 • הרצאה");
-        String lecturer = prefs.getString("class_lecturer", "👨‍🏫 דניאל אורנשטיין");
-        String status = prefs.getString("class_status", "⏰ מתחיל בעוד 10 דקות");
+        String title = prefs.getString("class_title", "אין שיעורים קרובים");
+        String time = prefs.getString("class_time", "--:--");
+        String details = prefs.getString("class_details", "פתח את האפליקציה לסנכרון מערכת");
+        String lecturer = prefs.getString("class_lecturer", "סמסטרו ME • הנדסת מכונות");
+        String status = prefs.getString("class_status", "חופשי");
         int totalClasses = prefs.getInt("all_classes_count", 1);
         int currentIndex = prefs.getInt("class_index", 0);
 

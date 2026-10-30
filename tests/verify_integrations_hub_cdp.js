@@ -127,13 +127,13 @@ async function main() {
         // Step 1: Set authenticated user Adir Moshe and verify session
         console.log('[Step 1] Initializing Adir Moshe authenticated session...');
         await cdp.eval(`
-            (() => {
+            (async () => {
                 sessionStorage.setItem('sw_last_controller_reload', String(Date.now()));
                 localStorage.setItem('ast_onboarding_shown', 'true');
-                localStorage.setItem('ast_logged_in_user', 'adir_moshe');
-                localStorage.setItem('ast_cheesefork_url', 'https://cheesefork.cf/s/technion-202601-adir');
                 if (window.AuthSync) {
-                    window.AuthSync.init();
+                    await window.AuthSync.loginWithPassword('adir_moshe', 'BenchyTech1');
+                    localStorage.setItem('ast_cheesefork_url', 'https://cheesefork.cf/s/technion-202601-adir');
+                    localStorage.setItem('ast_cheesefork_url_adir_moshe', 'https://cheesefork.cf/s/technion-202601-adir');
                     window.AuthSync.updateHudAuthControls();
                 }
             })()

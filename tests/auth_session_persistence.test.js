@@ -35,56 +35,72 @@ require('../auth_sync.js');
 const AuthSync = global.window.AuthSync;
 assert(AuthSync, 'AuthSync must be attached to window');
 
-console.log('Testing AuthSync Session Persistence & Shield...');
+(async () => {
+    console.log('Testing AuthSync Session Persistence, Zero-Default Guest & Cryptographic Proof Shield...');
 
-// Test 1: Refresh when logged in as adir_moshe MUST preserve session and developer flags
-localStorage.clear();
-localStorage.setItem('ast_logged_in_user', 'adir_moshe');
-AuthSync.init();
+    // Test 1a: Unverified ast_logged_in_user = 'adir_moshe' (legacy APK auto-login) MUST be evicted to 'guest'
+    localStorage.clear();
+    localStorage.setItem('ast_logged_in_user', 'adir_moshe');
+    localStorage.setItem('ast_is_developer_device', 'true');
+    AuthSync.init();
 
-assert.strictEqual(localStorage.getItem('ast_logged_in_user'), 'adir_moshe', 'Session must remain adir_moshe on refresh');
-assert.strictEqual(localStorage.getItem('ast_is_developer_device'), 'true', 'ast_is_developer_device must be true');
-assert.strictEqual(localStorage.getItem('ast_profile_adir_moshe'), 'true', 'ast_profile_adir_moshe must be true');
-assert.strictEqual(AuthSync.isLoggedIn(), true, 'isLoggedIn() must be true');
-assert.strictEqual(AuthSync.isAdirActive(), true, 'isAdirActive() must be true');
-console.log('✓ Test 1 Passed: adir_moshe session preserved on refresh without demotion');
+    assert.strictEqual(localStorage.getItem('ast_logged_in_user'), 'guest', 'Unverified adir_moshe session must be evicted to guest');
+    assert.strictEqual(localStorage.getItem('ast_is_developer_device'), null, 'Unverified developer flag must be stripped');
+    assert.strictEqual(AuthSync.isLoggedIn(), false, 'Unverified user must not be logged in');
+    assert.strictEqual(AuthSync.isAdirActive(), false, 'Unverified user must not be Adir');
+    console.log('✓ Test 1a Passed: Unverified adir_moshe session retroactively evicted to guest');
 
-// Test 2: Clean visitor starts as guest and is NOT adir_moshe
-localStorage.clear();
-AuthSync.init();
-assert.strictEqual(localStorage.getItem('ast_logged_in_user'), 'guest', 'Clean visitor must be guest');
-assert.strictEqual(AuthSync.isLoggedIn(), false, 'Guest is not logged in');
-assert.strictEqual(AuthSync.isAdirActive(), false, 'Guest is not Adir');
-console.log('✓ Test 2 Passed: Clean visitor defaults to guest safely');
+    // Test 1b: Password-verified adir_moshe session MUST persist across refresh (AuthSync.init())
+    localStorage.clear();
+    const loginOk = await AuthSync.loginWithPassword('adir_moshe', 'BenchyTech1');
+    assert.strictEqual(loginOk, true, 'Password login for adir_moshe must succeed');
+    assert(localStorage.getItem('ast_auth_verified_v3'), 'Cryptographic session proof must be issued');
 
-// Test 3: Guest state purge NEVER deletes LEGACY_SAVE_KEY (academic_skill_tree_save)
-localStorage.clear();
-localStorage.setItem('ast_logged_in_user', 'guest');
-localStorage.setItem('academic_skill_tree_save', JSON.stringify({ gpa: 86.04, courses: { '104041': { grade: 84 } } }));
-localStorage.setItem('ast_user_state_guest', JSON.stringify({ characterClass: 'סטודנט למדעי המחשב', completedCourses: 12, gpa: 90 }));
+    AuthSync.init(); // Simulate page refresh
+    assert.strictEqual(localStorage.getItem('ast_logged_in_user'), 'adir_moshe', 'Verified session must remain adir_moshe on refresh');
+    assert.strictEqual(localStorage.getItem('ast_is_developer_device'), 'true', 'ast_is_developer_device must remain true');
+    assert.strictEqual(AuthSync.isLoggedIn(), true, 'isLoggedIn() must be true');
+    assert.strictEqual(AuthSync.isAdirActive(), true, 'isAdirActive() must be true');
+    console.log('✓ Test 1b Passed: Verified adir_moshe session preserved on refresh without demotion');
 
-const guestLoaded = AuthSync.loadActiveUserState();
-assert.strictEqual(localStorage.getItem('academic_skill_tree_save') !== null, true, 'LEGACY_SAVE_KEY must NOT be removed by guest purge');
-assert.strictEqual(localStorage.getItem('ast_user_state_guest'), null, 'Contaminated guest key must be removed');
-console.log('✓ Test 3 Passed: LEGACY_SAVE_KEY protected from guest contamination purge');
+    // Test 2: Clean visitor starts as guest and is NOT adir_moshe
+    localStorage.clear();
+    AuthSync.init();
+    assert.strictEqual(localStorage.getItem('ast_logged_in_user'), 'guest', 'Clean visitor must be guest');
+    assert.strictEqual(AuthSync.isLoggedIn(), false, 'Guest is not logged in');
+    assert.strictEqual(AuthSync.isAdirActive(), false, 'Guest is not Adir');
+    console.log('✓ Test 2 Passed: Clean visitor defaults to guest safely');
 
-// Test 4: loginWithPassword identifier supports adir.m.2368@gmail.com
-localStorage.clear();
-AuthSync.loginWithPassword('adir.m.2368@gmail.com', 'BenchyTech1');
-assert.strictEqual(localStorage.getItem('ast_logged_in_user'), 'adir_moshe', 'Must log in as adir_moshe with adir.m.2368@gmail.com');
-assert.strictEqual(AuthSync.isAdirActive(), true, 'Must be active Adir');
-assert.strictEqual(localStorage.getItem('ast_is_developer_device'), 'true', 'Must set developer device flag');
-console.log('✓ Test 4 Passed: adir.m.2368@gmail.com recognized as Adir developer identifier');
+    // Test 3: Guest state load returns clean empty state and removes contaminated ast_user_state_guest
+    localStorage.clear();
+    AuthSync.init();
+    localStorage.setItem('ast_user_state_guest', JSON.stringify({ characterClass: 'סטודנט למדעי המחשב', completedCourses: 12, gpa: 90 }));
 
-// Test 5: syncToCloud blocks corrupted GPA 0 state for Adir
-let syncAttemptedWithZero = false;
-let healedStateSaved = false;
-const originalSave = AuthSync.saveActiveUserState;
-AuthSync.saveActiveUserState = function(s) {
-    if (s.gpa > 80) healedStateSaved = true;
-};
-AuthSync.syncToCloud({ gpa: 0, courses: {} });
-assert.strictEqual(healedStateSaved, true, 'Corrupted state must trigger auto-heal before syncing');
-console.log('✓ Test 5 Passed: syncToCloud blocks GPA 0 and auto-heals Adir');
+    const guestLoaded = AuthSync.loadActiveUserState();
+    assert.strictEqual(guestLoaded, null, 'Contaminated guest load must return null so clean curriculum loads');
+    assert.strictEqual(localStorage.getItem('ast_user_state_guest'), null, 'Contaminated guest key must be removed');
+    console.log('✓ Test 3 Passed: Guest contamination purged cleanly');
 
-console.log('\n🎉 ALL 5 AUTH & PERSISTENCE TESTS PASSED FLAWLESSLY!');
+    // Test 4: loginWithPassword identifier supports adir.m.2368@gmail.com
+    localStorage.clear();
+    const emailLoginOk = await AuthSync.loginWithPassword('adir.m.2368@gmail.com', 'BenchyTech1');
+    assert.strictEqual(emailLoginOk, true, 'Email login must succeed');
+    assert.strictEqual(localStorage.getItem('ast_logged_in_user'), 'adir_moshe', 'Must log in as adir_moshe with adir.m.2368@gmail.com');
+    assert.strictEqual(AuthSync.isAdirActive(), true, 'Must be active Adir');
+    assert.strictEqual(localStorage.getItem('ast_is_developer_device'), 'true', 'Must set developer device flag');
+    console.log('✓ Test 4 Passed: adir.m.2368@gmail.com recognized as Adir developer identifier');
+
+    // Test 5: syncToCloud blocks corrupted GPA 0 state for Adir
+    let healedStateSaved = false;
+    AuthSync.saveActiveUserState = function(s) {
+        if (s.gpa > 80) healedStateSaved = true;
+    };
+    await AuthSync.syncToCloud({ gpa: 0, courses: {} });
+    assert.strictEqual(healedStateSaved, true, 'Corrupted state must trigger auto-heal before syncing');
+    console.log('✓ Test 5 Passed: syncToCloud blocks GPA 0 and auto-heals Adir');
+
+    console.log('\n🎉 ALL AUTH & PERSISTENCE TESTS PASSED FLAWLESSLY!');
+})().catch(err => {
+    console.error(err);
+    process.exit(1);
+});

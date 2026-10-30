@@ -81,12 +81,12 @@ public class SemesteroTasksExamWidget extends AppWidgetProvider {
     public static void updateAppWidget(Context context, AppWidgetManager appWidgetManager, int appWidgetId) {
         SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
 
-        String examDays = prefs.getString("exam_days", "106");
-        String examTitle = prefs.getString("exam_title", "פיסיקה 2");
-        String examSub = prefs.getString("exam_sub", "מועד א' • 01/02/2027");
-        String task1 = prefs.getString("task_1", "📌 [פיזיקה 2מ] תרגיל בית 3 (נותר יום)");
-        String task2 = prefs.getString("task_2", "⚡ [מוצקים 2] תרגיל 1: כפיפת קורות (3 ימים)");
-        String tasksSummary = prefs.getString("tasks_summary", "עוד 4 משימות פתוחות בלוח");
+        String examDays = prefs.getString("exam_days", "--");
+        String examTitle = prefs.getString("exam_title", "אין בחינות קרובות");
+        String examSub = prefs.getString("exam_sub", "סמסטר חורף תשפ״ז");
+        String task1 = prefs.getString("task_1", "אין משימות פתוחות 🎉");
+        String task2 = prefs.getString("task_2", "");
+        String tasksSummary = prefs.getString("tasks_summary", "הכל מעודכן!");
         boolean task1Done = prefs.getBoolean("task_1_done", false);
         boolean task2Done = prefs.getBoolean("task_2_done", false);
 

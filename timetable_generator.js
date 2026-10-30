@@ -1033,14 +1033,27 @@
     const TimetableStudio = {
         options: [],
         currentOptionIndex: 0,
-        selectedCourses: ['034056', '034053', '034035', '104228', '114052', '03940805'],
+        selectedCourses: ['034056', '034053', '034035', '104228', '114052'],
         currentSort: 'freeDays',
         userAnchors: {}, // Map of slotKey => { slotKey, courseCode, courseName, slotType, groupId, lecturer, isFixed }
         isInitialized: false,
 
+        getScopedAnchorsKey: function () {
+            let uid = 'guest';
+            if (global.AuthSync && typeof global.AuthSync.getActiveUser === 'function') {
+                const u = global.AuthSync.getActiveUser();
+                if (u && u.id) uid = u.id;
+            }
+            return `ast_timetable_user_anchors_${uid}`;
+        },
+
         loadAnchors: function () {
             try {
-                const stored = localStorage.getItem('ast_timetable_user_anchors');
+                const scopedKey = this.getScopedAnchorsKey();
+                let stored = localStorage.getItem(scopedKey);
+                if (!stored && global.AuthSync && typeof global.AuthSync.isAdirActive === 'function' && global.AuthSync.isAdirActive()) {
+                    stored = localStorage.getItem('ast_timetable_user_anchors');
+                }
                 if (stored) {
                     this.userAnchors = JSON.parse(stored);
                 } else {
@@ -1053,7 +1066,7 @@
 
         saveAnchors: function () {
             try {
-                localStorage.setItem('ast_timetable_user_anchors', JSON.stringify(this.userAnchors || {}));
+                localStorage.setItem(this.getScopedAnchorsKey(), JSON.stringify(this.userAnchors || {}));
             } catch (e) {
                 console.warn('[TimetableStudio] Failed to save anchors:', e);
             }
@@ -1164,12 +1177,14 @@
 
             this.loadAnchors();
 
+            const isAdirUser = Boolean(global.AuthSync && typeof global.AuthSync.isAdirActive === 'function' && global.AuthSync.isAdirActive());
             const catalogCodes = Object.keys(TECH_COURSE_GROUPS_CATALOG);
+            const defaultCatalogCodes = isAdirUser ? catalogCodes : catalogCodes.filter(c => c !== '03940805');
 
             // Collect active courses from gameState if available and in catalog
             if (global.gameState && global.gameState.courses) {
                 const activeMatching = Object.values(global.gameState.courses)
-                    .filter(c => (c.status === 'active' || Number(c.semester) === 3))
+                    .filter(c => c.status === 'active' || (isAdirUser && Number(c.semester) === 3))
                     .map(c => {
                         if (TECH_COURSE_GROUPS_CATALOG[c.code]) return c.code;
                         if (TECH_COURSE_GROUPS_CATALOG['0' + c.code]) return '0' + c.code;
@@ -1179,13 +1194,13 @@
                     .filter(Boolean);
 
                 if (activeMatching.length >= 2) {
-                    if (!activeMatching.includes('03940805')) activeMatching.push('03940805');
+                    if (isAdirUser && !activeMatching.includes('03940805')) activeMatching.push('03940805');
                     this.selectedCourses = Array.from(new Set(activeMatching));
                 } else {
-                    this.selectedCourses = [...catalogCodes];
+                    this.selectedCourses = [...defaultCatalogCodes];
                 }
             } else if (!this.selectedCourses || this.selectedCourses.length === 0) {
-                this.selectedCourses = [...catalogCodes];
+                this.selectedCourses = [...defaultCatalogCodes];
             }
 
             this.computeAndRender();

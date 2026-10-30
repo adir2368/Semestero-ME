@@ -7457,7 +7457,7 @@ const PRELOADED_USER_STATE = (typeof window !== 'undefined' && window.PRELOADED_
   ],
   "bossesSlain": 11,
   "userProfile": {
-    "phone": "053-6202662"
+    "phone": ""
   },
   "isFinalsMode": false,
   "lastModified": 1789657339323,
@@ -9373,12 +9373,23 @@ function loadSavedState() {
         }
     }
 
-    // Guarantee persistent user phone is restored if missing
+    // Guarantee strictly user-scoped phone is restored for authenticated user ONLY (never unscoped global key)
     try {
-        const persistentPhone = localStorage.getItem('ast_persistent_user_phone') || '';
-        if (persistentPhone) {
-            if (!gameState.userProfile) gameState.userProfile = {};
-            if (!gameState.userProfile.phone) gameState.userProfile.phone = persistentPhone;
+        localStorage.removeItem('ast_persistent_user_phone');
+        const activeUid = (window.AuthSync && typeof window.AuthSync.isLoggedIn === 'function' && window.AuthSync.isLoggedIn() && typeof window.AuthSync.getActiveUser === 'function')
+            ? window.AuthSync.getActiveUser().id
+            : 'guest';
+        if (activeUid && activeUid !== 'guest') {
+            const scopedPhone = localStorage.getItem('ast_user_phone_' + activeUid) || '';
+            if (scopedPhone) {
+                if (!gameState.userProfile) gameState.userProfile = {};
+                if (!gameState.userProfile.phone) gameState.userProfile.phone = scopedPhone;
+            }
+        } else if (gameState.userProfile && gameState.userProfile.phone) {
+            // Guest nominal state has no preloaded phone number
+            if (!localStorage.getItem('ast_user_phone_guest')) {
+                gameState.userProfile.phone = '';
+            }
         }
     } catch (e) {}
 
@@ -9830,12 +9841,18 @@ function saveState(skipNotify = false) {
             gameState.lastModified = Date.now();
         }
 
-        // Keep persistent phone in sync
-        const phone = (gameState.userProfile && gameState.userProfile.phone) || localStorage.getItem('ast_persistent_user_phone') || "";
-        if (phone) {
-            if (!gameState.userProfile) gameState.userProfile = {};
-            gameState.userProfile.phone = phone;
-            localStorage.setItem('ast_persistent_user_phone', phone);
+        // Keep strictly user-scoped phone in sync (never write to global unscoped key)
+        localStorage.removeItem('ast_persistent_user_phone');
+        const activeUid = (window.AuthSync && typeof window.AuthSync.isLoggedIn === 'function' && window.AuthSync.isLoggedIn() && typeof window.AuthSync.getActiveUser === 'function')
+            ? window.AuthSync.getActiveUser().id
+            : 'guest';
+        if (activeUid && activeUid !== 'guest') {
+            const phone = (gameState.userProfile && gameState.userProfile.phone) || localStorage.getItem('ast_user_phone_' + activeUid) || "";
+            if (phone) {
+                if (!gameState.userProfile) gameState.userProfile = {};
+                gameState.userProfile.phone = phone;
+                localStorage.setItem('ast_user_phone_' + activeUid, phone);
+            }
         }
 
         if (window.AuthSync && typeof window.AuthSync.saveActiveUserState === 'function') {
@@ -22019,11 +22036,11 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.10.29-v2.8.7",
-    version: "2.8.7",
-    build: "20261020_03",
-    date: "2026-10-20 01:20",
-    description: "גרסה 2.5.2: פתרון מוחלט ללולאת העדכון במובייל וספארי, מנגנון אנטי-רילואד עמיד ב-localStorage, סנכרון גרסאות מלא וקישורי הורדה ישירים לטלפונים"
+    code: "REV-2026.10.31-v2.8.8",
+    version: "2.8.8",
+    build: "20261031_01",
+    date: "2026-10-31 01:15",
+    description: "גרסה 2.8.8: אבטחת מידע והפרדת משתמשים הרמטית ב-APK ובאתר (Zero-Default Guest Mode, אימות סשן קריפטוגרפי SHA-256, וניקוי ווידג'טים באנדרואיד)"
 };
 window.APP_VERSION = APP_CURRENT_REVISION.version;
 
@@ -22586,19 +22603,28 @@ function savePhoneAndNotificationPreferences(source = 'settings') {
 
     saveState();
 
-    // Synchronize to AuthSync profile and persistent storage
-    if (cleanPhone) {
-        try {
-            localStorage.setItem('ast_persistent_user_phone', cleanPhone);
-        } catch (e) {}
-    }
+    // Synchronize to AuthSync profile and strictly user-scoped storage (never global unscoped key)
+    try {
+        localStorage.removeItem('ast_persistent_user_phone');
+    } catch (e) {}
     if (window.AuthSync && typeof AuthSync.getActiveUser === 'function' && AuthSync.isLoggedIn()) {
         try {
             const u = AuthSync.getActiveUser();
+            if (u && u.id && u.id !== 'guest') {
+                if (cleanPhone) {
+                    localStorage.setItem('ast_user_phone_' + u.id, cleanPhone);
+                } else {
+                    localStorage.removeItem('ast_user_phone_' + u.id);
+                }
+            }
             const saved = localStorage.getItem('ast_profile_' + u.id);
-            const prof = saved ? JSON.parse(saved) : { id: u.id, name: u.name, email: u.email || '' };
+            const prof = saved && saved !== 'true' ? JSON.parse(saved) : { id: u.id, name: u.name, email: u.email || '' };
             prof.phone = cleanPhone;
             localStorage.setItem('ast_profile_' + u.id, JSON.stringify(prof));
+        } catch (e) {}
+    } else if (cleanPhone) {
+        try {
+            localStorage.setItem('ast_user_phone_guest', cleanPhone);
         } catch (e) {}
     }
 
@@ -24027,7 +24053,7 @@ window.getFormattedChangelogHTML = function() {
 };
 
 window.openChangelogModal = function(ver) {
-    const currentVer = ver || (typeof APP_CURRENT_REVISION !== 'undefined' && APP_CURRENT_REVISION && APP_CURRENT_REVISION.version) || "2.8.7";
+    const currentVer = ver || (typeof APP_CURRENT_REVISION !== 'undefined' && APP_CURRENT_REVISION && APP_CURRENT_REVISION.version) || "2.8.8";
     const updateModal = document.getElementById("version-update-modal");
     if (!updateModal) return;
     const modTitle = document.getElementById("update-modal-title");
@@ -25010,7 +25036,7 @@ function syncNativeAndroidWidgets(classData, tasksData) {
         if (typeof gameState !== 'undefined' && gameState) {
             const allExams = [];
 
-            // 1. Check all courses in gameState.courses
+            // 1. Check ONLY actively enrolled semester courses in gameState.courses (never leak un-enrolled catalog exams)
             Object.values(gameState.courses || {}).forEach(c => {
                 const code = c.code || '';
                 const cleanCode = code.replace(/^0+/, '');
@@ -25020,7 +25046,7 @@ function syncNativeAndroidWidgets(classData, tasksData) {
                 const dateB = (c.moedB && isCurrentOrUpcomingDate(c.moedB)) ? c.moedB : (cfEntry?.moedB);
 
                 const isCompleted = (typeof isCourseCompleted === 'function' && isCourseCompleted(code, c.altCode)) || c.status === 'completed';
-                if (!isCompleted) {
+                if (c.status === 'active' && !isCompleted) {
                     if (dateA && (typeof isCurrentOrUpcomingDate !== 'function' || isCurrentOrUpcomingDate(dateA))) {
                         allExams.push({
                             title: c.name || cfEntry?.name || code,
@@ -25037,30 +25063,19 @@ function syncNativeAndroidWidgets(classData, tasksData) {
                     }
                 }
 
-                // Check custom exam tasks
-                (c.tasks || []).forEach(t => {
-                    if (t.type === 'exam' && t.dueDate && (typeof isCurrentOrUpcomingDate !== 'function' || isCurrentOrUpcomingDate(t.dueDate))) {
-                        allExams.push({
-                            title: c.name || t.title,
-                            dueDate: (typeof parseDateToIso === 'function') ? parseDateToIso(t.dueDate) : t.dueDate,
-                            isMoedB: (t.title || '').includes("מועד ב")
-                        });
-                    }
-                });
+                // Check custom exam tasks on active courses
+                if (c.status === 'active') {
+                    (c.tasks || []).forEach(t => {
+                        if (t.type === 'exam' && t.dueDate && (typeof isCurrentOrUpcomingDate !== 'function' || isCurrentOrUpcomingDate(t.dueDate))) {
+                            allExams.push({
+                                title: c.name || t.title,
+                                dueDate: (typeof parseDateToIso === 'function') ? parseDateToIso(t.dueDate) : t.dueDate,
+                                isMoedB: (t.title || '').includes("מועד ב")
+                            });
+                        }
+                    });
+                }
             });
-
-            // 2. If still empty, check active timetable courses and CHEESEFORK_EXAM_DATES
-            if (allExams.length === 0 && typeof CHEESEFORK_EXAM_DATES !== 'undefined') {
-                Object.entries(CHEESEFORK_EXAM_DATES).forEach(([code, entry]) => {
-                    if (entry.moedA && (typeof isCurrentOrUpcomingDate !== 'function' || isCurrentOrUpcomingDate(entry.moedA))) {
-                        allExams.push({
-                            title: entry.name,
-                            dueDate: (typeof parseDateToIso === 'function') ? parseDateToIso(entry.moedA) : entry.moedA,
-                            isMoedB: false
-                        });
-                    }
-                });
-            }
 
             allExams.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
             if (allExams.length > 0) {
@@ -25112,9 +25127,9 @@ function syncNativeAndroidWidgets(classData, tasksData) {
             );
         }
 
-        // 3. Update Miluim Rights Tracker Widget
+        // 3. Update Miluim Rights Tracker Widget (Zero personal default; strictly user's own miluimDays)
         if (window.SemesteroWidgetBridge.updateMiluimWidget) {
-            const mDaysNum = (typeof gameState !== 'undefined' && typeof gameState.miluimDays === 'number') ? gameState.miluimDays : 21;
+            const mDaysNum = (typeof gameState !== 'undefined' && gameState && typeof gameState.miluimDays === 'number') ? gameState.miluimDays : 0;
             const mDays = String(mDaysNum);
             let badge = mDaysNum > 0 ? "🎖️ פעיל תשפ״ז" : "💤 ללא שמ״פ";
             let r1, r2, r3;
@@ -25142,14 +25157,16 @@ function syncNativeAndroidWidgets(classData, tasksData) {
             window.SemesteroWidgetBridge.updateMiluimWidget(mDays, badge, r1, r2, r3);
         }
 
-        // 4. Update Weekly Schedule Heatmap Widget (100% Dynamic calculation from active timetable)
+        // 4. Update Weekly Schedule Heatmap Widget (100% Dynamic calculation from active user timetable; neutral nominal defaults)
         if (window.SemesteroWidgetBridge.updateScheduleWidget) {
             const activeSched = (typeof getActiveTimetableSchedule === 'function') ? getActiveTimetableSchedule() : null;
             let totalSchedHours = 0;
             let freeDaysCount = 0;
             const dayStrings = ["", "", "", "", ""];
+            let hasValidSchedule = false;
 
             if (activeSched && activeSched.days && activeSched.days.length >= 5) {
+                hasValidSchedule = true;
                 for (let i = 0; i < 5; i++) {
                     const dayObj = activeSched.days.find(d => d.dayIndex === i) || activeSched.days[i];
                     const classes = (dayObj && dayObj.classes) ? dayObj.classes : [];
@@ -25180,29 +25197,46 @@ function syncNativeAndroidWidgets(classData, tasksData) {
                     }
                 }
             }
-            const weeklySummary = `${Math.round(totalSchedHours)} ש״ס • ${freeDaysCount > 0 ? freeDaysCount + ' ימי חופש 🏖️' : 'שבוע לימודים מלא'}`;
+            const weeklySummary = hasValidSchedule
+                ? `${Math.round(totalSchedHours)} ש״ס • ${freeDaysCount > 0 ? freeDaysCount + ' ימי חופש 🏖️' : 'שבוע לימודים מלא'}`
+                : "0 ש״ס • טרם הוגדרה מערכת";
 
             window.SemesteroWidgetBridge.updateScheduleWidget(
                 weeklySummary,
-                dayStrings[0] || "10:30-16:30 • מוצקים 2 + פיסיקה (4 שעות)",
-                dayStrings[1] || "🏖️ יום חופשי מלא! (0 שעות)",
-                dayStrings[2] || "08:30-14:30 • מתמטיקה ומעבדה (6 שעות)",
-                dayStrings[3] || "10:30-12:30 • תרגול מוצקים (2 שעות)",
-                dayStrings[4] || "07:30-10:30 • יוגה ורובוטיקה (3 שעות)"
+                dayStrings[0] || "אין שיעורים מתוזמנים",
+                dayStrings[1] || "אין שיעורים מתוזמנים",
+                dayStrings[2] || "אין שיעורים מתוזמנים",
+                dayStrings[3] || "אין שיעורים מתוזמנים",
+                dayStrings[4] || "אין שיעורים מתוזמנים"
             );
         }
 
-        // 5. Update Finals Runway & GPA Target Widget
+        // 5. Update Finals Runway & GPA Target Widget (Dynamic GPA & Honor Status; clean 0.0 nominal state)
         if (window.SemesteroWidgetBridge.updateFinalsGpaWidget) {
-            const currentGpa = (typeof gameState !== 'undefined' && gameState.calculatedAverage) ? String(gameState.calculatedAverage) : "88.4";
+            const rawAvg = Number((typeof gameState !== 'undefined' && gameState && (gameState.calculatedAverage || gameState.gpa)) || 0);
+            const currentGpa = rawAvg > 0 ? rawAvg.toFixed(1) : "0.0";
+            const targetGpaText = (typeof gameState !== 'undefined' && gameState && gameState.targetGpa)
+                ? `יעד סמסטר: ${Number(gameState.targetGpa).toFixed(1)}`
+                : "יעד סמסטר: --";
+            const gpaBadge = rawAvg >= 91
+                ? "🏆 מצטיין נשיא"
+                : (rawAvg >= 84 ? "🏆 מצטיין דיקן" : (rawAvg > 0 ? "📈 במעקב אקדמי" : "✨ מצב התחלתי"));
             window.SemesteroWidgetBridge.updateFinalsGpaWidget(
                 currentGpa,
-                "יעד סמסטר: 90.0",
-                "🏆 מצטיין דיקן",
+                targetGpaText,
+                gpaBadge,
                 examDays,
                 (examDays === "1" ? "יום לבחינה" : "ימים לבחינה"),
                 examTitle
             );
+        }
+
+        // 5b. Sync Launchpad CheeseFork URL strictly to active user's CheeseFork URL (or generic https://cheesefork.cf/)
+        if (window.SemesteroWidgetBridge.updateLaunchpadCheeseForkUrl) {
+            const activeCfUrl = (typeof gameState !== 'undefined' && gameState && gameState.userProfile && gameState.userProfile.cheeseforkUrl)
+                || localStorage.getItem('ast_cheesefork_url')
+                || 'https://cheesefork.cf/';
+            window.SemesteroWidgetBridge.updateLaunchpadCheeseForkUrl(activeCfUrl);
         }
 
         // 6. Update Pomodoro Focus Timer Widget (Dynamic focus task from active queue)

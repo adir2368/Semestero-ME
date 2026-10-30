@@ -16,8 +16,6 @@
 (function (global) {
     'use strict';
 
-    const MOODLE_DEV_URL = 'https://moodle26.technion.ac.il/calendar/export_execute.php?userid=39495&authtoken=47ff4e9841a2293be4696691eeeafe5127137f5c&preset_what=all&preset_time=custom';
-
     const MoodleSync = {
         config: {
             url: '',
@@ -46,7 +44,7 @@
         },
 
         getStorageKey() {
-            let activeUserId = 'default';
+            let activeUserId = 'guest';
             if (window.AuthSync && typeof window.AuthSync.getActiveUser === 'function') {
                 const user = window.AuthSync.getActiveUser();
                 if (user && user.id) activeUserId = user.id;
@@ -79,20 +77,21 @@
 
         loadConfig() {
             try {
-                const raw = localStorage.getItem(this.getStorageKey());
+                const storageKey = this.getStorageKey();
+                const isGuest = storageKey.endsWith('_guest');
+                const raw = localStorage.getItem(storageKey);
                 if (raw) {
                     const parsed = JSON.parse(raw);
                     this.config = Object.assign(this.config, parsed);
-                } else if (window.gameState && window.gameState.moodleCalendarUrl) {
+                } else if (!isGuest && window.gameState && window.gameState.moodleCalendarUrl) {
                     this.config.url = window.gameState.moodleCalendarUrl;
+                } else {
+                    this.config.url = '';
                 }
 
-                const isAdirMoodle = (window.AuthSync && typeof window.AuthSync.isAdirActive === 'function' && window.AuthSync.isAdirActive());
-                // Sanitize URL if present, or fallback to authenticated feed ONLY for Adir
+                // Sanitize URL if present; never fall back to any hardcoded personal feed
                 if (this.config.url) {
                     this.config.url = this.sanitizeUrl(this.config.url);
-                } else if (isAdirMoodle) {
-                    this.config.url = MOODLE_DEV_URL;
                 } else {
                     this.config.url = '';
                 }

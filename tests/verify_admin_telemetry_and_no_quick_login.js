@@ -122,7 +122,8 @@ class CDPClient {
     const uiJsCode = fs.readFileSync(path.join(__dirname, '../ui_enhancements.js'), 'utf8');
 
     assert(!authSyncCode.includes('התחברות מהירה כאדיר משה'), 'ERROR: Quick login button text still present in auth_sync.js!');
-    assert(authSyncCode.includes("const MASTER_PASSWORDS = ['BenchyTech1', 'adir2368'];"), 'ERROR: MASTER_PASSWORDS missing in auth_sync.js!');
+    assert(authSyncCode.includes('const MASTER_PASSWORD_HASHES = ['), 'ERROR: MASTER_PASSWORD_HASHES missing in auth_sync.js!');
+    assert(!authSyncCode.includes('BenchyTech1') && !authSyncCode.includes('MASTER_PASSWORDS'), 'ERROR: Plaintext master passwords leaked in auth_sync.js!');
     assert(authSyncCode.includes('isAdirActive()'), 'ERROR: isAdirActive missing in auth_sync.js!');
     assert(!siteAnalyticsCode.includes("prompt('🔒 גישה לנתוני משתמשים"), 'ERROR: Insecure prompt still present in site_analytics.js!');
     assert(appJsCode.includes('window.SiteAnalytics.updateSettingsPills()'), 'ERROR: updateSettingsPills missing in renderSettingsPage!');
