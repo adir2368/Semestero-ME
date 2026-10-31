@@ -105,6 +105,7 @@ public class MainActivity extends BridgeActivity {
                 .apply();
 
             SemesteroNextClassWidget.pushUpdate(context);
+            WearSyncManager.syncClassToWatch(context, title, time, details, lecturer, status);
         }
 
         @JavascriptInterface
@@ -124,6 +125,7 @@ public class MainActivity extends BridgeActivity {
                 .apply();
 
             SemesteroTasksExamWidget.pushUpdate(context);
+            WearSyncManager.syncTasksToWatch(context, examDays + " - " + examTitle, tasksSummary);
         }
 
         @JavascriptInterface
@@ -185,6 +187,7 @@ public class MainActivity extends BridgeActivity {
                 .putString("finals_exam_course", examCourse)
                 .apply();
             SemesteroFinalsGpaWidget.pushUpdate(context);
+            WearSyncManager.syncGpaToWatch(context, gpaCurrent, badge);
         }
 
         @JavascriptInterface

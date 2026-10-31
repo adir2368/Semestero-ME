@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#000000">
+    <title>Semestero ME • Galaxy Watch 8</title>
+    <link rel="icon" type="image/png" href="icon_small.png">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            background-color: #000000;
+            color: #f8fafc;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Rubik", "Heebo", Arial, sans-serif;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Physical Smartwatch Circular Chassis */
+        .watch-container {
+            width: 100vw;
+            height: 100vh;
+            max-width: 450px;
+            max-height: 450px;
+            background: #000000;
+            border-radius: 50%;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: inset 0 0 35px rgba(56, 189, 248, 0.15);
+        }
+
+        /* Ambient Outer Progress Ring */
+        .watch-bezel-ring {
+            position: absolute;
+            inset: 3px;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.08);
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .watch-bezel-glow {
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            background: conic-gradient(from 180deg, #38bdf8 0deg, #a855f7 120deg, transparent 240deg);
+            opacity: 0.35;
+            mask: radial-gradient(transparent 68%, black 70%);
+            -webkit-mask: radial-gradient(transparent 68%, black 70%);
+            pointer-events: none;
+            z-index: 11;
+            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Header Bar (Time + Battery / Faculty Icon) */
+        .watch-header {
+            position: absolute;
+            top: 14px;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 6px;
+            z-index: 20;
+        }
+
+        .watch-digital-clock {
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: #e2e8f0;
+            letter-spacing: 0.5px;
+            direction: ltr;
+        }
+
+        .watch-badge-faculty {
+            font-size: 0.68rem;
+            color: #38bdf8;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            background: rgba(56, 189, 248, 0.12);
+            padding: 1px 6px;
+            border-radius: 10px;
+        }
+
+        /* Screen Carousel Viewport */
+        .watch-viewport {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .watch-screen {
+            position: absolute;
+            width: 82%;
+            height: 82%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            opacity: 0;
+            transform: scale(0.92);
+            pointer-events: none;
+            transition: all 0.35s cubic-bezier(0.2, 0.9, 0.3, 1);
+        }
+
+        .watch-screen.active {
+            opacity: 1;
+            transform: scale(1);
+            pointer-events: auto;
+        }
+
+        /* Screen 1: Next Class Radar */
+        .radar-status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.74rem;
+            font-weight: 700;
+            color: #10b981;
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.35);
+            padding: 3px 10px;
+            border-radius: 12px;
+            margin-bottom: 6px;
+            animation: pulseBadge 2.5s infinite;
+        }
+
+        @keyframes pulseBadge {
+            0%, 100% { box-shadow: 0 0 0 rgba(16, 185, 129, 0); }
+            50% { box-shadow: 0 0 10px rgba(16, 185, 129, 0.4); }
+        }
+
+        .radar-course-name {
+            font-size: 1.35rem;
+            font-weight: 900;
+            color: #f8fafc;
+            margin-bottom: 4px;
+            letter-spacing: -0.3px;
+            max-width: 90%;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .radar-time-pill {
+            font-size: 0.95rem;
+            font-weight: 800;
+            color: #38bdf8;
+            margin-bottom: 6px;
+            direction: ltr;
+        }
+
+        .radar-room-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: #f8fafc;
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 4px 12px;
+            border-radius: 14px;
+        }
+
+        .radar-lecturer {
+            font-size: 0.7rem;
+            color: #94a3b8;
+            margin-top: 6px;
+        }
+
+        /* Screen 2: Today's Timeline */
+        .timeline-scroll-wrap {
+            width: 100%;
+            max-height: 220px;
+            overflow-y: auto;
+            scrollbar-width: none;
+            padding: 4px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .timeline-scroll-wrap::-webkit-scrollbar {
+            display: none;
+        }
+
+        .timeline-item {
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 8px 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.78rem;
+        }
+
+        .timeline-item.active {
+            border-color: #38bdf8;
+            background: rgba(56, 189, 248, 0.12);
+        }
+
+        .timeline-item-title {
+            font-weight: 700;
+            color: #f8fafc;
+            text-align: right;
+        }
+
+        .timeline-item-room {
+            font-size: 0.7rem;
+            color: #94a3b8;
+        }
+
+        .timeline-item-time {
+            color: #38bdf8;
+            font-weight: 700;
+            direction: ltr;
+            font-size: 0.75rem;
+        }
+
+        /* Screen 3: Tasks & Exams */
+        .exam-banner-card {
+            background: linear-gradient(135deg, rgba(251, 191, 36, 0.15), rgba(15, 23, 42, 0.8));
+            border: 1px solid rgba(251, 191, 36, 0.4);
+            border-radius: 12px;
+            padding: 8px 12px;
+            margin-bottom: 8px;
+            width: 100%;
+        }
+
+        .exam-banner-title {
+            font-size: 0.76rem;
+            font-weight: 800;
+            color: #fbbf24;
+        }
+
+        .exam-banner-sub {
+            font-size: 0.68rem;
+            color: #cbd5e1;
+            margin-top: 2px;
+        }
+
+        .watch-task-item {
+            background: rgba(15, 23, 42, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+            padding: 7px 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            margin-bottom: 5px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .watch-task-item.completed {
+            opacity: 0.5;
+            text-decoration: line-through;
+            border-color: rgba(16, 185, 129, 0.4);
+        }
+
+        .watch-task-title {
+            font-size: 0.74rem;
+            font-weight: 600;
+            color: #f8fafc;
+            text-align: right;
+            max-width: 170px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .watch-task-chk {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            border: 2px solid #38bdf8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            color: #ffffff;
+            transition: all 0.15s ease;
+        }
+
+        .watch-task-item.completed .watch-task-chk {
+            background: #10b981;
+            border-color: #10b981;
+        }
+
+        /* Screen 4: Academic Stats */
+        .gpa-circle-wrap {
+            position: relative;
+            width: 110px;
+            height: 110px;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .gpa-svg-ring {
+            width: 100%;
+            height: 100%;
+            transform: rotate(-90deg);
+        }
+
+        .gpa-circle-inner {
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .gpa-value-big {
+            font-size: 1.55rem;
+            font-weight: 900;
+            color: #f8fafc;
+            letter-spacing: -0.5px;
+        }
+
+        .gpa-sub-label {
+            font-size: 0.62rem;
+            color: #94a3b8;
+            margin-top: -2px;
+        }
+
+        .gpa-honors-pill {
+            background: rgba(168, 85, 247, 0.2);
+            border: 1px solid rgba(168, 85, 247, 0.5);
+            color: #d8b4fe;
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 3px 10px;
+            border-radius: 12px;
+        }
+
+        .gpa-credits-text {
+            font-size: 0.68rem;
+            color: #cbd5e1;
+            margin-top: 4px;
+        }
+
+        /* Bottom Pagination Indicator Dots */
+        .watch-dots {
+            position: absolute;
+            bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            z-index: 20;
+        }
+
+        .watch-dot {
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.25);
+            transition: all 0.25s ease;
+        }
+
+        .watch-dot.active {
+            width: 14px;
+            border-radius: 4px;
+            background: #38bdf8;
+        }
+
+        /* Ambient Mode (Power-Saving AOD) */
+        .ambient-mode {
+            filter: grayscale(100%) brightness(0.7) !important;
+        }
+        .ambient-mode .radar-status-badge,
+        .ambient-mode .watch-badge-faculty,
+        .ambient-mode .watch-bezel-glow {
+            display: none !important;
+        }
+
+        /* 44mm & 40mm Galaxy Watch Physical Screen Optimizations (<= 380px) */
+        @media (max-width: 380px) {
+            .watch-header {
+                top: 8px;
+            }
+            .watch-digital-clock {
+                font-size: 0.74rem;
+            }
+            .watch-badge-faculty {
+                font-size: 0.62rem;
+                padding: 1px 4px;
+            }
+            .radar-status-badge {
+                font-size: 0.64rem;
+                padding: 2px 8px;
+                margin-bottom: 4px;
+            }
+            .radar-course-name {
+                font-size: 1.1rem;
+                margin-bottom: 2px;
+            }
+            .radar-time-pill {
+                font-size: 0.82rem;
+                margin-bottom: 4px;
+            }
+            .radar-room-tag {
+                font-size: 0.72rem;
+                padding: 2px 8px;
+            }
+            .radar-lecturer {
+                font-size: 0.62rem;
+                margin-top: 3px;
+            }
+            .timeline-scroll-wrap {
+                max-height: 140px;
+                gap: 4px;
+            }
+            .timeline-item {
+                padding: 5px 8px;
+                font-size: 0.7rem;
+            }
+            .exam-banner-card {
+                padding: 5px 8px;
+                margin-bottom: 5px;
+            }
+            .exam-banner-title {
+                font-size: 0.68rem;
+            }
+            .exam-banner-sub {
+                font-size: 0.6rem;
+            }
+            .watch-task-item {
+                padding: 5px 8px;
+            }
+            .watch-task-title {
+                font-size: 0.68rem;
+                max-width: 130px;
+            }
+            .gpa-circle-wrap {
+                width: 85px;
+                height: 85px;
+                margin-bottom: 4px;
+            }
+            .gpa-value-big {
+                font-size: 1.25rem;
+            }
+            .gpa-sub-label {
+                font-size: 0.55rem;
+            }
+            .gpa-honors-pill {
+                font-size: 0.64rem;
+                padding: 2px 8px;
+            }
+            .gpa-credits-text {
+                font-size: 0.6rem;
+                margin-top: 2px;
+            }
+            .watch-dots {
+                bottom: 6px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="watch-container" id="watch-container">
+        <!-- Bezel Ring & Conic Progress Glow -->
+        <div class="watch-bezel-ring"></div>
+        <div class="watch-bezel-glow" id="bezel-glow"></div>
+
+        <!-- Top Header Status -->
+        <div class="watch-header">
+            <span class="watch-digital-clock" id="watch-clock">10:42</span>
+            <span class="watch-badge-faculty">ME 034</span>
+        </div>
+
+        <!-- Carousel Viewport -->
+        <div class="watch-viewport" id="watch-viewport">
+
+            <!-- Screen 1: Next Class Radar -->
+            <div class="watch-screen active" id="screen-radar" data-index="0">
+                <div class="radar-status-badge" id="w-class-status">🟢 מתקיים כעת!</div>
+                <div class="radar-course-name" id="w-class-title">חדו״א 2מ׳</div>
+                <div class="radar-time-pill" id="w-class-time">10:30 - 12:30</div>
+                <div class="radar-room-tag" id="w-class-room">📍 דנציגר 101</div>
+                <div class="radar-lecturer" id="w-class-lecturer">👨‍🏫 פרופ' כהן • הרצאה</div>
+            </div>
+
+            <!-- Screen 2: Today's Timeline -->
+            <div class="watch-screen" id="screen-timeline" data-index="1">
+                <div style="font-size: 0.72rem; color: #94a3b8; font-weight: 700; margin-bottom: 6px;">לו״ז היום (אביב תשפ"ד)</div>
+                <div class="timeline-scroll-wrap" id="w-timeline-list">
+                    <!-- Populated dynamically via JS -->
+                </div>
+            </div>
+
+            <!-- Screen 3: Tasks & Exams -->
+            <div class="watch-screen" id="screen-tasks" data-index="2">
+                <div class="exam-banner-card">
+                    <div class="exam-banner-title" id="w-exam-title">📝 מועד א׳ בעוד 14 ימים</div>
+                    <div class="exam-banner-sub" id="w-exam-course">034028 - מכניקת מוצקים 1</div>
+                </div>
+                <div id="w-tasks-list" style="width: 100%;">
+                    <!-- Populated dynamically via JS -->
+                </div>
+            </div>
+
+            <!-- Screen 4: Academic Stats -->
+            <div class="watch-screen" id="screen-stats" data-index="3">
+                <div class="gpa-circle-wrap">
+                    <svg class="gpa-svg-ring" viewBox="0 0 100 100">
+                        <circle cx="50" cy="50" r="42" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="6" />
+                        <circle id="w-gpa-ring-bar" cx="50" cy="50" r="42" fill="none" stroke="url(#gpaGradient)" stroke-width="6"
+                                stroke-dasharray="264" stroke-dashoffset="37" stroke-linecap="round" />
+                        <defs>
+                            <linearGradient id="gpaGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#38bdf8" />
+                                <stop offset="100%" stop-color="#a855f7" />
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                    <div class="gpa-circle-inner">
+                        <div class="gpa-value-big" id="w-gpa-val">86.04</div>
+                        <div class="gpa-sub-label">ממוצע תואר</div>
+                    </div>
+                </div>
+                <div class="gpa-honors-pill" id="w-honors-pill">🎖️ הצטיינות דיקן</div>
+                <div class="gpa-credits-text" id="w-credits-text">38.5 / 157.5 נק״ז</div>
+            </div>
+
+        </div>
+
+        <!-- Bottom Dot Indicators -->
+        <div class="watch-dots" id="watch-dots">
+            <span class="watch-dot active"></span>
+            <span class="watch-dot"></span>
+            <span class="watch-dot"></span>
+            <span class="watch-dot"></span>
+        </div>
+    </div>
+
+    <!-- Watch Companion Controller -->
+    <script src="watch_companion.js?v=2.8.8"></script>
+</body>
+</html>

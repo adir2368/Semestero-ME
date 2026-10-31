@@ -518,39 +518,51 @@
             getNormalizedCodes(c.code, c.altCode).forEach(k => allCodes.add(k));
         }));
 
-        const hasPhys1 = ['01140051', '114051', '01140071', '114071', '01140077', '114077'].some(k => allCodes.has(k));
+        const hasPhys1 = ['01140051', '114051', '01140071', '114071', '01140077', '114077', '01140055', '114055'].some(k => allCodes.has(k));
         if (!hasPhys1) {
+            const p1Pref = (global.gameState && global.gameState.userSettings && global.gameState.userSettings.physicsVariants && global.gameState.userSettings.physicsVariants.physics1) ||
+                           (typeof localStorage !== 'undefined' ? localStorage.getItem('semestero_physics_variant_physics1') : null);
+            const p1Obj = (p1Pref && p1Pref.includes('114071')) ? { code: "01140071", altCode: "114071", name: "פיזיקה 1מ'", credits: 3.5 } :
+                          (p1Pref && p1Pref.includes('114077')) ? { code: "01140077", altCode: "114077", name: "פיזיקה 1פ'", credits: 4.0 } :
+                          (p1Pref && p1Pref.includes('114055')) ? { code: "01140055", altCode: "114055", name: "פיזיקה 1ת'", credits: 3.5 } :
+                          { code: "01140051", altCode: "114051", name: "פיזיקה 1", credits: 2.5 };
             const sem1 = plan.find(s => s.semester === 1) || plan[0];
             if (sem1) {
                 sem1.courses = sem1.courses || [];
                 sem1.courses.push({
-                    code: "01140051",
-                    altCode: "114051",
-                    name: "פיזיקה 1",
-                    credits: 2.5,
+                    code: p1Obj.code,
+                    altCode: p1Obj.altCode,
+                    name: p1Obj.name,
+                    credits: p1Obj.credits,
                     type: "mandatory",
                     variantGroupId: "physics_1",
                     prereqs: []
                 });
-                console.log('[Planner] Restored Physics 1 to Semester 1');
+                console.log(`[Planner] Restored ${p1Obj.name} to Semester 1`);
             }
         }
 
-        const hasPhys2 = ['01140052', '114052', '01140075', '114075', '01140078', '114078'].some(k => allCodes.has(k));
+        const hasPhys2 = ['01140052', '114052', '01140075', '114075', '01140078', '114078', '01140076', '114076'].some(k => allCodes.has(k));
         if (!hasPhys2) {
+            const p2Pref = (global.gameState && global.gameState.userSettings && global.gameState.userSettings.physicsVariants && global.gameState.userSettings.physicsVariants.physics2) ||
+                           (typeof localStorage !== 'undefined' ? localStorage.getItem('semestero_physics_variant_physics2') : null);
+            const p2Obj = (p2Pref && p2Pref.includes('114075')) ? { code: "01140075", altCode: "114075", name: "פיזיקה 2ממ", credits: 5.0 } :
+                          (p2Pref && p2Pref.includes('114078')) ? { code: "01140078", altCode: "114078", name: "פיזיקה 2פ'", credits: 5.0 } :
+                          (p2Pref && p2Pref.includes('114076')) ? { code: "01140076", altCode: "114076", name: "פיזיקה 2ת'", credits: 5.0 } :
+                          { code: "01140052", altCode: "114052", name: "פיזיקה 2", credits: 3.5 };
             const sem3 = plan.find(s => s.semester === 3) || plan[2] || plan[plan.length - 1];
             if (sem3) {
                 sem3.courses = sem3.courses || [];
                 sem3.courses.push({
-                    code: "01140052",
-                    altCode: "114052",
-                    name: "פיזיקה 2",
-                    credits: 3.5,
+                    code: p2Obj.code,
+                    altCode: p2Obj.altCode,
+                    name: p2Obj.name,
+                    credits: p2Obj.credits,
                     type: "mandatory",
                     variantGroupId: "physics_2",
                     prereqs: ["01140051", "01040041"]
                 });
-                console.log('[Planner] Restored Physics 2 to Semester 3');
+                console.log(`[Planner] Restored ${p2Obj.name} to Semester 3`);
             }
         }
     }
@@ -838,7 +850,7 @@
             let changed = false;
 
             // 1. Purge accidental duplicate courses and purged courses from gameState.courses
-            const PURGED_TREE_CODES = new Set(['035044', '035026', '35026', '01140071', '114071']);
+            const PURGED_TREE_CODES = new Set(['035044', '035026', '35026']);
             QA_INFILTRATOR_CODES.forEach(code => PURGED_TREE_CODES.add(code));
             Object.keys(global.gameState.courses).forEach(key => {
                 if (PURGED_TREE_CODES.has(key)) {
@@ -900,8 +912,6 @@
                             }
                         }
                     } else {
-                        // DO NOT inject alternative tracks of mandatory courses (e.g. Physics 1M if Physics 1 was taken)
-                        if (c.trackGroup === 'physics_1' || c.code === '01140071' || c.code === '114071') return;
                         if (c.code === '00350026' || c.code === '035026' || c.code === '35026') return;
 
                         // Normalize key to 6-digit course code
@@ -2033,6 +2043,11 @@
         const atudaToggle = document.getElementById('toggle-planner-atuda');
         const atudaBadge = document.getElementById('planner-atuda-badge');
         if (atudaToggle) atudaToggle.checked = isAtudaTironut;
+
+        // Technion Classification Exams State
+        if (typeof updateClassificationExamsUI === 'function') {
+            updateClassificationExamsUI();
+        }
         if (atudaBadge) atudaBadge.style.display = isAtudaTironut ? 'inline-block' : 'none';
     }
 
@@ -2245,6 +2260,64 @@
             });
         });
 
+        // 1b. Gather all official mandatory courses for the active track
+        const suggestedCatalog = getSuggestedCatalogForTrack(selectedTrack) || global.PLANNER_CATALOG.SUGGESTED_MANDATORY_SYLLABUS || [];
+        const allMandatoryCourses = [];
+        const seenMandatoryCodes = new Set();
+        suggestedCatalog.forEach(sem => {
+            (sem.courses || []).forEach(c => {
+                const primaryCode = c.altCode || c.code;
+                if (!seenMandatoryCodes.has(primaryCode)) {
+                    seenMandatoryCodes.add(primaryCode);
+                    allMandatoryCourses.push({
+                        ...c,
+                        suggestedSemester: sem.semester,
+                        suggestedSemesterTitle: sem.title,
+                        type: 'mandatory'
+                    });
+                }
+            });
+        });
+
+        // 1c. Identify missing mandatory courses (not placed and not completed)
+        const missingMandatoryCourses = allMandatoryCourses.filter(c => {
+            const mKeys = getNormalizedCodes(c.code, c.altCode);
+            const isPlaced = mKeys.some(k => placedCodes.has(k));
+            const isCompleted = isCourseCompleted(c.code, c.altCode);
+            return !isPlaced && !isCompleted;
+        });
+
+        const missingContainer = document.getElementById('planner-missing-mandatory-section');
+        if (missingContainer) {
+            if (missingMandatoryCourses.length === 0) {
+                missingContainer.style.display = 'none';
+                missingContainer.innerHTML = '';
+            } else {
+                missingContainer.style.display = 'flex';
+                missingContainer.innerHTML = `
+                    <div class="missing-mandatory-header">
+                        <span class="missing-mandatory-title">⚠️ חסרים ${missingMandatoryCourses.length} קורסי חובה בתכנון</span>
+                        <button type="button" class="btn-restore-all-mandatory" id="btn-restore-all-mandatory" title="החזר את כל קורסי החובה החסרים לסמסטרים המומלצים">🔄 שחזר הכל</button>
+                    </div>
+                    <div class="planner-missing-mandatory-list">
+                        ${missingMandatoryCourses.map(course => `
+                            <div class="planner-pool-item" draggable="true" data-code="${escapeHtml(course.code)}" data-alt-code="${escapeHtml(course.altCode || '')}">
+                                <div class="pool-item-info">
+                                    <span class="pool-item-title">${escapeHtml(course.name)}</span>
+                                    <div class="pool-item-meta">
+                                        <span class="course-card-tag tag-missing-mandatory">חובה (סמ׳ ${course.suggestedSemester})</span>
+                                        <span>${escapeHtml(course.code)}</span>
+                                        <span>• ${course.credits} נק״ז</span>
+                                    </div>
+                                </div>
+                                <button type="button" class="btn-restore-mandatory" data-code="${escapeHtml(course.code)}" data-sem="${course.suggestedSemester}" title="החזר לסמסטר ${course.suggestedSemester}">➕ החזר</button>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+        }
+
         // 2. Compute "Ready For You" electives
         const readyContainer = document.getElementById('planner-ready-electives-list');
         const readyCourses = [];
@@ -2335,6 +2408,23 @@
                 if (!matchesSearch(course)) return;
                 coursesToShow.push({ ...course, isUnassignedItem: true });
             });
+        } else if (selectedCategory === 'MANDATORY') {
+            allMandatoryCourses.forEach(course => {
+                const keys = getNormalizedCodes(course.code, course.altCode);
+                const isCompleted = isCourseCompleted(course.code, course.altCode);
+                if (isCompleted) return;
+                if (!matchesSearch(course)) return;
+
+                const isPlaced = keys.some(k => placedCodes.has(k));
+                const placedSem = isPlaced ? keys.map(k => courseSemMap[k]).find(s => s !== undefined) : null;
+
+                coursesToShow.push({
+                    ...course,
+                    isMandatoryCatalogItem: true,
+                    isPlaced: isPlaced,
+                    placedSem: placedSem
+                });
+            });
         } else if (selectedCategory === 'SUMMER') {
             const allCandidates = [];
             (unassignedCourses || []).forEach(c => allCandidates.push({ ...c, isUnassignedItem: true }));
@@ -2362,6 +2452,18 @@
                     if (!matchesSearch(course)) return;
                     coursesToShow.push({ ...course, isUnassignedItem: true });
                 });
+
+                // Include missing mandatory courses in ALL view
+                missingMandatoryCourses.forEach(course => {
+                    if (!matchesSearch(course)) return;
+                    if (!coursesToShow.some(c => c.code === course.code)) {
+                        coursesToShow.push({
+                            ...course,
+                            isMandatoryCatalogItem: true,
+                            isPlaced: false
+                        });
+                    }
+                });
             }
 
             const cats = selectedCategory === 'ALL' ? ['A', 'B', 'C', 'D', 'E', 'SPORTS', 'MALAG'] : [selectedCategory];
@@ -2379,20 +2481,33 @@
         if (coursesToShow.length === 0) {
             const emptyMsg = selectedCategory === 'UNASSIGNED' 
                 ? 'אין כרגע קורסים שלא שובצו. גרור קורסים מכל סמסטר לכאן כדי להסיר אותם מהתכנון.' 
-                : (selectedCategory === 'SUMMER' 
-                    ? 'לא נמצאו קורסים המוצעים בסמסטר קיץ התואמים לחיפוש.' 
-                    : 'לא נמצאו קורסי בחירה מתאימים לסינון.');
+                : (selectedCategory === 'MANDATORY'
+                    ? 'לא נמצאו קורסי חובה מתאימים לחיפוש.'
+                    : (selectedCategory === 'SUMMER' 
+                        ? 'לא נמצאו קורסים המוצעים בסמסטר קיץ התואמים לחיפוש.' 
+                        : 'לא נמצאו קורסי בחירה מתאימים לסינון.'));
             poolContainer.innerHTML = `<div style="font-size: 0.76rem; color: #94a3b8; text-align: center; padding: 16px;">${emptyMsg}</div>`;
         } else {
             poolContainer.innerHTML = coursesToShow.map(course => {
                 const isSportItem = course.list === 'SPORTS' || course.type === 'sports';
                 const isMalagItem = course.list === 'MALAG' || course.type === 'humanities';
+                const isMandatoryItem = course.isMandatoryCatalogItem;
+
                 const tagClass = course.isUnassignedItem 
                     ? 'tag-mandatory' 
-                    : (isSportItem ? 'tag-sports' : (isMalagItem ? 'tag-malag' : (course.list ? `tag-list-${course.list}` : 'tag-mandatory')));
+                    : (isMandatoryItem
+                        ? (course.isPlaced ? 'tag-placed-mandatory' : 'tag-missing-mandatory')
+                        : (isSportItem ? 'tag-sports' : (isMalagItem ? 'tag-malag' : (course.list ? `tag-list-${course.list}` : 'tag-mandatory'))));
+                
                 const tagLabel = course.isUnassignedItem 
                     ? 'שלא שובץ' 
-                    : (isSportItem ? '🏃 ספורט' : (isMalagItem ? '🎭 מל״ג' : (course.list ? `רשימה ${course.list}׳` : 'חובה')));
+                    : (isMandatoryItem
+                        ? (course.isPlaced ? `✓ משובץ בסמ' ${course.placedSem}` : '⚠️ חסר בתכנון')
+                        : (isSportItem ? '🏃 ספורט' : (isMalagItem ? '🎭 מל״ג' : (course.list ? `רשימה ${course.list}׳` : 'חובה'))));
+
+                const actionButton = isMandatoryItem && !course.isPlaced
+                    ? `<button type="button" class="btn-restore-mandatory" data-code="${escapeHtml(course.code)}" data-sem="${course.suggestedSemester || 1}" title="החזר לסמסטר ${course.suggestedSemester || 1}">➕ החזר</button>`
+                    : `<button type="button" class="btn-add-to-plan" data-code="${escapeHtml(course.code)}" title="${isMandatoryItem && course.isPlaced ? 'העבר לסמסטר אחר' : 'הוסף קורס זה לסמסטר'}">${isMandatoryItem && course.isPlaced ? '⇄' : '+'}</button>`;
 
                 return `
                     <div class="planner-pool-item" draggable="true" data-code="${escapeHtml(course.code)}" data-alt-code="${escapeHtml(course.altCode || '')}" title="לחץ לצפייה בסילבוס, ביקורות והיסטוגרמות ב-CheeseFork 🧀">
@@ -2414,7 +2529,7 @@
                                 return '';
                             })()}
                         </div>
-                        <button type="button" class="btn-add-to-plan" data-code="${escapeHtml(course.code)}" title="הוסף קורס זה לסמסטר">+</button>
+                        ${actionButton}
                     </div>
                 `;
             }).join('');
@@ -2722,6 +2837,24 @@
                 return;
             }
 
+            // Restore Specific Mandatory Course (+ החזר)
+            const restoreBtn = e.target.closest('.btn-restore-mandatory');
+            if (restoreBtn) {
+                e.stopPropagation();
+                const code = restoreBtn.getAttribute('data-code');
+                const sem = parseFloat(restoreBtn.getAttribute('data-sem'));
+                restoreMandatoryCourse(code, sem);
+                return;
+            }
+
+            // Restore All Missing Mandatory Courses
+            const restoreAllBtn = e.target.closest('#btn-restore-all-mandatory');
+            if (restoreAllBtn) {
+                e.stopPropagation();
+                restoreAllMissingMandatoryCourses();
+                return;
+            }
+
             // What-If GPA Simulator Toggle
             const whatIfBtn = e.target.closest('#btn-planner-what-if');
             if (whatIfBtn) {
@@ -2934,6 +3067,23 @@
                 showPlannerToast(e.target.checked ? 'הופעל פטור מקורסי שפה (134+).' : 'בוטל פטור מקורסי שפה.', true);
             });
         }
+
+        // 10. Technion Classification Exam Selectors (Mechanics, Electricity, Math)
+        ['mechanics', 'electricity', 'math'].forEach(type => {
+            const selectEl = document.getElementById(`select-classification-${type}`);
+            if (selectEl && !selectEl.dataset.bound) {
+                selectEl.dataset.bound = 'true';
+                selectEl.addEventListener('change', (e) => {
+                    const newVal = e.target.value;
+                    if (typeof setClassificationExamStatus === 'function') {
+                        setClassificationExamStatus(type, newVal);
+                    } else if (typeof localStorage !== 'undefined') {
+                        localStorage.setItem(`semestero_classification_${type}`, newVal);
+                        if (typeof updateClassificationExamsUI === 'function') updateClassificationExamsUI();
+                    }
+                });
+            }
+        });
     }
 
     // --------------------------------------------------------------------------
@@ -3572,6 +3722,110 @@
         saveCustomPlan();
         renderDegreePlanner();
         showPlannerToast(`הקורס "${removedCourse.name}" הוסר מהתכנון והועבר לרשימת הקורסים שלא שובצו.`);
+    }
+
+    // --------------------------------------------------------------------------
+    // Mandatory Courses Quick-Restore Engine
+    // --------------------------------------------------------------------------
+    function restoreMandatoryCourse(code, targetSem) {
+        if (!code || !customPlan) return;
+        const course = resolveCourseObject(code);
+        if (!course) return;
+
+        let targetSemester = targetSem;
+        if (!targetSemester) {
+            const suggestedCatalog = getSuggestedCatalogForTrack(selectedTrack) || global.PLANNER_CATALOG.SUGGESTED_MANDATORY_SYLLABUS || [];
+            for (const s of suggestedCatalog) {
+                if ((s.courses || []).some(c => c.code === code || c.altCode === code)) {
+                    targetSemester = s.semester;
+                    break;
+                }
+            }
+        }
+        if (!targetSemester) targetSemester = 1;
+
+        let semObj = customPlan.find(s => s.semester === targetSemester);
+        if (!semObj) {
+            semObj = customPlan[0];
+        }
+
+        const mKeys = new Set(getNormalizedCodes(course.code, course.altCode));
+        const alreadyPlaced = (semObj.courses || []).some(c => {
+            const cKeys = getNormalizedCodes(c.code, c.altCode);
+            return cKeys.some(k => mKeys.has(k));
+        });
+
+        if (!alreadyPlaced) {
+            semObj.courses.push({
+                code: course.code,
+                altCode: course.altCode || null,
+                name: course.name,
+                credits: course.credits,
+                type: 'mandatory',
+                prereqs: course.prereqs || []
+            });
+        }
+
+        // Remove from unassignedCourses if present
+        unassignedCourses = (unassignedCourses || []).filter(c => {
+            const uKeys = getNormalizedCodes(c.code, c.altCode);
+            return !uKeys.some(k => mKeys.has(k));
+        });
+
+        syncCourseToGameState(course, semObj.semester);
+        saveCustomPlan();
+        renderDegreePlanner();
+        showPlannerToast(`✓ הקורס "${course.name}" שוחזר בהצלחה לסמסטר ${semObj.semester}!`);
+    }
+
+    function restoreAllMissingMandatoryCourses() {
+        if (!customPlan) return;
+        const suggestedCatalog = getSuggestedCatalogForTrack(selectedTrack) || global.PLANNER_CATALOG.SUGGESTED_MANDATORY_SYLLABUS || [];
+        const placedCodes = new Set();
+        customPlan.forEach(sem => {
+            (sem.courses || []).forEach(c => {
+                getNormalizedCodes(c.code, c.altCode).forEach(k => placedCodes.add(k));
+            });
+        });
+
+        let count = 0;
+        suggestedCatalog.forEach(sem => {
+            let semObj = customPlan.find(s => s.semester === sem.semester);
+            if (!semObj) return;
+
+            (sem.courses || []).forEach(course => {
+                const mKeys = getNormalizedCodes(course.code, course.altCode);
+                if (mKeys.some(k => placedCodes.has(k))) return;
+                if (isCourseCompleted(course.code, course.altCode)) return;
+
+                semObj.courses.push({
+                    code: course.code,
+                    altCode: course.altCode || null,
+                    name: course.name,
+                    credits: course.credits,
+                    type: 'mandatory',
+                    prereqs: course.prereqs || []
+                });
+
+                mKeys.forEach(k => placedCodes.add(k));
+
+                unassignedCourses = (unassignedCourses || []).filter(c => {
+                    const uKeys = getNormalizedCodes(c.code, c.altCode);
+                    return !uKeys.some(k => mKeys.has(k));
+                });
+
+                syncCourseToGameState(course, semObj.semester);
+                count++;
+            });
+        });
+
+        if (count > 0) {
+            saveCustomPlan();
+            renderDegreePlanner();
+            showPlannerToast(`✓ שוחזרו בהצלחה ${count} קורסי חובה לסמסטרים המומלצים!`);
+        } else {
+            showPlannerToast('כל קורסי החובה כבר משובצים בתוכנית.');
+        }
     }
 
     // Interactive Non-Blocking Semester Selector Modal
@@ -4258,14 +4512,27 @@
     global.openSemesterManagerModal = openSemesterManagerModal;
 
     global.handlePhysicsVariantSelect = function(currentCode, selectedCode, event) {
-        if (event) event.stopPropagation();
+        if (event && event.stopPropagation) event.stopPropagation();
+        const target = selectedCode || currentCode;
+        const curr = selectedCode ? currentCode : null;
+        if (typeof global.selectPhysicsVariant === 'function') {
+            global.selectPhysicsVariant(target, curr);
+            return;
+        }
+
         if (!customPlan) return;
         let foundCourse = null;
+
+        const p1Codes = ['01140051', '114051', '01140071', '114071', '01140077', '114077', '01140055', '114055'];
+        const p2Codes = ['01140052', '114052', '01140075', '114075', '01140078', '114078', '01140076', '114076'];
+        const isTargetP1 = p1Codes.includes(target);
+        const isTargetP2 = p2Codes.includes(target);
+        const searchCodes = isTargetP1 ? p1Codes : (isTargetP2 ? p2Codes : [currentCode, target].filter(Boolean));
 
         for (let sem of customPlan) {
             for (let c of (sem.courses || [])) {
                 const keys = getNormalizedCodes(c.code, c.altCode);
-                if (keys.includes(currentCode)) {
+                if (keys.some(k => searchCodes.includes(k))) {
                     foundCourse = c;
                     break;
                 }
@@ -4274,59 +4541,81 @@
         }
 
         if (!foundCourse) {
-            foundCourse = unassignedCourses.find(c => getNormalizedCodes(c.code, c.altCode).includes(currentCode));
+            foundCourse = unassignedCourses.find(c => {
+                const keys = getNormalizedCodes(c.code, c.altCode);
+                return keys.some(k => searchCodes.includes(k));
+            });
         }
 
-        if (!foundCourse) return;
-
         const variantMeta = {
-            '01140051': { name: 'פיזיקה 1', credits: 2.5, altCode: '114051' },
-            '01140071': { name: "פיזיקה 1מ'", credits: 3.5, altCode: '114071' },
-            '01140077': { name: "פיזיקה 1פ'", credits: 4.0, altCode: '114077' },
-            '01140055': { name: "פיזיקה 1ת'", credits: 3.5, altCode: '114055' },
-            '01140052': { name: 'פיזיקה 2', credits: 3.5, altCode: '114052' },
-            '01140075': { name: "פיזיקה 2מ'", credits: 5.0, altCode: '114075' },
-            '01140078': { name: "פיזיקה 2פ'", credits: 5.0, altCode: '114078' },
-            '01140076': { name: "פיזיקה 2ת'", credits: 5.0, altCode: '114076' }
-        }[selectedCode];
+            '01140051': { name: 'פיזיקה 1', credits: 2.5, altCode: '114051', code: '01140051' },
+            '114051': { name: 'פיזיקה 1', credits: 2.5, altCode: '114051', code: '01140051' },
+            '01140071': { name: "פיזיקה 1מ'", credits: 3.5, altCode: '114071', code: '01140071' },
+            '114071': { name: "פיזיקה 1מ'", credits: 3.5, altCode: '114071', code: '01140071' },
+            '01140077': { name: "פיזיקה 1פ'", credits: 4.0, altCode: '114077', code: '01140077' },
+            '114077': { name: "פיזיקה 1פ'", credits: 4.0, altCode: '114077', code: '01140077' },
+            '01140055': { name: "פיזיקה 1ת'", credits: 3.5, altCode: '114055', code: '01140055' },
+            '114055': { name: "פיזיקה 1ת'", credits: 3.5, altCode: '114055', code: '01140055' },
+            '01140052': { name: 'פיזיקה 2', credits: 3.5, altCode: '114052', code: '01140052' },
+            '114052': { name: 'פיזיקה 2', credits: 3.5, altCode: '114052', code: '01140052' },
+            '01140075': { name: "פיזיקה 2ממ", credits: 5.0, altCode: '114075', code: '01140075' },
+            '114075': { name: "פיזיקה 2ממ", credits: 5.0, altCode: '114075', code: '01140075' },
+            '01140078': { name: "פיזיקה 2פ'", credits: 5.0, altCode: '114078', code: '01140078' },
+            '114078': { name: "פיזיקה 2פ'", credits: 5.0, altCode: '114078', code: '01140078' },
+            '01140076': { name: "פיזיקה 2ת'", credits: 5.0, altCode: '114076', code: '01140076' },
+            '114076': { name: "פיזיקה 2ת'", credits: 5.0, altCode: '114076', code: '01140076' }
+        }[target];
 
-        if (variantMeta) {
-            foundCourse.code = selectedCode;
+        if (foundCourse && variantMeta) {
+            foundCourse.code = variantMeta.code;
             foundCourse.altCode = variantMeta.altCode;
             foundCourse.name = variantMeta.name;
             foundCourse.credits = variantMeta.credits;
+            foundCourse.variantGroupId = isTargetP1 ? 'physics_1' : 'physics_2';
         }
 
         if (!global.gameState.userSettings) global.gameState.userSettings = {};
         if (!global.gameState.userSettings.physicsVariants) global.gameState.userSettings.physicsVariants = {};
-        if (['01140051', '01140071', '01140077', '01140055'].includes(selectedCode)) {
-            global.gameState.userSettings.physicsVariants.physics1 = selectedCode;
-        } else {
-            global.gameState.userSettings.physicsVariants.physics2 = selectedCode;
+        const familyKey = isTargetP1 ? 'physics1' : 'physics2';
+        if (variantMeta) {
+            global.gameState.userSettings.physicsVariants[familyKey] = variantMeta.code;
+            try {
+                localStorage.setItem(`semestero_physics_variant_${familyKey}`, variantMeta.code);
+            } catch (e) {}
         }
 
         // Synchronize in gameState.courses so Tree and Flowchart reflect choice immediately
-        if (global.gameState && global.gameState.courses) {
+        if (global.gameState && global.gameState.courses && variantMeta) {
             for (let [k, cObj] of Object.entries(global.gameState.courses)) {
                 const cNorms = getNormalizedCodes(cObj.code, cObj.altCode);
-                if (cNorms.includes(currentCode) || cNorms.includes(selectedCode)) {
-                    if (variantMeta) {
-                        cObj.name = variantMeta.name;
-                        cObj.credits = variantMeta.credits;
-                        cObj.code = selectedCode;
-                        cObj.altCode = variantMeta.altCode;
-                    }
+                if (cNorms.some(codeKey => searchCodes.includes(codeKey))) {
+                    cObj.name = variantMeta.name;
+                    cObj.credits = variantMeta.credits;
+                    cObj.code = variantMeta.code;
+                    cObj.altCode = variantMeta.altCode;
+                    cObj.variantGroupId = isTargetP1 ? 'physics_1' : 'physics_2';
                 }
             }
+            searchCodes.forEach(oldCode => {
+                if (oldCode !== variantMeta.code && oldCode !== variantMeta.altCode) {
+                    delete global.gameState.courses[oldCode];
+                }
+            });
+            global.gameState.courses[variantMeta.altCode] = foundCourse || global.gameState.courses[variantMeta.altCode];
+            global.gameState.courses[variantMeta.code] = foundCourse || global.gameState.courses[variantMeta.code];
         }
 
-        saveCustomPlan();
+        saveCustomPlan(true);
         renderDegreePlanner();
         if (typeof global.saveState === 'function') global.saveState();
         if (typeof global.renderUI === 'function') global.renderUI();
         if (typeof global.renderFlowchartTree === 'function') global.renderFlowchartTree();
-        showPlannerToast(`עודכנה גרסת הפיזיקה: ${foundCourse.name} (${foundCourse.credits} נק״ז) ⚛️`, false);
+        if (variantMeta && typeof showPlannerToast === 'function') {
+            showPlannerToast(`עודכנה גרסת הפיזיקה: ${variantMeta.name} (${variantMeta.credits} נק״ז) ⚛️`, false);
+        }
     };
+    global.DegreePlanner = global.DegreePlanner || {};
+    global.DegreePlanner.handlePhysicsVariantSelect = global.handlePhysicsVariantSelect;
 
     // Public API for English Level State
     global.openSportClubSelectorModal = openSportClubSelectorModal;

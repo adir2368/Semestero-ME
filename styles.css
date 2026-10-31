@@ -9846,6 +9846,71 @@ html.is-iphone .app-global-footer {
     flex-shrink: 0;
 }
 
+.planner-missing-mandatory-section {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.12), rgba(239, 68, 68, 0.08));
+    border: 1px solid rgba(245, 158, 11, 0.35);
+    border-radius: 8px;
+    padding: 9px 11px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex-shrink: 0;
+    margin-bottom: 8px;
+}
+
+.missing-mandatory-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 6px;
+}
+
+.missing-mandatory-title {
+    font-size: 0.74rem;
+    font-weight: 800;
+    color: #f59e0b;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.btn-restore-all-mandatory {
+    background: rgba(245, 158, 11, 0.2);
+    border: 1px solid rgba(245, 158, 11, 0.5);
+    color: #fde68a;
+    font-size: 0.68rem;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.btn-restore-all-mandatory:hover {
+    background: #f59e0b;
+    color: #000000;
+}
+
+.planner-missing-mandatory-list {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    max-height: 130px;
+    overflow-y: auto;
+}
+
+.tag-missing-mandatory {
+    background: rgba(245, 158, 11, 0.18) !important;
+    color: #f59e0b !important;
+    border: 1px solid rgba(245, 158, 11, 0.4) !important;
+}
+
+.tag-placed-mandatory {
+    background: rgba(16, 185, 129, 0.15) !important;
+    color: #10b981 !important;
+    border: 1px solid rgba(16, 185, 129, 0.35) !important;
+}
+
 .planner-ready-section {
     background: linear-gradient(135deg, rgba(56, 189, 248, 0.12), rgba(16, 185, 129, 0.08));
     border: 1px solid rgba(56, 189, 248, 0.3);
@@ -11058,12 +11123,12 @@ html.is-iphone .app-global-footer {
         overflow: hidden !important;
     }
 
-    body * {
+    body:not(.is-printing-grade-sheet) * {
         visibility: hidden !important;
     }
 
-    #planner-workspace,
-    #planner-workspace * {
+    body:not(.is-printing-grade-sheet) #planner-workspace,
+    body:not(.is-printing-grade-sheet) #planner-workspace * {
         visibility: visible !important;
     }
 
@@ -14891,4 +14956,913 @@ tr.is-task-pinned {
 }
 .technion-link-btn:hover .technion-btn-brand-icon {
     transform: scale(1.15);
+}
+
+
+/* ==============================================================================
+   Semestero ME - Technion Academic Grade Sheet & What-If Simulator Styling
+   ============================================================================== */
+
+.grade-sheet-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(8, 12, 22, 0.88);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100060;
+    padding: 16px;
+    direction: rtl;
+}
+
+.grade-sheet-modal-content {
+    width: 1060px !important;
+    max-width: 96vw !important;
+    max-height: 92vh !important;
+    background: #090e1a !important;
+    border: 1px solid rgba(168, 85, 247, 0.35) !important;
+    border-radius: 18px !important;
+    box-shadow: 0 25px 70px rgba(0, 0, 0, 0.85), 0 0 40px rgba(168, 85, 247, 0.18) !important;
+    padding: 0 !important;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden !important;
+    position: relative;
+}
+
+.grade-sheet-toolbar {
+    padding: 14px 22px;
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.98), rgba(30, 41, 59, 0.85));
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+}
+
+.grade-sheet-toolbar-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.grade-sheet-tool-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    color: #e2e8f0;
+    padding: 7px 14px;
+    border-radius: 9px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s ease;
+}
+
+.grade-sheet-tool-btn:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.25);
+    color: #ffffff;
+    transform: translateY(-1px);
+}
+
+.grade-sheet-tool-btn.primary {
+    background: linear-gradient(135deg, #0284c7, #2563eb);
+    border-color: rgba(56, 189, 248, 0.5);
+    color: #ffffff;
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+}
+
+.grade-sheet-tool-btn.primary:hover {
+    background: linear-gradient(135deg, #0369a1, #1d4ed8);
+    box-shadow: 0 6px 18px rgba(37, 99, 235, 0.5);
+}
+
+.grade-sheet-tool-btn.toggle-sim {
+    background: rgba(168, 85, 247, 0.12);
+    border-color: rgba(168, 85, 247, 0.35);
+    color: #d8b4fe;
+}
+
+.grade-sheet-tool-btn.toggle-sim:hover,
+.grade-sheet-tool-btn.toggle-sim.active {
+    background: linear-gradient(135deg, #7c3aed, #9333ea);
+    border-color: rgba(192, 132, 252, 0.6);
+    color: #ffffff;
+    box-shadow: 0 4px 16px rgba(147, 51, 234, 0.4);
+}
+
+.grade-sheet-toolbar-right .modal-close {
+    background: transparent;
+    border: none;
+    font-size: 1.6rem;
+    color: #94a3b8;
+    cursor: pointer;
+    padding: 4px 8px;
+    line-height: 1;
+    border-radius: 6px;
+    transition: all 0.15s ease;
+}
+
+.grade-sheet-toolbar-right .modal-close:hover {
+    color: #f87171;
+    background: rgba(239, 68, 68, 0.12);
+}
+
+.grade-sheet-scrollable-wrap {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px;
+    background: #090e1a;
+}
+
+.grade-sheet-document {
+    max-width: 980px;
+    margin: 0 auto;
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+    padding: 28px 32px;
+}
+
+.grade-sheet-doc-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 18px;
+    margin-bottom: 20px;
+}
+
+.grade-sheet-crest-group {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.grade-sheet-crest-symbol {
+    font-size: 2.4rem;
+    filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.5));
+}
+
+.grade-sheet-header-text h1 {
+    margin: 0;
+    font-size: 1.45rem;
+    font-weight: 800;
+    color: #f8fafc;
+    letter-spacing: -0.2px;
+}
+
+.grade-sheet-header-text h2 {
+    margin: 3px 0 0 0;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #38bdf8;
+}
+
+.grade-sheet-header-text h3 {
+    margin: 3px 0 0 0;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: #94a3b8;
+}
+
+.grade-sheet-date-box {
+    text-align: left;
+    direction: ltr;
+    font-size: 0.82rem;
+    color: #94a3b8;
+    line-height: 1.6;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 8px;
+    padding: 8px 14px;
+}
+
+.grade-sheet-date-box div {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.grade-sheet-student-info-bar {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+    background: rgba(30, 41, 59, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 10px;
+    padding: 14px 18px;
+    margin-bottom: 20px;
+}
+
+.student-info-field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.student-info-field .info-label {
+    font-size: 0.74rem;
+    font-weight: 600;
+    color: #94a3b8;
+    text-transform: uppercase;
+}
+
+.student-info-field .info-value {
+    font-size: 0.94rem;
+    font-weight: 700;
+    color: #f8fafc;
+    outline: none;
+    border-bottom: 1px dashed transparent;
+    transition: all 0.15s ease;
+}
+
+.student-info-field .info-value[contenteditable="true"]:hover,
+.student-info-field .info-value[contenteditable="true"]:focus {
+    border-bottom-color: #38bdf8;
+    color: #38bdf8;
+    background: rgba(56, 189, 248, 0.06);
+    border-radius: 3px;
+    padding: 0 4px;
+}
+
+.student-info-field .standing-badge {
+    color: #10b981;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* What-If Simulator Styling */
+.grade-sheet-sim-panel {
+    background: linear-gradient(135deg, rgba(88, 28, 135, 0.3), rgba(30, 27, 75, 0.55));
+    border: 1px solid rgba(168, 85, 247, 0.45);
+    border-radius: 12px;
+    padding: 18px 22px;
+    margin-bottom: 22px;
+    box-shadow: 0 8px 24px rgba(147, 51, 234, 0.15);
+    animation: fadeIn 0.25s ease;
+}
+
+.sim-panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    border-bottom: 1px solid rgba(168, 85, 247, 0.25);
+    padding-bottom: 12px;
+    margin-bottom: 14px;
+}
+
+.sim-panel-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: #f3e8ff;
+}
+
+.sim-panel-badge {
+    background: rgba(168, 85, 247, 0.25);
+    border: 1px solid rgba(192, 132, 252, 0.5);
+    color: #e9d5ff;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 12px;
+}
+
+.sim-panel-presets {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.sim-panel-presets .presets-label {
+    font-size: 0.8rem;
+    color: #d8b4fe;
+    font-weight: 600;
+    margin-left: 4px;
+}
+
+.sim-preset-btn {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(168, 85, 247, 0.3);
+    color: #e9d5ff;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.15s ease;
+}
+
+.sim-preset-btn:hover {
+    background: rgba(168, 85, 247, 0.3);
+    color: #ffffff;
+    border-color: #c084fc;
+}
+
+.sim-preset-btn.danger {
+    border-color: rgba(239, 68, 68, 0.4);
+    color: #fca5a5;
+}
+
+.sim-preset-btn.danger:hover {
+    background: rgba(239, 68, 68, 0.25);
+    color: #ffffff;
+}
+
+.sim-target-row {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.sim-target-input-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.sim-target-input-group label {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: #f3e8ff;
+}
+
+.sim-target-field input {
+    width: 85px;
+    background: rgba(15, 23, 42, 0.8);
+    border: 1px solid rgba(168, 85, 247, 0.6);
+    border-radius: 7px;
+    color: #ffffff;
+    font-size: 1rem;
+    font-weight: 700;
+    text-align: center;
+    padding: 5px 8px;
+    outline: none;
+    direction: ltr;
+}
+
+.sim-target-field input:focus {
+    border-color: #38bdf8;
+    box-shadow: 0 0 10px rgba(56, 189, 248, 0.4);
+}
+
+.sim-target-output {
+    background: rgba(15, 23, 42, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 0.88rem;
+    line-height: 1.5;
+}
+
+/* Cumulative KPI Summary Bar */
+.grade-sheet-kpi-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.gs-kpi-box {
+    background: rgba(15, 23, 42, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    position: relative;
+    overflow: hidden;
+}
+
+.gs-kpi-box.border-beam-box {
+    border-color: rgba(56, 189, 248, 0.4);
+    box-shadow: 0 4px 20px rgba(56, 189, 248, 0.1);
+}
+
+.gs-kpi-label {
+    font-size: 0.74rem;
+    font-weight: 600;
+    color: #94a3b8;
+}
+
+.gs-kpi-val {
+    font-size: 1.45rem;
+    font-weight: 800;
+    color: #f8fafc;
+    letter-spacing: -0.3px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.gs-kpi-sub {
+    font-size: 0.72rem;
+    color: #64748b;
+}
+
+.sim-badge-inline {
+    background: rgba(168, 85, 247, 0.25);
+    border: 1px solid rgba(168, 85, 247, 0.5);
+    color: #d8b4fe;
+    font-size: 0.68rem;
+    padding: 1px 6px;
+    border-radius: 8px;
+    font-weight: 600;
+}
+
+/* Semester Blocks & Tables */
+.grade-sheet-sem-block {
+    background: rgba(2, 6, 23, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    margin-bottom: 22px;
+    overflow: hidden;
+    page-break-inside: avoid;
+}
+
+.grade-sheet-sem-header {
+    background: rgba(30, 41, 59, 0.65);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 12px 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.sem-header-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.sem-header-title h4 {
+    margin: 0;
+    font-size: 1.02rem;
+    font-weight: 800;
+    color: #f8fafc;
+}
+
+.sem-honors-badge {
+    padding: 2px 9px;
+    border-radius: 10px;
+    font-size: 0.74rem;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.sem-honors-badge.president {
+    background: rgba(251, 191, 36, 0.2);
+    border: 1px solid rgba(251, 191, 36, 0.5);
+    color: #fbbf24;
+}
+
+.sem-honors-badge.dean {
+    background: rgba(56, 189, 248, 0.2);
+    border: 1px solid rgba(56, 189, 248, 0.5);
+    color: #38bdf8;
+}
+
+.sem-header-stats {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 0.84rem;
+    color: #cbd5e1;
+}
+
+.sem-gpa-badge {
+    background: rgba(16, 185, 129, 0.16);
+    border: 1px solid rgba(16, 185, 129, 0.4);
+    color: #34d399;
+    padding: 3px 10px;
+    border-radius: 8px;
+    font-weight: 700;
+}
+
+.sem-gpa-badge.is-sim {
+    background: rgba(168, 85, 247, 0.2);
+    border-color: rgba(168, 85, 247, 0.5);
+    color: #d8b4fe;
+}
+
+.sem-gpa-pending {
+    color: #94a3b8;
+    font-style: italic;
+    font-size: 0.8rem;
+}
+
+.grade-sheet-table-wrapper {
+    overflow-x: auto;
+}
+
+.grade-sheet-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+}
+
+.grade-sheet-table th {
+    background: rgba(15, 23, 42, 0.8);
+    color: #94a3b8;
+    font-weight: 700;
+    font-size: 0.78rem;
+    padding: 10px 14px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    text-align: right;
+}
+
+.grade-sheet-table td {
+    padding: 10px 14px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    color: #e2e8f0;
+}
+
+.grade-sheet-table tr.row-mastered:hover {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.grade-sheet-table tr.row-pending {
+    opacity: 0.88;
+}
+
+.grade-sheet-table tr.row-pending:hover {
+    background: rgba(255, 255, 255, 0.03);
+    opacity: 1;
+}
+
+.cell-code {
+    font-family: monospace;
+    font-weight: 700;
+    color: #38bdf8;
+    direction: ltr;
+}
+
+.cell-name {
+    font-weight: 600;
+    color: #f1f5f9;
+}
+
+.grade-value-cell {
+    font-size: 0.98rem;
+    color: #34d399;
+}
+
+.badge-binary-pass {
+    background: rgba(56, 189, 248, 0.15);
+    border: 1px solid rgba(56, 189, 248, 0.35);
+    color: #38bdf8;
+    font-size: 0.74rem;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 6px;
+}
+
+.status-pill {
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 8px;
+}
+
+.status-pill.status-mastered {
+    background: rgba(16, 185, 129, 0.15);
+    color: #34d399;
+}
+
+.status-pill.status-active {
+    background: rgba(56, 189, 248, 0.15);
+    color: #38bdf8;
+}
+
+.status-pill.status-planned {
+    background: rgba(148, 163, 184, 0.15);
+    color: #94a3b8;
+}
+
+.sim-input-wrapper {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sim-grade-input {
+    width: 58px;
+    background: rgba(30, 27, 75, 0.8);
+    border: 1px solid rgba(168, 85, 247, 0.6);
+    border-radius: 6px;
+    color: #e9d5ff;
+    font-size: 0.88rem;
+    font-weight: 700;
+    text-align: center;
+    padding: 3px 4px;
+    outline: none;
+    direction: ltr;
+}
+
+.sim-grade-input:focus {
+    border-color: #38bdf8;
+    box-shadow: 0 0 8px rgba(56, 189, 248, 0.4);
+}
+
+.sim-print-val {
+    display: none;
+}
+
+.table-subtotal-row td {
+    background: rgba(15, 23, 42, 0.9);
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+    font-size: 0.86rem;
+    color: #f8fafc;
+    padding: 11px 14px;
+}
+
+/* Document Footer & Notes */
+.grade-sheet-doc-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    border-top: 2px solid rgba(255, 255, 255, 0.1);
+    padding-top: 20px;
+    margin-top: 24px;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.grade-sheet-notes {
+    flex: 1;
+    min-width: 280px;
+}
+
+.grade-sheet-notes h4 {
+    margin: 0 0 8px 0;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #94a3b8;
+}
+
+.grade-sheet-notes ul {
+    margin: 0;
+    padding-right: 18px;
+    color: #64748b;
+    font-size: 0.74rem;
+    line-height: 1.6;
+}
+
+.grade-sheet-stamp-box {
+    text-align: center;
+    border: 1px dashed rgba(56, 189, 248, 0.35);
+    border-radius: 8px;
+    padding: 12px 18px;
+    background: rgba(56, 189, 248, 0.04);
+}
+
+.stamp-emblem {
+    font-family: monospace;
+    font-weight: 800;
+    font-size: 0.92rem;
+    color: #38bdf8;
+    letter-spacing: 1px;
+}
+
+.stamp-verified {
+    font-size: 0.7rem;
+    color: #10b981;
+    margin-top: 3px;
+    font-weight: 600;
+}
+
+/* ==============================================================================
+   Print Optimization Rules for Grade Sheet (A4 PDF & Paper)
+   ============================================================================== */
+@media print {
+    body.is-printing-grade-sheet {
+        overflow: visible !important;
+        height: auto !important;
+        background: #ffffff !important;
+        color: #0f172a !important;
+    }
+
+    body.is-printing-grade-sheet * {
+        visibility: hidden !important;
+    }
+
+    body.is-printing-grade-sheet #modal-grade-sheet,
+    body.is-printing-grade-sheet #modal-grade-sheet * {
+        visibility: visible !important;
+    }
+
+    body.is-printing-grade-sheet #modal-grade-sheet {
+        position: static !important;
+        display: block !important;
+        width: 100% !important;
+        height: auto !important;
+        background: #ffffff !important;
+        color: #0f172a !important;
+        box-shadow: none !important;
+        border: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        z-index: 999999 !important;
+    }
+
+    body.is-printing-grade-sheet .grade-sheet-modal-content {
+        max-width: 100% !important;
+        width: 100% !important;
+        max-height: none !important;
+        height: auto !important;
+        overflow: visible !important;
+        background: #ffffff !important;
+        color: #0f172a !important;
+        box-shadow: none !important;
+        border: none !important;
+        border-radius: 0 !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    body.is-printing-grade-sheet .grade-sheet-scrollable-wrap {
+        padding: 0 !important;
+        background: #ffffff !important;
+        overflow: visible !important;
+    }
+
+    body.is-printing-grade-sheet .grade-sheet-document {
+        max-width: 100% !important;
+        width: 100% !important;
+        background: #ffffff !important;
+        border: none !important;
+        border-radius: 0 !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    body.is-printing-grade-sheet .grade-sheet-toolbar,
+    body.is-printing-grade-sheet .grade-sheet-sim-panel,
+    body.is-printing-grade-sheet .no-print,
+    body.is-printing-grade-sheet .sim-grade-input {
+        display: none !important;
+    }
+
+    body.is-printing-grade-sheet .sim-print-val {
+        display: inline-block !important;
+        color: #0f172a !important;
+        font-weight: 700 !important;
+    }
+
+    body.is-printing-grade-sheet .grade-sheet-doc-header {
+        border-bottom: 2px solid #0f172a !important;
+        padding-bottom: 12px !important;
+        margin-bottom: 16px !important;
+    }
+
+    body.is-printing-grade-sheet .grade-sheet-header-text h1 {
+        color: #0f172a !important;
+        font-size: 1.4rem !important;
+    }
+
+    body.is-printing-grade-sheet .grade-sheet-header-text h2 {
+        color: #0369a1 !important;
+        font-size: 1.05rem !important;
+    }
+
+    body.is-printing-grade-sheet .grade-sheet-header-text h3 {
+        color: #475569 !important;
+        font-size: 0.9rem !important;
+    }
+
+    body.is-printing-grade-sheet .grade-sheet-date-box {
+        background: #f8fafc !important;
+        border: 1px solid #cbd5e1 !important;
+        color: #334155 !important;
+    }
+
+    body.is-printing-grade-sheet .grade-sheet-student-info-bar {
+        background: #f1f5f9 !important;
+        border: 1px solid #cbd5e1 !important;
+        color: #0f172a !important;
+        padding: 10px 14px !important;
+        margin-bottom: 16px !important;
+    }
+
+    body.is-printing-grade-sheet .student-info-field .info-label {
+        color: #64748b !important;
+    }
+
+    body.is-printing-grade-sheet .student-info-field .info-value {
+        color: #0f172a !important;
+        border-bottom: none !important;
+    }
+
+    body.is-printing-grade-sheet .gs-kpi-box {
+        background: #f8fafc !important;
+        border: 1px solid #cbd5e1 !important;
+        box-shadow: none !important;
+        padding: 10px 12px !important;
+    }
+
+    body.is-printing-grade-sheet .gs-kpi-label {
+        color: #64748b !important;
+    }
+
+    body.is-printing-grade-sheet .gs-kpi-val {
+        color: #0f172a !important;
+        font-size: 1.25rem !important;
+    }
+
+    body.is-printing-grade-sheet .grade-sheet-sem-block {
+        background: #ffffff !important;
+        border: 1px solid #cbd5e1 !important;
+        margin-bottom: 18px !important;
+        page-break-inside: avoid !important;
+    }
+
+    body.is-printing-grade-sheet .grade-sheet-sem-header {
+        background: #f1f5f9 !important;
+        border-bottom: 1px solid #cbd5e1 !important;
+        color: #0f172a !important;
+        padding: 8px 14px !important;
+    }
+
+    body.is-printing-grade-sheet .sem-header-title h4 {
+        color: #0f172a !important;
+    }
+
+    body.is-printing-grade-sheet .sem-gpa-badge {
+        background: #dcfce7 !important;
+        border: 1px solid #86efac !important;
+        color: #15803d !important;
+    }
+
+    body.is-printing-grade-sheet .grade-sheet-table th {
+        background: #e2e8f0 !important;
+        color: #1e293b !important;
+        border-bottom: 1px solid #cbd5e1 !important;
+    }
+
+    body.is-printing-grade-sheet .grade-sheet-table td {
+        border-bottom: 1px solid #e2e8f0 !important;
+        color: #0f172a !important;
+        padding: 7px 10px !important;
+    }
+
+    body.is-printing-grade-sheet .cell-code {
+        color: #0369a1 !important;
+    }
+
+    body.is-printing-grade-sheet .grade-value-cell {
+        color: #0f172a !important;
+        font-weight: 800 !important;
+    }
+
+    body.is-printing-grade-sheet .badge-binary-pass {
+        background: #e0f2fe !important;
+        border: 1px solid #7dd3fc !important;
+        color: #0369a1 !important;
+    }
+
+    body.is-printing-grade-sheet .table-subtotal-row td {
+        background: #f8fafc !important;
+        border-top: 1px solid #cbd5e1 !important;
+        color: #0f172a !important;
+    }
+
+    body.is-printing-grade-sheet .grade-sheet-doc-footer {
+        border-top: 1px solid #cbd5e1 !important;
+        color: #475569 !important;
+        page-break-inside: avoid !important;
+    }
+
+    body.is-printing-grade-sheet .grade-sheet-notes ul {
+        color: #475569 !important;
+    }
+
+    body.is-printing-grade-sheet .grade-sheet-stamp-box {
+        border: 1px solid #0369a1 !important;
+        background: #f0f9ff !important;
+    }
+
+    body.is-printing-grade-sheet .stamp-emblem {
+        color: #0369a1 !important;
+    }
 }

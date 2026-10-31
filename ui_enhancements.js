@@ -354,10 +354,12 @@
         // 2. Global Actions
         const actions = [
             { id: 'act-tour', title: 'מדריך מערכת וסיור אינטראקטיבי (Tutorial Academy)', icon: '🧭', shortcut: 'T', action: () => (window.openTutorialHubModal ? window.openTutorialHubModal() : window.startInteractiveTour && window.startInteractiveTour()) },
+            { id: 'act-grade-sheet', title: 'גיליון ציונים אקדמי רשמי (Academic Grade Sheet & What-If)', icon: '🎓', shortcut: 'Ctrl+Shift+G', action: () => window.openGradeSheetModal && window.openGradeSheetModal() },
             { id: 'act-audit', title: 'בדיקת זכאות לתואר ודרישות סיום (Graduation Audit)', icon: '🎓', shortcut: 'Ctrl+G', action: () => window.DegreePlanner && (window.DegreePlanner.openGraduationClearanceModal ? window.DegreePlanner.openGraduationClearanceModal() : window.DegreePlanner.openGraduationAuditModal && window.DegreePlanner.openGraduationAuditModal()) },
             { id: 'act-faq', title: 'מרכז זכויות ושאלות נפוצות (Technion FAQ & Rights)', icon: '📖', shortcut: 'Ctrl+H', action: () => window.openFaqModal() },
             { id: 'act-compare', title: 'השוואת קורסי בחירה צד-מול-צד (Course Comparator)', icon: '⚖️', shortcut: '', action: () => window.openCourseComparisonModal() },
             { id: 'act-downloads', title: 'מרכז הורדה ישירה (Android APK / מחשב)', icon: '⬇️', shortcut: 'Ctrl+D', action: () => window.openDownloadModal() },
+            { id: 'act-watch', title: 'שעון חכם - תצוגת Galaxy Watch 8 (Wear OS Companion)', icon: '⌚', shortcut: 'Ctrl+Shift+W', action: () => window.open('watch.html', '_blank', 'width=460,height=460,resizable=no') },
             { id: 'act-sync', title: 'סנכרון מיידי לענן (Supabase Cloud Sync)', icon: '🔄', shortcut: 'Ctrl+S', action: () => window.AuthSync && window.AuthSync.syncToCloud && window.AuthSync.syncToCloud() },
             { id: 'act-shortcuts', title: 'מקשי קיצור במקלדת (Keyboard Shortcuts)', icon: '⌨️', shortcut: '?', action: () => window.openKeyboardShortcutsModal() }
         ];

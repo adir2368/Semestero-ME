@@ -9203,7 +9203,16 @@ function loadSavedState() {
                 }
             });
         }
+        const savedP1Choice = (gameState.userSettings && gameState.userSettings.physicsVariants && gameState.userSettings.physicsVariants.physics1) ||
+                              (typeof localStorage !== 'undefined' ? localStorage.getItem('semestero_physics_variant_physics1') : null);
+        const savedP2Choice = (gameState.userSettings && gameState.userSettings.physicsVariants && gameState.userSettings.physicsVariants.physics2) ||
+                              (typeof localStorage !== 'undefined' ? localStorage.getItem('semestero_physics_variant_physics2') : null);
+        const p1FamilyList = ['01140051', '114051', '01140071', '114071', '01140077', '114077', '01140055', '114055'];
+        const p2FamilyList = ['01140052', '114052', '01140075', '114075', '01140078', '114078', '01140076', '114076'];
+
         Object.entries(preloadedForRecovery.courses).forEach(([code, preloadedCourse]) => {
+            if (p1FamilyList.includes(code) && savedP1Choice && !savedP1Choice.includes(code)) return;
+            if (p2FamilyList.includes(code) && savedP2Choice && !savedP2Choice.includes(code)) return;
             const existing = gameState.courses[code];
             if (!existing) {
                 gameState.courses[code] = JSON.parse(JSON.stringify(preloadedCourse));
@@ -9237,7 +9246,7 @@ function loadSavedState() {
     gameState.isFinalsMode = false;
 
     // 1. Purge canceled / user-removed courses & deduplicate any accidental 8-digit courses
-    const PURGED_APP_CODES = ['035044', '035026', '35026', '01140071', '114071'];
+    const PURGED_APP_CODES = ['035044', '035026', '35026'];
     if (gameState.courses) {
         PURGED_APP_CODES.forEach(code => {
             if (gameState.courses[code]) {
@@ -9806,6 +9815,38 @@ function loadSavedState() {
         enrichTimetableWithAuthenticRooms(gameState.timetable);
     }
 
+    // Apply user selected physics variants if set
+    const userPrefP1 = (gameState.userSettings && gameState.userSettings.physicsVariants && gameState.userSettings.physicsVariants.physics1) ||
+                       (typeof localStorage !== 'undefined' ? localStorage.getItem('semestero_physics_variant_physics1') : null);
+    const userPrefP2 = (gameState.userSettings && gameState.userSettings.physicsVariants && gameState.userSettings.physicsVariants.physics2) ||
+                       (typeof localStorage !== 'undefined' ? localStorage.getItem('semestero_physics_variant_physics2') : null);
+    if (userPrefP1 && typeof selectPhysicsVariant === 'function') {
+        const curP1 = gameState.courses && (gameState.courses['114051'] || gameState.courses['01140051'] || gameState.courses['114071'] || gameState.courses['01140071']);
+        if (!curP1 || (curP1.code !== userPrefP1 && curP1.altCode !== userPrefP1)) {
+            selectPhysicsVariant(userPrefP1, null, true);
+        }
+    }
+    if (userPrefP2 && typeof selectPhysicsVariant === 'function') {
+        const curP2 = gameState.courses && (gameState.courses['114052'] || gameState.courses['01140052'] || gameState.courses['114075'] || gameState.courses['01140075']);
+        if (!curP2 || (curP2.code !== userPrefP2 && curP2.altCode !== userPrefP2)) {
+            selectPhysicsVariant(userPrefP2, null, true);
+        }
+    }
+
+    // Restore or initialize Technion classification exams
+    if (!gameState.userSettings) gameState.userSettings = {};
+    if (!gameState.userSettings.classificationExams) {
+        gameState.userSettings.classificationExams = {
+            mechanics: (typeof localStorage !== 'undefined' && localStorage.getItem('semestero_classification_mechanics')) || 'exempt_bagrut',
+            electricity: (typeof localStorage !== 'undefined' && localStorage.getItem('semestero_classification_electricity')) || 'exempt_bagrut',
+            math: (typeof localStorage !== 'undefined' && localStorage.getItem('semestero_classification_math')) || 'exempt_bagrut',
+            english: (typeof localStorage !== 'undefined' && (localStorage.getItem('semestero_classification_english') || localStorage.getItem('semestero_planner_english_level_v2'))) || 'exempt_all'
+        };
+    }
+    if (typeof updateClassificationExamsUI === 'function') {
+        updateClassificationExamsUI();
+    }
+
     recalculateCourseStates();
     saveState();
     window.gameState = gameState;
@@ -10131,13 +10172,15 @@ function recalculateCourseStates() {
         const prereq = gameState.courses[preCode];
         if (prereq && prereq.status === 'mastered') return true;
 
-        // Physics 1 (114051) <-> Physics 1M (114071)
-        if (preCode === '114051' && gameState.courses['114071'] && gameState.courses['114071'].status === 'mastered') return true;
-        if (preCode === '114071' && gameState.courses['114051'] && gameState.courses['114051'].status === 'mastered') return true;
+        const p1FamilyCodes = ['01140051', '114051', '01140071', '114071', '01140077', '114077', '01140055', '114055'];
+        const p2FamilyCodes = ['01140052', '114052', '01140075', '114075', '01140078', '114078', '01140076', '114076'];
 
-        // Physics 2 (114052) <-> Physics 2MM (114075)
-        if (preCode === '114052' && gameState.courses['114075'] && gameState.courses['114075'].status === 'mastered') return true;
-        if (preCode === '114075' && gameState.courses['114052'] && gameState.courses['114052'].status === 'mastered') return true;
+        if (p1FamilyCodes.includes(preCode)) {
+            if (p1FamilyCodes.some(c => gameState.courses[c] && gameState.courses[c].status === 'mastered')) return true;
+        }
+        if (p2FamilyCodes.includes(preCode)) {
+            if (p2FamilyCodes.some(c => gameState.courses[c] && gameState.courses[c].status === 'mastered')) return true;
+        }
 
         return false;
     };
@@ -12302,6 +12345,313 @@ function escapeHtml(str) {
 }
 if (typeof window !== 'undefined') window.escapeHtml = escapeHtml;
 
+// ==============================================================================
+// Authoritative Physics Variant Selection & Instant Multi-Subsystem Persistence
+// ==============================================================================
+function selectPhysicsVariant(targetCode, currentCode, silent = false) {
+    if (!targetCode) return;
+
+    const phys1Family = [
+        { code: "01140051", altCode: "114051", name: "פיזיקה 1", credits: 2.5 },
+        { code: "01140071", altCode: "114071", name: "פיזיקה 1מ'", credits: 3.5 },
+        { code: "01140077", altCode: "114077", name: "פיזיקה 1פ'", credits: 4.0 },
+        { code: "01140055", altCode: "114055", name: "פיזיקה 1ת'", credits: 3.5 }
+    ];
+    const phys2Family = [
+        { code: "01140052", altCode: "114052", name: "פיזיקה 2", credits: 3.5 },
+        { code: "01140075", altCode: "114075", name: "פיזיקה 2ממ", credits: 5.0 },
+        { code: "01140078", altCode: "114078", name: "פיזיקה 2פ'", credits: 5.0 },
+        { code: "01140076", altCode: "114076", name: "פיזיקה 2ת'", credits: 5.0 }
+    ];
+
+    const isPhys1 = phys1Family.some(f => f.code === targetCode || f.altCode === targetCode);
+    const isPhys2 = phys2Family.some(f => f.code === targetCode || f.altCode === targetCode);
+    if (!isPhys1 && !isPhys2) return;
+
+    const family = isPhys1 ? phys1Family : phys2Family;
+    const familyKey = isPhys1 ? 'physics1' : 'physics2';
+    const variantGroupId = isPhys1 ? 'physics_1' : 'physics_2';
+    const targetMeta = family.find(f => f.code === targetCode || f.altCode === targetCode);
+    if (!targetMeta) return;
+
+    const allFamilyCodes = [];
+    family.forEach(f => {
+        allFamilyCodes.push(f.code, f.altCode, String(f.altCode).replace(/^0+/, ''));
+    });
+
+    // 1. Remove all family codes from removedCourses so they are NEVER purged
+    if (gameState && Array.isArray(gameState.removedCourses)) {
+        gameState.removedCourses = gameState.removedCourses.filter(c => !allFamilyCodes.includes(c));
+    }
+
+    // 2. Persist in userSettings and localStorage immediately
+    if (!gameState.userSettings) gameState.userSettings = {};
+    if (!gameState.userSettings.physicsVariants) gameState.userSettings.physicsVariants = {};
+    gameState.userSettings.physicsVariants[familyKey] = targetMeta.code;
+    try {
+        localStorage.setItem(`semestero_physics_variant_${familyKey}`, targetMeta.code);
+    } catch (e) {
+        console.warn('Could not save physics variant to localStorage', e);
+    }
+
+    // 3. Find existing course object in gameState.courses or create it
+    gameState.courses = gameState.courses || {};
+    let existingCourse = null;
+    let oldKeys = [];
+
+    for (const [k, c] of Object.entries(gameState.courses)) {
+        if (!c) continue;
+        if (allFamilyCodes.includes(k) || allFamilyCodes.includes(c.code) || allFamilyCodes.includes(c.altCode)) {
+            if (!existingCourse) existingCourse = c;
+            oldKeys.push(k);
+        }
+    }
+
+    if (!existingCourse) {
+        existingCourse = {
+            id: targetMeta.altCode,
+            code: targetMeta.code,
+            altCode: targetMeta.altCode,
+            name: targetMeta.name,
+            credits: targetMeta.credits,
+            semester: isPhys1 ? 2 : 3,
+            status: 'available',
+            type: 'mandatory',
+            faculty: 'פיזיקה',
+            variantGroupId: variantGroupId,
+            tasks: []
+        };
+    } else {
+        existingCourse.code = targetMeta.code;
+        existingCourse.altCode = targetMeta.altCode;
+        existingCourse.name = targetMeta.name;
+        existingCourse.credits = targetMeta.credits;
+        existingCourse.variantGroupId = variantGroupId;
+    }
+
+    // Remove outdated family keys from gameState.courses
+    oldKeys.forEach(k => {
+        if (k !== targetMeta.altCode && k !== targetMeta.code) {
+            delete gameState.courses[k];
+        }
+    });
+
+    // Save under both 6-digit and 8-digit keys
+    gameState.courses[targetMeta.altCode] = existingCourse;
+    gameState.courses[targetMeta.code] = existingCourse;
+
+    // 4. Update Degree Planner (customPlan, gameState.degreePlan, unassignedCourses)
+    if (window.DegreePlanner && typeof window.DegreePlanner.getCustomPlan === 'function') {
+        const cPlan = window.DegreePlanner.getCustomPlan();
+        if (Array.isArray(cPlan)) {
+            cPlan.forEach(sem => {
+                (sem.courses || []).forEach(c => {
+                    if (allFamilyCodes.includes(c.code) || allFamilyCodes.includes(c.altCode) || c.variantGroupId === variantGroupId) {
+                        c.code = targetMeta.code;
+                        c.altCode = targetMeta.altCode;
+                        c.name = targetMeta.name;
+                        c.credits = targetMeta.credits;
+                        c.variantGroupId = variantGroupId;
+                    }
+                });
+            });
+        }
+        if (typeof window.DegreePlanner.saveCustomPlan === 'function') {
+            window.DegreePlanner.saveCustomPlan(true);
+        }
+    }
+
+    if (Array.isArray(gameState.degreePlan)) {
+        gameState.degreePlan.forEach(sem => {
+            (sem.courses || []).forEach(c => {
+                if (allFamilyCodes.includes(c.code) || allFamilyCodes.includes(c.altCode) || c.variantGroupId === variantGroupId) {
+                    c.code = targetMeta.code;
+                    c.altCode = targetMeta.altCode;
+                    c.name = targetMeta.name;
+                    c.credits = targetMeta.credits;
+                    c.variantGroupId = variantGroupId;
+                }
+            });
+        });
+    }
+
+    if (typeof unassignedCourses !== 'undefined' && Array.isArray(unassignedCourses)) {
+        unassignedCourses.forEach(c => {
+            if (allFamilyCodes.includes(c.code) || allFamilyCodes.includes(c.altCode) || c.variantGroupId === variantGroupId) {
+                c.code = targetMeta.code;
+                c.altCode = targetMeta.altCode;
+                c.name = targetMeta.name;
+                c.credits = targetMeta.credits;
+                c.variantGroupId = variantGroupId;
+            }
+        });
+    }
+
+    // 5. Recalculate & save
+    if (typeof recalculateCourseStates === 'function') recalculateCourseStates();
+    if (typeof saveState === 'function') saveState();
+
+    // 6. Refresh UI components
+    if (typeof renderUI === 'function') renderUI();
+    if (typeof renderFlowchartTree === 'function') renderFlowchartTree();
+    if (window.DegreePlanner && typeof window.DegreePlanner.renderDegreePlanner === 'function') {
+        window.DegreePlanner.renderDegreePlanner();
+    }
+
+    // 7. Refresh open course modal if currently active
+    const modal = typeof document !== 'undefined' ? document.getElementById("course-modal") : null;
+    if (modal && modal.classList.contains("active") && typeof openCourseDetails === 'function') {
+        openCourseDetails(targetMeta.altCode);
+    }
+
+    // 8. User feedback toast
+    if (!silent && typeof showToastNotification === 'function') {
+        showToastNotification(`✓ מסלול הפיזיקה עודכן ונשמר: ${targetMeta.name} (${targetMeta.credits} נק״ז) ⚛️`, 'success');
+    }
+}
+
+if (typeof window !== 'undefined') {
+    window.selectPhysicsVariant = selectPhysicsVariant;
+    window.handlePhysicsVariantSelect = selectPhysicsVariant;
+    window.DegreePlanner = window.DegreePlanner || {};
+    window.DegreePlanner.handlePhysicsVariantSelect = selectPhysicsVariant;
+}
+
+// ==============================================================================
+// Technion Classification Exams (בחינות סיווג טכניוניות: מכניקה, חשמל, מתמטיקה ואנגלית)
+// ==============================================================================
+
+function getClassificationExamStatus(type) {
+    if (gameState && gameState.userSettings && gameState.userSettings.classificationExams && gameState.userSettings.classificationExams[type]) {
+        return gameState.userSettings.classificationExams[type];
+    }
+    try {
+        if (typeof localStorage !== 'undefined') {
+            const stored = localStorage.getItem(`semestero_classification_${type}`);
+            if (stored) return stored;
+            if (type === 'english') {
+                const engStored = localStorage.getItem('semestero_planner_english_level_v2');
+                if (engStored) return engStored;
+            }
+        }
+    } catch (e) {}
+
+    // Default: in Technion ME, students by default have bagrut exemptions or pending
+    if (type === 'english') return 'exempt_all';
+    return 'exempt_bagrut';
+}
+
+function setClassificationExamStatus(type, value, silent) {
+    if (!type || !value) return;
+    if (!gameState) return;
+    if (!gameState.userSettings) gameState.userSettings = {};
+    if (!gameState.userSettings.classificationExams) {
+        gameState.userSettings.classificationExams = {
+            mechanics: 'exempt_bagrut',
+            electricity: 'exempt_bagrut',
+            math: 'exempt_bagrut',
+            english: 'exempt_all'
+        };
+    }
+    gameState.userSettings.classificationExams[type] = value;
+
+    try {
+        if (typeof localStorage !== 'undefined') {
+            localStorage.setItem(`semestero_classification_${type}`, value);
+        }
+    } catch (e) {
+        console.warn('Could not save classification exam to localStorage:', e);
+    }
+
+    // Sync English level if type is english
+    if (type === 'english' && typeof applyEnglishLevelState === 'function') {
+        applyEnglishLevelState(value);
+    }
+
+    // Update UI elements across planner & sidebar
+    updateClassificationExamsUI();
+
+    if (!silent) {
+        const labels = {
+            mechanics: 'סיווג מכניקה (פיזיקה 1)',
+            electricity: 'סיווג חשמל (פיזיקה 2)',
+            math: 'סיווג / כניסה מתמטיקה',
+            english: 'סיווג שפה אנגלית'
+        };
+        const optLabels = {
+            exempt_bagrut: 'פטור בגרות 5 יח״ל (70+)',
+            passed_exam: 'עבר בחינת סיווג',
+            mechina: 'מכינה / קורס קדם',
+            pending: 'טרם הושלם (חובה להשלים)',
+            exempt_all: 'פטור מלא (134+)',
+            exempt_a: 'מתקדמים ב׳ (120-133)',
+            none: 'ללא פטור (104-119)'
+        };
+        if (typeof showToastNotification === 'function') {
+            showToastNotification(`✓ עודכן ${labels[type] || type}: ${optLabels[value] || value}`, 'success');
+        }
+        if (typeof recalculateCourseStates === 'function') recalculateCourseStates();
+        if (typeof saveState === 'function') saveState();
+        if (typeof renderUI === 'function') renderUI();
+        if (typeof renderFlowchartTree === 'function') renderFlowchartTree();
+        if (window.DegreePlanner && typeof window.DegreePlanner.renderDegreePlanner === 'function') {
+            window.DegreePlanner.renderDegreePlanner();
+        }
+    }
+}
+
+function updateClassificationExamsUI() {
+    if (typeof document === 'undefined') return;
+
+    const mechSelect = document.getElementById('select-classification-mechanics');
+    const elecSelect = document.getElementById('select-classification-electricity');
+    const mathSelect = document.getElementById('select-classification-math');
+    const mainBadge = document.getElementById('planner-classification-badge');
+
+    const mechVal = getClassificationExamStatus('mechanics');
+    const elecVal = getClassificationExamStatus('electricity');
+    const mathVal = getClassificationExamStatus('math');
+
+    if (mechSelect && mechSelect.value !== mechVal) mechSelect.value = mechVal;
+    if (elecSelect && elecSelect.value !== elecVal) elecSelect.value = elecVal;
+    if (mathSelect && mathSelect.value !== mathVal) mathSelect.value = mathVal;
+
+    const badgeMech = document.getElementById('badge-classification-mechanics');
+    if (badgeMech) {
+        badgeMech.innerText = mechVal === 'exempt_bagrut' ? 'פטור בגרות' : (mechVal === 'passed_exam' ? 'עבר סיווג' : (mechVal === 'mechina' ? 'מכינה' : 'טרם הושלם'));
+        badgeMech.style.color = mechVal === 'pending' ? '#fbbf24' : '#34d399';
+    }
+    const badgeElec = document.getElementById('badge-classification-electricity');
+    if (badgeElec) {
+        badgeElec.innerText = elecVal === 'exempt_bagrut' ? 'פטור בגרות' : (elecVal === 'passed_exam' ? 'עבר סיווג' : (elecVal === 'mechina' ? 'מכינה' : 'טרם הושלם'));
+        badgeElec.style.color = elecVal === 'pending' ? '#fbbf24' : '#34d399';
+    }
+    const badgeMath = document.getElementById('badge-classification-math');
+    if (badgeMath) {
+        badgeMath.innerText = mathVal === 'exempt_bagrut' ? 'פטור בגרות' : (mathVal === 'passed_exam' ? 'עבר סיווג' : (mathVal === 'mechina' ? 'מכינה' : 'טרם הושלם'));
+        badgeMath.style.color = mathVal === 'pending' ? '#fbbf24' : '#34d399';
+    }
+
+    if (mainBadge) {
+        const hasPending = mechVal === 'pending' || elecVal === 'pending' || mathVal === 'pending';
+        if (hasPending) {
+            mainBadge.innerText = 'נדרש סיווג ⚠️';
+            mainBadge.style.background = '#f59e0b';
+            mainBadge.style.color = '#451a03';
+        } else {
+            mainBadge.innerText = 'תקין ✓';
+            mainBadge.style.background = '#10b981';
+            mainBadge.style.color = '#022c22';
+        }
+    }
+}
+
+if (typeof window !== 'undefined') {
+    window.getClassificationExamStatus = getClassificationExamStatus;
+    window.setClassificationExamStatus = setClassificationExamStatus;
+    window.updateClassificationExamsUI = updateClassificationExamsUI;
+}
+
 // Open and load details into Course Details Modal
 function openCourseDetails(code) {
     window.openCourseDetails = openCourseDetails;
@@ -12462,13 +12812,13 @@ function openCourseDetails(code) {
         ];
         const phys2Family = [
             { code: "01140052", altCode: "114052", name: "פיזיקה 2", credits: 3.5 },
-            { code: "01140075", altCode: "114075", name: "פיזיקה 2מ'", credits: 5.0 },
+            { code: "01140075", altCode: "114075", name: "פיזיקה 2ממ", credits: 5.0 },
             { code: "01140078", altCode: "114078", name: "פיזיקה 2פ'", credits: 5.0 },
             { code: "01140076", altCode: "114076", name: "פיזיקה 2ת'", credits: 5.0 }
         ];
 
-        const isPhys1 = phys1Family.some(v => v.code === course.code || v.altCode === course.code);
-        const isPhys2 = phys2Family.some(v => v.code === course.code || v.altCode === course.code);
+        const isPhys1 = phys1Family.some(v => v.code === course.code || v.altCode === course.code || v.code === course.altCode || v.altCode === course.altCode);
+        const isPhys2 = phys2Family.some(v => v.code === course.code || v.altCode === course.code || v.code === course.altCode || v.altCode === course.altCode);
 
         if (isPhys1 || isPhys2) {
             const family = isPhys1 ? phys1Family : phys2Family;
@@ -12478,7 +12828,7 @@ function openCourseDetails(code) {
                     <div style="font-size: 0.82rem; font-weight: 700; color: #38bdf8; margin-bottom: 8px;">⚛️ ${title}</div>
                     <div style="display: flex; gap: 6px; flex-wrap: wrap;">
                         ${family.map(v => {
-                            const isCurrent = v.code === course.code || v.altCode === course.code;
+                            const isCurrent = v.code === course.code || v.altCode === course.code || v.code === course.altCode || v.altCode === course.altCode;
                             return `
                                 <button type="button" class="btn btn-sm ${isCurrent ? 'btn-primary' : 'btn-outline-primary'}"
                                         data-variant-code="${v.code}"
@@ -12493,26 +12843,100 @@ function openCourseDetails(code) {
             physicsVariantsContainer.querySelectorAll('button[data-variant-code]').forEach(btn => {
                 btn.onclick = () => {
                     const targetCode = btn.dataset.variantCode;
-                    if (targetCode && targetCode !== course.code) {
-                        if (window.DegreePlanner && typeof window.DegreePlanner.handlePhysicsVariantSelect === 'function') {
-                            window.DegreePlanner.handlePhysicsVariantSelect(targetCode);
-                        } else {
-                            const vObj = family.find(f => f.code === targetCode);
-                            if (vObj) {
-                                course.code = vObj.code;
-                                course.altCode = vObj.altCode;
-                                course.name = vObj.name;
-                                course.credits = vObj.credits;
-                                saveState();
-                                renderUI();
-                            }
+                    if (targetCode) {
+                        const targetMeta = family.find(f => f.code === targetCode || f.altCode === targetCode);
+                        const isCurrent = targetMeta && (
+                            targetMeta.code === course.code || targetMeta.altCode === course.code ||
+                            targetMeta.code === course.altCode || targetMeta.altCode === course.altCode
+                        );
+                        if (!isCurrent) {
+                            selectPhysicsVariant(targetCode, course.code);
                         }
-                        openCourseDetails(targetCode);
                     }
                 };
             });
         } else {
             physicsVariantsContainer.innerHTML = '';
+        }
+    }
+
+    // Technion Classification Exams Chooser (Rendered if course is Physics 1, Physics 2, Math 1, or English)
+    const classificationContainer = document.getElementById("modal-classification-exam-container");
+    if (classificationContainer) {
+        const p1FamilyCodes = ['01140051', '114051', '01140071', '114071', '01140077', '114077', '01140055', '114055'];
+        const p2FamilyCodes = ['01140052', '114052', '01140075', '114075', '01140078', '114078', '01140076', '114076'];
+        const math1FamilyCodes = ['01040041', '104041', '01040010', '104010', '01040003', '104003', '01040012', '104012', '01040019', '104019', '01040166', '104166'];
+        const englishFamilyCodes = ['03240032', '324032', '03240033', '324033'];
+
+        const isP1 = p1FamilyCodes.includes(course.code) || p1FamilyCodes.includes(course.altCode);
+        const isP2 = p2FamilyCodes.includes(course.code) || p2FamilyCodes.includes(course.altCode);
+        const isMath = math1FamilyCodes.includes(course.code) || math1FamilyCodes.includes(course.altCode);
+        const isEnglish = englishFamilyCodes.includes(course.code) || englishFamilyCodes.includes(course.altCode);
+
+        if (isP1 || isP2 || isMath || isEnglish) {
+            const type = isP1 ? 'mechanics' : (isP2 ? 'electricity' : (isMath ? 'math' : 'english'));
+            const examTitle = isP1 ? 'סיווג בפיזיקה - מכניקה' : (isP2 ? 'סיווג בפיזיקה - חשמל' : (isMath ? 'סיווג / כניסה במתמטיקה' : 'סיווג שפה אנגלית'));
+            const currentStatus = (typeof getClassificationExamStatus === 'function') ? getClassificationExamStatus(type) : 'exempt_bagrut';
+
+            const options = isEnglish ? [
+                { id: 'exempt_all', label: '🎖️ פטור מלא (134+)', hint: 'פטור מ-324032 ו-324033 (נדרשים 2 קורסי תוכן באנגלית/מל״ג)' },
+                { id: 'exempt_a', label: '📖 מתקדמים ב׳ (120–133)', hint: 'פטור מ-324032, חובה ללמוד 324033 (3 נק״ז)' },
+                { id: 'none', label: '⏳ ללא פטור (104–119)', hint: 'חובה ללמוד מתקדמים א׳ ומתקדמים ב׳' }
+            ] : [
+                { id: 'exempt_bagrut', label: '🎖️ פטור בגרות 5 יח״ל', hint: isMath ? 'ציון 70+ ב-5 יח״ל או 85+ ב-4 יח״ל' : 'ציון 70 ומעלה בבגרות 5 יח״ל' },
+                { id: 'passed_exam', label: '✅ עבר בחינת סיווג', hint: isMath ? 'ציון 70+ בבחינת הכניסה' : 'ציון 60 ומעלה בבחינת הסיווג בטכניון' },
+                { id: 'mechina', label: '📚 קורס קדם / מכינה', hint: isP1 ? 'השלמת קורס קדם 01140049 / מכינת הטכניון' : (isP2 ? 'השלמת קורס קדם 01140050 / מכינת הטכניון' : 'מכינה / ריענון במתמטיקה') },
+                { id: 'pending', label: '⏳ טרם הושלם', hint: 'טרם הושג פטור או מעבר סיווג — חובה להסדיר טרם הרישום לקורס זה' }
+            ];
+
+            const isPending = currentStatus === 'pending' || currentStatus === 'none';
+
+            classificationContainer.innerHTML = `
+                <div style="background: rgba(139, 92, 246, 0.08); border: 1px solid rgba(139, 92, 246, 0.3); border-radius: 8px; padding: 10px 12px; margin-bottom: 12px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                        <span style="font-size: 0.82rem; font-weight: 700; color: #a78bfa; display: flex; align-items: center; gap: 6px;">
+                            <span>🏛️</span>
+                            <span>בחינת סיווג (${examTitle}):</span>
+                        </span>
+                        <span style="font-size: 0.70rem; padding: 2px 8px; border-radius: 12px; font-weight: bold; ${isPending ? 'background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid #f59e0b;' : 'background: rgba(52, 211, 153, 0.15); color: #34d399; border: 1px solid #34d399;'}">
+                            ${isPending ? '⚠️ דורש השלמה' : '✅ עומד בדרישות'}
+                        </span>
+                    </div>
+                    <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 6px;">
+                        ${options.map(opt => {
+                            const isSelected = opt.id === currentStatus;
+                            return `
+                                <button type="button" class="btn btn-sm"
+                                        data-classification-type="${type}"
+                                        data-classification-val="${opt.id}"
+                                        style="font-size: 0.76rem; padding: 4px 10px; border-radius: 6px; cursor: pointer; transition: all 0.2s ease; ${isSelected ? 'background: #8b5cf6; color: #ffffff; font-weight: 700; border: 1px solid #a78bfa; box-shadow: 0 0 8px rgba(139,92,246,0.5);' : 'background: rgba(15, 23, 42, 0.6); color: #94a3b8; border: 1px solid #475569;'}">
+                                    ${opt.label}
+                                </button>
+                            `;
+                        }).join('')}
+                    </div>
+                    <div style="font-size: 0.70rem; color: #94a3b8; line-height: 1.35;">
+                        💡 ${options.find(o => o.id === currentStatus)?.hint || 'בחר את סטטוס הסיווג שלך בטכניון.'}
+                    </div>
+                </div>
+            `;
+
+            classificationContainer.querySelectorAll('button[data-classification-val]').forEach(btn => {
+                btn.onclick = () => {
+                    const targetType = btn.dataset.classificationType;
+                    const targetVal = btn.dataset.classificationVal;
+                    if (targetType && targetVal) {
+                        if (typeof setClassificationExamStatus === 'function') {
+                            setClassificationExamStatus(targetType, targetVal);
+                        }
+                        if (typeof openCourseDetails === 'function') {
+                            openCourseDetails(course.code);
+                        }
+                    }
+                };
+            });
+        } else {
+            classificationContainer.innerHTML = '';
         }
     }
 
@@ -13598,7 +14022,7 @@ function openCourseDetails(code) {
             } else if (isPhys2) {
                 const p2Variants = [
                     { code: '01140052', altCode: '114052', name: 'פיזיקה 2' },
-                    { code: '01140075', altCode: '114075', name: "פיזיקה 2מ'" },
+                    { code: '01140075', altCode: '114075', name: "פיזיקה 2ממ" },
                     { code: '01140078', altCode: '114078', name: "פיזיקה 2פ'" },
                     { code: '01140076', altCode: '114076', name: "פיזיקה 2ת'" }
                 ];
@@ -14868,6 +15292,9 @@ function completeAllTasks(course) {
         if (task.status !== 'done' || !task.completed) {
             task.status = 'done';
             task.completed = true;
+            if (window.MoodleSync && typeof window.MoodleSync.markTaskCompletedInRegistry === 'function') {
+                window.MoodleSync.markTaskCompletedInRegistry(course.code, task);
+            }
             if (task.type === 'exam' && (task.grade === undefined || task.grade === null) && course.grade !== undefined && course.grade !== null) {
                 task.grade = course.grade;
             }
@@ -14885,6 +15312,9 @@ function uncompleteAllTasks(course) {
         if (task.status === 'done') {
             task.status = 'not_started';
             task.completed = false;
+            if (window.MoodleSync && typeof window.MoodleSync.unmarkTaskCompletedInRegistry === 'function') {
+                window.MoodleSync.unmarkTaskCompletedInRegistry(course.code, task);
+            }
             xpLost += task.xp;
         }
     });
@@ -15937,6 +16367,10 @@ function deleteSingleTask(courseCode, taskId) {
 
     if (!confirm(`האם אתה בטוח שברצונך למחוק את "${title}"?`)) return;
 
+    if (task && window.MoodleSync && typeof window.MoodleSync.markTaskDismissedInRegistry === 'function') {
+        window.MoodleSync.markTaskDismissedInRegistry(courseCode, task);
+    }
+
     course.tasks = course.tasks.filter(t => t.id !== taskId);
     if (window.selectedTasksMap) window.selectedTasksMap.delete(`${courseCode}:::${taskId}`);
 
@@ -15970,6 +16404,13 @@ function deleteSelectedTasks() {
         const course = gameState.courses[cCode];
         if (!course || !Array.isArray(course.tasks)) return;
         const set = byCourse[cCode];
+        if (window.MoodleSync && typeof window.MoodleSync.markTaskDismissedInRegistry === 'function') {
+            course.tasks.forEach(t => {
+                if (set.has(t.id)) {
+                    window.MoodleSync.markTaskDismissedInRegistry(cCode, t);
+                }
+            });
+        }
         const prevLen = course.tasks.length;
         course.tasks = course.tasks.filter(t => !set.has(t.id));
         deletedCount += (prevLen - course.tasks.length);
@@ -16547,6 +16988,15 @@ function toggleTaskStatusInState(courseCode, taskId, newStatus, skipRecalcAndSav
     const wasComplete = (oldStatus === 'done' || oldStatus === 'submitted');
     const isComplete = (newStatus === 'done' || newStatus === 'submitted');
     task.completed = isComplete;
+
+    // Maintain completion lock in MoodleSync registry so subsequent Moodle syncs never revert this task
+    if (window.MoodleSync && typeof window.MoodleSync.markTaskCompletedInRegistry === 'function') {
+        if (isComplete) {
+            window.MoodleSync.markTaskCompletedInRegistry(courseCode, task);
+        } else {
+            window.MoodleSync.unmarkTaskCompletedInRegistry(courseCode, task);
+        }
+    }
 
     // Add/remove XP
     if (!wasComplete && isComplete) {
@@ -17501,15 +17951,26 @@ function handleCreateTaskSubmit() {
     const xp = xpInput ? (parseInt(xpInput.value, 10) || 50) : 50;
 
     if (!course.tasks) course.tasks = [];
-    course.tasks.push({
+    const newManualTask = {
         id: `task-${Date.now()}`,
         title: title,
         type: currentTaskModalType,
         completed: false,
         status: "not_started",
         xp: xp,
-        dueDate: eventDate
-    });
+        dueDate: eventDate,
+        source: "manual"
+    };
+
+    // Auto-reconcile with existing unlinked Moodle task if present
+    if (window.MoodleSync && typeof window.MoodleSync.reconcileManualTaskWithCourse === 'function') {
+        const merged = window.MoodleSync.reconcileManualTaskWithCourse(course, newManualTask);
+        if (!merged) {
+            course.tasks.push(newManualTask);
+        }
+    } else {
+        course.tasks.push(newManualTask);
+    }
 
     // Auto-promote course to active so it immediately appears in Notion Tasks table
     if (course.status !== 'mastered' && course.status !== 'active') {
@@ -19220,7 +19681,7 @@ function renderFlowchartTree() {
     });
 
     const PURGED_FLOWCHART_CODES = new Set([
-        '035026', '35026', '035044', '01140071', '114071',
+        '035026', '35026', '035044',
         '03240269', '3240269',
         '03940800', '3940800', '0394800', '394800',
         '03940808', '3940808', '0394808', '394808'
@@ -22038,11 +22499,11 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.10.31-v2.8.8",
-    version: "2.8.8",
-    build: "20261031_01",
-    date: "2026-10-31 01:15",
-    description: "גרסה 2.8.8: אבטחת מידע והפרדת משתמשים הרמטית ב-APK ובאתר (Zero-Default Guest Mode, אימות סשן קריפטוגרפי SHA-256, וניקוי ווידג'טים באנדרואיד)"
+    code: "REV-2026.10.31-v2.8.9",
+    version: "2.8.9",
+    build: "20261031_02",
+    date: "2026-10-31 19:30",
+    description: "גרסה 2.8.9: תמיכה מלאה בבחינות סיווג טכניוניות (מכניקה, חשמל, מתמטיקה ואנגלית) בחלונית הקורס ובמתכנן התואר, התמדת בחירת גרסאות פיזיקה 1 ו-2 (כולל פיזיקה 2ממ), ומאגר שחזור קורסי חובה בלחיצה אחת"
 };
 window.APP_VERSION = APP_CURRENT_REVISION.version;
 
@@ -22987,6 +23448,9 @@ async function triggerManualCalendarPull() {
     }
 
     // Analytics & GPA Hub Modal (v2.0.0 Bklit UI / Shadcn Charts)
+    const btnOpenGradeSheet = document.getElementById("btn-open-grade-sheet");
+    if (btnOpenGradeSheet) btnOpenGradeSheet.onclick = () => window.openGradeSheetModal && window.openGradeSheetModal();
+
     const btnOpenAnalytics = document.getElementById("btn-open-analytics");
     if (btnOpenAnalytics) btnOpenAnalytics.onclick = () => window.openAnalyticsModal();
 
@@ -24055,7 +24519,7 @@ window.getFormattedChangelogHTML = function() {
 };
 
 window.openChangelogModal = function(ver) {
-    const currentVer = ver || (typeof APP_CURRENT_REVISION !== 'undefined' && APP_CURRENT_REVISION && APP_CURRENT_REVISION.version) || "2.8.8";
+    const currentVer = ver || (typeof APP_CURRENT_REVISION !== 'undefined' && APP_CURRENT_REVISION && APP_CURRENT_REVISION.version) || "2.8.9";
     const updateModal = document.getElementById("version-update-modal");
     if (!updateModal) return;
     const modTitle = document.getElementById("update-modal-title");

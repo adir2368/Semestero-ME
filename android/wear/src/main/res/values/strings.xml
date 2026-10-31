@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Semestero ME Watch</string>
+    <string name="tile_class_label">שיעור קרוב - סמסטרו</string>
+    <string name="tile_class_desc">לוח השיעורים הקרוב, מיקום חדר וספירה לאחור לשעון Galaxy Watch 8</string>
+    <string name="no_classes_today">אין שיעורים קרובים היום</string>
+    <string name="free_day_msg">יום חופשי או שהסתיימו הלימודים 🎉</string>
+</resources>

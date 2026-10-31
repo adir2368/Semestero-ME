@@ -76,10 +76,34 @@ class CDPClient {
     }
 }
 
+function isServerListening(port) {
+    return new Promise(resolve => {
+        const req = http.get(`http://127.0.0.1:${port}/`, () => {
+            resolve(true);
+        });
+        req.on('error', () => resolve(false));
+        req.setTimeout(1000, () => {
+            req.abort();
+            resolve(false);
+        });
+    });
+}
+
 async function runTest() {
     console.log('================================================================');
     console.log('🛡️ QA SUITE: TASKS REFRESH, DEDUPLICATION & STALE DATA UPDATE');
     console.log('================================================================\n');
+
+    let serverProcess = null;
+    const serverRunning = await isServerListening(8080);
+    if (!serverRunning) {
+        console.log('[Server] Starting server.js on port 8080...');
+        serverProcess = spawn('node', ['server.js'], {
+            cwd: path.join(__dirname, '..'),
+            stdio: 'ignore'
+        });
+        await delay(1500);
+    }
 
     // Launch Chrome with remote debugging
     console.log(`[Test 1] Launching Chrome on dynamic port ${PORT}...`);
@@ -297,6 +321,7 @@ END:VCALENDAR\`;
 
     // Teardown
     chrome.kill();
+    if (serverProcess) serverProcess.kill();
     console.log('\n================================================================');
     console.log('🎉 ALL TASKS REFRESH & DEDUPLICATION TESTS PASSED 100%!');
     console.log('================================================================\n');

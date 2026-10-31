@@ -93,7 +93,7 @@
                     variantGroupId: "physics_2",
                     variants: [
                         { code: "01140052", altCode: "114052", name: "פיזיקה 2", credits: 3.5 },
-                        { code: "01140075", altCode: "114075", name: "פיזיקה 2מ'", credits: 5.0 },
+                        { code: "01140075", altCode: "114075", name: "פיזיקה 2ממ", credits: 5.0 },
                         { code: "01140078", altCode: "114078", name: "פיזיקה 2פ'", credits: 5.0 },
                         { code: "01140076", altCode: "114076", name: "פיזיקה 2ת'", credits: 5.0 }
                     ],
@@ -219,7 +219,7 @@
                     variantGroupId: "physics_2",
                     variants: [
                         { code: "01140052", altCode: "114052", name: "פיזיקה 2", credits: 3.5 },
-                        { code: "01140075", altCode: "114075", name: "פיזיקה 2ממ'", credits: 5.0 },
+                        { code: "01140075", altCode: "114075", name: "פיזיקה 2ממ", credits: 5.0 },
                         { code: "01140078", altCode: "114078", name: "פיזיקה 2פ'", credits: 5.0 }
                     ],
                     prereqs: ["01140051", "01040043"] 
@@ -328,7 +328,7 @@
                     variantGroupId: "physics_2",
                     variants: [
                         { code: "01140052", altCode: "114052", name: "פיזיקה 2", credits: 3.5 },
-                        { code: "01140075", altCode: "114075", name: "פיזיקה 2ממ'", credits: 5.0 },
+                        { code: "01140075", altCode: "114075", name: "פיזיקה 2ממ", credits: 5.0 },
                         { code: "01140078", altCode: "114078", name: "פיזיקה 2פ'", credits: 5.0 }
                     ],
                     prereqs: ["01140051", "01040043"] 
@@ -681,7 +681,7 @@
                 { code: "01040043", altCode: "104043", name: "חדו\"א 2מ' 1", credits: 5.0, type: "mandatory", prereqs: ["01040041"] },
                 { code: "00340028", altCode: "034028", name: "מכניקת מוצקים 1", credits: 4.0, type: "mandatory", prereqs: ["01040041", "01040065", "01140071"] },
                 { code: "01040131", altCode: "104131", name: "משוואות דיפרנציאליות רגילות/ח", credits: 2.5, type: "mandatory", prereqs: ["01040041", "01040065"] },
-                { code: "01140075", altCode: "114075", name: "פיזיקה 2ממ'", credits: 5.0, type: "mandatory", prereqs: ["01140071", "01040043"] },
+                { code: "01140075", altCode: "114075", name: "פיזיקה 2ממ", credits: 5.0, type: "mandatory", prereqs: ["01140071", "01040043"] },
                 { code: "03140533", altCode: "314533", name: "מבוא להנדסת חומרים מ'", credits: 3.5, type: "mandatory", prereqs: ["01250001"] },
                 { code: "00340061", altCode: "034061", name: "מבוא לגרפיקה ותכנון הנדסי", credits: 3.5, type: "mandatory", prereqs: [] }
             ]

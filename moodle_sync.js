@@ -27,20 +27,56 @@
         init() {
             this.loadConfig();
             this.bindUI();
+            this.syncCompletedTasksFromState();
+            this.setupAutoSyncListeners();
             
-            // Background auto-sync on app launch if URL is configured and running in native app (Electron or Android phone)
-            const isNative = !!(
-                (window.electronAPI && window.electronAPI.isElectron) ||
-                (window.SemesteroWidgetBridge && typeof window.SemesteroWidgetBridge.fetchMoodleIcs === 'function') ||
-                (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) ||
-                (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.CapacitorHttp)
-            );
-            if (this.config.url && this.config.autoSync && isNative) {
+            // Background auto-sync on app launch if URL is configured
+            if (this.config.url && this.config.autoSync !== false) {
                 setTimeout(() => {
-                    console.log('[MoodleSync] Triggering background auto-sync on startup (native mobile/desktop bridge)...');
-                    this.sync({ isSilent: true });
+                    this.triggerThrottledAutoSync('startup');
                 }, 2500);
             }
+        },
+
+        setupAutoSyncListeners() {
+            if (this._listenersAttached) return;
+            this._listenersAttached = true;
+
+            // Visibility change (when switching back to Semestero tab)
+            if (typeof document !== 'undefined' && typeof document.addEventListener === 'function') {
+                document.addEventListener('visibilitychange', () => {
+                    if (document.visibilityState === 'visible') {
+                        this.triggerThrottledAutoSync('visibility');
+                    }
+                });
+            }
+
+            // Window focus
+            if (typeof window !== 'undefined' && typeof window.addEventListener === 'function') {
+                window.addEventListener('focus', () => {
+                    this.triggerThrottledAutoSync('focus');
+                });
+            }
+
+            // 15-minute background interval
+            if (typeof setInterval === 'function') {
+                setInterval(() => {
+                    this.triggerThrottledAutoSync('interval');
+                }, 15 * 60 * 1000);
+            }
+        },
+
+        triggerThrottledAutoSync(reason = 'auto') {
+            if (!this.config.url || this.config.autoSync === false) return;
+            const now = Date.now();
+            const last = this.config.lastSyncTimestamp ? new Date(this.config.lastSyncTimestamp).getTime() : 0;
+            // Throttle to once every 10 minutes for passive background triggers
+            if (now - last < 10 * 60 * 1000) return;
+
+            console.log(`[MoodleSync] Triggering background auto-sync (reason: ${reason})...`);
+            this.sync({ isSilent: true }).catch(err => {
+                console.log(`[MoodleSync] Background auto-sync quiet catch (${reason}):`, err.message);
+            });
         },
 
         getStorageKey() {
@@ -442,6 +478,191 @@
             return t;
         },
 
+        /**
+         * Computes canonical category + sequence token (e.g. 'hw_1', 'lab_2', 'quiz_1', 'exam_a')
+         * for high-accuracy deduplication between manual and Moodle tasks.
+         */
+        getCanonicalTaskToken(title, courseName) {
+            if (!title) return '';
+            let t = String(title).trim().toLowerCase();
+
+            // 1. Remove course name / code if present in title
+            if (courseName) {
+                const cClean = String(courseName).trim().toLowerCase().replace(/[\s\-_:.,()״'"׳]+/g, ' ');
+                t = t.replace(cClean, ' ');
+            }
+
+            // 2. Remove Moodle wrapping boilerplate
+            t = t.replace(/^יש להגיש את\s*['"״׳]?/i, '');
+            t = t.replace(/['"״׳]$/, '');
+            t = t.replace(/^(תאריך הגשה|מועד הגשה)\s*[:#-]?\s*/i, '');
+
+            // 3. Remove update/extension/bonus/status parentheticals and brackets
+            t = t.replace(/\((בונוס|הארכה|מתוקן|הגשה|סופי|חובה|רשות|עדכון).*?\)/gi, '');
+            t = t.replace(/\[(בונוס|הארכה|מתוקן|הגשה|סופי|חובה|רשות|עדכון).*?\]/gi, '');
+
+            // 4. Remove common trailing suffixes like "- הגשה", "הגשה סופית", etc.
+            t = t.replace(/[-–—]?\s*(הגשה סופית|הגשה|הגשת מטלה|הגשת תרגיל|submission|final submission)\s*$/i, '');
+
+            // 5. Remove "הגשת" at start
+            t = t.replace(/^הגשת\s+/i, '');
+
+            // 6. Detect exam moed tokens
+            if (/מועד\s*[אa]|moed\s*a/i.test(t)) return 'exam_a';
+            if (/מועד\s*[בb]|moed\s*b/i.test(t)) return 'exam_b';
+            if (/מועד\s*[גc]|moed\s*c|מועד מיוחד/i.test(t)) return 'exam_c';
+
+            // 7. Extract task category
+            let category = 'hw';
+            if (/דוח|דו"ח|מעבדה|lab/i.test(t)) {
+                category = 'lab';
+            } else if (/פרויקט|פרוייקט|project|milestone/i.test(t)) {
+                category = 'project';
+            } else if (/בוחן|קוויז|quiz/i.test(t)) {
+                category = 'quiz';
+            }
+
+            // 8. Look for numbers: digits or Hebrew letters (א-ט)
+            t = t.replace(/(מס['׳]|מספר|no\.?|#)\s*/gi, '');
+
+            const numMatch = t.match(/\b0*(\d+)\b/);
+            if (numMatch) {
+                return `${category}_${parseInt(numMatch[1], 10)}`;
+            }
+
+            const hebMap = { "א": 1, "ב": 2, "ג": 3, "ד": 4, "ה": 5, "ו": 6, "ז": 7, "ח": 8, "ט": 9, "י": 10 };
+            const hebMatch = t.match(/\b([א-י])['׳]?\b/);
+            if (hebMatch && hebMap[hebMatch[1]]) {
+                return `${category}_${hebMap[hebMatch[1]]}`;
+            }
+
+            // Fallback: stripped string
+            t = t.replace(/^(מטלת בית|תרגיל בית|תרגיל|מטלה|שיעורי בית|hw|assignment|task|דו"ח|דוח מעבדה|דוח|מעבדה|בוחן|קוויז)\s*[:#-]?\s*/i, '');
+            t = t.replace(/[\s\-_:.,()״'"׳]+/g, ' ').trim();
+            return t;
+        },
+
+        getTaskCompletionKeys(courseCode, task) {
+            const keys = [];
+            if (!task) return keys;
+            const mId = this.extractMoodleId(task);
+            if (mId) keys.push(`moodle_event:${mId}`);
+            if (task.moodleUid) keys.push(`moodle_uid:${task.moodleUid}`);
+            if (task.moodleUrl) keys.push(`moodle_url:${task.moodleUrl.trim().toLowerCase()}`);
+            if (task.id) keys.push(`task_id:${task.id}`);
+            
+            const title = task.title || '';
+            if (title) {
+                const cToken = this.getCanonicalTaskToken(title, courseCode);
+                if (cToken && courseCode) {
+                    keys.push(`canonical:${courseCode}:${cToken}`);
+                }
+                const norm = this.normalizeTaskTitle(title, courseCode);
+                if (norm && courseCode) {
+                    keys.push(`norm:${courseCode}:${norm}`);
+                }
+            }
+            return keys;
+        },
+
+        markTaskCompletedInRegistry(courseCode, task) {
+            if (!window.gameState) return;
+            if (!window.gameState.completedTaskRegistry) window.gameState.completedTaskRegistry = {};
+            const keys = this.getTaskCompletionKeys(courseCode, task);
+            const now = Date.now();
+            keys.forEach(k => {
+                window.gameState.completedTaskRegistry[k] = {
+                    completedAt: now,
+                    title: task.title,
+                    courseCode: courseCode || ''
+                };
+            });
+        },
+
+        unmarkTaskCompletedInRegistry(courseCode, task) {
+            if (!window.gameState || !window.gameState.completedTaskRegistry) return;
+            const keys = this.getTaskCompletionKeys(courseCode, task);
+            keys.forEach(k => {
+                delete window.gameState.completedTaskRegistry[k];
+            });
+        },
+
+        isTaskCompletedInRegistry(courseCode, task) {
+            if (!task) return false;
+            if (task.completed === true || task.status === 'done' || task.status === 'submitted') {
+                return true;
+            }
+            if (!window.gameState || !window.gameState.completedTaskRegistry) return false;
+            const keys = this.getTaskCompletionKeys(courseCode, task);
+            for (let i = 0; i < keys.length; i++) {
+                if (window.gameState.completedTaskRegistry[keys[i]]) {
+                    return true;
+                }
+            }
+            return false;
+        },
+
+        markTaskDismissedInRegistry(courseCode, task) {
+            if (!window.gameState) return;
+            if (!window.gameState.dismissedTaskRegistry) window.gameState.dismissedTaskRegistry = {};
+            const keys = this.getTaskCompletionKeys(courseCode, task);
+            const now = Date.now();
+            keys.forEach(k => {
+                window.gameState.dismissedTaskRegistry[k] = {
+                    dismissedAt: now,
+                    title: task.title,
+                    courseCode: courseCode || ''
+                };
+            });
+        },
+
+        isTaskDismissedInRegistry(courseCode, task) {
+            if (!task || !window.gameState || !window.gameState.dismissedTaskRegistry) return false;
+            const keys = this.getTaskCompletionKeys(courseCode, task);
+            for (let i = 0; i < keys.length; i++) {
+                if (window.gameState.dismissedTaskRegistry[keys[i]]) {
+                    return true;
+                }
+            }
+            return false;
+        },
+
+        syncCompletedTasksFromState() {
+            if (!window.gameState || !window.gameState.courses) return;
+            const courses = Object.values(window.gameState.courses);
+            courses.forEach(course => {
+                if (Array.isArray(course.tasks)) {
+                    course.tasks.forEach(task => {
+                        if (task && (task.completed === true || task.status === 'done' || task.status === 'submitted')) {
+                            this.markTaskCompletedInRegistry(course.code, task);
+                        }
+                    });
+                }
+            });
+        },
+
+        /**
+         * Reconciles a newly added manual task with any existing unlinked Moodle task in the same course.
+         * If a matching Moodle task already exists, merges the details without creating a duplicate.
+         */
+        reconcileManualTaskWithCourse(course, manualTask) {
+            if (!course || !Array.isArray(course.tasks) || !manualTask) return false;
+            for (let i = 0; i < course.tasks.length; i++) {
+                const existing = course.tasks[i];
+                if (!existing || existing.id === manualTask.id) continue;
+                if (this.areTasksDuplicates(existing, manualTask, course.name)) {
+                    course.tasks[i] = this.mergeTaskPair(existing, manualTask);
+                    if (manualTask.completed || manualTask.status === 'done' || manualTask.status === 'submitted') {
+                        course.tasks[i].completed = true;
+                        course.tasks[i].status = 'done';
+                        this.markTaskCompletedInRegistry(course.code, course.tasks[i]);
+                    }
+                    return true;
+                }
+            }
+            return false;
+        },
+
         extractMoodleId(task) {
             if (!task) return null;
             if (task.moodleEventId && /^\d+$/.test(String(task.moodleEventId).trim())) {
@@ -500,6 +721,13 @@
                 if (isMoedB1 && isMoedB2) return true;
             }
 
+            // Check Canonical Sequence / Category Token (e.g. hw_1, lab_2, quiz_1, exam_a)
+            const cToken1 = this.getCanonicalTaskToken(title1, courseName);
+            const cToken2 = this.getCanonicalTaskToken(title2, courseName);
+            if (cToken1 && cToken2 && cToken1 === cToken2) {
+                return true;
+            }
+
             // Check Normalized Titles
             const norm1 = this.normalizeTaskTitle(title1, courseName);
             const norm2 = this.normalizeTaskTitle(title2, courseName);
@@ -536,11 +764,12 @@
                 }
             }
 
-            // Completed status: completed progress is strictly preserved
-            const isDone = primary.completed === true || primary.status === 'done' || 
-                           secondary.completed === true || secondary.status === 'done';
+            // Completed status: completed progress is strictly preserved across all sources & registries
+            const isDone = primary.completed === true || primary.status === 'done' || primary.status === 'submitted' ||
+                           secondary.completed === true || secondary.status === 'done' || secondary.status === 'submitted' ||
+                           this.isTaskCompletedInRegistry(null, primary) || this.isTaskCompletedInRegistry(null, secondary);
 
-            return {
+            const merged = {
                 id: primary.id || secondary.id,
                 title: chosenTitle,
                 type: primary.type || secondary.type || 'hw',
@@ -560,6 +789,12 @@
                     ? Array.from(new Set([...(primary.comments || []), ...(secondary.comments || [])]))
                     : undefined
             };
+
+            if (isDone) {
+                this.markTaskCompletedInRegistry(null, merged);
+            }
+
+            return merged;
         },
 
         deduplicateCourseTasks(course) {
@@ -916,6 +1151,11 @@
                     dueTimestamp: dueDateObj.getTime()
                 };
 
+                // Skip events that the user explicitly deleted / dismissed from this course
+                if (this.isTaskDismissedInRegistry(targetCourse.code, incomingMock)) {
+                    continue;
+                }
+
                 // Find ALL existing tasks matching this incoming Moodle event (handling duplicates & title edits)
                 const matchingIndices = [];
                 for (let j = 0; j < targetCourse.tasks.length; j++) {
@@ -927,6 +1167,16 @@
                 if (matchingIndices.length > 0) {
                     const primary = targetCourse.tasks[matchingIndices[0]];
                     let modified = false;
+
+                    // Strictly lock and preserve completed status across manual/moodle sources & registries
+                    const isAlreadyDone = primary.completed === true || primary.status === 'done' || primary.status === 'submitted' ||
+                                         this.isTaskCompletedInRegistry(targetCourse.code, primary) ||
+                                         this.isTaskCompletedInRegistry(targetCourse.code, incomingMock);
+                    if (isAlreadyDone) {
+                        primary.completed = true;
+                        primary.status = 'done';
+                        this.markTaskCompletedInRegistry(targetCourse.code, primary);
+                    }
 
                     // Update due date if changed or postponed by lecturer
                     if (primary.dueDate !== formattedDate || primary.dueTimestamp !== dueDateObj.getTime()) {
@@ -961,6 +1211,7 @@
                             if (duplicate.completed || duplicate.status === 'done') {
                                 primary.completed = true;
                                 primary.status = 'done';
+                                this.markTaskCompletedInRegistry(targetCourse.code, primary);
                             }
                             if (duplicate.pinned) primary.pinned = true;
                             if (duplicate.notes && !primary.notes) primary.notes = duplicate.notes;
@@ -970,7 +1221,8 @@
                         targetCourse.tasks = targetCourse.tasks.filter((_, idx) => !removeSet.has(idx));
                     }
                 } else {
-                    // Create new task with properly detected type
+                    // Check if this task was previously marked as completed in the registry
+                    const wasCompletedBefore = this.isTaskCompletedInRegistry(targetCourse.code, incomingMock);
                     const newTask = {
                         id: `task_moodle_${eventId}_${Date.now()}`,
                         title: cleanTitle,
@@ -978,8 +1230,8 @@
                         dueDate: formattedDate,
                         dueTimestamp: dueDateObj.getTime(),
                         xp: 50,
-                        completed: false,
-                        status: 'not_started',
+                        completed: wasCompletedBefore,
+                        status: wasCompletedBefore ? 'done' : 'not_started',
                         moodleUid: uid,
                         moodleEventId: eventId,
                         moodleUrl: moodleUrl,
