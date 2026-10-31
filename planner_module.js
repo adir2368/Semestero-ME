@@ -162,9 +162,58 @@
         return Array.from(new Set(codes));
     }
 
+    function getExactCourseCodes(code, altCode) {
+        const codes = [];
+        const process = (c) => {
+            if (!c) return;
+            const str = String(c).trim();
+            if (!str) return;
+            codes.push(str);
+            const digits = str.replace(/\D/g, '');
+            if (digits) {
+                codes.push(digits);
+                codes.push(digits.replace(/^0+/, ''));
+                if (digits.length === 6) {
+                    codes.push('0' + digits);
+                    codes.push('00' + digits);
+                }
+                if (digits.length === 8 && digits.startsWith('0')) {
+                    codes.push(digits.slice(1, 4) + digits.slice(5));
+                }
+            }
+        };
+        process(code);
+        process(altCode);
+        return Array.from(new Set(codes));
+    }
+
+    function unremoveCourseFromGameState(code, altCode) {
+        if (!global.gameState) return;
+        if (!Array.isArray(global.gameState.removedCourses)) {
+            global.gameState.removedCourses = [];
+            return;
+        }
+        const codesToUnremove = new Set(getExactCourseCodes(code, altCode));
+        const phys1Codes = ['01140051', '114051', '01140071', '114071', '01140077', '114077', '01140055', '114055'];
+        const phys2Codes = ['01140052', '114052', '01140075', '114075', '01140078', '114078', '01140076', '114076'];
+        if (phys1Codes.some(c => codesToUnremove.has(c))) {
+            phys1Codes.forEach(c => codesToUnremove.add(c));
+        }
+        if (phys2Codes.some(c => codesToUnremove.has(c))) {
+            phys2Codes.forEach(c => codesToUnremove.add(c));
+        }
+
+        const originalLen = global.gameState.removedCourses.length;
+        global.gameState.removedCourses = global.gameState.removedCourses.filter(c => !codesToUnremove.has(c));
+        if (global.gameState.removedCourses.length !== originalLen) {
+            global.gameState.lastModified = Date.now();
+            if (typeof global.saveState === 'function') global.saveState(true);
+        }
+    }
+
     function isPurgedCourse(code, altCode) {
         if (!code && !altCode) return false;
-        const codes = getNormalizedCodes(code, altCode);
+        const codes = getExactCourseCodes(code, altCode);
 
         // Explicit user-removed courses always take precedence
         if (global.gameState && Array.isArray(global.gameState.removedCourses)) {
@@ -708,6 +757,11 @@
 
         customPlan = loadedPlan;
         unassignedCourses = loadedUnassigned;
+
+        // Cleanse legacy physics variant codes from removedCourses
+        if (global.gameState && Array.isArray(global.gameState.removedCourses)) {
+            global.gameState.removedCourses = global.gameState.removedCourses.filter(c => c !== '114071' && c !== '114075' && c !== '01140071' && c !== '01140075');
+        }
 
         // 1. Purge removed/exempt courses
         if (customPlan) {
@@ -2264,13 +2318,43 @@
         const suggestedCatalog = getSuggestedCatalogForTrack(selectedTrack) || global.PLANNER_CATALOG.SUGGESTED_MANDATORY_SYLLABUS || [];
         const allMandatoryCourses = [];
         const seenMandatoryCodes = new Set();
+
+        const p1Pref = (global.gameState && global.gameState.userSettings && global.gameState.userSettings.physicsVariants && global.gameState.userSettings.physicsVariants.physics1) ||
+                       (typeof localStorage !== 'undefined' ? localStorage.getItem('semestero_physics_variant_physics1') : null);
+        const p2Pref = (global.gameState && global.gameState.userSettings && global.gameState.userSettings.physicsVariants && global.gameState.userSettings.physicsVariants.physics2) ||
+                       (typeof localStorage !== 'undefined' ? localStorage.getItem('semestero_physics_variant_physics2') : null);
+
+        const p1FamilyCodes = new Set(['01140051', '114051', '01140071', '114071', '01140077', '114077', '01140055', '114055']);
+        const p2FamilyCodes = new Set(['01140052', '114052', '01140075', '114075', '01140078', '114078', '01140076', '114076']);
+
         suggestedCatalog.forEach(sem => {
             (sem.courses || []).forEach(c => {
-                const primaryCode = c.altCode || c.code;
+                let courseToAdd = { ...c };
+                if (p1FamilyCodes.has(c.code) || p1FamilyCodes.has(c.altCode)) {
+                    if (p1Pref && p1Pref.includes('114071')) {
+                        courseToAdd = { code: "01140071", altCode: "114071", name: "פיזיקה 1מ'", credits: 4.0 };
+                    } else if (p1Pref && p1Pref.includes('114077')) {
+                        courseToAdd = { code: "01140077", altCode: "114077", name: "פיזיקה 1פ'", credits: 4.0 };
+                    } else {
+                        courseToAdd = { code: "01140051", altCode: "114051", name: "פיזיקה 1", credits: 3.5 };
+                    }
+                } else if (p2FamilyCodes.has(c.code) || p2FamilyCodes.has(c.altCode)) {
+                    if (p2Pref && p2Pref.includes('114075')) {
+                        courseToAdd = { code: "01140075", altCode: "114075", name: "פיזיקה 2ממ", credits: 5.0 };
+                    } else if (p2Pref && p2Pref.includes('114078')) {
+                        courseToAdd = { code: "01140078", altCode: "114078", name: "פיזיקה 2פ'", credits: 5.0 };
+                    } else if (p2Pref && p2Pref.includes('114076')) {
+                        courseToAdd = { code: "01140076", altCode: "114076", name: "פיזיקה 2ת'", credits: 5.0 };
+                    } else {
+                        courseToAdd = { code: "01140052", altCode: "114052", name: "פיזיקה 2", credits: 3.5 };
+                    }
+                }
+
+                const primaryCode = courseToAdd.altCode || courseToAdd.code;
                 if (!seenMandatoryCodes.has(primaryCode)) {
                     seenMandatoryCodes.add(primaryCode);
                     allMandatoryCourses.push({
-                        ...c,
+                        ...courseToAdd,
                         suggestedSemester: sem.semester,
                         suggestedSemesterTitle: sem.title,
                         type: 'mandatory'
@@ -2310,7 +2394,7 @@
                                         <span>• ${course.credits} נק״ז</span>
                                     </div>
                                 </div>
-                                <button type="button" class="btn-restore-mandatory" data-code="${escapeHtml(course.code)}" data-sem="${course.suggestedSemester}" title="החזר לסמסטר ${course.suggestedSemester}">➕ החזר</button>
+                                <button type="button" class="btn-restore-mandatory" data-code="${escapeHtml(course.code)}" data-sem="${course.suggestedSemester}" title="הוסף קורס זה לסמסטר בתכנון">➕ הוסף</button>
                             </div>
                         `).join('')}
                     </div>
@@ -2506,7 +2590,7 @@
                         : (isSportItem ? '🏃 ספורט' : (isMalagItem ? '🎭 מל״ג' : (course.list ? `רשימה ${course.list}׳` : 'חובה'))));
 
                 const actionButton = isMandatoryItem && !course.isPlaced
-                    ? `<button type="button" class="btn-restore-mandatory" data-code="${escapeHtml(course.code)}" data-sem="${course.suggestedSemester || 1}" title="החזר לסמסטר ${course.suggestedSemester || 1}">➕ החזר</button>`
+                    ? `<button type="button" class="btn-restore-mandatory" data-code="${escapeHtml(course.code)}" data-sem="${course.suggestedSemester || 1}" title="הוסף קורס זה לסמסטר בתכנון">➕ הוסף</button>`
                     : `<button type="button" class="btn-add-to-plan" data-code="${escapeHtml(course.code)}" title="${isMandatoryItem && course.isPlaced ? 'העבר לסמסטר אחר' : 'הוסף קורס זה לסמסטר'}">${isMandatoryItem && course.isPlaced ? '⇄' : '+'}</button>`;
 
                 return `
@@ -2837,13 +2921,12 @@
                 return;
             }
 
-            // Restore Specific Mandatory Course (+ החזר)
+            // Add/Restore Specific Mandatory Course (+ הוסף)
             const restoreBtn = e.target.closest('.btn-restore-mandatory');
             if (restoreBtn) {
                 e.stopPropagation();
                 const code = restoreBtn.getAttribute('data-code');
-                const sem = parseFloat(restoreBtn.getAttribute('data-sem'));
-                restoreMandatoryCourse(code, sem);
+                promptAddCourseToSemester(code);
                 return;
             }
 
@@ -3084,6 +3167,38 @@
                 });
             }
         });
+
+        // 10b. Technion Classification Card Collapsible Toggle
+        const classCardHeader = document.getElementById('planner-classification-header');
+        const classCardBody = document.getElementById('planner-classification-body');
+        const classToggleBtn = document.getElementById('btn-toggle-classification-card');
+
+        function setClassificationCardCollapsed(collapsed, save = true) {
+            if (!classCardBody || !classToggleBtn) return;
+            classCardBody.style.display = collapsed ? 'none' : 'block';
+            classToggleBtn.innerText = collapsed ? '◀' : '▼';
+            classToggleBtn.title = collapsed ? 'הרחב בחינות סיווג' : 'צמצם בחינות סיווג';
+            if (save) {
+                try {
+                    localStorage.setItem('semestero_classification_collapsed', collapsed ? 'true' : 'false');
+                } catch (e) {}
+            }
+        }
+
+        // Restore collapsed state: check localStorage
+        const savedCollapsed = localStorage.getItem('semestero_classification_collapsed');
+        if (savedCollapsed === 'true') {
+            setClassificationCardCollapsed(true, false);
+        }
+
+        if (classCardHeader && !classCardHeader.dataset.bound) {
+            classCardHeader.dataset.bound = 'true';
+            classCardHeader.addEventListener('click', (e) => {
+                if (e.target.closest('select') || e.target.closest('option')) return;
+                const isCurrentlyCollapsed = classCardBody && classCardBody.style.display === 'none';
+                setClassificationCardCollapsed(!isCurrentlyCollapsed, true);
+            });
+        }
     }
 
     // --------------------------------------------------------------------------
@@ -3488,7 +3603,24 @@
             }
         }
 
-        // 5. CHEESEFORK_DB
+        // 5. SUGGESTED_MANDATORY_SYLLABUS & Suggested Tracks
+        const suggestedCatalogs = [
+            getSuggestedCatalogForTrack(selectedTrack),
+            global.PLANNER_CATALOG ? global.PLANNER_CATALOG.SUGGESTED_MANDATORY_SYLLABUS : null,
+            global.PLANNER_CATALOG ? global.PLANNER_CATALOG.SUGGESTED_BARAK_SYLLABUS : null
+        ];
+        for (const cat of suggestedCatalogs) {
+            if (!cat) continue;
+            for (const sem of cat) {
+                found = (sem.courses || []).find(c => {
+                    const uKeys = getNormalizedCodes(c.code, c.altCode);
+                    return uKeys.some(k => cKeys.has(k));
+                });
+                if (found) return { ...found, type: 'mandatory' };
+            }
+        }
+
+        // 6. CHEESEFORK_DB
         if (typeof CHEESEFORK_DB !== 'undefined') {
             for (const k of cKeys) {
                 if (CHEESEFORK_DB[k]) {
@@ -3654,6 +3786,14 @@
                 if (hasOverride) newCourse.hasOverride = true;
                 checkAndApplySeasonalCode(newCourse, targetSemester, targetSemObj);
                 if (!targetSemObj.courses) targetSemObj.courses = [];
+                const isMandatory = (global.PLANNER_CATALOG && global.PLANNER_CATALOG.SUGGESTED_MANDATORY_SYLLABUS &&
+                    global.PLANNER_CATALOG.SUGGESTED_MANDATORY_SYLLABUS.some(s => (s.courses || []).some(c => {
+                        const keys = getNormalizedCodes(c.code, c.altCode);
+                        return keys.includes(newCourse.code) || (newCourse.altCode && keys.includes(newCourse.altCode));
+                    })));
+                if (isMandatory || courseObj.type === 'mandatory') {
+                    newCourse.type = 'mandatory';
+                }
                 targetSemObj.courses.push(newCourse);
                 const cKeys = new Set(getNormalizedCodes(data.code, data.code));
                 unassignedCourses = unassignedCourses.filter(c => {
@@ -3662,8 +3802,9 @@
                 });
             }
 
+            unremoveCourseFromGameState(courseObj.code, courseObj.altCode);
             syncCourseToGameState(courseObj, targetSemester);
-            saveCustomPlan();
+            saveCustomPlan(true);
             renderDegreePlanner();
             if (typeof window.renderUI === 'function') window.renderUI();
             if (hasOverride) {
@@ -3732,6 +3873,8 @@
         const course = resolveCourseObject(code);
         if (!course) return;
 
+        unremoveCourseFromGameState(course.code, course.altCode);
+
         let targetSemester = targetSem;
         if (!targetSemester) {
             const suggestedCatalog = getSuggestedCatalogForTrack(selectedTrack) || global.PLANNER_CATALOG.SUGGESTED_MANDATORY_SYLLABUS || [];
@@ -3773,7 +3916,7 @@
         });
 
         syncCourseToGameState(course, semObj.semester);
-        saveCustomPlan();
+        saveCustomPlan(true);
         renderDegreePlanner();
         showPlannerToast(`✓ הקורס "${course.name}" שוחזר בהצלחה לסמסטר ${semObj.semester}!`);
     }
@@ -3814,13 +3957,14 @@
                     return !uKeys.some(k => mKeys.has(k));
                 });
 
+                unremoveCourseFromGameState(course.code, course.altCode);
                 syncCourseToGameState(course, semObj.semester);
                 count++;
             });
         });
 
         if (count > 0) {
-            saveCustomPlan();
+            saveCustomPlan(true);
             renderDegreePlanner();
             showPlannerToast(`✓ שוחזרו בהצלחה ${count} קורסי חובה לסמסטרים המומלצים!`);
         } else {
@@ -3927,6 +4071,7 @@
                 if (btn.disabled) return;
                 const chosenSem = parseFloat(btn.getAttribute('data-semester'));
                 closeModal();
+                unremoveCourseFromGameState(course.code, course.altCode);
                 handleCourseDrop({ type: 'pool-elective', code: course.code }, chosenSem);
             });
         });

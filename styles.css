@@ -9891,6 +9891,32 @@ html.is-iphone .app-global-footer {
     color: #000000;
 }
 
+.btn-restore-mandatory {
+    background: rgba(56, 189, 248, 0.16);
+    border: 1px solid rgba(56, 189, 248, 0.45);
+    color: #38bdf8;
+    font-size: 0.68rem;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    white-space: nowrap;
+}
+
+.btn-restore-mandatory:hover {
+    background: #38bdf8;
+    color: #0f172a;
+}
+
+#planner-classification-header:hover {
+    opacity: 0.92;
+}
+
+#btn-toggle-classification-card:hover {
+    color: #c4b5fd !important;
+}
+
 .planner-missing-mandatory-list {
     display: flex;
     flex-direction: column;

@@ -8221,9 +8221,7 @@ const PRELOADED_USER_STATE = (typeof window !== 'undefined' && window.PRELOADED_
     "324033",
     "03240033",
     "035026",
-    "35026",
-    "114071",
-    "114075"
+    "35026"
   ],
   "completedCourses": 11,
   "pastExamSchedule": [
@@ -22499,11 +22497,11 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.10.31-v2.8.9",
-    version: "2.8.9",
-    build: "20261031_02",
-    date: "2026-10-31 19:30",
-    description: "גרסה 2.8.9: תמיכה מלאה בבחינות סיווג טכניוניות (מכניקה, חשמל, מתמטיקה ואנגלית) בחלונית הקורס ובמתכנן התואר, התמדת בחירת גרסאות פיזיקה 1 ו-2 (כולל פיזיקה 2ממ), ומאגר שחזור קורסי חובה בלחיצה אחת"
+    code: "REV-2026.10.31-v2.9.0",
+    version: "2.9.0",
+    build: "20261031_03",
+    date: "2026-10-31 20:05",
+    description: "גרסה 2.9.0: שיבוץ אינטראקטיבי של קורסי חובה לפי סמסטר לבחירה, פתרון שחזור פיזיקה 2, וכרטיסיית בחינות סיווג מתקפלת"
 };
 window.APP_VERSION = APP_CURRENT_REVISION.version;
 
@@ -24519,7 +24517,7 @@ window.getFormattedChangelogHTML = function() {
 };
 
 window.openChangelogModal = function(ver) {
-    const currentVer = ver || (typeof APP_CURRENT_REVISION !== 'undefined' && APP_CURRENT_REVISION && APP_CURRENT_REVISION.version) || "2.8.9";
+    const currentVer = ver || (typeof APP_CURRENT_REVISION !== 'undefined' && APP_CURRENT_REVISION && APP_CURRENT_REVISION.version) || "2.9.0";
     const updateModal = document.getElementById("version-update-modal");
     if (!updateModal) return;
     const modTitle = document.getElementById("update-modal-title");
