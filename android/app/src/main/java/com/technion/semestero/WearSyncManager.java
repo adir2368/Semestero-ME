@@ -69,6 +69,7 @@ public class WearSyncManager {
             String task1 = tasksPrefs.getString("task_1", "");
             String task2 = tasksPrefs.getString("task_2", "");
             String tasksSummary = tasksPrefs.getString("tasks_summary", "0 משימות פתוחות");
+            String allTasksJson = tasksPrefs.getString("all_tasks_json", "[]");
 
             mapRequest.getDataMap().putString("exam_days", examDays);
             mapRequest.getDataMap().putString("exam_title", examTitle);
@@ -76,6 +77,7 @@ public class WearSyncManager {
             mapRequest.getDataMap().putString("task_1", task1);
             mapRequest.getDataMap().putString("task_2", task2);
             mapRequest.getDataMap().putString("tasks_summary", tasksSummary);
+            mapRequest.getDataMap().putString("all_tasks_json", allTasksJson);
 
             // 4. GPA & Academic Standing
             SharedPreferences gpaPrefs = context.getSharedPreferences(SemesteroFinalsGpaWidget.PREFS_NAME, Context.MODE_PRIVATE);
@@ -113,6 +115,11 @@ public class WearSyncManager {
     }
 
     public static void syncTasksToWatch(Context context, String examDays, String tasksSummary) {
+        if (context == null) return;
+        syncAllToWatch(context);
+    }
+
+    public static void syncTasksToWatch(Context context, String examDays, String tasksSummary, String allTasksJson) {
         if (context == null) return;
         syncAllToWatch(context);
     }

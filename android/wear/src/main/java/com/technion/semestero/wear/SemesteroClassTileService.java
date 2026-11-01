@@ -59,51 +59,128 @@ public class SemesteroClassTileService extends TileService {
             classRoom = prefs.getString("class_details", "יום חופשי 🎉");
             classStatus = prefs.getString("class_status", "חופשי");
         } else {
-            // Built-in authentic Technion Mechanical Engineering Schedule
-            int curTotalMin = now.get(Calendar.HOUR_OF_DAY) * 60 + now.get(Calendar.MINUTE);
+            // Built-in authentic Technion Mechanical Engineering Schedule (Winter 2026/2027)
+            // Rules:
+            // 1) 15 minutes after start of previous class (startMin + 15), switch to next class / recitation!
+            // 2) In the evening (>= 17:00) or once today's classes finish, preview tomorrow / next school day!
+            int curHour = now.get(Calendar.HOUR_OF_DAY);
+            int curMin = now.get(Calendar.MINUTE);
+            int curTotalMin = curHour * 60 + curMin;
+            boolean isEvening = (curHour >= 17);
+
             switch (dayOfWeek) {
                 case Calendar.SUNDAY:
-                    classTitle = "משוואות דיפרנציאליות חלקיות מ'";
-                    classTime = "11:30 - 13:30";
-                    classRoom = "📍 אולמן 506";
-                    classStatus = (curTotalMin >= 690 && curTotalMin <= 810) ? "🟢 מתקיים כעת!" : (curTotalMin < 690 ? "⏳ השיעור הבא היום" : "🎉 הסתיימו הלימודים");
+                    if (!isEvening && curTotalMin < 690) {
+                        classTitle = "משוואות דיפרנציאליות חלקיות מ׳";
+                        classTime = "11:30 - 13:30";
+                        classRoom = "📍 אולמן 506";
+                        classStatus = "⏳ מתחיל בעוד " + (690 - curTotalMin) + " דק׳";
+                    } else if (!isEvening && curTotalMin < 705) {
+                        classTitle = "משוואות דיפרנציאליות חלקיות מ׳";
+                        classTime = "11:30 - 13:30";
+                        classRoom = "📍 אולמן 506";
+                        classStatus = "🟢 מתקיים כעת!";
+                    } else {
+                        classTitle = "פיסיקה 2";
+                        classTime = "08:30 - 10:30";
+                        classRoom = "📍 טאוב 1";
+                        classStatus = isEvening ? "מערכת מחר (יום שני) • שיעור ראשון" : "השיעור הבא מחר (שני) ב-08:30";
+                    }
                     break;
                 case Calendar.MONDAY:
-                    classTitle = "פיסיקה 2";
-                    classTime = "08:30 - 10:30";
-                    classRoom = "📍 טאוב 1";
-                    classStatus = (curTotalMin >= 510 && curTotalMin <= 630) ? "🟢 מתקיים כעת!" : (curTotalMin < 510 ? "⏳ השיעור הבא היום" : "🎉 השיעור הבא: מוצקים 2");
+                    if (!isEvening && curTotalMin < 510) {
+                        classTitle = "פיסיקה 2";
+                        classTime = "08:30 - 10:30";
+                        classRoom = "📍 טאוב 1";
+                        classStatus = "⏳ מתחיל בעוד " + (510 - curTotalMin) + " דק׳";
+                    } else if (!isEvening && curTotalMin < 525) {
+                        classTitle = "פיסיקה 2";
+                        classTime = "08:30 - 10:30";
+                        classRoom = "📍 טאוב 1";
+                        classStatus = "🟢 מתקיים כעת!";
+                    } else if (!isEvening && curTotalMin < 630) {
+                        classTitle = "מכניקת מוצקים 2מ׳";
+                        classTime = "10:30 - 14:30";
+                        classRoom = "📍 דנציגר אודיטוריום 1";
+                        classStatus = "⏳ השיעור הבא היום (10:30)";
+                    } else if (!isEvening && curTotalMin < 645) {
+                        classTitle = "מכניקת מוצקים 2מ׳";
+                        classTime = "10:30 - 14:30";
+                        classRoom = "📍 דנציגר אודיטוריום 1";
+                        classStatus = "🟢 מתקיים כעת!";
+                    } else {
+                        classTitle = "תרמודינמיקה 1";
+                        classTime = "08:30 - 11:30";
+                        classRoom = "📍 דנציגר אודיטוריום 1";
+                        classStatus = isEvening ? "מערכת מחר (יום שלישי) • שיעור ראשון" : "השיעור הבא מחר (שלישי) ב-08:30";
+                    }
                     break;
                 case Calendar.TUESDAY:
-                    classTitle = "תרמודינמיקה 1";
-                    classTime = "08:30 - 11:30";
-                    classRoom = "📍 הנדסה כימית 1";
-                    classStatus = (curTotalMin >= 510 && curTotalMin <= 690) ? "🟢 מתקיים כעת!" : "⏳ השיעור הבא היום";
+                    if (!isEvening && curTotalMin < 510) {
+                        classTitle = "תרמודינמיקה 1";
+                        classTime = "08:30 - 11:30";
+                        classRoom = "📍 הנדסה כימית 1";
+                        classStatus = "⏳ מתחיל בעוד " + (510 - curTotalMin) + " דק׳";
+                    } else if (!isEvening && curTotalMin < 525) {
+                        classTitle = "תרמודינמיקה 1";
+                        classTime = "08:30 - 11:30";
+                        classRoom = "📍 הנדסה כימית 1";
+                        classStatus = "🟢 מתקיים כעת!";
+                    } else {
+                        classTitle = "מכניקת מוצקים 2מ׳";
+                        classTime = "12:30 - 14:30";
+                        classRoom = "📍 ליידי דייוויס 240";
+                        classStatus = isEvening ? "מערכת מחר (יום רביעי) • שיעור ראשון" : "השיעור הבא מחר (רביעי) ב-12:30";
+                    }
                     break;
                 case Calendar.WEDNESDAY:
-                    classTitle = "מכניקת מוצקים 2מ'";
-                    classTime = "12:30 - 14:30";
-                    classRoom = "📍 ליידי דייוויס 240";
-                    classStatus = (curTotalMin >= 750 && curTotalMin <= 870) ? "🟢 מתקיים כעת!" : "⏳ השיעור הבא היום";
+                    if (!isEvening && curTotalMin < 750) {
+                        classTitle = "מכניקת מוצקים 2מ׳";
+                        classTime = "12:30 - 14:30";
+                        classRoom = "📍 ליידי דייוויס 240";
+                        classStatus = "⏳ מתחיל בעוד " + (750 - curTotalMin) + " דק׳";
+                    } else if (!isEvening && curTotalMin < 765) {
+                        classTitle = "מכניקת מוצקים 2מ׳";
+                        classTime = "12:30 - 14:30";
+                        classRoom = "📍 ליידי דייוויס 240";
+                        classStatus = "🟢 מתקיים כעת!";
+                    } else {
+                        classTitle = "גרפיקה הנדסית";
+                        classTime = "09:30 - 11:30";
+                        classRoom = "📍 בניין מכונות • מעבדה 10";
+                        classStatus = isEvening ? "מערכת מחר (יום חמישי) • שיעור ראשון" : "השיעור הבא מחר (חמישי) ב-09:30";
+                    }
                     break;
                 case Calendar.THURSDAY:
-                    classTitle = "גרפיקה הנדסית";
-                    classTime = "09:30 - 11:30";
-                    classRoom = "📍 דנציגר";
-                    classStatus = (curTotalMin >= 570 && curTotalMin <= 690) ? "🟢 מתקיים כעת!" : "⏳ השיעור הבא היום";
+                    if (!isEvening && curTotalMin < 570) {
+                        classTitle = "גרפיקה הנדסית";
+                        classTime = "09:30 - 11:30";
+                        classRoom = "📍 דנציגר";
+                        classStatus = "⏳ מתחיל בעוד " + (570 - curTotalMin) + " דק׳";
+                    } else if (!isEvening && curTotalMin < 585) {
+                        classTitle = "גרפיקה הנדסית";
+                        classTime = "09:30 - 11:30";
+                        classRoom = "📍 דנציגר";
+                        classStatus = "🟢 מתקיים כעת!";
+                    } else {
+                        classTitle = "משוואות דיפרנציאליות חלקיות מ׳";
+                        classTime = "11:30 - 13:30";
+                        classRoom = "📍 אולמן 506";
+                        classStatus = "מערכת יום ראשון • שיעור ראשון (סופ״ש 🎉)";
+                    }
                     break;
                 case Calendar.FRIDAY:
-                    classTitle = "יום שישי - יום חופשי";
-                    classTime = "סופ״ש נעים 🏖️";
-                    classRoom = "ללא שיעורים פרונטליים";
-                    classStatus = "🏖️ יום חופשי";
+                    classTitle = "משוואות דיפרנציאליות חלקיות מ׳";
+                    classTime = "11:30 - 13:30";
+                    classRoom = "📍 אולמן 506";
+                    classStatus = "מערכת יום ראשון • שיעור ראשון (סופ״ש 🏖️)";
                     break;
                 case Calendar.SATURDAY:
                 default:
-                    classTitle = "שבת שלום ומנוחה! 🕯️";
-                    classTime = "סופ״ש";
-                    classRoom = "מתחילים ביום ראשון ב-11:30";
-                    classStatus = "🕯️ שבת שלום";
+                    classTitle = "משוואות דיפרנציאליות חלקיות מ׳";
+                    classTime = "11:30 - 13:30";
+                    classRoom = "📍 אולמן 506";
+                    classStatus = isEvening ? "מערכת מחר (יום ראשון) • 11:30" : "שבוע חדש מתחיל מחר (ראשון)";
                     break;
             }
         }

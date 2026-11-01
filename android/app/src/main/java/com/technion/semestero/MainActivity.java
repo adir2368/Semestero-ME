@@ -117,6 +117,11 @@ public class MainActivity extends BridgeActivity {
 
         @JavascriptInterface
         public void updateTasksWidget(String examDays, String examTitle, String examSub, String task1, String task1Id, String task2, String task2Id, String tasksSummary) {
+            updateTasksWidget(examDays, examTitle, examSub, task1, task1Id, task2, task2Id, tasksSummary, "[]");
+        }
+
+        @JavascriptInterface
+        public void updateTasksWidget(String examDays, String examTitle, String examSub, String task1, String task1Id, String task2, String task2Id, String tasksSummary, String allTasksJson) {
             SharedPreferences prefs = context.getSharedPreferences(SemesteroTasksExamWidget.PREFS_NAME, Context.MODE_PRIVATE);
             prefs.edit()
                 .putString("exam_days", examDays)
@@ -129,10 +134,11 @@ public class MainActivity extends BridgeActivity {
                 .putString("task_2_id", task2Id != null ? task2Id : "")
                 .putBoolean("task_2_done", false)
                 .putString("tasks_summary", tasksSummary)
+                .putString("all_tasks_json", (allTasksJson != null && !allTasksJson.trim().isEmpty()) ? allTasksJson : "[]")
                 .apply();
 
             SemesteroTasksExamWidget.pushUpdate(context);
-            WearSyncManager.syncTasksToWatch(context, examDays + " - " + examTitle, tasksSummary);
+            WearSyncManager.syncTasksToWatch(context, examDays + " - " + examTitle, tasksSummary, allTasksJson);
         }
 
         @JavascriptInterface

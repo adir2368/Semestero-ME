@@ -229,18 +229,23 @@
                     };
                 }
             } else {
-                // Find ongoing or upcoming class
+                // User Rule: 15 minutes after start of class, switch to next class!
+                // In the evening (17:00 onwards), display tomorrow's schedule
                 let activeOrUpcoming = null;
-                for (const c of todaysClasses) {
-                    if (curTotalMin < c.endMin) {
-                        activeOrUpcoming = c;
-                        break;
+                const isEvening = curTotalMin >= 17 * 60;
+
+                if (!isEvening) {
+                    for (const c of todaysClasses) {
+                        if (curTotalMin < c.startMin + 15) {
+                            activeOrUpcoming = c;
+                            break;
+                        }
                     }
                 }
 
                 if (activeOrUpcoming) {
                     let statusText;
-                    if (curTotalMin >= activeOrUpcoming.startMin && curTotalMin <= activeOrUpcoming.endMin) {
+                    if (curTotalMin >= activeOrUpcoming.startMin && curTotalMin < activeOrUpcoming.startMin + 15) {
                         statusText = "🟢 מתקיים כעת!";
                     } else if (curTotalMin < activeOrUpcoming.startMin) {
                         const diff = activeOrUpcoming.startMin - curTotalMin;
@@ -258,15 +263,39 @@
                         status: statusText
                     };
                 } else {
-                    // All classes finished for today
-                    nextClass = {
-                        name: todaysClasses[todaysClasses.length - 1].title,
-                        time: todaysClasses[todaysClasses.length - 1].time,
-                        room: "הסתיימו הלימודים להיום 🎉",
-                        lecturer: "השיעור הבא ביום הלימודים הבא",
-                        type: "סיום יום",
-                        status: "🎉 הסתיימו הלימודים"
-                    };
+                    // Evening or all classes finished: look ahead to tomorrow / next school day
+                    const dayHebNames = ["ראשון", "שני", "שלישי", "רביעי", "חמישי", "שישי", "שבת"];
+                    let nextDayClass = null;
+                    let nextDayLabel = "";
+                    for (let offset = 1; offset <= 6; offset++) {
+                        const nextDayIdx = (dayIdx + offset) % 7;
+                        const nextDayClasses = TECHNION_SCHEDULE[nextDayIdx] || [];
+                        if (nextDayClasses.length > 0) {
+                            nextDayClass = nextDayClasses[0];
+                            nextDayLabel = (offset === 1) ? "מחר (יום " + dayHebNames[nextDayIdx] + ")" : "יום " + dayHebNames[nextDayIdx];
+                            break;
+                        }
+                    }
+
+                    if (nextDayClass) {
+                        nextClass = {
+                            name: nextDayClass.title,
+                            time: nextDayClass.time,
+                            room: nextDayClass.room,
+                            lecturer: nextDayClass.lecturer,
+                            type: nextDayClass.type,
+                            status: `מערכת ${nextDayLabel} • שיעור ראשון`
+                        };
+                    } else {
+                        nextClass = {
+                            name: "יום חופשי",
+                            time: "סופ״ש",
+                            room: "ללא שיעורים קרובים",
+                            lecturer: "סמסטרו ME",
+                            type: "חופשי",
+                            status: "🏖️ יום חופשי"
+                        };
+                    }
                 }
             }
         }
@@ -316,13 +345,30 @@
 
         const tasksList = document.getElementById('w-tasks-list');
         if (tasksList) {
-            const sampleTasks = [
-                { id: "t1", title: "תרגיל 3: משוואת הגלים ומיתר", done: false },
-                { id: "t2", title: "דוח מכין: מעבדת פיסיקה 2", done: false }
-            ];
+            let activeTasks = [];
+            try {
+                const synced = localStorage.getItem('ast_synced_tasks_json');
+                if (synced) {
+                    const parsed = JSON.parse(synced);
+                    if (Array.isArray(parsed) && parsed.length > 0) activeTasks = parsed;
+                }
+            } catch(e) {}
+
+            if (activeTasks.length === 0) {
+                activeTasks = [
+                    { id: "104228_h1", title: "[מדח מ׳] תרגיל בית 1: משוואות דיפרנציאליות", done: false },
+                    { id: "104228_ww1", title: "[מדח מ׳] WebWork 1: מד״ח מ׳", done: false },
+                    { id: "114052_h1", title: "[פיסיקה 2] תרגיל בית 1: אלקטרוסטטיקה וחוק קולון", done: false },
+                    { id: "114052_ww1", title: "[פיסיקה 2] WebWork 1: פיסיקה 2", done: false },
+                    { id: "034035_h1", title: "[תרמו 1] תרגיל בית 1: חוק ראשון ומאזני אנרגיה", done: false },
+                    { id: "034053_h1", title: "[מוצקים 2] תרגיל בית 1: פיתול ומאמצים מורכבים", done: false },
+                    { id: "034056_h1", title: "[גרפיקה] תרגיל בית 1: היטלים ומבטים בשרטוט", done: false },
+                    { id: "034056_p1", title: "[גרפיקה] פרויקט תכן מקדים: מידול חלקים בתיב״ם", done: false }
+                ];
+            }
 
             let tasksHtml = '';
-            sampleTasks.forEach(t => {
+            activeTasks.slice(0, 5).forEach(t => {
                 tasksHtml += `
                     <div class="watch-task-item ${t.done ? 'completed' : ''}" id="task-item-${t.id}" onclick="window.toggleWatchTask('${t.id}')">
                         <div class="watch-task-title">${t.title}</div>

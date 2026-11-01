@@ -263,7 +263,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:gravity="center"
-                                android:text="[מדח מ׳] תרגיל בית 3"
+                                android:text="[מדח מ׳] תרגיל בית 1: משוואות דיפרנציאליות"
                                 android:textColor="@color/text_primary"
                                 android:textSize="11.5sp"
                                 android:textStyle="bold" />
@@ -274,7 +274,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="2dp"
                                 android:gravity="center"
-                                android:text="⏳ להגשה: יום חמישי (11:30)"
+                                android:text="⏳ מודל טכניון • שבוע 2"
                                 android:textColor="@color/amber_warning"
                                 android:textSize="10sp" />
 
@@ -311,7 +311,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:gravity="center"
-                                android:text="[פיסיקה 2] דו״ח מעבדה 2"
+                                android:text="[מדח מ׳] WebWork 1: מד״ח מ׳"
                                 android:textColor="@color/text_primary"
                                 android:textSize="11.5sp"
                                 android:textStyle="bold" />
@@ -322,7 +322,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="2dp"
                                 android:gravity="center"
-                                android:text="⏳ להגשה: 8 בנובמבר (23:59)"
+                                android:text="⏳ מערכת WebWork • שבוע 2"
                                 android:textColor="@color/amber_warning"
                                 android:textSize="10sp" />
 
@@ -358,7 +358,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:gravity="center"
-                                android:text="[מוצקים 2] פרויקט תכן מקדים"
+                                android:text="[פיסיקה 2] תרגיל בית 1: אלקטרוסטטיקה וחוק קולון"
                                 android:textColor="@color/text_primary"
                                 android:textSize="11.5sp"
                                 android:textStyle="bold" />
@@ -369,7 +369,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="2dp"
                                 android:gravity="center"
-                                android:text="⏳ להגשה: 15 בנובמבר"
+                                android:text="⏳ מודל טכניון • שבוע 2"
                                 android:textColor="@color/amber_warning"
                                 android:textSize="10sp" />
 

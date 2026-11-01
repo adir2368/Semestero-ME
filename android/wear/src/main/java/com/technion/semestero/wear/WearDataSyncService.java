@@ -49,6 +49,7 @@ public class WearDataSyncService extends WearableListenerService {
                     if (dataMap.containsKey("task_1")) editor.putString("task_1", dataMap.getString("task_1"));
                     if (dataMap.containsKey("task_2")) editor.putString("task_2", dataMap.getString("task_2"));
                     if (dataMap.containsKey("tasks_summary")) editor.putString("tasks_summary", dataMap.getString("tasks_summary"));
+                    if (dataMap.containsKey("all_tasks_json")) editor.putString("all_tasks_json", dataMap.getString("all_tasks_json"));
 
                     // 4. GPA & Standing
                     if (dataMap.containsKey("gpa_current")) editor.putString("gpa_current", dataMap.getString("gpa_current"));
@@ -77,16 +78,8 @@ public class WearDataSyncService extends WearableListenerService {
                         TileService.getUpdater(this).requestUpdate(SemesteroClassTileService.class);
                     } catch (Exception ignored) {}
 
-                    // If incoming sync indicates an imminent or active class, trigger native wrist notification
-                    if (dataMap.containsKey("class_title")) {
-                        String title = dataMap.getString("class_title");
-                        String time = dataMap.getString("class_time", "");
-                        String room = dataMap.getString("class_details", "");
-                        String status = dataMap.getString("class_status", "");
-                        if (status != null && (status.contains("בעוד") || status.contains("מתקיים"))) {
-                            WearNotificationHelper.sendClassReminder(this, title, time, room);
-                        }
-                    }
+                    // User directive: Silent radar updates without buzzing/alerts ("בלי התראה")
+                    // Routine class transitions update silently on the watch display.
                 }
             }
         }

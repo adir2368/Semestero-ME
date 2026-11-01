@@ -382,7 +382,12 @@ public class MainActivity extends Activity {
         }
 
         // 3. Resolve class data:
-        // If prefs contains synced data for today, use it. Otherwise, compute from Technion timetable.
+        int curHour = now.get(Calendar.HOUR_OF_DAY);
+        int curMin = now.get(Calendar.MINUTE);
+        int curTotalMin = curHour * 60 + curMin;
+        boolean isEvening = (curHour >= 17);
+
+        // If prefs contains synced data for today and it's not evening without next-day data, use it.
         String syncedDay = prefs.getString("day_name", "");
         boolean hasMatchingDaySync = isFreshSync && (curDayName.equals(syncedDay) || (prefs.getInt("day_index", -1) == (dayOfWeek - 1)));
 
@@ -398,80 +403,136 @@ public class MainActivity extends Activity {
             classStatus = prefs.getString("class_status", "חופשי");
         } else {
             // Built-in authentic Technion Mechanical Engineering Schedule (Winter 2026/2027)
-            int curHour = now.get(Calendar.HOUR_OF_DAY);
-            int curMin = now.get(Calendar.MINUTE);
-            int curTotalMin = curHour * 60 + curMin;
-
+            // Rules:
+            // 1) 15 minutes after start of previous class (startMin + 15), switch silently to next class!
+            // 2) In the evening (>= 17:00) or once today's classes finish, preview tomorrow / next school day!
             switch (dayOfWeek) {
                 case Calendar.SUNDAY: // יום ראשון
-                    classTitle = "משוואות דיפרנציאליות חלקיות מ׳";
-                    classTime = "11:30 - 13:30";
-                    if (curTotalMin < 690) { // Before 11:30
+                    // Class: 11:30 - 13:30 (startMin = 690)
+                    if (!isEvening && curTotalMin < 690) { // Before 11:30
+                        classTitle = "משוואות דיפרנציאליות חלקיות מ׳";
+                        classTime = "11:30 - 13:30";
+                        classRoom = "📍 אולמן 506 • ד״ר רחל כהן";
                         int diff = 690 - curTotalMin;
                         classStatus = "⏳ השיעור מתחיל בעוד " + diff + " דק׳";
-                        classRoom = "📍 אולמן 506 • ד״ר רחל כהן";
-                    } else if (curTotalMin <= 810) { // 11:30 to 13:30
-                        classStatus = "🟢 מתקיים כעת!";
+                    } else if (!isEvening && curTotalMin < 705) { // 11:30 - 11:45 (first 15 min of class)
+                        classTitle = "משוואות דיפרנציאליות חלקיות מ׳";
+                        classTime = "11:30 - 13:30";
                         classRoom = "📍 אולמן 506 • הרצאה פעילה";
-                    } else { // After 13:30
-                        classStatus = "🎉 הסתיימו הלימודים להיום";
-                        classRoom = "השיעור הבא מחר: פיסיקה 2 ב-08:30 (טאוב)";
+                        classStatus = "🟢 מתקיים כעת!";
+                    } else { // 11:45 onwards OR evening: switch to tomorrow (Monday)
+                        classTitle = "פיסיקה 2";
+                        classTime = "08:30 - 10:30";
+                        classRoom = "📍 טאוב 1 • מרצה: פרופ׳ כץ";
+                        classStatus = isEvening ? "מערכת מחר (יום שני) • שיעור ראשון" : "השיעור הבא מחר (יום שני) ב-08:30";
                     }
                     break;
 
                 case Calendar.MONDAY: // יום שני
-                    if (curTotalMin < 630) {
+                    // Classes:
+                    // 1) 08:30 - 10:30 (startMin = 510) - Physics 2
+                    // 2) 10:30 - 14:30 (startMin = 630) - Solids 2M
+                    if (!isEvening && curTotalMin < 510) { // Before 08:30
                         classTitle = "פיסיקה 2";
                         classTime = "08:30 - 10:30";
                         classRoom = "📍 טאוב 1 • מרצה: פרופ׳ כץ";
-                        classStatus = curTotalMin >= 510 ? "🟢 מתקיים כעת!" : "⏳ השיעור הבא היום";
-                    } else if (curTotalMin <= 870) {
+                        classStatus = "⏳ מתחיל בעוד " + (510 - curTotalMin) + " דק׳";
+                    } else if (!isEvening && curTotalMin < 525) { // 08:30 - 08:45
+                        classTitle = "פיסיקה 2";
+                        classTime = "08:30 - 10:30";
+                        classRoom = "📍 טאוב 1 • הרצאה פעילה";
+                        classStatus = "🟢 מתקיים כעת!";
+                    } else if (!isEvening && curTotalMin < 630) { // 08:45 - 10:30 (switched to Solids 2M!)
                         classTitle = "מכניקת מוצקים 2מ׳";
                         classTime = "10:30 - 14:30";
                         classRoom = "📍 דנציגר אודיטוריום 1";
-                        classStatus = curTotalMin >= 630 ? "🟢 מתקיים כעת!" : "⏳ השיעור הבא היום";
-                    } else {
+                        classStatus = "⏳ השיעור הבא היום (10:30)";
+                    } else if (!isEvening && curTotalMin < 645) { // 10:30 - 10:45
                         classTitle = "מכניקת מוצקים 2מ׳";
                         classTime = "10:30 - 14:30";
-                        classRoom = "השיעור הבא מחר: תרמודינמיקה 1 ב-08:30";
-                        classStatus = "🎉 הסתיימו הלימודים להיום";
+                        classRoom = "📍 דנציגר אודיטוריום 1 • הרצאה פעילה";
+                        classStatus = "🟢 מתקיים כעת!";
+                    } else { // 10:45 onwards OR evening: switch to tomorrow (Tuesday)
+                        classTitle = "תרמודינמיקה 1";
+                        classTime = "08:30 - 11:30";
+                        classRoom = "📍 דנציגר אודיטוריום 1";
+                        classStatus = isEvening ? "מערכת מחר (יום שלישי) • שיעור ראשון" : "השיעור הבא מחר (יום שלישי) ב-08:30";
                     }
                     break;
 
                 case Calendar.TUESDAY: // יום שלישי
-                    classTitle = "תרמודינמיקה 1";
-                    classTime = "08:30 - 11:30";
-                    classRoom = "📍 דנציגר אודיטוריום 1";
-                    classStatus = (curTotalMin >= 510 && curTotalMin <= 690) ? "🟢 מתקיים כעת!" : (curTotalMin < 510 ? "⏳ השיעור הבא היום" : "🎉 הסתיימו הלימודים להיום");
+                    // Class: 08:30 - 11:30 (startMin = 510) - Thermo 1
+                    if (!isEvening && curTotalMin < 510) {
+                        classTitle = "תרמודינמיקה 1";
+                        classTime = "08:30 - 11:30";
+                        classRoom = "📍 דנציגר אודיטוריום 1";
+                        classStatus = "⏳ מתחיל בעוד " + (510 - curTotalMin) + " דק׳";
+                    } else if (!isEvening && curTotalMin < 525) { // 08:30 - 08:45
+                        classTitle = "תרמודינמיקה 1";
+                        classTime = "08:30 - 11:30";
+                        classRoom = "📍 דנציגר אודיטוריום 1 • הרצאה פעילה";
+                        classStatus = "🟢 מתקיים כעת!";
+                    } else { // 08:45 onwards OR evening: switch to tomorrow (Wednesday)
+                        classTitle = "מכניקת מוצקים 2מ׳";
+                        classTime = "12:30 - 14:30";
+                        classRoom = "📍 ליידי דייוויס 240";
+                        classStatus = isEvening ? "מערכת מחר (יום רביעי) • שיעור ראשון" : "השיעור הבא מחר (יום רביעי) ב-12:30";
+                    }
                     break;
 
                 case Calendar.WEDNESDAY: // יום רביעי
-                    classTitle = "מכניקת מוצקים 2מ׳";
-                    classTime = "12:30 - 14:30";
-                    classRoom = "📍 ליידי דייוויס 240";
-                    classStatus = (curTotalMin >= 750 && curTotalMin <= 870) ? "🟢 מתקיים כעת!" : (curTotalMin < 750 ? "⏳ השיעור הבא היום" : "🎉 הסתיימו הלימודים להיום");
+                    // Class: 12:30 - 14:30 (startMin = 750) - Solids 2M
+                    if (!isEvening && curTotalMin < 750) {
+                        classTitle = "מכניקת מוצקים 2מ׳";
+                        classTime = "12:30 - 14:30";
+                        classRoom = "📍 ליידי דייוויס 240";
+                        classStatus = "⏳ מתחיל בעוד " + (750 - curTotalMin) + " דק׳";
+                    } else if (!isEvening && curTotalMin < 765) { // 12:30 - 12:45
+                        classTitle = "מכניקת מוצקים 2מ׳";
+                        classTime = "12:30 - 14:30";
+                        classRoom = "📍 ליידי דייוויס 240 • תרגול פעיל";
+                        classStatus = "🟢 מתקיים כעת!";
+                    } else { // 12:45 onwards OR evening: switch to tomorrow (Thursday)
+                        classTitle = "גרפיקה הנדסית ומבוא לתיב״ם";
+                        classTime = "09:30 - 11:30";
+                        classRoom = "📍 בניין מכונות • מעבדה 10";
+                        classStatus = isEvening ? "מערכת מחר (יום חמישי) • שיעור ראשון" : "השיעור הבא מחר (יום חמישי) ב-09:30";
+                    }
                     break;
 
                 case Calendar.THURSDAY: // יום חמישי
-                    classTitle = "גרפיקה הנדסית ומבוא לתיב״ם";
-                    classTime = "09:30 - 11:30";
-                    classRoom = "📍 בניין מכונות • מעבדה 10";
-                    classStatus = (curTotalMin >= 570 && curTotalMin <= 690) ? "🟢 מתקיים כעת!" : (curTotalMin < 570 ? "⏳ השיעור הבא היום" : "🎉 סופ״ש מתחיל!");
+                    // Class: 09:30 - 11:30 (startMin = 570) - Graphics & CAD
+                    if (!isEvening && curTotalMin < 570) {
+                        classTitle = "גרפיקה הנדסית ומבוא לתיב״ם";
+                        classTime = "09:30 - 11:30";
+                        classRoom = "📍 בניין מכונות • מעבדה 10";
+                        classStatus = "⏳ מתחיל בעוד " + (570 - curTotalMin) + " דק׳";
+                    } else if (!isEvening && curTotalMin < 585) { // 09:30 - 09:45
+                        classTitle = "גרפיקה הנדסית ומבוא לתיב״ם";
+                        classTime = "09:30 - 11:30";
+                        classRoom = "📍 בניין מכונות • כיתת מחשבים";
+                        classStatus = "🟢 מתקיים כעת!";
+                    } else { // 09:45 onwards OR evening: weekend starts -> next school day: Sunday
+                        classTitle = "משוואות דיפרנציאליות חלקיות מ׳";
+                        classTime = "11:30 - 13:30";
+                        classRoom = "📍 אולמן 506 • ד״ר רחל כהן";
+                        classStatus = "מערכת יום ראשון • שיעור ראשון (סופ״ש נעים! 🎉)";
+                    }
                     break;
 
                 case Calendar.FRIDAY: // יום שישי
-                    classTitle = "יום שישי - יום חופשי";
-                    classTime = "סופ״ש נעים 🏖️";
-                    classRoom = "ללא שיעורים פרונטליים. זמן מעולה לפרויקטים";
-                    classStatus = "🏖️ יום חופשי";
+                    classTitle = "משוואות דיפרנציאליות חלקיות מ׳";
+                    classTime = "11:30 - 13:30";
+                    classRoom = "📍 אולמן 506 • ד״ר רחל כהן";
+                    classStatus = "מערכת יום ראשון • שיעור ראשון (סופ״ש 🏖️)";
                     break;
 
                 case Calendar.SATURDAY: // שבת
                 default:
-                    classTitle = "שבת שלום ומנוחה! 🕯️";
-                    classTime = "סופ״ש";
-                    classRoom = "שבוע חדש מתחיל מחר (יום ראשון) ב-11:30";
-                    classStatus = "🕯️ שבת שלום";
+                    classTitle = "משוואות דיפרנציאליות חלקיות מ׳";
+                    classTime = "11:30 - 13:30";
+                    classRoom = "📍 אולמן 506 • ד״ר רחל כהן";
+                    classStatus = isEvening ? "מערכת מחר (יום ראשון) • 11:30" : "שבוע חדש מתחיל מחר (ראשון) ב-11:30";
                     break;
             }
         }
@@ -483,26 +544,68 @@ public class MainActivity extends Activity {
 
         // 4. Tasks & Exam Countdown
         String examDays = prefs.getString("exam_days", "📝 מבחן מועד א׳ בעוד 14 יום");
-        String tasksSummary = prefs.getString("tasks_summary", "2 משימות פתוחות במודל");
+        String tasksSummary = prefs.getString("tasks_summary", "משימות פתוחות במודל");
         if (tvExamCountdown != null) tvExamCountdown.setText(examDays);
-        if (tvTasksSummary != null) tvTasksSummary.setText(tasksSummary);
 
-        // Populate Individual Open Tasks
+        // Populate Individual Open Tasks from Semestero synced JSON
         task1Done = prefs.getBoolean("wear_task_1_done", false);
         task2Done = prefs.getBoolean("wear_task_2_done", false);
         task3Done = prefs.getBoolean("wear_task_3_done", false);
 
-        String syncedTask1 = prefs.getString("task_1", "");
-        String syncedTask2 = prefs.getString("task_2", "");
+        String allTasksJson = prefs.getString("all_tasks_json", "[]");
+        String t1Title = "";
+        String t1Due = "";
+        String t2Title = "";
+        String t2Due = "";
+        String t3Title = "";
+        String t3Due = "";
+        int openTasksCount = 0;
+
+        try {
+            org.json.JSONArray arr = new org.json.JSONArray(allTasksJson);
+            if (arr.length() > 0) {
+                openTasksCount = arr.length();
+                org.json.JSONObject o1 = arr.getJSONObject(0);
+                t1Title = o1.optString("title", "");
+                t1Due = o1.optString("dueFormatted", "⏳ מודל טכניון • שבוע 2");
+            }
+            if (arr.length() > 1) {
+                org.json.JSONObject o2 = arr.getJSONObject(1);
+                t2Title = o2.optString("title", "");
+                t2Due = o2.optString("dueFormatted", "⏳ מודל טכניון • שבוע 2");
+            }
+            if (arr.length() > 2) {
+                org.json.JSONObject o3 = arr.getJSONObject(2);
+                t3Title = o3.optString("title", "");
+                t3Due = o3.optString("dueFormatted", "⏳ מודל טכניון • שבוע 2");
+            }
+        } catch (Exception ignored) {}
+
+        // Fallbacks: authentic Semester 3 Technion Mechanical Engineering tasks only (no fake tasks)
+        if (t1Title.isEmpty()) {
+            t1Title = prefs.getString("task_1", "[מדח מ׳] תרגיל בית 1: משוואות דיפרנציאליות");
+            t1Due = "⏳ מודל טכניון • שבוע 2";
+        }
+        if (t2Title.isEmpty()) {
+            t2Title = prefs.getString("task_2", "[מדח מ׳] WebWork 1: מד״ח מ׳");
+            t2Due = "⏳ מערכת WebWork • שבוע 2";
+        }
+        if (t3Title.isEmpty()) {
+            t3Title = "[פיסיקה 2] תרגיל בית 1: אלקטרוסטטיקה וחוק קולון";
+            t3Due = "⏳ מודל טכניון • שבוע 2";
+        }
+
+        if (tvTasksSummary != null) {
+            if (openTasksCount > 0) {
+                tvTasksSummary.setText(openTasksCount + " משימות פתוחות במודל");
+            } else {
+                tvTasksSummary.setText(tasksSummary);
+            }
+        }
 
         if (tvTask1Title != null) {
-            if (!syncedTask1.trim().isEmpty()) {
-                tvTask1Title.setText(syncedTask1);
-                if (tvTask1Due != null) tvTask1Due.setText("⏳ מודל טכניון • להגשה בקרוב");
-            } else {
-                tvTask1Title.setText("[מדח מ׳] תרגיל בית 3");
-                if (tvTask1Due != null) tvTask1Due.setText("⏳ להגשה: יום חמישי (11:30)");
-            }
+            tvTask1Title.setText(t1Title);
+            if (tvTask1Due != null) tvTask1Due.setText(t1Due);
             if (task1Done) {
                 tvTask1Title.setPaintFlags(tvTask1Title.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
                 tvTask1Title.setTextColor(getColor(R.color.text_secondary));
@@ -516,13 +619,8 @@ public class MainActivity extends Activity {
         }
 
         if (tvTask2Title != null) {
-            if (!syncedTask2.trim().isEmpty()) {
-                tvTask2Title.setText(syncedTask2);
-                if (tvTask2Due != null) tvTask2Due.setText("⏳ מודל טכניון • להגשה בקרוב");
-            } else {
-                tvTask2Title.setText("[פיסיקה 2] דו״ח מעבדה 2");
-                if (tvTask2Due != null) tvTask2Due.setText("⏳ להגשה: 8 בנובמבר (23:59)");
-            }
+            tvTask2Title.setText(t2Title);
+            if (tvTask2Due != null) tvTask2Due.setText(t2Due);
             if (task2Done) {
                 tvTask2Title.setPaintFlags(tvTask2Title.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
                 tvTask2Title.setTextColor(getColor(R.color.text_secondary));
@@ -536,8 +634,8 @@ public class MainActivity extends Activity {
         }
 
         if (tvTask3Title != null) {
-            tvTask3Title.setText("[מוצקים 2] פרויקט תכן מקדים");
-            if (tvTask3Due != null) tvTask3Due.setText("⏳ להגשה: 15 בנובמבר");
+            tvTask3Title.setText(t3Title);
+            if (tvTask3Due != null) tvTask3Due.setText(t3Due);
             if (task3Done) {
                 tvTask3Title.setPaintFlags(tvTask3Title.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
                 tvTask3Title.setTextColor(getColor(R.color.text_secondary));

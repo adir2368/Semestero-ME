@@ -25375,12 +25375,13 @@ function getRemainingClassesToday() {
         };
     }
 
-    // Filter classes whose endTime is strictly in the future or currently running
+    // User Rule: 15 minutes after start of previous class, switch to next class / recitation!
+    // A class is only active for the "next class radar" until (startMin + 15).
     const remaining = allClasses.filter(c => {
-        if (!c.endTime) return true;
-        const parts = c.endTime.split(':');
-        const endMin = parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
-        return endMin > curMin;
+        if (!c.startTime) return true;
+        const parts = c.startTime.split(':');
+        const startMin = parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
+        return curMin < (startMin + 15);
     });
 
     const nextClass = remaining.length > 0 ? remaining[0] : null;
@@ -25409,7 +25410,9 @@ function getUpcomingPriorityTasks(limit = 8) {
     Object.values(gameState.courses).forEach(course => {
         const isBinary = (course.isBinaryPass === true || course.grade === 'עובר' || course.grade === 'PASS');
         const hasPassingGrade = isBinary || (course.grade !== undefined && course.grade !== null && course.grade !== '' && !isNaN(Number(course.grade)) && Number(course.grade) >= 55);
-        if (course.status !== 'active' || hasPassingGrade) return;
+        const isCurrentSemCourse = (course.status === 'active') || 
+            (course.status === 'available' && (course.semester === (gameState.currentActiveSemester || 3) || !course.semester));
+        if (!isCurrentSemCourse || hasPassingGrade) return;
         if (!isWinterSemesterStarted() && (course.semester || 1) > (gameState.currentActiveSemester || 2)) return;
 
         (course.tasks || []).forEach(task => {
@@ -25539,11 +25542,11 @@ function syncNativeAndroidWidgets(classData, tasksData) {
             status: "שיעור אקדמי"
         })) : [];
 
-        // If today's classes have finished or it's weekend, look ahead to tomorrow or next school day
-        if (!cData || !cData.nextClass) {
+        // User Rule: In the evening (17:00 onwards), or after today's classes ended (+15 min), look ahead to tomorrow's schedule
+        const currentHour = now.getHours();
+        if (!cData || !cData.nextClass || currentHour >= 17) {
             const sched = (typeof getActiveTimetableSchedule === 'function') ? getActiveTimetableSchedule() : null;
             if (sched && sched.days && sched.days.length > 0) {
-                const now = new Date();
                 const curDay = now.getDay();
                 const dayHebNames = ["ראשון", "שני", "שלישי", "רביעי", "חמישי", "שישי", "שבת"];
                 for (let offset = 1; offset <= 6; offset++) {
@@ -25551,16 +25554,16 @@ function syncNativeAndroidWidgets(classData, tasksData) {
                     const dayObj = sched.days.find(d => d.dayIndex === checkDayIdx);
                     if (dayObj && !dayObj.isFree && dayObj.classes && dayObj.classes.length > 0) {
                         const firstClass = dayObj.classes[0];
-                        const dayLabel = (offset === 1) ? "מחר" : `ביום ${dayHebNames[checkDayIdx]}`;
+                        const dayLabel = (offset === 1) ? "מחר (יום " + dayHebNames[checkDayIdx] + ")" : `ביום ${dayHebNames[checkDayIdx]}`;
                         classTitle = firstClass.name || firstClass.courseName || firstClass.title || "הרצאה";
                         classTime = (firstClass.startTime && firstClass.endTime) ? `${firstClass.startTime} - ${firstClass.endTime}` : (firstClass.time || "--:--");
-                        classDetails = `${dayLabel} • ${firstClass.room ? '📍 ' + firstClass.room : '📍 טכניון'}${firstClass.type ? ' • ' + firstClass.type : ''}`;
+                        classDetails = `מערכת ${dayLabel} • ${firstClass.room ? '📍 ' + firstClass.room : '📍 טכניון'}${firstClass.type ? ' • ' + firstClass.type : ''}`;
                         classLecturer = firstClass.lecturer ? `👨‍🏫 ${firstClass.lecturer}` : "טכניון • סמסטר חורף";
-                        classStatus = `⏳ השיעור הבא (${dayLabel})`;
+                        classStatus = `מערכת ${dayLabel}`;
                         allClassesList = dayObj.classes.map(c => ({
                             title: c.name || c.courseName || c.title || "הרצאה",
                             time: (c.startTime && c.endTime) ? `${c.startTime} - ${c.endTime}` : (c.time || "--:--"),
-                            details: `${dayLabel} • ${c.room ? '📍 ' + c.room : '📍 טכניון'}${c.type ? ' • ' + c.type : ''}`,
+                            details: `מערכת ${dayLabel} • ${c.room ? '📍 ' + c.room : '📍 טכניון'}${c.type ? ' • ' + c.type : ''}`,
                             lecturer: c.lecturer ? `👨‍🏫 ${c.lecturer}` : "טכניון • סמסטר חורף",
                             status: "שיעור קרוב"
                         }));
@@ -25668,6 +25671,19 @@ function syncNativeAndroidWidgets(classData, tasksData) {
                 : (tList.length === 2 ? `2 משימות פתוחות בסך הכל` : `משימה אחת פתוחה בסך הכל`);
         }
 
+        const allTasksJson = JSON.stringify(tList.map(t => ({
+            id: t.id || "",
+            course: t.courseShortName || t.courseName || "",
+            title: t.title || "",
+            due: t.timingText || "להגשה בקרוב",
+            type: t.type || "hw",
+            completed: false
+        })));
+
+        try {
+            localStorage.setItem('ast_synced_tasks_json', allTasksJson);
+        } catch(e) {}
+
         if (window.SemesteroWidgetBridge.updateTasksWidget) {
             window.SemesteroWidgetBridge.updateTasksWidget(
                 examDays,
@@ -25677,7 +25693,8 @@ function syncNativeAndroidWidgets(classData, tasksData) {
                 task1Id,
                 task2,
                 task2Id,
-                tasksSummary
+                tasksSummary,
+                allTasksJson
             );
         }
 
