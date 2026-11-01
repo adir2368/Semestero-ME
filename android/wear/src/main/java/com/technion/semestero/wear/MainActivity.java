@@ -7,13 +7,16 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Paint;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.util.Log;
 import android.view.InputDevice;
 import android.view.MotionEvent;
+import android.view.View;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -30,6 +33,7 @@ public class MainActivity extends Activity {
 
     public static final String PREFS_NAME = "semestero_wear_prefs";
     public static final String PATH_REQUEST_SYNC = "/semestero/request_sync";
+    public static final String PATH_COMPLETE_TASK = "/semestero/complete_task";
     private static final String TAG = "WearMainActivity";
     private static final int PERMISSION_REQ_NOTIF = 201;
 
@@ -46,6 +50,31 @@ public class MainActivity extends Activity {
     private TextView tvClassRoom;
     private TextView tvExamCountdown;
     private TextView tvTasksSummary;
+    private TextView tvTasksToggleHint;
+    private LinearLayout cardTasksExam;
+    private LinearLayout layoutOpenTasksExpanded;
+
+    // Task 1
+    private LinearLayout taskItemView1;
+    private TextView tvTask1Title;
+    private TextView tvTask1Due;
+    private TextView btnCompleteTask1;
+    private boolean task1Done = false;
+
+    // Task 2
+    private LinearLayout taskItemView2;
+    private TextView tvTask2Title;
+    private TextView tvTask2Due;
+    private TextView btnCompleteTask2;
+    private boolean task2Done = false;
+
+    // Task 3
+    private LinearLayout taskItemView3;
+    private TextView tvTask3Title;
+    private TextView tvTask3Due;
+    private TextView btnCompleteTask3;
+    private boolean task3Done = false;
+
     private TextView tvGpaVal;
     private TextView tvHonorsBadge;
     private Button btnRefresh;
@@ -73,6 +102,28 @@ public class MainActivity extends Activity {
         tvClassRoom = findViewById(R.id.tv_class_room);
         tvExamCountdown = findViewById(R.id.tv_exam_countdown);
         tvTasksSummary = findViewById(R.id.tv_tasks_summary);
+        tvTasksToggleHint = findViewById(R.id.tv_tasks_toggle_hint);
+        cardTasksExam = findViewById(R.id.card_tasks_exam);
+        layoutOpenTasksExpanded = findViewById(R.id.layout_open_tasks_expanded);
+
+        // Task 1 views
+        taskItemView1 = findViewById(R.id.task_item_view_1);
+        tvTask1Title = findViewById(R.id.tv_task_1_title);
+        tvTask1Due = findViewById(R.id.tv_task_1_due);
+        btnCompleteTask1 = findViewById(R.id.btn_complete_wear_task_1);
+
+        // Task 2 views
+        taskItemView2 = findViewById(R.id.task_item_view_2);
+        tvTask2Title = findViewById(R.id.tv_task_2_title);
+        tvTask2Due = findViewById(R.id.tv_task_2_due);
+        btnCompleteTask2 = findViewById(R.id.btn_complete_wear_task_2);
+
+        // Task 3 views
+        taskItemView3 = findViewById(R.id.task_item_view_3);
+        tvTask3Title = findViewById(R.id.tv_task_3_title);
+        tvTask3Due = findViewById(R.id.tv_task_3_due);
+        btnCompleteTask3 = findViewById(R.id.btn_complete_wear_task_3);
+
         tvGpaVal = findViewById(R.id.tv_gpa_val);
         tvHonorsBadge = findViewById(R.id.tv_honors_badge);
         btnRefresh = findViewById(R.id.btn_refresh_watch);
@@ -88,6 +139,52 @@ public class MainActivity extends Activity {
             if (checkSelfPermission("android.permission.POST_NOTIFICATIONS") != PackageManager.PERMISSION_GRANTED) {
                 requestPermissions(new String[]{"android.permission.POST_NOTIFICATIONS"}, PERMISSION_REQ_NOTIF);
             }
+        }
+
+        // Tap on Card 2 (Tasks) to inspect and reveal open tasks
+        if (cardTasksExam != null) {
+            cardTasksExam.setOnClickListener(v -> {
+                if (vibrator != null) vibrator.vibrate(25);
+                boolean currentlyExpanded = (layoutOpenTasksExpanded != null && layoutOpenTasksExpanded.getVisibility() == View.VISIBLE);
+                if (currentlyExpanded) {
+                    if (layoutOpenTasksExpanded != null) layoutOpenTasksExpanded.setVisibility(View.GONE);
+                    if (tvTasksToggleHint != null) tvTasksToggleHint.setText("👇 לחץ לצפייה במשימות הפתוחות");
+                } else {
+                    if (layoutOpenTasksExpanded != null) layoutOpenTasksExpanded.setVisibility(View.VISIBLE);
+                    if (tvTasksToggleHint != null) tvTasksToggleHint.setText("▲ לחץ לצמצום הרשימה");
+                    // Smoothly scroll down so the full open tasks list is centered in the round screen
+                    if (scrollView != null) {
+                        scrollView.postDelayed(() -> {
+                            int targetY = cardTasksExam.getTop() - 20;
+                            scrollView.smoothScrollTo(0, Math.max(0, targetY));
+                        }, 80);
+                    }
+                }
+            });
+        }
+
+        // Task 1 interactive completion button
+        if (btnCompleteTask1 != null) {
+            btnCompleteTask1.setOnClickListener(v -> {
+                task1Done = !task1Done;
+                updateTaskDoneState(1, task1Done);
+            });
+        }
+
+        // Task 2 interactive completion button
+        if (btnCompleteTask2 != null) {
+            btnCompleteTask2.setOnClickListener(v -> {
+                task2Done = !task2Done;
+                updateTaskDoneState(2, task2Done);
+            });
+        }
+
+        // Task 3 interactive completion button
+        if (btnCompleteTask3 != null) {
+            btnCompleteTask3.setOnClickListener(v -> {
+                task3Done = !task3Done;
+                updateTaskDoneState(3, task3Done);
+            });
         }
 
         btnRefresh.setOnClickListener(v -> {
@@ -115,6 +212,74 @@ public class MainActivity extends Activity {
 
         // Ensure rotary bezel events focus on the scrollview
         scrollView.requestFocus();
+    }
+
+    private void updateTaskDoneState(int taskIndex, boolean isDone) {
+        if (vibrator != null) {
+            if (isDone) {
+                vibrator.vibrate(40);
+            } else {
+                vibrator.vibrate(20);
+            }
+        }
+
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        prefs.edit().putBoolean("wear_task_" + taskIndex + "_done", isDone).apply();
+
+        TextView titleView = (taskIndex == 1) ? tvTask1Title : ((taskIndex == 2) ? tvTask2Title : tvTask3Title);
+        TextView btnView = (taskIndex == 1) ? btnCompleteTask1 : ((taskIndex == 2) ? btnCompleteTask2 : btnCompleteTask3);
+
+        if (titleView != null) {
+            if (isDone) {
+                titleView.setPaintFlags(titleView.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+                titleView.setTextColor(getColor(R.color.text_secondary));
+            } else {
+                titleView.setPaintFlags(titleView.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
+                titleView.setTextColor(getColor(R.color.text_primary));
+            }
+        }
+
+        if (btnView != null) {
+            if (isDone) {
+                btnView.setText("🎉 בוצע!");
+                btnView.setTextColor(getColor(R.color.emerald_green));
+            } else {
+                btnView.setText("✓ סמן כבוצע");
+                btnView.setTextColor(getColor(R.color.emerald_green));
+            }
+        }
+
+        // Recompute open tasks summary count
+        int openCount = (task1Done ? 0 : 1) + (task2Done ? 0 : 1) + (task3Done ? 0 : 1);
+        if (tvTasksSummary != null) {
+            if (openCount == 0) {
+                tvTasksSummary.setText("🎉 כל המשימות בוצעו!");
+            } else if (openCount == 1) {
+                tvTasksSummary.setText("משימה אחת פתוחה להגשה");
+            } else {
+                tvTasksSummary.setText(openCount + " משימות פתוחות להגשה");
+            }
+        }
+
+        // Send task completion message to phone companion
+        notifyPhoneTaskStatus(taskIndex, isDone);
+    }
+
+    private void notifyPhoneTaskStatus(int taskIndex, boolean isDone) {
+        try {
+            Wearable.getNodeClient(this).getConnectedNodes().addOnSuccessListener(nodes -> {
+                if (nodes != null) {
+                    for (Node node : nodes) {
+                        String payload = taskIndex + ":" + (isDone ? "1" : "0");
+                        Wearable.getMessageClient(this).sendMessage(
+                            node.getId(),
+                            PATH_COMPLETE_TASK,
+                            payload.getBytes(StandardCharsets.UTF_8)
+                        );
+                    }
+                }
+            });
+        } catch (Exception ignored) {}
     }
 
     @Override
@@ -239,15 +404,16 @@ public class MainActivity extends Activity {
 
             switch (dayOfWeek) {
                 case Calendar.SUNDAY: // יום ראשון
-                    classTitle = "משוואות דיפרנציאליות חלקיות מ'";
+                    classTitle = "משוואות דיפרנציאליות חלקיות מ׳";
                     classTime = "11:30 - 13:30";
-                    classRoom = "📍 אולמן 506 • תרגול 22 (אמתי אלפרין)";
-                    if (curTotalMin >= 690 && curTotalMin <= 810) {
-                        classStatus = "🟢 מתקיים כעת!";
-                    } else if (curTotalMin < 690) {
+                    if (curTotalMin < 690) { // Before 11:30
                         int diff = 690 - curTotalMin;
-                        classStatus = diff <= 60 ? "⏰ מתחיל בעוד " + diff + " דק'" : "⏳ השיעור הבא היום";
-                    } else {
+                        classStatus = "⏳ השיעור מתחיל בעוד " + diff + " דק׳";
+                        classRoom = "📍 אולמן 506 • ד״ר רחל כהן";
+                    } else if (curTotalMin <= 810) { // 11:30 to 13:30
+                        classStatus = "🟢 מתקיים כעת!";
+                        classRoom = "📍 אולמן 506 • הרצאה פעילה";
+                    } else { // After 13:30
                         classStatus = "🎉 הסתיימו הלימודים להיום";
                         classRoom = "השיעור הבא מחר: פיסיקה 2 ב-08:30 (טאוב)";
                     }
@@ -257,15 +423,15 @@ public class MainActivity extends Activity {
                     if (curTotalMin < 630) {
                         classTitle = "פיסיקה 2";
                         classTime = "08:30 - 10:30";
-                        classRoom = "📍 טאוב 1 • הרצאה 10 (ד\"ר גדעון אלון)";
+                        classRoom = "📍 טאוב 1 • מרצה: פרופ׳ כץ";
                         classStatus = curTotalMin >= 510 ? "🟢 מתקיים כעת!" : "⏳ השיעור הבא היום";
                     } else if (curTotalMin <= 870) {
-                        classTitle = "מכניקת מוצקים 2מ'";
+                        classTitle = "מכניקת מוצקים 2מ׳";
                         classTime = "10:30 - 14:30";
-                        classRoom = "📍 הנדסה כימית 1 • הרצאה 10";
+                        classRoom = "📍 דנציגר אודיטוריום 1";
                         classStatus = curTotalMin >= 630 ? "🟢 מתקיים כעת!" : "⏳ השיעור הבא היום";
                     } else {
-                        classTitle = "מכניקת מוצקים 2מ'";
+                        classTitle = "מכניקת מוצקים 2מ׳";
                         classTime = "10:30 - 14:30";
                         classRoom = "השיעור הבא מחר: תרמודינמיקה 1 ב-08:30";
                         classStatus = "🎉 הסתיימו הלימודים להיום";
@@ -275,21 +441,21 @@ public class MainActivity extends Activity {
                 case Calendar.TUESDAY: // יום שלישי
                     classTitle = "תרמודינמיקה 1";
                     classTime = "08:30 - 11:30";
-                    classRoom = "📍 הנדסה כימית 1 • הרצאה 10";
+                    classRoom = "📍 דנציגר אודיטוריום 1";
                     classStatus = (curTotalMin >= 510 && curTotalMin <= 690) ? "🟢 מתקיים כעת!" : (curTotalMin < 510 ? "⏳ השיעור הבא היום" : "🎉 הסתיימו הלימודים להיום");
                     break;
 
                 case Calendar.WEDNESDAY: // יום רביעי
-                    classTitle = "מכניקת מוצקים 2מ'";
+                    classTitle = "מכניקת מוצקים 2מ׳";
                     classTime = "12:30 - 14:30";
-                    classRoom = "📍 ליידי דייוויס 240 • תרגול";
+                    classRoom = "📍 ליידי דייוויס 240";
                     classStatus = (curTotalMin >= 750 && curTotalMin <= 870) ? "🟢 מתקיים כעת!" : (curTotalMin < 750 ? "⏳ השיעור הבא היום" : "🎉 הסתיימו הלימודים להיום");
                     break;
 
                 case Calendar.THURSDAY: // יום חמישי
-                    classTitle = "גרפיקה הנדסית וכתיבה טכנית";
+                    classTitle = "גרפיקה הנדסית ומבוא לתיב״ם";
                     classTime = "09:30 - 11:30";
-                    classRoom = "📍 דנציגר • הרצאה 10";
+                    classRoom = "📍 בניין מכונות • מעבדה 10";
                     classStatus = (curTotalMin >= 570 && curTotalMin <= 690) ? "🟢 מתקיים כעת!" : (curTotalMin < 570 ? "⏳ השיעור הבא היום" : "🎉 סופ״ש מתחיל!");
                     break;
 
@@ -310,21 +476,84 @@ public class MainActivity extends Activity {
             }
         }
 
-        tvClassTitle.setText(classTitle);
-        tvClassTime.setText(classTime);
-        tvClassRoom.setText(classRoom);
-        tvClassStatus.setText(classStatus);
+        if (tvClassTitle != null) tvClassTitle.setText(classTitle);
+        if (tvClassTime != null) tvClassTime.setText(classTime);
+        if (tvClassRoom != null) tvClassRoom.setText(classRoom);
+        if (tvClassStatus != null) tvClassStatus.setText(classStatus);
 
         // 4. Tasks & Exam Countdown
-        String examDays = prefs.getString("exam_days", "מבחן מועד א׳ בעוד 14 יום");
+        String examDays = prefs.getString("exam_days", "📝 מבחן מועד א׳ בעוד 14 יום");
         String tasksSummary = prefs.getString("tasks_summary", "2 משימות פתוחות במודל");
-        tvExamCountdown.setText(examDays);
-        tvTasksSummary.setText(tasksSummary);
+        if (tvExamCountdown != null) tvExamCountdown.setText(examDays);
+        if (tvTasksSummary != null) tvTasksSummary.setText(tasksSummary);
+
+        // Populate Individual Open Tasks
+        task1Done = prefs.getBoolean("wear_task_1_done", false);
+        task2Done = prefs.getBoolean("wear_task_2_done", false);
+        task3Done = prefs.getBoolean("wear_task_3_done", false);
+
+        String syncedTask1 = prefs.getString("task_1", "");
+        String syncedTask2 = prefs.getString("task_2", "");
+
+        if (tvTask1Title != null) {
+            if (!syncedTask1.trim().isEmpty()) {
+                tvTask1Title.setText(syncedTask1);
+                if (tvTask1Due != null) tvTask1Due.setText("⏳ מודל טכניון • להגשה בקרוב");
+            } else {
+                tvTask1Title.setText("[מדח מ׳] תרגיל בית 3");
+                if (tvTask1Due != null) tvTask1Due.setText("⏳ להגשה: יום חמישי (11:30)");
+            }
+            if (task1Done) {
+                tvTask1Title.setPaintFlags(tvTask1Title.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+                tvTask1Title.setTextColor(getColor(R.color.text_secondary));
+            } else {
+                tvTask1Title.setPaintFlags(tvTask1Title.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
+                tvTask1Title.setTextColor(getColor(R.color.text_primary));
+            }
+        }
+        if (btnCompleteTask1 != null) {
+            btnCompleteTask1.setText(task1Done ? "🎉 בוצע!" : "✓ סמן כבוצע");
+        }
+
+        if (tvTask2Title != null) {
+            if (!syncedTask2.trim().isEmpty()) {
+                tvTask2Title.setText(syncedTask2);
+                if (tvTask2Due != null) tvTask2Due.setText("⏳ מודל טכניון • להגשה בקרוב");
+            } else {
+                tvTask2Title.setText("[פיסיקה 2] דו״ח מעבדה 2");
+                if (tvTask2Due != null) tvTask2Due.setText("⏳ להגשה: 8 בנובמבר (23:59)");
+            }
+            if (task2Done) {
+                tvTask2Title.setPaintFlags(tvTask2Title.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+                tvTask2Title.setTextColor(getColor(R.color.text_secondary));
+            } else {
+                tvTask2Title.setPaintFlags(tvTask2Title.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
+                tvTask2Title.setTextColor(getColor(R.color.text_primary));
+            }
+        }
+        if (btnCompleteTask2 != null) {
+            btnCompleteTask2.setText(task2Done ? "🎉 בוצע!" : "✓ סמן כבוצע");
+        }
+
+        if (tvTask3Title != null) {
+            tvTask3Title.setText("[מוצקים 2] פרויקט תכן מקדים");
+            if (tvTask3Due != null) tvTask3Due.setText("⏳ להגשה: 15 בנובמבר");
+            if (task3Done) {
+                tvTask3Title.setPaintFlags(tvTask3Title.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+                tvTask3Title.setTextColor(getColor(R.color.text_secondary));
+            } else {
+                tvTask3Title.setPaintFlags(tvTask3Title.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
+                tvTask3Title.setTextColor(getColor(R.color.text_primary));
+            }
+        }
+        if (btnCompleteTask3 != null) {
+            btnCompleteTask3.setText(task3Done ? "🎉 בוצע!" : "✓ סמן כבוצע");
+        }
 
         // 5. GPA & Academic Standing
         String gpaVal = prefs.getString("gpa_current", "86.04");
         String honors = prefs.getString("gpa_badge", "🎖️ הצטיינות דיקן");
-        tvGpaVal.setText(gpaVal);
-        tvHonorsBadge.setText(honors);
+        if (tvGpaVal != null) tvGpaVal.setText(gpaVal);
+        if (tvHonorsBadge != null) tvHonorsBadge.setText(honors);
     }
 }
