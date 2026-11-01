@@ -5,11 +5,11 @@ android {
     compileSdk = 35
 
     defaultConfig {
-        applicationId "com.technion.semestero.wear"
+        applicationId "com.technion.semestero"
         minSdkVersion 30
         targetSdkVersion 34
-        versionCode 46
-        versionName "2.9.0"
+        versionCode 47
+        versionName "2.9.1"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 

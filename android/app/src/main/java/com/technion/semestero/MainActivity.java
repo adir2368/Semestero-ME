@@ -22,6 +22,7 @@ public class MainActivity extends BridgeActivity {
 
         configureWebView();
         handleWidgetIntent(getIntent());
+        WearSyncManager.syncAllToWatch(this);
     }
 
     @Override
@@ -29,6 +30,7 @@ public class MainActivity extends BridgeActivity {
         super.onStart();
         configureWebView();
         handleWidgetIntent(getIntent());
+        WearSyncManager.syncAllToWatch(this);
     }
 
     @Override
@@ -89,6 +91,11 @@ public class MainActivity extends BridgeActivity {
 
         public SemesteroWidgetBridge(Context context) {
             this.context = context;
+        }
+
+                @JavascriptInterface
+        public void syncAllToWatch() {
+            WearSyncManager.syncAllToWatch(context);
         }
 
         @JavascriptInterface

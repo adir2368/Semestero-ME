@@ -3,7 +3,7 @@
 // Module: watch_companion.js
 // Handles:
 // 1. Circular smartwatch rotary bezel & touch swipe navigation
-// 2. Real-time class radar & countdown updates
+// 2. Real-time class radar & countdown updates with authentic Hebrew day detection
 // 3. Moodle urgent tasks with 1-tap haptic checkoff & lock
 // 4. Academic stats ring & Dean's honors badge
 // 5. Ambient Always-On Display (AOD) power-saving mode
@@ -29,7 +29,36 @@
     const clockEl = document.getElementById('watch-clock');
     const container = document.getElementById('watch-container');
 
-    // 1. Digital Clock
+    const HEBREW_DAYS = ["יום ראשון", "יום שני", "יום שלישי", "יום רביעי", "יום חמישי", "יום שישי", "שבת"];
+    const HEBREW_MONTHS = ["ינואר", "פברואר", "מרץ", "אפריל", "מאי", "יוני", "יולי", "אוגוסט", "ספטמבר", "אוקטובר", "נובמבר", "דצמבר"];
+
+    // Authentic Technion Mechanical Engineering Schedule (Winter Semester 2026/2027)
+    const TECHNION_SCHEDULE = {
+        0: [ // יום ראשון
+            { title: "משוואות דיפרנציאליות חלקיות מ'", time: "11:30 - 13:30", startMin: 690, endMin: 810, room: "אולמן 506", lecturer: "אמתי אלפרין", type: "תרגול 22" }
+        ],
+        1: [ // יום שני
+            { title: "פיסיקה 2", time: "08:30 - 10:30", startMin: 510, endMin: 630, room: "טאוב 1", lecturer: "ד\"ר גדעון אלון", type: "הרצאה 10" },
+            { title: "מכניקת מוצקים 2מ'", time: "10:30 - 14:30", startMin: 630, endMin: 870, room: "הנדסה כימית 1", lecturer: "פרופ' יוסף גבלי", type: "הרצאה 10" }
+        ],
+        2: [ // יום שלישי
+            { title: "תרמודינמיקה 1", time: "08:30 - 11:30", startMin: 510, endMin: 690, room: "הנדסה כימית 1", lecturer: "פרופ' טרטקובסקי", type: "הרצאה 10" },
+            { title: "משוואות דיפרנציאליות חלקיות מ'", time: "12:30 - 14:30", startMin: 750, endMin: 870, room: "אולמן 506", lecturer: "אמתי אלפרין", type: "הרצאה" },
+            { title: "פיסיקה 2", time: "14:30 - 16:30", startMin: 870, endMin: 990, room: "טאוב", lecturer: "צוות פיסיקה", type: "תרגול" }
+        ],
+        3: [ // יום רביעי
+            { title: "מכניקת מוצקים 2מ'", time: "12:30 - 14:30", startMin: 750, endMin: 870, room: "ליידי דייוויס 240", lecturer: "מתרגל", type: "תרגול" },
+            { title: "גרפיקה הנדסית וכתיבה טכנית", time: "14:30 - 17:30", startMin: 870, endMin: 1050, room: "דנציגר", lecturer: "צוות גרפיקה", type: "מעבדה" }
+        ],
+        4: [ // יום חמישי
+            { title: "גרפיקה הנדסית וכתיבה טכנית", time: "09:30 - 11:30", startMin: 570, endMin: 690, room: "דנציגר", lecturer: "מרצה", type: "הרצאה 10" },
+            { title: "מעבדת פיסיקה 2", time: "12:30 - 15:30", startMin: 750, endMin: 930, room: "פיסיקה 200", lecturer: "מדריך מעבדה", type: "מעבדה" }
+        ],
+        5: [], // יום שישי (חופשי)
+        6: []  // שבת
+    };
+
+    // 1. Digital Clock & Live Day Display
     function updateClock() {
         if (!clockEl) return;
         const now = new Date();
@@ -138,9 +167,25 @@
     }
     resetIdleTimer();
 
-    // 4. Data Extraction & Rendering
+    // 4. Data Extraction & Real-Time Schedule Resolution
     function loadWatchData() {
         const state = (window.opener && window.opener.gameState) || window.gameState || window.PRELOADED_USER_STATE || {};
+
+        // Day and Date Evaluation
+        const now = new Date();
+        const dayIdx = now.getDay();
+        const curDayName = HEBREW_DAYS[dayIdx] || "יום ראשון";
+        const curDateStr = `${now.getDate()} ב${HEBREW_MONTHS[now.getMonth()]}`;
+        const dayHeader = `${curDayName} • ${curDateStr}`;
+
+        const dayRadarEl = document.getElementById('w-day-radar');
+        if (dayRadarEl) dayRadarEl.innerText = dayHeader;
+
+        const timelineHeaderEl = document.getElementById('w-timeline-header');
+        if (timelineHeaderEl) timelineHeaderEl.innerText = `לו״ז ${curDayName} (${curDateStr})`;
+
+        // Current time in minutes
+        const curTotalMin = now.getHours() * 60 + now.getMinutes();
 
         // A. Next Class Radar
         const titleEl = document.getElementById('w-class-title');
@@ -149,16 +194,9 @@
         const statusEl = document.getElementById('w-class-status');
         const lecturerEl = document.getElementById('w-class-lecturer');
 
-        // Check if there are cached widget classes
-        let nextClass = {
-            name: "חדו״א 2מ׳",
-            time: "10:30 - 12:30",
-            room: "דנציגר 101",
-            lecturer: "פרופ' כהן",
-            type: "הרצאה",
-            status: "🟢 מתקיים כעת!"
-        };
+        let nextClass = null;
 
+        // Try reading cached widget class if valid
         try {
             const rawNext = localStorage.getItem('ast_next_class_cache');
             if (rawNext) {
@@ -167,33 +205,106 @@
             }
         } catch(e) {}
 
-        if (titleEl) titleEl.innerText = nextClass.name;
-        if (timeEl) timeEl.innerText = nextClass.time;
-        if (roomEl) roomEl.innerText = `📍 ${nextClass.room}`;
-        if (statusEl) statusEl.innerText = nextClass.status;
-        if (lecturerEl) lecturerEl.innerText = `👨‍🏫 ${nextClass.lecturer} • ${nextClass.type}`;
+        // If no cached class or new day, resolve using authentic schedule
+        const todaysClasses = TECHNION_SCHEDULE[dayIdx] || [];
+        if (!nextClass) {
+            if (todaysClasses.length === 0) {
+                if (dayIdx === 5) {
+                    nextClass = {
+                        name: "יום שישי - יום חופשי",
+                        time: "סופ״ש נעים 🏖️",
+                        room: "ללא שיעורים פרונטליים",
+                        lecturer: "זמן מעולה לפרויקטים",
+                        type: "חופשי",
+                        status: "🏖️ יום חופשי"
+                    };
+                } else {
+                    nextClass = {
+                        name: "שבת שלום ומנוחה! 🕯️",
+                        time: "סופ״ש",
+                        room: "מתחילים מחר (יום ראשון) ב-11:30",
+                        lecturer: "סמסטרו ME",
+                        type: "שבת",
+                        status: "🕯️ שבת שלום"
+                    };
+                }
+            } else {
+                // Find ongoing or upcoming class
+                let activeOrUpcoming = null;
+                for (const c of todaysClasses) {
+                    if (curTotalMin < c.endMin) {
+                        activeOrUpcoming = c;
+                        break;
+                    }
+                }
+
+                if (activeOrUpcoming) {
+                    let statusText;
+                    if (curTotalMin >= activeOrUpcoming.startMin && curTotalMin <= activeOrUpcoming.endMin) {
+                        statusText = "🟢 מתקיים כעת!";
+                    } else if (curTotalMin < activeOrUpcoming.startMin) {
+                        const diff = activeOrUpcoming.startMin - curTotalMin;
+                        statusText = diff <= 60 ? `⏰ מתחיל בעוד ${diff} דקות` : "⏳ השיעור הבא היום";
+                    } else {
+                        statusText = "⏳ שיעור קרוב";
+                    }
+
+                    nextClass = {
+                        name: activeOrUpcoming.title,
+                        time: activeOrUpcoming.time,
+                        room: activeOrUpcoming.room,
+                        lecturer: activeOrUpcoming.lecturer,
+                        type: activeOrUpcoming.type,
+                        status: statusText
+                    };
+                } else {
+                    // All classes finished for today
+                    nextClass = {
+                        name: todaysClasses[todaysClasses.length - 1].title,
+                        time: todaysClasses[todaysClasses.length - 1].time,
+                        room: "הסתיימו הלימודים להיום 🎉",
+                        lecturer: "השיעור הבא ביום הלימודים הבא",
+                        type: "סיום יום",
+                        status: "🎉 הסתיימו הלימודים"
+                    };
+                }
+            }
+        }
+
+        if (titleEl && nextClass) titleEl.innerText = nextClass.name;
+        if (timeEl && nextClass) timeEl.innerText = nextClass.time;
+        if (roomEl && nextClass) roomEl.innerText = nextClass.room.startsWith("📍") ? nextClass.room : `📍 ${nextClass.room}`;
+        if (statusEl && nextClass) statusEl.innerText = nextClass.status;
+        if (lecturerEl && nextClass) lecturerEl.innerText = `👨‍🏫 ${nextClass.lecturer} • ${nextClass.type}`;
 
         // B. Today's Timeline
         const timelineList = document.getElementById('w-timeline-list');
         if (timelineList) {
-            const sampleTimeline = [
-                { title: "חדו״א 2מ׳", time: "10:30 - 12:30", room: "דנציגר 101", active: true },
-                { title: "מכניקת מוצקים 1", time: "12:30 - 14:30", room: "ליידי דייוויס 240", active: false },
-                { title: "פיסיקה 1", time: "15:30 - 17:30", room: "פיסיקה 100", active: false }
-            ];
-
             let timelineHtml = '';
-            sampleTimeline.forEach(c => {
-                timelineHtml += `
-                    <div class="timeline-item ${c.active ? 'active' : ''}">
+            if (todaysClasses.length === 0) {
+                timelineHtml = `
+                    <div class="timeline-item">
                         <div class="timeline-item-title">
-                            <div>${c.title}</div>
-                            <div class="timeline-item-room">📍 ${c.room}</div>
+                            <div>${dayIdx === 5 ? 'יום שישי - יום חופשי 🏖️' : 'שבת שלום ומנוחה 🕯️'}</div>
+                            <div class="timeline-item-room">אין שיעורים מתוזמנים</div>
                         </div>
-                        <div class="timeline-item-time">${c.time}</div>
+                        <div class="timeline-item-time">חופשי</div>
                     </div>
                 `;
-            });
+            } else {
+                todaysClasses.forEach(c => {
+                    const isActive = (curTotalMin >= c.startMin && curTotalMin <= c.endMin);
+                    timelineHtml += `
+                        <div class="timeline-item ${isActive ? 'active' : ''}">
+                            <div class="timeline-item-title">
+                                <div>${c.title}</div>
+                                <div class="timeline-item-room">📍 ${c.room}</div>
+                            </div>
+                            <div class="timeline-item-time">${c.time}</div>
+                        </div>
+                    `;
+                });
+            }
             timelineList.innerHTML = timelineHtml;
         }
 
@@ -201,13 +312,13 @@
         const examTitle = document.getElementById('w-exam-title');
         const examCourse = document.getElementById('w-exam-course');
         if (examTitle) examTitle.innerText = "📝 מועד א׳ בעוד 14 ימים";
-        if (examCourse) examCourse.innerText = "034028 - מכניקת מוצקים 1";
+        if (examCourse) examCourse.innerText = "104228 - מד״ח מ'";
 
         const tasksList = document.getElementById('w-tasks-list');
         if (tasksList) {
             const sampleTasks = [
-                { id: "t1", title: "תרגיל 3: פיתול ומאמצים", done: false },
-                { id: "t2", title: "מעבדה 2: דוח מכין", done: false }
+                { id: "t1", title: "תרגיל 3: משוואת הגלים ומיתר", done: false },
+                { id: "t2", title: "דוח מכין: מעבדת פיסיקה 2", done: false }
             ];
 
             let tasksHtml = '';

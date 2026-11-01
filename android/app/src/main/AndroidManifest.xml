@@ -126,7 +126,15 @@
             <meta-data
                 android:name="android.appwidget.provider"
                 android:resource="@xml/widget_pomodoro_info" />
-        </receiver>
+        </receiver>        <!-- Wearable Data Layer Listener Service (Galaxy Watch 8 Bi-directional Sync) -->
+        <service
+            android:name=".PhoneWearListenerService"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.google.android.gms.wearable.MESSAGE_RECEIVED" />
+                <data android:scheme="wear" android:host="*" android:pathPrefix="/semestero" />
+            </intent-filter>
+        </service>
     </application>
 
     <!-- Permissions -->

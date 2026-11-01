@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- 
-    Semestero ME • Galaxy Watch 8 (44mm & 40mm) Wear OS Layout
+    Semestero ME ג€¢ Galaxy Watch 8 (44mm & 40mm) Wear OS Layout
     Optimized for circular AMOLED displays (450x450 / 480x480)
     Follows Wear OS 4/5 & One UI 6 Watch design standards
 -->
@@ -43,7 +43,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="🎓"
+                    android:text="נ“"
                     android:textSize="11sp" />
 
                 <TextView
@@ -55,6 +55,35 @@
                     android:textColor="@color/cyan_accent"
                     android:textSize="10.5sp"
                     android:textStyle="bold" />
+            </LinearLayout>
+
+            <!-- Today's Day & Live Date Header -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/tv_current_day"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="יום ראשון • 1 בנובמבר"
+                    android:textColor="@color/text_primary"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tv_sync_status"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="1dp"
+                    android:gravity="center"
+                    android:text="⚡ מסונכרן עם הטלפון"
+                    android:textColor="@color/cyan_accent"
+                    android:textSize="9.5sp" />
             </LinearLayout>
 
             <!-- Card 1: Next Class Radar (Hero Card) -->
@@ -81,7 +110,7 @@
                     android:paddingTop="2dp"
                     android:paddingEnd="8dp"
                     android:paddingBottom="2dp"
-                    android:text="🟢 מתקיים כעת!"
+                    android:text="נ¢ ׳׳×׳§׳™׳™׳ ׳›׳¢׳×!"
                     android:textColor="@color/emerald_green"
                     android:textSize="10sp"
                     android:textStyle="bold" />
@@ -95,7 +124,7 @@
                     android:ellipsize="end"
                     android:gravity="center"
                     android:maxLines="2"
-                    android:text="חדו״א 2מ׳"
+                    android:text="׳—׳“׳•׳´׳ 2׳׳³"
                     android:textColor="@color/text_primary"
                     android:textSize="15sp"
                     android:textStyle="bold" />
@@ -118,7 +147,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp"
                     android:gravity="center"
-                    android:text="📍 דנציגר 101"
+                    android:text="נ“ ׳“׳ ׳¦׳™׳’׳¨ 101"
                     android:textColor="@color/text_secondary"
                     android:textSize="11.5sp" />
             </LinearLayout>
@@ -148,7 +177,7 @@
                     android:paddingTop="2dp"
                     android:paddingEnd="8dp"
                     android:paddingBottom="2dp"
-                    android:text="📝 מבחן מועד א׳ בעוד 14 יום"
+                    android:text="נ“ ׳׳‘׳—׳ ׳׳•׳¢׳“ ׳׳³ ׳‘׳¢׳•׳“ 14 ׳™׳•׳"
                     android:textColor="@color/amber_warning"
                     android:textSize="10.5sp"
                     android:textStyle="bold" />
@@ -160,7 +189,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="5dp"
                     android:gravity="center"
-                    android:text="2 משימות פתוחות במודל"
+                    android:text="2 ׳׳©׳™׳׳•׳× ׳₪׳×׳•׳—׳•׳× ׳‘׳׳•׳“׳"
                     android:textColor="@color/text_primary"
                     android:textSize="12sp" />
             </LinearLayout>
@@ -182,7 +211,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="🎯 ממוצע תואר"
+                    android:text="נ¯ ׳׳׳•׳¦׳¢ ׳×׳•׳׳¨"
                     android:textColor="@color/text_secondary"
                     android:textSize="10sp" />
 
@@ -203,7 +232,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp"
                     android:gravity="center"
-                    android:text="🎖️ הצטיינות דיקן"
+                    android:text="נ–ן¸ ׳”׳¦׳˜׳™׳™׳ ׳•׳× ׳“׳™׳§׳"
                     android:textColor="@color/cyan_accent"
                     android:textSize="10.5sp"
                     android:textStyle="bold" />
@@ -225,7 +254,7 @@
                     android:paddingTop="0dp"
                     android:paddingEnd="18dp"
                     android:paddingBottom="0dp"
-                    android:text="🔄 רענן נתונים"
+                    android:text="נ”„ ׳¨׳¢׳ ׳ ׳ ׳×׳•׳ ׳™׳"
                     android:textColor="@color/cyan_accent"
                     android:textSize="11sp"
                     android:textStyle="bold" />
@@ -240,7 +269,7 @@
                     android:paddingTop="0dp"
                     android:paddingEnd="16dp"
                     android:paddingBottom="0dp"
-                    android:text="🔔 בדיקת התראה ורטט"
+                    android:text="נ”” ׳‘׳“׳™׳§׳× ׳”׳×׳¨׳׳” ׳•׳¨׳˜׳˜"
                     android:textColor="@color/emerald_green"
                     android:textSize="10.5sp"
                     android:textStyle="bold" />
