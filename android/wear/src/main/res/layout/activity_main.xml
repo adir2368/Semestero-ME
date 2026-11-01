@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- 
-    Semestero ME ג€¢ Galaxy Watch 8 (44mm & 40mm) Wear OS Layout
+    Semestero ME • Galaxy Watch 8 (44mm & 40mm) Wear OS Layout
     Optimized for circular AMOLED displays (450x450 / 480x480)
     Follows Wear OS 4/5 & One UI 6 Watch design standards
 -->
@@ -43,7 +43,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="נ“"
+                    android:text="🎓"
                     android:textSize="11sp" />
 
                 <TextView
@@ -110,7 +110,7 @@
                     android:paddingTop="2dp"
                     android:paddingEnd="8dp"
                     android:paddingBottom="2dp"
-                    android:text="נ¢ ׳׳×׳§׳™׳™׳ ׳›׳¢׳×!"
+                    android:text="🟢 מתקיים כעת!"
                     android:textColor="@color/emerald_green"
                     android:textSize="10sp"
                     android:textStyle="bold" />
@@ -124,7 +124,7 @@
                     android:ellipsize="end"
                     android:gravity="center"
                     android:maxLines="2"
-                    android:text="׳—׳“׳•׳´׳ 2׳׳³"
+                    android:text="חדו״א 2מ׳"
                     android:textColor="@color/text_primary"
                     android:textSize="15sp"
                     android:textStyle="bold" />
@@ -147,7 +147,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp"
                     android:gravity="center"
-                    android:text="נ“ ׳“׳ ׳¦׳™׳’׳¨ 101"
+                    android:text="📍 דנציגר 101"
                     android:textColor="@color/text_secondary"
                     android:textSize="11.5sp" />
             </LinearLayout>
@@ -177,7 +177,7 @@
                     android:paddingTop="2dp"
                     android:paddingEnd="8dp"
                     android:paddingBottom="2dp"
-                    android:text="נ“ ׳׳‘׳—׳ ׳׳•׳¢׳“ ׳׳³ ׳‘׳¢׳•׳“ 14 ׳™׳•׳"
+                    android:text="📝 מבחן מועד א׳ בעוד 14 יום"
                     android:textColor="@color/amber_warning"
                     android:textSize="10.5sp"
                     android:textStyle="bold" />
@@ -189,7 +189,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="5dp"
                     android:gravity="center"
-                    android:text="2 ׳׳©׳™׳׳•׳× ׳₪׳×׳•׳—׳•׳× ׳‘׳׳•׳“׳"
+                    android:text="2 משימות פתוחות במודל"
                     android:textColor="@color/text_primary"
                     android:textSize="12sp" />
             </LinearLayout>
@@ -211,7 +211,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="נ¯ ׳׳׳•׳¦׳¢ ׳×׳•׳׳¨"
+                    android:text="🎯 ממוצע תואר"
                     android:textColor="@color/text_secondary"
                     android:textSize="10sp" />
 
@@ -232,7 +232,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp"
                     android:gravity="center"
-                    android:text="נ–ן¸ ׳”׳¦׳˜׳™׳™׳ ׳•׳× ׳“׳™׳§׳"
+                    android:text="🎖️ הצטיינות דיקן"
                     android:textColor="@color/cyan_accent"
                     android:textSize="10.5sp"
                     android:textStyle="bold" />
@@ -254,7 +254,7 @@
                     android:paddingTop="0dp"
                     android:paddingEnd="18dp"
                     android:paddingBottom="0dp"
-                    android:text="נ”„ ׳¨׳¢׳ ׳ ׳ ׳×׳•׳ ׳™׳"
+                    android:text="🔄 רענן נתונים"
                     android:textColor="@color/cyan_accent"
                     android:textSize="11sp"
                     android:textStyle="bold" />
@@ -269,7 +269,7 @@
                     android:paddingTop="0dp"
                     android:paddingEnd="16dp"
                     android:paddingBottom="0dp"
-                    android:text="נ”” ׳‘׳“׳™׳§׳× ׳”׳×׳¨׳׳” ׳•׳¨׳˜׳˜"
+                    android:text="🔔 בדיקת התראה ורטט"
                     android:textColor="@color/emerald_green"
                     android:textSize="10.5sp"
                     android:textStyle="bold" />
