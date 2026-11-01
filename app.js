@@ -1,3 +1,47 @@
+// ==========================================================================
+// App-Performance Toolkit (03/31 & 12/31): Network Deduplication & Request Timeout
+// ==========================================================================
+const _inFlightFetchRequests = new Map();
+
+async function fetchWithTimeoutAndDedup(url, options = {}, timeoutMs = 8000) {
+    const method = (options.method || 'GET').toUpperCase();
+    const isGet = method === 'GET';
+    const cacheKey = isGet ? `${url}::${JSON.stringify(options.headers || {})}` : null;
+
+    if (isGet && _inFlightFetchRequests.has(cacheKey)) {
+        console.log(`[NetDedup] Reusing in-flight network request for: ${url}`);
+        return _inFlightFetchRequests.get(cacheKey);
+    }
+
+    const controller = new AbortController();
+    const userSignal = options.signal;
+    if (userSignal) {
+        userSignal.addEventListener('abort', () => controller.abort());
+    }
+    const timeoutId = setTimeout(() => {
+        controller.abort(new Error(`[NetworkTimeout] Request timed out after ${timeoutMs}ms: ${url}`));
+    }, timeoutMs);
+
+    const fetchPromise = (async () => {
+        try {
+            const resp = await fetch(url, { ...options, signal: controller.signal });
+            return resp;
+        } finally {
+            clearTimeout(timeoutId);
+            if (isGet && cacheKey) {
+                _inFlightFetchRequests.delete(cacheKey);
+            }
+        }
+    })();
+
+    if (isGet && cacheKey) {
+        _inFlightFetchRequests.set(cacheKey, fetchPromise);
+    }
+
+    return fetchPromise;
+}
+window.fetchWithTimeoutAndDedup = fetchWithTimeoutAndDedup;
+
 // Calculates semester-specific metrics: GPA, graded credits, and completion status
 function getSemesterStats(semNumber) {
     if (!gameState || !gameState.courses) {
@@ -2677,7 +2721,7 @@ async function performMoodleSync(moodleUrl, token) {
 
     try {
         const coursesUrl = `${moodleUrl}/webservice/rest/server.php?wstoken=${token}&wsfunction=core_enrol_get_users_courses&moodlewsrestformat=json`;
-        const response = await fetch(coursesUrl);
+        const response = await fetchWithTimeoutAndDedup(coursesUrl, {}, 8000);
         if (!response.ok) throw new Error("Connection failed");
         
         const moodleCourses = await response.json();
@@ -12312,22 +12356,22 @@ function renderTechnionPlusQuickBar(course) {
 
     groupEl.innerHTML = `
         <a href="${moodleUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-xs technion-link-btn" style="background: rgba(2, 132, 199, 0.22); border: 1px solid #0284c7; color: #38bdf8; text-decoration: none; padding: 4px 10px; border-radius: 6px; font-size: 0.76rem; font-weight: 700; display: inline-flex; align-items: center; gap: 5px;" title="מעבר ישיר לקורס במודל תשפ״ז (Moodle 26)">
-            <img src="moodle_icon.svg" alt="Moodle" class="technion-btn-brand-icon" style="width: 15px; height: 15px; object-fit: contain; vertical-align: -2px; flex-shrink: 0;"> מודל 26 ↗
+            <img src="moodle_icon.svg" alt="Moodle" loading="lazy" decoding="async" class="technion-btn-brand-icon" style="width: 15px; height: 15px; object-fit: contain; vertical-align: -2px; flex-shrink: 0;"> מודל 26 ↗
         </a>
         <a href="${panoptoUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-xs technion-link-btn" style="background: rgba(244, 63, 94, 0.18); border: 1px solid #f43f5e; color: #fb7185; text-decoration: none; padding: 4px 10px; border-radius: 6px; font-size: 0.76rem; font-weight: 700; display: inline-flex; align-items: center; gap: 5px;" title="חיפוש הקלטות הקורס בפנופטו הטכניון">
-            <img src="panopto_icon.svg" alt="Panopto" class="technion-btn-brand-icon" style="width: 15px; height: 15px; object-fit: contain; vertical-align: -2px; flex-shrink: 0;"> פנופטו ↗
+            <img src="panopto_icon.svg" alt="Panopto" loading="lazy" decoding="async" class="technion-btn-brand-icon" style="width: 15px; height: 15px; object-fit: contain; vertical-align: -2px; flex-shrink: 0;"> פנופטו ↗
         </a>
         <a href="${cfUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-xs technion-link-btn" style="background: rgba(245, 158, 11, 0.18); border: 1px solid #f59e0b; color: #fbbf24; text-decoration: none; padding: 4px 10px; border-radius: 6px; font-size: 0.76rem; font-weight: 700; display: inline-flex; align-items: center; gap: 5px;" title="דף הקורס ומערכת שעות ב-CheeseFork">
-            <img src="cheesefork_icon.png" alt="CheeseFork" class="technion-btn-brand-icon" style="width: 15px; height: 15px; object-fit: contain; vertical-align: -2px; border-radius: 2px; flex-shrink: 0;"> צ'יזפורק ↗
+            <img src="cheesefork_icon.webp" alt="CheeseFork" loading="lazy" decoding="async" class="technion-btn-brand-icon" style="width: 15px; height: 15px; object-fit: contain; vertical-align: -2px; border-radius: 2px; flex-shrink: 0;"> צ'יזפורק ↗
         </a>
         <a href="${pangeaUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-xs technion-link-btn" style="background: rgba(14, 165, 233, 0.18); border: 1px solid #0284c7; color: #38bdf8; text-decoration: none; padding: 4px 10px; border-radius: 6px; font-size: 0.76rem; font-weight: 700; display: inline-flex; align-items: center; gap: 5px;" title="קישור ישיר לסיכומי הקורס ודפי נוסחאות בפנגייה (Ido Fang Bentov)">
-            <img src="pangea_icon.png" alt="Fangia" class="technion-btn-brand-icon pangea-btn-icon" style="width: 15px; height: 15px; object-fit: contain; vertical-align: -2px; border-radius: 2px; flex-shrink: 0;"> פנגייה ↗
+            <img src="pangea_icon.png" alt="Fangia" loading="lazy" decoding="async" class="technion-btn-brand-icon pangea-btn-icon" style="width: 15px; height: 15px; object-fit: contain; vertical-align: -2px; border-radius: 2px; flex-shrink: 0;"> פנגייה ↗
         </a>
         <a href="${driveUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-xs technion-link-btn" style="background: rgba(168, 85, 247, 0.18); border: 1px solid #a855f7; color: #c084fc; text-decoration: none; padding: 4px 10px; border-radius: 6px; font-size: 0.76rem; font-weight: 700; display: inline-flex; align-items: center; gap: 5px;" title="חיפוש תיקיות Google Drive, סיכומים וחומרי עזר">
-            <img src="drive_icon.svg" alt="Google Drive" class="technion-btn-brand-icon" style="width: 15px; height: 15px; object-fit: contain; vertical-align: -2px; flex-shrink: 0;"> דרייב וסיכומים ↗
+            <img src="drive_icon.svg" alt="Google Drive" loading="lazy" decoding="async" class="technion-btn-brand-icon" style="width: 15px; height: 15px; object-fit: contain; vertical-align: -2px; flex-shrink: 0;"> דרייב וסיכומים ↗
         </a>
         <a href="https://grades.technion.ac.il/" target="_blank" rel="noopener noreferrer" class="btn btn-xs technion-link-btn" style="background: rgba(147, 51, 234, 0.22); border: 1px solid #9333ea; color: #d8b4fe; text-decoration: none; padding: 4px 10px; border-radius: 6px; font-size: 0.76rem; font-weight: 700; display: inline-flex; align-items: center; gap: 5px;" title="פורטל הציונים, סריקות מחברות בחינה וערעורים באס״ט ובטכניון (grades.technion.ac.il)">
-            <img src="asat_icon.png" alt="ASAT" class="technion-btn-brand-icon" style="width: 15px; height: 15px; object-fit: contain; vertical-align: -2px; border-radius: 2px; flex-shrink: 0;"> ציונים וסריקות ↗
+            <img src="asat_icon.webp" alt="ASAT" loading="lazy" decoding="async" class="technion-btn-brand-icon" style="width: 15px; height: 15px; object-fit: contain; vertical-align: -2px; border-radius: 2px; flex-shrink: 0;"> ציונים וסריקות ↗
         </a>
     `;
 }
@@ -13625,7 +13669,8 @@ function openCourseDetails(code) {
                 }
 
                 try {
-                    const response = await fetch(`${moodleUrl}/webservice/rest/server.php?wstoken=${token}&wsfunction=mod_assign_get_assignments&moodlewsrestformat=json`, { mode: 'cors' });
+                    const moodleApiUrl = `${moodleUrl}/webservice/rest/server.php?wstoken=${token}&wsfunction=mod_assign_get_assignments&moodlewsrestformat=json`;
+                    const response = await fetchWithTimeoutAndDedup(moodleApiUrl, { mode: 'cors' }, 8000);
                     if (!response.ok) {
                         throw new Error(`שגיאת שרת: ${response.status} ${response.statusText}`);
                     }
@@ -14275,7 +14320,7 @@ function openCourseDetails(code) {
                 examsHtml = `
                     <div class="modal-exam-dates-strip" style="background: rgba(148, 163, 184, 0.08); border: 1px solid rgba(148, 163, 184, 0.2); border-radius: 6px; padding: 8px 12px; color: #94a3b8; font-size: 0.8rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
                         <span>📅 מועדי בחינות (סמסטר חורף תשפ״ז 2026/27): טרם פורסמו רשמית בטכניון</span>
-                        <a href="${cfUrl}" target="_blank" rel="noopener noreferrer" style="color: #fbbf24; text-decoration: none; font-size: 0.78rem; font-weight: 600;"><img src="cheesefork_icon.png" alt="CheeseFork" style="width: 14px; height: 14px; object-fit: contain; vertical-align: -2px; margin-left: 3px;">בדוק עדכונים ב-CheeseFork ↗</a>
+                        <a href="${cfUrl}" target="_blank" rel="noopener noreferrer" style="color: #fbbf24; text-decoration: none; font-size: 0.78rem; font-weight: 600;"><img src="cheesefork_icon.webp" alt="CheeseFork" loading="lazy" decoding="async" style="width: 14px; height: 14px; object-fit: contain; vertical-align: -2px; margin-left: 3px;">בדוק עדכונים ב-CheeseFork ↗</a>
                     </div>
                 `;
             }
@@ -16608,6 +16653,48 @@ window.hideTaskContextMenu = hideTaskContextMenu;
 window.updateTasksBulkToolbar = updateTasksBulkToolbar;
 
 
+// App-Performance Toolkit (01/31): Skeleton Loading Rows for Tasks
+function renderTaskSkeletons() {
+    const tableBody = document.getElementById("notion-tasks-table-body");
+    if (!tableBody) return;
+    tableBody.innerHTML = `
+        <tr class="skeleton-task-tr">
+            <td colspan="6" style="padding: 10px 14px;">
+                <div class="skeleton-task-item" style="margin: 0; background: transparent; border: none;">
+                    <span class="skeleton-box skeleton-task-check"></span>
+                    <div class="skeleton-task-content">
+                        <span class="skeleton-box skeleton-task-title"></span>
+                        <span class="skeleton-box skeleton-task-due"></span>
+                    </div>
+                </div>
+            </td>
+        </tr>
+        <tr class="skeleton-task-tr">
+            <td colspan="6" style="padding: 10px 14px;">
+                <div class="skeleton-task-item" style="margin: 0; background: transparent; border: none;">
+                    <span class="skeleton-box skeleton-task-check"></span>
+                    <div class="skeleton-task-content">
+                        <span class="skeleton-box skeleton-task-title" style="width: 50%;"></span>
+                        <span class="skeleton-box skeleton-task-due" style="width: 30%;"></span>
+                    </div>
+                </div>
+            </td>
+        </tr>
+        <tr class="skeleton-task-tr">
+            <td colspan="6" style="padding: 10px 14px;">
+                <div class="skeleton-task-item" style="margin: 0; background: transparent; border: none;">
+                    <span class="skeleton-box skeleton-task-check"></span>
+                    <div class="skeleton-task-content">
+                        <span class="skeleton-box skeleton-task-title" style="width: 65%;"></span>
+                        <span class="skeleton-box skeleton-task-due" style="width: 25%;"></span>
+                    </div>
+                </div>
+            </td>
+        </tr>
+    `;
+}
+window.renderTaskSkeletons = renderTaskSkeletons;
+
 // Unified Task Refresh & Stale Data Sanitization Engine
 window.refreshTasks = function(options = {}) {
     const isSilent = options.isSilent === true;
@@ -16615,6 +16702,9 @@ window.refreshTasks = function(options = {}) {
     if (btn) {
         btn.disabled = true;
         btn.innerHTML = '<span>⏳</span> <span>מרענן...</span>';
+    }
+    if (!isSilent) {
+        renderTaskSkeletons();
     }
 
     try {
@@ -22497,11 +22587,11 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.10.31-v2.9.0",
-    version: "2.9.0",
-    build: "20261031_03",
-    date: "2026-10-31 20:05",
-    description: "גרסה 2.9.0: שיבוץ אינטראקטיבי של קורסי חובה לפי סמסטר לבחירה, פתרון שחזור פיזיקה 2, וכרטיסיית בחינות סיווג מתקפלת"
+    code: "REV-2026.11.01-v2.9.1",
+    version: "2.9.1",
+    build: "20261101_01",
+    date: "2026-11-01 19:15",
+    description: "גרסה 2.9.1: הטמעת ערכת ביצועי-על (31 App-Performance Toolkit) - שלדי טעינה Shimmer, מניעת כפילויות רשת, Windowing במאגר הקורסים, ניטור Core Web Vitals ו-Font Optimization"
 };
 window.APP_VERSION = APP_CURRENT_REVISION.version;
 

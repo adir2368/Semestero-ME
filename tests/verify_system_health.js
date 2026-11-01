@@ -277,6 +277,42 @@ async function run() {
             assert.strictEqual(mapStats.uniqueHubs, 34, `Expected 34 unique Pangea course hubs, got ${mapStats?.uniqueHubs}`);
             assert(mapStats.hasDynamics && mapStats.hasFluids && mapStats.hasManufacture && mapStats.hasCalculus1 && mapStats.hasPhysicsLab && mapStats.hasMaterials, 'Key mandatory courses missing from Pangea course map');
         });
+        // Test 9: App-Performance Toolkit (Core Web Vitals RUM & Network Deduplication)
+        await test('App-Performance Toolkit (03/31 & 30/31): Network Deduplication & Core Web Vitals RUM', async () => {
+            const perfStats = await cdp.eval(`(() => {
+                return {
+                    hasFetchDedup: typeof window.fetchWithTimeoutAndDedup === 'function',
+                    hasVitalsObj: typeof window.__semestero_vitals === 'object' && window.__semestero_vitals !== null,
+                    hasTraceApi: typeof window.SiteAnalytics !== 'undefined' && typeof window.SiteAnalytics.startTrace === 'function',
+                    hasSkeletonTask: typeof window.renderTaskSkeletons === 'function'
+                };
+            })()`);
+            assert(perfStats.hasFetchDedup, 'fetchWithTimeoutAndDedup is not exposed globally');
+            assert(perfStats.hasVitalsObj, '__semestero_vitals is not initialized on window');
+            assert(perfStats.hasTraceApi, 'SiteAnalytics.startTrace is not defined');
+            assert(perfStats.hasSkeletonTask, 'renderTaskSkeletons is not defined');
+        });
+
+        // Test 10: App-Performance Toolkit (01/31 & 23/31): Skeleton Loading & Windowed List Rendering
+        await test('App-Performance Toolkit (01/31 & 23/31): Skeletons & Windowed Catalog Rendering', async () => {
+            const plannerState = await cdp.eval(`(() => {
+                const hasCatalogSkeleton = typeof window.renderCatalogSkeletons === 'function';
+                if (typeof window.setActiveMainTab === 'function') {
+                    window.setActiveMainTab('planner');
+                }
+                const pool = document.getElementById('planner-available-electives-list');
+                const loadMoreBtn = document.getElementById('btn-catalog-load-more');
+                return {
+                    hasCatalogSkeleton,
+                    hasPool: !!pool,
+                    itemsCount: pool ? pool.querySelectorAll('.planner-pool-item').length : 0,
+                    hasLoadMoreBtn: !!loadMoreBtn
+                };
+            })()`);
+            assert(plannerState.hasCatalogSkeleton, 'renderCatalogSkeletons is not defined');
+            assert(plannerState.hasPool, 'planner-available-electives-list pool container missing');
+        });
+
 
     } finally {
         console.log(`\n========================================================================`);

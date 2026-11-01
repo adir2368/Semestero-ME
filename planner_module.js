@@ -19,6 +19,8 @@
     let englishLevel = 'none'; // 'exempt_all' | 'exempt_a' | 'none'
     let selectedCategory = 'ALL'; // 'ALL' | 'A' | 'B' | 'C' | 'D' | 'E' | 'UNASSIGNED'
     let searchQuery = '';
+    const CATALOG_WINDOW_PAGE_SIZE = 24;
+    let catalogVisibleCount = CATALOG_WINDOW_PAGE_SIZE;
     let customPlan = null;
     let unassignedCourses = [];
     let isWhatIfMode = false;
@@ -2305,6 +2307,44 @@
         }
     }
 
+    // App-Performance Toolkit (01/31): Shimmer Skeleton Placeholder for Catalog Loading
+    function renderCatalogSkeletons(container) {
+        if (!container) return;
+        container.innerHTML = `
+            <div class="skeleton-pool-item">
+                <div class="skeleton-pool-info">
+                    <span class="skeleton-box skeleton-pool-title"></span>
+                    <div class="skeleton-pool-meta">
+                        <span class="skeleton-box skeleton-pool-tag"></span>
+                        <span class="skeleton-box skeleton-pool-code"></span>
+                    </div>
+                </div>
+                <span class="skeleton-box skeleton-pool-btn"></span>
+            </div>
+            <div class="skeleton-pool-item">
+                <div class="skeleton-pool-info">
+                    <span class="skeleton-box skeleton-pool-title" style="width: 50%;"></span>
+                    <div class="skeleton-pool-meta">
+                        <span class="skeleton-box skeleton-pool-tag"></span>
+                        <span class="skeleton-box skeleton-pool-code" style="width: 60px;"></span>
+                    </div>
+                </div>
+                <span class="skeleton-box skeleton-pool-btn"></span>
+            </div>
+            <div class="skeleton-pool-item">
+                <div class="skeleton-pool-info">
+                    <span class="skeleton-box skeleton-pool-title" style="width: 75%;"></span>
+                    <div class="skeleton-pool-meta">
+                        <span class="skeleton-box skeleton-pool-tag"></span>
+                        <span class="skeleton-box skeleton-pool-code"></span>
+                    </div>
+                </div>
+                <span class="skeleton-box skeleton-pool-btn"></span>
+            </div>
+        `;
+    }
+    global.renderCatalogSkeletons = renderCatalogSkeletons;
+
     function renderAddElectivesSection(plan, courseSemMap) {
         // 1. Gather all course codes currently placed in plan
         const placedCodes = new Set();
@@ -2572,7 +2612,11 @@
                         : 'לא נמצאו קורסי בחירה מתאימים לסינון.'));
             poolContainer.innerHTML = `<div style="font-size: 0.76rem; color: #94a3b8; text-align: center; padding: 16px;">${emptyMsg}</div>`;
         } else {
-            poolContainer.innerHTML = coursesToShow.map(course => {
+            const totalCount = coursesToShow.length;
+            const visibleCourses = coursesToShow.slice(0, catalogVisibleCount);
+            const hasMore = totalCount > catalogVisibleCount;
+
+            const cardsHtml = visibleCourses.map(course => {
                 const isSportItem = course.list === 'SPORTS' || course.type === 'sports';
                 const isMalagItem = course.list === 'MALAG' || course.type === 'humanities';
                 const isMandatoryItem = course.isMandatoryCatalogItem;
@@ -2617,6 +2661,14 @@
                     </div>
                 `;
             }).join('');
+
+            const loadMoreHtml = hasMore ? `
+                <button type="button" class="catalog-load-more-btn" id="btn-catalog-load-more" title="הצג קורסים נוספים ממאגר התכנון">
+                    <span>⬇️ הצג עוד 24 קורסים (${Math.min(catalogVisibleCount, totalCount)} מתוך ${totalCount})</span>
+                </button>
+            ` : '';
+
+            poolContainer.innerHTML = cardsHtml + loadMoreHtml;
         }
     }
 
@@ -2894,6 +2946,15 @@
                 filterPills.forEach(p => p.classList.remove('active'));
                 pill.classList.add('active');
                 selectedCategory = pill.getAttribute('data-category');
+                catalogVisibleCount = CATALOG_WINDOW_PAGE_SIZE;
+                renderAddElectivesSection(getActivePlan(), buildCourseSemesterMap(getActivePlan()));
+                return;
+            }
+
+            // Load More Catalog Courses Click (Windowed rendering pagination)
+            const loadMoreBtn = e.target.closest('#btn-catalog-load-more, .catalog-load-more-btn');
+            if (loadMoreBtn) {
+                catalogVisibleCount += CATALOG_WINDOW_PAGE_SIZE;
                 renderAddElectivesSection(getActivePlan(), buildCourseSemesterMap(getActivePlan()));
                 return;
             }
@@ -3049,6 +3110,7 @@
                 if (searchDebounceTimer) clearTimeout(searchDebounceTimer);
                 searchDebounceTimer = setTimeout(() => {
                     searchQuery = e.target.value.trim();
+                    catalogVisibleCount = CATALOG_WINDOW_PAGE_SIZE;
                     renderAddElectivesSection(getActivePlan(), buildCourseSemesterMap(getActivePlan()));
                 }, 150);
             });
@@ -3059,6 +3121,7 @@
         if (trackSelect) {
             trackSelect.addEventListener('change', (e) => {
                 selectedTrack = e.target.value;
+                catalogVisibleCount = CATALOG_WINDOW_PAGE_SIZE;
                 try {
                     localStorage.setItem(getScopedPlannerKey(PLANNER_TRACK_KEY), selectedTrack);
                 } catch (err) {}

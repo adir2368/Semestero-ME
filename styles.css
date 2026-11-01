@@ -15892,3 +15892,153 @@ tr.is-task-pinned {
         color: #0369a1 !important;
     }
 }
+
+/* ==========================================================================
+   App-Performance Toolkit (01/31): Skeleton Loading Screens & Shimmer Animation
+   ========================================================================== */
+@keyframes skeleton-shimmer {
+    0% {
+        background-position: -200% 0;
+    }
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+.skeleton-box {
+    display: inline-block;
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(90deg, rgba(30, 41, 59, 0.65) 25%, rgba(51, 65, 85, 0.9) 50%, rgba(30, 41, 59, 0.65) 75%);
+    background-size: 200% 100%;
+    animation: skeleton-shimmer 1.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+    border-radius: 6px;
+}
+
+.skeleton-pool-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    background: rgba(15, 23, 42, 0.65);
+    border: 1px solid rgba(56, 189, 248, 0.15);
+    border-radius: 8px;
+    margin-bottom: 8px;
+    gap: 12px;
+}
+
+.skeleton-pool-info {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1;
+}
+
+.skeleton-pool-title {
+    width: 65%;
+    height: 15px;
+    border-radius: 4px;
+}
+
+.skeleton-pool-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.skeleton-pool-tag {
+    width: 55px;
+    height: 18px;
+    border-radius: 10px;
+}
+
+.skeleton-pool-code {
+    width: 75px;
+    height: 13px;
+    border-radius: 4px;
+}
+
+.skeleton-pool-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    flex-shrink: 0;
+}
+
+.skeleton-task-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    background: rgba(15, 23, 42, 0.55);
+    border: 1px solid rgba(148, 163, 184, 0.12);
+    border-radius: 8px;
+    margin-bottom: 8px;
+}
+
+.skeleton-task-check {
+    width: 20px;
+    height: 20px;
+    border-radius: 6px;
+    flex-shrink: 0;
+}
+
+.skeleton-task-content {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1;
+}
+
+.skeleton-task-title {
+    width: 70%;
+    height: 14px;
+    border-radius: 4px;
+}
+
+.skeleton-task-due {
+    width: 40%;
+    height: 11px;
+    border-radius: 4px;
+}
+
+.skeleton-text-line {
+    display: block;
+    height: 12px;
+    margin-bottom: 6px;
+    border-radius: 4px;
+}
+
+.skeleton-text-line.w-full { width: 100%; }
+.skeleton-text-line.w-80 { width: 80%; }
+.skeleton-text-line.w-60 { width: 60%; }
+.skeleton-text-line.w-40 { width: 40%; }
+
+/* ==========================================================================
+   App-Performance Toolkit (05 & 23): Windowed List Rendering & Pagination Controls
+   ========================================================================== */
+.catalog-load-more-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 10px 16px;
+    margin-top: 10px;
+    background: linear-gradient(135deg, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.9));
+    border: 1px solid rgba(56, 189, 248, 0.35);
+    border-radius: 8px;
+    color: #38bdf8;
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.catalog-load-more-btn:hover {
+    background: rgba(56, 189, 248, 0.15);
+    border-color: #38bdf8;
+    box-shadow: 0 0 12px rgba(56, 189, 248, 0.3);
+    transform: translateY(-1px);
+}
+

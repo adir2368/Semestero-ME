@@ -415,10 +415,11 @@
 
             // Method 2: Direct Fetch (works in Electron without bridge if webSecurity is false, or in browser if allowed)
             try {
-                console.log('[MoodleSync] Attempting direct fetch:', cleanUrl);
-                const resp = await fetch(cleanUrl, {
+                console.log('[MoodleSync] Attempting direct fetch with timeout & dedup:', cleanUrl);
+                const fetchFn = (typeof window !== 'undefined' && window.fetchWithTimeoutAndDedup) ? window.fetchWithTimeoutAndDedup : fetch;
+                const resp = await fetchFn(cleanUrl, {
                     headers: { 'Accept': 'text/calendar, text/plain, */*' }
-                });
+                }, 8000);
                 if (resp.ok) {
                     const text = await resp.text();
                     if (text && text.includes('BEGIN:VCALENDAR')) {

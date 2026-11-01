@@ -29,6 +29,7 @@
         },
 
         init() {
+            this.initWebVitalsMonitor();
             this.loadLocalCounts();
 
             // Defer non-critical analytics recording to browser idle time to optimize TBT and FCP
@@ -57,6 +58,88 @@
             }
         },
 
+        
+        // ==========================================================================
+        // App-Performance Toolkit (30/31): Core Web Vitals Real-User Monitoring (RUM)
+        // ==========================================================================
+        initWebVitalsMonitor() {
+            window.__semestero_vitals = window.__semestero_vitals || {
+                lcp: null,
+                cls: 0,
+                fid: null,
+                inp: null,
+                longTasksCount: 0,
+                maxLongTaskMs: 0
+            };
+
+            if (typeof PerformanceObserver === 'undefined') return;
+
+            // 1. Largest Contentful Paint (LCP) - Target: < 2500ms
+            try {
+                const lcpObserver = new PerformanceObserver((entryList) => {
+                    const entries = entryList.getEntries();
+                    const lastEntry = entries[entries.length - 1];
+                    if (lastEntry) {
+                        window.__semestero_vitals.lcp = Math.round(lastEntry.startTime);
+                    }
+                });
+                lcpObserver.observe({ type: 'largest-contentful-paint', buffered: true });
+            } catch (e) {}
+
+            // 2. Cumulative Layout Shift (CLS) - Target: < 0.1
+            try {
+                let clsValue = 0;
+                const clsObserver = new PerformanceObserver((entryList) => {
+                    for (const entry of entryList.getEntries()) {
+                        if (!entry.hadRecentInput) {
+                            clsValue += entry.value;
+                            window.__semestero_vitals.cls = Number(clsValue.toFixed(4));
+                        }
+                    }
+                });
+                clsObserver.observe({ type: 'layout-shift', buffered: true });
+            } catch (e) {}
+
+            // 3. First Input Delay (FID) / Interaction to Next Paint (INP) - Target: < 200ms
+            try {
+                const fidObserver = new PerformanceObserver((entryList) => {
+                    const firstInput = entryList.getEntries()[0];
+                    if (firstInput) {
+                        window.__semestero_vitals.fid = Math.round(firstInput.processingStart - firstInput.startTime);
+                    }
+                });
+                fidObserver.observe({ type: 'first-input', buffered: true });
+            } catch (e) {}
+
+            // 4. Long Tasks Monitor (> 50ms blocking main thread)
+            try {
+                const longTaskObserver = new PerformanceObserver((entryList) => {
+                    for (const entry of entryList.getEntries()) {
+                        window.__semestero_vitals.longTasksCount++;
+                        if (entry.duration > window.__semestero_vitals.maxLongTaskMs) {
+                            window.__semestero_vitals.maxLongTaskMs = Math.round(entry.duration);
+                        }
+                    }
+                });
+                longTaskObserver.observe({ type: 'longtask', buffered: true });
+            } catch (e) {}
+        },
+
+        
+        // App-Performance Toolkit (18/31): User Timing Marks & Measures Trace
+        startTrace(name) {
+            if (typeof performance !== 'undefined' && performance.mark) {
+                performance.mark(name + '_start');
+            }
+        },
+        endTrace(name) {
+            if (typeof performance !== 'undefined' && performance.mark && performance.measure) {
+                try {
+                    performance.mark(name + '_end');
+                    performance.measure('[SemesteroTrace] ' + name, name + '_start', name + '_end');
+                } catch (e) {}
+            }
+        },
         loadLocalCounts() {
             this.stats.localTotalVisits = parseInt(localStorage.getItem(LOCAL_TOTAL_KEY) || '0', 10);
             this.stats.localOfflineVisits = parseInt(localStorage.getItem(LOCAL_OFFLINE_KEY) || '0', 10);
