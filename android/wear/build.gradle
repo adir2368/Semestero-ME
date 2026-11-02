@@ -8,13 +8,22 @@ android {
         applicationId "com.technion.semestero"
         minSdkVersion 30
         targetSdkVersion 34
-        versionCode 47
-        versionName "2.9.1"
+        versionCode 49
+        versionName "2.9.6"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        release {
+            storeFile file('../semestero-release-key.jks')
+            storePassword 'semestero2026'
+            keyAlias 'semestero'
+            keyPassword 'semestero2026'
+        }
+    }
     buildTypes {
         release {
+            signingConfig signingConfigs.release
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }

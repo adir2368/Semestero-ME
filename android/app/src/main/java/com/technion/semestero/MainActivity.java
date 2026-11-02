@@ -9,9 +9,54 @@ import android.webkit.WebView;
 import com.getcapacitor.BridgeActivity;
 
 public class MainActivity extends BridgeActivity {
+    private static MainActivity instance;
+
+    public static MainActivity getInstance() {
+        return instance;
+    }
+
+    public static void triggerTasksSyncFromWear(String taskId, boolean isDone) {
+        if (instance != null && instance.getBridge() != null && instance.getBridge().getWebView() != null) {
+            instance.runOnUiThread(() -> {
+                try {
+                    String js = "(function() { " +
+                        "if (typeof window.markTaskCompletedById === 'function') { " +
+                        "  window.markTaskCompletedById('" + taskId + "', " + isDone + "); " +
+                        "} else if (typeof gameState !== 'undefined') { " +
+                        "  var modified = false; " +
+                        "  Object.values(gameState.courses || {}).forEach(function(c) { " +
+                        "    (c.tasks || []).forEach(function(t) { " +
+                        "      if (t.id === '" + taskId + "') { t.completed = " + isDone + "; t.status = " + (isDone ? "'done'" : "'todo'") + "; modified = true; } " +
+                        "    }); " +
+                        "  }); " +
+                        "  if (modified) { " +
+                        "    if (typeof saveState === 'function') saveState(); " +
+                        "    if (typeof syncNativeAndroidWidgets === 'function') syncNativeAndroidWidgets(); " +
+                        "  } " +
+                        "} " +
+                        "})();";
+                    instance.getBridge().getWebView().evaluateJavascript(js, null);
+                } catch (Exception ignored) {}
+            });
+        }
+    }
+
+    public static void requestWidgetRefreshFromWear() {
+        if (instance != null && instance.getBridge() != null && instance.getBridge().getWebView() != null) {
+            instance.runOnUiThread(() -> {
+                try {
+                    instance.getBridge().getWebView().evaluateJavascript(
+                        "if (typeof syncNativeAndroidWidgets === 'function') syncNativeAndroidWidgets();",
+                        null
+                    );
+                } catch (Exception ignored) {}
+            });
+        }
+    }
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        instance = this;
         
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
             android.view.Window window = getWindow();
@@ -23,6 +68,12 @@ public class MainActivity extends BridgeActivity {
         configureWebView();
         handleWidgetIntent(getIntent());
         WearSyncManager.syncAllToWatch(this);
+    }
+
+    @Override
+    public void onDestroy() {
+        if (instance == this) instance = null;
+        super.onDestroy();
     }
 
     @Override
@@ -123,7 +174,7 @@ public class MainActivity extends BridgeActivity {
         @JavascriptInterface
         public void updateTasksWidget(String examDays, String examTitle, String examSub, String task1, String task1Id, String task2, String task2Id, String tasksSummary, String allTasksJson) {
             SharedPreferences prefs = context.getSharedPreferences(SemesteroTasksExamWidget.PREFS_NAME, Context.MODE_PRIVATE);
-            prefs.edit()
+            SharedPreferences.Editor editor = prefs.edit()
                 .putString("exam_days", examDays)
                 .putString("exam_title", examTitle)
                 .putString("exam_sub", examSub)
@@ -134,8 +185,21 @@ public class MainActivity extends BridgeActivity {
                 .putString("task_2_id", task2Id != null ? task2Id : "")
                 .putBoolean("task_2_done", false)
                 .putString("tasks_summary", tasksSummary)
-                .putString("all_tasks_json", (allTasksJson != null && !allTasksJson.trim().isEmpty()) ? allTasksJson : "[]")
-                .apply();
+                .putString("all_tasks_json", (allTasksJson != null && !allTasksJson.trim().isEmpty()) ? allTasksJson : "[]");
+
+            try {
+                org.json.JSONArray arr = new org.json.JSONArray(allTasksJson);
+                if (arr.length() > 2) {
+                    org.json.JSONObject o3 = arr.getJSONObject(2);
+                    String t3Course = o3.optString("course", "");
+                    String t3Title = o3.optString("title", "");
+                    String fullT3 = (!t3Course.isEmpty() && !t3Title.startsWith("[")) ? ("\uD83D\uDCCC [" + t3Course + "] " + t3Title) : t3Title;
+                    editor.putString("task_3", fullT3);
+                    editor.putString("task_3_id", o3.optString("id", ""));
+                    editor.putBoolean("task_3_done", false);
+                }
+            } catch (Exception ignored) {}
+            editor.apply();
 
             SemesteroTasksExamWidget.pushUpdate(context);
             WearSyncManager.syncTasksToWatch(context, examDays + " - " + examTitle, tasksSummary, allTasksJson);

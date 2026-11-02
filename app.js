@@ -22587,11 +22587,11 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.11.01-v2.9.1",
-    version: "2.9.1",
+    code: "REV-2026.11.01-v2.9.5",
+    version: "2.9.5",
     build: "20261101_01",
     date: "2026-11-01 19:15",
-    description: "גרסה 2.9.1: הטמעת ערכת ביצועי-על (31 App-Performance Toolkit) - שלדי טעינה Shimmer, מניעת כפילויות רשת, Windowing במאגר הקורסים, ניטור Core Web Vitals ו-Font Optimization"
+    description: "גרסה 2.9.5: הטמעת ערכת ביצועי-על (31 App-Performance Toolkit) - שלדי טעינה Shimmer, מניעת כפילויות רשת, Windowing במאגר הקורסים, ניטור Core Web Vitals ו-Font Optimization"
 };
 window.APP_VERSION = APP_CURRENT_REVISION.version;
 
@@ -24607,7 +24607,7 @@ window.getFormattedChangelogHTML = function() {
 };
 
 window.openChangelogModal = function(ver) {
-    const currentVer = ver || (typeof APP_CURRENT_REVISION !== 'undefined' && APP_CURRENT_REVISION && APP_CURRENT_REVISION.version) || "2.9.0";
+    const currentVer = ver || (typeof APP_CURRENT_REVISION !== 'undefined' && APP_CURRENT_REVISION && APP_CURRENT_REVISION.version) || "2.9.5";
     const updateModal = document.getElementById("version-update-modal");
     if (!updateModal) return;
     const modTitle = document.getElementById("update-modal-title");
@@ -25490,6 +25490,28 @@ function getUpcomingPriorityTasks(limit = 8) {
 }
 
 // 3. Update the Bell Badge counter & Native Android Home Screen Widgets
+// Global bridge handler for task completion from Galaxy Watch 8 & widgets
+window.markTaskCompletedById = function(taskId, isDone) {
+    if (!taskId || !window.gameState || !window.gameState.courses) return;
+    let changed = false;
+    Object.values(window.gameState.courses).forEach(course => {
+        (course.tasks || []).forEach(task => {
+            if (task.id === taskId) {
+                task.completed = !!isDone;
+                task.status = isDone ? 'done' : 'todo';
+                changed = true;
+            }
+        });
+    });
+    if (changed) {
+        if (typeof saveState === 'function') saveState();
+        if (typeof syncNativeAndroidWidgets === 'function') syncNativeAndroidWidgets();
+        if (typeof showHudToast === 'function') {
+            showHudToast(isDone ? '? ????? ????? ??????? ??????!' : '?? ????? ????? ???? ??????', 'success');
+        }
+    }
+};
+
 function syncNativeAndroidWidgets(classData, tasksData) {
     if (!window.SemesteroWidgetBridge) return;
 
@@ -25676,6 +25698,7 @@ function syncNativeAndroidWidgets(classData, tasksData) {
             course: t.courseShortName || t.courseName || "",
             title: t.title || "",
             due: t.timingText || "להגשה בקרוב",
+            dueFormatted: t.timingText || "להגשה בקרוב",
             type: t.type || "hw",
             completed: false
         })));

@@ -22,6 +22,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.wearable.Node;
+import com.google.android.gms.wearable.MessageClient;
+import com.google.android.gms.wearable.MessageEvent;
+import org.json.JSONObject;
 import com.google.android.gms.wearable.Wearable;
 
 import java.nio.charset.StandardCharsets;
@@ -29,7 +32,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
 
-public class MainActivity extends Activity {
+public class MainActivity extends Activity implements MessageClient.OnMessageReceivedListener {
 
     public static final String PREFS_NAME = "semestero_wear_prefs";
     public static final String PATH_REQUEST_SYNC = "/semestero/request_sync";
@@ -91,6 +94,7 @@ public class MainActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setRequestedOrientation(android.content.pm.ActivityInfo.SCREEN_ORIENTATION_NOSENSOR);
         setContentView(R.layout.activity_main);
 
         scrollView = findViewById(R.id.wear_scroll_view);
@@ -261,16 +265,17 @@ public class MainActivity extends Activity {
             }
         }
 
+        String taskId = prefs.getString("wear_task_" + taskIndex + "_id", "");
         // Send task completion message to phone companion
-        notifyPhoneTaskStatus(taskIndex, isDone);
+        notifyPhoneTaskStatus(taskId, taskIndex, isDone);
     }
 
-    private void notifyPhoneTaskStatus(int taskIndex, boolean isDone) {
+    private void notifyPhoneTaskStatus(String taskId, int taskIndex, boolean isDone) {
         try {
             Wearable.getNodeClient(this).getConnectedNodes().addOnSuccessListener(nodes -> {
                 if (nodes != null) {
                     for (Node node : nodes) {
-                        String payload = taskIndex + ":" + (isDone ? "1" : "0");
+                        String payload = (taskId != null ? taskId : "") + ":" + (isDone ? "1" : "0") + ":" + taskIndex;
                         Wearable.getMessageClient(this).sendMessage(
                             node.getId(),
                             PATH_COMPLETE_TASK,
@@ -285,6 +290,7 @@ public class MainActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
+        Wearable.getMessageClient(this).addListener(this);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             registerReceiver(syncReceiver, new IntentFilter(WearDataSyncService.ACTION_DATA_SYNCED), RECEIVER_EXPORTED);
         } else {
@@ -298,8 +304,30 @@ public class MainActivity extends Activity {
     protected void onPause() {
         super.onPause();
         try {
+            Wearable.getMessageClient(this).removeListener(this);
             unregisterReceiver(syncReceiver);
         } catch (Exception ignored) {}
+    }
+
+    @Override
+    public void onMessageReceived(MessageEvent messageEvent) {
+        if (messageEvent == null) return;
+        String path = messageEvent.getPath();
+        Log.d(TAG, "MainActivity onMessageReceived on path: " + path);
+        if (WearDataSyncService.PATH_DIRECT_SYNC.equals(path)) {
+            try {
+                String jsonStr = new String(messageEvent.getData(), StandardCharsets.UTF_8);
+                JSONObject json = new JSONObject(jsonStr);
+                WearDataSyncService.applyJsonToPrefs(this, json);
+                runOnUiThread(() -> {
+                    updateUIFromPrefsAndSchedule();
+                    Toast.makeText(this, "\u26A1 \u05E1\u05D5\u05E0\u05DB\u05E8\u05DF \u05D1\u05D4\u05E6\u05DC\u05D7\u05D4 \u05DE\u05D4\u05D8\u05DC\u05E4\u05D5\u05DF!", Toast.LENGTH_SHORT).show();
+                    if (vibrator != null) vibrator.vibrate(35);
+                });
+            } catch (Exception e) {
+                Log.e(TAG, "Error handling direct sync message in MainActivity: ", e);
+            }
+        }
     }
 
     /**
@@ -327,6 +355,10 @@ public class MainActivity extends Activity {
      * Sends an immediate message to the phone companion requesting fresh sync data.
      */
     public void requestSyncFromPhone() {
+        if (tvSyncStatus != null) {
+            tvSyncStatus.setText("\uD83D\uDD04 \u05DE\u05E1\u05E0\u05DB\u05E8\u05DF \u05E2\u05DD \u05D4\u05D8\u05DC\u05E4\u05D5\u05DF...");
+            tvSyncStatus.setTextColor(getColor(R.color.amber_warning));
+        }
         try {
             Wearable.getNodeClient(this).getConnectedNodes().addOnSuccessListener(nodes -> {
                 if (nodes != null && !nodes.isEmpty()) {
@@ -340,8 +372,14 @@ public class MainActivity extends Activity {
                     }
                 } else {
                     Log.d(TAG, "No connected phone nodes currently reachable; evaluating standalone schedule.");
+                    runOnUiThread(() -> {
+                        if (tvSyncStatus != null) {
+                            tvSyncStatus.setText("\uD83D\uDD52 \u05E9\u05E2\u05D5\u05DF \u05E2\u05E6\u05DE\u05D0\u05D9 (Technion Radar)");
+                            tvSyncStatus.setTextColor(getColor(R.color.text_secondary));
+                        }
+                    });
                 }
-            });
+            }).addOnFailureListener(e -> Log.w(TAG, "Node client query failed: " + e.getMessage()));
         } catch (Exception e) {
             Log.e(TAG, "Error querying connected nodes: ", e);
         }
@@ -553,47 +591,62 @@ public class MainActivity extends Activity {
         task3Done = prefs.getBoolean("wear_task_3_done", false);
 
         String allTasksJson = prefs.getString("all_tasks_json", "[]");
-        String t1Title = "";
-        String t1Due = "";
-        String t2Title = "";
-        String t2Due = "";
-        String t3Title = "";
-        String t3Due = "";
+        String t1Title = "", t2Title = "", t3Title = "";
+        String t1Due = "", t2Due = "", t3Due = "";
+        String t1Id = "", t2Id = "", t3Id = "";
         int openTasksCount = 0;
 
         try {
             org.json.JSONArray arr = new org.json.JSONArray(allTasksJson);
+            openTasksCount = arr.length();
             if (arr.length() > 0) {
-                openTasksCount = arr.length();
                 org.json.JSONObject o1 = arr.getJSONObject(0);
-                t1Title = o1.optString("title", "");
-                t1Due = o1.optString("dueFormatted", "⏳ מודל טכניון • שבוע 2");
+                String c1 = o1.optString("course", "");
+                String title1 = o1.optString("title", "");
+                t1Title = (!c1.isEmpty() && !title1.startsWith("[")) ? ("[" + c1 + "] " + title1) : title1;
+                t1Due = o1.optString("dueFormatted", o1.optString("due", "\u23F3 \u05DE\u05D5\u05D3\u05DC \u05D8\u05DB\u05E0\u05D9\u05D5\u05DF \u2022 \u05E9\u05D1\u05D5\u05E2 2"));
+                t1Id = o1.optString("id", "");
             }
             if (arr.length() > 1) {
                 org.json.JSONObject o2 = arr.getJSONObject(1);
-                t2Title = o2.optString("title", "");
-                t2Due = o2.optString("dueFormatted", "⏳ מודל טכניון • שבוע 2");
+                String c2 = o2.optString("course", "");
+                String title2 = o2.optString("title", "");
+                t2Title = (!c2.isEmpty() && !title2.startsWith("[")) ? ("[" + c2 + "] " + title2) : title2;
+                t2Due = o2.optString("dueFormatted", o2.optString("due", "\u23F3 \u05DE\u05D5\u05D3\u05DC \u05D8\u05DB\u05E0\u05D9\u05D5\u05DF \u2022 \u05E9\u05D1\u05D5\u05E2 2"));
+                t2Id = o2.optString("id", "");
             }
             if (arr.length() > 2) {
                 org.json.JSONObject o3 = arr.getJSONObject(2);
-                t3Title = o3.optString("title", "");
-                t3Due = o3.optString("dueFormatted", "⏳ מודל טכניון • שבוע 2");
+                String c3 = o3.optString("course", "");
+                String title3 = o3.optString("title", "");
+                t3Title = (!c3.isEmpty() && !title3.startsWith("[")) ? ("[" + c3 + "] " + title3) : title3;
+                t3Due = o3.optString("dueFormatted", o3.optString("due", "\u23F3 \u05DE\u05D5\u05D3\u05DC \u05D8\u05DB\u05E0\u05D9\u05D5\u05DF \u2022 \u05E9\u05D1\u05D5\u05E2 2"));
+                t3Id = o3.optString("id", "");
             }
         } catch (Exception ignored) {}
 
         // Fallbacks: authentic Semester 3 Technion Mechanical Engineering tasks only (no fake tasks)
         if (t1Title.isEmpty()) {
-            t1Title = prefs.getString("task_1", "[מדח מ׳] תרגיל בית 1: משוואות דיפרנציאליות");
-            t1Due = "⏳ מודל טכניון • שבוע 2";
+            t1Title = prefs.getString("task_1", "[\u05DE\u05D3\u05D7 \u05DE\u05F3] \u05EA\u05E8\u05D2\u05D9\u05DC \u05D1\u05D9\u05EA 1: \u05DE\u05E9\u05D5\u05D5\u05D0\u05D5\u05EA \u05D3\u05D9\u05E4\u05E8\u05E0\u05E6\u05D9\u05D0\u05DC\u05D9\u05D5\u05EA");
+            t1Due = "\u23F3 \u05DE\u05D5\u05D3\u05DC \u05D8\u05DB\u05E0\u05D9\u05D5\u05DF \u2022 \u05E9\u05D1\u05D5\u05E2 2";
+            t1Id = prefs.getString("wear_task_1_id", "fallback_task_1");
         }
         if (t2Title.isEmpty()) {
-            t2Title = prefs.getString("task_2", "[מדח מ׳] WebWork 1: מד״ח מ׳");
-            t2Due = "⏳ מערכת WebWork • שבוע 2";
+            t2Title = prefs.getString("task_2", "[\u05DE\u05D3\u05D7 \u05DE\u05F3] WebWork 1: \u05DE\u05D3\u05F4\u05D7 \u05DE\u05F3");
+            t2Due = "\u23F3 \u05DE\u05E2\u05E8\u05DB\u05EA WebWork \u2022 \u05E9\u05D1\u05D5\u05E2 2";
+            t2Id = prefs.getString("wear_task_2_id", "fallback_task_2");
         }
         if (t3Title.isEmpty()) {
-            t3Title = "[פיסיקה 2] תרגיל בית 1: אלקטרוסטטיקה וחוק קולון";
-            t3Due = "⏳ מודל טכניון • שבוע 2";
+            t3Title = prefs.getString("task_3", "[\u05E4\u05D9\u05E1\u05D9\u05E7\u05D4 2] \u05EA\u05E8\u05D2\u05D9\u05DC \u05D1\u05D9\u05EA 1: \u05D0\u05DC\u05E7\u05D8\u05E8\u05D5\u05E1\u05D8\u05D8\u05D9\u05E7\u05D4 \u05D5\u05D7\u05D5\u05E7 \u05E7\u05D5\u05DC\u05D5\u05DF");
+            t3Due = "\u23F3 \u05DE\u05D5\u05D3\u05DC \u05D8\u05DB\u05E0\u05D9\u05D5\u05DF \u2022 \u05E9\u05D1\u05D5\u05E2 2";
+            t3Id = prefs.getString("wear_task_3_id", "fallback_task_3");
         }
+
+        prefs.edit()
+            .putString("wear_task_1_id", t1Id)
+            .putString("wear_task_2_id", t2Id)
+            .putString("wear_task_3_id", t3Id)
+            .apply();
 
         if (tvTasksSummary != null) {
             if (openTasksCount > 0) {

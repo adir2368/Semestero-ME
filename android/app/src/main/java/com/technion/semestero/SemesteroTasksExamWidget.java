@@ -29,8 +29,8 @@ public class SemesteroTasksExamWidget extends AppWidgetProvider {
 
     private void markTaskComplete(Context context, int taskNum) {
         SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-        String taskIdKey = taskNum == 1 ? "task_1_id" : "task_2_id";
-        String doneKey = taskNum == 1 ? "task_1_done" : "task_2_done";
+        String taskIdKey = taskNum == 1 ? "task_1_id" : (taskNum == 2 ? "task_2_id" : "task_3_id");
+        String doneKey = taskNum == 1 ? "task_1_done" : (taskNum == 2 ? "task_2_done" : "task_3_done");
         String taskId = prefs.getString(taskIdKey, "");
 
         boolean isDone = prefs.getBoolean(doneKey, false);
