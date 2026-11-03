@@ -2911,7 +2911,7 @@ const PRELOADED_USER_STATE = (typeof window !== 'undefined' && window.PRELOADED_
           "title": "הגשת גיליון 3",
           "source": "moodle",
           "status": "done",
-          "dueDate": "2027-07-03 09:00",
+          "dueDate": "2026-01-15 09:00",
           "completed": true,
           "moodleUid": "11028@moodle25.technion.ac.il",
           "dueTimestamp": 1814605200000,
@@ -2962,7 +2962,7 @@ const PRELOADED_USER_STATE = (typeof window !== 'undefined' && window.PRELOADED_
           "grade": 70,
           "title": "מועד ב'",
           "status": "done",
-          "dueDate": "2026-11-15",
+          "dueDate": "2026-08-05",
           "completed": true
         },
         {
@@ -3068,7 +3068,7 @@ const PRELOADED_USER_STATE = (typeof window !== 'undefined' && window.PRELOADED_
           "grade": 74,
           "title": "מועד ב'",
           "status": "done",
-          "dueDate": "2026-11-12",
+          "dueDate": "2026-08-13",
           "completed": true
         }
       ],
@@ -4087,7 +4087,7 @@ const PRELOADED_USER_STATE = (typeof window !== 'undefined' && window.PRELOADED_
           "grade": 99,
           "title": "מועד א",
           "status": "done",
-          "dueDate": "2026-12-20",
+          "dueDate": "2026-07-20",
           "completed": true
         },
         {
@@ -4105,7 +4105,7 @@ const PRELOADED_USER_STATE = (typeof window !== 'undefined' && window.PRELOADED_
           "grade": 99,
           "title": "מועד ב'",
           "status": "done",
-          "dueDate": "2027-01-15",
+          "dueDate": "2026-08-27",
           "completed": true
         },
         {
@@ -4361,7 +4361,7 @@ const PRELOADED_USER_STATE = (typeof window !== 'undefined' && window.PRELOADED_
                 "title": "הגשת גיליון 3",
                 "source": "moodle",
                 "status": "done",
-                "dueDate": "2027-07-03 09:00",
+                "dueDate": "2026-01-15 09:00",
                 "completed": true,
                 "moodleUid": "11028@moodle25.technion.ac.il",
                 "dueTimestamp": 1814605200000,
@@ -4412,7 +4412,7 @@ const PRELOADED_USER_STATE = (typeof window !== 'undefined' && window.PRELOADED_
                 "grade": 70,
                 "title": "מועד ב'",
                 "status": "done",
-                "dueDate": "2026-11-15",
+                "dueDate": "2026-08-05",
                 "completed": true
               },
               {
@@ -4518,7 +4518,7 @@ const PRELOADED_USER_STATE = (typeof window !== 'undefined' && window.PRELOADED_
                 "grade": 74,
                 "title": "מועד ב'",
                 "status": "done",
-                "dueDate": "2026-11-12",
+                "dueDate": "2026-08-13",
                 "completed": true
               }
             ],
@@ -5596,7 +5596,7 @@ const PRELOADED_USER_STATE = (typeof window !== 'undefined' && window.PRELOADED_
                 "grade": 99,
                 "title": "מועד א",
                 "status": "done",
-                "dueDate": "2026-12-20",
+                "dueDate": "2026-07-20",
                 "completed": true
               },
               {
@@ -5614,7 +5614,7 @@ const PRELOADED_USER_STATE = (typeof window !== 'undefined' && window.PRELOADED_
                 "grade": 99,
                 "title": "מועד ב'",
                 "status": "done",
-                "dueDate": "2027-01-15",
+                "dueDate": "2026-08-27",
                 "completed": true
               },
               {
@@ -8730,10 +8730,21 @@ const CHEESEFORK_SEMESTER_SCHEDULE = {
                     courseName: "מכניקת מוצקים 2מ'",
                     type: "הרצאה 10",
                     lecturer: "פרופ' יוסף גבלי",
-                    room: "הנדסה כימית 1",
-                    startTime: "10:30",
+                    room: "דן קאהן - מכונות 6",
+                    startTime: "11:30",
                     endTime: "14:30",
-                    duration: "4 שעות",
+                    duration: "3 שעות",
+                    cardClass: "timetable-card-solids"
+                },
+                {
+                    courseId: "034053",
+                    courseName: "מכניקת מוצקים 2מ'",
+                    type: "תרגול 20",
+                    lecturer: "מר מירון דואר",
+                    room: "אולמן 602",
+                    startTime: "14:30",
+                    endTime: "16:30",
+                    duration: "שעתיים",
                     cardClass: "timetable-card-solids"
                 }
             ]
@@ -8770,8 +8781,8 @@ const CHEESEFORK_SEMESTER_SCHEDULE = {
                     courseId: "034053",
                     courseName: "מכניקת מוצקים 2מ'",
                     type: "תרגול 11",
-                    lecturer: "מר מירון דואר",
-                    room: "אולמן 602",
+                    lecturer: "מר איתם טננבאום",
+                    room: "אולמן 103",
                     startTime: "14:30",
                     endTime: "16:30",
                     duration: "שעתיים",
@@ -8799,9 +8810,9 @@ const CHEESEFORK_SEMESTER_SCHEDULE = {
                 {
                     courseId: "114052",
                     courseName: "פיסיקה 2",
-                    type: "תרגול 13",
-                    lecturer: "גב' נעם חגי גמליאל",
-                    room: "שרמן - חינוך למדע וטכנולוגיה 107",
+                    type: "תרגול 21",
+                    lecturer: "מר אייל קלמן",
+                    room: "אולמן 606",
                     startTime: "09:30",
                     endTime: "10:30",
                     duration: "שעה",
@@ -8831,7 +8842,7 @@ const CHEESEFORK_SEMESTER_SCHEDULE = {
                     courseName: "חינוך גופני - אתלטיקה קלה",
                     type: "יוגה 24",
                     lecturer: "שלומית בן-איש",
-                    room: "מרכז ספורט - אתלטיקה קלה",
+                    room: "חינוך גופני - אתלטיקה קלה",
                     startTime: "07:30",
                     endTime: "09:00",
                     duration: "שעה וחצי",
@@ -8842,8 +8853,8 @@ const CHEESEFORK_SEMESTER_SCHEDULE = {
                     courseId: "104228",
                     courseName: "משוואות דיפרנציאליות חלקיות מ'",
                     type: "הרצאה 20",
-                    lecturer: "ד\"ר שלומי גובר",
-                    room: "שרמן - חינוך למדע וטכנולוגיה 107",
+                    lecturer: "ד\"ר רועי בר און",
+                    room: "הנדסה כימית 1",
                     startTime: "10:30",
                     endTime: "12:30",
                     duration: "שעתיים",
@@ -8853,8 +8864,8 @@ const CHEESEFORK_SEMESTER_SCHEDULE = {
                     courseId: "034056",
                     courseName: "מבוא לחישוב מדעי והנדסי",
                     type: "תרגול 15",
-                    lecturer: "מר גיא ארבר",
-                    room: "אולמן 501",
+                    lecturer: "מר יותם אהרון פרי",
+                    room: "אולמן 705",
                     startTime: "12:30",
                     endTime: "14:30",
                     duration: "שעתיים",
@@ -8876,13 +8887,17 @@ const AUTHENTIC_TIMETABLE_METADATA = {
     '1040228_0_11:30':  { room: 'אולמן 506', lecturer: 'אמתי אלפרין' },
 
     // Monday (שני - dayIndex 1)
-    '114052_1_08:30':   { room: 'טאוב - מדמ"ח 1', lecturer: 'ד"ר גדעון אלון' },
-    '01140052_1_08:30': { room: 'טאוב - מדמ"ח 1', lecturer: 'ד"ר גדעון אלון' },
-    '1140052_1_08:30':  { room: 'טאוב - מדמ"ח 1', lecturer: 'ד"ר גדעון אלון' },
-    '034053_1_10:30':   { room: 'הנדסה כימית 1', lecturer: "פרופ' יוסף גבלי" },
-    '34053_1_10:30':    { room: 'הנדסה כימית 1', lecturer: "פרופ' יוסף גבלי" },
-    '00340053_1_10:30': { room: 'הנדסה כימית 1', lecturer: "פרופ' יוסף גבלי" },
-    '340053_1_10:30':   { room: 'הנדסה כימית 1', lecturer: "פרופ' יוסף גבלי" },
+    '114052_1_08:30':   { room: 'טאוב - מדמ\"ח 1', lecturer: 'ד\"ר גדעון אלון' },
+    '01140052_1_08:30': { room: 'טאוב - מדמ\"ח 1', lecturer: 'ד\"ר גדעון אלון' },
+    '1140052_1_08:30':  { room: 'טאוב - מדמ\"ח 1', lecturer: 'ד\"ר גדעון אלון' },
+    '034053_1_11:30':   { room: 'דן קאהן - מכונות 6', lecturer: "פרופ' יוסף גבלי" },
+    '34053_1_11:30':    { room: 'דן קאהן - מכונות 6', lecturer: "פרופ' יוסף גבלי" },
+    '00340053_1_11:30': { room: 'דן קאהן - מכונות 6', lecturer: "פרופ' יוסף גבלי" },
+    '340053_1_11:30':   { room: 'דן קאהן - מכונות 6', lecturer: "פרופ' יוסף גבלי" },
+    '034053_1_14:30':   { room: 'אולמן 602', lecturer: 'מר מירון דואר' },
+    '34053_1_14:30':    { room: 'אולמן 602', lecturer: 'מר מירון דואר' },
+    '00340053_1_14:30': { room: 'אולמן 602', lecturer: 'מר מירון דואר' },
+    '340053_1_14:30':   { room: 'אולמן 602', lecturer: 'מר מירון דואר' },
 
     // Tuesday (שלישי - dayIndex 2)
     '034035_2_08:30':   { room: 'הנדסה כימית 1', lecturer: "פרופ' לאוניד טרטקובסקי" },
@@ -8893,34 +8908,34 @@ const AUTHENTIC_TIMETABLE_METADATA = {
     '34035_2_12:30':    { room: 'אולמן 101', lecturer: "גב' עומר גזית אורלוב" },
     '00340035_2_12:30': { room: 'אולמן 101', lecturer: "גב' עומר גזית אורלוב" },
     '340035_2_12:30':   { room: 'אולמן 101', lecturer: "גב' עומר גזית אורלוב" },
-    '034053_2_14:30':   { room: 'אולמן 602', lecturer: 'מר מירון דואר' },
-    '34053_2_14:30':    { room: 'אולמן 602', lecturer: 'מר מירון דואר' },
-    '00340053_2_14:30': { room: 'אולמן 602', lecturer: 'מר מירון דואר' },
-    '340053_2_14:30':   { room: 'אולמן 602', lecturer: 'מר מירון דואר' },
+    '034053_2_14:30':   { room: 'אולמן 103', lecturer: 'מר איתם טננבאום' },
+    '34053_2_14:30':    { room: 'אולמן 103', lecturer: 'מר איתם טננבאום' },
+    '00340053_2_14:30': { room: 'אולמן 103', lecturer: 'מר איתם טננבאום' },
+    '340053_2_14:30':   { room: 'אולמן 103', lecturer: 'מר איתם טננבאום' },
 
     // Wednesday (רביעי - dayIndex 3)
-    '114052_3_08:30':   { room: 'פיזיקה 1', lecturer: 'ד"ר גדעון אלון' },
-    '01140052_3_08:30': { room: 'פיזיקה 1', lecturer: 'ד"ר גדעון אלון' },
-    '1140052_3_08:30':  { room: 'פיזיקה 1', lecturer: 'ד"ר גדעון אלון' },
-    '114052_3_09:30':   { room: 'שרמן - חינוך למדע וטכנולוגיה 107', lecturer: "גב' נעם חגי גמליאל" },
-    '01140052_3_09:30': { room: 'שרמן - חינוך למדע וטכנולוגיה 107', lecturer: "גב' נעם חגי גמליאל" },
-    '1140052_3_09:30':  { room: 'שרמן - חינוך למדע וטכנולוגיה 107', lecturer: "גב' נעם חגי גמליאל" },
-    '034056_3_14:30':   { room: 'הנדסה כימית 1', lecturer: 'ד"ר דניאל הקסנר' },
-    '34056_3_14:30':    { room: 'הנדסה כימית 1', lecturer: 'ד"ר דניאל הקסנר' },
-    '00340056_3_14:30': { room: 'הנדסה כימית 1', lecturer: 'ד"ר דניאל הקסנר' },
-    '340056_3_14:30':   { room: 'הנדסה כימית 1', lecturer: 'ד"ר דניאל הקסנר' },
+    '114052_3_08:30':   { room: 'פיזיקה 1', lecturer: 'ד\"ר גדעון אלון' },
+    '01140052_3_08:30': { room: 'פיזיקה 1', lecturer: 'ד\"ר גדעון אלון' },
+    '1140052_3_08:30':  { room: 'פיזיקה 1', lecturer: 'ד\"ר גדעון אלון' },
+    '114052_3_09:30':   { room: 'אולמן 606', lecturer: 'מר אייל קלמן' },
+    '01140052_3_09:30': { room: 'אולמן 606', lecturer: 'מר אייל קלמן' },
+    '1140052_3_09:30':  { room: 'אולמן 606', lecturer: 'מר אייל קלמן' },
+    '034056_3_14:30':   { room: 'הנדסה כימית 1', lecturer: 'ד\"ר דניאל הקסנר' },
+    '34056_3_14:30':    { room: 'הנדסה כימית 1', lecturer: 'ד\"ר דניאל הקסנר' },
+    '00340056_3_14:30': { room: 'הנדסה כימית 1', lecturer: 'ד\"ר דניאל הקסנר' },
+    '340056_3_14:30':   { room: 'הנדסה כימית 1', lecturer: 'ד\"ר דניאל הקסנר' },
 
     // Thursday (חמישי - dayIndex 4)
-    '03940805_4_07:30': { room: 'מרכז ספורט - אתלטיקה קלה', lecturer: 'שלומית בן-איש' },
-    '3940805_4_07:30':  { room: 'מרכז ספורט - אתלטיקה קלה', lecturer: 'שלומית בן-איש' },
-    '104228_4_10:30':   { room: 'שרמן - חינוך למדע וטכנולוגיה 107', lecturer: 'ד"ר שלומי גובר' },
-    '01040228_4_10:30': { room: 'שרמן - חינוך למדע וטכנולוגיה 107', lecturer: 'ד"ר שלומי גובר' },
-    '0104228_4_10:30':  { room: 'שרמן - חינוך למדע וטכנולוגיה 107', lecturer: 'ד"ר שלומי גובר' },
-    '1040228_4_10:30':  { room: 'שרמן - חינוך למדע וטכנולוגיה 107', lecturer: 'ד"ר שלומי גובר' },
-    '034056_4_12:30':   { room: 'אולמן 501', lecturer: 'מר גיא ארבר' },
-    '34056_4_12:30':    { room: 'אולמן 501', lecturer: 'מר גיא ארבר' },
-    '00340056_4_12:30': { room: 'אולמן 501', lecturer: 'מר גיא ארבר' },
-    '340056_4_12:30':   { room: 'אולמן 501', lecturer: 'מר גיא ארבר' }
+    '03940805_4_07:30': { room: 'חינוך גופני - אתלטיקה קלה', lecturer: 'שלומית בן-איש' },
+    '3940805_4_07:30':  { room: 'חינוך גופני - אתלטיקה קלה', lecturer: 'שלומית בן-איש' },
+    '104228_4_10:30':   { room: 'הנדסה כימית 1', lecturer: 'ד\"ר רועי בר און' },
+    '01040228_4_10:30': { room: 'הנדסה כימית 1', lecturer: 'ד\"ר רועי בר און' },
+    '0104228_4_10:30':  { room: 'הנדסה כימית 1', lecturer: 'ד\"ר רועי בר און' },
+    '1040228_4_10:30':  { room: 'הנדסה כימית 1', lecturer: 'ד\"ר רועי בר און' },
+    '034056_4_12:30':   { room: 'אולמן 705', lecturer: 'מר יותם אהרון פרי' },
+    '34056_4_12:30':    { room: 'אולמן 705', lecturer: 'מר יותם אהרון פרי' },
+    '00340056_4_12:30': { room: 'אולמן 705', lecturer: 'מר יותם אהרון פרי' },
+    '340056_4_12:30':   { room: 'אולמן 705', lecturer: 'מר יותם אהרון פרי' }
 };
 
 function formatClassDuration(startTime, endTime) {
@@ -8991,19 +9006,16 @@ function enrichTimetableWithAuthenticRooms(timetable) {
                     enrichedCount++;
                 }
             }
-            if (cleanCode === '3940805' || cleanCode === '03940805') {
+            if (cleanCode === '3940805' || cleanCode === '03940805' || cleanCode === '394800') {
                 if (day.dayIndex === 4 && c.startTime === '07:30' && c.endTime === '08:30') {
                     c.endTime = '09:00';
                     enrichedCount++;
                 }
             }
+            // Auto-heal Monday Solid Mechanics lecture time to 11:30 - 14:30 if old 10:30 was present
             if (cleanCode === '34053' || cleanCode === '034053') {
-                if (day.dayIndex === 1 && c.startTime === '14:30' && c.endTime === '16:30') {
-                    c.startTime = '10:30';
-                    c.endTime = '14:30';
-                    c.type = 'הרצאה 10';
-                    c.lecturer = "פרופ' יוסף גבלי";
-                    c.room = 'הנדסה כימית 1';
+                if (day.dayIndex === 1 && c.startTime === '10:30' && c.endTime === '14:30') {
+                    c.startTime = '11:30';
                     enrichedCount++;
                 }
             }
@@ -10165,6 +10177,19 @@ function recalculateCourseStates() {
     }
 
     autoUpdateTaskStatusesByDueDate();
+
+    // Sanitize any stale future exam dates on mastered/completed courses
+    if (gameState && gameState.courses) {
+        Object.values(gameState.courses).forEach(c => {
+            if (c.status === 'mastered' && Array.isArray(c.tasks)) {
+                c.tasks.forEach(t => {
+                    if (t.type === 'exam' && t.dueDate && t.dueDate > '2026-09-01') {
+                        t.dueDate = '';
+                    }
+                });
+            }
+        });
+    }
     
     // Clear and recalculate stats
     let totalCredits = 0;
@@ -15232,19 +15257,51 @@ window.syncLiveCheeseForkData = async function(customUrl = null, isManual = fals
             }
         });
 
-        // Ensure authentic Physics 2 tutorial 13 (Wednesday 09:30 - 10:30, Sherman 107, Noam Hagai Gamliel)
+        // Ensure authentic Physics 2 tutorial (Wednesday 09:30 - 10:30, Ullmann 606, Eyal Kalman)
         const hasPhys2Tutorial = timetableDays[3].classes.some(c => (c.courseId === '114052' || c.courseId === '01140052') && c.startTime === '09:30');
         if (!hasPhys2Tutorial && (rawCourseCodes.includes('01140052') || rawCourseCodes.includes('114052'))) {
             timetableDays[3].classes.push({
                 courseId: '114052',
                 courseName: 'פיסיקה 2',
-                type: 'תרגול 13',
-                lecturer: "גב' נעם חגי גמליאל",
-                room: 'שרמן - חינוך למדע וטכנולוגיה 107',
+                type: 'תרגול 21',
+                lecturer: 'מר אייל קלמן',
+                room: 'אולמן 606',
                 startTime: '09:30',
                 endTime: '10:30',
                 duration: 'שעה',
                 cardClass: 'timetable-card-physics'
+            });
+            totalClassesCount++;
+        }
+
+        // Ensure authentic Solid Mechanics tutorials are preserved (Monday & Tuesday distinct tutorials)
+        const hasSolidsMonTutorial = timetableDays[1].classes.some(c => (c.courseId === '034053' || c.courseId === '00340053') && c.startTime === '14:30');
+        if (!hasSolidsMonTutorial && (rawCourseCodes.includes('00340053') || rawCourseCodes.includes('034053'))) {
+            timetableDays[1].classes.push({
+                courseId: '034053',
+                courseName: "מכניקת מוצקים 2מ'",
+                type: 'תרגול 20',
+                lecturer: 'מר מירון דואר',
+                room: 'אולמן 602',
+                startTime: '14:30',
+                endTime: '16:30',
+                duration: 'שעתיים',
+                cardClass: 'timetable-card-solids'
+            });
+            totalClassesCount++;
+        }
+        const hasSolidsTueTutorial = timetableDays[2].classes.some(c => (c.courseId === '034053' || c.courseId === '00340053') && c.startTime === '14:30');
+        if (!hasSolidsTueTutorial && (rawCourseCodes.includes('00340053') || rawCourseCodes.includes('034053'))) {
+            timetableDays[2].classes.push({
+                courseId: '034053',
+                courseName: "מכניקת מוצקים 2מ'",
+                type: 'תרגול 11',
+                lecturer: 'מר איתם טננבאום',
+                room: 'אולמן 103',
+                startTime: '14:30',
+                endTime: '16:30',
+                duration: 'שעתיים',
+                cardClass: 'timetable-card-solids'
             });
             totalClassesCount++;
         }
@@ -22680,11 +22737,11 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.11.03-v2.9.9",
-    version: "2.9.9",
-    build: "20261103_02",
-    date: "2026-11-03 09:40",
-    description: "גרסה 2.9.9: עיצוב Tile של השעון 1:1 לפי הרדאר, הוספת Watch Face Complication לפינות המסך (רבע/חוגה) ותיקון סופי למניעת קפיצה מוקדמת למחר"
+    code: "REV-2026.11.03-v2.10.0",
+    version: "2.10.0",
+    build: "20261103_03",
+    date: "2026-11-03 18:30",
+    description: "שדרוג 2.10.0: תיקון סנכרון ציזפורק 1:1, מניעת ערבוב תרגולים, ניקוי מבחנים ישנים, מניעת גלישת Side Peek במובייל ונעילת גרסה"
 };
 window.APP_VERSION = APP_CURRENT_REVISION.version;
 

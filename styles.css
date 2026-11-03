@@ -1870,7 +1870,7 @@ body {
 }
 .peek-close-btn {
     position: absolute;
-    top: 16px;
+    top: max(calc(env(safe-area-inset-top, 0px) + 16px), 16px);
     left: 16px;
     background: rgba(15, 23, 42, 0.7);
     border: 1px solid var(--border-color);
@@ -12289,8 +12289,20 @@ html.is-iphone .app-global-footer {
         max-width: 100vw !important;
         border-right: none !important;
     }
+    .task-side-peek {
+        width: 100vw !important;
+        max-width: 100vw !important;
+        border-right: none !important;
+        padding-top: max(env(safe-area-inset-top, 0px), 24px) !important;
+    }
     .peek-content {
-        padding: 16px 16px calc(24px + env(safe-area-inset-bottom)) 16px !important;
+        padding-top: max(calc(env(safe-area-inset-top, 0px) + 24px), 36px) !important;
+        padding-bottom: calc(28px + env(safe-area-inset-bottom, 0px)) !important;
+        padding-left: 16px !important;
+        padding-right: 16px !important;
+    }
+    .peek-close-btn {
+        top: max(calc(env(safe-area-inset-top, 0px) + 20px), 32px) !important;
     }
     .peek-property-row {
         grid-template-columns: 1fr !important;
@@ -12301,7 +12313,8 @@ html.is-iphone .app-global-footer {
         font-size: 0.8rem !important;
     }
     .peek-header {
-        padding-left: 40px !important; /* Leave room for close button on the left */
+        padding-left: 44px !important; /* Leave room for close button on the left */
+        margin-top: 4px !important;
     }
     .peek-title-input {
         font-size: 1.4rem !important;

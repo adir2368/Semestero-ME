@@ -51,7 +51,7 @@
           "title": "הגשת גיליון 3",
           "source": "moodle",
           "status": "done",
-          "dueDate": "2027-07-03 09:00",
+          "dueDate": "2026-01-15 09:00",
           "completed": true,
           "moodleUid": "11028@moodle25.technion.ac.il",
           "dueTimestamp": 1814605200000,
@@ -102,7 +102,7 @@
           "grade": 70,
           "title": "מועד ב'",
           "status": "done",
-          "dueDate": "2026-11-15",
+          "dueDate": "2026-08-05",
           "completed": true
         },
         {
@@ -208,7 +208,7 @@
           "grade": 74,
           "title": "מועד ב'",
           "status": "done",
-          "dueDate": "2026-11-12",
+          "dueDate": "2026-08-13",
           "completed": true
         }
       ],
@@ -1314,7 +1314,7 @@
           "grade": 99,
           "title": "מועד א",
           "status": "done",
-          "dueDate": "2026-12-20",
+          "dueDate": "2026-07-20",
           "completed": true
         },
         {
@@ -1332,7 +1332,7 @@
           "grade": 99,
           "title": "מועד ב'",
           "status": "done",
-          "dueDate": "2027-01-15",
+          "dueDate": "2026-08-27",
           "completed": true
         },
         {
@@ -1594,7 +1594,7 @@
                 "title": "הגשת גיליון 3",
                 "source": "moodle",
                 "status": "done",
-                "dueDate": "2027-07-03 09:00",
+                "dueDate": "2026-01-15 09:00",
                 "completed": true,
                 "moodleUid": "11028@moodle25.technion.ac.il",
                 "dueTimestamp": 1814605200000,
@@ -1645,7 +1645,7 @@
                 "grade": 70,
                 "title": "מועד ב'",
                 "status": "done",
-                "dueDate": "2026-11-15",
+                "dueDate": "2026-08-05",
                 "completed": true
               },
               {
@@ -1751,7 +1751,7 @@
                 "grade": 74,
                 "title": "מועד ב'",
                 "status": "done",
-                "dueDate": "2026-11-12",
+                "dueDate": "2026-08-13",
                 "completed": true
               }
             ],
@@ -2829,7 +2829,7 @@
                 "grade": 99,
                 "title": "מועד א",
                 "status": "done",
-                "dueDate": "2026-12-20",
+                "dueDate": "2026-07-20",
                 "completed": true
               },
               {
@@ -2847,7 +2847,7 @@
                 "grade": 99,
                 "title": "מועד ב'",
                 "status": "done",
-                "dueDate": "2027-01-15",
+                "dueDate": "2026-08-27",
                 "completed": true
               },
               {
