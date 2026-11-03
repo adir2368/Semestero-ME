@@ -571,8 +571,11 @@
 
         const hasPhys1 = ['01140051', '114051', '01140071', '114071', '01140077', '114077', '01140055', '114055'].some(k => allCodes.has(k));
         if (!hasPhys1) {
-            const p1Pref = (global.gameState && global.gameState.userSettings && global.gameState.userSettings.physicsVariants && global.gameState.userSettings.physicsVariants.physics1) ||
+            let p1Pref = (global.gameState && global.gameState.userSettings && global.gameState.userSettings.physicsVariants && global.gameState.userSettings.physicsVariants.physics1) ||
                            (typeof localStorage !== 'undefined' ? localStorage.getItem('semestero_physics_variant_physics1') : null);
+            if (global.gameState && global.gameState.courses && (global.gameState.courses['114051'] || global.gameState.courses['01140051'])) {
+                p1Pref = '01140051';
+            }
             const p1Obj = (p1Pref && p1Pref.includes('114071')) ? { code: "01140071", altCode: "114071", name: "פיזיקה 1מ'", credits: 3.5 } :
                           (p1Pref && p1Pref.includes('114077')) ? { code: "01140077", altCode: "114077", name: "פיזיקה 1פ'", credits: 4.0 } :
                           (p1Pref && p1Pref.includes('114055')) ? { code: "01140055", altCode: "114055", name: "פיזיקה 1ת'", credits: 3.5 } :
@@ -595,8 +598,11 @@
 
         const hasPhys2 = ['01140052', '114052', '01140075', '114075', '01140078', '114078', '01140076', '114076'].some(k => allCodes.has(k));
         if (!hasPhys2) {
-            const p2Pref = (global.gameState && global.gameState.userSettings && global.gameState.userSettings.physicsVariants && global.gameState.userSettings.physicsVariants.physics2) ||
+            let p2Pref = (global.gameState && global.gameState.userSettings && global.gameState.userSettings.physicsVariants && global.gameState.userSettings.physicsVariants.physics2) ||
                            (typeof localStorage !== 'undefined' ? localStorage.getItem('semestero_physics_variant_physics2') : null);
+            if (global.gameState && global.gameState.courses && (global.gameState.courses['114052'] || global.gameState.courses['01140052'])) {
+                p2Pref = '01140052';
+            }
             const p2Obj = (p2Pref && p2Pref.includes('114075')) ? { code: "01140075", altCode: "114075", name: "פיזיקה 2ממ", credits: 5.0 } :
                           (p2Pref && p2Pref.includes('114078')) ? { code: "01140078", altCode: "114078", name: "פיזיקה 2פ'", credits: 5.0 } :
                           (p2Pref && p2Pref.includes('114076')) ? { code: "01140076", altCode: "114076", name: "פיזיקה 2ת'", credits: 5.0 } :
@@ -775,6 +781,31 @@
             unassignedCourses = unassignedCourses.filter(c => !isPurgedCourse(c.code, c.altCode));
         }
 
+        // Ensure Chemistry Lab (125013) belongs strictly to Semester 2 (Adir took it early in spring)
+        if (customPlan) {
+            const isChemLab = c => c && (c.code === '01250013' || c.altCode === '125013' || c.code === '125013');
+            const isAdirOrCompletedS2 = (typeof isAdirAuthenticated === 'function' && isAdirAuthenticated()) || (global.gameState && global.gameState.courses && global.gameState.courses['125013'] && (global.gameState.courses['125013'].status === 'mastered' || global.gameState.courses['125013'].grade));
+            if (isAdirOrCompletedS2) {
+                const sem4 = customPlan.find(s => s.semester === 4);
+                const sem2 = customPlan.find(s => s.semester === 2);
+                if (sem4 && Array.isArray(sem4.courses)) {
+                    const labIdx = sem4.courses.findIndex(isChemLab);
+                    if (labIdx !== -1) {
+                        const labItem = sem4.courses.splice(labIdx, 1)[0];
+                        if (sem2 && Array.isArray(sem2.courses) && !sem2.courses.some(isChemLab)) {
+                            sem2.courses.push(labItem);
+                        }
+                    }
+                }
+                if (global.gameState && global.gameState.courses && global.gameState.courses['125013']) {
+                    global.gameState.courses['125013'].semester = 2;
+                }
+                if (global.gameState && global.gameState.courses && global.gameState.courses['01250013']) {
+                    global.gameState.courses['01250013'].semester = 2;
+                }
+            }
+        }
+
         // Ensure Physics Lab (114032) belongs strictly to Semester 5 (not Semester 4)
         if (isAdir && customPlan) {
             const isLab = c => c && (c.code === '01140032' || c.altCode === '114032' || c.code === '114032');
@@ -924,6 +955,38 @@
                 }
             });
 
+            // Strict mutual exclusivity: Purge alternative physics variants when standard physics exists
+            if (global.gameState.courses['114051'] || global.gameState.courses['01140051']) {
+                ['114071', '01140071', '114077', '01140077', '114055', '01140055'].forEach(code => {
+                    if (global.gameState.courses[code]) {
+                        delete global.gameState.courses[code];
+                        changed = true;
+                    }
+                });
+            }
+            if (global.gameState.courses['114052'] || global.gameState.courses['01140052']) {
+                ['114075', '01140075', '114078', '01140078', '114076', '01140076'].forEach(code => {
+                    if (global.gameState.courses[code]) {
+                        delete global.gameState.courses[code];
+                        changed = true;
+                    }
+                });
+            }
+
+            // Lock Chemistry Lab (125013) strictly to Semester 2
+            if (global.gameState.courses['125013'] && (global.gameState.courses['125013'].status === 'mastered' || global.gameState.courses['125013'].grade)) {
+                if (global.gameState.courses['125013'].semester !== 2) {
+                    global.gameState.courses['125013'].semester = 2;
+                    changed = true;
+                }
+            }
+            if (global.gameState.courses['01250013'] && (global.gameState.courses['01250013'].status === 'mastered' || global.gameState.courses['01250013'].grade)) {
+                if (global.gameState.courses['01250013'].semester !== 2) {
+                    global.gameState.courses['01250013'].semester = 2;
+                    changed = true;
+                }
+            }
+
             // 2. Sync courses from customPlan
             customPlan.forEach(sem => {
                 const semNum = sem.semester;
@@ -950,6 +1013,13 @@
 
                     if (foundKey) {
                         const targetCourse = global.gameState.courses[foundKey];
+                        // Lock Chemistry Lab (125013) to Semester 2
+                        if (foundKey === '125013' || foundKey === '01250013' || (targetCourse && (targetCourse.code === '125013' || targetCourse.altCode === '125013'))) {
+                            if (targetCourse.status === 'mastered' || targetCourse.grade) {
+                                targetCourse.semester = 2;
+                                return;
+                            }
+                        }
                         if (targetCourse.status === 'mastered') {
                             // Lock mastered courses to their completed semester (e.g. Chem Lab in semester 2)
                         } else if (targetCourse.semester !== semNum) {
@@ -988,7 +1058,22 @@
                             return;
                         }
 
-                        // Truly new elective/custom course added in "התוכנית שלי"
+// Do not inject alternative physics variants if standard physics exists
+                        if ((normCode === '114071' || normCode === '01140071' || normCode === '114077' || normCode === '114055') &&
+                            (global.gameState.courses['114051'] || global.gameState.courses['01140051'])) {
+                            return;
+                        }
+                        if ((normCode === '114075' || normCode === '01140075' || normCode === '114078' || normCode === '114076') &&
+                            (global.gameState.courses['114052'] || global.gameState.courses['01140052'])) {
+                            return;
+                        }
+
+                        // Chemistry Lab lock to semester 2
+                        if (normCode === '125013' || normCode === '01250013') {
+                            semNum = 2;
+                        }
+
+                                                // Truly new elective/custom course added in "התוכנית שלי"
                         const normPrereqs = (c.prereqs || c.prerequisites || []).map(p => {
                             let np = String(p);
                             if (/^\d{8}$/.test(np) && np.startsWith('0') && !np.startsWith('0394')) {

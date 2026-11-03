@@ -4737,65 +4737,6 @@ const PRELOADED_USER_STATE = (typeof window !== 'undefined' && window.PRELOADED_
               "104041"
             ]
           },
-          "114071": {
-            "code": "114071",
-            "name": "פיסיקה 1מ׳",
-            "tasks": [
-              {
-                "id": "114071_h1",
-                "xp": 50,
-                "type": "hw",
-                "title": "תרגיל בית 1: מכניקה יחסותית וחוקי שימור",
-                "completed": false
-              },
-              {
-                "id": "114071_ex",
-                "xp": 500,
-                "type": "exam",
-                "title": "מועד א",
-                "completed": false
-              }
-            ],
-            "status": "exempt",
-            "credits": 3.5,
-            "semester": 1,
-            "trackGroup": "physics_1",
-            "prerequisites": [],
-            "mutuallyExclusiveWith": [
-              "114051"
-            ]
-          },
-          "114075": {
-            "code": "114075",
-            "name": "פיסיקה 2ממ׳",
-            "tasks": [
-              {
-                "id": "114075_h1",
-                "xp": 60,
-                "type": "hw",
-                "title": "תרגיל בית 1: שדה חשמלי, מגנטיות וגלי אור",
-                "completed": false
-              },
-              {
-                "id": "114075_ex",
-                "xp": 550,
-                "type": "exam",
-                "title": "מועד א",
-                "completed": false
-              }
-            ],
-            "status": "exempt",
-            "credits": 5,
-            "semester": 3,
-            "trackGroup": "physics_2",
-            "prerequisites": [
-              "114071",
-              "104041"
-            ],
-            "mutuallyExclusiveWith": [
-              "114052"
-            ]
-          },
           "125001": {
             "code": "125001",
             "name": "כימיה כללית",
@@ -9337,6 +9278,28 @@ function loadSavedState() {
                 delete gameState.courses[code];
             }
         });
+        // Guarantee Physics 1M / 2MM are permanently purged when standard physics is enrolled/completed
+        if (gameState.courses['114051'] || gameState.courses['01140051']) {
+            delete gameState.courses['114071'];
+            delete gameState.courses['01140071'];
+            delete gameState.courses['114077'];
+            delete gameState.courses['01140077'];
+            delete gameState.courses['114055'];
+            delete gameState.courses['01140055'];
+        }
+        if (gameState.courses['114052'] || gameState.courses['01140052']) {
+            delete gameState.courses['114075'];
+            delete gameState.courses['01140075'];
+            delete gameState.courses['114078'];
+            delete gameState.courses['01140078'];
+            delete gameState.courses['114076'];
+            delete gameState.courses['01140076'];
+        }
+
+        // Lock Chemistry Lab (125013) strictly to Semester 2
+        if (gameState.courses['125013']) gameState.courses['125013'].semester = 2;
+        if (gameState.courses['01250013']) gameState.courses['01250013'].semester = 2;
+
         // Deduplicate any 8-digit codes that have a 6-digit counterpart
         Object.keys(gameState.courses).forEach(key => {
             if (/^\d{8}$/.test(key) && !key.startsWith('0394')) {
@@ -10153,6 +10116,7 @@ function toIsoDateOnly(dateVal) {
 }
 
 function recalculateCourseStates() {
+    window.recalculateCourseStates = recalculateCourseStates;
     let changed = false;
 
     // Automatic Technion Semester Transition: Winter semester 2026/2027 starts on 28.10.2026
@@ -10277,19 +10241,37 @@ function recalculateCourseStates() {
     const p2 = gameState.courses['114052'];
     const p2mm = gameState.courses['114075'];
 
-    // Physics 1 track (114051 vs 114071)
+    // Physics 1 track (114051 vs 114071): Enforce strict mutual exclusivity
     if (p1 && (p1.status === 'mastered' || p1.status === 'active' || p1.status === 'available' || (p1.grade && p1.grade > 0))) {
-        if (p1m && p1m.status !== 'mastered') p1m.status = 'exempt';
+        if (p1m && p1m.status !== 'mastered') {
+            delete gameState.courses['114071'];
+            delete gameState.courses['01140071'];
+            delete gameState.courses['114077'];
+        }
     } else if (p1m && p1m.status === 'mastered') {
-        if (p1 && p1.status !== 'mastered') p1.status = 'exempt';
+        if (p1 && p1.status !== 'mastered') {
+            delete gameState.courses['114051'];
+            delete gameState.courses['01140051'];
+        }
     }
 
-    // Physics 2 track (114052 vs 114075)
+    // Physics 2 track (114052 vs 114075): Enforce strict mutual exclusivity
     if (p2 && (p2.status === 'mastered' || p2.status === 'active' || p2.status === 'available' || (p2.grade && p2.grade > 0))) {
-        if (p2mm && p2mm.status !== 'mastered') p2mm.status = 'exempt';
+        if (p2mm && p2mm.status !== 'mastered') {
+            delete gameState.courses['114075'];
+            delete gameState.courses['01140075'];
+            delete gameState.courses['114078'];
+        }
     } else if (p2mm && p2mm.status === 'mastered') {
-        if (p2 && p2.status !== 'mastered') p2.status = 'exempt';
+        if (p2 && p2.status !== 'mastered') {
+            delete gameState.courses['114052'];
+            delete gameState.courses['01140052'];
+        }
     }
+
+    // Chemistry Lab (125013) is locked strictly to Semester 2
+    if (gameState.courses['125013']) gameState.courses['125013'].semester = 2;
+    if (gameState.courses['01250013']) gameState.courses['01250013'].semester = 2;
 
     // Helper: Check prerequisite satisfaction supporting Physics track alternatives
     const isPrereqSatisfied = (preCode) => {
@@ -10371,6 +10353,7 @@ function recalculateCourseStates() {
     
     return changed;
 }
+window.recalculateCourseStates = recalculateCourseStates;
 
 // Circular Dependency Detector for Academic Prerequisite Directed Graph
 function detectCircularPrerequisites(courses = (window.gameState && window.gameState.courses)) {
@@ -19919,6 +19902,28 @@ function renderFlowchartTree() {
         root = root.replace(/^0+/, '');
         if (seenRootsInTree.has(root)) return;
         seenRootsInTree.add(root);
+
+        // Strict Mutual Exclusion Check:
+        // When standard Physics 1 (114051 / 01140051) is present, NEVER render alternative variants (114071, 114077, 114055)
+        const hasPhys1Standard = Boolean(gameState.courses['114051'] || gameState.courses['01140051']);
+        if (hasPhys1Standard) {
+            const p1Variants = ['114071', '01140071', '114077', '01140077', '114055', '01140055'];
+            if (p1Variants.includes(course.code) || (course.altCode && p1Variants.includes(course.altCode))) return;
+        }
+
+        // When standard Physics 2 (114052 / 01140052) is present, NEVER render alternative variants (114075, 114078, 114076)
+        const hasPhys2Standard = Boolean(gameState.courses['114052'] || gameState.courses['01140052']);
+        if (hasPhys2Standard) {
+            const p2Variants = ['114075', '01140075', '114078', '01140078', '114076', '01140076'];
+            if (p2Variants.includes(course.code) || (course.altCode && p2Variants.includes(course.altCode))) return;
+        }
+
+        // Strict guard: Chemistry Lab (125013) is locked to Semester 2 when completed or for Adir
+        if (course.code === '125013' || course.altCode === '125013' || course.code === '01250013' || course.altCode === '01250013') {
+            if (course.status === 'mastered' || course.grade || (window.AuthSync && typeof window.AuthSync.isAdirActive === 'function' && window.AuthSync.isAdirActive())) {
+                course.semester = 2;
+            }
+        }
 
         let sem = Number(course.semester) || 1;
         if (sem === 9) sem = 2.5;

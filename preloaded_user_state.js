@@ -1970,65 +1970,6 @@
               "104041"
             ]
           },
-          "114071": {
-            "code": "114071",
-            "name": "פיסיקה 1מ׳",
-            "tasks": [
-              {
-                "id": "114071_h1",
-                "xp": 50,
-                "type": "hw",
-                "title": "תרגיל בית 1: מכניקה יחסותית וחוקי שימור",
-                "completed": false
-              },
-              {
-                "id": "114071_ex",
-                "xp": 500,
-                "type": "exam",
-                "title": "מועד א",
-                "completed": false
-              }
-            ],
-            "status": "exempt",
-            "credits": 3.5,
-            "semester": 1,
-            "trackGroup": "physics_1",
-            "prerequisites": [],
-            "mutuallyExclusiveWith": [
-              "114051"
-            ]
-          },
-          "114075": {
-            "code": "114075",
-            "name": "פיסיקה 2ממ׳",
-            "tasks": [
-              {
-                "id": "114075_h1",
-                "xp": 60,
-                "type": "hw",
-                "title": "תרגיל בית 1: שדה חשמלי, מגנטיות וגלי אור",
-                "completed": false
-              },
-              {
-                "id": "114075_ex",
-                "xp": 550,
-                "type": "exam",
-                "title": "מועד א",
-                "completed": false
-              }
-            ],
-            "status": "exempt",
-            "credits": 5,
-            "semester": 3,
-            "trackGroup": "physics_2",
-            "prerequisites": [
-              "114071",
-              "104041"
-            ],
-            "mutuallyExclusiveWith": [
-              "114052"
-            ]
-          },
           "125001": {
             "code": "125001",
             "name": "כימיה כללית",

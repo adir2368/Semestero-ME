@@ -281,7 +281,7 @@ var SAMPLE_ME_DEGREE = (typeof window !== 'undefined' && window.SAMPLE_ME_DEGREE
         code: "125013",
         name: "מעבדה בכימיה",
         credits: 0.5,
-        semester: 2,
+        semester: 4,
         prerequisites: ["125001"],
         status: "available",
         tasks: [
