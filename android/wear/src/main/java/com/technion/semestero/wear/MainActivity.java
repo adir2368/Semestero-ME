@@ -411,7 +411,7 @@ public class MainActivity extends Activity implements MessageClient.OnMessageRec
         adapter.radarStatus = classStatus;
         adapter.radarCourse = classTitle;
         adapter.radarTime = classTime;
-        adapter.radarRoom = classRoom;
+        adapter.radarRoom = WearScheduleHelper.formatRoom(classRoom);
         adapter.radarLecturer = classLecturer;
 
         // Check connected nodes for sync status

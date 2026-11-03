@@ -208,7 +208,7 @@ public class WearScheduleHelper {
         // Populate Timeline items
         for (CourseSlot cs : todaysCourses) {
             boolean active = (curTotalMin >= cs.startMin && curTotalMin < cs.endMin);
-            String roomTag = cs.room.startsWith("חדר") ? cs.room : "חדר " + cs.room;
+            String roomTag = formatRoom(cs.room);
             res.timelineItems.add(new WearCarouselAdapter.ClassItem(
                 cs.title,
                 cs.time,
@@ -231,7 +231,7 @@ public class WearScheduleHelper {
             res.statusText = "🟢 שיעור מתקיים כעת!";
             res.courseTitle = activeSlot.title;
             res.timeText = activeSlot.time;
-            res.roomText = activeSlot.room.startsWith("חדר") ? activeSlot.room : "חדר " + activeSlot.room;
+            res.roomText = formatRoom(activeSlot.room);
             res.lecturerText = "👨‍🏫 " + activeSlot.lecturer + " • " + activeSlot.type;
             return res;
         }
@@ -255,7 +255,7 @@ public class WearScheduleHelper {
             }
             res.courseTitle = upcomingSlot.title;
             res.timeText = upcomingSlot.time;
-            res.roomText = upcomingSlot.room.startsWith("חדר") ? upcomingSlot.room : "חדר " + upcomingSlot.room;
+            res.roomText = formatRoom(upcomingSlot.room);
             res.lecturerText = "👨‍🏫 " + upcomingSlot.lecturer + " • " + upcomingSlot.type;
             return res;
         }
@@ -303,16 +303,26 @@ public class WearScheduleHelper {
             }
             res.courseTitle = nextDaySlot.title;
             res.timeText = nextDaySlot.time;
-            res.roomText = nextDaySlot.room.startsWith("חדר") ? nextDaySlot.room : "חדר " + nextDaySlot.room;
+            res.roomText = formatRoom(nextDaySlot.room);
             res.lecturerText = "👨‍🏫 " + nextDaySlot.lecturer + " • " + nextDaySlot.type;
         } else {
             res.statusText = "יום חופשי";
             res.courseTitle = "סיום שיעורי השבוע";
             res.timeText = "--:--";
-            res.roomText = "חדר חופשי";
+            res.roomText = "יום חופשי";
             res.lecturerText = "סמסטרו ME";
         }
 
         return res;
+    }
+    public static String formatRoom(String room) {
+        if (room == null || room.trim().isEmpty()) return "";
+        String r = room.trim();
+        if (r.startsWith("חדר:") || r.startsWith("חדר ")) {
+            if (!r.contains("כושר")) {
+                r = r.replaceFirst("^חדר[:\s]+", "").trim();
+            }
+        }
+        return r;
     }
 }
