@@ -38,21 +38,23 @@
             { title: "משוואות דיפרנציאליות חלקיות מ'", time: "11:30 - 13:30", startMin: 690, endMin: 810, room: "אולמן 506", lecturer: "אמתי אלפרין", type: "תרגול 22" }
         ],
         1: [ // יום שני
-            { title: "פיסיקה 2", time: "08:30 - 10:30", startMin: 510, endMin: 630, room: "טאוב 1", lecturer: "ד\"ר גדעון אלון", type: "הרצאה 10" },
+            { title: "פיסיקה 2", time: "08:30 - 10:30", startMin: 510, endMin: 630, room: "טאוב - מדמ\"ח 1", lecturer: "ד\"ר גדעון אלון", type: "הרצאה 10" },
             { title: "מכניקת מוצקים 2מ'", time: "10:30 - 14:30", startMin: 630, endMin: 870, room: "הנדסה כימית 1", lecturer: "פרופ' יוסף גבלי", type: "הרצאה 10" }
         ],
         2: [ // יום שלישי
-            { title: "תרמודינמיקה 1", time: "08:30 - 11:30", startMin: 510, endMin: 690, room: "הנדסה כימית 1", lecturer: "פרופ' טרטקובסקי", type: "הרצאה 10" },
-            { title: "משוואות דיפרנציאליות חלקיות מ'", time: "12:30 - 14:30", startMin: 750, endMin: 870, room: "אולמן 506", lecturer: "אמתי אלפרין", type: "הרצאה" },
-            { title: "פיסיקה 2", time: "14:30 - 16:30", startMin: 870, endMin: 990, room: "טאוב", lecturer: "צוות פיסיקה", type: "תרגול" }
+            { title: "תרמודינמיקה 1", time: "08:30 - 11:30", startMin: 510, endMin: 690, room: "הנדסה כימית 1", lecturer: "פרופ' לאוניד טרטקובסקי", type: "הרצאה 10" },
+            { title: "תרמודינמיקה 1", time: "12:30 - 14:30", startMin: 750, endMin: 870, room: "אולמן 101", lecturer: "גב' עומר גזית אורלוב", type: "תרגול 11" },
+            { title: "מכניקת מוצקים 2מ'", time: "14:30 - 16:30", startMin: 870, endMin: 990, room: "אולמן 602", lecturer: "מר מירון דואר", type: "תרגול 11" }
         ],
         3: [ // יום רביעי
-            { title: "מכניקת מוצקים 2מ'", time: "12:30 - 14:30", startMin: 750, endMin: 870, room: "ליידי דייוויס 240", lecturer: "מתרגל", type: "תרגול" },
-            { title: "גרפיקה הנדסית וכתיבה טכנית", time: "14:30 - 17:30", startMin: 870, endMin: 1050, room: "דנציגר", lecturer: "צוות גרפיקה", type: "מעבדה" }
+            { title: "פיסיקה 2", time: "08:30 - 09:30", startMin: 510, endMin: 570, room: "פיזיקה 1", lecturer: "ד\"ר גדעון אלון", type: "הרצאה 10" },
+            { title: "פיסיקה 2", time: "09:30 - 10:30", startMin: 570, endMin: 630, room: "שרמן - חינוך למדע וטכנולוגיה 107", lecturer: "גב' נעם חגי גמליאל", type: "תרגול 13" },
+            { title: "מבוא לחישוב מדעי והנדסי", time: "14:30 - 17:30", startMin: 870, endMin: 1050, room: "הנדסה כימית 1", lecturer: "ד\"ר דניאל הקסנר", type: "הרצאה 10" }
         ],
         4: [ // יום חמישי
-            { title: "גרפיקה הנדסית וכתיבה טכנית", time: "09:30 - 11:30", startMin: 570, endMin: 690, room: "דנציגר", lecturer: "מרצה", type: "הרצאה 10" },
-            { title: "מעבדת פיסיקה 2", time: "12:30 - 15:30", startMin: 750, endMin: 930, room: "פיסיקה 200", lecturer: "מדריך מעבדה", type: "מעבדה" }
+            { title: "חינוך גופני - יוגה", time: "07:30 - 09:00", startMin: 450, endMin: 540, room: "מרכז ספורט - אתלטיקה קלה", lecturer: "שלומית בן-איש", type: "יוגה 24" },
+            { title: "משוואות דיפרנציאליות חלקיות מ'", time: "10:30 - 12:30", startMin: 630, endMin: 750, room: "שרמן - חינוך למדע וטכנולוגיה 107", lecturer: "ד\"ר שלומי גובר", type: "הרצאה 20" },
+            { title: "מבוא לחישוב מדעי והנדסי", time: "12:30 - 14:30", startMin: 750, endMin: 870, room: "אולמן 501", lecturer: "מר גיא ארבר", type: "תרגול 15" }
         ],
         5: [], // יום שישי (חופשי)
         6: []  // שבת
@@ -205,8 +207,38 @@
             }
         } catch(e) {}
 
-        // If no cached class or new day, resolve using authentic schedule
-        const todaysClasses = TECHNION_SCHEDULE[dayIdx] || [];
+        // Read authentic schedule dynamically from localStorage / gameState if available
+        let activeSchedule = TECHNION_SCHEDULE;
+        try {
+            const rawSave = localStorage.getItem('academic_skill_tree_save');
+            if (rawSave) {
+                const parsedSave = JSON.parse(rawSave);
+                if (parsedSave && parsedSave.timetable && Array.isArray(parsedSave.timetable.days)) {
+                    const dynamicSched = {};
+                    parsedSave.timetable.days.forEach(d => {
+                        const dIdx = d.dayIndex;
+                        dynamicSched[dIdx] = (d.classes || []).map(c => {
+                            const [sh, sm] = (c.startTime || '08:30').split(':').map(Number);
+                            const [eh, em] = (c.endTime || '10:30').split(':').map(Number);
+                            return {
+                                title: c.courseName || c.title || c.courseId,
+                                time: `${c.startTime} - ${c.endTime}`,
+                                startMin: sh * 60 + (sm || 0),
+                                endMin: eh * 60 + (em || 0),
+                                room: c.room || 'טאוב',
+                                lecturer: c.lecturer || 'סמסטרו ME',
+                                type: c.type || 'הרצאה'
+                            };
+                        });
+                    });
+                    if (Object.keys(dynamicSched).length > 0) {
+                        activeSchedule = dynamicSched;
+                    }
+                }
+            }
+        } catch(e) {}
+
+        const todaysClasses = activeSchedule[dayIdx] || [];
         if (!nextClass) {
             if (todaysClasses.length === 0) {
                 if (dayIdx === 5) {
@@ -230,11 +262,12 @@
                 }
             } else {
                 // User Rule: 15 minutes after start of class, switch to next class!
-                // In the evening (17:00 onwards), display tomorrow's schedule
+                // Stay on today's classes until all of today's classes have finished!
                 let activeOrUpcoming = null;
-                const isEvening = curTotalMin >= 17 * 60;
+                const lastClass = todaysClasses.length > 0 ? todaysClasses[todaysClasses.length - 1] : null;
+                const isAllClassesDone = lastClass ? (curTotalMin > lastClass.endMin) : (curTotalMin >= 21 * 60);
 
-                if (!isEvening) {
+                if (!isAllClassesDone) {
                     for (const c of todaysClasses) {
                         if (curTotalMin < c.startMin + 15) {
                             activeOrUpcoming = c;
@@ -269,7 +302,7 @@
                     let nextDayLabel = "";
                     for (let offset = 1; offset <= 6; offset++) {
                         const nextDayIdx = (dayIdx + offset) % 7;
-                        const nextDayClasses = TECHNION_SCHEDULE[nextDayIdx] || [];
+                        const nextDayClasses = activeSchedule[nextDayIdx] || [];
                         if (nextDayClasses.length > 0) {
                             nextDayClass = nextDayClasses[0];
                             nextDayLabel = (offset === 1) ? "מחר (יום " + dayHebNames[nextDayIdx] + ")" : "יום " + dayHebNames[nextDayIdx];
@@ -362,8 +395,7 @@
                     { id: "114052_ww1", title: "[פיסיקה 2] WebWork 1: פיסיקה 2", done: false },
                     { id: "034035_h1", title: "[תרמו 1] תרגיל בית 1: חוק ראשון ומאזני אנרגיה", done: false },
                     { id: "034053_h1", title: "[מוצקים 2] תרגיל בית 1: פיתול ומאמצים מורכבים", done: false },
-                    { id: "034056_h1", title: "[גרפיקה] תרגיל בית 1: היטלים ומבטים בשרטוט", done: false },
-                    { id: "034056_p1", title: "[גרפיקה] פרויקט תכן מקדים: מידול חלקים בתיב״ם", done: false }
+                    { id: "034056_h1", title: "[חישוב הנדסי] תרגיל בית 1: אנליזה נומרית ב-MATLAB", done: false }
                 ];
             }
 

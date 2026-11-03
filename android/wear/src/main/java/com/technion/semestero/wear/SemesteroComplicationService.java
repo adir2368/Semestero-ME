@@ -73,23 +73,30 @@ public class SemesteroComplicationService extends ComplicationDataSourceService 
         String titleText;
         String longText;
 
+        String shortName = getShortCourseName(res.courseTitle);
+        String shortRoom = getShortRoomName(res.roomText);
+
         if (res.isActive) {
             mainText = "פעיל";
-            titleText = res.timeText.split(" - ")[0]; // e.g. "12:30"
-            longText = "🟢 " + res.courseTitle + " (" + res.timeText + ")";
+            titleText = shortName;
+            longText = "🟢 " + shortName + " (" + res.timeText + ")";
         } else if (res.isStartingSoon) {
-            // e.g. "51 דק׳"
+            // e.g. "15ד׳"
             mainText = res.statusText.replace("⏰ מתחיל בעוד ", "").replace(" דקות", "ד׳");
-            titleText = res.timeText.split(" - ")[0];
-            longText = "⏳ " + res.courseTitle + " • " + res.roomText;
+            titleText = shortName;
+            longText = "⏳ " + shortName + " • " + shortRoom;
         } else if (!res.isTomorrow && !res.isFreeDay) {
-            mainText = res.timeText.split(" - ")[0];
-            titleText = getShortCourseName(res.courseTitle);
-            longText = res.courseTitle + " • " + res.timeText;
+            mainText = res.timeText.split(" - ")[0]; // e.g. "14:30"
+            titleText = shortName;
+            longText = shortName + " • " + res.timeText;
+        } else if (res.isTomorrow) {
+            mainText = "מחר";
+            titleText = shortName;
+            longText = "מחר: " + shortName + " (" + res.timeText.split(" - ")[0] + ")";
         } else {
             mainText = "חופשי";
             titleText = "סמסטרו";
-            longText = res.courseTitle;
+            longText = "חופשי • אין שיעורים";
         }
 
         ComplicationData data = null;
@@ -109,7 +116,7 @@ public class SemesteroComplicationService extends ComplicationDataSourceService 
                 new PlainComplicationText.Builder(longText).build(),
                 new PlainComplicationText.Builder("סמסטרו ME").build()
             )
-            .setTitle(new PlainComplicationText.Builder(res.roomText).build())
+            .setTitle(new PlainComplicationText.Builder(shortRoom).build())
             .setMonochromaticImage(mono)
             .setTapAction(tapIntent)
             .build();
@@ -134,12 +141,31 @@ public class SemesteroComplicationService extends ComplicationDataSourceService 
     }
 
     private String getShortCourseName(String title) {
-        if (title.contains("דיפרנציאליות") || title.contains("מד״ח") || title.contains("מד\"ח")) return "מד״ח מ׳";
+        if (title == null) return "סמסטרו";
+        if (title.contains("דיפרנציאליות") || title.contains("מד״ח") || title.contains("מד\"ח") || title.contains("מדר")) return "מד״ח מ׳";
+        if (title.contains("חדוא") || title.contains("חדו״א")) return "חדו״א";
+        if (title.contains("מוצקים")) return "מוצקים";
+        if (title.contains("חישוב") || title.contains("מדעי והנדסי") || title.contains("מלמו") || title.contains("מלמ״ו")) return "מלמ״ו";
         if (title.contains("תרמודינמיקה")) return "תרמו 1";
         if (title.contains("פיסיקה")) return "פיסיקה 2";
-        if (title.contains("מוצקים")) return "מוצקים 2";
+        if (title.contains("אתלטיקה") || title.contains("יוגה") || title.contains("ספורט")) return "אתלטיקה";
         if (title.contains("גרפיקה")) return "גרפיקה";
+        if (title.contains("כימיה")) return "כימיה";
         if (title.length() > 6) return title.substring(0, 6);
         return title;
+    }
+
+    private String getShortRoomName(String room) {
+        if (room == null) return "";
+        String r = room.replace("📍", "").trim();
+        if (r.contains("הנדסה כימית")) return "כימית 1";
+        if (r.contains("טאוב")) return "טאוב 1";
+        if (r.contains("ספורט") || r.contains("אתלטיקה")) return "ספורט";
+        if (r.contains("שרמן")) return "שרמן 107";
+        if (r.contains("אולמן")) {
+            // Keep room number, e.g. "אולמן 506"
+            return r;
+        }
+        return r;
     }
 }

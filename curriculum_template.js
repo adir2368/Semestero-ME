@@ -281,7 +281,7 @@ var SAMPLE_ME_DEGREE = (typeof window !== 'undefined' && window.SAMPLE_ME_DEGREE
         code: "125013",
         name: "מעבדה בכימיה",
         credits: 0.5,
-        semester: 4,
+        semester: 2,
         prerequisites: ["125001"],
         status: "available",
         tasks: [
@@ -511,7 +511,7 @@ function getCleanCurriculumState(startingSemester = 1, priorCompletedCourses = {
 
     // Physics track mutual exclusion resolution in clean state
     // Physics 1 track (114051 vs 114071 / 114077)
-    if (courses["114051"] && courses["114051"].status === 'mastered') {
+    if (courses["114051"] && (courses["114051"].status === 'mastered' || courses["114051"].status === 'active' || courses["114051"].status === 'available' || courses["114051"].grade > 0)) {
         if (courses["114071"]) courses["114071"].status = 'exempt';
         if (courses["114077"]) courses["114077"].status = 'exempt';
     } else if (courses["114071"] && courses["114071"].status === 'mastered') {
@@ -523,7 +523,7 @@ function getCleanCurriculumState(startingSemester = 1, priorCompletedCourses = {
     }
 
     // Physics 2 track (114052 vs 114075 / 114078)
-    if (courses["114052"] && courses["114052"].status === 'mastered') {
+    if (courses["114052"] && (courses["114052"].status === 'mastered' || courses["114052"].status === 'active' || courses["114052"].status === 'available' || courses["114052"].grade > 0)) {
         if (courses["114075"]) courses["114075"].status = 'exempt';
         if (courses["114078"]) courses["114078"].status = 'exempt';
     } else if (courses["114075"] && courses["114075"].status === 'mastered') {

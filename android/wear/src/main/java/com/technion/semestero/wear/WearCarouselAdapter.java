@@ -25,6 +25,7 @@ public class WearCarouselAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     public static final int TYPE_RADAR = 0;
     public static final int TYPE_TIMELINE = 1;
     public static final int TYPE_TASKS = 2;
+    public static final int TYPE_SYNC = 3;
 
     public interface OnCarouselActionListener {
         void onTaskToggled(int taskIndex);
@@ -76,6 +77,11 @@ public class WearCarouselAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     private final LayoutInflater inflater;
     private final OnCarouselActionListener actionListener;
 
+    public String syncStatusText = "טלפון מחובר";
+    public String syncLastTime = "סונכרן: מעודכן";
+    public boolean isSyncing = false;
+    public ScrollView syncScrollView;
+
     public ScrollView timelineScrollView;
     public ScrollView tasksScrollView;
 
@@ -87,7 +93,7 @@ public class WearCarouselAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
     @Override
     public int getItemCount() {
-        return 3;
+        return 4;
     }
 
     @Override
@@ -107,10 +113,14 @@ public class WearCarouselAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                 View v = inflater.inflate(R.layout.page_timeline, parent, false);
                 return new TimelineViewHolder(v);
             }
-            case TYPE_TASKS:
-            default: {
+            case TYPE_TASKS: {
                 View v = inflater.inflate(R.layout.page_tasks, parent, false);
                 return new TasksViewHolder(v);
+            }
+            case TYPE_SYNC:
+            default: {
+                View v = inflater.inflate(R.layout.page_sync, parent, false);
+                return new SyncViewHolder(v);
             }
         }
     }
@@ -123,7 +133,32 @@ public class WearCarouselAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             bindTimeline((TimelineViewHolder) holder);
         } else if (holder instanceof TasksViewHolder) {
             bindTasks((TasksViewHolder) holder);
+        } else if (holder instanceof SyncViewHolder) {
+            bindSync((SyncViewHolder) holder);
         }
+    }
+
+    private void bindSync(SyncViewHolder h) {
+        this.syncScrollView = h.scrollView;
+        h.tvPhoneStatusText.setText(syncStatusText);
+        h.tvLastSynced.setText(syncLastTime);
+        if (isSyncing) {
+            h.tvSyncBtnLabel.setText("🔄 מסנכרן כעת...");
+            h.btnTriggerSync.setEnabled(false);
+            h.btnTriggerSync.setAlpha(0.6f);
+        } else {
+            h.tvSyncBtnLabel.setText("🔄 סנכרן נתונים עכשיו");
+            h.btnTriggerSync.setEnabled(true);
+            h.btnTriggerSync.setAlpha(1.0f);
+        }
+
+        h.btnTriggerSync.setOnClickListener(v -> {
+            if (actionListener != null) {
+                isSyncing = true;
+                notifyItemChanged(TYPE_SYNC);
+                actionListener.onRefreshRequested();
+            }
+        });
     }
 
     private void bindRadar(RadarViewHolder h) {
@@ -251,6 +286,25 @@ public class WearCarouselAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             tvExamSub = itemView.findViewById(R.id.tv_exam_banner_sub);
             container = itemView.findViewById(R.id.tasks_items_container);
             scrollView = itemView.findViewById(R.id.tasks_scroll_view);
+        }
+    }
+
+    public static class SyncViewHolder extends RecyclerView.ViewHolder {
+        public ScrollView scrollView;
+        public View btnTriggerSync;
+        public TextView tvSyncBtnLabel;
+        public TextView tvPhoneStatusDot;
+        public TextView tvPhoneStatusText;
+        public TextView tvLastSynced;
+
+        public SyncViewHolder(@NonNull View itemView) {
+            super(itemView);
+            scrollView = itemView.findViewById(R.id.scroll_sync);
+            btnTriggerSync = itemView.findViewById(R.id.btn_trigger_sync);
+            tvSyncBtnLabel = itemView.findViewById(R.id.tv_sync_btn_label);
+            tvPhoneStatusDot = itemView.findViewById(R.id.tv_phone_status_dot);
+            tvPhoneStatusText = itemView.findViewById(R.id.tv_phone_status_text);
+            tvLastSynced = itemView.findViewById(R.id.tv_last_synced_time);
         }
     }
 }

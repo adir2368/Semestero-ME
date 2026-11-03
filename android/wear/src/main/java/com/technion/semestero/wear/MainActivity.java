@@ -91,7 +91,8 @@ public class MainActivity extends Activity implements MessageClient.OnMessageRec
         dotViews = new View[] {
             findViewById(R.id.dot_0),
             findViewById(R.id.dot_1),
-            findViewById(R.id.dot_2)
+            findViewById(R.id.dot_2),
+            findViewById(R.id.dot_3)
         };
 
         adapter = new WearCarouselAdapter(this, this);
@@ -103,8 +104,8 @@ public class MainActivity extends Activity implements MessageClient.OnMessageRec
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
                 super.onPageScrolled(position, positionOffset, positionOffsetPixels);
                 if (ivBezelGlow != null) {
-                    // 3 screens: 120 degrees per screen (0°, 120°, 240°)
-                    ivBezelGlow.setRotation(position * 120f + positionOffset * 120f);
+                    // 4 screens: 90 degrees per screen (0°, 90°, 180°, 270°)
+                    ivBezelGlow.setRotation(position * 90f + positionOffset * 90f);
                 }
             }
 
@@ -191,6 +192,10 @@ public class MainActivity extends Activity implements MessageClient.OnMessageRec
     @Override
     public void onRefreshRequested() {
         if (vibrator != null) vibrator.vibrate(35);
+        if (adapter != null) {
+            adapter.isSyncing = true;
+            adapter.notifyItemChanged(WearCarouselAdapter.TYPE_SYNC);
+        }
         requestSyncFromPhone();
         updateUIFromPrefsAndSchedule();
         Toast.makeText(this, "מבקש סנכרון מהטלפון... 🔄", Toast.LENGTH_SHORT).show();
@@ -248,6 +253,12 @@ public class MainActivity extends Activity implements MessageClient.OnMessageRec
                 JSONObject json = new JSONObject(jsonStr);
                 WearDataSyncService.applyJsonToPrefs(this, json);
                 runOnUiThread(() -> {
+                    if (adapter != null) {
+                        adapter.isSyncing = false;
+                        java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("HH:mm", java.util.Locale.getDefault());
+                        adapter.syncLastTime = "סונכרן: היום ב-" + sdf.format(new java.util.Date());
+                        adapter.syncStatusText = "טלפון מחובר ופעיל";
+                    }
                     updateUIFromPrefsAndSchedule();
                     Toast.makeText(this, "⚡ סונכרן בהצלחה מהטלפון!", Toast.LENGTH_SHORT).show();
                     if (vibrator != null) vibrator.vibrate(35);
@@ -292,9 +303,14 @@ public class MainActivity extends Activity implements MessageClient.OnMessageRec
                 adapter.tasksScrollView.smoothScrollBy(0, scrollAmount);
                 if (vibrator != null) vibrator.vibrate(8);
                 return true;
+            } else if (currentItem == WearCarouselAdapter.TYPE_SYNC && adapter.syncScrollView != null) {
+                int scrollAmount = Math.round(delta * 40);
+                adapter.syncScrollView.smoothScrollBy(0, scrollAmount);
+                if (vibrator != null) vibrator.vibrate(8);
+                return true;
             } else {
                 bezelAccumulatedScroll += delta;
-                if (bezelAccumulatedScroll > 0.8f && currentItem < 2) {
+                if (bezelAccumulatedScroll > 0.8f && currentItem < 3) {
                     wearViewPager.setCurrentItem(currentItem + 1, true);
                     bezelAccumulatedScroll = 0f;
                     if (vibrator != null) vibrator.vibrate(12);
@@ -390,6 +406,19 @@ public class MainActivity extends Activity implements MessageClient.OnMessageRec
         adapter.radarTime = classTime;
         adapter.radarRoom = classRoom;
         adapter.radarLecturer = classLecturer;
+
+        // Check connected nodes for sync status
+        try {
+            com.google.android.gms.wearable.Wearable.getNodeClient(this).getConnectedNodes().addOnSuccessListener(nodes -> {
+                if (nodes != null && !nodes.isEmpty()) {
+                    String nodeName = nodes.get(0).getDisplayName();
+                    adapter.syncStatusText = (nodeName != null && !nodeName.isEmpty()) ? nodeName : "טלפון מחובר";
+                } else {
+                    adapter.syncStatusText = "ממתין לחיבור טלפון...";
+                }
+                adapter.notifyItemChanged(WearCarouselAdapter.TYPE_SYNC);
+            });
+        } catch (Exception ignored) {}
 
         // Apply timeline data to adapter
         adapter.timelineHeader = "לו״ז " + res.dayHeader;

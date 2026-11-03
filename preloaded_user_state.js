@@ -4312,10 +4312,20 @@
           "prereqs": [
             "01250001"
           ]
+        },
+        {
+          "code": "01250013",
+          "name": "מעבדה בכימיה",
+          "type": "mandatory",
+          "altCode": "125013",
+          "credits": 0.5,
+          "prereqs": [
+            "01250001"
+          ]
         }
       ],
       "semester": 2,
-      "targetCredits": 21
+      "targetCredits": 19.0
     },
     {
       "title": "שנה ב׳ - סמסטר ג׳ (חורף נוכחי)",
@@ -4373,10 +4383,18 @@
             "01040043",
             "01040131"
           ]
+        },
+        {
+          "code": "03940805",
+          "name": "חינוך גופני - אתלטיקה קלה",
+          "type": "sport",
+          "altCode": "3940805",
+          "credits": 1.0,
+          "prereqs": []
         }
       ],
       "semester": 3,
-      "targetCredits": 19.5
+      "targetCredits": 20.5
     },
     {
       "title": "שנה ב׳ - סמסטר ד׳ (אביב)",
@@ -4428,20 +4446,10 @@
             "01040065",
             "01040131"
           ]
-        },
-        {
-          "code": "01250013",
-          "name": "מעבדה בכימיה",
-          "type": "mandatory",
-          "altCode": "125013",
-          "credits": 0.5,
-          "prereqs": [
-            "01250001"
-          ]
         }
       ],
       "semester": 4,
-      "targetCredits": 18
+      "targetCredits": 17.5
     },
     {
       "title": "שנה ג׳ - סמסטר ה׳",

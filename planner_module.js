@@ -73,8 +73,8 @@
         const s3 = (sem3.courses || []).map(c => c.code || c.altCode);
         const hasPhys1InS1 = s1.some(c => c === '01140051' || c === '114051');
         const hasChemLabInS2 = s2.some(c => c === '01250013' || c === '125013');
-        const hasYogaInS3 = s3.some(c => c === '03940805');
-        return hasPhys1InS1 && hasChemLabInS2 && hasYogaInS3;
+        const hasYogaInS3 = s3.some(c => c === '03940805' || c === '3940805');
+        return hasPhys1InS1 && hasChemLabInS2;
     }
 
     function getPlannerStorageKeyV2() {
@@ -760,9 +760,9 @@
         customPlan = loadedPlan;
         unassignedCourses = loadedUnassigned;
 
-        // Cleanse legacy physics variant codes from removedCourses
+        // Cleanse legacy physics variant codes from removedCourses - keep user exclusions intact
         if (global.gameState && Array.isArray(global.gameState.removedCourses)) {
-            global.gameState.removedCourses = global.gameState.removedCourses.filter(c => c !== '114071' && c !== '114075' && c !== '01140071' && c !== '01140075');
+            // Keep user exclusions intact
         }
 
         // 1. Purge removed/exempt courses
@@ -950,7 +950,9 @@
 
                     if (foundKey) {
                         const targetCourse = global.gameState.courses[foundKey];
-                        if (targetCourse.semester !== semNum) {
+                        if (targetCourse.status === 'mastered') {
+                            // Lock mastered courses to their completed semester (e.g. Chem Lab in semester 2)
+                        } else if (targetCourse.semester !== semNum) {
                             targetCourse.semester = semNum;
                             changed = true;
                         }

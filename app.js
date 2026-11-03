@@ -2486,7 +2486,7 @@ var SAMPLE_ME_DEGREE = (typeof window !== 'undefined' && window.SAMPLE_ME_DEGREE
         code: "125013",
         name: "מעבדה בכימיה",
         credits: 0.5,
-        semester: 4,
+        semester: 2,
         prerequisites: ["125001"],
         status: "locked",
         tasks: [
@@ -8870,33 +8870,57 @@ const CHEESEFORK_SEMESTER_SCHEDULE = {
 // ==============================================================================
 const AUTHENTIC_TIMETABLE_METADATA = {
     // Sunday (ראשון - dayIndex 0)
-    '104228_0_11:30': { room: 'אולמן 506', lecturer: 'אמתי אלפרין' },
+    '104228_0_11:30':   { room: 'אולמן 506', lecturer: 'אמתי אלפרין' },
+    '01040228_0_11:30': { room: 'אולמן 506', lecturer: 'אמתי אלפרין' },
+    '0104228_0_11:30':  { room: 'אולמן 506', lecturer: 'אמתי אלפרין' },
+    '1040228_0_11:30':  { room: 'אולמן 506', lecturer: 'אמתי אלפרין' },
 
     // Monday (שני - dayIndex 1)
-    '114052_1_08:30': { room: 'טאוב - מדמ"ח 1', lecturer: 'ד"ר גדעון אלון' },
-    '034053_1_10:30': { room: 'הנדסה כימית 1', lecturer: "פרופ' יוסף גבלי" },
-    '34053_1_10:30':  { room: 'הנדסה כימית 1', lecturer: "פרופ' יוסף גבלי" },
+    '114052_1_08:30':   { room: 'טאוב - מדמ"ח 1', lecturer: 'ד"ר גדעון אלון' },
+    '01140052_1_08:30': { room: 'טאוב - מדמ"ח 1', lecturer: 'ד"ר גדעון אלון' },
+    '1140052_1_08:30':  { room: 'טאוב - מדמ"ח 1', lecturer: 'ד"ר גדעון אלון' },
+    '034053_1_10:30':   { room: 'הנדסה כימית 1', lecturer: "פרופ' יוסף גבלי" },
+    '34053_1_10:30':    { room: 'הנדסה כימית 1', lecturer: "פרופ' יוסף גבלי" },
+    '00340053_1_10:30': { room: 'הנדסה כימית 1', lecturer: "פרופ' יוסף גבלי" },
+    '340053_1_10:30':   { room: 'הנדסה כימית 1', lecturer: "פרופ' יוסף גבלי" },
 
     // Tuesday (שלישי - dayIndex 2)
-    '034035_2_08:30': { room: 'הנדסה כימית 1', lecturer: "פרופ' לאוניד טרטקובסקי" },
-    '34035_2_08:30':  { room: 'הנדסה כימית 1', lecturer: "פרופ' לאוניד טרטקובסקי" },
-    '034035_2_12:30': { room: 'אולמן 101', lecturer: "גב' עומר גזית אורלוב" },
-    '34035_2_12:30':  { room: 'אולמן 101', lecturer: "גב' עומר גזית אורלוב" },
-    '034053_2_14:30': { room: 'אולמן 602', lecturer: 'מר מירון דואר' },
-    '34053_2_14:30':  { room: 'אולמן 602', lecturer: 'מר מירון דואר' },
+    '034035_2_08:30':   { room: 'הנדסה כימית 1', lecturer: "פרופ' לאוניד טרטקובסקי" },
+    '34035_2_08:30':    { room: 'הנדסה כימית 1', lecturer: "פרופ' לאוניד טרטקובסקי" },
+    '00340035_2_08:30': { room: 'הנדסה כימית 1', lecturer: "פרופ' לאוניד טרטקובסקי" },
+    '340035_2_08:30':   { room: 'הנדסה כימית 1', lecturer: "פרופ' לאוניד טרטקובסקי" },
+    '034035_2_12:30':   { room: 'אולמן 101', lecturer: "גב' עומר גזית אורלוב" },
+    '34035_2_12:30':    { room: 'אולמן 101', lecturer: "גב' עומר גזית אורלוב" },
+    '00340035_2_12:30': { room: 'אולמן 101', lecturer: "גב' עומר גזית אורלוב" },
+    '340035_2_12:30':   { room: 'אולמן 101', lecturer: "גב' עומר גזית אורלוב" },
+    '034053_2_14:30':   { room: 'אולמן 602', lecturer: 'מר מירון דואר' },
+    '34053_2_14:30':    { room: 'אולמן 602', lecturer: 'מר מירון דואר' },
+    '00340053_2_14:30': { room: 'אולמן 602', lecturer: 'מר מירון דואר' },
+    '340053_2_14:30':   { room: 'אולמן 602', lecturer: 'מר מירון דואר' },
 
     // Wednesday (רביעי - dayIndex 3)
-    '114052_3_08:30': { room: 'פיזיקה 1', lecturer: 'ד"ר גדעון אלון' },
-    '114052_3_09:30': { room: 'שרמן - חינוך למדע וטכנולוגיה 107', lecturer: "גב' נעם חגי גמליאל" },
-    '034056_3_14:30': { room: 'הנדסה כימית 1', lecturer: 'ד"ר דניאל הקסנר' },
-    '34056_3_14:30':  { room: 'הנדסה כימית 1', lecturer: 'ד"ר דניאל הקסנר' },
+    '114052_3_08:30':   { room: 'פיזיקה 1', lecturer: 'ד"ר גדעון אלון' },
+    '01140052_3_08:30': { room: 'פיזיקה 1', lecturer: 'ד"ר גדעון אלון' },
+    '1140052_3_08:30':  { room: 'פיזיקה 1', lecturer: 'ד"ר גדעון אלון' },
+    '114052_3_09:30':   { room: 'שרמן - חינוך למדע וטכנולוגיה 107', lecturer: "גב' נעם חגי גמליאל" },
+    '01140052_3_09:30': { room: 'שרמן - חינוך למדע וטכנולוגיה 107', lecturer: "גב' נעם חגי גמליאל" },
+    '1140052_3_09:30':  { room: 'שרמן - חינוך למדע וטכנולוגיה 107', lecturer: "גב' נעם חגי גמליאל" },
+    '034056_3_14:30':   { room: 'הנדסה כימית 1', lecturer: 'ד"ר דניאל הקסנר' },
+    '34056_3_14:30':    { room: 'הנדסה כימית 1', lecturer: 'ד"ר דניאל הקסנר' },
+    '00340056_3_14:30': { room: 'הנדסה כימית 1', lecturer: 'ד"ר דניאל הקסנר' },
+    '340056_3_14:30':   { room: 'הנדסה כימית 1', lecturer: 'ד"ר דניאל הקסנר' },
 
     // Thursday (חמישי - dayIndex 4)
     '03940805_4_07:30': { room: 'מרכז ספורט - אתלטיקה קלה', lecturer: 'שלומית בן-איש' },
     '3940805_4_07:30':  { room: 'מרכז ספורט - אתלטיקה קלה', lecturer: 'שלומית בן-איש' },
     '104228_4_10:30':   { room: 'שרמן - חינוך למדע וטכנולוגיה 107', lecturer: 'ד"ר שלומי גובר' },
+    '01040228_4_10:30': { room: 'שרמן - חינוך למדע וטכנולוגיה 107', lecturer: 'ד"ר שלומי גובר' },
+    '0104228_4_10:30':  { room: 'שרמן - חינוך למדע וטכנולוגיה 107', lecturer: 'ד"ר שלומי גובר' },
+    '1040228_4_10:30':  { room: 'שרמן - חינוך למדע וטכנולוגיה 107', lecturer: 'ד"ר שלומי גובר' },
     '034056_4_12:30':   { room: 'אולמן 501', lecturer: 'מר גיא ארבר' },
-    '34056_4_12:30':    { room: 'אולמן 501', lecturer: 'מר גיא ארבר' }
+    '34056_4_12:30':    { room: 'אולמן 501', lecturer: 'מר גיא ארבר' },
+    '00340056_4_12:30': { room: 'אולמן 501', lecturer: 'מר גיא ארבר' },
+    '340056_4_12:30':   { room: 'אולמן 501', lecturer: 'מר גיא ארבר' }
 };
 
 function formatClassDuration(startTime, endTime) {
@@ -8950,22 +8974,30 @@ function enrichTimetableWithAuthenticRooms(timetable) {
         if (!Array.isArray(day.classes)) return;
         day.classes.forEach(c => {
             const rawId = (c.courseId || '').trim();
-            const cleanCode = rawId.replace(/^0+/, '');
-            
+            let cleanCode = rawId;
+            if (/^\d{8}$/.test(rawId) && !rawId.startsWith('0394')) {
+                cleanCode = (rawId.slice(1, 4) + rawId.slice(5)).replace(/^0+/, '');
+            } else {
+                cleanCode = rawId.replace(/^0+/, '');
+            }
+            const strippedCode = rawId.replace(/^0+/, '');
+            const padded6 = cleanCode.padStart(6, '0');
+            const padded8 = cleanCode.padStart(8, '0');
+
             // Auto-heal any stale shortened end-times from older revisions
-            if (cleanCode === '034056' || cleanCode === '34056') {
+            if (cleanCode === '34056' || cleanCode === '034056') {
                 if (day.dayIndex === 3 && c.startTime === '14:30' && c.endTime === '16:30') {
                     c.endTime = '17:30';
                     enrichedCount++;
                 }
             }
-            if (cleanCode === '03940805' || cleanCode === '3940805') {
+            if (cleanCode === '3940805' || cleanCode === '03940805') {
                 if (day.dayIndex === 4 && c.startTime === '07:30' && c.endTime === '08:30') {
                     c.endTime = '09:00';
                     enrichedCount++;
                 }
             }
-            if (cleanCode === '034053' || cleanCode === '34053') {
+            if (cleanCode === '34053' || cleanCode === '034053') {
                 if (day.dayIndex === 1 && c.startTime === '14:30' && c.endTime === '16:30') {
                     c.startTime = '10:30';
                     c.endTime = '14:30';
@@ -8983,29 +9015,27 @@ function enrichTimetableWithAuthenticRooms(timetable) {
                 enrichedCount++;
             }
 
-            // Match strictly by ID + Day + StartTime
+            // Match strictly by ID + Day + StartTime across all normalized keys
             const meta = AUTHENTIC_TIMETABLE_METADATA[`${rawId}_${day.dayIndex}_${c.startTime}`] ||
-                         AUTHENTIC_TIMETABLE_METADATA[`${cleanCode}_${day.dayIndex}_${c.startTime}`];
+                         AUTHENTIC_TIMETABLE_METADATA[`${cleanCode}_${day.dayIndex}_${c.startTime}`] ||
+                         AUTHENTIC_TIMETABLE_METADATA[`${padded6}_${day.dayIndex}_${c.startTime}`] ||
+                         AUTHENTIC_TIMETABLE_METADATA[`${padded8}_${day.dayIndex}_${c.startTime}`] ||
+                         AUTHENTIC_TIMETABLE_METADATA[`${strippedCode}_${day.dayIndex}_${c.startTime}`];
 
             if (meta) {
-                // Only enrich room if missing, blank, or placeholder
-                const isOutdatedRoom = !c.room || !c.room.trim() || 
-                    c.room === 'כיתת טכניון' || 
-                    c.room === 'מרכז ספורט טכניון' || 
-                    c.room === '0';
-
-                if (isOutdatedRoom && meta.room) {
+                if (meta.room && c.room !== meta.room) {
                     c.room = meta.room;
                     enrichedCount++;
                 }
-
-                // Only enrich lecturer if missing or blank
-                if ((!c.lecturer || !c.lecturer.trim() || c.lecturer === '0') && meta.lecturer) {
+                if (meta.lecturer && c.lecturer !== meta.lecturer) {
                     c.lecturer = meta.lecturer;
                     enrichedCount++;
                 }
             }
         });
+
+        // Always sort classes chronologically by start time
+        day.classes.sort((a, b) => (a.startTime || '').localeCompare(b.startTime || ''));
     });
     return enrichedCount;
 }
@@ -9415,6 +9445,17 @@ function loadSavedState() {
             Object.keys(SAMPLE_ME_DEGREE).forEach(code => {
                 if (PURGED_APP_CODES.includes(code)) return;
                 if (removedList.includes(code)) return; // Strictly respect user deletions!
+
+                // Do not inject physics variants if the standard track courses exist
+                if ((code === '114071' || code === '01140071' || code === '114077') &&
+                    (gameState.courses['114051'] || gameState.courses['01140051'])) {
+                    return;
+                }
+                if ((code === '114075' || code === '01140075' || code === '114078') &&
+                    (gameState.courses['114052'] || gameState.courses['01140052'])) {
+                    return;
+                }
+
                 if (!gameState.courses[code]) {
                     gameState.courses[code] = JSON.parse(JSON.stringify(SAMPLE_ME_DEGREE[code]));
                 } else if (SAMPLE_ME_DEGREE[code].prerequisites) {
@@ -9422,6 +9463,22 @@ function loadSavedState() {
                     gameState.courses[code].prerequisites = [...SAMPLE_ME_DEGREE[code].prerequisites];
                 }
             });
+
+            // Ensure Physics 1M / 2MM are permanently purged when standard physics is enrolled/completed
+            if (gameState.courses['114051'] || gameState.courses['01140051']) {
+                delete gameState.courses['114071'];
+                delete gameState.courses['01140071'];
+                delete gameState.courses['114077'];
+            }
+            if (gameState.courses['114052'] || gameState.courses['01140052']) {
+                delete gameState.courses['114075'];
+                delete gameState.courses['01140075'];
+                delete gameState.courses['114078'];
+            }
+
+            // Lock Chemistry Lab (125013) to Semester 2
+            if (gameState.courses['125013']) gameState.courses['125013'].semester = 2;
+            if (gameState.courses['01250013']) gameState.courses['01250013'].semester = 2;
         }
     }
 
@@ -10196,14 +10253,14 @@ function recalculateCourseStates() {
     const p2mm = gameState.courses['114075'];
 
     // Physics 1 track (114051 vs 114071)
-    if (p1 && p1.status === 'mastered') {
+    if (p1 && (p1.status === 'mastered' || p1.status === 'active' || p1.status === 'available' || (p1.grade && p1.grade > 0))) {
         if (p1m && p1m.status !== 'mastered') p1m.status = 'exempt';
     } else if (p1m && p1m.status === 'mastered') {
         if (p1 && p1.status !== 'mastered') p1.status = 'exempt';
     }
 
     // Physics 2 track (114052 vs 114075)
-    if (p2 && p2.status === 'mastered') {
+    if (p2 && (p2.status === 'mastered' || p2.status === 'active' || p2.status === 'available' || (p2.grade && p2.grade > 0))) {
         if (p2mm && p2mm.status !== 'mastered') p2mm.status = 'exempt';
     } else if (p2mm && p2mm.status === 'mastered') {
         if (p2 && p2.status !== 'mastered') p2.status = 'exempt';
@@ -15174,6 +15231,23 @@ window.syncLiveCheeseForkData = async function(customUrl = null, isManual = fals
                 }
             }
         });
+
+        // Ensure authentic Physics 2 tutorial 13 (Wednesday 09:30 - 10:30, Sherman 107, Noam Hagai Gamliel)
+        const hasPhys2Tutorial = timetableDays[3].classes.some(c => (c.courseId === '114052' || c.courseId === '01140052') && c.startTime === '09:30');
+        if (!hasPhys2Tutorial && (rawCourseCodes.includes('01140052') || rawCourseCodes.includes('114052'))) {
+            timetableDays[3].classes.push({
+                courseId: '114052',
+                courseName: 'פיסיקה 2',
+                type: 'תרגול 13',
+                lecturer: "גב' נעם חגי גמליאל",
+                room: 'שרמן - חינוך למדע וטכנולוגיה 107',
+                startTime: '09:30',
+                endTime: '10:30',
+                duration: 'שעה',
+                cardClass: 'timetable-card-physics'
+            });
+            totalClassesCount++;
+        }
 
         // 5. Finalize Timetable Days structure
         timetableDays.forEach(d => {
@@ -22218,7 +22292,7 @@ function createCalendarDayCell(dateStr, dayNum, isToday, itemsByDate, isOtherMon
         } else if (item.isExamEvent) {
             const passedClass = item.isPassed ? "passed" : "";
             cellHtml += `
-                <div class="cal-event-pill exam-event ${passedClass}" data-course-code="${item.courseCode}" title="מבחן סוף: ${item.courseName || ''} (${item.courseCode}) | ${item.rawTitle || item.title} - לחץ לפתיחת פרטי קורס">
+                <div class="cal-event-pill exam-event ${passedClass}" data-course-code="${item.courseCode}" data-task-id="${item.taskId || ''}" title="מבחן: ${item.courseName || ''} (${item.courseCode}) | ${item.rawTitle || item.title} - לחץ לפתיחת פרטי משימה">
                     <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: block;">${item.title}</span>
                 </div>
             `;
@@ -22317,12 +22391,17 @@ function createCalendarDayCell(dateStr, dayNum, isToday, itemsByDate, isOtherMon
         });
     });
 
-    // Exam event click listener -> Open course details modal
+    // Exam event click listener -> Open task side peek if task exists, else course details
     cell.querySelectorAll(".cal-event-pill.exam-event").forEach(pill => {
         pill.addEventListener("click", (e) => {
             e.stopPropagation();
             const cCode = pill.dataset.courseCode;
-            if (cCode) openCourseDetails(cCode);
+            const tId = pill.dataset.taskId;
+            if (cCode && tId && typeof openTaskSidePeek === 'function') {
+                openTaskSidePeek(cCode, tId);
+            } else if (cCode) {
+                openCourseDetails(cCode);
+            }
         });
     });
 
@@ -22483,6 +22562,20 @@ function renderDayModalEventsList(dateStr) {
             </div>
             ${delBtnHtml}
         `;
+
+        if (item.isTaskEvent || item.isExamEvent) {
+            itemRow.style.cursor = "pointer";
+            itemRow.title = "לחץ לצפייה בפרטי המשימה";
+            itemRow.addEventListener("click", (e) => {
+                if (e.target.closest(".btn-del-modal-event")) return;
+                closeCalendarDayModal();
+                if (item.courseCode && item.taskId && typeof openTaskSidePeek === 'function') {
+                    openTaskSidePeek(item.courseCode, item.taskId);
+                } else if (item.courseCode) {
+                    openCourseDetails(item.courseCode);
+                }
+            });
+        }
 
         if (item.isPersonalEvent) {
             const delBtn = itemRow.querySelector(".btn-del-modal-event");
