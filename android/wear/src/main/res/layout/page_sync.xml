@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
     Semestero ME • Galaxy Watch 8
-    Screen 3: Phone Sync & Cloud Bridge (סנכרון עם הטלפון)
+    Screen 3: Phone Sync & Cloud Bridge (סנכרון עם הטלפון והענן)
 -->
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/scroll_sync"
@@ -36,7 +36,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
-            android:text="סמסטר ג׳ • הנדסת מכונות"
+            android:text="סמסטר ג' • חורף תשפ&quot;ז"
             android:textColor="#94a3b8"
             android:textSize="10sp" />
 
@@ -64,7 +64,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="4dp"
-                android:text="טלפון מחובר"
+                android:text="מחובר לטלפון"
                 android:textColor="#f8fafc"
                 android:textSize="11sp"
                 android:textStyle="bold" />
@@ -90,7 +90,7 @@
                 android:layout_height="wrap_content"
                 android:text="🔄 סנכרן נתונים עכשיו"
                 android:textColor="#ffffff"
-                android:textSize="12.5sp"
+                android:textSize="12sp"
                 android:textStyle="bold" />
 
             <TextView
@@ -98,9 +98,40 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
-                android:text="לו״ז, כיתות ומשימות מהטלפון"
+                android:text="נק&quot;ז, משימות ומערכת שעות"
                 android:textColor="#cbd5e1"
                 android:textSize="9sp" />
+        </LinearLayout>
+
+        <!-- Test Notification Button -->
+        <LinearLayout
+            android:id="@+id/btn_test_notification"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/card_timeline_item"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:paddingVertical="7dp"
+            android:paddingHorizontal="10dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="🔔"
+                android:textSize="11sp" />
+
+            <TextView
+                android:id="@+id/tv_test_notif_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="6dp"
+                android:text="בדיקת התראות"
+                android:textColor="#38bdf8"
+                android:textSize="11sp"
+                android:textStyle="bold" />
         </LinearLayout>
 
         <!-- Last Synced Timestamp -->
@@ -109,7 +140,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="סונכרן לאחרונה: הרגע"
+            android:text="סנכרון אחרון: כרגע"
             android:textColor="#64748b"
             android:textSize="9.5sp" />
 

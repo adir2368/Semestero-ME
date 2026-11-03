@@ -43,7 +43,7 @@
           "title": "הגשת גיליון 3",
           "source": "moodle",
           "status": "done",
-          "dueDate": "2027-07-03 09:00",
+          "dueDate": "",
           "completed": true,
           "moodleUid": "11028@moodle25.technion.ac.il",
           "dueTimestamp": 1814605200000,
@@ -94,7 +94,7 @@
           "grade": 70,
           "title": "מועד ב'",
           "status": "done",
-          "dueDate": "2026-11-15",
+          "dueDate": "",
           "completed": true
         },
         {
@@ -200,7 +200,7 @@
           "grade": 74,
           "title": "מועד ב'",
           "status": "done",
-          "dueDate": "2026-11-12",
+          "dueDate": "",
           "completed": true
         }
       ],
@@ -1306,7 +1306,7 @@
           "grade": 99,
           "title": "מועד א",
           "status": "done",
-          "dueDate": "2026-12-20",
+          "dueDate": "",
           "completed": true
         },
         {
@@ -1324,7 +1324,7 @@
           "grade": 99,
           "title": "מועד ב'",
           "status": "done",
-          "dueDate": "2027-01-15",
+          "dueDate": "",
           "completed": true
         },
         {
@@ -4304,6 +4304,16 @@
           "prereqs": [
             "01250001"
           ]
+        },
+        {
+          "code": "01250013",
+          "name": "מעבדה בכימיה",
+          "type": "mandatory",
+          "altCode": "125013",
+          "credits": 0.5,
+          "prereqs": [
+            "01250001"
+          ]
         }
       ],
       "semester": 2,
@@ -4419,16 +4429,6 @@
           "prereqs": [
             "01040065",
             "01040131"
-          ]
-        },
-        {
-          "code": "01250013",
-          "name": "מעבדה בכימיה",
-          "type": "mandatory",
-          "altCode": "125013",
-          "credits": 0.5,
-          "prereqs": [
-            "01250001"
           ]
         }
       ],
@@ -5493,7 +5493,17 @@
     "035026",
     "35026",
     "114071",
-    "114075"
+    "114075",
+    "01140071",
+    "01140075",
+    "114077",
+    "01140077",
+    "114078",
+    "01140078",
+    "114055",
+    "01140055",
+    "114076",
+    "01140076"
   ],
   "completedCourses": 11,
   "pastExamSchedule": [

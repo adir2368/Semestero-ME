@@ -107,13 +107,9 @@ async function runTests() {
     assert.strictEqual(mondaySolidsTut.room, 'אולמן 602', "Monday 034053 tutorial must be in אולמן 602");
     assert.strictEqual(mondaySolidsTut.lecturer, 'מר מירון דואר', "Monday 034053 tutorial lecturer must be מר מירון דואר");
 
-    // Verify Tuesday Solids Tutorial 11
+    // Verify Tuesday Solids Tutorial 11 is strictly filtered out (unselected candidate)
     const tuesdaySolids = tt.days[2].classes.find(c => c.courseId.includes('34053') && c.type.includes('תרגול'));
-    assert.ok(tuesdaySolids, "Tuesday 034053 tutorial 11 must be present");
-    assert.strictEqual(tuesdaySolids.startTime, '14:30', "Tuesday 034053 tutorial must start at 14:30");
-    assert.strictEqual(tuesdaySolids.endTime, '16:30', "Tuesday 034053 tutorial must end at 16:30");
-    assert.strictEqual(tuesdaySolids.room, 'אולמן 103', "Tuesday 034053 tutorial must be in אולמן 103");
-    assert.strictEqual(tuesdaySolids.lecturer, 'מר איתם טננבאום', "Tuesday 034053 tutorial lecturer must be מר איתם טננבאום");
+    assert.strictEqual(tuesdaySolids, undefined, "Tuesday 034053 tutorial 11 must be discarded");
 
     // Verify Thursday PDE Lecture 20
     const thursdayPde = tt.days[4].classes.find(c => c.courseId.includes('104228') && c.type.includes('הרצאה'));

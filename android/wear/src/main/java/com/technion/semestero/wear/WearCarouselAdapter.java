@@ -30,6 +30,7 @@ public class WearCarouselAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     public interface OnCarouselActionListener {
         void onTaskToggled(int taskIndex);
         void onRefreshRequested();
+        void onTestNotificationRequested();
     }
 
     public static class ClassItem {
@@ -159,6 +160,14 @@ public class WearCarouselAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                 actionListener.onRefreshRequested();
             }
         });
+
+        if (h.btnTestNotification != null) {
+            h.btnTestNotification.setOnClickListener(v -> {
+                if (actionListener != null) {
+                    actionListener.onTestNotificationRequested();
+                }
+            });
+        }
     }
 
     private void bindRadar(RadarViewHolder h) {
@@ -292,6 +301,7 @@ public class WearCarouselAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     public static class SyncViewHolder extends RecyclerView.ViewHolder {
         public ScrollView scrollView;
         public View btnTriggerSync;
+        public View btnTestNotification;
         public TextView tvSyncBtnLabel;
         public TextView tvPhoneStatusDot;
         public TextView tvPhoneStatusText;
@@ -301,6 +311,7 @@ public class WearCarouselAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             super(itemView);
             scrollView = itemView.findViewById(R.id.scroll_sync);
             btnTriggerSync = itemView.findViewById(R.id.btn_trigger_sync);
+            btnTestNotification = itemView.findViewById(R.id.btn_test_notification);
             tvSyncBtnLabel = itemView.findViewById(R.id.tv_sync_btn_label);
             tvPhoneStatusDot = itemView.findViewById(R.id.tv_phone_status_dot);
             tvPhoneStatusText = itemView.findViewById(R.id.tv_phone_status_text);

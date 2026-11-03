@@ -7019,10 +7019,20 @@ const PRELOADED_USER_STATE = (typeof window !== 'undefined' && window.PRELOADED_
           "prereqs": [
             "01250001"
           ]
+        },
+        {
+          "code": "01250013",
+          "name": "מעבדה בכימיה",
+          "type": "mandatory",
+          "altCode": "125013",
+          "credits": 0.5,
+          "prereqs": [
+            "01250001"
+          ]
         }
       ],
       "semester": 2,
-      "targetCredits": 21
+      "targetCredits": 21.5
     },
     {
       "title": "שנה ב׳ - סמסטר ג׳ (חורף נוכחי)",
@@ -7135,20 +7145,10 @@ const PRELOADED_USER_STATE = (typeof window !== 'undefined' && window.PRELOADED_
             "01040065",
             "01040131"
           ]
-        },
-        {
-          "code": "01250013",
-          "name": "מעבדה בכימיה",
-          "type": "mandatory",
-          "altCode": "125013",
-          "credits": 0.5,
-          "prereqs": [
-            "01250001"
-          ]
         }
       ],
       "semester": 4,
-      "targetCredits": 18
+      "targetCredits": 17.5
     },
     {
       "title": "שנה ג׳ - סמסטר ה׳",
@@ -8703,8 +8703,8 @@ const CHEESEFORK_SEMESTER_SCHEDULE = {
                     lecturer: "פרופ' לאוניד טרטקובסקי",
                     room: "הנדסה כימית 1",
                     startTime: "08:30",
-                    endTime: "11:30",
-                    duration: "3 שעות",
+                    endTime: "10:30",
+                    duration: "שעתיים",
                     cardClass: "timetable-card-thermo"
                 },
                 {
@@ -8717,17 +8717,6 @@ const CHEESEFORK_SEMESTER_SCHEDULE = {
                     endTime: "14:30",
                     duration: "שעתיים",
                     cardClass: "timetable-card-thermo"
-                },
-                {
-                    courseId: "034053",
-                    courseName: "מכניקת מוצקים 2מ'",
-                    type: "תרגול 11",
-                    lecturer: "מר איתם טננבאום",
-                    room: "אולמן 103",
-                    startTime: "14:30",
-                    endTime: "16:30",
-                    duration: "שעתיים",
-                    cardClass: "timetable-card-solids"
                 }
             ]
         },
@@ -8785,8 +8774,8 @@ const CHEESEFORK_SEMESTER_SCHEDULE = {
                     lecturer: "שלומית בן-איש",
                     room: "חינוך גופני - אתלטיקה קלה",
                     startTime: "07:30",
-                    endTime: "09:00",
-                    duration: "שעה וחצי",
+                    endTime: "08:30",
+                    duration: "שעה",
                     cardClass: "timetable-card-yoga",
                     isAnchor: true
                 },
@@ -8831,6 +8820,9 @@ const AUTHENTIC_TIMETABLE_METADATA = {
     '114052_1_08:30':   { room: 'טאוב - מדמ\"ח 1', lecturer: 'ד\"ר גדעון אלון' },
     '01140052_1_08:30': { room: 'טאוב - מדמ\"ח 1', lecturer: 'ד\"ר גדעון אלון' },
     '1140052_1_08:30':  { room: 'טאוב - מדמ\"ח 1', lecturer: 'ד\"ר גדעון אלון' },
+    '034053_1_10:30':   { room: 'דן קאהן - מכונות 6', lecturer: "פרופ' יוסף גבלי" },
+    '34053_1_10:30':    { room: 'דן קאהן - מכונות 6', lecturer: "פרופ' יוסף גבלי" },
+    '00340053_1_10:30': { room: 'דן קאהן - מכונות 6', lecturer: "פרופ' יוסף גבלי" },
     '034053_1_11:30':   { room: 'דן קאהן - מכונות 6', lecturer: "פרופ' יוסף גבלי" },
     '34053_1_11:30':    { room: 'דן קאהן - מכונות 6', lecturer: "פרופ' יוסף גבלי" },
     '00340053_1_11:30': { room: 'דן קאהן - מכונות 6', lecturer: "פרופ' יוסף גבלי" },
@@ -8928,6 +8920,13 @@ function enrichTimetableWithAuthenticRooms(timetable) {
     let enrichedCount = 0;
     timetable.days.forEach(day => {
         if (!Array.isArray(day.classes)) return;
+        // Strict guard: Tuesday must NEVER have candidate Solids 2 tutorial 11 when Monday tutorial 20 is active
+        if (day.dayIndex === 2) {
+            day.classes = day.classes.filter(c => {
+                const cId = (c.courseId || '').replace(/^0+/, '');
+                return !(cId === '34053' && c.startTime === '14:30');
+            });
+        }
         day.classes.forEach(c => {
             const rawId = (c.courseId || '').trim();
             let cleanCode = rawId;
@@ -8948,8 +8947,15 @@ function enrichTimetableWithAuthenticRooms(timetable) {
                 }
             }
             if (cleanCode === '3940805' || cleanCode === '03940805' || cleanCode === '394800') {
-                if (day.dayIndex === 4 && c.startTime === '07:30' && c.endTime === '08:30') {
-                    c.endTime = '09:00';
+                if (day.dayIndex === 4 && c.startTime === '07:30' && c.endTime === '09:00') {
+                    c.endTime = '08:30';
+                    enrichedCount++;
+                }
+            }
+            // Auto-heal Tuesday Thermo 1 lecture to 08:30 - 10:30 (2 hours)
+            if (cleanCode === '34035' || cleanCode === '034035') {
+                if (day.dayIndex === 2 && c.startTime === '08:30' && c.endTime === '11:30') {
+                    c.endTime = '10:30';
                     enrichedCount++;
                 }
             }
@@ -15123,6 +15129,10 @@ window.syncLiveCheeseForkData = async function(customUrl = null, isManual = fals
 
                         if (isMatch && itemDay && itemTime) {
                             const dayIdx = dayMap[itemDay];
+                            // Strict guard: Tuesday must NEVER have candidate Solids 2 tutorial
+                            if (dayIdx === 2 && (cleanCode === '034053' || cleanCode === '34053' || cleanCode === '00340053') && itemType.includes('תרגול')) {
+                                return;
+                            }
                             if (dayIdx !== undefined && dayIdx >= 0 && dayIdx <= 4) {
                                 const parts = itemTime.split('-').map(s => s.trim());
                                 const startTime = parts[0] || '08:30';
@@ -22083,7 +22093,7 @@ function renderFinalsCalendar() {
 
     // Also map real course exams and all active course tasks
     Object.values(gameState.courses || {}).forEach(course => {
-        if (course.status === 'locked') return; // Only active and enrolled courses on the calendar!
+        if (course.status === 'locked' || course.status === 'mastered') return; // Only active and enrolled courses on the calendar!
         if (!course.tasks) return;
         course.tasks.forEach(task => {
             if (!task.dueDate) return;

@@ -16,7 +16,7 @@ import org.json.JSONObject;
  * 
  * Guarantees:
  * 1. 100% authentic Technion Mechanical Engineering Semester 3 timetable.
- * 2. Active class detection: if a class is currently taking place, it is ACTIVE (🟢 מתקיים כעת!).
+ * 2. Active class detection: if a class is currently taking place, it is ACTIVE.
  * 3. Upcoming class detection: if a class is later today, it displays remaining minutes or start time.
  * 4. NEVER prematurely shows tomorrow while today's classes are ongoing or upcoming.
  * 5. Switches to tomorrow only after all classes of today are complete (or late evening >= 18:00).
@@ -48,12 +48,12 @@ public class WearScheduleHelper {
     }
 
     public static class ScheduleResolution {
-        public String dayHeader = "";       // e.g. "יום שלישי • 3 בנובמבר"
-        public String statusText = "";      // e.g. "🟢 מתקיים כעת!" or "⏰ מתחיל בעוד 51 דקות"
-        public String courseTitle = "";     // e.g. "משוואות דיפרנציאליות חלקיות מ׳"
-        public String timeText = "";        // e.g. "12:30 - 14:30"
-        public String roomText = "";        // e.g. "📍 אולמן 506"
-        public String lecturerText = "";    // e.g. "👨‍🏫 אמתי אלפרין • הרצאה"
+        public String dayHeader = "";
+        public String statusText = "";
+        public String courseTitle = "";
+        public String timeText = "";
+        public String roomText = "";
+        public String lecturerText = "";
         public boolean isActive = false;
         public boolean isStartingSoon = false;
         public boolean isTomorrow = false;
@@ -69,7 +69,7 @@ public class WearScheduleHelper {
         switch (dayOfWeek) {
             case Calendar.SUNDAY: // יום ראשון
                 list.add(new CourseSlot(
-                    "משוואות דיפרנציאליות חלקיות מ׳",
+                    "משוואות דיפרנציאליות חלקיות מ'",
                     "11:30 - 13:30",
                     690, 810,
                     "אולמן 506",
@@ -83,20 +83,20 @@ public class WearScheduleHelper {
                     "פיסיקה 2",
                     "08:30 - 10:30",
                     510, 630,
-                    "טאוב - מדמ״ח 1",
-                    "ד״ר גדעון אלון",
+                    "טאוב - מדמ\"ח 1",
+                    "ד\"ר גדעון אלון",
                     "הרצאה 10"
                 ));
                 list.add(new CourseSlot(
-                    "מכניקת מוצקים 2מ׳",
+                    "מכניקת מוצקים 2מ'",
                     "11:30 - 14:30",
                     690, 870,
                     "דן קאהן - מכונות 6",
-                    "פרופ׳ יוסף גבלי",
+                    "פרופ' יוסף גבלי",
                     "הרצאה 10"
                 ));
                 list.add(new CourseSlot(
-                    "מכניקת מוצקים 2מ׳",
+                    "מכניקת מוצקים 2מ'",
                     "14:30 - 16:30",
                     870, 990,
                     "אולמן 602",
@@ -108,10 +108,10 @@ public class WearScheduleHelper {
             case Calendar.TUESDAY: // יום שלישי
                 list.add(new CourseSlot(
                     "תרמודינמיקה 1",
-                    "08:30 - 11:30",
-                    510, 690,
+                    "08:30 - 10:30",
+                    510, 630,
                     "הנדסה כימית 1",
-                    "פרופ׳ לאוניד טרטקובסקי",
+                    "פרופ' לאוניד טרטקובסקי",
                     "הרצאה 10"
                 ));
                 list.add(new CourseSlot(
@@ -119,15 +119,7 @@ public class WearScheduleHelper {
                     "12:30 - 14:30",
                     750, 870,
                     "אולמן 101",
-                    "גב׳ עומר גזית אורלוב",
-                    "תרגול 11"
-                ));
-                list.add(new CourseSlot(
-                    "מכניקת מוצקים 2מ׳",
-                    "14:30 - 16:30",
-                    870, 990,
-                    "אולמן 103",
-                    "מר איתם טננבאום",
+                    "גב' עומר גזית אורלוב",
                     "תרגול 11"
                 ));
                 break;
@@ -137,8 +129,8 @@ public class WearScheduleHelper {
                     "פיסיקה 2",
                     "08:30 - 09:30",
                     510, 570,
-                    "פיזיקה 1",
-                    "ד״ר גדעון אלון",
+                    "הנדסה כימית 1",
+                    "ד\"ר גדעון אלון",
                     "הרצאה 10"
                 ));
                 list.add(new CourseSlot(
@@ -154,7 +146,7 @@ public class WearScheduleHelper {
                     "14:30 - 17:30",
                     870, 1050,
                     "הנדסה כימית 1",
-                    "ד״ר דניאל הקסנר",
+                    "ד\"ר דניאל הקסנר",
                     "הרצאה 10"
                 ));
                 break;
@@ -162,18 +154,18 @@ public class WearScheduleHelper {
             case Calendar.THURSDAY: // יום חמישי
                 list.add(new CourseSlot(
                     "חינוך גופני - אתלטיקה קלה",
-                    "07:30 - 09:00",
-                    450, 540,
+                    "07:30 - 08:30",
+                    450, 510,
                     "חינוך גופני - אתלטיקה קלה",
                     "שלומית בן-איש",
                     "יוגה 24"
                 ));
                 list.add(new CourseSlot(
-                    "משוואות דיפרנציאליות חלקיות מ׳",
+                    "משוואות דיפרנציאליות חלקיות מ'",
                     "10:30 - 12:30",
                     630, 750,
                     "הנדסה כימית 1",
-                    "ד״ר רועי בר און",
+                    "ד\"ר רועי בר און",
                     "הרצאה 20"
                 ));
                 list.add(new CourseSlot(
@@ -199,25 +191,24 @@ public class WearScheduleHelper {
      * Resolves current class status, active course, upcoming course, or tomorrow's preview.
      */
     public static ScheduleResolution resolve(Context context, Calendar now) {
-        if (now == null) now = Calendar.getInstance();
         ScheduleResolution res = new ScheduleResolution();
 
         int dayOfWeek = now.get(Calendar.DAY_OF_WEEK);
-        String curDayName = (dayOfWeek >= 1 && dayOfWeek <= 7) ? HEBREW_DAYS[dayOfWeek] : "יום ראשון";
-        SimpleDateFormat sdf = new SimpleDateFormat("d בMMMM", new Locale("he", "IL"));
-        String formattedDate = sdf.format(now.getTime());
-        res.dayHeader = curDayName + " • " + formattedDate;
-
         int curHour = now.get(Calendar.HOUR_OF_DAY);
         int curMin = now.get(Calendar.MINUTE);
         int curTotalMin = curHour * 60 + curMin;
+
+        String dayName = HEBREW_DAYS[dayOfWeek];
+        SimpleDateFormat sdf = new SimpleDateFormat("d MMMM", new Locale("he", "IL"));
+        String dateFormatted = sdf.format(now.getTime());
+        res.dayHeader = dayName + " • " + dateFormatted;
 
         List<CourseSlot> todaysCourses = getScheduleForDay(dayOfWeek);
 
         // Populate Timeline items
         for (CourseSlot cs : todaysCourses) {
             boolean active = (curTotalMin >= cs.startMin && curTotalMin < cs.endMin);
-            String roomTag = cs.room.startsWith("📍") ? cs.room : "📍 " + cs.room;
+            String roomTag = cs.room.startsWith("חדר") ? cs.room : "חדר " + cs.room;
             res.timelineItems.add(new WearCarouselAdapter.ClassItem(
                 cs.title,
                 cs.time,
@@ -237,10 +228,10 @@ public class WearScheduleHelper {
 
         if (activeSlot != null) {
             res.isActive = true;
-            res.statusText = "🟢 מתקיים כעת!";
+            res.statusText = "🟢 שיעור מתקיים כעת!";
             res.courseTitle = activeSlot.title;
             res.timeText = activeSlot.time;
-            res.roomText = activeSlot.room.startsWith("📍") ? activeSlot.room : "📍 " + activeSlot.room;
+            res.roomText = activeSlot.room.startsWith("חדר") ? activeSlot.room : "חדר " + activeSlot.room;
             res.lecturerText = "👨‍🏫 " + activeSlot.lecturer + " • " + activeSlot.type;
             return res;
         }
@@ -258,13 +249,13 @@ public class WearScheduleHelper {
             int diff = upcomingSlot.startMin - curTotalMin;
             if (diff <= 60) {
                 res.isStartingSoon = true;
-                res.statusText = "⏰ מתחיל בעוד " + diff + " דקות";
+                res.statusText = "⏳ מתחיל בעוד " + diff + " דקות";
             } else {
-                res.statusText = "⏳ השיעור הבא היום (" + upcomingSlot.time.split(" - ")[0] + ")";
+                res.statusText = "📌 השיעור הבא היום (" + upcomingSlot.time.split(" - ")[0] + ")";
             }
             res.courseTitle = upcomingSlot.title;
             res.timeText = upcomingSlot.time;
-            res.roomText = upcomingSlot.room.startsWith("📍") ? upcomingSlot.room : "📍 " + upcomingSlot.room;
+            res.roomText = upcomingSlot.room.startsWith("חדר") ? upcomingSlot.room : "חדר " + upcomingSlot.room;
             res.lecturerText = "👨‍🏫 " + upcomingSlot.lecturer + " • " + upcomingSlot.type;
             return res;
         }
@@ -275,20 +266,19 @@ public class WearScheduleHelper {
             res.isFreeDay = true;
             res.isTomorrow = true;
             if (dayOfWeek == Calendar.FRIDAY) {
-                res.statusText = "🏖️ יום שישי חופשי";
-                res.courseTitle = "סופ״ש נעים ומנוחה!";
+                res.statusText = "🎉 יום שישי חופשי";
+                res.courseTitle = "סוף שבוע רגוע ונעים!";
             } else {
-                res.statusText = "🕯️ שבת שלום ומנוחה";
+                res.statusText = "✨ שבת שלום ומנוחה";
                 res.courseTitle = "שבת שלום!";
             }
-            res.timeText = "חופשי";
-            res.roomText = "📍 ללא שיעורים פרונטליים";
+            res.timeText = "יום חופשי";
+            res.roomText = "אין שיעורים באוניברסיטה";
             res.lecturerText = "השיעור הבא ביום ראשון ב-11:30";
             return res;
         }
 
         // 4. Today had classes, but ALL of them are now FINISHED (curTotalMin >= lastClass.endMin).
-        // Only now do we preview tomorrow or next school day!
         res.isTomorrow = true;
         CourseSlot nextDaySlot = null;
         String nextDayName = "";
@@ -307,19 +297,19 @@ public class WearScheduleHelper {
 
         if (nextDaySlot != null) {
             if (isDirectTomorrow) {
-                res.statusText = "מערכת מחר (" + nextDayName + ") • " + nextDaySlot.time.split(" - ")[0];
+                res.statusText = "ראשון מחר (" + nextDayName + ") ב-" + nextDaySlot.time.split(" - ")[0];
             } else {
                 res.statusText = "השיעור הבא ב" + nextDayName + " ב-" + nextDaySlot.time.split(" - ")[0];
             }
             res.courseTitle = nextDaySlot.title;
             res.timeText = nextDaySlot.time;
-            res.roomText = nextDaySlot.room.startsWith("📍") ? nextDaySlot.room : "📍 " + nextDaySlot.room;
+            res.roomText = nextDaySlot.room.startsWith("חדר") ? nextDaySlot.room : "חדר " + nextDaySlot.room;
             res.lecturerText = "👨‍🏫 " + nextDaySlot.lecturer + " • " + nextDaySlot.type;
         } else {
-            res.statusText = "חופשי";
-            res.courseTitle = "אין שיעורים קרובים";
+            res.statusText = "יום חופשי";
+            res.courseTitle = "סיום שיעורי השבוע";
             res.timeText = "--:--";
-            res.roomText = "📍 טכניון";
+            res.roomText = "חדר חופשי";
             res.lecturerText = "סמסטרו ME";
         }
 

@@ -201,6 +201,13 @@ public class MainActivity extends Activity implements MessageClient.OnMessageRec
         Toast.makeText(this, "מבקש סנכרון מהטלפון... 🔄", Toast.LENGTH_SHORT).show();
     }
 
+    @Override
+    public void onTestNotificationRequested() {
+        if (vibrator != null) vibrator.vibrate(50);
+        WearNotificationHelper.sendTestNotification(this);
+        Toast.makeText(this, "התראת בדיקה נשלחה 🔔", Toast.LENGTH_SHORT).show();
+    }
+
     private void notifyPhoneTaskStatus(String taskId, int taskIndex, boolean isDone) {
         try {
             Wearable.getNodeClient(this).getConnectedNodes().addOnSuccessListener(nodes -> {
