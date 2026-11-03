@@ -172,6 +172,11 @@ public class MainActivity extends BridgeActivity {
         public void syncAllToWatch() {
             WearSyncManager.syncAllToWatch(context);
         }
+        @JavascriptInterface
+        public void sendTestNotificationToWatch(String title, String message) {
+            WearSyncManager.sendTestNotificationToWatch(context, title, message);
+        }
+
 
         @JavascriptInterface
         public void updateClassWidget(String title, String time, String details, String lecturer, String status, int totalClasses, String classesJson) {

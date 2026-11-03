@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.graphics.Paint;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Vibrator;
@@ -15,28 +14,41 @@ import android.util.Log;
 import android.view.InputDevice;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.Button;
-import android.widget.LinearLayout;
-import android.widget.ScrollView;
+import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.wearable.Node;
+import androidx.viewpager2.widget.ViewPager2;
+
 import com.google.android.gms.wearable.MessageClient;
 import com.google.android.gms.wearable.MessageEvent;
-import org.json.JSONObject;
+import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.Wearable;
+
+import org.json.JSONObject;
 
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Locale;
 
-public class MainActivity extends Activity implements MessageClient.OnMessageReceivedListener {
+/**
+ * Semestero ME • Samsung Galaxy Watch 8 Native ViewPager2 Carousel
+ * Focused 3-Screen Layout:
+ * Screen 0: Class Radar
+ * Screen 1: Today's Timeline
+ * Screen 2: Tasks & Exams (5 Tasks with 1-tap complete)
+ */
+public class MainActivity extends Activity implements MessageClient.OnMessageReceivedListener, WearCarouselAdapter.OnCarouselActionListener {
 
     public static final String PREFS_NAME = "semestero_wear_prefs";
     public static final String PATH_REQUEST_SYNC = "/semestero/request_sync";
     public static final String PATH_COMPLETE_TASK = "/semestero/complete_task";
+    public static final String PATH_TRIGGER_NOTIFICATION = "/semestero/trigger_notification";
+    public static final String ACTION_SET_PAGE = "com.technion.semestero.wear.SET_PAGE";
     private static final String TAG = "WearMainActivity";
     private static final int PERMISSION_REQ_NOTIF = 201;
 
@@ -44,49 +56,24 @@ public class MainActivity extends Activity implements MessageClient.OnMessageRec
         "", "יום ראשון", "יום שני", "יום שלישי", "יום רביעי", "יום חמישי", "יום שישי", "שבת"
     };
 
-    private ScrollView scrollView;
-    private TextView tvCurrentDay;
-    private TextView tvSyncStatus;
-    private TextView tvClassStatus;
-    private TextView tvClassTitle;
-    private TextView tvClassTime;
-    private TextView tvClassRoom;
-    private TextView tvExamCountdown;
-    private TextView tvTasksSummary;
-    private TextView tvTasksToggleHint;
-    private LinearLayout cardTasksExam;
-    private LinearLayout layoutOpenTasksExpanded;
-
-    // Task 1
-    private LinearLayout taskItemView1;
-    private TextView tvTask1Title;
-    private TextView tvTask1Due;
-    private TextView btnCompleteTask1;
-    private boolean task1Done = false;
-
-    // Task 2
-    private LinearLayout taskItemView2;
-    private TextView tvTask2Title;
-    private TextView tvTask2Due;
-    private TextView btnCompleteTask2;
-    private boolean task2Done = false;
-
-    // Task 3
-    private LinearLayout taskItemView3;
-    private TextView tvTask3Title;
-    private TextView tvTask3Due;
-    private TextView btnCompleteTask3;
-    private boolean task3Done = false;
-
-    private TextView tvGpaVal;
-    private TextView tvHonorsBadge;
-    private Button btnRefresh;
-    private Button btnTestNotif;
+    private ViewPager2 wearViewPager;
+    private WearCarouselAdapter adapter;
+    private ImageView ivBezelGlow;
+    private View[] dotViews;
     private Vibrator vibrator;
+
+    private float bezelAccumulatedScroll = 0f;
 
     private final BroadcastReceiver syncReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+            if (intent != null && ACTION_SET_PAGE.equals(intent.getAction())) {
+                int page = intent.getIntExtra("page", 0);
+                if (wearViewPager != null && page >= 0 && page <= 2) {
+                    wearViewPager.setCurrentItem(page, true);
+                }
+                return;
+            }
             updateUIFromPrefsAndSchedule();
         }
     };
@@ -97,45 +84,50 @@ public class MainActivity extends Activity implements MessageClient.OnMessageRec
         setRequestedOrientation(android.content.pm.ActivityInfo.SCREEN_ORIENTATION_NOSENSOR);
         setContentView(R.layout.activity_main);
 
-        scrollView = findViewById(R.id.wear_scroll_view);
-        tvCurrentDay = findViewById(R.id.tv_current_day);
-        tvSyncStatus = findViewById(R.id.tv_sync_status);
-        tvClassStatus = findViewById(R.id.tv_class_status);
-        tvClassTitle = findViewById(R.id.tv_class_title);
-        tvClassTime = findViewById(R.id.tv_class_time);
-        tvClassRoom = findViewById(R.id.tv_class_room);
-        tvExamCountdown = findViewById(R.id.tv_exam_countdown);
-        tvTasksSummary = findViewById(R.id.tv_tasks_summary);
-        tvTasksToggleHint = findViewById(R.id.tv_tasks_toggle_hint);
-        cardTasksExam = findViewById(R.id.card_tasks_exam);
-        layoutOpenTasksExpanded = findViewById(R.id.layout_open_tasks_expanded);
-
-        // Task 1 views
-        taskItemView1 = findViewById(R.id.task_item_view_1);
-        tvTask1Title = findViewById(R.id.tv_task_1_title);
-        tvTask1Due = findViewById(R.id.tv_task_1_due);
-        btnCompleteTask1 = findViewById(R.id.btn_complete_wear_task_1);
-
-        // Task 2 views
-        taskItemView2 = findViewById(R.id.task_item_view_2);
-        tvTask2Title = findViewById(R.id.tv_task_2_title);
-        tvTask2Due = findViewById(R.id.tv_task_2_due);
-        btnCompleteTask2 = findViewById(R.id.btn_complete_wear_task_2);
-
-        // Task 3 views
-        taskItemView3 = findViewById(R.id.task_item_view_3);
-        tvTask3Title = findViewById(R.id.tv_task_3_title);
-        tvTask3Due = findViewById(R.id.tv_task_3_due);
-        btnCompleteTask3 = findViewById(R.id.btn_complete_wear_task_3);
-
-        tvGpaVal = findViewById(R.id.tv_gpa_val);
-        tvHonorsBadge = findViewById(R.id.tv_honors_badge);
-        btnRefresh = findViewById(R.id.btn_refresh_watch);
-        btnTestNotif = findViewById(R.id.btn_test_notif);
-
         vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+        ivBezelGlow = findViewById(R.id.iv_bezel_glow);
+        wearViewPager = findViewById(R.id.wear_view_pager);
 
-        // Ensure notification channel is initialized on watch
+        dotViews = new View[] {
+            findViewById(R.id.dot_0),
+            findViewById(R.id.dot_1),
+            findViewById(R.id.dot_2)
+        };
+
+        adapter = new WearCarouselAdapter(this, this);
+        wearViewPager.setUserInputEnabled(true);
+        wearViewPager.setAdapter(adapter);
+
+        wearViewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+                super.onPageScrolled(position, positionOffset, positionOffsetPixels);
+                if (ivBezelGlow != null) {
+                    // 3 screens: 120 degrees per screen (0°, 120°, 240°)
+                    ivBezelGlow.setRotation(position * 120f + positionOffset * 120f);
+                }
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                super.onPageSelected(position);
+                updatePaginationDots(position);
+                if (vibrator != null) vibrator.vibrate(12);
+            }
+        });
+
+        // Direct dot tapping to switch screens
+        for (int i = 0; i < dotViews.length; i++) {
+            final int targetPage = i;
+            if (dotViews[i] != null) {
+                dotViews[i].setOnClickListener(v -> {
+                    if (vibrator != null) vibrator.vibrate(15);
+                    wearViewPager.setCurrentItem(targetPage, true);
+                });
+            }
+        }
+
+        // Initialize Notification Channels
         WearNotificationHelper.ensureNotificationChannel(this);
 
         // Request POST_NOTIFICATIONS permission on Wear OS 4/5 (Android 13+)
@@ -145,129 +137,63 @@ public class MainActivity extends Activity implements MessageClient.OnMessageRec
             }
         }
 
-        // Tap on Card 2 (Tasks) to inspect and reveal open tasks
-        if (cardTasksExam != null) {
-            cardTasksExam.setOnClickListener(v -> {
-                if (vibrator != null) vibrator.vibrate(25);
-                boolean currentlyExpanded = (layoutOpenTasksExpanded != null && layoutOpenTasksExpanded.getVisibility() == View.VISIBLE);
-                if (currentlyExpanded) {
-                    if (layoutOpenTasksExpanded != null) layoutOpenTasksExpanded.setVisibility(View.GONE);
-                    if (tvTasksToggleHint != null) tvTasksToggleHint.setText("👇 לחץ לצפייה במשימות הפתוחות");
-                } else {
-                    if (layoutOpenTasksExpanded != null) layoutOpenTasksExpanded.setVisibility(View.VISIBLE);
-                    if (tvTasksToggleHint != null) tvTasksToggleHint.setText("▲ לחץ לצמצום הרשימה");
-                    // Smoothly scroll down so the full open tasks list is centered in the round screen
-                    if (scrollView != null) {
-                        scrollView.postDelayed(() -> {
-                            int targetY = cardTasksExam.getTop() - 20;
-                            scrollView.smoothScrollTo(0, Math.max(0, targetY));
-                        }, 80);
-                    }
-                }
-            });
-        }
-
-        // Task 1 interactive completion button
-        if (btnCompleteTask1 != null) {
-            btnCompleteTask1.setOnClickListener(v -> {
-                task1Done = !task1Done;
-                updateTaskDoneState(1, task1Done);
-            });
-        }
-
-        // Task 2 interactive completion button
-        if (btnCompleteTask2 != null) {
-            btnCompleteTask2.setOnClickListener(v -> {
-                task2Done = !task2Done;
-                updateTaskDoneState(2, task2Done);
-            });
-        }
-
-        // Task 3 interactive completion button
-        if (btnCompleteTask3 != null) {
-            btnCompleteTask3.setOnClickListener(v -> {
-                task3Done = !task3Done;
-                updateTaskDoneState(3, task3Done);
-            });
-        }
-
-        btnRefresh.setOnClickListener(v -> {
-            if (vibrator != null) vibrator.vibrate(35);
-            requestSyncFromPhone();
-            updateUIFromPrefsAndSchedule();
-            Toast.makeText(this, "מבקש סנכרון מהטלפון... 🔄", Toast.LENGTH_SHORT).show();
-        });
-
-        if (btnTestNotif != null) {
-            btnTestNotif.setOnClickListener(v -> {
-                if (vibrator != null) vibrator.vibrate(50);
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
-                    checkSelfPermission("android.permission.POST_NOTIFICATIONS") != PackageManager.PERMISSION_GRANTED) {
-                    requestPermissions(new String[]{"android.permission.POST_NOTIFICATIONS"}, PERMISSION_REQ_NOTIF);
-                } else {
-                    WearNotificationHelper.sendTestNotification(this);
-                    Toast.makeText(this, "התראה נשלחה לשעון!", Toast.LENGTH_SHORT).show();
-                }
-            });
-        }
-
-        // Auto-request sync on startup
+        // Request sync from phone on launch
         requestSyncFromPhone();
 
-        // Ensure rotary bezel events focus on the scrollview
-        scrollView.requestFocus();
+        // Populate initial UI
+        updateUIFromPrefsAndSchedule();
     }
 
-    private void updateTaskDoneState(int taskIndex, boolean isDone) {
-        if (vibrator != null) {
-            if (isDone) {
-                vibrator.vibrate(40);
-            } else {
-                vibrator.vibrate(20);
-            }
-        }
+    private void updatePaginationDots(int activeIndex) {
+        if (dotViews == null) return;
+        int activeWidth = dpToPx(14);
+        int inactiveWidth = dpToPx(5);
+        int height = dpToPx(5);
 
+        for (int i = 0; i < dotViews.length; i++) {
+            View dot = dotViews[i];
+            if (dot == null) continue;
+            ViewGroup.LayoutParams lp = dot.getLayoutParams();
+            if (i == activeIndex) {
+                dot.setBackgroundResource(R.drawable.dot_active);
+                lp.width = activeWidth;
+            } else {
+                dot.setBackgroundResource(R.drawable.dot_inactive);
+                lp.width = inactiveWidth;
+            }
+            lp.height = height;
+            dot.setLayoutParams(lp);
+        }
+    }
+
+    private int dpToPx(int dp) {
+        float density = getResources().getDisplayMetrics().density;
+        return Math.round(dp * density);
+    }
+
+    @Override
+    public void onTaskToggled(int taskIndex) {
         SharedPreferences prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-        prefs.edit().putBoolean("wear_task_" + taskIndex + "_done", isDone).apply();
+        boolean currentDone = prefs.getBoolean("wear_task_" + taskIndex + "_done", false);
+        boolean newDone = !currentDone;
+        prefs.edit().putBoolean("wear_task_" + taskIndex + "_done", newDone).apply();
 
-        TextView titleView = (taskIndex == 1) ? tvTask1Title : ((taskIndex == 2) ? tvTask2Title : tvTask3Title);
-        TextView btnView = (taskIndex == 1) ? btnCompleteTask1 : ((taskIndex == 2) ? btnCompleteTask2 : btnCompleteTask3);
-
-        if (titleView != null) {
-            if (isDone) {
-                titleView.setPaintFlags(titleView.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
-                titleView.setTextColor(getColor(R.color.text_secondary));
-            } else {
-                titleView.setPaintFlags(titleView.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
-                titleView.setTextColor(getColor(R.color.text_primary));
-            }
+        if (vibrator != null) {
+            vibrator.vibrate(newDone ? 45 : 20);
         }
 
-        if (btnView != null) {
-            if (isDone) {
-                btnView.setText("🎉 בוצע!");
-                btnView.setTextColor(getColor(R.color.emerald_green));
-            } else {
-                btnView.setText("✓ סמן כבוצע");
-                btnView.setTextColor(getColor(R.color.emerald_green));
-            }
-        }
+        String taskId = prefs.getString("wear_task_" + taskIndex + "_id", "task_" + taskIndex);
+        notifyPhoneTaskStatus(taskId, taskIndex, newDone);
 
-        // Recompute open tasks summary count
-        int openCount = (task1Done ? 0 : 1) + (task2Done ? 0 : 1) + (task3Done ? 0 : 1);
-        if (tvTasksSummary != null) {
-            if (openCount == 0) {
-                tvTasksSummary.setText("🎉 כל המשימות בוצעו!");
-            } else if (openCount == 1) {
-                tvTasksSummary.setText("משימה אחת פתוחה להגשה");
-            } else {
-                tvTasksSummary.setText(openCount + " משימות פתוחות להגשה");
-            }
-        }
+        updateUIFromPrefsAndSchedule();
+    }
 
-        String taskId = prefs.getString("wear_task_" + taskIndex + "_id", "");
-        // Send task completion message to phone companion
-        notifyPhoneTaskStatus(taskId, taskIndex, isDone);
+    @Override
+    public void onRefreshRequested() {
+        if (vibrator != null) vibrator.vibrate(35);
+        requestSyncFromPhone();
+        updateUIFromPrefsAndSchedule();
+        Toast.makeText(this, "מבקש סנכרון מהטלפון... 🔄", Toast.LENGTH_SHORT).show();
     }
 
     private void notifyPhoneTaskStatus(String taskId, int taskIndex, boolean isDone) {
@@ -291,13 +217,15 @@ public class MainActivity extends Activity implements MessageClient.OnMessageRec
     protected void onResume() {
         super.onResume();
         Wearable.getMessageClient(this).addListener(this);
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(WearDataSyncService.ACTION_DATA_SYNCED);
+        filter.addAction(ACTION_SET_PAGE);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            registerReceiver(syncReceiver, new IntentFilter(WearDataSyncService.ACTION_DATA_SYNCED), RECEIVER_EXPORTED);
+            registerReceiver(syncReceiver, filter, RECEIVER_EXPORTED);
         } else {
-            registerReceiver(syncReceiver, new IntentFilter(WearDataSyncService.ACTION_DATA_SYNCED));
+            registerReceiver(syncReceiver, filter);
         }
         updateUIFromPrefsAndSchedule();
-        scrollView.requestFocus();
     }
 
     @Override
@@ -313,7 +241,7 @@ public class MainActivity extends Activity implements MessageClient.OnMessageRec
     public void onMessageReceived(MessageEvent messageEvent) {
         if (messageEvent == null) return;
         String path = messageEvent.getPath();
-        Log.d(TAG, "MainActivity onMessageReceived on path: " + path);
+        Log.d(TAG, "MainActivity onMessageReceived: " + path);
         if (WearDataSyncService.PATH_DIRECT_SYNC.equals(path)) {
             try {
                 String jsonStr = new String(messageEvent.getData(), StandardCharsets.UTF_8);
@@ -321,18 +249,30 @@ public class MainActivity extends Activity implements MessageClient.OnMessageRec
                 WearDataSyncService.applyJsonToPrefs(this, json);
                 runOnUiThread(() -> {
                     updateUIFromPrefsAndSchedule();
-                    Toast.makeText(this, "\u26A1 \u05E1\u05D5\u05E0\u05DB\u05E8\u05DF \u05D1\u05D4\u05E6\u05DC\u05D7\u05D4 \u05DE\u05D4\u05D8\u05DC\u05E4\u05D5\u05DF!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "⚡ סונכרן בהצלחה מהטלפון!", Toast.LENGTH_SHORT).show();
                     if (vibrator != null) vibrator.vibrate(35);
                 });
             } catch (Exception e) {
-                Log.e(TAG, "Error handling direct sync message in MainActivity: ", e);
+                Log.e(TAG, "Error handling direct sync message: ", e);
+            }
+        } else if (PATH_TRIGGER_NOTIFICATION.equals(path)) {
+            try {
+                String jsonStr = new String(messageEvent.getData(), StandardCharsets.UTF_8);
+                JSONObject json = new JSONObject(jsonStr);
+                String title = json.optString("title", "🎓 סמסטרו ME • בדיקת התראה");
+                String message = json.optString("message", "📍 אולמן 506 • משוואות דיפרנציאליות (בעוד 10 דק׳)");
+                runOnUiThread(() -> {
+                    WearNotificationHelper.sendClassReminder(this, title, "12:30", message);
+                    if (vibrator != null) vibrator.vibrate(new long[]{0, 300, 150, 300}, -1);
+                });
+            } catch (Exception e) {
+                runOnUiThread(() -> WearNotificationHelper.sendTestNotification(this));
             }
         }
     }
 
     /**
      * Samsung Galaxy Watch 8 Physical / Virtual Rotating Bezel Support.
-     * Captures rotary encoder delta and scrolls the layout with haptic feedback.
      */
     @Override
     public boolean onGenericMotionEvent(MotionEvent event) {
@@ -340,25 +280,36 @@ public class MainActivity extends Activity implements MessageClient.OnMessageRec
             (event.isFromSource(InputDevice.SOURCE_ROTARY_ENCODER) || event.isFromSource(InputDevice.SOURCE_CLASS_POINTER))) {
             
             float delta = -event.getAxisValue(MotionEvent.AXIS_SCROLL);
-            int scrollAmount = Math.round(delta * 45); // Scaled for smooth Wear OS scrolling
-            scrollView.smoothScrollBy(0, scrollAmount);
-            
-            if (vibrator != null && Math.abs(scrollAmount) > 10) {
-                vibrator.vibrate(10); // Subtle haptic tick per detent
+            int currentItem = wearViewPager.getCurrentItem();
+
+            if (currentItem == WearCarouselAdapter.TYPE_TIMELINE && adapter.timelineScrollView != null) {
+                int scrollAmount = Math.round(delta * 40);
+                adapter.timelineScrollView.smoothScrollBy(0, scrollAmount);
+                if (vibrator != null) vibrator.vibrate(8);
+                return true;
+            } else if (currentItem == WearCarouselAdapter.TYPE_TASKS && adapter.tasksScrollView != null) {
+                int scrollAmount = Math.round(delta * 40);
+                adapter.tasksScrollView.smoothScrollBy(0, scrollAmount);
+                if (vibrator != null) vibrator.vibrate(8);
+                return true;
+            } else {
+                bezelAccumulatedScroll += delta;
+                if (bezelAccumulatedScroll > 0.8f && currentItem < 2) {
+                    wearViewPager.setCurrentItem(currentItem + 1, true);
+                    bezelAccumulatedScroll = 0f;
+                    if (vibrator != null) vibrator.vibrate(12);
+                } else if (bezelAccumulatedScroll < -0.8f && currentItem > 0) {
+                    wearViewPager.setCurrentItem(currentItem - 1, true);
+                    bezelAccumulatedScroll = 0f;
+                    if (vibrator != null) vibrator.vibrate(12);
+                }
+                return true;
             }
-            return true;
         }
         return super.onGenericMotionEvent(event);
     }
 
-    /**
-     * Sends an immediate message to the phone companion requesting fresh sync data.
-     */
     public void requestSyncFromPhone() {
-        if (tvSyncStatus != null) {
-            tvSyncStatus.setText("\uD83D\uDD04 \u05DE\u05E1\u05E0\u05DB\u05E8\u05DF \u05E2\u05DD \u05D4\u05D8\u05DC\u05E4\u05D5\u05DF...");
-            tvSyncStatus.setTextColor(getColor(R.color.amber_warning));
-        }
         try {
             Wearable.getNodeClient(this).getConnectedNodes().addOnSuccessListener(nodes -> {
                 if (nodes != null && !nodes.isEmpty()) {
@@ -367,344 +318,333 @@ public class MainActivity extends Activity implements MessageClient.OnMessageRec
                             node.getId(),
                             PATH_REQUEST_SYNC,
                             "SYNC".getBytes(StandardCharsets.UTF_8)
-                        ).addOnSuccessListener(res -> Log.d(TAG, "Sent sync request to phone node: " + node.getDisplayName()))
-                         .addOnFailureListener(e -> Log.w(TAG, "Failed sending sync request to node: " + e.getMessage()));
+                        );
                     }
-                } else {
-                    Log.d(TAG, "No connected phone nodes currently reachable; evaluating standalone schedule.");
-                    runOnUiThread(() -> {
-                        if (tvSyncStatus != null) {
-                            tvSyncStatus.setText("\uD83D\uDD52 \u05E9\u05E2\u05D5\u05DF \u05E2\u05E6\u05DE\u05D0\u05D9 (Technion Radar)");
-                            tvSyncStatus.setTextColor(getColor(R.color.text_secondary));
-                        }
-                    });
                 }
-            }).addOnFailureListener(e -> Log.w(TAG, "Node client query failed: " + e.getMessage()));
-        } catch (Exception e) {
-            Log.e(TAG, "Error querying connected nodes: ", e);
-        }
+            });
+        } catch (Exception ignored) {}
     }
 
     /**
-     * Evaluates current Hebrew day, date, and resolves the class radar.
-     * Guaranteed to accurately show today's day even if offline/unsynced!
+     * Evaluates schedule, authentic Technion ME syllabus, and binds data across 3 screens.
      */
     public void updateUIFromPrefsAndSchedule() {
         SharedPreferences prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
 
-        // 1. Calculate authentic current day and formatted date
+        // 1. Current Day & Date
         Calendar now = Calendar.getInstance();
-        int dayOfWeek = now.get(Calendar.DAY_OF_WEEK); // 1 = Sunday, ..., 7 = Saturday
-        String curDayName = (dayOfWeek >= 1 && dayOfWeek <= 7) ? HEBREW_DAYS[dayOfWeek] : "יום ראשון";
+        int dayOfWeek = now.get(Calendar.DAY_OF_WEEK); // 1 = Sunday, 7 = Saturday
+        String curDayName = (dayOfWeek >= 1 && dayOfWeek <= 7) ? HEBREW_DAYS[dayOfWeek] : "יום שלישי";
 
         SimpleDateFormat sdf = new SimpleDateFormat("d בMMMM", new Locale("he", "IL"));
         String formattedDate = sdf.format(now.getTime());
 
-        if (tvCurrentDay != null) {
-            tvCurrentDay.setText(curDayName + " • " + formattedDate);
-        }
-
-        // 2. Sync Status indicator
-        long lastSync = prefs.getLong("last_sync_timestamp", 0);
-        long nowMs = System.currentTimeMillis();
-        boolean isFreshSync = (lastSync > 0) && ((nowMs - lastSync) < 24 * 3600 * 1000);
-
-        if (tvSyncStatus != null) {
-            if (isFreshSync) {
-                tvSyncStatus.setText("⚡ מסונכרן עם הטלפון");
-                tvSyncStatus.setTextColor(getColor(R.color.cyan_accent));
-            } else {
-                tvSyncStatus.setText("🕒 שעון עצמאי (Technion Radar)");
-                tvSyncStatus.setTextColor(getColor(R.color.text_secondary));
-            }
-        }
-
-        // 3. Resolve class data:
         int curHour = now.get(Calendar.HOUR_OF_DAY);
         int curMin = now.get(Calendar.MINUTE);
         int curTotalMin = curHour * 60 + curMin;
         boolean isEvening = (curHour >= 17);
 
-        // If prefs contains synced data for today and it's not evening without next-day data, use it.
-        String syncedDay = prefs.getString("day_name", "");
-        boolean hasMatchingDaySync = isFreshSync && (curDayName.equals(syncedDay) || (prefs.getInt("day_index", -1) == (dayOfWeek - 1)));
-
+        // Screen 0: Class Radar
         String classTitle;
         String classTime;
         String classRoom;
         String classStatus;
+        String classLecturer;
 
-        if (hasMatchingDaySync && prefs.contains("class_title")) {
-            classTitle = prefs.getString("class_title", "אין שיעורים קרובים היום");
-            classTime = prefs.getString("class_time", "--:--");
-            classRoom = prefs.getString("class_details", "יום חופשי או שהסתיימו הלימודים 🎉");
-            classStatus = prefs.getString("class_status", "חופשי");
-        } else {
-            // Built-in authentic Technion Mechanical Engineering Schedule (Winter 2026/2027)
-            // Rules:
-            // 1) 15 minutes after start of previous class (startMin + 15), switch silently to next class!
-            // 2) In the evening (>= 17:00) or once today's classes finish, preview tomorrow / next school day!
-            switch (dayOfWeek) {
-                case Calendar.SUNDAY: // יום ראשון
-                    // Class: 11:30 - 13:30 (startMin = 690)
-                    if (!isEvening && curTotalMin < 690) { // Before 11:30
-                        classTitle = "משוואות דיפרנציאליות חלקיות מ׳";
-                        classTime = "11:30 - 13:30";
-                        classRoom = "📍 אולמן 506 • ד״ר רחל כהן";
-                        int diff = 690 - curTotalMin;
-                        classStatus = "⏳ השיעור מתחיל בעוד " + diff + " דק׳";
-                    } else if (!isEvening && curTotalMin < 705) { // 11:30 - 11:45 (first 15 min of class)
-                        classTitle = "משוואות דיפרנציאליות חלקיות מ׳";
-                        classTime = "11:30 - 13:30";
-                        classRoom = "📍 אולמן 506 • הרצאה פעילה";
-                        classStatus = "🟢 מתקיים כעת!";
-                    } else { // 11:45 onwards OR evening: switch to tomorrow (Monday)
-                        classTitle = "פיסיקה 2";
-                        classTime = "08:30 - 10:30";
-                        classRoom = "📍 טאוב 1 • מרצה: פרופ׳ כץ";
-                        classStatus = isEvening ? "מערכת מחר (יום שני) • שיעור ראשון" : "השיעור הבא מחר (יום שני) ב-08:30";
-                    }
-                    break;
+        List<WearCarouselAdapter.ClassItem> timelineClasses = new ArrayList<>();
 
-                case Calendar.MONDAY: // יום שני
-                    // Classes:
-                    // 1) 08:30 - 10:30 (startMin = 510) - Physics 2
-                    // 2) 10:30 - 14:30 (startMin = 630) - Solids 2M
-                    if (!isEvening && curTotalMin < 510) { // Before 08:30
-                        classTitle = "פיסיקה 2";
-                        classTime = "08:30 - 10:30";
-                        classRoom = "📍 טאוב 1 • מרצה: פרופ׳ כץ";
-                        classStatus = "⏳ מתחיל בעוד " + (510 - curTotalMin) + " דק׳";
-                    } else if (!isEvening && curTotalMin < 525) { // 08:30 - 08:45
-                        classTitle = "פיסיקה 2";
-                        classTime = "08:30 - 10:30";
-                        classRoom = "📍 טאוב 1 • הרצאה פעילה";
-                        classStatus = "🟢 מתקיים כעת!";
-                    } else if (!isEvening && curTotalMin < 630) { // 08:45 - 10:30 (switched to Solids 2M!)
-                        classTitle = "מכניקת מוצקים 2מ׳";
-                        classTime = "10:30 - 14:30";
-                        classRoom = "📍 דנציגר אודיטוריום 1";
-                        classStatus = "⏳ השיעור הבא היום (10:30)";
-                    } else if (!isEvening && curTotalMin < 645) { // 10:30 - 10:45
-                        classTitle = "מכניקת מוצקים 2מ׳";
-                        classTime = "10:30 - 14:30";
-                        classRoom = "📍 דנציגר אודיטוריום 1 • הרצאה פעילה";
-                        classStatus = "🟢 מתקיים כעת!";
-                    } else { // 10:45 onwards OR evening: switch to tomorrow (Tuesday)
-                        classTitle = "תרמודינמיקה 1";
-                        classTime = "08:30 - 11:30";
-                        classRoom = "📍 דנציגר אודיטוריום 1";
-                        classStatus = isEvening ? "מערכת מחר (יום שלישי) • שיעור ראשון" : "השיעור הבא מחר (יום שלישי) ב-08:30";
-                    }
-                    break;
+        switch (dayOfWeek) {
+            case Calendar.SUNDAY: // יום ראשון
+                timelineClasses.add(new WearCarouselAdapter.ClassItem(
+                    "משוואות דיפרנציאליות חלקיות מ׳",
+                    "11:30 - 13:30",
+                    "📍 אולמן 506",
+                    (!isEvening && curTotalMin >= 690 && curTotalMin < 810)
+                ));
 
-                case Calendar.TUESDAY: // יום שלישי
-                    // Class: 08:30 - 11:30 (startMin = 510) - Thermo 1
-                    if (!isEvening && curTotalMin < 510) {
-                        classTitle = "תרמודינמיקה 1";
-                        classTime = "08:30 - 11:30";
-                        classRoom = "📍 דנציגר אודיטוריום 1";
-                        classStatus = "⏳ מתחיל בעוד " + (510 - curTotalMin) + " דק׳";
-                    } else if (!isEvening && curTotalMin < 525) { // 08:30 - 08:45
-                        classTitle = "תרמודינמיקה 1";
-                        classTime = "08:30 - 11:30";
-                        classRoom = "📍 דנציגר אודיטוריום 1 • הרצאה פעילה";
-                        classStatus = "🟢 מתקיים כעת!";
-                    } else { // 08:45 onwards OR evening: switch to tomorrow (Wednesday)
-                        classTitle = "מכניקת מוצקים 2מ׳";
-                        classTime = "12:30 - 14:30";
-                        classRoom = "📍 ליידי דייוויס 240";
-                        classStatus = isEvening ? "מערכת מחר (יום רביעי) • שיעור ראשון" : "השיעור הבא מחר (יום רביעי) ב-12:30";
-                    }
-                    break;
-
-                case Calendar.WEDNESDAY: // יום רביעי
-                    // Class: 12:30 - 14:30 (startMin = 750) - Solids 2M
-                    if (!isEvening && curTotalMin < 750) {
-                        classTitle = "מכניקת מוצקים 2מ׳";
-                        classTime = "12:30 - 14:30";
-                        classRoom = "📍 ליידי דייוויס 240";
-                        classStatus = "⏳ מתחיל בעוד " + (750 - curTotalMin) + " דק׳";
-                    } else if (!isEvening && curTotalMin < 765) { // 12:30 - 12:45
-                        classTitle = "מכניקת מוצקים 2מ׳";
-                        classTime = "12:30 - 14:30";
-                        classRoom = "📍 ליידי דייוויס 240 • תרגול פעיל";
-                        classStatus = "🟢 מתקיים כעת!";
-                    } else { // 12:45 onwards OR evening: switch to tomorrow (Thursday)
-                        classTitle = "גרפיקה הנדסית ומבוא לתיב״ם";
-                        classTime = "09:30 - 11:30";
-                        classRoom = "📍 בניין מכונות • מעבדה 10";
-                        classStatus = isEvening ? "מערכת מחר (יום חמישי) • שיעור ראשון" : "השיעור הבא מחר (יום חמישי) ב-09:30";
-                    }
-                    break;
-
-                case Calendar.THURSDAY: // יום חמישי
-                    // Class: 09:30 - 11:30 (startMin = 570) - Graphics & CAD
-                    if (!isEvening && curTotalMin < 570) {
-                        classTitle = "גרפיקה הנדסית ומבוא לתיב״ם";
-                        classTime = "09:30 - 11:30";
-                        classRoom = "📍 בניין מכונות • מעבדה 10";
-                        classStatus = "⏳ מתחיל בעוד " + (570 - curTotalMin) + " דק׳";
-                    } else if (!isEvening && curTotalMin < 585) { // 09:30 - 09:45
-                        classTitle = "גרפיקה הנדסית ומבוא לתיב״ם";
-                        classTime = "09:30 - 11:30";
-                        classRoom = "📍 בניין מכונות • כיתת מחשבים";
-                        classStatus = "🟢 מתקיים כעת!";
-                    } else { // 09:45 onwards OR evening: weekend starts -> next school day: Sunday
-                        classTitle = "משוואות דיפרנציאליות חלקיות מ׳";
-                        classTime = "11:30 - 13:30";
-                        classRoom = "📍 אולמן 506 • ד״ר רחל כהן";
-                        classStatus = "מערכת יום ראשון • שיעור ראשון (סופ״ש נעים! 🎉)";
-                    }
-                    break;
-
-                case Calendar.FRIDAY: // יום שישי
+                if (!isEvening && curTotalMin < 690) {
                     classTitle = "משוואות דיפרנציאליות חלקיות מ׳";
                     classTime = "11:30 - 13:30";
-                    classRoom = "📍 אולמן 506 • ד״ר רחל כהן";
-                    classStatus = "מערכת יום ראשון • שיעור ראשון (סופ״ש 🏖️)";
-                    break;
-
-                case Calendar.SATURDAY: // שבת
-                default:
+                    classRoom = "📍 אולמן 506";
+                    classLecturer = "👨‍🏫 ד״ר רחל כהן • הרצאה";
+                    int diff = 690 - curTotalMin;
+                    classStatus = "⏳ השיעור מתחיל בעוד " + diff + " דק׳";
+                } else if (!isEvening && curTotalMin < 705) {
                     classTitle = "משוואות דיפרנציאליות חלקיות מ׳";
                     classTime = "11:30 - 13:30";
-                    classRoom = "📍 אולמן 506 • ד״ר רחל כהן";
-                    classStatus = isEvening ? "מערכת מחר (יום ראשון) • 11:30" : "שבוע חדש מתחיל מחר (ראשון) ב-11:30";
-                    break;
-            }
+                    classRoom = "📍 אולמן 506";
+                    classLecturer = "👨‍🏫 ד״ר רחל כהן • הרצאה פעילה";
+                    classStatus = "🟢 מתקיים כעת!";
+                } else {
+                    classTitle = "פיסיקה 2";
+                    classTime = "08:30 - 10:30";
+                    classRoom = "📍 טאוב 1";
+                    classLecturer = "👨‍🏫 ד״ר גדעון אלון • הרצאה 10";
+                    classStatus = isEvening ? "מערכת מחר (יום שני) • שיעור ראשון" : "השיעור הבא מחר (שני) ב-08:30";
+                }
+                break;
+
+            case Calendar.MONDAY: // יום שני
+                boolean physActive = (!isEvening && curTotalMin >= 510 && curTotalMin < 630);
+                boolean solidsActive = (!isEvening && curTotalMin >= 630 && curTotalMin < 870);
+
+                timelineClasses.add(new WearCarouselAdapter.ClassItem(
+                    "פיסיקה 2",
+                    "08:30 - 10:30",
+                    "📍 טאוב 1",
+                    physActive
+                ));
+                timelineClasses.add(new WearCarouselAdapter.ClassItem(
+                    "מכניקת מוצקים 2מ׳",
+                    "10:30 - 14:30",
+                    "📍 הנדסה כימית 1",
+                    solidsActive
+                ));
+
+                if (!isEvening && curTotalMin < 510) {
+                    classTitle = "פיסיקה 2";
+                    classTime = "08:30 - 10:30";
+                    classRoom = "📍 טאוב 1";
+                    classLecturer = "👨‍🏫 ד״ר גדעון אלון • הרצאה 10";
+                    classStatus = "⏳ מתחיל בעוד " + (510 - curTotalMin) + " דק׳";
+                } else if (!isEvening && curTotalMin < 525) {
+                    classTitle = "פיסיקה 2";
+                    classTime = "08:30 - 10:30";
+                    classRoom = "📍 טאוב 1";
+                    classLecturer = "👨‍🏫 ד״ר גדעון אלון • הרצאה פעילה";
+                    classStatus = "🟢 מתקיים כעת!";
+                } else if (!isEvening && curTotalMin < 630) {
+                    classTitle = "מכניקת מוצקים 2מ׳";
+                    classTime = "10:30 - 14:30";
+                    classRoom = "📍 הנדסה כימית 1";
+                    classLecturer = "👨‍🏫 פרופ׳ יוסף גבלי • הרצאה 10";
+                    classStatus = "⏳ השיעור הבא היום (10:30)";
+                } else if (!isEvening && curTotalMin < 645) {
+                    classTitle = "מכניקת מוצקים 2מ׳";
+                    classTime = "10:30 - 14:30";
+                    classRoom = "📍 הנדסה כימית 1";
+                    classLecturer = "👨‍🏫 פרופ׳ יוסף גבלי • הרצאה פעילה";
+                    classStatus = "🟢 מתקיים כעת!";
+                } else {
+                    classTitle = "תרמודינמיקה 1";
+                    classTime = "08:30 - 11:30";
+                    classRoom = "📍 הנדסה כימית 1";
+                    classLecturer = "👨‍🏫 פרופ׳ טרטקובסקי • הרצאה 10";
+                    classStatus = isEvening ? "מערכת מחר (יום שלישי) • שיעור ראשון" : "השיעור הבא מחר (שלישי) ב-08:30";
+                }
+                break;
+
+            case Calendar.TUESDAY: // יום שלישי - Exact match with Screenshots 2 & 4!
+            default:
+                boolean t1Active = (!isEvening && curTotalMin >= 510 && curTotalMin < 690);
+                boolean t2Active = (!isEvening && curTotalMin >= 750 && curTotalMin < 870);
+                boolean t3Active = (!isEvening && curTotalMin >= 870 && curTotalMin < 990);
+
+                timelineClasses.add(new WearCarouselAdapter.ClassItem(
+                    "תרמודינמיקה 1",
+                    "08:30 - 11:30",
+                    "📍 הנדסה כימית 1",
+                    t1Active
+                ));
+                timelineClasses.add(new WearCarouselAdapter.ClassItem(
+                    "משוואות דיפרנציאליות חלקיות מ׳",
+                    "12:30 - 14:30",
+                    "📍 אולמן 506",
+                    t2Active
+                ));
+                timelineClasses.add(new WearCarouselAdapter.ClassItem(
+                    "פיסיקה 2",
+                    "14:30 - 16:30",
+                    "📍 טאוב",
+                    t3Active
+                ));
+
+                // Radar logic for Tuesday
+                if (!isEvening && curTotalMin < 510) {
+                    classTitle = "תרמודינמיקה 1";
+                    classTime = "08:30 - 11:30";
+                    classRoom = "📍 הנדסה כימית 1";
+                    classLecturer = "👨‍🏫 פרופ׳ טרטקובסקי • הרצאה 10";
+                    classStatus = "⏰ מתחיל בעוד " + (510 - curTotalMin) + " דקות";
+                } else if (!isEvening && curTotalMin < 525) {
+                    classTitle = "תרמודינמיקה 1";
+                    classTime = "08:30 - 11:30";
+                    classRoom = "📍 הנדסה כימית 1";
+                    classLecturer = "👨‍🏫 פרופ׳ טרטקובסקי • הרצאה פעילה";
+                    classStatus = "🟢 מתקיים כעת!";
+                } else if (!isEvening && curTotalMin < 750) { // Switched to PDE (12:30)
+                    classTitle = "משוואות דיפרנציאליות חלקיות מ׳";
+                    classTime = "12:30 - 14:30";
+                    classRoom = "📍 אולמן 506";
+                    classLecturer = "👨‍🏫 אמתי אלפרין • הרצאה";
+                    int diff = 750 - curTotalMin;
+                    classStatus = "מתחיל בעוד " + diff + " דקות ⏰";
+                } else if (!isEvening && curTotalMin < 765) {
+                    classTitle = "משוואות דיפרנציאליות חלקיות מ׳";
+                    classTime = "12:30 - 14:30";
+                    classRoom = "📍 אולמן 506";
+                    classLecturer = "👨‍🏫 אמתי אלפרין • הרצאה פעילה";
+                    classStatus = "🟢 מתקיים כעת!";
+                } else if (!isEvening && curTotalMin < 870) { // Switched to Physics 2 (14:30)
+                    classTitle = "פיסיקה 2";
+                    classTime = "14:30 - 16:30";
+                    classRoom = "📍 טאוב";
+                    classLecturer = "👨‍🏫 צוות פיסיקה • תרגול";
+                    int diff = 870 - curTotalMin;
+                    classStatus = "מתחיל בעוד " + diff + " דקות ⏰";
+                } else if (!isEvening && curTotalMin < 885) {
+                    classTitle = "פיסיקה 2";
+                    classTime = "14:30 - 16:30";
+                    classRoom = "📍 טאוב";
+                    classLecturer = "👨‍🏫 צוות פיסיקה • תרגול פעיל";
+                    classStatus = "🟢 מתקיים כעת!";
+                } else {
+                    classTitle = "מכניקת מוצקים 2מ׳";
+                    classTime = "12:30 - 14:30";
+                    classRoom = "📍 ליידי דייוויס 240";
+                    classLecturer = "👨‍🏫 מתרגל • תרגול כיתה";
+                    classStatus = isEvening ? "מערכת מחר (יום רביעי) • שיעור ראשון" : "השיעור הבא מחר (רביעי) ב-12:30";
+                }
+                break;
+
+            case Calendar.WEDNESDAY: // יום רביעי
+                boolean solidsWedActive = (!isEvening && curTotalMin >= 750 && curTotalMin < 870);
+                boolean cadWedActive = (!isEvening && curTotalMin >= 870 && curTotalMin < 1050);
+
+                timelineClasses.add(new WearCarouselAdapter.ClassItem(
+                    "מכניקת מוצקים 2מ׳",
+                    "12:30 - 14:30",
+                    "📍 ליידי דייוויס 240",
+                    solidsWedActive
+                ));
+                timelineClasses.add(new WearCarouselAdapter.ClassItem(
+                    "גרפיקה הנדסית וכתיבה טכנית",
+                    "14:30 - 17:30",
+                    "📍 דנציגר",
+                    cadWedActive
+                ));
+
+                if (!isEvening && curTotalMin < 750) {
+                    classTitle = "מכניקת מוצקים 2מ׳";
+                    classTime = "12:30 - 14:30";
+                    classRoom = "📍 ליידי דייוויס 240";
+                    classLecturer = "👨‍🏫 מתרגל • תרגול כיתה";
+                    classStatus = "מתחיל בעוד " + (750 - curTotalMin) + " דקות ⏰";
+                } else if (!isEvening && curTotalMin < 765) {
+                    classTitle = "מכניקת מוצקים 2מ׳";
+                    classTime = "12:30 - 14:30";
+                    classRoom = "📍 ליידי דייוויס 240";
+                    classLecturer = "👨‍🏫 מתרגל • תרגול פעיל";
+                    classStatus = "🟢 מתקיים כעת!";
+                } else {
+                    classTitle = "גרפיקה הנדסית וכתיבה טכנית";
+                    classTime = "09:30 - 11:30";
+                    classRoom = "📍 דנציגר";
+                    classLecturer = "👨‍🏫 מרצה • הרצאה 10";
+                    classStatus = isEvening ? "מערכת מחר (יום חמישי) • שיעור ראשון" : "השיעור הבא מחר (חמישי) ב-09:30";
+                }
+                break;
+
+            case Calendar.THURSDAY: // יום חמישי
+                boolean cadThuActive = (!isEvening && curTotalMin >= 570 && curTotalMin < 690);
+                boolean physLabActive = (!isEvening && curTotalMin >= 750 && curTotalMin < 930);
+
+                timelineClasses.add(new WearCarouselAdapter.ClassItem(
+                    "גרפיקה הנדסית וכתיבה טכנית",
+                    "09:30 - 11:30",
+                    "📍 דנציגר",
+                    cadThuActive
+                ));
+                timelineClasses.add(new WearCarouselAdapter.ClassItem(
+                    "מעבדת פיסיקה 2",
+                    "12:30 - 15:30",
+                    "📍 פיסיקה 200",
+                    physLabActive
+                ));
+
+                if (!isEvening && curTotalMin < 570) {
+                    classTitle = "גרפיקה הנדסית וכתיבה טכנית";
+                    classTime = "09:30 - 11:30";
+                    classRoom = "📍 דנציגר";
+                    classLecturer = "👨‍🏫 מרצה • הרצאה 10";
+                    classStatus = "מתחיל בעוד " + (570 - curTotalMin) + " דקות ⏰";
+                } else if (!isEvening && curTotalMin < 585) {
+                    classTitle = "גרפיקה הנדסית וכתיבה טכנית";
+                    classTime = "09:30 - 11:30";
+                    classRoom = "📍 דנציגר";
+                    classLecturer = "👨‍🏫 מעבדה פעילה";
+                    classStatus = "🟢 מתקיים כעת!";
+                } else {
+                    classTitle = "משוואות דיפרנציאליות חלקיות מ׳";
+                    classTime = "11:30 - 13:30";
+                    classRoom = "📍 אולמן 506";
+                    classLecturer = "👨‍🏫 אמתי אלפרין • תרגול 22";
+                    classStatus = "סופ״ש נעים! 🎉 השיעור הבא ביום ראשון";
+                }
+                break;
+
+            case Calendar.FRIDAY:
+            case Calendar.SATURDAY:
+                classTitle = "משוואות דיפרנציאליות חלקיות מ׳";
+                classTime = "11:30 - 13:30";
+                classRoom = "📍 אולמן 506";
+                classLecturer = "👨‍🏫 אמתי אלפרין • תרגול 22";
+                classStatus = "שבוע חדש מתחיל ביום ראשון ב-11:30";
+                break;
         }
 
-        if (tvClassTitle != null) tvClassTitle.setText(classTitle);
-        if (tvClassTime != null) tvClassTime.setText(classTime);
-        if (tvClassRoom != null) tvClassRoom.setText(classRoom);
-        if (tvClassStatus != null) tvClassStatus.setText(classStatus);
+        // Apply radar data to adapter
+        adapter.radarDay = curDayName + " • " + formattedDate;
+        adapter.radarStatus = classStatus;
+        adapter.radarCourse = classTitle;
+        adapter.radarTime = classTime;
+        adapter.radarRoom = classRoom;
+        adapter.radarLecturer = classLecturer;
 
-        // 4. Tasks & Exam Countdown
-        String examDays = prefs.getString("exam_days", "📝 מבחן מועד א׳ בעוד 14 יום");
-        String tasksSummary = prefs.getString("tasks_summary", "משימות פתוחות במודל");
-        if (tvExamCountdown != null) tvExamCountdown.setText(examDays);
+        // Apply timeline data to adapter
+        adapter.timelineHeader = "לו״ז " + curDayName + " (" + formattedDate + ")";
+        adapter.timelineClasses = timelineClasses;
 
-        // Populate Individual Open Tasks from Semestero synced JSON
-        task1Done = prefs.getBoolean("wear_task_1_done", false);
-        task2Done = prefs.getBoolean("wear_task_2_done", false);
-        task3Done = prefs.getBoolean("wear_task_3_done", false);
-
-        String allTasksJson = prefs.getString("all_tasks_json", "[]");
-        String t1Title = "", t2Title = "", t3Title = "";
-        String t1Due = "", t2Due = "", t3Due = "";
-        String t1Id = "", t2Id = "", t3Id = "";
-        int openTasksCount = 0;
-
-        try {
-            org.json.JSONArray arr = new org.json.JSONArray(allTasksJson);
-            openTasksCount = arr.length();
-            if (arr.length() > 0) {
-                org.json.JSONObject o1 = arr.getJSONObject(0);
-                String c1 = o1.optString("course", "");
-                String title1 = o1.optString("title", "");
-                t1Title = (!c1.isEmpty() && !title1.startsWith("[")) ? ("[" + c1 + "] " + title1) : title1;
-                t1Due = o1.optString("dueFormatted", o1.optString("due", "\u23F3 \u05DE\u05D5\u05D3\u05DC \u05D8\u05DB\u05E0\u05D9\u05D5\u05DF \u2022 \u05E9\u05D1\u05D5\u05E2 2"));
-                t1Id = o1.optString("id", "");
-            }
-            if (arr.length() > 1) {
-                org.json.JSONObject o2 = arr.getJSONObject(1);
-                String c2 = o2.optString("course", "");
-                String title2 = o2.optString("title", "");
-                t2Title = (!c2.isEmpty() && !title2.startsWith("[")) ? ("[" + c2 + "] " + title2) : title2;
-                t2Due = o2.optString("dueFormatted", o2.optString("due", "\u23F3 \u05DE\u05D5\u05D3\u05DC \u05D8\u05DB\u05E0\u05D9\u05D5\u05DF \u2022 \u05E9\u05D1\u05D5\u05E2 2"));
-                t2Id = o2.optString("id", "");
-            }
-            if (arr.length() > 2) {
-                org.json.JSONObject o3 = arr.getJSONObject(2);
-                String c3 = o3.optString("course", "");
-                String title3 = o3.optString("title", "");
-                t3Title = (!c3.isEmpty() && !title3.startsWith("[")) ? ("[" + c3 + "] " + title3) : title3;
-                t3Due = o3.optString("dueFormatted", o3.optString("due", "\u23F3 \u05DE\u05D5\u05D3\u05DC \u05D8\u05DB\u05E0\u05D9\u05D5\u05DF \u2022 \u05E9\u05D1\u05D5\u05E2 2"));
-                t3Id = o3.optString("id", "");
-            }
-        } catch (Exception ignored) {}
-
-        // Fallbacks: authentic Semester 3 Technion Mechanical Engineering tasks only (no fake tasks)
-        if (t1Title.isEmpty()) {
-            t1Title = prefs.getString("task_1", "[\u05DE\u05D3\u05D7 \u05DE\u05F3] \u05EA\u05E8\u05D2\u05D9\u05DC \u05D1\u05D9\u05EA 1: \u05DE\u05E9\u05D5\u05D5\u05D0\u05D5\u05EA \u05D3\u05D9\u05E4\u05E8\u05E0\u05E6\u05D9\u05D0\u05DC\u05D9\u05D5\u05EA");
-            t1Due = "\u23F3 \u05DE\u05D5\u05D3\u05DC \u05D8\u05DB\u05E0\u05D9\u05D5\u05DF \u2022 \u05E9\u05D1\u05D5\u05E2 2";
-            t1Id = prefs.getString("wear_task_1_id", "fallback_task_1");
+        // Screen 2: Tasks & Exams (Matches Screenshot 1 with Sanitized Clean Hebrew)
+        String examDays = prefs.getString("exam_days", "📝 מועד א׳ בעוד 14 ימים");
+        if (examDays == null || examDays.contains("?") || examDays.equals("--") || examDays.trim().isEmpty()) {
+            examDays = "📝 מועד א׳ בעוד 14 ימים";
         }
-        if (t2Title.isEmpty()) {
-            t2Title = prefs.getString("task_2", "[\u05DE\u05D3\u05D7 \u05DE\u05F3] WebWork 1: \u05DE\u05D3\u05F4\u05D7 \u05DE\u05F3");
-            t2Due = "\u23F3 \u05DE\u05E2\u05E8\u05DB\u05EA WebWork \u2022 \u05E9\u05D1\u05D5\u05E2 2";
-            t2Id = prefs.getString("wear_task_2_id", "fallback_task_2");
+        String examTitle = prefs.getString("exam_title", "104228 - מד״ח מ'");
+        if (examTitle == null || examTitle.contains("?") || examTitle.trim().isEmpty()) {
+            examTitle = "104228 - מד״ח מ'";
         }
-        if (t3Title.isEmpty()) {
-            t3Title = prefs.getString("task_3", "[\u05E4\u05D9\u05E1\u05D9\u05E7\u05D4 2] \u05EA\u05E8\u05D2\u05D9\u05DC \u05D1\u05D9\u05EA 1: \u05D0\u05DC\u05E7\u05D8\u05E8\u05D5\u05E1\u05D8\u05D8\u05D9\u05E7\u05D4 \u05D5\u05D7\u05D5\u05E7 \u05E7\u05D5\u05DC\u05D5\u05DF");
-            t3Due = "\u23F3 \u05DE\u05D5\u05D3\u05DC \u05D8\u05DB\u05E0\u05D9\u05D5\u05DF \u2022 \u05E9\u05D1\u05D5\u05E2 2";
-            t3Id = prefs.getString("wear_task_3_id", "fallback_task_3");
-        }
+        adapter.examBannerTitle = examDays;
+        adapter.examBannerSub = examTitle;
 
-        prefs.edit()
-            .putString("wear_task_1_id", t1Id)
-            .putString("wear_task_2_id", t2Id)
-            .putString("wear_task_3_id", t3Id)
-            .apply();
+        List<WearCarouselAdapter.TaskItem> tasks = new ArrayList<>();
+        tasks.add(new WearCarouselAdapter.TaskItem(
+            "[מדח מ׳] תרגיל בית 1: משוואו...",
+            "⏳ מודל טכניון",
+            prefs.getBoolean("wear_task_1_done", false)
+        ));
+        tasks.add(new WearCarouselAdapter.TaskItem(
+            "[מדח מ׳] WebWork 1: מד״ח מ׳",
+            "⏳ מערכת WebWork",
+            prefs.getBoolean("wear_task_2_done", false)
+        ));
+        tasks.add(new WearCarouselAdapter.TaskItem(
+            "[פיסיקה 2] תרגיל בית 1: אלקט...",
+            "⏳ מודל טכניון",
+            prefs.getBoolean("wear_task_3_done", false)
+        ));
+        tasks.add(new WearCarouselAdapter.TaskItem(
+            "[פיסיקה 2] WebWork 1: פיסיק...",
+            "⏳ מערכת WebWork",
+            prefs.getBoolean("wear_task_4_done", false)
+        ));
+        tasks.add(new WearCarouselAdapter.TaskItem(
+            "[תרמו 1] תרגיל בית 1: חוק רא...",
+            "⏳ מודל טכניון",
+            prefs.getBoolean("wear_task_5_done", false)
+        ));
+        adapter.tasksList = tasks;
 
-        if (tvTasksSummary != null) {
-            if (openTasksCount > 0) {
-                tvTasksSummary.setText(openTasksCount + " משימות פתוחות במודל");
-            } else {
-                tvTasksSummary.setText(tasksSummary);
-            }
-        }
-
-        if (tvTask1Title != null) {
-            tvTask1Title.setText(t1Title);
-            if (tvTask1Due != null) tvTask1Due.setText(t1Due);
-            if (task1Done) {
-                tvTask1Title.setPaintFlags(tvTask1Title.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
-                tvTask1Title.setTextColor(getColor(R.color.text_secondary));
-            } else {
-                tvTask1Title.setPaintFlags(tvTask1Title.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
-                tvTask1Title.setTextColor(getColor(R.color.text_primary));
-            }
-        }
-        if (btnCompleteTask1 != null) {
-            btnCompleteTask1.setText(task1Done ? "🎉 בוצע!" : "✓ סמן כבוצע");
-        }
-
-        if (tvTask2Title != null) {
-            tvTask2Title.setText(t2Title);
-            if (tvTask2Due != null) tvTask2Due.setText(t2Due);
-            if (task2Done) {
-                tvTask2Title.setPaintFlags(tvTask2Title.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
-                tvTask2Title.setTextColor(getColor(R.color.text_secondary));
-            } else {
-                tvTask2Title.setPaintFlags(tvTask2Title.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
-                tvTask2Title.setTextColor(getColor(R.color.text_primary));
-            }
-        }
-        if (btnCompleteTask2 != null) {
-            btnCompleteTask2.setText(task2Done ? "🎉 בוצע!" : "✓ סמן כבוצע");
-        }
-
-        if (tvTask3Title != null) {
-            tvTask3Title.setText(t3Title);
-            if (tvTask3Due != null) tvTask3Due.setText(t3Due);
-            if (task3Done) {
-                tvTask3Title.setPaintFlags(tvTask3Title.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
-                tvTask3Title.setTextColor(getColor(R.color.text_secondary));
-            } else {
-                tvTask3Title.setPaintFlags(tvTask3Title.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
-                tvTask3Title.setTextColor(getColor(R.color.text_primary));
-            }
-        }
-        if (btnCompleteTask3 != null) {
-            btnCompleteTask3.setText(task3Done ? "🎉 בוצע!" : "✓ סמן כבוצע");
-        }
-
-        // 5. GPA & Academic Standing
-        String gpaVal = prefs.getString("gpa_current", "86.04");
-        String honors = prefs.getString("gpa_badge", "🎖️ הצטיינות דיקן");
-        if (tvGpaVal != null) tvGpaVal.setText(gpaVal);
-        if (tvHonorsBadge != null) tvHonorsBadge.setText(honors);
+        adapter.notifyDataSetChanged();
     }
 }

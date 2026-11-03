@@ -23,6 +23,7 @@ public class WearDataSyncService extends WearableListenerService {
     private static final String TAG = "WearDataSyncService";
     public static final String SYNC_PATH = "/semestero/watch_sync";
     public static final String PATH_DIRECT_SYNC = "/semestero/direct_sync";
+    public static final String PATH_TRIGGER_NOTIFICATION = "/semestero/trigger_notification";
     public static final String ACTION_DATA_SYNCED = "com.technion.semestero.wear.DATA_SYNCED";
 
     @Override
@@ -55,6 +56,16 @@ public class WearDataSyncService extends WearableListenerService {
                 Log.d(TAG, "Wear OS SharedPreferences updated instantly from direct MessageClient!");
             } catch (Exception e) {
                 Log.e(TAG, "Error handling direct sync message: ", e);
+            }
+        } else if (PATH_TRIGGER_NOTIFICATION.equals(path)) {
+            try {
+                String jsonStr = new String(messageEvent.getData(), StandardCharsets.UTF_8);
+                JSONObject json = new JSONObject(jsonStr);
+                String title = json.optString("title", "🎓 סמסטרו ME • בדיקת התראה");
+                String message = json.optString("message", "📍 אולמן 506 • משוואות דיפרנציאליות (בעוד 10 דק׳)");
+                WearNotificationHelper.sendClassReminder(this, title, "12:30", message);
+            } catch (Exception e) {
+                WearNotificationHelper.sendTestNotification(this);
             }
         }
     }

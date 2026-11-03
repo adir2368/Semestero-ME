@@ -22587,11 +22587,11 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.11.03-v2.9.7",
-    version: "2.9.7",
+    code: "REV-2026.11.03-v2.9.8",
+    version: "2.9.8",
     build: "20261103_02",
     date: "2026-11-03 09:40",
-    description: "גרסה 2.9.7: עדכון מובייל ו-Wear OS, תיקון הורדות ישירות ב-WebView (DownloadListener), סנכרון דו-ערוצי טלפון-שעון ונעילת כיוון מסך nosensor"
+    description: "גרסה 2.9.8: שדרוג שעון Galaxy Watch 8 לקרוסלת 3 מסכים (רדאר, לו״ז, משימות), התראות בדיקה ישירות מהטלפון לשעון עם רטט מותאם וסנכרון מיידי"
 };
 window.APP_VERSION = APP_CURRENT_REVISION.version;
 
@@ -26440,6 +26440,9 @@ async function trigger10MinClassAlert(classItem, isTest = false) {
     const body = bodyLines.join('\n');
     const tag = `ast-reminder-${classItem.courseId || 'c'}-${(startTime || '0000').replace(':', '')}`;
 
+        if (window.SemesteroBridge && typeof window.SemesteroBridge.sendTestNotificationToWatch === 'function') {
+        window.SemesteroBridge.sendTestNotificationToWatch(title, body);
+    }
     const sent = await showNativeNotification(title, {
         body,
         icon: 'icon.png',
@@ -27037,6 +27040,20 @@ function setupMobileNotifications() {
     }
 
     // D2. Test 10-Minute Alert button
+    
+    const btnTestWatch = document.getElementById('btn-test-watch-alert');
+    if (btnTestWatch) {
+        btnTestWatch.addEventListener('click', () => {
+            triggerWatchTestAlert("🎓 סמסטרו ME • בדיקת שעון", "📍 אולמן 506 • משוואות דיפרנציאליות (בעוד 10 דק׳)");
+        });
+    }
+    const btnTestWatchSettings = document.getElementById('btn-test-watch-alert-settings');
+    if (btnTestWatchSettings) {
+        btnTestWatchSettings.addEventListener('click', () => {
+            triggerWatchTestAlert("🎓 סמסטרו ME • בדיקת שעון", "📍 אולמן 506 • משוואות דיפרנציאליות (בעוד 10 דק׳)");
+        });
+    }
+
     const test10MinBtn = document.getElementById('btn-test-10min-alert');
     if (test10MinBtn) {
         test10MinBtn.addEventListener('click', async () => {
@@ -27511,3 +27528,21 @@ window.forceUpdateApp = async function() {
         window.location.reload(true);
     }, 250);
 };
+
+
+// Global Watch Test Alert Handler (Dual Phone & Galaxy Watch 8 Sync)
+function triggerWatchTestAlert(title, message) {
+    const finalTitle = title || "🎓 סמסטרו ME • בדיקת רטט לשעון";
+    const finalMsg = message || "📍 אולמן 506 • משוואות דיפרנציאליות (בעוד 10 דק׳)";
+    if (window.SemesteroBridge && typeof window.SemesteroBridge.sendTestNotificationToWatch === 'function') {
+        window.SemesteroBridge.sendTestNotificationToWatch(finalTitle, finalMsg);
+        if (typeof showToastNotification === 'function') {
+            showToastNotification("התראת בדיקה נשלחה בהצלחה לשעון Galaxy Watch 8! ⌚⚡", "success");
+        }
+    } else {
+        if (typeof showToastNotification === 'function') {
+            showToastNotification("בדיקת התראה הופעלה (במכשיר נייד ההתראה תועבר לשעון) ⌚", "info");
+        }
+    }
+}
+window.triggerWatchTestAlert = triggerWatchTestAlert;

@@ -17,7 +17,7 @@ import java.util.Locale;
 import org.json.JSONObject;
 
 /**
- * WearSyncManager ? Synchronizes academic schedule, tasks, and GPA to Galaxy Watch 8.
+ * WearSyncManager — Synchronizes academic schedule, tasks, and GPA to Galaxy Watch 8.
  * Features resilient dual-transport synchronization:
  * 1. Persistent Google Play Wearable Data Layer (DataClient PutDataRequest)
  * 2. Instant low-latency direct RPC broadcast (MessageClient /semestero/direct_sync)
@@ -26,9 +26,10 @@ public class WearSyncManager {
     private static final String TAG = "WearSyncManager";
     public static final String SYNC_PATH = "/semestero/watch_sync";
     public static final String PATH_DIRECT_SYNC = "/semestero/direct_sync";
+    public static final String PATH_TRIGGER_NOTIFICATION = "/semestero/trigger_notification";
 
     private static final String[] HEBREW_DAYS = {
-        "", "??? ?????", "??? ???", "??? ?????", "??? ?????", "??? ?????", "??? ????", "???"
+        "", "יום ראשון", "יום שני", "יום שלישי", "יום רביעי", "יום חמישי", "יום שישי", "שבת"
     };
 
     /**
@@ -41,8 +42,8 @@ public class WearSyncManager {
             // 1. Current Day & Date Resolution
             Calendar cal = Calendar.getInstance();
             int dayOfWeek = cal.get(Calendar.DAY_OF_WEEK);
-            String dayName = (dayOfWeek >= 1 && dayOfWeek <= 7) ? HEBREW_DAYS[dayOfWeek] : "??? ?????";
-            SimpleDateFormat sdf = new SimpleDateFormat("d ?MMMM", new Locale("he", "IL"));
+            String dayName = (dayOfWeek >= 1 && dayOfWeek <= 7) ? HEBREW_DAYS[dayOfWeek] : "יום ראשון";
+            SimpleDateFormat sdf = new SimpleDateFormat("d 'ב'MMMM", new Locale("he", "IL"));
             String dateFormatted = sdf.format(cal.getTime());
 
             json.put("day_index", dayOfWeek - 1);
@@ -51,19 +52,19 @@ public class WearSyncManager {
 
             // 2. Class & Schedule Data from SharedPreferences
             SharedPreferences classPrefs = context.getSharedPreferences(SemesteroNextClassWidget.PREFS_NAME, Context.MODE_PRIVATE);
-            json.put("class_title", classPrefs.getString("class_title", "??? ??????? ?????? ????"));
+            json.put("class_title", classPrefs.getString("class_title", "אין שיעורים קרובים היום"));
             json.put("class_time", classPrefs.getString("class_time", "--:--"));
-            json.put("class_details", classPrefs.getString("class_details", "??? ????? ?? ???????? ???????? ??"));
-            json.put("class_lecturer", classPrefs.getString("class_lecturer", "?????? ? ????? ????"));
-            json.put("class_status", classPrefs.getString("class_status", "?????"));
+            json.put("class_details", classPrefs.getString("class_details", "זמן מעולה לפרויקטים ולמידה"));
+            json.put("class_lecturer", classPrefs.getString("class_lecturer", "סמסטרו ME"));
+            json.put("class_status", classPrefs.getString("class_status", "חופשי"));
             json.put("all_classes_json", classPrefs.getString("all_classes_json", "[]"));
             json.put("all_classes_count", classPrefs.getInt("all_classes_count", 0));
 
             // 3. Tasks & Exams Data
             SharedPreferences tasksPrefs = context.getSharedPreferences(SemesteroTasksExamWidget.PREFS_NAME, Context.MODE_PRIVATE);
             json.put("exam_days", tasksPrefs.getString("exam_days", "--"));
-            json.put("exam_title", tasksPrefs.getString("exam_title", "??? ?????? ??????"));
-            json.put("exam_sub", tasksPrefs.getString("exam_sub", "????? ???? ?????"));
+            json.put("exam_title", tasksPrefs.getString("exam_title", "אין מבחנים קרובים"));
+            json.put("exam_sub", tasksPrefs.getString("exam_sub", "תקופת לימודים שוטפת"));
             json.put("task_1", tasksPrefs.getString("task_1", ""));
             json.put("task_1_id", tasksPrefs.getString("task_1_id", ""));
             json.put("task_1_done", tasksPrefs.getBoolean("task_1_done", false));
@@ -73,13 +74,13 @@ public class WearSyncManager {
             json.put("task_3", tasksPrefs.getString("task_3", ""));
             json.put("task_3_id", tasksPrefs.getString("task_3_id", ""));
             json.put("task_3_done", tasksPrefs.getBoolean("task_3_done", false));
-            json.put("tasks_summary", tasksPrefs.getString("tasks_summary", "0 ?????? ??????"));
+            json.put("tasks_summary", tasksPrefs.getString("tasks_summary", "כל המשימות הושלמו!"));
             json.put("all_tasks_json", tasksPrefs.getString("all_tasks_json", "[]"));
 
             // 4. GPA & Academic Standing
             SharedPreferences gpaPrefs = context.getSharedPreferences(SemesteroFinalsGpaWidget.PREFS_NAME, Context.MODE_PRIVATE);
             json.put("gpa_current", gpaPrefs.getString("gpa_current", "86.04"));
-            json.put("gpa_badge", gpaPrefs.getString("gpa_badge", "??? ???????? ????"));
+            json.put("gpa_badge", gpaPrefs.getString("gpa_badge", "🎖️ הצטיינות דיקן"));
 
             // 5. Weekly Schedule Summary
             SharedPreferences schedPrefs = context.getSharedPreferences(SemesteroScheduleWidget.PREFS_NAME, Context.MODE_PRIVATE);
@@ -169,4 +170,30 @@ public class WearSyncManager {
         if (context == null) return;
         syncAllToWatch(context);
     }
+
+    public static void sendTestNotificationToWatch(Context context, String title, String message) {
+        if (context == null) return;
+        try {
+            JSONObject notifJson = new JSONObject();
+            notifJson.put("title", (title != null && !title.isEmpty()) ? title : "🎓 סמסטרו ME • בדיקת התראה");
+            notifJson.put("message", (message != null && !message.isEmpty()) ? message : "📍 אולמן 506 • משוואות דיפרנציאליות (בעוד 10 דק׳)");
+            byte[] directBytes = notifJson.toString().getBytes(StandardCharsets.UTF_8);
+
+            Wearable.getNodeClient(context).getConnectedNodes().addOnSuccessListener(nodes -> {
+                if (nodes != null && !nodes.isEmpty()) {
+                    for (Node node : nodes) {
+                        Wearable.getMessageClient(context).sendMessage(
+                            node.getId(),
+                            PATH_TRIGGER_NOTIFICATION,
+                            directBytes
+                        ).addOnSuccessListener(res -> Log.d(TAG, "Sent test notif to watch node: " + node.getDisplayName()))
+                         .addOnFailureListener(e -> Log.w(TAG, "Failed sending test notif to watch: " + e.getMessage()));
+                    }
+                }
+            }).addOnFailureListener(e -> Log.w(TAG, "Failed querying nodes for test notif: " + e.getMessage()));
+        } catch (Exception e) {
+            Log.e(TAG, "Error sending test notif to watch: ", e);
+        }
+    }
+
 }

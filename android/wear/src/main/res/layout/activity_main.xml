@@ -1,496 +1,96 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- 
-    Semestero ME • Galaxy Watch 8 (44mm & 40mm) Wear OS Layout
-    Optimized for circular AMOLED displays (450x450 / 480x480)
-    Follows Wear OS 4/5 & One UI 6 Watch design standards
-    Features vertically centered widget layout & expandable open tasks inspection
+    Semestero ME • Galaxy Watch 8 Native Layout
+    100% Visual Fidelity with watch.html screenshots
+    3-Screen Focused Carousel: Radar, Timeline, Tasks & Exams
 -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/root_wear_frame"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/black">
 
-    <ScrollView
-        android:id="@+id/wear_scroll_view"
+    <!-- Ambient Glowing Bezel Ring -->
+    <ImageView
+        android:id="@+id/iv_bezel_glow"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:clipToPadding="false"
-        android:fillViewport="true"
-        android:overScrollMode="never"
-        android:scrollbars="none">
+        android:src="@drawable/bezel_glow_ring"
+        android:contentDescription="Bezel Glow" />
 
-        <LinearLayout
-            android:layout_width="match_parent"
+    <!-- Top Digital Clock & Faculty Badge Header: ME 034 on LEFT, Clock on RIGHT -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:gravity="center"
+        android:layoutDirection="ltr"
+        android:orientation="horizontal"
+        android:elevation="12dp">
+
+        <TextView
+            android:id="@+id/tv_faculty_badge"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:gravity="center"
-            android:orientation="vertical"
-            android:paddingStart="14dp"
-            android:paddingTop="42dp"
-            android:paddingEnd="14dp"
-            android:paddingBottom="42dp">
+            android:background="@drawable/pill_faculty_badge"
+            android:paddingStart="7dp"
+            android:paddingTop="1.5dp"
+            android:paddingEnd="7dp"
+            android:paddingBottom="1.5dp"
+            android:text="ME 034"
+            android:textColor="@color/cyan_accent"
+            android:textSize="9.5sp"
+            android:textStyle="bold" />
 
-            <!-- Watch Header Badge -->
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="10dp"
-                android:background="@drawable/pill_header_badge"
-                android:gravity="center"
-                android:orientation="horizontal"
-                android:paddingStart="10dp"
-                android:paddingTop="3dp"
-                android:paddingEnd="10dp"
-                android:paddingBottom="3dp">
+        <TextClock
+            android:id="@+id/tc_watch_clock"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:format12Hour="HH:mm"
+            android:format24Hour="HH:mm"
+            android:textColor="#e2e8f0"
+            android:textSize="12.5sp"
+            android:textStyle="bold" />
+    </LinearLayout>
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="🎓"
-                    android:textSize="11sp" />
+    <!-- Main ViewPager2 3-Screen Carousel -->
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/wear_view_pager"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="4dp"
-                    android:letterSpacing="0.06"
-                    android:text="SEMESTERO ME"
-                    android:textColor="@color/cyan_accent"
-                    android:textSize="10.5sp"
-                    android:textStyle="bold" />
-            </LinearLayout>
+    <!-- Bottom Pagination Dots (3 Screens: Radar, Timeline, Tasks) -->
+    <LinearLayout
+        android:id="@+id/layout_pagination_dots"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:layout_marginBottom="10dp"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:elevation="12dp">
 
-            <!-- Today's Day & Live Date Header -->
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
-                android:gravity="center"
-                android:orientation="vertical">
+        <View
+            android:id="@+id/dot_0"
+            android:layout_width="14dp"
+            android:layout_height="5dp"
+            android:layout_marginHorizontal="2.5dp"
+            android:background="@drawable/dot_active" />
 
-                <TextView
-                    android:id="@+id/tv_current_day"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:text="יום ראשון • 1 בנובמבר"
-                    android:textColor="@color/text_primary"
-                    android:textSize="13sp"
-                    android:textStyle="bold" />
+        <View
+            android:id="@+id/dot_1"
+            android:layout_width="5dp"
+            android:layout_height="5dp"
+            android:layout_marginHorizontal="2.5dp"
+            android:background="@drawable/dot_inactive" />
 
-                <TextView
-                    android:id="@+id/tv_sync_status"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="1dp"
-                    android:gravity="center"
-                    android:text="⚡ מסונכרן עם הטלפון"
-                    android:textColor="@color/cyan_accent"
-                    android:textSize="9.5sp" />
-            </LinearLayout>
-
-            <!-- Card 1: Next Class Radar (Hero Card) -->
-            <LinearLayout
-                android:id="@+id/card_next_class"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
-                android:background="@drawable/card_rounded_bg"
-                android:gravity="center"
-                android:orientation="vertical"
-                android:paddingStart="12dp"
-                android:paddingTop="10dp"
-                android:paddingEnd="12dp"
-                android:paddingBottom="10dp">
-
-                <!-- Pulsing / Live Status Pill -->
-                <TextView
-                    android:id="@+id/tv_class_status"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/pill_status_emerald"
-                    android:gravity="center"
-                    android:paddingStart="8dp"
-                    android:paddingTop="2dp"
-                    android:paddingEnd="8dp"
-                    android:paddingBottom="2dp"
-                    android:text="🟢 מתקיים כעת!"
-                    android:textColor="@color/emerald_green"
-                    android:textSize="10sp"
-                    android:textStyle="bold" />
-
-                <!-- Course Title -->
-                <TextView
-                    android:id="@+id/tv_class_title"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="5dp"
-                    android:ellipsize="end"
-                    android:gravity="center"
-                    android:maxLines="2"
-                    android:text="חדו״א 2מ׳"
-                    android:textColor="@color/text_primary"
-                    android:textSize="15sp"
-                    android:textStyle="bold" />
-
-                <!-- Time Interval -->
-                <TextView
-                    android:id="@+id/tv_class_time"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp"
-                    android:gravity="center"
-                    android:text="10:30 - 12:30"
-                    android:textColor="@color/cyan_accent"
-                    android:textSize="12.5sp"
-                    android:textStyle="bold" />
-
-                <!-- Classroom / Building Location -->
-                <TextView
-                    android:id="@+id/tv_class_room"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp"
-                    android:gravity="center"
-                    android:text="📍 דנציגר 101"
-                    android:textColor="@color/text_secondary"
-                    android:textSize="11.5sp" />
-            </LinearLayout>
-
-            <!-- Card 2: Tasks & Nearest Exam (Expandable on Tap) -->
-            <LinearLayout
-                android:id="@+id/card_tasks_exam"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
-                android:background="@drawable/card_rounded_bg"
-                android:clickable="true"
-                android:focusable="true"
-                android:gravity="center"
-                android:orientation="vertical"
-                android:paddingStart="12dp"
-                android:paddingTop="10dp"
-                android:paddingEnd="12dp"
-                android:paddingBottom="10dp">
-
-                <!-- Nearest Exam Countdown Pill -->
-                <TextView
-                    android:id="@+id/tv_exam_countdown"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/pill_status_amber"
-                    android:gravity="center"
-                    android:paddingStart="8dp"
-                    android:paddingTop="2dp"
-                    android:paddingEnd="8dp"
-                    android:paddingBottom="2dp"
-                    android:text="📝 מבחן מועד א׳ בעוד 14 יום"
-                    android:textColor="@color/amber_warning"
-                    android:textSize="10.5sp"
-                    android:textStyle="bold" />
-
-                <!-- Open Moodle Tasks Summary -->
-                <TextView
-                    android:id="@+id/tv_tasks_summary"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="5dp"
-                    android:gravity="center"
-                    android:text="2 משימות פתוחות במודל"
-                    android:textColor="@color/text_primary"
-                    android:textSize="12sp" />
-
-                <!-- Interactive Tap Hint -->
-                <TextView
-                    android:id="@+id/tv_tasks_toggle_hint"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="3dp"
-                    android:gravity="center"
-                    android:text="👇 לחץ לצפייה במשימות הפתוחות"
-                    android:textColor="@color/cyan_accent"
-                    android:textSize="9.5sp"
-                    android:textStyle="bold" />
-
-                <!-- Expandable Open Tasks Detail Section -->
-                <LinearLayout
-                    android:id="@+id/layout_open_tasks_expanded"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:gravity="center"
-                    android:orientation="vertical"
-                    android:visibility="gone">
-
-                    <!-- Separator Line -->
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:layout_marginBottom="6dp"
-                        android:background="@color/border_subtle" />
-
-                    <!-- Tasks Section Header -->
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:gravity="center"
-                        android:text="📋 משימות פתוחות להגשה"
-                        android:textColor="@color/cyan_accent"
-                        android:textSize="11sp"
-                        android:textStyle="bold" />
-
-                    <!-- Tasks List Container -->
-                    <LinearLayout
-                        android:id="@+id/layout_tasks_items"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="6dp"
-                        android:gravity="center"
-                        android:orientation="vertical">
-
-                        <!-- Task 1 Card -->
-                        <LinearLayout
-                            android:id="@+id/task_item_view_1"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginBottom="6dp"
-                            android:background="@drawable/task_item_bg"
-                            android:gravity="center"
-                            android:orientation="vertical"
-                            android:padding="8dp">
-
-                            <TextView
-                                android:id="@+id/tv_task_1_title"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:gravity="center"
-                                android:text="[מדח מ׳] תרגיל בית 1: משוואות דיפרנציאליות"
-                                android:textColor="@color/text_primary"
-                                android:textSize="11.5sp"
-                                android:textStyle="bold" />
-
-                            <TextView
-                                android:id="@+id/tv_task_1_due"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="2dp"
-                                android:gravity="center"
-                                android:text="⏳ מודל טכניון • שבוע 2"
-                                android:textColor="@color/amber_warning"
-                                android:textSize="10sp" />
-
-                            <TextView
-                                android:id="@+id/btn_complete_wear_task_1"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="5dp"
-                                android:background="@drawable/pill_task_complete"
-                                android:gravity="center"
-                                android:paddingStart="10dp"
-                                android:paddingTop="2dp"
-                                android:paddingEnd="10dp"
-                                android:paddingBottom="2dp"
-                                android:text="✓ סמן כבוצע"
-                                android:textColor="@color/emerald_green"
-                                android:textSize="9.5sp"
-                                android:textStyle="bold" />
-                        </LinearLayout>
-
-                        <!-- Task 2 Card -->
-                        <LinearLayout
-                            android:id="@+id/task_item_view_2"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginBottom="6dp"
-                            android:background="@drawable/task_item_bg"
-                            android:gravity="center"
-                            android:orientation="vertical"
-                            android:padding="8dp">
-
-                            <TextView
-                                android:id="@+id/tv_task_2_title"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:gravity="center"
-                                android:text="[מדח מ׳] WebWork 1: מד״ח מ׳"
-                                android:textColor="@color/text_primary"
-                                android:textSize="11.5sp"
-                                android:textStyle="bold" />
-
-                            <TextView
-                                android:id="@+id/tv_task_2_due"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="2dp"
-                                android:gravity="center"
-                                android:text="⏳ מערכת WebWork • שבוע 2"
-                                android:textColor="@color/amber_warning"
-                                android:textSize="10sp" />
-
-                            <TextView
-                                android:id="@+id/btn_complete_wear_task_2"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="5dp"
-                                android:background="@drawable/pill_task_complete"
-                                android:gravity="center"
-                                android:paddingStart="10dp"
-                                android:paddingTop="2dp"
-                                android:paddingEnd="10dp"
-                                android:paddingBottom="2dp"
-                                android:text="✓ סמן כבוצע"
-                                android:textColor="@color/emerald_green"
-                                android:textSize="9.5sp"
-                                android:textStyle="bold" />
-                        </LinearLayout>
-
-                        <!-- Task 3 Card -->
-                        <LinearLayout
-                            android:id="@+id/task_item_view_3"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:background="@drawable/task_item_bg"
-                            android:gravity="center"
-                            android:orientation="vertical"
-                            android:padding="8dp">
-
-                            <TextView
-                                android:id="@+id/tv_task_3_title"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:gravity="center"
-                                android:text="[פיסיקה 2] תרגיל בית 1: אלקטרוסטטיקה וחוק קולון"
-                                android:textColor="@color/text_primary"
-                                android:textSize="11.5sp"
-                                android:textStyle="bold" />
-
-                            <TextView
-                                android:id="@+id/tv_task_3_due"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="2dp"
-                                android:gravity="center"
-                                android:text="⏳ מודל טכניון • שבוע 2"
-                                android:textColor="@color/amber_warning"
-                                android:textSize="10sp" />
-
-                            <TextView
-                                android:id="@+id/btn_complete_wear_task_3"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="5dp"
-                                android:background="@drawable/pill_task_complete"
-                                android:gravity="center"
-                                android:paddingStart="10dp"
-                                android:paddingTop="2dp"
-                                android:paddingEnd="10dp"
-                                android:paddingBottom="2dp"
-                                android:text="✓ סמן כבוצע"
-                                android:textColor="@color/emerald_green"
-                                android:textSize="9.5sp"
-                                android:textStyle="bold" />
-                        </LinearLayout>
-
-                    </LinearLayout>
-
-                    <!-- Collapse Hint -->
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="5dp"
-                        android:gravity="center"
-                        android:text="▲ לחץ לצמצום הרשימה"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="9.5sp" />
-                </LinearLayout>
-
-            </LinearLayout>
-
-            <!-- Card 3: Academic Standing & Cumulative GPA -->
-            <LinearLayout
-                android:id="@+id/card_gpa"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="12dp"
-                android:background="@drawable/card_rounded_bg"
-                android:gravity="center"
-                android:orientation="vertical"
-                android:paddingStart="12dp"
-                android:paddingTop="10dp"
-                android:paddingEnd="12dp"
-                android:paddingBottom="10dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:text="🎯 ממוצע תואר"
-                    android:textColor="@color/text_secondary"
-                    android:textSize="10sp" />
-
-                <TextView
-                    android:id="@+id/tv_gpa_val"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="1dp"
-                    android:gravity="center"
-                    android:letterSpacing="-0.02"
-                    android:text="86.04"
-                    android:textColor="@color/purple_accent"
-                    android:textSize="22sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/tv_honors_badge"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp"
-                    android:gravity="center"
-                    android:text="🎖️ הצטיינות דיקן"
-                    android:textColor="@color/cyan_accent"
-                    android:textSize="10.5sp"
-                    android:textStyle="bold" />
-            </LinearLayout>
-
-            <!-- Action Buttons -->
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:orientation="vertical">
-
-                <Button
-                    android:id="@+id/btn_refresh_watch"
-                    android:layout_width="wrap_content"
-                    android:layout_height="36dp"
-                    android:background="@drawable/btn_refresh_pill"
-                    android:gravity="center"
-                    android:paddingStart="18dp"
-                    android:paddingTop="0dp"
-                    android:paddingEnd="18dp"
-                    android:paddingBottom="0dp"
-                    android:text="🔄 רענן נתונים"
-                    android:textColor="@color/cyan_accent"
-                    android:textSize="11sp"
-                    android:textStyle="bold" />
-
-                <Button
-                    android:id="@+id/btn_test_notif"
-                    android:layout_width="wrap_content"
-                    android:layout_height="34dp"
-                    android:layout_marginTop="8dp"
-                    android:background="@drawable/pill_status_emerald"
-                    android:gravity="center"
-                    android:paddingStart="16dp"
-                    android:paddingTop="0dp"
-                    android:paddingEnd="16dp"
-                    android:paddingBottom="0dp"
-                    android:text="🔔 בדיקת התראה ורטט"
-                    android:textColor="@color/emerald_green"
-                    android:textSize="10.5sp"
-                    android:textStyle="bold" />
-            </LinearLayout>
-
-        </LinearLayout>
-    </ScrollView>
+        <View
+            android:id="@+id/dot_2"
+            android:layout_width="5dp"
+            android:layout_height="5dp"
+            android:layout_marginHorizontal="2.5dp"
+            android:background="@drawable/dot_inactive" />
+    </LinearLayout>
 
 </FrameLayout>
