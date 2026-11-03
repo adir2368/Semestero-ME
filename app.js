@@ -24303,6 +24303,27 @@ async function fetchLatestRemoteVersion() {
     return null;
 }
 
+window.openExternalUrlOrBrowser = function(url) {
+    if (!url) return;
+    try {
+        if (window.SemesteroWidgetBridge && typeof window.SemesteroWidgetBridge.openExternalUrl === 'function') {
+            window.SemesteroWidgetBridge.openExternalUrl(url);
+            return;
+        }
+    } catch (e) {
+        console.warn('[ExternalUrl] Bridge error:', e);
+    }
+    try {
+        if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Browser) {
+            window.Capacitor.Plugins.Browser.open({ url: url });
+            return;
+        }
+    } catch (e) {
+        console.warn('[ExternalUrl] Capacitor Browser error:', e);
+    }
+    window.open(url, '_blank', 'noopener,noreferrer');
+};
+
 window.checkRemoteAppVersion = async function(isManualCheck = false) {
     const isElectron = Boolean(window.electronAPI || (window.process && window.process.type === 'renderer') || (navigator.userAgent && navigator.userAgent.includes('Electron')));
     const domVerEl = document.getElementById("display-system-version");
@@ -24397,15 +24418,15 @@ window.checkRemoteAppVersion = async function(isManualCheck = false) {
                     pill.style.cssText = 'position: fixed; top: 16px; left: 50%; transform: translateX(-50%); z-index: 99999; background: linear-gradient(135deg, #10b981, #059669); color: #fff; padding: 10px 16px; border-radius: 9999px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); display: flex; align-items: center; gap: 10px; font-size: 0.85rem; font-weight: 600; font-family: inherit; direction: rtl; border: 1px solid rgba(255,255,255,0.25);';
                     pill.innerHTML = `
                         <span>⬇️ עדכון אפליקציה חדש זמין (v${remoteVer})</span>
-                        <a href="https://github.com/adir2368/Semestero-ME/releases/latest/download/Semestero-ME.apk" target="_blank" rel="noopener noreferrer" style="background: #fff; color: #059669; padding: 4px 10px; border-radius: 20px; text-decoration: none; font-weight: 700; font-size: 0.8rem; display: inline-flex; align-items: center; gap: 4px;">הורדה ישירה ⬇️</a>
+                        <a href="https://github.com/adir2368/Semestero-ME/releases/latest/download/Semestero-ME.apk" onclick="event.preventDefault(); window.openExternalUrlOrBrowser(this.href);" target="_blank" rel="noopener noreferrer" style="background: #fff; color: #059669; padding: 4px 10px; border-radius: 20px; text-decoration: none; font-weight: 700; font-size: 0.8rem; display: inline-flex; align-items: center; gap: 4px;">הורדה ישירה ⬇️</a>
                         <button type="button" style="background: transparent; border: none; color: #fff; font-size: 1.1rem; cursor: pointer; padding: 0 4px;" onclick="sessionStorage.setItem('${dismissedApkKey}', 'true'); this.parentElement.remove();">✕</button>
                     `;
                     document.body.appendChild(pill);
                 }
             }
 
-            // AUTO-UPDATE for background checks only (unattended)
-            if (!isElectron && !isManualCheck) {
+            // AUTO-UPDATE for background checks only (unattended web browsers / PWA only)
+            if (!isElectron && !isManualCheck && !isNativeAndroid) {
                 const autoUpdateKey = `semestero_auto_updated_to_${remoteVer}`;
                 const lastAutoReloadTs = Number(localStorage.getItem('semestero_last_auto_update_ts') || 0);
                 const timeSinceLastAutoReload = Date.now() - lastAutoReloadTs;

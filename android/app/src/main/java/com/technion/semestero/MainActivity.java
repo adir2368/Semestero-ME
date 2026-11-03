@@ -134,6 +134,17 @@ public class MainActivity extends BridgeActivity {
             settings.setTextZoom(100);
             webView.setBackgroundColor(android.graphics.Color.parseColor("#020617"));
             webView.addJavascriptInterface(new SemesteroWidgetBridge(this), "SemesteroWidgetBridge");
+
+            webView.setDownloadListener((url, userAgent, contentDisposition, mimetype, contentLength) -> {
+                try {
+                    android.content.Intent intent = new android.content.Intent(android.content.Intent.ACTION_VIEW);
+                    intent.setData(android.net.Uri.parse(url));
+                    intent.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(intent);
+                } catch (Exception e) {
+                    android.util.Log.e("SemesteroWebView", "Download listener error: " + e.getMessage());
+                }
+            });
         }
     }
 
@@ -142,6 +153,19 @@ public class MainActivity extends BridgeActivity {
 
         public SemesteroWidgetBridge(Context context) {
             this.context = context;
+        }
+
+        @JavascriptInterface
+        public void openExternalUrl(String url) {
+            if (url == null || url.trim().isEmpty()) return;
+            try {
+                android.content.Intent intent = new android.content.Intent(android.content.Intent.ACTION_VIEW);
+                intent.setData(android.net.Uri.parse(url.trim()));
+                intent.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK);
+                context.startActivity(intent);
+            } catch (Exception e) {
+                android.util.Log.e("SemesteroBridge", "Error opening external URL: " + e.getMessage());
+            }
         }
 
                 @JavascriptInterface
