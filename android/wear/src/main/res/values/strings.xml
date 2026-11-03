@@ -5,4 +5,6 @@
     <string name="tile_class_desc">לוח השיעורים הקרוב, מיקום חדר וספירה לאחור לשעון Galaxy Watch 8</string>
     <string name="no_classes_today">אין שיעורים קרובים היום</string>
     <string name="free_day_msg">יום חופשי או שהסתיימו הלימודים 🎉</string>
+    <string name="complication_label">סמסטרו ME • שיעור קרוב</string>
+    <string name="complication_desc">הצגת השיעור הקרוב, סטטוס פעיל וספירה לאחור בפינת מסך הבית של השעון</string>
 </resources>

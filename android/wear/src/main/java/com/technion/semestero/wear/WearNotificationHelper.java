@@ -7,9 +7,15 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
 import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
 
+/**
+ * Semestero ME • Wear OS Notification Engine
+ * High-priority heads-up reminders with custom vibration patterns for Galaxy Watch 8.
+ */
 public class WearNotificationHelper {
 
     public static final String CHANNEL_ID = "semestero_watch_alerts";
@@ -30,7 +36,7 @@ public class WearNotificationHelper {
                     );
                     channel.setDescription("התראות על שיעורים קרובים, חדרים ומבחנים");
                     channel.enableVibration(true);
-                    channel.setVibrationPattern(new long[]{0, 300, 150, 300});
+                    channel.setVibrationPattern(new long[]{0, 350, 150, 350, 150, 350});
                     nm.createNotificationChannel(channel);
                 }
             }
@@ -44,6 +50,9 @@ public class WearNotificationHelper {
         NotificationManager nm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         if (nm == null) return;
 
+        // Physical haptic trigger
+        triggerHaptic(context);
+
         Intent intent = new Intent(context, MainActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
         PendingIntent pendingIntent = PendingIntent.getActivity(
@@ -53,15 +62,19 @@ public class WearNotificationHelper {
             PendingIntent.FLAG_UPDATE_CURRENT | (Build.VERSION.SDK_INT >= 23 ? PendingIntent.FLAG_IMMUTABLE : 0)
         );
 
+        NotificationCompat.WearableExtender wearableExtender = new NotificationCompat.WearableExtender()
+            .setHintShowBackgroundOnly(false);
+
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
-            .setSmallIcon(R.mipmap.ic_launcher)
+            .setSmallIcon(R.drawable.ic_stat_notification)
             .setContentTitle("⏰ בעוד 10 דקות: " + title)
             .setContentText("📍 " + room + " • 🕒 " + time)
-            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setPriority(NotificationCompat.PRIORITY_MAX)
             .setCategory(NotificationCompat.CATEGORY_REMINDER)
             .setAutoCancel(true)
             .setDefaults(NotificationCompat.DEFAULT_ALL)
-            .setVibrate(new long[]{0, 300, 150, 300})
+            .setVibrate(new long[]{0, 350, 150, 350, 150, 350})
+            .extend(wearableExtender)
             .setContentIntent(pendingIntent);
 
         nm.notify(NOTIF_ID_CLASS, builder.build());
@@ -74,7 +87,11 @@ public class WearNotificationHelper {
         NotificationManager nm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         if (nm == null) return;
 
+        // Physical haptic trigger
+        triggerHaptic(context);
+
         Intent intent = new Intent(context, MainActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
         PendingIntent pendingIntent = PendingIntent.getActivity(
             context,
             0,
@@ -82,17 +99,35 @@ public class WearNotificationHelper {
             PendingIntent.FLAG_UPDATE_CURRENT | (Build.VERSION.SDK_INT >= 23 ? PendingIntent.FLAG_IMMUTABLE : 0)
         );
 
+        NotificationCompat.WearableExtender wearableExtender = new NotificationCompat.WearableExtender()
+            .setHintShowBackgroundOnly(false);
+
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
-            .setSmallIcon(R.mipmap.ic_launcher)
-            .setContentTitle("🎓 סמסטרו ME • בדיקת רטט")
-            .setContentText("📍 דנציגר 101 • חדו״א 2מ׳ (10:30)")
-            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setSmallIcon(R.drawable.ic_stat_notification)
+            .setContentTitle("🎓 סמסטרו ME • בדיקת רטט בשעון")
+            .setContentText("📍 אולמן 506 • משוואות דיפרנציאליות (בעוד 10 דק׳)")
+            .setPriority(NotificationCompat.PRIORITY_MAX)
+            .setCategory(NotificationCompat.CATEGORY_ALARM)
             .setAutoCancel(true)
             .setDefaults(NotificationCompat.DEFAULT_ALL)
-            .setVibrate(new long[]{0, 400, 200, 400})
+            .setVibrate(new long[]{0, 400, 200, 400, 200, 400})
+            .extend(wearableExtender)
             .setContentIntent(pendingIntent);
 
         nm.notify(NOTIF_ID_TEST, builder.build());
+    }
+
+    private static void triggerHaptic(Context context) {
+        try {
+            Vibrator v = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
+            if (v != null && v.hasVibrator()) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    v.vibrate(VibrationEffect.createWaveform(new long[]{0, 350, 150, 350}, -1));
+                } else {
+                    v.vibrate(new long[]{0, 350, 150, 350}, -1);
+                }
+            }
+        } catch (Exception ignored) {}
     }
 
     public static boolean hasNotificationPermission(Context context) {

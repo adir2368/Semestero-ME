@@ -8,8 +8,8 @@ android {
         applicationId "com.technion.semestero"
         minSdkVersion 30
         targetSdkVersion 34
-        versionCode 52
-        versionName "2.9.8"
+        versionCode 53
+        versionName "2.9.9"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -44,6 +44,7 @@ dependencies {
     implementation 'androidx.core:core:1.12.0'
     implementation 'androidx.wear:wear:1.3.0'
     implementation 'com.google.android.gms:play-services-wearable:18.2.0'
+    implementation 'androidx.wear.watchface:watchface-complications-data-source:1.2.1'
     implementation 'androidx.wear.tiles:tiles:1.4.0'
     implementation 'androidx.wear.tiles:tiles-material:1.4.0'
     implementation 'androidx.wear.protolayout:protolayout:1.2.0'

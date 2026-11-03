@@ -22587,11 +22587,11 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.11.03-v2.9.8",
-    version: "2.9.8",
+    code: "REV-2026.11.03-v2.9.9",
+    version: "2.9.9",
     build: "20261103_02",
     date: "2026-11-03 09:40",
-    description: "גרסה 2.9.8: שדרוג שעון Galaxy Watch 8 לקרוסלת 3 מסכים (רדאר, לו״ז, משימות), התראות בדיקה ישירות מהטלפון לשעון עם רטט מותאם וסנכרון מיידי"
+    description: "גרסה 2.9.9: עיצוב Tile של השעון 1:1 לפי הרדאר, הוספת Watch Face Complication לפינות המסך (רבע/חוגה) ותיקון סופי למניעת קפיצה מוקדמת למחר"
 };
 window.APP_VERSION = APP_CURRENT_REVISION.version;
 

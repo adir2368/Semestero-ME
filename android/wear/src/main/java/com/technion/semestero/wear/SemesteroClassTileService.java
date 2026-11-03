@@ -1,279 +1,188 @@
 package com.technion.semestero.wear;
 
 import android.content.Context;
-import android.content.SharedPreferences;
+import androidx.annotation.NonNull;
+import androidx.wear.protolayout.ActionBuilders;
+import androidx.wear.protolayout.ColorBuilders;
+import androidx.wear.protolayout.DimensionBuilders;
+import androidx.wear.protolayout.LayoutElementBuilders;
+import androidx.wear.protolayout.ModifiersBuilders;
+import androidx.wear.protolayout.ResourceBuilders;
+import androidx.wear.protolayout.TimelineBuilders;
 import androidx.wear.tiles.RequestBuilders;
 import androidx.wear.tiles.TileBuilders;
 import androidx.wear.tiles.TileService;
-import androidx.wear.protolayout.ResourceBuilders;
-import androidx.wear.protolayout.TimelineBuilders;
-import androidx.wear.protolayout.LayoutElementBuilders;
-import androidx.wear.protolayout.DimensionBuilders;
-import androidx.wear.protolayout.ColorBuilders;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
-
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Locale;
 
 /**
- * Semestero ME • Wear OS Tile Service
- * Provides glanceable Next Class Radar on 44mm & 40mm Galaxy Watch screens.
- * Includes authentic Hebrew day-of-week detection and real-time class resolution.
+ * Semestero ME • Wear OS Tile Service (Watch Widget)
+ * Provides 1:1 identical visual design to the interactive watch app's Class Radar screen.
+ * - Day & date header chip in cyan accent
+ * - Dynamic status pill (🟢 מתקיים כעת!, ⏰ מתחיל בעוד X דק׳, ⏳ השיעור הבא היום)
+ * - Hero course title in high-contrast crisp typography
+ * - Time pill in cyan
+ * - Rounded room tag card with border
+ * - Lecturer & course type tag
+ * - Never shows tomorrow prematurely while today's classes are ongoing or upcoming!
+ * - One-tap anywhere on the Tile directly launches the app into the Class Radar!
  */
 public class SemesteroClassTileService extends TileService {
 
-    private static final String RESOURCES_VERSION = "3";
-    private static final String[] HEBREW_DAYS = {
-        "", "יום ראשון", "יום שני", "יום שלישי", "יום רביעי", "יום חמישי", "יום שישי", "שבת"
-    };
+    private static final String RESOURCES_VERSION = "4";
 
     @Override
     protected ListenableFuture<TileBuilders.Tile> onTileRequest(RequestBuilders.TileRequest requestParams) {
-        SharedPreferences prefs = getSharedPreferences(MainActivity.PREFS_NAME, Context.MODE_PRIVATE);
-
-        // 1. Current Hebrew Day & Date
         Calendar now = Calendar.getInstance();
-        int dayOfWeek = now.get(Calendar.DAY_OF_WEEK);
-        String curDayName = (dayOfWeek >= 1 && dayOfWeek <= 7) ? HEBREW_DAYS[dayOfWeek] : "יום ראשון";
+        WearScheduleHelper.ScheduleResolution res = WearScheduleHelper.resolve(this, now);
 
-        SimpleDateFormat sdf = new SimpleDateFormat("d בMMMM", new Locale("he", "IL"));
-        String formattedDate = sdf.format(now.getTime());
-        String dayHeader = curDayName + " • " + formattedDate;
-
-        // 2. Class Resolution
-        long lastSync = prefs.getLong("last_sync_timestamp", 0);
-        boolean isFreshSync = (lastSync > 0) && ((System.currentTimeMillis() - lastSync) < 24 * 3600 * 1000);
-        String syncedDay = prefs.getString("day_name", "");
-        boolean hasMatchingDaySync = isFreshSync && curDayName.equals(syncedDay);
-
-        String classTitle;
-        String classTime;
-        String classRoom;
-        String classStatus;
-
-        if (hasMatchingDaySync && prefs.contains("class_title")) {
-            classTitle = prefs.getString("class_title", "אין שיעורים קרובים היום");
-            classTime = prefs.getString("class_time", "--:--");
-            classRoom = prefs.getString("class_details", "יום חופשי 🎉");
-            classStatus = prefs.getString("class_status", "חופשי");
-        } else {
-            // Built-in authentic Technion Mechanical Engineering Schedule (Winter 2026/2027)
-            // Rules:
-            // 1) 15 minutes after start of previous class (startMin + 15), switch to next class / recitation!
-            // 2) In the evening (>= 17:00) or once today's classes finish, preview tomorrow / next school day!
-            int curHour = now.get(Calendar.HOUR_OF_DAY);
-            int curMin = now.get(Calendar.MINUTE);
-            int curTotalMin = curHour * 60 + curMin;
-            boolean isEvening = (curHour >= 17);
-
-            switch (dayOfWeek) {
-                case Calendar.SUNDAY:
-                    if (!isEvening && curTotalMin < 690) {
-                        classTitle = "משוואות דיפרנציאליות חלקיות מ׳";
-                        classTime = "11:30 - 13:30";
-                        classRoom = "📍 אולמן 506";
-                        classStatus = "⏳ מתחיל בעוד " + (690 - curTotalMin) + " דק׳";
-                    } else if (!isEvening && curTotalMin < 705) {
-                        classTitle = "משוואות דיפרנציאליות חלקיות מ׳";
-                        classTime = "11:30 - 13:30";
-                        classRoom = "📍 אולמן 506";
-                        classStatus = "🟢 מתקיים כעת!";
-                    } else {
-                        classTitle = "פיסיקה 2";
-                        classTime = "08:30 - 10:30";
-                        classRoom = "📍 טאוב 1";
-                        classStatus = isEvening ? "מערכת מחר (יום שני) • שיעור ראשון" : "השיעור הבא מחר (שני) ב-08:30";
-                    }
-                    break;
-                case Calendar.MONDAY:
-                    if (!isEvening && curTotalMin < 510) {
-                        classTitle = "פיסיקה 2";
-                        classTime = "08:30 - 10:30";
-                        classRoom = "📍 טאוב 1";
-                        classStatus = "⏳ מתחיל בעוד " + (510 - curTotalMin) + " דק׳";
-                    } else if (!isEvening && curTotalMin < 525) {
-                        classTitle = "פיסיקה 2";
-                        classTime = "08:30 - 10:30";
-                        classRoom = "📍 טאוב 1";
-                        classStatus = "🟢 מתקיים כעת!";
-                    } else if (!isEvening && curTotalMin < 630) {
-                        classTitle = "מכניקת מוצקים 2מ׳";
-                        classTime = "10:30 - 14:30";
-                        classRoom = "📍 דנציגר אודיטוריום 1";
-                        classStatus = "⏳ השיעור הבא היום (10:30)";
-                    } else if (!isEvening && curTotalMin < 645) {
-                        classTitle = "מכניקת מוצקים 2מ׳";
-                        classTime = "10:30 - 14:30";
-                        classRoom = "📍 דנציגר אודיטוריום 1";
-                        classStatus = "🟢 מתקיים כעת!";
-                    } else {
-                        classTitle = "תרמודינמיקה 1";
-                        classTime = "08:30 - 11:30";
-                        classRoom = "📍 דנציגר אודיטוריום 1";
-                        classStatus = isEvening ? "מערכת מחר (יום שלישי) • שיעור ראשון" : "השיעור הבא מחר (שלישי) ב-08:30";
-                    }
-                    break;
-                case Calendar.TUESDAY:
-                    if (!isEvening && curTotalMin < 510) {
-                        classTitle = "תרמודינמיקה 1";
-                        classTime = "08:30 - 11:30";
-                        classRoom = "📍 הנדסה כימית 1";
-                        classStatus = "⏳ מתחיל בעוד " + (510 - curTotalMin) + " דק׳";
-                    } else if (!isEvening && curTotalMin < 525) {
-                        classTitle = "תרמודינמיקה 1";
-                        classTime = "08:30 - 11:30";
-                        classRoom = "📍 הנדסה כימית 1";
-                        classStatus = "🟢 מתקיים כעת!";
-                    } else {
-                        classTitle = "מכניקת מוצקים 2מ׳";
-                        classTime = "12:30 - 14:30";
-                        classRoom = "📍 ליידי דייוויס 240";
-                        classStatus = isEvening ? "מערכת מחר (יום רביעי) • שיעור ראשון" : "השיעור הבא מחר (רביעי) ב-12:30";
-                    }
-                    break;
-                case Calendar.WEDNESDAY:
-                    if (!isEvening && curTotalMin < 750) {
-                        classTitle = "מכניקת מוצקים 2מ׳";
-                        classTime = "12:30 - 14:30";
-                        classRoom = "📍 ליידי דייוויס 240";
-                        classStatus = "⏳ מתחיל בעוד " + (750 - curTotalMin) + " דק׳";
-                    } else if (!isEvening && curTotalMin < 765) {
-                        classTitle = "מכניקת מוצקים 2מ׳";
-                        classTime = "12:30 - 14:30";
-                        classRoom = "📍 ליידי דייוויס 240";
-                        classStatus = "🟢 מתקיים כעת!";
-                    } else {
-                        classTitle = "גרפיקה הנדסית";
-                        classTime = "09:30 - 11:30";
-                        classRoom = "📍 בניין מכונות • מעבדה 10";
-                        classStatus = isEvening ? "מערכת מחר (יום חמישי) • שיעור ראשון" : "השיעור הבא מחר (חמישי) ב-09:30";
-                    }
-                    break;
-                case Calendar.THURSDAY:
-                    if (!isEvening && curTotalMin < 570) {
-                        classTitle = "גרפיקה הנדסית";
-                        classTime = "09:30 - 11:30";
-                        classRoom = "📍 דנציגר";
-                        classStatus = "⏳ מתחיל בעוד " + (570 - curTotalMin) + " דק׳";
-                    } else if (!isEvening && curTotalMin < 585) {
-                        classTitle = "גרפיקה הנדסית";
-                        classTime = "09:30 - 11:30";
-                        classRoom = "📍 דנציגר";
-                        classStatus = "🟢 מתקיים כעת!";
-                    } else {
-                        classTitle = "משוואות דיפרנציאליות חלקיות מ׳";
-                        classTime = "11:30 - 13:30";
-                        classRoom = "📍 אולמן 506";
-                        classStatus = "מערכת יום ראשון • שיעור ראשון (סופ״ש 🎉)";
-                    }
-                    break;
-                case Calendar.FRIDAY:
-                    classTitle = "משוואות דיפרנציאליות חלקיות מ׳";
-                    classTime = "11:30 - 13:30";
-                    classRoom = "📍 אולמן 506";
-                    classStatus = "מערכת יום ראשון • שיעור ראשון (סופ״ש 🏖️)";
-                    break;
-                case Calendar.SATURDAY:
-                default:
-                    classTitle = "משוואות דיפרנציאליות חלקיות מ׳";
-                    classTime = "11:30 - 13:30";
-                    classRoom = "📍 אולמן 506";
-                    classStatus = isEvening ? "מערכת מחר (יום ראשון) • 11:30" : "שבוע חדש מתחיל מחר (ראשון)";
-                    break;
-            }
-        }
-
-        LayoutElementBuilders.Layout layout = new LayoutElementBuilders.Layout.Builder()
-            .setRoot(
-                new LayoutElementBuilders.Column.Builder()
-                    .setWidth(DimensionBuilders.expand())
-                    .setHeight(DimensionBuilders.expand())
-                    .setHorizontalAlignment(LayoutElementBuilders.HORIZONTAL_ALIGN_CENTER)
-                    // Top breathing room for round bezel
-                    .addContent(
-                        new LayoutElementBuilders.Spacer.Builder()
-                            .setHeight(DimensionBuilders.dp(12))
-                            .build()
-                    )
-                    // Day of Week & Date Header
-                    .addContent(
-                        new LayoutElementBuilders.Text.Builder()
-                            .setText(dayHeader)
-                            .setFontStyle(new LayoutElementBuilders.FontStyle.Builder()
-                                .setSize(DimensionBuilders.sp(11))
-                                .setColor(ColorBuilders.argb(0xFF38BDF8))
-                                .setWeight(LayoutElementBuilders.FONT_WEIGHT_BOLD)
-                                .build())
-                            .build()
-                    )
-                    .addContent(
-                        new LayoutElementBuilders.Spacer.Builder()
-                            .setHeight(DimensionBuilders.dp(4))
-                            .build()
-                    )
-                    // Status Badge
-                    .addContent(
-                        new LayoutElementBuilders.Text.Builder()
-                            .setText(classStatus)
-                            .setFontStyle(new LayoutElementBuilders.FontStyle.Builder()
-                                .setSize(DimensionBuilders.sp(10.5f))
-                                .setColor(ColorBuilders.argb(0xFF10B981))
-                                .setWeight(LayoutElementBuilders.FONT_WEIGHT_BOLD)
-                                .build())
-                            .build()
-                    )
-                    .addContent(
-                        new LayoutElementBuilders.Spacer.Builder()
-                            .setHeight(DimensionBuilders.dp(3))
-                            .build()
-                    )
-                    // Class Name (Max 1 line, prominent on 44mm screen)
-                    .addContent(
-                        new LayoutElementBuilders.Text.Builder()
-                            .setText(classTitle)
-                            .setMaxLines(1)
-                            .setFontStyle(new LayoutElementBuilders.FontStyle.Builder()
-                                .setSize(DimensionBuilders.sp(15))
-                                .setColor(ColorBuilders.argb(0xFFF8FAFC))
-                                .setWeight(LayoutElementBuilders.FONT_WEIGHT_BOLD)
-                                .build())
-                            .build()
-                    )
-                    .addContent(
-                        new LayoutElementBuilders.Spacer.Builder()
-                            .setHeight(DimensionBuilders.dp(2))
-                            .build()
-                    )
-                    // Time
-                    .addContent(
-                        new LayoutElementBuilders.Text.Builder()
-                            .setText(classTime)
-                            .setFontStyle(new LayoutElementBuilders.FontStyle.Builder()
-                                .setSize(DimensionBuilders.sp(12.5f))
-                                .setColor(ColorBuilders.argb(0xFF38BDF8))
-                                .setWeight(LayoutElementBuilders.FONT_WEIGHT_BOLD)
-                                .build())
-                            .build()
-                    )
-                    .addContent(
-                        new LayoutElementBuilders.Spacer.Builder()
-                            .setHeight(DimensionBuilders.dp(2))
-                            .build()
-                    )
-                    // Room Location
-                    .addContent(
-                        new LayoutElementBuilders.Text.Builder()
-                            .setText(classRoom)
-                            .setFontStyle(new LayoutElementBuilders.FontStyle.Builder()
-                                .setSize(DimensionBuilders.sp(11.5f))
-                                .setColor(ColorBuilders.argb(0xFF94A3B8))
-                                .build())
-                            .build()
-                    )
+        // Click action: tap anywhere opens MainActivity directly
+        ActionBuilders.LaunchAction launchAction = new ActionBuilders.LaunchAction.Builder()
+            .setAndroidActivity(
+                new ActionBuilders.AndroidActivity.Builder()
+                    .setPackageName("com.technion.semestero")
+                    .setClassName("com.technion.semestero.wear.MainActivity")
                     .build()
             )
+            .build();
+
+        ModifiersBuilders.Clickable clickable = new ModifiersBuilders.Clickable.Builder()
+            .setOnClick(launchAction)
+            .build();
+
+        // 1. Day & Date Chip
+        LayoutElementBuilders.Text dayChip = new LayoutElementBuilders.Text.Builder()
+            .setText(res.dayHeader)
+            .setFontStyle(new LayoutElementBuilders.FontStyle.Builder()
+                .setSize(DimensionBuilders.sp(11))
+                .setColor(ColorBuilders.argb(0xFF38BDF8))
+                .setWeight(LayoutElementBuilders.FONT_WEIGHT_BOLD)
+                .build())
+            .build();
+
+        // 2. Status Badge Pill
+        int statusBg = res.isActive ? 0x2E10B981 : (res.isStartingSoon ? 0x2EF59E0B : 0x2E38BDF8);
+        int statusColor = res.isActive ? 0xFF10B981 : (res.isStartingSoon ? 0xFFF59E0B : 0xFF38BDF8);
+
+        LayoutElementBuilders.Box statusBadgeBox = new LayoutElementBuilders.Box.Builder()
+            .setModifiers(new ModifiersBuilders.Modifiers.Builder()
+                .setBackground(new ModifiersBuilders.Background.Builder()
+                    .setColor(ColorBuilders.argb(statusBg))
+                    .setCorner(new ModifiersBuilders.Corner.Builder()
+                        .setRadius(DimensionBuilders.dp(12))
+                        .build())
+                    .build())
+                .setBorder(new ModifiersBuilders.Border.Builder()
+                    .setWidth(DimensionBuilders.dp(1f))
+                    .setColor(ColorBuilders.argb(statusColor))
+                    .build())
+                .setPadding(new ModifiersBuilders.Padding.Builder()
+                    .setStart(DimensionBuilders.dp(9))
+                    .setEnd(DimensionBuilders.dp(9))
+                    .setTop(DimensionBuilders.dp(2))
+                    .setBottom(DimensionBuilders.dp(2))
+                    .build())
+                .build())
+            .addContent(
+                new LayoutElementBuilders.Text.Builder()
+                    .setText(res.statusText)
+                    .setFontStyle(new LayoutElementBuilders.FontStyle.Builder()
+                        .setSize(DimensionBuilders.sp(10))
+                        .setColor(ColorBuilders.argb(statusColor))
+                        .setWeight(LayoutElementBuilders.FONT_WEIGHT_BOLD)
+                        .build())
+                    .build()
+            )
+            .build();
+
+        // 3. Course Title (Hero)
+        LayoutElementBuilders.Text courseTitle = new LayoutElementBuilders.Text.Builder()
+            .setText(res.courseTitle)
+            .setMaxLines(2)
+            .setMultilineAlignment(LayoutElementBuilders.TEXT_ALIGN_CENTER)
+            .setFontStyle(new LayoutElementBuilders.FontStyle.Builder()
+                .setSize(DimensionBuilders.sp(16))
+                .setColor(ColorBuilders.argb(0xFFF8FAFC))
+                .setWeight(LayoutElementBuilders.FONT_WEIGHT_BOLD)
+                .build())
+            .build();
+
+        // 4. Time Pill
+        LayoutElementBuilders.Text timePill = new LayoutElementBuilders.Text.Builder()
+            .setText(res.timeText)
+            .setFontStyle(new LayoutElementBuilders.FontStyle.Builder()
+                .setSize(DimensionBuilders.sp(13))
+                .setColor(ColorBuilders.argb(0xFF38BDF8))
+                .setWeight(LayoutElementBuilders.FONT_WEIGHT_BOLD)
+                .build())
+            .build();
+
+        // 5. Room Tag (Dark pill container matching card_timeline_item)
+        LayoutElementBuilders.Box roomBox = new LayoutElementBuilders.Box.Builder()
+            .setModifiers(new ModifiersBuilders.Modifiers.Builder()
+                .setBackground(new ModifiersBuilders.Background.Builder()
+                    .setColor(ColorBuilders.argb(0xFF1E293B))
+                    .setCorner(new ModifiersBuilders.Corner.Builder()
+                        .setRadius(DimensionBuilders.dp(8))
+                        .build())
+                    .build())
+                .setBorder(new ModifiersBuilders.Border.Builder()
+                    .setWidth(DimensionBuilders.dp(1f))
+                    .setColor(ColorBuilders.argb(0xFF334155))
+                    .build())
+                .setPadding(new ModifiersBuilders.Padding.Builder()
+                    .setStart(DimensionBuilders.dp(10))
+                    .setEnd(DimensionBuilders.dp(10))
+                    .setTop(DimensionBuilders.dp(2.5f))
+                    .setBottom(DimensionBuilders.dp(2.5f))
+                    .build())
+                .build())
+            .addContent(
+                new LayoutElementBuilders.Text.Builder()
+                    .setText(res.roomText)
+                    .setFontStyle(new LayoutElementBuilders.FontStyle.Builder()
+                        .setSize(DimensionBuilders.sp(11))
+                        .setColor(ColorBuilders.argb(0xFFF8FAFC))
+                        .setWeight(LayoutElementBuilders.FONT_WEIGHT_BOLD)
+                        .build())
+                    .build()
+            )
+            .build();
+
+        // 6. Lecturer & Type Subtitle
+        LayoutElementBuilders.Text lecturerText = new LayoutElementBuilders.Text.Builder()
+            .setText(res.lecturerText)
+            .setFontStyle(new LayoutElementBuilders.FontStyle.Builder()
+                .setSize(DimensionBuilders.sp(9.5f))
+                .setColor(ColorBuilders.argb(0xFF94A3B8))
+                .build())
+            .build();
+
+        // Assemble Root Layout with round bezel spacing
+        LayoutElementBuilders.Column rootColumn = new LayoutElementBuilders.Column.Builder()
+            .setWidth(DimensionBuilders.expand())
+            .setHeight(DimensionBuilders.expand())
+            .setHorizontalAlignment(LayoutElementBuilders.HORIZONTAL_ALIGN_CENTER)
+            .setModifiers(new ModifiersBuilders.Modifiers.Builder()
+                .setClickable(clickable)
+                .build())
+            .addContent(new LayoutElementBuilders.Spacer.Builder().setHeight(DimensionBuilders.dp(10)).build())
+            .addContent(dayChip)
+            .addContent(new LayoutElementBuilders.Spacer.Builder().setHeight(DimensionBuilders.dp(4)).build())
+            .addContent(statusBadgeBox)
+            .addContent(new LayoutElementBuilders.Spacer.Builder().setHeight(DimensionBuilders.dp(4)).build())
+            .addContent(courseTitle)
+            .addContent(new LayoutElementBuilders.Spacer.Builder().setHeight(DimensionBuilders.dp(3)).build())
+            .addContent(timePill)
+            .addContent(new LayoutElementBuilders.Spacer.Builder().setHeight(DimensionBuilders.dp(3)).build())
+            .addContent(roomBox)
+            .addContent(new LayoutElementBuilders.Spacer.Builder().setHeight(DimensionBuilders.dp(2)).build())
+            .addContent(lecturerText)
+            .build();
+
+        LayoutElementBuilders.Layout layout = new LayoutElementBuilders.Layout.Builder()
+            .setRoot(rootColumn)
             .build();
 
         TimelineBuilders.Timeline timeline = new TimelineBuilders.Timeline.Builder()

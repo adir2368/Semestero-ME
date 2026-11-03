@@ -16,7 +16,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.viewpager2.widget.ViewPager2;
@@ -26,6 +25,7 @@ import com.google.android.gms.wearable.MessageEvent;
 import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.Wearable;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.nio.charset.StandardCharsets;
@@ -38,8 +38,8 @@ import java.util.Locale;
 /**
  * Semestero ME • Samsung Galaxy Watch 8 Native ViewPager2 Carousel
  * Focused 3-Screen Layout:
- * Screen 0: Class Radar
- * Screen 1: Today's Timeline
+ * Screen 0: Class Radar (Live upcoming / active lecture countdown)
+ * Screen 1: Today's Timeline (Full authentic daily schedule from CheeseFork & phone companion)
  * Screen 2: Tasks & Exams (5 Tasks with 1-tap complete)
  */
 public class MainActivity extends Activity implements MessageClient.OnMessageReceivedListener, WearCarouselAdapter.OnCarouselActionListener {
@@ -260,7 +260,7 @@ public class MainActivity extends Activity implements MessageClient.OnMessageRec
                 String jsonStr = new String(messageEvent.getData(), StandardCharsets.UTF_8);
                 JSONObject json = new JSONObject(jsonStr);
                 String title = json.optString("title", "🎓 סמסטרו ME • בדיקת התראה");
-                String message = json.optString("message", "📍 אולמן 506 • משוואות דיפרנציאליות (בעוד 10 דק׳)");
+                String message = json.optString("message", "📍 אולמן 101 • תרמודינמיקה 1 (תרגול)");
                 runOnUiThread(() -> {
                     WearNotificationHelper.sendClassReminder(this, title, "12:30", message);
                     if (vibrator != null) vibrator.vibrate(new long[]{0, 300, 150, 300}, -1);
@@ -326,275 +326,65 @@ public class MainActivity extends Activity implements MessageClient.OnMessageRec
     }
 
     /**
-     * Evaluates schedule, authentic Technion ME syllabus, and binds data across 3 screens.
+     * Evaluates schedule from phone companion (CheeseFork) and authentic Technion ME syllabus.
+     * 100% Alignment with the User's Phone Application:
+     * - Sunday: PDE Exercise (11:30-13:30) [Ullmann 506]
+     * - Monday: Physics 2 Lecture (08:30-10:30) [Taub 1], Solids 2 Lecture (10:30-14:30) [ChemEng 1]
+     * - Tuesday: Thermo 1 Lecture (08:30-11:30) [ChemEng 1], Thermo 1 Exercise (12:30-14:30) [Ullmann 101], Solids 2 Exercise (14:30-16:30) [Ullmann 602]
+     * - Wednesday: Physics 2 Lecture (08:30-09:30) [Physics 1], Physics 2 Exercise (09:30-10:30) [Sherman 107], Scientific Computing (14:30-17:30) [ChemEng 1]
+     * - Thursday: Sports/Yoga (07:30-09:00) [Sports Center], PDE Lecture (10:30-12:30) [Sherman 107], Scientific Computing Exercise (12:30-14:30) [Ullmann 501]
      */
     public void updateUIFromPrefsAndSchedule() {
         SharedPreferences prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
 
-        // 1. Current Day & Date
         Calendar now = Calendar.getInstance();
-        int dayOfWeek = now.get(Calendar.DAY_OF_WEEK); // 1 = Sunday, 7 = Saturday
-        String curDayName = (dayOfWeek >= 1 && dayOfWeek <= 7) ? HEBREW_DAYS[dayOfWeek] : "יום שלישי";
+        WearScheduleHelper.ScheduleResolution res = WearScheduleHelper.resolve(this, now);
 
-        SimpleDateFormat sdf = new SimpleDateFormat("d בMMMM", new Locale("he", "IL"));
-        String formattedDate = sdf.format(now.getTime());
+        String classTitle = res.courseTitle;
+        String classTime = res.timeText;
+        String classRoom = res.roomText;
+        String classStatus = res.statusText;
+        String classLecturer = res.lecturerText;
+        List<WearCarouselAdapter.ClassItem> timelineClasses = new ArrayList<>(res.timelineItems);
 
-        int curHour = now.get(Calendar.HOUR_OF_DAY);
-        int curMin = now.get(Calendar.MINUTE);
-        int curTotalMin = curHour * 60 + curMin;
-        boolean isEvening = (curHour >= 17);
-
-        // Screen 0: Class Radar
-        String classTitle;
-        String classTime;
-        String classRoom;
-        String classStatus;
-        String classLecturer;
-
-        List<WearCarouselAdapter.ClassItem> timelineClasses = new ArrayList<>();
-
-        switch (dayOfWeek) {
-            case Calendar.SUNDAY: // יום ראשון
-                timelineClasses.add(new WearCarouselAdapter.ClassItem(
-                    "משוואות דיפרנציאליות חלקיות מ׳",
-                    "11:30 - 13:30",
-                    "📍 אולמן 506",
-                    (!isEvening && curTotalMin >= 690 && curTotalMin < 810)
-                ));
-
-                if (!isEvening && curTotalMin < 690) {
-                    classTitle = "משוואות דיפרנציאליות חלקיות מ׳";
-                    classTime = "11:30 - 13:30";
-                    classRoom = "📍 אולמן 506";
-                    classLecturer = "👨‍🏫 ד״ר רחל כהן • הרצאה";
-                    int diff = 690 - curTotalMin;
-                    classStatus = "⏳ השיעור מתחיל בעוד " + diff + " דק׳";
-                } else if (!isEvening && curTotalMin < 705) {
-                    classTitle = "משוואות דיפרנציאליות חלקיות מ׳";
-                    classTime = "11:30 - 13:30";
-                    classRoom = "📍 אולמן 506";
-                    classLecturer = "👨‍🏫 ד״ר רחל כהן • הרצאה פעילה";
-                    classStatus = "🟢 מתקיים כעת!";
-                } else {
-                    classTitle = "פיסיקה 2";
-                    classTime = "08:30 - 10:30";
-                    classRoom = "📍 טאוב 1";
-                    classLecturer = "👨‍🏫 ד״ר גדעון אלון • הרצאה 10";
-                    classStatus = isEvening ? "מערכת מחר (יום שני) • שיעור ראשון" : "השיעור הבא מחר (שני) ב-08:30";
+        // If phone companion has synced live class data via SharedPreferences, prioritize it ONLY if clean & valid
+        String syncedClassesJson = prefs.getString("all_classes_json", "");
+        if (syncedClassesJson != null && !syncedClassesJson.trim().isEmpty() && !syncedClassesJson.equals("[]") && !syncedClassesJson.contains("?")) {
+            try {
+                JSONArray arr = new JSONArray(syncedClassesJson);
+                if (arr.length() > 0) {
+                    List<WearCarouselAdapter.ClassItem> syncedList = new ArrayList<>();
+                    for (int i = 0; i < arr.length(); i++) {
+                        JSONObject obj = arr.getJSONObject(i);
+                        String title = obj.optString("title", "");
+                        String time = obj.optString("time", "");
+                        String details = obj.optString("details", "");
+                        boolean active = (classTime.equals(time) && classStatus.contains("מתקיים כעת"));
+                        syncedList.add(new WearCarouselAdapter.ClassItem(title, time, details, active));
+                    }
+                    if (!syncedList.isEmpty()) {
+                        timelineClasses = syncedList;
+                    }
                 }
-                break;
+            } catch (Exception ignored) {}
+        }
 
-            case Calendar.MONDAY: // יום שני
-                boolean physActive = (!isEvening && curTotalMin >= 510 && curTotalMin < 630);
-                boolean solidsActive = (!isEvening && curTotalMin >= 630 && curTotalMin < 870);
-
-                timelineClasses.add(new WearCarouselAdapter.ClassItem(
-                    "פיסיקה 2",
-                    "08:30 - 10:30",
-                    "📍 טאוב 1",
-                    physActive
-                ));
-                timelineClasses.add(new WearCarouselAdapter.ClassItem(
-                    "מכניקת מוצקים 2מ׳",
-                    "10:30 - 14:30",
-                    "📍 הנדסה כימית 1",
-                    solidsActive
-                ));
-
-                if (!isEvening && curTotalMin < 510) {
-                    classTitle = "פיסיקה 2";
-                    classTime = "08:30 - 10:30";
-                    classRoom = "📍 טאוב 1";
-                    classLecturer = "👨‍🏫 ד״ר גדעון אלון • הרצאה 10";
-                    classStatus = "⏳ מתחיל בעוד " + (510 - curTotalMin) + " דק׳";
-                } else if (!isEvening && curTotalMin < 525) {
-                    classTitle = "פיסיקה 2";
-                    classTime = "08:30 - 10:30";
-                    classRoom = "📍 טאוב 1";
-                    classLecturer = "👨‍🏫 ד״ר גדעון אלון • הרצאה פעילה";
-                    classStatus = "🟢 מתקיים כעת!";
-                } else if (!isEvening && curTotalMin < 630) {
-                    classTitle = "מכניקת מוצקים 2מ׳";
-                    classTime = "10:30 - 14:30";
-                    classRoom = "📍 הנדסה כימית 1";
-                    classLecturer = "👨‍🏫 פרופ׳ יוסף גבלי • הרצאה 10";
-                    classStatus = "⏳ השיעור הבא היום (10:30)";
-                } else if (!isEvening && curTotalMin < 645) {
-                    classTitle = "מכניקת מוצקים 2מ׳";
-                    classTime = "10:30 - 14:30";
-                    classRoom = "📍 הנדסה כימית 1";
-                    classLecturer = "👨‍🏫 פרופ׳ יוסף גבלי • הרצאה פעילה";
-                    classStatus = "🟢 מתקיים כעת!";
-                } else {
-                    classTitle = "תרמודינמיקה 1";
-                    classTime = "08:30 - 11:30";
-                    classRoom = "📍 הנדסה כימית 1";
-                    classLecturer = "👨‍🏫 פרופ׳ טרטקובסקי • הרצאה 10";
-                    classStatus = isEvening ? "מערכת מחר (יום שלישי) • שיעור ראשון" : "השיעור הבא מחר (שלישי) ב-08:30";
-                }
-                break;
-
-            case Calendar.TUESDAY: // יום שלישי - Exact match with Screenshots 2 & 4!
-            default:
-                boolean t1Active = (!isEvening && curTotalMin >= 510 && curTotalMin < 690);
-                boolean t2Active = (!isEvening && curTotalMin >= 750 && curTotalMin < 870);
-                boolean t3Active = (!isEvening && curTotalMin >= 870 && curTotalMin < 990);
-
-                timelineClasses.add(new WearCarouselAdapter.ClassItem(
-                    "תרמודינמיקה 1",
-                    "08:30 - 11:30",
-                    "📍 הנדסה כימית 1",
-                    t1Active
-                ));
-                timelineClasses.add(new WearCarouselAdapter.ClassItem(
-                    "משוואות דיפרנציאליות חלקיות מ׳",
-                    "12:30 - 14:30",
-                    "📍 אולמן 506",
-                    t2Active
-                ));
-                timelineClasses.add(new WearCarouselAdapter.ClassItem(
-                    "פיסיקה 2",
-                    "14:30 - 16:30",
-                    "📍 טאוב",
-                    t3Active
-                ));
-
-                // Radar logic for Tuesday
-                if (!isEvening && curTotalMin < 510) {
-                    classTitle = "תרמודינמיקה 1";
-                    classTime = "08:30 - 11:30";
-                    classRoom = "📍 הנדסה כימית 1";
-                    classLecturer = "👨‍🏫 פרופ׳ טרטקובסקי • הרצאה 10";
-                    classStatus = "⏰ מתחיל בעוד " + (510 - curTotalMin) + " דקות";
-                } else if (!isEvening && curTotalMin < 525) {
-                    classTitle = "תרמודינמיקה 1";
-                    classTime = "08:30 - 11:30";
-                    classRoom = "📍 הנדסה כימית 1";
-                    classLecturer = "👨‍🏫 פרופ׳ טרטקובסקי • הרצאה פעילה";
-                    classStatus = "🟢 מתקיים כעת!";
-                } else if (!isEvening && curTotalMin < 750) { // Switched to PDE (12:30)
-                    classTitle = "משוואות דיפרנציאליות חלקיות מ׳";
-                    classTime = "12:30 - 14:30";
-                    classRoom = "📍 אולמן 506";
-                    classLecturer = "👨‍🏫 אמתי אלפרין • הרצאה";
-                    int diff = 750 - curTotalMin;
-                    classStatus = "מתחיל בעוד " + diff + " דקות ⏰";
-                } else if (!isEvening && curTotalMin < 765) {
-                    classTitle = "משוואות דיפרנציאליות חלקיות מ׳";
-                    classTime = "12:30 - 14:30";
-                    classRoom = "📍 אולמן 506";
-                    classLecturer = "👨‍🏫 אמתי אלפרין • הרצאה פעילה";
-                    classStatus = "🟢 מתקיים כעת!";
-                } else if (!isEvening && curTotalMin < 870) { // Switched to Physics 2 (14:30)
-                    classTitle = "פיסיקה 2";
-                    classTime = "14:30 - 16:30";
-                    classRoom = "📍 טאוב";
-                    classLecturer = "👨‍🏫 צוות פיסיקה • תרגול";
-                    int diff = 870 - curTotalMin;
-                    classStatus = "מתחיל בעוד " + diff + " דקות ⏰";
-                } else if (!isEvening && curTotalMin < 885) {
-                    classTitle = "פיסיקה 2";
-                    classTime = "14:30 - 16:30";
-                    classRoom = "📍 טאוב";
-                    classLecturer = "👨‍🏫 צוות פיסיקה • תרגול פעיל";
-                    classStatus = "🟢 מתקיים כעת!";
-                } else {
-                    classTitle = "מכניקת מוצקים 2מ׳";
-                    classTime = "12:30 - 14:30";
-                    classRoom = "📍 ליידי דייוויס 240";
-                    classLecturer = "👨‍🏫 מתרגל • תרגול כיתה";
-                    classStatus = isEvening ? "מערכת מחר (יום רביעי) • שיעור ראשון" : "השיעור הבא מחר (רביעי) ב-12:30";
-                }
-                break;
-
-            case Calendar.WEDNESDAY: // יום רביעי
-                boolean solidsWedActive = (!isEvening && curTotalMin >= 750 && curTotalMin < 870);
-                boolean cadWedActive = (!isEvening && curTotalMin >= 870 && curTotalMin < 1050);
-
-                timelineClasses.add(new WearCarouselAdapter.ClassItem(
-                    "מכניקת מוצקים 2מ׳",
-                    "12:30 - 14:30",
-                    "📍 ליידי דייוויס 240",
-                    solidsWedActive
-                ));
-                timelineClasses.add(new WearCarouselAdapter.ClassItem(
-                    "גרפיקה הנדסית וכתיבה טכנית",
-                    "14:30 - 17:30",
-                    "📍 דנציגר",
-                    cadWedActive
-                ));
-
-                if (!isEvening && curTotalMin < 750) {
-                    classTitle = "מכניקת מוצקים 2מ׳";
-                    classTime = "12:30 - 14:30";
-                    classRoom = "📍 ליידי דייוויס 240";
-                    classLecturer = "👨‍🏫 מתרגל • תרגול כיתה";
-                    classStatus = "מתחיל בעוד " + (750 - curTotalMin) + " דקות ⏰";
-                } else if (!isEvening && curTotalMin < 765) {
-                    classTitle = "מכניקת מוצקים 2מ׳";
-                    classTime = "12:30 - 14:30";
-                    classRoom = "📍 ליידי דייוויס 240";
-                    classLecturer = "👨‍🏫 מתרגל • תרגול פעיל";
-                    classStatus = "🟢 מתקיים כעת!";
-                } else {
-                    classTitle = "גרפיקה הנדסית וכתיבה טכנית";
-                    classTime = "09:30 - 11:30";
-                    classRoom = "📍 דנציגר";
-                    classLecturer = "👨‍🏫 מרצה • הרצאה 10";
-                    classStatus = isEvening ? "מערכת מחר (יום חמישי) • שיעור ראשון" : "השיעור הבא מחר (חמישי) ב-09:30";
-                }
-                break;
-
-            case Calendar.THURSDAY: // יום חמישי
-                boolean cadThuActive = (!isEvening && curTotalMin >= 570 && curTotalMin < 690);
-                boolean physLabActive = (!isEvening && curTotalMin >= 750 && curTotalMin < 930);
-
-                timelineClasses.add(new WearCarouselAdapter.ClassItem(
-                    "גרפיקה הנדסית וכתיבה טכנית",
-                    "09:30 - 11:30",
-                    "📍 דנציגר",
-                    cadThuActive
-                ));
-                timelineClasses.add(new WearCarouselAdapter.ClassItem(
-                    "מעבדת פיסיקה 2",
-                    "12:30 - 15:30",
-                    "📍 פיסיקה 200",
-                    physLabActive
-                ));
-
-                if (!isEvening && curTotalMin < 570) {
-                    classTitle = "גרפיקה הנדסית וכתיבה טכנית";
-                    classTime = "09:30 - 11:30";
-                    classRoom = "📍 דנציגר";
-                    classLecturer = "👨‍🏫 מרצה • הרצאה 10";
-                    classStatus = "מתחיל בעוד " + (570 - curTotalMin) + " דקות ⏰";
-                } else if (!isEvening && curTotalMin < 585) {
-                    classTitle = "גרפיקה הנדסית וכתיבה טכנית";
-                    classTime = "09:30 - 11:30";
-                    classRoom = "📍 דנציגר";
-                    classLecturer = "👨‍🏫 מעבדה פעילה";
-                    classStatus = "🟢 מתקיים כעת!";
-                } else {
-                    classTitle = "משוואות דיפרנציאליות חלקיות מ׳";
-                    classTime = "11:30 - 13:30";
-                    classRoom = "📍 אולמן 506";
-                    classLecturer = "👨‍🏫 אמתי אלפרין • תרגול 22";
-                    classStatus = "סופ״ש נעים! 🎉 השיעור הבא ביום ראשון";
-                }
-                break;
-
-            case Calendar.FRIDAY:
-            case Calendar.SATURDAY:
-                classTitle = "משוואות דיפרנציאליות חלקיות מ׳";
-                classTime = "11:30 - 13:30";
-                classRoom = "📍 אולמן 506";
-                classLecturer = "👨‍🏫 אמתי אלפרין • תרגול 22";
-                classStatus = "שבוע חדש מתחיל ביום ראשון ב-11:30";
-                break;
+        // If phone synced a specific active next class ONLY if clean and free of corruption
+        String syncedTitle = prefs.getString("class_title", "");
+        if (syncedTitle != null && !syncedTitle.trim().isEmpty() && !syncedTitle.contains("אין שיעורים קרובים") && !syncedTitle.contains("?")) {
+            classTitle = syncedTitle;
+            String syncedTime = prefs.getString("class_time", "");
+            if (!syncedTime.isEmpty() && !syncedTime.contains("?")) classTime = syncedTime;
+            String syncedRoom = prefs.getString("class_details", "");
+            if (!syncedRoom.isEmpty() && !syncedRoom.contains("?")) classRoom = syncedRoom;
+            String syncedLec = prefs.getString("class_lecturer", "");
+            if (!syncedLec.isEmpty() && !syncedLec.contains("?")) classLecturer = syncedLec;
+            String syncedStat = prefs.getString("class_status", "");
+            if (!syncedStat.isEmpty() && !syncedStat.contains("?")) classStatus = syncedStat;
         }
 
         // Apply radar data to adapter
-        adapter.radarDay = curDayName + " • " + formattedDate;
+        adapter.radarDay = res.dayHeader;
         adapter.radarStatus = classStatus;
         adapter.radarCourse = classTitle;
         adapter.radarTime = classTime;
@@ -602,10 +392,10 @@ public class MainActivity extends Activity implements MessageClient.OnMessageRec
         adapter.radarLecturer = classLecturer;
 
         // Apply timeline data to adapter
-        adapter.timelineHeader = "לו״ז " + curDayName + " (" + formattedDate + ")";
+        adapter.timelineHeader = "לו״ז " + res.dayHeader;
         adapter.timelineClasses = timelineClasses;
 
-        // Screen 2: Tasks & Exams (Matches Screenshot 1 with Sanitized Clean Hebrew)
+        // Screen 2: Tasks & Exams
         String examDays = prefs.getString("exam_days", "📝 מועד א׳ בעוד 14 ימים");
         if (examDays == null || examDays.contains("?") || examDays.equals("--") || examDays.trim().isEmpty()) {
             examDays = "📝 מועד א׳ בעוד 14 ימים";
