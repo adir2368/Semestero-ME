@@ -8672,20 +8672,9 @@ const CHEESEFORK_SEMESTER_SCHEDULE = {
                     type: "הרצאה 10",
                     lecturer: "פרופ' יוסף גבלי",
                     room: "דן קאהן - מכונות 6",
-                    startTime: "11:30",
+                    startTime: "10:30",
                     endTime: "14:30",
-                    duration: "3 שעות",
-                    cardClass: "timetable-card-solids"
-                },
-                {
-                    courseId: "034053",
-                    courseName: "מכניקת מוצקים 2מ'",
-                    type: "תרגול 20",
-                    lecturer: "מר מירון דואר",
-                    room: "אולמן 602",
-                    startTime: "14:30",
-                    endTime: "16:30",
-                    duration: "שעתיים",
+                    duration: "4 שעות",
                     cardClass: "timetable-card-solids"
                 }
             ]
@@ -8717,6 +8706,17 @@ const CHEESEFORK_SEMESTER_SCHEDULE = {
                     endTime: "14:30",
                     duration: "שעתיים",
                     cardClass: "timetable-card-thermo"
+                },
+                {
+                    courseId: "034053",
+                    courseName: "מכניקת מוצקים 2מ'",
+                    type: "תרגול 11",
+                    lecturer: "מר איתם טננבאום",
+                    room: "אולמן 103",
+                    startTime: "14:30",
+                    endTime: "16:30",
+                    duration: "שעתיים",
+                    cardClass: "timetable-card-solids"
                 }
             ]
         },
@@ -8920,11 +8920,11 @@ function enrichTimetableWithAuthenticRooms(timetable) {
     let enrichedCount = 0;
     timetable.days.forEach(day => {
         if (!Array.isArray(day.classes)) return;
-        // Strict guard: Tuesday must NEVER have candidate Solids 2 tutorial 11 when Monday tutorial 20 is active
-        if (day.dayIndex === 2) {
+        // Strict guard: Monday must NOT have tutorial 20 when Tuesday tutorial 11 is authentic
+        if (day.dayIndex === 1) {
             day.classes = day.classes.filter(c => {
                 const cId = (c.courseId || '').replace(/^0+/, '');
-                return !(cId === '34053' && c.startTime === '14:30');
+                return !(cId === '34053' && c.type && c.type.includes('תרגול'));
             });
         }
         day.classes.forEach(c => {
@@ -8959,11 +8959,14 @@ function enrichTimetableWithAuthenticRooms(timetable) {
                     enrichedCount++;
                 }
             }
-            // Auto-heal Monday Solid Mechanics lecture time to 11:30 - 14:30 if old 10:30 was present
+            // Auto-heal Monday Solid Mechanics lecture time to 10:30 - 14:30 (4 hours)
             if (cleanCode === '34053' || cleanCode === '034053') {
-                if (day.dayIndex === 1 && c.startTime === '10:30' && c.endTime === '14:30') {
-                    c.startTime = '11:30';
-                    enrichedCount++;
+                if (day.dayIndex === 1 && c.type && c.type.includes('הרצאה')) {
+                    if (c.startTime !== '10:30' || c.endTime !== '14:30') {
+                        c.startTime = '10:30';
+                        c.endTime = '14:30';
+                        enrichedCount++;
+                    }
                 }
             }
 
@@ -9164,6 +9167,17 @@ function loadSavedState() {
                             course.tasks.forEach(task => {
                                 task.completed = true;
                                 task.status = 'done';
+                            });
+                        }
+                    });
+
+                    // Sanitize mastered courses: Completed courses from previous semesters must NEVER have future due dates!
+                    Object.values(gameState.courses || {}).forEach(c => {
+                        if (c.status === 'mastered') {
+                            (c.tasks || []).forEach(t => {
+                                if (t.dueDate && t.dueDate >= '2026-11-01') {
+                                    t.dueDate = (t.id === 'task-104043-exam-b' ? '2026-08-05' : '');
+                                }
                             });
                         }
                     });
@@ -15128,9 +15142,9 @@ window.syncLiveCheeseForkData = async function(customUrl = null, isManual = fals
                         }
 
                         if (isMatch && itemDay && itemTime) {
-                            const dayIdx = dayMap[itemDay];
-                            // Strict guard: Tuesday must NEVER have candidate Solids 2 tutorial
-                            if (dayIdx === 2 && (cleanCode === '034053' || cleanCode === '34053' || cleanCode === '00340053') && itemType.includes('תרגול')) {
+                            let dayIdx = dayMap[itemDay];
+                            // Strict guard: Monday must NOT have unselected Solids 2 tutorial 20
+                            if (dayIdx === 1 && (cleanCode === '034053' || cleanCode === '34053' || cleanCode === '00340053') && itemType.includes('תרגול')) {
                                 return;
                             }
                             if (dayIdx !== undefined && dayIdx >= 0 && dayIdx <= 4) {
@@ -15267,23 +15281,19 @@ window.syncLiveCheeseForkData = async function(customUrl = null, isManual = fals
             totalClassesCount++;
         }
 
-        // Ensure authentic Solid Mechanics tutorials are preserved (Monday & Tuesday distinct tutorials)
-        const hasSolidsMonTutorial = timetableDays[1].classes.some(c => (c.courseId === '034053' || c.courseId === '00340053') && c.startTime === '14:30');
-        if (!hasSolidsMonTutorial && (rawCourseCodes.includes('00340053') || rawCourseCodes.includes('034053'))) {
-            timetableDays[1].classes.push({
-                courseId: '034053',
-                courseName: "מכניקת מוצקים 2מ'",
-                type: 'תרגול 20',
-                lecturer: 'מר מירון דואר',
-                room: 'אולמן 602',
-                startTime: '14:30',
-                endTime: '16:30',
-                duration: 'שעתיים',
-                cardClass: 'timetable-card-solids'
-            });
-            totalClassesCount++;
+        // Ensure authentic Solid Mechanics schedule (Monday 4h Lecture 10:30-14:30, Tuesday Tutorial 11 14:30-16:30, zero Monday tutorial)
+        timetableDays[1].classes = timetableDays[1].classes.filter(c => {
+            const isSolids = c.courseId === '034053' || c.courseId === '00340053' || c.courseId === '34053';
+            return !(isSolids && c.type && c.type.includes('תרגול'));
+        });
+        const solidsMonLecture = timetableDays[1].classes.find(c => (c.courseId === '034053' || c.courseId === '00340053' || c.courseId === '34053') && c.type && c.type.includes('הרצאה'));
+        if (solidsMonLecture) {
+            solidsMonLecture.startTime = '10:30';
+            solidsMonLecture.endTime = '14:30';
+            solidsMonLecture.duration = '4 שעות';
         }
-        const hasSolidsTueTutorial = timetableDays[2].classes.some(c => (c.courseId === '034053' || c.courseId === '00340053') && c.startTime === '14:30');
+
+        const hasSolidsTueTutorial = timetableDays[2].classes.some(c => (c.courseId === '034053' || c.courseId === '00340053' || c.courseId === '34053') && c.startTime === '14:30');
         if (!hasSolidsTueTutorial && (rawCourseCodes.includes('00340053') || rawCourseCodes.includes('034053'))) {
             timetableDays[2].classes.push({
                 courseId: '034053',
@@ -22463,12 +22473,17 @@ function createCalendarDayCell(dateStr, dayNum, isToday, itemsByDate, isOtherMon
         });
     });
 
-    // Exam event click listener -> Open task side peek if task exists, else course details
+    // Exam event click listener -> Open task side peek (always prioritize task over course)
     cell.querySelectorAll(".cal-event-pill.exam-event").forEach(pill => {
         pill.addEventListener("click", (e) => {
             e.stopPropagation();
             const cCode = pill.dataset.courseCode;
-            const tId = pill.dataset.taskId;
+            let tId = pill.dataset.taskId;
+            if (!tId && cCode && gameState.courses && gameState.courses[cCode]) {
+                const c = gameState.courses[cCode];
+                const examTask = (c.tasks || []).find(t => t.type === 'exam') || (c.tasks || [])[0];
+                if (examTask) tId = examTask.id;
+            }
             if (cCode && tId && typeof openTaskSidePeek === 'function') {
                 openTaskSidePeek(cCode, tId);
             } else if (cCode) {
@@ -22641,8 +22656,14 @@ function renderDayModalEventsList(dateStr) {
             itemRow.addEventListener("click", (e) => {
                 if (e.target.closest(".btn-del-modal-event")) return;
                 closeCalendarDayModal();
-                if (item.courseCode && item.taskId && typeof openTaskSidePeek === 'function') {
-                    openTaskSidePeek(item.courseCode, item.taskId);
+                let tId = item.taskId;
+                if (!tId && item.courseCode && gameState.courses && gameState.courses[item.courseCode]) {
+                    const c = gameState.courses[item.courseCode];
+                    const examTask = (c.tasks || []).find(t => t.type === 'exam') || (c.tasks || [])[0];
+                    if (examTask) tId = examTask.id;
+                }
+                if (item.courseCode && tId && typeof openTaskSidePeek === 'function') {
+                    openTaskSidePeek(item.courseCode, tId);
                 } else if (item.courseCode) {
                     openCourseDetails(item.courseCode);
                 }
@@ -22752,10 +22773,10 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.11.03-v2.10.0",
-    version: "2.10.0",
-    build: "20261103_03",
-    date: "2026-11-03 18:30",
+    code: "REV-2026.11.04-v2.10.1",
+    version: "2.10.1",
+    build: "20261104_01",
+    date: "2026-11-04 00:00",
     description: "שדרוג 2.10.0: תיקון סנכרון ציזפורק 1:1, מניעת ערבוב תרגולים, ניקוי מבחנים ישנים, מניעת גלישת Side Peek במובייל ונעילת גרסה"
 };
 window.APP_VERSION = APP_CURRENT_REVISION.version;

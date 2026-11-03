@@ -989,7 +989,7 @@
 
             // 2. Sync courses from customPlan
             customPlan.forEach(sem => {
-                const semNum = sem.semester;
+                let semNum = sem.semester;
                 (sem.courses || []).forEach(c => {
                     if (!c || !c.code) return;
                     if (isPurgedCourse(c.code, c.altCode)) return;
@@ -1049,16 +1049,12 @@
                         }
                         const strippedCode = normCode.replace(/^0+/, '');
 
-                        if (global.gameState.courses[normCode] || global.gameState.courses[strippedCode]) {
-                            const k = global.gameState.courses[normCode] ? normCode : strippedCode;
-                            if (global.gameState.courses[k].semester !== semNum) {
-                                global.gameState.courses[k].semester = semNum;
-                                changed = true;
-                            }
-                            return;
+                        // Chemistry Lab lock strictly to semester 2
+                        if (normCode === '125013' || normCode === '01250013' || strippedCode === '125013') {
+                            semNum = 2;
                         }
 
-// Do not inject alternative physics variants if standard physics exists
+                        // Do not inject alternative physics variants if standard physics exists
                         if ((normCode === '114071' || normCode === '01140071' || normCode === '114077' || normCode === '114055') &&
                             (global.gameState.courses['114051'] || global.gameState.courses['01140051'])) {
                             return;
@@ -1068,9 +1064,17 @@
                             return;
                         }
 
-                        // Chemistry Lab lock to semester 2
-                        if (normCode === '125013' || normCode === '01250013') {
-                            semNum = 2;
+                        if (global.gameState.courses[normCode] || global.gameState.courses[strippedCode]) {
+                            const k = global.gameState.courses[normCode] ? normCode : strippedCode;
+                            if (k === '125013' || k === '01250013') {
+                                global.gameState.courses[k].semester = 2;
+                            } else if (global.gameState.courses[k].status === 'mastered') {
+                                // Keep mastered course semester intact
+                            } else if (global.gameState.courses[k].semester !== semNum) {
+                                global.gameState.courses[k].semester = semNum;
+                                changed = true;
+                            }
+                            return;
                         }
 
                                                 // Truly new elective/custom course added in "התוכנית שלי"
