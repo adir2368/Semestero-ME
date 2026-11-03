@@ -22587,11 +22587,11 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.11.01-v2.9.5",
-    version: "2.9.5",
-    build: "20261101_01",
-    date: "2026-11-01 19:15",
-    description: "גרסה 2.9.5: הטמעת ערכת ביצועי-על (31 App-Performance Toolkit) - שלדי טעינה Shimmer, מניעת כפילויות רשת, Windowing במאגר הקורסים, ניטור Core Web Vitals ו-Font Optimization"
+    code: "REV-2026.11.03-v2.9.7",
+    version: "2.9.7",
+    build: "20261103_02",
+    date: "2026-11-03 09:40",
+    description: "גרסה 2.9.7: עדכון מובייל ו-Wear OS, תיקון הורדות ישירות ב-WebView (DownloadListener), סנכרון דו-ערוצי טלפון-שעון ונעילת כיוון מסך nosensor"
 };
 window.APP_VERSION = APP_CURRENT_REVISION.version;
 
