@@ -153,8 +153,12 @@ var SAMPLE_ME_DEGREE = (typeof window !== 'undefined' && window.SAMPLE_ME_DEGREE
         prerequisites: ["034028","104043","104065"],
         status: "locked",
         tasks: [
-            { id: "034053_h1", title: "תרגיל בית 1: כפיפת קורות ומאמצים משולבים (הגשת PDF בכתב יד)", type: "hw", xp: 60, completed: false },
-            { id: "034053_ex", title: "מבחן סוף", type: "exam", xp: 550, completed: false }
+            { id: "034053_hw1", title: "HW 1 - Stress Tensor (הגשת פתרון תרגיל בית 1)", type: "hw", xp: 60, dueDate: "2026-11-12 23:59", completed: false, source: "moodle" },
+            { id: "034053_miluim_survey", title: "שאלון מילואימניקים", type: "quiz", xp: 30, dueDate: "2026-11-13 14:41", completed: false, source: "moodle" },
+            { id: "034053_hw2", title: "HW 2 - Principle Stresses (הגשת פתרון תרגיל בית 2)", type: "hw", xp: 60, dueDate: "2026-11-26 23:59", completed: false, source: "moodle" },
+            { id: "034053_hw3", title: "HW 3 - Rotation Transformation (הגשת פתרון תרגיל בית 3)", type: "hw", xp: 60, dueDate: "2026-12-01 23:59", completed: false, source: "moodle" },
+            { id: "034053_ex", title: "מועד א", type: "exam", xp: 550, dueDate: "2027-02-18", completed: false },
+            { id: "034053_ex_b", title: "מועד ב'", type: "exam", xp: 550, dueDate: "2027-03-18", completed: false }
         ]
     },
     "114052": {

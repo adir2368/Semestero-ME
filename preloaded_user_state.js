@@ -129,7 +129,7 @@
     },
     "104065": {
       "code": "104065",
-      "name": "אלגברה ליניארית מ׳",
+      "name": "אלגברה ליניארית 1מ",
       "type": "core",
       "grade": 87,
       "tasks": [
@@ -352,6 +352,30 @@
       "moedA": "2027-02-01",
       "moedB": "2027-03-02",
       "tasks": [
+        {
+          "id": "114052_hw0",
+          "moodleUid": "9593@moodle26.technion.ac.il",
+          "title": "תרגיל בית 0 - איך עובדים עם מודל?",
+          "type": "hw",
+          "xp": 30,
+          "dueDate": "2027-01-28 23:59",
+          "dueTimestamp": 1801173540000,
+          "status": "not_started",
+          "completed": false,
+          "source": "moodle"
+        },
+        {
+          "id": "114052_miluim_3010",
+          "moodleUid": "9572@moodle26.technion.ac.il",
+          "title": "אישור מילואים (טופס 3010) חורף",
+          "type": "hw",
+          "xp": 30,
+          "dueDate": "2027-02-01 23:59",
+          "dueTimestamp": 1801519140000,
+          "status": "not_started",
+          "completed": false,
+          "source": "moodle"
+        },
         {
           "id": "114052_h1",
           "xp": 50,
@@ -623,6 +647,7 @@
       "isBinaryPass": false,
       "prerequisites": [
         "034028",
+        "114071",
         "114051",
         "104043",
         "104131"
@@ -669,6 +694,7 @@
       "prerequisites": [
         "104041",
         "104065",
+        "114071",
         "114051"
       ]
     },
@@ -739,15 +765,6 @@
       "moedA": "2027-02-07",
       "moedB": "2027-03-05",
       "tasks": [
-        {
-          "id": "034035_midterm",
-          "xp": 150,
-          "type": "exam",
-          "title": "בוחן אמצע מגן (20%)",
-          "status": "not_started",
-          "dueDate": "2026-12-16",
-          "completed": false
-        },
         {
           "id": "034035_h1",
           "xp": 50,
@@ -905,13 +922,56 @@
       "moedB": "2027-03-18",
       "tasks": [
         {
-          "id": "034053_h1",
-          "xp": 60,
+          "id": "034053_hw1",
+          "moodleUid": "00340053_hw1",
+          "title": "HW 1 - Stress Tensor (הגשת פתרון תרגיל בית 1)",
           "type": "hw",
-          "title": "תרגיל בית 1: כפיפת קורות ומאמצים משולבים (הגשת PDF בכתב יד)",
+          "xp": 60,
+          "dueDate": "2026-11-12 23:59",
+          "dueTimestamp": 1794520740000,
           "status": "not_started",
-          "dueDate": "",
-          "completed": false
+          "completed": false,
+          "source": "moodle",
+          "moodleUrl": "https://moodle26.technion.ac.il/course/view.php?id=116"
+        },
+        {
+          "id": "034053_miluim_survey",
+          "moodleUid": "15386@moodle26.technion.ac.il",
+          "title": "שאלון מילואימניקים",
+          "type": "quiz",
+          "xp": 30,
+          "dueDate": "2026-11-13 14:41",
+          "dueTimestamp": 1794573660000,
+          "status": "not_started",
+          "completed": false,
+          "source": "moodle",
+          "moodleUrl": "https://moodle26.technion.ac.il/course/view.php?id=116"
+        },
+        {
+          "id": "034053_hw2",
+          "moodleUid": "00340053_hw2",
+          "title": "HW 2 - Principle Stresses (הגשת פתרון תרגיל בית 2)",
+          "type": "hw",
+          "xp": 60,
+          "dueDate": "2026-11-26 23:59",
+          "dueTimestamp": 1795730340000,
+          "status": "not_started",
+          "completed": false,
+          "source": "moodle",
+          "moodleUrl": "https://moodle26.technion.ac.il/course/view.php?id=116"
+        },
+        {
+          "id": "034053_hw3",
+          "moodleUid": "00340053_hw3",
+          "title": "HW 3 - Rotation Transformation (הגשת פתרון תרגיל בית 3)",
+          "type": "hw",
+          "xp": 60,
+          "dueDate": "2026-12-01 23:59",
+          "dueTimestamp": 1796162340000,
+          "status": "not_started",
+          "completed": false,
+          "source": "moodle",
+          "moodleUrl": "https://moodle26.technion.ac.il/course/view.php?id=116"
         },
         {
           "id": "034053_ex",
@@ -1041,26 +1101,32 @@
       "moedB": "2027-03-10",
       "tasks": [
         {
-          "id": "034056_matlab_bonus",
-          "xp": 75,
-          "type": "assignment",
-          "title": "לומדת MATLAB (בונוס 2 נק׳ לציון הסופי)",
-          "status": "done",
-          "dueDate": "2026-11-19",
-          "completed": true
+          "id": "034056_matlab",
+          "moodleUid": "9032@moodle26.technion.ac.il",
+          "title": "לומדת MATLAB",
+          "type": "hw",
+          "xp": 60,
+          "dueDate": "2026-11-19 23:59",
+          "dueTimestamp": 1795125540000,
+          "status": "not_started",
+          "completed": false,
+          "source": "moodle"
         },
         {
-          "id": "034056_h1",
-          "xp": 50,
-          "type": "hw",
-          "title": "תרגיל בית 1: פתרון משוואות לא ליניאריות בפייתון",
+          "id": "034056_miluim",
+          "moodleUid": "15247@moodle26.technion.ac.il",
+          "title": "שאלון מילואים",
+          "type": "quiz",
+          "xp": 30,
+          "dueDate": "2026-11-20 11:16",
+          "dueTimestamp": 1795166160000,
           "status": "not_started",
-          "dueDate": "",
-          "completed": false
+          "completed": false,
+          "source": "moodle"
         },
         {
           "id": "034056_p1",
-          "xp": 200,
+          "xp": 150,
           "type": "project",
           "title": "פרוייקט חישובי: אנליזה נומרית של מערכת מכנית",
           "status": "not_started",
@@ -1069,7 +1135,7 @@
         },
         {
           "id": "034056_ex",
-          "xp": 500,
+          "xp": 550,
           "type": "exam",
           "title": "מועד א",
           "status": "not_started",
@@ -1078,7 +1144,7 @@
         },
         {
           "id": "034056_ex_b",
-          "xp": 500,
+          "xp": 550,
           "type": "exam",
           "title": "מועד ב'",
           "status": "not_started",
@@ -1150,6 +1216,8 @@
       "semester": 6,
       "isBinaryPass": false,
       "prerequisites": [
+        "034010",
+        "034053",
         "034041",
         "034040",
         "034051",
@@ -1221,6 +1289,7 @@
       "isBinaryPass": false,
       "prerequisites": [
         "034032",
+        "114075",
         "114052"
       ]
     },
@@ -1314,7 +1383,8 @@
       "isBinaryPass": false,
       "prerequisites": [
         "034054",
-        "034030"
+        "034030",
+        "034053"
       ]
     },
     "034379": {
@@ -1343,7 +1413,12 @@
       "semester": 7,
       "isBinaryPass": false,
       "prerequisites": [
-        "034371"
+        "034371",
+        "034054",
+        "034060",
+        "034041",
+        "034040",
+        "034010"
       ]
     },
     "034380": {
@@ -1597,7 +1672,7 @@
           },
           "104065": {
             "code": "104065",
-            "name": "אלגברה ליניארית מ׳",
+            "name": "אלגברה ליניארית 1מ",
             "type": "core",
             "grade": 87,
             "tasks": [
@@ -4184,7 +4259,7 @@
         }
       ],
       "semester": 1,
-      "targetCredits": 20.5
+      "targetCredits": 20
     },
     {
       "title": "שנה א׳ - סמסטר ב׳",
@@ -4237,20 +4312,10 @@
           "prereqs": [
             "01250001"
           ]
-        },
-        {
-          "code": "01250013",
-          "altCode": "125013",
-          "name": "מעבדה בכימיה",
-          "credits": 0.5,
-          "type": "mandatory",
-          "prereqs": [
-            "01250001"
-          ]
         }
       ],
       "semester": 2,
-      "targetCredits": 19
+      "targetCredits": 21
     },
     {
       "title": "שנה ב׳ - סמסטר ג׳ (חורף נוכחי)",
@@ -4308,18 +4373,10 @@
             "01040043",
             "01040131"
           ]
-        },
-        {
-          "code": "03940805",
-          "altCode": "03940805",
-          "name": "חינוך גופני - אתלטיקה קלה / יוגה",
-          "credits": 1,
-          "type": "sports",
-          "prereqs": []
         }
       ],
       "semester": 3,
-      "targetCredits": 20.5
+      "targetCredits": 19.5
     },
     {
       "title": "שנה ב׳ - סמסטר ד׳ (אביב)",
@@ -4371,10 +4428,20 @@
             "01040065",
             "01040131"
           ]
+        },
+        {
+          "code": "01250013",
+          "name": "מעבדה בכימיה",
+          "type": "mandatory",
+          "altCode": "125013",
+          "credits": 0.5,
+          "prereqs": [
+            "01250001"
+          ]
         }
       ],
       "semester": 4,
-      "targetCredits": 17.5
+      "targetCredits": 18
     },
     {
       "title": "שנה ג׳ - סמסטר ה׳",
@@ -5432,7 +5499,9 @@
     "324033",
     "03240033",
     "035026",
-    "35026"
+    "35026",
+    "114071",
+    "114075"
   ],
   "completedCourses": 11,
   "pastExamSchedule": [
@@ -5822,7 +5891,7 @@
       "courseCode": "104043"
     }
   ],
-  "moodleCalendarUrl": "",
+  "moodleCalendarUrl": "https://moodle26.technion.ac.il/calendar/export_execute.php?userid=39495&authtoken=47ff4e9841a2293be4696691eeeafe5127137f5c&preset_what=all&preset_time=custom",
   "semesterGuardMode": "locked",
   "customCalendarEvents": [],
   "degreePlanUnassigned": [],
@@ -5840,11 +5909,11 @@
   "hasLoadedGoogleCalendarAugustV3": true
 };
 
-    window.PRELOADED_USER_STATE = PRELOADED_USER_STATE;
-    if (typeof global !== 'undefined') {
-        global.PRELOADED_USER_STATE = PRELOADED_USER_STATE;
+    if (typeof window !== 'undefined') {
+        window.PRELOADED_USER_STATE = PRELOADED_USER_STATE;
+        window.AUTHENTIC_USER_STATE = PRELOADED_USER_STATE;
     }
-    if (typeof module !== 'undefined') {
-        module.exports = { PRELOADED_USER_STATE };
+    if (typeof module !== 'undefined' && module.exports) {
+        module.exports = PRELOADED_USER_STATE;
     }
-})(typeof window !== 'undefined' ? window : global);
+})(typeof window !== 'undefined' ? window : globalThis);

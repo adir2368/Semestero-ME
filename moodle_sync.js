@@ -1073,12 +1073,25 @@
                 const catMatch = block.match(/CATEGORIES:([^\r\n]+)/);
                 const categoryStr = catMatch ? catMatch[1].trim() : '';
                 
-                // Match course number: Technion uses 6 or 8 digits (e.g. 034061, 00340061, 01040043)
+                // Match course number: Technion uses 6 or 8 digits (e.g. 034061, 00340061, 01040043, 00340053, 01040228)
                 let courseCode = '';
                 const codeMatch = categoryStr.match(/\b\d{6,8}\b/) || summary.match(/\b\d{6,8}\b/);
                 if (codeMatch) {
                     const rawCode = codeMatch[0];
-                    courseCode = (rawCode.length === 8) ? (rawCode.substring(1, 4) + rawCode.substring(5, 8)) : rawCode;
+                    if (rawCode.length === 8) {
+                        const pp = rawCode.substring(0, 2);
+                        const ff = rawCode.substring(2, 4);
+                        const nnnn = rawCode.substring(4, 8);
+                        if (pp === '00') {
+                            courseCode = '0' + ff + nnnn.substring(1);
+                        } else if (pp === '01') {
+                            courseCode = '1' + ff + nnnn.substring(1);
+                        } else {
+                            courseCode = rawCode.substring(1, 4) + rawCode.substring(5, 8);
+                        }
+                    } else {
+                        courseCode = rawCode;
+                    }
                 }
 
                 // Extract Dates
