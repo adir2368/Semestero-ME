@@ -12278,7 +12278,7 @@ const MOODLE26_COURSE_MAP = {
     '3940805': 1212
 };
 
-const FACULTY_DRIVE_WEB_URL = 'https://technionmail-my.sharepoint.com/personal/adir_moshe_campus_technion_ac_il/_layouts/15/onedrive.aspx?listurl=https%3A%2F%2Ftechnionmail-my%2Esharepoint%2Ecom%2Fpersonal%2Fmech_info_asat_technion_ac_il%2FDocuments&view=3&id=%2Fpersonal%2Fmech_info_asat_technion_ac_il%2FDocuments%2FMechanical%20Engineering%20Drive&csf=1&web=1&e=jG2HFG&FolderCTID=0x01200020FCF278196BFF4B9D20B38488EBB4E7';
+const FACULTY_DRIVE_WEB_URL = 'https://technionmail-my.sharepoint.com/personal/mech_info_asat_technion_ac_il/_layouts/15/onedrive.aspx';
 const FACULTY_DRIVE_LOCAL_PATH = 'C:\\Users\\user\\OneDrive - Technion\\Mechanichal Info TSA\'s files - Mechanical Engineering Drive';
 if (typeof window !== 'undefined') {
     window.FACULTY_DRIVE_WEB_URL = FACULTY_DRIVE_WEB_URL;
