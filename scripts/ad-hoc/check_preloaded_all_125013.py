@@ -1,0 +1,6 @@
+with open('preloaded_user_state.js', 'r', encoding='utf-8') as f:
+    lines = f.readlines()
+
+for i, line in enumerate(lines):
+    if '01250013' in line or '125013' in line:
+        print(f"Line {i+1}: {line.strip()[:100]}")

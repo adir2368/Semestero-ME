@@ -618,11 +618,23 @@
         },
 
         isTaskDismissedInRegistry(courseCode, task) {
-            if (!task || !window.gameState || !window.gameState.dismissedTaskRegistry) return false;
-            const keys = this.getTaskCompletionKeys(courseCode, task);
-            for (let i = 0; i < keys.length; i++) {
-                if (window.gameState.dismissedTaskRegistry[keys[i]]) {
-                    return true;
+            if (!task || !window.gameState) return false;
+
+            // 1. Direct check against persistent deletedTaskIds
+            if (Array.isArray(window.gameState.deletedTaskIds)) {
+                if (task.id && window.gameState.deletedTaskIds.includes(task.id)) return true;
+                const mId = this.extractMoodleId(task);
+                if (mId && window.gameState.deletedTaskIds.includes(String(mId))) return true;
+                if (task.moodleUid && window.gameState.deletedTaskIds.includes(String(task.moodleUid))) return true;
+            }
+
+            // 2. Check dismissed registry keys
+            if (window.gameState.dismissedTaskRegistry) {
+                const keys = this.getTaskCompletionKeys(courseCode, task);
+                for (let i = 0; i < keys.length; i++) {
+                    if (window.gameState.dismissedTaskRegistry[keys[i]]) {
+                        return true;
+                    }
                 }
             }
             return false;

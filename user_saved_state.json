@@ -223,9 +223,22 @@
           "id": "104228_h1",
           "xp": 50,
           "type": "hw",
-          "title": "תרגיל בית 1: משוואות מסדר ראשון ומאפיינים",
+          "title": "תרגיל אלקטרוני 1 - סיווג מד״ח",
+          "status": "in_progress",
+          "dueDate": "2026-11-09T23:59:00",
+          "completed": false,
+          "moodleUrl": "https://moodle26.technion.ac.il/mod/scorm/view.php?id=95378",
+          "pangeaUrl": "https://idofangbentov.uk/Technion/PDE1/PDE1_000-104228-%D7%9E%D7%93%D7%97-%D7%9E"
+        },
+        {
+          "id": "104228_h2",
+          "xp": 50,
+          "type": "hw",
+          "title": "תרגיל אלקטרוני 2",
           "status": "not_started",
-          "dueDate": "",
+          "dueDate": "2026-11-16T23:59:00",
+          "moodleUrl": "https://moodle26.technion.ac.il/course/view.php?id=643",
+          "pangeaUrl": "https://idofangbentov.uk/Technion/PDE1/PDE1_000-104228-%D7%9E%D7%93%D7%97-%D7%9E",
           "completed": false
         },
         {

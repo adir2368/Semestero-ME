@@ -1,0 +1,3070 @@
+{
+  "name": "projects/cheesefork-de9af/databases/(default)/documents/users/D4bh8oHO0GQI5Gx1iYAbWsouBVx2/semesters/202601",
+  "fields": {
+    "202601_01140052": {
+      "mapValue": {
+        "fields": {
+          "05d405e805e605d005d4": {
+            "integerValue": "10"
+          },
+          "05ea05e805d205d505dc": {
+            "integerValue": "21"
+          }
+        }
+      }
+    },
+    "202601_00340035": {
+      "mapValue": {
+        "fields": {
+          "05d405e805e605d005d4": {
+            "integerValue": "10"
+          },
+          "05ea05e805d205d505dc": {
+            "integerValue": "11"
+          }
+        }
+      }
+    },
+    "202601_metadata_03940805": {
+      "mapValue": {
+        "fields": {
+          "schedule": {
+            "arrayValue": {
+              "values": [
+                {
+                  "mapValue": {
+                    "fields": {
+                      "קבוצה": {
+                        "integerValue": "12"
+                      },
+                      "סוג": {
+                        "stringValue": "יוגה מתקדמים"
+                      },
+                      "יום": {
+                        "stringValue": "ראשון"
+                      },
+                      "שעה": {
+                        "stringValue": "10:30 - 12:00"
+                      },
+                      "בניין": {
+                        "stringValue": ""
+                      },
+                      "חדר": {
+                        "integerValue": "0"
+                      },
+                      "מרצה/מתרגל": {
+                        "stringValue": ""
+                      },
+                      "מס.": {
+                        "integerValue": "12"
+                      }
+                    }
+                  }
+                },
+                {
+                  "mapValue": {
+                    "fields": {
+                      "קבוצה": {
+                        "integerValue": "13"
+                      },
+                      "סוג": {
+                        "stringValue": "יוגה"
+                      },
+                      "יום": {
+                        "stringValue": "רביעי"
+                      },
+                      "שעה": {
+                        "stringValue": "16:30 - 18:00"
+                      },
+                      "בניין": {
+                        "stringValue": ""
+                      },
+                      "חדר": {
+                        "integerValue": "0"
+                      },
+                      "מרצה/מתרגל": {
+                        "stringValue": ""
+                      },
+                      "מס.": {
+                        "integerValue": "13"
+                      }
+                    }
+                  }
+                },
+                {
+                  "mapValue": {
+                    "fields": {
+                      "קבוצה": {
+                        "integerValue": "14"
+                      },
+                      "סוג": {
+                        "stringValue": "יוגה"
+                      },
+                      "יום": {
+                        "stringValue": "שני"
+                      },
+                      "שעה": {
+                        "stringValue": "09:00 - 10:30"
+                      },
+                      "בניין": {
+                        "stringValue": ""
+                      },
+                      "חדר": {
+                        "integerValue": "0"
+                      },
+                      "מרצה/מתרגל": {
+                        "stringValue": ""
+                      },
+                      "מס.": {
+                        "integerValue": "14"
+                      }
+                    }
+                  }
+                },
+                {
+                  "mapValue": {
+                    "fields": {
+                      "קבוצה": {
+                        "integerValue": "15"
+                      },
+                      "סוג": {
+                        "stringValue": "פילאטיס מכשירים רפואה"
+                      },
+                      "יום": {
+                        "stringValue": "ראשון"
+                      },
+                      "שעה": {
+                        "stringValue": "21:00 - 22:30"
+                      },
+                      "בניין": {
+                        "stringValue": ""
+                      },
+                      "חדר": {
+                        "integerValue": "0"
+                      },
+                      "מרצה/מתרגל": {
+                        "stringValue": ""
+                      },
+                      "מס.": {
+                        "integerValue": "15"
+                      }
+                    }
+                  }
+                },
+                {
+                  "mapValue": {
+                    "fields": {
+                      "קבוצה": {
+                        "integerValue": "16"
+                      },
+                      "סוג": {
+                        "stringValue": "ריצת ניווט ספורטיבי"
+                      },
+                      "יום": {
+                        "stringValue": "שישי"
+                      },
+                      "שעה": {
+                        "stringValue": "08:00 - 11:00"
+                      },
+                      "בניין": {
+                        "stringValue": ""
+                      },
+                      "חדר": {
+                        "integerValue": "0"
+                      },
+                      "מרצה/מתרגל": {
+                        "stringValue": ""
+                      },
+                      "מס.": {
+                        "integerValue": "16"
+                      }
+                    }
+                  }
+                },
+                {
+                  "mapValue": {
+                    "fields": {
+                      "קבוצה": {
+                        "integerValue": "17"
+                      },
+                      "סוג": {
+                        "stringValue": "שחמט"
+                      },
+                      "יום": {
+                        "stringValue": "שני"
+                      },
+                      "שעה": {
+                        "stringValue": "17:00 - 18:30"
+                      },
+                      "בניין": {
+                        "stringValue": ""
+                      },
+                      "חדר": {
+                        "integerValue": "0"
+                      },
+                      "מרצה/מתרגל": {
+                        "stringValue": ""
+                      },
+                      "מס.": {
+                        "integerValue": "17"
+                      }
+                    }
+                  }
+                },
+                {
+                  "mapValue": {
+                    "fields": {
+                      "קבוצה": {
+                        "integerValue": "19"
+                      },
+                      "סוג": {
+                        "stringValue": "ריצות ארוכות"
+                      },
+                      "יום": {
+                        "stringValue": "רביעי"
+                      },
+                      "שעה": {
+                        "stringValue": "19:00 - 20:30"
+                      },
+                      "בניין": {
+                        "stringValue": ""
+                      },
+                      "חדר": {
+                        "integerValue": "0"
+                      },
+                      "מרצה/מתרגל": {
+                        "stringValue": ""
+                      },
+                      "מס.": {
+                        "integerValue": "19"
+                      }
+                    }
+                  }
+                },
+                {
+                  "mapValue": {
+                    "fields": {
+                      "קבוצה": {
+                        "integerValue": "20"
+                      },
+                      "סוג": {
+                        "stringValue": "פלדנקרייז"
+                      },
+                      "יום": {
+                        "stringValue": "ראשון"
+                      },
+                      "שעה": {
+                        "stringValue": "10:30 - 12:00"
+                      },
+                      "בניין": {
+                        "stringValue": ""
+                      },
+                      "חדר": {
+                        "integerValue": "0"
+                      },
+                      "מרצה/מתרגל": {
+                        "stringValue": ""
+                      },
+                      "מס.": {
+                        "integerValue": "20"
+                      }
+                    }
+                  }
+                },
+                {
+                  "mapValue": {
+                    "fields": {
+                      "קבוצה": {
+                        "integerValue": "21"
+                      },
+                      "סוג": {
+                        "stringValue": "פלדנקרייז"
+                      },
+                      "יום": {
+                        "stringValue": "ראשון"
+                      },
+                      "שעה": {
+                        "stringValue": "12:00 - 13:30"
+                      },
+                      "בניין": {
+                        "stringValue": ""
+                      },
+                      "חדר": {
+                        "integerValue": "0"
+                      },
+                      "מרצה/מתרגל": {
+                        "stringValue": ""
+                      },
+                      "מס.": {
+                        "integerValue": "21"
+                      }
+                    }
+                  }
+                },
+                {
+                  "mapValue": {
+                    "fields": {
+                      "קבוצה": {
+                        "integerValue": "22"
+                      },
+                      "סוג": {
+                        "stringValue": "ריצת לילה"
+                      },
+                      "יום": {
+                        "stringValue": "שני"
+                      },
+                      "שעה": {
+                        "stringValue": "17:30 - 19:00"
+                      },
+                      "בניין": {
+                        "stringValue": ""
+                      },
+                      "חדר": {
+                        "integerValue": "0"
+                      },
+                      "מרצה/מתרגל": {
+                        "stringValue": ""
+                      },
+                      "מס.": {
+                        "integerValue": "22"
+                      }
+                    }
+                  }
+                },
+                {
+                  "mapValue": {
+                    "fields": {
+                      "קבוצה": {
+                        "integerValue": "23"
+                      },
+                      "סוג": {
+                        "stringValue": "ריצת לילה"
+                      },
+                      "יום": {
+                        "stringValue": "רביעי"
+                      },
+                      "שעה": {
+                        "stringValue": "17:30 - 19:00"
+                      },
+                      "בניין": {
+                        "stringValue": ""
+                      },
+                      "חדר": {
+                        "integerValue": "0"
+                      },
+                      "מרצה/מתרגל": {
+                        "stringValue": ""
+                      },
+                      "מס.": {
+                        "integerValue": "23"
+                      }
+                    }
+                  }
+                },
+                {
+                  "mapValue": {
+                    "fields": {
+                      "קבוצה": {
+                        "integerValue": "24"
+                      },
+                      "סוג": {
+                        "stringValue": "יוגה"
+                      },
+                      "יום": {
+                        "stringValue": "חמישי"
+                      },
+                      "שעה": {
+                        "stringValue": "07:30 - 09:00"
+                      },
+                      "בניין": {
+                        "stringValue": ""
+                      },
+                      "חדר": {
+                        "integerValue": "0"
+                      },
+                      "מרצה/מתרגל": {
+                        "stringValue": ""
+                      },
+                      "מס.": {
+                        "integerValue": "24"
+                      }
+                    }
+                  }
+                },
+                {
+                  "mapValue": {
+                    "fields": {
+                      "קבוצה": {
+                        "integerValue": "25"
+                      },
+                      "סוג": {
+                        "stringValue": "שחמט"
+                      },
+                      "יום": {
+                        "stringValue": "שני"
+                      },
+                      "שעה": {
+                        "stringValue": "18:30 - 20:00"
+                      },
+                      "בניין": {
+                        "stringValue": ""
+                      },
+                      "חדר": {
+                        "integerValue": "0"
+                      },
+                      "מרצה/מתרגל": {
+                        "stringValue": ""
+                      },
+                      "מס.": {
+                        "integerValue": "25"
+                      }
+                    }
+                  }
+                },
+                {
+                  "mapValue": {
+                    "fields": {
+                      "קבוצה": {
+                        "integerValue": "26"
+                      },
+                      "סוג": {
+                        "stringValue": "יוגה"
+                      },
+                      "יום": {
+                        "stringValue": "שני"
+                      },
+                      "שעה": {
+                        "stringValue": "10:30 - 12:00"
+                      },
+                      "בניין": {
+                        "stringValue": ""
+                      },
+                      "חדר": {
+                        "integerValue": "0"
+                      },
+                      "מרצה/מתרגל": {
+                        "stringValue": ""
+                      },
+                      "מס.": {
+                        "integerValue": "26"
+                      }
+                    }
+                  }
+                },
+                {
+                  "mapValue": {
+                    "fields": {
+                      "קבוצה": {
+                        "integerValue": "27"
+                      },
+                      "סוג": {
+                        "stringValue": "יוגה מאזנת"
+                      },
+                      "יום": {
+                        "stringValue": "שני"
+                      },
+                      "שעה": {
+                        "stringValue": "12:15 - 13:45"
+                      },
+                      "בניין": {
+                        "stringValue": ""
+                      },
+                      "חדר": {
+                        "integerValue": "0"
+                      },
+                      "מרצה/מתרגל": {
+                        "stringValue": ""
+                      },
+                      "מס.": {
+                        "integerValue": "27"
+                      }
+                    }
+                  }
+                },
+                {
+                  "mapValue": {
+                    "fields": {
+                      "קבוצה": {
+                        "integerValue": "28"
+                      },
+                      "סוג": {
+                        "stringValue": "פלדנקרייז"
+                      },
+                      "יום": {
+                        "stringValue": "שלישי"
+                      },
+                      "שעה": {
+                        "stringValue": "14:00 - 15:30"
+                      },
+                      "בניין": {
+                        "stringValue": ""
+                      },
+                      "חדר": {
+                        "integerValue": "0"
+                      },
+                      "מרצה/מתרגל": {
+                        "stringValue": ""
+                      },
+                      "מס.": {
+                        "integerValue": "28"
+                      }
+                    }
+                  }
+                },
+                {
+                  "mapValue": {
+                    "fields": {
+                      "קבוצה": {
+                        "integerValue": "29"
+                      },
+                      "סוג": {
+                        "stringValue": "פלדנקרייז"
+                      },
+                      "יום": {
+                        "stringValue": "שלישי"
+                      },
+                      "שעה": {
+                        "stringValue": "15:30 - 17:00"
+                      },
+                      "בניין": {
+                        "stringValue": ""
+                      },
+                      "חדר": {
+                        "integerValue": "0"
+                      },
+                      "מרצה/מתרגל": {
+                        "stringValue": ""
+                      },
+                      "מס.": {
+                        "integerValue": "29"
+                      }
+                    }
+                  }
+                },
+                {
+                  "mapValue": {
+                    "fields": {
+                      "קבוצה": {
+                        "integerValue": "30"
+                      },
+                      "סוג": {
+                        "stringValue": "ריצת לילה רפואה"
+                      },
+                      "יום": {
+                        "stringValue": "ראשון"
+                      },
+                      "שעה": {
+                        "stringValue": "18:00 - 19:30"
+                      },
+                      "בניין": {
+                        "stringValue": ""
+                      },
+                      "חדר": {
+                        "integerValue": "0"
+                      },
+                      "מרצה/מתרגל": {
+                        "stringValue": ""
+                      },
+                      "מס.": {
+                        "integerValue": "30"
+                      }
+                    }
+                  }
+                },
+                {
+                  "mapValue": {
+                    "fields": {
+                      "קבוצה": {
+                        "integerValue": "31"
+                      },
+                      "סוג": {
+                        "stringValue": "ריצת לילה רפואה"
+                      },
+                      "יום": {
+                        "stringValue": "שלישי"
+                      },
+                      "שעה": {
+                        "stringValue": "19:30 - 21:00"
+                      },
+                      "בניין": {
+                        "stringValue": ""
+                      },
+                      "חדר": {
+                        "integerValue": "0"
+                      },
+                      "מרצה/מתרגל": {
+                        "stringValue": ""
+                      },
+                      "מס.": {
+                        "integerValue": "31"
+                      }
+                    }
+                  }
+                },
+                {
+                  "mapValue": {
+                    "fields": {
+                      "קבוצה": {
+                        "integerValue": "32"
+                      },
+                      "סוג": {
+                        "stringValue": "ניווט מתקדמים"
+                      },
+                      "יום": {
+                        "stringValue": "שישי"
+                      },
+                      "שעה": {
+                        "stringValue": "11:00 - 14:00"
+                      },
+                      "בניין": {
+                        "stringValue": ""
+                      },
+                      "חדר": {
+                        "integerValue": "0"
+                      },
+                      "מרצה/מתרגל": {
+                        "stringValue": ""
+                      },
+                      "מס.": {
+                        "integerValue": "32"
+                      }
+                    }
+                  }
+                },
+                {
+                  "mapValue": {
+                    "fields": {
+                      "קבוצה": {
+                        "integerValue": "33"
+                      },
+                      "סוג": {
+                        "stringValue": "טיפוס ספורטיבי"
+                      },
+                      "יום": {
+                        "stringValue": "חמישי"
+                      },
+                      "שעה": {
+                        "stringValue": "10:30 - 12:00"
+                      },
+                      "בניין": {
+                        "stringValue": ""
+                      },
+                      "חדר": {
+                        "integerValue": "0"
+                      },
+                      "מרצה/מתרגל": {
+                        "stringValue": ""
+                      },
+                      "מס.": {
+                        "integerValue": "33"
+                      }
+                    }
+                  }
+                },
+                {
+                  "mapValue": {
+                    "fields": {
+                      "קבוצה": {
+                        "integerValue": "34"
+                      },
+                      "סוג": {
+                        "stringValue": "שחמט"
+                      },
+                      "יום": {
+                        "stringValue": "שני"
+                      },
+                      "שעה": {
+                        "stringValue": "20:00 - 21:30"
+                      },
+                      "בניין": {
+                        "stringValue": ""
+                      },
+                      "חדר": {
+                        "integerValue": "0"
+                      },
+                      "מרצה/מתרגל": {
+                        "stringValue": ""
+                      },
+                      "מס.": {
+                        "integerValue": "34"
+                      }
+                    }
+                  }
+                },
+                {
+                  "mapValue": {
+                    "fields": {
+                      "קבוצה": {
+                        "integerValue": "35"
+                      },
+                      "סוג": {
+                        "stringValue": "טיפוס ספורטיבי"
+                      },
+                      "יום": {
+                        "stringValue": "ראשון"
+                      },
+                      "שעה": {
+                        "stringValue": "10:30 - 12:00"
+                      },
+                      "בניין": {
+                        "stringValue": ""
+                      },
+                      "חדר": {
+                        "integerValue": "0"
+                      },
+                      "מרצה/מתרגל": {
+                        "stringValue": ""
+                      },
+                      "מס.": {
+                        "integerValue": "35"
+                      }
+                    }
+                  }
+                },
+                {
+                  "mapValue": {
+                    "fields": {
+                      "קבוצה": {
+                        "integerValue": "36"
+                      },
+                      "סוג": {
+                        "stringValue": "טיפוס ספורטיבי"
+                      },
+                      "יום": {
+                        "stringValue": "ראשון"
+                      },
+                      "שעה": {
+                        "stringValue": "09:00 - 10:30"
+                      },
+                      "בניין": {
+                        "stringValue": ""
+                      },
+                      "חדר": {
+                        "integerValue": "0"
+                      },
+                      "מרצה/מתרגל": {
+                        "stringValue": ""
+                      },
+                      "מס.": {
+                        "integerValue": "36"
+                      }
+                    }
+                  }
+                },
+                {
+                  "mapValue": {
+                    "fields": {
+                      "קבוצה": {
+                        "integerValue": "37"
+                      },
+                      "סוג": {
+                        "stringValue": " קארטינג גברים"
+                      },
+                      "יום": {
+                        "stringValue": "שישי"
+                      },
+                      "שעה": {
+                        "stringValue": "08:30 - 10:00"
+                      },
+                      "בניין": {
+                        "stringValue": ""
+                      },
+                      "חדר": {
+                        "integerValue": "0"
+                      },
+                      "מרצה/מתרגל": {
+                        "stringValue": ""
+                      },
+                      "מס.": {
+                        "integerValue": "37"
+                      }
+                    }
+                  }
+                },
+                {
+                  "mapValue": {
+                    "fields": {
+                      "קבוצה": {
+                        "integerValue": "38"
+                      },
+                      "סוג": {
+                        "stringValue": "  קארטינג נשים"
+                      },
+                      "יום": {
+                        "stringValue": "שישי"
+                      },
+                      "שעה": {
+                        "stringValue": "10:00 - 11:30"
+                      },
+                      "בניין": {
+                        "stringValue": ""
+                      },
+                      "חדר": {
+                        "integerValue": "0"
+                      },
+                      "מרצה/מתרגל": {
+                        "stringValue": ""
+                      },
+                      "מס.": {
+                        "integerValue": "38"
+                      }
+                    }
+                  }
+                },
+                {
+                  "mapValue": {
+                    "fields": {
+                      "קבוצה": {
+                        "integerValue": "39"
+                      },
+                      "סוג": {
+                        "stringValue": "ביליארד"
+                      },
+                      "יום": {
+                        "stringValue": "ראשון"
+                      },
+                      "שעה": {
+                        "stringValue": "17:00 - 18:30"
+                      },
+                      "בניין": {
+                        "stringValue": ""
+                      },
+                      "חדר": {
+                        "integerValue": "0"
+                      },
+                      "מרצה/מתרגל": {
+                        "stringValue": ""
+                      },
+                      "מס.": {
+                        "integerValue": "39"
+                      }
+                    }
+                  }
+                },
+                {
+                  "mapValue": {
+                    "fields": {
+                      "קבוצה": {
+                        "integerValue": "40"
+                      },
+                      "סוג": {
+                        "stringValue": "ביליארד"
+                      },
+                      "יום": {
+                        "stringValue": "ראשון"
+                      },
+                      "שעה": {
+                        "stringValue": "19:00 - 20:30"
+                      },
+                      "בניין": {
+                        "stringValue": ""
+                      },
+                      "חדר": {
+                        "integerValue": "0"
+                      },
+                      "מרצה/מתרגל": {
+                        "stringValue": ""
+                      },
+                      "מס.": {
+                        "integerValue": "40"
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "general": {
+            "mapValue": {
+              "fields": {
+                "פקולטה": {
+                  "stringValue": "המחלקה ללימודים הומניסטיים ואמנות"
+                },
+                "מסגרת לימודים": {
+                  "stringValue": "לימודי הסמכה"
+                },
+                "מספר מקצוע": {
+                  "stringValue": "03940805"
+                },
+                "מקצועות ללא זיכוי נוסף": {
+                  "stringValue": "03940807"
+                },
+                "הערות": {
+                  "stringValue": ""
+                },
+                "סילבוס": {
+                  "stringValue": "סטודנטים חייבים לצבור במהלך לימודיהם, שתי נקודות מתוך רשימת קורסי חינוך גופני, בהם מלמדים תאוריה ומתרגלים מיומנויות.\nנוכחות חובה בשיעורים. הציון יקבע על סמךמעקב והערכה במשך הסמסטר ו.או מבחני מיומנויות. \nאחריות הרישום והביטול לקורסים  חלה על הסטודנט.ית בלבד.\nלא ניתן להירשם \\ להשתתף ליותר מקורס או נבחרת באותו סמסטר.\n"
+                },
+                "שם מקצוע": {
+                  "stringValue": "חינוך גופני - אתלטיקה קלה"
+                },
+                "אחראים": {
+                  "stringValue": ""
+                },
+                "נקודות": {
+                  "stringValue": "1"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "displayName": {
+      "stringValue": "אדיר משה"
+    },
+    "202601_03940805": {
+      "mapValue": {
+        "fields": {
+          "sport": {
+            "integerValue": "24"
+          }
+        }
+      }
+    },
+    "202601_metadata_00340053": {
+      "mapValue": {
+        "fields": {
+          "general": {
+            "mapValue": {
+              "fields": {
+                "שם מקצוע": {
+                  "stringValue": "מכניקת מוצקים 2מ"
+                },
+                "אחראים": {
+                  "stringValue": ""
+                },
+                "נקודות": {
+                  "stringValue": "5"
+                },
+                "סילבוס": {
+                  "stringValue": "מאמצים, עיבורים, קשרי מאמץ -עיבור (חוק הוק), קריטריוני כניעה וכשל, מבוא לאלסטיות ליניארית (משוואות שיווי משקל, משוואות ההתאמה, פתרונות קלאסיים) , מומנטי אינרציה, מאמצים נורמליים ומאמצי גזירה בכפיפה, דפורמציות אלסטיות בכפיפה, שיטות אנרגיה לחישוב הזזות, קריסת עמודים."
+                },
+                "מקצועות קדם": {
+                  "stringValue": "(01040016 ו-00340028 ו-01040022) או (00340028 ו-01040065 ו-01040043)"
+                },
+                "מועד א": {
+                  "stringValue": "18-02-2027"
+                },
+                "הערות": {
+                  "stringValue": "קבוצה 77 סגור לסיניים בלבד."
+                },
+                "מקצועות ללא זיכוי נוסף": {
+                  "stringValue": "00150008 00340026 00340027 00340029 00840505 03340222"
+                },
+                "מספר מקצוע": {
+                  "stringValue": "00340053"
+                },
+                "פקולטה": {
+                  "stringValue": "הפקולטה להנדסת מכונות"
+                },
+                "מסגרת לימודים": {
+                  "stringValue": "לימודי הסמכה"
+                },
+                "מועד ב": {
+                  "stringValue": "18-03-2027"
+                }
+              }
+            }
+          },
+          "schedule": {
+            "arrayValue": {
+              "values": [
+                {
+                  "mapValue": {
+                    "fields": {
+                      "קבוצה": {
+                        "integerValue": "11"
+                      },
+                      "סוג": {
+                        "stringValue": "תרגול"
+                      },
+                      "יום": {
+                        "stringValue": "שלישי"
+                      },
+                      "שעה": {
+                        "stringValue": "14:30 - 16:30"
+                      },
+                      "בניין": {
+                        "stringValue": ""
+                      },
+                      "חדר": {
+                        "integerValue": "0"
+                      },
+                      "מרצה/מתרגל": {
+                        "stringValue": ""
+                      },
+                      "מס.": {
+                        "integerValue": "11"
+                      }
+                    }
+                  }
+                },
+                {
+                  "mapValue": {
+                    "fields": {
+                      "קבוצה": {
+                        "integerValue": "11"
+                      },
+                      "סוג": {
+                        "stringValue": "הרצאה"
+                      },
+                      "יום": {
+                        "stringValue": "שני"
+                      },
+                      "שעה": {
+                        "stringValue": "10:30 - 14:30"
+                      },
+                      "בניין": {
+                        "stringValue": ""
+                      },
+                      "חדר": {
+                        "integerValue": "0"
+                      },
+                      "מרצה/מתרגל": {
+                        "stringValue": "פרופ' יוסף גבלי"
+                      },
+                      "מס.": {
+                        "integerValue": "10"
+                      }
+                    }
+                  }
+                },
+                {
+                  "mapValue": {
+                    "fields": {
+                      "קבוצה": {
+                        "integerValue": "12"
+                      },
+                      "סוג": {
+                        "stringValue": "תרגול"
+                      },
+                      "יום": {
+                        "stringValue": "חמישי"
+                      },
+                      "שעה": {
+                        "stringValue": "08:30 - 10:30"
+                      },
+                      "בניין": {
+                        "stringValue": ""
+                      },
+                      "חדר": {
+                        "integerValue": "0"
+                      },
+                      "מרצה/מתרגל": {
+                        "stringValue": ""
+                      },
+                      "מס.": {
+                        "integerValue": "12"
+                      }
+                    }
+                  }
+                },
+                {
+                  "mapValue": {
+                    "fields": {
+                      "קבוצה": {
+                        "integerValue": "12"
+                      },
+                      "סוג": {
+                        "stringValue": "הרצאה"
+                      },
+                      "יום": {
+                        "stringValue": "שני"
+                      },
+                      "שעה": {
+                        "stringValue": "10:30 - 14:30"
+                      },
+                      "בניין": {
+                        "stringValue": ""
+                      },
+                      "חדר": {
+                        "integerValue": "0"
+                      },
+                      "מרצה/מתרגל": {
+                        "stringValue": "פרופ' יוסף גבלי"
+                      },
+                      "מס.": {
+                        "integerValue": "10"
+                      }
+                    }
+                  }
+                },
+                {
+                  "mapValue": {
+                    "fields": {
+                      "קבוצה": {
+                        "integerValue": "20"
+                      },
+                      "סוג": {
+                        "stringValue": "תרגול"
+                      },
+                      "יום": {
+                        "stringValue": "שני"
+                      },
+                      "שעה": {
+                        "stringValue": "14:30 - 16:30"
+                      },
+                      "בניין": {
+                        "stringValue": ""
+                      },
+                      "חדר": {
+                        "integerValue": "0"
+                      },
+                      "מרצה/מתרגל": {
+                        "stringValue": ""
+                      },
+                      "מס.": {
+                        "integerValue": "20"
+                      }
+                    }
+                  }
+                },
+                {
+                  "mapValue": {
+                    "fields": {
+                      "קבוצה": {
+                        "integerValue": "20"
+                      },
+                      "סוג": {
+                        "stringValue": "הרצאה"
+                      },
+                      "יום": {
+                        "stringValue": "ראשון"
+                      },
+                      "שעה": {
+                        "stringValue": "14:30 - 18:30"
+                      },
+                      "בניין": {
+                        "stringValue": ""
+                      },
+                      "חדר": {
+                        "integerValue": "0"
+                      },
+                      "מרצה/מתרגל": {
+                        "stringValue": "פרופ' דן מרדכי"
+                      },
+                      "מס.": {
+                        "integerValue": "20"
+                      }
+                    }
+                  }
+                },
+                {
+                  "mapValue": {
+                    "fields": {
+                      "קבוצה": {
+                        "integerValue": "21"
+                      },
+                      "סוג": {
+                        "stringValue": "תרגול"
+                      },
+                      "יום": {
+                        "stringValue": "חמישי"
+                      },
+                      "שעה": {
+                        "stringValue": "12:30 - 14:30"
+                      },
+                      "בניין": {
+                        "stringValue": ""
+                      },
+                      "חדר": {
+                        "integerValue": "0"
+                      },
+                      "מרצה/מתרגל": {
+                        "stringValue": ""
+                      },
+                      "מס.": {
+                        "integerValue": "21"
+                      }
+                    }
+                  }
+                },
+                {
+                  "mapValue": {
+                    "fields": {
+                      "קבוצה": {
+                        "integerValue": "21"
+                      },
+                      "סוג": {
+                        "stringValue": "הרצאה"
+                      },
+                      "יום": {
+                        "stringValue": "ראשון"
+                      },
+                      "שעה": {
+                        "stringValue": "14:30 - 18:30"
+                      },
+                      "בניין": {
+                        "stringValue": ""
+                      },
+                      "חדר": {
+                        "integerValue": "0"
+                      },
+                      "מרצה/מתרגל": {
+                        "stringValue": "פרופ' דן מרדכי"
+                      },
+                      "מס.": {
+                        "integerValue": "20"
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    "202601_01040228": {
+      "mapValue": {
+        "fields": {
+          "05ea05e805d205d505dc": {
+            "integerValue": "22"
+          },
+          "05d405e805e605d005d4": {
+            "integerValue": "20"
+          }
+        }
+      }
+    },
+    "202601_courses": {
+      "arrayValue": {
+        "values": [
+          {
+            "stringValue": "00340053"
+          },
+          {
+            "stringValue": "01140052"
+          },
+          {
+            "stringValue": "00340056"
+          },
+          {
+            "stringValue": "00340035"
+          },
+          {
+            "stringValue": "01040228"
+          },
+          {
+            "stringValue": "03940805"
+          }
+        ]
+      }
+    },
+    "202601_metadata_00340056": {
+      "mapValue": {
+        "fields": {
+          "schedule": {
+            "arrayValue": {
+              "values": [
+                {
+                  "mapValue": {
+                    "fields": {
+                      "קבוצה": {
+                        "integerValue": "11"
+                      },
+                      "סוג": {
+                        "stringValue": "תרגול"
+                      },
+                      "יום": {
+                        "stringValue": "שלישי"
+                      },
+                      "שעה": {
+                        "stringValue": "14:30 - 16:30"
+                      },
+                      "בניין": {
+                        "stringValue": ""
+                      },
+                      "חדר": {
+                        "integerValue": "0"
+                      },
+                      "מרצה/מתרגל": {
+                        "stringValue": ""
+                      },
+                      "מס.": {
+                        "integerValue": "11"
+                      }
+                    }
+                  }
+                },
+                {
+                  "mapValue": {
+                    "fields": {
+                      "קבוצה": {
+                        "integerValue": "11"
+                      },
+                      "סוג": {
+                        "stringValue": "הרצאה"
+                      },
+                      "יום": {
+                        "stringValue": "רביעי"
+                      },
+                      "שעה": {
+                        "stringValue": "14:30 - 17:30"
+                      },
+                      "בניין": {
+                        "stringValue": ""
+                      },
+                      "חדר": {
+                        "integerValue": "0"
+                      },
+                      "מרצה/מתרגל": {
+                        "stringValue": "ד\"ר דניאל הקסנר"
+                      },
+                      "מס.": {
+                        "integerValue": "10"
+                      }
+                    }
+                  }
+                },
+                {
+                  "mapValue": {
+                    "fields": {
+                      "קבוצה": {
+                        "integerValue": "12"
+                      },
+                      "סוג": {
+                        "stringValue": "תרגול"
+                      },
+                      "יום": {
+                        "stringValue": "שני"
+                      },
+                      "שעה": {
+                        "stringValue": "08:30 - 10:30"
+                      },
+                      "בניין": {
+                        "stringValue": ""
+                      },
+                      "חדר": {
+                        "integerValue": "0"
+                      },
+                      "מרצה/מתרגל": {
+                        "stringValue": ""
+                      },
+                      "מס.": {
+                        "integerValue": "12"
+                      }
+                    }
+                  }
+                },
+                {
+                  "mapValue": {
+                    "fields": {
+                      "קבוצה": {
+                        "integerValue": "12"
+                      },
+                      "סוג": {
+                        "stringValue": "הרצאה"
+                      },
+                      "יום": {
+                        "stringValue": "רביעי"
+                      },
+                      "שעה": {
+                        "stringValue": "14:30 - 17:30"
+                      },
+                      "בניין": {
+                        "stringValue": ""
+                      },
+                      "חדר": {
+                        "integerValue": "0"
+                      },
+                      "מרצה/מתרגל": {
+                        "stringValue": "ד\"ר דניאל הקסנר"
+                      },
+                      "מס.": {
+                        "integerValue": "10"
+                      }
+                    }
+                  }
+                },
+                {
+                  "mapValue": {
+                    "fields": {
+                      "קבוצה": {
+                        "integerValue": "13"
+                      },
+                      "סוג": {
+                        "stringValue": "תרגול"
+                      },
+                      "יום": {
+                        "stringValue": "חמישי"
+                      },
+                      "שעה": {
+                        "stringValue": "08:30 - 10:30"
+                      },
+                      "בניין": {
+                        "stringValue": ""
+                      },
+                      "חדר": {
+                        "integerValue": "0"
+                      },
+                      "מרצה/מתרגל": {
+                        "stringValue": ""
+                      },
+                      "מס.": {
+                        "integerValue": "13"
+                      }
+                    }
+                  }
+                },
+                {
+                  "mapValue": {
+                    "fields": {
+                      "קבוצה": {
+                        "integerValue": "13"
+                      },
+                      "סוג": {
+                        "stringValue": "הרצאה"
+                      },
+                      "יום": {
+                        "stringValue": "רביעי"
+                      },
+                      "שעה": {
+                        "stringValue": "14:30 - 17:30"
+                      },
+                      "בניין": {
+                        "stringValue": ""
+                      },
+                      "חדר": {
+                        "integerValue": "0"
+                      },
+                      "מרצה/מתרגל": {
+                        "stringValue": "ד\"ר דניאל הקסנר"
+                      },
+                      "מס.": {
+                        "integerValue": "10"
+                      }
+                    }
+                  }
+                },
+                {
+                  "mapValue": {
+                    "fields": {
+                      "קבוצה": {
+                        "integerValue": "14"
+                      },
+                      "סוג": {
+                        "stringValue": "תרגול"
+                      },
+                      "יום": {
+                        "stringValue": "שני"
+                      },
+                      "שעה": {
+                        "stringValue": "14:30 - 16:30"
+                      },
+                      "בניין": {
+                        "stringValue": ""
+                      },
+                      "חדר": {
+                        "integerValue": "0"
+                      },
+                      "מרצה/מתרגל": {
+                        "stringValue": ""
+                      },
+                      "מס.": {
+                        "integerValue": "14"
+                      }
+                    }
+                  }
+                },
+                {
+                  "mapValue": {
+                    "fields": {
+                      "קבוצה": {
+                        "integerValue": "14"
+                      },
+                      "סוג": {
+                        "stringValue": "הרצאה"
+                      },
+                      "יום": {
+                        "stringValue": "רביעי"
+                      },
+                      "שעה": {
+                        "stringValue": "14:30 - 17:30"
+                      },
+                      "בניין": {
+                        "stringValue": ""
+                      },
+                      "חדר": {
+                        "integerValue": "0"
+                      },
+                      "מרצה/מתרגל": {
+                        "stringValue": "ד\"ר דניאל הקסנר"
+                      },
+                      "מס.": {
+                        "integerValue": "10"
+                      }
+                    }
+                  }
+                },
+                {
+                  "mapValue": {
+                    "fields": {
+                      "קבוצה": {
+                        "integerValue": "15"
+                      },
+                      "סוג": {
+                        "stringValue": "תרגול"
+                      },
+                      "יום": {
+                        "stringValue": "חמישי"
+                      },
+                      "שעה": {
+                        "stringValue": "12:30 - 14:30"
+                      },
+                      "בניין": {
+                        "stringValue": ""
+                      },
+                      "חדר": {
+                        "integerValue": "0"
+                      },
+                      "מרצה/מתרגל": {
+                        "stringValue": ""
+                      },
+                      "מס.": {
+                        "integerValue": "15"
+                      }
+                    }
+                  }
+                },
+                {
+                  "mapValue": {
+                    "fields": {
+                      "קבוצה": {
+                        "integerValue": "15"
+                      },
+                      "סוג": {
+                        "stringValue": "הרצאה"
+                      },
+                      "יום": {
+                        "stringValue": "רביעי"
+                      },
+                      "שעה": {
+                        "stringValue": "14:30 - 17:30"
+                      },
+                      "בניין": {
+                        "stringValue": ""
+                      },
+                      "חדר": {
+                        "integerValue": "0"
+                      },
+                      "מרצה/מתרגל": {
+                        "stringValue": "ד\"ר דניאל הקסנר"
+                      },
+                      "מס.": {
+                        "integerValue": "10"
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "general": {
+            "mapValue": {
+              "fields": {
+                "שם מקצוע": {
+                  "stringValue": "מבוא לחישוב מדעי והנדסי"
+                },
+                "נקודות": {
+                  "stringValue": "4"
+                },
+                "אחראים": {
+                  "stringValue": ""
+                },
+                "מקצועות קדם": {
+                  "stringValue": "(01040131 ו-02340111) או (02340128 ו-01040131) או (01040131 ו-02340112)"
+                },
+                "מועד א": {
+                  "stringValue": "11-02-2027"
+                },
+                "פקולטה": {
+                  "stringValue": "הפקולטה להנדסת מכונות"
+                },
+                "מספר מקצוע": {
+                  "stringValue": "00340056"
+                },
+                "מקצועות ללא זיכוי נוסף": {
+                  "stringValue": "00340033 00540254 00540374 00850135 01040283 01040294 02340125"
+                },
+                "הערות": {
+                  "stringValue": "קבוצה 77 סגור לסיניים בלבד."
+                },
+                "מקצועות ללא זיכוי נוסף (מוכלים)": {
+                  "stringValue": "02380125"
+                },
+                "מועד ב": {
+                  "stringValue": "10-03-2027"
+                },
+                "מסגרת לימודים": {
+                  "stringValue": "לימודי הסמכה"
+                },
+                "סילבוס": {
+                  "stringValue": "1. הקדמה לחישוב מדעי 2. שיטות פתרון למשוואות לינאריות. A. שיטת גאוס B. פירוק UL C. נורמות של מטריצה, מספר התנאי D. שיטות איטרטיביות3. פתרון משוואות לא לינאריות 4. מבוא לאופטימיזציה 5. פירוק RQ ושימושיו, מציאת ערכים עצמיים, ערכים סינגולריים. 6. אינטרפולציה 7. גזירה ואינטגרציה נומרית 8. פתרון של משוואות דיפרנציאליות רגילות : בעיית תנאי התחלה ותנאי שפה."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "202601_00340053": {
+      "mapValue": {
+        "fields": {
+          "05d405e805e605d005d4": {
+            "integerValue": "10"
+          }
+        }
+      }
+    },
+    "202601_metadata_00340035": {
+      "mapValue": {
+        "fields": {
+          "schedule": {
+            "arrayValue": {
+              "values": [
+                {
+                  "mapValue": {
+                    "fields": {
+                      "קבוצה": {
+                        "integerValue": "11"
+                      },
+                      "סוג": {
+                        "stringValue": "תרגול"
+                      },
+                      "יום": {
+                        "stringValue": "שלישי"
+                      },
+                      "שעה": {
+                        "stringValue": "12:30 - 14:30"
+                      },
+                      "בניין": {
+                        "stringValue": "אולמן"
+                      },
+                      "חדר": {
+                        "integerValue": "101"
+                      },
+                      "מרצה/מתרגל": {
+                        "stringValue": "גב' עומר גזית אורלוב"
+                      },
+                      "מס.": {
+                        "integerValue": "11"
+                      }
+                    }
+                  }
+                },
+                {
+                  "mapValue": {
+                    "fields": {
+                      "קבוצה": {
+                        "integerValue": "11"
+                      },
+                      "סוג": {
+                        "stringValue": "הרצאה"
+                      },
+                      "יום": {
+                        "stringValue": "שלישי"
+                      },
+                      "שעה": {
+                        "stringValue": "08:30 - 11:30"
+                      },
+                      "בניין": {
+                        "stringValue": "הנדסה כימית"
+                      },
+                      "חדר": {
+                        "integerValue": "1"
+                      },
+                      "מרצה/מתרגל": {
+                        "stringValue": "פרופ' לאוניד טרטקובסקי"
+                      },
+                      "מס.": {
+                        "integerValue": "10"
+                      }
+                    }
+                  }
+                },
+                {
+                  "mapValue": {
+                    "fields": {
+                      "קבוצה": {
+                        "integerValue": "12"
+                      },
+                      "סוג": {
+                        "stringValue": "תרגול"
+                      },
+                      "יום": {
+                        "stringValue": "רביעי"
+                      },
+                      "שעה": {
+                        "stringValue": "10:30 - 12:30"
+                      },
+                      "בניין": {
+                        "stringValue": "אולמן"
+                      },
+                      "חדר": {
+                        "integerValue": "606"
+                      },
+                      "מרצה/מתרגל": {
+                        "stringValue": "יעקב לנצר"
+                      },
+                      "מס.": {
+                        "integerValue": "12"
+                      }
+                    }
+                  }
+                },
+                {
+                  "mapValue": {
+                    "fields": {
+                      "קבוצה": {
+                        "integerValue": "12"
+                      },
+                      "סוג": {
+                        "stringValue": "הרצאה"
+                      },
+                      "יום": {
+                        "stringValue": "שלישי"
+                      },
+                      "שעה": {
+                        "stringValue": "08:30 - 11:30"
+                      },
+                      "בניין": {
+                        "stringValue": "הנדסה כימית"
+                      },
+                      "חדר": {
+                        "integerValue": "1"
+                      },
+                      "מרצה/מתרגל": {
+                        "stringValue": "פרופ' לאוניד טרטקובסקי"
+                      },
+                      "מס.": {
+                        "integerValue": "10"
+                      }
+                    }
+                  }
+                },
+                {
+                  "mapValue": {
+                    "fields": {
+                      "קבוצה": {
+                        "integerValue": "13"
+                      },
+                      "סוג": {
+                        "stringValue": "תרגול"
+                      },
+                      "יום": {
+                        "stringValue": "שני"
+                      },
+                      "שעה": {
+                        "stringValue": "08:30 - 10:30"
+                      },
+                      "בניין": {
+                        "stringValue": "אולמן"
+                      },
+                      "חדר": {
+                        "integerValue": "203"
+                      },
+                      "מרצה/מתרגל": {
+                        "stringValue": "מר תומר גור אפטר"
+                      },
+                      "מס.": {
+                        "integerValue": "13"
+                      }
+                    }
+                  }
+                },
+                {
+                  "mapValue": {
+                    "fields": {
+                      "קבוצה": {
+                        "integerValue": "13"
+                      },
+                      "סוג": {
+                        "stringValue": "הרצאה"
+                      },
+                      "יום": {
+                        "stringValue": "שלישי"
+                      },
+                      "שעה": {
+                        "stringValue": "08:30 - 11:30"
+                      },
+                      "בניין": {
+                        "stringValue": "הנדסה כימית"
+                      },
+                      "חדר": {
+                        "integerValue": "1"
+                      },
+                      "מרצה/מתרגל": {
+                        "stringValue": "פרופ' לאוניד טרטקובסקי"
+                      },
+                      "מס.": {
+                        "integerValue": "10"
+                      }
+                    }
+                  }
+                },
+                {
+                  "mapValue": {
+                    "fields": {
+                      "קבוצה": {
+                        "integerValue": "14"
+                      },
+                      "סוג": {
+                        "stringValue": "תרגול"
+                      },
+                      "יום": {
+                        "stringValue": "חמישי"
+                      },
+                      "שעה": {
+                        "stringValue": "10:30 - 12:30"
+                      },
+                      "בניין": {
+                        "stringValue": "אולמן"
+                      },
+                      "חדר": {
+                        "integerValue": "502"
+                      },
+                      "מרצה/מתרגל": {
+                        "stringValue": "עידן ויסלר"
+                      },
+                      "מס.": {
+                        "integerValue": "14"
+                      }
+                    }
+                  }
+                },
+                {
+                  "mapValue": {
+                    "fields": {
+                      "קבוצה": {
+                        "integerValue": "14"
+                      },
+                      "סוג": {
+                        "stringValue": "הרצאה"
+                      },
+                      "יום": {
+                        "stringValue": "שלישי"
+                      },
+                      "שעה": {
+                        "stringValue": "08:30 - 11:30"
+                      },
+                      "בניין": {
+                        "stringValue": "הנדסה כימית"
+                      },
+                      "חדר": {
+                        "integerValue": "1"
+                      },
+                      "מרצה/מתרגל": {
+                        "stringValue": "פרופ' לאוניד טרטקובסקי"
+                      },
+                      "מס.": {
+                        "integerValue": "10"
+                      }
+                    }
+                  }
+                },
+                {
+                  "mapValue": {
+                    "fields": {
+                      "קבוצה": {
+                        "integerValue": "15"
+                      },
+                      "סוג": {
+                        "stringValue": "תרגול"
+                      },
+                      "יום": {
+                        "stringValue": "ראשון"
+                      },
+                      "שעה": {
+                        "stringValue": "11:30 - 13:30"
+                      },
+                      "בניין": {
+                        "stringValue": "אולמן"
+                      },
+                      "חדר": {
+                        "integerValue": "201"
+                      },
+                      "מרצה/מתרגל": {
+                        "stringValue": "מר בן בן דוד הולצר"
+                      },
+                      "מס.": {
+                        "integerValue": "15"
+                      }
+                    }
+                  }
+                },
+                {
+                  "mapValue": {
+                    "fields": {
+                      "קבוצה": {
+                        "integerValue": "15"
+                      },
+                      "סוג": {
+                        "stringValue": "הרצאה"
+                      },
+                      "יום": {
+                        "stringValue": "שלישי"
+                      },
+                      "שעה": {
+                        "stringValue": "08:30 - 11:30"
+                      },
+                      "בניין": {
+                        "stringValue": "הנדסה כימית"
+                      },
+                      "חדר": {
+                        "integerValue": "1"
+                      },
+                      "מרצה/מתרגל": {
+                        "stringValue": "פרופ' לאוניד טרטקובסקי"
+                      },
+                      "מס.": {
+                        "integerValue": "10"
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "general": {
+            "mapValue": {
+              "fields": {
+                "בוחן מועד א": {
+                  "stringValue": "16-12-2026"
+                },
+                "סילבוס": {
+                  "stringValue": "מושגי יסוד, מערכת, תכונות, מצב, תהליך, חוק האפס והחוק הראשון. אנרגיה. אנתלפיה. שימושים בחוק הראשון למערכות סגורות ופתוחות. נפח בקרה. חומר טהור: נוזל-אד ומערכות חד-פזיות. גז אידאלי. החוק השני: עקרון קרנו, טמפרטורה תרמודינמית. אנטרופיה. החוק השני לנפח בקרה. מחזורי עבודה: מחזורי אדים וגז. מחזורי קרור. תערובות גזים."
+                },
+                "מועד ב": {
+                  "stringValue": "05-03-2027"
+                },
+                "מספר מקצוע": {
+                  "stringValue": "00340035"
+                },
+                "פקולטה": {
+                  "stringValue": "הפקולטה להנדסת מכונות"
+                },
+                "מועד א": {
+                  "stringValue": "07-02-2027"
+                },
+                "שם מקצוע": {
+                  "stringValue": "תרמודינמיקה 1"
+                },
+                "מקצועות קדם": {
+                  "stringValue": "(01040022 ו-01040018) או (01040043 ו-01040041)"
+                },
+                "אחראים": {
+                  "stringValue": ""
+                },
+                "נקודות": {
+                  "stringValue": "4"
+                },
+                "הערות": {
+                  "stringValue": "קבוצה 77 סגורה לסיניים בלבד."
+                },
+                "מסגרת לימודים": {
+                  "stringValue": "לימודי הסמכה"
+                },
+                "מקצועות ללא זיכוי נוסף": {
+                  "stringValue": "00340012 00840213"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "202601_00340056": {
+      "mapValue": {
+        "fields": {
+          "05d405e805e605d005d4": {
+            "integerValue": "10"
+          },
+          "05ea05e805d205d505dc": {
+            "integerValue": "15"
+          }
+        }
+      }
+    },
+    "202601_metadata_01040228": {
+      "mapValue": {
+        "fields": {
+          "general": {
+            "mapValue": {
+              "fields": {
+                "מקצועות קדם": {
+                  "stringValue": "(01040131 ו-01040004) או (01040004 ו-01040135) או (01040043 ו-01040131) או (01040044 ו-01040131) או (01040285 ו-01040004) או (01040022 ו-01040131) או (01040013 ו-01040135) או (01040013 ו-01040285)"
+                },
+                "מועד א": {
+                  "stringValue": "24-02-2027"
+                },
+                "מספר מקצוע": {
+                  "stringValue": "01040228"
+                },
+                "פקולטה": {
+                  "stringValue": "הפקולטה למתמטיקה"
+                },
+                "שם מקצוע": {
+                  "stringValue": "משוואות דיפרנציאליות חלקיות מ'"
+                },
+                "הערות": {
+                  "stringValue": "קב' 77 עבור סט' סינים"
+                },
+                "מקצועות ללא זיכוי נוסף": {
+                  "stringValue": "01040218"
+                },
+                "מקצועות ללא זיכוי נוסף (מכילים)": {
+                  "stringValue": "01040030 01040220 01040223"
+                },
+                "מועד ב": {
+                  "stringValue": "26-03-2027"
+                },
+                "סילבוס": {
+                  "stringValue": "הערה: דרוש קורס קדם נוסף של תכנות (למשל: 2340128 או 2340112 או 2340127) אפשר גם ללמוד את קורס התכנות במקביל למקצוע זה. דיון כללי על משוואות דיפרנציאליות חלקיות ותנאים מצורפים. התרת משוואות מסדר ראשון, בעיית קושי ועקומים אופייניים. מיון משוואות דיפרנציאליות חלקיות מסדר שני והבאתם לצורה קנונית. בעיה מוצגת היטב. משוואת הגלים החד-ממדית, שיטת ד'למבר. טורי פורייה טריגונומטריים, שיטת הפרדת המשתנים ובעיית שטורם-ליוביל. משוואת החום והגלים בקטע סופי, משוואות לפלס ופואסון. עקרון המקסימום והמינימום ותכונות פונקציות הרמוניות. התמרת פורייה ושימושים למד\"ר ומד\"ח."
+                },
+                "מסגרת לימודים": {
+                  "stringValue": "לימודי הסמכה"
+                },
+                "אחראים": {
+                  "stringValue": ""
+                },
+                "נקודות": {
+                  "stringValue": "3"
+                }
+              }
+            }
+          },
+          "schedule": {
+            "arrayValue": {
+              "values": [
+                {
+                  "mapValue": {
+                    "fields": {
+                      "קבוצה": {
+                        "integerValue": "11"
+                      },
+                      "סוג": {
+                        "stringValue": "הרצאה"
+                      },
+                      "יום": {
+                        "stringValue": "רביעי"
+                      },
+                      "שעה": {
+                        "stringValue": "14:30 - 16:30"
+                      },
+                      "בניין": {
+                        "stringValue": ""
+                      },
+                      "חדר": {
+                        "integerValue": "0"
+                      },
+                      "מרצה/מתרגל": {
+                        "stringValue": ""
+                      },
+                      "מס.": {
+                        "integerValue": "10"
+                      }
+                    }
+                  }
+                },
+                {
+                  "mapValue": {
+                    "fields": {
+                      "קבוצה": {
+                        "integerValue": "11"
+                      },
+                      "סוג": {
+                        "stringValue": "תרגול"
+                      },
+                      "יום": {
+                        "stringValue": "ראשון"
+                      },
+                      "שעה": {
+                        "stringValue": "15:30 - 17:30"
+                      },
+                      "בניין": {
+                        "stringValue": ""
+                      },
+                      "חדר": {
+                        "integerValue": "0"
+                      },
+                      "מרצה/מתרגל": {
+                        "stringValue": ""
+                      },
+                      "מס.": {
+                        "integerValue": "11"
+                      }
+                    }
+                  }
+                },
+                {
+                  "mapValue": {
+                    "fields": {
+                      "קבוצה": {
+                        "integerValue": "12"
+                      },
+                      "סוג": {
+                        "stringValue": "הרצאה"
+                      },
+                      "יום": {
+                        "stringValue": "רביעי"
+                      },
+                      "שעה": {
+                        "stringValue": "14:30 - 16:30"
+                      },
+                      "בניין": {
+                        "stringValue": ""
+                      },
+                      "חדר": {
+                        "integerValue": "0"
+                      },
+                      "מרצה/מתרגל": {
+                        "stringValue": ""
+                      },
+                      "מס.": {
+                        "integerValue": "10"
+                      }
+                    }
+                  }
+                },
+                {
+                  "mapValue": {
+                    "fields": {
+                      "קבוצה": {
+                        "integerValue": "12"
+                      },
+                      "סוג": {
+                        "stringValue": "תרגול"
+                      },
+                      "יום": {
+                        "stringValue": "שני"
+                      },
+                      "שעה": {
+                        "stringValue": "12:30 - 14:30"
+                      },
+                      "בניין": {
+                        "stringValue": ""
+                      },
+                      "חדר": {
+                        "integerValue": "0"
+                      },
+                      "מרצה/מתרגל": {
+                        "stringValue": ""
+                      },
+                      "מס.": {
+                        "integerValue": "12"
+                      }
+                    }
+                  }
+                },
+                {
+                  "mapValue": {
+                    "fields": {
+                      "קבוצה": {
+                        "integerValue": "13"
+                      },
+                      "סוג": {
+                        "stringValue": "הרצאה"
+                      },
+                      "יום": {
+                        "stringValue": "רביעי"
+                      },
+                      "שעה": {
+                        "stringValue": "14:30 - 16:30"
+                      },
+                      "בניין": {
+                        "stringValue": ""
+                      },
+                      "חדר": {
+                        "integerValue": "0"
+                      },
+                      "מרצה/מתרגל": {
+                        "stringValue": ""
+                      },
+                      "מס.": {
+                        "integerValue": "10"
+                      }
+                    }
+                  }
+                },
+                {
+                  "mapValue": {
+                    "fields": {
+                      "קבוצה": {
+                        "integerValue": "13"
+                      },
+                      "סוג": {
+                        "stringValue": "תרגול"
+                      },
+                      "יום": {
+                        "stringValue": "שלישי"
+                      },
+                      "שעה": {
+                        "stringValue": "10:30 - 12:30"
+                      },
+                      "בניין": {
+                        "stringValue": ""
+                      },
+                      "חדר": {
+                        "integerValue": "0"
+                      },
+                      "מרצה/מתרגל": {
+                        "stringValue": ""
+                      },
+                      "מס.": {
+                        "integerValue": "13"
+                      }
+                    }
+                  }
+                },
+                {
+                  "mapValue": {
+                    "fields": {
+                      "קבוצה": {
+                        "integerValue": "21"
+                      },
+                      "סוג": {
+                        "stringValue": "הרצאה"
+                      },
+                      "יום": {
+                        "stringValue": "חמישי"
+                      },
+                      "שעה": {
+                        "stringValue": "10:30 - 12:30"
+                      },
+                      "בניין": {
+                        "stringValue": ""
+                      },
+                      "חדר": {
+                        "integerValue": "0"
+                      },
+                      "מרצה/מתרגל": {
+                        "stringValue": ""
+                      },
+                      "מס.": {
+                        "integerValue": "20"
+                      }
+                    }
+                  }
+                },
+                {
+                  "mapValue": {
+                    "fields": {
+                      "קבוצה": {
+                        "integerValue": "21"
+                      },
+                      "סוג": {
+                        "stringValue": "תרגול"
+                      },
+                      "יום": {
+                        "stringValue": "רביעי"
+                      },
+                      "שעה": {
+                        "stringValue": "10:30 - 12:30"
+                      },
+                      "בניין": {
+                        "stringValue": ""
+                      },
+                      "חדר": {
+                        "integerValue": "0"
+                      },
+                      "מרצה/מתרגל": {
+                        "stringValue": ""
+                      },
+                      "מס.": {
+                        "integerValue": "21"
+                      }
+                    }
+                  }
+                },
+                {
+                  "mapValue": {
+                    "fields": {
+                      "קבוצה": {
+                        "integerValue": "22"
+                      },
+                      "סוג": {
+                        "stringValue": "הרצאה"
+                      },
+                      "יום": {
+                        "stringValue": "חמישי"
+                      },
+                      "שעה": {
+                        "stringValue": "10:30 - 12:30"
+                      },
+                      "בניין": {
+                        "stringValue": ""
+                      },
+                      "חדר": {
+                        "integerValue": "0"
+                      },
+                      "מרצה/מתרגל": {
+                        "stringValue": ""
+                      },
+                      "מס.": {
+                        "integerValue": "20"
+                      }
+                    }
+                  }
+                },
+                {
+                  "mapValue": {
+                    "fields": {
+                      "קבוצה": {
+                        "integerValue": "22"
+                      },
+                      "סוג": {
+                        "stringValue": "תרגול"
+                      },
+                      "יום": {
+                        "stringValue": "ראשון"
+                      },
+                      "שעה": {
+                        "stringValue": "11:30 - 13:30"
+                      },
+                      "בניין": {
+                        "stringValue": ""
+                      },
+                      "חדר": {
+                        "integerValue": "0"
+                      },
+                      "מרצה/מתרגל": {
+                        "stringValue": ""
+                      },
+                      "מס.": {
+                        "integerValue": "22"
+                      }
+                    }
+                  }
+                },
+                {
+                  "mapValue": {
+                    "fields": {
+                      "קבוצה": {
+                        "integerValue": "23"
+                      },
+                      "סוג": {
+                        "stringValue": "הרצאה"
+                      },
+                      "יום": {
+                        "stringValue": "חמישי"
+                      },
+                      "שעה": {
+                        "stringValue": "10:30 - 12:30"
+                      },
+                      "בניין": {
+                        "stringValue": ""
+                      },
+                      "חדר": {
+                        "integerValue": "0"
+                      },
+                      "מרצה/מתרגל": {
+                        "stringValue": ""
+                      },
+                      "מס.": {
+                        "integerValue": "20"
+                      }
+                    }
+                  }
+                },
+                {
+                  "mapValue": {
+                    "fields": {
+                      "קבוצה": {
+                        "integerValue": "23"
+                      },
+                      "סוג": {
+                        "stringValue": "תרגול"
+                      },
+                      "יום": {
+                        "stringValue": "שלישי"
+                      },
+                      "שעה": {
+                        "stringValue": "12:30 - 14:30"
+                      },
+                      "בניין": {
+                        "stringValue": ""
+                      },
+                      "חדר": {
+                        "integerValue": "0"
+                      },
+                      "מרצה/מתרגל": {
+                        "stringValue": ""
+                      },
+                      "מס.": {
+                        "integerValue": "23"
+                      }
+                    }
+                  }
+                },
+                {
+                  "mapValue": {
+                    "fields": {
+                      "קבוצה": {
+                        "integerValue": "31"
+                      },
+                      "סוג": {
+                        "stringValue": "הרצאה"
+                      },
+                      "יום": {
+                        "stringValue": "שני"
+                      },
+                      "שעה": {
+                        "stringValue": "12:30 - 14:30"
+                      },
+                      "בניין": {
+                        "stringValue": ""
+                      },
+                      "חדר": {
+                        "integerValue": "0"
+                      },
+                      "מרצה/מתרגל": {
+                        "stringValue": ""
+                      },
+                      "מס.": {
+                        "integerValue": "30"
+                      }
+                    }
+                  }
+                },
+                {
+                  "mapValue": {
+                    "fields": {
+                      "קבוצה": {
+                        "integerValue": "31"
+                      },
+                      "סוג": {
+                        "stringValue": "תרגול"
+                      },
+                      "יום": {
+                        "stringValue": "שני"
+                      },
+                      "שעה": {
+                        "stringValue": "14:30 - 16:30"
+                      },
+                      "בניין": {
+                        "stringValue": ""
+                      },
+                      "חדר": {
+                        "integerValue": "0"
+                      },
+                      "מרצה/מתרגל": {
+                        "stringValue": ""
+                      },
+                      "מס.": {
+                        "integerValue": "31"
+                      }
+                    }
+                  }
+                },
+                {
+                  "mapValue": {
+                    "fields": {
+                      "קבוצה": {
+                        "integerValue": "32"
+                      },
+                      "סוג": {
+                        "stringValue": "הרצאה"
+                      },
+                      "יום": {
+                        "stringValue": "שני"
+                      },
+                      "שעה": {
+                        "stringValue": "12:30 - 14:30"
+                      },
+                      "בניין": {
+                        "stringValue": ""
+                      },
+                      "חדר": {
+                        "integerValue": "0"
+                      },
+                      "מרצה/מתרגל": {
+                        "stringValue": ""
+                      },
+                      "מס.": {
+                        "integerValue": "30"
+                      }
+                    }
+                  }
+                },
+                {
+                  "mapValue": {
+                    "fields": {
+                      "קבוצה": {
+                        "integerValue": "32"
+                      },
+                      "סוג": {
+                        "stringValue": "תרגול"
+                      },
+                      "יום": {
+                        "stringValue": "חמישי"
+                      },
+                      "שעה": {
+                        "stringValue": "11:30 - 13:30"
+                      },
+                      "בניין": {
+                        "stringValue": ""
+                      },
+                      "חדר": {
+                        "integerValue": "0"
+                      },
+                      "מרצה/מתרגל": {
+                        "stringValue": ""
+                      },
+                      "מס.": {
+                        "integerValue": "32"
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    "202601_metadata_01140052": {
+      "mapValue": {
+        "fields": {
+          "schedule": {
+            "arrayValue": {
+              "values": [
+                {
+                  "mapValue": {
+                    "fields": {
+                      "קבוצה": {
+                        "integerValue": "12"
+                      },
+                      "סוג": {
+                        "stringValue": "תרגול"
+                      },
+                      "יום": {
+                        "stringValue": "שלישי"
+                      },
+                      "שעה": {
+                        "stringValue": "14:30 - 15:30"
+                      },
+                      "בניין": {
+                        "stringValue": ""
+                      },
+                      "חדר": {
+                        "integerValue": "0"
+                      },
+                      "מרצה/מתרגל": {
+                        "stringValue": ""
+                      },
+                      "מס.": {
+                        "integerValue": "12"
+                      }
+                    }
+                  }
+                },
+                {
+                  "mapValue": {
+                    "fields": {
+                      "קבוצה": {
+                        "integerValue": "12"
+                      },
+                      "סוג": {
+                        "stringValue": "הרצאה"
+                      },
+                      "יום": {
+                        "stringValue": "שני"
+                      },
+                      "שעה": {
+                        "stringValue": "08:30 - 10:30"
+                      },
+                      "בניין": {
+                        "stringValue": ""
+                      },
+                      "חדר": {
+                        "integerValue": "0"
+                      },
+                      "מרצה/מתרגל": {
+                        "stringValue": "ד\"ר גדעון אלון"
+                      },
+                      "מס.": {
+                        "integerValue": "10"
+                      }
+                    }
+                  }
+                },
+                {
+                  "mapValue": {
+                    "fields": {
+                      "קבוצה": {
+                        "integerValue": "12"
+                      },
+                      "סוג": {
+                        "stringValue": "הרצאה"
+                      },
+                      "יום": {
+                        "stringValue": "רביעי"
+                      },
+                      "שעה": {
+                        "stringValue": "08:30 - 09:30"
+                      },
+                      "בניין": {
+                        "stringValue": ""
+                      },
+                      "חדר": {
+                        "integerValue": "0"
+                      },
+                      "מרצה/מתרגל": {
+                        "stringValue": "ד\"ר גדעון אלון"
+                      },
+                      "מס.": {
+                        "integerValue": "10"
+                      }
+                    }
+                  }
+                },
+                {
+                  "mapValue": {
+                    "fields": {
+                      "קבוצה": {
+                        "integerValue": "13"
+                      },
+                      "סוג": {
+                        "stringValue": "תרגול"
+                      },
+                      "יום": {
+                        "stringValue": "רביעי"
+                      },
+                      "שעה": {
+                        "stringValue": "09:30 - 10:30"
+                      },
+                      "בניין": {
+                        "stringValue": ""
+                      },
+                      "חדר": {
+                        "integerValue": "0"
+                      },
+                      "מרצה/מתרגל": {
+                        "stringValue": ""
+                      },
+                      "מס.": {
+                        "integerValue": "13"
+                      }
+                    }
+                  }
+                },
+                {
+                  "mapValue": {
+                    "fields": {
+                      "קבוצה": {
+                        "integerValue": "13"
+                      },
+                      "סוג": {
+                        "stringValue": "הרצאה"
+                      },
+                      "יום": {
+                        "stringValue": "שני"
+                      },
+                      "שעה": {
+                        "stringValue": "08:30 - 10:30"
+                      },
+                      "בניין": {
+                        "stringValue": ""
+                      },
+                      "חדר": {
+                        "integerValue": "0"
+                      },
+                      "מרצה/מתרגל": {
+                        "stringValue": "ד\"ר גדעון אלון"
+                      },
+                      "מס.": {
+                        "integerValue": "10"
+                      }
+                    }
+                  }
+                },
+                {
+                  "mapValue": {
+                    "fields": {
+                      "קבוצה": {
+                        "integerValue": "13"
+                      },
+                      "סוג": {
+                        "stringValue": "הרצאה"
+                      },
+                      "יום": {
+                        "stringValue": "רביעי"
+                      },
+                      "שעה": {
+                        "stringValue": "08:30 - 09:30"
+                      },
+                      "בניין": {
+                        "stringValue": ""
+                      },
+                      "חדר": {
+                        "integerValue": "0"
+                      },
+                      "מרצה/מתרגל": {
+                        "stringValue": "ד\"ר גדעון אלון"
+                      },
+                      "מס.": {
+                        "integerValue": "10"
+                      }
+                    }
+                  }
+                },
+                {
+                  "mapValue": {
+                    "fields": {
+                      "קבוצה": {
+                        "integerValue": "15"
+                      },
+                      "סוג": {
+                        "stringValue": "הרצאה"
+                      },
+                      "יום": {
+                        "stringValue": "שני"
+                      },
+                      "שעה": {
+                        "stringValue": "08:30 - 10:30"
+                      },
+                      "בניין": {
+                        "stringValue": ""
+                      },
+                      "חדר": {
+                        "integerValue": "0"
+                      },
+                      "מרצה/מתרגל": {
+                        "stringValue": "ד\"ר גדעון אלון"
+                      },
+                      "מס.": {
+                        "integerValue": "10"
+                      }
+                    }
+                  }
+                },
+                {
+                  "mapValue": {
+                    "fields": {
+                      "קבוצה": {
+                        "integerValue": "15"
+                      },
+                      "סוג": {
+                        "stringValue": "הרצאה"
+                      },
+                      "יום": {
+                        "stringValue": "רביעי"
+                      },
+                      "שעה": {
+                        "stringValue": "08:30 - 09:30"
+                      },
+                      "בניין": {
+                        "stringValue": ""
+                      },
+                      "חדר": {
+                        "integerValue": "0"
+                      },
+                      "מרצה/מתרגל": {
+                        "stringValue": "ד\"ר גדעון אלון"
+                      },
+                      "מס.": {
+                        "integerValue": "10"
+                      }
+                    }
+                  }
+                },
+                {
+                  "mapValue": {
+                    "fields": {
+                      "קבוצה": {
+                        "integerValue": "21"
+                      },
+                      "סוג": {
+                        "stringValue": "הרצאה"
+                      },
+                      "יום": {
+                        "stringValue": "שלישי"
+                      },
+                      "שעה": {
+                        "stringValue": "12:30 - 14:30"
+                      },
+                      "בניין": {
+                        "stringValue": ""
+                      },
+                      "חדר": {
+                        "integerValue": "0"
+                      },
+                      "מרצה/מתרגל": {
+                        "stringValue": "ד\"ר הדיל ח'מיס"
+                      },
+                      "מס.": {
+                        "integerValue": "20"
+                      }
+                    }
+                  }
+                },
+                {
+                  "mapValue": {
+                    "fields": {
+                      "קבוצה": {
+                        "integerValue": "21"
+                      },
+                      "סוג": {
+                        "stringValue": "הרצאה"
+                      },
+                      "יום": {
+                        "stringValue": "חמישי"
+                      },
+                      "שעה": {
+                        "stringValue": "09:30 - 10:30"
+                      },
+                      "בניין": {
+                        "stringValue": ""
+                      },
+                      "חדר": {
+                        "integerValue": "0"
+                      },
+                      "מרצה/מתרגל": {
+                        "stringValue": "ד\"ר הדיל ח'מיס"
+                      },
+                      "מס.": {
+                        "integerValue": "20"
+                      }
+                    }
+                  }
+                },
+                {
+                  "mapValue": {
+                    "fields": {
+                      "קבוצה": {
+                        "integerValue": "23"
+                      },
+                      "סוג": {
+                        "stringValue": "תרגול"
+                      },
+                      "יום": {
+                        "stringValue": "חמישי"
+                      },
+                      "שעה": {
+                        "stringValue": "10:30 - 11:30"
+                      },
+                      "בניין": {
+                        "stringValue": ""
+                      },
+                      "חדר": {
+                        "integerValue": "0"
+                      },
+                      "מרצה/מתרגל": {
+                        "stringValue": ""
+                      },
+                      "מס.": {
+                        "integerValue": "23"
+                      }
+                    }
+                  }
+                },
+                {
+                  "mapValue": {
+                    "fields": {
+                      "קבוצה": {
+                        "integerValue": "23"
+                      },
+                      "סוג": {
+                        "stringValue": "הרצאה"
+                      },
+                      "יום": {
+                        "stringValue": "שלישי"
+                      },
+                      "שעה": {
+                        "stringValue": "12:30 - 14:30"
+                      },
+                      "בניין": {
+                        "stringValue": ""
+                      },
+                      "חדר": {
+                        "integerValue": "0"
+                      },
+                      "מרצה/מתרגל": {
+                        "stringValue": "ד\"ר הדיל ח'מיס"
+                      },
+                      "מס.": {
+                        "integerValue": "20"
+                      }
+                    }
+                  }
+                },
+                {
+                  "mapValue": {
+                    "fields": {
+                      "קבוצה": {
+                        "integerValue": "23"
+                      },
+                      "סוג": {
+                        "stringValue": "הרצאה"
+                      },
+                      "יום": {
+                        "stringValue": "חמישי"
+                      },
+                      "שעה": {
+                        "stringValue": "09:30 - 10:30"
+                      },
+                      "בניין": {
+                        "stringValue": ""
+                      },
+                      "חדר": {
+                        "integerValue": "0"
+                      },
+                      "מרצה/מתרגל": {
+                        "stringValue": "ד\"ר הדיל ח'מיס"
+                      },
+                      "מס.": {
+                        "integerValue": "20"
+                      }
+                    }
+                  }
+                },
+                {
+                  "mapValue": {
+                    "fields": {
+                      "קבוצה": {
+                        "integerValue": "24"
+                      },
+                      "סוג": {
+                        "stringValue": "תרגול"
+                      },
+                      "יום": {
+                        "stringValue": "חמישי"
+                      },
+                      "שעה": {
+                        "stringValue": "10:30 - 11:30"
+                      },
+                      "בניין": {
+                        "stringValue": ""
+                      },
+                      "חדר": {
+                        "integerValue": "0"
+                      },
+                      "מרצה/מתרגל": {
+                        "stringValue": ""
+                      },
+                      "מס.": {
+                        "integerValue": "24"
+                      }
+                    }
+                  }
+                },
+                {
+                  "mapValue": {
+                    "fields": {
+                      "קבוצה": {
+                        "integerValue": "24"
+                      },
+                      "סוג": {
+                        "stringValue": "הרצאה"
+                      },
+                      "יום": {
+                        "stringValue": "שלישי"
+                      },
+                      "שעה": {
+                        "stringValue": "12:30 - 14:30"
+                      },
+                      "בניין": {
+                        "stringValue": ""
+                      },
+                      "חדר": {
+                        "integerValue": "0"
+                      },
+                      "מרצה/מתרגל": {
+                        "stringValue": "ד\"ר הדיל ח'מיס"
+                      },
+                      "מס.": {
+                        "integerValue": "20"
+                      }
+                    }
+                  }
+                },
+                {
+                  "mapValue": {
+                    "fields": {
+                      "קבוצה": {
+                        "integerValue": "24"
+                      },
+                      "סוג": {
+                        "stringValue": "הרצאה"
+                      },
+                      "יום": {
+                        "stringValue": "חמישי"
+                      },
+                      "שעה": {
+                        "stringValue": "09:30 - 10:30"
+                      },
+                      "בניין": {
+                        "stringValue": ""
+                      },
+                      "חדר": {
+                        "integerValue": "0"
+                      },
+                      "מרצה/מתרגל": {
+                        "stringValue": "ד\"ר הדיל ח'מיס"
+                      },
+                      "מס.": {
+                        "integerValue": "20"
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "general": {
+            "mapValue": {
+              "fields": {
+                "נקודות": {
+                  "stringValue": "3.5"
+                },
+                "מקצועות קדם": {
+                  "stringValue": "(01140051 ו-01130014) או (01130014 ו-01140071) או (01140077 ו-01130014)"
+                },
+                "אחראים": {
+                  "stringValue": ""
+                },
+                "מקצועות ללא זיכוי נוסף": {
+                  "stringValue": "01140078 01140249 01150249"
+                },
+                "שם מקצוע": {
+                  "stringValue": "פיסיקה 2"
+                },
+                "הערות": {
+                  "stringValue": "קבוצה 77 סגורה לסיניים בלבד."
+                },
+                "מקצועות ללא זיכוי נוסף (מכילים)": {
+                  "stringValue": "01140072 01140075 01140076"
+                },
+                "מספר מקצוע": {
+                  "stringValue": "01140052"
+                },
+                "מסגרת לימודים": {
+                  "stringValue": "לימודי הסמכה"
+                },
+                "מועד א": {
+                  "stringValue": "01-02-2027"
+                },
+                "סילבוס": {
+                  "stringValue": "***מקצועות קדם: בחינת סווג בפיסיקה חלק ב' - חשמל או פטור ממנה.*** חשמל ומגנטיות: אלקטרוסטטיקה, שדה חשמלי, חוק גאוס, פוטנציאל, קבליםוחומרים דיאלקטריים. חוק אום, מעגלי RC, שדה מגנטי, חוק אמפר, חוק פרדי, השראות, תכונות מגנטיות של חומר, משוואות מקסוול. גלים: גלים מכניים, שרשרת אוסצילטורים, גלי רוחב במיתר, גלים אקוסטיים בנוזל או בגז, תנאי שפה, גלים עומדים: ספקטרום תדרים. גלים מתקדמים: מהירות פאזהומהירות חבורה, שבירה והחזרה, החזרה מלאה. עקרון הויגנס: עקיפה והתאבכות, פיזור בראג. גלים אלקטרומגנטיים בריק, קיטוב."
+                },
+                "מקצועות ללא זיכוי נוסף (מוכלים)": {
+                  "stringValue": "01140002 01140004 01140014 01140064"
+                },
+                "מועד ב": {
+                  "stringValue": "02-03-2027"
+                },
+                "פקולטה": {
+                  "stringValue": "הפקולטה לפיזיקה"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "createTime": "2026-07-12T13:56:52.606092Z",
+  "updateTime": "2026-11-03T16:11:30.848704Z"
+}
