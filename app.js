@@ -12278,6 +12278,37 @@ const MOODLE26_COURSE_MAP = {
     '3940805': 1212
 };
 
+function resolveDirectMoodleTaskUrl(courseCode, task) {
+    if (!task) return '';
+    const cleanCode = (courseCode || '').toString().replace(/^0+/, '');
+    
+    // 1. Direct explicit activity URLs (scorm, assign, quiz)
+    if (task.moodleUrl && !task.moodleUrl.includes('/calendar/')) {
+        return task.moodleUrl;
+    }
+
+    const title = (task.title || '').toLowerCase();
+
+    // 2. Exact known assignment activities
+    if (cleanCode === '104228' || cleanCode === '01040228') {
+        if (title.includes('אלקטרוני 1') || title.includes('סיווג מד״ח') || title.includes('סיווג מדח') || title.includes('h1')) {
+            return 'https://moodle26.technion.ac.il/mod/scorm/view.php?id=95378';
+        }
+    }
+
+    // 3. Fallback to direct Course View in Moodle 26 (NEVER calendar!)
+    const moodleCourseId = (typeof MOODLE26_COURSE_MAP !== 'undefined') 
+        ? (MOODLE26_COURSE_MAP[courseCode] || MOODLE26_COURSE_MAP[cleanCode])
+        : null;
+    if (moodleCourseId) {
+        return `https://moodle26.technion.ac.il/course/view.php?id=${moodleCourseId}`;
+    }
+
+    // 4. Search fallback
+    return `https://moodle26.technion.ac.il/course/search.php?search=${encodeURIComponent(cleanCode || courseCode)}`;
+}
+if (typeof window !== 'undefined') window.resolveDirectMoodleTaskUrl = resolveDirectMoodleTaskUrl;
+
 const FACULTY_DRIVE_WEB_URL = 'https://technionmail-my.sharepoint.com/personal/mech_info_asat_technion_ac_il/_layouts/15/onedrive.aspx';
 const FACULTY_DRIVE_LOCAL_PATH = 'C:\\Users\\user\\OneDrive - Technion\\Mechanichal Info TSA\'s files - Mechanical Engineering Drive';
 if (typeof window !== 'undefined') {
@@ -15974,6 +16005,8 @@ window.switchTab = function(tabNameOrNumber) {
     
     setupNotionFilterPopover();
     setupNotionTypeFilterPopover();
+    setupNotionSemesterFilterPopover();
+    setupNotionCourseFilterPopover();
     setupNotionFocusToggle();
     setupFlowchartViewMode();
 
@@ -16312,22 +16345,47 @@ window.switchTab = function(tabNameOrNumber) {
 // Fill Course filter dropdown with currently active courses
 function populateNotionCourseFilter() {
     const select = document.getElementById("filter-course");
-    if (!select) return;
-    
-    const currentVal = select.value || "all";
-    select.innerHTML = '<option value="all">הכל (כל הקורסים)</option>';
+    if (select) {
+        const currentVal = select.value || "all";
+        select.innerHTML = '<option value="all">הכל (כל הקורסים)</option>';
+        Object.values(gameState.courses).forEach(course => {
+            if (course.status === 'active') {
+                const opt = document.createElement("option");
+                opt.value = course.code;
+                const shortName = (typeof COURSE_SHORT_NAMES !== 'undefined' && COURSE_SHORT_NAMES[course.code]) || course.name;
+                opt.innerText = `${shortName} - ${course.name} (${course.code.toUpperCase()})`;
+                select.appendChild(opt);
+            }
+        });
+        select.value = currentVal;
+    }
 
-    Object.values(gameState.courses).forEach(course => {
-        if (course.status === 'active') {
-            const opt = document.createElement("option");
-            opt.value = course.code;
-            const shortName = COURSE_SHORT_NAMES[course.code] || course.name;
-            opt.innerText = `${shortName} - ${course.name} (${course.code.toUpperCase()})`;
-            select.appendChild(opt);
-        }
-    });
-
-    select.value = currentVal;
+    const courseFilterBody = document.getElementById("notion-course-filter-body");
+    if (courseFilterBody) {
+        courseFilterBody.innerHTML = '';
+        const activeCourses = Object.values(gameState.courses).filter(c => c.status === 'active');
+        activeCourses.forEach(course => {
+            const shortName = (typeof COURSE_SHORT_NAMES !== 'undefined' && COURSE_SHORT_NAMES[course.code]) || course.name;
+            const row = document.createElement("div");
+            row.className = "notion-filter-item-row flat";
+            row.innerHTML = `
+                <label for="filter-course-${course.code}" style="cursor: pointer; display: flex; align-items: center; gap: 8px; flex: 1; font-size: 0.8rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                    <span class="course-color-dot" style="width: 8px; height: 8px; border-radius: 50%; background: ${course.color || '#38bdf8'}; display: inline-block; flex-shrink: 0;"></span>
+                    <span title="${course.name} (${course.code})">${shortName} (${course.code})</span>
+                </label>
+                <input type="checkbox" id="filter-course-${course.code}" class="notion-filter-cb notion-course-opt-cb" data-course-code="${course.code}" checked>
+            `;
+            courseFilterBody.appendChild(row);
+        });
+        
+        courseFilterBody.querySelectorAll(".notion-course-opt-cb").forEach(cb => {
+            cb.addEventListener("change", () => {
+                updateCourseFilterSummary();
+                renderNotionTasksTable();
+            });
+        });
+        updateCourseFilterSummary();
+    }
 }
 
 // Compute days remaining and return a styled info object
@@ -16946,6 +17004,8 @@ function renderNotionTasksTable() {
     const semesterFilter = (semesterFilterEl && semesterFilterEl.value) ? semesterFilterEl.value : "active";
     const activeStatusFilters = (typeof getActiveStatusFilters === 'function') ? getActiveStatusFilters() : [];
     const activeTypeFilters = (typeof getActiveTypeFilters === 'function') ? getActiveTypeFilters() : ['hw', 'project', 'exam'];
+    const activeSemesterFilters = (typeof getActiveSemesterFilters === 'function') ? getActiveSemesterFilters() : null;
+    const activeCourseFilters = (typeof getActiveCourseFilters === 'function') ? getActiveCourseFilters() : null;
     const searchInput = document.getElementById("search-tasks");
     const searchQuery = (searchInput && searchInput.value) ? String(searchInput.value).trim().toLowerCase() : "";
     
@@ -16954,11 +17014,18 @@ function renderNotionTasksTable() {
     // Gather tasks and pre-compute timestamp for high-performance sorting
     const curActiveSem = (gameState && gameState.currentActiveSemester) ? gameState.currentActiveSemester : 3;
     Object.values(gameState.courses).forEach(course => {
-        if (courseFilter !== 'all' && course.code !== courseFilter) return;
+        // Course Multi-select Filter
+        if (activeCourseFilters && activeCourseFilters.size > 0) {
+            if (!activeCourseFilters.has(course.code)) return;
+        } else if (courseFilter !== 'all' && course.code !== courseFilter) {
+            return;
+        }
         
-        // Semester Filter
+        // Semester Multi-select Filter
         const cSem = course.semester || 1;
-        if (semesterFilter === 'active') {
+        if (activeSemesterFilters) {
+            if (!activeSemesterFilters.has(cSem)) return;
+        } else if (semesterFilter === 'active') {
             if (cSem < curActiveSem && course.status === 'mastered') {
                 return; // Hide past completed semesters by default
             }
@@ -17106,16 +17173,9 @@ function renderNotionTasksTable() {
         else if (t.status === 'not_started' || !t.status) displayLabel = 'not started';
         else displayLabel = (typeof STATUS_LABELS !== 'undefined' && STATUS_LABELS[t.status]) || t.status || 'not started';
         
-        let moodleUrl = t.moodleUrl || '';
-        if (!moodleUrl && (t.moodleEventId || t.source === 'moodle')) {
-            const evId = t.moodleEventId || (t.id && t.id.startsWith('task_moodle_') ? t.id.split('_')[2] : '');
-            if (evId && /^\d+$/.test(evId)) {
-                const baseHost = (gameState.moodleCalendarUrl && gameState.moodleCalendarUrl.includes('moodle25')) ? 'https://moodle25.technion.ac.il' : 'https://moodle26.technion.ac.il';
-                moodleUrl = `${baseHost}/calendar/event.php?id=${evId}`;
-            }
-        }
+        const moodleUrl = resolveDirectMoodleTaskUrl(c.code, t);
         const moodleLinkHtml = moodleUrl ? `
-            <a href="${moodleUrl}" target="_blank" rel="noopener noreferrer" class="notion-moodle-link-btn" title="מעבר לכרטיס המטלה או דף הפעילות במודל" onclick="event.stopPropagation();">
+            <a href="${moodleUrl}" target="_blank" rel="noopener noreferrer" class="notion-moodle-link-btn" title="מעבר ישיר לדף המטלה או דף הקורס במודל (ללא לוח שנה)" onclick="event.stopPropagation();">
                 <span>🎓 הגשה במודל ↗</span>
             </a>
         ` : '';
@@ -17123,7 +17183,8 @@ function renderNotionTasksTable() {
         const pangeaUrl = getPangeaTaskUrl(c.code, t);
         const pangeaLinkHtml = pangeaUrl ? `
             <a href="${pangeaUrl}" target="_blank" rel="noopener noreferrer" class="notion-pangea-link-btn" title="מעבר ישיר לסיכומי הקורס, דפי נוסחאות וחומרי לימוד בפנגייה (Ido Fang Bentov)" onclick="event.stopPropagation();">
-                <span>🌍 פנגיאה ↗</span>
+                <img src="pangea_icon.png" alt="Pangea" class="pangea-btn-icon" style="width: 14px; height: 14px; object-fit: contain; vertical-align: -2px; border-radius: 2px;">
+                <span>פנגייה ↗</span>
             </a>
         ` : '';
 
@@ -17312,9 +17373,11 @@ function showTaskCompletionVerificationModal(courseCode, task, newStatus) {
         ? `המשימה "${task.title}" מוגדרת כמשימת מילואים ואינה מסומנת כהוגשה במודל.`
         : `המשימה "${task.title}" אינה מסומנת כהוגשה או בעלת ציון במודל.`;
 
+    const directMoodleUrl = resolveDirectMoodleTaskUrl(courseCode, task);
+
     const overlay = document.createElement('div');
     overlay.className = 'notion-confirm-modal-overlay';
-    overlay.style.cssText = 'position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); z-index: 100000; display: flex; align-items: center; justify-content: center; padding: 20px;';
+    overlay.style.cssText = 'position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); z-index: 200050; display: flex; align-items: center; justify-content: center; padding: 20px;';
     
     overlay.innerHTML = `
         <div class="notion-confirm-modal-card" style="background: #1e293b; border: 1px solid rgba(56,189,248,0.3); border-radius: 12px; padding: 24px; max-width: 480px; width: 100%; box-shadow: 0 10px 30px rgba(0,0,0,0.5); direction: rtl; color: #f8fafc; font-family: inherit;">
@@ -17326,9 +17389,14 @@ function showTaskCompletionVerificationModal(courseCode, task, newStatus) {
                 ${reasonText}
             </p>
             <p style="font-size: 0.88rem; line-height: 1.5; color: #94a3b8; margin-bottom: 20px;">
-                האם באמת סיימת והגשת את המשימה, או שברצונך <strong>להסיר אותה לצמיתות</strong> כי היא אינה רלוונטית עבורך (למשל כי אינך במילואים)?
+                האם באמת סיימת והגשת את המשימה, או שברצונך <strong>להסיר אותה לצמיתות</strong> כי היא אינה רלוונטית עבורך?
             </p>
             <div style="display: flex; flex-direction: column; gap: 10px;">
+                ${directMoodleUrl ? `
+                <a href="${directMoodleUrl}" target="_blank" rel="noopener noreferrer" id="btn-check-task-moodle" style="background: rgba(56, 189, 248, 0.14); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.45); padding: 10px 14px; border-radius: 8px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 0.88rem; text-decoration: none; transition: all 0.15s ease;">
+                    <span>🎓</span> <span>פתח מטלה במודל לבדיקת הגשה ↗</span>
+                </a>
+                ` : ''}
                 <button type="button" id="btn-confirm-task-done" style="background: linear-gradient(135deg, #0284c7, #2563eb); color: white; border: none; padding: 10px 14px; border-radius: 8px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 0.88rem;">
                     <span>✅</span> <span>סיימתי והגשתי במודל</span>
                 </button>
@@ -17510,14 +17578,7 @@ function openTaskSidePeek(courseCode, taskId) {
     
     const moodleRow = document.getElementById("peek-property-moodle-row");
     const moodleLink = document.getElementById("peek-property-moodle-link");
-    let resolvedMoodleUrl = task.moodleUrl || '';
-    if (!resolvedMoodleUrl && (task.moodleEventId || task.source === 'moodle')) {
-        const evId = task.moodleEventId || (task.id && task.id.startsWith('task_moodle_') ? task.id.split('_')[2] : '');
-        if (evId && /^\d+$/.test(evId)) {
-            const baseHost = (gameState.moodleCalendarUrl && gameState.moodleCalendarUrl.includes('moodle25')) ? 'https://moodle25.technion.ac.il' : 'https://moodle26.technion.ac.il';
-            resolvedMoodleUrl = `${baseHost}/calendar/event.php?id=${evId}`;
-        }
-    }
+    let resolvedMoodleUrl = resolveDirectMoodleTaskUrl(course.code, task);
     if (moodleRow && moodleLink) {
         if (resolvedMoodleUrl) {
             moodleRow.style.display = "grid";
@@ -18474,6 +18535,165 @@ function updateFilterSummary() {
 }
 
 // Setup Notion Type Filter Popover listeners
+// ==========================================
+// Notion Multi-Select Semester Filter Popover
+// ==========================================
+function setupNotionSemesterFilterPopover() {
+    const btn = document.getElementById("notion-semester-filter-btn");
+    const popover = document.getElementById("notion-semester-filter-popover");
+    const selectAllBtn = document.getElementById("notion-semester-select-all");
+    
+    if (!btn || !popover) return;
+    
+    btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        popover.classList.toggle("show");
+        btn.classList.toggle("active", popover.classList.contains("show"));
+    });
+    
+    document.addEventListener("mousedown", (e) => {
+        if (!popover.contains(e.target) && !btn.contains(e.target)) {
+            popover.classList.remove("show");
+            btn.classList.remove("active");
+        }
+    });
+    
+    const semCheckboxes = popover.querySelectorAll(".notion-sem-opt-cb");
+    semCheckboxes.forEach(cb => {
+        cb.addEventListener("change", () => {
+            updateSemesterFilterSummary();
+            renderNotionTasksTable();
+        });
+    });
+    
+    if (selectAllBtn) {
+        selectAllBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            const allChecked = Array.from(semCheckboxes).every(cb => cb.checked);
+            semCheckboxes.forEach(cb => cb.checked = !allChecked);
+            selectAllBtn.innerText = allChecked ? "בחר הכל" : "בטל הכל";
+            updateSemesterFilterSummary();
+            renderNotionTasksTable();
+        });
+    }
+}
+
+function getActiveSemesterFilters() {
+    const popover = document.getElementById("notion-semester-filter-popover");
+    if (!popover) return null;
+    const checkedOpts = popover.querySelectorAll(".notion-sem-opt-cb:checked");
+    if (checkedOpts.length === 0) return new Set();
+    const sems = new Set();
+    checkedOpts.forEach(cb => {
+        const val = parseInt(cb.getAttribute("data-sem"), 10);
+        if (!isNaN(val)) sems.add(val);
+    });
+    return sems;
+}
+
+function updateSemesterFilterSummary() {
+    const summary = document.getElementById("notion-semester-filter-summary");
+    const popover = document.getElementById("notion-semester-filter-popover");
+    const hiddenSelect = document.getElementById("filter-semester");
+    if (!summary || !popover) return;
+    
+    const checkboxes = popover.querySelectorAll(".notion-sem-opt-cb");
+    const checked = popover.querySelectorAll(".notion-sem-opt-cb:checked");
+    
+    const semHebrewMap = { 1: 'א׳', 2: 'ב׳', 3: 'ג׳', 4: 'ד׳', 5: 'ה׳', 6: 'ו׳' };
+    
+    if (checked.length === checkboxes.length) {
+        summary.innerText = "כל הסמסטרים";
+        if (hiddenSelect) hiddenSelect.value = "all";
+    } else if (checked.length === 0) {
+        summary.innerText = "ללא סמסטר (0)";
+        if (hiddenSelect) hiddenSelect.value = "none";
+    } else if (checked.length === 1) {
+        const sem = checked[0].getAttribute("data-sem");
+        summary.innerText = `סמסטר ${semHebrewMap[sem] || sem}${sem === '3' ? ' (נוכחי)' : ''}`;
+        if (hiddenSelect) hiddenSelect.value = sem;
+    } else {
+        const names = Array.from(checked).map(cb => semHebrewMap[cb.getAttribute("data-sem")] || cb.getAttribute("data-sem"));
+        summary.innerText = `סמסטר ` + names.join(', ');
+        if (hiddenSelect) hiddenSelect.value = checked[0].getAttribute("data-sem");
+    }
+}
+
+// ==========================================
+// Notion Multi-Select Course Filter Popover
+// ==========================================
+function setupNotionCourseFilterPopover() {
+    const btn = document.getElementById("notion-course-filter-btn");
+    const popover = document.getElementById("notion-course-filter-popover");
+    const selectAllBtn = document.getElementById("notion-course-select-all");
+    
+    if (!btn || !popover) return;
+    
+    btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        popover.classList.toggle("show");
+        btn.classList.toggle("active", popover.classList.contains("show"));
+    });
+    
+    document.addEventListener("mousedown", (e) => {
+        if (!popover.contains(e.target) && !btn.contains(e.target)) {
+            popover.classList.remove("show");
+            btn.classList.remove("active");
+        }
+    });
+    
+    if (selectAllBtn) {
+        selectAllBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            const courseCbs = popover.querySelectorAll(".notion-course-opt-cb");
+            const allChecked = Array.from(courseCbs).every(cb => cb.checked);
+            courseCbs.forEach(cb => cb.checked = !allChecked);
+            selectAllBtn.innerText = allChecked ? "בחר הכל" : "בטל הכל";
+            updateCourseFilterSummary();
+            renderNotionTasksTable();
+        });
+    }
+}
+
+function getActiveCourseFilters() {
+    const popover = document.getElementById("notion-course-filter-popover");
+    if (!popover) return null;
+    const all = popover.querySelectorAll(".notion-course-opt-cb");
+    const checked = popover.querySelectorAll(".notion-course-opt-cb:checked");
+    if (all.length === 0 || checked.length === all.length) return null; // null means all allowed
+    const courses = new Set();
+    checked.forEach(cb => courses.add(cb.getAttribute("data-course-code")));
+    return courses;
+}
+
+function updateCourseFilterSummary() {
+    const summary = document.getElementById("notion-course-filter-summary");
+    const popover = document.getElementById("notion-course-filter-popover");
+    const hiddenSelect = document.getElementById("filter-course");
+    if (!summary || !popover) return;
+    
+    const checkboxes = popover.querySelectorAll(".notion-course-opt-cb");
+    const checked = popover.querySelectorAll(".notion-course-opt-cb:checked");
+    
+    if (checkboxes.length === 0 || checked.length === checkboxes.length) {
+        summary.innerText = "הכל (כל הקורסים)";
+        if (hiddenSelect) hiddenSelect.value = "all";
+    } else if (checked.length === 0) {
+        summary.innerText = "ללא קורסים (0)";
+        if (hiddenSelect) hiddenSelect.value = "none";
+    } else if (checked.length <= 2) {
+        const names = Array.from(checked).map(cb => {
+            const code = cb.getAttribute("data-course-code");
+            return (typeof COURSE_SHORT_NAMES !== 'undefined' && COURSE_SHORT_NAMES[code]) || code;
+        });
+        summary.innerText = names.join(', ');
+        if (hiddenSelect) hiddenSelect.value = checked[0].getAttribute("data-course-code");
+    } else {
+        summary.innerText = `${checked.length} קורסים נבחרו`;
+        if (hiddenSelect) hiddenSelect.value = checked[0].getAttribute("data-course-code");
+    }
+}
+
 function setupNotionTypeFilterPopover() {
     const btn = document.getElementById("notion-type-filter-btn");
     const popover = document.getElementById("notion-type-filter-popover");
@@ -23058,11 +23278,11 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.11.05-v2.10.2",
-    version: "2.10.2",
-    build: "20261104_01",
-    date: "2026-11-04 00:00",
-    description: "שדרוג 2.10.0: תיקון סנכרון ציזפורק 1:1, מניעת ערבוב תרגולים, ניקוי מבחנים ישנים, מניעת גלישת Side Peek במובייל ונעילת גרסה"
+    code: "REV-2026.11.05-v2.10.3",
+    version: "2.10.3",
+    build: "20261105_01",
+    date: "2026-11-05 20:50",
+    description: "v2.10.3: שדרוג לוח המשימות וסינון Notion מתקדם, תיקון זליגת שכבות (z-index) בניווט, מיתוג פנגייה רשמי, ניתוב ישיר להגשות מודל 26 (עקיפת לוח השנה) וקישור ישיר לדרייב הפקולטה להנדסת מכונות."
 };
 window.APP_VERSION = APP_CURRENT_REVISION.version;
 
