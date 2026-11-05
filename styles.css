@@ -12803,6 +12803,56 @@ html.is-iphone .app-global-footer {
     box-shadow: 0 2px 6px rgba(52, 211, 153, 0.3);
 }
 
+/* Direct Faculty Drive Repository Link Button */
+.notion-drive-link-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(168, 85, 247, 0.12);
+    border: 1px solid rgba(192, 132, 252, 0.35);
+    color: #c084fc !important;
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 12px;
+    text-decoration: none !important;
+    white-space: nowrap;
+    transition: all 0.18s ease;
+    margin-right: 4px;
+    vertical-align: middle;
+}
+
+.notion-drive-link-btn:hover {
+    background: rgba(168, 85, 247, 0.28);
+    border-color: #c084fc;
+    color: #fff !important;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(192, 132, 252, 0.3);
+}
+
+.notion-faculty-drive-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(168, 85, 247, 0.12);
+    border: 1px solid rgba(168, 85, 247, 0.35);
+    color: #c084fc !important;
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 5px 12px;
+    border-radius: 6px;
+    text-decoration: none !important;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.notion-faculty-drive-btn:hover {
+    background: rgba(168, 85, 247, 0.25);
+    border-color: #c084fc;
+    color: #fff !important;
+    box-shadow: 0 0 10px rgba(168, 85, 247, 0.3);
+}
+
 /* Semester Pill Badges */
 .notion-semester-pill {
     display: inline-flex;

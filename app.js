@@ -12278,6 +12278,13 @@ const MOODLE26_COURSE_MAP = {
     '3940805': 1212
 };
 
+const FACULTY_DRIVE_WEB_URL = 'https://technionmail-my.sharepoint.com/personal/adir_moshe_campus_technion_ac_il/_layouts/15/onedrive.aspx?listurl=https%3A%2F%2Ftechnionmail-my%2Esharepoint%2Ecom%2Fpersonal%2Fmech_info_asat_technion_ac_il%2FDocuments&view=3&id=%2Fpersonal%2Fmech_info_asat_technion_ac_il%2FDocuments%2FMechanical%20Engineering%20Drive&csf=1&web=1&e=jG2HFG&FolderCTID=0x01200020FCF278196BFF4B9D20B38488EBB4E7';
+const FACULTY_DRIVE_LOCAL_PATH = 'C:\\Users\\user\\OneDrive - Technion\\Mechanichal Info TSA\'s files - Mechanical Engineering Drive';
+if (typeof window !== 'undefined') {
+    window.FACULTY_DRIVE_WEB_URL = FACULTY_DRIVE_WEB_URL;
+    window.FACULTY_DRIVE_LOCAL_PATH = FACULTY_DRIVE_LOCAL_PATH;
+}
+
 const PANGEA_COURSE_MAP = {
     '00340010': 'https://idofangbentov.uk/Technion/DYN1/DYN1_000-034010-%D7%93%D7%99%D7%A0%D7%9E%D7%99%D7%A7%D7%94',
     '00340022': 'https://idofangbentov.uk/Technion/IME1/IME1_000-00340022-%D7%9E%D7%91%D7%95%D7%90-%D7%9C%D7%9E%D7%9B%D7%98%D7%A8%D7%95%D7%A0%D7%99%D7%A7%D7%94',
@@ -12437,7 +12444,7 @@ function renderTechnionPlusQuickBar(course) {
     const cfUrl = `https://cheesefork.cf/course/${cleanCode || fullCode}`;
     const pangeaDirectUrl = PANGEA_COURSE_MAP[fullCode] || PANGEA_COURSE_MAP[cleanCode];
     const pangeaUrl = pangeaDirectUrl || `https://idofangbentov.uk/?q=${encodeURIComponent(cleanCode || fullCode)}`;
-    const driveUrl = `https://www.google.com/search?q=${encodeURIComponent('טכניון ' + (cleanCode || fullCode) + ' ' + (course.name || '') + ' סיכומים מבחנים drive')}`;
+    const driveUrl = FACULTY_DRIVE_WEB_URL;
 
     groupEl.innerHTML = `
         <a href="${moodleUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-xs technion-link-btn" style="background: rgba(2, 132, 199, 0.22); border: 1px solid #0284c7; color: #38bdf8; text-decoration: none; padding: 4px 10px; border-radius: 6px; font-size: 0.76rem; font-weight: 700; display: inline-flex; align-items: center; gap: 5px;" title="מעבר ישיר לקורס במודל תשפ״ז (Moodle 26)">
@@ -12452,8 +12459,8 @@ function renderTechnionPlusQuickBar(course) {
         <a href="${pangeaUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-xs technion-link-btn" style="background: rgba(14, 165, 233, 0.18); border: 1px solid #0284c7; color: #38bdf8; text-decoration: none; padding: 4px 10px; border-radius: 6px; font-size: 0.76rem; font-weight: 700; display: inline-flex; align-items: center; gap: 5px;" title="קישור ישיר לסיכומי הקורס ודפי נוסחאות בפנגייה (Ido Fang Bentov)">
             <img src="pangea_icon.png" alt="Fangia" loading="lazy" decoding="async" class="technion-btn-brand-icon pangea-btn-icon" style="width: 15px; height: 15px; object-fit: contain; vertical-align: -2px; border-radius: 2px; flex-shrink: 0;"> פנגייה ↗
         </a>
-        <a href="${driveUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-xs technion-link-btn" style="background: rgba(168, 85, 247, 0.18); border: 1px solid #a855f7; color: #c084fc; text-decoration: none; padding: 4px 10px; border-radius: 6px; font-size: 0.76rem; font-weight: 700; display: inline-flex; align-items: center; gap: 5px;" title="חיפוש תיקיות Google Drive, סיכומים וחומרי עזר">
-            <img src="drive_icon.svg" alt="Google Drive" loading="lazy" decoding="async" class="technion-btn-brand-icon" style="width: 15px; height: 15px; object-fit: contain; vertical-align: -2px; flex-shrink: 0;"> דרייב וסיכומים ↗
+        <a href="${driveUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-xs technion-link-btn" style="background: rgba(168, 85, 247, 0.18); border: 1px solid #a855f7; color: #c084fc; text-decoration: none; padding: 4px 10px; border-radius: 6px; font-size: 0.76rem; font-weight: 700; display: inline-flex; align-items: center; gap: 5px;" title="מעבר ישיר לדרייב הפקולטה להנדסת מכונות (אס״ט) - פתרונות שיעורי בית ישנים, רפרנסים ומבחני עבר">
+            <img src="drive_icon.svg" alt="Google Drive" loading="lazy" decoding="async" class="technion-btn-brand-icon" style="width: 15px; height: 15px; object-fit: contain; vertical-align: -2px; flex-shrink: 0;"> דרייב הפקולטה ↗
         </a>
         <a href="https://grades.technion.ac.il/" target="_blank" rel="noopener noreferrer" class="btn btn-xs technion-link-btn" style="background: rgba(147, 51, 234, 0.22); border: 1px solid #9333ea; color: #d8b4fe; text-decoration: none; padding: 4px 10px; border-radius: 6px; font-size: 0.76rem; font-weight: 700; display: inline-flex; align-items: center; gap: 5px;" title="פורטל הציונים, סריקות מחברות בחינה וערעורים באס״ט ובטכניון (grades.technion.ac.il)">
             <img src="asat_icon.webp" alt="ASAT" loading="lazy" decoding="async" class="technion-btn-brand-icon" style="width: 15px; height: 15px; object-fit: contain; vertical-align: -2px; border-radius: 2px; flex-shrink: 0;"> ציונים וסריקות ↗
@@ -17120,6 +17127,13 @@ function renderNotionTasksTable() {
             </a>
         ` : '';
 
+        const facultyDriveUrl = FACULTY_DRIVE_WEB_URL;
+        const facultyDriveLinkHtml = facultyDriveUrl ? `
+            <a href="${facultyDriveUrl}" target="_blank" rel="noopener noreferrer" class="notion-drive-link-btn" title="מעבר ישיר לדרייב הפקולטה להנדסת מכונות (אס״ט) - פתרונות שיעורי בית ישנים, רפרנסים ומבחני עבר" onclick="event.stopPropagation();">
+                <span>📁 דרייב ↗</span>
+            </a>
+        ` : '';
+
         const semNum = c.semester || 1;
         const semHebrewMap = { 1: 'א׳', 2: 'ב׳', 3: 'ג׳', 4: 'ד׳', 5: 'ה׳', 6: 'ו׳', 7: 'ז׳', 8: 'ח׳' };
         const semLabel = `סמסטר ${semHebrewMap[semNum] || semNum}`;
@@ -17138,6 +17152,7 @@ function renderNotionTasksTable() {
                         </span>
                         ${moodleLinkHtml}
                         ${pangeaLinkHtml}
+                        ${facultyDriveLinkHtml}
                         <button class="notion-open-peek-btn" title="פתח תצוגת צד">🔲 OPEN</button>
                     </div>
                 </td>
@@ -17522,6 +17537,13 @@ function openTaskSidePeek(courseCode, taskId) {
         } else {
             pangeaRow.style.display = "none";
         }
+    }
+
+    const driveRow = document.getElementById("peek-property-drive-row");
+    const driveLink = document.getElementById("peek-property-drive-link");
+    if (driveRow && driveLink) {
+        driveRow.style.display = "grid";
+        driveLink.href = FACULTY_DRIVE_WEB_URL;
     }
 
     const gradeRow = document.getElementById("peek-property-grade-row");
