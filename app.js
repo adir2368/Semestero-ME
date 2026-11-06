@@ -23377,11 +23377,11 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.11.07-v2.10.5",
-    version: "2.10.5",
-    build: "20261107_02",
-    date: "2026-11-07 01:08",
-    description: "v2.10.5: שיפור אבטחת Supabase באמצעות שאילתות ממוקדות (Point Queries) למניעת דלף נתונים, מטמון L1 Snapshot לטעינה מיידית ללא קליטה, ונעילת גלילת רקע במודלים לפי עקרונות Primitives (ADR-075)."
+    code: "REV-2026.11.07-v2.10.6",
+    version: "2.10.6",
+    build: "20261107_03",
+    date: "2026-11-07 01:20",
+    description: "v2.10.6: הוספת רכיב ThinkingOrbs בקנבס 2D לשילובים וסנכרון, מטריצת בקרת הרשאות אבטחה ב-AGENTS.md, תרחיש בדיקת עומסים k6, ומחוון סליידר אינטראקטיבי לסימולטור What-If (ADR-075)."
 };
 window.APP_VERSION = APP_CURRENT_REVISION.version;
 

@@ -99,6 +99,24 @@
       "_origin": "ast"
     },
     {
+      "id": "agents_security_access_control_matrix_acm",
+      "label": "Security & Access Control Matrix (ACM)",
+      "file_type": "document",
+      "node_kind": "heading",
+      "source_file": "AGENTS.md",
+      "source_location": "L35",
+      "_origin": "ast"
+    },
+    {
+      "id": "agents_strict_engineering_guards",
+      "label": "Strict Engineering Guards:",
+      "file_type": "document",
+      "node_kind": "heading",
+      "source_file": "AGENTS.md",
+      "source_location": "L45",
+      "_origin": "ast"
+    },
+    {
       "id": "app",
       "label": "app.js",
       "file_type": "code",
@@ -6210,6 +6228,95 @@
       "_origin": "ast"
     },
     {
+      "id": "thinking_orbs",
+      "label": "thinking_orbs.js",
+      "file_type": "code",
+      "source_file": "thinking_orbs.js",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
+      "id": "thinking_orbs_canvasorbinstance",
+      "label": "CanvasOrbInstance",
+      "file_type": "code",
+      "source_file": "thinking_orbs.js",
+      "source_location": "L12",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "thinking_orbs_canvasorbinstance_constructor",
+      "label": ".constructor()",
+      "file_type": "code",
+      "source_file": "thinking_orbs.js",
+      "source_location": "L13",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "thinking_orbs_canvasorbinstance_init",
+      "label": ".init()",
+      "file_type": "code",
+      "source_file": "thinking_orbs.js",
+      "source_location": "L31",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "thinking_orbs_canvasorbinstance_start",
+      "label": ".start()",
+      "file_type": "code",
+      "source_file": "thinking_orbs.js",
+      "source_location": "L73",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "thinking_orbs_canvasorbinstance_stop",
+      "label": ".stop()",
+      "file_type": "code",
+      "source_file": "thinking_orbs.js",
+      "source_location": "L97",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "thinking_orbs_canvasorbinstance_setstate",
+      "label": ".setState()",
+      "file_type": "code",
+      "source_file": "thinking_orbs.js",
+      "source_location": "L104",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "thinking_orbs_canvasorbinstance_draw",
+      "label": ".draw()",
+      "file_type": "code",
+      "source_file": "thinking_orbs.js",
+      "source_location": "L111",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "thinking_orbs_canvasorbinstance_destroy",
+      "label": ".destroy()",
+      "file_type": "code",
+      "source_file": "thinking_orbs.js",
+      "source_location": "L188",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "thinking_orbs_js_docref_adr_0075",
+      "label": "ADR-0075",
+      "file_type": "doc_ref",
+      "source_file": "thinking_orbs.js",
+      "source_location": "L2",
+      "_origin": "ast"
+    },
+    {
       "id": "timetable_generator",
       "label": "timetable_generator.js",
       "file_type": "code",
@@ -8685,6 +8792,30 @@
       "file_type": "code",
       "source_file": "tests/deep_engine_stress_test.js",
       "source_location": "L212",
+      "_origin": "ast"
+    },
+    {
+      "id": "tests_k6_load_test",
+      "label": "k6_load_test.js",
+      "file_type": "code",
+      "source_file": "tests/k6_load_test.js",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
+      "id": "tests_k6_load_test_options",
+      "label": "options",
+      "file_type": "code",
+      "source_file": "tests/k6_load_test.js",
+      "source_location": "L9",
+      "_origin": "ast"
+    },
+    {
+      "id": "tests_k6_load_test_js_docref_adr_0075",
+      "label": "ADR-0075",
+      "file_type": "doc_ref",
+      "source_file": "tests/k6_load_test.js",
+      "source_location": "L49",
       "_origin": "ast"
     },
     {
@@ -20948,6 +21079,14 @@
       "_origin": "ast"
     },
     {
+      "id": "scripts_ad_hoc_find_course_modal",
+      "label": "find_course_modal.py",
+      "file_type": "code",
+      "source_file": "scripts/ad-hoc/find_course_modal.py",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
       "id": "scripts_ad_hoc_find_ghost_exam",
       "label": "find_ghost_exam.py",
       "file_type": "code",
@@ -21064,6 +21203,22 @@
       "label": "find_rooms.py",
       "file_type": "code",
       "source_file": "scripts/ad-hoc/find_rooms.py",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
+      "id": "scripts_ad_hoc_find_tasks_container",
+      "label": "find_tasks_container.py",
+      "file_type": "code",
+      "source_file": "scripts/ad-hoc/find_tasks_container.py",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
+      "id": "scripts_ad_hoc_find_tasks_pane",
+      "label": "find_tasks_pane.py",
+      "file_type": "code",
+      "source_file": "scripts/ad-hoc/find_tasks_pane.py",
       "source_location": "L1",
       "_origin": "ast"
     },
@@ -21188,6 +21343,14 @@
       "_origin": "ast"
     },
     {
+      "id": "scripts_ad_hoc_inspect_course_modal",
+      "label": "inspect_course_modal.py",
+      "file_type": "code",
+      "source_file": "scripts/ad-hoc/inspect_course_modal.py",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
       "id": "scripts_ad_hoc_inspect_course_semesters",
       "label": "inspect_course_semesters.py",
       "file_type": "code",
@@ -21304,6 +21467,14 @@
       "label": "inspect_syntax_dupe.py",
       "file_type": "code",
       "source_file": "scripts/ad-hoc/inspect_syntax_dupe.py",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
+      "id": "scripts_ad_hoc_inspect_tasks_tab",
+      "label": "inspect_tasks_tab.py",
+      "file_type": "code",
+      "source_file": "scripts/ad-hoc/inspect_tasks_tab.py",
       "source_location": "L1",
       "_origin": "ast"
     },
@@ -21777,6 +21948,14 @@
       "label": "read_sync_exact.py",
       "file_type": "code",
       "source_file": "scripts/ad-hoc/read_sync_exact.py",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
+      "id": "scripts_ad_hoc_read_tasks_section",
+      "label": "read_tasks_section.py",
+      "file_type": "code",
+      "source_file": "scripts/ad-hoc/read_tasks_section.py",
       "source_location": "L1",
       "_origin": "ast"
     },
@@ -34697,6 +34876,26 @@
       "confidence": "EXTRACTED",
       "source_file": "AGENTS.md",
       "source_location": "L27",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "agents_agents_md_semestero_me_academic_skill_tree",
+      "target": "agents_security_access_control_matrix_acm",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "AGENTS.md",
+      "source_location": "L35",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "agents_security_access_control_matrix_acm",
+      "target": "agents_strict_engineering_guards",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "AGENTS.md",
+      "source_location": "L45",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -56249,6 +56448,173 @@
       "_origin": "ast"
     },
     {
+      "source": "thinking_orbs",
+      "target": "thinking_orbs_canvasorbinstance",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "thinking_orbs.js",
+      "source_location": "L12",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "thinking_orbs_canvasorbinstance",
+      "target": "thinking_orbs_canvasorbinstance_constructor",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "thinking_orbs.js",
+      "source_location": "L13",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "thinking_orbs_canvasorbinstance",
+      "target": "thinking_orbs_canvasorbinstance_init",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "thinking_orbs.js",
+      "source_location": "L31",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "thinking_orbs_canvasorbinstance",
+      "target": "thinking_orbs_canvasorbinstance_start",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "thinking_orbs.js",
+      "source_location": "L73",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "thinking_orbs_canvasorbinstance",
+      "target": "thinking_orbs_canvasorbinstance_stop",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "thinking_orbs.js",
+      "source_location": "L97",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "thinking_orbs_canvasorbinstance",
+      "target": "thinking_orbs_canvasorbinstance_setstate",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "thinking_orbs.js",
+      "source_location": "L104",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "thinking_orbs_canvasorbinstance",
+      "target": "thinking_orbs_canvasorbinstance_draw",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "thinking_orbs.js",
+      "source_location": "L111",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "thinking_orbs_canvasorbinstance",
+      "target": "thinking_orbs_canvasorbinstance_destroy",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "thinking_orbs.js",
+      "source_location": "L188",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "thinking_orbs",
+      "target": "thinking_orbs_canvasorbinstance_destroy",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "thinking_orbs.js",
+      "source_location": "L200",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "thinking_orbs",
+      "target": "thinking_orbs_canvasorbinstance",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "thinking_orbs.js",
+      "source_location": "L203",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "thinking_orbs_canvasorbinstance_constructor",
+      "target": "thinking_orbs_canvasorbinstance_init",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "thinking_orbs.js",
+      "source_location": "L28",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "thinking_orbs_canvasorbinstance_init",
+      "target": "thinking_orbs_canvasorbinstance_start",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "thinking_orbs.js",
+      "source_location": "L70",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "thinking_orbs_canvasorbinstance_start",
+      "target": "thinking_orbs_canvasorbinstance_stop",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "thinking_orbs.js",
+      "source_location": "L76",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "thinking_orbs_canvasorbinstance_start",
+      "target": "thinking_orbs_canvasorbinstance_draw",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "thinking_orbs.js",
+      "source_location": "L86",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "thinking_orbs_canvasorbinstance_destroy",
+      "target": "thinking_orbs_canvasorbinstance_stop",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "thinking_orbs.js",
+      "source_location": "L189",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "thinking_orbs",
+      "target": "thinking_orbs_js_docref_adr_0075",
+      "relation": "cites",
+      "confidence": "EXTRACTED",
+      "source_file": "thinking_orbs.js",
+      "source_location": "L2",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
       "source": "timetable_generator",
       "target": "timetable_generator_timetominutes",
       "relation": "contains",
@@ -61472,6 +61838,48 @@
       "confidence": "EXTRACTED",
       "source_file": "tests/deep_engine_stress_test.js",
       "source_location": "L204",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "tests_k6_load_test",
+      "target": "ref_k6",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/k6_load_test.js",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "tests_k6_load_test",
+      "target": "ref_k6",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/k6_load_test.js",
+      "source_location": "L2",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "tests_k6_load_test",
+      "target": "tests_k6_load_test_options",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/k6_load_test.js",
+      "source_location": "L9",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "tests_k6_load_test",
+      "target": "tests_k6_load_test_js_docref_adr_0075",
+      "relation": "cites",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/k6_load_test.js",
+      "source_location": "L49",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -93282,6 +93690,17 @@
       "_origin": "ast"
     },
     {
+      "source": "scripts_ad_hoc_find_course_modal",
+      "target": "sys",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/ad-hoc/find_course_modal.py",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
       "source": "scripts_ad_hoc_find_ghost_exam",
       "target": "os",
       "relation": "imports",
@@ -93480,6 +93899,28 @@
       "_origin": "ast"
     },
     {
+      "source": "scripts_ad_hoc_find_tasks_container",
+      "target": "sys",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/ad-hoc/find_tasks_container.py",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "scripts_ad_hoc_find_tasks_pane",
+      "target": "sys",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/ad-hoc/find_tasks_pane.py",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
       "source": "scripts_ad_hoc_find_user_saved_refs",
       "target": "os",
       "relation": "imports",
@@ -93552,6 +93993,17 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "scripts/ad-hoc/inspect_all_tasks.py",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "scripts_ad_hoc_inspect_course_modal",
+      "target": "sys",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/ad-hoc/inspect_course_modal.py",
       "source_location": "L1",
       "weight": 1.0,
       "_origin": "ast"
@@ -93783,6 +94235,17 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "scripts/ad-hoc/inspect_syntax_dupe.py",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "scripts_ad_hoc_inspect_tasks_tab",
+      "target": "sys",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/ad-hoc/inspect_tasks_tab.py",
       "source_location": "L1",
       "weight": 1.0,
       "_origin": "ast"
@@ -94273,6 +94736,17 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "scripts/ad-hoc/read_sync_exact.py",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "scripts_ad_hoc_read_tasks_section",
+      "target": "sys",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/ad-hoc/read_tasks_section.py",
       "source_location": "L1",
       "weight": 1.0,
       "_origin": "ast"
@@ -135448,6 +135922,7 @@
     "C:\\Users\\user\\.gemini\\antigravity\\scratch\\academic-skill-tree\\sync_from_google_calendars.py",
     "C:\\Users\\user\\.gemini\\antigravity\\scratch\\academic-skill-tree\\sync_to_dist.js",
     "C:\\Users\\user\\.gemini\\antigravity\\scratch\\academic-skill-tree\\technion_academic_calendar.js",
+    "C:\\Users\\user\\.gemini\\antigravity\\scratch\\academic-skill-tree\\thinking_orbs.js",
     "C:\\Users\\user\\.gemini\\antigravity\\scratch\\academic-skill-tree\\timetable_generator.js",
     "C:\\Users\\user\\.gemini\\antigravity\\scratch\\academic-skill-tree\\ui_enhancements.js",
     "C:\\Users\\user\\.gemini\\antigravity\\scratch\\academic-skill-tree\\update_shortcut_to_exe.py",
@@ -135546,6 +136021,7 @@
     "C:\\Users\\user\\.gemini\\antigravity\\scratch\\academic-skill-tree\\tests\\cheesefork_precision_sync.test.js",
     "C:\\Users\\user\\.gemini\\antigravity\\scratch\\academic-skill-tree\\tests\\curriculum_isolation_and_recommended_tracks.test.js",
     "C:\\Users\\user\\.gemini\\antigravity\\scratch\\academic-skill-tree\\tests\\deep_engine_stress_test.js",
+    "C:\\Users\\user\\.gemini\\antigravity\\scratch\\academic-skill-tree\\tests\\k6_load_test.js",
     "C:\\Users\\user\\.gemini\\antigravity\\scratch\\academic-skill-tree\\tests\\new_features_validation_test.js",
     "C:\\Users\\user\\.gemini\\antigravity\\scratch\\academic-skill-tree\\tests\\qa_verify_classification_exams.js",
     "C:\\Users\\user\\.gemini\\antigravity\\scratch\\academic-skill-tree\\tests\\qa_verify_grade_sheet_browser.js",
@@ -135736,6 +136212,7 @@
     "C:\\Users\\user\\.gemini\\antigravity\\scratch\\academic-skill-tree\\scripts\\ad-hoc\\find_1115.py",
     "C:\\Users\\user\\.gemini\\antigravity\\scratch\\academic-skill-tree\\scripts\\ad-hoc\\find_all_ghost_exams.py",
     "C:\\Users\\user\\.gemini\\antigravity\\scratch\\academic-skill-tree\\scripts\\ad-hoc\\find_all_moodle_tasks.py",
+    "C:\\Users\\user\\.gemini\\antigravity\\scratch\\academic-skill-tree\\scripts\\ad-hoc\\find_course_modal.py",
     "C:\\Users\\user\\.gemini\\antigravity\\scratch\\academic-skill-tree\\scripts\\ad-hoc\\find_ghost_exam.py",
     "C:\\Users\\user\\.gemini\\antigravity\\scratch\\academic-skill-tree\\scripts\\ad-hoc\\find_gradle.py",
     "C:\\Users\\user\\.gemini\\antigravity\\scratch\\academic-skill-tree\\scripts\\ad-hoc\\find_ics.py",
@@ -135751,6 +136228,8 @@
     "C:\\Users\\user\\.gemini\\antigravity\\scratch\\academic-skill-tree\\scripts\\ad-hoc\\find_release_check.py",
     "C:\\Users\\user\\.gemini\\antigravity\\scratch\\academic-skill-tree\\scripts\\ad-hoc\\find_release_fast.py",
     "C:\\Users\\user\\.gemini\\antigravity\\scratch\\academic-skill-tree\\scripts\\ad-hoc\\find_rooms.py",
+    "C:\\Users\\user\\.gemini\\antigravity\\scratch\\academic-skill-tree\\scripts\\ad-hoc\\find_tasks_container.py",
+    "C:\\Users\\user\\.gemini\\antigravity\\scratch\\academic-skill-tree\\scripts\\ad-hoc\\find_tasks_pane.py",
     "C:\\Users\\user\\.gemini\\antigravity\\scratch\\academic-skill-tree\\scripts\\ad-hoc\\find_user_saved_refs.py",
     "C:\\Users\\user\\.gemini\\antigravity\\scratch\\academic-skill-tree\\scripts\\ad-hoc\\fix_app_cheesefork_final.py",
     "C:\\Users\\user\\.gemini\\antigravity\\scratch\\academic-skill-tree\\scripts\\ad-hoc\\fix_app_solids_tuesday.py",
@@ -135766,6 +136245,7 @@
     "C:\\Users\\user\\.gemini\\antigravity\\scratch\\academic-skill-tree\\scripts\\ad-hoc\\insert_diagnostic.py",
     "C:\\Users\\user\\.gemini\\antigravity\\scratch\\academic-skill-tree\\scripts\\ad-hoc\\inspect_after_72923.py",
     "C:\\Users\\user\\.gemini\\antigravity\\scratch\\academic-skill-tree\\scripts\\ad-hoc\\inspect_all_tasks.py",
+    "C:\\Users\\user\\.gemini\\antigravity\\scratch\\academic-skill-tree\\scripts\\ad-hoc\\inspect_course_modal.py",
     "C:\\Users\\user\\.gemini\\antigravity\\scratch\\academic-skill-tree\\scripts\\ad-hoc\\inspect_course_semesters.py",
     "C:\\Users\\user\\.gemini\\antigravity\\scratch\\academic-skill-tree\\scripts\\ad-hoc\\inspect_dom_ver.py",
     "C:\\Users\\user\\.gemini\\antigravity\\scratch\\academic-skill-tree\\scripts\\ad-hoc\\inspect_drive_structure.py",
@@ -135781,6 +136261,7 @@
     "C:\\Users\\user\\.gemini\\antigravity\\scratch\\academic-skill-tree\\scripts\\ad-hoc\\inspect_snapshot.py",
     "C:\\Users\\user\\.gemini\\antigravity\\scratch\\academic-skill-tree\\scripts\\ad-hoc\\inspect_steps.py",
     "C:\\Users\\user\\.gemini\\antigravity\\scratch\\academic-skill-tree\\scripts\\ad-hoc\\inspect_syntax_dupe.py",
+    "C:\\Users\\user\\.gemini\\antigravity\\scratch\\academic-skill-tree\\scripts\\ad-hoc\\inspect_tasks_tab.py",
     "C:\\Users\\user\\.gemini\\antigravity\\scratch\\academic-skill-tree\\scripts\\ad-hoc\\inspect_transcript.py",
     "C:\\Users\\user\\.gemini\\antigravity\\scratch\\academic-skill-tree\\scripts\\ad-hoc\\inspect_verify_btn.py",
     "C:\\Users\\user\\.gemini\\antigravity\\scratch\\academic-skill-tree\\scripts\\ad-hoc\\inspect_window_open.py",
@@ -135835,6 +136316,7 @@
     "C:\\Users\\user\\.gemini\\antigravity\\scratch\\academic-skill-tree\\scripts\\ad-hoc\\read_preload.py",
     "C:\\Users\\user\\.gemini\\antigravity\\scratch\\academic-skill-tree\\scripts\\ad-hoc\\read_resolve_func.py",
     "C:\\Users\\user\\.gemini\\antigravity\\scratch\\academic-skill-tree\\scripts\\ad-hoc\\read_sync_exact.py",
+    "C:\\Users\\user\\.gemini\\antigravity\\scratch\\academic-skill-tree\\scripts\\ad-hoc\\read_tasks_section.py",
     "C:\\Users\\user\\.gemini\\antigravity\\scratch\\academic-skill-tree\\scripts\\ad-hoc\\read_test_moodle.py",
     "C:\\Users\\user\\.gemini\\antigravity\\scratch\\academic-skill-tree\\scripts\\ad-hoc\\replace_course_filter_html.py",
     "C:\\Users\\user\\.gemini\\antigravity\\scratch\\academic-skill-tree\\scripts\\ad-hoc\\replace_test_cf.py",

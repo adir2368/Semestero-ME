@@ -31,3 +31,18 @@ After ANY round of changes in Semestero, automatically perform the entire pipeli
    ```bash
    python scripts/send_ntfy.py --topic "adir-antigravity-done" --title "Antigravity Needs Input" --message "<Question or prompt for user>" --priority "high" --tags "question,bell"
    ```
+
+## Security & Access Control Matrix (ACM)
+
+In accordance with defensive AI application security standards (ADR-075):
+
+| Role | Cloud `user_states` Access | Local Storage Scope | Network / Secret Rules |
+|---|---|---|---|
+| **Guest (`guest`)** | **None** (Blocked from reading or writing cloud states) | Isolated to `ast_user_state_guest` & clean template | Zero token issuance; never sync to cloud |
+| **Authenticated Student** | **Strict Point Queries Only** (`.eq('user_id', cleanUid)`) | Scoped strictly to `ast_user_state_<uid>` | Public `anon` key only; never dump table via `.select('*')` |
+| **Master Developer (`adir_moshe`)** | Authorized personal state with `ast_auth_verified_v3` proof | Protected `academic_skill_tree_save` with auto-heal | No plaintext secrets; salted SHA-256 digests only |
+
+### Strict Engineering Guards:
+1. **Never perform table-wide scans** (`.select('*')` on `user_states` is strictly forbidden). Always use targeted point queries with `.eq()` or `.or()`.
+2. **Row-Level Security (RLS)**: Database tables must enforce `auth.uid() = user_id`.
+3. **Secret Isolation**: Supabase `service_role` secret must NEVER enter client code, Electron renderers, or Android APK bundles.
