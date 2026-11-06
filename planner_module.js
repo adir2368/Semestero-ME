@@ -879,6 +879,94 @@
 
         // 4. Persist clean state
         saveCustomPlan(true);
+
+        // 5. Initialize Planner Header Collapse & Mobile Segmented View Preferences
+        initPlannerLayoutPreferences();
+    }
+
+    function initPlannerLayoutPreferences() {
+        try {
+            const isBannerCollapsed = localStorage.getItem('semestero_planner_banner_collapsed') === 'true';
+            const banner = document.getElementById('planner-header-banner');
+            if (banner) {
+                banner.classList.toggle('collapsed', isBannerCollapsed);
+                const mainBtn = document.getElementById('btn-toggle-planner-collapse-main');
+                if (mainBtn) {
+                    const icon = mainBtn.querySelector('.collapse-icon');
+                    const text = mainBtn.querySelector('.collapse-text');
+                    if (icon) icon.innerText = isBannerCollapsed ? '▼' : '▲';
+                    if (text) text.innerText = isBannerCollapsed ? 'הרחב' : 'מזער';
+                }
+            }
+
+            const savedMobileView = localStorage.getItem('semestero_planner_mobile_view') || 'catalog';
+            setPlannerMobileView(savedMobileView, false);
+        } catch (e) {
+            console.error('[Planner] Error initializing layout preferences:', e);
+        }
+    }
+
+    function togglePlannerHeaderCollapse() {
+        const banner = document.getElementById('planner-header-banner');
+        if (!banner) return;
+        const isCollapsed = banner.classList.toggle('collapsed');
+        try {
+            localStorage.setItem('semestero_planner_banner_collapsed', isCollapsed ? 'true' : 'false');
+            if (global.gameState) global.gameState.plannerBannerCollapsed = isCollapsed;
+        } catch (e) {}
+
+        const mainBtn = document.getElementById('btn-toggle-planner-collapse-main');
+        if (mainBtn) {
+            const icon = mainBtn.querySelector('.collapse-icon');
+            const text = mainBtn.querySelector('.collapse-text');
+            if (icon) icon.innerText = isCollapsed ? '▼' : '▲';
+            if (text) text.innerText = isCollapsed ? 'הרחב' : 'מזער';
+        }
+
+        updatePlannerCollapsedPills();
+    }
+
+    function updatePlannerCollapsedPills(rulesEval) {
+        const modePill = document.getElementById('planner-collapsed-mode-pill');
+        if (modePill) {
+            modePill.innerText = currentMode === 'custom' ? '📋 התוכנית שלי' : '🏛️ שיבוץ מומלץ';
+        }
+
+        const creditsPill = document.getElementById('planner-collapsed-credits-pill');
+        if (creditsPill) {
+            if (rulesEval && typeof rulesEval.totalDegreeCredits === 'number') {
+                const reqDegree = rulesEval.requiredDegreeCredits || 157.5;
+                creditsPill.innerText = `${rulesEval.totalDegreeCredits.toFixed(1)} / ${reqDegree.toFixed(1)} נק״ז`;
+            } else {
+                const totalEl = document.getElementById('planner-total-credits-val');
+                if (totalEl && totalEl.innerText) {
+                    creditsPill.innerText = `${totalEl.innerText} נק״ז`;
+                }
+            }
+        }
+    }
+
+    function setPlannerMobileView(view, save = true) {
+        const validViews = ['board', 'catalog', 'both'];
+        const targetView = validViews.includes(view) ? view : 'catalog';
+
+        const wrapper = document.querySelector('.planner-wrapper');
+        if (wrapper) {
+            wrapper.setAttribute('data-mobile-view', targetView);
+        }
+
+        // Update active tab buttons
+        ['board', 'catalog', 'both'].forEach(v => {
+            const btn = document.getElementById(`btn-planner-view-${v}`);
+            if (btn) btn.classList.toggle('active', v === targetView);
+        });
+
+        if (save) {
+            try {
+                localStorage.setItem('semestero_planner_mobile_view', targetView);
+                if (global.gameState) global.gameState.plannerMobileView = targetView;
+            } catch (e) {}
+        }
     }
 
     function syncCourseToGameState(courseObj, targetSemester) {
@@ -2135,6 +2223,8 @@
             electivesCredsEl.innerText = `${rulesEval.totalElectiveCredits.toFixed(1)} / 32.5`;
             electivesCredsEl.style.color = rulesEval.ruleTotalElectives_met ? '#10b981' : '#38bdf8';
         }
+
+        updatePlannerCollapsedPills(rulesEval);
 
         const btnCustom = document.getElementById('btn-planner-mode-custom');
         const btnSuggested = document.getElementById('btn-planner-mode-suggested');
@@ -4916,10 +5006,18 @@
     global.DegreePlanner = global.DegreePlanner || {};
     global.DegreePlanner.handlePhysicsVariantSelect = global.handlePhysicsVariantSelect;
 
-    // Public API for English Level State
+    // Public API for English Level State & Mobile Ergonomics
     global.openSportClubSelectorModal = openSportClubSelectorModal;
     global.applyEnglishLevelState = applyEnglishLevelState;
     global.getEnglishLevel = () => englishLevel;
+    global.togglePlannerHeaderCollapse = togglePlannerHeaderCollapse;
+    global.updatePlannerCollapsedPills = updatePlannerCollapsedPills;
+    global.setPlannerMobileView = setPlannerMobileView;
+    if (global.DegreePlanner) {
+        global.DegreePlanner.togglePlannerHeaderCollapse = togglePlannerHeaderCollapse;
+        global.DegreePlanner.updatePlannerCollapsedPills = updatePlannerCollapsedPills;
+        global.DegreePlanner.setPlannerMobileView = setPlannerMobileView;
+    }
 
     // Auto initialize events on DOM load
     if (typeof document !== 'undefined') {

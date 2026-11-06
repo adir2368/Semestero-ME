@@ -10249,13 +10249,38 @@ html.is-iphone .app-global-footer {
     to { opacity: 1; transform: translate(-50%, 0); }
 }
 
-/* Mobile Responsiveness */
+/* =======================================================
+   Mobile Degree Planner Responsiveness, Scroll & Clipping Fixes
+   ======================================================= */
 @media (max-width: 768px), screen and (max-device-width: 768px) {
+    #planner-workspace {
+        padding-bottom: 0 !important;
+        height: 100% !important;
+        min-height: 0 !important;
+        overflow: hidden !important;
+        display: flex !important;
+        flex-direction: column !important;
+    }
+
+    .planner-wrapper {
+        height: 100% !important;
+        flex: 1 1 auto !important;
+        display: flex !important;
+        flex-direction: column !important;
+        overflow: hidden !important;
+        min-height: 0 !important;
+    }
+
     .planner-header-banner {
         flex-direction: column !important;
         align-items: stretch !important;
         gap: 4px !important;
         padding: 4px 6px !important;
+    }
+
+    .planner-header-banner.collapsed {
+        padding: 5px 8px !important;
+        gap: 0 !important;
     }
 
     .planner-header-left {
@@ -10305,11 +10330,18 @@ html.is-iphone .app-global-footer {
         justify-content: center !important;
     }
 
+    /* Primary Unified Scroll Container on Mobile */
     .planner-main-container {
-        flex-direction: column;
-        padding: 6px;
-        gap: 8px;
-        overflow-y: auto;
+        flex: 1 1 auto !important;
+        min-height: 0 !important;
+        height: 100% !important;
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        padding: 6px 6px calc(140px + env(safe-area-inset-bottom, 0px)) 6px !important;
+        box-sizing: border-box !important;
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 10px !important;
     }
 
     .planner-board-area {
@@ -10327,11 +10359,59 @@ html.is-iphone .app-global-footer {
         min-width: 220px;
     }
 
-        .planner-sidebar {
-        width: 100%;
-        min-width: 100%;
-        max-width: 100%;
-        height: auto;
+    /* Un-nest inner scroll traps on mobile: page scrolls inside main container */
+    .planner-sidebar {
+        width: 100% !important;
+        min-width: 100% !important;
+        max-width: 100% !important;
+        height: auto !important;
+        overflow: visible !important;
+        overflow-y: visible !important;
+        padding-bottom: 16px !important;
+    }
+
+    .planner-add-electives-card {
+        min-height: auto !important;
+        height: auto !important;
+        overflow: visible !important;
+    }
+
+    .planner-electives-pool {
+        max-height: none !important;
+        min-height: auto !important;
+        height: auto !important;
+        overflow: visible !important;
+        overflow-y: visible !important;
+        padding-bottom: 30px !important;
+    }
+
+    .planner-pool-item:last-child {
+        margin-bottom: 40px !important;
+    }
+
+    /* Mobile Segmented Switcher Visibility & Toggling */
+    .planner-mobile-view-tabs {
+        display: flex !important;
+    }
+
+    .planner-wrapper[data-mobile-view="board"] .planner-board-area {
+        display: block !important;
+    }
+    .planner-wrapper[data-mobile-view="board"] .planner-sidebar {
+        display: none !important;
+    }
+
+    .planner-wrapper[data-mobile-view="catalog"] .planner-board-area {
+        display: none !important;
+    }
+    .planner-wrapper[data-mobile-view="catalog"] .planner-sidebar {
+        display: block !important;
+        width: 100% !important;
+    }
+
+    .planner-wrapper[data-mobile-view="both"] .planner-board-area,
+    .planner-wrapper[data-mobile-view="both"] .planner-sidebar {
+        display: block !important;
     }
 }
 
@@ -14337,8 +14417,7 @@ tr.is-task-pinned {
 
     #notion-tasks-workspace,
     #timetable-workspace,
-    #settings-workspace,
-    #planner-workspace {
+    #settings-workspace {
         padding-bottom: calc(140px + env(safe-area-inset-bottom, 0px)) !important;
     }
 }
@@ -16652,4 +16731,285 @@ tr.is-task-pinned {
     0% { box-shadow: 0 0 0 rgba(56, 189, 248, 0); }
     50% { box-shadow: 0 0 25px rgba(56, 189, 248, 0.6); border-color: #38bdf8; }
     100% { box-shadow: 0 0 0 rgba(56, 189, 248, 0); }
+}
+
+/* =======================================================
+   Degree Planner Collapsible Header Toolbar & Mobile Tabs
+   ======================================================= */
+.planner-header-banner {
+    position: relative;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.planner-header-collapsed-bar {
+    display: none;
+    width: 100%;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 2px 4px;
+}
+
+.planner-header-banner.collapsed {
+    padding: 6px 14px !important;
+    gap: 0 !important;
+    background: rgba(15, 23, 42, 0.95) !important;
+    border-bottom: 1px solid rgba(56, 189, 248, 0.3) !important;
+}
+
+.planner-header-banner.collapsed .planner-header-collapsed-bar {
+    display: flex !important;
+}
+
+.planner-header-banner.collapsed .planner-header-left,
+.planner-header-banner.collapsed .planner-header-right {
+    display: none !important;
+}
+
+.planner-collapsed-left,
+.planner-collapsed-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.planner-collapsed-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 8px;
+    background: rgba(30, 41, 59, 0.8);
+    border: 1px solid rgba(56, 189, 248, 0.25);
+    border-radius: 6px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #e2e8f0;
+}
+
+.planner-collapsed-pill.credits {
+    color: #38bdf8;
+    border-color: rgba(56, 189, 248, 0.4);
+    background: rgba(14, 165, 233, 0.12);
+}
+
+.btn-toggle-planner-collapse {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: rgba(30, 41, 59, 0.75);
+    border: 1px solid rgba(56, 189, 248, 0.35);
+    color: #38bdf8;
+    padding: 4px 10px;
+    font-size: 0.76rem;
+    font-weight: 600;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-toggle-planner-collapse:hover {
+    background: rgba(56, 189, 248, 0.2);
+    border-color: #38bdf8;
+    color: #ffffff;
+}
+
+.btn-toggle-planner-collapse .collapse-icon {
+    font-size: 0.68rem;
+    transition: transform 0.2s ease;
+}
+
+.planner-mobile-view-tabs {
+    display: none;
+    width: 100%;
+    padding: 6px 8px;
+    background: rgba(15, 23, 42, 0.95);
+    border-bottom: 1px solid rgba(56, 189, 248, 0.2);
+    gap: 6px;
+    box-sizing: border-box;
+    flex-shrink: 0;
+}
+
+.btn-planner-view-tab {
+    flex: 1;
+    background: rgba(30, 41, 59, 0.65);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: #94a3b8;
+    padding: 6px 4px;
+    font-size: 0.76rem;
+    font-weight: 600;
+    border-radius: 6px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.btn-planner-view-tab:hover {
+    color: #e2e8f0;
+}
+
+.btn-planner-view-tab.active {
+    background: linear-gradient(135deg, rgba(2, 132, 199, 0.85), rgba(37, 99, 235, 0.85));
+    border-color: rgba(56, 189, 248, 0.5);
+    color: #ffffff;
+    box-shadow: 0 0 10px rgba(56, 189, 248, 0.25);
+    font-weight: 700;
+}
+
+/* =======================================================
+   Notion Homework Policy Strip Collapsed State
+   ======================================================= */
+.btn-toggle-hw-collapse {
+    background: rgba(30, 41, 59, 0.8);
+    border: 1px solid rgba(167, 139, 250, 0.35);
+    color: #c084fc;
+    padding: 3px 10px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.btn-toggle-hw-collapse:hover {
+    background: rgba(167, 139, 250, 0.2);
+    color: #f1f5f9;
+}
+
+.notion-hw-policy-strip.collapsed {
+    padding: 4px 10px !important;
+    margin-bottom: 8px !important;
+}
+
+.notion-hw-policy-strip.collapsed .hw-strip-header {
+    margin-bottom: 2px !important;
+    padding-bottom: 0 !important;
+    flex-wrap: nowrap !important;
+    justify-content: space-between !important;
+}
+
+.notion-hw-policy-strip.collapsed .hw-strip-title {
+    font-size: 0.80rem !important;
+    gap: 6px !important;
+}
+
+.notion-hw-policy-strip.collapsed .hw-strip-badge {
+    font-size: 0.68rem !important;
+    padding: 1px 6px !important;
+}
+
+.notion-hw-policy-strip.collapsed .hw-strip-hint,
+.notion-hw-policy-strip.collapsed .hw-capsules-grid {
+    display: none !important;
+}
+
+.notion-hw-policy-strip .hw-collapsed-summary {
+    display: none;
+    align-items: center;
+    gap: 6px;
+    overflow-x: auto;
+    white-space: nowrap;
+    flex-wrap: nowrap;
+    -webkit-overflow-scrolling: touch;
+    padding: 4px 2px 2px 2px;
+    scrollbar-width: thin;
+}
+
+.notion-hw-policy-strip.collapsed .hw-collapsed-summary {
+    display: flex !important;
+}
+
+.hw-mini-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(30, 41, 59, 0.85);
+    border: 1px solid rgba(56, 189, 248, 0.25);
+    border-radius: 6px;
+    padding: 2px 8px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: #e2e8f0;
+    white-space: nowrap;
+    flex-shrink: 0 !important;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.hw-mini-chip:hover {
+    border-color: #38bdf8;
+    background: rgba(56, 189, 248, 0.15);
+    transform: translateY(-1px);
+}
+
+.hw-mini-chip.met {
+    border-color: rgba(16, 185, 129, 0.4);
+    color: #34d399;
+    background: rgba(16, 185, 129, 0.12);
+}
+
+/* Ensure mobile degree planner final override at the very end of file */
+@media (max-width: 768px), screen and (max-device-width: 768px) {
+    #planner-workspace {
+        padding-bottom: 0 !important;
+        height: 100% !important;
+        min-height: 0 !important;
+        overflow: hidden !important;
+        display: flex !important;
+        flex-direction: column !important;
+    }
+
+    .planner-wrapper {
+        height: 100% !important;
+        flex: 1 1 auto !important;
+        display: flex !important;
+        flex-direction: column !important;
+        overflow: hidden !important;
+        min-height: 0 !important;
+    }
+
+    .planner-main-container {
+        flex: 1 1 auto !important;
+        min-height: 0 !important;
+        height: 100% !important;
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        padding: 6px 6px calc(140px + env(safe-area-inset-bottom, 0px)) 6px !important;
+        box-sizing: border-box !important;
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 10px !important;
+    }
+
+    .planner-sidebar {
+        width: 100% !important;
+        min-width: 100% !important;
+        max-width: 100% !important;
+        height: auto !important;
+        overflow: visible !important;
+        overflow-y: visible !important;
+        padding-bottom: 16px !important;
+    }
+
+    .planner-add-electives-card {
+        min-height: auto !important;
+        height: auto !important;
+        overflow: visible !important;
+    }
+
+    .planner-electives-pool {
+        max-height: none !important;
+        min-height: auto !important;
+        height: auto !important;
+        overflow: visible !important;
+        overflow-y: visible !important;
+        padding-bottom: 30px !important;
+    }
+
+    .planner-pool-item:last-child {
+        margin-bottom: 50px !important;
+    }
 }

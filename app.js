@@ -23379,11 +23379,11 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.11.07-v2.10.7",
-    version: "2.10.7",
+    code: "REV-2026.11.07-v2.10.8",
+    version: "2.10.8",
     build: "20261107_03",
     date: "2026-11-07 01:20",
-    description: "v2.10.7: הוספת רכיב ThinkingOrbs בקנבס 2D לשילובים וסנכרון, מטריצת בקרת הרשאות אבטחה ב-AGENTS.md, תרחיש בדיקת עומסים k6, ומחוון סליידר אינטראקטיבי לסימולטור What-If (ADR-075)."
+    description: "v2.10.8: צמצום ויזואלי בסרגל תכנון תואר, בורר תצוגה נייד (לוח/מאגר/הכל), פתרון שורשי לחיתוך גלילה במובייל ומזעור מעקב שיעורי בית (ADR-077)."
 };
 window.APP_VERSION = APP_CURRENT_REVISION.version;
 
@@ -28582,7 +28582,15 @@ function renderNotionHomeworkPolicyStrip() {
 
     stripContainer.style.display = "block";
 
+    const isCollapsed = (typeof localStorage !== 'undefined' && localStorage.getItem('semestero_hw_strip_collapsed') === 'true');
+    if (isCollapsed) {
+        stripContainer.classList.add('collapsed');
+    } else {
+        stripContainer.classList.remove('collapsed');
+    }
+
     let capsulesHtml = "";
+    let miniChipsHtml = "";
     activeCourses.forEach(course => {
         const hwStatus = getCourseHomeworkStatus(course.code);
         if (!hwStatus) return;
@@ -28603,6 +28611,13 @@ function renderNotionHomeworkPolicyStrip() {
 
         const ratioBadgeClass = hwStatus.isMet ? 'met' : 'progress';
         const ratioBadgeText = hwStatus.isMet ? `${hwStatus.completedCount}/${hwStatus.bestN} ✓` : `${hwStatus.completedCount}/${hwStatus.bestN}`;
+
+        miniChipsHtml += `
+            <span class="hw-mini-chip ${hwStatus.isMet ? 'met' : ''}" onclick="if (window.openCourseHomeworkDetail) window.openCourseHomeworkDetail('${course.code}');" title="${displayName} (${course.code}) - ${hwStatus.policy.policyLabel}: ${ratioBadgeText}">
+                <span>${displayName}:</span>
+                <strong>${hwStatus.completedCount}/${hwStatus.bestN}</strong>
+            </span>
+        `;
 
         capsulesHtml += `
             <div class="course-hw-capsule" onclick="if (window.openCourseHomeworkDetail) window.openCourseHomeworkDetail('${course.code}');" title="לחץ לפירוט 12 הגיליונות וההגשות הכפולות">
@@ -28634,9 +28649,19 @@ function renderNotionHomeworkPolicyStrip() {
                 <span>מעקב חובת שיעורי בית ("הטובים מ-N")</span>
                 <span class="hw-strip-badge">סמסטר ${curActiveSem} פעיל</span>
             </div>
-            <div class="hw-strip-hint">
-                💡 לחץ על קורס לפירוט 12 הגיליונות, השאלון הדיגיטלי והפתרון בכתב ↗
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <div class="hw-strip-hint">
+                    💡 לחץ על קורס לפירוט 12 הגיליונות, השאלון הדיגיטלי והפתרון בכתב ↗
+                </div>
+                <button type="button" class="btn-toggle-hw-collapse" onclick="if(window.toggleHomeworkPolicyStripCollapse) window.toggleHomeworkPolicyStripCollapse(event);" title="מזער / הרחב מעקב שיעורי בית לצמצום ויזואלי">
+                    <span id="hw-collapse-icon">${isCollapsed ? '▼' : '▲'}</span>
+                    <span id="hw-collapse-text">${isCollapsed ? 'הרחב' : 'מזער'}</span>
+                </button>
             </div>
+        </div>
+        <div class="hw-collapsed-summary">
+            <span style="font-size: 0.74rem; font-weight: 700; color: #c084fc; margin-left: 4px;">תקציר חובות הגשה:</span>
+            ${miniChipsHtml}
         </div>
         <div class="hw-capsules-grid">
             ${capsulesHtml}
@@ -28937,6 +28962,21 @@ function openCourseHomeworkDetail(courseCode) {
     }, 150);
 }
 
+function toggleHomeworkPolicyStripCollapse(e) {
+    if (e && e.stopPropagation) e.stopPropagation();
+    const strip = document.getElementById("notion-hw-policy-strip");
+    if (!strip) return;
+    const isCollapsed = strip.classList.toggle("collapsed");
+    try {
+        localStorage.setItem("semestero_hw_strip_collapsed", isCollapsed ? "true" : "false");
+    } catch (err) {}
+    const icon = document.getElementById("hw-collapse-icon");
+    const text = document.getElementById("hw-collapse-text");
+    if (icon) icon.innerText = isCollapsed ? "▼" : "▲";
+    if (text) text.innerText = isCollapsed ? "הרחב" : "מזער";
+}
+
+window.toggleHomeworkPolicyStripCollapse = toggleHomeworkPolicyStripCollapse;
 window.renderNotionHomeworkPolicyStrip = renderNotionHomeworkPolicyStrip;
 window.renderCourseModalHomeworkPolicy = renderCourseModalHomeworkPolicy;
 window.toggleHomeworkSheetComponent = toggleHomeworkSheetComponent;

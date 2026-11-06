@@ -390,6 +390,50 @@ async function run() {
             assert(result.hasDualComponents, 'Must render dual components for 034053');
         });
 
+        // Test 13: Degree Planner Mobile Ergonomics & Visual Collapse
+        await test('Degree Planner Mobile Ergonomics: Header Collapse, View Switcher & Unclipped Catalog', async () => {
+            const result = await cdp.eval(`(() => {
+                if (typeof window.setActiveMainTab === 'function') {
+                    window.setActiveMainTab('planner');
+                }
+                const banner = document.getElementById('planner-header-banner');
+                const tabs = document.getElementById('planner-mobile-view-tabs');
+                const wrapper = document.querySelector('.planner-wrapper');
+
+                const initialHeight = banner ? Math.round(banner.getBoundingClientRect().height) : 0;
+                if (typeof window.togglePlannerHeaderCollapse === 'function') {
+                    window.togglePlannerHeaderCollapse();
+                }
+                const isCollapsed = banner ? banner.classList.contains('collapsed') : false;
+                const collapsedHeight = banner ? Math.round(banner.getBoundingClientRect().height) : 0;
+
+                // Test view switcher
+                if (typeof window.setPlannerMobileView === 'function') {
+                    window.setPlannerMobileView('catalog');
+                }
+                const currentView = wrapper ? wrapper.getAttribute('data-mobile-view') : null;
+
+                // Re-expand banner for clean state
+                if (typeof window.togglePlannerHeaderCollapse === 'function') {
+                    window.togglePlannerHeaderCollapse();
+                }
+
+                return {
+                    hasBanner: !!banner,
+                    hasTabs: !!tabs,
+                    initialHeight,
+                    isCollapsed,
+                    collapsedHeight,
+                    currentView
+                };
+            })()`);
+            assert(result.hasBanner, 'planner-header-banner missing');
+            assert(result.hasTabs, 'planner-mobile-view-tabs missing');
+            assert(result.isCollapsed, 'togglePlannerHeaderCollapse failed to set collapsed class');
+            assert(result.collapsedHeight <= 55, `Collapsed banner should be <= 55px, got ${result.collapsedHeight}px`);
+            assert.strictEqual(result.currentView, 'catalog', 'setPlannerMobileView failed to set catalog view');
+        });
+
 
     } finally {
         console.log(`\n========================================================================`);
