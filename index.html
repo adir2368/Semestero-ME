@@ -1699,6 +1699,10 @@
                             <!-- Populated dynamically via JS -->
                         </div>
                     </div>
+                    <!-- Homework Progress & Best N of M Policy Tracker Strip (Macro View) -->
+                    <div id="notion-hw-policy-strip" class="notion-hw-policy-strip" style="display: none;">
+                        <!-- Populated dynamically via renderNotionHomeworkPolicyStrip() -->
+                    </div>
                     <div class="notion-tasks-header">
                         <div class="notion-tasks-header-main" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; width: 100%; margin-bottom: 8px;">
                             <h2 style="margin: 0; font-size: 1.12rem;">📋 לוח משימות ומבחנים</h2>
@@ -2377,6 +2381,11 @@
                         <textarea id="input-syllabus-text" name="input_syllabus_text" aria-label="טקסט סילבוס הקורס" rows="4" placeholder="הדבק כאן את הטקסט של הסילבוס (לדוגמה: תרגיל בית 1 בנושא קינמטיקה, מעבדה 2, פרויקט מסכם, מבחן סוף...)" style="background: var(--bg-deep); border: 1px solid var(--border-color); color: var(--text-light); border-radius: 4px; padding: 8px; font-family: inherit; font-size: 0.8rem; resize: vertical; width: 100%; box-sizing: border-box;"></textarea>
                         <button class="btn btn-sm" id="btn-import-syllabus-submit" style="background-color: var(--color-mastered); color: #fff; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; padding: 6px 12px; font-family: inherit; align-self: flex-start;">נתח וייבא משימות</button>
                     </div>
+                </div>
+
+                <!-- Homework Progress & Best N of M Sheet Tracker (Micro View) -->
+                <div class="details-section" id="modal-hw-policy-section" style="display: none; background: rgba(30, 41, 59, 0.45); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 10px; padding: 14px; margin-bottom: 14px;">
+                    <!-- Populated dynamically via renderCourseModalHomeworkPolicy(course) -->
                 </div>
 
                 <!-- Course Questline Journey (Notion Style Timeline) -->
