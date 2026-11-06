@@ -8,8 +8,8 @@ android {
         applicationId "com.technion.semestero"
         minSdkVersion 30
         targetSdkVersion 34
-        versionCode 58
-        versionName "2.10.4"
+        versionCode 61
+        versionName "2.10.7"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 

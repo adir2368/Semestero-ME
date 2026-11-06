@@ -355,6 +355,41 @@ async function run() {
             assert(result.hasPangeaPill, 'notion-pangea-link-btn element missing in table');
         });
 
+        // Test 12: Homework Policy Tracker (Macro Strip & Micro Modal 12-Sheet Grid)
+        await test('Homework Policy Tracker: Macro Strip & Micro Modal 12-Sheet Grid', async () => {
+            const result = await cdp.eval(`(() => {
+                const strip = document.getElementById('notion-hw-policy-strip');
+                if (typeof window.renderNotionHomeworkPolicyStrip === 'function') {
+                    window.renderNotionHomeworkPolicyStrip();
+                }
+                const capsules = strip ? strip.querySelectorAll('.course-hw-capsule') : [];
+                const solidsCapsule = Array.from(capsules).find(c => c.textContent.includes('מוצקים 2') || c.textContent.includes('034053'));
+                
+                // Open modal micro view
+                if (typeof window.openCourseHomeworkDetail === 'function') {
+                    window.openCourseHomeworkDetail('034053');
+                }
+                const modalHw = document.getElementById('modal-hw-policy-section');
+                const sheetCards = modalHw ? modalHw.querySelectorAll('.hw-sheet-card') : [];
+                const dualRows = modalHw ? modalHw.querySelectorAll('.hw-component-row') : [];
+
+                return {
+                    hasStrip: !!strip,
+                    capsulesCount: capsules.length,
+                    hasSolidsCapsule: !!solidsCapsule,
+                    hasModalHw: !!modalHw && modalHw.style.display !== 'none',
+                    sheetCardsCount: sheetCards.length,
+                    hasDualComponents: dualRows.length >= 24
+                };
+            })()`);
+            assert(result.hasStrip, 'notion-hw-policy-strip element missing');
+            assert(result.capsulesCount >= 1, 'Should render at least 1 active homework capsule');
+            assert(result.hasSolidsCapsule, 'Solid Mechanics 2 capsule missing');
+            assert(result.hasModalHw, 'modal-hw-policy-section missing in course modal');
+            assert.strictEqual(result.sheetCardsCount, 12, 'Must render exactly 12 sheets for 034053');
+            assert(result.hasDualComponents, 'Must render dual components for 034053');
+        });
+
 
     } finally {
         console.log(`\n========================================================================`);
