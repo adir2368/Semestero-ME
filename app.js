@@ -12309,12 +12309,79 @@ function resolveDirectMoodleTaskUrl(courseCode, task) {
 }
 if (typeof window !== 'undefined') window.resolveDirectMoodleTaskUrl = resolveDirectMoodleTaskUrl;
 
+const COURSE_FACULTY_DRIVE_MAP = {
+    "035026": "https://technionmail-my.sharepoint.com/personal/mech_info_asat_technion_ac_il/_layouts/15/onedrive.aspx?id=/personal/mech_info_asat_technion_ac_il/Documents/Mechanical%20Engineering%20Drive/General%20Drive/%D7%A1%D7%9E%D7%A1%D7%98%D7%A8%20%D7%90/%28035026%29%20%D7%9E%D7%91%D7%95%D7%90%20%D7%99%D7%A6%D7%99%D7%A8%D7%AA%D7%99%20%D7%9C%D7%94%D7%A0%D7%93%D7%A1%D7%AA%20%D7%9E%D7%9B%D7%95%D7%A0%D7%95%D7%AA/%D7%A8%D7%A4%D7%A8%D7%A0%D7%A1%D7%99%D7%9D",
+    "35026": "https://technionmail-my.sharepoint.com/personal/mech_info_asat_technion_ac_il/_layouts/15/onedrive.aspx?id=/personal/mech_info_asat_technion_ac_il/Documents/Mechanical%20Engineering%20Drive/General%20Drive/%D7%A1%D7%9E%D7%A1%D7%98%D7%A8%20%D7%90/%28035026%29%20%D7%9E%D7%91%D7%95%D7%90%20%D7%99%D7%A6%D7%99%D7%A8%D7%AA%D7%99%20%D7%9C%D7%94%D7%A0%D7%93%D7%A1%D7%AA%20%D7%9E%D7%9B%D7%95%D7%A0%D7%95%D7%AA/%D7%A8%D7%A4%D7%A8%D7%A0%D7%A1%D7%99%D7%9D",
+    "104016": "https://technionmail-my.sharepoint.com/personal/mech_info_asat_technion_ac_il/_layouts/15/onedrive.aspx?id=/personal/mech_info_asat_technion_ac_il/Documents/Mechanical%20Engineering%20Drive/General%20Drive/%D7%A1%D7%9E%D7%A1%D7%98%D7%A8%20%D7%90/%28104016%29%20%D7%90%D7%9C%D7%92%D7%91%D7%A8%D7%94%201%D7%9E/%D7%A8%D7%A4%D7%A8%D7%A0%D7%A1%D7%99%D7%9D",
+    "104018": "https://technionmail-my.sharepoint.com/personal/mech_info_asat_technion_ac_il/_layouts/15/onedrive.aspx?id=/personal/mech_info_asat_technion_ac_il/Documents/Mechanical%20Engineering%20Drive/General%20Drive/%D7%A1%D7%9E%D7%A1%D7%98%D7%A8%20%D7%90/%28104018%29%20%D7%97%D7%93%D7%95%D7%90%201%D7%9E/%D7%A8%D7%A4%D7%A8%D7%A0%D7%A1%D7%99%D7%9D",
+    "125001": "https://technionmail-my.sharepoint.com/personal/mech_info_asat_technion_ac_il/_layouts/15/onedrive.aspx?id=/personal/mech_info_asat_technion_ac_il/Documents/Mechanical%20Engineering%20Drive/General%20Drive/%D7%A1%D7%9E%D7%A1%D7%98%D7%A8%20%D7%90/%28125001%29%20%D7%9B%D7%99%D7%9E%D7%99%D7%94%20%D7%9B%D7%9C%D7%9C%D7%99%D7%AA/%D7%A8%D7%A4%D7%A8%D7%A0%D7%A1%D7%99%D7%9D",
+    "234128": "https://technionmail-my.sharepoint.com/personal/mech_info_asat_technion_ac_il/_layouts/15/onedrive.aspx?id=/personal/mech_info_asat_technion_ac_il/Documents/Mechanical%20Engineering%20Drive/General%20Drive/%D7%A1%D7%9E%D7%A1%D7%98%D7%A8%20%D7%90/%28234128%29%20%D7%A4%D7%99%D7%99%D7%AA%D7%95%D7%9F/%D7%A8%D7%A4%D7%A8%D7%A0%D7%A1%D7%99%D7%9D",
+    "034028": "https://technionmail-my.sharepoint.com/personal/mech_info_asat_technion_ac_il/_layouts/15/onedrive.aspx?id=/personal/mech_info_asat_technion_ac_il/Documents/Mechanical%20Engineering%20Drive/General%20Drive/%D7%A1%D7%9E%D7%A1%D7%98%D7%A8%20%D7%91/%28034028%29%20%D7%9E%D7%9B%D7%A0%D7%99%D7%A7%D7%AA%20%D7%9E%D7%95%D7%A6%D7%A7%D7%99%D7%9D%201/3.%20%D7%A8%D7%A4%D7%A8%D7%A0%D7%A1%D7%99%D7%9D",
+    "34028": "https://technionmail-my.sharepoint.com/personal/mech_info_asat_technion_ac_il/_layouts/15/onedrive.aspx?id=/personal/mech_info_asat_technion_ac_il/Documents/Mechanical%20Engineering%20Drive/General%20Drive/%D7%A1%D7%9E%D7%A1%D7%98%D7%A8%20%D7%91/%28034028%29%20%D7%9E%D7%9B%D7%A0%D7%99%D7%A7%D7%AA%20%D7%9E%D7%95%D7%A6%D7%A7%D7%99%D7%9D%201/3.%20%D7%A8%D7%A4%D7%A8%D7%A0%D7%A1%D7%99%D7%9D",
+    "034042": "https://technionmail-my.sharepoint.com/personal/mech_info_asat_technion_ac_il/_layouts/15/onedrive.aspx?id=/personal/mech_info_asat_technion_ac_il/Documents/Mechanical%20Engineering%20Drive/General%20Drive/%D7%A1%D7%9E%D7%A1%D7%98%D7%A8%20%D7%91/%28034042%29%20%D7%9E%D7%91%D7%95%D7%90%20%D7%9C%D7%A9%D7%A8%D7%98%D7%95%D7%98%20%D7%94%D7%A0%D7%93%D7%A1%D7%99/3.%20%D7%A8%D7%A4%D7%A8%D7%A0%D7%A1%D7%99%D7%9D",
+    "34042": "https://technionmail-my.sharepoint.com/personal/mech_info_asat_technion_ac_il/_layouts/15/onedrive.aspx?id=/personal/mech_info_asat_technion_ac_il/Documents/Mechanical%20Engineering%20Drive/General%20Drive/%D7%A1%D7%9E%D7%A1%D7%98%D7%A8%20%D7%91/%28034042%29%20%D7%9E%D7%91%D7%95%D7%90%20%D7%9C%D7%A9%D7%A8%D7%98%D7%95%D7%98%20%D7%94%D7%A0%D7%93%D7%A1%D7%99/3.%20%D7%A8%D7%A4%D7%A8%D7%A0%D7%A1%D7%99%D7%9D",
+    "104022": "https://technionmail-my.sharepoint.com/personal/mech_info_asat_technion_ac_il/_layouts/15/onedrive.aspx?id=/personal/mech_info_asat_technion_ac_il/Documents/Mechanical%20Engineering%20Drive/General%20Drive/%D7%A1%D7%9E%D7%A1%D7%98%D7%A8%20%D7%91/%28104022%29%20%D7%97%D7%93%D7%95%D7%90%202%D7%9E/3.%20%D7%A8%D7%A4%D7%A8%D7%A0%D7%A1%D7%99%D7%9D",
+    "104131": "https://technionmail-my.sharepoint.com/personal/mech_info_asat_technion_ac_il/_layouts/15/onedrive.aspx?id=/personal/mech_info_asat_technion_ac_il/Documents/Mechanical%20Engineering%20Drive/General%20Drive/%D7%A1%D7%9E%D7%A1%D7%98%D7%A8%20%D7%91/%28104131%29%20%D7%9E%D7%93%D7%A8%20%D7%97/3.%20%D7%A8%D7%A4%D7%A8%D7%A0%D7%A1%D7%99%D7%9D",
+    "114051": "https://technionmail-my.sharepoint.com/personal/mech_info_asat_technion_ac_il/_layouts/15/onedrive.aspx?id=/personal/mech_info_asat_technion_ac_il/Documents/Mechanical%20Engineering%20Drive/General%20Drive/%D7%A1%D7%9E%D7%A1%D7%98%D7%A8%20%D7%91/%28114051%29%20%D7%A4%D7%99%D7%A1%D7%99%D7%A7%D7%94%201/3.%20%D7%A8%D7%A4%D7%A8%D7%A0%D7%A1%D7%99%D7%9D",
+    "114071": "https://technionmail-my.sharepoint.com/personal/mech_info_asat_technion_ac_il/_layouts/15/onedrive.aspx?id=/personal/mech_info_asat_technion_ac_il/Documents/Mechanical%20Engineering%20Drive/General%20Drive/%D7%A1%D7%9E%D7%A1%D7%98%D7%A8%20%D7%91/%28114071%29%20%D7%A4%D7%99%D7%A1%D7%99%D7%A7%D7%94%201%D7%9E/3.%20%D7%A8%D7%A4%D7%A8%D7%A0%D7%A1%D7%99%D7%9D",
+    "125013": "https://technionmail-my.sharepoint.com/personal/mech_info_asat_technion_ac_il/_layouts/15/onedrive.aspx?id=/personal/mech_info_asat_technion_ac_il/Documents/Mechanical%20Engineering%20Drive/General%20Drive/%D7%A1%D7%9E%D7%A1%D7%98%D7%A8%20%D7%91/%28125013%29%20%D7%9E%D7%A2%D7%91%D7%93%D7%94%20%D7%91%D7%9B%D7%99%D7%9E%D7%99%D7%94%20%D7%9B%D7%9C%D7%9C%D7%99%D7%AA",
+    "314533": "https://technionmail-my.sharepoint.com/personal/mech_info_asat_technion_ac_il/_layouts/15/onedrive.aspx?id=/personal/mech_info_asat_technion_ac_il/Documents/Mechanical%20Engineering%20Drive/General%20Drive/%D7%A1%D7%9E%D7%A1%D7%98%D7%A8%20%D7%91/%28314533%29%20%D7%9E%D7%91%D7%95%D7%90%20%D7%9C%D7%94%D7%A0%D7%93%D7%A1%D7%AA%20%D7%97%D7%95%D7%9E%D7%A8%D7%99%D7%9D/3.%20%D7%A8%D7%A4%D7%A8%D7%A0%D7%A1%D7%99%D7%9D",
+    "034029": "https://technionmail-my.sharepoint.com/personal/mech_info_asat_technion_ac_il/_layouts/15/onedrive.aspx?id=/personal/mech_info_asat_technion_ac_il/Documents/Mechanical%20Engineering%20Drive/General%20Drive/%D7%A1%D7%9E%D7%A1%D7%98%D7%A8%20%D7%92/%28034029%29%20%D7%9E%D7%9B%D7%A0%D7%99%D7%A7%D7%AA%20%D7%9E%D7%95%D7%A6%D7%A7%D7%99%D7%9D%202/3.%20%D7%A8%D7%A4%D7%A8%D7%A0%D7%A1%D7%99%D7%9D",
+    "34029": "https://technionmail-my.sharepoint.com/personal/mech_info_asat_technion_ac_il/_layouts/15/onedrive.aspx?id=/personal/mech_info_asat_technion_ac_il/Documents/Mechanical%20Engineering%20Drive/General%20Drive/%D7%A1%D7%9E%D7%A1%D7%98%D7%A8%20%D7%92/%28034029%29%20%D7%9E%D7%9B%D7%A0%D7%99%D7%A7%D7%AA%20%D7%9E%D7%95%D7%A6%D7%A7%D7%99%D7%9D%202/3.%20%D7%A8%D7%A4%D7%A8%D7%A0%D7%A1%D7%99%D7%9D",
+    "034035": "https://technionmail-my.sharepoint.com/personal/mech_info_asat_technion_ac_il/_layouts/15/onedrive.aspx?id=/personal/mech_info_asat_technion_ac_il/Documents/Mechanical%20Engineering%20Drive/General%20Drive/%D7%A1%D7%9E%D7%A1%D7%98%D7%A8%20%D7%92/%28034035%29%20%D7%AA%D7%A8%D7%9E%D7%95%D7%93%D7%99%D7%A0%D7%9E%D7%99%D7%A7%D7%94%201/%D7%A8%D7%A4%D7%A8%D7%A0%D7%A1%D7%99%D7%9D",
+    "34035": "https://technionmail-my.sharepoint.com/personal/mech_info_asat_technion_ac_il/_layouts/15/onedrive.aspx?id=/personal/mech_info_asat_technion_ac_il/Documents/Mechanical%20Engineering%20Drive/General%20Drive/%D7%A1%D7%9E%D7%A1%D7%98%D7%A8%20%D7%92/%28034035%29%20%D7%AA%D7%A8%D7%9E%D7%95%D7%93%D7%99%D7%A0%D7%9E%D7%99%D7%A7%D7%94%201/%D7%A8%D7%A4%D7%A8%D7%A0%D7%A1%D7%99%D7%9D",
+    "034043": "https://technionmail-my.sharepoint.com/personal/mech_info_asat_technion_ac_il/_layouts/15/onedrive.aspx?id=/personal/mech_info_asat_technion_ac_il/Documents/Mechanical%20Engineering%20Drive/General%20Drive/%D7%A1%D7%9E%D7%A1%D7%98%D7%A8%20%D7%92/%28034043%29%20%D7%A9%D7%A8%D7%98%D7%95%D7%98%20%D7%94%D7%A0%D7%93%D7%A1%D7%99%20%D7%9E%D7%9E%D7%95%D7%97%D7%A9%D7%91",
+    "34043": "https://technionmail-my.sharepoint.com/personal/mech_info_asat_technion_ac_il/_layouts/15/onedrive.aspx?id=/personal/mech_info_asat_technion_ac_il/Documents/Mechanical%20Engineering%20Drive/General%20Drive/%D7%A1%D7%9E%D7%A1%D7%98%D7%A8%20%D7%92/%28034043%29%20%D7%A9%D7%A8%D7%98%D7%95%D7%98%20%D7%94%D7%A0%D7%93%D7%A1%D7%99%20%D7%9E%D7%9E%D7%95%D7%97%D7%A9%D7%91",
+    "104228": "https://technionmail-my.sharepoint.com/personal/mech_info_asat_technion_ac_il/_layouts/15/onedrive.aspx?id=/personal/mech_info_asat_technion_ac_il/Documents/Mechanical%20Engineering%20Drive/General%20Drive/%D7%A1%D7%9E%D7%A1%D7%98%D7%A8%20%D7%92/%28104228%29%20%D7%9E%D7%93%D7%97%20%D7%9E/3.%20%D7%A8%D7%A4%D7%A8%D7%A0%D7%A1%D7%99%D7%9D",
+    "34056": "https://technionmail-my.sharepoint.com/personal/mech_info_asat_technion_ac_il/_layouts/15/onedrive.aspx?id=/personal/mech_info_asat_technion_ac_il/Documents/Mechanical%20Engineering%20Drive/General%20Drive/%D7%A1%D7%9E%D7%A1%D7%98%D7%A8%20%D7%92/%D7%9E%D7%91%D7%95%D7%90%20%D7%9C%D7%97%D7%99%D7%A9%D7%95%D7%91%20%D7%9E%D7%93%D7%A2%D7%99%20%D7%95%D7%94%D7%A0%D7%93%D7%A1%D7%99%20%2034056/3.%20%D7%A8%D7%A4%D7%A8%D7%A0%D7%A1%D7%99%D7%9D",
+    "034010": "https://technionmail-my.sharepoint.com/personal/mech_info_asat_technion_ac_il/_layouts/15/onedrive.aspx?id=/personal/mech_info_asat_technion_ac_il/Documents/Mechanical%20Engineering%20Drive/General%20Drive/%D7%A1%D7%9E%D7%A1%D7%98%D7%A8%20%D7%93/%28034010%29%20%D7%93%D7%99%D7%A0%D7%9E%D7%99%D7%A7%D7%94/3.%20%D7%A8%D7%A4%D7%A8%D7%A0%D7%A1%D7%99%D7%9D",
+    "34010": "https://technionmail-my.sharepoint.com/personal/mech_info_asat_technion_ac_il/_layouts/15/onedrive.aspx?id=/personal/mech_info_asat_technion_ac_il/Documents/Mechanical%20Engineering%20Drive/General%20Drive/%D7%A1%D7%9E%D7%A1%D7%98%D7%A8%20%D7%93/%28034010%29%20%D7%93%D7%99%D7%A0%D7%9E%D7%99%D7%A7%D7%94/3.%20%D7%A8%D7%A4%D7%A8%D7%A0%D7%A1%D7%99%D7%9D",
+    "034030": "https://technionmail-my.sharepoint.com/personal/mech_info_asat_technion_ac_il/_layouts/15/onedrive.aspx?id=/personal/mech_info_asat_technion_ac_il/Documents/Mechanical%20Engineering%20Drive/General%20Drive/%D7%A1%D7%9E%D7%A1%D7%98%D7%A8%20%D7%93/%28034030%29%20%D7%AA%D7%94%D7%9C%D7%99%D7%9B%D7%99%20%D7%99%D7%A6%D7%95%D7%A8/3.%D7%A8%D7%A4%D7%A8%D7%A0%D7%A1%D7%99%D7%9D",
+    "34030": "https://technionmail-my.sharepoint.com/personal/mech_info_asat_technion_ac_il/_layouts/15/onedrive.aspx?id=/personal/mech_info_asat_technion_ac_il/Documents/Mechanical%20Engineering%20Drive/General%20Drive/%D7%A1%D7%9E%D7%A1%D7%98%D7%A8%20%D7%93/%28034030%29%20%D7%AA%D7%94%D7%9C%D7%99%D7%9B%D7%99%20%D7%99%D7%A6%D7%95%D7%A8/3.%D7%A8%D7%A4%D7%A8%D7%A0%D7%A1%D7%99%D7%9D",
+    "034032": "https://technionmail-my.sharepoint.com/personal/mech_info_asat_technion_ac_il/_layouts/15/onedrive.aspx?id=/personal/mech_info_asat_technion_ac_il/Documents/Mechanical%20Engineering%20Drive/General%20Drive/%D7%A1%D7%9E%D7%A1%D7%98%D7%A8%20%D7%93/%28034032%29%20%D7%9E%D7%A2%D7%A8%D7%9B%D7%95%D7%AA%20%D7%9C%D7%99%D7%A0%D7%90%D7%A8%D7%99%D7%95%D7%AA%20%D7%9E/3.%D7%A8%D7%A4%D7%A8%D7%A0%D7%A1%D7%99%D7%9D",
+    "34032": "https://technionmail-my.sharepoint.com/personal/mech_info_asat_technion_ac_il/_layouts/15/onedrive.aspx?id=/personal/mech_info_asat_technion_ac_il/Documents/Mechanical%20Engineering%20Drive/General%20Drive/%D7%A1%D7%9E%D7%A1%D7%98%D7%A8%20%D7%93/%28034032%29%20%D7%9E%D7%A2%D7%A8%D7%9B%D7%95%D7%AA%20%D7%9C%D7%99%D7%A0%D7%90%D7%A8%D7%99%D7%95%D7%AA%20%D7%9E/3.%D7%A8%D7%A4%D7%A8%D7%A0%D7%A1%D7%99%D7%9D",
+    "034055": "https://technionmail-my.sharepoint.com/personal/mech_info_asat_technion_ac_il/_layouts/15/onedrive.aspx?id=/personal/mech_info_asat_technion_ac_il/Documents/Mechanical%20Engineering%20Drive/General%20Drive/%D7%A1%D7%9E%D7%A1%D7%98%D7%A8%20%D7%93/%28034055%29%20%D7%AA%D7%95%D7%A8%D7%AA%20%D7%94%D7%96%D7%A8%D7%99%D7%9E%D7%94%201%D7%9E/3.%20%D7%A8%D7%A4%D7%A8%D7%A0%D7%A1%D7%99%D7%9D",
+    "34055": "https://technionmail-my.sharepoint.com/personal/mech_info_asat_technion_ac_il/_layouts/15/onedrive.aspx?id=/personal/mech_info_asat_technion_ac_il/Documents/Mechanical%20Engineering%20Drive/General%20Drive/%D7%A1%D7%9E%D7%A1%D7%98%D7%A8%20%D7%93/%28034055%29%20%D7%AA%D7%95%D7%A8%D7%AA%20%D7%94%D7%96%D7%A8%D7%99%D7%9E%D7%94%201%D7%9E/3.%20%D7%A8%D7%A4%D7%A8%D7%A0%D7%A1%D7%99%D7%9D",
+    "114052": "https://technionmail-my.sharepoint.com/personal/mech_info_asat_technion_ac_il/_layouts/15/onedrive.aspx?id=/personal/mech_info_asat_technion_ac_il/Documents/Mechanical%20Engineering%20Drive/General%20Drive/%D7%A1%D7%9E%D7%A1%D7%98%D7%A8%20%D7%93/%28114052%29%20%D7%A4%D7%99%D7%A1%D7%99%D7%A7%D7%94%202/3.%20%D7%A8%D7%A4%D7%A8%D7%A0%D7%A1%D7%99%D7%9D",
+    "114075": "https://technionmail-my.sharepoint.com/personal/mech_info_asat_technion_ac_il/_layouts/15/onedrive.aspx?id=/personal/mech_info_asat_technion_ac_il/Documents/Mechanical%20Engineering%20Drive/General%20Drive/%D7%A1%D7%9E%D7%A1%D7%98%D7%A8%20%D7%93/%28114075%29%20%D7%A4%D7%99%D7%A1%D7%99%D7%A7%D7%94%202%D7%9E%D7%9E/3.%20%D7%A8%D7%A4%D7%A8%D7%A0%D7%A1%D7%99%D7%9D",
+    "034015": "https://technionmail-my.sharepoint.com/personal/mech_info_asat_technion_ac_il/_layouts/15/onedrive.aspx?id=/personal/mech_info_asat_technion_ac_il/Documents/Mechanical%20Engineering%20Drive/General%20Drive/%D7%A1%D7%9E%D7%A1%D7%98%D7%A8%20%D7%94/%28034015%29%20%D7%AA%D7%9B%D7%9F%20%D7%9E%D7%9B%D7%A0%D7%99%201%D7%9E/%D7%A8%D7%A4%D7%A8%D7%A0%D7%A1%D7%99%D7%9D",
+    "34015": "https://technionmail-my.sharepoint.com/personal/mech_info_asat_technion_ac_il/_layouts/15/onedrive.aspx?id=/personal/mech_info_asat_technion_ac_il/Documents/Mechanical%20Engineering%20Drive/General%20Drive/%D7%A1%D7%9E%D7%A1%D7%98%D7%A8%20%D7%94/%28034015%29%20%D7%AA%D7%9B%D7%9F%20%D7%9E%D7%9B%D7%A0%D7%99%201%D7%9E/%D7%A8%D7%A4%D7%A8%D7%A0%D7%A1%D7%99%D7%9D",
+    "034022": "https://technionmail-my.sharepoint.com/personal/mech_info_asat_technion_ac_il/_layouts/15/onedrive.aspx?id=/personal/mech_info_asat_technion_ac_il/Documents/Mechanical%20Engineering%20Drive/General%20Drive/%D7%A1%D7%9E%D7%A1%D7%98%D7%A8%20%D7%94/%28034022%29%20%D7%9E%D7%91%D7%95%D7%90%20%D7%9C%D7%9E%D7%9B%D7%98%D7%A8%D7%95%D7%A0%D7%99%D7%A7%D7%94/3.%20%D7%A8%D7%A4%D7%A8%D7%A0%D7%A1%D7%99%D7%9D",
+    "34022": "https://technionmail-my.sharepoint.com/personal/mech_info_asat_technion_ac_il/_layouts/15/onedrive.aspx?id=/personal/mech_info_asat_technion_ac_il/Documents/Mechanical%20Engineering%20Drive/General%20Drive/%D7%A1%D7%9E%D7%A1%D7%98%D7%A8%20%D7%94/%28034022%29%20%D7%9E%D7%91%D7%95%D7%90%20%D7%9C%D7%9E%D7%9B%D7%98%D7%A8%D7%95%D7%A0%D7%99%D7%A7%D7%94/3.%20%D7%A8%D7%A4%D7%A8%D7%A0%D7%A1%D7%99%D7%9D",
+    "034040": "https://technionmail-my.sharepoint.com/personal/mech_info_asat_technion_ac_il/_layouts/15/onedrive.aspx?id=/personal/mech_info_asat_technion_ac_il/Documents/Mechanical%20Engineering%20Drive/General%20Drive/%D7%A1%D7%9E%D7%A1%D7%98%D7%A8%20%D7%94/%28034040%29%20%D7%9E%D7%91%D7%95%D7%90%20%D7%9C%D7%91%D7%A7%D7%A8%D7%94/%D7%A8%D7%A4%D7%A8%D7%A0%D7%A1%D7%99%D7%9D",
+    "34040": "https://technionmail-my.sharepoint.com/personal/mech_info_asat_technion_ac_il/_layouts/15/onedrive.aspx?id=/personal/mech_info_asat_technion_ac_il/Documents/Mechanical%20Engineering%20Drive/General%20Drive/%D7%A1%D7%9E%D7%A1%D7%98%D7%A8%20%D7%94/%28034040%29%20%D7%9E%D7%91%D7%95%D7%90%20%D7%9C%D7%91%D7%A7%D7%A8%D7%94/%D7%A8%D7%A4%D7%A8%D7%A0%D7%A1%D7%99%D7%9D",
+    "034041": "https://technionmail-my.sharepoint.com/personal/mech_info_asat_technion_ac_il/_layouts/15/onedrive.aspx?id=/personal/mech_info_asat_technion_ac_il/Documents/Mechanical%20Engineering%20Drive/General%20Drive/%D7%A1%D7%9E%D7%A1%D7%98%D7%A8%20%D7%94/%28034041%29%20%D7%9E%D7%A2%D7%91%D7%A8%20%D7%97%D7%95%D7%9D/%D7%A8%D7%A4%D7%A8%D7%A0%D7%A1%D7%99%D7%9D",
+    "34041": "https://technionmail-my.sharepoint.com/personal/mech_info_asat_technion_ac_il/_layouts/15/onedrive.aspx?id=/personal/mech_info_asat_technion_ac_il/Documents/Mechanical%20Engineering%20Drive/General%20Drive/%D7%A1%D7%9E%D7%A1%D7%98%D7%A8%20%D7%94/%28034041%29%20%D7%9E%D7%A2%D7%91%D7%A8%20%D7%97%D7%95%D7%9D/%D7%A8%D7%A4%D7%A8%D7%A0%D7%A1%D7%99%D7%9D",
+    "094481": "https://technionmail-my.sharepoint.com/personal/mech_info_asat_technion_ac_il/_layouts/15/onedrive.aspx?id=/personal/mech_info_asat_technion_ac_il/Documents/Mechanical%20Engineering%20Drive/General%20Drive/%D7%A1%D7%9E%D7%A1%D7%98%D7%A8%20%D7%94/%28094481%29%20%D7%94%D7%A1%D7%AA%D7%91%D7%A8%D7%95%D7%AA%20%D7%95%D7%A1%D7%98%D7%98%D7%99%D7%A1%D7%98%D7%99%D7%A7%D7%94",
+    "94481": "https://technionmail-my.sharepoint.com/personal/mech_info_asat_technion_ac_il/_layouts/15/onedrive.aspx?id=/personal/mech_info_asat_technion_ac_il/Documents/Mechanical%20Engineering%20Drive/General%20Drive/%D7%A1%D7%9E%D7%A1%D7%98%D7%A8%20%D7%94/%28094481%29%20%D7%94%D7%A1%D7%AA%D7%91%D7%A8%D7%95%D7%AA%20%D7%95%D7%A1%D7%98%D7%98%D7%99%D7%A1%D7%98%D7%99%D7%A7%D7%94",
+    "114081": "https://technionmail-my.sharepoint.com/personal/mech_info_asat_technion_ac_il/_layouts/15/onedrive.aspx?id=/personal/mech_info_asat_technion_ac_il/Documents/Mechanical%20Engineering%20Drive/General%20Drive/%D7%A1%D7%9E%D7%A1%D7%98%D7%A8%20%D7%94/%28114081%29%20%D7%9E%D7%A2%D7%91%D7%93%D7%94%20%D7%9C%D7%A4%D7%99%D7%96%D7%99%D7%A7%D7%94%201",
+    "034011": "https://technionmail-my.sharepoint.com/personal/mech_info_asat_technion_ac_il/_layouts/15/onedrive.aspx?id=/personal/mech_info_asat_technion_ac_il/Documents/Mechanical%20Engineering%20Drive/General%20Drive/%D7%A1%D7%9E%D7%A1%D7%98%D7%A8%20%D7%94/034011%20-%20%D7%93%D7%99%D7%A0%D7%9E%D7%99%D7%A7%D7%94%20%D7%95%D7%9E%D7%9B%D7%A0%D7%99%D7%A7%D7%94%20%D7%A9%D7%9C%20%D7%AA%D7%A0%D7%95%D7%93%D7%95%D7%AA%20%28%D7%A8%D7%98%D7%98%29/3.%20%D7%A8%D7%A4%D7%A8%D7%A0%D7%A1%D7%99%D7%9D",
+    "34011": "https://technionmail-my.sharepoint.com/personal/mech_info_asat_technion_ac_il/_layouts/15/onedrive.aspx?id=/personal/mech_info_asat_technion_ac_il/Documents/Mechanical%20Engineering%20Drive/General%20Drive/%D7%A1%D7%9E%D7%A1%D7%98%D7%A8%20%D7%94/034011%20-%20%D7%93%D7%99%D7%A0%D7%9E%D7%99%D7%A7%D7%94%20%D7%95%D7%9E%D7%9B%D7%A0%D7%99%D7%A7%D7%94%20%D7%A9%D7%9C%20%D7%AA%D7%A0%D7%95%D7%93%D7%95%D7%AA%20%28%D7%A8%D7%98%D7%98%29/3.%20%D7%A8%D7%A4%D7%A8%D7%A0%D7%A1%D7%99%D7%9D",
+    "034034": "https://technionmail-my.sharepoint.com/personal/mech_info_asat_technion_ac_il/_layouts/15/onedrive.aspx?id=/personal/mech_info_asat_technion_ac_il/Documents/Mechanical%20Engineering%20Drive/General%20Drive/%D7%A1%D7%9E%D7%A1%D7%98%D7%A8%20%D7%95/%28034034%29%20%D7%94%D7%A0%D7%A2%20%D7%97%D7%A9%D7%9E%D7%9C%D7%99/3.%20%D7%A8%D7%A4%D7%A8%D7%A0%D7%A1%D7%99%D7%9D",
+    "34034": "https://technionmail-my.sharepoint.com/personal/mech_info_asat_technion_ac_il/_layouts/15/onedrive.aspx?id=/personal/mech_info_asat_technion_ac_il/Documents/Mechanical%20Engineering%20Drive/General%20Drive/%D7%A1%D7%9E%D7%A1%D7%98%D7%A8%20%D7%95/%28034034%29%20%D7%94%D7%A0%D7%A2%20%D7%97%D7%A9%D7%9E%D7%9C%D7%99/3.%20%D7%A8%D7%A4%D7%A8%D7%A0%D7%A1%D7%99%D7%9D",
+    "034039": "https://technionmail-my.sharepoint.com/personal/mech_info_asat_technion_ac_il/_layouts/15/onedrive.aspx?id=/personal/mech_info_asat_technion_ac_il/Documents/Mechanical%20Engineering%20Drive/General%20Drive/%D7%A1%D7%9E%D7%A1%D7%98%D7%A8%20%D7%95/%28034039%29%20%D7%9E%D7%A2%D7%91%D7%93%D7%94%20%D7%91%D7%A9%D7%99%D7%98%D7%A0%D7%A1",
+    "34039": "https://technionmail-my.sharepoint.com/personal/mech_info_asat_technion_ac_il/_layouts/15/onedrive.aspx?id=/personal/mech_info_asat_technion_ac_il/Documents/Mechanical%20Engineering%20Drive/General%20Drive/%D7%A1%D7%9E%D7%A1%D7%98%D7%A8%20%D7%95/%28034039%29%20%D7%9E%D7%A2%D7%91%D7%93%D7%94%20%D7%91%D7%A9%D7%99%D7%98%D7%A0%D7%A1",
+    "034044": "https://technionmail-my.sharepoint.com/personal/mech_info_asat_technion_ac_il/_layouts/15/onedrive.aspx?id=/personal/mech_info_asat_technion_ac_il/Documents/Mechanical%20Engineering%20Drive/General%20Drive/%D7%A1%D7%9E%D7%A1%D7%98%D7%A8%20%D7%95/%28034044%29%20%D7%9E%D7%91%D7%95%D7%90%20%D7%9C%D7%A9%D7%99%D7%98%D7%95%D7%AA%20%D7%A0%D7%99%D7%A1%D7%95%D7%99",
+    "34044": "https://technionmail-my.sharepoint.com/personal/mech_info_asat_technion_ac_il/_layouts/15/onedrive.aspx?id=/personal/mech_info_asat_technion_ac_il/Documents/Mechanical%20Engineering%20Drive/General%20Drive/%D7%A1%D7%9E%D7%A1%D7%98%D7%A8%20%D7%95/%28034044%29%20%D7%9E%D7%91%D7%95%D7%90%20%D7%9C%D7%A9%D7%99%D7%98%D7%95%D7%AA%20%D7%A0%D7%99%D7%A1%D7%95%D7%99",
+    "034371": "https://technionmail-my.sharepoint.com/personal/mech_info_asat_technion_ac_il/_layouts/15/onedrive.aspx?id=/personal/mech_info_asat_technion_ac_il/Documents/Mechanical%20Engineering%20Drive/General%20Drive/%D7%A1%D7%9E%D7%A1%D7%98%D7%A8%20%D7%95/%28034371%29%20%D7%A4%D7%A8%D7%95%D7%99%D7%A7%D7%98%20%D7%AA%D7%9B%D7%9F%20%D7%9C%D7%99%D7%99%D7%A6%D7%95%D7%A8",
+    "34371": "https://technionmail-my.sharepoint.com/personal/mech_info_asat_technion_ac_il/_layouts/15/onedrive.aspx?id=/personal/mech_info_asat_technion_ac_il/Documents/Mechanical%20Engineering%20Drive/General%20Drive/%D7%A1%D7%9E%D7%A1%D7%98%D7%A8%20%D7%95/%28034371%29%20%D7%A4%D7%A8%D7%95%D7%99%D7%A7%D7%98%20%D7%AA%D7%9B%D7%9F%20%D7%9C%D7%99%D7%99%D7%A6%D7%95%D7%A8"
+};
+
 const FACULTY_DRIVE_WEB_URL = 'https://technionmail-my.sharepoint.com/personal/mech_info_asat_technion_ac_il/_layouts/15/onedrive.aspx';
 const FACULTY_DRIVE_LOCAL_PATH = 'C:\\Users\\user\\OneDrive - Technion\\Mechanichal Info TSA\'s files - Mechanical Engineering Drive';
-if (typeof window !== 'undefined') {
-    window.FACULTY_DRIVE_WEB_URL = FACULTY_DRIVE_WEB_URL;
-    window.FACULTY_DRIVE_LOCAL_PATH = FACULTY_DRIVE_LOCAL_PATH;
+
+function getFacultyDriveCourseUrl(courseCode, task) {
+    if (!courseCode) return FACULTY_DRIVE_WEB_URL;
+    const cleanCode = String(courseCode).replace(/^0+/, '');
+    const directUrl = COURSE_FACULTY_DRIVE_MAP[courseCode] || COURSE_FACULTY_DRIVE_MAP[cleanCode];
+    if (directUrl) return directUrl;
+    return FACULTY_DRIVE_WEB_URL;
 }
+if (typeof window !== 'undefined') {
+    window.COURSE_FACULTY_DRIVE_MAP = COURSE_FACULTY_DRIVE_MAP;
+    window.getFacultyDriveCourseUrl = getFacultyDriveCourseUrl;
+}
+
 
 const PANGEA_COURSE_MAP = {
     '00340010': 'https://idofangbentov.uk/Technion/DYN1/DYN1_000-034010-%D7%93%D7%99%D7%A0%D7%9E%D7%99%D7%A7%D7%94',
@@ -17175,7 +17242,7 @@ function renderNotionTasksTable() {
         
         const moodleUrl = resolveDirectMoodleTaskUrl(c.code, t);
         const moodleLinkHtml = moodleUrl ? `
-            <a href="${moodleUrl}" target="_blank" rel="noopener noreferrer" class="notion-moodle-link-btn" title="מעבר ישיר לדף המטלה או דף הקורס במודל (ללא לוח שנה)" onclick="event.stopPropagation();">
+            <a href="${moodleUrl}" target="_blank" rel="noopener noreferrer" class="notion-moodle-link-btn" title="מעבר ישיר לדף המטלה או דף הקורס במודל (ללא לוח שנה)" onclick="event.stopPropagation(); if (window.openExternalUrlOrBrowser) { window.openExternalUrlOrBrowser('${moodleUrl}'); event.preventDefault(); }">
                 <span>🎓 הגשה במודל ↗</span>
             </a>
         ` : '';
@@ -17188,9 +17255,9 @@ function renderNotionTasksTable() {
             </a>
         ` : '';
 
-        const facultyDriveUrl = FACULTY_DRIVE_WEB_URL;
+        const facultyDriveUrl = (typeof getFacultyDriveCourseUrl === 'function') ? getFacultyDriveCourseUrl(c.code, t) : FACULTY_DRIVE_WEB_URL;
         const facultyDriveLinkHtml = facultyDriveUrl ? `
-            <a href="${facultyDriveUrl}" target="_blank" rel="noopener noreferrer" class="notion-drive-link-btn" title="מעבר ישיר לדרייב הפקולטה להנדסת מכונות (אס״ט) - פתרונות שיעורי בית ישנים, רפרנסים ומבחני עבר" onclick="event.stopPropagation();">
+            <a href="${facultyDriveUrl}" target="_blank" rel="noopener noreferrer" class="notion-drive-link-btn" title="מעבר ישיר לתיקיית רפרנסים ופתרונות בדרייב הפקולטה להנדסת מכונות (אס״ט)" onclick="event.stopPropagation(); if (window.openExternalUrlOrBrowser) { window.openExternalUrlOrBrowser('${facultyDriveUrl}'); event.preventDefault(); }">
                 <span>📁 דרייב ↗</span>
             </a>
         ` : '';
@@ -17393,7 +17460,7 @@ function showTaskCompletionVerificationModal(courseCode, task, newStatus) {
             </p>
             <div style="display: flex; flex-direction: column; gap: 10px;">
                 ${directMoodleUrl ? `
-                <a href="${directMoodleUrl}" target="_blank" rel="noopener noreferrer" id="btn-check-task-moodle" style="background: rgba(56, 189, 248, 0.14); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.45); padding: 10px 14px; border-radius: 8px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 0.88rem; text-decoration: none; transition: all 0.15s ease;">
+                <a href="${directMoodleUrl}" target="_blank" rel="noopener noreferrer" id="btn-check-task-moodle" onclick="if (window.openExternalUrlOrBrowser) { window.openExternalUrlOrBrowser('${directMoodleUrl}'); event.preventDefault(); }" style="background: rgba(56, 189, 248, 0.14); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.45); padding: 10px 14px; border-radius: 8px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 0.88rem; text-decoration: none; transition: all 0.15s ease;">
                     <span>🎓</span> <span>פתח מטלה במודל לבדיקת הגשה ↗</span>
                 </a>
                 ` : ''}
@@ -17583,6 +17650,12 @@ function openTaskSidePeek(courseCode, taskId) {
         if (resolvedMoodleUrl) {
             moodleRow.style.display = "grid";
             moodleLink.href = resolvedMoodleUrl;
+            moodleLink.onclick = function(e) {
+                if (window.openExternalUrlOrBrowser) {
+                    window.openExternalUrlOrBrowser(resolvedMoodleUrl);
+                    e.preventDefault();
+                }
+            };
         } else {
             moodleRow.style.display = "none";
         }
@@ -17595,6 +17668,12 @@ function openTaskSidePeek(courseCode, taskId) {
         if (resolvedPangeaUrl) {
             pangeaRow.style.display = "grid";
             pangeaLink.href = resolvedPangeaUrl;
+            pangeaLink.onclick = function(e) {
+                if (window.openExternalUrlOrBrowser) {
+                    window.openExternalUrlOrBrowser(resolvedPangeaUrl);
+                    e.preventDefault();
+                }
+            };
         } else {
             pangeaRow.style.display = "none";
         }
@@ -17602,9 +17681,16 @@ function openTaskSidePeek(courseCode, taskId) {
 
     const driveRow = document.getElementById("peek-property-drive-row");
     const driveLink = document.getElementById("peek-property-drive-link");
+    const resolvedDriveUrl = (typeof getFacultyDriveCourseUrl === 'function') ? getFacultyDriveCourseUrl(course.code, task) : FACULTY_DRIVE_WEB_URL;
     if (driveRow && driveLink) {
         driveRow.style.display = "grid";
-        driveLink.href = FACULTY_DRIVE_WEB_URL;
+        driveLink.href = resolvedDriveUrl;
+        driveLink.onclick = function(e) {
+            if (window.openExternalUrlOrBrowser) {
+                window.openExternalUrlOrBrowser(resolvedDriveUrl);
+                e.preventDefault();
+            }
+        };
     }
 
     const gradeRow = document.getElementById("peek-property-grade-row");
@@ -23278,11 +23364,11 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.11.05-v2.10.3",
-    version: "2.10.3",
-    build: "20261105_01",
-    date: "2026-11-05 20:50",
-    description: "v2.10.3: שדרוג לוח המשימות וסינון Notion מתקדם, תיקון זליגת שכבות (z-index) בניווט, מיתוג פנגייה רשמי, ניתוב ישיר להגשות מודל 26 (עקיפת לוח השנה) וקישור ישיר לדרייב הפקולטה להנדסת מכונות."
+    code: "REV-2026.11.07-v2.10.4",
+    version: "2.10.4",
+    build: "20261107_01",
+    date: "2026-11-07 01:00",
+    description: "v2.10.4: פתיחה אוטומטית בדפדפן מערכת חיצוני של כלל שירותי המודל והאס״ט, קישור עמוק ישיר לתיקיות רפרנסים של קורסים בדרייב הפקולטה, ומבנה נתונים כפול לשיעורי בית (דיגיטלי + פתרון בכתב)."
 };
 window.APP_VERSION = APP_CURRENT_REVISION.version;
 
@@ -24996,6 +25082,14 @@ async function fetchLatestRemoteVersion() {
 
 window.openExternalUrlOrBrowser = function(url) {
     if (!url) return;
+    try {
+        if (window.electronAPI && typeof window.electronAPI.openExternal === 'function') {
+            window.electronAPI.openExternal(url);
+            return;
+        }
+    } catch (e) {
+        console.warn('[ExternalUrl] Electron openExternal error:', e);
+    }
     try {
         if (window.SemesteroWidgetBridge && typeof window.SemesteroWidgetBridge.openExternalUrl === 'function') {
             window.SemesteroWidgetBridge.openExternalUrl(url);

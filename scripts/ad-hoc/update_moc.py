@@ -1,18 +1,18 @@
-import sys
-sys.stdout.reconfigure(encoding='utf-8')
-
-path = r'C:\Users\user\OneDrive - Technion\Obsidian Vault\SecondBrain\05_MOC\MOC_Atlas_ME.md'
-with open(path, 'r', encoding='utf-8') as f:
+moc_path = r"C:\Users\user\OneDrive - Technion\Obsidian Vault\SecondBrain\05_MOC\MOC_Atlas_ME.md"
+with open(moc_path, "r", encoding="utf-8") as f:
     text = f.read()
 
-target = "- [[ADR-072-Flowchart-Tree-Purity-Physics-Variant-Suppression-and-Chemistry-Lab-Lock]]: Flowchart Course Tree Purity & Chemistry Lab Lock"
-new_entry = """- [[ADR-072-Flowchart-Tree-Purity-Physics-Variant-Suppression-and-Chemistry-Lab-Lock]]: Flowchart Course Tree Purity & Chemistry Lab Lock
-- [[ADR-073-Watch-Test-Notification-Button-and-Schedule-Disentanglement]]: Watch Test Notification Button, Complication Abbreviations, CheeseFork Tutorial Disentanglement, and v2.10.0 Release Promotion"""
+target = "## 🚀 Chronological Development Sprints & Logs\n\n### November 3, 2026"
+replacement = "## 🚀 Chronological Development Sprints & Logs\n\n### November 5, 2026\n- [[04_Agent_Memory/Session_Logs/2026-11-05_v2.10.3_Notion_Filters_Z_Index_Fix_Pangea_Branding_And_Direct_Moodle|v2.10.3 Notion Multi-Select Filters, Z-Index Bleedthrough Fix, Pangea Branding & Direct Moodle Routing]]\n\n### November 3, 2026"
 
-if target in text and "ADR-073" not in text:
-    text = text.replace(target, new_entry)
-    with open(path, 'w', encoding='utf-8') as f:
-        f.write(text)
-    print("Updated MOC_Atlas_ME.md with ADR-073")
-else:
-    print("Already updated or target not found")
+if target not in text:
+    target = target.replace("\n", "\r\n")
+    replacement = replacement.replace("\n", "\r\n")
+
+assert target in text, "Target not found in MOC_Atlas_ME.md"
+text = text.replace(target, replacement, 1)
+
+with open(moc_path, "w", encoding="utf-8") as f:
+    f.write(text)
+
+print("Updated MOC_Atlas_ME.md successfully!")

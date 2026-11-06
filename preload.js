@@ -2,5 +2,6 @@ const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('electronAPI', {
     isElectron: true,
-    fetchMoodleFeed: (url) => ipcRenderer.invoke('fetch-moodle-feed', url)
+    fetchMoodleFeed: (url) => ipcRenderer.invoke('fetch-moodle-feed', url),
+    openExternal: (url) => ipcRenderer.invoke('open-external', url)
 });

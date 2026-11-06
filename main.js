@@ -1,4 +1,4 @@
-const { app, BrowserWindow, Menu, ipcMain } = require('electron');
+const { app, BrowserWindow, Menu, ipcMain, shell } = require('electron');
 const path = require('path');
 
 app.setName('Semestero ME');
@@ -34,6 +34,15 @@ function createWindow() {
 
     // Load local HTML directly from disk (no server required)
     mainWindow.loadFile(path.join(__dirname, 'index.html'));
+
+    // Open all external URLs (Moodle, Faculty Drive, Pangea, Panopto, etc.) in the user's default system browser
+    mainWindow.webContents.setWindowOpenHandler(({ url }) => {
+        if (url && (url.startsWith('http:') || url.startsWith('https:') || url.startsWith('mailto:'))) {
+            shell.openExternal(url);
+            return { action: 'deny' };
+        }
+        return { action: 'allow' };
+    });
 
     mainWindow.on('closed', () => {
         mainWindow = null;
@@ -74,4 +83,17 @@ app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') {
         app.quit();
     }
+});
+
+// Native IPC Handler for opening links in default system browser
+ipcMain.handle('open-external', async (event, url) => {
+    if (url && (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('mailto:'))) {
+        try {
+            await shell.openExternal(url);
+            return { success: true };
+        } catch (err) {
+            return { success: false, error: err.message };
+        }
+    }
+    return { success: false, error: 'Invalid URL scheme' };
 });
