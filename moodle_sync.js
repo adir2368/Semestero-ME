@@ -521,6 +521,8 @@
                 category = 'project';
             } else if (/בוחן|קוויז|quiz/i.test(t)) {
                 category = 'quiz';
+            } else if (/(הגשת\s*פתרון|פתרון\s*בכתב|סריקה|סריקת\s*פתרון|פתרון\s*תרגיל|פתרון\s*גיליון)/i.test(title || '')) {
+                category = 'hw_written';
             }
 
             // 8. Look for numbers: digits or Hebrew letters (א-ט)
