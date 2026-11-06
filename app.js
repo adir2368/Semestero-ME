@@ -9994,6 +9994,19 @@ function saveState(skipNotify = false) {
         if (window.AuthSync && typeof window.AuthSync.saveActiveUserState === 'function') {
             window.AuthSync.saveActiveUserState(gameState);
         }
+        // L1 Instant-On Dashboard Snapshot (ADR-075)
+        try {
+            const l1Snapshot = {
+                timestamp: Date.now(),
+                gpa: gameState.gpa || 0,
+                completedCredits: gameState.completedCredits || 0,
+                currentSemester: gameState.currentSemester || 3,
+                activeUid: (window.AuthSync && typeof window.AuthSync.getActiveUser === 'function') ? window.AuthSync.getActiveUser().id : 'guest',
+                updatedAt: new Date().toISOString()
+            };
+            localStorage.setItem('ast_l1_dashboard_snapshot', JSON.stringify(l1Snapshot));
+        } catch (e) {}
+
         const isAdirSession = (window.AuthSync && typeof window.AuthSync.isAdirActive === 'function' && window.AuthSync.isAdirActive());
         if (isAdirSession) {
             localStorage.setItem("academic_skill_tree_save", JSON.stringify(gameState));
@@ -23364,11 +23377,11 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.11.07-v2.10.4",
-    version: "2.10.4",
-    build: "20261107_01",
-    date: "2026-11-07 01:00",
-    description: "v2.10.4: פתיחה אוטומטית בדפדפן מערכת חיצוני של כלל שירותי המודל והאס״ט, קישור עמוק ישיר לתיקיות רפרנסים של קורסים בדרייב הפקולטה, ומבנה נתונים כפול לשיעורי בית (דיגיטלי + פתרון בכתב)."
+    code: "REV-2026.11.07-v2.10.5",
+    version: "2.10.5",
+    build: "20261107_02",
+    date: "2026-11-07 01:08",
+    description: "v2.10.5: שיפור אבטחת Supabase באמצעות שאילתות ממוקדות (Point Queries) למניעת דלף נתונים, מטמון L1 Snapshot לטעינה מיידית ללא קליטה, ונעילת גלילת רקע במודלים לפי עקרונות Primitives (ADR-075)."
 };
 window.APP_VERSION = APP_CURRENT_REVISION.version;
 

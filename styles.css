@@ -911,6 +911,30 @@ body {
     z-index: 100050 !important;
 }
 
+/* Headless UI Primitive Ergonomics (ADR-075) - Background Scroll Lock on Active Dialogs */
+body.modal-open,
+body:has(.modal-overlay.active),
+body:has(.modal-overlay[style*="display: flex"]),
+body:has(.modal-backdrop.active),
+body:has(.modal-backdrop[style*="display: flex"]),
+body:has(#course-comparison-modal.active),
+body:has(#academic-faq-modal.active) {
+    overflow: hidden !important;
+    touch-action: none;
+}
+
+/* Headless UI Primitive Ergonomics (ADR-075) - Background Scroll Lock on Active Dialogs */
+body.modal-open,
+body:has(.modal-overlay.active),
+body:has(.modal-overlay[style*="display: flex"]),
+body:has(.modal-backdrop.active),
+body:has(.modal-backdrop[style*="display: flex"]),
+body:has(#course-comparison-modal.active),
+body:has(#academic-faq-modal.active) {
+    overflow: hidden !important;
+    touch-action: none;
+}
+
 .command-palette-overlay.active,
 .command-palette-overlay[style*="display: flex"],
 #command-palette-modal.active,

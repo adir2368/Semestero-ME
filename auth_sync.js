@@ -800,7 +800,11 @@
             }
 
             try {
-                const { data, error } = await supabaseClient.from('user_states').select('*');
+                // Targeted point-query by identifier (user_id, user_name, or user_email) - never dump all user records
+                const { data, error } = await supabaseClient
+                    .from('user_states')
+                    .select('user_id, user_name, user_email, state_json, updated_at')
+                    .or(`user_id.ilike.${cleanUserLower},user_name.ilike.${cleanUserLower},user_email.ilike.${cleanUserLower}`);
                 if (error || !data || data.length === 0) {
                     if (typeof alert === 'function') alert('לא נמצאו משתמשים בענן. וודא שהפרטים נכונים או הירשם כסטודנט חדש.');
                     return false;
@@ -995,9 +999,13 @@
             }
 
             try {
-                const { data, error } = await supabaseClient.from('user_states').select('*');
+                // Targeted point-query strictly by registered user_email
+                const { data, error } = await supabaseClient
+                    .from('user_states')
+                    .select('user_id, user_name, user_email, state_json, updated_at')
+                    .ilike('user_email', cleanEmail);
                 if (error || !data || data.length === 0) {
-                    if (typeof alert === 'function') alert('לא נמצאו משתמשים בענן.');
+                    if (typeof alert === 'function') alert('לא נמצאו משתמשים בענן עם כתובת אימייל זו.');
                     return false;
                 }
 
