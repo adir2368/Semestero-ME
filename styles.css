@@ -16228,3 +16228,428 @@ tr.is-task-pinned {
     transform: translateY(-1px);
 }
 
+
+
+/* ==========================================================================
+   Homework Progress & "Best N of M" Policy Tracker (Macro & Micro Views)
+   ========================================================================== */
+
+/* 1. Macro View Strip (Notion Tasks Board) */
+.notion-hw-policy-strip {
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.75), rgba(30, 41, 59, 0.85));
+    border: 1px solid rgba(56, 189, 248, 0.25);
+    border-radius: 12px;
+    padding: 14px 18px;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+    backdrop-filter: blur(10px);
+}
+
+.hw-strip-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.hw-strip-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #f8fafc;
+}
+
+.hw-strip-badge {
+    background: rgba(56, 189, 248, 0.15);
+    border: 1px solid rgba(56, 189, 248, 0.35);
+    color: #38bdf8;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 0.72rem;
+    font-weight: 600;
+}
+
+.hw-strip-hint {
+    font-size: 0.76rem;
+    color: var(--text-muted);
+}
+
+.hw-capsules-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 12px;
+}
+
+.course-hw-capsule {
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    padding: 12px 14px;
+    cursor: pointer;
+    transition: all 0.22s ease-in-out;
+    position: relative;
+    overflow: hidden;
+}
+
+.course-hw-capsule:hover {
+    transform: translateY(-2px);
+    border-color: rgba(56, 189, 248, 0.5);
+    background: rgba(30, 41, 59, 0.7);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35), 0 0 12px rgba(56, 189, 248, 0.2);
+}
+
+.capsule-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.capsule-course-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.capsule-course-name {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: #f1f5f9;
+}
+
+.capsule-course-code {
+    font-size: 0.72rem;
+    color: #94a3b8;
+    background: rgba(255, 255, 255, 0.06);
+    padding: 1px 6px;
+    border-radius: 4px;
+}
+
+.capsule-ratio-badge {
+    font-size: 0.76rem;
+    font-weight: 800;
+    padding: 3px 8px;
+    border-radius: 8px;
+    white-space: nowrap;
+}
+
+.capsule-ratio-badge.met {
+    background: rgba(16, 185, 129, 0.2);
+    color: #34d399;
+    border: 1px solid rgba(52, 211, 153, 0.4);
+    box-shadow: 0 0 8px rgba(52, 211, 153, 0.2);
+}
+
+.capsule-ratio-badge.progress {
+    background: rgba(56, 189, 248, 0.15);
+    color: #38bdf8;
+    border: 1px solid rgba(56, 189, 248, 0.35);
+}
+
+.capsule-meta-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.74rem;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+}
+
+.capsule-policy-label {
+    color: #fbbf24;
+    font-weight: 600;
+}
+
+/* Dot Track (12 segments/dots) */
+.hw-dots-track {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    background: rgba(0, 0, 0, 0.25);
+    padding: 6px 8px;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.hw-dot {
+    flex: 1;
+    height: 9px;
+    border-radius: 3px;
+    background: rgba(255, 255, 255, 0.1);
+    position: relative;
+    transition: all 0.2s ease;
+}
+
+.hw-dot.done {
+    background: #10b981;
+    box-shadow: 0 0 6px rgba(16, 185, 129, 0.5);
+}
+
+.hw-dot.submitted {
+    background: linear-gradient(135deg, #a855f7, #6366f1);
+    box-shadow: 0 0 6px rgba(168, 85, 247, 0.5);
+}
+
+.hw-dot.todo {
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.hw-dot.locked {
+    background: rgba(255, 255, 255, 0.04);
+    opacity: 0.5;
+}
+
+.hw-dot-threshold {
+    width: 2px;
+    height: 14px;
+    background: #f59e0b;
+    border-radius: 1px;
+    margin: 0 2px;
+    box-shadow: 0 0 4px #f59e0b;
+}
+
+/* 2. Micro View (Course Modal) */
+.modal-hw-box {
+    color: #f8fafc;
+}
+
+.modal-hw-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.modal-hw-title-group h3 {
+    margin: 0 0 4px 0;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #38bdf8;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.modal-hw-subtitle {
+    font-size: 0.76rem;
+    color: #94a3b8;
+}
+
+.modal-hw-stats-strip {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+}
+
+.modal-hw-stat-pill {
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.modal-hw-stat-pill.done {
+    color: #34d399;
+    border-color: rgba(52, 211, 153, 0.35);
+    background: rgba(16, 185, 129, 0.12);
+}
+
+.modal-hw-stat-pill.submitted {
+    color: #c084fc;
+    border-color: rgba(192, 132, 252, 0.35);
+    background: rgba(168, 85, 247, 0.12);
+}
+
+.modal-hw-stat-pill.target {
+    color: #fbbf24;
+    border-color: rgba(251, 191, 36, 0.35);
+    background: rgba(245, 158, 11, 0.12);
+}
+
+.modal-hw-progress-track {
+    width: 100%;
+    height: 8px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.modal-hw-progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #38bdf8, #10b981);
+    transition: width 0.3s ease;
+    border-radius: 4px;
+}
+
+/* 12-Sheet Grid */
+.hw-sheets-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 10px;
+    max-height: 480px;
+    overflow-y: auto;
+    padding-left: 4px;
+}
+
+.hw-sheet-card {
+    background: rgba(15, 23, 42, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    transition: all 0.2s ease;
+}
+
+.hw-sheet-card.is-done {
+    border-color: rgba(16, 185, 129, 0.35);
+    background: rgba(16, 185, 129, 0.05);
+}
+
+.hw-sheet-card.is-submitted {
+    border-color: rgba(168, 85, 247, 0.35);
+    background: rgba(168, 85, 247, 0.05);
+}
+
+.hw-sheet-card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 6px;
+}
+
+.hw-sheet-index {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #f1f5f9;
+}
+
+.hw-sheet-topic {
+    font-size: 0.72rem;
+    color: #94a3b8;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 140px;
+}
+
+.hw-sheet-status-badge {
+    font-size: 0.70rem;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 4px;
+    white-space: nowrap;
+}
+
+.hw-sheet-status-badge.done {
+    background: rgba(16, 185, 129, 0.2);
+    color: #34d399;
+}
+
+.hw-sheet-status-badge.submitted {
+    background: rgba(168, 85, 247, 0.2);
+    color: #c084fc;
+}
+
+.hw-sheet-status-badge.todo {
+    background: rgba(255, 255, 255, 0.08);
+    color: #94a3b8;
+}
+
+/* Dual Components Row */
+.hw-components-container {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.hw-component-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 8px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 6px;
+    font-size: 0.74rem;
+}
+
+.hw-component-label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    color: #cbd5e1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.hw-component-actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.btn-hw-toggle {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #cbd5e1;
+    font-size: 0.70rem;
+    padding: 2px 7px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.btn-hw-toggle:hover {
+    background: rgba(56, 189, 248, 0.2);
+    border-color: #38bdf8;
+    color: #38bdf8;
+}
+
+.btn-hw-toggle.active {
+    background: rgba(16, 185, 129, 0.25);
+    border-color: #10b981;
+    color: #34d399;
+    font-weight: 700;
+}
+
+.hw-link-btn {
+    color: #38bdf8;
+    text-decoration: none;
+    font-size: 0.70rem;
+    padding: 2px 4px;
+    border-radius: 4px;
+}
+
+.hw-link-btn:hover {
+    background: rgba(56, 189, 248, 0.15);
+}
+
+.hw-sheet-highlight-pulse {
+    animation: hwPulseHighlight 2s ease-in-out;
+}
+
+@keyframes hwPulseHighlight {
+    0% { box-shadow: 0 0 0 rgba(56, 189, 248, 0); }
+    50% { box-shadow: 0 0 25px rgba(56, 189, 248, 0.6); border-color: #38bdf8; }
+    100% { box-shadow: 0 0 0 rgba(56, 189, 248, 0); }
+}
