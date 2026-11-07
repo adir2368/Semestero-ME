@@ -10258,8 +10258,13 @@ html.is-iphone .app-global-footer {
         height: 100% !important;
         min-height: 0 !important;
         overflow: hidden !important;
-        display: flex !important;
         flex-direction: column !important;
+    }
+
+    #planner-workspace[style*="display: none"],
+    #planner-workspace[style*="display:none"],
+    #planner-workspace.hidden {
+        display: none !important;
     }
 
     .planner-wrapper {
@@ -16958,8 +16963,13 @@ tr.is-task-pinned {
         height: 100% !important;
         min-height: 0 !important;
         overflow: hidden !important;
-        display: flex !important;
         flex-direction: column !important;
+    }
+
+    #planner-workspace[style*="display: none"],
+    #planner-workspace[style*="display:none"],
+    #planner-workspace.hidden {
+        display: none !important;
     }
 
     .planner-wrapper {

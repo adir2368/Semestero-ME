@@ -434,6 +434,37 @@ async function run() {
             assert.strictEqual(result.currentView, 'catalog', 'setPlannerMobileView failed to set catalog view');
         });
 
+        // Test 14: Strict Workspace Tab Isolation (Zero Bleedthrough)
+        await test('Workspace Tab Isolation: Strict display none for inactive workspaces (Zero Bleedthrough)', async () => {
+            const result = await cdp.eval(`(() => {
+                const tabTasks = document.getElementById('tab-tasks');
+                if (tabTasks) tabTasks.click();
+
+                const pw = document.getElementById('planner-workspace');
+                const tw = document.getElementById('notion-tasks-workspace');
+
+                const plannerOnTasks = pw ? getComputedStyle(pw).display : null;
+                const tasksOnTasks = tw ? getComputedStyle(tw).display : null;
+
+                const tabPlanner = document.getElementById('tab-planner');
+                if (tabPlanner) tabPlanner.click();
+
+                const plannerOnPlanner = pw ? getComputedStyle(pw).display : null;
+                const tasksOnPlanner = tw ? getComputedStyle(tw).display : null;
+
+                return {
+                    plannerOnTasks,
+                    tasksOnTasks,
+                    plannerOnPlanner,
+                    tasksOnPlanner
+                };
+            })()`);
+            assert.strictEqual(result.plannerOnTasks, 'none', 'Planner workspace must be strictly display:none when on Tasks tab');
+            assert.notStrictEqual(result.tasksOnTasks, 'none', 'Tasks workspace must be visible when on Tasks tab');
+            assert.notStrictEqual(result.plannerOnPlanner, 'none', 'Planner workspace must be visible when on Planner tab');
+            assert.strictEqual(result.tasksOnPlanner, 'none', 'Tasks workspace must be strictly display:none when on Planner tab');
+        });
+
 
     } finally {
         console.log(`\n========================================================================`);
