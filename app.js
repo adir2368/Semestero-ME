@@ -14971,17 +14971,48 @@ function saveQuest() {
     }
 
     const newTask = {
-        id: `${course.code}_${type}_${Date.now()}`,
+        id: `task-${course.code}_${type}_${Date.now()}`,
         title,
         type,
         xp,
         completed: false,
         status: 'not_started',
-        dueDate: date
+        dueDate: date,
+        source: 'manual',
+        dueTimestamp: date ? (Date.parse(date) || 0) : 0
     };
 
-    course.tasks.push(newTask);
-    notifyStateChanged();
+    if (!Array.isArray(course.tasks)) course.tasks = [];
+
+    // Auto-reconcile with existing unlinked Moodle task if present
+    if (window.MoodleSync && typeof window.MoodleSync.reconcileManualTaskWithCourse === 'function') {
+        const merged = window.MoodleSync.reconcileManualTaskWithCourse(course, newTask);
+        if (!merged) {
+            course.tasks.push(newTask);
+        }
+    } else {
+        course.tasks.push(newTask);
+    }
+
+    // Auto-promote course to active so it immediately appears in Notion Tasks table
+    if (course.status !== 'mastered' && course.status !== 'active') {
+        course.status = 'active';
+    }
+
+    saveState();
+    viewsDirtyState.tasks = true;
+    viewsDirtyState.calendar = true;
+
+    // Refresh course filter if active courses changed
+    if (typeof populateNotionCourseFilter === 'function') {
+        populateNotionCourseFilter();
+    }
+
+    notifyStateChanged({ tab: 'tasks' });
+
+    if (typeof renderNotionTasksTable === 'function') {
+        renderNotionTasksTable();
+    }
     
     // Hide form and reset fields
     document.getElementById("form-add-quest").style.display = 'none';
@@ -17105,17 +17136,26 @@ function renderNotionTasksTable() {
         
         // Semester Multi-select Filter
         const cSem = course.semester || 1;
+        const isCourseActiveNow = (course.status === 'active');
+        const hasPendingTasks = course.tasks && course.tasks.some(t => !t.completed && t.status !== 'done' && t.status !== 'submitted');
+
         if (activeSemesterFilters) {
-            if (!activeSemesterFilters.has(cSem)) return;
+            const matchesSem = activeSemesterFilters.has(cSem) || 
+                               (isCourseActiveNow && activeSemesterFilters.has(curActiveSem)) ||
+                               (hasPendingTasks && activeSemesterFilters.has(curActiveSem));
+            if (!matchesSem) return;
         } else if (semesterFilter === 'active') {
-            if (cSem < curActiveSem && course.status === 'mastered') {
-                return; // Hide past completed semesters by default
+            if (cSem < curActiveSem && course.status === 'mastered' && !hasPendingTasks) {
+                return; // Hide past completed semesters only if no pending tasks remain
             }
-            if (cSem > curActiveSem && course.status !== 'active' && course.status !== 'available') {
-                return; // Hide future semesters unless active or available
+            if (cSem > curActiveSem && course.status !== 'active' && course.status !== 'available' && !hasPendingTasks) {
+                return; // Hide future semesters unless active, available, or has pending tasks
             }
         } else if (semesterFilter !== 'all') {
-            if (String(cSem) !== String(semesterFilter)) return;
+            const matchesSem = (String(cSem) === String(semesterFilter)) || 
+                               (isCourseActiveNow && String(curActiveSem) === String(semesterFilter)) ||
+                               (hasPendingTasks && String(curActiveSem) === String(semesterFilter));
+            if (!matchesSem) return;
         }
 
         if (!Array.isArray(course.tasks)) course.tasks = [];
@@ -17183,7 +17223,7 @@ function renderNotionTasksTable() {
     
     // Sequential Task Gating ("Next-Action Focus" / משימה רלוונטית בלבד)
     const focusBtn = document.getElementById("notion-focus-toggle-btn");
-    const isFocusMode = focusBtn ? focusBtn.classList.contains("active") : (localStorage.getItem("semestero_notion_focus_mode") !== "false");
+    const isFocusMode = focusBtn ? focusBtn.classList.contains("active") : (localStorage.getItem("semestero_notion_focus_mode") === "true");
     if (isFocusMode && !searchQuery) {
         const uncompletedSeqSeen = new Set();
         allTasks.sort((a, b) => a.dueTime - b.dueTime);
@@ -17191,6 +17231,11 @@ function renderNotionTasksTable() {
             const isDone = item.task.status === 'done' || item.task.status === 'submitted';
             if (isDone) return true; // Allow completed history if status filter allows
             
+            // Manual tasks and pinned tasks are EXEMPT from gating - never hide user-added tasks!
+            if (item.task.source === 'manual' || item.task.pinned || (item.task.id && String(item.task.id).startsWith('task-'))) {
+                return true;
+            }
+
             const cat = getTaskNormalizedCategory(item.task.type);
             const seqKey = `${item.course.code}:::${cat}`;
             if (uncompletedSeqSeen.has(seqKey)) {
@@ -18868,7 +18913,7 @@ function setupNotionFocusToggle() {
     if (!focusBtn) return;
     
     const saved = localStorage.getItem("semestero_notion_focus_mode");
-    const isFocus = saved !== "false";
+    const isFocus = saved === "true";
     focusBtn.classList.toggle("active", isFocus);
     
     focusBtn.onclick = (e) => {
@@ -23379,11 +23424,11 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.11.07-v2.10.8",
+    code: "REV-2026.11.07-v2.10.9",
     version: "2.10.8",
     build: "20261107_03",
     date: "2026-11-07 01:20",
-    description: "v2.10.8: צמצום ויזואלי בסרגל תכנון תואר, בורר תצוגה נייד (לוח/מאגר/הכל), פתרון שורשי לחיתוך גלילה במובייל ומזעור מעקב שיעורי בית (ADR-077)."
+    description: "v2.10.9: צמצום ויזואלי בסרגל תכנון תואר, בורר תצוגה נייד (לוח/מאגר/הכל), פתרון שורשי לחיתוך גלילה במובייל ומזעור מעקב שיעורי בית (ADR-077)."
 };
 window.APP_VERSION = APP_CURRENT_REVISION.version;
 

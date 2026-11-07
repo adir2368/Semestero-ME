@@ -465,6 +465,60 @@ async function run() {
             assert.strictEqual(result.tasksOnPlanner, 'none', 'Tasks workspace must be strictly display:none when on Planner tab');
         });
 
+        // Test 15: Manual Course Tasks Visibility & Focus Mode Gating Exemption
+        await test('Manual Course Tasks Visibility: Immediate table rendering & focus gating exemption', async () => {
+            const result = await cdp.eval(`(() => {
+                const tabTasks = document.getElementById('tab-tasks');
+                if (tabTasks) tabTasks.click();
+
+                const courseCodes = Object.keys(window.gameState.courses);
+                const courseCode = courseCodes.find(c => window.gameState.courses[c].status === 'active') || courseCodes[0];
+                const course = window.gameState.courses[courseCode];
+                if (!course) return { success: false, reason: "No courses found" };
+
+                openCourseDetails(course.code);
+
+                const titleInput = document.getElementById("input-quest-title");
+                const typeInput = document.getElementById("input-quest-type");
+                const dateInput = document.getElementById("input-quest-date");
+                if (!titleInput || !typeInput || !dateInput) return { success: false, reason: "Missing inputs" };
+
+                titleInput.value = "מטלת בדיקה אוטומטית";
+                typeInput.value = "hw";
+                dateInput.value = "2026-11-30";
+
+                saveQuest();
+
+                renderNotionTasksTable();
+
+                const tableBody = document.getElementById("notion-tasks-table-body");
+                const hasTaskRow = tableBody && tableBody.innerText.includes("מטלת בדיקה אוטומטית");
+
+                window.MoodleSync.deduplicateCourseTasks(course);
+                const hasTaskAfterMoodleSync = course.tasks.some(t => t.title === "מטלת בדיקה אוטומטית" && t.source === "manual");
+
+                const focusBtn = document.getElementById("notion-focus-toggle-btn");
+                if (focusBtn && !focusBtn.classList.contains("active")) {
+                    focusBtn.click();
+                }
+                renderNotionTasksTable();
+                const hasTaskInFocusMode = tableBody && tableBody.innerText.includes("מטלת בדיקה אוטומטית");
+
+                // Cleanup test task
+                course.tasks = course.tasks.filter(t => t.title !== "מטלת בדיקה אוטומטית");
+                saveState();
+                renderNotionTasksTable();
+
+                return {
+                    success: Boolean(hasTaskRow && hasTaskAfterMoodleSync && hasTaskInFocusMode),
+                    hasTaskRow,
+                    hasTaskAfterMoodleSync,
+                    hasTaskInFocusMode
+                };
+            })()`);
+            assert(result.success, `Manual task must be visible in table, preserved after deduplication, and exempt from focus gating: ${JSON.stringify(result)}`);
+        });
+
 
     } finally {
         console.log(`\n========================================================================`);

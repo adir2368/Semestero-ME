@@ -797,7 +797,7 @@
                 moodleEventId: primary.moodleEventId || secondary.moodleEventId || this.extractMoodleId(secondary) || this.extractMoodleId(primary),
                 moodleUid: primary.moodleUid || secondary.moodleUid,
                 moodleUrl: primary.moodleUrl || secondary.moodleUrl,
-                source: primary.source || secondary.source || (this.extractMoodleId(primary) ? 'moodle' : undefined),
+                source: (primary.source === 'manual' || secondary.source === 'manual') ? 'manual' : (primary.source || secondary.source || (this.extractMoodleId(primary) ? 'moodle' : undefined)),
                 pinned: !!(primary.pinned || secondary.pinned),
                 notes: primary.notes || secondary.notes || undefined,
                 comments: (Array.isArray(primary.comments) || Array.isArray(secondary.comments))
@@ -825,19 +825,22 @@
                 if (!candidate) continue;
 
                 // Purge non-task items (Zoom links, virtual sessions, opening notices)
-                const isNonTask = (
-                    /(זום|zoom)/i.test(candidate.title || '') ||
-                    (candidate.moodleUrl && /(זום|zoom)/i.test(candidate.moodleUrl)) ||
-                    (candidate.title && (
-                        candidate.title.startsWith('נפתח ב') ||
-                        candidate.title.startsWith('נפתח:') ||
-                        candidate.title.includes('תאריך תחילת') ||
-                        candidate.title.endsWith('opens')
-                    ))
-                );
-                if (isNonTask) {
-                    removedCount++;
-                    continue;
+                const isManual = candidate.source === 'manual' || (candidate.id && String(candidate.id).startsWith('task-'));
+                if (!isManual) {
+                    const isNonTask = (
+                        /(זום|zoom)/i.test(candidate.title || '') ||
+                        (candidate.moodleUrl && /(זום|zoom)/i.test(candidate.moodleUrl)) ||
+                        (candidate.title && (
+                            candidate.title.startsWith('נפתח ב') ||
+                            candidate.title.startsWith('נפתח:') ||
+                            candidate.title.includes('תאריך תחילת') ||
+                            candidate.title.endsWith('opens')
+                        ))
+                    );
+                    if (isNonTask) {
+                        removedCount++;
+                        continue;
+                    }
                 }
 
                 let mergedIndex = -1;
