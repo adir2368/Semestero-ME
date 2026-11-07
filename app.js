@@ -1849,9 +1849,10 @@ function getTaskTypeBadgeHtml(task) {
     const title = (task.title || "").toLowerCase();
     const type = task.type || "";
     
-    // 1. WebWork: dedicated "planet with lines" WWW globe icon
-    if (title.includes("webwork") || type === "webwork") {
-        return `<span class="notion-task-badge webwork" title="WebWork"><span class="badge-icon">🌐</span><span class="badge-text">WebWork</span></span>`;
+    // 1. WebWork & Electronic / SCORM / Lomda exercises
+    if (title.includes("webwork") || type === "webwork" || title.includes("אלקטרוני") || title.includes("לומדה") || title.includes("scorm") || type === "hw_digital") {
+        const badgeLabel = title.includes("לומדה") || title.includes("scorm") ? "לומדה" : (title.includes("אלקטרוני") ? "אלקטרוני" : "WebWork");
+        return `<span class="notion-task-badge webwork" title="מטלה מקוונת / לומדה / WebWork"><span class="badge-icon">🌐</span><span class="badge-text">${badgeLabel}</span></span>`;
     }
     
     // 2. Exam: official exam indicator
@@ -9647,11 +9648,32 @@ function loadSavedState() {
             if (gameState.courses['104228']) {
                 const c = gameState.courses['104228'];
                 if (!c.tasks) c.tasks = [];
+                if (c.status !== 'active') c.status = 'active';
                 let exA = c.tasks.find(t => t.id === '104228_ex' || t.title.includes('מועד א'));
                 if (exA) { exA.dueDate = '2027-02-24'; exA.title = "מד\"ח - מועד א'"; }
                 let exB = c.tasks.find(t => t.id === '104228_ex_b' || t.title.includes("מועד ב"));
                 if (exB) { exB.dueDate = '2027-03-26'; exB.title = "מד\"ח - מועד ב'"; }
                 else { c.tasks.push({ id: '104228_ex_b', title: "מד\"ח - מועד ב'", type: 'exam', xp: 500, completed: false, status: 'not_started', dueDate: '2027-03-26' }); }
+
+                // Active Moodle 26 SCORM Electronic Exercise: תרגיל אלקטרוני 1 - סיווג מד"ח (חבילת לומדה - SCORM)
+                let scormTask = c.tasks.find(t => t.id === 'task_moodle_scorm_95378' || t.title.includes('סיווג מד"ח') || t.title.includes('תרגיל אלקטרוני 1'));
+                if (!scormTask) {
+                    c.tasks.unshift({
+                        id: 'task_moodle_scorm_95378',
+                        moodleEventId: '95378',
+                        moodleUrl: 'https://moodle26.technion.ac.il/mod/scorm/view.php?id=95378',
+                        source: 'moodle',
+                        title: 'תרגיל אלקטרוני 1 - סיווג מד"ח (חבילת לומדה)',
+                        type: 'hw',
+                        xp: 50,
+                        completed: false,
+                        status: 'not_started',
+                        dueDate: '2026-11-09 23:59'
+                    });
+                } else {
+                    scormTask.dueDate = '2026-11-09 23:59';
+                    if (!scormTask.moodleUrl) scormTask.moodleUrl = 'https://moodle26.technion.ac.il/mod/scorm/view.php?id=95378';
+                }
             }
             if (gameState.courses['03940805']) {
                 const c = gameState.courses['03940805'];
@@ -16524,7 +16546,9 @@ function populateNotionCourseFilter() {
         const currentVal = select.value || "all";
         select.innerHTML = '<option value="all">הכל (כל הקורסים)</option>';
         Object.values(gameState.courses).forEach(course => {
-            if (course.status === 'active') {
+            const hasManual = course.tasks && course.tasks.some(t => t.source === 'manual' || (t.id && String(t.id).startsWith('task-')));
+            const hasPending = course.tasks && course.tasks.some(t => !t.completed && t.status !== 'done' && t.status !== 'submitted');
+            if (course.status === 'active' || hasManual || hasPending) {
                 const opt = document.createElement("option");
                 opt.value = course.code;
                 const shortName = (typeof COURSE_SHORT_NAMES !== 'undefined' && COURSE_SHORT_NAMES[course.code]) || course.name;
@@ -16538,7 +16562,11 @@ function populateNotionCourseFilter() {
     const courseFilterBody = document.getElementById("notion-course-filter-body");
     if (courseFilterBody) {
         courseFilterBody.innerHTML = '';
-        const activeCourses = Object.values(gameState.courses).filter(c => c.status === 'active');
+        const activeCourses = Object.values(gameState.courses).filter(c => {
+            const hasManual = c.tasks && c.tasks.some(t => t.source === 'manual' || (t.id && String(t.id).startsWith('task-')));
+            const hasPending = c.tasks && c.tasks.some(t => !t.completed && t.status !== 'done' && t.status !== 'submitted');
+            return c.status === 'active' || hasManual || hasPending;
+        });
         activeCourses.forEach(course => {
             const shortName = (typeof COURSE_SHORT_NAMES !== 'undefined' && COURSE_SHORT_NAMES[course.code]) || course.name;
             const row = document.createElement("div");
@@ -16620,7 +16648,7 @@ function updateOrganitCategoryCounts(allTasks) {
     let counts = { all: allTasks.length, hw: 0, exam: 0, project: 0, miluim: 0 };
     allTasks.forEach(item => {
         const t = item.task;
-        if (t.type === 'hw' || t.type === 'homework' || t.type === 'assignment' || t.type === 'quiz') counts.hw++;
+        if (t.type === 'hw' || t.type === 'homework' || t.type === 'assignment' || t.type === 'quiz' || t.type === 'webwork' || t.type === 'hw_digital' || t.type === 'hw_written' || (t.title && /תרגיל|מטלה|גיליון|גליון|שאלון|לומדה|scorm|webwork/i.test(t.title))) counts.hw++;
         if (t.type === 'exam' || t.type === 'midterm' || t.type === 'moed_a' || t.type === 'moed_b') counts.exam++;
         if (t.type === 'project' || t.type === 'lab') counts.project++;
         if (t.isMiluim === true || t.miluim === true) counts.miluim++;
@@ -17245,7 +17273,7 @@ function renderNotionTasksTable() {
         // 0. Organit++ Category Filter
         const organitCat = window.activeOrganitCategory || 'all';
         if (organitCat !== 'all') {
-            if (organitCat === 'hw' && !(t.type === 'hw' || t.type === 'homework' || t.type === 'assignment' || t.type === 'quiz')) {
+            if (organitCat === 'hw' && !(t.type === 'hw' || t.type === 'homework' || t.type === 'assignment' || t.type === 'quiz' || t.type === 'webwork' || t.type === 'hw_digital' || t.type === 'hw_written' || (t.title && /תרגיל|מטלה|גיליון|גליון|שאלון|לומדה|scorm|webwork/i.test(t.title)))) {
                 return false;
             }
             if (organitCat === 'exam' && !(t.type === 'exam' || t.type === 'midterm' || t.type === 'moed_a' || t.type === 'moed_b')) {
@@ -23487,11 +23515,11 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.11.07-v2.10.10",
-    version: "2.10.8",
+    code: "REV-2026.11.07-v2.10.11",
+    version: "2.10.11",
     build: "20261107_03",
     date: "2026-11-07 01:20",
-    description: "v2.10.10: צמצום ויזואלי בסרגל תכנון תואר, בורר תצוגה נייד (לוח/מאגר/הכל), פתרון שורשי לחיתוך גלילה במובייל ומזעור מעקב שיעורי בית (ADR-077)."
+    description: "v2.10.11: סנכרון תרגיל אלקטרוני ולומדות SCORM במד\"ח, חסינות משימות ידניות ממחיקה/מיזוג כפילויות, ותאימות קטלוג SAP וסילבוס טכניון מלא (ADR-080)."
 };
 window.APP_VERSION = APP_CURRENT_REVISION.version;
 
@@ -25086,7 +25114,70 @@ function compareSemver(v1, v2) {
 
 // Zero-Lag Multi-Tier Remote Version Resolver (Bypasses Fastly raw CDN caching)
 async function fetchLatestRemoteVersion() {
-    // Priority 1: GitHub Releases API (Instantaneous upon release publish, zero Fastly CDN cache delay)
+    const candidates = [];
+
+    // Priority 1: GitHub Contents API for package.json on main (Authoritative live deployed code)
+    try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 4000);
+        const resp = await fetch(`https://api.github.com/repos/adir2368/Semestero-ME/contents/package.json?ref=main&_nc=${Date.now()}`, {
+            cache: 'no-store',
+            headers: { 'Accept': 'application/vnd.github.v3.raw' },
+            signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+        if (resp.ok) {
+            const pkg = await resp.json();
+            if (pkg && pkg.version) {
+                const ver = pkg.version.trim();
+                candidates.push({ version: ver, notes: pkg.description || '', source: 'github_contents' });
+            }
+        }
+    } catch (e) {
+        console.warn('[VersionCheck] GitHub Contents API error:', e);
+    }
+
+    // Priority 2: raw.githubusercontent.com fallback for package.json
+    try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 4000);
+        const resp = await fetch(`https://raw.githubusercontent.com/adir2368/Semestero-ME/main/package.json?_nc=${Date.now()}`, {
+            cache: 'no-store',
+            signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+        if (resp.ok) {
+            const pkg = await resp.json();
+            if (pkg && pkg.version) {
+                const ver = pkg.version.trim();
+                candidates.push({ version: ver, notes: pkg.description || '', source: 'github_raw' });
+            }
+        }
+    } catch (e) {
+        console.warn('[VersionCheck] GitHub Raw fallback error:', e);
+    }
+
+    // Priority 3: Local / Origin package.json
+    try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 3000);
+        const resp = await fetch(`./package.json?_nc=${Date.now()}`, {
+            cache: 'no-store',
+            signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+        if (resp.ok) {
+            const pkg = await resp.json();
+            if (pkg && pkg.version) {
+                const ver = pkg.version.trim();
+                candidates.push({ version: ver, notes: pkg.description || '', source: 'origin_pkg' });
+            }
+        }
+    } catch (e) {
+        console.warn('[VersionCheck] Origin package.json error:', e);
+    }
+
+    // Priority 4: GitHub Releases API
     try {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 3500);
@@ -25101,106 +25192,20 @@ async function fetchLatestRemoteVersion() {
             if (data && data.tag_name) {
                 const tagMatch = data.tag_name.match(/(\d+\.\d+\.\d+)/);
                 if (tagMatch) {
-                    const ver = tagMatch[1];
-                    console.log(`[VersionCheck] Source 1 (GitHub Releases API) returned v${ver}`);
-                    return { version: ver, notes: data.name || data.body || '', source: 'github_releases' };
+                    candidates.push({ version: tagMatch[1], notes: data.name || data.body || '', source: 'github_releases' });
                 }
             }
         }
     } catch (e) {
-        console.warn('[VersionCheck] Source 1 (GitHub Releases) error:', e);
+        console.warn('[VersionCheck] GitHub Releases error:', e);
     }
 
-    // Priority 2: GitHub Tags API (Immediate git tag index)
-    try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 3500);
-        const resp = await fetch(`https://api.github.com/repos/adir2368/Semestero-ME/tags?per_page=1&_nc=${Date.now()}`, {
-            cache: 'no-store',
-            headers: { 'Accept': 'application/vnd.github.v3+json' },
-            signal: controller.signal
-        });
-        clearTimeout(timeoutId);
-        if (resp.ok) {
-            const tags = await resp.json();
-            if (Array.isArray(tags) && tags.length > 0 && tags[0].name) {
-                const tagMatch = tags[0].name.match(/(\d+\.\d+\.\d+)/);
-                if (tagMatch) {
-                    const ver = tagMatch[1];
-                    console.log(`[VersionCheck] Source 2 (GitHub Tags API) returned v${ver}`);
-                    return { version: ver, notes: '', source: 'github_tags' };
-                }
-            }
-        }
-    } catch (e) {
-        console.warn('[VersionCheck] Source 2 (GitHub Tags) error:', e);
-    }
+    if (candidates.length === 0) return null;
 
-    // Priority 3: GitHub Contents API for package.json (Live git repo contents, not Fastly raw CDN)
-    try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 3500);
-        const resp = await fetch(`https://api.github.com/repos/adir2368/Semestero-ME/contents/package.json?ref=main&_nc=${Date.now()}`, {
-            cache: 'no-store',
-            headers: { 'Accept': 'application/vnd.github.v3.raw' },
-            signal: controller.signal
-        });
-        clearTimeout(timeoutId);
-        if (resp.ok) {
-            const pkg = await resp.json();
-            if (pkg && pkg.version) {
-                const ver = pkg.version.trim();
-                console.log(`[VersionCheck] Source 3 (GitHub Contents API) returned v${ver}`);
-                return { version: ver, notes: pkg.description || '', source: 'github_contents' };
-            }
-        }
-    } catch (e) {
-        console.warn('[VersionCheck] Source 3 (GitHub Contents) error:', e);
-    }
-
-    // Priority 4: Origin package.json (Direct local origin fetch)
-    try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 3000);
-        const resp = await fetch(`./package.json?_nc=${Date.now()}`, {
-            cache: 'no-store',
-            signal: controller.signal
-        });
-        clearTimeout(timeoutId);
-        if (resp.ok) {
-            const pkg = await resp.json();
-            if (pkg && pkg.version) {
-                const ver = pkg.version.trim();
-                console.log(`[VersionCheck] Source 4 (Origin package.json) returned v${ver}`);
-                return { version: ver, notes: pkg.description || '', source: 'origin_pkg' };
-            }
-        }
-    } catch (e) {
-        console.warn('[VersionCheck] Source 4 (Origin package.json) error:', e);
-    }
-
-    // Priority 5: raw.githubusercontent.com fallback
-    try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 3500);
-        const resp = await fetch(`https://raw.githubusercontent.com/adir2368/Semestero-ME/main/package.json?_nc=${Date.now()}`, {
-            cache: 'no-store',
-            signal: controller.signal
-        });
-        clearTimeout(timeoutId);
-        if (resp.ok) {
-            const pkg = await resp.json();
-            if (pkg && pkg.version) {
-                const ver = pkg.version.trim();
-                console.log(`[VersionCheck] Source 5 (raw.githubusercontent) returned v${ver}`);
-                return { version: ver, notes: pkg.description || '', source: 'github_raw' };
-            }
-        }
-    } catch (e) {
-        console.warn('[VersionCheck] Source 5 (raw.githubusercontent) error:', e);
-    }
-
-    return null;
+    // Pick highest semver among all responsive sources
+    candidates.sort((a, b) => compareSemver(b.version, a.version));
+    console.log('[VersionCheck] Selected latest remote candidate:', candidates[0]);
+    return candidates[0];
 }
 
 window.openExternalUrlOrBrowser = function(url) {
@@ -28533,7 +28538,7 @@ function getDynamicCourseHomeworkPolicy(course) {
     if (COURSE_HOMEWORK_POLICIES[cleanCode]) return COURSE_HOMEWORK_POLICIES[cleanCode];
 
     const tasks = Array.isArray(course.tasks) ? course.tasks : [];
-    const hwTasks = tasks.filter(t => t.type === 'hw' || (t.title && /תרגיל|מטלה|גיליון|גליון|hw/i.test(t.title)));
+    const hwTasks = tasks.filter(t => t.type === 'hw' || t.type === 'webwork' || t.type === 'hw_digital' || t.type === 'hw_written' || (t.title && /תרגיל|מטלה|גיליון|גליון|שאלון|לומדה|scorm|webwork|hw/i.test(t.title)));
     if (hwTasks.length === 0) return null;
 
     const total = Math.max(hwTasks.length, 6);

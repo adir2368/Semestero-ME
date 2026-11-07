@@ -521,6 +521,8 @@
                 category = 'project';
             } else if (/בוחן|קוויז|quiz/i.test(t)) {
                 category = 'quiz';
+            } else if (/(אלקטרוני|שאלון|דיגיטלי|מקוון|לומדה|scorm|webwork|lon-capa|מבדק)/i.test(title || '') || /(אלקטרוני|שאלון|דיגיטלי|מקוון|לומדה|scorm|webwork|lon-capa|מבדק)/i.test(t)) {
+                category = 'hw_digital';
             } else if (/(הגשת\s*פתרון|פתרון\s*בכתב|סריקה|סריקת\s*פתרון|פתרון\s*תרגיל|פתרון\s*גיליון)/i.test(title || '')) {
                 category = 'hw_written';
             }
@@ -667,6 +669,12 @@
                 if (!existing || existing.id === manualTask.id) continue;
                 if (this.areTasksDuplicates(existing, manualTask, course.name)) {
                     course.tasks[i] = this.mergeTaskPair(existing, manualTask);
+                    course.tasks[i].source = 'manual';
+                    if (manualTask.title) course.tasks[i].title = manualTask.title;
+                    if (manualTask.dueDate) {
+                        course.tasks[i].dueDate = manualTask.dueDate;
+                        course.tasks[i].dueTimestamp = manualTask.dueTimestamp || (Date.parse(manualTask.dueDate) || 0);
+                    }
                     if (manualTask.completed || manualTask.status === 'done' || manualTask.status === 'submitted') {
                         course.tasks[i].completed = true;
                         course.tasks[i].status = 'done';
@@ -754,11 +762,17 @@
         },
 
         mergeTaskPair(primary, secondary) {
-            // Keep most detailed/up-to-date title
+            // Keep most detailed/up-to-date title, strictly prioritizing explicit manual task titles
             const t1 = primary.title || '';
             const t2 = secondary.title || '';
             let chosenTitle = t1;
-            if (t2.length > t1.length && !t1.includes('בונוס') && !t1.includes('(העתק)')) {
+            const isManual1 = primary.source === 'manual' || (primary.id && String(primary.id).startsWith('task-'));
+            const isManual2 = secondary.source === 'manual' || (secondary.id && String(secondary.id).startsWith('task-'));
+            if (isManual2 && !isManual1) {
+                chosenTitle = t2;
+            } else if (isManual1 && !isManual2) {
+                chosenTitle = t1;
+            } else if (t2.length > t1.length && !t1.includes('בונוס') && !t1.includes('(העתק)')) {
                 chosenTitle = t2;
             } else if (t2.includes('בונוס') && !t1.includes('בונוס')) {
                 chosenTitle = t2;
