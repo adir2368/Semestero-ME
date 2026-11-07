@@ -519,6 +519,46 @@ async function run() {
             assert(result.success, `Manual task must be visible in table, preserved after deduplication, and exempt from focus gating: ${JSON.stringify(result)}`);
         });
 
+        // Test 16: Technion SAP SLcM Catalog & Anti-Requisites Integration
+        await test('Technion SAP SLcM: Authoritative catalog, anti-requisites & live exam metadata', async () => {
+            const result = await cdp.eval(`(async () => {
+                if (typeof ensureCheeseForkDatabase === 'function') {
+                    await ensureCheeseForkDatabase();
+                }
+                const db = window.CHEESEFORK_DB || [];
+                const course34032 = db.find(c => c.code6 === '034032' || c.rawNum === '00340032');
+                const hasCourse = !!course34032;
+                const hasAntiReq = hasCourse && typeof course34032.antiRequisites === 'string' && course34032.antiRequisites.length > 0;
+                const hasSchedule = hasCourse && Array.isArray(course34032.schedule) && course34032.schedule.length > 0;
+                const hasBuildingRoom = hasSchedule && course34032.schedule.some(s => s.building && s.room);
+
+                // Check modal rendering
+                openCourseDetails('034032');
+                const modal = document.getElementById('course-modal');
+                const cfContainer = document.getElementById('modal-cheesefork-container');
+                const hasSapBadge = cfContainer && cfContainer.innerHTML.includes('Technion SAP 2026/27');
+                const hasSapLink = cfContainer && cfContainer.innerHTML.includes('portalex.technion.ac.il/ovv');
+                const hasAntiReqBanner = cfContainer && cfContainer.innerHTML.includes('ללא זיכוי נוסף');
+
+                return {
+                    dbCount: db.length,
+                    hasCourse,
+                    hasAntiReq,
+                    hasBuildingRoom,
+                    hasSapBadge,
+                    hasSapLink,
+                    hasAntiReqBanner
+                };
+            })()`);
+            assert(result.dbCount >= 2500, `Consolidated catalog must contain at least 2500 courses, got ${result.dbCount}`);
+            assert(result.hasCourse, 'Course 034032 must exist in consolidated catalog');
+            assert(result.hasAntiReq, 'Course 034032 must have official anti-requisites');
+            assert(result.hasBuildingRoom, 'Course 034032 must have classroom and building in schedule');
+            assert(result.hasSapBadge, 'Modal must display Technion SAP 2026/27 badge');
+            assert(result.hasSapLink, 'Modal must provide direct link to official Technion SAP SLcM');
+            assert(result.hasAntiReqBanner, 'Modal must render anti-requisites warning banner');
+        });
+
 
     } finally {
         console.log(`\n========================================================================`);

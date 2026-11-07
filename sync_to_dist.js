@@ -33,6 +33,7 @@ const filesToCopy = [
     'planner_catalog.js',
     'curriculum_template.js',
     'cheesefork_database.js',
+    'technion_sap_database.js',
     'cheesefork_courses.min.js',
     'cheesefork_courses_2025_200.min.js',
     'user_saved_state.json',

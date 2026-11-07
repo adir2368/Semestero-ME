@@ -1628,6 +1628,9 @@ function saveCourseIcon() {
     if (typeof renderNotionTasksTable === 'function') {
         renderNotionTasksTable();
     }
+    if (typeof renderTasksReminderBanner === 'function') {
+        renderTasksReminderBanner();
+    }
     if (typeof renderNotionCalendarMonthView === 'function') {
         renderNotionCalendarMonthView();
     }
@@ -14446,21 +14449,21 @@ function openCourseDetails(code) {
         const cfUrl = `https://cheesefork.cf/course/${cleanCode || fullCode}`;
         const isMasteredCourse = Boolean(course.status === 'mastered' || (course.grade !== null && course.grade !== undefined && Number(course.grade) >= 55) || course.isExempt);
 
-        // Auto-populate from CheeseFork database if schedule or syllabus is absent
-        if (window.CHEESEFORK_DB && Array.isArray(window.CHEESEFORK_DB)) {
-            const cfMatch = window.CHEESEFORK_DB.find(c => c.code6 === cleanCode || c.rawNum === cleanCode || c.code6 === fullCode || c.rawNum === fullCode);
-            if (cfMatch) {
-                if ((!course.schedule || course.schedule.length === 0) && cfMatch.schedule && cfMatch.schedule.length > 0 && !isMasteredCourse) {
-                    course.schedule = cfMatch.schedule;
-                }
-                if (cfMatch.syllabus && !course.syllabus) course.syllabus = cfMatch.syllabus;
-                if (cfMatch.faculty && !course.faculty) course.faculty = cfMatch.faculty;
+        // Auto-populate from CheeseFork & Technion SAP database if schedule or syllabus is absent
+        const cfMatch = (window.CHEESEFORK_DB && Array.isArray(window.CHEESEFORK_DB))
+            ? window.CHEESEFORK_DB.find(c => c.code6 === cleanCode || c.rawNum === cleanCode || c.code6 === fullCode || c.rawNum === fullCode)
+            : null;
+        if (cfMatch) {
+            if ((!course.schedule || course.schedule.length === 0) && cfMatch.schedule && cfMatch.schedule.length > 0 && !isMasteredCourse) {
+                course.schedule = cfMatch.schedule;
+            }
+            if (cfMatch.syllabus && !course.syllabus) course.syllabus = cfMatch.syllabus;
+            if (cfMatch.faculty && !course.faculty) course.faculty = cfMatch.faculty;
 
-                // STRICT TEMPORAL FILTER: NEVER copy stale dates from past semesters (< October 2026)
-                if (!isMasteredCourse) {
-                    if (cfMatch.moedA && !course.moedA && isCurrentOrUpcomingDate(cfMatch.moedA)) course.moedA = cfMatch.moedA;
-                    if (cfMatch.moedB && !course.moedB && isCurrentOrUpcomingDate(cfMatch.moedB)) course.moedB = cfMatch.moedB;
-                }
+            // STRICT TEMPORAL FILTER: NEVER copy stale dates from past semesters (< October 2026)
+            if (!isMasteredCourse) {
+                if (cfMatch.moedA && !course.moedA && isCurrentOrUpcomingDate(cfMatch.moedA)) course.moedA = cfMatch.moedA;
+                if (cfMatch.moedB && !course.moedB && isCurrentOrUpcomingDate(cfMatch.moedB)) course.moedB = cfMatch.moedB;
             }
         }
 
@@ -14486,13 +14489,16 @@ function openCourseDetails(code) {
 
         let scheduleItemsHtml = "";
         if (hasSchedule) {
-            scheduleItemsHtml = course.schedule.map(s => `
+            scheduleItemsHtml = course.schedule.map(s => {
+                const roomInfo = (s.building || s.room) ? `• ${s.building ? s.building : ''}${(s.building && s.room) ? ' ' : ''}${s.room ? ('חדר ' + s.room) : ''}` : '';
+                return `
                 <div class="modal-schedule-item">
                     <div class="modal-schedule-item-time">⏰ יום ${s.day} | ${s.hours}</div>
-                    <div class="modal-schedule-item-desc">${s.type} ${s.group ? `(קבוצה ${s.group})` : ''} ${s.room ? `• ${s.room}` : ''}</div>
-                    ${s.lecturer ? `<div class="modal-schedule-item-lecturer">מרצה: ${s.lecturer}</div>` : ''}
+                    <div class="modal-schedule-item-desc">${s.type} ${s.group ? `(קבוצה ${s.group})` : ''} ${roomInfo}</div>
+                    ${s.lecturer ? `<div class="modal-schedule-item-lecturer">מרצה/מתרגל: ${s.lecturer}</div>` : ''}
                 </div>
-            `).join("");
+            `;
+            }).join("");
         }
 
         let examsHtml = "";
@@ -14577,17 +14583,33 @@ function openCourseDetails(code) {
         cfContainer.innerHTML = `
             <div class="modal-cheesefork-section">
                 <div class="modal-cheesefork-header" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
-                    <div class="modal-cheesefork-title">
-                        <span>🧀 מערכת שעות ופרטי קורס (CheeseFork)</span>
+                    <div class="modal-cheesefork-title" style="display: flex; align-items: center; gap: 8px;">
+                        <span>🧀 מערכת שעות ופרטי קורס</span>
+                        <span style="font-size: 0.70rem; background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.35); padding: 2px 7px; border-radius: 12px; font-weight: 700;">✓ Technion SAP 2026/27</span>
                     </div>
-                    <a href="${cfUrl}" target="_blank" rel="noopener noreferrer" 
-                       class="btn btn-xs" 
-                       style="background: rgba(245, 158, 11, 0.22); border: 1px solid #f59e0b; color: #fbbf24; text-decoration: none; padding: 5px 12px; border-radius: 6px; font-size: 0.78rem; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s;" 
-                       title="פתח את דף הקורס ב-CheeseFork לצפייה בביקורות סטודנטים, דירוגי הוראה והיסטוגרמות ציונים">
-                        <span>🧀</span> צפה בביקורות והיסטוגרמות ב-CheeseFork ↗
-                    </a>
+                    <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                        <a href="https://portalex.technion.ac.il/ovv/" target="_blank" rel="noopener noreferrer"
+                           class="btn btn-xs"
+                           style="background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.4); color: #38bdf8; text-decoration: none; padding: 5px 10px; border-radius: 6px; font-size: 0.76rem; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;"
+                           title="פתח בספר הקורסים הרשמי של הטכניון ב-SAP SLcM">
+                            <span>🏛️</span> ספר הקורסים ב-SAP ↗
+                        </a>
+                        <a href="${cfUrl}" target="_blank" rel="noopener noreferrer" 
+                           class="btn btn-xs" 
+                           style="background: rgba(245, 158, 11, 0.22); border: 1px solid #f59e0b; color: #fbbf24; text-decoration: none; padding: 5px 12px; border-radius: 6px; font-size: 0.78rem; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s;" 
+                           title="פתח את דף הקורס ב-CheeseFork לצפייה בביקורות סטודנטים, דירוגי הוראה והיסטוגרמות ציונים">
+                            <span>🧀</span> CheeseFork ↗
+                        </a>
+                    </div>
                 </div>
-                ${course.faculty ? `<div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 6px;">פקולטה: ${course.faculty}</div>` : ''}
+                ${course.faculty ? `<div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 4px;">פקולטה: ${course.faculty} ${cfMatch && cfMatch.framework ? `• ${cfMatch.framework}` : ''}</div>` : ''}
+                ${(cfMatch && cfMatch.responsible) ? `<div style="font-size: 0.78rem; color: #cbd5e1; margin-bottom: 6px; background: rgba(0,0,0,0.18); padding: 4px 8px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.04);"><strong>👨‍🏫 סגל אחראי:</strong> ${cfMatch.responsible}</div>` : ''}
+                ${(cfMatch && cfMatch.antiRequisites) ? `
+                    <div style="font-size: 0.77rem; color: #fca5a5; background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 6px; padding: 6px 10px; margin-bottom: 6px; display: flex; align-items: flex-start; gap: 6px;">
+                        <span style="font-size: 0.9rem; line-height: 1;">⚠️</span>
+                        <div><strong>ללא זיכוי נוסף (איסור כפל נק״ז):</strong> ${cfMatch.antiRequisites}</div>
+                    </div>
+                ` : ''}
                 ${hasSchedule ? `<div class="modal-cheesefork-grid">${scheduleItemsHtml}</div>` : scheduleStatusNotice}
                 ${examsHtml}
                 ${moodleSyllabusHtml}
@@ -15733,7 +15755,8 @@ function renderTasksReminderBanner() {
     const tasksByCategory = {};
 
     Object.values(gameState.courses).forEach(course => {
-        if (course.status !== 'active') return;
+        const hasPendingTasks = (course.tasks || []).some(t => !t.completed && t.status !== 'done' && t.status !== 'submitted');
+        if (course.status !== 'active' && !hasPendingTasks) return;
         (course.tasks || []).forEach(task => {
             const isDone = task.completed || task.status === 'done' || task.status === 'submitted';
             if (isDone) return;
@@ -15747,12 +15770,15 @@ function renderTasksReminderBanner() {
         });
     });
 
-    // 2. Pick ONLY the first incomplete task from each category group
-    // Sort group tasks: if dueDate is set, earlier date first; otherwise keep syllabus order
+    // 2. Pick candidate items: prioritize pinned and manual tasks, then by earliest due date
     const candidateItems = [];
     Object.values(tasksByCategory).forEach(groupList => {
         if (groupList.length === 0) return;
         groupList.sort((a, b) => {
+            if (a.task.pinned && !b.task.pinned) return -1;
+            if (!a.task.pinned && b.task.pinned) return 1;
+            if (a.task.source === 'manual' && b.task.source !== 'manual') return -1;
+            if (a.task.source !== 'manual' && b.task.source === 'manual') return 1;
             if (a.task.dueDate && b.task.dueDate) {
                 return new Date(a.task.dueDate) - new Date(b.task.dueDate);
             }
@@ -15761,13 +15787,27 @@ function renderTasksReminderBanner() {
             return 0;
         });
         candidateItems.push(groupList[0]);
+        // Also include all additional manual or pinned tasks in candidate list so user-created tasks are never suppressed
+        for (let i = 1; i < groupList.length; i++) {
+            if (groupList[i].task.source === 'manual' || groupList[i].task.pinned) {
+                candidateItems.push(groupList[i]);
+            }
+        }
     });
 
     // 3. Filter candidates: ONLY tasks due in less than 2 weeks (diffDays <= 14 or overdue diffDays < 0)
     const openItems = [];
     candidateItems.forEach(({ course, task }) => {
         if (!task.dueDate) {
-            // No due date set: do not clutter urgent reminders banner; accessible in table below
+            if (task.source === 'manual' || task.pinned) {
+                openItems.push({
+                    course,
+                    task,
+                    urgency: 'upcoming',
+                    diffDays: 999,
+                    urgencyText: '📌 משימה פתוחה'
+                });
+            }
             return;
         }
 
@@ -23424,11 +23464,11 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.11.07-v2.10.9",
+    code: "REV-2026.11.07-v2.10.10",
     version: "2.10.8",
     build: "20261107_03",
     date: "2026-11-07 01:20",
-    description: "v2.10.9: צמצום ויזואלי בסרגל תכנון תואר, בורר תצוגה נייד (לוח/מאגר/הכל), פתרון שורשי לחיתוך גלילה במובייל ומזעור מעקב שיעורי בית (ADR-077)."
+    description: "v2.10.10: צמצום ויזואלי בסרגל תכנון תואר, בורר תצוגה נייד (לוח/מאגר/הכל), פתרון שורשי לחיתוך גלילה במובייל ומזעור מעקב שיעורי בית (ADR-077)."
 };
 window.APP_VERSION = APP_CURRENT_REVISION.version;
 
