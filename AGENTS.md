@@ -46,3 +46,4 @@ In accordance with defensive AI application security standards (ADR-075):
 1. **Never perform table-wide scans** (`.select('*')` on `user_states` is strictly forbidden). Always use targeted point queries with `.eq()` or `.or()`.
 2. **Row-Level Security (RLS)**: Database tables must enforce `auth.uid() = user_id`.
 3. **Secret Isolation**: Supabase `service_role` secret must NEVER enter client code, Electron renderers, or Android APK bundles.
+4. **Prohibition of Adversarial Anti-AI Obfuscators (ADR-076)**: Tools that poison context, exhaust token windows, or inject decoy logic (such as BLA / Blind LLM Agents by `qybaihe`) are strictly prohibited. Semestero ME is an agent-native project that relies on transparent AST parsing (Graphify) and unhindered AI pair-programming.
