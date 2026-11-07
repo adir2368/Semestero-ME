@@ -20,7 +20,7 @@ with open(os.path.join(ROOT, "package.json"), "r", encoding="utf-8") as f:
     pkg = json.load(f)
 VERSION = pkg.get("version", "2.10.11")
 TAG = f"v{VERSION}"
-NAME = f"Semestero ME v{VERSION} - Moodle SCORM Tasks, Manual Title Precedence & Multi-Source Version Check"
+NAME = f"Semestero ME v{VERSION} - Technion-Wide Course Catalog Search & Dynamic Degree Planning"
 
 def get_github_token():
     try:
@@ -100,6 +100,12 @@ def main():
 
     body_notes = f"""# Semestero ME {TAG} Release Notes
 
+### 1. חיפוש בכלל קורסי הטכניון לתכנון תואר (Technion-Wide Catalog Search)
+- **מאגר רזה ללא עומס כברירת מחדל**: מאגר הקורסים נשאר ממוקד ומהיר עם קורסי תוכנית הלימודים וחובות חסרות בלבד, מבלי להציף אלפי קורסים.
+- **חיפוש חי בכל 2,784 קורסי הטכניון**: הקלדת חיפוש (לפי שם או מספר כגון 234124, מדעי המחשב, איטלקית, שחייה, כלכלה) סורקת בזמן אמת את כלל הפקולטות בטכניון ומציגה את הקורסים התואמים.
+- **תיוג ושיבוץ בסמסטרים**: תיוג ייעודי (`🌐 בחירה חופשית`, `🏃 ספורט`, `🎭 מל״ג`) עם שם הפקולטה והנק"ז, ושיבוץ מיידי בכל סמסטר בלחיצה על `+` או גרירה.
+- **שקלול מלא בכללי סיום התואר וסימולטור הממוצע**: הקורסים נספרים אוטומטית במכסת הנק"ז לתואר (157.5) ובמכסת הבחירה החופשית (12.0).
+
 ### 1. תיקון אי-הופעת משימות ידניות בלוח המשימות (Manual Task Disappearance Fix)
 - **הפרדת קטגוריות טוקנים קנוניים**: הוטמעה הבחנה קנונית מוחלטת ב-`moodle_sync.js::getCanonicalTaskToken` עבור מטלות אלקטרוניות, לומדות SCORM, שאלוני WebWork ומבחנים מקוונים (`hw_digital`) לעומת שיעורי בית רגילים (`hw`) והגשות פתרון בכתב (`hw_written`). מנענו כפילות שגויה שמחקה משימות שהוזנו ידנית.
 - **עדיפות קשיחה לכותרת ידנית**: במיזוג משימות (`mergeTaskPair`), כותרת ופרטי משימה ידנית מקבלים עדיפות מוחלטת על פני שמות ברירת מחדל של קורסים.
@@ -114,7 +120,7 @@ def main():
 - ביטול קפיצה ויזואלית ל-2.10.2 וסנכרון מלא של כל תגיות הגרסה ב-DOM ל-`{TAG}`.
 
 ### 4. קבצי הפצה:
-- `Semestero-ME.apk` (Android `versionCode 65`)
+- `Semestero-ME.apk` (Android `versionCode 66`)
 - `Semestero ME-win32-x64` (Electron Desktop Client)
 """
 

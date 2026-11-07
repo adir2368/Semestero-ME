@@ -10878,6 +10878,13 @@ function searchCheeseForkCourses(query, maxResults = 8) {
     return results;
 }
 
+if (typeof window !== 'undefined') {
+    window.findCheeseForkCourse = findCheeseForkCourse;
+    window.searchCheeseForkCourses = searchCheeseForkCourses;
+    window.ensureCheeseForkDatabase = ensureCheeseForkDatabase;
+    window.initCheeseForkDatabase = initCheeseForkDatabase;
+}
+
 // ==============================================================================
 // Prerequisite Interactive Chips & Autocomplete Search Engine (v2.2.2)
 // ==============================================================================
@@ -23515,8 +23522,8 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.11.07-v2.10.11",
-    version: "2.10.11",
+    code: "REV-2026.11.07-v2.10.12",
+    version: "2.10.12",
     build: "20261107_03",
     date: "2026-11-07 01:20",
     description: "v2.10.11: סנכרון תרגיל אלקטרוני ולומדות SCORM במד\"ח, חסינות משימות ידניות ממחיקה/מיזוג כפילויות, ותאימות קטלוג SAP וסילבוס טכניון מלא (ADR-080)."

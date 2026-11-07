@@ -9392,6 +9392,12 @@ html.is-iphone .app-global-footer {
     border: 1px solid rgba(148, 163, 184, 0.3);
 }
 
+.tag-technion-wide {
+    background: rgba(14, 165, 233, 0.15) !important;
+    color: #38bdf8 !important;
+    border: 1px solid rgba(14, 165, 233, 0.35) !important;
+}
+
 .tag-sports,
 .tag-list-SPORTS {
     background: rgba(34, 197, 94, 0.15) !important;
