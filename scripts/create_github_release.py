@@ -18,9 +18,9 @@ ZIP_PATH = os.path.join(ROOT, "Semestero-ME-Windows-x64.zip")
 
 with open(os.path.join(ROOT, "package.json"), "r", encoding="utf-8") as f:
     pkg = json.load(f)
-VERSION = pkg.get("version", "2.8.8")
+VERSION = pkg.get("version", "2.10.11")
 TAG = f"v{VERSION}"
-NAME = f"Semestero ME v{VERSION} - Zero-Default Guest Mode & Multi-Tenant APK Security Hardening"
+NAME = f"Semestero ME v{VERSION} - Moodle SCORM Tasks, Manual Title Precedence & Multi-Source Version Check"
 
 def get_github_token():
     try:
@@ -58,57 +58,64 @@ def upload_asset(upload_url_template, file_path, content_type, headers):
                     print(f"[Upload] Successfully uploaded {file_name}")
                     return True
                 else:
-                    print(f"[Upload] Upload returned status {res.status}")
+                    print(f"[Upload] Failed with status {res.status}")
                     return False
     except urllib.error.HTTPError as e:
-        print(f"[Upload] HTTPError during upload of {file_name}: {e.code} {e.reason}")
+        print(f"[Upload] HTTPError: {e.code} {e.reason}")
         try:
-            print(e.read().decode())
+            print(f"[Upload] Details: {e.read().decode()}")
         except:
             pass
         return False
     except Exception as e:
-        print(f"[Upload] Exception during upload of {file_name}: {e}")
+        print(f"[Upload] Exception: {e}")
         return False
 
-def delete_existing_asset_if_any(release_id, file_name, headers):
-    url = f"https://api.github.com/repos/{REPO}/releases/{release_id}/assets"
-    req = urllib.request.Request(url, headers=headers)
+def delete_existing_asset_if_any(release_id, asset_name, headers):
     try:
+        req = urllib.request.Request(f"https://api.github.com/repos/{REPO}/releases/{release_id}/assets", headers=headers)
         with urllib.request.urlopen(req) as res:
             assets = json.loads(res.read().decode())
             for a in assets:
-                if a["name"] == file_name:
-                    print(f"[Release] Found existing asset {file_name} (id={a['id']}). Deleting for clean re-upload...")
+                if a["name"] == asset_name:
+                    print(f"[Asset] Deleting existing asset {asset_name} (id={a['id']})...")
                     del_req = urllib.request.Request(f"https://api.github.com/repos/{REPO}/releases/assets/{a['id']}", headers=headers, method="DELETE")
-                    urllib.request.urlopen(del_req)
-                    print(f"[Release] Deleted asset {file_name}")
+                    with urllib.request.urlopen(del_req) as del_res:
+                        print(f"[Asset] Deleted {asset_name}")
+                    break
     except Exception as e:
-        print(f"[Release] Notice while checking assets: {e}")
+        print(f"[Asset] Warning deleting asset: {e}")
 
 def main():
     token = get_github_token()
+    if not token:
+        print("Error: No GitHub token found.")
+        sys.exit(1)
+
     headers = {
         "Authorization": f"Bearer {token}",
-        "Accept": "application/vnd.github+json",
-        "X-GitHub-Api-Version": "2022-11-28",
-        "User-Agent": "Semestero-ME-Release-Agent"
+        "Accept": "application/vnd.github.v3+json",
+        "User-Agent": "Semestero-Release-Script"
     }
 
-    body_notes = f"""## מה חדש בגרסה v{VERSION} 🔒🛡️🎓
+    body_notes = f"""# Semestero ME {TAG} Release Notes
 
-### 1. מצב אורח נומינלי ללא חשבון דיפולטיבי (Zero-Default Nominal Guest State)
-- **פתיחה נקייה בכל הפלטפורמות**: הורדת והתקנת `Semestero-ME.apk`, גרסת ה-Windows או כניסה חדשה לאתר נפתחות תמיד במצב **אורח (Guest)** נקי ומבודד (`0.00` ממוצע, `0.0 / 157.5` נק"ז, ללא קורסים שהושלמו וללא מערכת שעות אישית) — לעולם לא בתוך חשבון דיפולטיבי.
-- **תוכנית לימודים מומלצת תקנית**: אורחים ומשתמשים חדשים מקבלים את תוכנית הלימודים המומלצת הרשמית של המסלול (פיזיקה 1 בסמסטר 2, מעבדה בכימיה בסמסטר 4, ללא יוגה/ספורט משוריין).
+### 1. תיקון אי-הופעת משימות ידניות בלוח המשימות (Manual Task Disappearance Fix)
+- **הפרדת קטגוריות טוקנים קנוניים**: הוטמעה הבחנה קנונית מוחלטת ב-`moodle_sync.js::getCanonicalTaskToken` עבור מטלות אלקטרוניות, לומדות SCORM, שאלוני WebWork ומבחנים מקוונים (`hw_digital`) לעומת שיעורי בית רגילים (`hw`) והגשות פתרון בכתב (`hw_written`). מנענו כפילות שגויה שמחקה משימות שהוזנו ידנית.
+- **עדיפות קשיחה לכותרת ידנית**: במיזוג משימות (`mergeTaskPair`), כותרת ופרטי משימה ידנית מקבלים עדיפות מוחלטת על פני שמות ברירת מחדל של קורסים.
+- **תאימות סינון ארגונית**: הרחבת סינון `hw` בארגונית++ לקבלת `webwork`, `hw_digital`, ו-`hw_written`.
+- **הכללת קורסים עם משימות בסינון**: קורסים המכילים משימות ידניות או ממתינות מוצגים אוטומטית בבורר הקורסים והסמסטרים בטבלה.
 
-### 2. אימות סשן קריפטוגרפי וניתוק רטרואקטיבי ב-APK מותקן (`ast_auth_verified_v3`)
-- הוטמע מנוע חתימת סשן מבוסס SHA-256 (`ast_device_auth_nonce_v3` + `ast_auth_verified_v3`) הנוצר אך ורק לאחר הזנת סיסמה תקינה.
-- מכשירים שכבר התקינו גרסאות APK קודמות ללא אימות סיסמה מועברים אוטומטית למצב **אורח (Guest)** מיד בטעינת האפליקציה, תוך מחיקת נתונים מקומיים ואיפוס ווידג'טים באנדרואיד (`SemesteroWidgetBridge.clearWidgetData()`).
+### 2. סנכרון תרגיל אלקטרוני ולומדות SCORM במד"ח (104228)
+- סנכרון ישיר של `תרגיל אלקטרוני 1 - סיווג מד"ח (חבילת לומדה - SCORM)` עם תאריך הגשה רשמי: יום שני, 9 בנובמבר 2026, 23:59 וקישור ישיר למודל 26 (`id=95378`).
 
-### 3. הקשחת אבטחה, הצפנת סיסמאות ובידוד אינטגרציות ו-ווידג'טים
-- **Salted SHA-256 Passwords**: החלפת סיסמאות בטקסט גלוי בגיבוב SHA-256 מומלח, חסימת פרצות URL והתאמת מחרוזות חלקית, נעילת חשבון המפתח מפני איפוס/מחיקה מרחוק, ואימות דו-שלבי (שם מלא + אימייל רשום) לאיפוס סיסמת סטודנט.
-- **הפרדת נתוני משתמשים וניקוי ווידג'טים**: הסרת כל קישורי Moodle / CheeseFork / טלפון קשיחים מקוד הלקוח והאנדרואיד, הפרדת מפתחות `localStorage` לכל מזהה משתמש (`uid`), וניטרול כל 7 הווידג'טים באנדרואיד לערכי ברירת מחדל נקיים.
-- **בדיקות אבטחה מקיפות**: סוויטת E2E חדשה (`tests/verify_zero_default_account_and_apk_security.js`) + קובץ `Semestero-ME.apk` מעודכן (`versionCode 44`).
+### 3. מנוע בדיקת גרסה רב-מקורית (Multi-Source Highest Semver Version Check)
+- החלפת התלות היחידה ב-`releases/latest` בבדיקה מרובת מקורות (GitHub Contents API `package.json`, Raw CDN, Local Origin, GitHub Releases API) ובחירת הגרסה הגבוהה ביותר באופן אוטונומי.
+- ביטול קפיצה ויזואלית ל-2.10.2 וסנכרון מלא של כל תגיות הגרסה ב-DOM ל-`{TAG}`.
+
+### 4. קבצי הפצה:
+- `Semestero-ME.apk` (Android `versionCode 65`)
+- `Semestero ME-win32-x64` (Electron Desktop Client)
 """
 
     req_tag = urllib.request.Request(f"https://api.github.com/repos/{REPO}/releases/tags/{TAG}", headers=headers)
