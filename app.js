@@ -8996,6 +8996,29 @@ function enrichTimetableWithAuthenticRooms(timetable) {
                     c.lecturer = meta.lecturer;
                     enrichedCount++;
                 }
+            } else if ((!c.room || c.room === 'כיתת טכניון' || c.room.trim() === '') && window.CHEESEFORK_DB && Array.isArray(window.CHEESEFORK_DB)) {
+                // Official Technion SAP SLcM Auto-Enrichment fallback for classrooms and instructors
+                const sapCourse = window.CHEESEFORK_DB.find(item => item.code6 === cleanCode || item.rawNum === cleanCode || item.code6 === padded6 || item.rawNum === padded8);
+                if (sapCourse && Array.isArray(sapCourse.schedule)) {
+                    const hebDays = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי'];
+                    const dayName = day.name || hebDays[day.dayIndex];
+                    const match = sapCourse.schedule.find(s => {
+                        const dayMatch = (s.day === dayName);
+                        const hoursMatch = s.hours && (s.hours.includes(c.startTime) || (c.endTime && s.hours.includes(c.endTime)));
+                        return dayMatch && hoursMatch;
+                    });
+                    if (match) {
+                        const roomStr = (match.building && match.room) ? `${match.building} חדר ${match.room}` : (match.building || (match.room ? `חדר ${match.room}` : ''));
+                        if (roomStr && c.room !== roomStr) {
+                            c.room = roomStr;
+                            enrichedCount++;
+                        }
+                        if (match.lecturer && (!c.lecturer || c.lecturer === 'סגל הקורס')) {
+                            c.lecturer = match.lecturer;
+                            enrichedCount++;
+                        }
+                    }
+                }
             }
         });
 
