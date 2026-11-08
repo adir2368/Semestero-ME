@@ -779,15 +779,6 @@
       "moedB": "2027-03-05",
       "tasks": [
         {
-          "id": "034035_h1",
-          "xp": 50,
-          "type": "hw",
-          "title": "תרגיל בית 1: החוק הראשון של התרמודינמיקה",
-          "status": "not_started",
-          "dueDate": "",
-          "completed": false
-        },
-        {
           "id": "034035_ex",
           "xp": 500,
           "type": "exam",
@@ -2295,15 +2286,6 @@
             "moedA": "2027-02-07",
             "moedB": "2027-03-05",
             "tasks": [
-              {
-                "id": "034035_h1",
-                "xp": 50,
-                "type": "hw",
-                "title": "תרגיל בית 1: החוק הראשון של התרמודינמיקה",
-                "status": "not_started",
-                "dueDate": "",
-                "completed": false
-              },
               {
                 "id": "034035_ex",
                 "xp": 500,

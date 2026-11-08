@@ -212,7 +212,6 @@ var SAMPLE_ME_DEGREE = (typeof window !== 'undefined' && window.SAMPLE_ME_DEGREE
         status: "available",
         tasks: [
             { id: "034035_midterm", title: "בוחן אמצע מגן (20% מגן)", type: "exam", xp: 150, completed: false },
-            { id: "034035_h1", title: "תרגיל בית 1: החוק הראשון של התרמודינמיקה", type: "hw", xp: 50, completed: false },
             { id: "034035_ex", title: "מבחן סוף", type: "exam", xp: 500, completed: false }
         ]
     },

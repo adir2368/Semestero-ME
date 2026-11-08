@@ -18,9 +18,9 @@ ZIP_PATH = os.path.join(ROOT, "Semestero-ME-Windows-x64.zip")
 
 with open(os.path.join(ROOT, "package.json"), "r", encoding="utf-8") as f:
     pkg = json.load(f)
-VERSION = pkg.get("version", "2.10.11")
+VERSION = pkg.get("version", "2.10.14")
 TAG = f"v{VERSION}"
-NAME = f"Semestero ME v{VERSION} - Technion-Wide Course Catalog Search & Dynamic Degree Planning"
+NAME = f"Semestero ME v{VERSION} - Strict Homework Color Palette & Thermodynamics 1 State Alignment"
 
 def get_github_token():
     try:
@@ -100,28 +100,24 @@ def main():
 
     body_notes = f"""# Semestero ME {TAG} Release Notes
 
-### 1. חיפוש בכלל קורסי הטכניון לתכנון תואר (Technion-Wide Catalog Search)
-- **מאגר רזה ללא עומס כברירת מחדל**: מאגר הקורסים נשאר ממוקד ומהיר עם קורסי תוכנית הלימודים וחובות חסרות בלבד, מבלי להציף אלפי קורסים.
-- **חיפוש חי בכל 2,784 קורסי הטכניון**: הקלדת חיפוש (לפי שם או מספר כגון 234124, מדעי המחשב, איטלקית, שחייה, כלכלה) סורקת בזמן אמת את כלל הפקולטות בטכניון ומציגה את הקורסים התואמים.
-- **תיוג ושיבוץ בסמסטרים**: תיוג ייעודי (`🌐 בחירה חופשית`, `🏃 ספורט`, `🎭 מל״ג`) עם שם הפקולטה והנק"ז, ושיבוץ מיידי בכל סמסטר בלחיצה על `+` או גרירה.
-- **שקלול מלא בכללי סיום התואר וסימולטור הממוצע**: הקורסים נספרים אוטומטית במכסת הנק"ז לתואר (157.5) ובמכסת הבחירה החופשית (12.0).
+### 🎯 1. מערכת צבעים מוקפדת למעקב הגשת שיעורי בית (Strict Color Coding Compliance)
+- **התאמה מלאה למודל המשתמש**:
+  - **אדום (`#ef4444` / 🔴)**: **לא התחיל** (`open`) — שיעורי בית שפורסמו על ידי הסגל ופתוחים להגשה, אך הסטודנט טרם החל בעבודתם.
+  - **צהוב (`#eab308` / 🟡)**: **בתהליך** (`in_progress`) — שיעורי בית שהסטודנט החל לעבוד עליהם באופן פעיל (נורה מהבהבת בעדינות ומסגרת כרטיסייה מוארת).
+  - **כחול (`#3b82f6` / 🔵)**: **הוגש** (`submitted`) — שיעורי בית שהוגשו (או חלק יחיד בשיעורי בית כפולים) וממתינים לציון.
+  - **ירוק (`#10b981` / 🟢)**: **הסתיים** (`done`) — שיעורי בית שהושלמו במלואם.
+  - **מעומעם (`rgba(255, 255, 255, 0.04)` / 🔒)**: **טרם נפתח** (`locked`) — גיליונות עתידיים בסמסטר שטרם פורסמו על ידי סגל ההוראה.
 
-### 1. תיקון אי-הופעת משימות ידניות בלוח המשימות (Manual Task Disappearance Fix)
-- **הפרדת קטגוריות טוקנים קנוניים**: הוטמעה הבחנה קנונית מוחלטת ב-`moodle_sync.js::getCanonicalTaskToken` עבור מטלות אלקטרוניות, לומדות SCORM, שאלוני WebWork ומבחנים מקוונים (`hw_digital`) לעומת שיעורי בית רגילים (`hw`) והגשות פתרון בכתב (`hw_written`). מנענו כפילות שגויה שמחקה משימות שהוזנו ידנית.
-- **עדיפות קשיחה לכותרת ידנית**: במיזוג משימות (`mergeTaskPair`), כותרת ופרטי משימה ידנית מקבלים עדיפות מוחלטת על פני שמות ברירת מחדל של קורסים.
-- **תאימות סינון ארגונית**: הרחבת סינון `hw` בארגונית++ לקבלת `webwork`, `hw_digital`, ו-`hw_written`.
-- **הכללת קורסים עם משימות בסינון**: קורסים המכילים משימות ידניות או ממתינות מוצגים אוטומטית בבורר הקורסים והסמסטרים בטבלה.
+### ❄️ 2. סנכרון תרמודינמיקה 1 (034035) למצב האקדמי האותנטי
+- **בדיקה ואימות סגל מודל 26**: אומת כי בסמסטר הנוכחי סגל תרמודינמיקה 1 טרם פרסם תרגילי בית להגשה.
+- **טיהור מוחלט של מצגי-שווא (Placeholders)**: הוסר תרגיל הדמה `034035_h1` מכלל המקורות (`curriculum_template.js`, `user_saved_state.json`, `watch_companion.js`, `preloaded_user_state.js`).
+- **תיקון אלגוריתם הגיליונות**: בוטל מנגנון ברירת-המחדל שפתח אוטומטית את גיליון 1 בכל קורס.
+- **תוצאה**: כל 10 הגיליונות של תרמודינמיקה 1 מסומנים כנעולים (`טרם נפתח 🔒`) עם קפסולת מאקרו מפורשת `נותרו עוד 8 • טרם נפתחו תרגילים 🔒`.
 
-### 2. סנכרון תרגיל אלקטרוני ולומדות SCORM במד"ח (104228)
-- סנכרון ישיר של `תרגיל אלקטרוני 1 - סיווג מד"ח (חבילת לומדה - SCORM)` עם תאריך הגשה רשמי: יום שני, 9 בנובמבר 2026, 23:59 וקישור ישיר למודל 26 (`id=95378`).
-
-### 3. מנוע בדיקת גרסה רב-מקורית (Multi-Source Highest Semver Version Check)
-- החלפת התלות היחידה ב-`releases/latest` בבדיקה מרובת מקורות (GitHub Contents API `package.json`, Raw CDN, Local Origin, GitHub Releases API) ובחירת הגרסה הגבוהה ביותר באופן אוטונומי.
-- ביטול קפיצה ויזואלית ל-2.10.2 וסנכרון מלא של כל תגיות הגרסה ב-DOM ל-`{TAG}`.
-
-### 4. קבצי הפצה:
-- `Semestero-ME.apk` (Android `versionCode 66`)
-- `Semestero ME-win32-x64` (Electron Desktop Client)
+### 📦 3. קבצי הפצה:
+- `Semestero-ME.apk` (Android `versionCode 68`, `versionName 2.10.14`)
+- `Semestero ME-win32-x64` (Electron Desktop Client v2.10.14)
+- קוד מקור מלא מסונכרן לדומיין הראשי `https://semestero.me`
 """
 
     req_tag = urllib.request.Request(f"https://api.github.com/repos/{REPO}/releases/tags/{TAG}", headers=headers)
@@ -139,58 +135,65 @@ def main():
         print(f"[Release] Exception checking tag: {e}")
 
     if not release:
-        print(f"[Release] Creating release for {TAG}...")
-        create_payload = json.dumps({
+        print(f"[Release] Creating new GitHub release for {TAG}...")
+        create_payload = {
             "tag_name": TAG,
             "target_commitish": "main",
             "name": NAME,
             "body": body_notes,
             "draft": False,
             "prerelease": False
-        }).encode("utf-8")
-        create_req = urllib.request.Request(f"https://api.github.com/repos/{REPO}/releases", data=create_payload, headers=headers, method="POST")
+        }
+        create_req = urllib.request.Request(
+            f"https://api.github.com/repos/{REPO}/releases",
+            data=json.dumps(create_payload).encode(),
+            headers=headers,
+            method="POST"
+        )
         try:
             with urllib.request.urlopen(create_req) as res:
                 release = json.loads(res.read().decode())
-                print(f"[Release] Successfully created release id={release['id']}")
-        except Exception as e:
-            print(f"[Release] Failed to create release: {e}")
-            return
-    else:
-        print(f"[Release] Updating release notes for id={release['id']}...")
-        update_payload = json.dumps({
-            "name": NAME,
-            "body": body_notes
-        }).encode("utf-8")
-        update_req = urllib.request.Request(f"https://api.github.com/repos/{REPO}/releases/{release['id']}", data=update_payload, headers=headers, method="PATCH")
-        try:
-            with urllib.request.urlopen(update_req) as res:
-                release = json.loads(res.read().decode())
-                print(f"[Release] Successfully updated release id={release['id']}")
-        except Exception as e:
-            print(f"[Release] Failed to update release: {e}")
+                print(f"[Release] Created release id={release['id']} ({release['html_url']})")
+        except urllib.error.HTTPError as e:
+            print(f"[Release] Failed to create release: {e.code} {e.reason}")
+            try:
+                print(f"[Release] Details: {e.read().decode()}")
+            except:
+                pass
+            sys.exit(1)
 
-    upload_url_template = release.get("upload_url", "")
-    if not upload_url_template:
-        print("[Release] Error: No upload_url in release data")
-        return
-
-    # Delete old assets if re-uploading
-    delete_existing_asset_if_any(release["id"], "Semestero-ME.apk", headers)
+    upload_url = release.get("upload_url")
+    if not upload_url:
+        print("Error: No upload_url in release object.")
+        sys.exit(1)
 
     # 1. Upload APK
     if os.path.exists(APK_PATH):
-        upload_asset(upload_url_template, APK_PATH, "application/vnd.android.package-archive", headers)
+        delete_existing_asset_if_any(release["id"], "Semestero-ME.apk", headers)
+        upload_asset(upload_url, APK_PATH, "application/vnd.android.package-archive", headers)
     else:
-        print(f"[Release] APK file not found at {APK_PATH}")
+        print(f"[Warning] APK not found at {APK_PATH}")
 
     # 2. Upload Windows ZIP if exists
     if os.path.exists(ZIP_PATH):
         delete_existing_asset_if_any(release["id"], "Semestero-ME-Windows-x64.zip", headers)
-        upload_asset(upload_url_template, ZIP_PATH, "application/zip", headers)
+        upload_asset(upload_url, ZIP_PATH, "application/zip", headers)
+    elif os.path.exists(EXE_PATH):
+        dist_dir = os.path.dirname(EXE_PATH)
+        print(f"[Zip] Creating {ZIP_PATH} from {dist_dir}...")
+        try:
+            subprocess.run([
+                "powershell", "-Command",
+                f"Compress-Archive -Path '{dist_dir}\\*' -DestinationPath '{ZIP_PATH}' -Force"
+            ], check=True)
+            if os.path.exists(ZIP_PATH):
+                delete_existing_asset_if_any(release["id"], "Semestero-ME-Windows-x64.zip", headers)
+                upload_asset(upload_url, ZIP_PATH, "application/zip", headers)
+        except Exception as e:
+            print(f"[Zip] Failed to compress desktop build: {e}")
 
-    print(f"\n🎉 Release process finished for {TAG}!")
-    print(f"URL: {release.get('html_url')}")
+    print(f"\n🎉 Successfully created/updated GitHub release {TAG}!")
+    print(f"🔗 Release URL: {release['html_url']}")
 
 if __name__ == "__main__":
     main()

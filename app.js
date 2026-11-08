@@ -2421,7 +2421,6 @@ var SAMPLE_ME_DEGREE = (typeof window !== 'undefined' && window.SAMPLE_ME_DEGREE
         prerequisites: ["104043","104041"],
         status: "available",
         tasks: [
-            { id: "034035_h1", title: "תרגיל בית 1: החוק הראשון של התרמודינמיקה", type: "hw", xp: 50, completed: false },
             { id: "034035_ex", title: "מבחן סוף", type: "exam", xp: 500, completed: false }
         ]
     },
@@ -3603,15 +3602,6 @@ const PRELOADED_USER_STATE = (typeof window !== 'undefined' && window.PRELOADED_
       "moedA": "2027-02-07",
       "moedB": "2027-03-05",
       "tasks": [
-        {
-          "id": "034035_h1",
-          "xp": 50,
-          "type": "hw",
-          "title": "תרגיל בית 1: החוק הראשון של התרמודינמיקה",
-          "status": "not_started",
-          "dueDate": "",
-          "completed": false
-        },
         {
           "id": "034035_ex",
           "xp": 500,
@@ -5053,15 +5043,6 @@ const PRELOADED_USER_STATE = (typeof window !== 'undefined' && window.PRELOADED_
             "moedA": "2027-02-07",
             "moedB": "2027-03-05",
             "tasks": [
-              {
-                "id": "034035_h1",
-                "xp": 50,
-                "type": "hw",
-                "title": "תרגיל בית 1: החוק הראשון של התרמודינמיקה",
-                "status": "not_started",
-                "dueDate": "",
-                "completed": false
-              },
               {
                 "id": "034035_ex",
                 "xp": 500,
@@ -9532,7 +9513,10 @@ function loadSavedState() {
             }
             if (!c.tasks) return;
             // Remove redundant/duplicate tasks
-            c.tasks = c.tasks.filter(t => t.id !== 'task-moed-b-1786656028960');
+            c.tasks = c.tasks.filter(t => t.id !== 'task-moed-b-1786656028960' && t.id !== '034035_h1');
+            if (c.code === '034035' || c.code === '34035') {
+                c.tasks = c.tasks.filter(t => t.id !== '034035_h1' && !(t.title && /תרגיל|מטלה|גיליון|גליון|hw/i.test(t.title)));
+            }
             c.tasks.forEach(t => {
                 if (t.title) {
                     t.title = t.title.replace(/\s*\(קרב בוס\)/g, "")
@@ -23522,11 +23506,11 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.11.08-v2.10.13",
-    version: "2.10.13",
-    build: "20261108_01",
-    date: "2026-11-08 10:30",
-    description: "v2.10.13: מעקב הגשת שיעורי בית מורחב (הבדלה ויזואלית מלאה בין תרגילים פתוחים שטרם התחילו לתרגילים בתהליך, תגיות ייעודיות ונורות אינדיקציה זוהרות) (ADR-085)."
+    code: "REV-2026.11.08-v2.10.14",
+    version: "2.10.14",
+    build: "20261108_02",
+    date: "2026-11-08 12:15",
+    description: "v2.10.14: מערכת צבעים מוקפדת למעקב הגשת שיעורי בית (אדום-לא התחיל, צהוב-בתהליך, כחול-הוגש, ירוק-הסתיים) ונעילת כל 10 הגליונות בתרמודינמיקה 1 עד לפתיחתם (ADR-087)."
 };
 window.APP_VERSION = APP_CURRENT_REVISION.version;
 
@@ -28615,7 +28599,7 @@ function getCourseHomeworkStatus(courseCode) {
             singleTask = matchingTasks[0] || null;
         }
 
-        let status = 'open';
+        let status = 'locked';
         let isDigitalDone = false;
         let isWrittenDone = false;
         let isDigitalSubmitted = false;
@@ -28637,7 +28621,7 @@ function getCourseHomeworkStatus(courseCode) {
                 status = 'submitted';
             } else if (isDigitalInProgress || isWrittenInProgress) {
                 status = 'in_progress';
-            } else if (digitalTask || writtenTask || matchingTasks.length > 0 || i === 1) {
+            } else if (digitalTask || writtenTask || matchingTasks.length > 0) {
                 status = 'open';
             } else {
                 status = 'locked';
@@ -28649,7 +28633,7 @@ function getCourseHomeworkStatus(courseCode) {
             if (isDone) status = 'done';
             else if (isSub) status = 'submitted';
             else if (isInProg) status = 'in_progress';
-            else if (singleTask || matchingTasks.length > 0 || i === 1) status = 'open';
+            else if (singleTask || matchingTasks.length > 0) status = 'open';
             else status = 'locked';
         }
 
@@ -28747,12 +28731,12 @@ function renderNotionHomeworkPolicyStrip() {
             if (sheet.index === hwStatus.bestN + 1) {
                 dotsHtml += `<div class="hw-dot-threshold" title="סף מגן: ${hwStatus.bestN} גיליונות"></div>`;
             }
-            const statusClass = sheet.status; // 'done', 'submitted', 'in_progress', 'open', 'locked'
+            const statusClass = sheet.status; // 'done' (green), 'submitted' (blue), 'in_progress' (yellow), 'open' (red), 'locked' (dimmed)
             let statusLabel = 'טרם נפתח 🔒';
-            if (sheet.status === 'done') statusLabel = 'הושלם ✓';
-            else if (sheet.status === 'submitted') statusLabel = 'הוגש (ממתין/חלקי) ⏳';
-            else if (sheet.status === 'in_progress') statusLabel = 'בתהליך עבודה ✏️';
-            else if (sheet.status === 'open') statusLabel = 'פתוח להגשה 📬';
+            if (sheet.status === 'done') statusLabel = 'הסתיים ✓ (ירוק)';
+            else if (sheet.status === 'submitted') statusLabel = 'הוגש (ממתין/חלקי) ⏳ (כחול)';
+            else if (sheet.status === 'in_progress') statusLabel = 'בתהליך עבודה ✏️ (צהוב)';
+            else if (sheet.status === 'open') statusLabel = 'לא התחיל (פתוח להגשה) 🔴 (אדום)';
 
             dotsHtml += `<div class="hw-dot ${statusClass}" title="גיליון ${sheet.index} - ${sheet.name}: ${statusLabel}"></div>`;
         });
@@ -28760,13 +28744,31 @@ function renderNotionHomeworkPolicyStrip() {
         const ratioBadgeClass = hwStatus.isMet ? 'met' : 'progress';
         const ratioBadgeText = hwStatus.isMet ? `${hwStatus.completedCount}/${hwStatus.bestN} ✓` : `${hwStatus.completedCount}/${hwStatus.bestN}`;
 
+        let chipDetails = "";
+        if (hwStatus.inProgressCount > 0) {
+            chipDetails += `<span style="color: #eab308; font-size: 0.68rem; margin-right: 3px;">(${hwStatus.inProgressCount} בתהליך)</span>`;
+        }
+        if (hwStatus.openCount > 0) {
+            chipDetails += `<span style="color: #ef4444; font-size: 0.68rem; margin-right: 3px;">(${hwStatus.openCount} לא התחילו)</span>`;
+        }
+
         miniChipsHtml += `
             <span class="hw-mini-chip ${hwStatus.isMet ? 'met' : ''}" onclick="if (window.openCourseHomeworkDetail) window.openCourseHomeworkDetail('${course.code}');" title="${displayName} (${course.code}) - ${hwStatus.policy.policyLabel}: ${ratioBadgeText}">
                 <span>${displayName}:</span>
                 <strong>${hwStatus.completedCount}/${hwStatus.bestN}</strong>
-                ${hwStatus.inProgressCount > 0 ? `<span style="color: #fbbf24; font-size: 0.68rem; margin-right: 3px;">(${hwStatus.inProgressCount} בתהליך)</span>` : ''}
+                ${chipDetails}
             </span>
         `;
+
+        let metaExtra = "";
+        if (hwStatus.inProgressCount > 0) {
+            metaExtra += ` &bull; <strong style="color: #eab308;">${hwStatus.inProgressCount} בתהליך 🟡</strong>`;
+        }
+        if (hwStatus.openCount > 0) {
+            metaExtra += ` &bull; <span style="color: #ef4444;">${hwStatus.openCount} לא התחילו 🔴</span>`;
+        } else if (hwStatus.completedCount === 0 && hwStatus.submittedCount === 0 && hwStatus.inProgressCount === 0) {
+            metaExtra += ` &bull; <span style="color: #94a3b8;">טרם נפתחו תרגילים 🔒</span>`;
+        }
 
         capsulesHtml += `
             <div class="course-hw-capsule" onclick="if (window.openCourseHomeworkDetail) window.openCourseHomeworkDetail('${course.code}');" title="לחץ לפירוט הגיליונות ומעקב ההגשות">
@@ -28784,8 +28786,7 @@ function renderNotionHomeworkPolicyStrip() {
                     <span class="capsule-policy-label">🎯 ${hwStatus.policy.policyLabel}</span>
                     <span style="font-size: 0.70rem; color: #94a3b8;">
                         ${hwStatus.remaining > 0 ? `נותרו עוד ${hwStatus.remaining}` : 'היעד הובטח!'}
-                        ${hwStatus.inProgressCount > 0 ? ` &bull; <strong style="color: #fbbf24;">${hwStatus.inProgressCount} בתהליך</strong>` : ''}
-                        ${hwStatus.openCount > 0 ? ` &bull; <span style="color: #38bdf8;">${hwStatus.openCount} פתוחים</span>` : ''}
+                        ${metaExtra}
                     </span>
                 </div>
                 <div class="hw-dots-track">
@@ -28804,7 +28805,7 @@ function renderNotionHomeworkPolicyStrip() {
             </div>
             <div style="display: flex; align-items: center; gap: 8px;">
                 <div class="hw-strip-hint">
-                    💡 לחץ על קורס לפירוט הגיליונות, מצבי הגשה (פתוח 📬 / בתהליך ✏️ / הוגש ⏳ / הושלם ✓) ↗
+                    💡 מקרא צבעים: 🔴 לא התחיל | 🟡 בתהליך | 🔵 הוגש | 🟢 הסתיים | 🔒 טרם נפתח
                 </div>
                 <button type="button" class="btn-toggle-hw-collapse" onclick="if(window.toggleHomeworkPolicyStripCollapse) window.toggleHomeworkPolicyStripCollapse(event);" title="מזער / הרחב מעקב הגשת שיעורי בית לצמצום ויזואלי">
                     <span id="hw-collapse-icon">${isCollapsed ? '▼' : '▲'}</span>
@@ -28845,7 +28846,7 @@ function renderCourseModalHomeworkPolicy(course) {
 
     // Summary pills
     const statusMsg = hwStatus.isMet
-        ? `<span style="color: #34d399; font-weight: 700;">🎉 יעד המגן הובטח בהצלחה! (${hwStatus.completedCount}/${hwStatus.bestN} הושלמו)</span>`
+        ? `<span style="color: #34d399; font-weight: 700;">🎉 יעד המגן הובטח בהצלחה! (${hwStatus.completedCount}/${hwStatus.bestN} הסתיימו)</span>`
         : `<span style="color: #fbbf24; font-weight: 600;">נותרו עוד ${hwStatus.remaining} גיליונות להבטחת המגן המלא (${hwStatus.completedCount}/${hwStatus.bestN})</span>`;
 
     // Sheets cards
@@ -28856,16 +28857,16 @@ function renderCourseModalHomeworkPolicy(course) {
 
         if (sheet.status === 'done') {
             cardClass = 'is-done';
-            statusBadgeLabel = 'הושלם ✓';
+            statusBadgeLabel = 'הסתיים 🟢';
         } else if (sheet.status === 'submitted') {
             cardClass = 'is-submitted';
-            statusBadgeLabel = 'בהגשה ⏳';
+            statusBadgeLabel = 'הוגש 🔵';
         } else if (sheet.status === 'in_progress') {
             cardClass = 'is-in-progress';
-            statusBadgeLabel = 'בתהליך ✏️';
+            statusBadgeLabel = 'בתהליך 🟡';
         } else if (sheet.status === 'open') {
             cardClass = 'is-open';
-            statusBadgeLabel = 'פתוח להגשה 📬';
+            statusBadgeLabel = 'לא התחיל 🔴';
         } else {
             cardClass = 'is-locked';
             statusBadgeLabel = 'טרם נפתח 🔒';
@@ -28876,8 +28877,9 @@ function renderCourseModalHomeworkPolicy(course) {
             // Part A: Digital Online Quiz
             const digDone = sheet.isDigitalDone;
             const digInProg = sheet.isDigitalInProgress;
-            const digBtnClass = digDone ? 'active' : '';
-            const digBtnText = digDone ? 'הושלם ✓' : 'סמן כהוגש';
+            const digSub = sheet.isDigitalSubmitted;
+            const digBtnClass = digDone ? 'active' : (digSub ? 'submitted' : '');
+            const digBtnText = digDone ? 'הסתיים 🟢' : (digSub ? 'הוגש 🔵' : 'סמן כהוגש');
             const digLink = (sheet.digitalTask && sheet.digitalTask.moodleUrl)
                 ? `<a href="javascript:void(0)" onclick="if (window.openExternalUrlOrBrowser) window.openExternalUrlOrBrowser('${sheet.digitalTask.moodleUrl}', '_blank');" class="hw-link-btn" title="פתח שאלון במודל">מודל ↗</a>`
                 : '';
@@ -28885,8 +28887,9 @@ function renderCourseModalHomeworkPolicy(course) {
             // Part B: Written Solution Upload
             const writDone = sheet.isWrittenDone;
             const writInProg = sheet.isWrittenInProgress;
-            const writBtnClass = writDone ? 'active' : '';
-            const writBtnText = writDone ? 'הושלם ✓' : 'סמן כהוגש';
+            const writSub = sheet.isWrittenSubmitted;
+            const writBtnClass = writDone ? 'active' : (writSub ? 'submitted' : '');
+            const writBtnText = writDone ? 'הסתיים 🟢' : (writSub ? 'הוגש 🔵' : 'סמן כהוגש');
             const writLink = (sheet.writtenTask && sheet.writtenTask.moodleUrl)
                 ? `<a href="javascript:void(0)" onclick="if (window.openExternalUrlOrBrowser) window.openExternalUrlOrBrowser('${sheet.writtenTask.moodleUrl}', '_blank');" class="hw-link-btn" title="פתח הגשת פתרון במודל">מודל ↗</a>`
                 : '';
@@ -28901,7 +28904,7 @@ function renderCourseModalHomeworkPolicy(course) {
                         <div class="hw-component-actions">
                             ${digLink}
                             <button type="button" class="btn-hw-quick-status ${digInProg ? 'active-prog' : ''}" onclick="if (window.setHomeworkComponentLifecycle) window.setHomeworkComponentLifecycle('${course.code}', ${sheet.index}, 'digital', '${digInProg ? 'open' : 'in_progress'}');" title="${digInProg ? 'בטל סימון בתהליך' : 'סמן שהתחלת לעבוד'}">
-                                ${digInProg ? '✏️ בתהליך' : '✏️ התחל'}
+                                ${digInProg ? '🟡 בתהליך' : '🟡 התחל'}
                             </button>
                             <button type="button" class="btn-hw-toggle ${digBtnClass}" onclick="if (window.toggleHomeworkSheetComponent) window.toggleHomeworkSheetComponent('${course.code}', ${sheet.index}, 'digital');" title="${digDone ? 'בטל הגשה' : 'סמן כהוגש'}">
                                 ${digBtnText}
@@ -28916,7 +28919,7 @@ function renderCourseModalHomeworkPolicy(course) {
                         <div class="hw-component-actions">
                             ${writLink}
                             <button type="button" class="btn-hw-quick-status ${writInProg ? 'active-prog' : ''}" onclick="if (window.setHomeworkComponentLifecycle) window.setHomeworkComponentLifecycle('${course.code}', ${sheet.index}, 'written', '${writInProg ? 'open' : 'in_progress'}');" title="${writInProg ? 'בטל סימון בתהליך' : 'סמן שהתחלת לעבוד'}">
-                                ${writInProg ? '✏️ בתהליך' : '✏️ התחל'}
+                                ${writInProg ? '🟡 בתהליך' : '🟡 התחל'}
                             </button>
                             <button type="button" class="btn-hw-toggle ${writBtnClass}" onclick="if (window.toggleHomeworkSheetComponent) window.toggleHomeworkSheetComponent('${course.code}', ${sheet.index}, 'written');" title="${writDone ? 'בטל הגשה' : 'סמן כהוגש'}">
                                 ${writBtnText}
@@ -28929,8 +28932,9 @@ function renderCourseModalHomeworkPolicy(course) {
             // Single Component
             const sDone = sheet.status === 'done';
             const sInProg = sheet.status === 'in_progress';
-            const sBtnClass = sDone ? 'active' : '';
-            const sBtnText = sDone ? 'הושלם ✓' : 'סמן כהוגש';
+            const sSub = sheet.status === 'submitted';
+            const sBtnClass = sDone ? 'active' : (sSub ? 'submitted' : '');
+            const sBtnText = sDone ? 'הסתיים 🟢' : (sSub ? 'הוגש 🔵' : 'סמן כהוגש');
             const sLink = (sheet.singleTask && sheet.singleTask.moodleUrl)
                 ? `<a href="javascript:void(0)" onclick="if (window.openExternalUrlOrBrowser) window.openExternalUrlOrBrowser('${sheet.singleTask.moodleUrl}', '_blank');" class="hw-link-btn" title="פתח מטלה במודל">מודל ↗</a>`
                 : '';
@@ -28945,7 +28949,7 @@ function renderCourseModalHomeworkPolicy(course) {
                         <div class="hw-component-actions">
                             ${sLink}
                             <button type="button" class="btn-hw-quick-status ${sInProg ? 'active-prog' : ''}" onclick="if (window.setHomeworkSheetLifecycle) window.setHomeworkSheetLifecycle('${course.code}', ${sheet.index}, '${sInProg ? 'open' : 'in_progress'}');" title="${sInProg ? 'בטל סימון בתהליך' : 'סמן שהתחלת לעבוד'}">
-                                ${sInProg ? '✏️ בתהליך' : '✏️ התחל'}
+                                ${sInProg ? '🟡 בתהליך' : '🟡 התחל'}
                             </button>
                             <button type="button" class="btn-hw-toggle ${sBtnClass}" onclick="if (window.toggleHomeworkSheetStatus) window.toggleHomeworkSheetStatus('${course.code}', ${sheet.index});" title="${sDone ? 'בטל הגשה' : 'סמן כהוגש'}">
                                 ${sBtnText}
@@ -28990,23 +28994,23 @@ function renderCourseModalHomeworkPolicy(course) {
                 ` : ''}
             </div>
 
-            <!-- Stats Strip -->
+            <!-- Stats Strip (Red: Not Started, Yellow: In Progress, Blue: Submitted, Green: Finished) -->
             <div class="modal-hw-stats-strip">
-                <div class="modal-hw-stat-pill done">
+                <div class="modal-hw-stat-pill done" title="הסתיים וקיבל ציון (ירוק)">
                     <span>🟢</span>
-                    <span>הושלמו: ${hwStatus.completedCount}</span>
+                    <span>הסתיים: ${hwStatus.completedCount}</span>
                 </div>
-                <div class="modal-hw-stat-pill submitted">
-                    <span>🟣</span>
-                    <span>בהגשה / חלקי: ${hwStatus.submittedCount}</span>
+                <div class="modal-hw-stat-pill submitted" title="הוגש וממתין לבדיקה (כחול)">
+                    <span>🔵</span>
+                    <span>הוגש / חלקי: ${hwStatus.submittedCount}</span>
                 </div>
-                <div class="modal-hw-stat-pill in_progress">
-                    <span>🟠</span>
+                <div class="modal-hw-stat-pill in_progress" title="בתהליך עבודה (צהוב)">
+                    <span>🟡</span>
                     <span>בתהליך: ${hwStatus.inProgressCount}</span>
                 </div>
-                <div class="modal-hw-stat-pill open">
-                    <span>🔵</span>
-                    <span>פתוחים להגשה: ${hwStatus.openCount}</span>
+                <div class="modal-hw-stat-pill open" title="טרם התחיל ופתוח להגשה (אדום)">
+                    <span>🔴</span>
+                    <span>לא התחיל: ${hwStatus.openCount}</span>
                 </div>
                 <div class="modal-hw-stat-pill target">
                     <span>🎯</span>
@@ -29078,7 +29082,6 @@ function setHomeworkComponentLifecycle(courseCode, sheetIndex, compType, newStat
         }
     }
 
-    // Sync registry with MoodleSync
     if (window.MoodleSync) {
         if (targetTask.completed && typeof window.MoodleSync.markTaskCompletedInRegistry === 'function') {
             window.MoodleSync.markTaskCompletedInRegistry(course.code, targetTask);

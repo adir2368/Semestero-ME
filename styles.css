@@ -16477,19 +16477,22 @@ tr.is-task-pinned {
     transition: all 0.2s ease;
 }
 
+/* 🟢 Green: Finished / הסתיים */
 .hw-dot.done {
     background: #10b981;
-    box-shadow: 0 0 6px rgba(16, 185, 129, 0.5);
+    box-shadow: 0 0 6px rgba(16, 185, 129, 0.6);
 }
 
+/* 🔵 Blue: Submitted / הוגש */
 .hw-dot.submitted {
-    background: linear-gradient(135deg, #a855f7, #6366f1);
-    box-shadow: 0 0 6px rgba(168, 85, 247, 0.5);
+    background: linear-gradient(135deg, #2563eb, #3b82f6);
+    box-shadow: 0 0 6px rgba(59, 130, 246, 0.6);
 }
 
+/* 🟡 Yellow: In Progress / בתהליך */
 .hw-dot.in_progress {
-    background: #f59e0b;
-    box-shadow: 0 0 8px rgba(245, 158, 11, 0.65);
+    background: #eab308;
+    box-shadow: 0 0 8px rgba(234, 179, 8, 0.7);
     animation: hwDotPulse 2s infinite ease-in-out;
 }
 
@@ -16498,18 +16501,21 @@ tr.is-task-pinned {
     50% { opacity: 0.55; }
 }
 
+/* 🔴 Red: Not Started / לא התחיל (פתוח להגשה) */
 .hw-dot.open {
-    background: #38bdf8;
-    box-shadow: 0 0 6px rgba(56, 189, 248, 0.5);
+    background: #ef4444;
+    box-shadow: 0 0 6px rgba(239, 68, 68, 0.6);
 }
 
 .hw-dot.todo {
-    background: rgba(255, 255, 255, 0.12);
+    background: #ef4444;
+    box-shadow: 0 0 6px rgba(239, 68, 68, 0.5);
 }
 
+/* 🔒 Dimmed: Locked / טרם נפתח */
 .hw-dot.locked {
     background: rgba(255, 255, 255, 0.04);
-    opacity: 0.5;
+    opacity: 0.35;
 }
 
 .hw-dot-threshold {
@@ -16571,26 +16577,26 @@ tr.is-task-pinned {
 
 .modal-hw-stat-pill.done {
     color: #34d399;
-    border-color: rgba(52, 211, 153, 0.35);
+    border-color: rgba(52, 211, 153, 0.4);
     background: rgba(16, 185, 129, 0.12);
 }
 
 .modal-hw-stat-pill.submitted {
-    color: #c084fc;
-    border-color: rgba(192, 132, 252, 0.35);
-    background: rgba(168, 85, 247, 0.12);
+    color: #60a5fa;
+    border-color: rgba(96, 165, 250, 0.4);
+    background: rgba(59, 130, 246, 0.12);
 }
 
 .modal-hw-stat-pill.in_progress {
-    color: #f59e0b;
-    border-color: rgba(245, 158, 11, 0.35);
-    background: rgba(245, 158, 11, 0.12);
+    color: #facc15;
+    border-color: rgba(250, 204, 21, 0.4);
+    background: rgba(234, 179, 8, 0.12);
 }
 
 .modal-hw-stat-pill.open {
-    color: #38bdf8;
-    border-color: rgba(56, 189, 248, 0.35);
-    background: rgba(56, 189, 248, 0.12);
+    color: #f87171;
+    border-color: rgba(248, 113, 113, 0.4);
+    background: rgba(239, 68, 68, 0.12);
 }
 
 .modal-hw-stat-pill.target {
@@ -16638,28 +16644,28 @@ tr.is-task-pinned {
 }
 
 .hw-sheet-card.is-done {
-    border-color: rgba(16, 185, 129, 0.35);
+    border-color: rgba(16, 185, 129, 0.4);
     background: rgba(16, 185, 129, 0.05);
 }
 
 .hw-sheet-card.is-submitted {
-    border-color: rgba(168, 85, 247, 0.35);
-    background: rgba(168, 85, 247, 0.05);
+    border-color: rgba(59, 130, 246, 0.4);
+    background: rgba(59, 130, 246, 0.05);
 }
 
 .hw-sheet-card.is-in-progress {
-    border-color: rgba(245, 158, 11, 0.45);
-    background: rgba(245, 158, 11, 0.06);
-    box-shadow: 0 0 10px rgba(245, 158, 11, 0.08);
+    border-color: rgba(234, 179, 8, 0.5);
+    background: rgba(234, 179, 8, 0.06);
+    box-shadow: 0 0 10px rgba(234, 179, 8, 0.1);
 }
 
 .hw-sheet-card.is-open {
-    border-color: rgba(56, 189, 248, 0.35);
-    background: rgba(56, 189, 248, 0.04);
+    border-color: rgba(239, 68, 68, 0.4);
+    background: rgba(239, 68, 68, 0.04);
 }
 
 .hw-sheet-card.is-locked {
-    opacity: 0.65;
+    opacity: 0.6;
     border-color: rgba(255, 255, 255, 0.05);
     background: rgba(15, 23, 42, 0.4);
 }
@@ -16697,28 +16703,36 @@ tr.is-task-pinned {
 .hw-sheet-status-badge.done {
     background: rgba(16, 185, 129, 0.2);
     color: #34d399;
+    border: 1px solid rgba(16, 185, 129, 0.35);
 }
 
 .hw-sheet-status-badge.submitted {
-    background: rgba(168, 85, 247, 0.2);
-    color: #c084fc;
+    background: rgba(59, 130, 246, 0.2);
+    color: #60a5fa;
+    border: 1px solid rgba(59, 130, 246, 0.35);
 }
 
 .hw-sheet-status-badge.in_progress {
-    background: rgba(245, 158, 11, 0.2);
-    color: #fbbf24;
-    border: 1px solid rgba(245, 158, 11, 0.35);
+    background: rgba(234, 179, 8, 0.2);
+    color: #facc15;
+    border: 1px solid rgba(234, 179, 8, 0.4);
 }
 
 .hw-sheet-status-badge.open {
-    background: rgba(56, 189, 248, 0.18);
-    color: #38bdf8;
-    border: 1px solid rgba(56, 189, 248, 0.3);
+    background: rgba(239, 68, 68, 0.2);
+    color: #f87171;
+    border: 1px solid rgba(239, 68, 68, 0.4);
 }
 
 .hw-sheet-status-badge.locked {
     background: rgba(255, 255, 255, 0.06);
     color: #94a3b8;
+}
+
+.hw-sheet-status-badge.todo {
+    background: rgba(239, 68, 68, 0.2);
+    color: #f87171;
+    border: 1px solid rgba(239, 68, 68, 0.4);
 }
 
 .hw-sheet-status-badge.todo {
@@ -16777,6 +16791,13 @@ tr.is-task-pinned {
     color: #38bdf8;
 }
 
+.btn-hw-toggle.submitted {
+    background: rgba(59, 130, 246, 0.25);
+    border-color: #3b82f6;
+    color: #60a5fa;
+    font-weight: 700;
+}
+
 .btn-hw-toggle.active {
     background: rgba(16, 185, 129, 0.25);
     border-color: #10b981;
@@ -16785,9 +16806,9 @@ tr.is-task-pinned {
 }
 
 .btn-hw-quick-status {
-    background: rgba(245, 158, 11, 0.1);
-    border: 1px solid rgba(245, 158, 11, 0.25);
-    color: #fbbf24;
+    background: rgba(234, 179, 8, 0.12);
+    border: 1px solid rgba(234, 179, 8, 0.3);
+    color: #facc15;
     font-size: 0.70rem;
     padding: 2px 7px;
     border-radius: 4px;
@@ -16796,17 +16817,17 @@ tr.is-task-pinned {
 }
 
 .btn-hw-quick-status:hover {
-    background: rgba(245, 158, 11, 0.25);
-    border-color: #f59e0b;
-    color: #fde047;
+    background: rgba(234, 179, 8, 0.25);
+    border-color: #eab308;
+    color: #fef08a;
 }
 
 .btn-hw-quick-status.active-prog {
-    background: rgba(245, 158, 11, 0.3);
-    border-color: #f59e0b;
-    color: #fde047;
+    background: rgba(234, 179, 8, 0.3);
+    border-color: #eab308;
+    color: #fef08a;
     font-weight: 700;
-    box-shadow: 0 0 6px rgba(245, 158, 11, 0.4);
+    box-shadow: 0 0 6px rgba(234, 179, 8, 0.45);
 }
 
 .hw-link-btn {
