@@ -559,6 +559,59 @@ async function run() {
             assert(result.hasAntiReqBanner, 'Modal must render anti-requisites warning banner');
         });
 
+        // Test 17: Pangea Knowledge Hub, Smart Homework Resolver, Search & Quick Peek Reader
+        await test('Pangea Knowledge Hub: Smart homework deep-linking, search & In-App Reader', async () => {
+            const result = await cdp.eval(`(() => {
+                const hubExists = !!window.PangeaHub && typeof window.PangeaHub.getCourseData === 'function';
+                if (!hubExists) return { success: false, reason: 'PangeaHub not defined' };
+
+                const coursesCount = Object.keys(window.PangeaHub.catalog).length;
+                const thermoData = window.PangeaHub.getCourseData('034035');
+                const hasThermo = !!thermoData && thermoData.exams.length >= 8 && thermoData.lectures.length >= 10;
+
+                // Test smart homework resolver
+                const hwDyn5 = window.PangeaHub.resolveTaskHomework('034010', 'תרגיל בית 5');
+                const isDyn5Match = hwDyn5 && hwDyn5.isExactMatch && hwDyn5.slug.includes('DYN1_HW005');
+
+                // Test search
+                const searchResults = window.PangeaHub.search('ברנולי');
+                const hasBernoulli = searchResults.some(r => r.title.includes('ברנולי'));
+
+                // Test Course Modal rendering
+                openCourseDetails('034035');
+                const pangeaContainer = document.getElementById('modal-pangea-container');
+                const hasHubRendered = pangeaContainer && pangeaContainer.innerHTML.includes('סיכומי פנגייה');
+                const hasExamsRendered = pangeaContainer && pangeaContainer.innerHTML.includes('מאגר מבחנים פתורים');
+
+                // Test In-App Reader Modal elements
+                const readerModal = document.getElementById('pangea-reader-modal');
+                const readerIframe = document.getElementById('pangea-reader-iframe');
+                const readerExtBtn = document.getElementById('pangea-reader-ext-btn');
+                const hasReader = !!readerModal && !!readerIframe && !!readerExtBtn;
+
+                return {
+                    hubExists,
+                    coursesCount,
+                    hasThermo,
+                    isDyn5Match,
+                    hasBernoulli,
+                    hasHubRendered,
+                    hasExamsRendered,
+                    hasReader
+                };
+            })()`);
+
+            assert(result.hubExists, 'window.PangeaHub must be defined globally');
+            assert(result.coursesCount >= 34, `Expected at least 34 courses in PangeaHub, got ${result.coursesCount}`);
+            assert(result.hasThermo, 'Thermodynamics 1 must have rich lectures and exams in PangeaHub');
+            assert(result.isDyn5Match, 'Dynamics HW 5 must resolve to exact DYN1_HW005 slug');
+            assert(result.hasBernoulli, 'Search for Bernoulli must find matching lectures');
+            assert(result.hasHubRendered, 'Pangea Hub must render inside Course Details modal');
+            assert(result.hasExamsRendered, 'Pangea Hub must render solved exams list in modal');
+            assert(result.hasReader, 'In-App Quick Peek Reader Modal elements must exist in DOM');
+        });
+
+
 
     } finally {
         console.log(`\n========================================================================`);

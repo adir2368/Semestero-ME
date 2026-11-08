@@ -17163,3 +17163,343 @@ tr.is-task-pinned {
     transform: scale(0.98);
     background: rgba(56, 189, 248, 0.3);
 }
+
+
+/* =======================================================
+   Pangea Knowledge Hub & In-App Quick Peek Reader Styles
+   ======================================================= */
+.pangea-reader-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 100060;
+    background: rgba(10, 15, 29, 0.88);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    box-sizing: border-box;
+}
+
+.pangea-reader-container {
+    width: 92vw;
+    max-width: 1240px;
+    height: 88vh;
+    background: #0f172a;
+    border: 1px solid rgba(56, 189, 248, 0.35);
+    border-radius: 14px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6), 0 0 25px rgba(56, 189, 248, 0.15);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.pangea-reader-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 18px;
+    background: rgba(30, 41, 59, 0.95);
+    border-bottom: 1px solid rgba(56, 189, 248, 0.25);
+    flex-shrink: 0;
+}
+
+.pangea-reader-header-start {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.pangea-reader-icon {
+    border-radius: 4px;
+    box-shadow: 0 0 8px rgba(56, 189, 248, 0.4);
+}
+
+.pangea-reader-title-box {
+    display: flex;
+    flex-direction: column;
+}
+
+.pangea-reader-title {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #f8fafc;
+    letter-spacing: -0.01em;
+}
+
+.pangea-reader-subtitle {
+    font-size: 0.72rem;
+    color: #38bdf8;
+    font-weight: 500;
+}
+
+.pangea-reader-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.pangea-reader-action-btn {
+    border-color: rgba(56, 189, 248, 0.4);
+    color: #38bdf8;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 8px;
+    background: rgba(14, 165, 233, 0.12);
+    transition: all 0.2s ease;
+}
+
+.pangea-reader-action-btn:hover {
+    background: rgba(14, 165, 233, 0.25);
+    border-color: #38bdf8;
+    color: #fff;
+}
+
+.pangea-reader-close-btn {
+    background: none;
+    border: none;
+    font-size: 1.8rem;
+    color: #94a3b8;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0 4px;
+    transition: color 0.15s ease;
+}
+
+.pangea-reader-close-btn:hover {
+    color: #f43f5e;
+}
+
+.pangea-reader-body {
+    flex: 1;
+    position: relative;
+    background: #020617;
+    overflow: hidden;
+}
+
+.pangea-reader-iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    background: #0b0f19;
+}
+
+.pangea-reader-loading {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    color: #94a3b8;
+    font-size: 0.88rem;
+    background: #0b0f19;
+    z-index: 5;
+}
+
+.pangea-spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid rgba(56, 189, 248, 0.2);
+    border-top-color: #38bdf8;
+    border-radius: 50%;
+    animation: pangeaSpin 0.8s linear infinite;
+}
+
+@keyframes pangeaSpin {
+    to { transform: rotate(360deg); }
+}
+
+.pangea-reader-fallback {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    text-align: center;
+    background: #0b0f19;
+    color: #cbd5e1;
+    z-index: 6;
+}
+
+.pangea-fallback-icon {
+    font-size: 2.8rem;
+    margin-bottom: 8px;
+}
+
+/* Global Search Modal */
+.pangea-search-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 100050;
+    background: rgba(10, 15, 29, 0.85);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    box-sizing: border-box;
+}
+
+.pangea-search-dialog {
+    width: 90vw;
+    max-width: 680px;
+    max-height: 80vh;
+    background: #0f172a;
+    border: 1px solid rgba(56, 189, 248, 0.35);
+    border-radius: 14px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.pangea-search-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 18px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.pangea-search-body {
+    padding: 16px 18px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    overflow: hidden;
+}
+
+.pangea-search-input {
+    width: 100%;
+    box-sizing: border-box;
+    background: #020617;
+    border: 1px solid rgba(56, 189, 248, 0.35);
+    border-radius: 8px;
+    padding: 10px 14px;
+    color: #f8fafc;
+    font-size: 0.92rem;
+    font-family: inherit;
+    outline: none;
+    transition: all 0.2s ease;
+}
+
+.pangea-search-input:focus {
+    border-color: #38bdf8;
+    box-shadow: 0 0 12px rgba(56, 189, 248, 0.25);
+}
+
+.pangea-search-results-list {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 50vh;
+    padding-left: 4px;
+}
+
+.pangea-search-result-card {
+    background: rgba(30, 41, 59, 0.6);
+    border: 1px solid rgba(56, 189, 248, 0.2);
+    border-radius: 8px;
+    padding: 10px 12px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.pangea-search-result-card:hover {
+    background: rgba(14, 165, 233, 0.15);
+    border-color: #38bdf8;
+    transform: translateY(-1px);
+}
+
+.pangea-result-badge {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #38bdf8;
+    background: rgba(56, 189, 248, 0.15);
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+.pangea-result-course {
+    font-size: 0.72rem;
+    color: #94a3b8;
+    font-weight: 600;
+}
+
+.pangea-result-title {
+    font-size: 0.86rem;
+    color: #f1f5f9;
+    font-weight: 600;
+}
+
+/* Resource chips inside Course Modal */
+.pangea-resource-chip {
+    background: rgba(30, 41, 59, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 6px;
+    padding: 6px 10px;
+    color: #e2e8f0;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.15s ease;
+    text-align: right;
+    font-family: inherit;
+}
+
+.pangea-resource-chip:hover {
+    transform: translateY(-1px);
+}
+
+.pangea-hw-chip {
+    border-color: rgba(16, 185, 129, 0.35);
+    color: #a7f3d0;
+}
+.pangea-hw-chip:hover {
+    background: rgba(16, 185, 129, 0.22);
+    border-color: #34d399;
+}
+
+.pangea-exam-chip {
+    border-color: rgba(245, 158, 11, 0.35);
+    color: #fde68a;
+}
+.pangea-exam-chip:hover {
+    background: rgba(245, 158, 11, 0.22);
+    border-color: #fbbf24;
+}
+
+.pangea-lecture-chip {
+    border-color: rgba(56, 189, 248, 0.3);
+    color: #bae6fd;
+}
+.pangea-lecture-chip:hover {
+    background: rgba(14, 165, 233, 0.2);
+    border-color: #38bdf8;
+}
+
+@media (max-width: 768px) {
+    .pangea-reader-container {
+        width: 100vw;
+        height: 100vh;
+        border-radius: 0;
+        border: none;
+    }
+    .pangea-reader-overlay {
+        padding: 0;
+    }
+}

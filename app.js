@@ -12605,7 +12605,7 @@ function renderTechnionPlusQuickBar(course) {
         <a href="${cfUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-xs technion-link-btn" style="background: rgba(245, 158, 11, 0.18); border: 1px solid #f59e0b; color: #fbbf24; text-decoration: none; padding: 4px 10px; border-radius: 6px; font-size: 0.76rem; font-weight: 700; display: inline-flex; align-items: center; gap: 5px;" title="דף הקורס ומערכת שעות ב-CheeseFork">
             <img src="cheesefork_icon.webp" alt="CheeseFork" loading="lazy" decoding="async" class="technion-btn-brand-icon" style="width: 15px; height: 15px; object-fit: contain; vertical-align: -2px; border-radius: 2px; flex-shrink: 0;"> צ'יזפורק ↗
         </a>
-        <a href="${pangeaUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-xs technion-link-btn" style="background: rgba(14, 165, 233, 0.18); border: 1px solid #0284c7; color: #38bdf8; text-decoration: none; padding: 4px 10px; border-radius: 6px; font-size: 0.76rem; font-weight: 700; display: inline-flex; align-items: center; gap: 5px;" title="קישור ישיר לסיכומי הקורס ודפי נוסחאות בפנגייה (Ido Fang Bentov)">
+        <a href="${pangeaUrl}" onclick="event.preventDefault(); if (window.PangeaHub) window.PangeaHub.openQuickPeek('${pangeaUrl}', '${escapeHtml(course.name)} - סיכומי פנגייה', '${pangeaUrl}'); else window.open('${pangeaUrl}', '_blank');" target="_blank" rel="noopener noreferrer" class="btn btn-xs technion-link-btn" style="background: rgba(14, 165, 233, 0.18); border: 1px solid #0284c7; color: #38bdf8; text-decoration: none; padding: 4px 10px; border-radius: 6px; font-size: 0.76rem; font-weight: 700; display: inline-flex; align-items: center; gap: 5px;" title="צפייה מהירה בסיכומי הקורס ודפי נוסחאות בפנגייה (Ido Fang Bentov)">
             <img src="pangea_icon.png" alt="Fangia" loading="lazy" decoding="async" class="technion-btn-brand-icon pangea-btn-icon" style="width: 15px; height: 15px; object-fit: contain; vertical-align: -2px; border-radius: 2px; flex-shrink: 0;"> פנגייה ↗
         </a>
         <a href="${driveUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-xs technion-link-btn" style="background: rgba(168, 85, 247, 0.18); border: 1px solid #a855f7; color: #c084fc; text-decoration: none; padding: 4px 10px; border-radius: 6px; font-size: 0.76rem; font-weight: 700; display: inline-flex; align-items: center; gap: 5px;" title="מעבר ישיר לדרייב הפקולטה להנדסת מכונות (אס״ט) - פתרונות שיעורי בית ישנים, רפרנסים ומבחני עבר">
@@ -14476,6 +14476,13 @@ function openCourseDetails(code) {
     renderTechnionPlusQuickBar(course);
 
     // CheeseFork Schedule & Exam Information Section
+    
+    // Render Pangea Knowledge Hub Section
+    const pangeaContainer = document.getElementById("modal-pangea-container");
+    if (pangeaContainer && window.PangeaHub) {
+        window.PangeaHub.renderCoursePangeaSection(course.code, pangeaContainer);
+    }
+
     const cfContainer = document.getElementById("modal-cheesefork-container");
     if (cfContainer) {
         cfContainer.innerHTML = "";
@@ -17163,6 +17170,15 @@ window.refreshTasks = function(options = {}) {
 function getPangeaTaskUrl(courseCode, task) {
     if (task && task.pangeaUrl) return task.pangeaUrl;
     if (!courseCode) return null;
+
+    // Check smart homework resolver
+    if (window.PangeaHub && task && (task.title || task.name)) {
+        const resolved = window.PangeaHub.resolveTaskHomework(courseCode, task.title || task.name);
+        if (resolved && resolved.url) {
+            return resolved.url;
+        }
+    }
+
     const cleanCode = String(courseCode).trim().replace(/^0+/, '');
     const fullCode = String(courseCode).trim();
     const paddedCode = fullCode.padStart(8, '0');
@@ -17389,10 +17405,13 @@ function renderNotionTasksTable() {
         ` : '';
 
         const pangeaUrl = getPangeaTaskUrl(c.code, t);
+        const resolvedHw = (window.PangeaHub && t) ? window.PangeaHub.resolveTaskHomework(c.code, t.title || t.name) : null;
+        const isHwMatch = resolvedHw && resolvedHw.isExactMatch;
+        const pangeaLabel = isHwMatch ? '📝 פתרון בפנגייה ↗' : 'פנגייה ↗';
         const pangeaLinkHtml = pangeaUrl ? `
-            <a href="${pangeaUrl}" target="_blank" rel="noopener noreferrer" class="notion-pangea-link-btn" title="מעבר ישיר לסיכומי הקורס, דפי נוסחאות וחומרי לימוד בפנגייה (Ido Fang Bentov)" onclick="event.stopPropagation();">
+            <a href="${pangeaUrl}" target="_blank" rel="noopener noreferrer" class="notion-pangea-link-btn ${isHwMatch ? 'pangea-hw-matched-btn' : ''}" title="${isHwMatch ? 'צפייה ישירה בפתרון תרגיל הבית בפנגייה' : 'מעבר ישיר לסיכומי הקורס וחומרי לימוד בפנגייה'}" onclick="event.stopPropagation(); event.preventDefault(); if (window.PangeaHub) window.PangeaHub.openQuickPeek('${pangeaUrl}', '${escapeHtml(t.title || 'משימה')} - פנגייה', '${pangeaUrl}'); else window.open('${pangeaUrl}', '_blank');">
                 <img src="pangea_icon.png" alt="Pangea" class="pangea-btn-icon" style="width: 14px; height: 14px; object-fit: contain; vertical-align: -2px; border-radius: 2px;">
-                <span>פנגייה ↗</span>
+                <span>${pangeaLabel}</span>
             </a>
         ` : '';
 
@@ -23505,11 +23524,11 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.11.08-v2.10.16",
-    version: "2.10.16",
+    code: "REV-2026.11.09-v2.10.17",
+    version: "2.10.17",
     build: "20261108_04",
     date: "2026-11-08 13:30",
-    description: "v2.10.16: ניתוב ישיר ובלתי אמצעי לפורטלים הראשיים של CheeseFork (cheesefork.cf) ו-Moodle (moodle26/my) לעריכה אינטראקטיבית וחיבור אוטומטי (ADR-089)."
+    description: "v2.10.17: אינטגרציית עומק לפנגייה (Pangea Knowledge Hub): פתרונות ש\"ב ישירים, מבחנים פתורים, חיפוש נושאים וקורא פנימי In-App Reader (ADR-090)."
 };
 window.APP_VERSION = APP_CURRENT_REVISION.version;
 

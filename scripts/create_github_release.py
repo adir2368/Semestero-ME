@@ -18,9 +18,9 @@ ZIP_PATH = os.path.join(ROOT, "Semestero-ME-Windows-x64.zip")
 
 with open(os.path.join(ROOT, "package.json"), "r", encoding="utf-8") as f:
     pkg = json.load(f)
-VERSION = pkg.get("version", "2.10.15")
+VERSION = pkg.get("version", "2.10.17")
 TAG = f"v{VERSION}"
-NAME = f"Semestero ME v{VERSION} - Direct Primary Academic Portals Linking (CheeseFork & Moodle)"
+NAME = f"Semestero ME v{VERSION} - Pangea Knowledge Hub, Smart HW Resolver & In-App Reader"
 
 def get_github_token():
     try:
@@ -100,15 +100,17 @@ def main():
 
     body_notes = f"""# Semestero ME {TAG} Release Notes
 
-### 📱 1. תכנון תואר במובייל — הצגה מיידית של לוח הסמסטרים (Semesters Board Immediate Visibility)
-- **פתרון שורשי לתלונת המשתמש ("חסר לי את כל החלק של הסמסטרים")**: ברירת-המחדל של בורר התצוגה במובייל הוחזרה למצב 'both' (הכל) — לוח הסמסטרים מוצג מיידית בראש העמוד ואינו מוסתר עוד.
-- **ריפוי אוטומטי של זיכרון מקומי (Auto-Heal Stored Preferences)**: קוד האפליקציה בודק ומעדכן אוטומטית מכשירי משתמשים שהיו "תקועים" על מצב קטלוג בלבד (catalog), ומחזיר אותם לתצוגה המלאה.
-- **באנר מעבר מהיר (Quick Switch Banner)**: במידה והסטודנט בוחר במכוון במצב 'מאגר קורסים בלבד', מופיע בראש הקטלוג באנר מואר ואינטראקטיבי: `💡 לוח הסמסטרים מוסתר • לחץ כאן למעבר ללוח 📅`, המאפשר חזרה מיידית בטאפ בודד.
+### 🏛️ 1. אינטגרציית עומק לפנגייה (Pangea Knowledge Hub - idofangbentov.uk)
+- **קורא פנימי מהיר (In-App Quick Peek Reader)**: צפייה ישירה בסיכומי הרצאות, תרגולים ומבחנים של פנגייה בתוך מודאל אלגנטי באפליקציה, עם ספינר טעינה, כרטיס גיבוי מובנה וכפתור ישיר `פתח באתר המקורי ↗` למעבר מהיר לדפדפן חיצוני בכל עת.
+- **מפענח שיעורי בית חכם (Smart Homework Deep-Linking Resolver)**: מיפוי אוטומטי של מספרי קורסים ומספרי תרגילים (למשל 'תרגיל בית 5' בדינמיקה 034010) לקבצי הפתרון הספציפיים בפנגייה (`DYN1_HW005`), עם כפתור מיוחד `📝 פתרון בפנגייה ↗` בלוח המטלות ובמגירת ה-Peek Drawer.
+- **קטלוג מבחנים מלא ומקיף**: הצגה כרונולוגית של כל המבחנים הפתורים בפנגייה ללא סינון עונתי, המאפשרת גישה מיידית לכל המועדים לקראת תקופת המבחנים.
+- **חיפוש גלובלי לפי נושא ומילת מפתח (Topic & Keyword Live Search)**: מודאל חיפוש מהיר המאפשר איתור נושאים ספציפיים (כגון 'ברנולי', 'נאויה-סטוקס', 'אוילר') ישירות בתוכן פנגייה בכל 38 הקורסים.
 
 ### 📦 2. קבצי הפצה:
-- `Semestero-ME.apk` (Android `versionCode 69`, `versionName 2.10.15`)
-- `Semestero ME-win32-x64` (Electron Desktop Client v2.10.15)
-- קוד מקור מלא מסונכרן לדומיין הראשי `https://semestero.me`
+- `Semestero-ME.apk` (Android `versionCode 71`, `versionName 2.10.17`)
+- `Semestero-ME-Watch.apk` (Wear OS Companion `versionCode 71`, `versionName 2.10.17`)
+- `Semestero-ME-Windows-x64.zip` (Electron Desktop Client v2.10.17)
+- סנכרון מלא של כל הנכסים ב-GitHub Pages ודומיין `https://semestero.me`
 """
 
     req_tag = urllib.request.Request(f"https://api.github.com/repos/{REPO}/releases/tags/{TAG}", headers=headers)

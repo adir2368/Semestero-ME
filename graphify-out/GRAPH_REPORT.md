@@ -1,17 +1,17 @@
-# Graph Report - academic-skill-tree  (2026-11-08)
+# Graph Report - academic-skill-tree  (2026-11-09)
 
 ## Corpus Check
-- 602 files · ~1,542,302 words
+- 608 files · ~1,562,752 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 87 file(s) not represented in the graph (top: .xml 61, (none) 6, .bat 6)
 
 ## Summary
-- 2849 nodes · 5084 edges · 289 communities (129 shown, 160 thin omitted)
+- 2854 nodes · 5101 edges · 292 communities (131 shown, 161 thin omitted)
 - Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 61 edges (avg confidence: 0.85)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `13dc0b0e`
+- Built from commit: `a780f9af`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -47,9 +47,9 @@
 - app_restored.js
 - fetch_technion_sap_catalog.js
 - create_github_release.py
-- test_app_purge.js
+- verify_wear_tasks_expand_and_vertical_centering.test.js
 - SemesteroComplicationService.java
-- test_filter_logic.js
+- update_tour_settings.js
 - ref_path
 - SemesteroMiluimWidget
 - openCourseDetails
@@ -74,8 +74,8 @@
 - verify_phone_watch_dual_sync.test.js
 - notifyStateChanged
 - bump_version_2_10_12.js
-- initPrereqChipsSearch
-- test_modal_error.js
+- setupEventListeners
+- test_app_purge.js
 - verify_planner_mandatory_restore.test.js
 - sync_from_google_calendars.py
 - grade_sheet.js
@@ -112,13 +112,15 @@
 - SemesteroNextClassWidget
 - .resolve
 - bump_version.js
-- verify_v2414_flask_gear.js
+- test_open_modal_sim.js
 - manifest.json
 - apply_v258_upgrade.js
 - apply_v259.js
 - site_analytics.js
 - verify_shortcuts_moodle_and_admin.js
 - SemesteroFinalsGpaWidget
+- build_mobile_dist.js
+- cheesefork_precision_sync.test.js
 - verify_v262_back_to_top.js
 - ref_http
 - apply_hud_fixes.js
@@ -126,6 +128,7 @@
 - deep_engine_stress_test.js
 - verify_classification_exams.test.js
 - verify_desktop_and_mobile_suite.js
+- patch_test5.js
 - test_clean_state_isolation.js
 - qa_verify_performance_browser.js
 - מדיניות פרטיות והגנת מידע (Privacy Policy)
@@ -142,7 +145,6 @@
 - watch_companion.js
 - check_prereqs.js
 - generate_verified_prereqs.js
-- test_miluim_and_moodle_sync.js
 - unit_dedup_logic.js
 - AGENTS.md — Semestero ME (Academic Skill Tree)
 - apply_curriculum_separation.py
@@ -169,7 +171,7 @@
 ## God Nodes (most connected - your core abstractions)
 1. `saveState()` - 57 edges
 2. `showToastNotification()` - 55 edges
-3. `renderNotionTasksTable()` - 46 edges
+3. `renderNotionTasksTable()` - 47 edges
 4. `openCourseDetails()` - 39 edges
 5. `notifyStateChanged()` - 34 edges
 6. `setupNotionDashboard()` - 31 edges
@@ -193,7 +195,7 @@
 ## Import Cycles
 - None detected.
 
-## Communities (289 total, 160 thin omitted)
+## Communities (292 total, 161 thin omitted)
 
 ### Community 0 - "WearCarouselAdapter"
 Cohesion: 0.11
@@ -201,7 +203,7 @@ Nodes (20): Adapter, android.view.LayoutInflater, android.view.View, android.vie
 
 ### Community 1 - "app.js"
 Cohesion: 0.03
-Nodes (75): _activePrereqCodes, APP_CURRENT_REVISION, AUGUST_2026_PERSONAL_EVENTS, AUGUST_2026_SCHEDULE, AUTHENTIC_TIMETABLE_METADATA, CHEESEFORK_EXAM_DATES, CHEESEFORK_SEMESTER_SCHEDULE, clearConstellationHighlight() (+67 more)
+Nodes (68): _activePrereqCodes, APP_CURRENT_REVISION, AUGUST_2026_PERSONAL_EVENTS, AUGUST_2026_SCHEDULE, AUTHENTIC_TIMETABLE_METADATA, CHEESEFORK_EXAM_DATES, CHEESEFORK_SEMESTER_SCHEDULE, clearConstellationHighlight() (+60 more)
 
 ### Community 2 - "SemesteroClassTileService.java"
 Cohesion: 0.08
@@ -212,8 +214,8 @@ Cohesion: 0.09
 Nodes (30): Override, PhoneWearListenerService, android.os.Vibrator, arraylist, build, calendar, com.google.android.gms.wearable.MessageEvent, com.google.android.gms.wearable.WearableListenerService (+22 more)
 
 ### Community 6 - "os"
-Cohesion: 0.04
-Nodes (6): io, os, pil, shutil, xml_etree_elementtree, zipfile
+Cohesion: 0.03
+Nodes (7): io, os, pil, shutil, subprocess, xml_etree_elementtree, zipfile
 
 ### Community 7 - "AppDelegate"
 Cohesion: 0.09
@@ -248,8 +250,8 @@ Cohesion: 0.17
 Nodes (4): SemesteroWidgetBridge, Override, SemesteroScheduleWidget, android.webkit.JavascriptInterface
 
 ### Community 16 - "saveState"
-Cohesion: 0.15
-Nodes (45): addNewCustomClassPrompt(), addXp(), applyTimetableMobileFilter(), bulkSetTasksStatus(), createCalendarDayCell(), createNewRevisionSnapshot(), deleteClassFromSchedule(), deleteCourse() (+37 more)
+Cohesion: 0.14
+Nodes (47): addNewCustomClassPrompt(), addXp(), applyTimetableMobileFilter(), autoUpdateTaskStatusesByDueDate(), bulkSetTasksStatus(), createCalendarDayCell(), createNewRevisionSnapshot(), deleteClassFromSchedule() (+39 more)
 
 ### Community 17 - "MainActivity"
 Cohesion: 0.18
@@ -280,8 +282,8 @@ Cohesion: 0.16
 Nodes (34): areTasksDuplicates(), bindUI(), cleanTaskSummary(), closeModal(), deduplicateAllTasks(), deduplicateCourseTasks(), detectTaskType(), extractMoodleId() (+26 more)
 
 ### Community 24 - "ref_fs"
-Cohesion: 0.06
-Nodes (28): ref_fs, ref_jsdom, fs, userSaved, fs, userSaved, cfContent, fs (+20 more)
+Cohesion: 0.07
+Nodes (21): ref_fs, fs, userSaved, fs, userSaved, activeStatusFilters, activeTypeFilters, fs (+13 more)
 
 ### Community 25 - "verify_performance_toolkit.test.js"
 Cohesion: 0.18
@@ -292,8 +294,8 @@ Cohesion: 0.31
 Nodes (10): closeCourseIconPicker(), getDefaultCourseIconKey(), NOTION_COLORS, openCourseIconPicker(), renderIconPickerGrid(), renderIconPickerPalette(), resetCourseIcon(), saveCourseIcon() (+2 more)
 
 ### Community 27 - "ref_child_process"
-Cohesion: 0.22
-Nodes (9): ref_child_process, fetchJson(), fs, http, main(), send(), path, SCREENSHOT_PATH (+1 more)
+Cohesion: 0.12
+Nodes (16): ref_child_process, fs, http, MIME_TYPES, path, send(), server, { spawn } (+8 more)
 
 ### Community 28 - "app_restored.js"
 Cohesion: 0.19
@@ -304,28 +306,28 @@ Cohesion: 0.06
 Nodes (36): ref_https, https, options, https, options, headers, https, CHEESEFORK_DB_PATH (+28 more)
 
 ### Community 30 - "create_github_release.py"
-Cohesion: 0.09
-Nodes (10): argparse, base64, delete_existing_asset_if_any(), get_github_token(), main(), upload_asset(), subprocess, urllib_error (+2 more)
+Cohesion: 0.11
+Nodes (9): argparse, base64, delete_existing_asset_if_any(), get_github_token(), main(), upload_asset(), urllib_error, urllib_parse (+1 more)
 
-### Community 31 - "test_app_purge.js"
-Cohesion: 0.22
-Nodes (8): cleaned, fs, localStorageMock, parsed, path, raw, root, vm
+### Community 31 - "verify_wear_tasks_expand_and_vertical_centering.test.js"
+Cohesion: 0.12
+Nodes (15): assert, fs, path, phoneApkPath, phoneStat, ROOT_DIR, watchHtml, watchHtmlPath (+7 more)
 
 ### Community 32 - "SemesteroComplicationService.java"
 Cohesion: 0.15
 Nodes (14): Override, SemesteroComplicationService, androidx.annotation.Nullable, androidx.wear.watchface.complications.data.ComplicationData, androidx.wear.watchface.complications.data.ComplicationType, androidx.wear.watchface.complications.datasource.ComplicationDataSourceService, androidx.wear.watchface.complications.datasource.ComplicationRequest, ComplicationRequestListener (+6 more)
 
-### Community 33 - "test_filter_logic.js"
-Cohesion: 0.29
-Nodes (5): activeStatusFilters, activeTypeFilters, fs, item, normCat
+### Community 33 - "update_tour_settings.js"
+Cohesion: 0.22
+Nodes (8): content, filePath, fs, hasCRLF, normContent, normNew, normOld, path
 
 ### Community 34 - "ref_path"
-Cohesion: 0.07
-Nodes (25): { app, BrowserWindow, Menu, ipcMain, shell }, path, { contextBridge, ipcRenderer }, electron, ref_path, content, fs, path (+17 more)
+Cohesion: 0.08
+Nodes (20): { app, BrowserWindow, Menu, ipcMain, shell }, path, { contextBridge, ipcRenderer }, electron, ref_path, { app, BrowserWindow }, fs, path (+12 more)
 
 ### Community 36 - "openCourseDetails"
-Cohesion: 0.07
-Nodes (42): applyCheeseForkCourse(), autoUpdateTaskStatusesByDueDate(), clearFlowchartHighlight(), completeAllTasks(), enrichTimetableWithAuthenticRooms(), ensureCheeseForkDatabase(), escapeHtml(), fetchWithTimeoutAndDedup() (+34 more)
+Cohesion: 0.09
+Nodes (29): clearFlowchartHighlight(), completeAllTasks(), enrichTimetableWithAuthenticRooms(), escapeHtml(), exportSvgToPng(), fetchWithTimeoutAndDedup(), findCourseObj(), fitFlowchartToWidth() (+21 more)
 
 ### Community 37 - "setupNotionDashboard"
 Cohesion: 0.16
@@ -340,8 +342,8 @@ Cohesion: 0.13
 Nodes (35): checkAndTrigger10MinReminders(), closeNotificationDrawer(), completeTaskFromNotification(), constructor(), dispatchNativeMobileNotifications(), downloadICSFile(), ensureCapacitorNotificationChannel(), ensureNotificationPreferencesDefaults() (+27 more)
 
 ### Community 40 - "ref_assert"
-Cohesion: 0.06
-Nodes (31): ref_assert, assert, fs, runSimulation(), collectAndFilterTasks(), getTaskNormalizedCategory(), appCode, assert (+23 more)
+Cohesion: 0.15
+Nodes (12): ref_assert, assert, fs, runSimulation(), collectAndFilterTasks(), getTaskNormalizedCategory(), assert, fs (+4 more)
 
 ### Community 41 - "verify_homework_submission_states.js"
 Cohesion: 0.19
@@ -407,13 +409,13 @@ Nodes (32): addCustomExamToBank(), autoScheduleCourseExams(), closeCalendarDayMo
 Cohesion: 0.15
 Nodes (12): appJs, appPath, fs, gradlePath, indexHtml, indexPath, path, pkg (+4 more)
 
-### Community 65 - "initPrereqChipsSearch"
-Cohesion: 0.31
-Nodes (7): addPrereqChip(), escapeHtmlPrereq(), initPrereqChipsSearch(), closeDropdown(), renderDropdown(), removePrereqChip(), renderPrereqChips()
+### Community 65 - "setupEventListeners"
+Cohesion: 0.11
+Nodes (25): addPrereqChip(), applyCheeseForkCourse(), ensureCheeseForkDatabase(), escapeHtmlPrereq(), findCheeseForkCourse(), formatAcademicTermForDate(), getCourseCheeseforkExamDates(), getCourseDisplayNameByCode() (+17 more)
 
-### Community 69 - "test_modal_error.js"
-Cohesion: 0.20
-Nodes (8): ref_vm, context, documentMock, elements, fs, path, root, vm
+### Community 69 - "test_app_purge.js"
+Cohesion: 0.11
+Nodes (16): ref_vm, cleaned, fs, localStorageMock, parsed, path, raw, root (+8 more)
 
 ### Community 70 - "verify_planner_mandatory_restore.test.js"
 Cohesion: 0.11
@@ -551,9 +553,9 @@ Nodes (3): CourseSlot, ScheduleResolution, WearScheduleHelper
 Cohesion: 0.33
 Nodes (5): fs, html, indexPath, path, ROOT
 
-### Community 108 - "verify_v2414_flask_gear.js"
-Cohesion: 0.40
-Nodes (5): fetch(), fs, http, path, verify()
+### Community 108 - "test_open_modal_sim.js"
+Cohesion: 0.25
+Nodes (7): ref_jsdom, appJsCode, dom, fs, html, jsdom, plannerCatalogCode
 
 ### Community 109 - "manifest.json"
 Cohesion: 0.14
@@ -575,13 +577,21 @@ Nodes (10): fetchStats(), init(), initWebVitalsMonitor(), loadLocalCounts(), ope
 Cohesion: 0.08
 Nodes (20): assert, fs, manualTaskInput, merged, moodleSyncCode, path, testPairs, userCopyDup (+12 more)
 
+### Community 115 - "build_mobile_dist.js"
+Cohesion: 0.33
+Nodes (5): FILES_TO_COPY, fs, path, ROOT, WWW
+
+### Community 116 - "cheesefork_precision_sync.test.js"
+Cohesion: 0.33
+Nodes (4): appCode, assert, fs, mockEl
+
 ### Community 117 - "verify_v262_back_to_top.js"
 Cohesion: 0.15
 Nodes (11): appJs, assert, fs, gradle, indexHtml, packageJson, path, ROOT (+3 more)
 
 ### Community 118 - "ref_http"
-Cohesion: 0.11
-Nodes (17): ref_http, fs, http, MIME_TYPES, path, send(), server, { spawn } (+9 more)
+Cohesion: 0.13
+Nodes (15): ref_http, fetch(), fs, http, verify(), fetch(), fs, http (+7 more)
 
 ### Community 119 - "apply_hud_fixes.js"
 Cohesion: 0.17
@@ -602,6 +612,10 @@ Nodes (11): appGradle, appJs, assert, fs, indexHtml, path, pkg, plannerJs (+3 mo
 ### Community 123 - "verify_desktop_and_mobile_suite.js"
 Cohesion: 0.17
 Nodes (10): appJs, assert, fs, indexHtml, packageJson, path, plannerJs, ROOT (+2 more)
+
+### Community 124 - "patch_test5.js"
+Cohesion: 0.40
+Nodes (4): content, fs, path, targetFile
 
 ### Community 127 - "test_clean_state_isolation.js"
 Cohesion: 0.18
@@ -663,10 +677,6 @@ Nodes (7): cfContent, cfMap, courses, curContent, fs, normalizeRawCode(), parseP
 Cohesion: 0.25
 Nodes (6): cfContent, cfMap, codeEquivalents, curContent, fs, verifiedPrereqs
 
-### Community 148 - "test_miluim_and_moodle_sync.js"
-Cohesion: 0.25
-Nodes (7): appJs, assert, convertedCodes, fs, indexHtml, mockCourses, path
-
 ### Community 149 - "unit_dedup_logic.js"
 Cohesion: 0.43
 Nodes (7): areTasksDuplicates(), deduplicateCourseTaskList(), extractMoodleId(), mergeTaskPair(), normalizeTaskTitle(), res, sampleTasks
@@ -713,8 +723,8 @@ Nodes (3): ref_k6, ADR-0075, options
 
 ## Knowledge Gaps
 - **935 isolated node(s):** `type`, `$schema`, `version`, `body`, `actions` (+930 more)
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 1448 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
-- **160 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 1449 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+- **161 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
@@ -730,6 +740,6 @@ _Questions this graph is uniquely positioned to answer:_
 - **Should `WearCarouselAdapter` be split into smaller, more focused modules?**
   _Cohesion score 0.10931174089068826 - nodes in this community are weakly interconnected._
 - **Should `app.js` be split into smaller, more focused modules?**
-  _Cohesion score 0.03065660032029284 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.031007751937984496 - nodes in this community are weakly interconnected._
 - **Should `SemesteroClassTileService.java` be split into smaller, more focused modules?**
   _Cohesion score 0.07765151515151515 - nodes in this community are weakly interconnected._
