@@ -9029,9 +9029,8 @@ function resetToAuthenticSchedule() {
 window.resetToAuthenticSchedule = resetToAuthenticSchedule;
 
 function openCheeseFork(event) {
-    const savedUrl = localStorage.getItem('ast_cheesefork_url');
-    const defaultUrl = "https://cheesefork.netlify.app/?semester=202601";
-    const targetUrl = savedUrl || defaultUrl;
+    // Send to primary CheeseFork portal (https://cheesefork.cf/) for full live interactive editing & auto-login
+    const targetUrl = "https://cheesefork.cf/";
     if (event && event.currentTarget && event.currentTarget.tagName === 'A') {
         event.currentTarget.href = targetUrl;
     } else {
@@ -23506,11 +23505,11 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.11.08-v2.10.15",
-    version: "2.10.15",
-    build: "20261108_03",
-    date: "2026-11-08 12:45",
-    description: "v2.10.15: תיקון תצוגת ברירת מחדל במובייל לתכנון תואר (הצגת לוח הסמסטרים באופן גלוי ומיידי, ריפוי אוטומטי מהסתרת קטלוג, ובאנר מעבר מהיר) (ADR-088)."
+    code: "REV-2026.11.08-v2.10.16",
+    version: "2.10.16",
+    build: "20261108_04",
+    date: "2026-11-08 13:30",
+    description: "v2.10.16: ניתוב ישיר ובלתי אמצעי לפורטלים הראשיים של CheeseFork (cheesefork.cf) ו-Moodle (moodle26/my) לעריכה אינטראקטיבית וחיבור אוטומטי (ADR-089)."
 };
 window.APP_VERSION = APP_CURRENT_REVISION.version;
 
@@ -26084,7 +26083,7 @@ function updateDailyTimetableFocus() {
                     <span>🏖️</span>
                     <span>ימים חופשיים: <strong>ראשון ושישי</strong></span>
                 </div>
-                <a href="https://cheesefork.netlify.app/?semester=202601" target="_blank" rel="noopener" class="btn btn-sm btn-outline" style="border-color: #f59e0b; color: #fbbf24; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+                <a href="https://cheesefork.cf/" target="_blank" rel="noopener" class="btn btn-sm btn-outline" style="border-color: #f59e0b; color: #fbbf24; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
                     🧀 פתח ב-CheeseFork
                 </a>
             `;
@@ -26099,7 +26098,7 @@ function updateDailyTimetableFocus() {
                     <span>📚</span>
                     <span>מערכת אישית נקייה</span>
                 </div>
-                <a href="https://cheesefork.netlify.app" target="_blank" rel="noopener" class="btn btn-sm btn-outline" style="border-color: #f59e0b; color: #fbbf24; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+                <a href="https://cheesefork.cf/" target="_blank" rel="noopener" class="btn btn-sm btn-outline" style="border-color: #f59e0b; color: #fbbf24; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
                     🧀 CheeseFork מערכת שעות
                 </a>
             `;

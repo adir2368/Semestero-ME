@@ -1974,7 +1974,7 @@
                         </button>
                     </div>
                     <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.73rem;">
-                        <a href="https://cheesefork.netlify.app/?semester=202601" target="_blank" rel="noopener noreferrer" style="color: #38bdf8; text-decoration: underline; display: flex; align-items: center; gap: 4px;">
+                        <a href="https://cheesefork.cf/" target="_blank" rel="noopener noreferrer" style="color: #38bdf8; text-decoration: underline; display: flex; align-items: center; gap: 4px;">
                             <span>🌐</span> <span>פתח את CheeseFork</span>
                         </a>
                         <button type="button" onclick="const h = document.getElementById('cf-help-tooltip'); if(h) h.style.display = h.style.display === 'none' ? 'block' : 'none';" style="background: none; border: none; color: #94a3b8; cursor: pointer; text-decoration: underline; padding: 0;">
@@ -2009,7 +2009,7 @@
                         </button>
                     </div>
                     <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.73rem;">
-                        <a href="https://moodle26.technion.ac.il" target="_blank" rel="noopener noreferrer" style="color: #38bdf8; text-decoration: underline; display: flex; align-items: center; gap: 4px;">
+                        <a href="https://moodle26.technion.ac.il/my/" target="_blank" rel="noopener noreferrer" style="color: #38bdf8; text-decoration: underline; display: flex; align-items: center; gap: 4px;">
                             <span>🌐</span> <span>פתח את Moodle הטכניון</span>
                         </a>
                         <button type="button" onclick="if(window.MoodleSync && typeof window.MoodleSync.openModal==='function') { window.MoodleSync.openModal(); } else { const h=document.getElementById('moodle-help-tooltip'); if(h) h.style.display = h.style.display === 'none' ? 'block' : 'none'; }" style="background: none; border: none; color: #94a3b8; cursor: pointer; text-decoration: underline; padding: 0;">

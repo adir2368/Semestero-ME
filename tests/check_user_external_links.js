@@ -9,13 +9,13 @@ const http = require('http');
 const USER_LINKS = [
     {
         name: 'CheeseFork Live Schedule (Adir Profile)',
-        url: 'https://cheesefork.netlify.app/?semester=202601',
+        url: 'https://cheesefork.cf/',
         expected: [200, 301, 302],
         category: 'CheeseFork'
     },
     {
         name: 'CheeseFork Homepage',
-        url: 'https://cheesefork.netlify.app',
+        url: 'https://cheesefork.cf/',
         expected: [200, 301, 302],
         category: 'CheeseFork'
     },

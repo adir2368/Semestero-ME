@@ -20,7 +20,7 @@ with open(os.path.join(ROOT, "package.json"), "r", encoding="utf-8") as f:
     pkg = json.load(f)
 VERSION = pkg.get("version", "2.10.15")
 TAG = f"v{VERSION}"
-NAME = f"Semestero ME v{VERSION} - Degree Planner Mobile Semesters Board Immediate Visibility"
+NAME = f"Semestero ME v{VERSION} - Direct Primary Academic Portals Linking (CheeseFork & Moodle)"
 
 def get_github_token():
     try:
@@ -98,7 +98,7 @@ def main():
         "User-Agent": "Semestero-Release-Script"
     }
 
-        body_notes = f"""# Semestero ME {TAG} Release Notes
+    body_notes = f"""# Semestero ME {TAG} Release Notes
 
 ### 📱 1. תכנון תואר במובייל — הצגה מיידית של לוח הסמסטרים (Semesters Board Immediate Visibility)
 - **פתרון שורשי לתלונת המשתמש ("חסר לי את כל החלק של הסמסטרים")**: ברירת-המחדל של בורר התצוגה במובייל הוחזרה למצב 'both' (הכל) — לוח הסמסטרים מוצג מיידית בראש העמוד ואינו מוסתר עוד.
@@ -174,8 +174,7 @@ def main():
         print(f"[Zip] Creating {ZIP_PATH} from {dist_dir}...")
         try:
             subprocess.run([
-                "powershell", "-Command",
-                f"Compress-Archive -Path '{dist_dir}\\*' -DestinationPath '{ZIP_PATH}' -Force"
+                "tar", "-a", "-c", "-f", ZIP_PATH, "-C", dist_dir, "."
             ], check=True)
             if os.path.exists(ZIP_PATH):
                 delete_existing_asset_if_any(release["id"], "Semestero-ME-Windows-x64.zip", headers)
