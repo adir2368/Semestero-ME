@@ -17171,10 +17171,10 @@ tr.is-task-pinned {
 .pangea-reader-overlay {
     position: fixed;
     inset: 0;
-    z-index: 100060;
-    background: rgba(10, 15, 29, 0.88);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+    z-index: 2000000 !important;
+    background: rgba(10, 15, 29, 0.94);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -17200,9 +17200,11 @@ tr.is-task-pinned {
     justify-content: space-between;
     align-items: center;
     padding: 12px 18px;
-    background: rgba(30, 41, 59, 0.95);
+    padding-top: max(12px, env(safe-area-inset-top, 12px));
+    background: rgba(30, 41, 59, 0.98);
     border-bottom: 1px solid rgba(56, 189, 248, 0.25);
     flex-shrink: 0;
+    z-index: 10;
 }
 
 .pangea-reader-header-start {
@@ -17339,9 +17341,10 @@ tr.is-task-pinned {
 .pangea-search-overlay {
     position: fixed;
     inset: 0;
-    z-index: 100050;
-    background: rgba(10, 15, 29, 0.85);
-    backdrop-filter: blur(8px);
+    z-index: 2000010 !important;
+    background: rgba(10, 15, 29, 0.94);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -17502,6 +17505,22 @@ tr.is-task-pinned {
     .pangea-reader-overlay {
         padding: 0;
     }
+    .pangea-reader-header {
+        padding: 14px 14px;
+        padding-top: max(16px, env(safe-area-inset-top, 16px));
+        gap: 8px;
+    }
+    .pangea-reader-title {
+        font-size: 0.94rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 48vw;
+    }
+    .pangea-reader-action-btn {
+        padding: 5px 8px;
+        font-size: 0.72rem;
+    }
 }
 
 /* =======================================================
@@ -17560,4 +17579,101 @@ tr.is-task-pinned {
 .timetable-card.attendance-card-missed {
     border-color: rgba(239, 68, 68, 0.45);
     box-shadow: inset 0 0 10px rgba(239, 68, 68, 0.08);
+}
+
+/* Parallel Class Catch-Up Recommendations */
+.catchup-parallel-box {
+    margin-top: 10px;
+    background: rgba(14, 165, 233, 0.08);
+    border: 1px solid rgba(56, 189, 248, 0.28);
+    border-radius: 10px;
+    padding: 10px 12px;
+    transition: all 0.2s ease;
+}
+
+.catchup-parallel-box:hover {
+    background: rgba(14, 165, 233, 0.12);
+    border-color: rgba(56, 189, 248, 0.45);
+}
+
+.catchup-parallel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.catchup-parallel-title {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #38bdf8;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.catchup-parallel-badge {
+    font-size: 0.68rem;
+    color: #34d399;
+    font-weight: 600;
+    background: rgba(52, 211, 153, 0.15);
+    border: 1px solid rgba(52, 211, 153, 0.3);
+    padding: 2px 7px;
+    border-radius: 4px;
+}
+
+.catchup-parallel-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.catchup-parallel-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(15, 23, 42, 0.65);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 7px;
+    padding: 7px 10px;
+    font-size: 0.76rem;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.catchup-parallel-item:hover {
+    border-color: rgba(56, 189, 248, 0.35);
+    background: rgba(15, 23, 42, 0.85);
+}
+
+.catchup-parallel-item-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.catchup-parallel-time {
+    color: #f8fafc;
+    font-weight: 700;
+}
+
+.catchup-parallel-group {
+    color: #cbd5e1;
+}
+
+.catchup-parallel-room {
+    color: #94a3b8;
+    font-size: 0.72rem;
+}
+
+.catchup-parallel-chip-free {
+    font-size: 0.66rem;
+    background: rgba(14, 165, 233, 0.2);
+    color: #38bdf8;
+    border: 1px solid rgba(56, 189, 248, 0.4);
+    padding: 2px 6px;
+    border-radius: 4px;
+    white-space: nowrap;
 }

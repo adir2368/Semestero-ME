@@ -120,6 +120,127 @@
         /**
          * Computes unique key for a timetable slot
          */
+        
+        /**
+         * Finds parallel sessions (lecture / tutorial) for a course that fit
+         * cleanly into the student's active weekly schedule without conflicts.
+         */
+        findParallelSlotRecommendations: function(courseId, type, missedDayIndex, missedStartTime) {
+            if (!courseId) return [];
+            const cleanCode = String(courseId).replace(/\D/g, '');
+            const rawCode = String(courseId).trim();
+
+            let catalog = null;
+            if (window.TimetableGenerator && window.TimetableGenerator.catalog) {
+                catalog = window.TimetableGenerator.catalog;
+            } else if (typeof TECH_COURSE_GROUPS_CATALOG !== 'undefined') {
+                catalog = TECH_COURSE_GROUPS_CATALOG;
+            } else if (window.TimetableStudio && window.TimetableStudio.catalog) {
+                catalog = window.TimetableStudio.catalog;
+            }
+            if (!catalog) return [];
+
+            const courseEntry = catalog[cleanCode] ||
+                                catalog['0' + cleanCode] ||
+                                catalog[cleanCode.replace(/^0+/, '')] ||
+                                catalog[rawCode];
+            if (!courseEntry || !courseEntry.slots || courseEntry.slots.length === 0) return [];
+
+            const lowerType = String(type || '').toLowerCase();
+            let targetSlotType = null;
+            if (lowerType.includes('תרגול') || lowerType.includes('tutorial') || lowerType.includes('מעבדה') || lowerType.includes('lab')) {
+                targetSlotType = 'tutorial';
+            } else if (lowerType.includes('הרצאה') || lowerType.includes('lecture')) {
+                targetSlotType = 'lecture';
+            } else if (lowerType.includes('אימון') || lowerType.includes('ספורט') || lowerType.includes('sports')) {
+                targetSlotType = 'sports';
+            }
+
+            let activeSchedule = null;
+            if (typeof getActiveTimetableSchedule === 'function') {
+                activeSchedule = getActiveTimetableSchedule();
+            } else if (window.gameState && window.gameState.timetable) {
+                activeSchedule = window.gameState.timetable;
+            } else if (typeof CHEESEFORK_SEMESTER_SCHEDULE !== 'undefined') {
+                activeSchedule = CHEESEFORK_SEMESTER_SCHEDULE;
+            }
+
+            const parseTimeToMinutes = (t) => {
+                if (!t || typeof t !== 'string') return 0;
+                const parts = t.split(':').map(Number);
+                return (parts[0] || 0) * 60 + (parts[1] || 0);
+            };
+
+            const recommendations = [];
+            const relevantSlots = targetSlotType
+                ? courseEntry.slots.filter(s => s.slotType === targetSlotType)
+                : courseEntry.slots;
+
+            relevantSlots.forEach(slot => {
+                if (!slot.options) return;
+                slot.options.forEach(opt => {
+                    if (!opt.meetings) return;
+                    opt.meetings.forEach(meeting => {
+                        if (missedDayIndex !== undefined && missedDayIndex !== null &&
+                            meeting.dayIndex === Number(missedDayIndex) &&
+                            meeting.startTime === missedStartTime) {
+                            return;
+                        }
+
+                        const mStart = parseTimeToMinutes(meeting.startTime);
+                        const mEnd = parseTimeToMinutes(meeting.endTime);
+                        if (mEnd <= mStart) return;
+
+                        let hasConflict = false;
+                        if (activeSchedule && activeSchedule.days) {
+                            const schedDay = activeSchedule.days.find(d => d.dayIndex === meeting.dayIndex);
+                            if (schedDay && schedDay.classes && schedDay.classes.length > 0) {
+                                for (const c of schedDay.classes) {
+                                    if (meeting.dayIndex === Number(missedDayIndex) && c.startTime === missedStartTime) {
+                                        continue;
+                                    }
+                                    const cStart = parseTimeToMinutes(c.startTime);
+                                    const cEnd = parseTimeToMinutes(c.endTime);
+                                    if (mStart < cEnd && cStart < mEnd) {
+                                        hasConflict = true;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+
+                        if (!hasConflict) {
+                            const dayNames = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'];
+                            const dayName = meeting.dayName || dayNames[meeting.dayIndex] || ('יום ' + (meeting.dayIndex + 1));
+                            recommendations.push({
+                                courseId: cleanCode,
+                                courseName: courseEntry.name,
+                                slotType: slot.slotType,
+                                slotName: slot.slotName || (slot.slotType === 'tutorial' ? 'תרגול' : 'הרצאה'),
+                                groupId: opt.groupId,
+                                lecturer: opt.lecturer || meeting.lecturer || '',
+                                dayIndex: meeting.dayIndex,
+                                dayName: dayName,
+                                startTime: meeting.startTime,
+                                endTime: meeting.endTime,
+                                duration: meeting.duration || '',
+                                room: meeting.room || opt.room || 'אולמן / דנציגר',
+                                fitsSchedule: true,
+                                displayText: dayName + ' ' + meeting.startTime + '–' + meeting.endTime + ' • קבוצה ' + opt.groupId + ' (' + (opt.lecturer || '') + ') • ' + (meeting.room || opt.room || '')
+                            });
+                        }
+                    });
+                });
+            });
+
+            recommendations.sort((a, b) => {
+                if (a.dayIndex !== b.dayIndex) return a.dayIndex - b.dayIndex;
+                return parseTimeToMinutes(a.startTime) - parseTimeToMinutes(b.startTime);
+            });
+
+            return recommendations;
+        },
+
         makeSlotKey: function(courseId, dayIndex, startTime, dateStr) {
             const date = dateStr || this.getCurrentDateString();
             return `${courseId}_d${dayIndex}_${(startTime || '00:00').replace(':', '')}_${date}`;
@@ -177,16 +298,21 @@
             };
 
             if (targetStatus === 'missed') {
+                const parallelRecs = this.findParallelSlotRecommendations(courseId, type, dayIndex, startTime);
                 this.createCatchupItem({
                     slotKey: key,
                     courseId: String(courseId).trim(),
                     courseName: courseName,
                     type: type || 'שיעור',
+                    dayIndex: Number(dayIndex),
+                    startTime: startTime,
+                    endTime: endTime,
                     date: dateStr,
-                    startTime: startTime
+                    parallelRecs: parallelRecs
                 });
                 if (typeof showToastNotification === 'function') {
-                    showToastNotification(`⚠️ [${courseName}] סומן כהוחסר ונוסף לתור ההשלמות! 📹`, 'warning');
+                    const recSuffix = parallelRecs.length > 0 ? (' (נמצאו ' + parallelRecs.length + ' השלמות פרונטליות פנויות במערכת! 💡)') : '';
+                    showToastNotification('⚠️ [' + courseName + '] סומן כהוחסר ונוסף לתור ההשלמות!' + recSuffix + ' 📹', 'warning');
                 }
             } else {
                 // If it was attended, remove any pending catchup for this exact slot
@@ -228,6 +354,8 @@
                 courseName: meta.courseName,
                 type: meta.type,
                 date: meta.date,
+                dayIndex: meta.dayIndex !== undefined ? meta.dayIndex : null,
+                parallelRecs: meta.parallelRecs || this.findParallelSlotRecommendations(cleanCode, meta.type, meta.dayIndex, meta.startTime),
                 startTime: meta.startTime,
                 week: this.getCurrentAcademicWeek(),
                 topic: pangeaChapter ? pangeaChapter.displayTitle : `${meta.type} שבוע ${this.getCurrentAcademicWeek()}`,
@@ -490,6 +618,34 @@
                                     </button>
                                 </div>
                             </div>
+                            ${(() => {
+                                const recs = (item.parallelRecs && item.parallelRecs.length > 0)
+                                    ? item.parallelRecs
+                                    : (window.AttendanceHub ? window.AttendanceHub.findParallelSlotRecommendations(item.courseId, item.type, item.dayIndex, item.startTime) : []);
+                                if (!recs || recs.length === 0) return '';
+                                return `
+                                    <div class="catchup-parallel-box">
+                                        <div class="catchup-parallel-header">
+                                            <span class="catchup-parallel-title">
+                                                <span>💡</span> השלמה פרונטלית מומלצת במערכת (${recs.length} מועדים מקבילים פנויים):
+                                            </span>
+                                            <span class="catchup-parallel-badge">✓ ללא חפיפה במערכת</span>
+                                        </div>
+                                        <div class="catchup-parallel-list">
+                                            ${recs.map(rec => `
+                                                <div class="catchup-parallel-item">
+                                                    <div class="catchup-parallel-item-info">
+                                                        <span class="catchup-parallel-time">${rec.dayName} ${rec.startTime}–${rec.endTime}</span>
+                                                        <span class="catchup-parallel-group">${rec.slotName} קבוצה ${rec.groupId}${rec.lecturer ? (' • ' + rec.lecturer) : ''}</span>
+                                                        <span class="catchup-parallel-room">📍 ${rec.room}</span>
+                                                    </div>
+                                                    <span class="catchup-parallel-chip-free">פנוי במערכת</span>
+                                                </div>
+                                            `).join('')}
+                                        </div>
+                                    </div>
+                                `;
+                            })()}
                         </div>
                     `;
                 });

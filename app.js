@@ -23528,10 +23528,10 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.11.09-v2.10.18",
-    version: "2.10.18",
-    build: "20261108_04",
-    date: "2026-11-08 13:30",
+    code: "REV-2026.11.09-v2.10.19",
+    version: "2.10.19",
+    build: "20261109_01",
+    date: "2026-11-09 01:45",
     description: "v2.10.18: מעקב נוכחות חובה (ספורט ומעבדות), תור השלמות ופנאופטו בלחיצה אחת, וחיבור לסיכומי פנגייה (ADR-091)."
 };
 window.APP_VERSION = APP_CURRENT_REVISION.version;

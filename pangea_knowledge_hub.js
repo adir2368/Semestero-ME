@@ -4725,6 +4725,14 @@
                 return;
             }
 
+            // Guarantee foreground layering by moving to document.body root
+            if (modal.parentElement !== document.body) {
+                document.body.appendChild(modal);
+            } else {
+                document.body.appendChild(modal);
+            }
+            modal.style.zIndex = '2000000';
+
             if (titleEl) titleEl.innerText = title || 'סיכומי פנגייה (Ido Fang Bentov)';
             
             const handleExtClick = function() {
@@ -4741,16 +4749,25 @@
             if (fallbackCard) fallbackCard.style.display = 'none';
             if (loadingEl) loadingEl.style.display = 'flex';
 
+            let loadTimeout = null;
             if (iframe) {
                 iframe.style.display = 'block';
                 iframe.onload = function() {
+                    if (loadTimeout) clearTimeout(loadTimeout);
                     if (loadingEl) loadingEl.style.display = 'none';
                 };
                 iframe.onerror = function() {
+                    if (loadTimeout) clearTimeout(loadTimeout);
                     if (loadingEl) loadingEl.style.display = 'none';
                     if (fallbackCard) fallbackCard.style.display = 'flex';
                     iframe.style.display = 'none';
                 };
+                loadTimeout = setTimeout(function() {
+                    if (loadingEl && loadingEl.style.display !== 'none') {
+                        loadingEl.style.display = 'none';
+                        if (fallbackCard) fallbackCard.style.display = 'flex';
+                    }
+                }, 8000);
                 iframe.src = url;
             }
 
@@ -4776,6 +4793,12 @@
             const modal = document.getElementById('pangea-search-modal');
             const input = document.getElementById('pangea-global-search-input');
             if (!modal) return;
+            if (modal.parentElement !== document.body) {
+                document.body.appendChild(modal);
+            } else {
+                document.body.appendChild(modal);
+            }
+            modal.style.zIndex = '2000010';
             modal.style.display = 'flex';
             document.body.style.overflow = 'hidden';
             if (input) {

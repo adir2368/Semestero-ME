@@ -669,6 +669,78 @@ async function run() {
 
 
 
+
+        // Test 19: Pangea Reader CSP & Topmost Layering + Attendance Parallel Class Recommender
+        await test('Pangea Reader CSP & Layering + Parallel Attendance Catch-Up Recommender', async () => {
+            const result = await cdp.eval(`(() => {
+                // 1. Check CSP meta tag
+                const cspMeta = document.querySelector('meta[http-equiv="Content-Security-Policy"]');
+                const cspContent = cspMeta ? cspMeta.getAttribute('content') : '';
+                const hasPangeaCsp = cspContent.includes('https://idofangbentov.uk') && cspContent.includes('frame-src');
+
+                // 2. Check Pangea Reader z-index and foreground appending
+                const readerModal = document.getElementById('pangea-reader-modal');
+                if (window.PangeaHub && typeof window.PangeaHub.openQuickPeek === 'function') {
+                    window.PangeaHub.openQuickPeek('https://idofangbentov.uk/test', 'Test Pangea Title', 'https://idofangbentov.uk/test');
+                }
+                const isAttachedToBody = readerModal && readerModal.parentElement === document.body;
+                const isTopZIndex = readerModal && (readerModal.style.zIndex === '2000000' || getComputedStyle(readerModal).zIndex === '2000000');
+                if (window.PangeaHub && typeof window.PangeaHub.closeQuickPeek === 'function') {
+                    window.PangeaHub.closeQuickPeek();
+                }
+
+                // 3. Check Parallel Class Recommendations in AttendanceHub
+                const hub = window.AttendanceHub;
+                const hasRecMethod = hub && typeof hub.findParallelSlotRecommendations === 'function';
+                
+                // For Thermo (034035) tutorial (Tuesday 12:30): parallel tutorials should be found
+                const thermoRecs = hasRecMethod ? hub.findParallelSlotRecommendations('034035', 'תרגול 11', 2, '12:30') : [];
+                const hasThermoRecs = thermoRecs.length > 0;
+                const thermoRecDayNames = thermoRecs.map(r => r.dayName);
+
+                // 4. Test Catchup Item and Card Rendering with Parallel Recs
+                hub.records = {};
+                hub.catchupQueue = [];
+                hub.toggleAttendance('034035', 'תרמודינמיקה 1', 'תרגול 11', 2, '12:30', '14:30', 'אולמן 101', 'missed');
+                
+                const queueItem = hub.catchupQueue.find(i => i.courseId === '034035');
+                const itemHasRecs = queueItem && queueItem.parallelRecs && queueItem.parallelRecs.length > 0;
+
+                // Render modal to check parallel box DOM
+                hub.openModal('catchup');
+                const modal = document.getElementById('modal-attendance-hub');
+                const hasParallelBox = modal && modal.innerHTML.includes('catchup-parallel-box');
+                const hasConflictFreeBadge = modal && modal.innerHTML.includes('ללא חפיפה במערכת');
+                if (modal) modal.remove();
+
+                // Clean up
+                hub.records = {};
+                hub.catchupQueue = [];
+                hub.save();
+
+                return {
+                    hasPangeaCsp,
+                    isAttachedToBody,
+                    isTopZIndex,
+                    hasRecMethod,
+                    hasThermoRecs,
+                    thermoRecsCount: thermoRecs.length,
+                    itemHasRecs,
+                    hasParallelBox,
+                    hasConflictFreeBadge
+                };
+            })()`);
+
+            assert(result.hasPangeaCsp, 'CSP meta tag must permit https://idofangbentov.uk and define frame-src');
+            assert(result.isAttachedToBody, 'Pangea Reader modal must be attached to document.body root');
+            assert(result.isTopZIndex, 'Pangea Reader modal must have z-index 2000000');
+            assert(result.hasRecMethod, 'window.AttendanceHub.findParallelSlotRecommendations must be a function');
+            assert(result.hasThermoRecs, 'Must find parallel tutorial sessions for Thermo (034035)');
+            assert(result.itemHasRecs, 'Catch-up queue item must persist parallelRecommendations');
+            assert(result.hasParallelBox, 'Attendance Hub catch-up tab must render .catchup-parallel-box');
+            assert(result.hasConflictFreeBadge, 'Parallel recommendation must display conflict-free badge');
+        });
+
     } finally {
         console.log(`\n========================================================================`);
         console.log(`SUMMARY: ${passed} passed, ${failed} failed.`);

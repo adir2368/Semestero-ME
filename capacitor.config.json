@@ -10,7 +10,11 @@
       "semestero.me",
       "*.semestero.me",
       "adir2368.github.io",
-      "*.github.io"
+      "*.github.io",
+      "idofangbentov.uk",
+      "*.idofangbentov.uk",
+      "technion.ac.il",
+      "*.technion.ac.il"
     ],
     "cleartext": false,
     "androidScheme": "https"
