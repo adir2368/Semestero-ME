@@ -16487,6 +16487,22 @@ tr.is-task-pinned {
     box-shadow: 0 0 6px rgba(168, 85, 247, 0.5);
 }
 
+.hw-dot.in_progress {
+    background: #f59e0b;
+    box-shadow: 0 0 8px rgba(245, 158, 11, 0.65);
+    animation: hwDotPulse 2s infinite ease-in-out;
+}
+
+@keyframes hwDotPulse {
+    0%, 100% { opacity: 0.95; }
+    50% { opacity: 0.55; }
+}
+
+.hw-dot.open {
+    background: #38bdf8;
+    box-shadow: 0 0 6px rgba(56, 189, 248, 0.5);
+}
+
 .hw-dot.todo {
     background: rgba(255, 255, 255, 0.12);
 }
@@ -16565,6 +16581,18 @@ tr.is-task-pinned {
     background: rgba(168, 85, 247, 0.12);
 }
 
+.modal-hw-stat-pill.in_progress {
+    color: #f59e0b;
+    border-color: rgba(245, 158, 11, 0.35);
+    background: rgba(245, 158, 11, 0.12);
+}
+
+.modal-hw-stat-pill.open {
+    color: #38bdf8;
+    border-color: rgba(56, 189, 248, 0.35);
+    background: rgba(56, 189, 248, 0.12);
+}
+
 .modal-hw-stat-pill.target {
     color: #fbbf24;
     border-color: rgba(251, 191, 36, 0.35);
@@ -16619,6 +16647,23 @@ tr.is-task-pinned {
     background: rgba(168, 85, 247, 0.05);
 }
 
+.hw-sheet-card.is-in-progress {
+    border-color: rgba(245, 158, 11, 0.45);
+    background: rgba(245, 158, 11, 0.06);
+    box-shadow: 0 0 10px rgba(245, 158, 11, 0.08);
+}
+
+.hw-sheet-card.is-open {
+    border-color: rgba(56, 189, 248, 0.35);
+    background: rgba(56, 189, 248, 0.04);
+}
+
+.hw-sheet-card.is-locked {
+    opacity: 0.65;
+    border-color: rgba(255, 255, 255, 0.05);
+    background: rgba(15, 23, 42, 0.4);
+}
+
 .hw-sheet-card-top {
     display: flex;
     justify-content: space-between;
@@ -16657,6 +16702,23 @@ tr.is-task-pinned {
 .hw-sheet-status-badge.submitted {
     background: rgba(168, 85, 247, 0.2);
     color: #c084fc;
+}
+
+.hw-sheet-status-badge.in_progress {
+    background: rgba(245, 158, 11, 0.2);
+    color: #fbbf24;
+    border: 1px solid rgba(245, 158, 11, 0.35);
+}
+
+.hw-sheet-status-badge.open {
+    background: rgba(56, 189, 248, 0.18);
+    color: #38bdf8;
+    border: 1px solid rgba(56, 189, 248, 0.3);
+}
+
+.hw-sheet-status-badge.locked {
+    background: rgba(255, 255, 255, 0.06);
+    color: #94a3b8;
 }
 
 .hw-sheet-status-badge.todo {
@@ -16720,6 +16782,31 @@ tr.is-task-pinned {
     border-color: #10b981;
     color: #34d399;
     font-weight: 700;
+}
+
+.btn-hw-quick-status {
+    background: rgba(245, 158, 11, 0.1);
+    border: 1px solid rgba(245, 158, 11, 0.25);
+    color: #fbbf24;
+    font-size: 0.70rem;
+    padding: 2px 7px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.btn-hw-quick-status:hover {
+    background: rgba(245, 158, 11, 0.25);
+    border-color: #f59e0b;
+    color: #fde047;
+}
+
+.btn-hw-quick-status.active-prog {
+    background: rgba(245, 158, 11, 0.3);
+    border-color: #f59e0b;
+    color: #fde047;
+    font-weight: 700;
+    box-shadow: 0 0 6px rgba(245, 158, 11, 0.4);
 }
 
 .hw-link-btn {

@@ -37,6 +37,7 @@ const FILES_TO_COPY = [
     'sw.js',
     'manifest.json',
     'cheesefork_database.js',
+    'technion_sap_database.js',
     'cheesefork_courses.min.js',
     'cheesefork_courses_2025_200.min.js',
     'adir_avatar.png',
