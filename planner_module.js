@@ -899,7 +899,14 @@
                 }
             }
 
-            const savedMobileView = localStorage.getItem('semestero_planner_mobile_view') || 'catalog';
+            let savedMobileView = localStorage.getItem('semestero_planner_mobile_view');
+            // Auto-heal: ensure semesters board is never hidden by default on mobile
+            if (!savedMobileView || savedMobileView === 'catalog') {
+                savedMobileView = 'both';
+                try {
+                    localStorage.setItem('semestero_planner_mobile_view', 'both');
+                } catch (e) {}
+            }
             setPlannerMobileView(savedMobileView, false);
         } catch (e) {
             console.error('[Planner] Error initializing layout preferences:', e);
@@ -948,7 +955,7 @@
 
     function setPlannerMobileView(view, save = true) {
         const validViews = ['board', 'catalog', 'both'];
-        const targetView = validViews.includes(view) ? view : 'catalog';
+        const targetView = validViews.includes(view) ? view : 'both';
 
         const wrapper = document.querySelector('.planner-wrapper');
         if (wrapper) {

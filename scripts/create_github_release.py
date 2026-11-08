@@ -18,9 +18,9 @@ ZIP_PATH = os.path.join(ROOT, "Semestero-ME-Windows-x64.zip")
 
 with open(os.path.join(ROOT, "package.json"), "r", encoding="utf-8") as f:
     pkg = json.load(f)
-VERSION = pkg.get("version", "2.10.14")
+VERSION = pkg.get("version", "2.10.15")
 TAG = f"v{VERSION}"
-NAME = f"Semestero ME v{VERSION} - Strict Homework Color Palette & Thermodynamics 1 State Alignment"
+NAME = f"Semestero ME v{VERSION} - Degree Planner Mobile Semesters Board Immediate Visibility"
 
 def get_github_token():
     try:
@@ -98,25 +98,16 @@ def main():
         "User-Agent": "Semestero-Release-Script"
     }
 
-    body_notes = f"""# Semestero ME {TAG} Release Notes
+        body_notes = f"""# Semestero ME {TAG} Release Notes
 
-### 🎯 1. מערכת צבעים מוקפדת למעקב הגשת שיעורי בית (Strict Color Coding Compliance)
-- **התאמה מלאה למודל המשתמש**:
-  - **אדום (`#ef4444` / 🔴)**: **לא התחיל** (`open`) — שיעורי בית שפורסמו על ידי הסגל ופתוחים להגשה, אך הסטודנט טרם החל בעבודתם.
-  - **צהוב (`#eab308` / 🟡)**: **בתהליך** (`in_progress`) — שיעורי בית שהסטודנט החל לעבוד עליהם באופן פעיל (נורה מהבהבת בעדינות ומסגרת כרטיסייה מוארת).
-  - **כחול (`#3b82f6` / 🔵)**: **הוגש** (`submitted`) — שיעורי בית שהוגשו (או חלק יחיד בשיעורי בית כפולים) וממתינים לציון.
-  - **ירוק (`#10b981` / 🟢)**: **הסתיים** (`done`) — שיעורי בית שהושלמו במלואם.
-  - **מעומעם (`rgba(255, 255, 255, 0.04)` / 🔒)**: **טרם נפתח** (`locked`) — גיליונות עתידיים בסמסטר שטרם פורסמו על ידי סגל ההוראה.
+### 📱 1. תכנון תואר במובייל — הצגה מיידית של לוח הסמסטרים (Semesters Board Immediate Visibility)
+- **פתרון שורשי לתלונת המשתמש ("חסר לי את כל החלק של הסמסטרים")**: ברירת-המחדל של בורר התצוגה במובייל הוחזרה למצב 'both' (הכל) — לוח הסמסטרים מוצג מיידית בראש העמוד ואינו מוסתר עוד.
+- **ריפוי אוטומטי של זיכרון מקומי (Auto-Heal Stored Preferences)**: קוד האפליקציה בודק ומעדכן אוטומטית מכשירי משתמשים שהיו "תקועים" על מצב קטלוג בלבד (catalog), ומחזיר אותם לתצוגה המלאה.
+- **באנר מעבר מהיר (Quick Switch Banner)**: במידה והסטודנט בוחר במכוון במצב 'מאגר קורסים בלבד', מופיע בראש הקטלוג באנר מואר ואינטראקטיבי: `💡 לוח הסמסטרים מוסתר • לחץ כאן למעבר ללוח 📅`, המאפשר חזרה מיידית בטאפ בודד.
 
-### ❄️ 2. סנכרון תרמודינמיקה 1 (034035) למצב האקדמי האותנטי
-- **בדיקה ואימות סגל מודל 26**: אומת כי בסמסטר הנוכחי סגל תרמודינמיקה 1 טרם פרסם תרגילי בית להגשה.
-- **טיהור מוחלט של מצגי-שווא (Placeholders)**: הוסר תרגיל הדמה `034035_h1` מכלל המקורות (`curriculum_template.js`, `user_saved_state.json`, `watch_companion.js`, `preloaded_user_state.js`).
-- **תיקון אלגוריתם הגיליונות**: בוטל מנגנון ברירת-המחדל שפתח אוטומטית את גיליון 1 בכל קורס.
-- **תוצאה**: כל 10 הגיליונות של תרמודינמיקה 1 מסומנים כנעולים (`טרם נפתח 🔒`) עם קפסולת מאקרו מפורשת `נותרו עוד 8 • טרם נפתחו תרגילים 🔒`.
-
-### 📦 3. קבצי הפצה:
-- `Semestero-ME.apk` (Android `versionCode 68`, `versionName 2.10.14`)
-- `Semestero ME-win32-x64` (Electron Desktop Client v2.10.14)
+### 📦 2. קבצי הפצה:
+- `Semestero-ME.apk` (Android `versionCode 69`, `versionName 2.10.15`)
+- `Semestero ME-win32-x64` (Electron Desktop Client v2.10.15)
 - קוד מקור מלא מסונכרן לדומיין הראשי `https://semestero.me`
 """
 
