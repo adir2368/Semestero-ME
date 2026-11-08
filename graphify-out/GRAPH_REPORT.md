@@ -1,17 +1,17 @@
 # Graph Report - academic-skill-tree  (2026-11-09)
 
 ## Corpus Check
-- 608 files · ~1,562,752 words
+- 609 files · ~1,566,491 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 87 file(s) not represented in the graph (top: .xml 61, (none) 6, .bat 6)
 
 ## Summary
-- 2854 nodes · 5101 edges · 292 communities (131 shown, 161 thin omitted)
+- 2855 nodes · 5102 edges · 293 communities (131 shown, 162 thin omitted)
 - Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 61 edges (avg confidence: 0.85)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `a780f9af`
+- Built from commit: `be18a298`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -42,7 +42,7 @@
 - moodle_sync.js
 - ref_fs
 - verify_performance_toolkit.test.js
-- setupNotionIconPickerEvents
+- openModal
 - ref_child_process
 - app_restored.js
 - fetch_technion_sap_catalog.js
@@ -195,7 +195,7 @@
 ## Import Cycles
 - None detected.
 
-## Communities (292 total, 161 thin omitted)
+## Communities (293 total, 162 thin omitted)
 
 ### Community 0 - "WearCarouselAdapter"
 Cohesion: 0.11
@@ -203,7 +203,7 @@ Nodes (20): Adapter, android.view.LayoutInflater, android.view.View, android.vie
 
 ### Community 1 - "app.js"
 Cohesion: 0.03
-Nodes (68): _activePrereqCodes, APP_CURRENT_REVISION, AUGUST_2026_PERSONAL_EVENTS, AUGUST_2026_SCHEDULE, AUTHENTIC_TIMETABLE_METADATA, CHEESEFORK_EXAM_DATES, CHEESEFORK_SEMESTER_SCHEDULE, clearConstellationHighlight() (+60 more)
+Nodes (74): _activePrereqCodes, APP_CURRENT_REVISION, AUGUST_2026_PERSONAL_EVENTS, AUGUST_2026_SCHEDULE, AUTHENTIC_TIMETABLE_METADATA, CHEESEFORK_EXAM_DATES, CHEESEFORK_SEMESTER_SCHEDULE, clearConstellationHighlight() (+66 more)
 
 ### Community 2 - "SemesteroClassTileService.java"
 Cohesion: 0.08
@@ -250,8 +250,8 @@ Cohesion: 0.17
 Nodes (4): SemesteroWidgetBridge, Override, SemesteroScheduleWidget, android.webkit.JavascriptInterface
 
 ### Community 16 - "saveState"
-Cohesion: 0.14
-Nodes (47): addNewCustomClassPrompt(), addXp(), applyTimetableMobileFilter(), autoUpdateTaskStatusesByDueDate(), bulkSetTasksStatus(), createCalendarDayCell(), createNewRevisionSnapshot(), deleteClassFromSchedule() (+39 more)
+Cohesion: 0.15
+Nodes (45): addNewCustomClassPrompt(), addXp(), applyTimetableMobileFilter(), bulkSetTasksStatus(), createCalendarDayCell(), createNewRevisionSnapshot(), deleteClassFromSchedule(), deleteCourse() (+37 more)
 
 ### Community 17 - "MainActivity"
 Cohesion: 0.18
@@ -289,9 +289,9 @@ Nodes (21): ref_fs, fs, userSaved, fs, userSaved, activeStatusFilters, activeTyp
 Cohesion: 0.18
 Nodes (10): analyticsContent, appJsContent, assert, cssContent, fs, htmlContent, path, plannerContent (+2 more)
 
-### Community 26 - "setupNotionIconPickerEvents"
-Cohesion: 0.31
-Nodes (10): closeCourseIconPicker(), getDefaultCourseIconKey(), NOTION_COLORS, openCourseIconPicker(), renderIconPickerGrid(), renderIconPickerPalette(), resetCourseIcon(), saveCourseIcon() (+2 more)
+### Community 26 - "openModal"
+Cohesion: 0.24
+Nodes (11): closeModal(), computeNextTaskNumber(), handleCreateTaskSubmit(), init(), openAddCustomTaskModal(), openModal(), render(), setTaskModalCategory() (+3 more)
 
 ### Community 27 - "ref_child_process"
 Cohesion: 0.12
@@ -327,7 +327,7 @@ Nodes (20): { app, BrowserWindow, Menu, ipcMain, shell }, path, { contextBridge,
 
 ### Community 36 - "openCourseDetails"
 Cohesion: 0.09
-Nodes (29): clearFlowchartHighlight(), completeAllTasks(), enrichTimetableWithAuthenticRooms(), escapeHtml(), exportSvgToPng(), fetchWithTimeoutAndDedup(), findCourseObj(), fitFlowchartToWidth() (+21 more)
+Nodes (24): autoUpdateTaskStatusesByDueDate(), clearFlowchartHighlight(), completeAllTasks(), enrichTimetableWithAuthenticRooms(), escapeHtml(), fetchWithTimeoutAndDedup(), findCourseObj(), formatClassDuration() (+16 more)
 
 ### Community 37 - "setupNotionDashboard"
 Cohesion: 0.16
@@ -723,23 +723,23 @@ Nodes (3): ref_k6, ADR-0075, options
 
 ## Knowledge Gaps
 - **935 isolated node(s):** `type`, `$schema`, `version`, `body`, `actions` (+930 more)
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 1449 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
-- **161 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 1450 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+- **162 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `authSync` connect `setupMobileNotifications` to `ref_assert`, `verify_shortcuts_moodle_and_admin.js`, `auth_session_persistence.test.js`, `auth_sync.js`?**
-  _High betweenness centrality (0.090) - this node is a cross-community bridge._
+  _High betweenness centrality (0.089) - this node is a cross-community bridge._
 - **Why does `savePhoneAndNotificationPreferences()` connect `setupMobileNotifications` to `saveState`, `app.js`, `notifyStateChanged`?**
-  _High betweenness centrality (0.028) - this node is a cross-community bridge._
-- **Why does `electron` connect `ref_path` to `package.json`?**
-  _High betweenness centrality (0.025) - this node is a cross-community bridge._
+  _High betweenness centrality (0.027) - this node is a cross-community bridge._
+- **Why does `renderFlowchartTree()` connect `openCourseDetails` to `setupEventListeners`, `app.js`, `verify_flowchart_course_tree_purity.test.js`, `saveState`, `notifyStateChanged`?**
+  _High betweenness centrality (0.024) - this node is a cross-community bridge._
 - **What connects `type`, `$schema`, `version` to the rest of the system?**
   _935 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `WearCarouselAdapter` be split into smaller, more focused modules?**
   _Cohesion score 0.10931174089068826 - nodes in this community are weakly interconnected._
 - **Should `app.js` be split into smaller, more focused modules?**
-  _Cohesion score 0.031007751937984496 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.031089294062646097 - nodes in this community are weakly interconnected._
 - **Should `SemesteroClassTileService.java` be split into smaller, more focused modules?**
   _Cohesion score 0.07765151515151515 - nodes in this community are weakly interconnected._

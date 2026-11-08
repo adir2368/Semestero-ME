@@ -611,6 +611,62 @@ async function run() {
             assert(result.hasReader, 'In-App Quick Peek Reader Modal elements must exist in DOM');
         });
 
+        await test('Attendance Hub: 1-Tap check-in, Catch-Up Queue, Mandatory Quotas & Pangea Integration', async () => {
+            const result = await cdp.eval(`(() => {
+                const hubExists = typeof window.AttendanceHub !== 'undefined';
+                if (!hubExists) return { hubExists: false };
+
+                // Test toggle attendance
+                window.AttendanceHub.records = {};
+                window.AttendanceHub.catchupQueue = [];
+                
+                // 1. Mark missed class for Dynamics
+                window.AttendanceHub.toggleAttendance('034010', 'דינמיקה', 'הרצאה', 1, '10:30', '12:30', 'דנציגר 220', 'missed');
+                const recMissed = window.AttendanceHub.getRecord('034010', 1, '10:30');
+                const isMissedLogged = recMissed && recMissed.status === 'missed';
+                
+                // 2. Catchup queue auto-generated
+                const queue = window.AttendanceHub.catchupQueue;
+                const hasCatchupItem = queue.length > 0 && queue[0].courseId === '034010';
+                const hasPangeaTopic = queue.length > 0 && !!queue[0].topic;
+
+                // 3. Mark attended for Sports
+                window.AttendanceHub.toggleAttendance('394000', 'חינוך גופני', 'אימון', 2, '08:30', '10:00', 'אולם כושר', 'attended');
+                const sportsStats = window.AttendanceHub.getCourseStats('394000');
+                const isSportsAttended = sportsStats.attended === 1;
+                const hasQuota = !!sportsStats.quota && sportsStats.quota.minRequired === 10;
+
+                // 4. Test modal open
+                window.AttendanceHub.openModal('catchup');
+                const modal = document.getElementById('modal-attendance-hub');
+                const hasModalRendered = !!modal && modal.innerHTML.includes('תור השלמות');
+                if (modal) modal.remove();
+
+                // Clean up test data
+                window.AttendanceHub.records = {};
+                window.AttendanceHub.catchupQueue = [];
+                window.AttendanceHub.save();
+
+                return {
+                    hubExists,
+                    isMissedLogged,
+                    hasCatchupItem,
+                    hasPangeaTopic,
+                    isSportsAttended,
+                    hasQuota,
+                    hasModalRendered
+                };
+            })()`);
+
+            assert(result.hubExists, 'window.AttendanceHub must be defined globally');
+            assert(result.isMissedLogged, 'Missed lecture must be recorded in AttendanceHub');
+            assert(result.hasCatchupItem, 'Marking lecture as missed must auto-generate a Catch-Up item');
+            assert(result.hasPangeaTopic, 'Catch-up item must resolve topic from Pangea / course metadata');
+            assert(result.isSportsAttended, 'Attended sports session must increment sports attendance counter');
+            assert(result.hasQuota, 'Sports course must have mandatory attendance quota (10 min required)');
+            assert(result.hasModalRendered, 'Attendance & Catch-Up modal must render cleanly');
+        });
+
 
 
     } finally {

@@ -18,9 +18,9 @@ ZIP_PATH = os.path.join(ROOT, "Semestero-ME-Windows-x64.zip")
 
 with open(os.path.join(ROOT, "package.json"), "r", encoding="utf-8") as f:
     pkg = json.load(f)
-VERSION = pkg.get("version", "2.10.17")
+VERSION = pkg.get("version", "2.10.18")
 TAG = f"v{VERSION}"
-NAME = f"Semestero ME v{VERSION} - Pangea Knowledge Hub, Smart HW Resolver & In-App Reader"
+NAME = f"Semestero ME v{VERSION} - Attendance & Lecture Catch-Up Hub (נוכחות והשלמות)"
 
 def get_github_token():
     try:
@@ -100,15 +100,21 @@ def main():
 
     body_notes = f"""# Semestero ME {TAG} Release Notes
 
-### 🏛️ 1. אינטגרציית עומק לפנגייה (Pangea Knowledge Hub - idofangbentov.uk)
+### 📋 1. מרכז נוכחות והשלמות שיעורים (Attendance & Lecture Catch-Up Hub)
+- **רישום נוכחות בטאפ בודד במערכת השעות (1-Tap Check-In)**: כל כרטיס שיעור במערכת השעות כולל כעת כפתורי פעולה מהירים `✓ הייתי` ו-`✗ החסרתי` עם משוב ויזואלי מיידי.
+- **תור השלמות אוטומטי (Autonomous Catch-Up Queue)**: סימון שיעור כהוחסר מייצר אוטומטית משימת השלמה הכוללת את תאריך השיעור, נושא ההרצאה, קישור ישיר להקלטת פנאופטו / מודל, וכפתור קריאה מהירה של סיכום הפרק בפנגייה (In-App Quick Peek Reader).
+- **מדדי בטיחות נוכחות חובה (Mandatory Attendance Shields)**: מעקב נוכחות חי בקורסים קריטיים (חינוך גופני 394000 הדורש 10/13 שיעורים, מעבדות פיסיקה 114032, אנגלית) עם התרעות צבעוניות על יתרת היעדרויות מותרת למניעת פסילת קורס.
+- **יומן נוכחות ואישורי מילואים**: יומן היסטורי מלא עם סימון מיוחד להיעדרויות עקב שירות מילואים ומימוש זכויות אקדמיות.
+
+### 🏛️ 2. אינטגרציית עומק לפנגייה (Pangea Knowledge Hub - idofangbentov.uk)
 - **קורא פנימי מהיר (In-App Quick Peek Reader)**: צפייה ישירה בסיכומי הרצאות, תרגולים ומבחנים של פנגייה בתוך מודאל אלגנטי באפליקציה, עם ספינר טעינה, כרטיס גיבוי מובנה וכפתור ישיר `פתח באתר המקורי ↗` למעבר מהיר לדפדפן חיצוני בכל עת.
 - **מפענח שיעורי בית חכם (Smart Homework Deep-Linking Resolver)**: מיפוי אוטומטי של מספרי קורסים ומספרי תרגילים (למשל 'תרגיל בית 5' בדינמיקה 034010) לקבצי הפתרון הספציפיים בפנגייה (`DYN1_HW005`), עם כפתור מיוחד `📝 פתרון בפנגייה ↗` בלוח המטלות ובמגירת ה-Peek Drawer.
 - **קטלוג מבחנים מלא ומקיף**: הצגה כרונולוגית של כל המבחנים הפתורים בפנגייה ללא סינון עונתי, המאפשרת גישה מיידית לכל המועדים לקראת תקופת המבחנים.
 - **חיפוש גלובלי לפי נושא ומילת מפתח (Topic & Keyword Live Search)**: מודאל חיפוש מהיר המאפשר איתור נושאים ספציפיים (כגון 'ברנולי', 'נאויה-סטוקס', 'אוילר') ישירות בתוכן פנגייה בכל 38 הקורסים.
 
 ### 📦 2. קבצי הפצה:
-- `Semestero-ME.apk` (Android `versionCode 71`, `versionName 2.10.17`)
-- `Semestero-ME-Watch.apk` (Wear OS Companion `versionCode 71`, `versionName 2.10.17`)
+- `Semestero-ME.apk` (Android `versionCode 72`, `versionName 2.10.18`)
+- `Semestero-ME-Watch.apk` (Wear OS Companion `versionCode 72`, `versionName 2.10.18`)
 - `Semestero-ME-Windows-x64.zip` (Electron Desktop Client v2.10.17)
 - סנכרון מלא של כל הנכסים ב-GitHub Pages ודומיין `https://semestero.me`
 """

@@ -4861,6 +4861,10 @@
             const homework = cData.homework || [];
             const exams = cData.exams || [];
 
+            const facultyDriveUrl = (typeof window !== 'undefined' && typeof window.getFacultyDriveCourseUrl === 'function')
+                ? window.getFacultyDriveCourseUrl(cleanCode)
+                : null;
+
             containerEl.innerHTML = `
                 <div class="pangea-course-hub-card" id="pangea-course-hub-${cleanCode}" style="margin-top: 14px; background: rgba(15, 23, 42, 0.75); border: 1px solid rgba(56, 189, 248, 0.35); border-radius: 10px; padding: 14px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
@@ -4896,6 +4900,28 @@
                                 </div>
                             </div>
                         ` : ''}
+
+                        <!-- Primary Official Exams Bar (Faculty Drive & Moodle) -->
+                        <div style="background: rgba(168, 85, 247, 0.08); border: 1px solid rgba(168, 85, 247, 0.3); border-radius: 10px; padding: 10px 12px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap;">
+                            <div>
+                                <div style="font-size: 0.82rem; font-weight: 700; color: #c084fc; display: flex; align-items: center; gap: 6px;">
+                                    <span>📁 מאגרי מבחני עבר רשמיים (דרייב ומודל):</span>
+                                </div>
+                                <div style="font-size: 0.72rem; color: #cbd5e1; margin-top: 2px;">
+                                    ארכיון המבחנים המלא של הפקולטה (עשור אחרון) וטופסי בחינות רשמיים במודל
+                                </div>
+                            </div>
+                            <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                                ${facultyDriveUrl ? `
+                                    <a href="${facultyDriveUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-xs" style="background: rgba(168, 85, 247, 0.2); border: 1px solid #a855f7; color: #e9d5ff; padding: 4px 10px; border-radius: 6px; font-size: 0.74rem; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;" title="פתח תיקיית רפרנסים ומבחני עבר בדרייב הפקולטי">
+                                        <span>📁 כל המבחנים בדרייב פקולטי ↗</span>
+                                    </a>
+                                ` : ''}
+                                <a href="https://moodle26.technion.ac.il/my/" target="_blank" rel="noopener noreferrer" class="btn btn-xs" style="background: rgba(56, 189, 248, 0.2); border: 1px solid #38bdf8; color: #bae6fd; padding: 4px 10px; border-radius: 6px; font-size: 0.74rem; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;" title="פתח אזור אישי ומודל קורס">
+                                    <span>🎓 מודל 26 ↗</span>
+                                </a>
+                            </div>
+                        </div>
 
                         <!-- Solved Exams Section -->
                         ${exams.length > 0 ? `

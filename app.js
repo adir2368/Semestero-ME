@@ -19127,6 +19127,10 @@ window.PanoptoTracker = {
     },
 
     openModal() {
+        if (window.AttendanceHub && typeof window.AttendanceHub.openModal === 'function') {
+            window.AttendanceHub.openModal('catchup');
+            return;
+        }
         let modal = document.getElementById("modal-panopto-tracker");
         if (modal) modal.remove();
 
@@ -23524,11 +23528,11 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.11.09-v2.10.17",
-    version: "2.10.17",
+    code: "REV-2026.11.09-v2.10.18",
+    version: "2.10.18",
     build: "20261108_04",
     date: "2026-11-08 13:30",
-    description: "v2.10.17: אינטגרציית עומק לפנגייה (Pangea Knowledge Hub): פתרונות ש\"ב ישירים, מבחנים פתורים, חיפוש נושאים וקורא פנימי In-App Reader (ADR-090)."
+    description: "v2.10.18: מעקב נוכחות חובה (ספורט ומעבדות), תור השלמות ופנאופטו בלחיצה אחת, וחיבור לסיכומי פנגייה (ADR-091)."
 };
 window.APP_VERSION = APP_CURRENT_REVISION.version;
 
@@ -25878,8 +25882,14 @@ function renderTimetableGrid() {
                     c.duration = durMeta.text;
                 }
 
+                const attRecord = (window.AttendanceHub && typeof window.AttendanceHub.getRecord === 'function')
+                    ? window.AttendanceHub.getRecord(c.courseId, day.dayIndex, c.startTime)
+                    : null;
+                const attStatus = attRecord ? attRecord.status : null;
+                const attBorderClass = attStatus === 'attended' ? 'attendance-card-attended' : (attStatus === 'missed' ? 'attendance-card-missed' : '');
+
                 bodyHtml += `
-                    <div class="timetable-card ${c.cardClass || ''} ${durMeta.blockClass}" onclick="if (typeof openCourseDetails === 'function') openCourseDetails('${c.courseId}')">
+                    <div class="timetable-card ${c.cardClass || ''} ${durMeta.blockClass} ${attBorderClass}" onclick="if (typeof openCourseDetails === 'function') openCourseDetails('${c.courseId}')">
                         <!-- שורה 1: תגית סוג שיעור + תגית משך זמן שיעור מובלטת -->
                         <div class="timetable-card-top">
                             <span class="timetable-tag">${c.type}</span>
@@ -25903,6 +25913,20 @@ function renderTimetableGrid() {
                         ` : ''}
                         <!-- שורה 5: קורס -->
                         <div class="timetable-card-title">${c.courseName} <span class="course-code-dim">(${c.courseId})</span></div>
+                        
+                        <!-- שורה 6: פעולות נוכחות והשלמות -->
+                        <div class="attendance-card-actions" onclick="event.stopPropagation()">
+                            <button type="button" class="btn-attendance-action ${attStatus === 'attended' ? 'is-attended' : ''}" 
+                                    onclick="if(window.AttendanceHub) window.AttendanceHub.toggleAttendance('${c.courseId}', '${(c.courseName || '').replace(/'/g, "\\'")}', '${(c.type || '').replace(/'/g, "\\'")}', '${day.dayIndex}', '${c.startTime}', '${c.endTime}', '${(c.room || '').replace(/'/g, "\\'")}', 'attended')"
+                                    title="סמן נוכחות בשיעור זה">
+                                ${attStatus === 'attended' ? '✓ נוכחתי' : '✓ הייתי'}
+                            </button>
+                            <button type="button" class="btn-attendance-action ${attStatus === 'missed' ? 'is-missed' : ''}" 
+                                    onclick="if(window.AttendanceHub) window.AttendanceHub.toggleAttendance('${c.courseId}', '${(c.courseName || '').replace(/'/g, "\\'")}', '${(c.type || '').replace(/'/g, "\\'")}', '${day.dayIndex}', '${c.startTime}', '${c.endTime}', '${(c.room || '').replace(/'/g, "\\'")}', 'missed')"
+                                    title="סמן כהוחסר והוסף אוטומטית לתור השלמות ופנאופטו">
+                                ${attStatus === 'missed' ? '✗ הוחסר (בתור)' : '✗ החסרתי'}
+                            </button>
+                        </div>
                     </div>
                 `;
             });
