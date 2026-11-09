@@ -23534,11 +23534,11 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.11.09-v2.10.22",
-    version: "2.10.20",
-    build: "20261109_01",
-    date: "2026-11-09 01:45",
-    description: "v2.10.18: מעקב נוכחות חובה (ספורט ומעבדות), תור השלמות ופנאופטו בלחיצה אחת, וחיבור לסיכומי פנגייה (ADR-091)."
+    code: "REV-2026.11.10-v2.10.23",
+    version: "2.10.23",
+    build: "20261110_01",
+    date: "2026-11-10 00:45",
+    description: "v2.10.23: ארכיטקטורת Onboarding In-Situ לשימור משתמשים גבוה, סיור מודרך אוטומטי לאורחים ומנוע TipKit לפעולות חכמות (ADR-096)."
 };
 window.APP_VERSION = APP_CURRENT_REVISION.version;
 

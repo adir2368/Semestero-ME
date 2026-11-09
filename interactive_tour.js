@@ -254,9 +254,33 @@
                 }
             });
 
-            // NOTE: Auto-prompt on launch is intentionally DISABLED.
-            // Per user directive: The tour is ONLY triggered when finishing registration (onboarding)
-            // or when explicitly clicked in Settings/Tutorial Academy. Never on regular app launch.
+            // TipKit contextual discovery engine initialization
+            if (TipKit && typeof TipKit.init === 'function') {
+                TipKit.init();
+            }
+
+            // High-Retention In-Situ Onboarding: Smart trigger for unauthenticated / guest first visitors
+            setTimeout(() => {
+                try {
+                    const isQaTest = typeof window !== 'undefined' && window.location && window.location.search && window.location.search.includes('qa_health_test');
+                    if (isQaTest) return;
+
+                    const tourCompleted = localStorage.getItem(TOUR_STORAGE_KEY) === 'true';
+                    const authPromptDismissed = sessionStorage.getItem('ast_auth_prompt_dismissed') === 'true';
+                    const onboardingModal = document.getElementById('onboarding-wizard-modal');
+                    const authModal = document.getElementById('auth-modal');
+                    const isAuthModalOpen = (authModal && authModal.classList.contains('active')) || 
+                                           (onboardingModal && onboardingModal.classList.contains('active'));
+
+                    // Trigger when user is viewing screen with no blocking modal and hasn't seen the tour
+                    if (!tourCompleted && !isAuthModalOpen && !this.active) {
+                        const targetCard = document.querySelector('.course-card.active, .course-card');
+                        if (targetCard) {
+                            this.showWelcomeTourPrompt();
+                        }
+                    }
+                } catch (e) {}
+            }, 2500);
         },
 
         injectStyles() {
@@ -636,6 +660,92 @@
                     overflow: hidden;
                     padding: 20px;
                     color: #e2e8f0;
+                }
+
+                /* TipKit - Contextual Action Tips & Floating Beacons */
+                .tipkit-popover-card {
+                    position: fixed;
+                    z-index: 99995;
+                    background: rgba(15, 23, 42, 0.96);
+                    backdrop-filter: blur(12px);
+                    border: 1px solid rgba(56, 189, 248, 0.6);
+                    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.8), 0 0 20px rgba(56, 189, 248, 0.25);
+                    border-radius: 12px;
+                    padding: 12px 14px;
+                    max-width: 290px;
+                    direction: rtl;
+                    text-align: right;
+                    color: #e2e8f0;
+                    animation: tipkitFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+                    pointer-events: auto;
+                    font-family: inherit;
+                }
+                @keyframes tipkitFadeIn {
+                    from { opacity: 0; transform: scale(0.92) translateY(6px); }
+                    to { opacity: 1; transform: scale(1) translateY(0); }
+                }
+                .tipkit-badge-header {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    gap: 8px;
+                    margin-bottom: 6px;
+                }
+                .tipkit-icon {
+                    font-size: 1.15rem;
+                }
+                .tipkit-title {
+                    font-size: 0.88rem;
+                    font-weight: 800;
+                    color: #38bdf8;
+                    flex: 1;
+                }
+                .tipkit-close-btn {
+                    background: none;
+                    border: none;
+                    color: #94a3b8;
+                    font-size: 1.15rem;
+                    cursor: pointer;
+                    padding: 0 4px;
+                    line-height: 1;
+                    transition: color 0.15s ease;
+                }
+                .tipkit-close-btn:hover {
+                    color: #ffffff;
+                }
+                .tipkit-body {
+                    font-size: 0.8rem;
+                    line-height: 1.5;
+                    color: #cbd5e1;
+                    margin-bottom: 10px;
+                }
+                .tipkit-footer {
+                    display: flex;
+                    justify-content: flex-end;
+                }
+                .tipkit-action-btn {
+                    background: linear-gradient(135deg, #0284c7, #2563eb);
+                    color: #ffffff;
+                    border: 1px solid rgba(56, 189, 248, 0.4);
+                    border-radius: 6px;
+                    padding: 5px 12px;
+                    font-size: 0.78rem;
+                    font-weight: 700;
+                    cursor: pointer;
+                    transition: all 0.15s ease;
+                }
+                .tipkit-action-btn:hover {
+                    box-shadow: 0 0 12px rgba(56, 189, 248, 0.5);
+                    transform: translateY(-1px);
+                }
+                .tipkit-target-highlight {
+                    box-shadow: 0 0 0 2px #38bdf8, 0 0 22px rgba(56, 189, 248, 0.65) !important;
+                    transition: box-shadow 0.3s ease !important;
+                    animation: tipkitTargetPulse 1.8s infinite alternate ease-in-out !important;
+                }
+                @keyframes tipkitTargetPulse {
+                    from { box-shadow: 0 0 0 2px #38bdf8, 0 0 12px rgba(56, 189, 248, 0.4); }
+                    to { box-shadow: 0 0 0 3px #7dd3fc, 0 0 24px rgba(125, 211, 252, 0.8); }
                 }
             `;
             document.head.appendChild(style);
@@ -1206,6 +1316,201 @@
 
     window.InteractiveTour = InteractiveTour;
     window.startInteractiveTour = (startIndex = 0) => InteractiveTour.startTour(startIndex);
+
+    // =========================================================================
+    // TipKit Engine: High-Retention In-Situ Contextual Action Tips
+    // =========================================================================
+    const TipKit = {
+        TIPS: [
+            {
+                id: 'curriculum-flow',
+                tab: 'curriculum',
+                target: '.course-card.active, .course-card',
+                icon: '💡',
+                title: 'הארת שרשרת קדמים',
+                text: 'לחץ על כל קורס בעץ כדי לראות את קורסי הקדם (בכחול) וההמשך (בירוק) נדלקים בזמן אמת!',
+                actionText: 'הבנתי 👍'
+            },
+            {
+                id: 'planner-audit',
+                tab: 'planner',
+                target: '#btn-open-graduation-clearance',
+                icon: '🎓',
+                title: 'בדיקת זכאות 157.5 נק״ז',
+                text: 'בלחיצה אחת: בדיקת עמידה בכל דרישות התואר, שקלול מילואים (155.5) וטירונות עתודה.',
+                actionText: 'מעולה 🚀'
+            },
+            {
+                id: 'tasks-moodle-sync',
+                tab: 'tasks',
+                target: '#btn-sync-moodle-tasks',
+                icon: '⚡',
+                title: 'סנכרון מטלות Moodle',
+                text: 'סנכרן את כל המטלות, תרגילי הבית וציוני המודל הרשמיים ישירות ללוח המשימות!',
+                actionText: 'סנכרן כעת',
+                actionCallback: () => {
+                    const btn = document.getElementById('btn-sync-moodle-tasks');
+                    if (btn) btn.click();
+                }
+            },
+            {
+                id: 'timetable-cf-sync',
+                tab: 'timetable',
+                target: '#btn-sync-cheesefork-now',
+                icon: '🕒',
+                title: 'סנכרון שעות מ-CheeseFork',
+                text: 'משיכת שעות ההרצאה והתרגול משרתי CheeseFork ומחולל קומבינציות ללא חלונות.',
+                actionText: 'הבנתי 🕒'
+            },
+            {
+                id: 'command-palette-hint',
+                tab: 'curriculum',
+                target: '#btn-open-command-palette',
+                icon: '🔍',
+                title: 'שורת פקודות (Ctrl+K)',
+                text: 'איתור מהיר של כל קורס, משימה או פעולת מערכת מכל מקום בלחיצה על Ctrl+K.',
+                actionText: 'נסה עכשיו',
+                actionCallback: () => {
+                    if (window.openCommandPalette) window.openCommandPalette();
+                }
+            }
+        ],
+
+        activeTipEl: null,
+        currentTip: null,
+
+        init() {
+            // Intercept tab changes
+            const hookTab = () => {
+                if (typeof window.setActiveMainTab === 'function' && !window.setActiveMainTab._tipKitHooked) {
+                    const original = window.setActiveMainTab;
+                    window.setActiveMainTab = (tabKey) => {
+                        original(tabKey);
+                        setTimeout(() => this.checkAndShowTipForTab(tabKey), 800);
+                    };
+                    window.setActiveMainTab._tipKitHooked = true;
+                }
+            };
+            hookTab();
+            setTimeout(hookTab, 1500);
+
+            // Listen for window resize to reposition active tip
+            window.addEventListener('resize', () => {
+                if (this.activeTipEl) this.repositionActiveTip();
+            }, { passive: true });
+        },
+
+        checkAndShowTipForTab(tabKey) {
+            if (InteractiveTour && InteractiveTour.active) return;
+            if (document.querySelector('.modal.active, .modal-backdrop.active, #tour-welcome-prompt')) return;
+
+            const tip = this.TIPS.find(t => t.tab === tabKey && !localStorage.getItem('ast_tip_seen_' + t.id));
+            if (!tip) return;
+
+            this.showTip(tip);
+        },
+
+        showTip(tip) {
+            this.dismissActiveTip();
+
+            const targetEl = document.querySelector(tip.target);
+            if (!targetEl) return;
+
+            const rect = targetEl.getBoundingClientRect();
+            if (rect.width === 0 || rect.height === 0 || rect.bottom < 0 || rect.top > window.innerHeight) return;
+
+            const tipEl = document.createElement('div');
+            tipEl.id = 'tipkit-active-popover';
+            tipEl.className = 'tipkit-popover-card';
+            tipEl.innerHTML = `
+                <div class="tipkit-badge-header">
+                    <span class="tipkit-icon">${tip.icon}</span>
+                    <span class="tipkit-title">${tip.title}</span>
+                    <button type="button" class="tipkit-close-btn" title="סגור טיפ">&times;</button>
+                </div>
+                <div class="tipkit-body">${tip.text}</div>
+                <div class="tipkit-footer">
+                    <button type="button" class="tipkit-action-btn">${tip.actionText}</button>
+                </div>
+            `;
+
+            document.body.appendChild(tipEl);
+            this.activeTipEl = tipEl;
+            this.currentTip = tip;
+
+            targetEl.classList.add('tipkit-target-highlight');
+            this.repositionActiveTip();
+
+            const closeBtn = tipEl.querySelector('.tipkit-close-btn');
+            if (closeBtn) {
+                closeBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    this.markTipSeen(tip.id);
+                    this.dismissActiveTip();
+                };
+            }
+
+            const actionBtn = tipEl.querySelector('.tipkit-action-btn');
+            if (actionBtn) {
+                actionBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    this.markTipSeen(tip.id);
+                    this.dismissActiveTip();
+                    if (typeof tip.actionCallback === 'function') {
+                        tip.actionCallback();
+                    }
+                };
+            }
+
+            const dismissOnTargetClick = () => {
+                this.markTipSeen(tip.id);
+                this.dismissActiveTip();
+                targetEl.removeEventListener('click', dismissOnTargetClick);
+            };
+            targetEl.addEventListener('click', dismissOnTargetClick, { once: true });
+        },
+
+        markTipSeen(tipId) {
+            try {
+                localStorage.setItem('ast_tip_seen_' + tipId, 'true');
+            } catch (e) {}
+        },
+
+        dismissActiveTip() {
+            if (this.activeTipEl) {
+                this.activeTipEl.remove();
+                this.activeTipEl = null;
+            }
+            document.querySelectorAll('.tipkit-target-highlight').forEach(el => {
+                el.classList.remove('tipkit-target-highlight');
+            });
+        },
+
+        repositionActiveTip() {
+            if (!this.activeTipEl || !this.currentTip) return;
+            const targetEl = document.querySelector(this.currentTip.target);
+            if (!targetEl) return;
+
+            const rect = targetEl.getBoundingClientRect();
+            const tipRect = this.activeTipEl.getBoundingClientRect();
+
+            let top = rect.bottom + 12;
+            let left = rect.left + (rect.width / 2) - (tipRect.width / 2);
+
+            if (left < 14) left = 14;
+            if (left + tipRect.width > window.innerWidth - 14) {
+                left = window.innerWidth - tipRect.width - 14;
+            }
+            if (top + tipRect.height > window.innerHeight - 60) {
+                top = Math.max(14, rect.top - tipRect.height - 12);
+            }
+
+            this.activeTipEl.style.top = `${top}px`;
+            this.activeTipEl.style.left = `${left}px`;
+        }
+    };
+
+    window.TipKit = TipKit;
 
     // =========================================================================
     // Tutorial Hub & Knowledge Academy Modal

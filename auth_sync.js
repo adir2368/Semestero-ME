@@ -1610,6 +1610,16 @@
         closeAuthModal() {
             const modal = document.getElementById('auth-modal');
             if (modal) modal.classList.remove('active');
+            sessionStorage.setItem('ast_auth_prompt_dismissed', 'true');
+
+            // High-Retention In-Situ Onboarding: Offer welcome guided tour for first-time guests
+            if (window.InteractiveTour && typeof window.InteractiveTour.showWelcomeTourPrompt === 'function') {
+                setTimeout(() => {
+                    if (!localStorage.getItem('ast_interactive_tour_completed_v267')) {
+                        window.InteractiveTour.showWelcomeTourPrompt();
+                    }
+                }, 700);
+            }
         },
 
         // Open Onboarding Wizard for new students
