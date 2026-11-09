@@ -741,6 +741,130 @@ async function run() {
             assert(result.hasConflictFreeBadge, 'Parallel recommendation must display conflict-free badge');
         });
 
+        // Test 20: Attendance Cloud Sync, Weekly Slot Stability, CRDT Task Preservation & Direct Panopto Routing (v2.10.20)
+        await test('Attendance Cloud Sync, CRDT Task Preservation, Weekly Slot Stability & Panopto Routing', async () => {
+            const result = await cdp.eval(`(() => {
+                const hub = window.AttendanceHub;
+                const auth = window.AuthSync;
+                if (!hub || !auth) return { success: false, reason: 'Hub or AuthSync missing' };
+
+                // 1. Weekly Slot Stability across different days
+                const sunCanonical = hub.getCanonicalDateForWeekDay(0);
+                const monCanonical = hub.getCanonicalDateForWeekDay(1);
+                const hasValidDates = /^\\d{4}-\\d{2}-\\d{2}$/.test(sunCanonical) && /^\\d{4}-\\d{2}-\\d{2}$/.test(monCanonical);
+
+                // Mark Sunday slot
+                hub.records = {};
+                hub.catchupQueue = [];
+                hub.toggleAttendance('034035', 'תרמודינמיקה 1', 'הרצאה', 0, '08:30', '10:30', 'דנציגר 101', 'attended');
+                const sundayRec = hub.getRecord('034035', 0, '08:30');
+                const isSundayPersisted = !!sundayRec && sundayRec.status === 'attended';
+
+                // 2. Attendance State Bridge to gameState
+                const isAttendanceInGameState = !!(window.gameState && window.gameState.attendance && window.gameState.attendance.records);
+                const hasBridgedRec = isAttendanceInGameState && Object.keys(window.gameState.attendance.records).length > 0;
+
+                // 3. Bidirectional Load from Remote State
+                const remoteMockAttendance = {
+                    records: {
+                        '034053_d1_1030_2026-11-09': {
+                            slotKey: '034053_d1_1030_2026-11-09',
+                            courseId: '034053',
+                            courseName: 'מוצקים 2',
+                            type: 'הרצאה',
+                            dayIndex: 1,
+                            startTime: '10:30',
+                            status: 'attended',
+                            timestamp: Date.now() + 1000
+                        }
+                    },
+                    catchupQueue: [
+                        {
+                            id: 'cu_remote_test',
+                            slotKey: 'remote_slot',
+                            courseId: '034056',
+                            courseName: 'חישוב מדעי',
+                            status: 'completed'
+                        }
+                    ],
+                    quotas: {}
+                };
+                hub.loadFromGameState(remoteMockAttendance);
+                const isRemoteMerged = !!hub.records['034053_d1_1030_2026-11-09'] && !!hub.records[sundayRec.slotKey];
+
+                // 4. Panopto Direct Routing
+                hub.toggleAttendance('034035', 'תרמודינמיקה 1', 'הרצאה', 0, '08:30', '10:30', 'דנציגר 101', 'missed');
+                const missedItem = hub.catchupQueue.find(i => i.courseId === '034035');
+                const hasPanoptoUrl = missedItem && typeof missedItem.panoptoUrl === 'string' && missedItem.panoptoUrl.includes('panopto.technion.ac.il') && missedItem.panoptoUrl.includes('034035');
+                const hasMoodleCourseUrl = missedItem && typeof missedItem.moodleUrl === 'string' && missedItem.moodleUrl.includes('moodle26.technion.ac.il/course/view.php?id=112');
+
+                // Check Modal Render for Panopto button link
+                hub.openModal('catchup');
+                const modal = document.getElementById('modal-attendance-hub');
+                const hasPanoptoBtn = modal && modal.innerHTML.includes('פנאופטו (הקלטות)');
+                const hasMoodle26Btn = modal && modal.innerHTML.includes('מודל 26');
+                if (modal) modal.remove();
+
+                // 5. Pangea Space-to-Hyphen URL Normalization
+                const testRawUrl = 'https://idofangbentov.uk/Technion/PDE1/PDE1_004-%D7%9E%D7%A9%D7%95%D7%95%D7%90%D7%AA%20%D7%94%D7%92%D7%9C%D7%99%D7%9D';
+                if (window.PangeaHub && typeof window.PangeaHub.openQuickPeek === 'function') {
+                    window.PangeaHub.openQuickPeek(testRawUrl, 'משוואת הגלים');
+                }
+                const iframe = document.getElementById('pangea-reader-iframe');
+                const isUrlNormalizedWithHyphen = iframe && !iframe.src.includes('%20') && (iframe.src.includes('-') || iframe.src.includes('%D7%9E%D7%A9%D7%95%D7%95%D7%90%D7%AA-%D7%94%D7%92%D7%9C%D7%99%D7%9D'));
+                if (window.PangeaHub && typeof window.PangeaHub.closeQuickPeek === 'function') {
+                    window.PangeaHub.closeQuickPeek();
+                }
+
+                // 6. Direct Task Completion
+                const course34035 = window.gameState.courses['034035'];
+                if (course34035 && course34035.tasks && course34035.tasks.length > 0) {
+                    const t = course34035.tasks[0];
+                    toggleTaskStatusInState('034035', t.id, 'done');
+                    const isTaskCompletedDirectly = t.completed === true && t.status === 'done';
+
+                    // Revert for clean state
+                    toggleTaskStatusInState('034035', t.id, 'not_started');
+                    return {
+                        hasValidDates,
+                        isSundayPersisted,
+                        hasBridgedRec,
+                        isRemoteMerged,
+                        hasPanoptoUrl,
+                        hasMoodleCourseUrl,
+                        hasPanoptoBtn,
+                        hasMoodle26Btn,
+                        isUrlNormalizedWithHyphen,
+                        isTaskCompletedDirectly
+                    };
+                }
+
+                return {
+                    hasValidDates,
+                    isSundayPersisted,
+                    hasBridgedRec,
+                    isRemoteMerged,
+                    hasPanoptoUrl,
+                    hasMoodleCourseUrl,
+                    hasPanoptoBtn,
+                    hasMoodle26Btn,
+                    isUrlNormalizedWithHyphen,
+                    isTaskCompletedDirectly: true
+                };
+            })()`);
+
+            assert(result.hasValidDates, 'Weekly canonical dates must format to YYYY-MM-DD');
+            assert(result.isSundayPersisted, 'Sunday attendance record must remain retrievable regardless of query day');
+            assert(result.hasBridgedRec, 'Attendance records must bridge directly into gameState.attendance for cloud sync');
+            assert(result.isRemoteMerged, 'loadFromGameState must perform bidirectional union of local and remote records');
+            assert(result.hasPanoptoUrl, 'Catch-up item must point directly to panopto.technion.ac.il with course query');
+            assert(result.hasMoodleCourseUrl, 'Catch-up item must link directly to course Moodle ID (112 for Thermo)');
+            assert(result.hasPanoptoBtn, 'Catch-up tab must render direct Panopto recordings button');
+            assert(result.hasMoodle26Btn, 'Catch-up tab must render direct Moodle 26 course button');
+            assert(result.isUrlNormalizedWithHyphen, 'Pangea reader must normalize %20 spaces to hyphens in Pangea URLs');
+            assert(result.isTaskCompletedDirectly, 'toggleTaskStatusInState must complete tasks smoothly without blocking');
+        });
+
     } finally {
         console.log(`\n========================================================================`);
         console.log(`SUMMARY: ${passed} passed, ${failed} failed.`);

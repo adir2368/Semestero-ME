@@ -230,6 +230,74 @@
     }
 
     // Inbound state sanitization against accidental test infiltrators & cross-account PII leaks
+    // Monotonic CRDT task completion merge (ADR-093): Once a task is completed on ANY device,
+    // it MUST remain completed and never be resurrected or uncompleted by an older snapshot.
+    function mergeCoursesPreservingTaskCompletion(localCourses = {}, remoteCourses = {}) {
+        if (!localCourses || typeof localCourses !== 'object') return remoteCourses || {};
+        if (!remoteCourses || typeof remoteCourses !== 'object') return localCourses || {};
+
+        const merged = { ...remoteCourses };
+
+        Object.keys(localCourses).forEach(code => {
+            const lCourse = localCourses[code];
+            if (!lCourse) return;
+            if (!merged[code]) {
+                merged[code] = lCourse;
+                return;
+            }
+            const rCourse = merged[code];
+            if (!Array.isArray(lCourse.tasks)) return;
+            if (!Array.isArray(rCourse.tasks)) {
+                rCourse.tasks = [...lCourse.tasks];
+                return;
+            }
+
+            // Map of local completed tasks by ID, moodleUid, and clean normalized title
+            const localDoneMap = new Map();
+            lCourse.tasks.forEach(lt => {
+                if (!lt) return;
+                const isDone = (lt.completed === true || lt.status === 'done' || lt.status === 'submitted');
+                if (isDone) {
+                    if (lt.id) localDoneMap.set(String(lt.id), lt);
+                    if (lt.moodleUid) localDoneMap.set('muid_' + String(lt.moodleUid), lt);
+                    if (lt.moodleEventId) localDoneMap.set('mevt_' + String(lt.moodleEventId), lt);
+                    if (lt.title) localDoneMap.set('title_' + lt.title.trim().toLowerCase(), lt);
+                }
+            });
+
+            // Apply completion locks to remote tasks
+            rCourse.tasks.forEach(rt => {
+                if (!rt) return;
+                let matchedLocal = null;
+                if (rt.id && localDoneMap.has(String(rt.id))) matchedLocal = localDoneMap.get(String(rt.id));
+                else if (rt.moodleUid && localDoneMap.has('muid_' + String(rt.moodleUid))) matchedLocal = localDoneMap.get('muid_' + String(rt.moodleUid));
+                else if (rt.moodleEventId && localDoneMap.has('mevt_' + String(rt.moodleEventId))) matchedLocal = localDoneMap.get('mevt_' + String(rt.moodleEventId));
+                else if (rt.title && localDoneMap.has('title_' + rt.title.trim().toLowerCase())) matchedLocal = localDoneMap.get('title_' + rt.title.trim().toLowerCase());
+
+                if (matchedLocal) {
+                    rt.completed = true;
+                    rt.status = 'done';
+                    rt.completedAt = rt.completedAt || matchedLocal.completedAt || Date.now();
+                }
+            });
+
+            // Preserve local custom tasks not present in remote
+            lCourse.tasks.forEach(lt => {
+                if (!lt) return;
+                const exists = rCourse.tasks.some(rt =>
+                    (rt.id && lt.id && rt.id === lt.id) ||
+                    (rt.moodleUid && lt.moodleUid && rt.moodleUid === lt.moodleUid) ||
+                    (rt.title && lt.title && rt.title.trim().toLowerCase() === lt.title.trim().toLowerCase())
+                );
+                if (!exists) {
+                    rCourse.tasks.push(lt);
+                }
+            });
+        });
+
+        return merged;
+    }
+
     function sanitizeInboundState(state, targetUid) {
         if (!state) return state;
         const effectiveUid = targetUid || (typeof localStorage !== 'undefined' ? localStorage.getItem(SESSION_USER_KEY) : 'guest') || 'guest';
@@ -2635,6 +2703,15 @@
                                     remoteState.userProfile.phone = scopedPhone;
                                 }
 
+                                // CRDT Monotonic Merge: preserve completed tasks across local and remote
+                                remoteState.courses = mergeCoursesPreservingTaskCompletion(localState.courses, remoteState.courses);
+                                remoteState.completedTaskRegistry = Object.assign({}, localState.completedTaskRegistry || {}, remoteState.completedTaskRegistry || {});
+
+                                // Sync Attendance bidirectionally if remote carries it
+                                if (remoteState.attendance && window.AttendanceHub && typeof window.AttendanceHub.loadFromGameState === 'function') {
+                                    window.AttendanceHub.loadFromGameState(remoteState.attendance);
+                                }
+
                                 const mergedRemoteJson = JSON.stringify(remoteState);
                                 if (localRaw !== mergedRemoteJson) {
                                     isApplyingRemoteUpdate = true;
@@ -2745,6 +2822,15 @@
                     if (scopedPhone && (!remoteState.userProfile || !remoteState.userProfile.phone)) {
                         if (!remoteState.userProfile) remoteState.userProfile = {};
                         remoteState.userProfile.phone = scopedPhone;
+                    }
+
+                    // CRDT Monotonic Merge: preserve completed tasks across local and remote
+                    remoteState.courses = mergeCoursesPreservingTaskCompletion(localState.courses, remoteState.courses);
+                    remoteState.completedTaskRegistry = Object.assign({}, localState.completedTaskRegistry || {}, remoteState.completedTaskRegistry || {});
+
+                    // Sync Attendance bidirectionally if remote carries it
+                    if (remoteState.attendance && window.AttendanceHub && typeof window.AttendanceHub.loadFromGameState === 'function') {
+                        window.AttendanceHub.loadFromGameState(remoteState.attendance);
                     }
 
                     // Adopt remote state
@@ -2868,6 +2954,16 @@
                         return; // ABORT - do not overwrite cloud with corrupted data!
                     }
                 }
+            }
+
+            // Ensure Attendance state is packaged into cloud payload
+            if (window.AttendanceHub && typeof window.AttendanceHub.records === 'object') {
+                state.attendance = {
+                    records: window.AttendanceHub.records || {},
+                    catchupQueue: window.AttendanceHub.catchupQueue || [],
+                    quotas: window.AttendanceHub.quotas || {},
+                    updatedAt: Date.now()
+                };
             }
 
             if (!supabaseClient) return;

@@ -4707,7 +4707,21 @@
          */
         openQuickPeek: function(url, title, externalUrl) {
             if (!url) return;
-            const targetExternalUrl = externalUrl || url;
+            let cleanUrl = String(url).trim();
+            if (cleanUrl.includes('idofangbentov.uk')) {
+                cleanUrl = cleanUrl.replace(/%20/g, '-').replace(/\s+/g, '-');
+            }
+            try {
+                cleanUrl = encodeURI(decodeURI(cleanUrl));
+            } catch (e) {}
+
+            let targetExternalUrl = externalUrl || cleanUrl;
+            if (targetExternalUrl.includes('idofangbentov.uk')) {
+                targetExternalUrl = targetExternalUrl.replace(/%20/g, '-').replace(/\s+/g, '-');
+            }
+            try {
+                targetExternalUrl = encodeURI(decodeURI(targetExternalUrl));
+            } catch (e) {}
             const modal = document.getElementById('pangea-reader-modal');
             const iframe = document.getElementById('pangea-reader-iframe');
             const titleEl = document.getElementById('pangea-reader-title');
@@ -4768,7 +4782,7 @@
                         if (fallbackCard) fallbackCard.style.display = 'flex';
                     }
                 }, 8000);
-                iframe.src = url;
+                iframe.src = cleanUrl;
             }
 
             modal.style.display = 'flex';

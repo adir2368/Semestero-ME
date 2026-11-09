@@ -115,6 +115,77 @@
                 console.error('[AttendanceHub] Storage save error:', err);
             }
             this.updateBadgeCounts();
+
+            // Bidirectional bridge to gameState and cloud sync
+            try {
+                if (typeof window !== 'undefined' && window.gameState) {
+                    window.gameState.attendance = {
+                        records: this.records,
+                        catchupQueue: this.catchupQueue,
+                        quotas: this.quotas,
+                        updatedAt: Date.now()
+                    };
+                    if (typeof window.saveState === 'function') {
+                        window.saveState(true);
+                    }
+                    if (window.AuthSync && typeof window.AuthSync.triggerDebouncedCloudSync === 'function') {
+                        window.AuthSync.triggerDebouncedCloudSync(window.gameState);
+                    }
+                }
+            } catch (syncErr) {
+                console.warn('[AttendanceHub] Cloud state bridge sync warning:', syncErr);
+            }
+        },
+
+        loadFromGameState: function(remoteAttendance) {
+            if (!remoteAttendance || typeof remoteAttendance !== 'object') return;
+            let modified = false;
+
+            if (remoteAttendance.records && typeof remoteAttendance.records === 'object') {
+                Object.keys(remoteAttendance.records).forEach(key => {
+                    const rRec = remoteAttendance.records[key];
+                    const lRec = this.records[key];
+                    if (!lRec) {
+                        this.records[key] = rRec;
+                        modified = true;
+                    } else if (rRec.timestamp && (!lRec.timestamp || rRec.timestamp > lRec.timestamp)) {
+                        this.records[key] = rRec;
+                        modified = true;
+                    } else if (rRec.status === 'attended' && lRec.status !== 'attended') {
+                        this.records[key] = rRec;
+                        modified = true;
+                    }
+                });
+            }
+
+            if (Array.isArray(remoteAttendance.catchupQueue)) {
+                remoteAttendance.catchupQueue.forEach(rItem => {
+                    const idx = this.catchupQueue.findIndex(ci => ci.slotKey === rItem.slotKey || ci.id === rItem.id);
+                    if (idx === -1) {
+                        this.catchupQueue.push(rItem);
+                        modified = true;
+                    } else {
+                        if (rItem.status === 'completed' && this.catchupQueue[idx].status !== 'completed') {
+                            this.catchupQueue[idx] = rItem;
+                            modified = true;
+                        }
+                    }
+                });
+            }
+
+            if (remoteAttendance.quotas && typeof remoteAttendance.quotas === 'object') {
+                this.quotas = Object.assign({}, DEFAULT_MANDATORY_QUOTAS, this.quotas, remoteAttendance.quotas);
+            }
+
+            if (modified) {
+                try {
+                    localStorage.setItem(STORAGE_KEY_RECORDS, JSON.stringify(this.records));
+                    localStorage.setItem(STORAGE_KEY_CATCHUP, JSON.stringify(this.catchupQueue));
+                    localStorage.setItem(STORAGE_KEY_QUOTAS, JSON.stringify(this.quotas));
+                } catch (e) {}
+                this.updateBadgeCounts();
+                this.refreshUI();
+            }
         },
 
         /**
@@ -241,9 +312,21 @@
             return recommendations;
         },
 
+        getCanonicalDateForWeekDay: function(dayIndex, refDate) {
+            const d = refDate ? new Date(refDate) : new Date();
+            const currentDay = d.getDay(); // 0 = Sunday, 1 = Monday, ...
+            const targetDay = Number(dayIndex !== undefined && dayIndex !== null ? dayIndex : currentDay);
+            const diff = targetDay - currentDay;
+            d.setDate(d.getDate() + diff);
+            const y = d.getFullYear();
+            const m = String(d.getMonth() + 1).padStart(2, '0');
+            const dayNum = String(d.getDate()).padStart(2, '0');
+            return `${y}-${m}-${dayNum}`;
+        },
+
         makeSlotKey: function(courseId, dayIndex, startTime, dateStr) {
-            const date = dateStr || this.getCurrentDateString();
-            return `${courseId}_d${dayIndex}_${(startTime || '00:00').replace(':', '')}_${date}`;
+            const canonicalDate = dateStr || this.getCanonicalDateForWeekDay(dayIndex);
+            return `${String(courseId).trim()}_d${dayIndex}_${(startTime || '00:00').replace(':', '')}_${canonicalDate}`;
         },
 
         getCurrentDateString: function() {
@@ -256,7 +339,15 @@
 
         getRecord: function(courseId, dayIndex, startTime, dateStr) {
             const key = this.makeSlotKey(courseId, dayIndex, startTime, dateStr);
-            return this.records[key] || null;
+            if (this.records[key]) return this.records[key];
+
+            // Resilience fallback: if no dateStr provided, check if a record exists for this dayIndex & startTime in the current week
+            if (!dateStr) {
+                const prefix = `${String(courseId).trim()}_d${dayIndex}_${(startTime || '00:00').replace(':', '')}_`;
+                const matchedKey = Object.keys(this.records).find(k => k.startsWith(prefix));
+                if (matchedKey) return this.records[matchedKey];
+            }
+            return null;
         },
 
         /**
@@ -346,6 +437,13 @@
                 }
             }
 
+            const moodleMap = (typeof MOODLE26_COURSE_MAP !== 'undefined') ? MOODLE26_COURSE_MAP : {};
+            const moodleCourseId = moodleMap[cleanCode] || moodleMap['0' + cleanCode] || moodleMap[meta.courseId];
+            const directMoodleUrl = moodleCourseId
+                ? `https://moodle26.technion.ac.il/course/view.php?id=${moodleCourseId}`
+                : `https://moodle26.technion.ac.il/course/search.php?search=${encodeURIComponent(cleanCode)}`;
+            const panoptoUrl = `https://panopto.technion.ac.il/Panopto/Pages/Sessions/List.aspx#query=${encodeURIComponent(cleanCode)}`;
+
             const catchupId = 'cu_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
             const newItem = {
                 id: catchupId,
@@ -361,7 +459,8 @@
                 topic: pangeaChapter ? pangeaChapter.displayTitle : `${meta.type} שבוע ${this.getCurrentAcademicWeek()}`,
                 pangeaUrl: pangeaChapter ? pangeaChapter.url : null,
                 pangeaTitle: pangeaChapter ? pangeaChapter.displayTitle : null,
-                moodleUrl: `https://moodle26.technion.ac.il/my/`,
+                panoptoUrl: panoptoUrl,
+                moodleUrl: directMoodleUrl,
                 status: 'pending', // 'pending' | 'watching' | 'completed'
                 isMiluim: false,
                 notes: '',
@@ -607,8 +706,11 @@
                                             📖 סיכום בפנגייה
                                         </button>
                                     ` : ''}
-                                    <a href="${item.moodleUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline" style="font-size: 0.74rem; padding: 4px 10px; color: #f43f5e; border-color: rgba(244, 63, 94, 0.4); border-radius: 6px; text-decoration: none;" title="פתח דף קורס במודל / פנאופטו">
-                                        🎬 פנאופטו ↗
+                                    <a href="${item.panoptoUrl || (`https://panopto.technion.ac.il/Panopto/Pages/Sessions/List.aspx#query=${encodeURIComponent(item.courseId)}`)}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline" style="font-size: 0.74rem; padding: 4px 10px; color: #f43f5e; border-color: rgba(244, 63, 94, 0.4); border-radius: 6px; text-decoration: none; font-weight: 700;" title="מעבר ישיר להקלטות הקורס בפנאופטו הטכניוני">
+                                        🎬 פנאופטו (הקלטות) ↗
+                                    </a>
+                                    <a href="${item.moodleUrl || 'https://moodle26.technion.ac.il/my/'}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline" style="font-size: 0.74rem; padding: 4px 10px; color: #38bdf8; border-color: rgba(56, 189, 248, 0.4); border-radius: 6px; text-decoration: none;" title="מעבר ישיר לדף הקורס במודל 26">
+                                        🎓 מודל 26 ↗
                                     </a>
                                     <button type="button" class="btn btn-sm ${isWatching ? 'btn-primary' : 'btn-outline'}" onclick="window.AttendanceHub.setCatchupStatus('${item.id}', '${isWatching ? 'pending' : 'watching'}')" style="font-size: 0.74rem; padding: 4px 8px; border-radius: 6px;">
                                         ${isWatching ? 'בצפייה כעת 📺' : 'סמן בצפייה'}
@@ -820,17 +922,26 @@
             if (!course) return;
             const topic = prompt('הזן נושא או פרק להשלמה (למשל: הרצאה 4 - תנע זוויתי):') || 'השלמת שיעור';
             
+            const cleanCode = course.replace(/\D/g, '') || '000000';
+            const moodleMap = (typeof MOODLE26_COURSE_MAP !== 'undefined') ? MOODLE26_COURSE_MAP : {};
+            const moodleCourseId = moodleMap[cleanCode] || moodleMap['0' + cleanCode];
+            const directMoodleUrl = moodleCourseId
+                ? `https://moodle26.technion.ac.il/course/view.php?id=${moodleCourseId}`
+                : `https://moodle26.technion.ac.il/course/search.php?search=${encodeURIComponent(cleanCode)}`;
+            const panoptoUrl = `https://panopto.technion.ac.il/Panopto/Pages/Sessions/List.aspx#query=${encodeURIComponent(cleanCode)}`;
+
             const newItem = {
                 id: 'cu_man_' + Date.now(),
                 slotKey: 'manual_' + Date.now(),
-                courseId: course.replace(/\D/g, '') || '000000',
+                courseId: cleanCode,
                 courseName: course,
                 type: 'הרצאה',
                 date: this.getCurrentDateString(),
                 week: this.getCurrentAcademicWeek(),
                 topic: topic,
                 pangeaUrl: null,
-                moodleUrl: 'https://moodle26.technion.ac.il/my/',
+                panoptoUrl: panoptoUrl,
+                moodleUrl: directMoodleUrl,
                 status: 'pending',
                 isMiluim: false,
                 notes: '',

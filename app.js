@@ -1897,6 +1897,9 @@ window.gameState = gameState;
 window.setGlobalGameState = function(newState) {
     gameState = newState;
     window.gameState = gameState;
+    if (window.AttendanceHub && newState && newState.attendance) {
+        window.AttendanceHub.loadFromGameState(newState.attendance);
+    }
 };
 window.getGlobalGameState = function() {
     return gameState;
@@ -17667,23 +17670,17 @@ function toggleTaskStatusInState(courseCode, taskId, newStatus, skipRecalcAndSav
     const oldStatus = task.status;
     if (oldStatus === newStatus) return;
 
-    // Verify task completion against Moodle state & Miluim relevance if marking complete
-    const isMarkingComplete = (newStatus === 'done' || newStatus === 'submitted');
-    const isMiluim = !!(task.isMiluim || task.miluim || (task.title && task.title.includes('מילואים')));
-    const isFromMoodle = !!(task.source === 'moodle' || task.moodleEventId || task.moodleUid);
-    const isMoodleConfirmed = !!(task.moodleCompleted || (task.grade !== undefined && task.grade !== null));
-
-    if (!forceConfirmed && isMarkingComplete && (isMiluim || (isFromMoodle && !isMoodleConfirmed))) {
-        showTaskCompletionVerificationModal(courseCode, task, newStatus);
-        return;
-    }
-    
-    task.status = newStatus;
-    task.completed = (newStatus === 'done');
-    
+    // Task completion and status update (ADR-093)
     const wasComplete = (oldStatus === 'done' || oldStatus === 'submitted');
     const isComplete = (newStatus === 'done' || newStatus === 'submitted');
+
+    task.status = newStatus;
     task.completed = isComplete;
+    if (isComplete) {
+        task.completedAt = Date.now();
+    } else {
+        delete task.completedAt;
+    }
 
     // Maintain completion lock in MoodleSync registry so subsequent Moodle syncs never revert this task
     if (window.MoodleSync && typeof window.MoodleSync.markTaskCompletedInRegistry === 'function') {
@@ -23528,8 +23525,8 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.11.09-v2.10.19",
-    version: "2.10.19",
+    code: "REV-2026.11.09-v2.10.20",
+    version: "2.10.20",
     build: "20261109_01",
     date: "2026-11-09 01:45",
     description: "v2.10.18: מעקב נוכחות חובה (ספורט ומעבדות), תור השלמות ופנאופטו בלחיצה אחת, וחיבור לסיכומי פנגייה (ADR-091)."

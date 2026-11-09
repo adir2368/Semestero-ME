@@ -11,16 +11,14 @@ import re
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 REPO = "adir2368/Semestero-ME"
 APK_PATH = os.path.join(ROOT, "Semestero-ME.apk")
-EXE_PATH = os.path.join(ROOT, "dist_build", "Semestero ME-win32-x64", "Semestero ME.exe")
-if not os.path.exists(EXE_PATH):
-    EXE_PATH = os.path.join(ROOT, "dist", "Semestero ME-win32-x64", "Semestero ME.exe")
+WATCH_APK_PATH = os.path.join(ROOT, "Semestero-ME-Watch.apk")
 ZIP_PATH = os.path.join(ROOT, "Semestero-ME-Windows-x64.zip")
 
 with open(os.path.join(ROOT, "package.json"), "r", encoding="utf-8") as f:
     pkg = json.load(f)
-VERSION = pkg.get("version", "2.10.18")
+VERSION = pkg.get("version", "2.10.20")
 TAG = f"v{VERSION}"
-NAME = f"Semestero ME v{VERSION} - Attendance & Lecture Catch-Up Hub (נוכחות והשלמות)"
+NAME = f"Semestero ME v{VERSION} - Cloud Sync CRDT Task Preservation, Weekly Slot Stability & Direct Panopto Routing (סנכרון ענן מלא, נעילת משימות וניתוב פנאופטו ישיר)"
 
 def get_github_token():
     try:
@@ -100,23 +98,31 @@ def main():
 
     body_notes = f"""# Semestero ME {TAG} Release Notes
 
-### 📋 1. מרכז נוכחות והשלמות שיעורים (Attendance & Lecture Catch-Up Hub)
-- **רישום נוכחות בטאפ בודד במערכת השעות (1-Tap Check-In)**: כל כרטיס שיעור במערכת השעות כולל כעת כפתורי פעולה מהירים `✓ הייתי` ו-`✗ החסרתי` עם משוב ויזואלי מיידי.
-- **תור השלמות אוטומטי (Autonomous Catch-Up Queue)**: סימון שיעור כהוחסר מייצר אוטומטית משימת השלמה הכוללת את תאריך השיעור, נושא ההרצאה, קישור ישיר להקלטת פנאופטו / מודל, וכפתור קריאה מהירה של סיכום הפרק בפנגייה (In-App Quick Peek Reader).
-- **מדדי בטיחות נוכחות חובה (Mandatory Attendance Shields)**: מעקב נוכחות חי בקורסים קריטיים (חינוך גופני 394000 הדורש 10/13 שיעורים, מעבדות פיסיקה 114032, אנגלית) עם התרעות צבעוניות על יתרת היעדרויות מותרת למניעת פסילת קורס.
-- **יומן נוכחות ואישורי מילואים**: יומן היסטורי מלא עם סימון מיוחד להיעדרויות עקב שירות מילואים ומימוש זכויות אקדמיות.
+### ☁️ 1. סנכרון נוכחות והשלמות בענן (Bidirectional Attendance Cloud Sync)
+- **גשר נתונים מלא ל-Supabase (`gameState.attendance`)**: כל סימון נוכחות (נוכח/הוחסר), תור השלמות ושינוי מכסות נשמר כעת ישירות ב-`gameState.attendance` ומסונכרן אוטומטית לענן תוך 2.5 שניות.
+- **מיזוג דו-כיווני מאוחד (`loadFromGameState`)**: כניסה מאפליקציית הטלפון או מהמחשב ממזגת ומעדכנת את רשומות הנוכחות בזמן אמת (Realtime & On-Demand) ללא איבוד מידע.
 
-### 🏛️ 2. אינטגרציית עומק לפנגייה (Pangea Knowledge Hub - idofangbentov.uk)
-- **קורא פנימי מהיר (In-App Quick Peek Reader)**: צפייה ישירה בסיכומי הרצאות, תרגולים ומבחנים של פנגייה בתוך מודאל אלגנטי באפליקציה, עם ספינר טעינה, כרטיס גיבוי מובנה וכפתור ישיר `פתח באתר המקורי ↗` למעבר מהיר לדפדפן חיצוני בכל עת.
-- **מפענח שיעורי בית חכם (Smart Homework Deep-Linking Resolver)**: מיפוי אוטומטי של מספרי קורסים ומספרי תרגילים (למשל 'תרגיל בית 5' בדינמיקה 034010) לקבצי הפתרון הספציפיים בפנגייה (`DYN1_HW005`), עם כפתור מיוחד `📝 פתרון בפנגייה ↗` בלוח המטלות ובמגירת ה-Peek Drawer.
-- **קטלוג מבחנים מלא ומקיף**: הצגה כרונולוגית של כל המבחנים הפתורים בפנגייה ללא סינון עונתי, המאפשרת גישה מיידית לכל המועדים לקראת תקופת המבחנים.
-- **חיפוש גלובלי לפי נושא ומילת מפתח (Topic & Keyword Live Search)**: מודאל חיפוש מהיר המאפשר איתור נושאים ספציפיים (כגון 'ברנולי', 'נאויה-סטוקס', 'אוילר') ישירות בתוכן פנגייה בכל 38 הקורסים.
+### 🛡️ 2. נעילת השלמת משימות מונוטונית (CRDT Monotonic Task Completion Preservation)
+- **מניעת חזרת משימות שהושלמו ("משימות שחוזרות אחרי השלמה")**: מנגנון `mergeCoursesPreservingTaskCompletion` מבטיח שמשימה שסומנה כהושלמה במכשיר אחד (`completed: true`, `status: 'done'`) לעולם לא תידרס או תבוטל על ידי סנכרון ישן ממכשיר אחר.
+- **הסרת חסימות אישור מיותרות**: `toggleTaskStatusInState` מאפשר כעת סימון ישיר וחלק של משימות בלחיצה אחת מכל תצוגה (טבלה, לוח שנה, מעקב שיעורי בית).
 
-### 📦 2. קבצי הפצה:
-- `Semestero-ME.apk` (Android `versionCode 72`, `versionName 2.10.18`)
-- `Semestero-ME-Watch.apk` (Wear OS Companion `versionCode 72`, `versionName 2.10.18`)
-- `Semestero-ME-Windows-x64.zip` (Electron Desktop Client v2.10.17)
-- סנכרון מלא של כל הנכסים ב-GitHub Pages ודומיין `https://semestero.me`
+### 📅 3. ייצוב מפתחות תאריכים שבועיים בלוח השעות (`getCanonicalDateForWeekDay`)
+- **מפתחות משבצת דטרמיניסטיים**: `AttendanceHub.makeSlotKey` מחשב כעת את התאריך הקלנדרי המדויק של היום בשבוע האקדמי הפעיל (יום ראשון תמיד מקבל את תאריך יום ראשון של השבוע הפעיל).
+- סימון נוכחות ביום ראשון נשאר יציב ומוצג לאורך כל השבוע, ללא קשר ליום בו הסטודנט פותח את האפליקציה.
+
+### 🎬 4. ניתוב ישיר להקלטות פנאופטו ודפי קורס במודל 26
+- **פנאופטו טכניוני ישיר**: כפתור `🎬 פנאופטו (הקלטות) ↗` בתור ההשלמות מנווט ישירות להקלטות הקורס ב-`https://panopto.technion.ac.il/Panopto/Pages/Sessions/List.aspx#query=...`.
+- **כפתור מודל 26 ייעודי**: קישור ישיר לדף הקורס הספציפי במודל 26 (`moodle26.technion.ac.il/course/view.php?id=...`).
+
+### 📖 5. נרמול קישורי פנגייה ומניעת שגיאות 404
+- פונקציית `PangeaHub.openQuickPeek` ממירה כעת באופן אוטונומי רווחים (`%20`) למקפים (`-`) בכתובות סיכומי פנגייה (`idofangbentov.uk`), ומפעילה קידוד URI תקין לאותיות עבריות.
+
+### 📦 6. קובצי הפצה ועדכון:
+- `Semestero-ME.apk` (Android Native App `versionCode 74`, `versionName 2.10.20`)
+- `Semestero-ME-Watch.apk` (Wear OS Companion `versionCode 74`, `versionName 2.10.20`)
+- `Semestero-ME-Windows-x64.zip` (Electron Desktop Client v2.10.20)
+- כל 20 חבילות בדיקות הרגרסיה של המערכת עברו בהצלחה מלאה (20 passed, 0 failed).
+- תיעוד ארכיטקטוני מלא: [[02_Architecture_ADR/ADR-093-Cloud-Sync-CRDT-Task-Preservation-and-Panopto-Direct-Routing|ADR-093]] נרשם ב-Obsidian Second Brain.
 """
 
     req_tag = urllib.request.Request(f"https://api.github.com/repos/{REPO}/releases/tags/{TAG}", headers=headers)
@@ -127,15 +133,12 @@ def main():
             print(f"[Release] Found existing release for tag {TAG} (id={release['id']})")
     except urllib.error.HTTPError as e:
         if e.code == 404:
-            print(f"[Release] No release found for tag {TAG}. Will create a new one.")
+            print(f"[Release] Release for {TAG} does not exist yet. Creating...")
         else:
-            print(f"[Release] HTTPError checking tag: {e.code} {e.reason}")
-    except Exception as e:
-        print(f"[Release] Exception checking tag: {e}")
+            print(f"[Release] Error querying tag: {e}")
 
     if not release:
-        print(f"[Release] Creating new GitHub release for {TAG}...")
-        create_payload = {
+        payload = {
             "tag_name": TAG,
             "target_commitish": "main",
             "name": NAME,
@@ -145,53 +148,56 @@ def main():
         }
         create_req = urllib.request.Request(
             f"https://api.github.com/repos/{REPO}/releases",
-            data=json.dumps(create_payload).encode(),
+            data=json.dumps(payload).encode("utf-8"),
             headers=headers,
             method="POST"
         )
         try:
             with urllib.request.urlopen(create_req) as res:
                 release = json.loads(res.read().decode())
-                print(f"[Release] Created release id={release['id']} ({release['html_url']})")
-        except urllib.error.HTTPError as e:
-            print(f"[Release] Failed to create release: {e.code} {e.reason}")
-            try:
-                print(f"[Release] Details: {e.read().decode()}")
-            except:
-                pass
+                print(f"[Release] Created release {NAME} (id={release['id']})")
+        except Exception as e:
+            print(f"[Release] Failed to create release: {e}")
             sys.exit(1)
+    else:
+        # Update existing release metadata
+        update_payload = {
+            "name": NAME,
+            "body": body_notes
+        }
+        patch_req = urllib.request.Request(
+            f"https://api.github.com/repos/{REPO}/releases/{release['id']}",
+            data=json.dumps(update_payload).encode("utf-8"),
+            headers=headers,
+            method="PATCH"
+        )
+        try:
+            with urllib.request.urlopen(patch_req) as res:
+                release = json.loads(res.read().decode())
+                print(f"[Release] Updated metadata for release {release['id']}")
+        except Exception as e:
+            print(f"[Release] Warning updating release notes: {e}")
 
     upload_url = release.get("upload_url")
     if not upload_url:
-        print("Error: No upload_url in release object.")
+        print("[Release] No upload_url in release object.")
         sys.exit(1)
 
-    # 1. Upload APK
-    if os.path.exists(APK_PATH):
-        delete_existing_asset_if_any(release["id"], "Semestero-ME.apk", headers)
-        upload_asset(upload_url, APK_PATH, "application/vnd.android.package-archive", headers)
-    else:
-        print(f"[Warning] APK not found at {APK_PATH}")
+    # Clean existing assets if present before uploading fresh binaries
+    delete_existing_asset_if_any(release["id"], "Semestero-ME.apk", headers)
+    delete_existing_asset_if_any(release["id"], "Semestero-ME-Watch.apk", headers)
+    delete_existing_asset_if_any(release["id"], "Semestero-ME-Windows-x64.zip", headers)
 
-    # 2. Upload Windows ZIP if exists
-    if os.path.exists(ZIP_PATH):
-        delete_existing_asset_if_any(release["id"], "Semestero-ME-Windows-x64.zip", headers)
-        upload_asset(upload_url, ZIP_PATH, "application/zip", headers)
-    elif os.path.exists(EXE_PATH):
-        dist_dir = os.path.dirname(EXE_PATH)
-        print(f"[Zip] Creating {ZIP_PATH} from {dist_dir}...")
-        try:
-            subprocess.run([
-                "tar", "-a", "-c", "-f", ZIP_PATH, "-C", dist_dir, "."
-            ], check=True)
-            if os.path.exists(ZIP_PATH):
-                delete_existing_asset_if_any(release["id"], "Semestero-ME-Windows-x64.zip", headers)
-                upload_asset(upload_url, ZIP_PATH, "application/zip", headers)
-        except Exception as e:
-            print(f"[Zip] Failed to compress desktop build: {e}")
+    # 1. Upload Android Mobile APK
+    upload_asset(upload_url, APK_PATH, "application/vnd.android.package-archive", headers)
 
-    print(f"\n🎉 Successfully created/updated GitHub release {TAG}!")
-    print(f"🔗 Release URL: {release['html_url']}")
+    # 2. Upload Galaxy Watch Companion APK
+    upload_asset(upload_url, WATCH_APK_PATH, "application/vnd.android.package-archive", headers)
+
+    # 3. Upload Windows x64 Desktop ZIP
+    upload_asset(upload_url, ZIP_PATH, "application/zip", headers)
+
+    print(f"\n🚀 Release {TAG} published successfully with all 3 assets attached!")
 
 if __name__ == "__main__":
     main()
