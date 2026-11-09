@@ -433,44 +433,59 @@ public class MainActivity extends Activity implements MessageClient.OnMessageRec
 
         // Screen 2: Tasks & Exams
         String examDays = prefs.getString("exam_days", "📝 מועד א׳ בעוד 14 ימים");
-        if (examDays == null || examDays.contains("?") || examDays.equals("--") || examDays.trim().isEmpty()) {
+        if (examDays == null || isCorruptedText(examDays) || examDays.equals("--") || examDays.trim().isEmpty()) {
             examDays = "📝 מועד א׳ בעוד 14 ימים";
         }
         String examTitle = prefs.getString("exam_title", "104228 - מד״ח מ'");
-        if (examTitle == null || examTitle.contains("?") || examTitle.trim().isEmpty()) {
+        if (examTitle == null || isCorruptedText(examTitle) || examTitle.trim().isEmpty()) {
             examTitle = "104228 - מד״ח מ'";
         }
         adapter.examBannerTitle = examDays;
         adapter.examBannerSub = examTitle;
 
         List<WearCarouselAdapter.TaskItem> tasks = new ArrayList<>();
-        tasks.add(new WearCarouselAdapter.TaskItem(
-            "[מדח מ׳] תרגיל בית 1: משוואו...",
-            "⏳ מודל טכניון",
-            prefs.getBoolean("wear_task_1_done", false)
-        ));
-        tasks.add(new WearCarouselAdapter.TaskItem(
-            "[מדח מ׳] WebWork 1: מד״ח מ׳",
-            "⏳ מערכת WebWork",
-            prefs.getBoolean("wear_task_2_done", false)
-        ));
-        tasks.add(new WearCarouselAdapter.TaskItem(
-            "[פיסיקה 2] תרגיל בית 1: אלקט...",
-            "⏳ מודל טכניון",
-            prefs.getBoolean("wear_task_3_done", false)
-        ));
-        tasks.add(new WearCarouselAdapter.TaskItem(
-            "[פיסיקה 2] WebWork 1: פיסיק...",
-            "⏳ מערכת WebWork",
-            prefs.getBoolean("wear_task_4_done", false)
-        ));
-        tasks.add(new WearCarouselAdapter.TaskItem(
-            "[תרמו 1] תרגיל בית 1: חוק רא...",
-            "⏳ מודל טכניון",
-            prefs.getBoolean("wear_task_5_done", false)
-        ));
+        String allTasksJson = prefs.getString("all_tasks_json", "[]");
+        try {
+            JSONArray arr = new JSONArray(allTasksJson);
+            for (int i = 0; i < arr.length(); i++) {
+                JSONObject obj = arr.getJSONObject(i);
+                String course = obj.optString("course", "");
+                String title = obj.optString("title", "");
+                if (title.isEmpty() || isCorruptedText(title)) {
+                    continue;
+                }
+                String fullTitle = (!course.isEmpty() && !title.startsWith("[")) ? ("[" + course + "] " + title) : title;
+                String due = obj.optString("dueFormatted", obj.optString("due", "להגשה בקרוב"));
+                if (isCorruptedText(due)) due = "להגשה בקרוב";
+                boolean done = prefs.getBoolean("wear_task_" + (i + 1) + "_done", obj.optBoolean("completed", false));
+                tasks.add(new WearCarouselAdapter.TaskItem(fullTitle, "⏳ " + due, done));
+            }
+        } catch (Exception ignored) {}
+
+        if (tasks.isEmpty()) {
+            for (int i = 1; i <= 3; i++) {
+                String t = prefs.getString("task_" + i, "");
+                if (t != null && !t.trim().isEmpty() && !isCorruptedText(t)) {
+                    boolean done = prefs.getBoolean("wear_task_" + i + "_done", false);
+                    tasks.add(new WearCarouselAdapter.TaskItem(t, "⏳ מודל טכניון", done));
+                }
+            }
+        }
+
+        if (tasks.isEmpty()) {
+            tasks.add(new WearCarouselAdapter.TaskItem("[מדח מ׳] תרגיל בית 1: משוואות", "⏳ מודל טכניון", prefs.getBoolean("wear_task_1_done", false)));
+            tasks.add(new WearCarouselAdapter.TaskItem("[מדח מ׳] WebWork 1: מד״ח מ׳", "⏳ מערכת WebWork", prefs.getBoolean("wear_task_2_done", false)));
+            tasks.add(new WearCarouselAdapter.TaskItem("[פיסיקה 2] תרגיל בית 1: אלקטרו...", "⏳ מודל טכניון", prefs.getBoolean("wear_task_3_done", false)));
+            tasks.add(new WearCarouselAdapter.TaskItem("[פיסיקה 2] WebWork 1: פיסיק...", "⏳ מערכת WebWork", prefs.getBoolean("wear_task_4_done", false)));
+            tasks.add(new WearCarouselAdapter.TaskItem("[תרמו 1] תרגיל בית 1: חוק רא...", "⏳ מודל טכניון", prefs.getBoolean("wear_task_5_done", false)));
+        }
         adapter.tasksList = tasks;
 
         adapter.notifyDataSetChanged();
+    }
+
+    public static boolean isCorruptedText(String s) {
+        if (s == null || s.trim().isEmpty()) return false;
+        return s.contains("?") && !s.matches(".*[\\u0590-\\u05FF].*");
     }
 }

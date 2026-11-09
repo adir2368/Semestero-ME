@@ -4709,7 +4709,7 @@
             if (!url) return;
             let cleanUrl = String(url).trim();
             if (cleanUrl.includes('idofangbentov.uk')) {
-                cleanUrl = cleanUrl.replace(/%20/g, '-').replace(/\s+/g, '-');
+                cleanUrl = cleanUrl.replace(/%20/g, '-').replace(/\s+/g, '-').replace(/-+/g, '-');
             }
             try {
                 cleanUrl = encodeURI(decodeURI(cleanUrl));
@@ -4717,7 +4717,7 @@
 
             let targetExternalUrl = externalUrl || cleanUrl;
             if (targetExternalUrl.includes('idofangbentov.uk')) {
-                targetExternalUrl = targetExternalUrl.replace(/%20/g, '-').replace(/\s+/g, '-');
+                targetExternalUrl = targetExternalUrl.replace(/%20/g, '-').replace(/\s+/g, '-').replace(/-+/g, '-');
             }
             try {
                 targetExternalUrl = encodeURI(decodeURI(targetExternalUrl));
@@ -4730,12 +4730,18 @@
             const fallbackBtn = document.getElementById('pangea-fallback-btn');
             const loadingEl = document.getElementById('pangea-reader-loading');
 
-            if (!modal) {
-                if (window.openExternalUrlOrBrowser) {
+            const handleExtClick = function() {
+                if (window.SemesteroWidgetBridge && typeof window.SemesteroWidgetBridge.openExternalUrl === 'function') {
+                    window.SemesteroWidgetBridge.openExternalUrl(targetExternalUrl);
+                } else if (window.openExternalUrlOrBrowser) {
                     window.openExternalUrlOrBrowser(targetExternalUrl);
                 } else {
                     window.open(targetExternalUrl, '_blank', 'noopener,noreferrer');
                 }
+            };
+
+            if (!modal) {
+                handleExtClick();
                 return;
             }
 
@@ -4748,14 +4754,6 @@
             modal.style.zIndex = '2000000';
 
             if (titleEl) titleEl.innerText = title || 'סיכומי פנגייה (Ido Fang Bentov)';
-            
-            const handleExtClick = function() {
-                if (window.openExternalUrlOrBrowser) {
-                    window.openExternalUrlOrBrowser(targetExternalUrl);
-                } else {
-                    window.open(targetExternalUrl, '_blank', 'noopener,noreferrer');
-                }
-            };
 
             if (extBtn) extBtn.onclick = handleExtClick;
             if (fallbackBtn) fallbackBtn.onclick = handleExtClick;

@@ -457,7 +457,7 @@
                 startTime: meta.startTime,
                 week: this.getCurrentAcademicWeek(),
                 topic: pangeaChapter ? pangeaChapter.displayTitle : `${meta.type} שבוע ${this.getCurrentAcademicWeek()}`,
-                pangeaUrl: pangeaChapter ? pangeaChapter.url : null,
+                pangeaUrl: pangeaChapter ? (pangeaChapter.url ? pangeaChapter.url.replace(/%20/g, '-').replace(/\s+/g, '-').replace(/-+/g, '-') : null) : null,
                 pangeaTitle: pangeaChapter ? pangeaChapter.displayTitle : null,
                 panoptoUrl: panoptoUrl,
                 moodleUrl: directMoodleUrl,

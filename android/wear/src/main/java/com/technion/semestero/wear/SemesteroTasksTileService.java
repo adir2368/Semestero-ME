@@ -35,6 +35,34 @@ public class SemesteroTasksTileService extends TileService {
         boolean task2Done = prefs.getBoolean("wear_task_2_done", false);
         String summary = prefs.getString("tasks_summary", "");
 
+        // If task1 is empty or corrupted, dynamically extract from all_tasks_json
+        if (task1.isEmpty() || isCorrupted(task1)) {
+            String allTasks = prefs.getString("all_tasks_json", "[]");
+            try {
+                org.json.JSONArray arr = new org.json.JSONArray(allTasks);
+                if (arr.length() > 0) {
+                    org.json.JSONObject o1 = arr.getJSONObject(0);
+                    String c1 = o1.optString("course", "");
+                    String t1 = o1.optString("title", "");
+                    if (!isCorrupted(t1) && !t1.isEmpty()) {
+                        task1 = (!c1.isEmpty() && !t1.startsWith("[")) ? ("📌 [" + c1 + "] " + t1) : t1;
+                    }
+                }
+                if (arr.length() > 1) {
+                    org.json.JSONObject o2 = arr.getJSONObject(1);
+                    String c2 = o2.optString("course", "");
+                    String t2 = o2.optString("title", "");
+                    if (!isCorrupted(t2) && !t2.isEmpty()) {
+                        task2 = (!c2.isEmpty() && !t2.startsWith("[")) ? ("⚡ [" + c2 + "] " + t2) : t2;
+                    }
+                }
+            } catch (Exception ignored) {}
+        }
+
+        if (isCorrupted(task1)) task1 = "";
+        if (isCorrupted(task2)) task2 = "";
+        if (isCorrupted(summary) || summary.isEmpty()) summary = "סמסטרו ME";
+
         // Launch MainActivity on tap
         ActionBuilders.LaunchAction launchAction = new ActionBuilders.LaunchAction.Builder()
             .setAndroidActivity(
@@ -152,6 +180,11 @@ public class SemesteroTasksTileService extends TileService {
             .build();
 
         return Futures.immediateFuture(tile);
+    }
+
+    private static boolean isCorrupted(String s) {
+        if (s == null || s.trim().isEmpty()) return false;
+        return s.contains("?") && !s.matches(".*[\\u0590-\\u05FF].*");
     }
 
     private LayoutElementBuilders.LayoutElement createTaskRow(String text, int color) {

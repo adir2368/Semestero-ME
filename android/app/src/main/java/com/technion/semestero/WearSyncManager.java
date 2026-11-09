@@ -43,7 +43,7 @@ public class WearSyncManager {
             Calendar cal = Calendar.getInstance();
             int dayOfWeek = cal.get(Calendar.DAY_OF_WEEK);
             String dayName = (dayOfWeek >= 1 && dayOfWeek <= 7) ? HEBREW_DAYS[dayOfWeek] : "יום ראשון";
-            SimpleDateFormat sdf = new SimpleDateFormat("d 'ב'MMMM", new Locale("he", "IL"));
+            SimpleDateFormat sdf = new SimpleDateFormat("d בMMMM", new Locale("he", "IL"));
             String dateFormatted = sdf.format(cal.getTime());
 
             json.put("day_index", dayOfWeek - 1);
