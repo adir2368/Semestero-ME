@@ -18,7 +18,7 @@ with open(os.path.join(ROOT, "package.json"), "r", encoding="utf-8") as f:
     pkg = json.load(f)
 VERSION = pkg.get("version", "2.10.20")
 TAG = f"v{VERSION}"
-NAME = f"Semestero ME v{VERSION} - Cloud Sync CRDT Task Preservation, Weekly Slot Stability & Direct Panopto Routing (סנכרון ענן מלא, נעילת משימות וניתוב פנאופטו ישיר)"
+NAME = f"Semestero ME v{VERSION} - Universal Calendar Sync (RFC 5545), Past Exams Solved Tracker & Galaxy Watch Glance Tile (סנכרון יומן מלא, מעקב מוכנות למבחנים ו-Tile לשעון)"
 
 def get_github_token():
     try:
@@ -98,31 +98,26 @@ def main():
 
     body_notes = f"""# Semestero ME {TAG} Release Notes
 
-### ☁️ 1. סנכרון נוכחות והשלמות בענן (Bidirectional Attendance Cloud Sync)
-- **גשר נתונים מלא ל-Supabase (`gameState.attendance`)**: כל סימון נוכחות (נוכח/הוחסר), תור השלמות ושינוי מכסות נשמר כעת ישירות ב-`gameState.attendance` ומסונכרן אוטומטית לענן תוך 2.5 שניות.
-- **מיזוג דו-כיווני מאוחד (`loadFromGameState`)**: כניסה מאפליקציית הטלפון או מהמחשב ממזגת ומעדכנת את רשומות הנוכחות בזמן אמת (Realtime & On-Demand) ללא איבוד מידע.
+### 📅 1. מנוע סנכרון יומן אוניברסלי (Universal RFC 5545 Calendar Engine)
+- **לוח שנה אקדמי מאוחד ומלא (`calendar_sync_engine.js`)**: יצירת קובץ `.ics` סטנדרטי בלחיצה אחת הכולל את מערכת השעות השבועית (אירועים חוזרים `RRULE:FREQ=WEEKLY` עם מספרי כיתות והתראות 15 דק' לפני), מועדי הגשות מודל (התראות כפולות 24 שעות ושעתיים לפני), ומועדי מבחנים סופיים (מועד א' ו-ב' עם התראה יום מראש).
+- **הורדה ושיתוף ישיר**: תמיכה מלאה בהורדה ישירה ובשיתוף קלנדרי מובנה ב-Android Capacitor באמצעות `navigator.share` לייבוא מיידי ל-Google Calendar, ל-Samsung Calendar ול-Apple Calendar.
 
-### 🛡️ 2. נעילת השלמת משימות מונוטונית (CRDT Monotonic Task Completion Preservation)
-- **מניעת חזרת משימות שהושלמו ("משימות שחוזרות אחרי השלמה")**: מנגנון `mergeCoursesPreservingTaskCompletion` מבטיח שמשימה שסומנה כהושלמה במכשיר אחד (`completed: true`, `status: 'done'`) לעולם לא תידרס או תבוטל על ידי סנכרון ישן ממכשיר אחר.
-- **הסרת חסימות אישור מיותרות**: `toggleTaskStatusInState` מאפשר כעת סימון ישיר וחלק של משימות בלחיצה אחת מכל תצוגה (טבלה, לוח שנה, מעקב שיעורי בית).
+### 🎯 2. מעקב פתרון מבחני עבר וטבעת מוכנות לבחינה (Exam Readiness Hub)
+- **טבלת מעקב מועדים אינטראקטיבית ל-5 השנים האחרונות (2021–2026)**: מעקב חורף/אביב מועד א' ו-ב' עם סטטוס תלת-מצבי (`⬜ לא נפתר` ➔ `⏳ נוסה בתרגול` ➔ `✅ פתור ונשלט`) ויומן ציונים עצמי.
+- **טבעת מוכנות מעוצבת ודינמית (Circular SVG Progress Ring)**: חישוב אחוז מוכנות משוקלל בזמן אמת עם מעברי צבעים חלקים (ירוק מעל 75%, צהוב/כתום מעל 45%).
+- **קישור ישיר משולש**: גישה מיידית בלחיצה אחת מכל שורת מבחן לסיכומי פנגייה (`PangeaHub.openQuickPeek`), לדרייב הפקולטה ולמודל הקורס.
+- **סנכרון ענן מלא**: נתוני ההכנה למבחנים נשמרים ב-`gameState.examPrep` ומסונכרנים אוטומטית לענן דרך `auth_sync.js`.
 
-### 📅 3. ייצוב מפתחות תאריכים שבועיים בלוח השעות (`getCanonicalDateForWeekDay`)
-- **מפתחות משבצת דטרמיניסטיים**: `AttendanceHub.makeSlotKey` מחשב כעת את התאריך הקלנדרי המדויק של היום בשבוע האקדמי הפעיל (יום ראשון תמיד מקבל את תאריך יום ראשון של השבוע הפעיל).
-- סימון נוכחות ביום ראשון נשאר יציב ומוצג לאורך כל השבוע, ללא קשר ליום בו הסטודנט פותח את האפליקציה.
+### ⌚ 3. ווידג'ט Glance Tile לשעון Galaxy Watch 8 וגילוי Complication משופר
+- **Tile ייעודי למשימות והגשות (`SemesteroTasksTileService`)**: תצוגת משימות קרובות והגשות ב-48 השעות הבאות ישירות בהחלקת מסך בשעון, עם אפשרות מעבר ישיר ללוח המשימות.
+- **תמיכה מלאה ב-One UI Watch 6.0**: רישום כפול של `androidx.wear.watchface.complications` ו-`android.support.wearable.complications` לגילוי מיידי של ה-Complication בבוחר מסכי השעון.
 
-### 🎬 4. ניתוב ישיר להקלטות פנאופטו ודפי קורס במודל 26
-- **פנאופטו טכניוני ישיר**: כפתור `🎬 פנאופטו (הקלטות) ↗` בתור ההשלמות מנווט ישירות להקלטות הקורס ב-`https://panopto.technion.ac.il/Panopto/Pages/Sessions/List.aspx#query=...`.
-- **כפתור מודל 26 ייעודי**: קישור ישיר לדף הקורס הספציפי במודל 26 (`moodle26.technion.ac.il/course/view.php?id=...`).
-
-### 📖 5. נרמול קישורי פנגייה ומניעת שגיאות 404
-- פונקציית `PangeaHub.openQuickPeek` ממירה כעת באופן אוטונומי רווחים (`%20`) למקפים (`-`) בכתובות סיכומי פנגייה (`idofangbentov.uk`), ומפעילה קידוד URI תקין לאותיות עבריות.
-
-### 📦 6. קובצי הפצה ועדכון:
-- `Semestero-ME.apk` (Android Native App `versionCode 74`, `versionName 2.10.20`)
-- `Semestero-ME-Watch.apk` (Wear OS Companion `versionCode 74`, `versionName 2.10.20`)
-- `Semestero-ME-Windows-x64.zip` (Electron Desktop Client v2.10.20)
-- כל 20 חבילות בדיקות הרגרסיה של המערכת עברו בהצלחה מלאה (20 passed, 0 failed).
-- תיעוד ארכיטקטוני מלא: [[02_Architecture_ADR/ADR-093-Cloud-Sync-CRDT-Task-Preservation-and-Panopto-Direct-Routing|ADR-093]] נרשם ב-Obsidian Second Brain.
+### 📦 4. קובצי הפצה ועדכון:
+- `Semestero-ME.apk` (Android Native App `versionCode 75`, `versionName 2.10.21`)
+- `Semestero-ME-Watch.apk` (Wear OS Companion `versionCode 75`, `versionName 2.10.21`)
+- `Semestero-ME-Windows-x64.zip` (Electron Desktop Client v2.10.21)
+- כל 21 חבילות בדיקות הרגרסיה של המערכת עברו בהצלחה מלאה (21 passed, 0 failed).
+- תיעוד ארכיטקטוני מלא: [[02_Architecture_ADR/ADR-094-Universal-Calendar-Sync-Past-Exams-Readiness-Ring-and-WearOS-Tasks-Tile|ADR-094]] נרשם ב-Obsidian Second Brain.
 """
 
     req_tag = urllib.request.Request(f"https://api.github.com/repos/{REPO}/releases/tags/{TAG}", headers=headers)

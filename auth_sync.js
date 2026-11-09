@@ -2711,6 +2711,10 @@
                                 if (remoteState.attendance && window.AttendanceHub && typeof window.AttendanceHub.loadFromGameState === 'function') {
                                     window.AttendanceHub.loadFromGameState(remoteState.attendance);
                                 }
+                                // Sync Exam Readiness & Past Exams bidirectionally if remote carries it
+                                if (remoteState.examPrep && window.ExamReadinessHub && typeof window.ExamReadinessHub.loadFromGameState === 'function') {
+                                    window.ExamReadinessHub.loadFromGameState(remoteState.examPrep);
+                                }
 
                                 const mergedRemoteJson = JSON.stringify(remoteState);
                                 if (localRaw !== mergedRemoteJson) {
@@ -2831,6 +2835,10 @@
                     // Sync Attendance bidirectionally if remote carries it
                     if (remoteState.attendance && window.AttendanceHub && typeof window.AttendanceHub.loadFromGameState === 'function') {
                         window.AttendanceHub.loadFromGameState(remoteState.attendance);
+                    }
+                    // Sync Exam Readiness & Past Exams bidirectionally if remote carries it
+                    if (remoteState.examPrep && window.ExamReadinessHub && typeof window.ExamReadinessHub.loadFromGameState === 'function') {
+                        window.ExamReadinessHub.loadFromGameState(remoteState.examPrep);
                     }
 
                     // Adopt remote state
@@ -2964,6 +2972,11 @@
                     quotas: window.AttendanceHub.quotas || {},
                     updatedAt: Date.now()
                 };
+            }
+
+            // Ensure Exam Prep state is packaged into cloud payload
+            if (window.gameState && window.gameState.examPrep) {
+                state.examPrep = window.gameState.examPrep;
             }
 
             if (!supabaseClient) return;

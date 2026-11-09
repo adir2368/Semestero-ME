@@ -5850,7 +5850,8 @@
     "academicGrades": false
   },
   "hasLoadedGoogleCalendarAugust": true,
-  "hasLoadedGoogleCalendarAugustV3": true
+  "hasLoadedGoogleCalendarAugustV3": true,
+  "examPrep": {}
 };
 
     if (typeof window !== 'undefined') {

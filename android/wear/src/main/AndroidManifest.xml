@@ -46,6 +46,19 @@
             </intent-filter>
         </service>
 
+        <!-- Galaxy Watch 8 Tile Service (Tasks & Homework Due) -->
+        <service
+            android:name=".SemesteroTasksTileService"
+            android:icon="@mipmap/ic_launcher"
+            android:label="@string/tile_tasks_label"
+            android:description="@string/tile_tasks_desc"
+            android:permission="com.google.android.wearable.permission.BIND_TILE_PROVIDER"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="androidx.wear.tiles.action.BIND_TILE_PROVIDER" />
+            </intent-filter>
+        </service>
+
         <!-- Watch Face Complication Service (Corner / Quadrant / Dial Complication) -->
         <service
             android:name=".SemesteroComplicationService"
@@ -56,6 +69,7 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="android.support.wearable.complications.ACTION_COMPLICATION_UPDATE_REQUEST" />
+                <action android:name="androidx.wear.watchface.complications.datasource.action.ComplicationDataSourceService" />
             </intent-filter>
             <meta-data
                 android:name="android.support.wearable.complications.SUPPORTED_TYPES"

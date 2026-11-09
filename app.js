@@ -1900,6 +1900,9 @@ window.setGlobalGameState = function(newState) {
     if (window.AttendanceHub && newState && newState.attendance) {
         window.AttendanceHub.loadFromGameState(newState.attendance);
     }
+    if (window.ExamReadinessHub && newState && newState.examPrep) {
+        window.ExamReadinessHub.loadFromGameState(newState.examPrep);
+    }
 };
 window.getGlobalGameState = function() {
     return gameState;
@@ -14486,6 +14489,12 @@ function openCourseDetails(code) {
         window.PangeaHub.renderCoursePangeaSection(course.code, pangeaContainer);
     }
 
+    // Render Past Exams Solved Tracker & Exam Readiness Ring
+    const readinessContainer = document.getElementById("modal-exam-readiness-container");
+    if (readinessContainer && window.ExamReadinessHub) {
+        window.ExamReadinessHub.renderExamReadinessCard(course.code, readinessContainer);
+    }
+
     const cfContainer = document.getElementById("modal-cheesefork-container");
     if (cfContainer) {
         cfContainer.innerHTML = "";
@@ -23525,7 +23534,7 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.11.09-v2.10.20",
+    code: "REV-2026.11.09-v2.10.21",
     version: "2.10.20",
     build: "20261109_01",
     date: "2026-11-09 01:45",

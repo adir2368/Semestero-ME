@@ -865,6 +865,67 @@ async function run() {
             assert(result.isTaskCompletedDirectly, 'toggleTaskStatusInState must complete tasks smoothly without blocking');
         });
 
+        // Test 21: Universal Calendar Sync Engine (RFC 5545), Exam Readiness Ring & Past Exams Tracker (v2.10.21)
+        await test('Universal Calendar Sync Engine (RFC 5545), Past Exams Tracker & Exam Readiness Ring', async () => {
+            const result = await cdp.eval(`(() => {
+                const cal = window.CalendarSyncEngine;
+                const exam = window.ExamReadinessHub;
+                if (!cal || !exam) return { success: false, reason: 'Engine or Hub missing' };
+
+                // 1. Calendar Engine RFC 5545 test
+                const icsResult = cal.generateUnifiedICS({ includeTimetable: true, includeTasks: true, includeExams: true });
+                const hasVCalendar = icsResult.icsString.includes('BEGIN:VCALENDAR') && icsResult.icsString.includes('END:VCALENDAR');
+                const hasRRule = icsResult.icsString.includes('RRULE:FREQ=WEEKLY');
+                const hasAlarm = icsResult.icsString.includes('BEGIN:VALARM');
+                const hasTotalCount = icsResult.totalCount > 0;
+
+                // 2. Exam Readiness Hub calculation test
+                const stats0 = exam.calculateReadiness('034010');
+                const prep = exam.getCourseExamPrep('034010');
+                const hasExamsList = prep && Array.isArray(prep.exams) && prep.exams.length >= 10;
+                
+                // Toggle one exam to mastered
+                const firstExam = prep.exams[0];
+                firstExam.status = 'mastered';
+                firstExam.score = 90;
+                const stats1 = exam.calculateReadiness('034010');
+                const isReadinessIncreased = stats1.readinessPct > 0 && stats1.mastered === 1;
+
+                // Test Card Rendering
+                let container = document.getElementById('modal-exam-readiness-container');
+                if (!container) {
+                    container = document.createElement('div');
+                    container.id = 'modal-exam-readiness-container';
+                    document.body.appendChild(container);
+                }
+                exam.renderExamReadinessCard('034010', container);
+                const hasCardRendered = container.innerHTML.includes('מדד מוכנות למבחן סופי') && (container.innerHTML.includes('מועדים נשלטו') || container.innerHTML.includes('🎯'));
+
+                // 3. Cloud Sync Integration test
+                const hasExamPrepInState = !!window.gameState.examPrep && !!window.gameState.examPrep['034010'];
+
+                return {
+                    hasVCalendar,
+                    hasRRule,
+                    hasAlarm,
+                    hasTotalCount,
+                    hasExamsList,
+                    isReadinessIncreased,
+                    hasCardRendered,
+                    hasExamPrepInState
+                };
+            })()`);
+
+            assert(result.hasVCalendar, 'CalendarSyncEngine must produce standard BEGIN:VCALENDAR and END:VCALENDAR');
+            assert(result.hasRRule, 'CalendarSyncEngine must produce recurring weekly classes with RRULE:FREQ=WEEKLY');
+            assert(result.hasAlarm, 'CalendarSyncEngine must embed VALARM display triggers');
+            assert(result.hasTotalCount, 'CalendarSyncEngine must detect active classes/tasks/exams');
+            assert(result.hasExamsList, 'ExamReadinessHub must generate default 5-year past moeds checklist');
+            assert(result.isReadinessIncreased, 'Mastering an exam must immediately elevate the readiness percentage');
+            assert(result.hasCardRendered, 'ExamReadinessHub must render the circular SVG gauge and moeds table');
+            assert(result.hasExamPrepInState, 'gameState.examPrep must persist course exam prep state for cloud sync');
+        });
+
     } finally {
         console.log(`\n========================================================================`);
         console.log(`SUMMARY: ${passed} passed, ${failed} failed.`);

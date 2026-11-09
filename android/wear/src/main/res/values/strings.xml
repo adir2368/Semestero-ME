@@ -3,6 +3,8 @@
     <string name="app_name">Semestero ME Watch</string>
     <string name="tile_class_label">שיעור קרוב - סמסטרו</string>
     <string name="tile_class_desc">לוח השיעורים הקרוב, מיקום חדר וספירה לאחור לשעון Galaxy Watch 8</string>
+    <string name="tile_tasks_label">משימות והגשות - סמסטרו</string>
+    <string name="tile_tasks_desc">הצגת מטלות הגשה ותרגילים ב-48 השעות הקרובות לשעון Galaxy Watch 8</string>
     <string name="no_classes_today">אין שיעורים קרובים היום</string>
     <string name="free_day_msg">יום חופשי או שהסתיימו הלימודים 🎉</string>
     <string name="complication_label">סמסטרו ME • שיעור קרוב</string>
