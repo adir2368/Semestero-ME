@@ -473,6 +473,16 @@
             }
         },
 
+        clearAllInsights() {
+            this.state.detectedItems = [];
+            this.persistState();
+            this.renderFeed();
+            this.updateRadarBadge();
+            if (typeof window.showNotification === 'function') {
+                window.showNotification('🗑️ כל העדכונים נוקו בהצלחה.', 'info');
+            }
+        },
+
         syncToGalaxyWatch() {
             try {
                 if (window.WearSyncManager && typeof window.WearSyncManager.syncTasksAndSchedule === 'function') {
