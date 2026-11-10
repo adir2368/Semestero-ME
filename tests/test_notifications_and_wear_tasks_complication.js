@@ -68,6 +68,21 @@ assert.strictEqual(
     true,
     'Complication tap intent must target MainActivity Tasks tab'
 );
+assert.strictEqual(
+    tasksServiceContent.includes('setMonochromaticImage'),
+    false,
+    'SemesteroTasksComplicationService must NOT include icons/symbols to prevent dial clutter'
+);
+assert.strictEqual(
+    tasksServiceContent.includes('setTitle'),
+    false,
+    'SemesteroTasksComplicationService must NOT include extra title lines to prevent dial clutter'
+);
+assert.strictEqual(
+    tasksServiceContent.includes('"אין משימות פתוחות"') && tasksServiceContent.includes(' משימות פתוחות"'),
+    true,
+    'SemesteroTasksComplicationService must strictly format "X משימות פתוחות" or "אין משימות פתוחות"'
+);
 console.log('   ✓ PASS: SemesteroTasksComplicationService Java implementation verified.');
 
 // -------------------------------------------------------------
