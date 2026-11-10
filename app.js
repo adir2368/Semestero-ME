@@ -23599,13 +23599,48 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.11.10-v2.10.33",
-    version: "2.10.31",
-    build: "20261110_03",
-    date: "2026-11-10 14:10",
-    description: "v2.10.33: רדאר מיילים והודעות אקדמיות (Outlook & Moodle): זיהוי אוטומטי של שינויי כיתות, שעות ומועדי הגשה, עדכון 1-Tap במערכת השעות ובלוח המשימות (ADR-104)."
+    code: "REV-2026.11.10-v2.11.0",
+    version: "2.11.0",
+    build: "20261110_05",
+    date: "2026-11-10 21:30",
+    description: "v2.11.0: ארכיטקטורת עדכונים חסינת כשל (Auto-Update Engine 2.0), רישום Service Worker חסין מטמון (updateViaCache: none), סנכרון גרסאות דינמי ואוטומטי מול GitHub ו-Production, ושדרוג מערכת שעות ומשימות (ADR-106)."
 };
 window.APP_VERSION = APP_CURRENT_REVISION.version;
+
+function syncApplicationVersionDOM() {
+    const ver = APP_CURRENT_REVISION.version;
+    const code = APP_CURRENT_REVISION.code;
+    window.APP_VERSION = ver;
+
+    const displayVersion = document.getElementById("display-system-version");
+    if (displayVersion) displayVersion.textContent = `v${ver} (${code})`;
+
+    const footerBadge = document.getElementById("footer-version-badge");
+    if (footerBadge && !footerBadge.classList.contains("has-update")) {
+        footerBadge.innerText = `v${ver} ✨`;
+        footerBadge.title = `לחץ לבדיקת עדכוני גרסה (v${ver})`;
+    }
+
+    const appVerBadges = document.querySelectorAll(".app-version-badge");
+    appVerBadges.forEach(b => {
+        if (b.id !== "footer-version-badge") {
+            if (b.textContent.includes("פעילה")) {
+                b.textContent = `v${ver} פעילה`;
+            } else if (b.textContent.includes("גרסה אחרונה")) {
+                b.textContent = `גרסה אחרונה v${ver}`;
+            }
+        }
+    });
+
+    const updateModalVer = document.getElementById("update-modal-version-text");
+    if (updateModalVer && updateModalVer.textContent.includes("העדכנית ביותר")) {
+        updateModalVer.textContent = `גרסה v${ver} (העדכנית ביותר) ✓`;
+    }
+}
+try { syncApplicationVersionDOM(); } catch (e) {}
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => { try { syncApplicationVersionDOM(); } catch (e) {} });
+}
 
 function ensureBaselineRevisions() {
     if (!gameState.revisions || !Array.isArray(gameState.revisions) || gameState.revisions.length === 0) {
@@ -25196,11 +25231,31 @@ function compareSemver(v1, v2) {
     return 0;
 }
 
-// Zero-Lag Multi-Tier Remote Version Resolver (Bypasses Fastly raw CDN caching)
+// Zero-Lag Multi-Tier Remote Version Resolver (Bypasses CDN and Proxy Caches)
 async function fetchLatestRemoteVersion() {
     const candidates = [];
 
-    // Priority 1: GitHub Contents API for package.json on main (Authoritative live deployed code)
+    // Priority 1: Direct Origin package.json (Live deployed code on hosting server - zero rate limits)
+    try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 3000);
+        const resp = await fetch(`./package.json?_nc=${Date.now()}`, {
+            cache: 'no-store',
+            signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+        if (resp.ok) {
+            const pkg = await resp.json();
+            if (pkg && pkg.version) {
+                const ver = pkg.version.trim();
+                candidates.push({ version: ver, notes: pkg.description || '', source: 'origin_pkg' });
+            }
+        }
+    } catch (e) {
+        console.warn('[VersionCheck] Origin package.json error:', e);
+    }
+
+    // Priority 2: GitHub Contents API for package.json on main
     try {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 4000);
@@ -25221,47 +25276,7 @@ async function fetchLatestRemoteVersion() {
         console.warn('[VersionCheck] GitHub Contents API error:', e);
     }
 
-    // Priority 2: raw.githubusercontent.com fallback for package.json
-    try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 4000);
-        const resp = await fetch(`https://raw.githubusercontent.com/adir2368/Semestero-ME/main/package.json?_nc=${Date.now()}`, {
-            cache: 'no-store',
-            signal: controller.signal
-        });
-        clearTimeout(timeoutId);
-        if (resp.ok) {
-            const pkg = await resp.json();
-            if (pkg && pkg.version) {
-                const ver = pkg.version.trim();
-                candidates.push({ version: ver, notes: pkg.description || '', source: 'github_raw' });
-            }
-        }
-    } catch (e) {
-        console.warn('[VersionCheck] GitHub Raw fallback error:', e);
-    }
-
-    // Priority 3: Local / Origin package.json
-    try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 3000);
-        const resp = await fetch(`./package.json?_nc=${Date.now()}`, {
-            cache: 'no-store',
-            signal: controller.signal
-        });
-        clearTimeout(timeoutId);
-        if (resp.ok) {
-            const pkg = await resp.json();
-            if (pkg && pkg.version) {
-                const ver = pkg.version.trim();
-                candidates.push({ version: ver, notes: pkg.description || '', source: 'origin_pkg' });
-            }
-        }
-    } catch (e) {
-        console.warn('[VersionCheck] Origin package.json error:', e);
-    }
-
-    // Priority 4: GitHub Releases API
+    // Priority 3: GitHub Releases API
     try {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 3500);
@@ -25282,6 +25297,26 @@ async function fetchLatestRemoteVersion() {
         }
     } catch (e) {
         console.warn('[VersionCheck] GitHub Releases error:', e);
+    }
+
+    // Priority 4: raw.githubusercontent.com fallback for package.json
+    try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 4000);
+        const resp = await fetch(`https://raw.githubusercontent.com/adir2368/Semestero-ME/main/package.json?_nc=${Date.now()}`, {
+            cache: 'no-store',
+            signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+        if (resp.ok) {
+            const pkg = await resp.json();
+            if (pkg && pkg.version) {
+                const ver = pkg.version.trim();
+                candidates.push({ version: ver, notes: pkg.description || '', source: 'github_raw' });
+            }
+        }
+    } catch (e) {
+        console.warn('[VersionCheck] GitHub Raw fallback error:', e);
     }
 
     if (candidates.length === 0) return null;
@@ -25427,10 +25462,9 @@ window.checkRemoteAppVersion = async function(isManualCheck = false) {
                 const autoUpdateKey = `semestero_auto_updated_to_${remoteVer}`;
                 const lastAutoReloadTs = Number(localStorage.getItem('semestero_last_auto_update_ts') || 0);
                 const timeSinceLastAutoReload = Date.now() - lastAutoReloadTs;
-                const alreadyUpdatedForVersion = localStorage.getItem(autoUpdateKey) || sessionStorage.getItem(autoUpdateKey);
 
-                if (alreadyUpdatedForVersion || timeSinceLastAutoReload < 10 * 60 * 1000) {
-                    console.warn(`[AutoUpdate] Loop guard active for v${remoteVer}. Suppressing auto-reload.`);
+                if (timeSinceLastAutoReload < 15000) {
+                    console.warn(`[AutoUpdate] Loop guard active for v${remoteVer}. Suppressing rapid auto-reload.`);
                     return;
                 }
 
@@ -25450,10 +25484,15 @@ window.checkRemoteAppVersion = async function(isManualCheck = false) {
                     } else {
                         window.location.reload(true);
                     }
-                }, 1400);
+                }, 1000);
             }
         } else {
             // Truly up to date
+            try {
+                Object.keys(localStorage).forEach(k => {
+                    if (k.startsWith('semestero_auto_updated_to_')) localStorage.removeItem(k);
+                });
+            } catch (e) {}
             const existingPill = document.getElementById('mobile-apk-update-pill');
             if (existingPill) existingPill.remove();
 
@@ -25520,14 +25559,17 @@ window.forceAppUpdate = async function() {
         updateModal.classList.remove("active");
     }
 
-    // Record reload timestamp so post-reload auto-check is throttled
+    // Clean update flags
     try {
-        localStorage.setItem('semestero_last_auto_update_ts', String(Date.now()));
-    } catch (e) {}
-
-    try {
+        localStorage.removeItem('semestero_last_auto_update_ts');
         sessionStorage.removeItem("dismissed_update");
         localStorage.removeItem("semestero_dismissed_update");
+        Object.keys(localStorage).forEach(k => {
+            if (k.startsWith('semestero_auto_updated_to_')) localStorage.removeItem(k);
+        });
+        Object.keys(sessionStorage).forEach(k => {
+            if (k.startsWith('semestero_auto_updated_to_')) sessionStorage.removeItem(k);
+        });
     } catch (e) {}
 
     try {

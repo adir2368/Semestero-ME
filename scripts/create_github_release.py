@@ -18,7 +18,7 @@ with open(os.path.join(ROOT, "package.json"), "r", encoding="utf-8") as f:
     pkg = json.load(f)
 VERSION = pkg.get("version", "2.10.22")
 TAG = f"v{VERSION}"
-NAME = f"Semestero ME v{VERSION} - Outlook & Email Intelligence Hub (קריאת מיילים מאוטלוק, זיהוי משימות, דחיות הגשה ושינויי כיתות)"
+NAME = f"Semestero ME v{VERSION} - Auto-Update Engine 2.0 (מנוע עדכונים חסין כשל, רישום Service Worker ללא מטמון, סנכרון גרסאות דינמי ומניעת היעלמות משימות)"
 
 def get_github_token():
     try:
