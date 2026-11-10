@@ -114,9 +114,9 @@ def main():
   * ⌚ **סנכרון לשעון Galaxy Watch**: דחיפת העדכונים ישירות ל-Tile ול-Complication בשעון.
 
 ### 📦 2. קובצי הפצה ועדכון:
-- `Semestero-ME.apk` (Android Native App `versionCode 86`, `versionName 2.10.32`)
-- `Semestero-ME-Watch.apk` (Wear OS Companion `versionCode 86`, `versionName 2.10.32`)
-- `Semestero-ME-Windows-x64.zip` (Electron Desktop Client v2.10.32)
+- `Semestero-ME.apk` (Android Native App `versionCode 87`, `versionName 2.10.33`)
+- `Semestero-ME-Watch.apk` (Wear OS Companion `versionCode 87`, `versionName 2.10.33`)
+- `Semestero-ME-Windows-x64.zip` (Electron Desktop Client v2.10.33)
 - כל 23 חבילות בדיקות הרגרסיה של המערכת עברו בהצלחה מלאה (23 passed, 0 failed).
 - תיעוד ארכיטקטוני מלא: [[02_Architecture_ADR/ADR-104-Academic-Email-Intelligence-Hub-Outlook-Moodle-NLP-And-Schedule-Overrides|ADR-104]] נרשם ב-Obsidian Second Brain.
 """

@@ -16583,9 +16583,8 @@ function populateNotionCourseFilter() {
     if (courseFilterBody) {
         courseFilterBody.innerHTML = '';
         const activeCourses = Object.values(gameState.courses).filter(c => {
-            const hasManual = c.tasks && c.tasks.some(t => t.source === 'manual' || (t.id && String(t.id).startsWith('task-')));
-            const hasPending = c.tasks && c.tasks.some(t => !t.completed && t.status !== 'done' && t.status !== 'submitted');
-            return c.status === 'active' || hasManual || hasPending;
+            const hasTasks = Array.isArray(c.tasks) && c.tasks.length > 0;
+            return c.status === 'active' || hasTasks;
         });
         activeCourses.forEach(course => {
             const shortName = (typeof COURSE_SHORT_NAMES !== 'undefined' && COURSE_SHORT_NAMES[course.code]) || course.name;
@@ -16651,13 +16650,23 @@ function setupOrganitCategoryPills() {
 
     container.querySelectorAll(".organit-pill").forEach(pill => {
         pill.addEventListener("click", () => {
+            const isCurrentlyActive = pill.classList.contains("active");
             container.querySelectorAll(".organit-pill").forEach(p => {
                 p.classList.remove("active");
                 p.setAttribute("aria-selected", "false");
             });
-            pill.classList.add("active");
-            pill.setAttribute("aria-selected", "true");
-            window.activeOrganitCategory = pill.dataset.category || 'all';
+            if (isCurrentlyActive && pill.dataset.category !== 'all') {
+                const allPill = container.querySelector('[data-category="all"]');
+                if (allPill) {
+                    allPill.classList.add("active");
+                    allPill.setAttribute("aria-selected", "true");
+                }
+                window.activeOrganitCategory = 'all';
+            } else {
+                pill.classList.add("active");
+                pill.setAttribute("aria-selected", "true");
+                window.activeOrganitCategory = pill.dataset.category || 'all';
+            }
             renderNotionTasksTable();
         });
     });
@@ -17240,6 +17249,22 @@ function renderNotionTasksTable() {
     const activeSemesterFilters = (typeof getActiveSemesterFilters === 'function') ? getActiveSemesterFilters() : null;
     const activeCourseFilters = (typeof getActiveCourseFilters === 'function') ? getActiveCourseFilters() : null;
     const searchInput = document.getElementById("search-tasks");
+    const clearSearchBtn = document.getElementById("btn-clear-task-search");
+    if (searchInput) {
+        // Sanitize: If search input was autofilled with an email by browser, clear it immediately
+        if (/@/i.test(searchInput.value) || /technion\.ac\.il/i.test(searchInput.value)) {
+            searchInput.value = '';
+        }
+        if (clearSearchBtn) {
+            clearSearchBtn.style.display = searchInput.value ? 'block' : 'none';
+            clearSearchBtn.onclick = (e) => {
+                e.stopPropagation();
+                searchInput.value = '';
+                clearSearchBtn.style.display = 'none';
+                renderNotionTasksTable();
+            };
+        }
+    }
     const searchQuery = (searchInput && searchInput.value) ? String(searchInput.value).trim().toLowerCase() : "";
     
     let allTasks = [];
@@ -17257,24 +17282,26 @@ function renderNotionTasksTable() {
         // Semester Multi-select Filter
         const cSem = course.semester || 1;
         const isCourseActiveNow = (course.status === 'active');
-        const hasPendingTasks = course.tasks && course.tasks.some(t => !t.completed && t.status !== 'done' && t.status !== 'submitted');
+        const hasTasks = Array.isArray(course.tasks) && course.tasks.length > 0;
 
         if (activeSemesterFilters) {
-            const matchesSem = activeSemesterFilters.has(cSem) || 
-                               (isCourseActiveNow && activeSemesterFilters.has(curActiveSem)) ||
-                               (hasPendingTasks && activeSemesterFilters.has(curActiveSem));
-            if (!matchesSem) return;
-        } else if (semesterFilter === 'active') {
-            if (cSem < curActiveSem && course.status === 'mastered' && !hasPendingTasks) {
-                return; // Hide past completed semesters only if no pending tasks remain
+            if (activeSemesterFilters.size > 0 && activeSemesterFilters.size < 6) {
+                const matchesSem = activeSemesterFilters.has(cSem) || 
+                                   (isCourseActiveNow && activeSemesterFilters.has(curActiveSem)) ||
+                                   (hasTasks && activeSemesterFilters.has(curActiveSem));
+                if (!matchesSem) return;
             }
-            if (cSem > curActiveSem && course.status !== 'active' && course.status !== 'available' && !hasPendingTasks) {
-                return; // Hide future semesters unless active, available, or has pending tasks
+        } else if (semesterFilter === 'active') {
+            if (cSem < curActiveSem && course.status === 'mastered' && !hasTasks) {
+                return; // Hide past completed semesters only if no tasks exist
+            }
+            if (cSem > curActiveSem && course.status !== 'active' && course.status !== 'available' && !hasTasks) {
+                return; // Hide future semesters unless active, available, or has tasks
             }
         } else if (semesterFilter !== 'all') {
             const matchesSem = (String(cSem) === String(semesterFilter)) || 
                                (isCourseActiveNow && String(curActiveSem) === String(semesterFilter)) ||
-                               (hasPendingTasks && String(curActiveSem) === String(semesterFilter));
+                               (hasTasks && String(curActiveSem) === String(semesterFilter));
             if (!matchesSem) return;
         }
 
@@ -17344,6 +17371,23 @@ function renderNotionTasksTable() {
     // Sequential Task Gating ("Next-Action Focus" / משימה רלוונטית בלבד)
     const focusBtn = document.getElementById("notion-focus-toggle-btn");
     const isFocusMode = focusBtn ? focusBtn.classList.contains("active") : (localStorage.getItem("semestero_notion_focus_mode") === "true");
+    
+    // Manage Focus Mode Active Banner
+    const focusBanner = document.getElementById("notion-focus-mode-banner");
+    if (focusBanner) {
+        focusBanner.style.display = (isFocusMode && !searchQuery) ? 'flex' : 'none';
+        const disableBtn = document.getElementById("btn-disable-focus-mode");
+        if (disableBtn) {
+            disableBtn.onclick = () => {
+                if (focusBtn) focusBtn.classList.remove("active");
+                localStorage.setItem("semestero_notion_focus_mode", "false");
+                renderNotionTasksTable();
+                if (typeof showToastNotification === 'function') {
+                    showToastNotification("🎯 מצב מיקוד בוטל - כל המשימות מוצגות!", "info");
+                }
+            };
+        }
+    }
     if (isFocusMode && !searchQuery) {
         const uncompletedSeqSeen = new Set();
         allTasks.sort((a, b) => a.dueTime - b.dueTime);
@@ -17383,7 +17427,17 @@ function renderNotionTasksTable() {
     
     // Render rows
     if (allTasks.length === 0) {
-        tableBody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 30px;">לא נמצאו משימות מתאימות.</td></tr>`;
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 40px 20px;">
+                    <div style="font-size: 1.15rem; font-weight: 700; color: #cbd5e1; margin-bottom: 8px;">📭 לא נמצאו משימות לפי הסינון הנוכחי</div>
+                    <div style="font-size: 0.86rem; color: #64748b; margin-bottom: 16px;">מסנני סמסטר, סטטוס, סוג, קורס או חיפוש מסתירים משימות קיימות.</div>
+                    <button type="button" class="btn btn-primary btn-sm" onclick="window.resetAllNotionFilters()" style="background: #0284c7; border: none; padding: 8px 18px; border-radius: 6px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);">
+                        <span>🔄</span> <span>אפס את כל הסינונים והצג את כל המשימות</span>
+                    </button>
+                </td>
+            </tr>
+        `;
         return;
     }
     
@@ -23545,11 +23599,11 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.11.10-v2.10.32",
+    code: "REV-2026.11.10-v2.10.33",
     version: "2.10.31",
     build: "20261110_03",
     date: "2026-11-10 14:10",
-    description: "v2.10.32: רדאר מיילים והודעות אקדמיות (Outlook & Moodle): זיהוי אוטומטי של שינויי כיתות, שעות ומועדי הגשה, עדכון 1-Tap במערכת השעות ובלוח המשימות (ADR-104)."
+    description: "v2.10.33: רדאר מיילים והודעות אקדמיות (Outlook & Moodle): זיהוי אוטומטי של שינויי כיתות, שעות ומועדי הגשה, עדכון 1-Tap במערכת השעות ובלוח המשימות (ADR-104)."
 };
 window.APP_VERSION = APP_CURRENT_REVISION.version;
 
@@ -29463,3 +29517,63 @@ window.toggleHomeworkSheetStatus = toggleHomeworkSheetStatus;
 window.openCourseHomeworkDetail = openCourseHomeworkDetail;
 window.getCourseHomeworkStatus = getCourseHomeworkStatus;
 window.COURSE_HOMEWORK_POLICIES = COURSE_HOMEWORK_POLICIES;
+// Global Reset for Notion Task Filters (Rescue function to restore all tasks)
+window.resetAllNotionFilters = function() {
+    const searchInput = document.getElementById("search-tasks");
+    if (searchInput) searchInput.value = '';
+    const clearBtn = document.getElementById("btn-clear-task-search");
+    if (clearBtn) clearBtn.style.display = 'none';
+
+    // Reset Semester filters to all
+    const semPopover = document.getElementById("notion-semester-filter-popover");
+    if (semPopover) {
+        semPopover.querySelectorAll(".notion-sem-opt-cb").forEach(cb => cb.checked = true);
+        if (typeof updateSemesterFilterSummary === 'function') updateSemesterFilterSummary();
+    }
+    const hiddenSemSelect = document.getElementById("filter-semester");
+    if (hiddenSemSelect) hiddenSemSelect.value = "all";
+
+    // Reset Status filters to all
+    const statusPopover = document.getElementById("notion-status-filter-popover");
+    if (statusPopover) {
+        statusPopover.querySelectorAll(".notion-filter-opt-cb").forEach(cb => cb.checked = true);
+        if (typeof updateStatusFilterSummary === 'function') updateStatusFilterSummary();
+    }
+
+    // Reset Type filters to all
+    const typePopover = document.getElementById("notion-type-filter-popover");
+    if (typePopover) {
+        typePopover.querySelectorAll(".notion-filter-type-cb").forEach(cb => cb.checked = true);
+        if (typeof updateTypeFilterSummary === 'function') updateTypeFilterSummary();
+    }
+
+    // Reset Course filters to all
+    const coursePopover = document.getElementById("notion-course-filter-popover");
+    if (coursePopover) {
+        coursePopover.querySelectorAll(".notion-course-opt-cb").forEach(cb => cb.checked = true);
+        if (typeof updateCourseFilterSummary === 'function') updateCourseFilterSummary();
+    }
+    const hiddenCourseSelect = document.getElementById("filter-course");
+    if (hiddenCourseSelect) hiddenCourseSelect.value = "all";
+
+    // Disable Focus Mode
+    const focusBtn = document.getElementById("notion-focus-toggle-btn");
+    if (focusBtn) focusBtn.classList.remove("active");
+    localStorage.removeItem("semestero_notion_focus_mode");
+
+    // Reset Organit Category
+    window.activeOrganitCategory = 'all';
+    const organitContainer = document.getElementById("organit-category-pills");
+    if (organitContainer) {
+        organitContainer.querySelectorAll(".organit-pill").forEach(p => {
+            const isAll = p.dataset.category === 'all';
+            p.classList.toggle("active", isAll);
+            p.setAttribute("aria-selected", isAll ? "true" : "false");
+        });
+    }
+
+    renderNotionTasksTable();
+    if (typeof showToastNotification === 'function') {
+        showToastNotification("🔄 כל הסינונים אופסו - כל המשימות מוצגות!", "success");
+    }
+};
