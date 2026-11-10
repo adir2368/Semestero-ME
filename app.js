@@ -23545,11 +23545,11 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.11.10-v2.10.26",
-    version: "2.10.26",
+    code: "REV-2026.11.10-v2.10.27",
+    version: "2.10.27",
     build: "20261110_02",
     date: "2026-11-10 07:15",
-    description: "v2.10.26: התראות נייד רחבות ומלאות (BigTextStyle) ווידג'ט סיבוך פינה לשעון למשימות פתוחות"
+    description: "v2.10.27: שדרוג התראות נייד לתצוגה רחבה ומלאה ללא קיטועים (InboxStyle & BigTextStyle), פתיחה ישירה של מערכת השעות ולוח המשימות בלחיצה, והסרת תגיות מותג עמוסות בשעון (ADR-100)."
 };
 window.APP_VERSION = APP_CURRENT_REVISION.version;
 
@@ -27175,11 +27175,13 @@ function isCapacitorPlatform() {
 }
 
 let _capChannelInitialized = false;
+let _capNotificationListenerRegistered = false;
 async function ensureCapacitorNotificationChannel() {
     if (_capChannelInitialized) return;
     if (isCapacitorPlatform() && window.Capacitor?.Plugins?.LocalNotifications) {
         try {
-            await window.Capacitor.Plugins.LocalNotifications.createChannel({
+            const ln = window.Capacitor.Plugins.LocalNotifications;
+            await ln.createChannel({
                 id: 'semestero_alerts',
                 name: 'התראות סמסטרו (לו״ז ומשימות)',
                 description: 'התראות 10 דקות לפני שיעור, לו״ז יומי ומשימות',
@@ -27189,8 +27191,52 @@ async function ensureCapacitorNotificationChannel() {
                 lights: true,
                 lightColor: '#0ea5e9'
             });
+
+            // Register Action Types for Action Buttons in Android Notification Shade
+            if (typeof ln.registerActionTypes === 'function') {
+                await ln.registerActionTypes({
+                    types: [
+                        {
+                            id: 'TIMETABLE_ACTIONS',
+                            actions: [
+                                { id: 'open-timetable', title: '📅 פתח מערכת מלאה' }
+                            ]
+                        },
+                        {
+                            id: 'TASKS_ACTIONS',
+                            actions: [
+                                { id: 'open-tasks', title: '📋 פתח רשימת משימות' }
+                            ]
+                        }
+                    ]
+                });
+            }
+
+            // Listen to notification tap / action clicks to navigate directly
+            if (typeof ln.addListener === 'function' && !_capNotificationListenerRegistered) {
+                _capNotificationListenerRegistered = true;
+                ln.addListener('localNotificationActionPerformed', (notificationAction) => {
+                    console.log('[Notifications] Native action performed:', notificationAction);
+                    const notif = notificationAction.notification;
+                    const actionId = notificationAction.actionId;
+                    const extra = notif?.extra || {};
+                    let targetTab = extra.tab || 'timetable';
+                    if (actionId === 'open-tasks' || extra.tab === 'tasks') {
+                        targetTab = 'tasks';
+                    } else if (actionId === 'open-timetable' || extra.tab === 'timetable') {
+                        targetTab = 'timetable';
+                    }
+                    if (typeof setActiveMainTab === 'function') {
+                        setActiveMainTab(targetTab);
+                    }
+                    if (typeof closeNotificationDrawer === 'function') {
+                        closeNotificationDrawer();
+                    }
+                });
+            }
+
             _capChannelInitialized = true;
-            console.log('[Notifications] Native Semestero notification channel ready');
+            console.log('[Notifications] Native Semestero notification channel & action types ready');
         } catch (e) {
             console.warn('[Notifications] Channel setup error:', e);
         }
@@ -27245,19 +27291,28 @@ async function showNativeNotification(title, options = {}) {
                 const largeBody = options.largeBody || options.body || '';
                 const summaryText = options.summaryText || 'סמסטרו ME';
 
+                const notifPayload = {
+                    id: notifId,
+                    title: title,
+                    body: options.body || '',
+                    largeBody: largeBody,
+                    summaryText: summaryText,
+                    channelId: 'semestero_alerts',
+                    schedule: scheduleAt ? { at: scheduleAt } : undefined,
+                    smallIcon: 'ic_stat_notification',
+                    iconColor: '#38bdf8',
+                    extra: options.data || {}
+                };
+
+                if (options.inboxList && Array.isArray(options.inboxList) && options.inboxList.length > 0) {
+                    notifPayload.inboxList = options.inboxList;
+                }
+                if (options.actionTypeId) {
+                    notifPayload.actionTypeId = options.actionTypeId;
+                }
+
                 await localNotifs.schedule({
-                    notifications: [{
-                        id: notifId,
-                        title: title,
-                        body: options.body || '',
-                        largeBody: largeBody,
-                        summaryText: summaryText,
-                        channelId: 'semestero_alerts',
-                        schedule: scheduleAt ? { at: scheduleAt } : undefined,
-                        smallIcon: 'ic_stat_notification',
-                        iconColor: '#38bdf8',
-                        extra: options.data || {}
-                    }]
+                    notifications: [notifPayload]
                 });
                 console.log(`[Notifications] Native Capacitor notification scheduled (ID: ${notifId}):`, title);
                 return true;
@@ -27373,46 +27428,47 @@ async function trigger10MinClassAlert(classItem, isTest = false) {
         return false;
     }
 
+    const shortCourse = (typeof COURSE_SHORT_NAMES !== 'undefined' && COURSE_SHORT_NAMES[classItem.courseId])
+        ? COURSE_SHORT_NAMES[classItem.courseId]
+        : (courseName.length > 20 ? courseName.substring(0, 18) + '..' : courseName);
+
     let title = '';
     if (isTest) {
-        title = isMobile ? `⏰ [בדיקה] בעוד 10 דק׳: ${courseName}` : `💻 [בדיקת מחשב] בעוד 10 דק׳: ${courseName}`;
+        title = isMobile ? `⏰ בעוד 10 דק׳: ${shortCourse}` : `💻 [בדיקה] בעוד 10 דק׳: ${shortCourse}`;
     } else if (diffMinutes > 1) {
-        title = isMobile
-            ? `⏰ בעוד כ-${diffMinutes} דק׳: ${courseName}${typeShort ? ' (' + typeShort + ')' : ''}`
-            : `💻 תזכורת שיעור בעוד ${diffMinutes} דק׳: ${courseName}${typeShort ? ' (' + typeShort + ')' : ''}`;
+        title = `⏰ בעוד ${diffMinutes} דק׳: ${shortCourse}${typeShort ? ' (' + typeShort + ')' : ''}`;
     } else if (diffMinutes >= -15) {
-        title = isMobile
-            ? `🟢 השיעור מתחיל כעת: ${courseName}${typeShort ? ' (' + typeShort + ')' : ''}`
-            : `💻 שיעור מתחיל כעת: ${courseName}${typeShort ? ' (' + typeShort + ')' : ''}`;
+        title = `🟢 מתחיל כעת: ${shortCourse}${typeShort ? ' (' + typeShort + ')' : ''}`;
     } else {
-        title = isMobile
-            ? `🕒 שיעור פעיל: ${courseName}${typeShort ? ' (' + typeShort + ')' : ''}`
-            : `💻 שיעור פעיל כרגע: ${courseName}${typeShort ? ' (' + typeShort + ')' : ''}`;
+        title = `🕒 שיעור פעיל: ${shortCourse}${typeShort ? ' (' + typeShort + ')' : ''}`;
     }
 
-    const bodyLines = [
-        `📚 ${type}`,
-        `⏰ שעות: ${startTime} - ${endTime} (${classItem.duration || 'שיעור'})`,
-        room
-    ];
+    const roomText = classItem.room || 'טכניון';
+    // Single dense first line so room is NEVER truncated in lockscreen or shade!
+    const primaryLine = `📍 ${roomText} • ⏰ ${startTime} - ${endTime} (${type})`;
+    const bodyLines = [primaryLine];
     if (lecturer) bodyLines.push(lecturer);
 
     // Check if there are remaining classes today after this one
     const remaining = getRemainingClassesToday();
     const afterThis = remaining.classes.filter(c => c.startTime > startTime);
     if (afterThis.length > 0) {
-        bodyLines.push('────────────────────');
         bodyLines.push(`בהמשך היום: עוד ${afterThis.length} שיעורים (הבא ב-${afterThis[0].startTime})`);
     }
 
     const body = bodyLines.join('\n');
+    const largeBody = bodyLines.join('\n') + '\n\n📅 הקש לצפייה במערכת השעות השבועית המלאה';
     const tag = `ast-reminder-${classItem.courseId || 'c'}-${(startTime || '0000').replace(':', '')}`;
 
-        if (window.SemesteroBridge && typeof window.SemesteroBridge.sendTestNotificationToWatch === 'function') {
+    if (window.SemesteroBridge && typeof window.SemesteroBridge.sendTestNotificationToWatch === 'function') {
         window.SemesteroBridge.sendTestNotificationToWatch(title, body);
     }
     const sent = await showNativeNotification(title, {
         body,
+        largeBody,
+        inboxList: bodyLines.slice(0, 5),
+        actionTypeId: 'TIMETABLE_ACTIONS',
+        summaryText: 'סמסטרו ME • תזכורת שיעור',
         icon: 'icon.png',
         badge: 'notification-badge.png',
         tag,
@@ -27420,7 +27476,7 @@ async function trigger10MinClassAlert(classItem, isTest = false) {
         vibrate: isMobile ? [250, 100, 250, 100, 250] : undefined,
         data: { tab: 'timetable' },
         actions: [
-            { action: 'open-timetable', title: '📍 פתח מערכת שעות' }
+            { action: 'open-timetable', title: '📅 פתח מערכת שעות' }
         ]
     });
 
@@ -27515,14 +27571,24 @@ function scheduleTodayClassTimeouts() {
                 ensureCapacitorNotificationChannel().then(() => {
                     const rawTag = `ast-alarm-${c.courseId || 'c'}-${(c.startTime || '0000').replace(':', '')}`;
                     const notifId = Math.abs(rawTag.split('').reduce((acc, ch) => ((acc << 5) - acc) + ch.charCodeAt(0), 0) % 2000000) + 1;
-                    const alarmBody = `📚 ${c.type || 'הרצאה / תרגול'}\n⏰ שעות: ${c.startTime} - ${c.endTime}\n📍 ${c.room || 'טכניון'}${c.lecturer ? '\n👨‍🏫 מרצה/מתרגל: ' + c.lecturer : ''}`;
+                    const shortCourse = (typeof COURSE_SHORT_NAMES !== 'undefined' && COURSE_SHORT_NAMES[c.courseId])
+                        ? COURSE_SHORT_NAMES[c.courseId]
+                        : ((c.courseName || 'שיעור').length > 20 ? (c.courseName || 'שיעור').substring(0, 18) + '..' : (c.courseName || 'שיעור'));
+                    const roomStr = c.room || 'טכניון';
+                    const alarmTitle = `⏰ בעוד 10 דק׳: ${shortCourse}`;
+                    const alarmLine1 = `📍 ${roomStr} • ⏰ ${c.startTime} - ${c.endTime} (${c.type || 'שיעור'})`;
+                    const alarmBody = c.lecturer ? `${alarmLine1}\n👨‍🏫 ${c.lecturer}` : alarmLine1;
+                    const alarmLargeBody = `${alarmBody}\n\n📅 הקש לצפייה במערכת השעות השבועית המלאה`;
+
                     window.Capacitor.Plugins.LocalNotifications.schedule({
                         notifications: [{
                             id: notifId,
-                            title: `⏰ בעוד 10 דק׳: ${c.courseName || 'שיעור אקדמי'}`,
+                            title: alarmTitle,
                             body: alarmBody,
-                            largeBody: alarmBody,
+                            largeBody: alarmLargeBody,
                             summaryText: 'סמסטרו ME • תזכורת שיעור',
+                            inboxList: [alarmLine1, c.lecturer ? `👨‍🏫 מרצה/מתרגל: ${c.lecturer}` : '📅 הקש לפתיחת מערכת שעות'],
+                            actionTypeId: 'TIMETABLE_ACTIONS',
                             channelId: 'semestero_alerts',
                             schedule: {
                                 at: new Date(reminderTimeMs),
@@ -27812,48 +27878,58 @@ async function dispatchNativeMobileNotifications() {
     const priorityTasks = getUpcomingPriorityTasks();
 
     // -------------------------------------------------------------
-    // Notification 1: Today's Remaining Lectures / Tutorials
+    // Notification 1: Today's Remaining Lectures / Tutorials (Untruncated)
     // -------------------------------------------------------------
     let lectureTitle = '';
     let lectureBody = '';
+    let lectureLargeBody = '';
+    let lectureInboxList = [];
 
     if (sendLectures) {
         if (!remainingLectures.hasSchedule) {
             lectureTitle = isMobile
-                ? '🎓 מערכת שעות: טרם הוגדרה מערכת'
-                : '💻 מערכת שעות במחשב: טרם הוגדרה מערכת';
-            lectureBody = '📅 כדי לקבל תזכורות להרצאות, סנכרן או בחר מערכת שעות פעילה בלשונית מערכת שעות.';
+                ? '🎓 לו״ז: טרם הוגדרה מערכת'
+                : '💻 לו״ז: טרם הוגדרה מערכת';
+            lectureBody = '📅 לחץ כאן להגדרת מערכת שעות פעילה';
+            lectureLargeBody = lectureBody;
         } else if (remainingLectures.isFree || remainingLectures.totalToday === 0) {
-            lectureTitle = isMobile
-                ? '🎓 מערכת שעות: יום חופשי מלימודים'
-                : '💻 מערכת שעות במחשב: יום חופשי מלימודים';
+            lectureTitle = '🎓 יום חופשי מלימודים 🏖️';
             lectureBody = '🏖️ אין שיעורים מתוכננים להיום. יום נעים, פורה ומנוחה טובה!';
+            lectureLargeBody = lectureBody;
         } else if (remainingLectures.count === 0) {
-            lectureTitle = isMobile
-                ? '🎓 מערכת שעות: השיעורים הסתיימו'
-                : '💻 מערכת שעות במחשב: השיעורים להיום הסתיימו';
-            lectureBody = `✔️ כל ${remainingLectures.totalToday} השיעורים להיום הושלמו בהצלחה!`;
+            lectureTitle = '🎓 השיעורים להיום הסתיימו ✔️';
+            lectureBody = `כל ${remainingLectures.totalToday} השיעורים להיום הושלמו! לחץ לצפייה במערכת המלאה.`;
+            lectureLargeBody = lectureBody;
         } else {
+            const count = remainingLectures.count;
             lectureTitle = isMobile
-                ? `🎓 לו״ז היום (${remainingLectures.count} שיעורים נותרו)`
-                : `💻 לו״ז היום במחשב (${remainingLectures.count} שיעורים נותרו)`;
+                ? (count === 1 ? '🎓 לו״ז היום (שיעור 1 נותר)' : `🎓 לו״ז היום (${count} שיעורים נותרו)`)
+                : `💻 לו״ז היום במחשב (${count} שיעורים נותרו)`;
 
-            const classBlocks = remainingLectures.classes.map((c, idx) => {
+            // Dense, single-line format for each class with room and type
+            const classLines = remainingLectures.classes.map((c, idx) => {
                 const isNext = (idx === 0);
-                const header = isNext 
-                    ? `⭐ הבא: ${c.startTime} | ${c.courseName}`
-                    : `🕒 ${c.startTime} - ${c.endTime} | ${c.courseName}`;
-                const details = `   📍 ${c.room || 'טכניון'} • ${c.type}${c.lecturer ? ' (' + c.lecturer + ')' : ''}`;
-                return `${header}\n${details}`;
+                const prefix = isNext ? '⭐ ' : '• ';
+                const roomStr = c.room ? ` • ${c.room}` : '';
+                const typeStr = c.type ? ` (${c.type})` : '';
+                return `${prefix}${c.startTime} | ${c.courseName}${roomStr}${typeStr}`;
             });
 
-            lectureBody = classBlocks.join('\n\n────────────────────\n\n');
+            // Single line summary for collapsed lockscreen body
+            const nextClass = remainingLectures.classes[0];
+            const nextRoom = nextClass.room ? ` • ${nextClass.room}` : '';
+            lectureBody = `הבא: ${nextClass.startTime} | ${nextClass.courseName}${nextRoom} (עוד ${count} שיעורים להיום)`;
+
+            lectureLargeBody = classLines.join('\n') + '\n\n📅 הקש לצפייה במערכת השעות השבועית המלאה';
+            lectureInboxList = classLines.slice(0, 5);
         }
 
-        // Dispatch Notification 1: Lectures (Wide & Full BigTextStyle)
+        // Dispatch Notification 1: Lectures (Wide & Full BigTextStyle + InboxStyle)
         await showNativeNotification(lectureTitle, {
             body: lectureBody,
-            largeBody: lectureBody,
+            largeBody: lectureLargeBody,
+            inboxList: lectureInboxList.length > 0 ? lectureInboxList : undefined,
+            actionTypeId: 'TIMETABLE_ACTIONS',
             summaryText: 'סמסטרו ME • לו״ז יומי',
             icon: 'icon.png',
             badge: 'notification-badge.png',
@@ -27868,43 +27944,52 @@ async function dispatchNativeMobileNotifications() {
     }
 
     // -------------------------------------------------------------
-    // Notification 2: Upcoming Priority Tasks
+    // Notification 2: Upcoming Priority Tasks (Untruncated)
     // -------------------------------------------------------------
     if (sendTasks) {
         let taskTitle = '';
         let taskBody = '';
+        let taskLargeBody = '';
+        let taskInboxList = [];
 
         if (priorityTasks.tasks.length === 0) {
-            taskTitle = isMobile
-                ? '📋 משימות אקדמיות: הכל הושלם!'
-                : '💻 משימות אקדמיות במחשב: הכל הושלם!';
+            taskTitle = '📋 כל המשימות הושלמו! 🎉';
             taskBody = '✨ אין משימות ממתינות להגשה. כל הכבוד!';
+            taskLargeBody = taskBody;
         } else {
+            const totalTasks = priorityTasks.tasks.length;
             taskTitle = isMobile
-                ? `📋 משימות דחופות (${priorityTasks.tasks.length} פתוחות)`
-                : `💻 משימות דחופות במחשב (${priorityTasks.tasks.length} פתוחות)`;
+                ? (totalTasks === 1 ? '📋 משימה 1 להגשה' : `📋 ${totalTasks} משימות להגשה`)
+                : `💻 משימות להגשה במחשב (${totalTasks})`;
 
             const maxTasksToShow = Math.min(priorityTasks.tasks.length, 10);
-            const taskBlocks = priorityTasks.tasks.slice(0, maxTasksToShow).map(t => {
-                const icon = t.diffDays < 0 ? '🚨' : (t.diffDays <= 1 ? '🔥' : '⚡');
-                const line1 = `${icon} [${t.courseShortName}] ${t.title}`;
-                const line2 = `   ⏳ ${t.timingText}`;
-                return `${line1}\n${line2}`;
+            const taskLines = priorityTasks.tasks.slice(0, maxTasksToShow).map((t, idx) => {
+                const icon = t.diffDays < 0 ? '🚨' : (t.diffDays <= 1 ? '🔥' : '📌');
+                const courseTag = t.courseShortName ? `[${t.courseShortName}] ` : '';
+                return `${idx + 1}. ${icon} ${courseTag}${t.title} • ${t.timingText}`;
             });
 
-            if (priorityTasks.tasks.length > maxTasksToShow) {
-                taskBlocks.push(`...ועוד ${priorityTasks.tasks.length - maxTasksToShow} משימות נוספות בלוח המשימות`);
+            if (totalTasks > maxTasksToShow) {
+                taskLines.push(`...ועוד ${totalTasks - maxTasksToShow} משימות נוספות בלוח המשימות`);
             }
 
-            taskBody = taskBlocks.join('\n\n────────────────────\n\n');
+            // Single line summary for collapsed lockscreen body
+            const topTask = priorityTasks.tasks[0];
+            const topTag = topTask.courseShortName ? `[${topTask.courseShortName}] ` : '';
+            taskBody = `${totalTasks} משימות פתוחות: הקרובה היא ${topTag}${topTask.title} (${topTask.timingText})`;
+
+            taskLargeBody = taskLines.join('\n') + '\n\n📋 הקש לצפייה בכל המשימות בלוח המשימות';
+            taskInboxList = taskLines.slice(0, 5);
         }
 
         const delay = sendLectures ? 350 : 0;
         setTimeout(async () => {
-            // Dispatch Notification 2: Tasks (Wide & Full BigTextStyle)
+            // Dispatch Notification 2: Tasks (Wide & Full BigTextStyle + InboxStyle)
             await showNativeNotification(taskTitle, {
                 body: taskBody,
-                largeBody: taskBody,
+                largeBody: taskLargeBody,
+                inboxList: taskInboxList.length > 0 ? taskInboxList : undefined,
+                actionTypeId: 'TASKS_ACTIONS',
                 summaryText: 'סמסטרו ME • משימות פתוחות',
                 icon: 'icon.png',
                 badge: 'notification-badge.png',

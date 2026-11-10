@@ -227,4 +227,31 @@ assert.strictEqual(
 );
 console.log('   ✓ PASS: styles.css full-width notification styles verified.');
 
+// -------------------------------------------------------------
+// Test 6: Capacitor Android Action Types & Deep-Linking Verification
+// -------------------------------------------------------------
+console.log('\n[Test 6] Verifying Capacitor Action Types & Deep-Link Listeners in app.js...');
+
+assert.strictEqual(
+    appJsContent.includes('notifPayload.inboxList = options.inboxList;'),
+    true,
+    'showNativeNotification must forward inboxList to Capacitor payload'
+);
+assert.strictEqual(
+    appJsContent.includes('TIMETABLE_ACTIONS') && appJsContent.includes('open-timetable'),
+    true,
+    'ensureCapacitorNotificationChannel must register TIMETABLE_ACTIONS'
+);
+assert.strictEqual(
+    appJsContent.includes('TASKS_ACTIONS') && appJsContent.includes('open-tasks'),
+    true,
+    'ensureCapacitorNotificationChannel must register TASKS_ACTIONS'
+);
+assert.strictEqual(
+    appJsContent.includes('localNotificationActionPerformed'),
+    true,
+    'ensureCapacitorNotificationChannel must register localNotificationActionPerformed listener'
+);
+console.log('   ✓ PASS: Capacitor action types, inboxList & deep-linking verified.');
+
 console.log('\n🎉 ALL MOBILE NOTIFICATIONS & WEAR OS TASKS COMPLICATION TESTS PASSED SUCCESSFULLY!\n');

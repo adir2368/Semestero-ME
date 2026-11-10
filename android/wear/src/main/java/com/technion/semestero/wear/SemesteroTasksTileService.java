@@ -61,7 +61,7 @@ public class SemesteroTasksTileService extends TileService {
 
         if (isCorrupted(task1)) task1 = "";
         if (isCorrupted(task2)) task2 = "";
-        if (isCorrupted(summary) || summary.isEmpty()) summary = "סמסטרו ME";
+        if (isCorrupted(summary) || summary.isEmpty()) summary = "משימות";
 
         // Launch MainActivity on tap
         ActionBuilders.LaunchAction launchAction = new ActionBuilders.LaunchAction.Builder()

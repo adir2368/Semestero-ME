@@ -47,9 +47,9 @@ public class SemesteroTasksComplicationService extends ComplicationDataSourceSer
         } else if (type == ComplicationType.LONG_TEXT) {
             return new LongTextComplicationData.Builder(
                 new PlainComplicationText.Builder("3 משימות פתוחות").build(),
-                new PlainComplicationText.Builder("סמסטרו ME").build()
+                new PlainComplicationText.Builder("3 משימות פתוחות").build()
             )
-            .setTitle(new PlainComplicationText.Builder("סמסטרו ME").build())
+            .setTitle(new PlainComplicationText.Builder("משימות").build())
             .setMonochromaticImage(mono)
             .setTapAction(tapIntent)
             .build();
@@ -99,7 +99,7 @@ public class SemesteroTasksComplicationService extends ComplicationDataSourceSer
                 new PlainComplicationText.Builder(longTextStr).build(),
                 new PlainComplicationText.Builder(contentDesc).build()
             )
-            .setTitle(new PlainComplicationText.Builder("סמסטרו ME").build())
+            .setTitle(new PlainComplicationText.Builder("משימות").build())
             .setMonochromaticImage(mono)
             .setTapAction(tapIntent)
             .build();

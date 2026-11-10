@@ -36,7 +36,7 @@ public class SemesteroComplicationService extends ComplicationDataSourceService 
         MonochromaticImage mono = new MonochromaticImage.Builder(icon).build();
 
         if (type == ComplicationType.SHORT_TEXT) {
-            return new ShortTextComplicationData.Builder(text, new PlainComplicationText.Builder("סמסטרו ME").build())
+            return new ShortTextComplicationData.Builder(text, new PlainComplicationText.Builder("שיעור קרוב").build())
                 .setTitle(title)
                 .setMonochromaticImage(mono)
                 .setTapAction(tapIntent)
@@ -44,7 +44,7 @@ public class SemesteroComplicationService extends ComplicationDataSourceService 
         } else if (type == ComplicationType.LONG_TEXT) {
             return new LongTextComplicationData.Builder(
                 new PlainComplicationText.Builder("11:30 מד\"ר ח").build(),
-                new PlainComplicationText.Builder("סמסטרו ME").build()
+                new PlainComplicationText.Builder("שיעור קרוב").build()
             )
             .setTitle(new PlainComplicationText.Builder("אולמן 506").build())
             .setMonochromaticImage(mono)
@@ -84,7 +84,7 @@ public class SemesteroComplicationService extends ComplicationDataSourceService 
             longText = "מחר: " + shortName + " (" + (res.timeText.contains(" - ") ? res.timeText.split(" - ")[0] : res.timeText) + ")";
         } else {
             mainText = "חופשי";
-            titleText = "סמסטרו";
+            titleText = "לו״ז";
             longText = "יום חופשי מלימודים";
         }
 
@@ -94,7 +94,7 @@ public class SemesteroComplicationService extends ComplicationDataSourceService 
         if (type == ComplicationType.SHORT_TEXT) {
             data = new ShortTextComplicationData.Builder(
                 new PlainComplicationText.Builder(mainText).build(),
-                new PlainComplicationText.Builder("סמסטרו ME").build()
+                new PlainComplicationText.Builder("שיעור קרוב").build()
             )
             .setTitle(new PlainComplicationText.Builder(titleText).build())
             .setMonochromaticImage(mono)
@@ -103,7 +103,7 @@ public class SemesteroComplicationService extends ComplicationDataSourceService 
         } else if (type == ComplicationType.LONG_TEXT) {
             data = new LongTextComplicationData.Builder(
                 new PlainComplicationText.Builder(longText).build(),
-                new PlainComplicationText.Builder("סמסטרו ME").build()
+                new PlainComplicationText.Builder("שיעור קרוב").build()
             )
             .setTitle(new PlainComplicationText.Builder(shortRoom).build())
             .setMonochromaticImage(mono)
@@ -134,7 +134,7 @@ public class SemesteroComplicationService extends ComplicationDataSourceService 
      * to prevent truncation on Samsung Galaxy Watch 8 corner dial widgets.
      */
     private String getShortCourseName(String title) {
-        if (title == null || title.trim().isEmpty()) return "סמסטרו";
+        if (title == null || title.trim().isEmpty()) return "לו״ז";
         String t = title.toLowerCase();
 
         if (t.contains("דיפרנציאליות חלקיות") || t.contains("מד\"ר ח") || t.contains("מד\"ח") || t.contains("מדח") || t.contains("104228")) {
