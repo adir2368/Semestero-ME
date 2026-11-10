@@ -18,6 +18,7 @@ fs.mkdirSync(WWW, { recursive: true });
 // Core files and assets needed by Semestero ME
 const FILES_TO_COPY = [
     'index.html',
+    'sentry_logger.js',
     'app.js',
     'preloaded_user_state.js',
     'styles.css',

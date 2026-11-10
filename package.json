@@ -1,7 +1,7 @@
 {
   "name": "semestero-me",
   "productName": "Semestero ME",
-  "version": "2.11.0",
+  "version": "2.10.31",
   "description": "Semestero ME - Academic Skill Tree and Degree Orchestration System",
   "main": "main.js",
   "scripts": {
@@ -14,8 +14,9 @@
     "build:ios": "node scripts/build_mobile_dist.js && npx cap sync ios",
     "build:all": "node scripts/build_mobile_dist.js && npx cap sync",
     "open:ios": "npx cap open ios",
-    "test": "node tests/test_notifications_and_wear_tasks_complication.js && node tests/test_pangea_deep_concept_search.js && node tests/test_mobile_back_navigation.js && node tests/test_extended_and_rapid_tour.js && node tests/verify_system_health.js",
-    "audit": "node scripts/audit_codebase_integrity.js"
+    "test": "node tests/test_sentry_crash_reporting.js && node tests/test_notifications_and_wear_tasks_complication.js && node tests/test_pangea_deep_concept_search.js && node tests/test_mobile_back_navigation.js && node tests/test_extended_and_rapid_tour.js && node tests/verify_system_health.js",
+    "audit": "node scripts/audit_codebase_integrity.js",
+    "sentry:report": "node scripts/inspect_crash_reports.js"
   },
   "keywords": [
     "academic",

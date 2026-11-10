@@ -4,6 +4,7 @@ const CACHE_NAME = 'semestero-me-v2.11.0';
 const STATIC_ASSETS = [
     './',
     './index.html',
+    './sentry_logger.js',
     './styles.css',
     './accessibility.css',
     './ui_enhancements.js',

@@ -2263,6 +2263,29 @@
                                 🔍 פתח לוח סטטיסטיקה
                             </button>
                         </div>
+
+                        <!-- Sentry & Crash Diagnostics (Developer & Stability) -->
+                        <div style="background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.35); border-radius: 8px; padding: 10px 14px; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                            <div>
+                                <div style="font-weight: 700; color: #f87171; font-size: 0.88rem; display: flex; align-items: center; gap: 6px;">
+                                    <span>🛡️</span> <span>ניטור שגיאות ודוחות קריסה (Sentry Engine)</span>
+                                </div>
+                                <div style="font-size: 0.74rem; color: #94a3b8; margin-top: 2px;">
+                                    דוחות שמורים מקומית: <strong id="sentry-crashes-count" style="color: #fca5a5;">${(window.SemesteroSentry && window.SemesteroSentry.getCrashReports().length) || 0}</strong> • לכידה אוטומטית של חריגות וקריסות
+                                </div>
+                            </div>
+                            <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
+                                <button type="button" class="btn btn-xs" onclick="const rep = (window.SemesteroSentry ? window.SemesteroSentry.getCrashReports() : []); if (!rep.length) { alert('אין קריסות או שגיאות שמורות במערכת ✓'); } else { alert('דוחות קריסה אחרונים (' + rep.length + '):\n\n' + rep.slice(-3).map(r => '[' + r.timestamp.slice(11,19) + '] ' + r.message).join('\n')); }" style="background: rgba(239, 68, 68, 0.2); border: 1px solid rgba(239, 68, 68, 0.4); color: #fca5a5; font-weight: 700; padding: 5px 10px; border-radius: 6px; cursor: pointer;">
+                                    📋 הצג דוחות
+                                </button>
+                                <button type="button" class="btn btn-xs" onclick="if (window.SemesteroSentry) { window.SemesteroSentry.triggerTestError(); const c = document.getElementById('sentry-crashes-count'); if (c) c.innerText = window.SemesteroSentry.getCrashReports().length; alert('שגיאת בדיקה נוצרה ונרשמה בהצלחה ב-Sentry ובאגרון המקומי ✓'); }" style="background: rgba(245, 158, 11, 0.2); border: 1px solid rgba(245, 158, 11, 0.4); color: #fcd34d; font-weight: 700; padding: 5px 10px; border-radius: 6px; cursor: pointer;">
+                                    ⚡ בדיקת שגיאה
+                                </button>
+                                <button type="button" class="btn btn-xs" onclick="if (window.SemesteroSentry) { const dsn = prompt('הזן Sentry DSN (ריק לביטול):', window.SemesteroSentry.getDsn()); if (dsn !== null) { window.SemesteroSentry.setDsn(dsn); alert(dsn ? 'Sentry DSN עודכן בהצלחה ✓' : 'Sentry DSN אופס.'); } }" style="background: rgba(56, 189, 248, 0.2); border: 1px solid rgba(56, 189, 248, 0.4); color: #7dd3fc; font-weight: 700; padding: 5px 10px; border-radius: 6px; cursor: pointer;">
+                                    ⚙️ DSN
+                                </button>
+                            </div>
+                        </div>
                         ` : ''}
 
                         <!-- Edit Account Form -->
