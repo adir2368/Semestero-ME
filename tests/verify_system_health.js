@@ -926,6 +926,76 @@ async function run() {
             assert(result.hasExamPrepInState, 'gameState.examPrep must persist course exam prep state for cloud sync');
         });
 
+        await test('Test 22: Pangea Deep Concept Search & Mobile Back Navigation Shield', async () => {
+            const result = await cdp.eval(`(() => {
+                // 1. Pangea Deep Concept Search
+                const steinerMatches = window.PangeaHub ? window.PangeaHub.search('שטיינר') : [];
+                const bernoulliMatches = window.PangeaHub ? window.PangeaHub.search('ברנולי') : [];
+                const mohrMatches = window.PangeaHub ? window.PangeaHub.search('מעגל מור') : [];
+                const vonMisesMatches = window.PangeaHub ? window.PangeaHub.search('פון מיזס') : [];
+
+                const hasSteinerConcept = steinerMatches.length > 0 && steinerMatches[0].type === 'concept' && steinerMatches[0].title.includes('שטיינר');
+                const hasBernoulliConcept = bernoulliMatches.length > 0 && bernoulliMatches[0].type === 'concept';
+                const hasMohrConcept = mohrMatches.length > 0 && mohrMatches[0].type === 'concept' && mohrMatches[0].title.includes('מור');
+                const hasVonMisesConcept = vonMisesMatches.length > 0 && vonMisesMatches[0].type === 'concept' && vonMisesMatches[0].title.includes('פון מיזס');
+
+                // 2. Mobile Back Navigation Shield
+                const hasBackManager = typeof window.handleMobileBackAction === 'function' && !!window.MobileBackNavigationManager;
+
+                // Close any open course modal from previous tests first via back action
+                const courseModal = document.getElementById('course-modal');
+                let courseModalClosedViaBack = false;
+                if (courseModal && courseModal.classList.contains('active')) {
+                    const cHandled = window.handleMobileBackAction();
+                    courseModalClosedViaBack = cHandled && !courseModal.classList.contains('active');
+                } else {
+                    courseModalClosedViaBack = true;
+                }
+
+                // Test Pangea modal closing via back
+                const pangeaReader = document.getElementById('pangea-reader-modal');
+                let readerClosedOnBack = false;
+                if (pangeaReader) {
+                    pangeaReader.style.display = 'flex';
+                    const handled = window.handleMobileBackAction();
+                    readerClosedOnBack = handled && pangeaReader.style.display === 'none';
+                }
+
+                // Ensure all modals closed for clean tab history test
+                document.querySelectorAll('.modal-overlay.active, .modal.active, [id$="-modal"].active').forEach(m => {
+                    m.classList.remove('active');
+                    m.style.display = 'none';
+                });
+
+                // Test tab history back
+                window._tabHistoryStack = ['curriculum', 'planner'];
+                window.currentActiveTab = 'tasks';
+                const tabBackHandled = window.handleMobileBackAction();
+                const tabIsPlanner = window.currentActiveTab === 'planner';
+
+                return {
+                    hasSteinerConcept,
+                    hasBernoulliConcept,
+                    hasMohrConcept,
+                    hasVonMisesConcept,
+                    hasBackManager,
+                    courseModalClosedViaBack,
+                    readerClosedOnBack,
+                    tabBackHandled,
+                    tabIsPlanner
+                };
+            })()`);
+
+            assert(result.hasSteinerConcept, 'PangeaHub must find Steiner theorem concept');
+            assert(result.hasBernoulliConcept, 'PangeaHub must find Bernoulli equation concept');
+            assert(result.hasMohrConcept, 'PangeaHub must find Mohr circle concept');
+            assert(result.hasVonMisesConcept, 'PangeaHub must find Von Mises yield criterion');
+            assert(result.hasBackManager, 'window.handleMobileBackAction and MobileBackNavigationManager must be registered');
+            assert(result.courseModalClosedViaBack, 'handleMobileBackAction must close active course modal');
+            assert(result.readerClosedOnBack, 'handleMobileBackAction must close open Pangea reader modal');
+            assert(result.tabBackHandled && result.tabIsPlanner, 'handleMobileBackAction must navigate back in tab history when no modal is open');
+        });
+
     } finally {
         console.log(`\n========================================================================`);
         console.log(`SUMMARY: ${passed} passed, ${failed} failed.`);

@@ -212,7 +212,7 @@
             id: 'step-grades',
             tab: 'curriculum',
             windowName: 'גיליון ציונים (Grade Sheet & Simulator)',
-            windowNumber: 'מעצמת למידה 3/4',
+            windowNumber: 'מעצמת למידה 3/3',
             target: ['#btn-open-grade-sheet', '.hud-left-actions', '.technion-ecosystem-bar'],
             icon: '🎓',
             tag: 'סימולטור What-If',
@@ -227,29 +227,9 @@
             },
             placement: 'bottom'
         },
-        {
-            id: 'step-watch',
-            tab: 'settings',
-            windowName: 'שעון חכם Galaxy Watch (Wear OS)',
-            windowNumber: 'מעצמת למידה 4/4',
-            target: ['#btn-test-watch-alert-settings', '.settings-group', '#settings-workspace'],
-            icon: '⌚',
-            tag: 'חומרה לבישה',
-            title: 'סנכרון מלא לשעון Samsung Galaxy Watch 8 (Wear OS)',
-            text: 'רוץ לשיעור הבא עם כל המידע על פרק כף היד: Watch Face Complication המציג את הכיתה והבניין, ווידג׳ט Tile רדאר מעוצב, קרוסלת מסכים מותאמת לבזל מסתובב, וסנכרון מיידי ללא אינטרנט!',
-            actionTip: 'הגדר את סנכרון השעון בהגדרות ושלח רטט בדיקה ישירות לשעון.',
-            actionBtn: {
-                label: '⌚ שלח רטט לשעון',
-                onClick: () => {
-                    const btn = document.getElementById('btn-test-watch-alert-settings');
-                    if (btn) btn.click();
-                }
-            },
-            placement: 'top'
-        },
+        STANDARD_STEPS[7], // 8: Rights & Miluim
         STANDARD_STEPS[6], // 9: Command search
-        STANDARD_STEPS[7], // 10: Rights
-        STANDARD_STEPS[5]  // 11: Settings
+        STANDARD_STEPS[5]  // 10: Settings
     ];
 
     const TOUR_STEPS = STANDARD_STEPS;
@@ -320,11 +300,11 @@
             stepIndex: 7
         },
         {
-            id: 'mod-watch',
-            icon: '⌚',
-            title: 'שעון חכם Samsung Galaxy Watch 8 (Wear OS)',
-            desc: 'Complication המציג כיתה ובניין, Tile רדאר מעוצב, תמיכה בבזל וסנכרון מיידי.',
-            tab: 'settings',
+            id: 'mod-faq',
+            icon: '🛡️',
+            title: 'זכויות ונהלים: יועץ זכויות ומילואים',
+            desc: 'כל מה שחשוב לדעת: פטור 2 נק״ז מילואים, טירונות עתודה, פורמולה טכניון ואנגלית.',
+            tab: 'curriculum',
             stepIndex: 8
         },
         {
@@ -336,20 +316,12 @@
             stepIndex: 9
         },
         {
-            id: 'mod-faq',
-            icon: '🛡️',
-            title: 'זכויות ונהלים: יועץ זכויות ומילואים',
-            desc: 'כל מה שחשוב לדעת: פטור 2 נק״ז מילואים, טירונות עתודה, פורמולה טכניון ואנגלית.',
-            tab: 'curriculum',
-            stepIndex: 10
-        },
-        {
             id: 'mod-settings',
             icon: '⚙️',
             title: 'חלון 6: הגדרות, גיבוי ענן והורדת אפליקציות',
             desc: 'מעבר מהיר עם מקשים 1-6, גודל פונט, סנכרון ענן והורדה ל-Windows ולאנדרואיד.',
             tab: 'settings',
-            stepIndex: 11
+            stepIndex: 10
         }
     ];
 
@@ -1715,7 +1687,7 @@
                                 <span>⚡</span> <span>סיור מהיר (3 דק׳)</span>
                             </button>
                             <button type="button" class="btn btn-primary" onclick="window.closeTutorialHubModal(); window.startInteractiveTour(0, 'extended');" style="background: linear-gradient(135deg, #0284c7, #2563eb); border: 1px solid rgba(56, 189, 248, 0.4); font-weight: 700; padding: 7px 16px; border-radius: 8px; font-size: 0.82rem; color: #ffffff; box-shadow: 0 3px 12px rgba(2, 132, 199, 0.35); display: inline-flex; align-items: center; gap: 6px;">
-                                <span>🌟</span> <span>סיור מורחב (12 מעצמות)</span>
+                                <span>🌟</span> <span>סיור מורחב (11 מעצמות)</span>
                             </button>
                         </div>
                     </div>

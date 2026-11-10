@@ -1422,12 +1422,215 @@
     }
 
     // =========================================================================
+    
+    // =========================================================================
+    // 11.5 Mobile Hardware & Gesture Back Button Navigation Shield
+    // =========================================================================
+    const MobileBackNavigationManager = {
+        init: function() {
+            // 1. Seed browser history state so back gestures don't abruptly exit
+            if (typeof history !== 'undefined' && history.pushState) {
+                try {
+                    history.replaceState({ semesteroRoot: true, depth: 0 }, '');
+                    history.pushState({ semesteroApp: true, depth: 1 }, '');
+                } catch (e) {}
+            }
+
+            // 2. Intercept browser / swipe-to-back popstate
+            window.addEventListener('popstate', (e) => {
+                const handled = this.handleBack();
+                if (handled) {
+                    try {
+                        history.pushState({ semesteroApp: true, depth: 1 }, '');
+                    } catch (err) {}
+                }
+            });
+
+            // 3. Intercept Android WebView / Cordova backbutton
+            document.addEventListener('backbutton', (e) => {
+                const handled = this.handleBack();
+                if (handled && e && typeof e.preventDefault === 'function') {
+                    e.preventDefault();
+                }
+            }, false);
+
+            // 4. Intercept Capacitor Native App backButton
+            if (typeof window !== 'undefined' && window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.App) {
+                try {
+                    window.Capacitor.Plugins.App.addListener('backButton', () => {
+                        const handled = this.handleBack();
+                        if (!handled && window.Capacitor.Plugins.App.exitApp) {
+                            window.Capacitor.Plugins.App.exitApp();
+                        }
+                    });
+                } catch (e) {
+                    console.warn('[MobileBack] Capacitor App plugin backButton listener error:', e);
+                }
+            }
+
+            // Expose globally
+            window.handleMobileBackAction = () => this.handleBack();
+            window.MobileBackNavigationManager = this;
+        },
+
+        isElementVisible: function(el) {
+            if (!el || el.hidden) return false;
+            if (el.style && el.style.display === 'none') return false;
+            if (el.classList && el.classList.contains('active')) return true;
+            if (el.style && (el.style.display === 'flex' || el.style.display === 'block' || el.style.display === 'grid')) return true;
+            if (typeof window !== 'undefined' && typeof window.getComputedStyle === 'function') {
+                try {
+                    const disp = window.getComputedStyle(el).display;
+                    return disp !== 'none' && disp !== '';
+                } catch (e) {
+                    return false;
+                }
+            }
+            return false;
+        },
+
+        handleBack: function() {
+            // A. Check active onboarding / guided tour
+            if (window.InteractiveTour && typeof window.InteractiveTour.isActive === 'function' && window.InteractiveTour.isActive()) {
+                window.InteractiveTour.endTour(true);
+                return true;
+            }
+
+            // B. Check Pangea QuickPeek Reader
+            const pangeaReader = document.getElementById('pangea-reader-modal');
+            if (pangeaReader && this.isElementVisible(pangeaReader)) {
+                if (window.PangeaHub && typeof window.PangeaHub.closeQuickPeek === 'function') {
+                    window.PangeaHub.closeQuickPeek();
+                } else {
+                    pangeaReader.style.display = 'none';
+                    pangeaReader.classList.remove('active');
+                }
+                return true;
+            }
+
+            // C. Check Pangea Global Search
+            const pangeaSearch = document.getElementById('pangea-search-modal');
+            if (pangeaSearch && this.isElementVisible(pangeaSearch)) {
+                if (window.PangeaHub && typeof window.PangeaHub.closeGlobalSearch === 'function') {
+                    window.PangeaHub.closeGlobalSearch();
+                } else {
+                    pangeaSearch.style.display = 'none';
+                    pangeaSearch.classList.remove('active');
+                }
+                return true;
+            }
+
+            // D. Check Notification Drawer
+            const notifDrawer = document.getElementById('notif-drawer-overlay');
+            if (notifDrawer && this.isElementVisible(notifDrawer)) {
+                const closeBtn = document.getElementById('btn-close-notif-drawer');
+                if (closeBtn) closeBtn.click();
+                else notifDrawer.style.display = 'none';
+                return true;
+            }
+
+            // E. Check Omni Command Palette
+            const cmdModal = document.getElementById('command-palette-modal') || document.getElementById('omni-command-palette-modal');
+            if (cmdModal && this.isElementVisible(cmdModal)) {
+                if (typeof window.closeCommandPalette === 'function') window.closeCommandPalette();
+                else {
+                    cmdModal.classList.remove('active');
+                    cmdModal.style.display = 'none';
+                }
+                return true;
+            }
+
+            // F. Check Attendance Hub
+            const attendanceModal = document.getElementById('modal-attendance-hub');
+            if (attendanceModal && this.isElementVisible(attendanceModal)) {
+                if (window.AttendanceHub && typeof window.AttendanceHub.close === 'function') {
+                    window.AttendanceHub.close();
+                } else {
+                    attendanceModal.classList.remove('active');
+                    attendanceModal.style.display = 'none';
+                }
+                return true;
+            }
+
+            // G. Check Grade Sheet / What-If Simulator
+            const gradeSheetModal = document.getElementById('grade-sheet-modal');
+            if (gradeSheetModal && this.isElementVisible(gradeSheetModal)) {
+                if (window.GradeSheetModal && typeof window.GradeSheetModal.close === 'function') {
+                    window.GradeSheetModal.close();
+                } else {
+                    gradeSheetModal.classList.remove('active');
+                    gradeSheetModal.style.display = 'none';
+                }
+                return true;
+            }
+
+            // H. Check Academic Rights & Miluim Advisor
+            const miluimModal = document.getElementById('modal-miluim-rights');
+            if (miluimModal && this.isElementVisible(miluimModal)) {
+                const bClose = document.getElementById('btn-close-miluim-modal');
+                if (bClose) bClose.click();
+                else {
+                    miluimModal.classList.remove('active');
+                    miluimModal.style.display = 'none';
+                }
+                return true;
+            }
+
+            // I. Check Course Details Modal
+            const courseModal = document.getElementById('course-modal');
+            if (courseModal && this.isElementVisible(courseModal)) {
+                const cClose = document.getElementById('course-modal-close');
+                if (cClose) cClose.click();
+                else {
+                    courseModal.classList.remove('active');
+                    courseModal.style.display = 'none';
+                }
+                return true;
+            }
+
+            // J. Check All Other Open Modals / Overlays
+            const openModals = Array.from(document.querySelectorAll(
+                '.modal-overlay.active, .modal.active, ' +
+                '.modal-overlay[style*="display: flex"], .modal-overlay[style*="display: block"], ' +
+                '.planner-export-modal.active, .planner-semesters-mgr-modal-overlay.active, ' +
+                '#accessibility-modal.active, #notion-icon-picker-modal[style*="display: flex"], ' +
+                '#notion-icon-picker-modal[style*="display: block"]'
+            )).filter(m => this.isElementVisible(m));
+
+            if (openModals.length > 0) {
+                // Topmost modal (last in DOM or active)
+                const topmost = openModals[openModals.length - 1];
+                const closeBtn = topmost.querySelector('.modal-close, .export-modal-close, .a11y-close-btn, .btn-close, [data-dismiss="modal"]');
+                if (closeBtn) {
+                    closeBtn.click();
+                } else {
+                    topmost.classList.remove('active');
+                    topmost.style.display = 'none';
+                }
+                return true;
+            }
+
+            // K. If No Modal is Open -> Navigate to Previous Tab
+            if (window._tabHistoryStack && window._tabHistoryStack.length > 0) {
+                const prevTab = window._tabHistoryStack.pop();
+                if (prevTab && prevTab !== window.currentActiveTab && typeof window.setActiveMainTab === 'function') {
+                    window.setActiveMainTab(prevTab, true);
+                    return true;
+                }
+            }
+
+            // L. Root state reached (no modal, no tab history)
+            return false;
+        }
+    };
+
     // 12. Main Initialization on DOM Ready
     // =========================================================================
     function initAllEnhancements() {
         initBackToTop();
         initKeyboardShortcuts();
         initFontScaling();
+        MobileBackNavigationManager.init();
         CourseWishlist.renderWishlistPillCount();
         RecentlyViewed.renderRecentChips();
 

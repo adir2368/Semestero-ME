@@ -16092,8 +16092,19 @@ window.switchTab = function(tabNameOrNumber) {
     }
 };
 
-    function setActiveMainTab(activeTabId) {
+    window._tabHistoryStack = window._tabHistoryStack || [];
+
+    function setActiveMainTab(activeTabId, isNavBack = false) {
         window.setActiveMainTab = setActiveMainTab;
+        if (!isNavBack && window.currentActiveTab && window.currentActiveTab !== activeTabId) {
+            window._tabHistoryStack.push(window.currentActiveTab);
+            if (window._tabHistoryStack.length > 30) window._tabHistoryStack.shift();
+            if (typeof history !== 'undefined' && history.pushState) {
+                try {
+                    history.pushState({ semesteroTab: activeTabId, depth: window._tabHistoryStack.length }, '');
+                } catch (e) {}
+            }
+        }
         window.currentActiveTab = activeTabId;
         try {
             localStorage.setItem('semestero_last_active_tab', activeTabId);
@@ -23534,11 +23545,11 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.11.10-v2.10.24",
-    version: "2.10.24",
+    code: "REV-2026.11.10-v2.10.25",
+    version: "2.10.25",
     build: "20261110_02",
     date: "2026-11-10 07:15",
-    description: "v2.10.24: סיור מורחב ומעמיק (12 מעצמות מערכת), אוטונומיה מלאה לאורחים ודילוג חופשי על סיורים ללא פופאפים חוסמים (ADR-097)."
+    description: "v2.10.25: מנוע חיפוש מושגים ומשפטים עמוק בפנגיה, שריון כפתור חזור וג'סטות בנייד, וסיור אקדמי ממוקד 11 מעצמות (ADR-098)."
 };
 window.APP_VERSION = APP_CURRENT_REVISION.version;
 

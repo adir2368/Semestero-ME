@@ -4583,9 +4583,1412 @@
   "35041": "MCS1"
 };
 
+
+    const PANGEA_CONCEPTS_INDEX = [
+    {
+        "id": "steiner-theorem",
+        "name": "משפט שטיינר (משפט הצירים המקבילים)",
+        "enName": "Steiner's Parallel Axis Theorem",
+        "aliases": [
+            "שטיינר",
+            "משפט שטיינר",
+            "צירים מקבילים",
+            "מומנט אינרציה",
+            "steiner",
+            "parallel axis theorem",
+            "מומנט שני של השטח"
+        ],
+        "category": "theorem",
+        "categoryLabel": "📐 משפט מרכזי",
+        "courseTag": "SLD1",
+        "courseTitle": "מכניקת מוצקים 1 (034028)",
+        "formula": "I = I_{cm} + A \\cdot d^2",
+        "description": "חישוב מומנט אינרציה של חתך סביב ציר כלשהו המקביל לציר שעובר דרך מרכז הכובד (Centroid), כאשר d הוא המרחק בין הצירים ו-A שטח החתך.",
+        "url": "https://idofangbentov.uk/Technion/SLD1/SLD1_006-מרכז-כובד-ומרכז-מסה",
+        "lectureName": "SLD1_006-מרכז-כובד-ומרכז-מסה"
+    },
+    {
+        "id": "hookes-law-1d",
+        "name": "חוק הוק החד-ממדי והתלת-ממדי",
+        "enName": "Hooke's Law",
+        "aliases": [
+            "הוק",
+            "חוק הוק",
+            "אלסטיות",
+            "מודול יאנג",
+            "מאמץ ועיבור",
+            "hooke",
+            "hookes law"
+        ],
+        "category": "law",
+        "categoryLabel": "⚡ חוק פיזיקלי",
+        "courseTag": "SLD1",
+        "courseTitle": "מכניקת מוצקים 1 (034028)",
+        "formula": "\\sigma = E \\cdot \\varepsilon, \\quad \\varepsilon_x = \\frac{1}{E}[\\sigma_x - \\nu(\\sigma_y + \\sigma_z)]",
+        "description": "הקשר הליניארי הבסיסי בין מאמץ נורמלי לעיבור אלסטי יחסי בחומר איזוטרופי בתחום האלסטי.",
+        "url": "https://idofangbentov.uk/Technion/SLD1/SLD1_007-מאמץ-ועיבור",
+        "lectureName": "SLD1_007-מאמץ-ועיבור"
+    },
+    {
+        "id": "poisson-ratio",
+        "name": "מקדם פואסון",
+        "enName": "Poisson's Ratio",
+        "aliases": [
+            "פואסון",
+            "מקדם פואסון",
+            "התכווצות רוחבית",
+            "poisson",
+            "poissons ratio"
+        ],
+        "category": "concept",
+        "categoryLabel": "💡 מושג מפתח",
+        "courseTag": "SLD1",
+        "courseTitle": "מכניקת מוצקים 1 (034028)",
+        "formula": "\\nu = -\\frac{\\varepsilon_{lateral}}{\\varepsilon_{axial}}, \\quad G = \\frac{E}{2(1+\\nu)}",
+        "description": "היחס השלילי בין העיבור הרוחבי לעיבור האורכי במתיחה חד-צירית. עבור רוב המתכות ערכו סביב 0.28-0.33.",
+        "url": "https://idofangbentov.uk/Technion/SLD1/SLD1_007-מאמץ-ועיבור",
+        "lectureName": "SLD1_007-מאמץ-ועיבור"
+    },
+    {
+        "id": "torsion-circular-shaft",
+        "name": "נוסחת הפיתול בציר מעגלי",
+        "enName": "Circular Shaft Torsion Formula",
+        "aliases": [
+            "פיתול",
+            "מאמץ פיתול",
+            "זווית פיתול",
+            "אינרציה פולרית",
+            "torsion",
+            "polar moment"
+        ],
+        "category": "formula",
+        "categoryLabel": "🔢 נוסחה יסודית",
+        "courseTag": "SLD1",
+        "courseTitle": "מכניקת מוצקים 1 (034028)",
+        "formula": "\\tau = \\frac{T \\cdot r}{J}, \\quad \\phi = \\frac{T \\cdot L}{G \\cdot J}, \\quad J = \\frac{\\pi d^4}{32}",
+        "description": "מאמץ הגזירה המקסימלי וזווית הפיתול של מוט עגול מלא או חלול הנתון למומנט פיתול T, כאשר J הוא מומנט האינרציה הפולרי.",
+        "url": "https://idofangbentov.uk/Technion/SLD1/SLD1_008-פיתול",
+        "lectureName": "SLD1_008-פיתול"
+    },
+    {
+        "id": "virtual-work-principle",
+        "name": "עקרון העבודה הוירטואלית",
+        "enName": "Principle of Virtual Work",
+        "aliases": [
+            "עבודה וירטואלית",
+            "העתקים וירטואליים",
+            "עבודה מדומה",
+            "virtual work"
+        ],
+        "category": "theorem",
+        "categoryLabel": "📐 משפט מרכזי",
+        "courseTag": "SLD1",
+        "courseTitle": "מכניקת מוצקים 1 (034028)",
+        "formula": "\\delta W = \\sum \\mathbf{F}_i \\cdot \\delta \\mathbf{r}_i + \\sum \\mathbf{M}_j \\cdot \\delta \\boldsymbol{\\theta}_j = 0",
+        "description": "תנאי הכרחי ומספיק לשיווי משקל של מערכת מכנית: סכום העבודות הווירטואליות של כל הכוחות הפועלים על כל העתק וירטואלי קינמטי שווה לאפס.",
+        "url": "https://idofangbentov.uk/Technion/SLD1/SLD1_004-עבודה-וירטואלית",
+        "lectureName": "SLD1_004-עבודה-וירטואלית"
+    },
+    {
+        "id": "beam-differential-equilibrium",
+        "name": "משוואות שיווי משקל דיפרנציאליות בקורות",
+        "enName": "Differential Relations in Beams",
+        "aliases": [
+            "מהלך כוחות",
+            "מהלך מומנטים",
+            "גזירה וכפיפה",
+            "גזירה בשיפוע",
+            "shear moment relation"
+        ],
+        "category": "formula",
+        "categoryLabel": "🔢 נוסחה יסודית",
+        "courseTag": "SLD1",
+        "courseTitle": "מכניקת מוצקים 1 (034028)",
+        "formula": "\\frac{dV}{dx} = -q(x), \\quad \\frac{dM}{dx} = V(x), \\quad \\frac{d^2 M}{dx^2} = -q(x)",
+        "description": "הקשר בין עומס מפורס q(x), כוח גזירה V(x) ומומנט כפיפה M(x). שיפוע מהלך המומנט שווה לגזירה.",
+        "url": "https://idofangbentov.uk/Technion/SLD1/SLD1_005-מהלכי-כוחות-ומומנטים-בקורות",
+        "lectureName": "SLD1_005-מהלכי-כוחות-ומומנטים-בקורות"
+    },
+    {
+        "id": "thermal-stress-1d",
+        "name": "מאמץ ועיוות תרמי",
+        "enName": "Thermal Stress & Strain",
+        "aliases": [
+            "מאמץ תרמי",
+            "התפשטות תרמית",
+            "עיוות תרמי",
+            "מקדם התפשטות",
+            "thermal stress",
+            "thermal expansion"
+        ],
+        "category": "formula",
+        "categoryLabel": "🔢 נוסחה יסודית",
+        "courseTag": "SLD1",
+        "courseTitle": "מכניקת מוצקים 1 (034028)",
+        "formula": "\\varepsilon_{th} = \\alpha \\Delta T, \\quad \\sigma_{th} = -E \\alpha \\Delta T",
+        "description": "חישוב עיבור תרמי הנובע משינוי טמפרטורה והמאמץ המתפתח בגוף כאשר ההתפשטות החופשית מוגבלת או חסומה.",
+        "url": "https://idofangbentov.uk/Technion/SLD1/SLD1_007-מאמץ-ועיבור",
+        "lectureName": "SLD1_007-מאמץ-ועיבור"
+    },
+    {
+        "id": "mohrs-circle",
+        "name": "מעגל מור למאמצים (דו-ממד ותלת-ממד)",
+        "enName": "Mohr's Circle for Stresses",
+        "aliases": [
+            "מור",
+            "מעגל מור",
+            "מאמצים ראשיים",
+            "מאמץ גזירה מרבי",
+            "טרנספורמציית מאמצים",
+            "mohr",
+            "mohrs circle"
+        ],
+        "category": "theorem",
+        "categoryLabel": "📐 משפט מרכזי",
+        "courseTag": "SLD2",
+        "courseTitle": "מכניקת מוצקים 2 (034053)",
+        "formula": "(\\sigma - \\sigma_{avg})^2 + \\tau^2 = R^2, \\quad R = \\sqrt{\\left(\\frac{\\sigma_x-\\sigma_y}{2}\\right)^2 + \\tau_{xy}^2}",
+        "description": "ייצוג גרפי וגאומטרי מדויק של מצב המאמצים בנקודה. מאפשר מציאת מאמצים ראשיים וכיווניהם ללא חישובים טנזוריים מורכבים.",
+        "url": "https://idofangbentov.uk/Technion/SLD2/SLD2_002-מישורים-ראשיים",
+        "lectureName": "SLD2_002-מישורים-ראשיים"
+    },
+    {
+        "id": "von-mises-yield-criterion",
+        "name": "קריטריון הכניעה של פון מיזס (אנרגיית עיוות צורה)",
+        "enName": "Von Mises Yield Criterion",
+        "aliases": [
+            "פון מיזס",
+            "פון מיסס",
+            "קריטריון פון מיזס",
+            "אנרגיית עיוות",
+            "מאמץ שקול",
+            "von mises",
+            "octahedral shear"
+        ],
+        "category": "criterion",
+        "categoryLabel": "🎯 קריטריון כשל",
+        "courseTag": "SLD2",
+        "courseTitle": "מכניקת מוצקים 2 (034053)",
+        "formula": "\\sigma_v = \\sqrt{\\frac{1}{2}[(\\sigma_1-\\sigma_2)^2 + (\\sigma_2-\\sigma_3)^2 + (\\sigma_3-\\sigma_1)^2]} \\le \\sigma_y",
+        "description": "קריטריון הכניעה המוביל עבור מתכות וחומרים משיכים (Ductile). קובע שכניעה מתרחשת כאשר אנרגיית עיוות הצורה מגיעה לערך הקריטי במתיחה חד-צירית.",
+        "url": "https://idofangbentov.uk/Technion/SLD2/SLD2_006-קריטריוני-כניעה-וכשל",
+        "lectureName": "SLD2_006-קריטריוני-כניעה-וכשל"
+    },
+    {
+        "id": "tresca-yield-criterion",
+        "name": "קריטריון הכניעה של טרסקה (מאמץ גזירה מרבי)",
+        "enName": "Tresca Yield Criterion (Maximum Shear Stress)",
+        "aliases": [
+            "טרסקה",
+            "קריטריון טרסקה",
+            "גזירה מקסימלית",
+            "tresca",
+            "max shear stress"
+        ],
+        "category": "criterion",
+        "categoryLabel": "🎯 קריטריון כשל",
+        "courseTag": "SLD2",
+        "courseTitle": "מכניקת מוצקים 2 (034053)",
+        "formula": "\\tau_{max} = \\frac{\\sigma_1 - \\sigma_3}{2} \\le \\frac{\\sigma_y}{2} \\iff \\sigma_1 - \\sigma_3 \\le \\sigma_y",
+        "description": "קריטריון שמרני לחומרים משיכים המבוסס על ההנחה שכניעה פלסטית מתחילה כאשר מאמץ הגזירה המקסימלי מגיע לגבול הגזירה בכניעה.",
+        "url": "https://idofangbentov.uk/Technion/SLD2/SLD2_006-קריטריוני-כניעה-וכשל",
+        "lectureName": "SLD2_006-קריטריוני-כניעה-וכשל"
+    },
+    {
+        "id": "castigliano-theorem",
+        "name": "משפט קסטיליינו (משפטי האנרגיה)",
+        "enName": "Castigliano's Theorem",
+        "aliases": [
+            "קסטיליינו",
+            "משפט קסטיליינו",
+            "שיטות אנרגיה",
+            "שקיעה באנרגיה",
+            "castigliano"
+        ],
+        "category": "theorem",
+        "categoryLabel": "📐 משפט מרכזי",
+        "courseTag": "SLD2",
+        "courseTitle": "מכניקת מוצקים 2 (034053)",
+        "formula": "\\delta_i = \\frac{\\partial U}{\\partial P_i}, \\quad \\theta_j = \\frac{\\partial U}{\\partial M_j}",
+        "description": "הנגזרת החלקית של אנרגיית העיבור האלסטית הכוללת U לפי כוח מרוכז P_i שווה לשקיעה או ההעתק \\delta_i בנקודת הפעלת הכוח ובכיוונו.",
+        "url": "https://idofangbentov.uk/Technion/SLD2/SLD2_011-שיטות-אנרגיה",
+        "lectureName": "SLD2_011-שיטות-אנרגיה"
+    },
+    {
+        "id": "zhuravskii-shear-formula",
+        "name": "נוסחת זורבסקי למאמצי גזירה בכפיפה",
+        "enName": "Zhuravskii's Shear Stress Formula",
+        "aliases": [
+            "זורבסקי",
+            "גזירה בכפיפה",
+            "מומנט סטטי",
+            "zhuravskii",
+            "shear formula"
+        ],
+        "category": "formula",
+        "categoryLabel": "🔢 נוסחה יסודית",
+        "courseTag": "SLD2",
+        "courseTitle": "מכניקת מוצקים 2 (034053)",
+        "formula": "\\tau = \\frac{V \\cdot Q}{I \\cdot b}, \\quad Q = \\int_{A^*} y \\, dA",
+        "description": "חישוב מאמצי הגזירה הרוחביים והאורכיים בקורות כפופות, כאשר Q הוא המומנט הסטטי של השטח מעל הגובה הנבדק ו-b רוחב החתך.",
+        "url": "https://idofangbentov.uk/Technion/SLD2/SLD2_008-מאמצי-גזירה-בכפיפה",
+        "lectureName": "SLD2_008-מאמצי-גזירה-בכפיפה"
+    },
+    {
+        "id": "navier-bending-formula",
+        "name": "נוסחת נאוויאר למאמצים נורמליים בכפיפה",
+        "enName": "Navier Bending Stress Formula",
+        "aliases": [
+            "נאוויאר",
+            "מאמצי כפיפה",
+            "ציר ניטרלי",
+            "כפיפה טהורה",
+            "navier",
+            "bending stress"
+        ],
+        "category": "formula",
+        "categoryLabel": "🔢 נוסחה יסודית",
+        "courseTag": "SLD2",
+        "courseTitle": "מכניקת מוצקים 2 (034053)",
+        "formula": "\\sigma = -\\frac{M_z \\cdot y}{I_z} + \\frac{M_y \\cdot z}{I_y}",
+        "description": "מאמץ המתיחה/לחיצה הנורמלי הנוצר בקורה כתוצאה ממומנט כפיפה M. המאמץ מתאפס בציר הניטרלי ומגיע לשיאו בסיבים הקיצוניים ביותר.",
+        "url": "https://idofangbentov.uk/Technion/SLD2/SLD2_007-מאמצים-נורמליים-בכפיפה",
+        "lectureName": "SLD2_007-מאמצים-נורמליים-בכפיפה"
+    },
+    {
+        "id": "euler-buckling-columns",
+        "name": "עומס קריסה של אוילר לעמודות דקות",
+        "enName": "Euler Column Buckling Load",
+        "aliases": [
+            "אוילר",
+            "קריסה",
+            "עומס קריסה",
+            "קריסה באלסטיות",
+            "עמודות דקות",
+            "euler buckling"
+        ],
+        "category": "formula",
+        "categoryLabel": "🔢 נוסחה יסודית",
+        "courseTag": "SLD2",
+        "courseTitle": "מכניקת מוצקים 2 (034053)",
+        "formula": "P_{cr} = \\frac{\\pi^2 E I}{(K L)^2}, \\quad \\sigma_{cr} = \\frac{\\pi^2 E}{\\lambda^2}, \\quad \\lambda = \\frac{K L}{r}",
+        "description": "העומס הצירי המקסימלי שעמודה דקה יכולה לשאת לפני אי-יציבות אלסטית וקריסה פתאומית הצידה, כאשר K הוא מקדם התמיכות.",
+        "url": "https://idofangbentov.uk/Technion/SLD2/SLD2_010-שקיעה-של-קורות",
+        "lectureName": "SLD2_010-שקיעה-של-קורות"
+    },
+    {
+        "id": "cauchy-stress-tensor",
+        "name": "טנזור המאמצים של קושי",
+        "enName": "Cauchy Stress Tensor",
+        "aliases": [
+            "טנזור מאמצים",
+            "קושי",
+            "טנזור המאמץ",
+            "וקטור מאמץ",
+            "cauchy",
+            "stress tensor"
+        ],
+        "category": "concept",
+        "categoryLabel": "💡 מושג מפתח",
+        "courseTag": "SLD2",
+        "courseTitle": "מכניקת מוצקים 2 (034053)",
+        "formula": "\\boldsymbol{\\sigma} = \\begin{bmatrix} \\sigma_{xx} & \\tau_{xy} & \\tau_{xz} \\\\ \\tau_{yx} & \\sigma_{yy} & \\tau_{yz} \\\\ \\tau_{zx} & \\tau_{zy} & \\sigma_{zz} \\end{bmatrix}, \\quad \\mathbf{T}^{(\\hat{n})} = \\boldsymbol{\\sigma} \\cdot \\hat{n}",
+        "description": "טנזור סימטרי מסדר שני המגדיר במלואו את מצב המאמצים בנקודה במרחב תלת-ממדי, וקובע את וקטור המאמץ על כל מישור בעל נורמל n.",
+        "url": "https://idofangbentov.uk/Technion/SLD2/SLD2_001-טנזור-המאמץ",
+        "lectureName": "SLD2_001-טנזור-המאמץ"
+    },
+    {
+        "id": "bernoulli-equation",
+        "name": "משוואת ברנולי בזרימה",
+        "enName": "Bernoulli's Equation",
+        "aliases": [
+            "ברנולי",
+            "משוואת ברנולי",
+            "עומד לחץ",
+            "עומד קינטי",
+            "שימור אנרגיה בזרימה",
+            "bernoulli"
+        ],
+        "category": "law",
+        "categoryLabel": "⚡ חוק פיזיקלי",
+        "courseTag": "FLD1",
+        "courseTitle": "תורת הזרימה 1 (034055)",
+        "formula": "p + \\frac{1}{2}\\rho v^2 + \\rho g z = \\text{const (לאורך קו זרם)}",
+        "description": "משוואת שימור האנרגיה לזרימה בלתי-דחיסה, חסרת חיכוך ומתמדת לאורך קו זרם. קובעת שעליית מהירות גורמת לירידת הלחץ הסטטי.",
+        "url": "https://idofangbentov.uk/Technion/FLD1/FLD1_003-חוקי-שימור-אינטגרליים",
+        "lectureName": "FLD1_003-חוקי-שימור-אינטגרליים"
+    },
+    {
+        "id": "navier-stokes-equations",
+        "name": "משוואות נאוויה-סטוקס",
+        "enName": "Navier-Stokes Equations",
+        "aliases": [
+            "נאוויה סטוקס",
+            "נוויר סטוקס",
+            "נאבייה סטוקס",
+            "שימור תנע דיפרנציאלי",
+            "navier stokes"
+        ],
+        "category": "law",
+        "categoryLabel": "⚡ חוק פיזיקלי",
+        "courseTag": "FLD1",
+        "courseTitle": "תורת הזרימה 1 (034055)",
+        "formula": "\\rho \\left(\\frac{\\partial \\mathbf{v}}{\\partial t} + (\\mathbf{v}\\cdot\\nabla)\\mathbf{v}\\right) = -\\nabla p + \\mu \\nabla^2 \\mathbf{v} + \\rho \\mathbf{g}",
+        "description": "משוואות התנועה היסודיות של מכניקת הזורמים הניוטוניים, המבטאות את החוק השני של ניוטון עבור אלמנט זורם צמיג ובלתי דחיס.",
+        "url": "https://idofangbentov.uk/Technion/FLD1/FLD1_004-משוואות-נאוויה-סטוקס",
+        "lectureName": "FLD1_004-משוואות-נאוויה-סטוקס"
+    },
+    {
+        "id": "reynolds-number",
+        "name": "מספר ריינולדס",
+        "enName": "Reynolds Number",
+        "aliases": [
+            "ריינולדס",
+            "מספר ריינולדס",
+            "זרימה למינרית",
+            "זרימה טורבולנטית",
+            "אינרציה מול צמיגות",
+            "reynolds"
+        ],
+        "category": "concept",
+        "categoryLabel": "💡 מושג מפתח",
+        "courseTag": "FLD1",
+        "courseTitle": "תורת הזרימה 1 (034055)",
+        "formula": "Re = \\frac{\\rho v D}{\\mu} = \\frac{v D}{\\nu} = \\frac{\\text{כוחות אינרציה}}{\\text{כוחות צמיגות}}",
+        "description": "גודל חסר ממד הקובע את אופי הזרימה: למינרית (Re נמוך, סדרי גודל < 2300 בצינור) או טורבולנטית (Re גבוה).",
+        "url": "https://idofangbentov.uk/Technion/FLD1/FLD1_006-צמיגות",
+        "lectureName": "FLD1_006-צמיגות"
+    },
+    {
+        "id": "continuity-equation-fluids",
+        "name": "משוואת הרציפות (שימור מסה)",
+        "enName": "Continuity Equation",
+        "aliases": [
+            "רציפות",
+            "שימור מסה",
+            "ספיקה נפחית",
+            "ספיקה מסית",
+            "continuity"
+        ],
+        "category": "law",
+        "categoryLabel": "⚡ חוק פיזיקלי",
+        "courseTag": "FLD1",
+        "courseTitle": "תורת הזרימה 1 (034055)",
+        "formula": "\\frac{\\partial \\rho}{\\partial t} + \\nabla \\cdot (\\rho \\mathbf{v}) = 0 \\quad \\xrightarrow{\\rho=\\text{const}} \\quad \\nabla \\cdot \\mathbf{v} = 0, \\; Q = A_1 v_1 = A_2 v_2",
+        "description": "ביטוי לשימור מסה בזורם. בזרימה בלתי-דחיסה, דיברגנץ שדה המהירות מתאפס והספיקה הנפחית נשמרת לאורך הצינור.",
+        "url": "https://idofangbentov.uk/Technion/FLD1/FLD1_003-חוקי-שימור-אינטגרליים",
+        "lectureName": "FLD1_003-חוקי-שימור-אינטגרליים"
+    },
+    {
+        "id": "reynolds-transport-theorem",
+        "name": "משפט ההסעה של ריינולדס (RTT)",
+        "enName": "Reynolds Transport Theorem",
+        "aliases": [
+            "הסעה של ריינולדס",
+            "נפח בקרה",
+            "RTT",
+            "מעבר ממערכת לנפח בקרה",
+            "reynolds transport"
+        ],
+        "category": "theorem",
+        "categoryLabel": "📐 משפט מרכזי",
+        "courseTag": "FLD1",
+        "courseTitle": "תורת הזרימה 1 (034055)",
+        "formula": "\\frac{dB_{sys}}{dt} = \\frac{d}{dt}\\iiint_{CV} \\rho \\beta \\, dV + \\iint_{CS} \\rho \\beta (\\mathbf{v}_{rel} \\cdot \\hat{n}) \\, dA",
+        "description": "הגשר המתמטי המקשר בין קצב שינוי תכונה במערכת חומר סגורה לבין שטפי התכונה דרך מעטפת נפח בקרה קבוע או נע.",
+        "url": "https://idofangbentov.uk/Technion/FLD1/FLD1_003-חוקי-שימור-אינטגרליים",
+        "lectureName": "FLD1_003-חוקי-שימור-אינטגרליים"
+    },
+    {
+        "id": "prandtl-boundary-layer",
+        "name": "תאוריית שכבת הגבול של פרנטל",
+        "enName": "Prandtl's Boundary Layer Theory",
+        "aliases": [
+            "שכבת גבול",
+            "פרנטל",
+            "בלסיוס",
+            "עובי שכבת גבול",
+            "מאמץ גזירה בדופן",
+            "boundary layer",
+            "prandtl"
+        ],
+        "category": "concept",
+        "categoryLabel": "💡 מושג מפתח",
+        "courseTag": "FLD1",
+        "courseTitle": "תורת הזרימה 1 (034055)",
+        "formula": "\\delta(x) \\approx \\frac{5.0 x}{\\sqrt{Re_x}} \\quad (\\text{למינרי}), \\quad C_f = \\frac{\\tau_w}{\\frac{1}{2}\\rho U^2}",
+        "description": "האזור הצר הסמוך לדופן מוצקה שבו השפעות הצמיגות ומאמצי הגזירה דומיננטיים, בעוד שמחוצה לו ניתן לקרב את הזרימה כאידיאלית וחסרת צמיגות.",
+        "url": "https://idofangbentov.uk/Technion/FLD1/FLD1_009-שכבות-גבול",
+        "lectureName": "FLD1_009-שכבות-גבול"
+    },
+    {
+        "id": "darcy-weisbach-equation",
+        "name": "משוואת דרסי-וייסבך להפסדי לחץ בצנרת",
+        "enName": "Darcy-Weisbach Pressure Loss Equation",
+        "aliases": [
+            "דרסי וייסבך",
+            "הפסדי לחץ",
+            "דיאגרמת מודי",
+            "מקדם חיכוך",
+            "הפסדים ראשיים",
+            "darcy weisbach",
+            "moody"
+        ],
+        "category": "formula",
+        "categoryLabel": "🔢 נוסחה יסודית",
+        "courseTag": "FLD1",
+        "courseTitle": "תורת הזרימה 1 (034055)",
+        "formula": "h_f = f \\frac{L}{D} \\frac{v^2}{2g}, \\quad \\Delta p = f \\frac{L}{D} \\frac{\\rho v^2}{2}, \\quad f_{lam} = \\frac{64}{Re}",
+        "description": "משוואה פיזיקלית לחישוב מפל הלחץ והפסדי עומד כתוצאה מחיכוך פנימי בצנרת באורך L ובקוטר D, כאשר f נשלף מדיאגרמת מודי.",
+        "url": "https://idofangbentov.uk/Technion/FLD1/FLD1_006-צמיגות",
+        "lectureName": "FLD1_006-צמיגות"
+    },
+    {
+        "id": "second-law-thermo",
+        "name": "החוק השני של התרמודינמיקה",
+        "enName": "Second Law of Thermodynamics",
+        "aliases": [
+            "חוק שני",
+            "החוק השני",
+            "תרמודינמיקה",
+            "אנטרופיה",
+            "קלוין פלאנק",
+            "קלאוזיוס",
+            "second law",
+            "clausius"
+        ],
+        "category": "law",
+        "categoryLabel": "⚡ חוק פיזיקלי",
+        "courseTag": "THE1",
+        "courseTitle": "תרמודינמיקה 1 (034035)",
+        "formula": "\\Delta S_{isolated} \\ge 0, \\quad \\oint \\frac{\\delta Q}{T} \\le 0",
+        "description": "קובע את כיוונם החד-סטרי של תהליכים ספונטניים בטבע: האנטרופיה הכוללת של מערכת מבודדת לעולם אינה קטנה. אי-אפשר לבנות מנוע חום שנצילותו 100%.",
+        "url": "https://idofangbentov.uk/Technion/THE1/THE1_005-החוק-השני-של-התרמודינמיקה",
+        "lectureName": "THE1_005-החוק-השני-של-התרמודינמיקה"
+    },
+    {
+        "id": "first-law-thermo",
+        "name": "החוק הראשון של התרמודינמיקה (שימור אנרגיה)",
+        "enName": "First Law of Thermodynamics",
+        "aliases": [
+            "חוק ראשון",
+            "החוק הראשון",
+            "שימור אנרגיה",
+            "אנרגיה פנימית",
+            "חום ועבודה",
+            "first law"
+        ],
+        "category": "law",
+        "categoryLabel": "⚡ חוק פיזיקלי",
+        "courseTag": "THE1",
+        "courseTitle": "תרמודינמיקה 1 (034035)",
+        "formula": "\\Delta U = Q - W, \\quad \\dot{Q} - \\dot{W}_{net} = \\sum \\dot{m}_{out}(h + \\frac{v^2}{2} + gz)_{out} - \\sum \\dot{m}_{in}(h + \\frac{v^2}{2} + gz)_{in}",
+        "description": "חוק שימור האנרגיה למערכת סגורה ולנפח בקרה מתמיד: שינוי באנרגיה הפנימית שווה לחום הנמסר למערכת פחות העבודה שהמערכת ביצעה.",
+        "url": "https://idofangbentov.uk/Technion/THE1/THE1_003-אנליזת-נפח-בקרה",
+        "lectureName": "THE1_003-אנליזת-נפח-בקרה"
+    },
+    {
+        "id": "carnot-cycle",
+        "name": "מחזור קרנו ונצילות קרנו המרבית",
+        "enName": "Carnot Cycle & Efficiency",
+        "aliases": [
+            "קרנו",
+            "מחזור קרנו",
+            "נצילות קרנו",
+            "נצילות מרבית",
+            "מנוע חום הפיך",
+            "carnot",
+            "carnot efficiency"
+        ],
+        "category": "theorem",
+        "categoryLabel": "📐 משפט מרכזי",
+        "courseTag": "THE1",
+        "courseTitle": "תרמודינמיקה 1 (034035)",
+        "formula": "\\eta_{Carnot} = 1 - \\frac{T_L}{T_H}, \\quad COP_{Carnot,R} = \\frac{T_L}{T_H - T_L}",
+        "description": "המחזור התרמודינמי ההפיך המושלם המציב את הגבול העליון התיאורטי לנצילות מנוע חום הפועל בין שני מאגרי חום בטמפרטורות T_H ו-T_L (בקלווין).",
+        "url": "https://idofangbentov.uk/Technion/THE1/THE1_004-מכונות-חום",
+        "lectureName": "THE1_004-מכונות-חום"
+    },
+    {
+        "id": "entropy-and-generation",
+        "name": "אנטרופיה ומאזן אנטרופיה",
+        "enName": "Entropy & Entropy Generation",
+        "aliases": [
+            "אנטרופיה",
+            "יצירת אנטרופיה",
+            "אי-הפיכות",
+            "איזנטרופי",
+            "entropy",
+            "sgen"
+        ],
+        "category": "concept",
+        "categoryLabel": "💡 מושג מפתח",
+        "courseTag": "THE1",
+        "courseTitle": "תרמודינמיקה 1 (034035)",
+        "formula": "dS = \\frac{\\delta Q_{rev}}{T}, \\quad \\Delta S_{sys} = \\int \\frac{\\delta Q}{T_b} + S_{gen}, \\quad S_{gen} \\ge 0",
+        "description": "פונקציית מצב המודדת את מידת אי-הסדר ואובדן האנרגיה הזמינה לביצוע עבודה. יצירת האנטרופיה S_gen גדולה ממש מאפס עבור כל תהליך ממשי בלתי-הפיך.",
+        "url": "https://idofangbentov.uk/Technion/THE1/THE1_006-אנטרופיה",
+        "lectureName": "THE1_006-אנטרופיה"
+    },
+    {
+        "id": "rankine-steam-cycle",
+        "name": "מחזור רנקין לתחנות כוח בקיטור",
+        "enName": "Rankine Steam Power Cycle",
+        "aliases": [
+            "רנקין",
+            "מחזור רנקין",
+            "תחנת כוח",
+            "טורבינת קיטור",
+            "חימום חוזר",
+            "rankine"
+        ],
+        "category": "concept",
+        "categoryLabel": "💡 מושג מפתח",
+        "courseTag": "THE1",
+        "courseTitle": "תרמודינמיקה 1 (034035)",
+        "formula": "\\eta = \\frac{w_{net}}{q_{in}} = \\frac{(h_3 - h_4) - (h_2 - h_1)}{h_3 - h_2}",
+        "description": "מחזור העבודה הסטנדרטי של תחנות כוח מבוססות טורבינות קיטור: דוד, טורבינה, מעבה ומשאבת הזנה.",
+        "url": "https://idofangbentov.uk/Technion/THE1/THE1_007-מחזורי-קיטור",
+        "lectureName": "THE1_007-מחזורי-קיטור"
+    },
+    {
+        "id": "brayton-gas-cycle",
+        "name": "מחזור ברייטון לטורבינות גז ומנועי סילון",
+        "enName": "Brayton Gas Turbine Cycle",
+        "aliases": [
+            "ברייטון",
+            "מחזור ברייטון",
+            "טורבינת גז",
+            "מנוע סילון",
+            "מדחס",
+            "יחס לחצים",
+            "brayton"
+        ],
+        "category": "concept",
+        "categoryLabel": "💡 מושג מפתח",
+        "courseTag": "THE1",
+        "courseTitle": "תרמודינמיקה 1 (034035)",
+        "formula": "\\eta = 1 - \\frac{1}{r_p^{(\\gamma-1)/\\gamma}}, \\quad r_p = \\frac{p_2}{p_1}",
+        "description": "מחזור פעולה המורכב מדחיסה איזנטרופית, הוספת חום בלחץ קבוע והתפשטות איזנטרופית בטורבינה. מהווה את הבסיס למנועי סילון.",
+        "url": "https://idofangbentov.uk/Technion/THE1/THE1_008-מחזורי-גז",
+        "lectureName": "THE1_008-מחזורי-גז"
+    },
+    {
+        "id": "fourier-law-heat-conduction",
+        "name": "חוק פורייה להולכת חום",
+        "enName": "Fourier's Law of Heat Conduction",
+        "aliases": [
+            "פורייה",
+            "חוק פורייה",
+            "הולכת חום",
+            "מוליכות תרמית",
+            "fourier",
+            "conduction"
+        ],
+        "category": "law",
+        "categoryLabel": "⚡ חוק פיזיקלי",
+        "courseTag": "HTF1",
+        "courseTitle": "מעבר חום (00340041)",
+        "formula": "q'' = -k \\nabla T, \\quad q_x = -k A \\frac{dT}{dx}",
+        "description": "צפיפות שטף החום בהולכה פרופורציונלית לגרדיאנט הטמפרטורה, כאשר k הוא מקדם המוליכות התרמית של החומר והסימן השלילי מורה על מעבר חום מחם לקר.",
+        "url": "https://idofangbentov.uk/Technion/HTF1/HTF1_001-מבוא",
+        "lectureName": "HTF1_001-מבוא"
+    },
+    {
+        "id": "newton-law-cooling-convection",
+        "name": "חוק הקירור של ניוטון להסעת חום",
+        "enName": "Newton's Law of Cooling (Convection)",
+        "aliases": [
+            "קירור של ניוטון",
+            "הסעת חום",
+            "מקדם הסעה",
+            "קונבקציה",
+            "newton cooling",
+            "convection"
+        ],
+        "category": "law",
+        "categoryLabel": "⚡ חוק פיזיקלי",
+        "courseTag": "HTF1",
+        "courseTitle": "מעבר חום (00340041)",
+        "formula": "q'' = h (T_s - T_\\infty), \\quad q = h A (T_s - T_\\infty)",
+        "description": "מגדיר את קצב מעבר החום בין משטח מוצק בטמפרטורה T_s לבין זורם בתנועה בטמפרטורה T_inf, כאשר h הוא מקדם ההסעה התרמי.",
+        "url": "https://idofangbentov.uk/Technion/HTF1/HTF1_005-מבוא-להסעה",
+        "lectureName": "HTF1_005-מבוא-להסעה"
+    },
+    {
+        "id": "stefan-boltzmann-law-radiation",
+        "name": "חוק סטפן-בולצמן לקרינה תרמית",
+        "enName": "Stefan-Boltzmann Radiation Law",
+        "aliases": [
+            "סטפן בולצמן",
+            "קרינה תרמית",
+            "גוף שחור",
+            "אמיסיביות",
+            "stefan boltzmann",
+            "radiation"
+        ],
+        "category": "law",
+        "categoryLabel": "⚡ חוק פיזיקלי",
+        "courseTag": "HTF1",
+        "courseTitle": "מעבר חום (00340041)",
+        "formula": "E_b = \\sigma T^4, \\quad q = \\epsilon \\sigma A (T_s^4 - T_{surr}^4), \\quad \\sigma = 5.67 \\times 10^{-8} \\frac{\\text{W}}{\\text{m}^2 \\text{K}^4}",
+        "description": "עוצמת הפליטה של גוף שחור פרופורציונלית לחזקה הרביעית של הטמפרטורה האבסולוטית בקלווין, כאשר sigma הוא קבוע סטפן-בולצמן.",
+        "url": "https://idofangbentov.uk/Technion/HTF1/HTF1_009-קרינה",
+        "lectureName": "HTF1_009-קרינה"
+    },
+    {
+        "id": "biot-number-lumped",
+        "name": "מספר ביו ומודל הקיבוליות המרוכזת",
+        "enName": "Biot Number & Lumped Capacitance Model",
+        "aliases": [
+            "ביו",
+            "מספר ביו",
+            "קיבוליות מרוכזת",
+            "הולכה לא מתמדת",
+            "קבוע זמן תרמי",
+            "biot",
+            "lumped capacitance"
+        ],
+        "category": "concept",
+        "categoryLabel": "💡 מושג מפתח",
+        "courseTag": "HTF1",
+        "courseTitle": "מעבר חום (00340041)",
+        "formula": "Bi = \\frac{h L_c}{k} < 0.1, \\quad \\frac{T(t) - T_\\infty}{T_i - T_\\infty} = \\exp\\left(-\\frac{t}{\\tau}\\right), \\quad \\tau = \\frac{\\rho V c_p}{h A_s}",
+        "description": "היחס בין התנגדות להולכה פנימית להתנגדות להסעה חיצונית. כאשר Bi < 0.1 ניתן להניח פילוג טמפרטורה אחיד בגוף בכל רגע.",
+        "url": "https://idofangbentov.uk/Technion/HTF1/HTF1_004-הולכה-במצב-לא-מתמיד",
+        "lectureName": "HTF1_004-הולכה-במצב-לא-מתמיד"
+    },
+    {
+        "id": "heat-exchanger-lmtd-ntu",
+        "name": "שיטות LMTD ו-NTU במחליפי חום",
+        "enName": "LMTD & NTU Heat Exchanger Analysis",
+        "aliases": [
+            "מחליפי חום",
+            "LMTD",
+            "NTU",
+            "נצילות מחלף חום",
+            "הפרש טמפרטורות לוגריתמי",
+            "heat exchanger"
+        ],
+        "category": "method",
+        "categoryLabel": "🛠️ שיטת חישוב",
+        "courseTag": "HTF1",
+        "courseTitle": "מעבר חום (00340041)",
+        "formula": "q = U A \\Delta T_{lm}, \\quad \\Delta T_{lm} = \\frac{\\Delta T_1 - \\Delta T_2}{\\ln(\\Delta T_1 / \\Delta T_2)}, \\quad \\epsilon = \\frac{q}{q_{max}}",
+        "description": "שתי השיטות המרכזיות לתכן וחישוב ביצועי מחליפי חום: שיטת הפרש הטמפרטורות הלוגריתמי (LMTD) ושיטת נצילות-NTU.",
+        "url": "https://idofangbentov.uk/Technion/HTF1/HTF1_007-מחליפי-חום",
+        "lectureName": "HTF1_007-מחליפי-חום"
+    },
+    {
+        "id": "dalembert-principle",
+        "name": "עקרון ד'אלמבר וכוחות אינרציה",
+        "enName": "D'Alembert's Principle",
+        "aliases": [
+            "דאלמבר",
+            "עקרון דאלמבר",
+            "כוח אינרציה",
+            "שיווי משקל דינמי",
+            "dalembert"
+        ],
+        "category": "theorem",
+        "categoryLabel": "📐 משפט מרכזי",
+        "courseTag": "DYN1",
+        "courseTitle": "דינמיקה (034010)",
+        "formula": "\\sum (\\mathbf{F}_i - m_i \\mathbf{a}_i) \\cdot \\delta \\mathbf{r}_i = 0, \\quad \\mathbf{F}_{inertial} = -m \\mathbf{a}",
+        "description": "המרת בעיה דינמית לבעיית שיווי משקל סטטי מדומה על ידי הוספת כוחות אינרציה פיקטיביים (-ma) ומומנטי אינרציה שקולים.",
+        "url": "https://idofangbentov.uk/Technion/DYN1/DYN1_006-קינטיקה-של-מערכת-חלקיקים",
+        "lectureName": "DYN1_006-קינטיקה-של-מערכת-חלקיקים"
+    },
+    {
+        "id": "coriolis-acceleration",
+        "name": "תאוצת קוריוליס במערכת צירים סובבת",
+        "enName": "Coriolis Acceleration",
+        "aliases": [
+            "קוריוליס",
+            "תאוצת קוריוליס",
+            "צירים סובבים",
+            "מהירות יחסית",
+            "coriolis"
+        ],
+        "category": "formula",
+        "categoryLabel": "🔢 נוסחה יסודית",
+        "courseTag": "DYN1",
+        "courseTitle": "דינמיקה (034010)",
+        "formula": "\\mathbf{a}_{cor} = 2 \\boldsymbol{\\Omega} \\times \\mathbf{v}_{rel}, \\quad \\mathbf{a} = \\mathbf{a}_0 + \\boldsymbol{\\Omega}\\times(\\boldsymbol{\\Omega}\\times\\mathbf{r}) + \\dot{\\boldsymbol{\\Omega}}\\times\\mathbf{r} + 2\\boldsymbol{\\Omega}\\times\\mathbf{v}_{rel} + \\mathbf{a}_{rel}",
+        "description": "רכיב התאוצה הנוסף הפועל על גוף הנע במהירות יחסית בתוך מערכת ייחוס סובבת במהירות זוויתית אומגה.",
+        "url": "https://idofangbentov.uk/Technion/DYN1/DYN1_002-קינמטיקה-של-חלקיק---מערכת-צירים-סובבת",
+        "lectureName": "DYN1_002-קינמטיקה-של-חלקיק---מערכת-צירים-סובבת"
+    },
+    {
+        "id": "euler-equations-rigid-body",
+        "name": "משוואות אוילר לסיבוב גוף קשיח בתלת-ממד",
+        "enName": "Euler's Equations of Motion for Rigid Bodies",
+        "aliases": [
+            "אוילר בדינמיקה",
+            "משוואות אוילר",
+            "מומנט זוויתי",
+            "גוף קשיח בתלת ממד",
+            "euler dynamics"
+        ],
+        "category": "law",
+        "categoryLabel": "⚡ חוק פיזיקלי",
+        "courseTag": "DYN1",
+        "courseTitle": "דינמיקה (034010)",
+        "formula": "I_x \\dot{\\omega}_x - (I_y - I_z) \\omega_y \\omega_z = M_x, \\quad \\mathbf{M}_G = \\dot{\\mathbf{H}}_G + \\boldsymbol{\\omega} \\times \\mathbf{H}_G",
+        "description": "משוואות התנועה הדינמיות הקובעות את הקשר בין מומנטי הכוח החיצוניים לשינוי במהירויות הזוויתיות סביב הצירים הראשיים של הגוף.",
+        "url": "https://idofangbentov.uk/Technion/DYN1/DYN1_007-קינטיקה-של-גוף-קשיח",
+        "lectureName": "DYN1_007-קינטיקה-של-גוף-קשיח"
+    },
+    {
+        "id": "inertia-tensor-3d",
+        "name": "טנזור האינרציה של גוף קשיח",
+        "enName": "Inertia Tensor",
+        "aliases": [
+            "טנזור אינרציה",
+            "מכפלות אינרציה",
+            "מומנטי אינרציה ראשיים",
+            "inertia tensor"
+        ],
+        "category": "concept",
+        "categoryLabel": "💡 מושג מפתח",
+        "courseTag": "DYN1",
+        "courseTitle": "דינמיקה (034010)",
+        "formula": "\\mathbf{I} = \\begin{bmatrix} I_{xx} & -I_{xy} & -I_{xz} \\\\ -I_{yx} & I_{yy} & -I_{yz} \\\\ -I_{zx} & -I_{zy} & I_{zz} \\end{bmatrix}, \\quad I_{xy} = \\iiint x y \\, dm",
+        "description": "מטריצה סימטרית 3x3 המאפיינת את התנגדות הגוף הקשיח לתאוצה זוויתית בכל כיוון במרחב סביב נקודת הייחוס.",
+        "url": "https://idofangbentov.uk/Technion/DYN1/DYN1_008-טנזור-האינרציה",
+        "lectureName": "DYN1_008-טנזור-האינרציה"
+    },
+    {
+        "id": "instantaneous-center-velocity",
+        "name": "מרכז רגעי של מהירות אפס (מר״מ / IC)",
+        "enName": "Instantaneous Center of Zero Velocity",
+        "aliases": [
+            "מרכז רגעי",
+            "מרמ",
+            "מהירות אפס",
+            "גלגול ללא החלקה",
+            "instantaneous center"
+        ],
+        "category": "concept",
+        "categoryLabel": "💡 מושג מפתח",
+        "courseTag": "DYN1",
+        "courseTitle": "דינמיקה (034010)",
+        "formula": "\\mathbf{v}_A = \\boldsymbol{\\omega} \\times \\mathbf{r}_{A/IC}, \\quad \\mathbf{v}_{IC} = 0",
+        "description": "נקודה במרחב או בגוף אשר מהירותה הרגעית שווה לאפס. מאפשרת חישוב מהיר של מהירות כל נקודה בגוף כתנועה סיבובית טהורה סביב המר״מ.",
+        "url": "https://idofangbentov.uk/Technion/DYN1/DYN1_003-קינמטיקה-של-גוף-קשיח",
+        "lectureName": "DYN1_003-קינמטיקה-של-גוף-קשיח"
+    },
+    {
+        "id": "gauss-divergence-theorem",
+        "name": "משפט גאוס (משפט הדיברגנץ)",
+        "enName": "Gauss's Divergence Theorem",
+        "aliases": [
+            "גאוס",
+            "משפט גאוס",
+            "דיברגנץ",
+            "משפט הדיברגנץ",
+            "שטף של שדה וקטורי",
+            "אינטגרל משולש",
+            "gauss",
+            "divergence theorem"
+        ],
+        "category": "theorem",
+        "categoryLabel": "📐 משפט מרכזי",
+        "courseTag": "CAL2",
+        "courseTitle": "חדו״א 2ת (104043)",
+        "formula": "\\iint_{\\partial V} \\mathbf{F} \\cdot d\\mathbf{S} = \\iiint_V (\\nabla \\cdot \\mathbf{F}) \\, dV",
+        "description": "השטף הכולל של שדה וקטורי דרך משטח סגור שווה לאינטגרל הנפחי של דיברגנץ השדה בתוך הנפח הכלוא. עקרון יסוד באלקטרוסטטיקה ובמכניקת זורמים.",
+        "url": "https://idofangbentov.uk/Technion/CAL2/CAL2_014-אינטגרלים-משטחיים",
+        "lectureName": "CAL2_014-אינטגרלים-משטחיים"
+    },
+    {
+        "id": "stokes-theorem",
+        "name": "משפט סטוקס (רוטור וסירקולציה)",
+        "enName": "Stokes' Theorem",
+        "aliases": [
+            "סטוקס",
+            "משפט סטוקס",
+            "רוטור",
+            "קרל",
+            "סירקולציה",
+            "אינטגרל משטחי וקווי",
+            "stokes"
+        ],
+        "category": "theorem",
+        "categoryLabel": "📐 משפט מרכזי",
+        "courseTag": "CAL2",
+        "courseTitle": "חדו״א 2ת (104043)",
+        "formula": "\\oint_{\\partial S} \\mathbf{F} \\cdot d\\mathbf{r} = \\iint_S (\\nabla \\times \\mathbf{F}) \\cdot d\\mathbf{S}",
+        "description": "האינטגרל הקווי (סירקולציה) של שדה וקטורי לאורך עקומה סגורה שווה לשטף הרוטור של השדה דרך כל משטח הנשען על העקומה.",
+        "url": "https://idofangbentov.uk/Technion/CAL2/CAL2_014-אינטגרלים-משטחיים",
+        "lectureName": "CAL2_014-אינטגרלים-משטחיים"
+    },
+    {
+        "id": "greens-theorem",
+        "name": "משפט גרין במישור",
+        "enName": "Green's Theorem in the Plane",
+        "aliases": [
+            "גרין",
+            "משפט גרין",
+            "אינטגרל קווי סגור",
+            "חישוב שטח באינטגרל קווי",
+            "green",
+            "greens theorem"
+        ],
+        "category": "theorem",
+        "categoryLabel": "📐 משפט מרכזי",
+        "courseTag": "CAL2",
+        "courseTitle": "חדו״א 2ת (104043)",
+        "formula": "\\oint_C (L \\, dx + M \\, dy) = \\iint_D \\left(\\frac{\\partial M}{\\partial x} - \\frac{\\partial L}{\\partial y}\\right) \\, dA",
+        "description": "מקרה פרטי דו-ממדי של משפט סטוקס, המקשר בין אינטגרל קווי מסביב למסלול סגור במישור לבין אינטגרל כפול על התחום הכלוא בו.",
+        "url": "https://idofangbentov.uk/Technion/CAL2/CAL2_012-אינטגרלים-קוויים-ומשפט-גרין",
+        "lectureName": "CAL2_012-אינטגרלים-קוויים-ומשפט-גרין"
+    },
+    {
+        "id": "gradient-directional-derivative",
+        "name": "גרדיאנט ונגזרת מכוונת",
+        "enName": "Gradient & Directional Derivative",
+        "aliases": [
+            "גרדיאנט",
+            "נגזרת מכוונת",
+            "וקטור שיפוע",
+            "עלייה מרבית",
+            "נורמל למשטח רמה",
+            "gradient",
+            "directional derivative"
+        ],
+        "category": "concept",
+        "categoryLabel": "💡 מושג מפתח",
+        "courseTag": "CAL2",
+        "courseTitle": "חדו״א 2ת (104043)",
+        "formula": "\\nabla f = \\left(\\frac{\\partial f}{\\partial x}, \\frac{\\partial f}{\\partial y}, \\frac{\\partial f}{\\partial z}\\right), \\quad D_{\\hat{u}} f = \\nabla f \\cdot \\hat{u} = |\\nabla f| \\cos \\theta",
+        "description": "וקטור הנגזרות החלקיות המצביע תמיד לכיוון העלייה המרבית של הפונקציה (שיפוע מקסימלי), וניצב למשטחי הרמה שלה.",
+        "url": "https://idofangbentov.uk/Technion/CAL2/CAL2_007-נגזרות-מכוונות-וגרדיאנט",
+        "lectureName": "CAL2_007-נגזרות-מכוונות-וגרדיאנט"
+    },
+    {
+        "id": "conservative-field-potential",
+        "name": "שדה וקטורי משמר ופוטנציאל סקלרי",
+        "enName": "Conservative Vector Fields & Potential",
+        "aliases": [
+            "שדה משמר",
+            "פוטנציאל סקלרי",
+            "אי תלות במסלול",
+            "רוטור מתאפס",
+            "conservative field"
+        ],
+        "category": "theorem",
+        "categoryLabel": "📐 משפט מרכזי",
+        "courseTag": "CAL2",
+        "courseTitle": "חדו״א 2ת (104043)",
+        "formula": "\\mathbf{F} = \\nabla \\phi \\iff \\nabla \\times \\mathbf{F} = 0 \\iff \\int_A^B \\mathbf{F} \\cdot d\\mathbf{r} = \\phi(B) - \\phi(A)",
+        "description": "שדה וקטורי שבו העבודה לאורך כל מסלול תלויה אך ורק בנקודות הקצה. תנאי הכרחי ומספיק (בתחום פשוט קשר) הוא התאפסות הרוטור.",
+        "url": "https://idofangbentov.uk/Technion/CAL2/CAL2_013-שדות-משמרים",
+        "lectureName": "CAL2_013-שדות-משמרים"
+    },
+    {
+        "id": "lagrange-multipliers",
+        "name": "שיטת כופלי לגראנז' לאופטימיזציה תחת אילוצים",
+        "enName": "Lagrange Multipliers",
+        "aliases": [
+            "לגראנז",
+            "כופלי לגראנז",
+            "קיצון תחת אילוץ",
+            "אופטימיזציה",
+            "lagrange multipliers"
+        ],
+        "category": "method",
+        "categoryLabel": "🛠️ שיטת חישוב",
+        "courseTag": "CAL2",
+        "courseTitle": "חדו״א 2ת (104043)",
+        "formula": "\\nabla f(x, y, z) = \\lambda \\nabla g(x, y, z), \\quad g(x, y, z) = 0",
+        "description": "שיטה אנליטית למציאת נקודות קיצון של פונקציה רב-משתנית f הכפופה לאילוץ שוויון g=0 על ידי השוואת הגרדיאנטים.",
+        "url": "https://idofangbentov.uk/Technion/CAL2/CAL2_010-נקודות-אקסטרמום",
+        "lectureName": "CAL2_010-נקודות-אקסטרמום"
+    },
+    {
+        "id": "eigenvalues-eigenvectors",
+        "name": "ערכים עצמיים ווקטורים עצמיים (ע״ע ו-ו״ע)",
+        "enName": "Eigenvalues & Eigenvectors",
+        "aliases": [
+            "ערכים עצמיים",
+            "וקטורים עצמיים",
+            "עע",
+            "וע",
+            "פולינום אופייני",
+            "eigenvalues",
+            "eigenvectors"
+        ],
+        "category": "concept",
+        "categoryLabel": "💡 מושג מפתח",
+        "courseTag": "ALG1",
+        "courseTitle": "אלגברה לינארית (104016)",
+        "formula": "A \\mathbf{v} = \\lambda \\mathbf{v} \\iff \\det(A - \\lambda I) = 0",
+        "description": "וקטור v שאינו מתאפס שהמטריצה A פועלת עליו כמתיחה או כיווץ סקלרי בלבד בפקטור למבדה (הערך העצמי). עקרון יסוד בניתוח תנודות, יציבות ומכניקת קוונטים.",
+        "url": "https://idofangbentov.uk/Technion/ALG1/ALG1_010-וקטורים-עצמיים-וערכים-עצמיים",
+        "lectureName": "ALG1_010-וקטורים-עצמיים-וערכים-עצמיים"
+    },
+    {
+        "id": "matrix-diagonalization",
+        "name": "לכסון מטריצות ופירוק ספקטרלי",
+        "enName": "Matrix Diagonalization",
+        "aliases": [
+            "לכסון",
+            "לכסון מטריצות",
+            "מטריצה לכסינה",
+            "דמיון מטריצות",
+            "diagonalization"
+        ],
+        "category": "method",
+        "categoryLabel": "🛠️ שיטת חישוב",
+        "courseTag": "ALG1",
+        "courseTitle": "אלגברה לינארית (104016)",
+        "formula": "A = P D P^{-1}, \\quad D = \\text{diag}(\\lambda_1, \\lambda_2, \\dots, \\lambda_n)",
+        "description": "הצגת מטריצה בצורה אלכסונית פשוטה ביחס לבסיס המורכב מ-n וקטורים עצמיים בלתי-תלויים לינארית. מאפשר חישוב חזקות מטריצה A^k בקלות.",
+        "url": "https://idofangbentov.uk/Technion/ALG1/ALG1_010-וקטורים-עצמיים-וערכים-עצמיים",
+        "lectureName": "ALG1_010-וקטורים-עצמיים-וערכים-עצמיים"
+    },
+    {
+        "id": "cayley-hamilton-theorem",
+        "name": "משפט קיילי-המילטון",
+        "enName": "Cayley-Hamilton Theorem",
+        "aliases": [
+            "קיילי המילטון",
+            "משפט קיילי המילטון",
+            "פולינום מאפס",
+            "cayley hamilton"
+        ],
+        "category": "theorem",
+        "categoryLabel": "📐 משפט מרכזי",
+        "courseTag": "ALG1",
+        "courseTitle": "אלגברה לינארית (104016)",
+        "formula": "p_A(A) = 0 \\quad (\\text{כל מטריצה מאפסת את הפולינום האופייני שלה})",
+        "description": "קובע שכל מטריצה ריבועית מקיימת את המשוואה האופיינית של עצמה, מה שמאפשר חישוב חזקות גבוהות והופכי של מטריצה ללא חישוב ישיר.",
+        "url": "https://idofangbentov.uk/Technion/ALG1/ALG1_010-וקטורים-עצמיים-וערכים-עצמיים",
+        "lectureName": "ALG1_010-וקטורים-עצמיים-וערכים-עצמיים"
+    },
+    {
+        "id": "gram-schmidt-orthogonalization",
+        "name": "תהליך גרם-שמידט לאורתוגונליזציה",
+        "enName": "Gram-Schmidt Orthogonalization Process",
+        "aliases": [
+            "גרם שמידט",
+            "אורתוגונליזציה",
+            "בסיס אורתונורמלי",
+            "היטל אורתוגונלי",
+            "gram schmidt"
+        ],
+        "category": "method",
+        "categoryLabel": "🛠️ שיטת חישוב",
+        "courseTag": "ALG1",
+        "courseTitle": "אלגברה לינארית (104016)",
+        "formula": "\\mathbf{u}_k = \\mathbf{v}_k - \\sum_{j=1}^{k-1} \\frac{\\langle \\mathbf{v}_k, \\mathbf{u}_j \\rangle}{\\|\\mathbf{u}_j\\|^2} \\mathbf{u}_j",
+        "description": "אלגוריתם להמרת בסיס כלשהו של מרחב מכפלה פנימית לבסיס אורתוגונלי (או אורתונורמלי) המייצר את אותו תת-מרחב.",
+        "url": "https://idofangbentov.uk/Technion/ALG1/ALG1_006-בסיס-ומימד",
+        "lectureName": "ALG1_006-בסיס-ומימד"
+    },
+    {
+        "id": "rank-nullity-theorem",
+        "name": "משפט הממדים (דרגה ואפסיות)",
+        "enName": "Rank-Nullity Theorem",
+        "aliases": [
+            "משפט הממדים",
+            "דרגה ואפסיות",
+            "גרעין ותמונה",
+            "rank nullity"
+        ],
+        "category": "theorem",
+        "categoryLabel": "📐 משפט מרכזי",
+        "courseTag": "ALG1",
+        "courseTitle": "אלגברה לינארית (104016)",
+        "formula": "\\dim(V) = \\dim(\\ker T) + \\dim(\\text{Im } T) \\iff n = \\text{nullity}(A) + \\text{rank}(A)",
+        "description": "משפט יסודי הקובע שסכום ממד הגרעין וממד התמונה של העתקה לינארית שווה לממד תחום ההעתקה.",
+        "url": "https://idofangbentov.uk/Technion/ALG1/ALG1_009-טרנספורמציות-לינאריות",
+        "lectureName": "ALG1_009-טרנספורמציות-לינאריות"
+    },
+    {
+        "id": "laplace-transform",
+        "name": "התמרת לפלס",
+        "enName": "Laplace Transform",
+        "aliases": [
+            "לפלס",
+            "התמרת לפלס",
+            "טרנספורמציית לפלס",
+            "תחום התדר",
+            "פתרון מד״ר",
+            "laplace"
+        ],
+        "category": "theorem",
+        "categoryLabel": "📐 משפט מרכזי",
+        "courseTag": "DEQ1",
+        "courseTitle": "מד״ר (104131)",
+        "formula": "\\mathcal{L}\\{f(t)\\} = F(s) = \\int_0^\\infty e^{-st} f(t) \\, dt, \\quad \\mathcal{L}\\{f'(t)\\} = s F(s) - f(0)",
+        "description": "התמרה אינטגרלית הממירה משוואות דיפרנציאליות עם תנאי התחלה למשוואות אלגבריות פשוטות במישור המרוכב s. כלי קריטי בבקרה, רטט ומערכות חשמל.",
+        "url": "https://idofangbentov.uk/Technion/DEQ1/DEQ1_009-טרנספורמציית-לפלס",
+        "lectureName": "DEQ1_009-טרנספורמציית-לפלס"
+    },
+    {
+        "id": "bernoulli-differential-equation",
+        "name": "משוואת ברנולי במד״ר",
+        "enName": "Bernoulli Differential Equation",
+        "aliases": [
+            "משוואת ברנולי מדר",
+            "ברנולי מדר",
+            "משוואה לא לינארית מסדר ראשון",
+            "הצבת ברנולי"
+        ],
+        "category": "formula",
+        "categoryLabel": "🔢 נוסחה יסודית",
+        "courseTag": "DEQ1",
+        "courseTitle": "מד״ר (104131)",
+        "formula": "y' + P(x) y = Q(x) y^n \\quad \\xrightarrow{v = y^{1-n}} \\quad \\frac{1}{1-n} v' + P(x) v = Q(x)",
+        "description": "משוואה דיפרנציאלית לא-לינארית מסדר ראשון המומרת למשוואה לינארית פתירה בעזרת ההצבה האלגנטית v = y^(1-n).",
+        "url": "https://idofangbentov.uk/Technion/DEQ1/DEQ1_003-משוואת-ברנולי-ומשוואה-מטיפוס-הומוגני",
+        "lectureName": "DEQ1_003-משוואת-ברנולי-ומשוואה-מטיפוס-הומוגני"
+    },
+    {
+        "id": "wronskian-determinant",
+        "name": "ורונסקיאן ואי-תלות לינארית של פתרונות",
+        "enName": "Wronskian Determinant",
+        "aliases": [
+            "ורונסקיאן",
+            "דטרמיננטת ורונסקי",
+            "אי תלות לינארית",
+            "מערכת יסודית",
+            "wronskian"
+        ],
+        "category": "concept",
+        "categoryLabel": "💡 מושג מפתח",
+        "courseTag": "DEQ1",
+        "courseTitle": "מד״ר (104131)",
+        "formula": "W(y_1, y_2)(x) = \\begin{vmatrix} y_1 & y_2 \\\\ y_1' & y_2' \\end{vmatrix} = y_1 y_2' - y_2 y_1' \\ne 0",
+        "description": "דטרמיננטה הבוחנת אי-תלות לינארית בין פתרונות של משוואה דיפרנציאלית לינארית הומוגנית. אם W אינו מתאפס, הפתרונות פורשים את מרחב הפתרונות.",
+        "url": "https://idofangbentov.uk/Technion/DEQ1/DEQ1_006-משוואות-לינאריות-הומוגניות-מסדר-גבוה",
+        "lectureName": "DEQ1_006-משוואות-לינאריות-הומוגניות-מסדר-גבוה"
+    },
+    {
+        "id": "variation-of-parameters",
+        "name": "שיטת וריאציית הפרמטרים למשוואות אי-הומוגניות",
+        "enName": "Variation of Parameters",
+        "aliases": [
+            "וריאציית פרמטרים",
+            "פתרון פרטי מדר",
+            "משוואה לא הומוגנית",
+            "variation of parameters"
+        ],
+        "category": "method",
+        "categoryLabel": "🛠️ שיטת חישוב",
+        "courseTag": "DEQ1",
+        "courseTitle": "מד״ר (104131)",
+        "formula": "y_p = -y_1 \\int \\frac{y_2 g(x)}{W(y_1, y_2)} \\, dx + y_2 \\int \\frac{y_1 g(x)}{W(y_1, y_2)} \\, dx",
+        "description": "שיטה כללית וחזקה למציאת פתרון פרטי למשוואה דיפרנציאלית לינארית אי-הומוגנית מסדר n כאשר ידועה המערכת היסודית ההומוגנית.",
+        "url": "https://idofangbentov.uk/Technion/DEQ1/DEQ1_007-משוואות-לא-הומוגניות",
+        "lectureName": "DEQ1_007-משוואות-לא-הומוגניות"
+    },
+    {
+        "id": "pid-controller",
+        "name": "בקר PID (פרופורציונלי-אינטגרלי-נגזרתי)",
+        "enName": "PID Controller",
+        "aliases": [
+            "PID",
+            "בקר PID",
+            "בקרת משוב",
+            "שגיאת מצב מתמיד",
+            "זמן עליה",
+            "pid controller"
+        ],
+        "category": "concept",
+        "categoryLabel": "💡 מושג מפתח",
+        "courseTag": "ICT1",
+        "courseTitle": "מבוא לבקרה (00340040)",
+        "formula": "u(t) = K_p e(t) + K_i \\int_0^t e(\\tau) \\, d\\tau + K_d \\frac{de(t)}{dt}, \\quad C(s) = K_p + \\frac{K_i}{s} + K_d s",
+        "description": "הבקר הנפוץ ביותר בתעשייה. האיבר הפרופורציונלי מקטין את השגיאה, האינטגרל מאפס את שגיאת המצב המתמיד, והנגזרת משפרת את הריסון ומהירות התגובה.",
+        "url": "https://idofangbentov.uk/Technion/ICT1/ICT1_012-בקר-PID",
+        "lectureName": "ICT1_012-בקר-PID"
+    },
+    {
+        "id": "root-locus-method",
+        "name": "שיטת מקום גאומטרי של השורשים (Root Locus)",
+        "enName": "Root Locus Method",
+        "aliases": [
+            "מקום גאומטרי של שורשים",
+            "רוט לוקוס",
+            "קוטבי חוג סגור",
+            "הגבר חוג",
+            "root locus"
+        ],
+        "category": "method",
+        "categoryLabel": "🛠️ שיטת חישוב",
+        "courseTag": "ICT1",
+        "courseTitle": "מבוא לבקרה (00340040)",
+        "formula": "1 + K G(s) H(s) = 0 \\iff |K G(s) H(s)| = 1, \\quad \\angle (G(s) H(s)) = \\pm 180^\\circ (2k+1)",
+        "description": "גרף המציג את מסלול קוטבי החוג הסגור במישור המרוכב s כפונקציה של הגבר הבקר K הנע מ-0 לאינסוף.",
+        "url": "https://idofangbentov.uk/Technion/ICT1/ICT1_006-שיטת-מקום-גאומטרי-של-שורשים",
+        "lectureName": "ICT1_006-שיטת-מקום-גאומטרי-של-שורשים"
+    },
+    {
+        "id": "nyquist-stability-criterion",
+        "name": "קריטריון נייקוויסט ליציבות מערכות משוב",
+        "enName": "Nyquist Stability Criterion",
+        "aliases": [
+            "נייקוויסט",
+            "קריטריון נייקוויסט",
+            "הקפה של מינוס 1",
+            "יציבות בחוג סגור",
+            "nyquist"
+        ],
+        "category": "criterion",
+        "categoryLabel": "🎯 קריטריון יציבות",
+        "courseTag": "ICT1",
+        "courseTitle": "מבוא לבקרה (00340040)",
+        "formula": "Z = N + P \\quad (\\text{תנאי ליציבות: } Z = 0 \\implies N = -P)",
+        "description": "קריטריון לקביעת יציבות מערכת בחוג סגור מתגובת התדר של החוג הפתוח G(jw), על פי מספר ההקפות N של הנקודה הקריטית (-1, 0j).",
+        "url": "https://idofangbentov.uk/Technion/ICT1/ICT1_009-יציבות-בעיצוב-חוג",
+        "lectureName": "ICT1_009-יציבות-בעיצוב-חוג"
+    },
+    {
+        "id": "bode-diagram-margins",
+        "name": "דיאגרמת בודה: שולי הגבר ושולי מופע (GM & PM)",
+        "enName": "Bode Plot, Gain Margin & Phase Margin",
+        "aliases": [
+            "בודה",
+            "דיאגרמת בודה",
+            "שולי הגבר",
+            "שולי מופע",
+            "רוחב פס",
+            "תגובת תדר",
+            "bode plot"
+        ],
+        "category": "concept",
+        "categoryLabel": "💡 מושג מפתח",
+        "courseTag": "ICT1",
+        "courseTitle": "מבוא לבקרה (00340040)",
+        "formula": "GM = -20 \\log_{10} |G(j\\omega_{180})| \\text{ [dB]}, \\quad PM = 180^\\circ + \\angle G(j\\omega_c)",
+        "description": "ייצוג תגובת התדר של מערכת בגרפי הגבר (דציבלים) ומופע (מעלות) מול תדר לוגריתמי. שולי ההגבר והמופע מכמתים את חוסן ויציבות המערכת.",
+        "url": "https://idofangbentov.uk/Technion/ICT1/ICT1_004-ניתוח-מודלי-וניתוח-תגובת-תדירות",
+        "lectureName": "ICT1_004-ניתוח-מודלי-וניתוח-תגובת-תדירות"
+    },
+    {
+        "id": "wohler-sn-fatigue",
+        "name": "עקומת S-N של ווהלר וגבול ההתעייפות",
+        "enName": "Wöhler S-N Curve & Fatigue Endurance Limit",
+        "aliases": [
+            "עקומת SN",
+            "ווהלר",
+            "התעייפות",
+            "גבול התעייפות",
+            "שבר התעייפות",
+            "wohler",
+            "fatigue"
+        ],
+        "category": "concept",
+        "categoryLabel": "💡 מושג מפתח",
+        "courseTag": "MDN1",
+        "courseTitle": "תכן מכני 1 (00340054)",
+        "formula": "S_e = k_a k_b k_c k_d k_e S_e', \\quad S_e' \\approx 0.5 S_{ut} \\quad (\\text{בפלדות})",
+        "description": "גרף המציג את הקשר בין משרעת המאמץ S למספר המחזורים עד לכשל N. בפלדות קיים גבול התעייפות Se שמתחתיו החלק ישרוד מספר מחזורים אינסופי.",
+        "url": "https://idofangbentov.uk/Technion/MDN1/MDN1_002-כשלים-כתוצאה-מעומס-משתנה",
+        "lectureName": "MDN1_002-כשלים-כתוצאה-מעומס-משתנה"
+    },
+    {
+        "id": "goodman-soderberg-gerber",
+        "name": "קריטריוני התעייפות בעומס משולב (גודמן, סודרברג, גרבר)",
+        "enName": "Fatigue Failure Criteria (Goodman, Soderberg, Gerber)",
+        "aliases": [
+            "גודמן",
+            "סודרברג",
+            "גרבר",
+            "מאמץ ממוצע ומשרעת",
+            "דיאגרמת היי",
+            "goodman",
+            "soderberg"
+        ],
+        "category": "criterion",
+        "categoryLabel": "🎯 קריטריון כשל",
+        "courseTag": "MDN1",
+        "courseTitle": "תכן מכני 1 (00340054)",
+        "formula": "\\frac{\\sigma_a}{S_e} + \\frac{\\sigma_m}{S_{ut}} = \\frac{1}{n} \\; (\\text{Goodman}), \\quad \\frac{\\sigma_a}{S_e} + \\frac{\\sigma_m}{S_y} = \\frac{1}{n} \\; (\\text{Soderberg})",
+        "description": "קריטריונים הנדסיים מנחים לתכן רכיבים מכניים הכפופים למאמצים מחזוריים עם מאמץ ממוצע שאינו אפס (sigma_m ו-sigma_a).",
+        "url": "https://idofangbentov.uk/Technion/MDN1/MDN1_002-כשלים-כתוצאה-מעומס-משתנה",
+        "lectureName": "MDN1_002-כשלים-כתוצאה-מעומס-משתנה"
+    },
+    {
+        "id": "involute-gear-profile",
+        "name": "פרופיל אבולוונטי בגלגלי שיניים ויחס תמסורת",
+        "enName": "Involute Gear Profile & Transmission Ratio",
+        "aliases": [
+            "גלגלי שיניים",
+            "פרופיל אבולוונטי",
+            "יחס תמסורת",
+            "מעגל יסוד",
+            "זווית לחץ",
+            "involute gears"
+        ],
+        "category": "concept",
+        "categoryLabel": "💡 מושג מפתח",
+        "courseTag": "MDN1",
+        "courseTitle": "תכן מכני 1 (00340054)",
+        "formula": "r_b = r \\cos \\phi, \\quad i = \\frac{\\omega_1}{\\omega_2} = \\frac{z_2}{z_1} = \\frac{d_2}{d_1}",
+        "description": "הפרופיל הגאומטרי התקני של שיני גלגל שיניים המבטיח יחס מהירויות זוויתיות קבוע לחלוטין בכל נקודת מגע לאורך קו הפעולה.",
+        "url": "https://idofangbentov.uk/Technion/MDN1/MDN1_007-פרופיל-השן",
+        "lectureName": "MDN1_007-פרופיל-השן"
+    },
+    {
+        "id": "iron-carbon-phase-diagram",
+        "name": "דיאגרמת פאזות ברזל-פחמן (Fe-C)",
+        "enName": "Iron-Carbon (Fe-C) Phase Diagram",
+        "aliases": [
+            "ברזל פחמן",
+            "דיאגרמת פאזות",
+            "פלדה",
+            "אוסטניט",
+            "פריט",
+            "פרליט",
+            "מרטנזיט",
+            "צמנטיט",
+            "אוטקטואיד",
+            "iron carbon"
+        ],
+        "category": "concept",
+        "categoryLabel": "💡 מושג מפתח",
+        "courseTag": "IMT1",
+        "courseTitle": "מדעי החומרים 1 (314533)",
+        "formula": "\\text{Eutectoid point: } 0.76\\% \\text{ C at } 727^\\circ\\text{C} \\implies \\gamma \\to \\alpha + \\text{Fe}_3\\text{C} \\text{ (Pearlite)}",
+        "description": "דיאגרמת שיווי המשקל המרכזית במטלורגיה המגדירה את הפאזות והמבנה המיקרוסקופי של פלדות ויצקות ברזל כפונקציה של אחוז הפחמן והטמפרטורה.",
+        "url": "https://idofangbentov.uk/Technion/IMT1/IMT1_005-דיאגרמת-ברזל-פחמן",
+        "lectureName": "IMT1_005-דיאגרמת-ברזל-פחמן"
+    },
+    {
+        "id": "ttt-cct-transformation-diagrams",
+        "name": "דיאגרמות טרנספורמציה איזותרמית ורציפה (TTT ו-CCT)",
+        "enName": "TTT & CCT Transformation Diagrams",
+        "aliases": [
+            "TTT",
+            "CCT",
+            "חיסום",
+            "הרפיה",
+            "מרטנזיט",
+            "בייניט",
+            "טיפול תרמי",
+            "heat treatment"
+        ],
+        "category": "concept",
+        "categoryLabel": "💡 מושג מפתח",
+        "courseTag": "IMT1",
+        "courseTitle": "מדעי החומרים 1 (314533)",
+        "formula": "\\gamma (\\text{Austenite}) \\xrightarrow{\\text{Quench}} \\text{Martensite (BCT - High Hardness)}",
+        "description": "עקומות זמן-טמפרטורה-טרנספורמציה המנחות את מהירות הקירור הנדרשת בטיפולים תרמיים לקבלת קשיחות, חוזק ומשיכות רצויים בפלדות.",
+        "url": "https://idofangbentov.uk/Technion/IMT1/IMT1_006-דאגרמות-TTT-ו-CTT",
+        "lectureName": "IMT1_006-דאגרמות-TTT-ו-CTT"
+    },
+    {
+        "id": "hall-petch-relationship",
+        "name": "קשר הול-פאץ' לחיזוק מתכות לפי גודל גרגר",
+        "enName": "Hall-Petch Strengthening Relationship",
+        "aliases": [
+            "הול פאץ",
+            "גודל גרגר",
+            "מנגנוני חיזוק",
+            "גבולות גרגר",
+            "hall petch"
+        ],
+        "category": "law",
+        "categoryLabel": "⚡ חוק פיזיקלי",
+        "courseTag": "IMT1",
+        "courseTitle": "מדעי החומרים 1 (314533)",
+        "formula": "\\sigma_y = \\sigma_0 + \\frac{k_y}{\\sqrt{d}}",
+        "description": "הקשר המראה שעידון גודל הגרגר הממוצע d במתכת מגדיל את חוזק הכניעה שלה, מכיוון שגבולות הגרגר חוסמים תנועת נקעים.",
+        "url": "https://idofangbentov.uk/Technion/IMT1/IMT1_007-תכונות-מכניות",
+        "lectureName": "IMT1_007-תכונות-מכניות"
+    },
+    {
+        "id": "natural-frequency-damping-ratio",
+        "name": "תדירות עצמית ויחס שיכוך (דמפינג)",
+        "enName": "Natural Frequency & Damping Ratio",
+        "aliases": [
+            "תדירות עצמית",
+            "יחס שיכוך",
+            "דמפינג",
+            "ריסון קריטי",
+            "רזוננס",
+            "natural frequency",
+            "damping ratio"
+        ],
+        "category": "formula",
+        "categoryLabel": "🔢 נוסחה יסודית",
+        "courseTag": "DVI1",
+        "courseTitle": "תנודות (034051)",
+        "formula": "\\omega_n = \\sqrt{\\frac{k}{m}}, \\quad \\zeta = \\frac{c}{c_c} = \\frac{c}{2 m \\omega_n}, \\quad \\omega_d = \\omega_n \\sqrt{1 - \\zeta^2}",
+        "description": "פרמטרי היסוד של מתנד הרמוני בעל דרגת חופש אחת: תדירות התנודה הטבעית ללא ריסון והיחס בין השיכוך הקיים לשיכוך הקריטי.",
+        "url": "https://idofangbentov.uk/Technion/DVI1/DVI1_001-מבוא",
+        "lectureName": "DVI1_001-מבוא"
+    },
+    {
+        "id": "resonance-magnification-factor",
+        "name": "מקדם הגברה דינמי ותהודה (Resonance)",
+        "enName": "Dynamic Magnification Factor & Resonance",
+        "aliases": [
+            "תהודה",
+            "רזוננס",
+            "מקדם הגברה דינמי",
+            "תנודות מאולצות",
+            "resonance",
+            "DMF"
+        ],
+        "category": "concept",
+        "categoryLabel": "💡 מושג מפתח",
+        "courseTag": "DVI1",
+        "courseTitle": "תנודות (034051)",
+        "formula": "DMF = \\frac{1}{\\sqrt{(1-r^2)^2 + (2\\zeta r)^2}}, \\quad r = \\frac{\\omega}{\\omega_n}",
+        "description": "היחס בין משרעת התנודה במצב מתמיד להעתק הסטטי. כאשר תדר העירור קרוב לתדירות העצמית (r=1), משרעת התנודה מגיעה לשיא קיצוני ומסוכן.",
+        "url": "https://idofangbentov.uk/Technion/DVI1/DVI1_004-תנודות-מאולצות",
+        "lectureName": "DVI1_004-תנודות-מאולצות"
+    },
+    {
+        "id": "newton-raphson-method",
+        "name": "שיטת ניוטון-רפסון למציאת שורשים נומרית",
+        "enName": "Newton-Raphson Method",
+        "aliases": [
+            "ניוטון רפסון",
+            "מציאת שורשים",
+            "איטרציה נומרית",
+            "קירוב נומרי",
+            "newton raphson"
+        ],
+        "category": "method",
+        "categoryLabel": "🛠️ שיטת חישוב",
+        "courseTag": "NUM1",
+        "courseTitle": "אנליזה נומרית (034056)",
+        "formula": "x_{n+1} = x_n - \\frac{f(x_n)}{f'(x_n)}",
+        "description": "אלגוריתם איטרטיבי בעל התכנסות ריבועית למציאת אפסים של משוואה f(x)=0 באמצעות קירוב המשיק בכל שלב.",
+        "url": "https://idofangbentov.uk/Technion/NUM1/NUM1_002-מציאת-שורשים",
+        "lectureName": "NUM1_002-מציאת-שורשים"
+    },
+    {
+        "id": "runge-kutta-rk4",
+        "name": "שיטת רונגה-קוטה מסדר רביעי (RK4)",
+        "enName": "Runge-Kutta 4th Order Method (RK4)",
+        "aliases": [
+            "רונגה קוטה",
+            "RK4",
+            "אינטגרציה נומרית של מד״ר",
+            "אוילר נומרי",
+            "runge kutta"
+        ],
+        "category": "method",
+        "categoryLabel": "🛠️ שיטת חישוב",
+        "courseTag": "NUM1",
+        "courseTitle": "אנליזה נומרית (034056)",
+        "formula": "y_{n+1} = y_n + \\frac{h}{6}(k_1 + 2k_2 + 2k_3 + k_4)",
+        "description": "שיטת הקירוב הנומרית המובילה לפתרון משוואות דיפרנציאליות רגילות. מספקת דיוק מסדר O(h^4) תוך שקלול 4 שיפועים בכל פסיעת זמן.",
+        "url": "https://idofangbentov.uk/Technion/NUM1/NUM1_007-פתרון-נומרי-של-מדר",
+        "lectureName": "NUM1_007-פתרון-נומרי-של-מדר"
+    }
+];
     const PangeaHub = {
         catalog: PANGEA_CATALOG,
         codeToTag: PANGEA_CODE_TO_TAG,
+        concepts: PANGEA_CONCEPTS_INDEX,
 
         /**
          * Get Pangea course entry by Technion course code or Pangea tag
@@ -4645,6 +6048,53 @@
             const q = query.trim().toLowerCase();
             const results = [];
 
+            // 1. Search deep concepts, theorems, laws and formulas
+            const conceptMatches = [];
+            const targetCourseTag = courseCodeFilter 
+                ? (this.codeToTag[courseCodeFilter] || courseCodeFilter) 
+                : null;
+            
+            const conceptsPool = this.concepts || PANGEA_CONCEPTS_INDEX || [];
+            conceptsPool.forEach(c => {
+                if (targetCourseTag && c.courseTag !== targetCourseTag) return;
+                
+                const nameMatch = c.name && c.name.toLowerCase().includes(q);
+                const enNameMatch = c.enName && c.enName.toLowerCase().includes(q);
+                const aliasMatch = Array.isArray(c.aliases) && c.aliases.some(a => a.toLowerCase().includes(q));
+                const formulaMatch = c.formula && c.formula.toLowerCase().includes(q);
+                const descMatch = c.description && c.description.toLowerCase().includes(q);
+                
+                if (nameMatch || enNameMatch || aliasMatch || formulaMatch || descMatch) {
+                    let score = 0;
+                    if (nameMatch) score += 100;
+                    if (aliasMatch) score += 80;
+                    if (enNameMatch) score += 60;
+                    if (formulaMatch) score += 40;
+                    if (descMatch) score += 20;
+
+                    conceptMatches.push({
+                        type: 'concept',
+                        id: c.id,
+                        category: c.category || 'concept',
+                        categoryLabel: c.categoryLabel || '💡 מושג מפתח',
+                        courseTag: c.courseTag,
+                        courseTitle: c.courseTitle,
+                        title: c.name,
+                        enName: c.enName,
+                        formula: c.formula,
+                        description: c.description,
+                        url: c.url,
+                        lectureName: c.lectureName,
+                        score: score
+                    });
+                }
+            });
+
+            // Sort concept matches by score descending
+            conceptMatches.sort((a, b) => b.score - a.score);
+
+            // 2. Search lectures, homework, and exams
+
             const targetTags = courseCodeFilter 
                 ? [this.codeToTag[courseCodeFilter] || courseCodeFilter]
                 : Object.keys(PANGEA_CATALOG);
@@ -4699,7 +6149,7 @@
                 });
             });
 
-            return results.slice(0, 30); // Top 30 matches
+            return [...conceptMatches, ...results].slice(0, 35); // Prioritize concept matches + catalog
         },
 
         /**
@@ -4838,7 +6288,7 @@
             if (!query || !query.trim()) {
                 container.innerHTML = `
                     <div style="text-align: center; color: #94a3b8; padding: 30px 10px; font-size: 0.85rem;">
-                        <span>💡 הקלד נושא (למשל: <em>ברנולי</em>, <em>לפלס</em>, <em>קרנו</em>, <em>מאמצים</em>, <em>2024</em>) לחיפוש מיידי ב-38 קורסי הטכניון בפנגייה.</span>
+                        <span>💡 הקלד מושג, משפט או נושא (למשל: <em>שטיינר</em>, <em>ברנולי</em>, <em>מור</em>, <em>פון מיזס</em>, <em>לפלס</em>, <em>קרנו</em>, <em>2024</em>) לחיפוש מיידי ב-38 קורסי הטכניון בפנגייה.</span>
                     </div>
                 `;
                 return;
@@ -4857,15 +6307,47 @@
                 return;
             }
 
-            container.innerHTML = results.map(r => `
-                <div class="pangea-search-result-card" onclick="window.PangeaHub.openQuickPeek('${r.url}', '${r.title}', '${r.url}')">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                        <span class="pangea-result-badge">${r.categoryLabel}</span>
-                        <span class="pangea-result-course">${r.courseTitle}</span>
+            container.innerHTML = results.map(r => {
+                const safeTitle = (r.title || '').replace(/'/g, "\\'");
+                if (r.type === 'concept') {
+                    return `
+                        <div class="pangea-search-result-card pangea-concept-card" onclick="window.PangeaHub.openQuickPeek('${r.url}', '${safeTitle}', '${r.url}')" style="border: 1px solid rgba(56, 189, 248, 0.45); background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.85)); box-shadow: 0 4px 15px rgba(0,0,0,0.3); border-right: 4px solid #38bdf8; margin-bottom: 8px; padding: 12px 14px; border-radius: 8px; cursor: pointer; transition: all 0.2s;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 4px;">
+                                <div style="display: flex; align-items: center; gap: 6px;">
+                                    <span class="pangea-result-badge" style="background: rgba(14, 165, 233, 0.2); color: #38bdf8; font-weight: 700; border: 1px solid rgba(56, 189, 248, 0.35); padding: 2px 7px; border-radius: 4px; font-size: 0.72rem;">${r.categoryLabel}</span>
+                                    <span style="font-size: 0.74rem; color: #94a3b8; font-style: italic;">${r.enName || ''}</span>
+                                </div>
+                                <span class="pangea-result-course" style="color: #a78bfa; font-weight: 600; font-size: 0.75rem;">${r.courseTitle}</span>
+                            </div>
+                            <div class="pangea-result-title" style="font-size: 0.95rem; font-weight: 700; color: #f8fafc; margin-bottom: 6px;">
+                                ${r.title}
+                            </div>
+                            ${r.formula ? `
+                                <div class="pangea-concept-formula" style="background: rgba(2, 6, 23, 0.85); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 6px; padding: 6px 10px; font-family: 'JetBrains Mono', Consolas, monospace; font-size: 0.82rem; color: #38bdf8; direction: ltr; text-align: left; margin-bottom: 6px; overflow-x: auto;">
+                                    <code>${r.formula}</code>
+                                </div>
+                            ` : ''}
+                            <div class="pangea-concept-desc" style="font-size: 0.8rem; color: #cbd5e1; line-height: 1.45; margin-bottom: 6px;">
+                                ${r.description}
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 6px; font-size: 0.72rem; color: #64748b;">
+                                <span>📖 לחץ לצפייה בסיכום המלא בפנגייה</span>
+                                <span style="color: #38bdf8;">פתח קריאה מהירה ↗</span>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                return `
+                    <div class="pangea-search-result-card" onclick="window.PangeaHub.openQuickPeek('${r.url}', '${safeTitle}', '${r.url}')">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                            <span class="pangea-result-badge">${r.categoryLabel}</span>
+                            <span class="pangea-result-course">${r.courseTitle}</span>
+                        </div>
+                        <div class="pangea-result-title">${r.title}</div>
                     </div>
-                    <div class="pangea-result-title">${r.title}</div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
         },
 
         /**

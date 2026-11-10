@@ -181,7 +181,7 @@ async function runExtendedTourSuite() {
         console.log('   Extended Step 3 (Attendance Hub):', extendedStep3);
         assert.strictEqual(extendedStep3.mode, 'extended', 'Mode must now be extended');
         assert.strictEqual(extendedStep3.step, 3, 'Should advance directly to step 3');
-        assert.strictEqual(extendedStep3.total, 12, 'Extended tour must have 12 powerhouse stations');
+        assert.strictEqual(extendedStep3.total, 11, 'Extended tour must have 11 powerhouse stations');
         assert(extendedStep3.windowBadge.includes('נוכחות') || extendedStep3.title.includes('נוכחות'), 'Must highlight Attendance Hub');
         console.log('   ✓ PASS: Seamless bridge from rapid to extended tour verified.\n');
 
@@ -221,12 +221,12 @@ async function runExtendedTourSuite() {
         assert(step7Grades.windowBadge.includes('ציונים') || step7Grades.title.includes('ציונים'), 'Must highlight Grade Sheet & What-If');
         console.log('   ✓ PASS: Grade Sheet & What-If Simulator station verified.\n');
 
-        // 5. Verify step 8: Samsung Galaxy Watch 8
-        console.log('[Test 5] Jumping to Step 8: Samsung Galaxy Watch 8 Wear OS...');
+        // 5. Verify step 8: Academic Rights & Miluim Advisor
+        console.log('[Test 5] Jumping to Step 8: Technion Academic Rights & Miluim Advisor...');
         await cdp.eval(`window.startInteractiveTour(8, 'extended');`);
         await delay(1500);
 
-        const step8Watch = await cdp.eval(`(() => {
+        const step8Rights = await cdp.eval(`(() => {
             const popover = document.getElementById('tour-popover');
             return {
                 step: window.InteractiveTour.currentStep,
@@ -234,10 +234,10 @@ async function runExtendedTourSuite() {
                 title: popover ? popover.querySelector('.tour-popover-title')?.innerText : ''
             };
         })()`);
-        console.log('   Step 8:', step8Watch);
-        assert.strictEqual(step8Watch.step, 8);
-        assert(step8Watch.windowBadge.includes('Watch') || step8Watch.title.includes('Watch') || step8Watch.title.includes('שעון'), 'Must highlight Galaxy Watch 8');
-        console.log('   ✓ PASS: Galaxy Watch 8 Wear OS station verified.\n');
+        console.log('   Step 8:', step8Rights);
+        assert.strictEqual(step8Rights.step, 8);
+        assert(step8Rights.windowBadge.includes('זכויות') || step8Rights.title.includes('זכויות') || step8Rights.title.includes('מילואים'), 'Must highlight Rights & Miluim Advisor');
+        console.log('   ✓ PASS: Academic Rights & Miluim Advisor station verified.\n');
 
         // 6. Test Skip via Escape key
         console.log('[Test 6] Testing Instant Skip Freedom via Esc key...');
