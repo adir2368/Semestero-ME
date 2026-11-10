@@ -4553,9 +4553,14 @@
                                     דוגמת דחיית הגשה
                                 </button>
                             </div>
-                            <button type="button" class="btn btn-primary" onclick="if(window.EmailIntelligenceHub) window.EmailIntelligenceHub.parsePastedText();" style="background: linear-gradient(135deg, #0284c7, #2563eb); border: none; font-weight: 700; font-size: 0.88rem; padding: 8px 18px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 6px;">
-                                <span>🎯</span> <span>נתח מייל והפק שינויים</span>
-                            </button>
+                            <div style="display: flex; gap: 8px;">
+                                <button type="button" class="btn btn-outline" onclick="if(window.EmailIntelligenceHub) window.EmailIntelligenceHub.pasteFromClipboard();" style="border-color: #38bdf8; color: #38bdf8; font-weight: 700; font-size: 0.85rem; padding: 8px 14px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                                    <span>📋</span> <span>הדבק מהלוח (Clipboard)</span>
+                                </button>
+                                <button type="button" class="btn btn-primary" onclick="if(window.EmailIntelligenceHub) window.EmailIntelligenceHub.parsePastedText();" style="background: linear-gradient(135deg, #0284c7, #2563eb); border: none; font-weight: 700; font-size: 0.88rem; padding: 8px 18px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                                    <span>🎯</span> <span>נתח מייל והפק שינויים</span>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>

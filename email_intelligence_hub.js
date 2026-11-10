@@ -130,10 +130,19 @@
          * Detect Course Code and Name
          */
         detectCourse(text, subject = '') {
-            // Priority 1: 6-digit Technion course code pattern (e.g. 034033, 104043, 114032, 084515)
-            const codeRegex = /\b([0-1]\d{5}|0[1-9]\d{4})\b/;
+            // Priority 1: Technion course code (6-digit, or 8-digit Moodle zero-padded like 00340053, 01040228)
+            const codeRegex = /\b(00\d{6}|01\d{6}|[0-1]\d{5}|0[1-9]\d{4})\b/;
             const match = subject.match(codeRegex) || text.match(codeRegex);
             let code = match ? match[1] : null;
+
+            // Normalize Technion 8-digit Moodle format to standard 6-digit catalog ID
+            if (code && code.length === 8) {
+                if (code.startsWith('00')) {
+                    code = '0' + code.substring(3); // e.g. 00340053 -> 034053
+                } else if (code.startsWith('01')) {
+                    code = '1' + code.substring(3); // e.g. 01040228 -> 104228
+                }
+            }
 
             let name = null;
 
@@ -601,6 +610,35 @@
                     return '<span style="font-size: 0.72rem; color: #34d399; background: rgba(52, 211, 153, 0.15); padding: 2px 7px; border-radius: 10px; font-weight: 700;">👨‍🏫 החלפת מתרגל</span>';
                 default:
                     return '<span style="font-size: 0.72rem; color: #94a3b8; background: rgba(148, 163, 184, 0.15); padding: 2px 7px; border-radius: 10px;">📢 הודעה כללית</span>';
+            }
+        },
+
+        /**
+         * 1-Tap Paste from System Clipboard
+         */
+        async pasteFromClipboard() {
+            try {
+                if (navigator.clipboard && typeof navigator.clipboard.readText === 'function') {
+                    const text = await navigator.clipboard.readText();
+                    if (text && text.trim()) {
+                        const textarea = document.getElementById('email-paste-textarea');
+                        if (textarea) textarea.value = text.trim();
+                        this.parsePastedText();
+                    } else {
+                        if (typeof window.showNotification === 'function') {
+                            window.showNotification('לוח הגזירים ריק.', 'warning');
+                        }
+                    }
+                } else {
+                    if (typeof window.showNotification === 'function') {
+                        window.showNotification('אנא הדבק ידנית באמצעות Ctrl+V.', 'info');
+                    }
+                }
+            } catch (err) {
+                console.warn('[EmailIntelligenceHub] Clipboard read error:', err);
+                if (typeof window.showNotification === 'function') {
+                    window.showNotification('אנא הדבק ידנית באמצעות Ctrl+V (דרושה הרשאת לוח בדפדפן).', 'info');
+                }
             }
         },
 
