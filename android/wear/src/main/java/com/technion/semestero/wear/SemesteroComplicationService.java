@@ -14,12 +14,16 @@ import androidx.wear.watchface.complications.data.ShortTextComplicationData;
 import androidx.wear.watchface.complications.datasource.ComplicationDataSourceService;
 import androidx.wear.watchface.complications.datasource.ComplicationRequest;
 import java.util.Calendar;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Semestero ME • Galaxy Watch 8 Corner / Watch Face Complication Provider.
- * Minimalist, ultra-concise next lecture/recitation provider without visual clutter:
- * Zero symbols/icons, zero redundant stacked headers, purely concise text:
- * e.g. "מוצקים • 14:30" or "מד"ר ח • 11:30" or "אין שיעורים".
+ * Ultra-minimalist next lecture/recitation provider:
+ * Strictly: [Location] [Course] [Hour]
+ * Zero status words ("פעיל", "מחר", "הבא"), zero countdown minutes,
+ * zero symbols/icons/bullets ("•"), only the essentials.
+ * e.g. "אולמן 506 מד\"ר ח 11:30" or "אין שיעורים".
  */
 public class SemesteroComplicationService extends ComplicationDataSourceService {
 
@@ -29,15 +33,14 @@ public class SemesteroComplicationService extends ComplicationDataSourceService 
     @Override
     public ComplicationData getPreviewData(@NonNull ComplicationType type) {
         PendingIntent tapIntent = getLaunchIntent();
-        PlainComplicationText text = new PlainComplicationText.Builder("מד\"ר ח • 11:30").build();
+        PlainComplicationText text = new PlainComplicationText.Builder("אולמן 506 מד\"ר ח 11:30").build();
 
         if (type == ComplicationType.SHORT_TEXT) {
             return new ShortTextComplicationData.Builder(text, text)
                 .setTapAction(tapIntent)
                 .build();
         } else if (type == ComplicationType.LONG_TEXT) {
-            PlainComplicationText longText = new PlainComplicationText.Builder("מד\"ר ח • 11:30 • אולמן 506").build();
-            return new LongTextComplicationData.Builder(longText, longText)
+            return new LongTextComplicationData.Builder(text, text)
                 .setTapAction(tapIntent)
                 .build();
         }
@@ -54,42 +57,46 @@ public class SemesteroComplicationService extends ComplicationDataSourceService 
         String shortName = getShortCourseName(res.courseTitle);
         String shortRoom = getShortRoomName(res.roomText);
 
-        String mainText;
-        String longText;
-
         String timeStart = "";
         if (res.timeText != null && !res.timeText.trim().isEmpty()) {
-            timeStart = res.timeText.contains(" - ") ? res.timeText.split(" - ")[0].trim() : res.timeText.trim();
+            String trimmed = res.timeText.trim();
+            if (trimmed.contains(" - ")) {
+                timeStart = trimmed.split(" - ")[0].trim();
+            } else if (trimmed.matches("^\\d{1,2}:\\d{2}.*")) {
+                timeStart = trimmed.substring(0, 5).trim();
+            }
         }
 
-        if (res.isActive) {
-            mainText = shortName + " (פעיל)";
-            longText = shortName + " (פעיל כעת" + (shortRoom.isEmpty() || shortRoom.equals("טכניון") ? "" : " • " + shortRoom) + ")";
-        } else if (res.isStartingSoon) {
-            String mins = res.statusText.replace("מתחיל בעוד ", "").replace(" דקות", " דק'").replace(" דקה", " דק'");
-            mainText = shortName + " • עוד " + mins;
-            longText = shortName + " בעוד " + mins + (shortRoom.isEmpty() || shortRoom.equals("טכניון") ? "" : " • " + shortRoom);
-        } else if (!res.isTomorrow && !res.isFreeDay && !timeStart.isEmpty()) {
-            mainText = shortName + " • " + timeStart;
-            longText = shortName + " • " + timeStart + (shortRoom.isEmpty() || shortRoom.equals("טכניון") ? "" : " • " + shortRoom);
-        } else if (res.isTomorrow) {
-            mainText = "מחר: " + shortName;
-            longText = "מחר: " + shortName + (timeStart.isEmpty() ? "" : " (" + timeStart + ")");
+        boolean hasValidClass = !res.isFreeDay 
+            && !timeStart.isEmpty() 
+            && !timeStart.equals("--:--")
+            && (res.courseTitle != null)
+            && !res.courseTitle.contains("שבת")
+            && !res.courseTitle.contains("סיום")
+            && !res.courseTitle.contains("סוף שבוע")
+            && !res.courseTitle.contains("חופשי");
+
+        String text;
+        if (hasValidClass) {
+            if (!shortRoom.isEmpty()) {
+                text = shortRoom + " " + shortName + " " + timeStart;
+            } else {
+                text = shortName + " " + timeStart;
+            }
         } else {
-            mainText = "אין שיעורים";
-            longText = "יום חופשי מלימודים";
+            text = "אין שיעורים";
         }
 
         ComplicationData data = null;
         ComplicationType type = request.getComplicationType();
 
+        PlainComplicationText compText = new PlainComplicationText.Builder(text).build();
+
         if (type == ComplicationType.SHORT_TEXT) {
-            PlainComplicationText compText = new PlainComplicationText.Builder(mainText).build();
             data = new ShortTextComplicationData.Builder(compText, compText)
                 .setTapAction(tapIntent)
                 .build();
         } else if (type == ComplicationType.LONG_TEXT) {
-            PlainComplicationText compText = new PlainComplicationText.Builder(longText).build();
             data = new LongTextComplicationData.Builder(compText, compText)
                 .setTapAction(tapIntent)
                 .build();
@@ -117,7 +124,7 @@ public class SemesteroComplicationService extends ComplicationDataSourceService 
      * Translates long Technion course titles to ultra-concise watch complication names
      * to prevent truncation on Samsung Galaxy Watch 8 corner dial widgets.
      */
-    private String getShortCourseName(String title) {
+    public static String getShortCourseName(String title) {
         if (title == null || title.trim().isEmpty()) return "שיעור";
         String t = title.toLowerCase();
 
@@ -145,6 +152,12 @@ public class SemesteroComplicationService extends ComplicationDataSourceService 
         if (t.contains("כימיה") || t.contains("125013") || t.contains("125001")) {
             return "כימיה";
         }
+        if (t.contains("חומרים") || t.contains("034028") || t.contains("34028")) {
+            return "חומרים";
+        }
+        if (t.contains("זורמים") || t.contains("זרימה") || t.contains("034055") || t.contains("34055")) {
+            return "זרימה 1";
+        }
 
         if (title.length() > 8) {
             return title.substring(0, 8);
@@ -152,20 +165,103 @@ public class SemesteroComplicationService extends ComplicationDataSourceService 
         return title;
     }
 
-    private String getShortRoomName(String room) {
-        if (room == null || room.trim().isEmpty()) return "טכניון";
-        String r = room.replace("חדר:", "").replace("חדר", "").trim();
-        if (r.contains("הנדסה כימית 1") || r.contains("כימית 1")) return "כימית 1";
-        if (r.contains("דן קאהן") || r.contains("מכונות 6")) return "קאהן 6";
-        if (r.contains("טאוב") || r.contains("מדמ\"ח 1")) return "טאוב 1";
-        if (r.contains("אולמן 506")) return "אולמן 506";
-        if (r.contains("אולמן 602")) return "אולמן 602";
-        if (r.contains("אולמן 606")) return "אולמן 606";
-        if (r.contains("אולמן 705")) return "אולמן 705";
-        if (r.contains("אולמן 101")) return "אולמן 101";
-        if (r.contains("אולמן 103")) return "אולמן 103";
-        if (r.contains("אתלטיקה קלה") || r.contains("חינוך גופני")) return "אתלטיקה";
-        if (r.contains("פיזיקה 1") || r.contains("פיסיקה 1")) return "פיסיקה 1";
+    /**
+     * Translates and compresses Technion classroom and building names to ultra-short
+     * formats for Samsung Galaxy Watch 8 complications, handling both established and new locations.
+     */
+    public static String getShortRoomName(String room) {
+        if (room == null || room.trim().isEmpty()) return "";
+        String r = room.replace("חדר:", "").replace("חדר", "")
+                       .replace("בניין:", "").replace("בניין", "")
+                       .replace("אולם:", "").replace("אולם", "")
+                       .replace("\"", "").replace("'", "")
+                       .replace("-", " ").trim().replaceAll("\\s+", " ");
+
+        if (r.isEmpty() || r.equals("טכניון") || r.equalsIgnoreCase("technion") 
+            || r.contains("אין שיעורים") || r.contains("יום חופשי") || r.equals("כללי")) {
+            return "";
+        }
+
+        // 1. Ullmann
+        if (r.contains("אולמן")) {
+            Matcher m = Pattern.compile("\\d+").matcher(r);
+            if (m.find()) return "אולמן " + m.group();
+            return "אולמן";
+        }
+
+        // 2. Dan Kahn / Mechanical
+        if (r.contains("קאהן") || r.contains("מכונות")) {
+            Matcher m = Pattern.compile("\\d+").matcher(r);
+            if (m.find()) return "קאהן " + m.group();
+            return "קאהן";
+        }
+
+        // 3. Chemical Engineering
+        if (r.contains("כימית")) {
+            Matcher m = Pattern.compile("\\d+").matcher(r);
+            if (m.find()) {
+                try {
+                    int num = Integer.parseInt(m.group());
+                    return "כימית " + num;
+                } catch (NumberFormatException ignored) {
+                    return "כימית " + m.group();
+                }
+            }
+            return "כימית";
+        }
+
+        // 4. Taub / CS
+        if (r.contains("טאוב") || r.contains("מדמ\"ח") || r.contains("מדמח")) {
+            Matcher m = Pattern.compile("\\d+").matcher(r);
+            if (m.find()) return "טאוב " + m.group();
+            return "טאוב";
+        }
+
+        // 5. Sego
+        if (r.contains("סגו")) {
+            Matcher m = Pattern.compile("\\d+").matcher(r);
+            if (m.find()) return "סגו " + m.group();
+            return "סגו";
+        }
+
+        // 6. Lady Davis
+        if (r.contains("דיוויס") || r.contains("דייויס")) {
+            Matcher m = Pattern.compile("\\d+").matcher(r);
+            if (m.find()) return "דייויס " + m.group();
+            return "דייויס";
+        }
+
+        // 7. Physics
+        if (r.contains("פיסיקה") || r.contains("פיזיקה")) {
+            Matcher m = Pattern.compile("\\d+").matcher(r);
+            if (m.find()) return "פיסיקה " + m.group();
+            return "פיסיקה";
+        }
+
+        // 8. Sports / Athletics / Pool / Gym
+        if (r.contains("אתלטיקה") || r.contains("חינוך גופני") || r.contains("גופני")) {
+            return "אתלטיקה";
+        }
+        if (r.contains("בריכה")) return "בריכה";
+        if (r.contains("כושר")) return "כושר";
+        if (r.contains("ספורט")) return "ספורט";
+
+        // 9. Bloomfield / Rabin / Silver
+        if (r.contains("בלומפילד")) {
+            Matcher m = Pattern.compile("\\d+").matcher(r);
+            if (m.find()) return "בלומפילד " + m.group();
+            return "בלומפילד";
+        }
+        if (r.contains("רבין")) {
+            Matcher m = Pattern.compile("\\d+").matcher(r);
+            if (m.find()) return "רבין " + m.group();
+            return "רבין";
+        }
+
+        // 10. Fallback for any other new room: clean and keep under 10 chars
+        if (r.length() > 10) {
+            return r.substring(0, 10).trim();
+        }
         return r;
     }
 }

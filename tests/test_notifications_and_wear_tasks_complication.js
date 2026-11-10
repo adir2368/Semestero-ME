@@ -88,18 +88,49 @@ console.log('   ✓ PASS: SemesteroTasksComplicationService Java implementation 
 const scheduleServicePath = path.join(__dirname, '..', 'android', 'wear', 'src', 'main', 'java', 'com', 'technion', 'semestero', 'wear', 'SemesteroComplicationService.java');
 assert.strictEqual(fs.existsSync(scheduleServicePath), true, 'SemesteroComplicationService.java must exist');
 const scheduleServiceContent = fs.readFileSync(scheduleServicePath, 'utf8');
+const scheduleCodeWithoutComments = scheduleServiceContent.replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, '');
 
 assert.strictEqual(
-    scheduleServiceContent.includes('setMonochromaticImage'),
+    scheduleCodeWithoutComments.includes('setMonochromaticImage'),
     false,
     'SemesteroComplicationService must NOT include icons/symbols to prevent dial clutter'
 );
 assert.strictEqual(
-    scheduleServiceContent.includes('setTitle'),
+    scheduleCodeWithoutComments.includes('setTitle'),
     false,
     'SemesteroComplicationService must NOT include extra title lines to prevent dial clutter'
 );
-console.log('   ✓ PASS: SemesteroComplicationService minimized schedule implementation verified.');
+assert.strictEqual(
+    scheduleCodeWithoutComments.includes('(פעיל)'),
+    false,
+    'SemesteroComplicationService must NOT contain status strings like (פעיל)'
+);
+assert.strictEqual(
+    scheduleCodeWithoutComments.includes('מתחיל בעוד') || scheduleCodeWithoutComments.includes('בעוד'),
+    false,
+    'SemesteroComplicationService must NOT contain countdown words like בעוד X דק\''
+);
+assert.strictEqual(
+    scheduleCodeWithoutComments.includes('•'),
+    false,
+    'SemesteroComplicationService must NOT contain bullet symbol •'
+);
+assert.strictEqual(
+    scheduleCodeWithoutComments.includes('shortRoom + " " + shortName + " " + timeStart'),
+    true,
+    'SemesteroComplicationService must strictly format [Location] [Course] [Hour]'
+);
+assert.strictEqual(
+    scheduleCodeWithoutComments.includes('"אין שיעורים"'),
+    true,
+    'SemesteroComplicationService must fall back cleanly to "אין שיעורים"'
+);
+assert.strictEqual(
+    scheduleCodeWithoutComments.includes('Matcher m = Pattern.compile("\\\\d+").matcher(r);'),
+    true,
+    'SemesteroComplicationService must dynamically parse room numbers for both established and new locations'
+);
+console.log('   ✓ PASS: SemesteroComplicationService ultra-minimalist schedule implementation verified.');
 
 // -------------------------------------------------------------
 // Test 2: Wear OS Reactive Updates from Sync Service & Task Checkoff
