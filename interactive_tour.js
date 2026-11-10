@@ -25,7 +25,7 @@
         }
     }
 
-    const TOUR_STEPS = [
+    const STANDARD_STEPS = [
         {
             id: 'step-curriculum',
             tab: 'curriculum',
@@ -162,6 +162,98 @@
         }
     ];
 
+    const RAPID_STEPS = STANDARD_STEPS.slice(0, 3);
+
+    const EXTENDED_STEPS = [
+        STANDARD_STEPS[0], // 0: Curriculum
+        STANDARD_STEPS[1], // 1: Planner
+        STANDARD_STEPS[2], // 2: Tasks
+        {
+            id: 'step-attendance',
+            tab: 'tasks',
+            windowName: 'מעקב נוכחות ופנופטו (Attendance Hub)',
+            windowNumber: 'מעצמת למידה 1/4',
+            target: ['#btn-open-panopto-tracker', '#notion-hw-policy-strip', '.notion-tasks-header-actions', '#notion-tasks-workspace'],
+            icon: '📊',
+            tag: 'מעצמת למידה',
+            title: 'מעקב נוכחות חובה ותור השלמת הרצאות Panopto',
+            text: 'פספסת שיעור? המערכת מחשבת עבורך אחוזי נוכחות מותרים (למשל 80% חובת נוכחות) ומנהלת רשימת מעקב השלמת הקלטות מ-Panopto בלחיצה אחת, כדי שלא תצבור פערים לפני תקופת המבחנים!',
+            actionTip: 'לחץ על "נוכחות והשלמות" לפתיחת חלון מעקב הנוכחות והפנופטו.',
+            actionBtn: {
+                label: '📊 פתח מרכז נוכחות',
+                onClick: () => {
+                    if (window.AttendanceHub) window.AttendanceHub.openModal('catchup');
+                }
+            },
+            placement: 'bottom'
+        },
+        {
+            id: 'step-pangea',
+            tab: 'tasks',
+            windowName: 'מאגר פנגיה (Pangea Knowledge Hub)',
+            windowNumber: 'מעצמת למידה 2/4',
+            target: ['#btn-open-pangea-search', '.notion-tasks-header-actions'],
+            icon: '📚',
+            tag: 'מאגר ידע אקדמי',
+            title: 'מאגר פנגיה: אלפי סיכומים, מבחני עבר וקורא PDF פנימי',
+            text: 'חיבור ישיר לכל 34 קורסי הנדסת מכונות במאגר Pangea של עידו פנג בנטוב. חפש הגדרות, תרגולים ומבחנים פתורים, וקרא את קובצי ה-PDF ישירות בתוך המערכת ללא פתיחת לשוניות חיצוניות!',
+            actionTip: 'לחץ על "חיפוש בפנגייה" כדי למצוא פתרונות ומבחני עבר לכל קורס.',
+            actionBtn: {
+                label: '📚 חפש בפנגייה',
+                onClick: () => {
+                    if (window.PangeaHub) window.PangeaHub.openGlobalSearch();
+                }
+            },
+            placement: 'bottom'
+        },
+        STANDARD_STEPS[4], // 5: Timetable
+        STANDARD_STEPS[3], // 6: Calendar
+        {
+            id: 'step-grades',
+            tab: 'curriculum',
+            windowName: 'גיליון ציונים (Grade Sheet & Simulator)',
+            windowNumber: 'מעצמת למידה 3/4',
+            target: ['#btn-open-grade-sheet', '.hud-left-actions', '.technion-ecosystem-bar'],
+            icon: '🎓',
+            tag: 'סימולטור What-If',
+            title: 'גיליון ציונים רשמי וסימולטור מה-אם לממוצע האקדמי',
+            text: 'חישוב ממוצע הטכניון המשוקלל בדיוק של מאית הנקודה. כולל סימולטור "What-If" המדמה כיצד ציון במועד ב׳ או שיפור ציון ישפיע על הממוצע המצטבר ועל זכאות למצטיין דיקן!',
+            actionTip: 'לחץ על כובע הבוגר בראש המסך לפתיחת גיליון הציונים המלא.',
+            actionBtn: {
+                label: '🎓 פתח גיליון ציונים',
+                onClick: () => {
+                    if (window.openGradeSheetModal) window.openGradeSheetModal();
+                }
+            },
+            placement: 'bottom'
+        },
+        {
+            id: 'step-watch',
+            tab: 'settings',
+            windowName: 'שעון חכם Galaxy Watch (Wear OS)',
+            windowNumber: 'מעצמת למידה 4/4',
+            target: ['#btn-test-watch-alert-settings', '.settings-group', '#settings-workspace'],
+            icon: '⌚',
+            tag: 'חומרה לבישה',
+            title: 'סנכרון מלא לשעון Samsung Galaxy Watch 8 (Wear OS)',
+            text: 'רוץ לשיעור הבא עם כל המידע על פרק כף היד: Watch Face Complication המציג את הכיתה והבניין, ווידג׳ט Tile רדאר מעוצב, קרוסלת מסכים מותאמת לבזל מסתובב, וסנכרון מיידי ללא אינטרנט!',
+            actionTip: 'הגדר את סנכרון השעון בהגדרות ושלח רטט בדיקה ישירות לשעון.',
+            actionBtn: {
+                label: '⌚ שלח רטט לשעון',
+                onClick: () => {
+                    const btn = document.getElementById('btn-test-watch-alert-settings');
+                    if (btn) btn.click();
+                }
+            },
+            placement: 'top'
+        },
+        STANDARD_STEPS[6], // 9: Command search
+        STANDARD_STEPS[7], // 10: Rights
+        STANDARD_STEPS[5]  // 11: Settings
+    ];
+
+    const TOUR_STEPS = STANDARD_STEPS;
+
     const TUTORIAL_MODULES = [
         {
             id: 'mod-tree',
@@ -174,50 +266,74 @@
         {
             id: 'mod-planner',
             icon: '🎯',
-            title: 'חלון 2: תכנון תואר ובדיקת זכאות לסיום',
-            desc: 'גרירת קורסים בין סמסטרים, ניהול עומס שבועי, ובדיקת עמידה בכל דרישות התואר (157.5 נק״ז).',
+            title: 'חלון 2: תכנון תואר ובדיקת זכאות לסיום (157.5 נק״ז)',
+            desc: 'גרירת קורסים בין סמסטרים, ניהול עומס שבועי, ובדיקת עמידה בכל דרישות התואר.',
             tab: 'planner',
             stepIndex: 1
         },
         {
             id: 'mod-tasks',
             icon: '📋',
-            title: 'חלון 3: לוח משימות ובחירה מרובה',
-            desc: 'סנכרון מטלות ממודל 26, בחירת שורות מרובות במקביל, העברה לקורס ותפריט Notion.',
+            title: 'חלון 3: לוח משימות Notion וסנכרון Moodle',
+            desc: 'סנכרון מטלות ממודל 26, בחירת שורות מרובות במקביל (Shift+Click) ותפריט Notion.',
             tab: 'tasks',
             stepIndex: 2
         },
         {
-            id: 'mod-calendar',
-            icon: '📅',
-            title: 'חלון 4: לוח שנה אקדמי ומסלול מבחנים',
-            desc: 'לוח חודשי של כל מטלות המודל, מועדי הגשות, ומסלול מרווח מבחנים בין מועדי א׳ וב׳.',
-            tab: 'calendar',
+            id: 'mod-attendance',
+            icon: '📊',
+            title: 'מעקב נוכחות חובה ותור השלמת Panopto',
+            desc: 'חישוב אחוזי נוכחות מותרים (80% חובה) ותור השלמת הקלטות מ-Panopto בלחיצה אחת.',
+            tab: 'tasks',
             stepIndex: 3
+        },
+        {
+            id: 'mod-pangea',
+            icon: '📚',
+            title: 'מאגר פנגיה: סיכומים, מבחנים וקורא PDF פנימי',
+            desc: '34 קורסים ממופים במאגר Pangea של עידו פנג בנטוב וקריאת PDF פנימית.',
+            tab: 'tasks',
+            stepIndex: 4
         },
         {
             id: 'mod-timetable',
             icon: '🕒',
             title: 'חלון 5: מערכת שעות שבועית ו-CheeseFork',
-            desc: 'משיכת שעות ישירה מ-CheeseFork, נעילת מרצים אהובים, וחישוב שילובים ללא התנגשויות.',
+            desc: 'משיכת שעות ישירה מ-CheeseFork, נעילת מרצים אהובים וחישוב שילובים ללא חלונות.',
             tab: 'timetable',
-            stepIndex: 4
+            stepIndex: 5
         },
         {
-            id: 'mod-settings',
-            icon: '⚙️',
-            title: 'חלון 6: הגדרות והורדת אפליקציות',
-            desc: 'מעבר מהיר עם מקשים 1-6, גודל פונט, סנכרון ענן והורדה ל-Windows ולאנדרואיד.',
+            id: 'mod-calendar',
+            icon: '📅',
+            title: 'חלון 4: לוח שנה אקדמי ומסלול מועדי בחינות',
+            desc: 'לוח חודשי של כל מטלות המודל, מועדי הגשות ומסלול מרווח מבחנים בין מועדי א׳ וב׳.',
+            tab: 'calendar',
+            stepIndex: 6
+        },
+        {
+            id: 'mod-grades',
+            icon: '🎓',
+            title: 'גיליון ציונים רשמי וסימולטור What-If לממוצע',
+            desc: 'חישוב ממוצע טכניון מדויק, השפעת שיפור ציון במועד ב׳ וזכאות למצטיין דיקן.',
+            tab: 'curriculum',
+            stepIndex: 7
+        },
+        {
+            id: 'mod-watch',
+            icon: '⌚',
+            title: 'שעון חכם Samsung Galaxy Watch 8 (Wear OS)',
+            desc: 'Complication המציג כיתה ובניין, Tile רדאר מעוצב, תמיכה בבזל וסנכרון מיידי.',
             tab: 'settings',
-            stepIndex: 5
+            stepIndex: 8
         },
         {
             id: 'mod-search',
             icon: '🔍',
-            title: 'כלי מהיר: פקודות וחיפוש (Ctrl+K)',
+            title: 'כלי מהיר: שורת פקודות וחיפוש (Ctrl+K)',
             desc: 'איתור מהיר של כל קורס, משימה, טאב או פעולה במערכת בעזרת שורת הפקודות החכמה.',
             tab: 'curriculum',
-            stepIndex: 6
+            stepIndex: 9
         },
         {
             id: 'mod-faq',
@@ -225,13 +341,23 @@
             title: 'זכויות ונהלים: יועץ זכויות ומילואים',
             desc: 'כל מה שחשוב לדעת: פטור 2 נק״ז מילואים, טירונות עתודה, פורמולה טכניון ואנגלית.',
             tab: 'curriculum',
-            stepIndex: 7
+            stepIndex: 10
+        },
+        {
+            id: 'mod-settings',
+            icon: '⚙️',
+            title: 'חלון 6: הגדרות, גיבוי ענן והורדת אפליקציות',
+            desc: 'מעבר מהיר עם מקשים 1-6, גודל פונט, סנכרון ענן והורדה ל-Windows ולאנדרואיד.',
+            tab: 'settings',
+            stepIndex: 11
         }
     ];
 
     const InteractiveTour = {
         currentStep: 0,
         active: false,
+        tourMode: 'standard',
+        tourSteps: STANDARD_STEPS,
         activeTargetEl: null,
         repositionHandler: null,
         keyHandler: null,
@@ -259,28 +385,10 @@
                 TipKit.init();
             }
 
-            // High-Retention In-Situ Onboarding: Smart trigger for unauthenticated / guest first visitors
-            setTimeout(() => {
-                try {
-                    const isQaTest = typeof window !== 'undefined' && window.location && window.location.search && window.location.search.includes('qa_health_test');
-                    if (isQaTest) return;
-
-                    const tourCompleted = localStorage.getItem(TOUR_STORAGE_KEY) === 'true';
-                    const authPromptDismissed = sessionStorage.getItem('ast_auth_prompt_dismissed') === 'true';
-                    const onboardingModal = document.getElementById('onboarding-wizard-modal');
-                    const authModal = document.getElementById('auth-modal');
-                    const isAuthModalOpen = (authModal && authModal.classList.contains('active')) || 
-                                           (onboardingModal && onboardingModal.classList.contains('active'));
-
-                    // Trigger when user is viewing screen with no blocking modal and hasn't seen the tour
-                    if (!tourCompleted && !isAuthModalOpen && !this.active) {
-                        const targetCard = document.querySelector('.course-card.active, .course-card');
-                        if (targetCard) {
-                            this.showWelcomeTourPrompt();
-                        }
-                    }
-                } catch (e) {}
-            }, 2500);
+            // NOTE: Automatic forced tour popups are strictly DISABLED.
+            // Users have full freedom to explore without logging in or being blocked by a tour.
+            // The tour can be started at any time via the '🧭 סיור' button in the header,
+            // through Settings, or by pressing 'T'. Skipping is always supported on all steps.
         },
 
         injectStyles() {
@@ -817,8 +925,19 @@
             };
         },
 
-        startTour(startIndex = 0) {
-            this.currentStep = Math.max(0, Math.min(TOUR_STEPS.length - 1, startIndex));
+        startTour(startIndex = 0, mode = 'standard') {
+            if (mode === 'extended') {
+                this.tourMode = 'extended';
+                this.tourSteps = EXTENDED_STEPS;
+            } else if (mode === 'rapid') {
+                this.tourMode = 'rapid';
+                this.tourSteps = RAPID_STEPS;
+            } else {
+                this.tourMode = 'standard';
+                this.tourSteps = STANDARD_STEPS;
+            }
+
+            this.currentStep = Math.max(0, Math.min(this.tourSteps.length - 1, startIndex));
             this.active = true;
             this.lastTab = (typeof window.currentActiveTab === 'string') ? window.currentActiveTab : null;
 
@@ -843,7 +962,7 @@
                     e.preventDefault();
                     this.endTour(true);
                 } else if (e.key === 'ArrowRight' || e.key === 'Enter') {
-                    if (this.currentStep < TOUR_STEPS.length - 1) {
+                    if (this.currentStep < this.tourSteps.length - 1) {
                         e.preventDefault();
                         this.nextStep();
                     }
@@ -927,7 +1046,7 @@
 
         renderStep() {
             if (!this.active) return;
-            const step = TOUR_STEPS[this.currentStep];
+            const step = (this.tourSteps ? this.tourSteps[this.currentStep] : TOUR_STEPS[this.currentStep]);
             if (!step) return;
 
             // Clear any active timers
@@ -1093,7 +1212,7 @@
             const popover = document.getElementById('tour-popover');
             if (!popover) return;
 
-            const step = TOUR_STEPS[this.currentStep];
+            const step = (this.tourSteps ? this.tourSteps[this.currentStep] : TOUR_STEPS[this.currentStep]);
             const popW = popover.offsetWidth || 380;
             const popH = popover.offsetHeight || 220;
             const winW = window.innerWidth;
@@ -1166,7 +1285,8 @@
             const popover = document.getElementById('tour-popover');
             if (!popover) return;
 
-            const total = TOUR_STEPS.length;
+            const steps = this.tourSteps || TOUR_STEPS;
+            const total = steps.length;
             const isFirst = this.currentStep === 0;
             const isLast = this.currentStep === total - 1;
 
@@ -1175,6 +1295,17 @@
                 actionBtnHtml = `
                     <button type="button" class="tour-action-callout-btn" id="tour-step-interactive-btn">
                         ${step.actionBtn.label}
+                    </button>
+                `;
+            }
+
+            let modeBadgeText = (this.tourMode === 'extended') ? ' • מורחב' : (this.tourMode === 'rapid') ? ' • מהיר' : '';
+
+            let extendBtnHtml = '';
+            if ((this.tourMode === 'rapid' && isLast) || (this.tourMode === 'standard' && isLast)) {
+                extendBtnHtml = `
+                    <button type="button" class="btn-tour-action btn-tour-extend" id="tour-btn-extend" style="background: linear-gradient(135deg, #059669, #10b981); color: #ffffff; border: 1px solid rgba(52, 211, 153, 0.4); box-shadow: 0 2px 10px rgba(16, 185, 129, 0.35);">
+                        🌟 ${this.tourMode === 'rapid' ? 'המשך לסיור מורחב (עוד פיצ\'רים) ➔' : 'סיור מורחב (פנופטו, פנגיה, שעון) ➔'}
                     </button>
                 `;
             }
@@ -1193,7 +1324,7 @@
                     </div>
                     <div class="tour-popover-meta">
                         <span class="tour-popover-tag">${step.tag}</span>
-                        <span class="tour-step-counter">${this.currentStep + 1} / ${total}</span>
+                        <span class="tour-step-counter">${this.currentStep + 1} / ${total}${modeBadgeText}</span>
                         <button type="button" class="tour-popover-close" id="tour-btn-close" aria-label="סגור">&times;</button>
                     </div>
                 </div>
@@ -1215,6 +1346,7 @@
                     <button type="button" class="tour-skip-link" id="tour-btn-skip">דלג על הסיור</button>
                     <div class="tour-nav-btns">
                         ${!isFirst ? `<button type="button" class="btn-tour-action btn-tour-prev" id="tour-btn-prev">הקודם</button>` : ''}
+                        ${extendBtnHtml}
                         <button type="button" class="btn-tour-action btn-tour-next" id="tour-btn-next">
                             ${isLast ? 'סיום והתחלת עבודה 🚀' : 'הבא ➔'}
                         </button>
@@ -1234,6 +1366,16 @@
             const prevBtn = document.getElementById('tour-btn-prev');
             if (prevBtn) prevBtn.onclick = () => this.prevStep();
 
+            const extendBtn = document.getElementById('tour-btn-extend');
+            if (extendBtn) {
+                extendBtn.onclick = () => {
+                    this.tourMode = 'extended';
+                    this.tourSteps = EXTENDED_STEPS;
+                    this.currentStep = 3;
+                    this.renderStep();
+                };
+            }
+
             document.getElementById('tour-btn-next').onclick = () => {
                 if (isLast) this.endTour(false);
                 else this.nextStep();
@@ -1246,7 +1388,8 @@
         },
 
         nextStep() {
-            if (this.currentStep < TOUR_STEPS.length - 1) {
+            const steps = this.tourSteps || TOUR_STEPS;
+            if (this.currentStep < steps.length - 1) {
                 this.currentStep++;
                 this.renderStep();
             }
@@ -1315,7 +1458,9 @@
     };
 
     window.InteractiveTour = InteractiveTour;
-    window.startInteractiveTour = (startIndex = 0) => InteractiveTour.startTour(startIndex);
+    window.startInteractiveTour = (startIndex = 0, mode = 'standard') => InteractiveTour.startTour(startIndex, mode);
+    window.startExtendedTour = (startIndex = 0) => InteractiveTour.startTour(startIndex, 'extended');
+    window.startRapidTour = (startIndex = 0) => InteractiveTour.startTour(startIndex, 'rapid');
 
     // =========================================================================
     // TipKit Engine: High-Retention In-Situ Contextual Action Tips
@@ -1557,22 +1702,27 @@
 
                 <div class="modal-body" style="padding-top: 14px;">
                     <div style="background: linear-gradient(135deg, rgba(2, 132, 199, 0.15), rgba(16, 185, 129, 0.15)); border: 1px solid rgba(56, 189, 248, 0.35); border-radius: 12px; padding: 14px 18px; display: flex; justify-content: space-between; align-items: center; gap: 14px; flex-wrap: wrap;">
-                        <div>
-                            <div style="font-weight: 800; color: #38bdf8; font-size: 1rem;">
-                                🚀 סיור מודרך חי (In-Situ Spotlight Walkthrough)
+                        <div style="flex: 1; min-width: 250px;">
+                            <div style="font-weight: 800; color: #38bdf8; font-size: 1rem; display: flex; align-items: center; gap: 6px;">
+                                <span>🧭</span> <span>סיורים מודרכים חיים (In-Situ Spotlight)</span>
                             </div>
-                            <div style="font-size: 0.8rem; color: #cbd5e1; margin-top: 3px;">
-                                סיור שלב-אחר-שלב המעביר אותך בין מסכי המערכת, מאיר את הכפתורים ומדגים איפה ללחוץ.
+                            <div style="font-size: 0.8rem; color: #cbd5e1; margin-top: 3px; line-height: 1.45;">
+                                סיור שלב-אחר-שלב המעביר אותך בין מסכי המערכת, מאיר כפתורים ומדגים מה כל דבר עושה.
                             </div>
                         </div>
-                        <button type="button" class="btn btn-primary" onclick="window.closeTutorialHubModal(); window.startInteractiveTour(0);" style="background: linear-gradient(135deg, #0284c7, #2563eb); border: none; font-weight: 700; padding: 8px 18px; border-radius: 8px;">
-                            ▶️ הפעל סיור חי
-                        </button>
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                            <button type="button" class="btn btn-secondary" onclick="window.closeTutorialHubModal(); window.startInteractiveTour(0, 'rapid');" style="background: rgba(30, 41, 59, 0.85); border: 1px solid rgba(255, 255, 255, 0.15); font-weight: 700; padding: 7px 13px; border-radius: 8px; font-size: 0.8rem; color: #cbd5e1; display: inline-flex; align-items: center; gap: 5px;">
+                                <span>⚡</span> <span>סיור מהיר (3 דק׳)</span>
+                            </button>
+                            <button type="button" class="btn btn-primary" onclick="window.closeTutorialHubModal(); window.startInteractiveTour(0, 'extended');" style="background: linear-gradient(135deg, #0284c7, #2563eb); border: 1px solid rgba(56, 189, 248, 0.4); font-weight: 700; padding: 7px 16px; border-radius: 8px; font-size: 0.82rem; color: #ffffff; box-shadow: 0 3px 12px rgba(2, 132, 199, 0.35); display: inline-flex; align-items: center; gap: 6px;">
+                                <span>🌟</span> <span>סיור מורחב (12 מעצמות)</span>
+                            </button>
+                        </div>
                     </div>
 
                     <div class="tutorial-hub-grid">
                         ${TUTORIAL_MODULES.map(m => `
-                            <div class="tutorial-hub-card" onclick="window.closeTutorialHubModal(); window.startInteractiveTour(${m.stepIndex});">
+                            <div class="tutorial-hub-card" onclick="window.closeTutorialHubModal(); window.startInteractiveTour(${m.stepIndex}, 'extended');">
                                 <div>
                                     <div class="tutorial-hub-card-header">
                                         <span style="font-size: 1.3rem;">${m.icon}</span>

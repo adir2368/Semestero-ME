@@ -42,9 +42,9 @@
     "semantic_hash": ""
   },
   "app.js": {
-    "mtime": 1794264106.5258284,
-    "seen": 1794266046.7093992,
-    "ast_hash": "e8c0ca7864fd2ed71fe5b44e5fd6d256",
+    "mtime": 1794289476.369988,
+    "seen": 1794289633.263188,
+    "ast_hash": "0f8bf7dd95d3ba6937b061e6e85b5780",
     "semantic_hash": ""
   },
   "app_restored.js": {
@@ -60,9 +60,9 @@
     "semantic_hash": ""
   },
   "auth_sync.js": {
-    "mtime": 1794263891.302947,
-    "seen": 1794266046.7094057,
-    "ast_hash": "b355ac5194e2dd06ecd6e5ee7b2aa713",
+    "mtime": 1794287619.6837604,
+    "seen": 1794289633.263194,
+    "ast_hash": "fb976364782ad8e0b57a7b50a1f4d2c7",
     "semantic_hash": ""
   },
   "backups/adir_moshe_personal_state_v1.4.4.json": {
@@ -126,9 +126,9 @@
     "semantic_hash": ""
   },
   "google_calendars_snapshot.json": {
-    "mtime": 1794264182.8496559,
-    "seen": 1794266046.7094233,
-    "ast_hash": "775e1074a8445ad7824c2b6c9a71d776",
+    "mtime": 1794289383.8310657,
+    "seen": 1794289633.2632136,
+    "ast_hash": "3e60a3d54e8396b2147228c90b46db6d",
     "semantic_hash": ""
   },
   "inject_preloaded_state.py": {
@@ -138,9 +138,9 @@
     "semantic_hash": ""
   },
   "interactive_tour.js": {
-    "mtime": 1794263782.2385087,
-    "seen": 1794266046.709469,
-    "ast_hash": "e4f9ac139f70a0a3e16db6b860146da2",
+    "mtime": 1794289289.3463812,
+    "seen": 1794289633.263218,
+    "ast_hash": "138d3b423e348f26f1e07baebcba895a",
     "semantic_hash": ""
   },
   "main.js": {
@@ -186,9 +186,9 @@
     "semantic_hash": ""
   },
   "package.json": {
-    "mtime": 1794263997.7441292,
-    "seen": 1794266046.7094889,
-    "ast_hash": "e0ae8f7a66c60f8257da99e759e7777e",
+    "mtime": 1794287743.1694214,
+    "seen": 1794289633.263239,
+    "ast_hash": "e11e114eee9502db8a159753c634b404",
     "semantic_hash": ""
   },
   "parse_exact_save.py": {
@@ -234,9 +234,9 @@
     "semantic_hash": ""
   },
   "sw.js": {
-    "mtime": 1794264213.5087497,
-    "seen": 1794266046.7100549,
-    "ast_hash": "e4c7b5521def0e119ebd15ee9cbaba82",
+    "mtime": 1794287853.5868387,
+    "seen": 1794289633.263865,
+    "ast_hash": "53a3204271ba9db0da31769ae4dd18d6",
     "semantic_hash": ""
   },
   "sync_calendar_daily.py": {
@@ -360,9 +360,9 @@
     "semantic_hash": ""
   },
   "index.html": {
-    "mtime": 1794264766.6838775,
-    "seen": 1794266046.710159,
-    "ast_hash": "2cff6f7c0a347e394f8c65bc1f3a9ed0",
+    "mtime": 1794289336.3536763,
+    "seen": 1794289633.2639797,
+    "ast_hash": "60d73157c347f6dd7b878cc66a47689e",
     "semantic_hash": ""
   },
   "llms.txt": {
@@ -546,14 +546,14 @@
     "semantic_hash": ""
   },
   "android/app/build.gradle": {
-    "mtime": 1794264320.279351,
-    "seen": 1794266046.7092998,
-    "ast_hash": "d5ee5ae26a455843b188da5106b94b10",
+    "mtime": 1794287907.717697,
+    "seen": 1794289633.2631412,
+    "ast_hash": "826c52b5c8212bac8fdc1962951bf707",
     "semantic_hash": ""
   },
   "android/app/capacitor.build.gradle": {
-    "mtime": 1794265047.5363338,
-    "seen": 1794266046.7093022,
+    "mtime": 1794289520.5083282,
+    "seen": 1794289633.2631443,
     "ast_hash": "40ff4eb78cc563ba8310aef14d1256c5",
     "semantic_hash": ""
   },
@@ -630,8 +630,8 @@
     "semantic_hash": ""
   },
   "android/capacitor.settings.gradle": {
-    "mtime": 1794265047.5353353,
-    "seen": 1794266046.709378,
+    "mtime": 1794289520.5077949,
+    "seen": 1794289633.2631671,
     "ast_hash": "d70c5b5a81b7362527e6d71aea3bd487",
     "semantic_hash": ""
   },
@@ -654,9 +654,9 @@
     "semantic_hash": ""
   },
   "android/wear/build.gradle": {
-    "mtime": 1794264426.9440148,
-    "seen": 1794266046.7093835,
-    "ast_hash": "15b986e73616c1fa9e00d59434a045df",
+    "mtime": 1794287961.245092,
+    "seen": 1794289633.2631726,
+    "ast_hash": "fb49453f36c43cb5dac0bf8e296f88ac",
     "semantic_hash": ""
   },
   "android/wear/src/main/java/com/technion/semestero/wear/MainActivity.java": {
@@ -4395,6 +4395,12 @@
     "mtime": 1794249253.587931,
     "seen": 1794250077.1964288,
     "ast_hash": "47ea7a8b19e907204a35326d84114740",
+    "semantic_hash": ""
+  },
+  "tests/test_extended_and_rapid_tour.js": {
+    "mtime": 1794289420.2877536,
+    "seen": 1794289633.2638943,
+    "ast_hash": "ea36a415401829a044202cce63bebf99",
     "semantic_hash": ""
   }
 }

@@ -1611,15 +1611,6 @@
             const modal = document.getElementById('auth-modal');
             if (modal) modal.classList.remove('active');
             sessionStorage.setItem('ast_auth_prompt_dismissed', 'true');
-
-            // High-Retention In-Situ Onboarding: Offer welcome guided tour for first-time guests
-            if (window.InteractiveTour && typeof window.InteractiveTour.showWelcomeTourPrompt === 'function') {
-                setTimeout(() => {
-                    if (!localStorage.getItem('ast_interactive_tour_completed_v267')) {
-                        window.InteractiveTour.showWelcomeTourPrompt();
-                    }
-                }, 700);
-            }
         },
 
         // Open Onboarding Wizard for new students
@@ -2451,8 +2442,8 @@
                                     </button>
                                 </div>
                                 <div style="text-align: center; margin-top: 12px;">
-                                    <button type="button" onclick="AuthSync.closeAuthModal(); sessionStorage.setItem('ast_auth_prompt_dismissed', 'true');" style="background: none; border: none; color: #64748b; font-size: 0.8rem; cursor: pointer; text-decoration: underline;">
-                                        המשך כאורח בינתיים (ללא סנכרון ענן) ←
+                                    <button type="button" onclick="AuthSync.closeAuthModal(); sessionStorage.setItem('ast_auth_prompt_dismissed', 'true');" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12); color: #cbd5e1; font-size: 0.82rem; cursor: pointer; padding: 7px 14px; border-radius: 6px; width: 100%; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.15s ease;">
+                                        <span>👀</span> <span>נסה את המערכת כאורח (ללא התחברות) ←</span>
                                     </button>
                                 </div>
                             </form>
@@ -2496,8 +2487,8 @@
                                     </a>
                                 </div>
                                 <div style="text-align: center; margin-top: 8px;">
-                                    <button type="button" onclick="AuthSync.closeAuthModal(); sessionStorage.setItem('ast_auth_prompt_dismissed', 'true');" style="background: none; border: none; color: #64748b; font-size: 0.8rem; cursor: pointer; text-decoration: underline;">
-                                        המשך כאורח בינתיים ←
+                                    <button type="button" onclick="AuthSync.closeAuthModal(); sessionStorage.setItem('ast_auth_prompt_dismissed', 'true');" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12); color: #cbd5e1; font-size: 0.82rem; cursor: pointer; padding: 7px 14px; border-radius: 6px; width: 100%; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.15s ease;">
+                                        <span>👀</span> <span>נסה את המערכת כאורח (ללא התחברות) ←</span>
                                     </button>
                                 </div>
                             </form>
