@@ -85,6 +85,22 @@ assert.strictEqual(
 );
 console.log('   ✓ PASS: SemesteroTasksComplicationService Java implementation verified.');
 
+const scheduleServicePath = path.join(__dirname, '..', 'android', 'wear', 'src', 'main', 'java', 'com', 'technion', 'semestero', 'wear', 'SemesteroComplicationService.java');
+assert.strictEqual(fs.existsSync(scheduleServicePath), true, 'SemesteroComplicationService.java must exist');
+const scheduleServiceContent = fs.readFileSync(scheduleServicePath, 'utf8');
+
+assert.strictEqual(
+    scheduleServiceContent.includes('setMonochromaticImage'),
+    false,
+    'SemesteroComplicationService must NOT include icons/symbols to prevent dial clutter'
+);
+assert.strictEqual(
+    scheduleServiceContent.includes('setTitle'),
+    false,
+    'SemesteroComplicationService must NOT include extra title lines to prevent dial clutter'
+);
+console.log('   ✓ PASS: SemesteroComplicationService minimized schedule implementation verified.');
+
 // -------------------------------------------------------------
 // Test 2: Wear OS Reactive Updates from Sync Service & Task Checkoff
 // -------------------------------------------------------------

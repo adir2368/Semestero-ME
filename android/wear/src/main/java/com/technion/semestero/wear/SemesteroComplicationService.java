@@ -2,7 +2,6 @@ package com.technion.semestero.wear;
 
 import android.app.PendingIntent;
 import android.content.Intent;
-import android.graphics.drawable.Icon;
 import android.os.RemoteException;
 import android.util.Log;
 import androidx.annotation.NonNull;
@@ -10,7 +9,6 @@ import androidx.annotation.Nullable;
 import androidx.wear.watchface.complications.data.ComplicationData;
 import androidx.wear.watchface.complications.data.ComplicationType;
 import androidx.wear.watchface.complications.data.LongTextComplicationData;
-import androidx.wear.watchface.complications.data.MonochromaticImage;
 import androidx.wear.watchface.complications.data.PlainComplicationText;
 import androidx.wear.watchface.complications.data.ShortTextComplicationData;
 import androidx.wear.watchface.complications.datasource.ComplicationDataSourceService;
@@ -19,8 +17,9 @@ import java.util.Calendar;
 
 /**
  * Semestero ME • Galaxy Watch 8 Corner / Watch Face Complication Provider.
- * Provides concise abbreviations for watch complications so names never cut off:
- * מד"ר ח, חדו"א, מוצקים, חישוב הנדסי, תרמו 1, פיסיקה 2, יוגה.
+ * Minimalist, ultra-concise next lecture/recitation provider without visual clutter:
+ * Zero symbols/icons, zero redundant stacked headers, purely concise text:
+ * e.g. "מוצקים • 14:30" or "מד"ר ח • 11:30" or "אין שיעורים".
  */
 public class SemesteroComplicationService extends ComplicationDataSourceService {
 
@@ -30,26 +29,17 @@ public class SemesteroComplicationService extends ComplicationDataSourceService 
     @Override
     public ComplicationData getPreviewData(@NonNull ComplicationType type) {
         PendingIntent tapIntent = getLaunchIntent();
-        PlainComplicationText text = new PlainComplicationText.Builder("11:30").build();
-        PlainComplicationText title = new PlainComplicationText.Builder("מד\"ר ח").build();
-        Icon icon = Icon.createWithResource(this, R.drawable.ic_stat_notification);
-        MonochromaticImage mono = new MonochromaticImage.Builder(icon).build();
+        PlainComplicationText text = new PlainComplicationText.Builder("מד\"ר ח • 11:30").build();
 
         if (type == ComplicationType.SHORT_TEXT) {
-            return new ShortTextComplicationData.Builder(text, new PlainComplicationText.Builder("שיעור קרוב").build())
-                .setTitle(title)
-                .setMonochromaticImage(mono)
+            return new ShortTextComplicationData.Builder(text, text)
                 .setTapAction(tapIntent)
                 .build();
         } else if (type == ComplicationType.LONG_TEXT) {
-            return new LongTextComplicationData.Builder(
-                new PlainComplicationText.Builder("11:30 מד\"ר ח").build(),
-                new PlainComplicationText.Builder("שיעור קרוב").build()
-            )
-            .setTitle(new PlainComplicationText.Builder("אולמן 506").build())
-            .setMonochromaticImage(mono)
-            .setTapAction(tapIntent)
-            .build();
+            PlainComplicationText longText = new PlainComplicationText.Builder("מד\"ר ח • 11:30 • אולמן 506").build();
+            return new LongTextComplicationData.Builder(longText, longText)
+                .setTapAction(tapIntent)
+                .build();
         }
         return null;
     }
@@ -60,31 +50,33 @@ public class SemesteroComplicationService extends ComplicationDataSourceService 
         WearScheduleHelper.ScheduleResolution res = WearScheduleHelper.resolve(this, now);
 
         PendingIntent tapIntent = getLaunchIntent();
-        Icon icon = Icon.createWithResource(this, R.drawable.ic_stat_notification);
-        MonochromaticImage mono = new MonochromaticImage.Builder(icon).build();
 
         String shortName = getShortCourseName(res.courseTitle);
         String shortRoom = getShortRoomName(res.roomText);
 
         String mainText;
-        String titleText = shortName;
         String longText;
 
+        String timeStart = "";
+        if (res.timeText != null && !res.timeText.trim().isEmpty()) {
+            timeStart = res.timeText.contains(" - ") ? res.timeText.split(" - ")[0].trim() : res.timeText.trim();
+        }
+
         if (res.isActive) {
-            mainText = "פעיל";
-            longText = "🟢 " + shortName + " (" + res.timeText + ")";
+            mainText = shortName + " (פעיל)";
+            longText = shortName + " (פעיל כעת" + (shortRoom.isEmpty() || shortRoom.equals("טכניון") ? "" : " • " + shortRoom) + ")";
         } else if (res.isStartingSoon) {
-            mainText = res.statusText.replace("מתחיל בעוד ", "").replace(" דקות", "ד'");
-            longText = "⏳ " + shortName + " ב-" + shortRoom;
-        } else if (!res.isTomorrow && !res.isFreeDay && !res.timeText.isEmpty()) {
-            mainText = res.timeText.split(" - ")[0];
-            longText = shortName + " ב-" + res.timeText;
+            String mins = res.statusText.replace("מתחיל בעוד ", "").replace(" דקות", " דק'").replace(" דקה", " דק'");
+            mainText = shortName + " • עוד " + mins;
+            longText = shortName + " בעוד " + mins + (shortRoom.isEmpty() || shortRoom.equals("טכניון") ? "" : " • " + shortRoom);
+        } else if (!res.isTomorrow && !res.isFreeDay && !timeStart.isEmpty()) {
+            mainText = shortName + " • " + timeStart;
+            longText = shortName + " • " + timeStart + (shortRoom.isEmpty() || shortRoom.equals("טכניון") ? "" : " • " + shortRoom);
         } else if (res.isTomorrow) {
-            mainText = "מחר";
-            longText = "מחר: " + shortName + " (" + (res.timeText.contains(" - ") ? res.timeText.split(" - ")[0] : res.timeText) + ")";
+            mainText = "מחר: " + shortName;
+            longText = "מחר: " + shortName + (timeStart.isEmpty() ? "" : " (" + timeStart + ")");
         } else {
-            mainText = "חופשי";
-            titleText = "לו״ז";
+            mainText = "אין שיעורים";
             longText = "יום חופשי מלימודים";
         }
 
@@ -92,23 +84,15 @@ public class SemesteroComplicationService extends ComplicationDataSourceService 
         ComplicationType type = request.getComplicationType();
 
         if (type == ComplicationType.SHORT_TEXT) {
-            data = new ShortTextComplicationData.Builder(
-                new PlainComplicationText.Builder(mainText).build(),
-                new PlainComplicationText.Builder("שיעור קרוב").build()
-            )
-            .setTitle(new PlainComplicationText.Builder(titleText).build())
-            .setMonochromaticImage(mono)
-            .setTapAction(tapIntent)
-            .build();
+            PlainComplicationText compText = new PlainComplicationText.Builder(mainText).build();
+            data = new ShortTextComplicationData.Builder(compText, compText)
+                .setTapAction(tapIntent)
+                .build();
         } else if (type == ComplicationType.LONG_TEXT) {
-            data = new LongTextComplicationData.Builder(
-                new PlainComplicationText.Builder(longText).build(),
-                new PlainComplicationText.Builder("שיעור קרוב").build()
-            )
-            .setTitle(new PlainComplicationText.Builder(shortRoom).build())
-            .setMonochromaticImage(mono)
-            .setTapAction(tapIntent)
-            .build();
+            PlainComplicationText compText = new PlainComplicationText.Builder(longText).build();
+            data = new LongTextComplicationData.Builder(compText, compText)
+                .setTapAction(tapIntent)
+                .build();
         }
 
         try {
@@ -134,7 +118,7 @@ public class SemesteroComplicationService extends ComplicationDataSourceService 
      * to prevent truncation on Samsung Galaxy Watch 8 corner dial widgets.
      */
     private String getShortCourseName(String title) {
-        if (title == null || title.trim().isEmpty()) return "לו״ז";
+        if (title == null || title.trim().isEmpty()) return "שיעור";
         String t = title.toLowerCase();
 
         if (t.contains("דיפרנציאליות חלקיות") || t.contains("מד\"ר ח") || t.contains("מד\"ח") || t.contains("מדח") || t.contains("104228")) {
