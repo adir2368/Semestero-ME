@@ -23545,11 +23545,11 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.11.10-v2.10.30",
-    version: "2.10.30",
-    build: "20261110_02",
-    date: "2026-11-10 07:15",
-    description: "v2.10.30: ווידג'ט שיעור קרוב אולטרה-מינימליסטי בפינת השעון: מיקום קורס שעה בלבד ללא מצב/ספירה/סימנים ותמיכה מלאה במיקומים חדשים (ADR-103)."
+    code: "REV-2026.11.10-v2.10.31",
+    version: "2.10.31",
+    build: "20261110_03",
+    date: "2026-11-10 14:10",
+    description: "v2.10.31: רדאר מיילים והודעות אקדמיות (Outlook & Moodle): זיהוי אוטומטי של שינויי כיתות, שעות ומועדי הגשה, עדכון 1-Tap במערכת השעות ובלוח המשימות (ADR-104)."
 };
 window.APP_VERSION = APP_CURRENT_REVISION.version;
 
@@ -26048,13 +26048,29 @@ function renderTodayTimetableBanner() {
             else if (status.code === 'next') itemClass += ' next-upcoming';
 
             const durMeta = getClassDurationMetadata(c.startTime, c.endTime);
+
+            // Check for Email Radar schedule overrides (Room changes, cancellations)
+            let overrideBadge = '';
+            if (window.gameState && window.gameState.scheduleOverrides) {
+                const ov = window.gameState.scheduleOverrides.find(o => 
+                    (o.courseCode && String(c.courseId).includes(o.courseCode)) ||
+                    (o.courseName && c.courseName && c.courseName.includes(o.courseName))
+                );
+                if (ov && ov.category === 'ROOM_CHANGE' && (ov.building || ov.room)) {
+                    const loc = [ov.building, ov.room ? `חדר ${ov.room}` : ''].filter(Boolean).join(' ');
+                    overrideBadge = `<span style="font-size: 0.72rem; color: #fbbf24; background: rgba(251, 191, 36, 0.2); border: 1px solid rgba(251, 191, 36, 0.4); padding: 1px 6px; border-radius: 4px; margin-right: 6px;">⚠️ כיתה שונתה למייל: ${loc}</span>`;
+                } else if (ov && ov.category === 'CANCELLATION') {
+                    overrideBadge = `<span style="font-size: 0.72rem; color: #f87171; background: rgba(248, 113, 113, 0.2); border: 1px solid rgba(248, 113, 113, 0.4); padding: 1px 6px; border-radius: 4px; margin-right: 6px;">🚫 שיעור מבוטל לפי מייל</span>`;
+                }
+            }
+
             bodyHtml += `
                 <div class="${itemClass}" onclick="openCourseDetails('${c.courseId}')">
                     <div class="today-class-top">
                         <span class="today-class-time">⏰ ${c.startTime} - ${c.endTime} (${durMeta.text})</span>
                         <span class="today-class-status ${status.code}">${status.text}</span>
                     </div>
-                    <div class="today-class-name">${c.courseName} (${c.courseId})</div>
+                    <div class="today-class-name">${c.courseName} (${c.courseId}) ${overrideBadge}</div>
                     <div class="today-class-sub">
                         <span>${c.type}</span>
                         ${c.lecturer ? `<span>${c.lecturer}</span>` : ''}

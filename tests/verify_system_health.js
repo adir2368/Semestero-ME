@@ -996,6 +996,76 @@ async function run() {
             assert(result.tabBackHandled && result.tabIsPlanner, 'handleMobileBackAction must navigate back in tab history when no modal is open');
         });
 
+        await test('Outlook & Email Intelligence Hub: Technion Regex NLP, Entity Extraction, Timetable Overrides & Tasks Sync', async () => {
+            const result = await cdp.eval(`(() => {
+                const hub = window.EmailIntelligenceHub;
+                if (!hub) return { exists: false };
+
+                // 1. Test Room Change Extraction
+                const roomEmail = hub.parseEmail(
+                    '[034033] הודעה: שינוי כיתה לתרגול שבוע 4',
+                    'שלום לכולם, עקב עבודות תחזוקה בבניין דנציגר, התרגול ביום רביעי הקרוב בשעה 10:30 הועבר לחדר 240 בבניין ליידי דייוויס.',
+                    'moodle@campus.technion.ac.il'
+                );
+
+                // 2. Test Deadline Postponement Extraction
+                const deadlineEmail = hub.parseEmail(
+                    '[104043] דחיית הגשת תרגיל בית 3',
+                    'סטודנטים יקרים, מועד הגשת תרגיל בית 3 נדחה ליום חמישי 20/11 בשעה 23:59.',
+                    'moodle@campus.technion.ac.il'
+                );
+
+                // 3. Test Cancellation Extraction
+                const cancelEmail = hub.parseEmail(
+                    '[114032] ביטול מעבדה ביום שני הקרוב',
+                    'שלום, המעבדה ביום שני הקרוב לא תתקיים עקב יום בחירות. מועד חלופי יפורסם.',
+                    'lecturer@technion.ac.il'
+                );
+
+                hub.addInsight(roomEmail);
+                hub.addInsight(deadlineEmail);
+                hub.addInsight(cancelEmail);
+
+                // 4. Test 1-Tap Actions
+                const overrideApplied = hub.applyTimetableOverride(roomEmail.id);
+                const taskAdded = hub.addTaskFromInsight(deadlineEmail.id);
+
+                const hasOverride = window.gameState && window.gameState.scheduleOverrides &&
+                    window.gameState.scheduleOverrides.some(o => o.courseCode === '034033' && o.room === '240');
+
+                const hasTask = window.gameState && window.gameState.tasks &&
+                    window.gameState.tasks.some(t => t.courseCode === '104043' && t.dueDate.includes('11-20'));
+
+                return {
+                    exists: true,
+                    roomCategory: roomEmail.category,
+                    roomCourse: roomEmail.courseCode,
+                    roomBuilding: roomEmail.entities.building,
+                    roomNum: roomEmail.entities.room,
+                    deadlineCategory: deadlineEmail.category,
+                    deadlineCourse: deadlineEmail.courseCode,
+                    deadlineDate: deadlineEmail.entities.deadlineDate,
+                    cancelCategory: cancelEmail.category,
+                    overrideApplied,
+                    taskAdded,
+                    hasOverride,
+                    hasTask
+                };
+            })()`);
+
+            assert(result.exists, 'window.EmailIntelligenceHub must be loaded and initialized');
+            assert(result.roomCategory === 'ROOM_CHANGE', `Expected ROOM_CHANGE, got ${result.roomCategory}`);
+            assert(result.roomCourse === '034033', `Expected 034033, got ${result.roomCourse}`);
+            assert(result.roomBuilding === 'ליידי דייוויס', `Expected ליידי דייוויס, got ${result.roomBuilding}`);
+            assert(result.roomNum === '240', `Expected 240, got ${result.roomNum}`);
+            assert(result.deadlineCategory === 'DEADLINE_CHANGE', `Expected DEADLINE_CHANGE, got ${result.deadlineCategory}`);
+            assert(result.deadlineCourse === '104043', `Expected 104043, got ${result.deadlineCourse}`);
+            assert(result.deadlineDate && result.deadlineDate.includes('11-20'), `Expected deadline date 11-20, got ${result.deadlineDate}`);
+            assert(result.cancelCategory === 'CANCELLATION', `Expected CANCELLATION, got ${result.cancelCategory}`);
+            assert(result.overrideApplied && result.hasOverride, 'applyTimetableOverride must record override in gameState.scheduleOverrides');
+            assert(result.taskAdded && result.hasTask, 'addTaskFromInsight must record task in gameState.tasks');
+        });
+
     } finally {
         console.log(`\n========================================================================`);
         console.log(`SUMMARY: ${passed} passed, ${failed} failed.`);

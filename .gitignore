@@ -28,3 +28,4 @@ graphify-out/20*/
 *.jks
 *.keystore
 scratch/
+tmp*/

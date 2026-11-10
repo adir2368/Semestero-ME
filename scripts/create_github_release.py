@@ -18,7 +18,7 @@ with open(os.path.join(ROOT, "package.json"), "r", encoding="utf-8") as f:
     pkg = json.load(f)
 VERSION = pkg.get("version", "2.10.22")
 TAG = f"v{VERSION}"
-NAME = f"Semestero ME v{VERSION} - Galaxy Watch Hebrew UTF-8 Encoding Resolution & Pangea CSP Hardening (טיהור קידוד עברית בשעון והקשחת תצוגת פנגייה)"
+NAME = f"Semestero ME v{VERSION} - Outlook & Email Intelligence Hub (קריאת מיילים מאוטלוק, זיהוי משימות, דחיות הגשה ושינויי כיתות)"
 
 def get_github_token():
     try:
@@ -98,22 +98,27 @@ def main():
 
     body_notes = f"""# Semestero ME {TAG} Release Notes
 
-### ⌚ 1. תיקון שורש לקידוד עברית בשעון Galaxy Watch (UTF-8 Javac Encoding Enforcement)
-- **אכיפת UTF-8 מלאה בקומפיילר Java של Gradle**: אכיפת `options.encoding = 'UTF-8'` בכל משימות ה-`JavaCompile` ברמת הפרויקט, ה-app וה-wear. נפתרה בעיית היסוד שבה קומפיילר javac בסביבת Windows השתמש בקידוד ברירת מחדל מערכתי (cp1255/windows-1252) והמיר מחרוזות עבריות לסימני שאלה (`????`) בתוך ה-bytecode.
-- **טיהור וחיטוי נתונים מקומיים**: הוספת מנגנון `isCorruptedText` ב-`MainActivity` וב-`SemesteroTasksTileService` שמסנן ופוסל באופן אוטומטי מחרוזות פגומות שהתקבלו מסנכרון עבר.
-- **אימות ויזואלי בשעון**: נבדק והותקן ישירות על גבי Samsung Galaxy Watch 8 - כל שמות המשימות, פריטי המערכת והטיילים מוצגים בעברית מושלמת וחדה.
+### 📬 1. רדאר מיילים והודעות אקדמיות (Outlook & Email Intelligence Hub)
+- **זיהוי וניתוח טבעי חכם (Technion Regex NLP)**: מנוע ייעודי המזהה באופן אוטומטי מספרי קורסים בטכניון (`034033`, `104043`, `114032`), שמות בניינים (`דנציגר`, `ליידי דייוויס`, `טאוב`, `אולמן`, `בלומפילד`), חדרים, ימים, שעות ותאריכי יעד.
+- **סיווג קטגוריות אקדמיות**:
+  * 🏢 **שינויי כיתות / חדרים**: זיהוי מיידי של העברת שיעור או תרגול לכיתה חדשה עם כפתור עדכון ישיר של מערכת השעות.
+  * 📝 **דחיות והארכות מועדי הגשה**: זיהוי דחיית תרגילי בית ומטלות, חילוץ תאריך ושעת יעד, וסנכרון מיידי ללוח המשימות ולמעקב שיעורי הבית.
+  * 🚫 **ביטולי שיעורים / הרצאות / מעבדות**: התרעה וסימון ביטול במערכת השעות השבועית.
+  * ⏰ **שיעורי השלמה והזזות זמנים**: עדכון לו"ז אקדמי.
+- **ערוץ הזנה כפול (Dual-Channel)**:
+  * **הדבקה וניתוח מהיר (Smart Paste & Drop)**: הזנה מהירה של תוכן מייל או גרירת קובצי `.eml` לעיבוד מיידי ופרטי (100% Client-Side).
+  * **חיבור ישיר ל-Technion Microsoft 365**: אינטגרציית OAuth 2.0 PKCE לקריאת הודעות פורום ומודל ישירות מחשבון הסטודנט (`campus.technion.ac.il`).
+- **אינטגרציה וסנכרון מלא למערכת**:
+  * ⚡ **תגיות שינוי במערכת השעות**: תצוגת תגית כתומה בולטת בלו"ז היומי (`⚠️ כיתה שונתה למייל: ליידי דייוויס חדר 240`).
+  * 📌 **סנכרון משימות ללוח Notion**: יצירה ועדכון אוטומטיים של תרגילי בית ומטלות.
+  * ⌚ **סנכרון לשעון Galaxy Watch**: דחיפת העדכונים ישירות ל-Tile ול-Complication בשעון.
 
-### 📖 2. הקשחת תצוגת סיכומי פנגייה ופתרון שגיאת CSP (Pangea Knowledge Hub Reader)
-- **פתרון שגיאת net::ERR_BLOCKED_BY_CSP**: עדכון מדיניות אבטחת התוכן (`Content-Security-Policy`) ב-`index.html` לתמיכה במסגרות מאובטחות (`frame-src 'self' https: data: blob:` ו-`child-src`).
-- **נרמול מקפים וקישורים לסיכומים**: נרמול אוטומטי של רווחים למקפים בכתובות פרקים (`משוואת-הגלים` במקום ביטול רווחים שגרם ל-404).
-- **חיבור כפתור פתיחה בדפדפן המקורי**: כפתור "פתח באתר המקורי ↗" מנתב ישירות ל-Native Android Intent לפתיחה חלקה בדפדפן המכשיר במקרה של חסימות תצוגה חיצוניות.
-
-### 📦 3. קובצי הפצה ועדכון:
-- `Semestero-ME.apk` (Android Native App `versionCode 76`, `versionName 2.10.22`)
-- `Semestero-ME-Watch.apk` (Wear OS Companion `versionCode 76`, `versionName 2.10.22`)
-- `Semestero-ME-Windows-x64.zip` (Electron Desktop Client v2.10.22)
-- כל 21 חבילות בדיקות הרגרסיה של המערכת עברו בהצלחה מלאה (21 passed, 0 failed).
-- תיעוד ארכיטקטוני מלא: [[02_Architecture_ADR/ADR-095-Wear-OS-UTF8-Compilation-Encoding-Sanitization-and-Pangea-CSP-Hardening|ADR-095]] נרשם ב-Obsidian Second Brain.
+### 📦 2. קובצי הפצה ועדכון:
+- `Semestero-ME.apk` (Android Native App `versionCode 85`, `versionName 2.10.31`)
+- `Semestero-ME-Watch.apk` (Wear OS Companion `versionCode 85`, `versionName 2.10.31`)
+- `Semestero-ME-Windows-x64.zip` (Electron Desktop Client v2.10.31)
+- כל 23 חבילות בדיקות הרגרסיה של המערכת עברו בהצלחה מלאה (23 passed, 0 failed).
+- תיעוד ארכיטקטוני מלא: [[02_Architecture_ADR/ADR-104-Academic-Email-Intelligence-Hub-Outlook-Moodle-NLP-And-Schedule-Overrides|ADR-104]] נרשם ב-Obsidian Second Brain.
 """
 
     req_tag = urllib.request.Request(f"https://api.github.com/repos/{REPO}/releases/tags/{TAG}", headers=headers)

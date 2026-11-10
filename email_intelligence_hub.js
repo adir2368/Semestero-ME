@@ -139,13 +139,16 @@
 
             // Search against student's active schedule courses
             if (window.gameState && window.gameState.courses) {
-                for (const c of window.gameState.courses) {
-                    if (code && String(c.id).includes(code)) {
-                        name = c.name;
+                const courseList = Array.isArray(window.gameState.courses) 
+                    ? window.gameState.courses 
+                    : Object.values(window.gameState.courses);
+                for (const c of courseList) {
+                    if (c && code && (String(c.id).includes(code) || String(c.code).includes(code))) {
+                        name = c.name || c.title;
                         break;
                     }
-                    if (c.name && text.includes(c.name)) {
-                        code = c.id;
+                    if (c && c.name && text.includes(c.name)) {
+                        code = c.id || c.code;
                         name = c.name;
                         break;
                     }
@@ -227,11 +230,24 @@
                 replacementStaff: null
             };
 
-            // Room & Building Extraction
+            // Smart Building Extraction: prioritize building mentioned after "הועבר ל" / "עבר ל" / "יתקיים ב"
+            const actionPhraseMatch = text.match(/(?:הועבר ל|עבר ל|יתקיים ב|יועבר ל|נקיים ב)([\s\S]{1,100})/i);
+            const targetScope = actionPhraseMatch ? actionPhraseMatch[1] : text;
+
             for (const b of TECHNION_BUILDINGS) {
-                if (b.regex.test(text)) {
+                if (b.regex.test(targetScope)) {
                     entities.building = b.nameHe;
                     break;
+                }
+            }
+
+            // Fallback: search full text if not found in action scope
+            if (!entities.building) {
+                for (const b of TECHNION_BUILDINGS) {
+                    if (b.regex.test(text)) {
+                        entities.building = b.nameHe;
+                        break;
+                    }
                 }
             }
 
@@ -370,7 +386,7 @@
             if (typeof window.showNotification === 'function') {
                 window.showNotification(`✅ מערכת השעות עודכנה: ${item.summary}`, 'success');
             } else {
-                alert(`✅ מערכת השעות עודכנה: ${item.summary}`);
+                console.log(`[EmailIntelligenceHub] ✅ מערכת השעות עודכנה: ${item.summary}`);
             }
             return true;
         },
@@ -442,7 +458,7 @@
             if (typeof window.showNotification === 'function') {
                 window.showNotification(`📌 משימה נוספה ללוח המשימות: ${taskTitle}`, 'success');
             } else {
-                alert(`📌 משימה נוספה ללוח המשימות: ${taskTitle}`);
+                console.log(`[EmailIntelligenceHub] 📌 משימה נוספה ללוח המשימות: ${taskTitle}`);
             }
             return true;
         },
@@ -590,7 +606,11 @@
             const subject = subjectInput ? subjectInput.value.trim() : '';
 
             if (!text) {
-                alert('אנא הדבק את תוכן המייל לתיבת הטקסט.');
+                if (typeof window.showNotification === 'function') {
+                    window.showNotification('אנא הדבק את תוכן המייל לתיבת הטקסט.', 'warning');
+                } else {
+                    console.warn('[EmailIntelligenceHub] Empty text pasted.');
+                }
                 return;
             }
 
@@ -607,7 +627,11 @@
                     window.showNotification(`🎯 זוהה בהצלחה: ${insight.summary}`, 'success');
                 }
             } else {
-                alert('לא זוהו פרטים אקדמיים בטקסט שהודבק.');
+                if (typeof window.showNotification === 'function') {
+                    window.showNotification('לא זוהו פרטים אקדמיים בטקסט שהודבק.', 'warning');
+                } else {
+                    console.warn('[EmailIntelligenceHub] No academic entities recognized.');
+                }
             }
         },
 
