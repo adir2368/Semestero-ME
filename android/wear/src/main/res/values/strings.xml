@@ -9,4 +9,6 @@
     <string name="free_day_msg">יום חופשי או שהסתיימו הלימודים 🎉</string>
     <string name="complication_label">סמסטרו ME • שיעור קרוב</string>
     <string name="complication_desc">הצגת השיעור הקרוב, סטטוס פעיל וספירה לאחור בפינת מסך הבית של השעון</string>
+    <string name="complication_tasks_label">סמסטרו ME • משימות פתוחות</string>
+    <string name="complication_tasks_desc">הצגת מספר המשימות והמטלות הפתוחות בפינת מסך הבית של השעון</string>
 </resources>

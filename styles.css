@@ -5166,6 +5166,21 @@ label[for="new-task-xp-input"],
     pointer-events: none;
 }
 
+/* Responsive full-width mobile toast notifications */
+@media (max-width: 768px) {
+    .ast-toast {
+        left: 12px !important;
+        right: 12px !important;
+        bottom: calc(20px + env(safe-area-inset-bottom, 0px)) !important;
+        max-width: calc(100% - 24px) !important;
+        width: auto !important;
+        justify-content: center !important;
+        text-align: center !important;
+        white-space: normal !important;
+        word-break: break-word !important;
+    }
+}
+
 @keyframes toastSlideUp {
     from { opacity: 0; transform: translateY(12px); }
     to { opacity: 1; transform: translateY(0); }
@@ -8240,10 +8255,11 @@ html.is-iphone .app-global-footer {
     font-size: 0.84rem;
     color: #e2e8f0;
     font-weight: 500;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    line-height: 1.3;
+    white-space: normal;
+    word-break: break-word;
+    overflow: visible;
+    text-overflow: unset;
+    line-height: 1.4;
 }
 
 .notif-card-header-right {
@@ -8378,6 +8394,11 @@ html.is-iphone .app-global-footer {
     font-size: 0.88rem;
     font-weight: 700;
     color: #f1f5f9;
+    white-space: normal;
+    word-break: break-word;
+    overflow: visible;
+    text-overflow: unset;
+    line-height: 1.35;
 }
 
 .notif-lecture-item-sub {
@@ -8431,9 +8452,11 @@ html.is-iphone .app-global-footer {
     font-size: 0.84rem;
     font-weight: 600;
     color: #f1f5f9;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    white-space: normal;
+    word-break: break-word;
+    overflow: visible;
+    text-overflow: unset;
+    line-height: 1.35;
 }
 
 .notif-task-sub {
@@ -8499,6 +8522,9 @@ html.is-iphone .app-global-footer {
     }
     
     .notif-drawer-panel {
+        width: 100%;
+        max-width: 100%;
+        margin: 0;
         max-height: calc(100vh - 85px - env(safe-area-inset-bottom));
         max-height: calc(100dvh - 85px - env(safe-area-inset-bottom));
         border-radius: 12px;

@@ -23545,11 +23545,11 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.11.10-v2.10.25",
-    version: "2.10.25",
+    code: "REV-2026.11.10-v2.10.26",
+    version: "2.10.26",
     build: "20261110_02",
     date: "2026-11-10 07:15",
-    description: "v2.10.25: מנוע חיפוש מושגים ומשפטים עמוק בפנגיה, שריון כפתור חזור וג'סטות בנייד, וסיור אקדמי ממוקד 11 מעצמות (ADR-098)."
+    description: "v2.10.26: התראות נייד רחבות ומלאות (BigTextStyle) ווידג'ט סיבוך פינה לשעון למשימות פתוחות"
 };
 window.APP_VERSION = APP_CURRENT_REVISION.version;
 
@@ -27242,11 +27242,16 @@ async function showNativeNotification(title, options = {}) {
                 const notifId = Math.abs(rawTag.split('').reduce((acc, c) => ((acc << 5) - acc) + c.charCodeAt(0), 0) % 2000000) + 1;
                 const scheduleAt = options.scheduleAt ? new Date(options.scheduleAt) : undefined;
 
+                const largeBody = options.largeBody || options.body || '';
+                const summaryText = options.summaryText || 'סמסטרו ME';
+
                 await localNotifs.schedule({
                     notifications: [{
                         id: notifId,
                         title: title,
                         body: options.body || '',
+                        largeBody: largeBody,
+                        summaryText: summaryText,
                         channelId: 'semestero_alerts',
                         schedule: scheduleAt ? { at: scheduleAt } : undefined,
                         smallIcon: 'ic_stat_notification',
@@ -27510,11 +27515,14 @@ function scheduleTodayClassTimeouts() {
                 ensureCapacitorNotificationChannel().then(() => {
                     const rawTag = `ast-alarm-${c.courseId || 'c'}-${(c.startTime || '0000').replace(':', '')}`;
                     const notifId = Math.abs(rawTag.split('').reduce((acc, ch) => ((acc << 5) - acc) + ch.charCodeAt(0), 0) % 2000000) + 1;
+                    const alarmBody = `📚 ${c.type || 'הרצאה / תרגול'}\n⏰ שעות: ${c.startTime} - ${c.endTime}\n📍 ${c.room || 'טכניון'}${c.lecturer ? '\n👨‍🏫 מרצה/מתרגל: ' + c.lecturer : ''}`;
                     window.Capacitor.Plugins.LocalNotifications.schedule({
                         notifications: [{
                             id: notifId,
                             title: `⏰ בעוד 10 דק׳: ${c.courseName || 'שיעור אקדמי'}`,
-                            body: `📚 ${c.type || 'הרצאה / תרגול'}\n⏰ שעות: ${c.startTime} - ${c.endTime}\n📍 ${c.room || 'טכניון'}`,
+                            body: alarmBody,
+                            largeBody: alarmBody,
+                            summaryText: 'סמסטרו ME • תזכורת שיעור',
                             channelId: 'semestero_alerts',
                             schedule: {
                                 at: new Date(reminderTimeMs),
@@ -27709,6 +27717,8 @@ function scheduleDaily730MorningBriefing() {
                     id: 73000,
                     title: briefing.title,
                     body: briefing.body,
+                    largeBody: briefing.body,
+                    summaryText: 'סמסטרו ME • תוכנית בוקר',
                     channelId: 'semestero_alerts',
                     schedule: {
                         on: { hour: 7, minute: 30 },
@@ -27840,9 +27850,11 @@ async function dispatchNativeMobileNotifications() {
             lectureBody = classBlocks.join('\n\n────────────────────\n\n');
         }
 
-        // Dispatch Notification 1: Lectures
+        // Dispatch Notification 1: Lectures (Wide & Full BigTextStyle)
         await showNativeNotification(lectureTitle, {
             body: lectureBody,
+            largeBody: lectureBody,
+            summaryText: 'סמסטרו ME • לו״ז יומי',
             icon: 'icon.png',
             badge: 'notification-badge.png',
             tag: 'ast-today-lectures',
@@ -27872,15 +27884,16 @@ async function dispatchNativeMobileNotifications() {
                 ? `📋 משימות דחופות (${priorityTasks.tasks.length} פתוחות)`
                 : `💻 משימות דחופות במחשב (${priorityTasks.tasks.length} פתוחות)`;
 
-            const taskBlocks = priorityTasks.tasks.slice(0, 5).map(t => {
+            const maxTasksToShow = Math.min(priorityTasks.tasks.length, 10);
+            const taskBlocks = priorityTasks.tasks.slice(0, maxTasksToShow).map(t => {
                 const icon = t.diffDays < 0 ? '🚨' : (t.diffDays <= 1 ? '🔥' : '⚡');
                 const line1 = `${icon} [${t.courseShortName}] ${t.title}`;
                 const line2 = `   ⏳ ${t.timingText}`;
                 return `${line1}\n${line2}`;
             });
 
-            if (priorityTasks.tasks.length > 5) {
-                taskBlocks.push(`...ועוד ${priorityTasks.tasks.length - 5} משימות בלוח המשימות`);
+            if (priorityTasks.tasks.length > maxTasksToShow) {
+                taskBlocks.push(`...ועוד ${priorityTasks.tasks.length - maxTasksToShow} משימות נוספות בלוח המשימות`);
             }
 
             taskBody = taskBlocks.join('\n\n────────────────────\n\n');
@@ -27888,9 +27901,11 @@ async function dispatchNativeMobileNotifications() {
 
         const delay = sendLectures ? 350 : 0;
         setTimeout(async () => {
-            // Dispatch Notification 2: Tasks
+            // Dispatch Notification 2: Tasks (Wide & Full BigTextStyle)
             await showNativeNotification(taskTitle, {
                 body: taskBody,
+                largeBody: taskBody,
+                summaryText: 'סמסטרו ME • משימות פתוחות',
                 icon: 'icon.png',
                 badge: 'notification-badge.png',
                 tag: 'ast-upcoming-tasks',

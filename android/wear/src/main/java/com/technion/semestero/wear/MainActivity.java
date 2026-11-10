@@ -143,6 +143,24 @@ public class MainActivity extends Activity implements MessageClient.OnMessageRec
 
         // Populate initial UI
         updateUIFromPrefsAndSchedule();
+
+        // Handle direct complication navigation intent
+        handleIntent(getIntent());
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        handleIntent(intent);
+    }
+
+    private void handleIntent(Intent intent) {
+        if (intent == null) return;
+        int targetPage = intent.getIntExtra("page", -1);
+        if (targetPage >= 0 && targetPage <= 3 && wearViewPager != null) {
+            wearViewPager.setCurrentItem(targetPage, false);
+        }
     }
 
     private void updatePaginationDots(int activeIndex) {
@@ -185,6 +203,12 @@ public class MainActivity extends Activity implements MessageClient.OnMessageRec
 
         String taskId = prefs.getString("wear_task_" + taskIndex + "_id", "task_" + taskIndex);
         notifyPhoneTaskStatus(taskId, taskIndex, newDone);
+
+        try {
+            androidx.wear.watchface.complications.datasource.ComplicationDataSourceUpdateRequester
+                .create(this, new android.content.ComponentName(this, SemesteroTasksComplicationService.class))
+                .requestUpdateAll();
+        } catch (Exception ignored) {}
 
         updateUIFromPrefsAndSchedule();
     }

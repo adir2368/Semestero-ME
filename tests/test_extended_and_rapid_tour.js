@@ -114,9 +114,15 @@ async function runExtendedTourSuite() {
         // 1. Verify Guest Mode freedom in Auth modal
         console.log('[Test 1] Verifying Guest Mode CTA in Auth Modal...');
         const guestCta = await cdp.eval(`(() => {
+            if (window.AuthSync && typeof window.AuthSync.openAuthModal === 'function') {
+                window.AuthSync.openAuthModal('login');
+            }
             const authModal = document.getElementById('auth-modal');
-            const btns = authModal ? Array.from(authModal.querySelectorAll('button')).map(b => b.innerText) : [];
+            const btns = authModal ? Array.from(authModal.querySelectorAll('button, a, .btn')).map(b => b.innerText) : [];
             const hasGuestBtn = btns.some(t => t.includes('נסה את המערכת כאורח') || t.includes('ללא התחברות'));
+            if (window.AuthSync && typeof window.AuthSync.closeAuthModal === 'function') {
+                window.AuthSync.closeAuthModal();
+            }
             return { hasGuestBtn, count: btns.length };
         })()`);
         console.log('   Guest CTA in Auth:', guestCta);

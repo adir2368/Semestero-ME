@@ -84,6 +84,9 @@ public class WearDataSyncService extends WearableListenerService {
             androidx.wear.watchface.complications.datasource.ComplicationDataSourceUpdateRequester
                 .create(this, new android.content.ComponentName(this, SemesteroComplicationService.class))
                 .requestUpdateAll();
+            androidx.wear.watchface.complications.datasource.ComplicationDataSourceUpdateRequester
+                .create(this, new android.content.ComponentName(this, SemesteroTasksComplicationService.class))
+                .requestUpdateAll();
         } catch (Exception ignored) {}
     }
 

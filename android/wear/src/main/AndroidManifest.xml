@@ -59,12 +59,32 @@
             </intent-filter>
         </service>
 
-        <!-- Watch Face Complication Service (Corner / Quadrant / Dial Complication) -->
+        <!-- Watch Face Complication Service (Class & Schedule - Corner / Quadrant / Dial Complication) -->
         <service
             android:name=".SemesteroComplicationService"
             android:icon="@drawable/ic_stat_notification"
             android:label="@string/complication_label"
             android:description="@string/complication_desc"
+            android:permission="com.google.android.wearable.permission.BIND_COMPLICATION_PROVIDER"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.support.wearable.complications.ACTION_COMPLICATION_UPDATE_REQUEST" />
+                <action android:name="androidx.wear.watchface.complications.datasource.action.ComplicationDataSourceService" />
+            </intent-filter>
+            <meta-data
+                android:name="android.support.wearable.complications.SUPPORTED_TYPES"
+                android:value="SHORT_TEXT,LONG_TEXT" />
+            <meta-data
+                android:name="android.support.wearable.complications.UPDATE_PERIOD_SECONDS"
+                android:value="300" />
+        </service>
+
+        <!-- Watch Face Complication Service (Open Tasks & Homework Count - Corner / Quadrant / Dial Complication) -->
+        <service
+            android:name=".SemesteroTasksComplicationService"
+            android:icon="@drawable/ic_stat_notification"
+            android:label="@string/complication_tasks_label"
+            android:description="@string/complication_tasks_desc"
             android:permission="com.google.android.wearable.permission.BIND_COMPLICATION_PROVIDER"
             android:exported="true">
             <intent-filter>
