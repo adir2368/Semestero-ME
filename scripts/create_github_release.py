@@ -18,7 +18,7 @@ with open(os.path.join(ROOT, "package.json"), "r", encoding="utf-8") as f:
     pkg = json.load(f)
 VERSION = pkg.get("version", "2.10.22")
 TAG = f"v{VERSION}"
-NAME = f"Semestero ME v{VERSION} - CheeseFork 1:1 Precision Sync (סנכרון מערכת שעות 1:1, מניעת שכפול קבוצות ושיבוץ חדרים מדויק)"
+NAME = f"Semestero ME v{VERSION} - Perpetual Ditch (Self-Study Mode) & Physics Attendance Fix (מצב למידה עצמית והברזה נצחית עם ניתוב פנאופטו/פנגיאה ותיקון סימון נוכחות בפיזיקה)"
 
 def get_github_token():
     try:

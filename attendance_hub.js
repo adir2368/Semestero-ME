@@ -523,7 +523,10 @@
             let safety = 'normal'; // 'safe' | 'warning' | 'danger'
             let remainingAllowed = null;
 
-            if (quota) {
+            const isPerpetual = (typeof window.isCoursePerpetualDitch === 'function') && window.isCoursePerpetualDitch(cleanCode);
+            if (isPerpetual) {
+                safety = 'perpetual';
+            } else if (quota) {
                 remainingAllowed = Math.max(0, quota.maxAllowedAbsences - missed);
                 if (missed > quota.maxAllowedAbsences) {
                     safety = 'danger';
@@ -542,7 +545,8 @@
                 pct,
                 quota,
                 remainingAllowed,
-                safety
+                safety,
+                isPerpetualDitch: isPerpetual
             };
         },
 
@@ -602,15 +606,18 @@
                     </div>
 
                     <!-- Segmented Tab Switcher -->
-                    <div style="display: flex; gap: 8px; margin-bottom: 16px; background: rgba(255,255,255,0.04); padding: 4px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.08);">
-                        <button type="button" class="attendance-tab-btn ${this.activeTab === 'catchup' ? 'active' : ''}" onclick="window.AttendanceHub.switchTab('catchup')" style="flex: 1; padding: 8px 12px; border: none; border-radius: 8px; font-weight: 700; font-size: 0.85rem; cursor: pointer; background: ${this.activeTab === 'catchup' ? '#10b981' : 'transparent'}; color: ${this.activeTab === 'catchup' ? '#fff' : '#94a3b8'}; transition: all 0.15s ease;">
+                    <div style="display: flex; gap: 8px; margin-bottom: 16px; background: rgba(255,255,255,0.04); padding: 4px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.08); flex-wrap: wrap;">
+                        <button type="button" class="attendance-tab-btn ${this.activeTab === 'catchup' ? 'active' : ''}" onclick="window.AttendanceHub.switchTab('catchup')" style="flex: 1; min-width: 140px; padding: 8px 10px; border: none; border-radius: 8px; font-weight: 700; font-size: 0.82rem; cursor: pointer; background: ${this.activeTab === 'catchup' ? '#10b981' : 'transparent'}; color: ${this.activeTab === 'catchup' ? '#fff' : '#94a3b8'}; transition: all 0.15s ease;">
                             📹 תור השלמות ופנאופטו (${this.catchupQueue.filter(i => i.status !== 'completed').length})
                         </button>
-                        <button type="button" class="attendance-tab-btn ${this.activeTab === 'mandatory' ? 'active' : ''}" onclick="window.AttendanceHub.switchTab('mandatory')" style="flex: 1; padding: 8px 12px; border: none; border-radius: 8px; font-weight: 700; font-size: 0.85rem; cursor: pointer; background: ${this.activeTab === 'mandatory' ? '#10b981' : 'transparent'}; color: ${this.activeTab === 'mandatory' ? '#fff' : '#94a3b8'}; transition: all 0.15s ease;">
-                            🛡️ מדדי נוכחות חובה (ספורט/מעבדות)
+                        <button type="button" class="attendance-tab-btn ${this.activeTab === 'selfstudy' ? 'active' : ''}" onclick="window.AttendanceHub.switchTab('selfstudy')" style="flex: 1; min-width: 140px; padding: 8px 10px; border: none; border-radius: 8px; font-weight: 700; font-size: 0.82rem; cursor: pointer; background: ${this.activeTab === 'selfstudy' ? '#a855f7' : 'transparent'}; color: ${this.activeTab === 'selfstudy' ? '#fff' : '#94a3b8'}; transition: all 0.15s ease;">
+                            🚀 למידה עצמית (${this.getSelfStudyCount()})
                         </button>
-                        <button type="button" class="attendance-tab-btn ${this.activeTab === 'history' ? 'active' : ''}" onclick="window.AttendanceHub.switchTab('history')" style="flex: 1; padding: 8px 12px; border: none; border-radius: 8px; font-weight: 700; font-size: 0.85rem; cursor: pointer; background: ${this.activeTab === 'history' ? '#10b981' : 'transparent'}; color: ${this.activeTab === 'history' ? '#fff' : '#94a3b8'}; transition: all 0.15s ease;">
-                            📅 יומן נוכחות מלא (${Object.keys(this.records).length})
+                        <button type="button" class="attendance-tab-btn ${this.activeTab === 'mandatory' ? 'active' : ''}" onclick="window.AttendanceHub.switchTab('mandatory')" style="flex: 1; min-width: 140px; padding: 8px 10px; border: none; border-radius: 8px; font-weight: 700; font-size: 0.82rem; cursor: pointer; background: ${this.activeTab === 'mandatory' ? '#10b981' : 'transparent'}; color: ${this.activeTab === 'mandatory' ? '#fff' : '#94a3b8'}; transition: all 0.15s ease;">
+                            🛡️ נוכחות חובה
+                        </button>
+                        <button type="button" class="attendance-tab-btn ${this.activeTab === 'history' ? 'active' : ''}" onclick="window.AttendanceHub.switchTab('history')" style="flex: 1; min-width: 120px; padding: 8px 10px; border: none; border-radius: 8px; font-weight: 700; font-size: 0.82rem; cursor: pointer; background: ${this.activeTab === 'history' ? '#10b981' : 'transparent'}; color: ${this.activeTab === 'history' ? '#fff' : '#94a3b8'}; transition: all 0.15s ease;">
+                            📅 יומן מלא (${Object.keys(this.records).length})
                         </button>
                     </div>
 
@@ -627,6 +634,14 @@
             this.renderModalBody();
         },
 
+        getSelfStudyCount: function() {
+            if (typeof window.isCoursePerpetualDitch !== 'function') return 0;
+            const curState = (window.getGlobalGameState ? window.getGlobalGameState() : window.gameState);
+            if (!curState || !curState.courses) return 0;
+            const activeCourses = Object.values(curState.courses).filter(c => c.status === 'active' || (c.semester && Number(c.semester) === 3));
+            return activeCourses.filter(c => window.isCoursePerpetualDitch(c.code)).length;
+        },
+
         switchTab: function(tabName) {
             this.activeTab = tabName;
             this.openModal(tabName);
@@ -638,11 +653,86 @@
 
             if (this.activeTab === 'catchup') {
                 this.renderCatchupTab(bodyEl);
+            } else if (this.activeTab === 'selfstudy') {
+                this.renderSelfStudyTab(bodyEl);
             } else if (this.activeTab === 'mandatory') {
                 this.renderMandatoryTab(bodyEl);
             } else if (this.activeTab === 'history') {
                 this.renderHistoryTab(bodyEl);
             }
+        },
+
+        renderSelfStudyTab: function(bodyEl) {
+            const curState = (window.getGlobalGameState ? window.getGlobalGameState() : window.gameState);
+            const courses = (curState && curState.courses) ? Object.values(curState.courses).filter(c => c.status === 'active' || (c.semester && Number(c.semester) === 3)) : [];
+
+            let html = `
+                <div style="margin-bottom: 14px; font-size: 0.82rem; color: #cbd5e1; line-height: 1.5; background: rgba(168, 85, 247, 0.08); border: 1px solid rgba(168, 85, 247, 0.3); border-radius: 10px; padding: 12px;">
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                        <span style="font-size: 1.2rem;">🚀</span>
+                        <strong style="color: #e9d5ff; font-size: 0.92rem;">מצב למידה עצמית (הברזה נצחית - Perpetual Ditch Mode):</strong>
+                    </div>
+                    הגדר קורסים שבהם בחרת ללמוד באופן עצמאי במקום להגיע להרצאות פרונטליות (למשל כאשר המרצה/מתרגל אינם אפקטיביים והלמידה נעשית מספרים, פנאופטו ופנגיאה). 
+                    קורסים אלו מסומנים ישירות במערכת השעות, פטורים מהתראות הגעה לכיתה, ומספקים גישה מהירה בלחיצה אחת לכל המקורות המוקלטים.
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 12px;">
+            `;
+
+            if (courses.length === 0) {
+                html += `
+                    <div style="grid-column: 1 / -1; text-align: center; padding: 30px; color: #94a3b8; font-size: 0.85rem;">
+                        לא נמצאו קורסים פעילים בסמסטר הנוכחי.
+                    </div>
+                `;
+            } else {
+                courses.forEach(c => {
+                    const isSelfStudy = (typeof window.isCoursePerpetualDitch === 'function') && window.isCoursePerpetualDitch(c.code);
+                    const resUrls = (typeof window.getCourseResourceUrls === 'function') ? window.getCourseResourceUrls(c.code) : { panoptoUrl: '#', pangeaUrl: '#' };
+                    const borderColor = isSelfStudy ? '#a855f7' : 'rgba(255,255,255,0.1)';
+                    const bgColor = isSelfStudy ? 'rgba(168, 85, 247, 0.08)' : 'rgba(255,255,255,0.03)';
+
+                    html += `
+                        <div style="background: ${bgColor}; border: 1px solid ${borderColor}; border-radius: 12px; padding: 14px; position: relative; transition: all 0.2s ease;">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                                <div>
+                                    <strong style="font-size: 0.95rem; color: #f8fafc;">${c.name}</strong>
+                                    <span style="font-size: 0.72rem; color: #94a3b8; font-family: monospace; display: block; margin-top: 2px;">(${c.code}) • סמסטר ${c.semester || 3}</span>
+                                </div>
+                                <span style="font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px; background: ${isSelfStudy ? '#a855f7' : 'rgba(255,255,255,0.1)'}; color: ${isSelfStudy ? '#fff' : '#94a3b8'};">
+                                    ${isSelfStudy ? '🚀 למידה עצמית פעילה' : '🏛️ שיעור פרונטלי'}
+                                </span>
+                            </div>
+
+                            <div style="font-size: 0.76rem; color: #cbd5e1; margin-bottom: 10px; line-height: 1.4;">
+                                ${isSelfStudy 
+                                    ? 'הקורס מוגדר בלמידה עצמאית. התראות הגעה מבוטלות ואי-הגעה לא נספרת כחיסור שלילי.' 
+                                    : 'הקורס במעקב נוכחות פרונטלי רגיל.'}
+                            </div>
+
+                            <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px;">
+                                <a href="${resUrls.panoptoUrl}" target="_blank" rel="noopener noreferrer" style="font-size: 0.72rem; padding: 4px 8px; background: rgba(244, 63, 94, 0.15); border: 1px solid rgba(244, 63, 94, 0.35); border-radius: 6px; color: #fb7185; text-decoration: none; font-weight: 600;">
+                                    📺 פנאופטו ↗
+                                </a>
+                                <a href="${resUrls.pangeaUrl}" target="_blank" rel="noopener noreferrer" style="font-size: 0.72rem; padding: 4px 8px; background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.35); border-radius: 6px; color: #38bdf8; text-decoration: none; font-weight: 600;">
+                                    📖 פנגיאה ↗
+                                </a>
+                                <a href="${resUrls.driveUrl || '#'}" target="_blank" rel="noopener noreferrer" style="font-size: 0.72rem; padding: 4px 8px; background: rgba(168, 85, 247, 0.15); border: 1px solid rgba(168, 85, 247, 0.35); border-radius: 6px; color: #c084fc; text-decoration: none; font-weight: 600;">
+                                    📁 דרייב ↗
+                                </a>
+                            </div>
+
+                            <div style="border-top: 1px dashed rgba(255,255,255,0.08); padding-top: 8px; display: flex; justify-content: flex-end;">
+                                <button type="button" onclick="window.toggleCoursePerpetualDitch('${c.code}'); window.AttendanceHub.renderModalBody();" style="font-size: 0.76rem; padding: 5px 12px; border-radius: 6px; border: none; font-weight: 700; cursor: pointer; background: ${isSelfStudy ? 'rgba(239, 68, 68, 0.2)' : '#a855f7'}; color: ${isSelfStudy ? '#f87171' : '#fff'}; transition: all 0.15s ease;">
+                                    ${isSelfStudy ? '↩️ בטל והחזר לנוכחות פרונטלית' : '🚀 הפעל מצב למידה עצמית'}
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            html += `</div>`;
+            bodyEl.innerHTML = html;
         },
 
         renderCatchupTab: function(bodyEl) {

@@ -1889,6 +1889,7 @@ const INITIAL_STATE = {
     credits: 0,
     completedCourses: 0,
     bossesSlain: 0,
+    perpetualDitchCourses: { '034056': true, '34056': true },
     courses: {}
 };
 
@@ -13699,6 +13700,18 @@ function openCourseDetails(code) {
         };
     }
 
+    // Perpetual Ditch / Self-Study Mode Checkbox (הברזה נצחית / למידה עצמית)
+    const perpetualDitchCheckbox = document.getElementById("modal-course-perpetual-ditch-checkbox");
+    if (perpetualDitchCheckbox) {
+        const isPerpetual = (typeof isCoursePerpetualDitch === 'function') && isCoursePerpetualDitch(course.code);
+        perpetualDitchCheckbox.checked = isPerpetual;
+        perpetualDitchCheckbox.onchange = (e) => {
+            if (typeof toggleCoursePerpetualDitch === 'function') {
+                toggleCoursePerpetualDitch(course.code, e.target.checked);
+            }
+        };
+    }
+
     // Grade Input & Breakdown Controller (Separating Exam Grade from Final Course Grade)
     const gradeSection = document.getElementById("modal-grade-section");
     const gradeInput = document.getElementById("modal-course-grade-input");
@@ -23637,11 +23650,11 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.11.11-v2.11.1",
-    version: "2.11.1",
-    build: "20261111_01",
-    date: "2026-11-11 07:15",
-    description: "v2.11.1: סנכרון מערכת שעות 1:1 מול CheeseFork (פתרון שכפול שיעורים וקבוצות), שדרוג שיבוץ מיקומים ומרצים מדויק לפי מספר קבוצה ב-SAP SLcM, וטיהור חדרים כפולים (ADR-107)."
+    code: "REV-2026.11.11-v2.11.2",
+    version: "2.11.2",
+    build: "20261111_02",
+    date: "2026-11-11 07:45",
+    description: "v2.11.2: תיקון סימון נוכחות בפיזיקה (הסרת תווים שוברים ב-onclick) והשקת מצב למידה עצמית (הברזה נצחית) עם ניתוב ישיר לפנאופטו/פנגיאה (ADR-108)."
 };
 window.APP_VERSION = APP_CURRENT_REVISION.version;
 
@@ -25975,6 +25988,121 @@ function getActiveTimetableSchedule() {
     return null;
 }
 
+// ==============================================================================
+// Perpetual Ditch / Self-Study Mode & Safe Attendance Click Handlers (ADR-108)
+// ==============================================================================
+
+function getCourseResourceUrls(courseId) {
+    const fullCode = String(courseId || '').trim();
+    const cleanCode = fullCode.replace(/\D/g, '').replace(/^0+/, '');
+    const moodleCourseId = (typeof MOODLE26_COURSE_MAP !== 'undefined') ? (MOODLE26_COURSE_MAP[fullCode] || MOODLE26_COURSE_MAP[cleanCode] || MOODLE26_COURSE_MAP['0' + cleanCode]) : null;
+    const moodleUrl = moodleCourseId 
+        ? `https://moodle26.technion.ac.il/course/view.php?id=${moodleCourseId}`
+        : `https://moodle26.technion.ac.il/course/search.php?search=${encodeURIComponent(cleanCode || fullCode)}`;
+    const panoptoUrl = `https://panopto.technion.ac.il/Panopto/Pages/Sessions/List.aspx#query=${encodeURIComponent(cleanCode || fullCode)}`;
+    const pangeaDirectUrl = (typeof PANGEA_COURSE_MAP !== 'undefined') ? (PANGEA_COURSE_MAP[fullCode] || PANGEA_COURSE_MAP[cleanCode] || PANGEA_COURSE_MAP['0' + cleanCode]) : null;
+    const pangeaUrl = pangeaDirectUrl || `https://idofangbentov.uk/?q=${encodeURIComponent(cleanCode || fullCode)}`;
+    const driveUrl = (typeof FACULTY_DRIVE_WEB_URL !== 'undefined') ? FACULTY_DRIVE_WEB_URL : "https://technionmail-my.sharepoint.com/personal/mech_info_asat_technion_ac_il/_layouts/15/onedrive.aspx";
+    return { cleanCode, fullCode, moodleUrl, panoptoUrl, pangeaUrl, driveUrl };
+}
+window.getCourseResourceUrls = getCourseResourceUrls;
+
+function isCoursePerpetualDitch(courseId) {
+    if (!courseId) return false;
+    const strId = String(courseId).trim();
+    const cleanId = strId.replace(/\D/g, '').replace(/^0+/, '');
+    const curState = (window.getGlobalGameState ? window.getGlobalGameState() : window.gameState);
+    if (curState && curState.perpetualDitchCourses) {
+        if (curState.perpetualDitchCourses[strId]) return true;
+        if (curState.perpetualDitchCourses[cleanId]) return true;
+        if (curState.perpetualDitchCourses['0' + cleanId]) return true;
+        if (curState.perpetualDitchCourses['00' + cleanId]) return true;
+    }
+    if (curState && curState.courses) {
+        const c = curState.courses[strId] || 
+                  curState.courses[cleanId] || 
+                  curState.courses['0' + cleanId];
+        if (c && c.isPerpetualDitch) return true;
+    }
+    return false;
+}
+window.isCoursePerpetualDitch = isCoursePerpetualDitch;
+
+function toggleCoursePerpetualDitch(courseId, forceVal) {
+    if (!courseId) return false;
+    const strId = String(courseId).trim();
+    const cleanId = strId.replace(/\D/g, '').replace(/^0+/, '');
+    const curState = (window.getGlobalGameState ? window.getGlobalGameState() : window.gameState);
+    if (!curState) return false;
+    if (!curState.perpetualDitchCourses) curState.perpetualDitchCourses = {};
+    
+    const current = isCoursePerpetualDitch(courseId);
+    const nextVal = (typeof forceVal === 'boolean') ? forceVal : !current;
+
+    curState.perpetualDitchCourses[strId] = nextVal;
+    curState.perpetualDitchCourses[cleanId] = nextVal;
+    if (cleanId.length === 5 || cleanId.length === 6) {
+        curState.perpetualDitchCourses['0' + cleanId] = nextVal;
+    }
+
+    // Sync to course objects
+    [strId, cleanId, '0' + cleanId].forEach(id => {
+        if (curState.courses && curState.courses[id]) {
+            curState.courses[id].isPerpetualDitch = nextVal;
+        }
+    });
+
+    if (typeof saveState === 'function') {
+        saveState();
+    }
+
+    if (typeof renderTimetableGrid === 'function') {
+        renderTimetableGrid();
+    }
+    if (typeof renderTodayTimetableBanner === 'function') {
+        renderTodayTimetableBanner();
+    }
+    if (window.AttendanceHub && typeof window.AttendanceHub.refreshUI === 'function') {
+        window.AttendanceHub.refreshUI();
+    }
+
+    const cName = (curState.courses && (curState.courses[strId] || curState.courses[cleanId]))
+        ? (curState.courses[strId] || curState.courses[cleanId]).name
+        : ((typeof COURSE_SHORT_NAMES !== 'undefined' && COURSE_SHORT_NAMES[cleanId]) || courseId);
+
+    if (typeof showToastNotification === 'function') {
+        if (nextVal) {
+            showToastNotification(`🚀 [${cName}] הוגדר במצב למידה עצמית (הברזה נצחית)! התראות הגעה מבוטלות ומשאבי פנאופטו/פנגיאה זמינים.`, 'success');
+        } else {
+            showToastNotification(`↩️ [${cName}] הוחזר למצב נוכחות פרונטלית רגילה.`, 'info');
+        }
+    }
+    return nextVal;
+}
+window.toggleCoursePerpetualDitch = toggleCoursePerpetualDitch;
+
+window.handleTimetableAttendance = function(btn, dayIdx, classIdx, targetStatus) {
+    if (!window.AttendanceHub) return;
+    const schedule = (typeof getActiveTimetableSchedule === 'function') 
+                     ? getActiveTimetableSchedule() 
+                     : ((typeof window.liveSyncedTimetable !== 'undefined' && window.liveSyncedTimetable) 
+                        || (typeof CHEESEFORK_SEMESTER_SCHEDULE !== 'undefined' ? CHEESEFORK_SEMESTER_SCHEDULE : null));
+    if (!schedule || !schedule.days) return;
+    const day = schedule.days.find(d => Number(d.dayIndex) === Number(dayIdx));
+    if (!day || !day.classes || !day.classes[classIdx]) return;
+    const c = day.classes[classIdx];
+    window.AttendanceHub.toggleAttendance(
+        c.courseId,
+        c.courseName,
+        c.type,
+        day.dayIndex,
+        c.startTime,
+        c.endTime,
+        c.room,
+        targetStatus
+    );
+};
+
 function renderTimetableGrid() {
     const container = document.getElementById('timetable-grid-container');
     if (!container) return;
@@ -26033,17 +26161,23 @@ function renderTimetableGrid() {
                     c.duration = durMeta.text;
                 }
 
+                const isPerpetual = isCoursePerpetualDitch(c.courseId);
+                const perpetualClass = isPerpetual ? 'is-perpetual-ditch' : '';
+
                 const attRecord = (window.AttendanceHub && typeof window.AttendanceHub.getRecord === 'function')
                     ? window.AttendanceHub.getRecord(c.courseId, day.dayIndex, c.startTime)
                     : null;
                 const attStatus = attRecord ? attRecord.status : null;
                 const attBorderClass = attStatus === 'attended' ? 'attendance-card-attended' : (attStatus === 'missed' ? 'attendance-card-missed' : '');
 
+                const resUrls = getCourseResourceUrls(c.courseId);
+
                 bodyHtml += `
-                    <div class="timetable-card ${c.cardClass || ''} ${durMeta.blockClass} ${attBorderClass}" onclick="if (typeof openCourseDetails === 'function') openCourseDetails('${c.courseId}')">
+                    <div class="timetable-card ${c.cardClass || ''} ${durMeta.blockClass} ${attBorderClass} ${perpetualClass}" onclick="if (typeof openCourseDetails === 'function') openCourseDetails('${c.courseId}')">
                         <!-- שורה 1: תגית סוג שיעור + תגית משך זמן שיעור מובלטת -->
                         <div class="timetable-card-top">
                             <span class="timetable-tag">${c.type}</span>
+                            ${isPerpetual ? `<span class="timetable-perpetual-badge" title="קורס זה מוגדר בלמידה עצמית (הברזה נצחית) - הסטודנט לומד עצמאית">🚀 למידה עצמית</span>` : ''}
                             <span class="timetable-duration-pill ${durMeta.pillClass}">⏱️ ${durMeta.text}</span>
                         </div>
                         <!-- שורה 2: שעות השיעור -->
@@ -26066,18 +26200,37 @@ function renderTimetableGrid() {
                         <div class="timetable-card-title">${c.courseName} <span class="course-code-dim">(${c.courseId})</span></div>
                         
                         <!-- שורה 6: פעולות נוכחות והשלמות -->
-                        <div class="attendance-card-actions" onclick="event.stopPropagation()">
-                            <button type="button" class="btn-attendance-action ${attStatus === 'attended' ? 'is-attended' : ''}" 
-                                    onclick="if(window.AttendanceHub) window.AttendanceHub.toggleAttendance('${c.courseId}', '${(c.courseName || '').replace(/'/g, "\\'")}', '${(c.type || '').replace(/'/g, "\\'")}', '${day.dayIndex}', '${c.startTime}', '${c.endTime}', '${(c.room || '').replace(/'/g, "\\'")}', 'attended')"
-                                    title="סמן נוכחות בשיעור זה">
-                                ${attStatus === 'attended' ? '✓ נוכחתי' : '✓ הייתי'}
-                            </button>
-                            <button type="button" class="btn-attendance-action ${attStatus === 'missed' ? 'is-missed' : ''}" 
-                                    onclick="if(window.AttendanceHub) window.AttendanceHub.toggleAttendance('${c.courseId}', '${(c.courseName || '').replace(/'/g, "\\'")}', '${(c.type || '').replace(/'/g, "\\'")}', '${day.dayIndex}', '${c.startTime}', '${c.endTime}', '${(c.room || '').replace(/'/g, "\\'")}', 'missed')"
-                                    title="סמן כהוחסר והוסף אוטומטית לתור השלמות ופנאופטו">
-                                ${attStatus === 'missed' ? '✗ הוחסר (בתור)' : '✗ החסרתי'}
-                            </button>
-                        </div>
+                        ${isPerpetual ? `
+                            <div class="attendance-card-actions is-perpetual-actions" onclick="event.stopPropagation()">
+                                <a href="${resUrls.panoptoUrl}" target="_blank" rel="noopener noreferrer" class="btn-attendance-action btn-perpetual-panopto" title="מעבר ישיר להרצאות מוקלטות בפנאופטו">
+                                    📺 פנאופטו
+                                </a>
+                                <a href="${resUrls.pangeaUrl}" onclick="event.preventDefault(); if (window.PangeaHub) window.PangeaHub.openQuickPeek('${resUrls.pangeaUrl}', '${(c.courseName || '').replace(/'/g, "\\'")} - סיכומי פנגייה', '${resUrls.pangeaUrl}'); else window.open('${resUrls.pangeaUrl}', '_blank');" target="_blank" rel="noopener noreferrer" class="btn-attendance-action btn-perpetual-pangea" title="צפייה מהירה בסיכומי פנגיאה ודרייב">
+                                    📖 פנגיאה
+                                </a>
+                                <button type="button" class="btn-attendance-action btn-perpetual-revert" onclick="window.toggleCoursePerpetualDitch('${c.courseId}')" title="בטל מצב למידה עצמית והחזר לנוכחות פרונטלית">
+                                    ↩️ החזר
+                                </button>
+                            </div>
+                        ` : `
+                            <div class="attendance-card-actions" onclick="event.stopPropagation()">
+                                <button type="button" class="btn-attendance-action ${attStatus === 'attended' ? 'is-attended' : ''}" 
+                                        onclick="window.handleTimetableAttendance(this, ${day.dayIndex}, ${idx}, 'attended')"
+                                        title="סמן נוכחות בשיעור זה">
+                                    ${attStatus === 'attended' ? '✓ נוכחתי' : '✓ הייתי'}
+                                </button>
+                                <button type="button" class="btn-attendance-action ${attStatus === 'missed' ? 'is-missed' : ''}" 
+                                        onclick="window.handleTimetableAttendance(this, ${day.dayIndex}, ${idx}, 'missed')"
+                                        title="סמן כהוחסר והוסף אוטומטית לתור השלמות ופנאופטו">
+                                    ${attStatus === 'missed' ? '✗ הוחסר (בתור)' : '✗ החסרתי'}
+                                </button>
+                                <button type="button" class="btn-attendance-action btn-perpetual-quick" 
+                                        onclick="window.toggleCoursePerpetualDitch('${c.courseId}')"
+                                        title="הגדר קורס זה כ'הברזה נצחית' (למידה עצמית בלבד במקום הרצאות פרונטליות)">
+                                    🚀 למידה עצמית
+                                </button>
+                            </div>
+                        `}
                     </div>
                 `;
             });
@@ -26098,6 +26251,7 @@ function renderTimetableGrid() {
 
     container.innerHTML = html;
 }
+window.renderTimetableGrid = renderTimetableGrid;
 
 function renderTodayTimetableBanner() {
     const banner = document.getElementById('timetable-today-banner');
@@ -26177,7 +26331,9 @@ function renderTodayTimetableBanner() {
         bodyHtml = '<div class="today-classes-list">';
         classes.forEach(c => {
             const status = getLiveClassStatus(c.startTime, c.endTime);
+            const isPerpetual = isCoursePerpetualDitch(c.courseId);
             let itemClass = 'today-class-item';
+            if (isPerpetual) itemClass += ' is-perpetual-ditch';
             if (status.code === 'live') itemClass += ' current-live';
             else if (status.code === 'next') itemClass += ' next-upcoming';
 
@@ -26186,7 +26342,10 @@ function renderTodayTimetableBanner() {
                 <div class="${itemClass}" onclick="openCourseDetails('${c.courseId}')">
                     <div class="today-class-top">
                         <span class="today-class-time">⏰ ${c.startTime} - ${c.endTime} (${durMeta.text})</span>
-                        <span class="today-class-status ${status.code}">${status.text}</span>
+                        ${isPerpetual 
+                            ? `<span class="today-class-status perpetual" title="בלמידה עצמית (הברזה נצחית)">🚀 למידה עצמית</span>` 
+                            : `<span class="today-class-status ${status.code}">${status.text}</span>`
+                        }
                     </div>
                     <div class="today-class-name">${c.courseName} (${c.courseId})</div>
                     <div class="today-class-sub">
@@ -27533,6 +27692,11 @@ async function trigger10MinClassAlert(classItem, isTest = false) {
     ensureNotificationPreferencesDefaults();
     if (!isTest && gameState.notificationPreferences && gameState.notificationPreferences.class10Min === false) {
         console.log(`[Notifications] Skipping 10-min alert: class10Min preference is disabled.`);
+        return false;
+    }
+
+    if (!isTest && (typeof isCoursePerpetualDitch === 'function') && isCoursePerpetualDitch(classItem.courseId)) {
+        console.log(`[Notifications] Skipping 10-min arrival alert: course [${classItem.courseId}] is in Perpetual Ditch (Self-Study Mode).`);
         return false;
     }
 
