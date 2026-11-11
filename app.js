@@ -13023,7 +13023,6 @@ if (typeof window !== 'undefined') {
 
 // Open and load details into Course Details Modal
 function openCourseDetails(code) {
-    window.openCourseDetails = openCourseDetails;
     if (!code) return;
     let course = gameState.courses[code];
     if (!course) {
@@ -13696,34 +13695,6 @@ function openCourseDetails(code) {
             }
             if (typeof showToastNotification === 'function') {
                 showToastNotification(checked ? `✓ ${course.name} סומן כנלמד באנגלית (נחשב לחובת 2 קורסים באנגלית)` : `בוטל סימון אנגלית עבור ${course.name}`, 'info');
-            }
-        };
-    }
-
-    // Perpetual Ditch / Self-Study Mode Checkbox (הברזה נצחית / למידה עצמית)
-    const perpetualDitchCheckbox = document.getElementById("modal-course-perpetual-ditch-checkbox");
-    const perpetualDitchLabel = document.getElementById("modal-perpetual-ditch-label");
-    const perpetualDitchNote = document.getElementById("modal-perpetual-ditch-status-note");
-    if (perpetualDitchCheckbox) {
-        const isPerpetual = (typeof isCoursePerpetualDitch === 'function') && isCoursePerpetualDitch(course.code);
-        perpetualDitchCheckbox.checked = isPerpetual;
-        if (perpetualDitchLabel) {
-            perpetualDitchLabel.style.background = isPerpetual ? 'rgba(168, 85, 247, 0.22)' : 'rgba(168, 85, 247, 0.08)';
-            perpetualDitchLabel.style.borderColor = isPerpetual ? 'rgba(168, 85, 247, 0.7)' : 'rgba(168, 85, 247, 0.3)';
-        }
-        if (perpetualDitchNote) {
-            perpetualDitchNote.style.display = isPerpetual ? 'block' : 'none';
-        }
-        perpetualDitchCheckbox.onchange = (e) => {
-            if (typeof toggleCoursePerpetualDitch === 'function') {
-                const nextActive = toggleCoursePerpetualDitch(course.code, e.target.checked);
-                if (perpetualDitchLabel) {
-                    perpetualDitchLabel.style.background = nextActive ? 'rgba(168, 85, 247, 0.22)' : 'rgba(168, 85, 247, 0.08)';
-                    perpetualDitchLabel.style.borderColor = nextActive ? 'rgba(168, 85, 247, 0.7)' : 'rgba(168, 85, 247, 0.3)';
-                }
-                if (perpetualDitchNote) {
-                    perpetualDitchNote.style.display = nextActive ? 'block' : 'none';
-                }
             }
         };
     }
@@ -14646,6 +14617,9 @@ function openCourseDetails(code) {
             course.moedB = '';
         }
 
+        const isPerpetual = (typeof isCoursePerpetualDitch === 'function') && isCoursePerpetualDitch(course.code);
+        const resUrls = (typeof getCourseResourceUrls === 'function') ? getCourseResourceUrls(course.code) : { panoptoUrl: '#', pangeaUrl: '#' };
+
         const hasSchedule = !isMasteredCourse && Array.isArray(course.schedule) && course.schedule.length > 0;
         const hasSyllabus = Boolean(course.syllabus);
 
@@ -14654,8 +14628,8 @@ function openCourseDetails(code) {
             scheduleItemsHtml = course.schedule.map(s => {
                 const roomInfo = (s.building || s.room) ? `• ${s.building ? s.building : ''}${(s.building && s.room) ? ' ' : ''}${s.room ? ('חדר ' + s.room) : ''}` : '';
                 return `
-                <div class="modal-schedule-item">
-                    <div class="modal-schedule-item-time">⏰ יום ${s.day} | ${s.hours}</div>
+                <div class="modal-schedule-item ${isPerpetual ? 'is-perpetual-slot' : ''}">
+                    <div class="modal-schedule-item-time">⏰ יום ${s.day} | ${s.hours} ${isPerpetual ? '<span style="font-size: 0.65rem; color: #d8b4fe; background: rgba(168,85,247,0.22); padding: 1px 6px; border-radius: 8px; margin-right: 4px; font-weight: 700;">🚀 למידה עצמית</span>' : ''}</div>
                     <div class="modal-schedule-item-desc">${s.type} ${s.group ? `(קבוצה ${s.group})` : ''} ${roomInfo}</div>
                     ${s.lecturer ? `<div class="modal-schedule-item-lecturer">מרצה/מתרגל: ${s.lecturer}</div>` : ''}
                 </div>
@@ -14742,6 +14716,42 @@ function openCourseDetails(code) {
             scheduleStatusNotice = `<div style="font-size: 0.78rem; color: #94a3b8; padding: 4px 0 8px;">לוח שעות רשמי טרם פורסם לקורס זה בסמסטר חורף תשפ״ז. לעיון בסילבוס, ביקורות סטודנטים עדכניות והיסטוגרמות ציונים לחץ על הכפתור למעלה.</div>`;
         }
 
+        let perpetualDitchBoxHtml = '';
+        if (!isMasteredCourse) {
+            perpetualDitchBoxHtml = `
+                <label class="modal-perpetual-ditch-card" style="display: flex; align-items: center; justify-content: space-between; gap: 10px; cursor: pointer; margin: 8px 0 10px 0; padding: 10px 12px; background: ${isPerpetual ? 'rgba(168, 85, 247, 0.16)' : 'rgba(168, 85, 247, 0.06)'}; border: 1px solid ${isPerpetual ? 'rgba(168, 85, 247, 0.65)' : 'rgba(168, 85, 247, 0.28)'}; border-radius: 8px; transition: all 0.2s ease;">
+                    <div style="display: flex; align-items: flex-start; gap: 8px; flex: 1;">
+                        <span style="font-size: 1.25rem; line-height: 1.2;">🚀</span>
+                        <div style="flex: 1;">
+                            <div style="font-size: 0.86rem; color: #f1f5f9; font-weight: 700; display: flex; align-items: center; gap: 6px;">
+                                <span>מצב למידה עצמית (הברזה נצחית)</span>
+                                ${isPerpetual ? `<span style="font-size: 0.66rem; background: #a855f7; color: #fff; padding: 1px 6px; border-radius: 10px; font-weight: 800;">פעיל ✨</span>` : ''}
+                            </div>
+                            <div style="font-size: 0.72rem; color: ${isPerpetual ? '#e9d5ff' : '#cbd5e1'}; margin-top: 2px; line-height: 1.4;">
+                                ${isPerpetual 
+                                    ? 'הקורס נלמד עצמאית במקום שיעורים פרונטליים • התראות הגעה מושתקות • קישורי פנאופטו ופנגיאה זמינים במערכת השעות'
+                                    : 'למידה עצמאית במקום שיעורים פרונטליים (פנאופטו ופנגיאה) • מבטל התראות הגעה ואי-נוכחות בכל המפגשים השבועיים של הקורס'}
+                            </div>
+                            ${isPerpetual ? `
+                                <div style="display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap;" onclick="event.stopPropagation()">
+                                    <a href="${resUrls.panoptoUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-xs btn-perpetual-panopto" style="text-decoration: none; padding: 3px 10px; border-radius: 6px; font-size: 0.74rem; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;">
+                                        📺 הרצאות בפנאופטו ↗
+                                    </a>
+                                    <a href="${resUrls.pangeaUrl}" onclick="event.preventDefault(); if (window.PangeaHub) window.PangeaHub.openQuickPeek('${resUrls.pangeaUrl}', '${(course.name || '').replace(/'/g, "\\'")} - סיכומי פנגיאה', '${resUrls.pangeaUrl}'); else window.open('${resUrls.pangeaUrl}', '_blank');" target="_blank" rel="noopener noreferrer" class="btn btn-xs btn-perpetual-pangea" style="text-decoration: none; padding: 3px 10px; border-radius: 6px; font-size: 0.74rem; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;">
+                                        📖 סיכומי פנגיאה ↗
+                                    </a>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                    <input type="checkbox" id="modal-course-perpetual-ditch-checkbox" ${isPerpetual ? 'checked' : ''} 
+                           onchange="if (typeof toggleCoursePerpetualDitch === 'function') { toggleCoursePerpetualDitch('${course.code}', this.checked); if (typeof openCourseDetails === 'function') openCourseDetails('${course.code}'); }"
+                           aria-label="הפעל מצב למידה עצמית לקורס זה"
+                           style="width: 22px; height: 22px; accent-color: #a855f7; cursor: pointer; flex-shrink: 0; margin-right: 8px;">
+                </label>
+            `;
+        }
+
         cfContainer.innerHTML = `
             <div class="modal-cheesefork-section">
                 <div class="modal-cheesefork-header" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
@@ -14772,6 +14782,7 @@ function openCourseDetails(code) {
                         <div><strong>ללא זיכוי נוסף (איסור כפל נק״ז):</strong> ${cfMatch.antiRequisites}</div>
                     </div>
                 ` : ''}
+                ${perpetualDitchBoxHtml}
                 ${hasSchedule ? `<div class="modal-cheesefork-grid">${scheduleItemsHtml}</div>` : scheduleStatusNotice}
                 ${examsHtml}
                 ${moodleSyllabusHtml}
@@ -14794,6 +14805,7 @@ function openCourseDetails(code) {
         if (modal) modal.classList.add("active");
     }
 }
+window.openCourseDetails = openCourseDetails;
 
 const PEER_CONSENSUS_DATA = {
     "104041": { diff: 4.8, diffLabel: "תובעני ביותר", hours: 14.5, recommendPct: 92, tip: "חובה לפתור מבחנים מלאים משנים אחרונות. תרגילי הבית דורשים זמן רב — אל תדחו לסופ״ש." },
@@ -23666,11 +23678,11 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.11.11-v2.11.3",
-    version: "2.11.3",
-    build: "20261111_03",
-    date: "2026-11-11 08:00",
-    description: "v2.11.3: העברת מתג מצב למידה עצמית (הברזה נצחית) באופן בלעדי לדף הקורס, ביטול ברירת מחדל, הסרת כפתורים מבלבלים ממערכת השעות ותיקון סימון נוכחות בפיזיקה (ADR-108)."
+    code: "REV-2026.11.11-v2.11.4",
+    version: "2.11.4",
+    build: "20261111_04",
+    date: "2026-11-11 08:35",
+    description: "v2.11.4: העברת מתג מצב למידה עצמית (הברזה נצחית) ישירות לתוך כרטיסיית מערכת השעות ופרטי הקורס (CheeseFork Schedule Section) בסמיכות מלאה להרצאות ולתרגולים (ADR-108)."
 };
 window.APP_VERSION = APP_CURRENT_REVISION.version;
 

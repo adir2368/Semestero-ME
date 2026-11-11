@@ -17848,3 +17848,34 @@ tr.is-task-pinned {
     border: 1px solid rgba(168, 85, 247, 0.4);
 }
 
+.modal-perpetual-ditch-card {
+    transition: all 0.2s ease;
+}
+.modal-perpetual-ditch-card:hover {
+    border-color: rgba(168, 85, 247, 0.65) !important;
+}
+.modal-schedule-item.is-perpetual-slot {
+    border-color: rgba(168, 85, 247, 0.35);
+    background: rgba(168, 85, 247, 0.04);
+}
+.btn-perpetual-panopto {
+    background: rgba(244, 63, 94, 0.16);
+    border: 1px solid rgba(244, 63, 94, 0.4);
+    color: #fb7185;
+}
+.btn-perpetual-panopto:hover {
+    background: rgba(244, 63, 94, 0.3);
+    border-color: #f43f5e;
+    color: #ffffff;
+}
+.btn-perpetual-pangea {
+    background: rgba(56, 189, 248, 0.16);
+    border: 1px solid rgba(56, 189, 248, 0.4);
+    color: #38bdf8;
+}
+.btn-perpetual-pangea:hover {
+    background: rgba(56, 189, 248, 0.3);
+    border-color: #38bdf8;
+    color: #ffffff;
+}
+

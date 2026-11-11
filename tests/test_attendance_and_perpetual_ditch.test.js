@@ -67,6 +67,17 @@ if (window.CHEESEFORK_SEMESTER_SCHEDULE) {
     window.gameState.timetable = JSON.parse(JSON.stringify(window.CHEESEFORK_SEMESTER_SCHEDULE));
 }
 
+if (!window.gameState.courses) window.gameState.courses = {};
+window.gameState.courses['034056'] = {
+    code: '034056',
+    name: 'מבוא לחישוב הנדסי',
+    status: 'available',
+    schedule: [
+        { day: 'שלישי', hours: '14:30 - 16:30', type: 'תרגול', group: '11', room: '201', building: 'דנציגר' }
+    ]
+};
+window.gameState.courses['34056'] = window.gameState.courses['034056'];
+
 console.log('Testing Physics Attendance Marking and Perpetual Ditch Self-Study Mode...');
 
 // 1. Verify window.handleTimetableAttendance exists
@@ -141,6 +152,35 @@ assert.ok(perpetualHtml.includes('⚙️ דף הקורס'), 'Container HTML must
 // Revert 034056 back
 window.toggleCoursePerpetualDitch('034056', false);
 assert.strictEqual(window.isCoursePerpetualDitch('034056'), false, '034056 reverted back to in-person');
+
+// 8. Test Course Details Modal renders perpetual ditch card inside Cheesefork Schedule section
+let cfRenderedHtml = '';
+const originalGetElementById = document.getElementById;
+document.getElementById = (id) => {
+    if (id === 'modal-cheesefork-container') {
+        return {
+            set innerHTML(val) { cfRenderedHtml = val; },
+            get innerHTML() { return cfRenderedHtml; }
+        };
+    }
+    return originalGetElementById(id);
+};
+
+window.openCourseDetails('034056');
+assert.ok(cfRenderedHtml.includes('modal-perpetual-ditch-card'), 'Cheesefork schedule section must contain modal-perpetual-ditch-card');
+assert.ok(cfRenderedHtml.includes('מצב למידה עצמית (הברזה נצחית)'), 'Cheesefork schedule section must include perpetual ditch title');
+assert.ok(cfRenderedHtml.includes('modal-course-perpetual-ditch-checkbox'), 'Cheesefork schedule section must contain toggle checkbox');
+
+// Test when activated
+window.toggleCoursePerpetualDitch('034056', true);
+window.openCourseDetails('034056');
+assert.ok(cfRenderedHtml.includes('פעיל ✨'), 'Cheesefork section must display active badge when perpetual ditch is enabled');
+assert.ok(cfRenderedHtml.includes('btn-perpetual-panopto'), 'Cheesefork section must display Panopto quick link when perpetual ditch is enabled');
+assert.ok(cfRenderedHtml.includes('is-perpetual-slot'), 'Schedule items must have is-perpetual-slot class');
+
+// Cleanup
+window.toggleCoursePerpetualDitch('034056', false);
+document.getElementById = originalGetElementById;
 
 console.log('✅ ALL TESTS PASSED: Physics attendance click and Perpetual Ditch verified successfully!');
 process.exit(0);

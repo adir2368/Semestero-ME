@@ -16,9 +16,9 @@ ZIP_PATH = os.path.join(ROOT, "Semestero-ME-Windows-x64.zip")
 
 with open(os.path.join(ROOT, "package.json"), "r", encoding="utf-8") as f:
     pkg = json.load(f)
-VERSION = pkg.get("version", "2.11.3")
+VERSION = pkg.get("version", "2.11.4")
 TAG = f"v{VERSION}"
-NAME = f"Semestero ME v{VERSION} - Perpetual Ditch Course-Level Refinement & Physics Attendance Fix (מצב למידה עצמית ברמת הקורס ותיקון סימון נוכחות)"
+NAME = f"Semestero ME v{VERSION} - Perpetual Ditch In-Schedule Relocation (העברת מתג הברזה נצחית לכרטיסיית מערכת השעות)"
 
 def get_github_token():
     try:
@@ -98,28 +98,25 @@ def main():
 
     body_notes = f"""# Semestero ME {TAG} Release Notes
 
-### 🚀 1. מצב למידה עצמית / הברזה נצחית ברמת הקורס (Course-Level Self-Study Mode & UX Hardening - ADR-108)
-- **ביטול ברירת מחדל אוטומטית (Zero Default)**: כל הקורסים מתחילים במצב נוכחות פרונטלית רגילה. מצב למידה עצמית הינו החלטה מכוונת של הסטודנט לקורסים שבהם ההוראה אינה אפקטיבית ויש צורך בלמידה עצמאית.
-- **העברת המתג באופן בלעדי לדף הקורס**:
-  * הסרת כפתורי "למידה עצמית" מבלבלים מכרטיסיות ההרצאה הבודדות במערכת השעות (מניעת עמימות בין הברזה משיעור בודד לבין הברזה מכל הקורס).
-  * הוספת מתג ייעודי, ברור ומעוצב בכרטיסיית פרטי הקורס: `🚀 מצב למידה עצמית (הברזה נצחית לקורס כולו)`.
-- **כרטיסיות מערכת שעות מותאמות**:
-  * קורס שהוגדר בלמידה עצמית הופך לכרטיסייה סגולה ייעודית עם תגית `🚀 למידה עצמית`, גישה ישירה בלחיצה אחת ל-`📺 פנאופטו` ו-`📖 פנגיאה`, וכפתור `⚙️ דף הקורס`.
-  * קורסים רגילים מציגים באופן חד וברור את שני כפתורי הנוכחות בלבד: `✓ הייתי / נוכחתי` ו-`✗ החסרתי / הוחסר (בתור)`.
-- **פטור מהתראות הגעה ואי-נוכחות**:
-  * התראות כיתה (10 דקות לפני שיעור) מושתקות עבור קורסים בלמידה עצמית.
-  * פטור מקנסות נוכחות במרכז הנוכחות (Attendance Hub) וניהול מרוכז בלשונית הלמידה העצמית.
+### 🚀 1. העברת מתג מצב למידה עצמית (הברזה נצחית) ישירות לתוך כרטיסיית מערכת השעות ופרטי הקורס (ADR-108)
+- **מיקום אינטואיטיבי ומדויק (In-Schedule Placement)**:
+  * המתג `🚀 מצב למידה עצמית (הברזה נצחית)` הועבר ישירות לתוך כרטיסיית **"🧀 מערכת שעות ופרטי קורס"** (CheeseFork Schedule Section) בדף הקורס, בדיוק מעל כרטיסיות ההרצאות והתרגולים השבועיים.
+  * הוסר לחלוטין מתיבת בחירת הסמסטרים של תוכנית הלימודים (`#modal-semester-select-container`).
+  * חיבור ישיר וברור בין ההחלטה על למידה עצמית לבין זמני המפגשים הפרונטליים המוצגים מול עיני הסטודנט.
+- **כרטיסיית למידה עצמית דינמית ומשאבים ישירים**:
+  * בעת הפעלה, הכרטיסייה נצבעת בסגול זוהר (`פעיל ✨`) וחושפת גישה מיידית בלחיצה אחת ל-`📺 הרצאות בפנאופטו ↗` ו-`📖 סיכומי פנגיאה ↗`.
+  * שיעורי ההרצאה והתרגול שמתחתיה מקבלים תגית סגולה מובלטת `🚀 למידה עצמית` ליד שעת המפגש.
+- **סנכרון מלא למערכת השעות והתראות**:
+  * שיעורי הקורס במערכת השעות הראשית מותאמים אוטומטית לכרטיסיות סגולות עם כפתור `⚙️ דף הקורס`.
+  * השתקה אוטומטית של התראות הגעה לכיתה (10 דקות לפני שיעור).
+  * פטור מקנסות נוכחות במרכז הנוכחות.
 
-### 🛡️ 2. תיקון סימון נוכחות בפיזיקה (Attendance Quote Bug Fix)
-- תיקון כשל לחיצה בפיזיקה 2 (`114052`) שנגרם בשל מירכאות כפולות (גרשיים) בשם החדר (`טאוב - מדמ"ח 1`).
-- מעבר לשימוש בפרמטרים פרימיטיביים בלבד (`dayIndex`, `classIndex`, `status`) ללא שרשור מחרוזות ב-HTML `onclick`.
-
-### 📦 3. קובצי הפצה ועדכון:
-- `Semestero-ME.apk` (Android Native App `versionCode 91`, `versionName 2.11.3`)
-- `Semestero-ME-Watch.apk` (Wear OS Companion `versionCode 91`, `versionName 2.11.3`)
-- `Semestero-ME-Windows-x64.zip` (Electron Desktop Client v2.11.3)
+### 📦 2. קובצי הפצה ועדכון:
+- `Semestero-ME.apk` (Android Native App `versionCode 92`, `versionName 2.11.4`)
+- `Semestero-ME-Watch.apk` (Wear OS Companion `versionCode 92`, `versionName 2.11.4`)
+- `Semestero-ME-Windows-x64.zip` (Electron Desktop Client v2.11.4)
 - כל 22 חבילות בדיקות הרגרסיה של המערכת ובדיקות הנוכחות עברו בהצלחה מלאה.
-- תיעוד ארכיטקטוני מלא: [[02_Architecture_ADR/ADR-108-Perpetual-Ditch-Self-Study-Mode-And-Attendance-Quote-Hardening|ADR-108]] נרשם ב-Obsidian Second Brain.
+- תיעוד ארכיטקטוני מלא: [[02_Architecture_ADR/ADR-108-Perpetual-Ditch-Self-Study-Mode-And-Attendance-Quote-Hardening|ADR-108]] עודכן ב-Obsidian Second Brain.
 """
 
     req_tag = urllib.request.Request(f"https://api.github.com/repos/{REPO}/releases/tags/{TAG}", headers=headers)
