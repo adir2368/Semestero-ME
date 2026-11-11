@@ -16,9 +16,9 @@ ZIP_PATH = os.path.join(ROOT, "Semestero-ME-Windows-x64.zip")
 
 with open(os.path.join(ROOT, "package.json"), "r", encoding="utf-8") as f:
     pkg = json.load(f)
-VERSION = pkg.get("version", "2.10.22")
+VERSION = pkg.get("version", "2.11.3")
 TAG = f"v{VERSION}"
-NAME = f"Semestero ME v{VERSION} - Perpetual Ditch (Self-Study Mode) & Physics Attendance Fix (מצב למידה עצמית והברזה נצחית עם ניתוב פנאופטו/פנגיאה ותיקון סימון נוכחות בפיזיקה)"
+NAME = f"Semestero ME v{VERSION} - Perpetual Ditch Course-Level Refinement & Physics Attendance Fix (מצב למידה עצמית ברמת הקורס ותיקון סימון נוכחות)"
 
 def get_github_token():
     try:
@@ -98,27 +98,28 @@ def main():
 
     body_notes = f"""# Semestero ME {TAG} Release Notes
 
-### 📬 1. רדאר מיילים והודעות אקדמיות (Outlook & Email Intelligence Hub)
-- **זיהוי וניתוח טבעי חכם (Technion Regex NLP)**: מנוע ייעודי המזהה באופן אוטומטי מספרי קורסים בטכניון (`034033`, `104043`, `114032`), שמות בניינים (`דנציגר`, `ליידי דייוויס`, `טאוב`, `אולמן`, `בלומפילד`), חדרים, ימים, שעות ותאריכי יעד.
-- **סיווג קטגוריות אקדמיות**:
-  * 🏢 **שינויי כיתות / חדרים**: זיהוי מיידי של העברת שיעור או תרגול לכיתה חדשה עם כפתור עדכון ישיר של מערכת השעות.
-  * 📝 **דחיות והארכות מועדי הגשה**: זיהוי דחיית תרגילי בית ומטלות, חילוץ תאריך ושעת יעד, וסנכרון מיידי ללוח המשימות ולמעקב שיעורי הבית.
-  * 🚫 **ביטולי שיעורים / הרצאות / מעבדות**: התרעה וסימון ביטול במערכת השעות השבועית.
-  * ⏰ **שיעורי השלמה והזזות זמנים**: עדכון לו"ז אקדמי.
-- **ערוץ הזנה כפול (Dual-Channel)**:
-  * **הדבקה וניתוח מהיר (Smart Paste & Drop)**: הזנה מהירה של תוכן מייל או גרירת קובצי `.eml` לעיבוד מיידי ופרטי (100% Client-Side).
-  * **חיבור ישיר ל-Technion Microsoft 365**: אינטגרציית OAuth 2.0 PKCE לקריאת הודעות פורום ומודל ישירות מחשבון הסטודנט (`campus.technion.ac.il`).
-- **אינטגרציה וסנכרון מלא למערכת**:
-  * ⚡ **תגיות שינוי במערכת השעות**: תצוגת תגית כתומה בולטת בלו"ז היומי (`⚠️ כיתה שונתה למייל: ליידי דייוויס חדר 240`).
-  * 📌 **סנכרון משימות ללוח Notion**: יצירה ועדכון אוטומטיים של תרגילי בית ומטלות.
-  * ⌚ **סנכרון לשעון Galaxy Watch**: דחיפת העדכונים ישירות ל-Tile ול-Complication בשעון.
+### 🚀 1. מצב למידה עצמית / הברזה נצחית ברמת הקורס (Course-Level Self-Study Mode & UX Hardening - ADR-108)
+- **ביטול ברירת מחדל אוטומטית (Zero Default)**: כל הקורסים מתחילים במצב נוכחות פרונטלית רגילה. מצב למידה עצמית הינו החלטה מכוונת של הסטודנט לקורסים שבהם ההוראה אינה אפקטיבית ויש צורך בלמידה עצמאית.
+- **העברת המתג באופן בלעדי לדף הקורס**:
+  * הסרת כפתורי "למידה עצמית" מבלבלים מכרטיסיות ההרצאה הבודדות במערכת השעות (מניעת עמימות בין הברזה משיעור בודד לבין הברזה מכל הקורס).
+  * הוספת מתג ייעודי, ברור ומעוצב בכרטיסיית פרטי הקורס: `🚀 מצב למידה עצמית (הברזה נצחית לקורס כולו)`.
+- **כרטיסיות מערכת שעות מותאמות**:
+  * קורס שהוגדר בלמידה עצמית הופך לכרטיסייה סגולה ייעודית עם תגית `🚀 למידה עצמית`, גישה ישירה בלחיצה אחת ל-`📺 פנאופטו` ו-`📖 פנגיאה`, וכפתור `⚙️ דף הקורס`.
+  * קורסים רגילים מציגים באופן חד וברור את שני כפתורי הנוכחות בלבד: `✓ הייתי / נוכחתי` ו-`✗ החסרתי / הוחסר (בתור)`.
+- **פטור מהתראות הגעה ואי-נוכחות**:
+  * התראות כיתה (10 דקות לפני שיעור) מושתקות עבור קורסים בלמידה עצמית.
+  * פטור מקנסות נוכחות במרכז הנוכחות (Attendance Hub) וניהול מרוכז בלשונית הלמידה העצמית.
 
-### 📦 2. קובצי הפצה ועדכון:
-- `Semestero-ME.apk` (Android Native App `versionCode 87`, `versionName 2.10.33`)
-- `Semestero-ME-Watch.apk` (Wear OS Companion `versionCode 87`, `versionName 2.10.33`)
-- `Semestero-ME-Windows-x64.zip` (Electron Desktop Client v2.10.33)
-- כל 23 חבילות בדיקות הרגרסיה של המערכת עברו בהצלחה מלאה (23 passed, 0 failed).
-- תיעוד ארכיטקטוני מלא: [[02_Architecture_ADR/ADR-104-Academic-Email-Intelligence-Hub-Outlook-Moodle-NLP-And-Schedule-Overrides|ADR-104]] נרשם ב-Obsidian Second Brain.
+### 🛡️ 2. תיקון סימון נוכחות בפיזיקה (Attendance Quote Bug Fix)
+- תיקון כשל לחיצה בפיזיקה 2 (`114052`) שנגרם בשל מירכאות כפולות (גרשיים) בשם החדר (`טאוב - מדמ"ח 1`).
+- מעבר לשימוש בפרמטרים פרימיטיביים בלבד (`dayIndex`, `classIndex`, `status`) ללא שרשור מחרוזות ב-HTML `onclick`.
+
+### 📦 3. קובצי הפצה ועדכון:
+- `Semestero-ME.apk` (Android Native App `versionCode 91`, `versionName 2.11.3`)
+- `Semestero-ME-Watch.apk` (Wear OS Companion `versionCode 91`, `versionName 2.11.3`)
+- `Semestero-ME-Windows-x64.zip` (Electron Desktop Client v2.11.3)
+- כל 22 חבילות בדיקות הרגרסיה של המערכת ובדיקות הנוכחות עברו בהצלחה מלאה.
+- תיעוד ארכיטקטוני מלא: [[02_Architecture_ADR/ADR-108-Perpetual-Ditch-Self-Study-Mode-And-Attendance-Quote-Hardening|ADR-108]] נרשם ב-Obsidian Second Brain.
 """
 
     req_tag = urllib.request.Request(f"https://api.github.com/repos/{REPO}/releases/tags/{TAG}", headers=headers)

@@ -76,9 +76,9 @@ assert.strictEqual(typeof window.handleTimetableAttendance, 'function', 'handleT
 assert.strictEqual(typeof window.isCoursePerpetualDitch, 'function', 'isCoursePerpetualDitch must be defined');
 assert.strictEqual(typeof window.toggleCoursePerpetualDitch, 'function', 'toggleCoursePerpetualDitch must be defined');
 
-// 3. Test that 034056 (מבוא לחישוב הנדסי) defaults to Perpetual Ditch
-assert.strictEqual(window.isCoursePerpetualDitch('034056'), true, '034056 must default to perpetual ditch');
-assert.strictEqual(window.isCoursePerpetualDitch('34056'), true, '34056 (clean) must also report true');
+// 3. Test that no courses default to Perpetual Ditch (must NOT be default)
+assert.strictEqual(window.isCoursePerpetualDitch('034056'), false, '034056 must NOT default to perpetual ditch');
+assert.strictEqual(window.isCoursePerpetualDitch('34056'), false, '34056 (clean) must also default to false');
 
 // 4. Test toggling another course (e.g. Physics 2 114052)
 assert.strictEqual(window.isCoursePerpetualDitch('114052'), false, '114052 initially not perpetual ditch');
@@ -101,6 +101,9 @@ assert.ok(!containerHtml.includes("טאוב - מדמ\"ח 1', 'attended')"), 'Mus
 // Verify that handleTimetableAttendance is rendered on the attendance buttons
 assert.ok(containerHtml.includes('handleTimetableAttendance(this, 1,'), 'Must use handleTimetableAttendance for Monday classes');
 
+// Verify that individual timetable cards do NOT contain ambiguous perpetual ditch quick buttons
+assert.ok(!containerHtml.includes('btn-perpetual-quick'), 'Timetable cards must not contain ambiguous btn-perpetual-quick button');
+
 // 6. Test clicking attendance for Physics 2 on Monday
 // Physics 2 is class 0 on Monday in CHEESEFORK_SEMESTER_SCHEDULE
 window.handleTimetableAttendance(null, 1, 0, 'attended');
@@ -122,11 +125,22 @@ assert.strictEqual(missedRecord.status, 'missed', 'Record status must be missed'
 // Clean up
 window.handleTimetableAttendance(null, 1, 0, 'missed');
 
-// 7. Test Perpetual Ditch card rendering for 034056 (Tuesday / Wednesday / Thursday)
-assert.ok(containerHtml.includes('is-perpetual-ditch'), 'Container HTML must contain is-perpetual-ditch class');
-assert.ok(containerHtml.includes('🚀 למידה עצמית'), 'Container HTML must contain 🚀 למידה עצמית badge');
-assert.ok(containerHtml.includes('btn-perpetual-panopto'), 'Container HTML must contain direct Panopto quick link');
-assert.ok(containerHtml.includes('btn-perpetual-pangea'), 'Container HTML must contain direct Pangea quick link');
+// 7. Test Perpetual Ditch card rendering when activated for 034056 (from course page)
+window.toggleCoursePerpetualDitch('034056', true);
+assert.strictEqual(window.isCoursePerpetualDitch('034056'), true, '034056 is now perpetual ditch');
+window.renderTimetableGrid();
+const perpetualHtml = capturedInnerHTML;
+
+assert.ok(perpetualHtml.includes('is-perpetual-ditch'), 'Container HTML must contain is-perpetual-ditch class');
+assert.ok(perpetualHtml.includes('🚀 למידה עצמית'), 'Container HTML must contain 🚀 למידה עצמית badge');
+assert.ok(perpetualHtml.includes('btn-perpetual-panopto'), 'Container HTML must contain direct Panopto quick link');
+assert.ok(perpetualHtml.includes('btn-perpetual-pangea'), 'Container HTML must contain direct Pangea quick link');
+assert.ok(perpetualHtml.includes('btn-perpetual-revert'), 'Container HTML must contain btn-perpetual-revert class');
+assert.ok(perpetualHtml.includes('⚙️ דף הקורס'), 'Container HTML must contain ⚙️ דף הקורס button');
+
+// Revert 034056 back
+window.toggleCoursePerpetualDitch('034056', false);
+assert.strictEqual(window.isCoursePerpetualDitch('034056'), false, '034056 reverted back to in-person');
 
 console.log('✅ ALL TESTS PASSED: Physics attendance click and Perpetual Ditch verified successfully!');
 process.exit(0);

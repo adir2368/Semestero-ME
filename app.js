@@ -1889,7 +1889,7 @@ const INITIAL_STATE = {
     credits: 0,
     completedCourses: 0,
     bossesSlain: 0,
-    perpetualDitchCourses: { '034056': true, '34056': true },
+    perpetualDitchCourses: {},
     courses: {}
 };
 
@@ -13702,12 +13702,28 @@ function openCourseDetails(code) {
 
     // Perpetual Ditch / Self-Study Mode Checkbox (הברזה נצחית / למידה עצמית)
     const perpetualDitchCheckbox = document.getElementById("modal-course-perpetual-ditch-checkbox");
+    const perpetualDitchLabel = document.getElementById("modal-perpetual-ditch-label");
+    const perpetualDitchNote = document.getElementById("modal-perpetual-ditch-status-note");
     if (perpetualDitchCheckbox) {
         const isPerpetual = (typeof isCoursePerpetualDitch === 'function') && isCoursePerpetualDitch(course.code);
         perpetualDitchCheckbox.checked = isPerpetual;
+        if (perpetualDitchLabel) {
+            perpetualDitchLabel.style.background = isPerpetual ? 'rgba(168, 85, 247, 0.22)' : 'rgba(168, 85, 247, 0.08)';
+            perpetualDitchLabel.style.borderColor = isPerpetual ? 'rgba(168, 85, 247, 0.7)' : 'rgba(168, 85, 247, 0.3)';
+        }
+        if (perpetualDitchNote) {
+            perpetualDitchNote.style.display = isPerpetual ? 'block' : 'none';
+        }
         perpetualDitchCheckbox.onchange = (e) => {
             if (typeof toggleCoursePerpetualDitch === 'function') {
-                toggleCoursePerpetualDitch(course.code, e.target.checked);
+                const nextActive = toggleCoursePerpetualDitch(course.code, e.target.checked);
+                if (perpetualDitchLabel) {
+                    perpetualDitchLabel.style.background = nextActive ? 'rgba(168, 85, 247, 0.22)' : 'rgba(168, 85, 247, 0.08)';
+                    perpetualDitchLabel.style.borderColor = nextActive ? 'rgba(168, 85, 247, 0.7)' : 'rgba(168, 85, 247, 0.3)';
+                }
+                if (perpetualDitchNote) {
+                    perpetualDitchNote.style.display = nextActive ? 'block' : 'none';
+                }
             }
         };
     }
@@ -23650,11 +23666,11 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.11.11-v2.11.2",
-    version: "2.11.2",
-    build: "20261111_02",
-    date: "2026-11-11 07:45",
-    description: "v2.11.2: תיקון סימון נוכחות בפיזיקה (הסרת תווים שוברים ב-onclick) והשקת מצב למידה עצמית (הברזה נצחית) עם ניתוב ישיר לפנאופטו/פנגיאה (ADR-108)."
+    code: "REV-2026.11.11-v2.11.3",
+    version: "2.11.3",
+    build: "20261111_03",
+    date: "2026-11-11 08:00",
+    description: "v2.11.3: העברת מתג מצב למידה עצמית (הברזה נצחית) באופן בלעדי לדף הקורס, ביטול ברירת מחדל, הסרת כפתורים מבלבלים ממערכת השעות ותיקון סימון נוכחות בפיזיקה (ADR-108)."
 };
 window.APP_VERSION = APP_CURRENT_REVISION.version;
 
@@ -26208,8 +26224,8 @@ function renderTimetableGrid() {
                                 <a href="${resUrls.pangeaUrl}" onclick="event.preventDefault(); if (window.PangeaHub) window.PangeaHub.openQuickPeek('${resUrls.pangeaUrl}', '${(c.courseName || '').replace(/'/g, "\\'")} - סיכומי פנגייה', '${resUrls.pangeaUrl}'); else window.open('${resUrls.pangeaUrl}', '_blank');" target="_blank" rel="noopener noreferrer" class="btn-attendance-action btn-perpetual-pangea" title="צפייה מהירה בסיכומי פנגיאה ודרייב">
                                     📖 פנגיאה
                                 </a>
-                                <button type="button" class="btn-attendance-action btn-perpetual-revert" onclick="window.toggleCoursePerpetualDitch('${c.courseId}')" title="בטל מצב למידה עצמית והחזר לנוכחות פרונטלית">
-                                    ↩️ החזר
+                                <button type="button" class="btn-attendance-action btn-perpetual-revert" onclick="if (typeof openCourseDetails === 'function') openCourseDetails('${c.courseId}')" title="פתח את דף הקורס לניהול מצב למידה עצמית">
+                                    ⚙️ דף הקורס
                                 </button>
                             </div>
                         ` : `
@@ -26223,11 +26239,6 @@ function renderTimetableGrid() {
                                         onclick="window.handleTimetableAttendance(this, ${day.dayIndex}, ${idx}, 'missed')"
                                         title="סמן כהוחסר והוסף אוטומטית לתור השלמות ופנאופטו">
                                     ${attStatus === 'missed' ? '✗ הוחסר (בתור)' : '✗ החסרתי'}
-                                </button>
-                                <button type="button" class="btn-attendance-action btn-perpetual-quick" 
-                                        onclick="window.toggleCoursePerpetualDitch('${c.courseId}')"
-                                        title="הגדר קורס זה כ'הברזה נצחית' (למידה עצמית בלבד במקום הרצאות פרונטליות)">
-                                    🚀 למידה עצמית
                                 </button>
                             </div>
                         `}

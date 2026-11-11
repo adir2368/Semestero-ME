@@ -17830,14 +17830,16 @@ tr.is-task-pinned {
 }
 
 .btn-attendance-action.btn-perpetual-revert {
-    background: rgba(148, 163, 184, 0.12);
-    border-color: rgba(148, 163, 184, 0.25);
-    color: #94a3b8;
+    background: rgba(168, 85, 247, 0.16);
+    border-color: rgba(168, 85, 247, 0.4);
+    color: #d8b4fe;
+    font-weight: 600;
 }
 
 .btn-attendance-action.btn-perpetual-revert:hover {
-    background: rgba(148, 163, 184, 0.25);
-    color: #f1f5f9;
+    background: rgba(168, 85, 247, 0.32);
+    border-color: #c084fc;
+    color: #ffffff;
 }
 
 .today-class-status.perpetual {
