@@ -370,11 +370,41 @@
             timelineList.innerHTML = timelineHtml;
         }
 
-        // C. Tasks & Exams
+        // C. Tasks & Exams (Dynamic from live state)
         const examTitle = document.getElementById('w-exam-title');
         const examCourse = document.getElementById('w-exam-course');
-        if (examTitle) examTitle.innerText = "📝 מועד א׳ בעוד 14 ימים";
-        if (examCourse) examCourse.innerText = "104228 - מד״ח מ'";
+        let nearestExamInfo = null;
+        if (state && state.courses && typeof state.courses === 'object') {
+            const nowMs = Date.now();
+            Object.values(state.courses).forEach(c => {
+                if (!c || !Array.isArray(c.tasks)) return;
+                c.tasks.forEach(t => {
+                    if (t && t.type === 'exam' && !t.completed && t.dueDate) {
+                        const dMs = new Date(t.dueDate).getTime();
+                        if (!isNaN(dMs) && dMs >= nowMs) {
+                            const daysLeft = Math.max(0, Math.ceil((dMs - nowMs) / (1000 * 60 * 60 * 24)));
+                            if (!nearestExamInfo || daysLeft < nearestExamInfo.daysLeft) {
+                                nearestExamInfo = {
+                                    daysLeft: daysLeft,
+                                    title: t.title || 'מבחן סוף',
+                                    courseLabel: `${c.code} - ${c.name || ''}`
+                                };
+                            }
+                        }
+                    }
+                });
+            });
+        }
+        if (examTitle) {
+            examTitle.innerText = nearestExamInfo
+                ? `📝 ${nearestExamInfo.title} בעוד ${nearestExamInfo.daysLeft} ימים`
+                : "📝 מועד א׳ בעוד 14 ימים";
+        }
+        if (examCourse) {
+            examCourse.innerText = nearestExamInfo
+                ? nearestExamInfo.courseLabel
+                : "104228 - מד״ח מ'";
+        }
 
         const tasksList = document.getElementById('w-tasks-list');
         if (tasksList) {
@@ -386,6 +416,22 @@
                     if (Array.isArray(parsed) && parsed.length > 0) activeTasks = parsed;
                 }
             } catch(e) {}
+
+            if (activeTasks.length === 0 && state && state.courses && typeof state.courses === 'object') {
+                Object.values(state.courses).forEach(c => {
+                    if (!c || (c.status !== 'active' && c.status !== 'available') || !Array.isArray(c.tasks)) return;
+                    c.tasks.forEach(t => {
+                        if (t && !t.completed && t.type !== 'exam') {
+                            activeTasks.push({
+                                id: t.id || `${c.code}_${activeTasks.length}`,
+                                courseCode: c.code,
+                                title: `[${c.name || c.code}] ${t.title}`,
+                                done: Boolean(t.completed)
+                            });
+                        }
+                    });
+                });
+            }
 
             if (activeTasks.length === 0) {
                 activeTasks = [
@@ -410,16 +456,29 @@
             tasksList.innerHTML = tasksHtml;
         }
 
-        // D. Academic Stats
+        // D. Academic Stats (Dynamic from live state)
         const gpaValEl = document.getElementById('w-gpa-val');
         const creditsEl = document.getElementById('w-credits-text');
         const honorsEl = document.getElementById('w-honors-pill');
         const ringBar = document.getElementById('w-gpa-ring-bar');
 
-        const gpa = state.gpa ? Number(state.gpa).toFixed(2) : "86.04";
+        const gpaNumVal = (state && state.gpa !== undefined && Number(state.gpa) > 0) ? Number(state.gpa) : 86.04;
+        const gpa = gpaNumVal.toFixed(2);
+        const totalCr = (state && state.totalCredits !== undefined) ? Number(state.totalCredits) : 38.5;
+        const targetCr = (state && state.userSettings && state.userSettings.isReservist) ? 155.5 : 157.5;
         if (gpaValEl) gpaValEl.innerText = gpa;
-        if (creditsEl) creditsEl.innerText = "38.5 / 157.5 נק״ז";
-        if (honorsEl) honorsEl.innerText = "🎖️ הצטיינות דיקן";
+        if (creditsEl) creditsEl.innerText = `${totalCr.toFixed(1)} / ${targetCr.toFixed(1)} נק״ז`;
+        if (honorsEl) {
+            if (gpaNumVal >= 91.0) {
+                honorsEl.innerText = "👑 הצטיינות נשיא";
+            } else if (gpaNumVal >= 85.0) {
+                honorsEl.innerText = "🎖️ הצטיינות דיקן";
+            } else if (gpaNumVal >= 65.0) {
+                honorsEl.innerText = "✅ מצב אקדמי תקין";
+            } else {
+                honorsEl.innerText = "⚠️ מעקב אקדמי";
+            }
+        }
 
         // SVG Ring calculation (Circumference = 2 * PI * 42 = ~264)
         if (ringBar) {
@@ -430,7 +489,7 @@
         }
     }
 
-    // 1-Tap Task Complete Handler
+    // 1-Tap Task Complete Handler with Persistent State Sync
     window.toggleWatchTask = function(taskId) {
         const item = document.getElementById(`task-item-${taskId}`);
         const chk = document.getElementById(`task-chk-${taskId}`);
@@ -439,6 +498,49 @@
         const isNowDone = !item.classList.contains('completed');
         item.classList.toggle('completed', isNowDone);
         chk.innerText = isNowDone ? '✓' : '';
+
+        try {
+            const syncedRaw = localStorage.getItem('ast_synced_tasks_json');
+            if (syncedRaw) {
+                const syncedArr = JSON.parse(syncedRaw);
+                if (Array.isArray(syncedArr)) {
+                    const match = syncedArr.find(t => String(t.id) === String(taskId));
+                    if (match) {
+                        match.done = isNowDone;
+                        localStorage.setItem('ast_synced_tasks_json', JSON.stringify(syncedArr));
+                    }
+                }
+            }
+            const stateKey = getStorageKey();
+            const rawState = localStorage.getItem(stateKey);
+            if (rawState) {
+                const parsedState = JSON.parse(rawState);
+                if (parsedState && parsedState.courses) {
+                    let updated = false;
+                    Object.values(parsedState.courses).forEach(c => {
+                        if (c && Array.isArray(c.tasks)) {
+                            c.tasks.forEach(t => {
+                                if (t && String(t.id) === String(taskId)) {
+                                    t.completed = isNowDone;
+                                    t.status = isNowDone ? 'done' : 'open';
+                                    updated = true;
+                                }
+                            });
+                        }
+                    });
+                    if (updated) {
+                        parsedState.lastModified = Date.now();
+                        localStorage.setItem(stateKey, JSON.stringify(parsedState));
+                    }
+                }
+            }
+            if (window.opener && typeof window.opener.loadState === 'function') {
+                window.opener.loadState();
+                if (typeof window.opener.renderUI === 'function') window.opener.renderUI();
+            }
+        } catch (err) {
+            console.warn('[WatchCompanion] Failed to persist task toggle:', err);
+        }
 
         if (navigator.vibrate) {
             try { navigator.vibrate([30, 50, 30]); } catch(e) {}

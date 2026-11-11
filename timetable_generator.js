@@ -601,15 +601,17 @@
         return Math.max(s1, s2) < Math.min(e1, e2);
     }
 
-    // Ingest extra or user-synced schedule groups from CheeseFork
+    // Ingest extra or user-synced schedule groups from CheeseFork or gameState.courses
     function ingestCheeseForkCourseGroups(catalog, coursesField) {
-        if (!coursesField || typeof coursesField !== 'object') return;
-        // Merge any dynamic course options
-        Object.entries(coursesField).forEach(([code, cData]) => {
-            const cleanCode = code.replace(/^0+/, '');
-            if (cData && cData.slots && Array.isArray(cData.slots)) {
-                catalog[cleanCode] = cData;
-                catalog[code] = cData;
+        if (!catalog || typeof catalog !== 'object') return;
+        const sourceMap = coursesField || (global.gameState && global.gameState.courses) || {};
+        if (typeof sourceMap !== 'object') return;
+        Object.entries(sourceMap).forEach(([code, cData]) => {
+            if (!cData) return;
+            const cleanCode = String(cData.code || code).replace(/^0+/, '');
+            const canonicalKey = catalog[code] ? code : (catalog[cleanCode] ? cleanCode : ('0' + cleanCode));
+            if (cData.slots && Array.isArray(cData.slots) && cData.slots.length > 0 && !catalog[code] && !catalog[cleanCode] && !catalog[canonicalKey]) {
+                catalog[cData.code || code] = cData;
             }
         });
     }
@@ -621,6 +623,7 @@
      */
     function generateTimetableCombinations(selectedCodes, preferences = {}) {
         const catalog = Object.assign({}, TECH_COURSE_GROUPS_CATALOG);
+        ingestCheeseForkCourseGroups(catalog, (global.gameState && global.gameState.courses) || {});
         
         // 1. Gather all required slots for selected courses
         const requiredSlots = [];
@@ -1439,7 +1442,9 @@
                     const item = catalog[courseCode] || Object.values(catalog).find(c => c.code.replace(/^0+/, '') === courseCode.replace(/^0+/, ''));
                     if (!item) return;
 
+                    const slotKey = `${item.code}_${slotType}`;
                     const prefix = `${item.code}_${slotType}_`;
+                    delete this.userAnchors[slotKey];
                     Object.keys(this.userAnchors || {}).forEach(k => {
                         if (k.startsWith(prefix)) delete this.userAnchors[k];
                     });
@@ -1448,19 +1453,20 @@
                         const slot = item.slots ? item.slots.find(s => s.slotType === slotType) : null;
                         const opt = slot ? slot.options.find(o => String(o.groupId) === String(groupId)) : null;
                         if (opt) {
-                            const anchorKey = `${prefix}${groupId}`;
-                            this.userAnchors[anchorKey] = {
+                            this.userAnchors[slotKey] = {
+                                slotKey: slotKey,
                                 courseCode: item.code,
                                 courseName: item.name,
                                 slotType: slotType,
-                                groupId: groupId,
+                                groupId: String(groupId),
                                 lecturer: opt.lecturer || '',
-                                meetings: opt.meetings
+                                meetings: opt.meetings,
+                                isFixed: false
                             };
                         }
                     }
                     this.saveAnchors();
-                    this.renderActiveAnchorsStrip();
+                    this.computeAndRender();
                 };
             });
         },

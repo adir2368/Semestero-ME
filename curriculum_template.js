@@ -245,7 +245,7 @@ var SAMPLE_ME_DEGREE = (typeof window !== 'undefined' && window.SAMPLE_ME_DEGREE
         name: "דינמיקה",
         credits: 5,
         semester: 4,
-        prerequisites: ["034028","114071","114051","104043","104131"],
+        prerequisites: ["034028","114051","104043","104131"],
         status: "locked",
         tasks: [
             { id: "034010_h1", title: "תרגיל בית 1: קינמטיקה של גוף קשיח בדו-מימד", type: "hw", xp: 60, completed: false },

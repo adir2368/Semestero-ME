@@ -121,13 +121,31 @@
             return {};
         },
 
-        // Extracts all relevant courses grouped by semester with full math metrics
+        // Extracts all relevant courses grouped by semester with full math metrics (deduplicated across 6/8-digit alias keys)
         getTranscriptData() {
             const raw = this.getRawCourses();
-            const list = Object.values(raw).filter(c => {
+            const seenObjects = new Set();
+            const seenRoots = new Set();
+            const uniqueRaw = [];
+            Object.entries(raw).forEach(([key, c]) => {
+                if (!c || typeof c !== 'object') return;
+                if (seenObjects.has(c)) return;
+                let norm = String(c.altCode || c.code || key).trim();
+                if (/^\d{8}$/.test(norm) && norm.startsWith('0') && !norm.startsWith('0394')) {
+                    norm = norm.slice(1, 4) + norm.slice(5);
+                }
+                const root = norm.replace(/^0+/, '');
+                if (root && seenRoots.has(root)) return;
+                seenObjects.add(c);
+                if (root) seenRoots.add(root);
+                uniqueRaw.push(c);
+            });
+
+            const list = uniqueRaw.filter(c => {
                 if (c.status === 'exempt') return false;
                 // Exclude mutually exclusive alternatives if one is mastered
-                if (['114071', '104016', '104166', '01140071'].includes(c.code) && !c.grade && c.status !== 'mastered') return false;
+                const chosenP1 = window.gameState && window.gameState.userSettings && window.gameState.userSettings.physicsVariants && window.gameState.userSettings.physicsVariants.physics1;
+                if (['114071', '104016', '104166', '01140071'].includes(c.code) && !c.grade && c.status !== 'mastered' && chosenP1 !== '01140071' && chosenP1 !== '114071') return false;
                 if (c.mutuallyExclusiveWith && Array.isArray(c.mutuallyExclusiveWith)) {
                     const hasMasteredPartner = c.mutuallyExclusiveWith.some(code => 
                         raw[code] && (raw[code].status === 'mastered' || (raw[code].grade && Number(raw[code].grade) >= 55))
@@ -262,15 +280,29 @@
             const cumulativeGpa = totalGradedCredits > 0 ? (totalQualityPoints / totalGradedCredits) : 0;
             const simCumulativeGpa = totalSimulatedGradedCredits > 0 ? (totalSimulatedQualityPoints / totalSimulatedGradedCredits) : cumulativeGpa;
 
-            // Cumulative Honors
-            let cumulativeStanding = 'תקין';
+            // Technion Academic Standing (תקינות אקדמית): GPA >= 65.0 and Success Ratio (מקדם הצלחה) >= 66%
+            let attemptedPastAndGradedCredits = 0;
+            const activeSem = (window.gameState && window.gameState.currentActiveSemester) || 3;
+            list.forEach(c => {
+                const cr = Number(c.credits) || 0;
+                const semNum = Number(c.semester || 1);
+                const hasAnyGrade = c.grade !== undefined && c.grade !== null && c.grade !== '';
+                if (c.status === 'mastered' || hasAnyGrade || semNum < activeSem) {
+                    attemptedPastAndGradedCredits += cr;
+                }
+            });
+            const successRatio = attemptedPastAndGradedCredits > 0 ? (totalEarnedCredits / attemptedPastAndGradedCredits) : 1.0;
             const evalGpa = this.isSimActive ? simCumulativeGpa : cumulativeGpa;
+            const isAcademicStandingValid = (totalGradedCredits === 0 || evalGpa >= 65.0) && successRatio >= 0.66;
+
+            // Cumulative Honors & Academic Standing
+            let cumulativeStanding = `תקין ✓ (מקדם הצלחה ${(successRatio * 100).toFixed(0)}%)`;
             if (evalGpa >= PRESIDENT_HONORS_MIN_GPA) {
                 cumulativeStanding = 'הצטיינות יתרה (Summa Cum Laude) ⭐';
             } else if (evalGpa >= DEAN_HONORS_MIN_GPA) {
                 cumulativeStanding = 'הצטיינות (Cum Laude) 🎖️';
-            } else if (evalGpa < 65.0 && totalGradedCredits > 0) {
-                cumulativeStanding = 'מעקב אקדמי ⚠️';
+            } else if ((evalGpa < 65.0 && totalGradedCredits > 0) || successRatio < 0.66) {
+                cumulativeStanding = `מעקב אקדמי ⚠️ (${evalGpa < 65.0 ? 'ממוצע < 65' : 'מקדם הצלחה < 66%'})`;
             }
 
             return {
@@ -283,7 +315,9 @@
                 simCumulativeGpa,
                 totalSimulatedGradedCredits,
                 totalSimulatedQualityPoints,
-                cumulativeStanding
+                cumulativeStanding,
+                successRatio,
+                isAcademicStandingValid
             };
         },
 

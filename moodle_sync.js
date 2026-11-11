@@ -1106,19 +1106,26 @@
                 
                 // Match course number: Technion uses 6 or 8 digits (e.g. 034061, 00340061, 01040043, 00340053, 01040228)
                 let courseCode = '';
+                let rawExtractedCode = '';
                 const codeMatch = categoryStr.match(/\b\d{6,8}\b/) || summary.match(/\b\d{6,8}\b/);
                 if (codeMatch) {
                     const rawCode = codeMatch[0];
+                    rawExtractedCode = rawCode;
                     if (rawCode.length === 8) {
                         const pp = rawCode.substring(0, 2);
                         const ff = rawCode.substring(2, 4);
                         const nnnn = rawCode.substring(4, 8);
-                        if (pp === '00') {
-                            courseCode = '0' + ff + nnnn.substring(1);
-                        } else if (pp === '01') {
-                            courseCode = '1' + ff + nnnn.substring(1);
+                        if (nnnn.startsWith('0')) {
+                            if (pp === '00') {
+                                courseCode = '0' + ff + nnnn.substring(1);
+                            } else if (pp === '01') {
+                                courseCode = '1' + ff + nnnn.substring(1);
+                            } else {
+                                courseCode = rawCode.substring(1, 4) + nnnn.substring(1);
+                            }
                         } else {
-                            courseCode = rawCode.substring(1, 4) + rawCode.substring(5, 8);
+                            // 4-digit course suffix (e.g. 03940805 or 03501460) - preserve all significant digits
+                            courseCode = rawCode.startsWith('0') ? rawCode.substring(1) : rawCode;
                         }
                     } else {
                         courseCode = rawCode;
@@ -1140,12 +1147,16 @@
 
                 syncedTotal++;
 
-                // Format display date
-                const formattedDate = dueDateObj.toISOString().slice(0, 16).replace('T', ' ');
+                // Format display date in local Israel timezone (prevents UTC midnight -1 day shift)
+                const pad2 = (n) => String(n).padStart(2, '0');
+                const formattedDate = `${dueDateObj.getFullYear()}-${pad2(dueDateObj.getMonth() + 1)}-${pad2(dueDateObj.getDate())} ${pad2(dueDateObj.getHours())}:${pad2(dueDateObj.getMinutes())}`;
                 const cleanTitle = this.cleanTaskSummary(summary);
 
-                // Target course resolution
-                let targetCourse = window.gameState.courses[courseCode];
+                // Target course resolution (check both 6-digit converted and raw 8-digit code)
+                let targetCourse = window.gameState.courses[courseCode] || (rawExtractedCode ? window.gameState.courses[rawExtractedCode] : null);
+                if (targetCourse && !window.gameState.courses[courseCode] && rawExtractedCode && window.gameState.courses[rawExtractedCode]) {
+                    courseCode = rawExtractedCode;
+                }
                 
                 // If course not found directly, check by loose matching or fallback to active courses
                 if (!targetCourse && courseCode) {

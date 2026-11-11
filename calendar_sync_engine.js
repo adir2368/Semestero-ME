@@ -11,7 +11,7 @@
 
     const CalendarSyncEngine = {
         // Fallback semester boundary dates for Technion Winter 2026/27 (תשפ״ז)
-        DEFAULT_SEM_START: new Date(2026, 9, 18), // Oct 18, 2026
+        DEFAULT_SEM_START: new Date(2026, 9, 28), // Oct 28, 2026 (aligned with Technion Winter 2026/27 start)
         DEFAULT_SEM_END_STR: '20270215T235959Z',  // Feb 15, 2027
 
         /**

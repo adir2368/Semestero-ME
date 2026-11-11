@@ -321,34 +321,37 @@
             }
         }
 
-        const targets = [
-            '03240269', '3240269',
-            '03940800', '3940800', '0394800', '394800',
-            '03940808', '3940808', '0394808', '394808'
-        ];
-        if (state.courses) {
-            targets.forEach(t => {
-                const c = state.courses[t];
-                if (c && !c.grade && (c.semester === 4 || !c.semester)) {
-                    delete state.courses[t];
-                }
-            });
-        }
-        if (Array.isArray(state.degreePlan)) {
-            state.degreePlan.forEach(s => {
-                if (s && s.semester === 4 && Array.isArray(s.courses)) {
-                    s.courses = s.courses.filter(c => {
-                        if (!c) return false;
-                        const code = String(c.code || '');
-                        const alt = String(c.altCode || '');
-                        if (targets.includes(code) || targets.includes(alt)) return false;
-                        if (c.type === 'sports' || c.list === 'SPORTS') return false;
-                        if (code.startsWith('0394') || code.startsWith('394')) return false;
-                        if (code.startsWith('0324') || code.startsWith('324')) return false;
-                        return true;
-                    });
-                }
-            });
+        const isTargetAdir = !targetUserId || targetUserId === 'adir_moshe';
+        if (isTargetAdir) {
+            const targets = [
+                '03240269', '3240269',
+                '03940800', '3940800', '0394800', '394800',
+                '03940808', '3940808', '0394808', '394808'
+            ];
+            if (state.courses) {
+                targets.forEach(t => {
+                    const c = state.courses[t];
+                    if (c && !c.grade && (c.semester === 4 || !c.semester)) {
+                        delete state.courses[t];
+                    }
+                });
+            }
+            if (Array.isArray(state.degreePlan)) {
+                state.degreePlan.forEach(s => {
+                    if (s && s.semester === 4 && Array.isArray(s.courses)) {
+                        s.courses = s.courses.filter(c => {
+                            if (!c) return false;
+                            const code = String(c.code || '');
+                            const alt = String(c.altCode || '');
+                            if (targets.includes(code) || targets.includes(alt)) return false;
+                            if (c.type === 'sports' || c.list === 'SPORTS') return false;
+                            if (code.startsWith('0394') || code.startsWith('394')) return false;
+                            if (code.startsWith('0324') || code.startsWith('324')) return false;
+                            return true;
+                        });
+                    }
+                });
+            }
         }
         return state;
     }
@@ -2708,12 +2711,15 @@
                                 const localLastMod = (localState && localState.lastModified) || 0;
                                 const remoteLastMod = (remoteState && remoteState.lastModified) || (payload && payload.new && payload.new.updated_at ? new Date(payload.new.updated_at).getTime() : 0);
 
+                                const localRemovedSet = new Set(Array.isArray(localState && localState.removedCourses) ? localState.removedCourses : []);
                                 const localCourses = (localState && localState.courses) ? Object.keys(localState.courses).length : 0;
-                                const remoteCourses = (remoteState && remoteState.courses) ? Object.keys(remoteState.courses).length : 0;
-                                const remoteHasMoreCourses = remoteCourses > localCourses;
+                                const effectiveRemoteCourses = (remoteState && remoteState.courses)
+                                    ? Object.keys(remoteState.courses).filter(k => !localRemovedSet.has(k)).length
+                                    : 0;
+                                const remoteHasMoreCourses = effectiveRemoteCourses > localCourses;
                                 const remoteHasRemovedTracking = Array.isArray(remoteState.removedCourses) && remoteState.removedCourses.length > 0 && (!localState || !localState.removedCourses || localState.removedCourses.length === 0);
 
-                                // Guard against clobbering newer local state UNLESS remote has more courses or active tracking
+                                // Guard against clobbering newer local state UNLESS remote genuinely has more non-tombstoned courses
                                 if (!remoteHasMoreCourses && !remoteHasRemovedTracking && localLastMod > 0 && remoteLastMod < localLastMod) {
                                     console.warn('[AuthSync Realtime] Ignored outdated remote update. Local is newer:', { localLastMod, remoteLastMod });
                                     this.triggerDebouncedCloudSync(localState);
@@ -2833,12 +2839,15 @@
                     const localLastMod = (localState && localState.lastModified) || 0;
                     const remoteLastMod = (remoteState && remoteState.lastModified) || (data && data.updated_at ? new Date(data.updated_at).getTime() : 0);
 
+                    const localRemovedSet = new Set(Array.isArray(localState && localState.removedCourses) ? localState.removedCourses : []);
                     const localCourses = (localState && localState.courses) ? Object.keys(localState.courses).length : 0;
-                    const remoteCourses = (remoteState && remoteState.courses) ? Object.keys(remoteState.courses).length : 0;
-                    const remoteHasMoreCourses = remoteCourses > localCourses;
+                    const effectiveRemoteCourses = (remoteState && remoteState.courses)
+                        ? Object.keys(remoteState.courses).filter(k => !localRemovedSet.has(k)).length
+                        : 0;
+                    const remoteHasMoreCourses = effectiveRemoteCourses > localCourses;
                     const remoteHasRemovedTracking = Array.isArray(remoteState.removedCourses) && remoteState.removedCourses.length > 0 && (!localState || !localState.removedCourses || localState.removedCourses.length === 0);
 
-                    // If local state is newer than remote AND has equal/more courses AND not forced, preserve local state!
+                    // If local state is newer than remote AND has equal/more non-tombstoned courses AND not forced, preserve local state!
                     if (!force && !remoteHasMoreCourses && !remoteHasRemovedTracking && localLastMod > 0 && remoteLastMod < localLastMod) {
                         console.log('[AuthSync] Local state is newer than cloud copy. Preserving local state.');
                         this.triggerDebouncedCloudSync(localState);

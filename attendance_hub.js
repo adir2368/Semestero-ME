@@ -471,10 +471,9 @@
         },
 
         getCurrentAcademicWeek: function() {
-            // Rough heuristic based on November 2026 Technion semester start
-            // Technion Winter 2026/27 started around mid-October.
+            // Aligned with Technion Winter 2026/27 semester start (October 28, 2026)
             const now = new Date();
-            const start = new Date(2026, 9, 18); // Oct 18, 2026
+            const start = new Date(2026, 9, 28); // Oct 28, 2026
             const diffDays = Math.floor((now - start) / (1000 * 60 * 60 * 24));
             const week = Math.max(1, Math.min(14, Math.floor(diffDays / 7) + 1));
             return week;

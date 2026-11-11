@@ -45,7 +45,7 @@
                 { code: "01040131", altCode: "104131", name: "משוואות דיפרנציאליות רגילות/ח", credits: 2.5, type: "mandatory", prereqs: ["01040041", "01040065"] },
                 { code: "03140533", altCode: "314533", name: "מבוא להנדסת חומרים מ'", credits: 3.5, type: "mandatory", prereqs: ["01250001"] },
                 { code: "00340061", altCode: "034061", name: "מבוא לגרפיקה ותכנון הנדסי", credits: 3.5, type: "mandatory", prereqs: [] },
-                { code: "01140039", altCode: "114039", name: "מעבדה לפיזיקה 1מח'", credits: 1.0, type: "mandatory", prereqs: ["01140051"] },
+                { code: "01140039", altCode: "114039", name: "מעבדה לפיזיקה 1מח'", credits: 1.0, type: "mandatory", prereqs: [], coreqs: ["01140051"] },
                 { 
                     code: "01140051", 
                     altCode: "114051", 
@@ -131,8 +131,8 @@
             title: "שנה ד׳ - סמסטר ז׳",
             targetCredits: 3.5,
             courses: [
-                { code: "00340379", altCode: "034379", name: "פרויקט גמר הנדסי 1", credits: 3.0, type: "final_project", prereqs: ["00340054", "00340371"] },
-                { code: "00340382", altCode: "034382", name: "מתודולוגיות פיתוח הנדסי 1", credits: 0.5, type: "mandatory", prereqs: [] }
+                { code: "00340379", altCode: "034379", name: "פרויקט גמר הנדסי 1", credits: 3.0, type: "final_project", prereqs: ["00340054", "00340371"], minCreditsRequired: 110.0 },
+                { code: "00340382", altCode: "034382", name: "מתודולוגיות פיתוח הנדסי 1", credits: 0.5, type: "mandatory", prereqs: ["00340054"] }
             ]
         },
         {
@@ -172,7 +172,7 @@
                 { code: "01040131", altCode: "104131", name: "משוואות דיפרנציאליות רגילות/ח", credits: 2.5, type: "mandatory", prereqs: ["01040041", "01040065"] },
                 { code: "03140533", altCode: "314533", name: "מבוא להנדסת חומרים מ'", credits: 3.5, type: "mandatory", prereqs: ["01250001"] },
                 { code: "00340061", altCode: "034061", name: "מבוא לגרפיקה ותכנון הנדסי", credits: 3.5, type: "mandatory", prereqs: [] },
-                { code: "01140039", altCode: "114039", name: "מעבדה לפיזיקה 1מח'", credits: 1.0, type: "mandatory", prereqs: ["01140051"] },
+                { code: "01140039", altCode: "114039", name: "מעבדה לפיזיקה 1מח'", credits: 1.0, type: "mandatory", prereqs: [], coreqs: ["01140051"] },
                 { 
                     code: "01140051", 
                     altCode: "114051", 
@@ -256,8 +256,8 @@
             title: "שנה ד׳ - סמסטר ז׳",
             targetCredits: 3.5,
             courses: [
-                { code: "00340379", altCode: "034379", name: "פרויקט גמר הנדסי 1", credits: 3.0, type: "final_project", prereqs: ["00340054", "00340371"] },
-                { code: "00340382", altCode: "034382", name: "מתודולוגיות פיתוח הנדסי 1", credits: 0.5, type: "mandatory", prereqs: [] }
+                { code: "00340379", altCode: "034379", name: "פרויקט גמר הנדסי 1", credits: 3.0, type: "final_project", prereqs: ["00340054", "00340371"], minCreditsRequired: 110.0 },
+                { code: "00340382", altCode: "034382", name: "מתודולוגיות פיתוח הנדסי 1", credits: 0.5, type: "mandatory", prereqs: ["00340054"] }
             ]
         },
         {
@@ -290,7 +290,7 @@
         {
             semester: 2,
             title: "שנה א׳ - סמסטר ב׳",
-            targetCredits: 20.5,
+            targetCredits: 21.0,
             courses: [
                 { code: "01040043", altCode: "104043", name: "חדו\"א 2מ' 1", credits: 5.0, type: "mandatory", prereqs: ["01040041"] },
                 { code: "00340028", altCode: "034028", name: "מכניקת מוצקים 1", credits: 4.0, type: "mandatory", prereqs: ["01040041", "01040065"] },
@@ -378,8 +378,8 @@
             title: "שנה ד׳ - סמסטר ז׳",
             targetCredits: 3.5,
             courses: [
-                { code: "00340379", altCode: "034379", name: "פרויקט גמר הנדסי 1", credits: 3.0, type: "final_project", prereqs: ["00340054", "00340371"] },
-                { code: "00340382", altCode: "034382", name: "מתודולוגיות פיתוח הנדסי 1", credits: 0.5, type: "mandatory", prereqs: [] }
+                { code: "00340379", altCode: "034379", name: "פרויקט גמר הנדסי 1", credits: 3.0, type: "final_project", prereqs: ["00340054", "00340371"], minCreditsRequired: 110.0 },
+                { code: "00340382", altCode: "034382", name: "מתודולוגיות פיתוח הנדסי 1", credits: 0.5, type: "mandatory", prereqs: ["00340054"] }
             ]
         },
         {
@@ -399,32 +399,32 @@
     const ELECTIVE_CATALOG = {
         // רשימה א' - קורסים חישוביים (Computational)
         A: [
-            { code: "00350022", altCode: "035022", name: "אלמנטים סופיים לאנליזה הנדסית", credits: 3.0, list: "A", prereqs: ["00340053", "00340056"] },
-            { code: "00360015", altCode: "036015", name: "שיטות אלמנטים סופיים בהנדסה 1", credits: 3.0, list: "A", prereqs: ["00340053", "00340056"] },
-            { code: "00350199", altCode: "035199", name: "שימוש המחשב בתורת הזרימה", credits: 3.0, list: "A", prereqs: ["00340055", "00340056"] },
-            { code: "00350013", altCode: "035013", name: "שיטות מספריות בהנדסת מכונות", credits: 2.5, list: "A", prereqs: ["00340056"] },
-            { code: "00350039", altCode: "035039", name: "עיבוד אותות", credits: 3.0, list: "A", prereqs: ["00340032"] },
-            { code: "00350054", altCode: "035054", name: "מבוא ללמידה ובינה בהנדסת מכונות", credits: 2.5, list: "A", prereqs: ["02340128", "00340056"] }
+            { code: "00350022", altCode: "035022", name: "אלמנטים סופיים לאנליזה הנדסית", credits: 3.0, list: "A", cluster: "חישוב ואנליזה (FEM/CFD)", prereqs: ["00340053", "00340056"] },
+            { code: "00360015", altCode: "036015", name: "שיטות אלמנטים סופיים בהנדסה 1", credits: 3.0, list: "A", cluster: "חישוב ואנליזה (FEM/CFD)", prereqs: ["00340053", "00340056"] },
+            { code: "00350199", altCode: "035199", name: "שימוש המחשב בתורת הזרימה", credits: 3.0, list: "A", cluster: "אנרגיה וזורמים", prereqs: ["00340055", "00340056"] },
+            { code: "00350013", altCode: "035013", name: "שיטות מספריות בהנדסת מכונות", credits: 2.5, list: "A", cluster: "חישוב ואנליזה (FEM/CFD)", prereqs: ["00340056"] },
+            { code: "00350039", altCode: "035039", name: "עיבוד אותות", credits: 3.0, list: "A", cluster: "רובוטיקה ובקרה", prereqs: ["00340032"] },
+            { code: "00350054", altCode: "035054", name: "מבוא ללמידה ובינה בהנדסת מכונות", credits: 2.5, list: "A", cluster: "רובוטיקה ובקרה", prereqs: ["02340128", "00340056"] }
         ],
 
         // רשימה ב' - קורסי נושאי ליבה (Core Topics)
         B: [
-            { code: "00350035", altCode: "035035", name: "תורת הזרימה 2", credits: 2.5, list: "B", prereqs: ["00340055"] },
-            { code: "00350091", altCode: "035091", name: "תרמודינמיקה 2", credits: 3.5, list: "B", prereqs: ["00340035"] },
-            { code: "00360009", altCode: "036009", name: "מעבר חום ומסה", credits: 3.0, list: "B", prereqs: ["00340041"] },
-            { code: "00350188", altCode: "035188", name: "תורת הבקרה", credits: 3.5, list: "B", prereqs: ["00340040"] },
-            { code: "00350001", altCode: "035001", name: "מבוא לרובוטיקה", credits: 2.5, list: "B", prereqs: ["00340010"] },
-            { code: "00360005", altCode: "036005", name: "דינמיקה אנליטית", credits: 3.0, list: "B", prereqs: ["00340010"] },
-            { code: "00350003", altCode: "035003", name: "מערכות תיב\"מ 1", credits: 3.0, list: "B", prereqs: ["00340061", "00340056"] },
-            { code: "00340016", altCode: "034016", name: "תכן מכני 2", credits: 3.0, list: "B", prereqs: ["00340054"] },
-            { code: "00350123", altCode: "035123", name: "מבוא למערכות יצור 1", credits: 2.5, list: "B", prereqs: ["00340030"] },
-            { code: "00350043", altCode: "035043", name: "מבוא לתורת האלסטיות", credits: 3.0, list: "B", prereqs: ["00340053"] },
-            { code: "00350041", altCode: "035041", name: "מכניקת מיקרו-מערכות", credits: 3.5, list: "B", prereqs: ["00340053"] },
-            { code: "00350034", altCode: "035034", name: "כשל חומרים", credits: 2.5, list: "B", prereqs: ["00340053", "03140533"] },
-            { code: "00350050", altCode: "035050", name: "תכנון מערכות אופטיות", credits: 3.5, list: "B", prereqs: ["01140052"] },
-            { code: "00350052", altCode: "035052", name: "אופטיקה לינארית ויישומים 1", credits: 3.5, list: "B", prereqs: ["01140052"] },
-            { code: "00360049", altCode: "036049", name: "רשתות עצביות לבקרה ודיאגנוסטיקה", credits: 2.5, list: "B", prereqs: ["00340032"] },
-            { code: "00350062", altCode: "035062", name: "אנליזה של מבנים", credits: 2.5, list: "B", prereqs: ["00340053"] }
+            { code: "00350035", altCode: "035035", name: "תורת הזרימה 2", credits: 2.5, list: "B", cluster: "אנרגיה וזורמים", prereqs: ["00340055"] },
+            { code: "00350091", altCode: "035091", name: "תרמודינמיקה 2", credits: 3.5, list: "B", cluster: "אנרגיה וזורמים", prereqs: ["00340035"] },
+            { code: "00360009", altCode: "036009", name: "מעבר חום ומסה", credits: 3.0, list: "B", cluster: "אנרגיה וזורמים", prereqs: ["00340041"] },
+            { code: "00350188", altCode: "035188", name: "תורת הבקרה", credits: 3.5, list: "B", cluster: "רובוטיקה ובקרה", prereqs: ["00340040"] },
+            { code: "00350001", altCode: "035001", name: "מבוא לרובוטיקה", credits: 2.5, list: "B", cluster: "רובוטיקה ובקרה", prereqs: ["00340010"] },
+            { code: "00360005", altCode: "036005", name: "דינמיקה אנליטית", credits: 3.0, list: "B", cluster: "רובוטיקה ובקרה", prereqs: ["00340010"] },
+            { code: "00350003", altCode: "035003", name: "מערכות תיב\"מ 1", credits: 3.0, list: "B", cluster: "תכן, חומרים וייצור", prereqs: ["00340061", "00340056"] },
+            { code: "00340016", altCode: "034016", name: "תכן מכני 2", credits: 3.0, list: "B", cluster: "תכן, חומרים וייצור", prereqs: ["00340054"] },
+            { code: "00350123", altCode: "035123", name: "מבוא למערכות יצור 1", credits: 2.5, list: "B", cluster: "תכן, חומרים וייצור", prereqs: ["00340030"] },
+            { code: "00350043", altCode: "035043", name: "מבוא לתורת האלסטיות", credits: 3.0, list: "B", cluster: "תכן, חומרים וייצור", prereqs: ["00340053"] },
+            { code: "00350041", altCode: "035041", name: "מכניקת מיקרו-מערכות", credits: 3.5, list: "B", cluster: "מכטרוניקה ואופטיקה", prereqs: ["00340053"] },
+            { code: "00350034", altCode: "035034", name: "כשל חומרים", credits: 2.5, list: "B", cluster: "תכן, חומרים וייצור", prereqs: ["00340053", "03140533"] },
+            { code: "00350050", altCode: "035050", name: "תכנון מערכות אופטיות", credits: 3.5, list: "B", cluster: "מכטרוניקה ואופטיקה", prereqs: ["01140052"] },
+            { code: "00350052", altCode: "035052", name: "אופטיקה לינארית ויישומים 1", credits: 3.5, list: "B", cluster: "מכטרוניקה ואופטיקה", prereqs: ["01140052"] },
+            { code: "00360049", altCode: "036049", name: "רשתות עצביות לבקרה ודיאגנוסטיקה", credits: 2.5, list: "B", cluster: "רובוטיקה ובקרה", prereqs: ["00340032"] },
+            { code: "00350062", altCode: "035062", name: "אנליזה של מבנים", credits: 2.5, list: "B", cluster: "חישוב ואנליזה (FEM/CFD)", prereqs: ["00340053"] }
         ],
 
         // רשימה ג' - קורסים יישומיים ושילוביים (אינטגרטיביים - Applied & Integrative)
@@ -622,7 +622,7 @@
             { code: "00340091", altCode: "034091", name: "פעילות בנבחרת פורמולה א'", credits: 2.0, type: "free", list: "MALAG", isBinaryPass: true, prereqs: [], note: "מסלול בחירה חופשית - 2 נק״ז בינארי לסמסטר פעיל בנבחרת הפורמולה (שנה א׳ ואילך)" },
             { code: "00340092", altCode: "034092", name: "פעילות בנבחרת פורמולה ב'", credits: 2.0, type: "free", list: "MALAG", isBinaryPass: true, prereqs: [], note: "מסלול בחירה חופשית - 2 נק״ז בינארי לסמסטר פעיל בנבחרת הפורמולה" },
             { code: "00340093", altCode: "034093", name: "פעילות בנבחרת פורמולה ג'", credits: 2.0, type: "free", list: "MALAG", isBinaryPass: true, prereqs: [], note: "מסלול בחירה חופשית - 2 נק״ז בינארי לסמסטר פעיל בנבחרת הפורמולה" },
-            { code: "00340384", altCode: "034384", name: "פרויקט גמר - פורמולה SAE 1", credits: 3.0, type: "final_project", prereqs: ["00340054", "00340371"], note: "מסלול פרויקט תכן הנדסי שנה ד׳ בנבחרת הפורמולה (סמסטר א׳ - 3 נק״ז)" },
+            { code: "00340384", altCode: "034384", name: "פרויקט גמר - פורמולה SAE 1", credits: 3.0, type: "final_project", prereqs: ["00340054", "00340371"], minCreditsRequired: 110.0, note: "מסלול פרויקט תכן הנדסי שנה ד׳ בנבחרת הפורמולה (סמסטר א׳ - 3 נק״ז)" },
             { code: "00340385", altCode: "034385", name: "פרויקט גמר - פורמולה SAE 2", credits: 3.0, type: "final_project", prereqs: ["00340384"], note: "מסלול פרויקט תכן הנדסי שנה ד׳ בנבחרת הפורמולה (סמסטר ב׳ - 3 נק״ז)" },
             { code: "03240262", altCode: "324262", name: "מל״ג - תולדות הפילוסופיה והמדע בעת החדשה", credits: 2.0, type: "humanities", list: "MALAG", prereqs: [], scheduleSlot: { day: "שני", time: "16:30 - 18:30", dayIndex: 1, startTime: "16:30", endTime: "18:30", room: "טאוב 1" } },
             { code: "03240265", altCode: "324265", name: "מל״ג - אקו-פילוסופיה: חשיבה סביבתית", credits: 2.0, type: "humanities", list: "MALAG", prereqs: [], scheduleSlot: { day: "שני", time: "14:30 - 16:30", dayIndex: 1, startTime: "14:30", endTime: "16:30", room: "אולמן 302" } },
@@ -670,7 +670,7 @@
                 { code: "01250001", altCode: "125001", name: "כימיה כללית", credits: 3.0, type: "mandatory", prereqs: [] },
                 { code: "02340128", altCode: "234128", name: "שפת פייתון", credits: 4.0, type: "mandatory", prereqs: [] },
                 { code: "01140071", altCode: "114071", name: "פיזיקה 1מ'", credits: 3.5, type: "mandatory", prereqs: [] },
-                { code: "01250013", altCode: "125013", name: "מעבדה בכימיה", credits: 0.5, type: "mandatory", prereqs: ["01250001"] }
+                { code: "01250013", altCode: "125013", name: "מעבדה בכימיה", credits: 0.5, type: "mandatory", prereqs: [], coreqs: ["01250001"] }
             ]
         },
         {
@@ -681,7 +681,7 @@
                 { code: "01040043", altCode: "104043", name: "חדו\"א 2מ' 1", credits: 5.0, type: "mandatory", prereqs: ["01040041"] },
                 { code: "00340028", altCode: "034028", name: "מכניקת מוצקים 1", credits: 4.0, type: "mandatory", prereqs: ["01040041", "01040065", "01140071"] },
                 { code: "01040131", altCode: "104131", name: "משוואות דיפרנציאליות רגילות/ח", credits: 2.5, type: "mandatory", prereqs: ["01040041", "01040065"] },
-                { code: "01140075", altCode: "114075", name: "פיזיקה 2ממ", credits: 5.0, type: "mandatory", prereqs: ["01140071", "01040043"] },
+                { code: "01140075", altCode: "114075", name: "פיזיקה 2ממ", credits: 5.0, type: "mandatory", prereqs: ["01140071"], coreqs: ["01040043"] },
                 { code: "03140533", altCode: "314533", name: "מבוא להנדסת חומרים מ'", credits: 3.5, type: "mandatory", prereqs: ["01250001"] },
                 { code: "00340061", altCode: "034061", name: "מבוא לגרפיקה ותכנון הנדסי", credits: 3.5, type: "mandatory", prereqs: [] }
             ]
@@ -706,7 +706,7 @@
             courses: [
                 { code: "00340030", altCode: "034030", name: "תהליכי ייצור", credits: 3.5, type: "mandatory", prereqs: ["00340053", "00340061", "03140533"] },
                 { code: "00340055", altCode: "034055", name: "תורת הזרימה 1 מורחב", credits: 5.0, type: "mandatory", prereqs: ["00340035", "01040131", "01040228"] },
-                { code: "00340041", altCode: "034041", name: "מעבר חום", credits: 4.0, type: "mandatory", prereqs: ["00340035", "00340055", "01040228"] },
+                { code: "00340041", altCode: "034041", name: "מעבר חום", credits: 4.0, type: "mandatory", prereqs: ["00340035", "01040228"], coreqs: ["00340055"] },
                 { code: "00340040", altCode: "034040", name: "מבוא לבקרה", credits: 3.0, type: "mandatory", prereqs: ["00340032"] },
                 { code: "00340054", altCode: "034054", name: "תכן מכני 1 מ'", credits: 4.0, type: "mandatory", prereqs: ["00340053", "00340061", "03140533"] },
                 { code: "00340058", altCode: "034058", name: "הסתברות וסטטיסטיקה מה' מכ'", credits: 3.0, type: "mandatory", prereqs: ["01040043"] }
@@ -729,8 +729,8 @@
             title: "שנה ג׳ - סמסטר ו׳ (ברקים)",
             targetCredits: 18.0,
             courses: [
-                { code: "00340379", altCode: "034379", name: "פרויקט גמר הנדסי 1", credits: 3.0, type: "final_project", prereqs: ["00340054", "00340371"] },
-                { code: "00340382", altCode: "034382", name: "מתודולוגיות פיתוח הנדסי 1", credits: 0.5, type: "mandatory", prereqs: [] }
+                { code: "00340379", altCode: "034379", name: "פרויקט גמר הנדסי 1", credits: 3.0, type: "final_project", prereqs: ["00340054", "00340371"], minCreditsRequired: 110.0 },
+                { code: "00340382", altCode: "034382", name: "מתודולוגיות פיתוח הנדסי 1", credits: 0.5, type: "mandatory", prereqs: ["00340054"] }
             ]
         },
         {
@@ -778,21 +778,21 @@
             id: 'year_2027',
             title: 'תוכנית הלימודים - שנתון תשפ״ז',
             description: 'קטלוג רישום עדכני עבור סטודנטים להנדסת מכונות',
-            syllabus: SUGGESTED_MANDATORY_SYLLABUS_2026,
+            syllabus: SUGGESTED_MANDATORY_SYLLABUS_2027,
             mandatoryCredits: 107.0
         },
         year_2025: {
             id: 'year_2025',
             title: 'תוכנית הלימודים - שנתון תשפ״ה',
             description: 'קטלוג רישום למתחילים בתשפ״ה',
-            syllabus: SUGGESTED_MANDATORY_SYLLABUS_2026,
+            syllabus: SUGGESTED_MANDATORY_SYLLABUS_2024,
             mandatoryCredits: 107.0
         },
         year_2024: {
             id: 'year_2024',
             title: 'תוכנית הלימודים - שנתון תשפ״ד',
             description: 'סילבוס קלאסי למתחילים בתשפ״ד',
-            syllabus: SUGGESTED_MANDATORY_SYLLABUS_2026,
+            syllabus: SUGGESTED_MANDATORY_SYLLABUS_2024,
             mandatoryCredits: 107.0
         },
         barak: {
@@ -833,11 +833,7 @@
         '01040228': { winter: '01040228', spring: '01040218', name: "מד\"ח מ'" },
         '01040218': { winter: '01040228', spring: '01040218', name: "מד\"ח מ'" },
         '104228':   { winter: '01040228', spring: '01040218', name: "מד\"ח מ'" },
-        '104218':   { winter: '01040228', spring: '01040218', name: "מד\"ח מ'" },
-
-        '00340030': { winter: '00340043', spring: '00340030', name: "תהליכי ייצור" },
-        '00340043': { winter: '00340043', spring: '00340030', name: "תהליכי ייצור" },
-        '034030':   { winter: '00340043', spring: '00340030', name: "תהליכי ייצור" }
+        '104218':   { winter: '01040228', spring: '01040218', name: "מד\"ח מ'" }
     };
 
     // ==========================================================================

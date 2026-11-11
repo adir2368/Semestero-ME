@@ -74,7 +74,7 @@
         const hasPhys1InS1 = s1.some(c => c === '01140051' || c === '114051');
         const hasChemLabInS2 = s2.some(c => c === '01250013' || c === '125013');
         const hasYogaInS3 = s3.some(c => c === '03940805' || c === '3940805');
-        return hasPhys1InS1 && hasChemLabInS2;
+        return hasPhys1InS1 && hasChemLabInS2 && hasYogaInS3;
     }
 
     function getPlannerStorageKeyV2() {
@@ -781,32 +781,29 @@
             unassignedCourses = unassignedCourses.filter(c => !isPurgedCourse(c.code, c.altCode));
         }
 
-        // Ensure Chemistry Lab (125013) belongs strictly to Semester 2 (Adir took it early in spring)
-        if (customPlan) {
+        // Ensure Chemistry Lab (125013) belongs strictly to Semester 2 for Adir
+        if (isAdir && customPlan) {
             const isChemLab = c => c && (c.code === '01250013' || c.altCode === '125013' || c.code === '125013');
-            const isAdirOrCompletedS2 = (typeof isAdirAuthenticated === 'function' && isAdirAuthenticated()) || (global.gameState && global.gameState.courses && global.gameState.courses['125013'] && (global.gameState.courses['125013'].status === 'mastered' || global.gameState.courses['125013'].grade));
-            if (isAdirOrCompletedS2) {
-                const sem4 = customPlan.find(s => s.semester === 4);
-                const sem2 = customPlan.find(s => s.semester === 2);
-                if (sem4 && Array.isArray(sem4.courses)) {
-                    const labIdx = sem4.courses.findIndex(isChemLab);
-                    if (labIdx !== -1) {
-                        const labItem = sem4.courses.splice(labIdx, 1)[0];
-                        if (sem2 && Array.isArray(sem2.courses) && !sem2.courses.some(isChemLab)) {
-                            sem2.courses.push(labItem);
-                        }
+            const sem4 = customPlan.find(s => s.semester === 4);
+            const sem2 = customPlan.find(s => s.semester === 2);
+            if (sem4 && Array.isArray(sem4.courses)) {
+                const labIdx = sem4.courses.findIndex(isChemLab);
+                if (labIdx !== -1) {
+                    const labItem = sem4.courses.splice(labIdx, 1)[0];
+                    if (sem2 && Array.isArray(sem2.courses) && !sem2.courses.some(isChemLab)) {
+                        sem2.courses.push(labItem);
                     }
                 }
-                if (global.gameState && global.gameState.courses && global.gameState.courses['125013']) {
-                    global.gameState.courses['125013'].semester = 2;
-                }
-                if (global.gameState && global.gameState.courses && global.gameState.courses['01250013']) {
-                    global.gameState.courses['01250013'].semester = 2;
-                }
+            }
+            if (global.gameState && global.gameState.courses && global.gameState.courses['125013']) {
+                global.gameState.courses['125013'].semester = 2;
+            }
+            if (global.gameState && global.gameState.courses && global.gameState.courses['01250013']) {
+                global.gameState.courses['01250013'].semester = 2;
             }
         }
 
-        // Ensure Physics Lab (114032) belongs strictly to Semester 5 (not Semester 4)
+        // Ensure Physics Lab (114032) belongs strictly to Semester 5 (not Semester 4) for Adir
         if (isAdir && customPlan) {
             const isLab = c => c && (c.code === '01140032' || c.altCode === '114032' || c.code === '114032');
             const sem4 = customPlan.find(s => s.semester === 4);
@@ -825,8 +822,8 @@
             }
         }
 
-        // 1b. Unconditional purge of accidental test infiltrator courses & sports from semester 4
-        if (customPlan && Array.isArray(customPlan)) {
+        // 1b. Purge of accidental test infiltrator courses & Adir-specific Semester 4 sports/MALAG
+        if (isAdir && customPlan && Array.isArray(customPlan)) {
             let touchedPlan = false;
             customPlan.forEach(sem => {
                 if (sem.semester === 4) {
@@ -1050,8 +1047,11 @@
                 }
             });
 
-            // Strict mutual exclusivity: Purge alternative physics variants when standard physics exists
-            if (global.gameState.courses['114051'] || global.gameState.courses['01140051']) {
+            const isAdirSync = isAdirAuthenticated();
+            // Strict mutual exclusivity: Purge alternative physics variants when standard physics exists (unless user selected alternative)
+            const chosenP1 = global.gameState.userSettings && global.gameState.userSettings.physicsVariants && global.gameState.userSettings.physicsVariants.physics1;
+            const chosenP2 = global.gameState.userSettings && global.gameState.userSettings.physicsVariants && global.gameState.userSettings.physicsVariants.physics2;
+            if ((global.gameState.courses['114051'] || global.gameState.courses['01140051']) && chosenP1 !== '01140071' && chosenP1 !== '114071') {
                 ['114071', '01140071', '114077', '01140077', '114055', '01140055'].forEach(code => {
                     if (global.gameState.courses[code]) {
                         delete global.gameState.courses[code];
@@ -1059,7 +1059,7 @@
                     }
                 });
             }
-            if (global.gameState.courses['114052'] || global.gameState.courses['01140052']) {
+            if ((global.gameState.courses['114052'] || global.gameState.courses['01140052']) && chosenP2 !== '01140075' && chosenP2 !== '114075') {
                 ['114075', '01140075', '114078', '01140078', '114076', '01140076'].forEach(code => {
                     if (global.gameState.courses[code]) {
                         delete global.gameState.courses[code];
@@ -1068,17 +1068,19 @@
                 });
             }
 
-            // Lock Chemistry Lab (125013) strictly to Semester 2
-            if (global.gameState.courses['125013'] && (global.gameState.courses['125013'].status === 'mastered' || global.gameState.courses['125013'].grade)) {
-                if (global.gameState.courses['125013'].semester !== 2) {
-                    global.gameState.courses['125013'].semester = 2;
-                    changed = true;
+            // Lock Chemistry Lab (125013) to Semester 2 for Adir
+            if (isAdirSync) {
+                if (global.gameState.courses['125013'] && (global.gameState.courses['125013'].status === 'mastered' || global.gameState.courses['125013'].grade)) {
+                    if (global.gameState.courses['125013'].semester !== 2) {
+                        global.gameState.courses['125013'].semester = 2;
+                        changed = true;
+                    }
                 }
-            }
-            if (global.gameState.courses['01250013'] && (global.gameState.courses['01250013'].status === 'mastered' || global.gameState.courses['01250013'].grade)) {
-                if (global.gameState.courses['01250013'].semester !== 2) {
-                    global.gameState.courses['01250013'].semester = 2;
-                    changed = true;
+                if (global.gameState.courses['01250013'] && (global.gameState.courses['01250013'].status === 'mastered' || global.gameState.courses['01250013'].grade)) {
+                    if (global.gameState.courses['01250013'].semester !== 2) {
+                        global.gameState.courses['01250013'].semester = 2;
+                        changed = true;
+                    }
                 }
             }
 
@@ -1088,7 +1090,7 @@
                 (sem.courses || []).forEach(c => {
                     if (!c || !c.code) return;
                     if (isPurgedCourse(c.code, c.altCode)) return;
-                    if (semNum === 4) {
+                    if (isAdirSync && semNum === 4) {
                         const cKeys = getNormalizedCodes(c.code, c.altCode);
                         if (cKeys.some(k => QA_INFILTRATOR_CODES.has(k))) return;
                         if (c.type === 'sports' || c.list === 'SPORTS') return;
@@ -1108,15 +1110,15 @@
 
                     if (foundKey) {
                         const targetCourse = global.gameState.courses[foundKey];
-                        // Lock Chemistry Lab (125013) to Semester 2
-                        if (foundKey === '125013' || foundKey === '01250013' || (targetCourse && (targetCourse.code === '125013' || targetCourse.altCode === '125013'))) {
+                        // Lock Chemistry Lab (125013) to Semester 2 for Adir
+                        if (isAdirSync && (foundKey === '125013' || foundKey === '01250013' || (targetCourse && (targetCourse.code === '125013' || targetCourse.altCode === '125013')))) {
                             if (targetCourse.status === 'mastered' || targetCourse.grade) {
                                 targetCourse.semester = 2;
                                 return;
                             }
                         }
                         if (targetCourse.status === 'mastered') {
-                            // Lock mastered courses to their completed semester (e.g. Chem Lab in semester 2)
+                            // Lock mastered courses to their completed semester
                         } else if (targetCourse.semester !== semNum) {
                             targetCourse.semester = semNum;
                             changed = true;
@@ -1144,24 +1146,26 @@
                         }
                         const strippedCode = normCode.replace(/^0+/, '');
 
-                        // Chemistry Lab lock strictly to semester 2
-                        if (normCode === '125013' || normCode === '01250013' || strippedCode === '125013') {
+                        // Chemistry Lab lock to semester 2 for Adir
+                        if (isAdirSync && (normCode === '125013' || normCode === '01250013' || strippedCode === '125013')) {
                             semNum = 2;
                         }
 
                         // Do not inject alternative physics variants if standard physics exists
                         if ((normCode === '114071' || normCode === '01140071' || normCode === '114077' || normCode === '114055') &&
-                            (global.gameState.courses['114051'] || global.gameState.courses['01140051'])) {
+                            (global.gameState.courses['114051'] || global.gameState.courses['01140051']) &&
+                            chosenP1 !== '01140071' && chosenP1 !== '114071') {
                             return;
                         }
                         if ((normCode === '114075' || normCode === '01140075' || normCode === '114078' || normCode === '114076') &&
-                            (global.gameState.courses['114052'] || global.gameState.courses['01140052'])) {
+                            (global.gameState.courses['114052'] || global.gameState.courses['01140052']) &&
+                            chosenP2 !== '01140075' && chosenP2 !== '114075') {
                             return;
                         }
 
                         if (global.gameState.courses[normCode] || global.gameState.courses[strippedCode]) {
                             const k = global.gameState.courses[normCode] ? normCode : strippedCode;
-                            if (k === '125013' || k === '01250013') {
+                            if (isAdirSync && (k === '125013' || k === '01250013')) {
                                 global.gameState.courses[k].semester = 2;
                             } else if (global.gameState.courses[k].status === 'mastered') {
                                 // Keep mastered course semester intact
@@ -1332,7 +1336,8 @@
 
         const performSave = () => {
             try {
-                if (Array.isArray(customPlan)) {
+                const isAdirSave = isAdirAuthenticated();
+                if (isAdirSave && Array.isArray(customPlan)) {
                     customPlan.forEach(sem => {
                         if (sem && sem.semester === 4 && Array.isArray(sem.courses)) {
                             sem.courses = sem.courses.filter(c => {
@@ -1347,6 +1352,7 @@
                     });
                 }
                 const dataToSave = {
+                    ownerUserId: getActiveUserId(),
                     semesters: customPlan,
                     unassigned: unassignedCourses
                 };
@@ -1421,37 +1427,72 @@
     }
 
     // --------------------------------------------------------------------------
-    // Prerequisite Engine & Visual Feedback
+    // Prerequisite, Corequisite, OR-Group & Credit-Threshold Engine
     // --------------------------------------------------------------------------
     function checkPrerequisites(course, semesterNum, courseSemMap) {
-        if (!course.prereqs || course.prereqs.length === 0) {
+        if (!course) {
             return { valid: true, missing: [], missingCodes: [] };
         }
+
+        const catMeta = (global.PLANNER_CATALOG && global.PLANNER_CATALOG.ALL_COURSES_MAP)
+            ? (global.PLANNER_CATALOG.ALL_COURSES_MAP[course.code] || (course.altCode && global.PLANNER_CATALOG.ALL_COURSES_MAP[course.altCode]))
+            : null;
+
+        const rawCoreqs = Array.isArray(course.coreqs)
+            ? course.coreqs
+            : (catMeta && Array.isArray(catMeta.coreqs) ? catMeta.coreqs : []);
+        const coreqNormSet = new Set();
+        rawCoreqs.forEach(cCode => {
+            getNormalizedCodes(cCode, cCode).forEach(k => coreqNormSet.add(k));
+        });
+
+        const rawPrereqs = Array.isArray(course.prereqs) ? course.prereqs : [];
+        const rawPrereqGroups = Array.isArray(course.prereqGroups)
+            ? course.prereqGroups
+            : (catMeta && Array.isArray(catMeta.prereqGroups) ? catMeta.prereqGroups : []);
+
+        const cNormCodes = getNormalizedCodes(course.code, course.altCode);
+        const isCapstone1 = cNormCodes.some(k => k === '00340379' || k === '034379' || k === '34379' || k === '00340384' || k === '034384' || k === '34384');
+        const minCreditsReq = course.minCreditsRequired !== undefined
+            ? Number(course.minCreditsRequired)
+            : (catMeta && catMeta.minCreditsRequired !== undefined ? Number(catMeta.minCreditsRequired) : (isCapstone1 ? 110.0 : 0));
 
         const missing = [];
         const missingCodes = [];
 
-        course.prereqs.forEach(prereqCode => {
+        const resolveSemInMap = (codeKey, altKey) => {
+            let pSem = courseSemMap[codeKey];
+            if (pSem === undefined && altKey) pSem = courseSemMap[altKey];
+            if (pSem === undefined) {
+                const normKeys = getNormalizedCodes(codeKey, altKey);
+                for (let i = 0; i < normKeys.length; i++) {
+                    if (courseSemMap[normKeys[i]] !== undefined) {
+                        pSem = courseSemMap[normKeys[i]];
+                        break;
+                    }
+                }
+            }
+            return pSem;
+        };
+
+        // 1. Strict Prerequisites (must be in a semester strictly < semesterNum, unless promoted to coreq in catalog)
+        rawPrereqs.forEach(prereqCode => {
             if (prereqCode === course.code || prereqCode === course.altCode) {
-                // Ignore self-referential prerequisite
                 return;
             }
-            const prereqCourse = global.PLANNER_CATALOG.ALL_COURSES_MAP[prereqCode];
+            if (coreqNormSet.has(prereqCode)) {
+                return; // Handled by corequisite check below
+            }
+            const prereqCourse = global.PLANNER_CATALOG && global.PLANNER_CATALOG.ALL_COURSES_MAP
+                ? global.PLANNER_CATALOG.ALL_COURSES_MAP[prereqCode]
+                : null;
             const alt = prereqCourse ? prereqCourse.altCode : null;
 
-            // Check 1: Already completed in student transcript
             if (isCourseCompleted(prereqCode, alt)) {
                 return;
             }
 
-            // Check 2: Scheduled in a semester strictly prior to semesterNum
-            let pSem = courseSemMap[prereqCode];
-            if (pSem === undefined && alt) pSem = courseSemMap[alt];
-            if (pSem === undefined) {
-                const stripped = prereqCode.replace(/^0+/, '');
-                if (stripped) pSem = courseSemMap[stripped];
-            }
-
+            const pSem = resolveSemInMap(prereqCode, alt);
             const name = prereqCourse ? prereqCourse.name : prereqCode;
             if (pSem === undefined) {
                 missing.push(`${name} (${prereqCode})`);
@@ -1463,6 +1504,98 @@
                 if (alt) missingCodes.push(alt);
             }
         });
+
+        // 2. Corequisites (קורסים צמודים - valid if completed OR scheduled in semester <= semesterNum)
+        rawCoreqs.forEach(coreqCode => {
+            if (coreqCode === course.code || coreqCode === course.altCode) {
+                return;
+            }
+            const coreqCourse = global.PLANNER_CATALOG && global.PLANNER_CATALOG.ALL_COURSES_MAP
+                ? global.PLANNER_CATALOG.ALL_COURSES_MAP[coreqCode]
+                : null;
+            const alt = coreqCourse ? coreqCourse.altCode : null;
+
+            if (isCourseCompleted(coreqCode, alt)) {
+                return;
+            }
+
+            const cSem = resolveSemInMap(coreqCode, alt);
+            const name = coreqCourse ? coreqCourse.name : coreqCode;
+            if (cSem === undefined) {
+                missing.push(`צמוד: ${name} (${coreqCode})`);
+                missingCodes.push(coreqCode);
+                if (alt) missingCodes.push(alt);
+            } else if (cSem > semesterNum) {
+                missing.push(`צמוד: ${name} (בסמסטר ${cSem})`);
+                missingCodes.push(coreqCode);
+                if (alt) missingCodes.push(alt);
+            }
+        });
+
+        // 3. Disjunctive OR-Prerequisite Groups (at least one option in each group must be satisfied)
+        rawPrereqGroups.forEach(group => {
+            if (!Array.isArray(group) || group.length === 0) return;
+            const groupSatisfied = group.some(optCode => {
+                const optCourse = global.PLANNER_CATALOG && global.PLANNER_CATALOG.ALL_COURSES_MAP
+                    ? global.PLANNER_CATALOG.ALL_COURSES_MAP[optCode]
+                    : null;
+                const alt = optCourse ? optCourse.altCode : null;
+                if (isCourseCompleted(optCode, alt)) return true;
+                const pSem = resolveSemInMap(optCode, alt);
+                return pSem !== undefined && pSem < semesterNum;
+            });
+            if (!groupSatisfied) {
+                const groupLabels = group.map(optCode => {
+                    const optCourse = global.PLANNER_CATALOG && global.PLANNER_CATALOG.ALL_COURSES_MAP
+                        ? global.PLANNER_CATALOG.ALL_COURSES_MAP[optCode]
+                        : null;
+                    return optCourse ? `${optCourse.name} (${optCode})` : optCode;
+                });
+                missing.push(`אחד מבין: ${groupLabels.join(' או ')}`);
+                group.forEach(optCode => missingCodes.push(optCode));
+            }
+        });
+
+        // 4. Cumulative Credit Threshold Gate (e.g., 110.0 credits required for Capstone Project 1)
+        if (minCreditsReq > 0) {
+            const activePlan = getActivePlan();
+            let totalPlannedCredits = 0;
+            let priorAccumulatedCredits = 0;
+            const countedRoots = new Set();
+
+            (activePlan || []).forEach(sem => {
+                const sNum = Number(sem.semester) || 0;
+                (sem.courses || []).forEach(c => {
+                    if (!c) return;
+                    const cr = Number(c.credits) || 0;
+                    const rootKey = String(c.altCode || c.code || '').replace(/^0+/, '');
+                    if (rootKey) countedRoots.add(rootKey);
+                    totalPlannedCredits += cr;
+                    if (sNum < semesterNum || isCourseCompleted(c.code, c.altCode)) {
+                        priorAccumulatedCredits += cr;
+                    }
+                });
+            });
+
+            if (global.gameState && global.gameState.courses) {
+                Object.values(global.gameState.courses).forEach(sc => {
+                    if (!sc || !isCourseCompleted(sc.code, sc.altCode)) return;
+                    const rootKey = String(sc.altCode || sc.code || '').replace(/^0+/, '');
+                    if (rootKey && !countedRoots.has(rootKey)) {
+                        countedRoots.add(rootKey);
+                        const cr = Number(sc.credits) || 0;
+                        totalPlannedCredits += cr;
+                        priorAccumulatedCredits += cr;
+                    }
+                });
+            }
+
+            // Enforce the 110.0-credit gate whenever the plan includes elective fill (>= minCreditsReq total)
+            // or when Capstone is dragged to an early semester (semesterNum < 7)
+            if ((totalPlannedCredits >= minCreditsReq || semesterNum < 7) && priorAccumulatedCredits < minCreditsReq) {
+                missing.push(`צבירת ${minCreditsReq.toFixed(1)} נק״ז קודמות (נצבר: ${priorAccumulatedCredits.toFixed(1)} נק״ז)`);
+            }
+        }
 
         return {
             valid: missing.length === 0,
@@ -1662,15 +1795,43 @@
         let countSport = 0;
         let hasScienceElective = false;
         let hasCapstone = false;
+        const seenSpecialRoots = new Set();
+        const clusterCounts = {};
+
+        const isEnglishLangCourseCode = (codeVal) => {
+            const clean = String(codeVal || '').replace(/^0+/, '');
+            return clean === '324032' || clean === '324033';
+        };
+
+        const isMalagCourseObj = (c) => {
+            if (!c) return false;
+            const codeStr = String(c.code || '').replace(/^0+/, '');
+            const nameStr = String(c.name || '');
+            if (isEnglishLangCourseCode(codeStr) || isEnglishLangCourseCode(c.altCode)) return false;
+            if (c.type === 'final_project') return false;
+            return (c.list === 'MALAG' && c.type !== 'free') ||
+                   c.type === 'malag' ||
+                   c.type === 'humanities' ||
+                   codeStr.startsWith('324') ||
+                   nameStr.includes('מל"ג') ||
+                   nameStr.includes('מלג');
+        };
 
         const checkSpecialRequirements = (c) => {
             if (!c) return;
             const codeStr = String(c.code || '').replace(/^0+/, '');
+            const altStr = String(c.altCode || '').replace(/^0+/, '');
+            const canonicalRoot = altStr || (codeStr.length === 7 && codeStr.slice(2, 3) === '0' ? codeStr.slice(0, 2) + codeStr.slice(3) : codeStr);
+            if (canonicalRoot) {
+                if (seenSpecialRoots.has(canonicalRoot)) return;
+                seenSpecialRoots.add(canonicalRoot);
+            }
+
             const nameStr = String(c.name || '');
             const creds = Number(c.credits) || 0;
 
-            // Malag / Humanities (dept 324, list E/MALAG, type humanities, or name contains מל"ג)
-            if (c.list === 'E' || c.list === 'MALAG' || c.type === 'humanities' || codeStr.startsWith('324') || nameStr.includes('מל"ג') || nameStr.includes('מלג')) {
+            // Malag / Humanities (dept 324 excluding English 324032/324033, list MALAG, type humanities, or name contains מל"ג)
+            if (isMalagCourseObj(c)) {
                 countMalag++;
                 creditsMalag += creds;
             }
@@ -1682,12 +1843,12 @@
 
             // Science elective (125001 general chemistry, 114073 physics 3, 134058 biology, 124120, 124503)
             const scienceCodes = ['125001', '114073', '134058', '124120', '124503'];
-            if (scienceCodes.includes(codeStr) || (c.altCode && scienceCodes.includes(String(c.altCode).replace(/^0+/, '')))) {
+            if (scienceCodes.includes(codeStr) || (altStr && scienceCodes.includes(altStr))) {
                 hasScienceElective = true;
             }
 
-            // Capstone / Final Project (034045, 035045, Formula Capstone 00340384/00340385, or title contains פרויקט גמר)
-            if (codeStr === '34045' || codeStr === '35045' || codeStr === '340384' || codeStr === '340385' || nameStr.includes('פרויקט גמר') || nameStr.includes('פורמולה - פרויקט') || c.hasCapstone === true) {
+            // Capstone / Final Project (034045, 035045, 00340379/034379, Formula Capstone 00340384/00340385, or title contains פרויקט גמר)
+            if (codeStr === '34045' || codeStr === '35045' || codeStr === '34379' || codeStr === '340379' || codeStr === '34384' || codeStr === '340384' || codeStr === '34385' || codeStr === '340385' || nameStr.includes('פרויקט גמר') || nameStr.includes('פורמולה - פרויקט') || c.hasCapstone === true || c.type === 'final_project') {
                 hasCapstone = true;
             }
         };
@@ -1698,6 +1859,14 @@
                 checkSpecialRequirements(c);
                 const creds = Number(c.credits) || 0;
                 totalDegreeCredits += creds;
+
+                const catItem = (global.PLANNER_CATALOG && global.PLANNER_CATALOG.ALL_COURSES_MAP)
+                    ? (global.PLANNER_CATALOG.ALL_COURSES_MAP[c.code] || (c.altCode && global.PLANNER_CATALOG.ALL_COURSES_MAP[c.altCode]))
+                    : null;
+                const clusterName = c.cluster || (catItem && catItem.cluster);
+                if (clusterName && (c.list === 'A' || c.list === 'B')) {
+                    clusterCounts[clusterName] = (clusterCounts[clusterName] || 0) + 1;
+                }
 
                 if (c.list === 'A') {
                     countA++;
@@ -1715,7 +1884,9 @@
                     creditsBCD += creds;
                     totalElectiveCredits += creds;
                 } else if (c.list === 'E') {
-                    totalElectiveCredits += creds;
+                    if (!isMalagCourseObj(c) && !isEnglishLangCourseCode(c.code) && !isEnglishLangCourseCode(c.altCode)) {
+                        totalElectiveCredits += creds;
+                    }
                 }
             });
         });
@@ -1817,6 +1988,7 @@
             ruleSport_met,
             ruleScience_met,
             ruleCapstone_met,
+            clusterCounts,
             clearanceRules,
             clearanceMetCount,
             clearancePct,
@@ -2561,11 +2733,13 @@
                 let courseToAdd = { ...c };
                 if (p1FamilyCodes.has(c.code) || p1FamilyCodes.has(c.altCode)) {
                     if (p1Pref && p1Pref.includes('114071')) {
-                        courseToAdd = { code: "01140071", altCode: "114071", name: "פיזיקה 1מ'", credits: 4.0 };
+                        courseToAdd = { code: "01140071", altCode: "114071", name: "פיזיקה 1מ'", credits: 3.5 };
                     } else if (p1Pref && p1Pref.includes('114077')) {
                         courseToAdd = { code: "01140077", altCode: "114077", name: "פיזיקה 1פ'", credits: 4.0 };
+                    } else if (p1Pref && p1Pref.includes('114055')) {
+                        courseToAdd = { code: "01140055", altCode: "114055", name: "פיזיקה 1ת'", credits: 3.5 };
                     } else {
-                        courseToAdd = { code: "01140051", altCode: "114051", name: "פיזיקה 1", credits: 3.5 };
+                        courseToAdd = { code: "01140051", altCode: "114051", name: "פיזיקה 1", credits: 2.5 };
                     }
                 } else if (p2FamilyCodes.has(c.code) || p2FamilyCodes.has(c.altCode)) {
                     if (p2Pref && p2Pref.includes('114075')) {
@@ -3389,13 +3563,19 @@
                     localStorage.setItem(getScopedPlannerKey(PLANNER_TRACK_KEY), selectedTrack);
                 } catch (err) {}
 
-                // Automatically update and align degree plan to new track syllabus
-                const targetSyllabus = getSuggestedCatalogForTrack(selectedTrack);
-                if (targetSyllabus) {
-                    customPlan = JSON.parse(JSON.stringify(targetSyllabus));
-                    unassignedCourses = [];
+                // Non-destructively migrate custom degree plan to new track syllabus
+                if (customPlan && Array.isArray(customPlan) && customPlan.length > 0) {
+                    migratePlanToTrack(selectedTrack);
                     syncCompletedCoursesFromGameState();
                     saveCustomPlan(true);
+                } else {
+                    const targetSyllabus = getSuggestedCatalogForTrack(selectedTrack);
+                    if (targetSyllabus) {
+                        customPlan = JSON.parse(JSON.stringify(targetSyllabus));
+                        unassignedCourses = [];
+                        syncCompletedCoursesFromGameState();
+                        saveCustomPlan(true);
+                    }
                 }
 
                 renderDegreePlanner();
@@ -4759,7 +4939,7 @@
     }
 
     function migratePlanToTrack(newTrack) {
-        const newSyllabus = getSuggestedSyllabusForTrack(newTrack);
+        const newSyllabus = getSuggestedCatalogForTrack(newTrack);
         if (!newSyllabus || !customPlan) return;
 
         const placedKeys = new Set();
@@ -5091,12 +5271,12 @@
                 }
             }
             searchCodes.forEach(oldCode => {
-                if (oldCode !== variantMeta.code && oldCode !== variantMeta.altCode) {
+                if (oldCode !== variantMeta.altCode) {
                     delete global.gameState.courses[oldCode];
                 }
             });
+            delete global.gameState.courses[variantMeta.code];
             global.gameState.courses[variantMeta.altCode] = foundCourse || global.gameState.courses[variantMeta.altCode];
-            global.gameState.courses[variantMeta.code] = foundCourse || global.gameState.courses[variantMeta.code];
         }
 
         saveCustomPlan(true);

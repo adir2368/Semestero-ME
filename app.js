@@ -10090,9 +10090,7 @@ function markInactiveViewsDirty(activeView) {
 // Save state to local storage safely
 function saveState(skipNotify = false) {
     try {
-        if (!gameState.lastModified) {
-            gameState.lastModified = Date.now();
-        }
+        gameState.lastModified = Date.now();
 
         // Keep strictly user-scoped phone in sync (never write to global unscoped key)
         localStorage.removeItem('ast_persistent_user_phone');
@@ -10265,9 +10263,62 @@ function toIsoDateOnly(dateVal) {
     return str.split('T')[0].split(' ')[0].trim();
 }
 
+// Canonical Course Deduplicator: ensures 6-digit + 8-digit alias keys never double-count credits, GPA, or tasks
+function getDeduplicatedCoursesList(coursesMap = (window.gameState && window.gameState.courses)) {
+    if (!coursesMap || typeof coursesMap !== 'object') return [];
+    const seenObjects = new Set();
+    const seenRoots = new Set();
+    const result = [];
+
+    Object.entries(coursesMap).forEach(([key, course]) => {
+        if (!course || typeof course !== 'object') return;
+        if (seenObjects.has(course)) return;
+        let rawCode = String(course.altCode || course.code || key).trim();
+        if (/^\d{8}$/.test(rawCode) && rawCode.startsWith('0') && !rawCode.startsWith('0394')) {
+            rawCode = rawCode.slice(1, 4) + rawCode.slice(5);
+        }
+        const root = rawCode.replace(/^0+/, '');
+        if (root && seenRoots.has(root)) return;
+        seenObjects.add(course);
+        if (root) seenRoots.add(root);
+        result.push(course);
+    });
+    return result;
+}
+window.getDeduplicatedCoursesList = getDeduplicatedCoursesList;
+
 function recalculateCourseStates() {
     window.recalculateCourseStates = recalculateCourseStates;
     let changed = false;
+
+    // Clean up any duplicate 8-digit alias keys pointing to the same course in gameState.courses
+    if (gameState && gameState.courses) {
+        const seenRootsCleanup = new Map();
+        Object.keys(gameState.courses).forEach(k => {
+            const c = gameState.courses[k];
+            if (!c) return;
+            let norm = String(c.code || k).trim();
+            if (/^\d{8}$/.test(norm) && norm.startsWith('0') && !norm.startsWith('0394')) {
+                norm = norm.slice(1, 4) + norm.slice(5);
+            }
+            const root = norm.replace(/^0+/, '');
+            if (!root) return;
+            if (seenRootsCleanup.has(root)) {
+                const existingKey = seenRootsCleanup.get(root);
+                // Prefer 6-digit canonical key in gameState.courses
+                if (k.length === 8 && existingKey.length <= 6) {
+                    delete gameState.courses[k];
+                } else if (existingKey.length === 8 && k.length <= 6) {
+                    delete gameState.courses[existingKey];
+                    seenRootsCleanup.set(root, k);
+                } else {
+                    delete gameState.courses[k];
+                }
+            } else {
+                seenRootsCleanup.set(root, k);
+            }
+        });
+    }
 
     // Automatic Technion Semester Transition: Winter semester 2026/2027 starts on 28.10.2026
     const winterStarted = isWinterSemesterStarted();
@@ -10292,12 +10343,13 @@ function recalculateCourseStates() {
 
     autoUpdateTaskStatusesByDueDate();
 
-    // Sanitize any stale future exam dates on mastered/completed courses
+    // Sanitize any stale future exam dates on mastered/completed courses (preserve Moed B improvement dates)
     if (gameState && gameState.courses) {
         Object.values(gameState.courses).forEach(c => {
-            if (c.status === 'mastered' && Array.isArray(c.tasks)) {
+            if (c.status === 'mastered' && !c.improveInMoedB && Array.isArray(c.tasks)) {
                 c.tasks.forEach(t => {
-                    if (t.type === 'exam' && t.dueDate && t.dueDate > '2026-09-01') {
+                    const isMoedB = Boolean(t.isMoedB || t.type === 'moed_b' || (t.title && /מועד\s*ב/i.test(t.title)));
+                    if (t.type === 'exam' && !isMoedB && t.dueDate && t.dueDate > '2026-09-01') {
                         t.dueDate = '';
                     }
                 });
@@ -10305,13 +10357,13 @@ function recalculateCourseStates() {
         });
     }
     
-    // Clear and recalculate stats
+    // Clear and recalculate stats using deduplicated courses list
     let totalCredits = 0;
     let completedCount = 0;
     let slayedCount = 0;
+    const uniqueCourses = getDeduplicatedCoursesList(gameState.courses);
     
-    Object.keys(gameState.courses).forEach(code => {
-        const course = gameState.courses[code];
+    uniqueCourses.forEach(course => {
         const isBinary = (course.isBinaryPass === true || course.grade === 'עובר' || course.grade === 'PASS');
         const hasPassingNumeric = (course.grade !== undefined && course.grade !== null && course.grade !== '' && !isNaN(Number(course.grade)) && Number(course.grade) >= 55);
         const hasPassingGrade = isBinary || hasPassingNumeric;
@@ -10349,8 +10401,7 @@ function recalculateCourseStates() {
     
     // Calculate total open tasks count (STRICTLY across actively registered/enrolled courses)
     let openTasksCount = 0;
-    Object.keys(gameState.courses).forEach(code => {
-        const course = gameState.courses[code];
+    uniqueCourses.forEach(course => {
         const isBinary = (course.isBinaryPass === true || course.grade === 'עובר' || course.grade === 'PASS');
         const hasPassingGrade = isBinary || (course.grade !== undefined && course.grade !== null && course.grade !== '' && !isNaN(Number(course.grade)) && Number(course.grade) >= 55);
         if (course.status === 'active' && !hasPassingGrade && course.tasks && Array.isArray(course.tasks)) {
@@ -10375,8 +10426,7 @@ function recalculateCourseStates() {
     // Calculate general GPA (weighted by credits - ONLY passing numeric grades >= 55, EXCLUDING binary pass)
     let totalWeightedGrades = 0;
     let gradedCreditsSum = 0;
-    Object.keys(gameState.courses).forEach(code => {
-        const course = gameState.courses[code];
+    uniqueCourses.forEach(course => {
         const isBinary = (course.isBinaryPass === true || course.grade === 'עובר' || course.grade === 'PASS');
         if (course.status === 'mastered' && !isBinary && course.grade !== undefined && course.grade !== null && course.grade !== '' && !isNaN(Number(course.grade)) && Number(course.grade) >= 55) {
             totalWeightedGrades += (Number(course.grade) * (course.credits || 0));
@@ -10385,43 +10435,48 @@ function recalculateCourseStates() {
     });
     gameState.gpa = gradedCreditsSum > 0 ? (totalWeightedGrades / gradedCreditsSum) : 0.00;
 
-    // Physics Tracks Mutual Exclusion & Track Selection
+    // Physics Tracks Mutual Exclusion & Track Selection (respect user-selected variant)
+    const chosenP1 = gameState.userSettings && gameState.userSettings.physicsVariants && gameState.userSettings.physicsVariants.physics1;
+    const chosenP2 = gameState.userSettings && gameState.userSettings.physicsVariants && gameState.userSettings.physicsVariants.physics2;
     const p1 = gameState.courses['114051'];
     const p1m = gameState.courses['114071'];
     const p2 = gameState.courses['114052'];
     const p2mm = gameState.courses['114075'];
 
     // Physics 1 track (114051 vs 114071): Enforce strict mutual exclusivity
-    if (p1 && (p1.status === 'mastered' || p1.status === 'active' || p1.status === 'available' || (p1.grade && p1.grade > 0))) {
+    if (p1m && (p1m.status === 'mastered' || chosenP1 === '01140071' || chosenP1 === '114071')) {
+        if (p1 && p1.status !== 'mastered') {
+            delete gameState.courses['114051'];
+            delete gameState.courses['01140051'];
+        }
+    } else if (p1 && (p1.status === 'mastered' || p1.status === 'active' || p1.status === 'available' || (p1.grade && p1.grade > 0))) {
         if (p1m && p1m.status !== 'mastered') {
             delete gameState.courses['114071'];
             delete gameState.courses['01140071'];
             delete gameState.courses['114077'];
         }
-    } else if (p1m && p1m.status === 'mastered') {
-        if (p1 && p1.status !== 'mastered') {
-            delete gameState.courses['114051'];
-            delete gameState.courses['01140051'];
-        }
     }
 
     // Physics 2 track (114052 vs 114075): Enforce strict mutual exclusivity
-    if (p2 && (p2.status === 'mastered' || p2.status === 'active' || p2.status === 'available' || (p2.grade && p2.grade > 0))) {
+    if (p2mm && (p2mm.status === 'mastered' || chosenP2 === '01140075' || chosenP2 === '114075')) {
+        if (p2 && p2.status !== 'mastered') {
+            delete gameState.courses['114052'];
+            delete gameState.courses['01140052'];
+        }
+    } else if (p2 && (p2.status === 'mastered' || p2.status === 'active' || p2.status === 'available' || (p2.grade && p2.grade > 0))) {
         if (p2mm && p2mm.status !== 'mastered') {
             delete gameState.courses['114075'];
             delete gameState.courses['01140075'];
             delete gameState.courses['114078'];
         }
-    } else if (p2mm && p2mm.status === 'mastered') {
-        if (p2 && p2.status !== 'mastered') {
-            delete gameState.courses['114052'];
-            delete gameState.courses['01140052'];
-        }
     }
 
-    // Chemistry Lab (125013) is locked strictly to Semester 2
-    if (gameState.courses['125013']) gameState.courses['125013'].semester = 2;
-    if (gameState.courses['01250013']) gameState.courses['01250013'].semester = 2;
+    // Chemistry Lab (125013) is locked to Semester 2 for Adir or when already completed in Sem 2
+    const isAdirUser = Boolean(window.AuthSync && typeof window.AuthSync.isAdirActive === 'function' && window.AuthSync.isAdirActive());
+    if (isAdirUser) {
+        if (gameState.courses['125013']) gameState.courses['125013'].semester = 2;
+        if (gameState.courses['01250013']) gameState.courses['01250013'].semester = 2;
+    }
 
     // Helper: Check prerequisite satisfaction supporting Physics track alternatives
     const isPrereqSatisfied = (preCode) => {
@@ -12779,8 +12834,8 @@ function selectPhysicsVariant(targetCode, currentCode, silent = false) {
     if (!existingCourse) {
         existingCourse = {
             id: targetMeta.altCode,
-            code: targetMeta.code,
-            altCode: targetMeta.altCode,
+            code: targetMeta.altCode,
+            altCode: targetMeta.code,
             name: targetMeta.name,
             credits: targetMeta.credits,
             semester: isPhys1 ? 2 : 3,
@@ -12791,23 +12846,23 @@ function selectPhysicsVariant(targetCode, currentCode, silent = false) {
             tasks: []
         };
     } else {
-        existingCourse.code = targetMeta.code;
-        existingCourse.altCode = targetMeta.altCode;
+        existingCourse.id = targetMeta.altCode;
+        existingCourse.code = targetMeta.altCode;
+        existingCourse.altCode = targetMeta.code;
         existingCourse.name = targetMeta.name;
         existingCourse.credits = targetMeta.credits;
         existingCourse.variantGroupId = variantGroupId;
     }
 
-    // Remove outdated family keys from gameState.courses
-    oldKeys.forEach(k => {
-        if (k !== targetMeta.altCode && k !== targetMeta.code) {
+    // Remove all outdated family keys (including 8-digit alias) from gameState.courses to prevent dual-key duplication
+    allFamilyCodes.concat(oldKeys).forEach(k => {
+        if (k !== targetMeta.altCode) {
             delete gameState.courses[k];
         }
     });
 
-    // Save under both 6-digit and 8-digit keys
+    // Save strictly under canonical 6-digit key
     gameState.courses[targetMeta.altCode] = existingCourse;
-    gameState.courses[targetMeta.code] = existingCourse;
 
     // 4. Update Degree Planner (customPlan, gameState.degreePlan, unassignedCourses)
     if (window.DegreePlanner && typeof window.DegreePlanner.getCustomPlan === 'function') {
@@ -17348,9 +17403,9 @@ function renderNotionTasksTable() {
     
     let allTasks = [];
     
-    // Gather tasks and pre-compute timestamp for high-performance sorting
+    // Gather tasks and pre-compute timestamp for high-performance sorting (deduplicated across alias keys)
     const curActiveSem = (gameState && gameState.currentActiveSemester) ? gameState.currentActiveSemester : 3;
-    Object.values(gameState.courses).forEach(course => {
+    getDeduplicatedCoursesList(gameState.courses).forEach(course => {
         // Course Multi-select Filter
         if (activeCourseFilters && activeCourseFilters.size > 0) {
             if (!activeCourseFilters.has(course.code)) return;
@@ -20828,24 +20883,25 @@ function renderFlowchartTree() {
         if (seenRootsInTree.has(root)) return;
         seenRootsInTree.add(root);
 
-        // Strict Mutual Exclusion Check:
-        // When standard Physics 1 (114051 / 01140051) is present, NEVER render alternative variants (114071, 114077, 114055)
-        const hasPhys1Standard = Boolean(gameState.courses['114051'] || gameState.courses['01140051']);
+        // Strict Mutual Exclusion Check: respect user-selected variant
+        const chosenP1 = gameState.userSettings && gameState.userSettings.physicsVariants && gameState.userSettings.physicsVariants.physics1;
+        const hasPhys1Standard = Boolean((gameState.courses['114051'] || gameState.courses['01140051']) && chosenP1 !== '01140071' && chosenP1 !== '114071');
         if (hasPhys1Standard) {
             const p1Variants = ['114071', '01140071', '114077', '01140077', '114055', '01140055'];
             if (p1Variants.includes(course.code) || (course.altCode && p1Variants.includes(course.altCode))) return;
         }
 
-        // When standard Physics 2 (114052 / 01140052) is present, NEVER render alternative variants (114075, 114078, 114076)
-        const hasPhys2Standard = Boolean(gameState.courses['114052'] || gameState.courses['01140052']);
+        const chosenP2 = gameState.userSettings && gameState.userSettings.physicsVariants && gameState.userSettings.physicsVariants.physics2;
+        const hasPhys2Standard = Boolean((gameState.courses['114052'] || gameState.courses['01140052']) && chosenP2 !== '01140075' && chosenP2 !== '114075');
         if (hasPhys2Standard) {
             const p2Variants = ['114075', '01140075', '114078', '01140078', '114076', '01140076'];
             if (p2Variants.includes(course.code) || (course.altCode && p2Variants.includes(course.altCode))) return;
         }
 
-        // Strict guard: Chemistry Lab (125013) is locked to Semester 2 when completed or for Adir
+        // Strict guard: Chemistry Lab (125013) is locked to Semester 2 for Adir
+        const isAdirFlowchart = Boolean(window.AuthSync && typeof window.AuthSync.isAdirActive === 'function' && window.AuthSync.isAdirActive());
         if (course.code === '125013' || course.altCode === '125013' || course.code === '01250013' || course.altCode === '01250013') {
-            if (course.status === 'mastered' || course.grade || (window.AuthSync && typeof window.AuthSync.isAdirActive === 'function' && window.AuthSync.isAdirActive())) {
+            if (isAdirFlowchart) {
                 course.semester = 2;
             }
         }
@@ -20859,8 +20915,8 @@ function renderFlowchartTree() {
             sem = Math.max(1, Math.min(8, sem));
         }
         if (!semesterCourses[sem]) semesterCourses[sem] = [];
-        // Strict guard: sports courses or Malag infiltrators must NEVER enter semester 4 in flowchart!
-        if (sem === 4) {
+        // Strict guard: QA infiltrators or Adir-specific Semester 4 Sports/MALAG filter
+        if (sem === 4 && isAdirFlowchart) {
             const cKeys = [course.code, course.altCode, String(course.code).replace(/^0+/, '')];
             if (cKeys.some(k => PURGED_FLOWCHART_CODES.has(k))) return;
             if (course.type === 'sports' || course.list === 'SPORTS') return;
@@ -21051,60 +21107,70 @@ function renderFlowchartTree() {
         return null;
     }
 
-    // 4. Draw Clean Connecting Bezier Curves (WITHOUT arrow heads)
+    // 4. Draw Clean Connecting Bezier Curves (WITHOUT arrow heads; solid for prereqs, dashed for coreqs)
     let connectionsHtml = "";
-    Object.values(gameState.courses).forEach(course => {
+    const deduplicatedFlowchartCourses = getDeduplicatedCoursesList(gameState.courses);
+    deduplicatedFlowchartCourses.forEach(course => {
         const dest = coursePositions[course.code];
         if (!dest) return;
 
+        const drawBeamForSource = (preCode, isCoreq = false) => {
+            const srcResolved = resolveCoursePosition(preCode);
+            if (!srcResolved) return;
+
+            const src = srcResolved.pos;
+            const srcCode = srcResolved.code;
+            const destCode = course.code;
+
+            const preCourse = gameState.courses[srcCode] || gameState.courses[preCode];
+            let beamClass = "locked";
+
+            if (preCourse && (preCourse.status === 'mastered' || (preCourse.grade && Number(preCourse.grade) >= 55))) {
+                beamClass = "mastered";
+            } else if (course.status !== 'locked') {
+                beamClass = "active";
+            }
+            if (isCoreq) {
+                beamClass += " coreq";
+            }
+
+            const x1 = src.x;
+            const y1 = src.y + (src.h / 2);
+            const x2 = dest.x;
+            const y2 = dest.y - (dest.h / 2);
+
+            const dy = y2 - y1;
+            let d = "";
+
+            if (Math.abs(x1 - x2) < 4) {
+                d = `M ${x1} ${y1} L ${x2 + 0.1} ${y2}`;
+            } else {
+                const cpOffset = Math.min(Math.max(Math.abs(dy) * 0.45, 30), 90);
+                d = `M ${x1} ${y1} C ${x1} ${y1 + cpOffset}, ${x2} ${y2 - cpOffset}, ${x2} ${y2}`;
+            }
+
+            const dashAttr = isCoreq ? 'stroke-dasharray="5, 4"' : '';
+            connectionsHtml += `
+                <path d="${d}" 
+                      class="fc-beam ${beamClass}" 
+                      ${dashAttr}
+                      data-from="${srcCode}" 
+                      data-to="${destCode}" />
+            `;
+        };
+
         if (course.prerequisites && course.prerequisites.length > 0) {
-            course.prerequisites.forEach(preCode => {
-                const srcResolved = resolveCoursePosition(preCode);
-                if (!srcResolved) return;
-
-                const src = srcResolved.pos;
-                const srcCode = srcResolved.code;
-                const destCode = course.code;
-
-                const preCourse = gameState.courses[srcCode] || gameState.courses[preCode];
-                let beamClass = "locked";
-
-                if (preCourse && (preCourse.status === 'mastered' || (preCourse.grade && Number(preCourse.grade) >= 55))) {
-                    beamClass = "mastered";
-                } else if (course.status !== 'locked') {
-                    beamClass = "active";
-                }
-
-                const x1 = src.x;
-                const y1 = src.y + (src.h / 2);
-                const x2 = dest.x;
-                const y2 = dest.y - (dest.h / 2);
-
-                const dy = y2 - y1;
-                let d = "";
-
-                if (Math.abs(x1 - x2) < 4) {
-                    // Small micro-offset (0.1px) guarantees non-zero bounding box width in SVG
-                    d = `M ${x1} ${y1} L ${x2 + 0.1} ${y2}`;
-                } else {
-                    const cpOffset = Math.min(Math.max(dy * 0.45, 30), 90);
-                    d = `M ${x1} ${y1} C ${x1} ${y1 + cpOffset}, ${x2} ${y2 - cpOffset}, ${x2} ${y2}`;
-                }
-
-                connectionsHtml += `
-                    <path d="${d}" 
-                          class="fc-beam ${beamClass}" 
-                          data-from="${srcCode}" 
-                          data-to="${destCode}" />
-                `;
-            });
+            course.prerequisites.forEach(preCode => drawBeamForSource(preCode, false));
+        }
+        if (course.coreqs && course.coreqs.length > 0) {
+            course.coreqs.forEach(coCode => drawBeamForSource(coCode, true));
         }
     });
     connectionsGroup.innerHTML = connectionsHtml;
 
     // 5. Render Course Cards with High Contrast & Legible Multi-line Typography
     nodesGroup.innerHTML = "";
-    Object.values(gameState.courses).forEach(course => {
+    deduplicatedFlowchartCourses.forEach(course => {
         const pos = coursePositions[course.code];
         if (!pos) return;
 
@@ -23678,11 +23744,11 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.11.11-v2.11.4",
-    version: "2.11.4",
-    build: "20261111_04",
-    date: "2026-11-11 08:35",
-    description: "v2.11.4: העברת מתג מצב למידה עצמית (הברזה נצחית) ישירות לתוך כרטיסיית מערכת השעות ופרטי הקורס (CheeseFork Schedule Section) בסמיכות מלאה להרצאות ולתרגולים (ADR-108)."
+    code: "REV-2026.11.11-v2.12.0",
+    version: "2.12.0",
+    build: "20261111_05",
+    date: "2026-11-11 23:18",
+    description: "v2.12.0: שדרוג ארכיטקטוני מקיף (ARGON 4.0 Audit, ADR-109) — מנוע קורסים צמודים (Corequisites), שער 110.0 נק״ז לפרויקט גמר, איחוד ומניעת כפילויות מפתחות 6/8 ספרות, בידוד רב-דיירים מלא, תקינות אקדמית בטכניון (66% הצלחה ו-65 ממוצע), ותיקון אזור זמן במודל."
 };
 window.APP_VERSION = APP_CURRENT_REVISION.version;
 
@@ -29026,6 +29092,23 @@ function getDynamicCourseHomeworkPolicy(course) {
     };
 }
 
+function extractHomeworkSheetIndex(rawTitle) {
+    if (!rawTitle) return null;
+    const title = String(rawTitle).toLowerCase();
+    // 1. Prefer explicit homework/sheet/quiz keyword followed by sheet number (prevents matching "מוצקים 2" or "פיזיקה 2")
+    const explicitMatch = title.match(/(?:תרגיל(?:\s*בית)?|גיליון|גליון|מטלה|שאלון|בוחן|webwork|hw|sheet|quiz|assignment)\s*#?\s*0*(\d+)\b/i);
+    if (explicitMatch) {
+        return parseInt(explicitMatch[1], 10);
+    }
+    // 2. Strip known course-level ordinal suffixes before falling back to standalone digit match
+    const strippedCourseOrdinals = title.replace(/(?:מוצקים|פיזיקה|פיסיקה|חדו"?א|אלגברה|תרמודינמיקה|זרימה|תכן(?:\s*מכני)?|מערכות\s*תיב"?מ|מתודולוגיות(?:\s*פיתוח(?:\s*הנדסי)?)?|פרויקט(?:\s*גמר(?:\s*הנדסי)?)?)\s*[123]\b/gi, '');
+    const digitMatch = strippedCourseOrdinals.match(/\b0*(\d+)\b/);
+    if (digitMatch) {
+        return parseInt(digitMatch[1], 10);
+    }
+    return null;
+}
+
 function getCourseHomeworkStatus(courseCode) {
     if (!courseCode || !window.gameState || !window.gameState.courses) return null;
     const cleanCode = (typeof cleanTechnionCourseCode === 'function') ? cleanTechnionCourseCode(courseCode) : String(courseCode).replace(/^0+/, '');
@@ -29050,9 +29133,9 @@ function getCourseHomeworkStatus(courseCode) {
         
         // Find tasks matching sheet i
         const matchingTasks = hwTasks.filter(t => {
+            const parsedIdx = extractHomeworkSheetIndex(t.title);
+            if (parsedIdx !== null) return parsedIdx === i;
             const title = String(t.title || '').toLowerCase();
-            const digitMatch = title.match(/\b0*(\d+)\b/);
-            if (digitMatch && parseInt(digitMatch[1], 10) === i) return true;
             const hebLetters = ['א', 'ב', 'ג', 'ד', 'ה', 'ו', 'ז', 'ח', 'ט', 'י', 'יא', 'יב'];
             if (hebLetters[i - 1]) {
                 const hebRegex = new RegExp(`\\b${hebLetters[i - 1]}['״׳]?\\b`, 'i');
@@ -29527,8 +29610,7 @@ function setHomeworkComponentLifecycle(courseCode, sheetIndex, compType, newStat
     let targetTask = null;
     course.tasks.forEach(t => {
         const title = String(t.title || '').toLowerCase();
-        const digitMatch = title.match(/\b0*(\d+)\b/);
-        const matchesIndex = (digitMatch && parseInt(digitMatch[1], 10) === sheetIndex);
+        const matchesIndex = (extractHomeworkSheetIndex(t.title) === sheetIndex);
         if (!matchesIndex) return;
 
         if (compType === 'written') {
@@ -29591,11 +29673,7 @@ function setHomeworkSheetLifecycle(courseCode, sheetIndex, newStatus) {
     const sheetName = (policy && policy.sheetNames && policy.sheetNames[sheetIndex]) ? policy.sheetNames[sheetIndex] : `גיליון ${sheetIndex}`;
 
     const hwTasks = course.tasks.filter(t => t.type === 'hw' || (t.title && /תרגיל|מטלה|גיליון|גליון|hw/i.test(t.title)));
-    let targetTask = hwTasks.find(t => {
-        const title = String(t.title || '').toLowerCase();
-        const digitMatch = title.match(/\b0*(\d+)\b/);
-        return (digitMatch && parseInt(digitMatch[1], 10) === sheetIndex);
-    });
+    let targetTask = hwTasks.find(t => extractHomeworkSheetIndex(t.title) === sheetIndex);
 
     if (!targetTask) {
         targetTask = {
@@ -29652,8 +29730,7 @@ function toggleHomeworkSheetComponent(courseCode, sheetIndex, compType) {
     let targetTask = null;
     course.tasks.forEach(t => {
         const title = String(t.title || '').toLowerCase();
-        const digitMatch = title.match(/\b0*(\d+)\b/);
-        const matchesIndex = (digitMatch && parseInt(digitMatch[1], 10) === sheetIndex);
+        const matchesIndex = (extractHomeworkSheetIndex(t.title) === sheetIndex);
         if (!matchesIndex) return;
 
         if (compType === 'written') {

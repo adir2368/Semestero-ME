@@ -25,9 +25,21 @@
         FONT_SCALE: 'ast_ui_font_scale_v1'
     };
 
+    function getScopedEnhancementKey(baseKey) {
+        if (baseKey === STORAGE_KEYS.FONT_SCALE) return baseKey;
+        try {
+            if (window.AuthSync && typeof window.AuthSync.isLoggedIn === 'function' && window.AuthSync.isLoggedIn() && typeof window.AuthSync.getActiveUser === 'function') {
+                const u = window.AuthSync.getActiveUser();
+                if (u && u.id) return `${baseKey}_${u.id}`;
+            }
+        } catch (e) {}
+        return `${baseKey}_guest`;
+    }
+
     function safeGetJson(key, defaultVal) {
         try {
-            const data = localStorage.getItem(key);
+            const scoped = getScopedEnhancementKey(key);
+            const data = localStorage.getItem(scoped) || localStorage.getItem(key);
             return data ? JSON.parse(data) : defaultVal;
         } catch (e) {
             return defaultVal;
@@ -36,7 +48,8 @@
 
     function safeSetJson(key, val) {
         try {
-            localStorage.setItem(key, JSON.stringify(val));
+            const scoped = getScopedEnhancementKey(key);
+            localStorage.setItem(scoped, JSON.stringify(val));
         } catch (e) {}
     }
 
@@ -1168,8 +1181,8 @@
         },
         {
             category: 'פרויקט גמר',
-            title: 'תנאי סף לרישום לפרויקט תכן גמר במכונות',
-            content: 'לרישום לפרויקט גמר (034045 או פרויקט פורמולה) נדרשת צבירה של לפחות 100 נק״ז אקדמיות וסיום קורסי החובה בתכן בסיסי: תכן מכונות 1 (034015), זרימה (034013), ומעבר חום (034014).'
+            title: 'תנאי סף לרישום לפרויקט תכן גמר במכונות (00340379 / 00340384)',
+            content: 'לרישום לפרויקט גמר הנדסי 1 (00340379) או פרויקט פורמולה SAE 1 (00340384) נדרשת צבירה של לפחות 110.0 נק״ז אקדמיות בטרם סמסטר הפרויקט, וכן השלמת קורסי הקדם: תכן מכונות 1 (00340054) ומעבדה בתכן המוצר (00340371).'
         },
         {
             category: 'בחינות',
