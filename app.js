@@ -8699,15 +8699,15 @@ const CHEESEFORK_SEMESTER_SCHEDULE = {
                     cardClass: "timetable-card-thermo"
                 },
                 {
-                    courseId: "034053",
-                    courseName: "מכניקת מוצקים 2מ'",
+                    courseId: "034056",
+                    courseName: "מבוא לחישוב מדעי והנדסי",
                     type: "תרגול 11",
-                    lecturer: "מר איתם טננבאום",
-                    room: "אולמן 103",
+                    lecturer: "מר גיא ארבר",
+                    room: "אולמן 501",
                     startTime: "14:30",
                     endTime: "16:30",
                     duration: "שעתיים",
-                    cardClass: "timetable-card-solids"
+                    cardClass: "timetable-card-computing"
                 }
             ]
         },
@@ -8731,9 +8731,9 @@ const CHEESEFORK_SEMESTER_SCHEDULE = {
                 {
                     courseId: "114052",
                     courseName: "פיסיקה 2",
-                    type: "תרגול 21",
-                    lecturer: "מר אייל קלמן",
-                    room: "אולמן 606",
+                    type: "תרגול 13",
+                    lecturer: "גב' נעם הנץ גמליאל",
+                    room: "שרמן - חינוך למדע וטכנולוגיה 107",
                     startTime: "09:30",
                     endTime: "10:30",
                     duration: "שעה",
@@ -8782,15 +8782,15 @@ const CHEESEFORK_SEMESTER_SCHEDULE = {
                     cardClass: "timetable-card-pde"
                 },
                 {
-                    courseId: "034056",
-                    courseName: "מבוא לחישוב מדעי והנדסי",
-                    type: "תרגול 15",
-                    lecturer: "מר יותם אהרון פרי",
-                    room: "אולמן 705",
+                    courseId: "034053",
+                    courseName: "מכניקת מוצקים 2מ'",
+                    type: "תרגול 21",
+                    lecturer: "מר יובל בר-רצון",
+                    room: "אולמן 205",
                     startTime: "12:30",
                     endTime: "14:30",
                     duration: "שעתיים",
-                    cardClass: "timetable-card-computing"
+                    cardClass: "timetable-card-solids"
                 }
             ]
         }
@@ -8856,10 +8856,29 @@ const AUTHENTIC_TIMETABLE_METADATA = {
     '01040228_4_10:30': { room: 'הנדסה כימית 1', lecturer: 'ד\"ר רועי בר און' },
     '0104228_4_10:30':  { room: 'הנדסה כימית 1', lecturer: 'ד\"ר רועי בר און' },
     '1040228_4_10:30':  { room: 'הנדסה כימית 1', lecturer: 'ד\"ר רועי בר און' },
-    '034056_4_12:30':   { room: 'אולמן 705', lecturer: 'מר יותם אהרון פרי' },
-    '34056_4_12:30':    { room: 'אולמן 705', lecturer: 'מר יותם אהרון פרי' },
-    '00340056_4_12:30': { room: 'אולמן 705', lecturer: 'מר יותם אהרון פרי' },
-    '340056_4_12:30':   { room: 'אולמן 705', lecturer: 'מר יותם אהרון פרי' }
+    '034056_4_12:30':   { room: 'אולמן 705', lecturer: 'מר יותם אהרון פרי', group: '15' },
+    '34056_4_12:30':    { room: 'אולמן 705', lecturer: 'מר יותם אהרון פרי', group: '15' },
+    '00340056_4_12:30': { room: 'אולמן 705', lecturer: 'מר יותם אהרון פרי', group: '15' },
+    '340056_4_12:30':   { room: 'אולמן 705', lecturer: 'מר יותם אהרון פרי', group: '15' },
+
+    // Additional Authentic Groups for Seamless 1:1 CheeseFork Sync
+    '034053_4_12:30':   { room: 'אולמן 205', lecturer: 'מר יובל בר-רצון', group: '21' },
+    '34053_4_12:30':    { room: 'אולמן 205', lecturer: 'מר יובל בר-רצון', group: '21' },
+    '00340053_4_12:30': { room: 'אולמן 205', lecturer: 'מר יובל בר-רצון', group: '21' },
+    '340053_4_12:30':   { room: 'אולמן 205', lecturer: 'מר יובל בר-רצון', group: '21' },
+
+    '034056_2_14:30':   { room: 'אולמן 501', lecturer: 'מר גיא ארבר', group: '11' },
+    '34056_2_14:30':    { room: 'אולמן 501', lecturer: 'מר גיא ארבר', group: '11' },
+    '00340056_2_14:30': { room: 'אולמן 501', lecturer: 'מר גיא ארבר', group: '11' },
+    '340056_2_14:30':   { room: 'אולמן 501', lecturer: 'מר גיא ארבר', group: '11' },
+
+    '114052_3_09:30_13':   { room: 'שרמן - חינוך למדע וטכנולוגיה 107', lecturer: 'גב\' נעם הנץ גמליאל', group: '13' },
+    '01140052_3_09:30_13': { room: 'שרמן - חינוך למדע וטכנולוגיה 107', lecturer: 'גב\' נעם הנץ גמליאל', group: '13' },
+    '1140052_3_09:30_13':  { room: 'שרמן - חינוך למדע וטכנולוגיה 107', lecturer: 'גב\' נעם הנץ גמליאל', group: '13' },
+
+    '114052_3_09:30_21':   { room: 'אולמן 606', lecturer: 'מר אייל קלמן', group: '21' },
+    '01140052_3_09:30_21': { room: 'אולמן 606', lecturer: 'מר אייל קלמן', group: '21' },
+    '1140052_3_09:30_21':  { room: 'אולמן 606', lecturer: 'מר אייל קלמן', group: '21' }
 };
 
 function formatClassDuration(startTime, endTime) {
@@ -8906,18 +8925,51 @@ function getClassDurationMetadata(startTime, endTime) {
 }
 window.getClassDurationMetadata = getClassDurationMetadata;
 
+function sanitizeDuplicateTimetableGroups(timetable) {
+    if (!timetable || !Array.isArray(timetable.days)) return false;
+    let changed = false;
+
+    // Check if Solids 2 (034053) has multiple tutorials
+    const solidsTutorials = [];
+    timetable.days.forEach(d => {
+        if (!Array.isArray(d.classes)) return;
+        d.classes.forEach(c => {
+            const cId = (c.courseId || '').replace(/^0+/, '');
+            if ((cId === '34053' || cId === '034053') && c.type && c.type.includes('תרגול')) {
+                solidsTutorials.push({ day: d, classObj: c });
+            }
+        });
+    });
+
+    // If both Tuesday tutorial 11 and Thursday tutorial 21 are present, prune the obsolete Tuesday tutorial 11
+    if (solidsTutorials.length > 1) {
+        const hasThu21 = solidsTutorials.some(st => st.day.dayIndex === 4 && (st.classObj.type.includes('21') || st.classObj.startTime === '12:30'));
+        if (hasThu21) {
+            timetable.days.forEach(d => {
+                if (d.dayIndex === 2) {
+                    const before = d.classes.length;
+                    d.classes = d.classes.filter(c => {
+                        const cId = (c.courseId || '').replace(/^0+/, '');
+                        return !(cId === '34053' && c.type && c.type.includes('תרגול') && c.startTime === '14:30');
+                    });
+                    if (d.classes.length !== before) changed = true;
+                }
+            });
+        }
+    }
+    return changed;
+}
+window.sanitizeDuplicateTimetableGroups = sanitizeDuplicateTimetableGroups;
+
 function enrichTimetableWithAuthenticRooms(timetable) {
     if (!timetable || !Array.isArray(timetable.days)) return 0;
     let enrichedCount = 0;
+
+    // Auto-prune any legacy duplicate tutorial groups that were stacked on previous versions
+    sanitizeDuplicateTimetableGroups(timetable);
+
     timetable.days.forEach(day => {
         if (!Array.isArray(day.classes)) return;
-        // Strict guard: Monday must NOT have tutorial 20 when Tuesday tutorial 11 is authentic
-        if (day.dayIndex === 1) {
-            day.classes = day.classes.filter(c => {
-                const cId = (c.courseId || '').replace(/^0+/, '');
-                return !(cId === '34053' && c.type && c.type.includes('תרגול'));
-            });
-        }
         day.classes.forEach(c => {
             const rawId = (c.courseId || '').trim();
             let cleanCode = rawId;
@@ -8952,9 +9004,8 @@ function enrichTimetableWithAuthenticRooms(timetable) {
             }
             // Auto-heal Monday Solid Mechanics lecture time to 10:30 - 14:30 (4 hours)
             if (cleanCode === '34053' || cleanCode === '034053') {
-                if (day.dayIndex === 1 && c.type && c.type.includes('הרצאה')) {
-                    if (c.startTime !== '10:30' || c.endTime !== '14:30') {
-                        c.startTime = '10:30';
+                if (day.dayIndex === 1 && c.type && c.type.includes('הרצאה') && c.startTime === '10:30') {
+                    if (c.endTime !== '14:30') {
                         c.endTime = '14:30';
                         enrichedCount++;
                     }
@@ -8968,12 +9019,30 @@ function enrichTimetableWithAuthenticRooms(timetable) {
                 enrichedCount++;
             }
 
-            // Match strictly by ID + Day + StartTime across all normalized keys
-            const meta = AUTHENTIC_TIMETABLE_METADATA[`${rawId}_${day.dayIndex}_${c.startTime}`] ||
-                         AUTHENTIC_TIMETABLE_METADATA[`${cleanCode}_${day.dayIndex}_${c.startTime}`] ||
-                         AUTHENTIC_TIMETABLE_METADATA[`${padded6}_${day.dayIndex}_${c.startTime}`] ||
-                         AUTHENTIC_TIMETABLE_METADATA[`${padded8}_${day.dayIndex}_${c.startTime}`] ||
-                         AUTHENTIC_TIMETABLE_METADATA[`${strippedCode}_${day.dayIndex}_${c.startTime}`];
+            // Extract group number from class type (e.g. 'תרגול 21' -> '21', 'הרצאה 10' -> '10')
+            const grpMatch = (c.type || '').match(/\b(\d+)\b/);
+            const grpStr = grpMatch ? grpMatch[1] : '';
+            const grpNum = grpMatch ? parseInt(grpMatch[1], 10) : null;
+
+            // Match strictly by ID + Day + StartTime (+ Group if present) across all normalized keys
+            let meta = null;
+            if (grpStr) {
+                meta = AUTHENTIC_TIMETABLE_METADATA[`${rawId}_${day.dayIndex}_${c.startTime}_${grpStr}`] ||
+                       AUTHENTIC_TIMETABLE_METADATA[`${cleanCode}_${day.dayIndex}_${c.startTime}_${grpStr}`] ||
+                       AUTHENTIC_TIMETABLE_METADATA[`${padded6}_${day.dayIndex}_${c.startTime}_${grpStr}`] ||
+                       AUTHENTIC_TIMETABLE_METADATA[`${padded8}_${day.dayIndex}_${c.startTime}_${grpStr}`] ||
+                       AUTHENTIC_TIMETABLE_METADATA[`${strippedCode}_${day.dayIndex}_${c.startTime}_${grpStr}`];
+            }
+            if (!meta) {
+                const candidate = AUTHENTIC_TIMETABLE_METADATA[`${rawId}_${day.dayIndex}_${c.startTime}`] ||
+                                  AUTHENTIC_TIMETABLE_METADATA[`${cleanCode}_${day.dayIndex}_${c.startTime}`] ||
+                                  AUTHENTIC_TIMETABLE_METADATA[`${padded6}_${day.dayIndex}_${c.startTime}`] ||
+                                  AUTHENTIC_TIMETABLE_METADATA[`${padded8}_${day.dayIndex}_${c.startTime}`] ||
+                                  AUTHENTIC_TIMETABLE_METADATA[`${strippedCode}_${day.dayIndex}_${c.startTime}`];
+                if (candidate && (!candidate.group || !grpStr || candidate.group === grpStr)) {
+                    meta = candidate;
+                }
+            }
 
             if (meta) {
                 if (meta.room && c.room !== meta.room) {
@@ -8990,11 +9059,21 @@ function enrichTimetableWithAuthenticRooms(timetable) {
                 if (sapCourse && Array.isArray(sapCourse.schedule)) {
                     const hebDays = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי'];
                     const dayName = day.name || hebDays[day.dayIndex];
-                    const match = sapCourse.schedule.find(s => {
-                        const dayMatch = (s.day === dayName);
-                        const hoursMatch = s.hours && (s.hours.includes(c.startTime) || (c.endTime && s.hours.includes(c.endTime)));
-                        return dayMatch && hoursMatch;
-                    });
+                    let match = null;
+                    if (grpNum) {
+                        match = sapCourse.schedule.find(s => {
+                            const dayMatch = (s.day === dayName);
+                            const hoursMatch = s.hours && (s.hours.includes(c.startTime) || (c.endTime && s.hours.includes(c.endTime)));
+                            return dayMatch && hoursMatch && s.group === grpNum;
+                        });
+                    }
+                    if (!match) {
+                        match = sapCourse.schedule.find(s => {
+                            const dayMatch = (s.day === dayName);
+                            const hoursMatch = s.hours && (s.hours.includes(c.startTime) || (c.endTime && s.hours.includes(c.endTime)));
+                            return dayMatch && hoursMatch;
+                        });
+                    }
                     if (match) {
                         const roomStr = (match.building && match.room) ? `${match.building} חדר ${match.room}` : (match.building || (match.room ? `חדר ${match.room}` : ''));
                         if (roomStr && c.room !== roomStr) {
@@ -15369,10 +15448,7 @@ window.syncLiveCheeseForkData = async function(customUrl = null, isManual = fals
 
                         if (isMatch && itemDay && itemTime) {
                             let dayIdx = dayMap[itemDay];
-                            // Strict guard: Monday must NOT have unselected Solids 2 tutorial 20
-                            if (dayIdx === 1 && (cleanCode === '034053' || cleanCode === '34053' || cleanCode === '00340053') && itemType.includes('תרגול')) {
-                                return;
-                            }
+
                             if (dayIdx !== undefined && dayIdx >= 0 && dayIdx <= 4) {
                                 const parts = itemTime.split('-').map(s => s.trim());
                                 const startTime = parts[0] || '08:30';
@@ -15490,49 +15566,11 @@ window.syncLiveCheeseForkData = async function(customUrl = null, isManual = fals
             }
         });
 
-        // Ensure authentic Physics 2 tutorial (Wednesday 09:30 - 10:30, Ullmann 606, Eyal Kalman)
-        const hasPhys2Tutorial = timetableDays[3].classes.some(c => (c.courseId === '114052' || c.courseId === '01140052') && c.startTime === '09:30');
-        if (!hasPhys2Tutorial && (rawCourseCodes.includes('01140052') || rawCourseCodes.includes('114052'))) {
-            timetableDays[3].classes.push({
-                courseId: '114052',
-                courseName: 'פיסיקה 2',
-                type: 'תרגול 21',
-                lecturer: 'מר אייל קלמן',
-                room: 'אולמן 606',
-                startTime: '09:30',
-                endTime: '10:30',
-                duration: 'שעה',
-                cardClass: 'timetable-card-physics'
-            });
-            totalClassesCount++;
-        }
-
-        // Ensure authentic Solid Mechanics schedule (Monday 4h Lecture 10:30-14:30, Tuesday Tutorial 11 14:30-16:30, zero Monday tutorial)
-        timetableDays[1].classes = timetableDays[1].classes.filter(c => {
-            const isSolids = c.courseId === '034053' || c.courseId === '00340053' || c.courseId === '34053';
-            return !(isSolids && c.type && c.type.includes('תרגול'));
-        });
-        const solidsMonLecture = timetableDays[1].classes.find(c => (c.courseId === '034053' || c.courseId === '00340053' || c.courseId === '34053') && c.type && c.type.includes('הרצאה'));
+        // Ensure authentic duration for Solid Mechanics Monday lecture if at 10:30
+        const solidsMonLecture = timetableDays[1].classes.find(c => (c.courseId === '034053' || c.courseId === '00340053' || c.courseId === '34053') && c.type && c.type.includes('הרצאה') && c.startTime === '10:30');
         if (solidsMonLecture) {
-            solidsMonLecture.startTime = '10:30';
             solidsMonLecture.endTime = '14:30';
             solidsMonLecture.duration = '4 שעות';
-        }
-
-        const hasSolidsTueTutorial = timetableDays[2].classes.some(c => (c.courseId === '034053' || c.courseId === '00340053' || c.courseId === '34053') && c.startTime === '14:30');
-        if (!hasSolidsTueTutorial && (rawCourseCodes.includes('00340053') || rawCourseCodes.includes('034053'))) {
-            timetableDays[2].classes.push({
-                courseId: '034053',
-                courseName: "מכניקת מוצקים 2מ'",
-                type: 'תרגול 11',
-                lecturer: 'מר איתם טננבאום',
-                room: 'אולמן 103',
-                startTime: '14:30',
-                endTime: '16:30',
-                duration: 'שעתיים',
-                cardClass: 'timetable-card-solids'
-            });
-            totalClassesCount++;
         }
 
         // 5. Finalize Timetable Days structure
@@ -23599,11 +23637,11 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.11.10-v2.11.0",
-    version: "2.11.0",
-    build: "20261110_05",
-    date: "2026-11-10 21:30",
-    description: "v2.11.0: ארכיטקטורת עדכונים חסינת כשל (Auto-Update Engine 2.0), רישום Service Worker חסין מטמון (updateViaCache: none), סנכרון גרסאות דינמי ואוטומטי מול GitHub ו-Production, ושדרוג מערכת שעות ומשימות (ADR-106)."
+    code: "REV-2026.11.11-v2.11.1",
+    version: "2.11.1",
+    build: "20261111_01",
+    date: "2026-11-11 07:15",
+    description: "v2.11.1: סנכרון מערכת שעות 1:1 מול CheeseFork (פתרון שכפול שיעורים וקבוצות), שדרוג שיבוץ מיקומים ומרצים מדויק לפי מספר קבוצה ב-SAP SLcM, וטיהור חדרים כפולים (ADR-107)."
 };
 window.APP_VERSION = APP_CURRENT_REVISION.version;
 
