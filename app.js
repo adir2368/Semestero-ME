@@ -10263,6 +10263,47 @@ function toIsoDateOnly(dateVal) {
     return str.split('T')[0].split(' ')[0].trim();
 }
 
+// User-Facing Date Formatter: strictly dd/mm/yyyy
+function formatDateToDisplay(dateVal) {
+    if (!dateVal) return '';
+    const str = String(dateVal).trim();
+    // 1. If already DD/MM/YYYY or DD-MM-YYYY
+    const dmy = str.match(/^(\d{1,2})[-/](\d{1,2})[-/](\d{4})/);
+    if (dmy) {
+        return `${dmy[1].padStart(2, '0')}/${dmy[2].padStart(2, '0')}/${dmy[3]}`;
+    }
+    // 2. If YYYY-MM-DD or YYYY/MM/DD
+    const ymd = str.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})/);
+    if (ymd) {
+        return `${ymd[3].padStart(2, '0')}/${ymd[2].padStart(2, '0')}/${ymd[1]}`;
+    }
+    const d = new Date(dateVal);
+    if (!isNaN(d.getTime())) {
+        const dd = String(d.getDate()).padStart(2, '0');
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        const yyyy = d.getFullYear();
+        return `${dd}/${mm}/${yyyy}`;
+    }
+    return str;
+}
+window.formatDateToDisplay = formatDateToDisplay;
+
+// Helper: Resilient course resolution for task handlers (handles 6-digit & 8-digit keys)
+function resolveCourseForTask(courseCode) {
+    if (!courseCode || !gameState || !gameState.courses) return null;
+    if (gameState.courses[courseCode]) return gameState.courses[courseCode];
+    if (typeof findCourseObj === 'function') {
+        const found = findCourseObj(courseCode);
+        if (found) return found;
+    }
+    const norm = String(courseCode).trim();
+    const stripped = norm.replace(/^0+/, '');
+    if (gameState.courses[stripped]) return gameState.courses[stripped];
+    if (gameState.courses['0' + stripped]) return gameState.courses['0' + stripped];
+    return null;
+}
+window.resolveCourseForTask = resolveCourseForTask;
+
 // Canonical Course Deduplicator: ensures 6-digit + 8-digit alias keys never double-count credits, GPA, or tasks
 function getDeduplicatedCoursesList(coursesMap = (window.gameState && window.gameState.courses)) {
     if (!coursesMap || typeof coursesMap !== 'object') return [];
@@ -10305,15 +10346,34 @@ function recalculateCourseStates() {
             if (!root) return;
             if (seenRootsCleanup.has(root)) {
                 const existingKey = seenRootsCleanup.get(root);
-                // Prefer 6-digit canonical key in gameState.courses
+                const objA = gameState.courses[existingKey];
+                const objB = gameState.courses[k];
+                // Determine surviving canonical key (prefer 6-digit canonical key)
+                let survivingKey = existingKey;
+                let redundantKey = k;
                 if (k.length === 8 && existingKey.length <= 6) {
-                    delete gameState.courses[k];
+                    survivingKey = existingKey;
+                    redundantKey = k;
                 } else if (existingKey.length === 8 && k.length <= 6) {
-                    delete gameState.courses[existingKey];
+                    survivingKey = k;
+                    redundantKey = existingKey;
                     seenRootsCleanup.set(root, k);
-                } else {
-                    delete gameState.courses[k];
                 }
+                const survivingObj = gameState.courses[survivingKey];
+                const redundantObj = gameState.courses[redundantKey];
+                // Merge tasks before deleting
+                if (survivingObj && redundantObj && Array.isArray(redundantObj.tasks) && redundantObj.tasks.length > 0) {
+                    if (!Array.isArray(survivingObj.tasks)) survivingObj.tasks = [];
+                    redundantObj.tasks.forEach(t => {
+                        if (!survivingObj.tasks.some(existing => existing.id === t.id || existing.title === t.title)) {
+                            survivingObj.tasks.push(t);
+                        }
+                    });
+                }
+                if (survivingObj) {
+                    survivingObj.code = survivingKey;
+                }
+                delete gameState.courses[redundantKey];
             } else {
                 seenRootsCleanup.set(root, k);
             }
@@ -10399,7 +10459,7 @@ function recalculateCourseStates() {
         }
     });
     
-    // Calculate total open tasks count (STRICTLY across actively registered/enrolled courses)
+    // Calculate total open tasks count (STRICTLY across actively registered/enrolled courses, EXCLUDING exams and tests)
     let openTasksCount = 0;
     uniqueCourses.forEach(course => {
         const isBinary = (course.isBinaryPass === true || course.grade === 'עובר' || course.grade === 'PASS');
@@ -10411,7 +10471,12 @@ function recalculateCourseStates() {
             if (!winterStarted && sem > activeSem) return;
 
             course.tasks.forEach(task => {
-                if (!task.completed && task.status !== 'done') {
+                const tType = String(task.type || '').toLowerCase();
+                const tTitle = String(task.title || '').toLowerCase();
+                const isExamOrQuiz = tType === 'exam' || tType === 'midterm' || tType === 'quiz' || tType === 'moed_a' || tType === 'moed_b' ||
+                    tTitle.includes('מבחן') || tTitle.includes('בחינה') || tTitle.includes('מועד א') || tTitle.includes('מועד ב') || tTitle.includes('בוחן');
+                if (isExamOrQuiz) return; // Open tasks strictly exclude exams and quizzes
+                if (!task.completed && task.status !== 'done' && task.status !== 'submitted') {
                     openTasksCount++;
                 }
             });
@@ -16098,15 +16163,26 @@ function renderTasksReminderBanner() {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    // 1. Group active, incomplete tasks by (course.code + "_" + category)
+    // 1. Group active, incomplete tasks by (course.code + "_" + category) - strictly current semester courses & non-exam tasks
     const tasksByCategory = {};
+    const curActiveSem = (gameState && gameState.currentActiveSemester) ? gameState.currentActiveSemester : 3;
 
     Object.values(gameState.courses).forEach(course => {
+        const cSem = course.semester || 1;
+        // Strictly only show tasks of the current semester
+        if (cSem !== curActiveSem && course.status !== 'active') return;
         const hasPendingTasks = (course.tasks || []).some(t => !t.completed && t.status !== 'done' && t.status !== 'submitted');
         if (course.status !== 'active' && !hasPendingTasks) return;
         (course.tasks || []).forEach(task => {
             const isDone = task.completed || task.status === 'done' || task.status === 'submitted';
             if (isDone) return;
+
+            // Open tasks strictly exclude exams and tests
+            const tType = String(task.type || '').toLowerCase();
+            const tTitle = String(task.title || '').toLowerCase();
+            const isExamOrQuiz = tType === 'exam' || tType === 'midterm' || tType === 'quiz' || tType === 'moed_a' || tType === 'moed_b' ||
+                tTitle.includes('מבחן') || tTitle.includes('בחינה') || tTitle.includes('מועד א') || tTitle.includes('מועד ב') || tTitle.includes('בוחן');
+            if (isExamOrQuiz) return;
 
             const category = getTaskCategoryKey(task);
             const groupKey = `${course.code}_${category}`;
@@ -16441,14 +16517,11 @@ window.switchTab = function(tabNameOrNumber) {
             if (settingsWorkspace) settingsWorkspace.style.display = "none";
             if (tablePane) tablePane.style.display = "block";
             if (calPane) calPane.style.display = "none";
-            if (viewsDirtyState.tasks) {
-                populateNotionCourseFilter();
-                renderNotionTasksTable();
-                renderExamGapRunway();
-                viewsDirtyState.tasks = false;
-            } else {
-                renderTasksReminderBanner();
-            }
+            populateNotionCourseFilter();
+            renderNotionTasksTable();
+            renderTasksReminderBanner();
+            renderExamGapRunway();
+            viewsDirtyState.tasks = false;
         } else if (activeTabId === 'calendar') {
             if (curriculumWorkspace) curriculumWorkspace.style.display = "none";
             if (plannerWorkspace) plannerWorkspace.style.display = "none";
@@ -16594,7 +16667,7 @@ window.switchTab = function(tabNameOrNumber) {
             // 0. Pin button click -> pin task to top of list
             if (e.target.classList.contains("notion-pin-task-btn") || e.target.closest(".notion-pin-task-btn")) {
                 e.stopPropagation();
-                const course = gameState.courses[courseCode];
+                const course = resolveCourseForTask(courseCode);
                 const task = course ? (course.tasks || []).find(t => t.id === taskId) : null;
                 if (task) {
                     task.pinned = !task.pinned;
@@ -16618,7 +16691,7 @@ window.switchTab = function(tabNameOrNumber) {
             // 2. Status pill click -> open inline dropdown
             if (e.target.classList.contains("notion-status-pill")) {
                 e.stopPropagation();
-                const course = gameState.courses[courseCode];
+                const course = resolveCourseForTask(courseCode);
                 const task = course ? (course.tasks || []).find(t => t.id === taskId) : null;
                 showNotionStatusDropdown(e, courseCode, taskId, task ? task.status : 'not_started');
                 return;
@@ -16640,7 +16713,7 @@ window.switchTab = function(tabNameOrNumber) {
             if (!courseCode || !taskId) return;
 
             if (e.target.classList.contains("notion-inline-date-input")) {
-                const course = gameState.courses[courseCode];
+                const course = resolveCourseForTask(courseCode);
                 const task = course ? (course.tasks || []).find(t => t.id === taskId) : null;
                 if (task) {
                     task.dueDate = e.target.value;
@@ -16656,7 +16729,7 @@ window.switchTab = function(tabNameOrNumber) {
                 if (!tr) return;
                 const courseCode = tr.dataset.courseCode;
                 const taskId = tr.dataset.taskId;
-                const course = gameState.courses[courseCode];
+                const course = resolveCourseForTask(courseCode);
                 const task = course ? (course.tasks || []).find(t => t.id === taskId) : null;
                 if (task) {
                     const newText = e.target.innerText.trim();
@@ -17076,7 +17149,7 @@ function handleTaskRowCheckboxChange(tr, courseCode, taskId, checked, isShift) {
 }
 
 function duplicateSingleTask(courseCode, taskId) {
-    const course = gameState.courses[courseCode];
+    const course = resolveCourseForTask(courseCode);
     if (!course || !Array.isArray(course.tasks)) return;
     const task = course.tasks.find(t => t.id === taskId);
     if (!task) return;
@@ -17103,7 +17176,7 @@ function duplicateSelectedTasks() {
     let duplicatedCount = 0;
 
     items.forEach(({ courseCode, taskId }) => {
-        const course = gameState.courses[courseCode];
+        const course = resolveCourseForTask(courseCode);
         if (!course || !Array.isArray(course.tasks)) return;
         const task = course.tasks.find(t => t.id === taskId);
         if (!task) return;
@@ -17129,7 +17202,7 @@ function duplicateSelectedTasks() {
 }
 
 function deleteSingleTask(courseCode, taskId, skipConfirm = false) {
-    const course = gameState.courses[courseCode];
+    const course = resolveCourseForTask(courseCode);
     if (!course || !Array.isArray(course.tasks)) return;
     const task = course.tasks.find(t => t.id === taskId);
     const title = task ? task.title : 'המשימה';
@@ -17152,7 +17225,7 @@ function deleteSingleTask(courseCode, taskId, skipConfirm = false) {
     }
 
     if (task && window.MoodleSync && typeof window.MoodleSync.markTaskDismissedInRegistry === 'function') {
-        window.MoodleSync.markTaskDismissedInRegistry(courseCode, task);
+        window.MoodleSync.markTaskDismissedInRegistry(course.code || courseCode, task);
     }
 
     course.tasks = course.tasks.filter(t => t.id !== taskId);
@@ -17185,13 +17258,13 @@ function deleteSelectedTasks() {
 
     let deletedCount = 0;
     Object.keys(byCourse).forEach(cCode => {
-        const course = gameState.courses[cCode];
+        const course = resolveCourseForTask(cCode);
         if (!course || !Array.isArray(course.tasks)) return;
         const set = byCourse[cCode];
         if (window.MoodleSync && typeof window.MoodleSync.markTaskDismissedInRegistry === 'function') {
             course.tasks.forEach(t => {
                 if (set.has(t.id)) {
-                    window.MoodleSync.markTaskDismissedInRegistry(cCode, t);
+                    window.MoodleSync.markTaskDismissedInRegistry(course.code || cCode, t);
                 }
             });
         }
@@ -17298,7 +17371,7 @@ function closeTaskMoveModal() {
 
 function executeMoveTasksToCourse(targetCourseCode) {
     if (!window.selectedTasksMap || window.selectedTasksMap.size === 0) return;
-    const destCourse = gameState.courses[targetCourseCode];
+    const destCourse = resolveCourseForTask(targetCourseCode);
     if (!destCourse) return;
     if (!Array.isArray(destCourse.tasks)) destCourse.tasks = [];
 
@@ -17307,7 +17380,7 @@ function executeMoveTasksToCourse(targetCourseCode) {
 
     items.forEach(({ courseCode, taskId }) => {
         if (courseCode === targetCourseCode) return; // already in destination course
-        const srcCourse = gameState.courses[courseCode];
+        const srcCourse = resolveCourseForTask(courseCode);
         if (!srcCourse || !Array.isArray(srcCourse.tasks)) return;
         const idx = srcCourse.tasks.findIndex(t => t.id === taskId);
         if (idx !== -1) {

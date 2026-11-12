@@ -1040,7 +1040,21 @@
                 if (/^\d{8}$/.test(key) && !key.startsWith('0394')) {
                     const norm = (key.slice(1, 4) + key.slice(5)).replace(/^0+/, '');
                     const stripped = key.replace(/^0+/, '');
-                    if (global.gameState.courses[norm] || global.gameState.courses[stripped] || global.gameState.courses['0' + norm]) {
+                    const targetKey = global.gameState.courses[norm] ? norm : (global.gameState.courses['0' + norm] ? ('0' + norm) : (global.gameState.courses[stripped] ? stripped : null));
+                    if (targetKey && targetKey !== key) {
+                        const targetObj = global.gameState.courses[targetKey];
+                        const dupObj = global.gameState.courses[key];
+                        if (targetObj && dupObj && Array.isArray(dupObj.tasks) && dupObj.tasks.length > 0) {
+                            if (!Array.isArray(targetObj.tasks)) targetObj.tasks = [];
+                            dupObj.tasks.forEach(t => {
+                                if (!targetObj.tasks.some(existing => existing.id === t.id || existing.title === t.title)) {
+                                    targetObj.tasks.push(t);
+                                }
+                            });
+                        }
+                        if (targetObj && (!targetObj.code || targetObj.code === key)) {
+                            targetObj.code = targetKey;
+                        }
                         delete global.gameState.courses[key];
                         changed = true;
                     }
@@ -5719,8 +5733,8 @@
                 if (cNorms.some(codeKey => searchCodes.includes(codeKey))) {
                     cObj.name = variantMeta.name;
                     cObj.credits = variantMeta.credits;
-                    cObj.code = variantMeta.code;
-                    cObj.altCode = variantMeta.altCode;
+                    cObj.code = variantMeta.altCode;
+                    cObj.altCode = variantMeta.code;
                     cObj.variantGroupId = isTargetP1 ? 'physics_1' : 'physics_2';
                 }
             }

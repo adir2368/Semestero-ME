@@ -263,11 +263,11 @@
                 }
             } else {
                 // User Rule: 15 minutes after start of class, switch to next class!
-                // If it is the last class of the day, stay on it until endMin so we never prematurely show tomorrow.
+                // If it is the last class of the day, stay on it until endMin or evening threshold (curTotalMin >= 17 * 60) so we never prematurely show tomorrow.
                 let activeOrUpcoming = null;
                 let isCurrentlyActive = false;
                 const lastClass = todaysClasses.length > 0 ? todaysClasses[todaysClasses.length - 1] : null;
-                const isAllClassesDone = lastClass ? (curTotalMin >= lastClass.endMin) : (curTotalMin >= 21 * 60);
+                const isAllClassesDone = lastClass ? (curTotalMin >= lastClass.endMin || (curTotalMin >= 17 * 60 && curTotalMin >= lastClass.endMin)) : (curTotalMin >= 17 * 60);
 
                 if (!isAllClassesDone) {
                     for (let i = 0; i < todaysClasses.length; i++) {
