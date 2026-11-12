@@ -559,12 +559,14 @@
                 } else if (evalGpa >= DEAN_HONORS_MIN_GPA) {
                     honorsEl.innerHTML = '<span style="color: #38bdf8;">הצטיינות דיקן 🎖️</span>';
                 } else {
-                    honorsEl.innerHTML = '<span style="color: #94a3b8;">רף דיקן: 84.0</span>';
+                    honorsEl.innerHTML = `<span style="color: #94a3b8;">רף דיקן: ${DEAN_HONORS_MIN_GPA.toFixed(1)}</span>`;
                 }
             }
 
             if (standingEl) {
-                standingEl.innerText = data.cumulativeStanding;
+                const standingPct = Math.round((data.creditSuccessRatio || 1) * 100);
+                const standingColor = data.isAcademicStandingOk ? '#34d399' : '#f87171';
+                standingEl.innerHTML = `<bdi dir="rtl">${data.cumulativeStanding} • <span style="color:${standingColor}; font-weight:700;" title="תקנון הטכניון: נדרש ממוצע ≥ 65.0 וצבירת ≥ 66% מהנק״ז">${data.academicStanding} (${standingPct}% נק״ז)</span></bdi>`;
             }
 
             // 2. Render Semester Tables
@@ -584,7 +586,7 @@
                         <div class="grade-sheet-sem-header">
                             <div class="sem-header-title">
                                 <span class="sem-icon">📅</span>
-                                <h4>${sem.name}</h4>
+                                <h4><bdi dir="rtl">${sem.name}</bdi></h4>
                                 ${sem.honors ? `<span class="sem-honors-badge ${sem.honors.type}">${sem.honors.label}</span>` : ''}
                             </div>
                             <div class="sem-header-stats">

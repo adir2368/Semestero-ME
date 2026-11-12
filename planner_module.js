@@ -2045,7 +2045,7 @@
                 </div>
 
                 <!-- 8-Point Clearance Checklist -->
-                <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px;">
+                <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 18px;">
                     ${rulesEval.clearanceRules.map(r => `
                         <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border-radius: 8px; background: ${r.isMet ? 'rgba(16, 185, 129, 0.08)' : 'rgba(255,255,255,0.02)'}; border: 1px solid ${r.isMet ? 'rgba(16, 185, 129, 0.3)' : 'rgba(255,255,255,0.06)'};">
                             <div style="flex: 1;">
@@ -2062,7 +2062,53 @@
                     `).join('')}
                 </div>
 
-                <div style="display: flex; justify-content: flex-end;">
+                <!-- Specialization Track Breakdown (U-02) -->
+                ${(() => {
+                    const allClusters = [
+                        'רובוטיקה ובקרה',
+                        'אנרגיה וזורמים',
+                        'תכן, חומרים וייצור',
+                        'חישוב ואנליזה (FEM/CFD)',
+                        'מכטרוניקה ואופטיקה'
+                    ];
+                    const counts = rulesEval.clusterCounts || {};
+                    let topCluster = null;
+                    let topCount = 0;
+                    Object.entries(counts).forEach(([k, v]) => {
+                        if (v > topCount) {
+                            topCount = v;
+                            topCluster = k;
+                        }
+                    });
+                    const hasPrimaryConcentration = topCount >= 3;
+                    return `
+                        <div style="background: rgba(168, 85, 247, 0.06); border: 1px solid rgba(168, 85, 247, 0.28); border-radius: 12px; padding: 12px 14px; margin-bottom: 18px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 6px;">
+                                <strong style="font-size: 0.86rem; color: #e9d5ff;">🔬 התפלגות אשכולות התמחות (רשימות א׳ + ב׳)</strong>
+                                <span style="font-size: 0.72rem; padding: 2px 8px; border-radius: 999px; background: ${hasPrimaryConcentration ? 'rgba(16,185,129,0.2)' : 'rgba(168,85,247,0.2)'}; color: ${hasPrimaryConcentration ? '#34d399' : '#d8b4fe'}; font-weight: 700;">
+                                    ${hasPrimaryConcentration ? `✅ התמחות עומק: ${topCluster} (${topCount} קורסים)` : 'מומלץ: ≥3 קורסים באשכול התמחות מוביל'}
+                                </span>
+                            </div>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 6px;">
+                                ${allClusters.map(cl => {
+                                    const cnt = counts[cl] || 0;
+                                    const isPrimary = cnt >= 3;
+                                    return `
+                                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 6px 10px; border-radius: 6px; background: ${cnt > 0 ? 'rgba(168,85,247,0.12)' : 'rgba(255,255,255,0.02)'}; border: 1px solid ${isPrimary ? '#34d399' : (cnt > 0 ? 'rgba(168,85,247,0.35)' : 'rgba(255,255,255,0.06)')}; font-size: 0.75rem;">
+                                            <span style="color: ${cnt > 0 ? '#f8fafc' : '#94a3b8'}; font-weight: ${cnt > 0 ? '700' : '400'};">${cl}</span>
+                                            <span style="font-weight: 800; color: ${isPrimary ? '#34d399' : (cnt > 0 ? '#d8b4fe' : '#64748b')};">${cnt} קורסים</span>
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                        </div>
+                    `;
+                })()}
+
+                <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap;">
+                    <button type="button" class="btn btn-sm btn-outline" onclick="document.getElementById('planner-graduation-clearance-modal')?.remove(); window.DegreePlanner.openExamDensityModal();" style="border-color: rgba(245, 158, 11, 0.45); color: #fbbf24; font-weight: 700; padding: 7px 14px; border-radius: 8px; background: rgba(245, 158, 11, 0.1); cursor: pointer;">
+                        📅 פתח מנתח צפיפות מבחנים ופיצול מועד ב׳
+                    </button>
                     <button type="button" class="btn btn-sm btn-primary btn-close-clearance-modal" style="background: #38bdf8; color: #082f49; font-weight: 800; padding: 8px 18px; border-radius: 8px; border: none; cursor: pointer;">
                         הבנתי, תודה
                     </button>
@@ -2079,9 +2125,349 @@
         });
     }
 
+    // --------------------------------------------------------------------------
+    // Exam Period Density & Strategic "Moed B Split" Analyzer (N-01)
+    // --------------------------------------------------------------------------
+    const DEFAULT_TECH_EXAM_DATES = {
+        // Semester 3 (Winter 2026/2027)
+        '00340053': { moedA: '2027-02-09', moedB: '2027-03-11' }, '034053': { moedA: '2027-02-09', moedB: '2027-03-11' },
+        '00340056': { moedA: '2027-02-14', moedB: '2027-03-16' }, '034056': { moedA: '2027-02-14', moedB: '2027-03-16' },
+        '00340035': { moedA: '2027-02-18', moedB: '2027-03-21' }, '034035': { moedA: '2027-02-18', moedB: '2027-03-21' },
+        '01040228': { moedA: '2027-02-21', moedB: '2027-03-24' }, '104228': { moedA: '2027-02-21', moedB: '2027-03-24' },
+        '01140052': { moedA: '2027-02-23', moedB: '2027-03-28' }, '114052': { moedA: '2027-02-23', moedB: '2027-03-28' },
+        '01140075': { moedA: '2027-02-23', moedB: '2027-03-28' }, '114075': { moedA: '2027-02-23', moedB: '2027-03-28' },
+        '00340043': { moedA: '2027-02-26', moedB: '2027-03-30' }, '034043': { moedA: '2027-02-26', moedB: '2027-03-30' },
+        // Semester 4 (Spring 2027)
+        '00340010': { moedA: '2027-07-04', moedB: '2027-08-05' }, '034010': { moedA: '2027-07-04', moedB: '2027-08-05' },
+        '00340055': { moedA: '2027-07-06', moedB: '2027-08-10' }, '034055': { moedA: '2027-07-06', moedB: '2027-08-10' },
+        '00340032': { moedA: '2027-07-11', moedB: '2027-08-15' }, '034032': { moedA: '2027-07-11', moedB: '2027-08-15' },
+        '00340030': { moedA: '2027-07-15', moedB: '2027-08-19' }, '034030': { moedA: '2027-07-15', moedB: '2027-08-19' },
+        '00340058': { moedA: '2027-07-18', moedB: '2027-08-22' }, '034058': { moedA: '2027-07-18', moedB: '2027-08-22' },
+        // Semester 5
+        '00340041': { moedA: '2028-02-06', moedB: '2028-03-08' }, '034041': { moedA: '2028-02-06', moedB: '2028-03-08' },
+        '00340040': { moedA: '2028-02-08', moedB: '2028-03-12' }, '034040': { moedA: '2028-02-08', moedB: '2028-03-12' },
+        '00340051': { moedA: '2028-02-13', moedB: '2028-03-16' }, '034051': { moedA: '2028-02-13', moedB: '2028-03-16' },
+        '00340054': { moedA: '2028-02-18', moedB: '2028-03-21' }, '034054': { moedA: '2028-02-18', moedB: '2028-03-21' }
+    };
+
+    function parseExamDateObj(dateStr) {
+        if (!dateStr) return null;
+        const s = String(dateStr).trim();
+        // Match YYYY-MM-DD
+        const isoMatch = s.match(/(\d{4})-(\d{1,2})-(\d{1,2})/);
+        if (isoMatch) {
+            return new Date(Number(isoMatch[1]), Number(isoMatch[2]) - 1, Number(isoMatch[3]), 9, 0, 0);
+        }
+        // Match DD/MM/YYYY or DD.MM.YYYY
+        const ilMatch = s.match(/(\d{1,2})[\/.](\d{1,2})[\/.](\d{2,4})/);
+        if (ilMatch) {
+            let yr = Number(ilMatch[3]);
+            if (yr < 100) yr += 2000;
+            return new Date(yr, Number(ilMatch[2]) - 1, Number(ilMatch[1]), 9, 0, 0);
+        }
+        const parsed = new Date(s);
+        return isNaN(parsed.getTime()) ? null : parsed;
+    }
+
+    function formatHebrewDateShort(dateObj) {
+        if (!dateObj || isNaN(dateObj.getTime())) return 'טרם פורסם';
+        const days = ['א׳', 'ב׳', 'ג׳', 'ד׳', 'ה׳', 'ו׳', 'ש׳'];
+        const d = String(dateObj.getDate()).padStart(2, '0');
+        const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+        const y = dateObj.getFullYear();
+        return `יום ${days[dateObj.getDay()]} ${d}/${m}/${y}`;
+    }
+
+    function getPlannedMoedBSplits() {
+        if (global.gameState && Array.isArray(global.gameState.plannedMoedBSplits)) {
+            return global.gameState.plannedMoedBSplits;
+        }
+        try {
+            const raw = localStorage.getItem('ast_planned_moed_b_splits');
+            return raw ? JSON.parse(raw) : [];
+        } catch (_) {
+            return [];
+        }
+    }
+
+    function togglePlannedMoedBSplit(courseCode) {
+        const norm = String(courseCode || '').trim();
+        if (!norm) return;
+        const current = getPlannedMoedBSplits();
+        const idx = current.indexOf(norm);
+        if (idx >= 0) {
+            current.splice(idx, 1);
+        } else {
+            current.push(norm);
+        }
+        if (global.gameState) {
+            global.gameState.plannedMoedBSplits = current;
+            if (typeof global.saveState === 'function') global.saveState();
+        }
+        try {
+            localStorage.setItem('ast_planned_moed_b_splits', JSON.stringify(current));
+        } catch (_) {}
+    }
+
+    function analyzeSemesterExamDensity(semNum) {
+        const plan = getActivePlan();
+        const activeSemNum = Number(semNum) || (global.gameState && Number(global.gameState.currentActiveSemester)) || 3;
+        const semObj = plan.find(s => Number(s.semester) === activeSemNum) || plan[2] || plan[0];
+        if (!semObj) return null;
+
+        const splits = getPlannedMoedBSplits();
+        const examCourses = [];
+
+        (semObj.courses || []).forEach((c, idx) => {
+            if (c.type === 'sports' || c.list === 'SPORTS' || Number(c.credits) === 0) return;
+            const cKeys = getNormalizedCodes(c.code, c.altCode);
+            let moedAStr = c.moedA || '';
+            let moedBStr = c.moedB || '';
+
+            if (global.gameState && global.gameState.courses) {
+                for (const k of cKeys) {
+                    const gc = global.gameState.courses[k];
+                    if (gc) {
+                        if (!moedAStr && (gc.moedA || gc.examDate)) moedAStr = gc.moedA || gc.examDate;
+                        if (!moedBStr && gc.moedB) moedBStr = gc.moedB;
+                    }
+                }
+            }
+            if ((!moedAStr || !moedBStr) && global.CHEESEFORK_DB && Array.isArray(global.CHEESEFORK_DB)) {
+                const cf = global.CHEESEFORK_DB.find(x => cKeys.includes(String(x.rawNum || x.code6 || x.code)));
+                if (cf) {
+                    if (!moedAStr && cf.moedA) moedAStr = cf.moedA;
+                    if (!moedBStr && cf.moedB) moedBStr = cf.moedB;
+                }
+            }
+            for (const k of cKeys) {
+                if (DEFAULT_TECH_EXAM_DATES[k]) {
+                    if (!moedAStr) moedAStr = DEFAULT_TECH_EXAM_DATES[k].moedA;
+                    if (!moedBStr) moedBStr = DEFAULT_TECH_EXAM_DATES[k].moedB;
+                }
+            }
+
+            // Synthesize deterministic dates for future semesters if still empty so the student can always simulate gaps
+            let moedADate = parseExamDateObj(moedAStr);
+            let moedBDate = parseExamDateObj(moedBStr);
+            if (!moedADate) {
+                const baseYear = 2026 + Math.floor(activeSemNum / 2);
+                const baseMonth = (activeSemNum % 2 === 1) ? 1 : 6; // Feb or July
+                moedADate = new Date(baseYear, baseMonth, 4 + idx * 4, 9, 0, 0);
+            }
+            if (!moedBDate) {
+                moedBDate = new Date(moedADate.getTime() + 28 * 24 * 60 * 60 * 1000);
+            }
+
+            const isSplitToB = splits.includes(c.code) || (c.altCode && splits.includes(c.altCode));
+            const wl = calculateCourseWorkload(c);
+            const bInfo = (global.PLANNER_CATALOG && typeof global.PLANNER_CATALOG.getBottleneckInfo === 'function')
+                ? global.PLANNER_CATALOG.getBottleneckInfo(c.code)
+                : null;
+
+            examCourses.push({
+                code: c.code,
+                altCode: c.altCode || c.code,
+                name: c.name,
+                credits: Number(c.credits) || 3.0,
+                workload: wl.score,
+                bottleneckCount: bInfo ? bInfo.transitiveUnlockCount : 0,
+                moedADate,
+                moedBDate,
+                activeDate: isSplitToB ? moedBDate : moedADate,
+                isSplitToB
+            });
+        });
+
+        // Sort active timeline (Moed A for non-split, Moed B for split)
+        const moedAList = examCourses.filter(e => !e.isSplitToB).sort((a, b) => a.moedADate - b.moedADate);
+        const moedBList = examCourses.filter(e => e.isSplitToB).sort((a, b) => a.moedBDate - b.moedBDate);
+
+        const computeGaps = (list, dateField) => {
+            return list.map((item, i) => {
+                if (i === 0) return { ...item, netStudyDays: null, gapStatus: 'first' };
+                const prevDate = list[i - 1][dateField];
+                const currDate = item[dateField];
+                const diffDays = Math.max(0, Math.round((currDate - prevDate) / (1000 * 60 * 60 * 24)) - 1);
+                let gapStatus = 'safe';
+                if (diffDays < 3) gapStatus = 'danger';
+                else if (diffDays <= 4) gapStatus = 'warning';
+                return { ...item, netStudyDays: diffDays, gapStatus, prevCourseName: list[i - 1].name };
+            });
+        };
+
+        const analyzedMoedA = computeGaps(moedAList, 'moedADate');
+        const analyzedMoedB = computeGaps(moedBList, 'moedBDate');
+        const collisions = analyzedMoedA.filter(x => x.gapStatus === 'danger');
+
+        // Strategic Moed B Split Recommendation: find which course in a tight cluster gives the highest relief when deferred to Moed B
+        let recommendedSplit = null;
+        if (collisions.length > 0) {
+            const firstCollisionIdx = analyzedMoedA.findIndex(x => x.gapStatus === 'danger');
+            const pair = [analyzedMoedA[firstCollisionIdx - 1], analyzedMoedA[firstCollisionIdx]].filter(Boolean);
+            // Prefer splitting the course with fewer downstream bottlenecks (so we don't risk delaying critical prerequisites), or lower credits
+            pair.sort((a, b) => (a.bottleneckCount - b.bottleneckCount) || (a.credits - b.credits));
+            const bestCandidate = pair[0];
+            if (bestCandidate) {
+                recommendedSplit = {
+                    course: bestCandidate,
+                    reason: `דחיית "${bestCandidate.name}" למועד ב׳ (${formatHebrewDateShort(bestCandidate.moedBDate)}) פותרת את הצפיפות הקריטית (${analyzedMoedA[firstCollisionIdx].netStudyDays} ימי למידה נטו) ומגדילה את מרווח הלמידה במועד א׳, תוך שמירה על קורסי החסימה הקריטיים במועד א׳.`
+                };
+            }
+        }
+
+        return {
+            semester: activeSemNum,
+            semesterTitle: semObj.title || `סמסטר ${activeSemNum}`,
+            allExams: examCourses,
+            moedA: analyzedMoedA,
+            moedB: analyzedMoedB,
+            collisionsCount: collisions.length,
+            recommendedSplit
+        };
+    }
+
+    function openExamDensityModal(defaultSemNum) {
+        const plan = getActivePlan();
+        const activeSem = Number(defaultSemNum) || (global.gameState && Number(global.gameState.currentActiveSemester)) || 3;
+        const analysis = analyzeSemesterExamDensity(activeSem);
+        if (!analysis) return;
+
+        let modal = document.getElementById('planner-exam-density-modal');
+        if (modal) modal.remove();
+
+        modal = document.createElement('div');
+        modal.id = 'planner-exam-density-modal';
+        modal.className = 'modal-backdrop active';
+        modal.style.cssText = 'position: fixed; inset: 0; background: rgba(10, 15, 29, 0.9); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 100060; padding: 16px;';
+
+        const semOptionsHtml = plan.map(s => `<option value="${s.semester}" ${Number(s.semester) === analysis.semester ? 'selected' : ''}>סמסטר ${s.semester} (${(s.courses || []).length} קורסים)</option>`).join('');
+
+        const renderExamRow = (item, isMoedBView) => {
+            const dateStr = formatHebrewDateShort(isMoedBView ? item.moedBDate : item.moedADate);
+            let gapBadge = '<span style="font-size:0.74rem; background:rgba(56,189,248,0.15); color:#38bdf8; padding:2px 8px; border-radius:6px; font-weight:700;">🏁 מבחן ראשון בסבב</span>';
+            if (item.netStudyDays !== null) {
+                const bg = item.gapStatus === 'danger' ? 'rgba(239,68,68,0.2)' : (item.gapStatus === 'warning' ? 'rgba(245,158,11,0.2)' : 'rgba(16,185,129,0.2)');
+                const col = item.gapStatus === 'danger' ? '#f87171' : (item.gapStatus === 'warning' ? '#fbbf24' : '#34d399');
+                const icon = item.gapStatus === 'danger' ? '🔴 צפיפות חריגה:' : (item.gapStatus === 'warning' ? '🟡 מרווח בינוני:' : '🟢 מרווח נוח:');
+                gapBadge = `<span style="font-size:0.74rem; background:${bg}; color:${col}; border:1px solid ${col}55; padding:2px 8px; border-radius:6px; font-weight:700;">${icon} ${item.netStudyDays} ימי למידה נטו</span>`;
+            }
+
+            return `
+                <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; padding:10px 14px; border-radius:10px; background:rgba(255,255,255,0.03); border:1px solid ${item.gapStatus === 'danger' ? 'rgba(239,68,68,0.45)' : 'rgba(255,255,255,0.08)'};">
+                    <div>
+                        <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                            <strong style="color:#f8fafc; font-size:0.9rem;">${escapeHtml(item.name)}</strong>
+                            <span style="font-size:0.72rem; color:#94a3b8; font-family:monospace;">(${escapeHtml(item.altCode)}) • ${item.credits} נק״ז</span>
+                            ${item.bottleneckCount >= 3 ? `<span style="font-size:0.68rem; background:rgba(245,158,11,0.18); color:#fcd34d; padding:1px 6px; border-radius:4px; font-weight:700;">🔥 חוסם ${item.bottleneckCount} קורסים</span>` : ''}
+                        </div>
+                        <div style="font-size:0.76rem; color:#cbd5e1; margin-top:4px; display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                            <span>📅 ${isMoedBView ? 'מועד ב׳' : 'מועד א׳'}: <strong>${dateStr}</strong></span>
+                            <span style="color:#94a3b8;">(${isMoedBView ? `מועד א׳ המקורי: ${formatHebrewDateShort(item.moedADate)}` : `מועד ב׳: ${formatHebrewDateShort(item.moedBDate)}`})</span>
+                        </div>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                        ${gapBadge}
+                        <button type="button" class="btn-toggle-moedb-split" data-code="${escapeHtml(item.code)}" style="font-size:0.74rem; font-weight:700; padding:5px 10px; border-radius:6px; cursor:pointer; border:1px solid ${item.isSplitToB ? '#38bdf8' : 'rgba(245,158,11,0.5)'}; background:${item.isSplitToB ? 'rgba(56,189,248,0.18)' : 'rgba(245,158,11,0.14)'}; color:${item.isSplitToB ? '#38bdf8' : '#fbbf24'};">
+                            ${item.isSplitToB ? '↩️ החזר למועד א׳' : '✂️ פצל למועד ב׳'}
+                        </button>
+                    </div>
+                </div>
+            `;
+        };
+
+        modal.innerHTML = `
+            <div class="modal-card" style="background:#0f172a; border:1px solid #f59e0b; border-radius:16px; padding:24px; width:100%; max-width:720px; max-height:90vh; overflow-y:auto; direction:rtl; box-shadow:0 15px 40px rgba(0,0,0,0.85);">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:14px; border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:12px; gap:10px; flex-wrap:wrap;">
+                    <div>
+                        <h2 style="margin:0; font-size:1.22rem; font-weight:800; color:#f8fafc; display:flex; align-items:center; gap:8px;">
+                            <span>📅</span>
+                            <span>מנתח צפיפות תקופת מבחנים ואסטרטגיית פיצול מועדי ב׳</span>
+                        </h2>
+                        <span style="font-size:0.76rem; color:#94a3b8;">חישוב ימי למידה נטו בין בחינות עוקבות, איתור התנגשויות (&lt;3 ימים), וסימולציית פיצול יזום למועד ב׳</span>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <select id="exam-density-sem-select" aria-label="בחר סמסטר לניתוח מבחנים" style="background:#1e293b; color:#f8fafc; border:1px solid rgba(255,255,255,0.15); border-radius:8px; padding:5px 10px; font-size:0.8rem; font-weight:700;">
+                            ${semOptionsHtml}
+                        </select>
+                        <button type="button" class="btn-close-exam-density" aria-label="סגור חלון" style="background:transparent; border:none; font-size:1.4rem; color:#94a3b8; cursor:pointer; padding:4px;">✕</button>
+                    </div>
+                </div>
+
+                <!-- Summary & Strategic Recommendation Banner -->
+                <div style="background:${analysis.collisionsCount > 0 ? 'rgba(239,68,68,0.1)' : 'rgba(16,185,129,0.1)'}; border:1px solid ${analysis.collisionsCount > 0 ? 'rgba(239,68,68,0.4)' : 'rgba(16,185,129,0.4)'}; border-radius:12px; padding:14px; margin-bottom:16px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:6px;">
+                        <strong style="font-size:0.95rem; color:${analysis.collisionsCount > 0 ? '#fca5a5' : '#34d399'};">
+                            ${analysis.collisionsCount > 0 ? `⚠️ זוהו ${analysis.collisionsCount} צפיפויות קריטיות (פחות מ-3 ימי למידה נטו) במועד א׳!` : '✅ לוח מבחני מועד א׳ מאוזן — לכל המבחנים לפחות 3 ימי למידה נטו!'}
+                        </strong>
+                        <span style="font-size:0.75rem; color:#cbd5e1;">מועד א׳: ${analysis.moedA.length} בחינות • פוצלו למועד ב׳: ${analysis.moedB.length} בחינות</span>
+                    </div>
+                    ${analysis.recommendedSplit ? `
+                        <div style="font-size:0.8rem; color:#fde68a; background:rgba(245,158,11,0.12); border:1px solid rgba(245,158,11,0.3); border-radius:8px; padding:8px 12px; margin-top:8px; display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
+                            <div style="flex:1;">💡 <strong>המלצת אלגוריתם:</strong> ${analysis.recommendedSplit.reason}</div>
+                            <button type="button" class="btn-toggle-moedb-split" data-code="${escapeHtml(analysis.recommendedSplit.course.code)}" style="background:#f59e0b; color:#0f172a; border:none; border-radius:6px; padding:5px 12px; font-size:0.76rem; font-weight:800; cursor:pointer; white-space:nowrap;">
+                                ⚡ החל פיצול מומלץ
+                            </button>
+                        </div>
+                    ` : ''}
+                </div>
+
+                <!-- Moed A Timeline -->
+                <div style="margin-bottom:16px;">
+                    <h3 style="font-size:0.88rem; color:#38bdf8; margin:0 0 8px 0;">📌 ציר זמן מועדי א׳ (${analysis.moedA.length} מבחנים פעילים):</h3>
+                    <div style="display:flex; flex-direction:column; gap:8px;">
+                        ${analysis.moedA.length > 0 ? analysis.moedA.map(item => renderExamRow(item, false)).join('') : '<div style="color:#94a3b8; font-size:0.8rem; padding:10px;">כל המבחנים בסמסטר זה פוצלו למועד ב׳.</div>'}
+                    </div>
+                </div>
+
+                <!-- Split to Moed B Timeline -->
+                ${analysis.moedB.length > 0 ? `
+                    <div style="margin-bottom:16px;">
+                        <h3 style="font-size:0.88rem; color:#fbbf24; margin:0 0 8px 0;">✂️ מבחנים שפוצלו יזום למועד ב׳ (${analysis.moedB.length}):</h3>
+                        <div style="display:flex; flex-direction:column; gap:8px;">
+                            ${analysis.moedB.map(item => renderExamRow(item, true)).join('')}
+                        </div>
+                    </div>
+                ` : ''}
+
+                <!-- Reserve Duty Moed C Rights Note -->
+                <div style="font-size:0.75rem; color:#94a3b8; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07); border-radius:8px; padding:10px 12px; display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
+                    <span>🎖️ <strong>זכויות משרתי מילואים (מתווה הטכניון):</strong> זכאות למועד מיוחד (מועד ג׳) לכל קורס שבו בוצעו מילואים סמוך לבחינה או שנמנע מרווח של 4 ימי למידה.</span>
+                    <button type="button" class="btn-close-exam-density" style="background:#38bdf8; color:#082f49; font-weight:800; padding:6px 16px; border-radius:8px; border:none; cursor:pointer;">סגור</button>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        const closeModal = () => modal.remove();
+        modal.querySelectorAll('.btn-close-exam-density').forEach(b => b.addEventListener('click', closeModal));
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) closeModal();
+        });
+
+        const semSel = modal.querySelector('#exam-density-sem-select');
+        if (semSel) {
+            semSel.addEventListener('change', () => {
+                openExamDensityModal(Number(semSel.value));
+            });
+        }
+
+        modal.querySelectorAll('.btn-toggle-moedb-split').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const cCode = btn.getAttribute('data-code');
+                togglePlannedMoedBSplit(cCode);
+                openExamDensityModal(analysis.semester);
+            });
+        });
+    }
+
     global.DegreePlanner = global.DegreePlanner || {};
     global.DegreePlanner.openGraduationClearanceModal = openGraduationClearanceModal;
     global.DegreePlanner.openGraduationAuditModal = openGraduationClearanceModal;
+    global.DegreePlanner.openExamDensityModal = openExamDensityModal;
+    global.DegreePlanner.analyzeSemesterExamDensity = analyzeSemesterExamDensity;
+    global.openExamDensityModal = openExamDensityModal;
 
     // --------------------------------------------------------------------------
     // Rendering Sub-systems
@@ -2488,7 +2874,10 @@
                             ${isSummer ? '<span style="font-size: 1rem;">☀️</span>' : ''}
                             <span class="semester-col-title">${escapeHtml(semTitle)}</span>
                         </div>
-                        <span class="semester-col-credits">${semCredits.toFixed(1)} נק״ז</span>
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                            <button type="button" onclick="window.DegreePlanner.openExamDensityModal(${semNum})" title="נתח צפיפות מבחנים וימי למידה נטו בסמסטר ${semNum}" style="background: rgba(245, 158, 11, 0.14); border: 1px solid rgba(245, 158, 11, 0.4); color: #fbbf24; font-size: 0.68rem; font-weight: 700; padding: 2px 6px; border-radius: 5px; cursor: pointer;">📅 מבחנים</button>
+                            <span class="semester-col-credits">${semCredits.toFixed(1)} נק״ז</span>
+                        </div>
                     </div>
                     ${semWorkload.meterHtml}
                     <div class="planner-course-list" data-semester="${semNum}">
@@ -2532,6 +2921,21 @@
                     }
                 }
 
+                const catLookup = (global.PLANNER_CATALOG && global.PLANNER_CATALOG.ALL_COURSES_MAP)
+                    ? (global.PLANNER_CATALOG.ALL_COURSES_MAP[course.code] || (course.altCode && global.PLANNER_CATALOG.ALL_COURSES_MAP[course.altCode]))
+                    : null;
+                const clusterLabel = course.cluster || (catLookup && catLookup.cluster) || '';
+                const clusterBadgeHtml = clusterLabel
+                    ? `<span class="badge-course-cluster" style="font-size: 0.65rem; background: rgba(168, 85, 247, 0.16); color: #d8b4fe; border: 1px solid rgba(168, 85, 247, 0.35); padding: 1px 6px; border-radius: 4px; font-weight: 700;" title="אשכול התמחות: ${escapeHtml(clusterLabel)}">🔬 ${escapeHtml(clusterLabel)}</span>`
+                    : '';
+
+                const bInfo = (!completed && global.PLANNER_CATALOG && typeof global.PLANNER_CATALOG.getBottleneckInfo === 'function')
+                    ? global.PLANNER_CATALOG.getBottleneckInfo(course.code)
+                    : null;
+                const bottleneckBadgeHtml = (bInfo && bInfo.isCriticalBottleneck)
+                    ? `<span class="badge-bottleneck-radar" style="font-size: 0.65rem; background: ${bInfo.severity === 'critical' ? 'rgba(239, 68, 68, 0.18)' : 'rgba(245, 158, 11, 0.18)'}; color: ${bInfo.severity === 'critical' ? '#fca5a5' : '#fcd34d'}; border: 1px solid ${bInfo.severity === 'critical' ? 'rgba(239, 68, 68, 0.4)' : 'rgba(245, 158, 11, 0.4)'}; padding: 1px 6px; border-radius: 4px; font-weight: 700;" title="צוואר בקבוק בנתיב הקריטי: פותח ${bInfo.transitiveUnlockCount} קורסי המשך בתואר (${bInfo.mandatoryUnlockCount} קורסי חובה)">🔥 פותח ${bInfo.transitiveUnlockCount}</span>`
+                    : '';
+
                 chunks.push(`
                     <div class="planner-course-card ${completed ? 'course-card-completed' : ''}" 
                          draggable="${canDrag ? 'true' : 'false'}" 
@@ -2545,6 +2949,8 @@
                                 ${movedBadge}
                                 ${retakeBadge}
                                 ${summerWarningBadge}
+                                ${bottleneckBadgeHtml}
+                                ${clusterBadgeHtml}
                                 <span class="course-card-tag ${tagClass} ${course.list && !completed ? 'tag-interactive-list' : ''}" 
                                       ${course.list && !completed ? `data-action="cycle-list" data-code="${escapeHtml(course.code)}" title="לחץ לשינוי שיוך רשימת בחירה (א׳ / ב׳ / ג׳ / ד׳ / חופשית)" style="cursor: pointer; user-select: none;"` : ''}>
                                     ${tagLabel} ${course.list && !completed ? '▾' : ''}
@@ -3029,7 +3435,38 @@
             }
         }
 
-        if (coursesToShow.length === 0) {
+        // Specialization Cluster Filter (U-02)
+        const activeClusterFilter = global._plannerClusterFilter || 'ALL';
+        const showClusterBar = (selectedCategory === 'ALL' || selectedCategory === 'A' || selectedCategory === 'B');
+        const clusterOptions = [
+            { id: 'ALL', label: 'כל האשכולות' },
+            { id: 'רובוטיקה ובקרה', label: '🤖 רובוטיקה ובקרה' },
+            { id: 'אנרגיה וזורמים', label: '🔥 אנרגיה וזורמים' },
+            { id: 'תכן, חומרים וייצור', label: '📐 תכן וייצור' },
+            { id: 'חישוב ואנליזה (FEM/CFD)', label: '💻 FEM/CFD' },
+            { id: 'מכטרוניקה ואופטיקה', label: '🔬 מכטרוניקה ואופטיקה' }
+        ];
+        const clusterFilterBarHtml = showClusterBar ? `
+            <div style="display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 8px; padding: 4px 2px; border-bottom: 1px solid rgba(255,255,255,0.06);">
+                ${clusterOptions.map(cl => `
+                    <button type="button" onclick="window._plannerClusterFilter='${cl.id}'; window.DegreePlanner.render();" style="font-size: 0.68rem; padding: 3px 8px; border-radius: 999px; cursor: pointer; font-weight: 700; border: 1px solid ${activeClusterFilter === cl.id ? '#a855f7' : 'rgba(255,255,255,0.12)'}; background: ${activeClusterFilter === cl.id ? 'rgba(168,85,247,0.25)' : 'rgba(255,255,255,0.04)'}; color: ${activeClusterFilter === cl.id ? '#f3e8ff' : '#94a3b8'};">
+                        ${cl.label}
+                    </button>
+                `).join('')}
+            </div>
+        ` : '';
+
+        const filteredByCluster = (showClusterBar && activeClusterFilter !== 'ALL')
+            ? coursesToShow.filter(c => {
+                const catLookup = (global.PLANNER_CATALOG && global.PLANNER_CATALOG.ALL_COURSES_MAP)
+                    ? (global.PLANNER_CATALOG.ALL_COURSES_MAP[c.code] || (c.altCode && global.PLANNER_CATALOG.ALL_COURSES_MAP[c.altCode]))
+                    : null;
+                const cl = c.cluster || (catLookup && catLookup.cluster) || '';
+                return cl === activeClusterFilter;
+            })
+            : coursesToShow;
+
+        if (filteredByCluster.length === 0) {
             const emptyMsg = selectedCategory === 'UNASSIGNED' 
                 ? 'אין כרגע קורסים שלא שובצו. גרור קורסים מכל סמסטר לכאן כדי להסיר אותם מהתכנון.' 
                 : (selectedCategory === 'MANDATORY'
@@ -3037,10 +3474,10 @@
                     : (selectedCategory === 'SUMMER' 
                         ? 'לא נמצאו קורסים המוצעים בסמסטר קיץ התואמים לחיפוש.' 
                         : 'לא נמצאו קורסי בחירה מתאימים לסינון.'));
-            poolContainer.innerHTML = `<div style="font-size: 0.76rem; color: #94a3b8; text-align: center; padding: 16px;">${emptyMsg}</div>`;
+            poolContainer.innerHTML = clusterFilterBarHtml + `<div style="font-size: 0.76rem; color: #94a3b8; text-align: center; padding: 16px;">${emptyMsg}</div>`;
         } else {
-            const totalCount = coursesToShow.length;
-            const visibleCourses = coursesToShow.slice(0, catalogVisibleCount);
+            const totalCount = filteredByCluster.length;
+            const visibleCourses = filteredByCluster.slice(0, catalogVisibleCount);
             const hasMore = totalCount > catalogVisibleCount;
 
             const cardsHtml = visibleCourses.map(course => {
@@ -3061,6 +3498,21 @@
                         ? (course.isPlaced ? `✓ משובץ בסמ' ${course.placedSem}` : '⚠️ חסר בתכנון')
                         : (isSportItem ? '🏃 ספורט' : (isMalagItem ? '🎭 מל״ג' : (isTechnionWide ? '🌐 בחירה חופשית' : (course.list ? `רשימה ${course.list}׳` : 'חובה')))));
 
+                const catLookup = (global.PLANNER_CATALOG && global.PLANNER_CATALOG.ALL_COURSES_MAP)
+                    ? (global.PLANNER_CATALOG.ALL_COURSES_MAP[course.code] || (course.altCode && global.PLANNER_CATALOG.ALL_COURSES_MAP[course.altCode]))
+                    : null;
+                const clusterLabel = course.cluster || (catLookup && catLookup.cluster) || '';
+                const clusterPillHtml = clusterLabel
+                    ? `<span style="font-size: 0.65rem; background: rgba(168, 85, 247, 0.16); color: #d8b4fe; border: 1px solid rgba(168, 85, 247, 0.35); padding: 1px 6px; border-radius: 4px; font-weight: 700;">🔬 ${escapeHtml(clusterLabel)}</span>`
+                    : '';
+
+                const bInfo = (global.PLANNER_CATALOG && typeof global.PLANNER_CATALOG.getBottleneckInfo === 'function')
+                    ? global.PLANNER_CATALOG.getBottleneckInfo(course.code)
+                    : null;
+                const bottleneckPillHtml = (bInfo && bInfo.isCriticalBottleneck)
+                    ? `<span style="font-size: 0.65rem; background: rgba(245, 158, 11, 0.18); color: #fcd34d; border: 1px solid rgba(245, 158, 11, 0.4); padding: 1px 6px; border-radius: 4px; font-weight: 700;" title="פותח ${bInfo.transitiveUnlockCount} קורסי המשך בתואר">🔥 פותח ${bInfo.transitiveUnlockCount}</span>`
+                    : '';
+
                 const actionButton = isMandatoryItem && !course.isPlaced
                     ? `<button type="button" class="btn-restore-mandatory" data-code="${escapeHtml(course.code)}" data-sem="${course.suggestedSemester || 1}" title="הוסף קורס זה לסמסטר בתכנון">➕ הוסף</button>`
                     : `<button type="button" class="btn-add-to-plan" data-code="${escapeHtml(course.code)}" title="${isMandatoryItem && course.isPlaced ? 'העבר לסמסטר אחר' : 'הוסף קורס זה לסמסטר'}">${isMandatoryItem && course.isPlaced ? '⇄' : '+'}</button>`;
@@ -3069,8 +3521,10 @@
                     <div class="planner-pool-item" draggable="true" data-code="${escapeHtml(course.code)}" data-alt-code="${escapeHtml(course.altCode || '')}" title="לחץ לצפייה בסילבוס, ביקורות והיסטוגרמות ב-CheeseFork 🧀">
                         <div class="pool-item-info">
                             <span class="pool-item-title">${escapeHtml(course.name)}</span>
-                            <div class="pool-item-meta">
+                            <div class="pool-item-meta" style="display: flex; align-items: center; gap: 4px; flex-wrap: wrap;">
                                 <span class="course-card-tag ${tagClass}">${tagLabel}</span>
+                                ${clusterPillHtml}
+                                ${bottleneckPillHtml}
                                 <span>${escapeHtml(course.code)}</span>
                                 <span>• ${course.credits} נק״ז</span>
                                 ${course.faculty ? `<span style="color: #94a3b8; font-size: 0.68rem; margin-right: 4px;" title="${escapeHtml(course.faculty)}">• ${escapeHtml(course.faculty.replace('הפקולטה ל', '').replace('המחלקה ל', ''))}</span>` : ''}
@@ -3097,7 +3551,7 @@
                 </button>
             ` : '';
 
-            poolContainer.innerHTML = cardsHtml + loadMoreHtml;
+            poolContainer.innerHTML = clusterFilterBarHtml + cardsHtml + loadMoreHtml;
         }
     }
 
@@ -5302,6 +5756,7 @@
         global.DegreePlanner.togglePlannerHeaderCollapse = togglePlannerHeaderCollapse;
         global.DegreePlanner.updatePlannerCollapsedPills = updatePlannerCollapsedPills;
         global.DegreePlanner.setPlannerMobileView = setPlannerMobileView;
+        global.DegreePlanner.scheduleCourseFromCatalog = promptAddCourseToSemester;
     }
 
     // Auto initialize events on DOM load

@@ -23,7 +23,7 @@ import java.util.regex.Pattern;
  * Strictly: [Location] [Course] [Hour]
  * Zero status words ("פעיל", "מחר", "הבא"), zero countdown minutes,
  * zero symbols/icons/bullets ("•"), only the essentials.
- * e.g. "אולמן 506 מד\"ר ח 11:30" or "אין שיעורים".
+ * e.g. "אולמן 506 מד\"ח 11:30" or "אין שיעורים".
  */
 public class SemesteroComplicationService extends ComplicationDataSourceService {
 
@@ -33,7 +33,7 @@ public class SemesteroComplicationService extends ComplicationDataSourceService 
     @Override
     public ComplicationData getPreviewData(@NonNull ComplicationType type) {
         PendingIntent tapIntent = getLaunchIntent();
-        PlainComplicationText text = new PlainComplicationText.Builder("אולמן 506 מד\"ר ח 11:30").build();
+        PlainComplicationText text = new PlainComplicationText.Builder("אולמן 506 מד\"ח 11:30").build();
 
         if (type == ComplicationType.SHORT_TEXT) {
             return new ShortTextComplicationData.Builder(text, text)
@@ -51,6 +51,7 @@ public class SemesteroComplicationService extends ComplicationDataSourceService 
     public void onComplicationRequest(@NonNull ComplicationRequest request, @NonNull ComplicationRequestListener listener) {
         Calendar now = Calendar.getInstance();
         WearScheduleHelper.ScheduleResolution res = WearScheduleHelper.resolve(this, now);
+        WearScheduleHelper.scheduleNextBoundaryUpdate(this);
 
         PendingIntent tapIntent = getLaunchIntent();
 
@@ -129,7 +130,7 @@ public class SemesteroComplicationService extends ComplicationDataSourceService 
         String t = title.toLowerCase();
 
         if (t.contains("דיפרנציאליות חלקיות") || t.contains("מד\"ר ח") || t.contains("מד\"ח") || t.contains("מדח") || t.contains("104228")) {
-            return "מד\"ר ח";
+            return "מד\"ח";
         }
         if (t.contains("מוצקים") || t.contains("034053") || t.contains("34053")) {
             return "מוצקים";
@@ -171,7 +172,8 @@ public class SemesteroComplicationService extends ComplicationDataSourceService 
      */
     public static String getShortRoomName(String room) {
         if (room == null || room.trim().isEmpty()) return "";
-        String r = room.replace("חדר:", "").replace("חדר", "")
+        String r = room.replace("📍", "")
+                       .replace("חדר:", "").replace("חדר", "")
                        .replace("בניין:", "").replace("בניין", "")
                        .replace("אולם:", "").replace("אולם", "")
                        .replace("\"", "").replace("'", "")
@@ -196,7 +198,14 @@ public class SemesteroComplicationService extends ComplicationDataSourceService 
             return "קאהן";
         }
 
-        // 3. Chemical Engineering
+        // 3. Sherman (Education in Science and Technology)
+        if (r.contains("שרמן")) {
+            Matcher m = Pattern.compile("\\d+").matcher(r);
+            if (m.find()) return "שרמן " + m.group();
+            return "שרמן";
+        }
+
+        // 4. Chemical Engineering
         if (r.contains("כימית")) {
             Matcher m = Pattern.compile("\\d+").matcher(r);
             if (m.find()) {
@@ -210,35 +219,35 @@ public class SemesteroComplicationService extends ComplicationDataSourceService 
             return "כימית";
         }
 
-        // 4. Taub / CS
+        // 5. Taub / CS
         if (r.contains("טאוב") || r.contains("מדמ\"ח") || r.contains("מדמח")) {
             Matcher m = Pattern.compile("\\d+").matcher(r);
             if (m.find()) return "טאוב " + m.group();
             return "טאוב";
         }
 
-        // 5. Sego
+        // 6. Sego
         if (r.contains("סגו")) {
             Matcher m = Pattern.compile("\\d+").matcher(r);
             if (m.find()) return "סגו " + m.group();
             return "סגו";
         }
 
-        // 6. Lady Davis
+        // 7. Lady Davis
         if (r.contains("דיוויס") || r.contains("דייויס")) {
             Matcher m = Pattern.compile("\\d+").matcher(r);
             if (m.find()) return "דייויס " + m.group();
             return "דייויס";
         }
 
-        // 7. Physics
+        // 8. Physics
         if (r.contains("פיסיקה") || r.contains("פיזיקה")) {
             Matcher m = Pattern.compile("\\d+").matcher(r);
             if (m.find()) return "פיסיקה " + m.group();
             return "פיסיקה";
         }
 
-        // 8. Sports / Athletics / Pool / Gym
+        // 9. Sports / Athletics / Pool / Gym
         if (r.contains("אתלטיקה") || r.contains("חינוך גופני") || r.contains("גופני")) {
             return "אתלטיקה";
         }
@@ -246,7 +255,7 @@ public class SemesteroComplicationService extends ComplicationDataSourceService 
         if (r.contains("כושר")) return "כושר";
         if (r.contains("ספורט")) return "ספורט";
 
-        // 9. Bloomfield / Rabin / Silver
+        // 10. Bloomfield / Rabin / Silver
         if (r.contains("בלומפילד")) {
             Matcher m = Pattern.compile("\\d+").matcher(r);
             if (m.find()) return "בלומפילד " + m.group();
@@ -258,7 +267,7 @@ public class SemesteroComplicationService extends ComplicationDataSourceService 
             return "רבין";
         }
 
-        // 10. Fallback for any other new room: clean and keep under 10 chars
+        // 11. Fallback for any other new room: clean and keep under 10 chars
         if (r.length() > 10) {
             return r.substring(0, 10).trim();
         }

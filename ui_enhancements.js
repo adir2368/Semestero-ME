@@ -998,33 +998,124 @@
         document.body.appendChild(div);
     }
 
+    function resolveRichCourseData(code) {
+        if (!code) return null;
+        const normCode = String(code).trim();
+        const strippedCode = normCode.replace(/^0+/, '');
+        const catalogMap = (window.PLANNER_CATALOG && window.PLANNER_CATALOG.ALL_COURSES_MAP) ? window.PLANNER_CATALOG.ALL_COURSES_MAP : {};
+        const catEntry = catalogMap[normCode] || catalogMap[strippedCode] || null;
+
+        let cfEntry = null;
+        if (window.CHEESEFORK_DB && Array.isArray(window.CHEESEFORK_DB)) {
+            cfEntry = window.CHEESEFORK_DB.find(x => {
+                const xCode = String(x.rawNum || x.code6 || x.code || '').trim();
+                return xCode === normCode || xCode.replace(/^0+/, '') === strippedCode;
+            }) || null;
+        }
+
+        if (!catEntry && !cfEntry) return null;
+        const merged = Object.assign({}, cfEntry || {}, catEntry || {});
+        merged.code = (catEntry && catEntry.code) || (cfEntry && (cfEntry.rawNum || cfEntry.code6 || cfEntry.code)) || normCode;
+        merged.name = (catEntry && catEntry.name) || (cfEntry && (cfEntry.name || cfEntry.title)) || `קורס טכניוני (${normCode})`;
+        merged.credits = (catEntry && typeof catEntry.credits === 'number') ? catEntry.credits : (parseFloat(cfEntry && cfEntry.credits) || 3.0);
+        merged.moedA = (cfEntry && cfEntry.moedA) || (catEntry && catEntry.moedA) || '';
+        merged.moedB = (cfEntry && cfEntry.moedB) || (catEntry && catEntry.moedB) || '';
+        merged.faculty = (cfEntry && cfEntry.faculty) || (catEntry && catEntry.faculty) || 'הנדסת מכונות';
+        merged.syllabus = (cfEntry && cfEntry.syllabus) || (catEntry && (catEntry.note || catEntry.description)) || 'סילבוס מלא זמין בקטלוג הטכניוני';
+        return merged;
+    }
+
+    function formatCourseCodeList(codes) {
+        if (!codes) return 'ללא';
+        if (typeof codes === 'string') return codes.trim() || 'ללא';
+        if (!Array.isArray(codes) || codes.length === 0) return 'ללא';
+        const catalogMap = (window.PLANNER_CATALOG && window.PLANNER_CATALOG.ALL_COURSES_MAP) ? window.PLANNER_CATALOG.ALL_COURSES_MAP : {};
+        return codes.map(raw => {
+            const c = catalogMap[raw] || catalogMap[String(raw).replace(/^0+/, '')];
+            const dispCode = (c && (c.altCode || c.code)) || raw;
+            const dispName = c && c.name ? c.name : '';
+            return dispName
+                ? `<span style="display:inline-block; background:rgba(56,189,248,0.12); border:1px solid rgba(56,189,248,0.3); border-radius:5px; padding:2px 7px; margin:2px; font-size:0.78rem;">${dispName} <small style="opacity:0.75; font-family:monospace;">(${dispCode})</small></span>`
+                : `<span style="font-family:monospace;">${raw}</span>`;
+        }).join(' ');
+    }
+
+    function estimateCourseWorkloadBadge(course) {
+        const cr = parseFloat(course && course.credits) || 3.0;
+        const type = (course && course.type) || '';
+        if (type === 'sports' || type === 'humanities' || cr <= 2.0) {
+            return `<span style="color:#34d399; font-weight:700;">🟢 עומס קל (~2-4 שעות/שבוע)</span>`;
+        }
+        if (cr >= 4.5 || (course.prereqs && course.prereqs.length >= 3)) {
+            return `<span style="color:#f87171; font-weight:700;">🔴 עומס גבוה מאוד (~10-13 שעות/שבוע)</span>`;
+        }
+        if (cr >= 3.5) {
+            return `<span style="color:#fbbf24; font-weight:700;">🟡 עומס בינוני-גבוה (~7-9 שעות/שבוע)</span>`;
+        }
+        return `<span style="color:#38bdf8; font-weight:700;">🔵 עומס מאוזן (~5-6 שעות/שבוע)</span>`;
+    }
+
     function populateCourseCompareOptions() {
         const sel1 = document.getElementById('compare-select-1');
         const sel2 = document.getElementById('compare-select-2');
         if (!sel1 || !sel2) return;
 
         const courses = [];
-        const seen = new Set();
+        const seenCanon = new Set();
 
-        if (window.CHEESEFORK_DB && Array.isArray(window.CHEESEFORK_DB)) {
-            window.CHEESEFORK_DB.forEach(c => {
-                const code = c.rawNum || c.code6 || c.code;
-                if (code && !seen.has(code)) {
-                    seen.add(code);
-                    courses.push({ code, name: c.name, credits: c.credits });
-                }
+        const addCandidate = (rawCode) => {
+            const rich = resolveRichCourseData(rawCode);
+            if (!rich || !rich.code) return;
+            const canon = String(rich.code).replace(/^0+/, '');
+            if (seenCanon.has(canon)) return;
+            seenCanon.add(canon);
+            courses.push({
+                code: rich.code,
+                displayCode: rich.altCode || rich.code,
+                name: rich.name,
+                credits: rich.credits
             });
-        }
-        courses.sort((a, b) => a.name.localeCompare(b.name, 'he'));
+        };
 
-        const optionsHtml = courses.map(c => `<option value="${c.code}">${c.code} - ${c.name} (${c.credits} נק״ז)</option>`).join('');
+        if (window.PLANNER_CATALOG && window.PLANNER_CATALOG.ALL_COURSES_MAP) {
+            Object.keys(window.PLANNER_CATALOG.ALL_COURSES_MAP).forEach(addCandidate);
+        }
+        if (window.CHEESEFORK_DB && Array.isArray(window.CHEESEFORK_DB)) {
+            window.CHEESEFORK_DB.forEach(c => addCandidate(c.rawNum || c.code6 || c.code));
+        }
+
+        courses.sort((a, b) => (a.name || '').localeCompare(b.name || '', 'he'));
+
+        const prev1 = sel1.value;
+        const prev2 = sel2.value;
+        const optionsHtml = courses.map(c => `<option value="${c.code}">${c.displayCode} - ${c.name} (${c.credits} נק״ז)</option>`).join('');
         sel1.innerHTML = optionsHtml;
         sel2.innerHTML = optionsHtml;
 
-        // Default: pick two popular electives if not set
-        if (!sel1.value && courses.length > 0) sel1.value = courses[0].code;
-        if (!sel2.value && courses.length > 1) sel2.value = courses[1].code;
+        if (prev1 && courses.some(c => c.code === prev1)) {
+            sel1.value = prev1;
+        } else if (courses.length > 0) {
+            const def1 = courses.find(c => c.code === '00340053' || c.displayCode === '034053') || courses[0];
+            sel1.value = def1.code;
+        }
+        if (prev2 && courses.some(c => c.code === prev2)) {
+            sel2.value = prev2;
+        } else if (courses.length > 1) {
+            const def2 = courses.find(c => (c.code === '00340056' || c.displayCode === '034056') && c.code !== sel1.value) || courses[1];
+            sel2.value = def2.code;
+        }
     }
+
+    window.quickScheduleFromComparator = function(courseCode) {
+        const rich = resolveRichCourseData(courseCode);
+        if (!rich) return;
+        if (window.DegreePlanner && typeof window.DegreePlanner.scheduleCourseFromCatalog === 'function') {
+            window.DegreePlanner.scheduleCourseFromCatalog(rich.code);
+            window.renderComparisonTable();
+        } else if (typeof window.showToastNotification === 'function') {
+            window.showToastNotification(`פתח את לשונית "תכנון תואר" כדי לשבץ את ${rich.name}`, 'info');
+        }
+    };
 
     window.renderComparisonTable = function() {
         const container = document.getElementById('comparison-table-container');
@@ -1035,25 +1126,8 @@
         const code1 = sel1.value;
         const code2 = sel2.value;
 
-        const getCourseData = (code) => {
-            if (!code) return null;
-            let c = null;
-            if (window.CHEESEFORK_DB && Array.isArray(window.CHEESEFORK_DB)) {
-                c = window.CHEESEFORK_DB.find(x => (x.rawNum === code || x.code6 === code || x.code === code));
-            }
-            if (!c && window.PLANNER_CATALOG) {
-                Object.values(window.PLANNER_CATALOG).forEach(list => {
-                    if (Array.isArray(list)) {
-                        const found = list.find(x => x.code === code || x.altCode === code);
-                        if (found) c = found;
-                    }
-                });
-            }
-            return c;
-        };
-
-        const c1 = getCourseData(code1);
-        const c2 = getCourseData(code2);
+        const c1 = resolveRichCourseData(code1);
+        const c2 = resolveRichCourseData(code2);
 
         if (!c1 || !c2) {
             container.innerHTML = `<div style="text-align: center; color: #94a3b8; padding: 20px;">בחר שני קורסים להשוואה</div>`;
@@ -1063,18 +1137,50 @@
         const isMoedAConflict = (c1.moedA && c2.moedA && c1.moedA === c2.moedA);
         const isMoedBConflict = (c1.moedB && c2.moedB && c1.moedB === c2.moedB);
 
+        const formatTypeLabel = (c) => {
+            if (c.list === 'A') return 'בחירה פקולטית - רשימה א׳';
+            if (c.list === 'B') return 'בחירה פקולטית - רשימה ב׳';
+            if (c.list === 'ENERGY') return 'אשכול אנרגיה';
+            if (c.list === 'MALAG' || c.type === 'humanities') return 'מל״ג / בחירה חופשית';
+            if (c.list === 'SPORTS' || c.type === 'sports') return 'חינוך גופני (ספורט)';
+            if (c.type === 'mandatory') return 'קורס חובה פקולטי';
+            if (c.type === 'science_fund') return 'מדעי יסוד הנדסיים';
+            if (c.type === 'final_project') return 'פרויקט גמר הנדסי (שנה ד׳)';
+            return c.type || 'קורס בחירה';
+        };
+
+        const formatBottleneckCell = (c) => {
+            const bInfo = (window.PLANNER_CATALOG && typeof window.PLANNER_CATALOG.getBottleneckInfo === 'function')
+                ? window.PLANNER_CATALOG.getBottleneckInfo(c.code)
+                : null;
+            if (!bInfo || bInfo.transitiveUnlockCount === 0) {
+                return `<span style="color:#94a3b8;">קורס קצה (אינו חוסם קורסי המשך)</span>`;
+            }
+            const badgeColor = bInfo.severity === 'critical' ? '#ef4444' : (bInfo.severity === 'high' ? '#f59e0b' : '#38bdf8');
+            const namesPreview = bInfo.directDependents.slice(0, 3).map(d => d.name).join(', ');
+            return `
+                <div style="font-weight:800; color:${badgeColor};">
+                    🔥 פותח ${bInfo.transitiveUnlockCount} קורסי המשך (${bInfo.directUnlockCount} ישירים)
+                </div>
+                <div style="font-size:0.75rem; color:#cbd5e1; margin-top:2px;">ישירים: ${namesPreview}${bInfo.directDependents.length > 3 ? '...' : ''}</div>
+            `;
+        };
+
+        const safeName1 = String(c1.name || '').replace(/'/g, "\\'");
+        const safeName2 = String(c2.name || '').replace(/'/g, "\\'");
+
         container.innerHTML = `
             <table class="comparison-table">
                 <thead>
                     <tr>
-                        <th style="width: 28%;">מאפיין השוואה</th>
-                        <th style="width: 36%; color: #38bdf8;">
-                            <div style="font-size: 1.05rem; font-weight: 800;">${c1.name || c1.title}</div>
-                            <div style="font-size: 0.8rem; color: #94a3b8; font-family: monospace;">${code1}</div>
+                        <th style="width: 24%;">מאפיין השוואה</th>
+                        <th style="width: 38%; color: #38bdf8;">
+                            <div style="font-size: 1.05rem; font-weight: 800;">${c1.name}</div>
+                            <div style="font-size: 0.8rem; color: #94a3b8; font-family: monospace;">${c1.altCode || c1.code}</div>
                         </th>
-                        <th style="width: 36%; color: #34d399;">
-                            <div style="font-size: 1.05rem; font-weight: 800;">${c2.name || c2.title}</div>
-                            <div style="font-size: 0.8rem; color: #94a3b8; font-family: monospace;">${code2}</div>
+                        <th style="width: 38%; color: #34d399;">
+                            <div style="font-size: 1.05rem; font-weight: 800;">${c2.name}</div>
+                            <div style="font-size: 0.8rem; color: #94a3b8; font-family: monospace;">${c2.altCode || c2.code}</div>
                         </th>
                     </tr>
                 </thead>
@@ -1085,53 +1191,70 @@
                         <td class="compare-val highlight-num">${c2.credits || 0} נק״ז</td>
                     </tr>
                     <tr>
-                        <td class="compare-label">סיווג רשימה פקולטית</td>
-                        <td class="compare-val">${c1.list ? `רשימה ${c1.list}` : (c1.type || 'בחירה')}</td>
-                        <td class="compare-val">${c2.list ? `רשימה ${c2.list}` : (c2.type || 'בחירה')}</td>
+                        <td class="compare-label">סיווג פקולטי</td>
+                        <td class="compare-val">${formatTypeLabel(c1)}</td>
+                        <td class="compare-val">${formatTypeLabel(c2)}</td>
                     </tr>
                     <tr>
-                        <td class="compare-label">פקולטה מלמדת</td>
-                        <td class="compare-val">${c1.faculty || 'הנדסת מכונות'}</td>
-                        <td class="compare-val">${c2.faculty || 'הנדסת מכונות'}</td>
+                        <td class="compare-label">אשכול התמחות</td>
+                        <td class="compare-val"><span style="background:rgba(168,85,247,0.15); color:#d8b4fe; border:1px solid rgba(168,85,247,0.35); padding:2px 8px; border-radius:999px; font-size:0.78rem; font-weight:700;">${c1.cluster || 'ליבה / כללי'}</span></td>
+                        <td class="compare-val"><span style="background:rgba(168,85,247,0.15); color:#d8b4fe; border:1px solid rgba(168,85,247,0.35); padding:2px 8px; border-radius:999px; font-size:0.78rem; font-weight:700;">${c2.cluster || 'ליבה / כללי'}</span></td>
                     </tr>
                     <tr>
-                        <td class="compare-label">דרישות קדם</td>
-                        <td class="compare-val">${c1.prereqs || 'ללא דרישות קדם'}</td>
-                        <td class="compare-val">${c2.prereqs || 'ללא דרישות קדם'}</td>
+                        <td class="compare-label">מדד עומס משוער</td>
+                        <td class="compare-val">${estimateCourseWorkloadBadge(c1)}</td>
+                        <td class="compare-val">${estimateCourseWorkloadBadge(c2)}</td>
+                    </tr>
+                    <tr>
+                        <td class="compare-label">דרישות קדם (Prereqs)</td>
+                        <td class="compare-val">${formatCourseCodeList(c1.prereqs)}</td>
+                        <td class="compare-val">${formatCourseCodeList(c2.prereqs)}</td>
+                    </tr>
+                    <tr>
+                        <td class="compare-label">קורסי צמוד (Coreqs)</td>
+                        <td class="compare-val">${formatCourseCodeList(c1.coreqs)}</td>
+                        <td class="compare-val">${formatCourseCodeList(c2.coreqs)}</td>
+                    </tr>
+                    <tr>
+                        <td class="compare-label">נתיב קריטי (קורסי המשך)</td>
+                        <td class="compare-val">${formatBottleneckCell(c1)}</td>
+                        <td class="compare-val">${formatBottleneckCell(c2)}</td>
                     </tr>
                     <tr>
                         <td class="compare-label">מועד א׳</td>
-                        <td class="compare-val ${isMoedAConflict ? 'conflict-date' : ''}">${c1.moedA || 'טרם פורסם'}</td>
+                        <td class="compare-val ${isMoedAConflict ? 'conflict-date' : ''}">${c1.moedA || 'לפי לוח בחינות סמסטריאלי'}</td>
                         <td class="compare-val ${isMoedAConflict ? 'conflict-date' : ''}">
-                            ${c2.moedA || 'טרם פורסם'}
+                            ${c2.moedA || 'לפי לוח בחינות סמסטריאלי'}
                             ${isMoedAConflict ? '<div class="conflict-pill">⚠️ התנגשות מועד א׳!</div>' : ''}
                         </td>
                     </tr>
                     <tr>
                         <td class="compare-label">מועד ב׳</td>
-                        <td class="compare-val ${isMoedBConflict ? 'conflict-date' : ''}">${c1.moedB || 'טרם פורסם'}</td>
+                        <td class="compare-val ${isMoedBConflict ? 'conflict-date' : ''}">${c1.moedB || 'לפי לוח בחינות סמסטריאלי'}</td>
                         <td class="compare-val ${isMoedBConflict ? 'conflict-date' : ''}">
-                            ${c2.moedB || 'טרם פורסם'}
+                            ${c2.moedB || 'לפי לוח בחינות סמסטריאלי'}
                             ${isMoedBConflict ? '<div class="conflict-pill">⚠️ התנגשות מועד ב׳!</div>' : ''}
                         </td>
                     </tr>
                     <tr>
                         <td class="compare-label">תקציר וסילבוס</td>
-                        <td class="compare-val syllabus-text">${c1.syllabus || 'סילבוס מלא זמין בקטלוג'}</td>
-                        <td class="compare-val syllabus-text">${c2.syllabus || 'סילבוס מלא זמין בקטלוג'}</td>
+                        <td class="compare-val syllabus-text">${c1.syllabus}</td>
+                        <td class="compare-val syllabus-text">${c2.syllabus}</td>
                     </tr>
                     <tr>
                         <td class="compare-label">פעולות מהירות</td>
                         <td class="compare-val">
                             <div style="display: flex; gap: 6px; flex-wrap: wrap;">
-                                <button type="button" class="btn btn-xs btn-outline" onclick="CourseWishlist.toggle({code: '${code1}', name: '${c1.name}', credits: ${c1.credits}})">⭐ מועדפים</button>
-                                <button type="button" class="btn btn-xs btn-outline" onclick="window.copyToClipboard('${code1}', 'קוד קורס ${code1} הועתק!')">📋 העתק קוד</button>
+                                <button type="button" class="btn btn-xs btn-primary" onclick="window.quickScheduleFromComparator('${c1.code}')">➕ שבץ בתכנון תואר</button>
+                                <button type="button" class="btn btn-xs btn-outline" onclick="CourseWishlist.toggle({code: '${c1.code}', name: '${safeName1}', credits: ${c1.credits}})">⭐ מועדפים</button>
+                                <button type="button" class="btn btn-xs btn-outline" onclick="window.copyToClipboard('${c1.altCode || c1.code}', 'קוד קורס ${c1.altCode || c1.code} הועתק!')">📋 העתק קוד</button>
                             </div>
                         </td>
                         <td class="compare-val">
                             <div style="display: flex; gap: 6px; flex-wrap: wrap;">
-                                <button type="button" class="btn btn-xs btn-outline" onclick="CourseWishlist.toggle({code: '${code2}', name: '${c2.name}', credits: ${c2.credits}})">⭐ מועדפים</button>
-                                <button type="button" class="btn btn-xs btn-outline" onclick="window.copyToClipboard('${code2}', 'קוד קורס ${code2} הועתק!')">📋 העתק קוד</button>
+                                <button type="button" class="btn btn-xs btn-primary" onclick="window.quickScheduleFromComparator('${c2.code}')">➕ שבץ בתכנון תואר</button>
+                                <button type="button" class="btn btn-xs btn-outline" onclick="CourseWishlist.toggle({code: '${c2.code}', name: '${safeName2}', credits: ${c2.credits}})">⭐ מועדפים</button>
+                                <button type="button" class="btn btn-xs btn-outline" onclick="window.copyToClipboard('${c2.altCode || c2.code}', 'קוד קורס ${c2.altCode || c2.code} הועתק!')">📋 העתק קוד</button>
                             </div>
                         </td>
                     </tr>

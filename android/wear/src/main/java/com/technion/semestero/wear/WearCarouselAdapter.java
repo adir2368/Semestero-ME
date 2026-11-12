@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -15,10 +16,11 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.List;
 
 /**
- * Semestero ME • Samsung Galaxy Watch 8 Focused 3-Screen Carousel:
- * Screen 0: Class Radar
- * Screen 1: Today's Timeline
- * Screen 2: Tasks & Exams
+ * Semestero ME • Samsung Galaxy Watch 8 4-Screen Carousel:
+ * Screen 0: Class Radar (Live upcoming / active lecture countdown + room + lecturer)
+ * Screen 1: Interactive Weekly Timeline (Day switcher ◀ / ▶ + full authentic daily schedule)
+ * Screen 2: Tasks & Exams (Prioritized tasks with due dates + 1-tap complete)
+ * Screen 3: Academic Status & Phone Sync Bridge (GPA, Honors, Weekly Load, Instant Sync)
  */
 public class WearCarouselAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
@@ -31,6 +33,7 @@ public class WearCarouselAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         void onTaskToggled(int taskIndex);
         void onRefreshRequested();
         void onTestNotificationRequested();
+        void onTimelineDayChanged(int delta);
     }
 
     public static class ClassItem {
@@ -66,6 +69,8 @@ public class WearCarouselAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     public String radarTime = "";
     public String radarRoom = "";
     public String radarLecturer = "";
+    public boolean radarIsActive = false;
+    public boolean radarIsStartingSoon = false;
 
     public String timelineHeader = "";
     public List<ClassItem> timelineClasses;
@@ -80,6 +85,8 @@ public class WearCarouselAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
     public String syncStatusText = "טלפון מחובר";
     public String syncLastTime = "סונכרן: מעודכן";
+    public String gpaSummaryText = "🎓 ממוצע: 86.04 • 🎖️ הצטיינות דיקן";
+    public String schedSummaryText = "📅 5 קורסים • 16 ש״ס השבוע";
     public boolean isSyncing = false;
     public ScrollView syncScrollView;
 
@@ -143,6 +150,12 @@ public class WearCarouselAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         this.syncScrollView = h.scrollView;
         h.tvPhoneStatusText.setText(syncStatusText);
         h.tvLastSynced.setText(syncLastTime);
+        if (h.tvGpaBadge != null) {
+            h.tvGpaBadge.setText(gpaSummaryText);
+        }
+        if (h.tvSchedSummary != null) {
+            h.tvSchedSummary.setText(schedSummaryText);
+        }
         if (isSyncing) {
             h.tvSyncBtnLabel.setText("🔄 מסנכרן כעת...");
             h.btnTriggerSync.setEnabled(false);
@@ -171,17 +184,45 @@ public class WearCarouselAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     }
 
     private void bindRadar(RadarViewHolder h) {
-        h.tvDayChip.setText(radarDay.isEmpty() ? "יום שלישי • 3 בנובמבר" : radarDay);
-        h.tvStatusBadge.setText(radarStatus.isEmpty() ? "⏰ מתחיל בעוד 51 דקות" : radarStatus);
+        h.tvDayChip.setText(radarDay.isEmpty() ? "יום חמישי • 12 בנובמבר" : radarDay);
+        h.tvStatusBadge.setText(radarStatus.isEmpty() ? "⏰ מתחיל בקרוב" : radarStatus);
+
+        if (radarIsActive) {
+            h.tvStatusBadge.setBackgroundResource(R.drawable.pill_status_emerald);
+            h.tvStatusBadge.setTextColor(context.getColor(R.color.emerald_green));
+        } else if (radarIsStartingSoon) {
+            h.tvStatusBadge.setBackgroundResource(R.drawable.pill_status_amber);
+            h.tvStatusBadge.setTextColor(context.getColor(R.color.amber_warning));
+        } else {
+            h.tvStatusBadge.setBackgroundResource(R.drawable.pill_faculty_badge);
+            h.tvStatusBadge.setTextColor(context.getColor(R.color.cyan_accent));
+        }
+
         h.tvCourseTitle.setText(radarCourse.isEmpty() ? "משוואות דיפרנציאליות חלקיות מ׳" : radarCourse);
-        h.tvTimePill.setText(radarTime.isEmpty() ? "12:30 - 14:30" : radarTime);
-        h.tvRoomTag.setText(radarRoom.isEmpty() ? "📍 אולמן 506" : radarRoom);
-        h.tvLecturer.setText(radarLecturer.isEmpty() ? "👨‍🏫 אמתי אלפרין • הרצאה" : radarLecturer);
+        h.tvTimePill.setText(radarTime.isEmpty() ? "10:30 - 12:30" : radarTime);
+        String cleanRoom = radarRoom.isEmpty() ? "הנדסה כימית 1" : radarRoom;
+        h.tvRoomTag.setText(cleanRoom.startsWith("📍") ? cleanRoom : ("📍 " + cleanRoom));
+        h.tvLecturer.setText(radarLecturer.isEmpty() ? "👨‍🏫 ד״ר רועי בר און • הרצאה 20" : radarLecturer);
     }
 
     private void bindTimeline(TimelineViewHolder h) {
         this.timelineScrollView = h.scrollView;
-        h.tvHeader.setText(timelineHeader.isEmpty() ? "לו״ז יום שלישי (3 בנובמבר)" : timelineHeader);
+        h.tvHeader.setText(timelineHeader.isEmpty() ? "לו״ז היום" : timelineHeader);
+
+        if (h.btnPrevDay != null) {
+            h.btnPrevDay.setOnClickListener(v -> {
+                if (actionListener != null) actionListener.onTimelineDayChanged(-1);
+            });
+        }
+        if (h.btnNextDay != null) {
+            h.btnNextDay.setOnClickListener(v -> {
+                if (actionListener != null) actionListener.onTimelineDayChanged(1);
+            });
+        }
+        h.tvHeader.setOnClickListener(v -> {
+            if (actionListener != null) actionListener.onTimelineDayChanged(0);
+        });
+
         h.container.removeAllViews();
 
         if (timelineClasses != null && !timelineClasses.isEmpty()) {
@@ -202,8 +243,22 @@ public class WearCarouselAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                     item.setBackgroundResource(R.drawable.card_timeline_item);
                     tvTime.setTextColor(context.getColor(R.color.cyan_accent));
                 }
+
+                item.setOnClickListener(v -> {
+                    Toast.makeText(context, ci.title + "\n" + ci.time + " | " + ci.room.replace("\n", " • "), Toast.LENGTH_SHORT).show();
+                });
+
                 h.container.addView(item);
             }
+        } else {
+            View emptyItem = inflater.inflate(R.layout.item_timeline, h.container, false);
+            TextView tvTitle = emptyItem.findViewById(R.id.tv_item_title);
+            TextView tvRoom = emptyItem.findViewById(R.id.tv_item_room);
+            TextView tvTime = emptyItem.findViewById(R.id.tv_item_time);
+            tvTitle.setText("יום חופשי ללא שיעורים 🏖️");
+            tvRoom.setText("זמן מצוין לתרגילי בית, חזרות או מנוחה");
+            tvTime.setText("חופשי");
+            h.container.addView(emptyItem);
         }
     }
 
@@ -220,10 +275,14 @@ public class WearCarouselAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
                 View item = inflater.inflate(R.layout.item_task, h.container, false);
                 TextView tvTitle = item.findViewById(R.id.tv_task_title);
+                TextView tvDue = item.findViewById(R.id.tv_task_due);
                 View chkBg = item.findViewById(R.id.view_task_chk_bg);
                 TextView tvChkIcon = item.findViewById(R.id.tv_task_chk_icon);
 
                 tvTitle.setText(t.title);
+                if (tvDue != null) {
+                    tvDue.setText((t.due != null && !t.due.isEmpty()) ? t.due : "⏳ להגשה בקרוב");
+                }
 
                 if (t.isDone) {
                     tvTitle.setPaintFlags(tvTitle.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
@@ -243,6 +302,11 @@ public class WearCarouselAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                     if (actionListener != null) {
                         actionListener.onTaskToggled(taskIndex);
                     }
+                });
+
+                item.setOnLongClickListener(v -> {
+                    Toast.makeText(context, t.title + "\n" + t.due, Toast.LENGTH_LONG).show();
+                    return true;
                 });
 
                 h.container.addView(item);
@@ -272,12 +336,16 @@ public class WearCarouselAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
     public static class TimelineViewHolder extends RecyclerView.ViewHolder {
         public TextView tvHeader;
+        public TextView btnPrevDay;
+        public TextView btnNextDay;
         public LinearLayout container;
         public ScrollView scrollView;
 
         public TimelineViewHolder(@NonNull View itemView) {
             super(itemView);
             tvHeader = itemView.findViewById(R.id.timeline_header);
+            btnPrevDay = itemView.findViewById(R.id.btn_prev_day);
+            btnNextDay = itemView.findViewById(R.id.btn_next_day);
             container = itemView.findViewById(R.id.timeline_container);
             scrollView = itemView.findViewById(R.id.timeline_scroll_view);
         }
@@ -306,6 +374,8 @@ public class WearCarouselAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         public TextView tvPhoneStatusDot;
         public TextView tvPhoneStatusText;
         public TextView tvLastSynced;
+        public TextView tvGpaBadge;
+        public TextView tvSchedSummary;
 
         public SyncViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -316,6 +386,8 @@ public class WearCarouselAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             tvPhoneStatusDot = itemView.findViewById(R.id.tv_phone_status_dot);
             tvPhoneStatusText = itemView.findViewById(R.id.tv_phone_status_text);
             tvLastSynced = itemView.findViewById(R.id.tv_last_synced_time);
+            tvGpaBadge = itemView.findViewById(R.id.tv_sync_gpa_badge);
+            tvSchedSummary = itemView.findViewById(R.id.tv_sync_sched_summary);
         }
     }
 }

@@ -321,7 +321,7 @@
             }
         }
 
-        const isTargetAdir = !targetUserId || targetUserId === 'adir_moshe';
+        const isTargetAdir = isAdirTarget || !targetUid || targetUid === 'adir_moshe';
         if (isTargetAdir) {
             const targets = [
                 '03240269', '3240269',

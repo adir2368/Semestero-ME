@@ -738,6 +738,13 @@
             const pending = this.catchupQueue.filter(i => i.status !== 'completed');
             const completed = this.catchupQueue.filter(i => i.status === 'completed');
 
+            const totalMinutes1x = pending.reduce((sum, item) => {
+                const isTut = item.type && (item.type.includes('תרגול') || item.type.includes('מעבדה'));
+                return sum + (isTut ? 55 : 100);
+            }, 0);
+            const hours1x = (totalMinutes1x / 60).toFixed(1);
+            const hours15x = (totalMinutes1x / 90).toFixed(1);
+
             let html = `
                 <!-- Catch-Up Summary Banner -->
                 <div style="background: rgba(244, 63, 94, 0.08); border: 1px solid rgba(244, 63, 94, 0.35); border-radius: 12px; padding: 14px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
@@ -748,6 +755,16 @@
                         <div style="font-size: 0.78rem; color: #cbd5e1;">
                             השלמת שיעורים מחזקת את רצף הלמידה ומונעת הצטברות חובות פנאופטו לקראת תקופת המבחנים.
                         </div>
+                        ${pending.length > 0 ? `
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px;">
+                            <span style="font-size: 0.74rem; background: rgba(56, 189, 248, 0.14); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.35); padding: 2px 8px; border-radius: 6px; font-weight: 700;">
+                                ⚡ זמן צפייה משוער ב-1.5x: ~${hours15x} שעות
+                            </span>
+                            <span style="font-size: 0.74rem; background: rgba(255, 255, 255, 0.06); color: #94a3b8; border: 1px solid rgba(255, 255, 255, 0.12); padding: 2px 8px; border-radius: 6px;">
+                                ⏱️ במהירות רגילה (1.0x): ~${hours1x} שעות
+                            </span>
+                        </div>
+                        ` : ''}
                     </div>
                     <button type="button" class="btn btn-sm btn-outline" onclick="window.AttendanceHub.promptManualCatchup()" style="font-size: 0.78rem; padding: 6px 12px; color: #38bdf8; border-color: rgba(56, 189, 248, 0.4); border-radius: 8px;">
                         ➕ הוסף השלמה ידנית

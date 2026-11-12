@@ -110,12 +110,13 @@
             </intent-filter>
         </service>
 
-            <!-- Broadcast Receiver for Test Notifications -->
+        <!-- Broadcast Receiver for Test Notifications & Boundary Refreshes -->
         <receiver
             android:name=".WearNotificationReceiver"
             android:exported="true">
             <intent-filter>
                 <action android:name="com.technion.semestero.wear.TRIGGER_TEST_NOTIF" />
+                <action android:name="com.technion.semestero.wear.BOUNDARY_REFRESH" />
             </intent-filter>
         </receiver>
 

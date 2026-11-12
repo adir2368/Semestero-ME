@@ -90,6 +90,7 @@ public class WearSyncManager {
             json.put("sched_tue", schedPrefs.getString("sched_tue", ""));
             json.put("sched_wed", schedPrefs.getString("sched_wed", ""));
             json.put("sched_thu", schedPrefs.getString("sched_thu", ""));
+            json.put("full_timetable_json", schedPrefs.getString("full_timetable_json", "[]"));
 
             json.put("timestamp", System.currentTimeMillis());
         } catch (Exception e) {

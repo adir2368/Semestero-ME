@@ -13902,23 +13902,25 @@ function openCourseDetails(code) {
 
             const hwPart = hg * ((100 - ew) / 100);
             const neededExam = (target - hwPart) / (ew / 100);
-            const roundedNeeded = Math.ceil(neededExam);
+            const rawRoundedNeeded = Math.ceil(neededExam);
+            // Technion Mandatory Rule: Final Exam must be >= 55 for homework/shield components to count
+            const roundedNeeded = Math.max(55, rawRoundedNeeded);
 
-            if (roundedNeeded <= 0) {
-                targetBadge.innerText = "0+ (עברת)";
+            if (rawRoundedNeeded <= 55 && target <= (55 * (ew / 100) + hwPart)) {
+                targetBadge.innerText = "55 (סף מעבר במבחן)";
                 targetBadge.style.background = "rgba(16, 185, 129, 0.2)";
                 targetBadge.style.color = "#34d399";
-                targetAdvice.innerHTML = `ציון המגן והמטלות (${hg}) כבר מבטיחים לך לעבור את היעד (${target})! כל ציון עובר במבחן מספיק.`;
+                targetAdvice.innerHTML = `ציון המגן והמטלות (${hg}) מבטיח לך להגיע ליעד (${target}) ברגע שתעבור את סף המעבר הטכניוני המחייב בבחינה (<strong>55</strong>).`;
             } else if (roundedNeeded <= 100) {
-                targetBadge.innerText = `${roundedNeeded} במועד ב׳`;
+                targetBadge.innerText = `${roundedNeeded} במבחן`;
                 targetBadge.style.background = roundedNeeded > 85 ? "rgba(239, 68, 68, 0.2)" : "rgba(245, 158, 11, 0.2)";
                 targetBadge.style.color = roundedNeeded > 85 ? "#f87171" : "#fbbf24";
-                targetAdvice.innerHTML = `כדי לסיים את הקורס בציון <strong>${target}</strong>, עליך להוציא לפחות <strong>${roundedNeeded}</strong> במבחן (משקל ${ew}%).`;
+                targetAdvice.innerHTML = `כדי לסיים את הקורס בציון <strong>${target}</strong>, עליך להוציא לפחות <strong>${roundedNeeded}</strong> במבחן (משקל ${ew}%, סף מעבר מינימלי 55).`;
             } else {
                 targetBadge.innerText = `${roundedNeeded} (בלתי אפשרי)`;
                 targetBadge.style.background = "rgba(239, 68, 68, 0.2)";
                 targetBadge.style.color = "#f87171";
-                targetAdvice.innerHTML = `גם עם 100 במועד ב׳, הציון המקסימלי האפשרי הוא <strong>${Math.round((100 * (ew/100)) + hwPart)}</strong> בגלל ציוני המטלות הקיימים.`;
+                targetAdvice.innerHTML = `גם עם 100 במבחן, הציון המקסימלי האפשרי הוא <strong>${Math.round((100 * (ew/100)) + hwPart)}</strong> בגלל ציוני המטלות הקיימים.`;
             }
         }
 
@@ -14807,6 +14809,91 @@ function openCourseDetails(code) {
             `;
         }
 
+        // Critical Path & Bottleneck Radar Banner (N-02)
+        const bInfo = (window.PLANNER_CATALOG && typeof window.PLANNER_CATALOG.getBottleneckInfo === 'function')
+            ? window.PLANNER_CATALOG.getBottleneckInfo(course.code)
+            : null;
+        let bottleneckBannerHtml = '';
+        if (bInfo && bInfo.transitiveUnlockCount > 0) {
+            const directNames = bInfo.directDependents.map(d => `${d.name} (${d.altCode})`).join(' • ');
+            const isCrit = bInfo.isCriticalBottleneck;
+            bottleneckBannerHtml = `
+                <div style="margin: 6px 0 8px 0; padding: 8px 12px; border-radius: 8px; background: ${isCrit ? 'rgba(245, 158, 11, 0.12)' : 'rgba(56, 189, 248, 0.08)'}; border: 1px solid ${isCrit ? 'rgba(245, 158, 11, 0.4)' : 'rgba(56, 189, 248, 0.28)'}; font-size: 0.76rem; color: #f1f5f9;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap;">
+                        <strong style="color: ${isCrit ? '#fbbf24' : '#38bdf8'};">
+                            ${isCrit ? '🔥 צוואר בקבוק קריטי בנתיב התואר:' : '🕸️ קשרי המשך בעץ הקורסים:'} פותח ${bInfo.transitiveUnlockCount} קורסי המשך (${bInfo.directUnlockCount} ישירים)
+                        </strong>
+                        ${bInfo.mandatoryUnlockCount > 0 ? `<span style="font-size: 0.68rem; background: rgba(0,0,0,0.28); padding: 1px 7px; border-radius: 999px; color: #fcd34d; font-weight: 700;">חוסם ${bInfo.mandatoryUnlockCount} קורסי חובה</span>` : ''}
+                    </div>
+                    <div style="font-size: 0.72rem; color: #cbd5e1; margin-top: 3px;">קורסי המשך ישירים: ${directNames}</div>
+                </div>
+            `;
+        }
+
+        // Interactive Course Final Grade & "Magen / Takaf" Shield Calculator (N-03)
+        let magenShieldCardHtml = '';
+        if (!isMasteredCourse && course.type !== 'sports' && course.list !== 'SPORTS') {
+            gameState.courseGradeSimulators = gameState.courseGradeSimulators || {};
+            const savedSim = gameState.courseGradeSimulators[course.code] || {};
+            const simExamW = savedSim.examW !== undefined ? Number(savedSim.examW) : 75;
+            const simMidW = savedSim.midW !== undefined ? Number(savedSim.midW) : 15;
+            const simMidMode = savedSim.midMode || 'magen'; // 'magen' | 'takaf'
+            const simMidScore = savedSim.midScore !== undefined ? Number(savedSim.midScore) : 85;
+            const simHwW = savedSim.hwW !== undefined ? Number(savedSim.hwW) : 10;
+            const simHwMode = savedSim.hwMode || 'takaf'; // 'takaf' | 'magen'
+            const simHwScore = savedSim.hwScore !== undefined ? Number(savedSim.hwScore) : 95;
+            const simTarget = savedSim.target !== undefined ? Number(savedSim.target) : 85;
+
+            magenShieldCardHtml = `
+                <div id="modal-magen-shield-calculator-card" style="margin: 8px 0 10px 0; padding: 12px 14px; background: rgba(15, 23, 42, 0.78); border: 1px solid rgba(56, 189, 248, 0.35); border-radius: 10px; direction: rtl;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; margin-bottom: 8px;">
+                        <div style="font-size: 0.85rem; font-weight: 800; color: #38bdf8; display: flex; align-items: center; gap: 6px;">
+                            <span>🧮</span>
+                            <span>מחשבון ציון סופי ומגן/תקף (Technion Magen &amp; Shield Simulator)</span>
+                        </div>
+                        <span style="font-size: 0.68rem; color: #94a3b8; background: rgba(255,255,255,0.05); padding: 2px 7px; border-radius: 999px;">סף מעבר טכניוני במבחן: ≥55</span>
+                    </div>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(145px, 1fr)); gap: 8px; margin-bottom: 10px; font-size: 0.74rem;">
+                        <div style="background: rgba(255,255,255,0.03); padding: 6px 8px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.07);">
+                            <label style="color: #94a3b8; display: block; margin-bottom: 3px;">משקל מבחן סופי (%)</label>
+                            <input type="number" id="magen-sim-exam-w" min="40" max="100" value="${simExamW}" style="width: 100%; background: #0f172a; color: #f8fafc; border: 1px solid rgba(56,189,248,0.3); border-radius: 4px; padding: 3px 6px; font-weight: 700;">
+                        </div>
+                        <div style="background: rgba(255,255,255,0.03); padding: 6px 8px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.07);">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 3px;">
+                                <label style="color: #94a3b8;">בוחן אמצע (% / ציון)</label>
+                                <select id="magen-sim-mid-mode" aria-label="סוג בוחן אמצע" style="background: #1e293b; color: #38bdf8; border: none; border-radius: 4px; font-size: 0.68rem; font-weight: 700;">
+                                    <option value="magen" ${simMidMode === 'magen' ? 'selected' : ''}>🛡️ מגן</option>
+                                    <option value="takaf" ${simMidMode === 'takaf' ? 'selected' : ''}>📌 תקף</option>
+                                </select>
+                            </div>
+                            <div style="display: flex; gap: 4px;">
+                                <input type="number" id="magen-sim-mid-w" min="0" max="50" value="${simMidW}" title="משקל בוחן (%)" style="width: 48%; background: #0f172a; color: #f8fafc; border: 1px solid rgba(255,255,255,0.15); border-radius: 4px; padding: 3px 5px; font-weight: 700;">
+                                <input type="number" id="magen-sim-mid-score" min="0" max="100" value="${simMidScore}" title="ציון בוחן" style="width: 52%; background: #0f172a; color: #fbbf24; border: 1px solid rgba(245,158,11,0.35); border-radius: 4px; padding: 3px 5px; font-weight: 700;">
+                            </div>
+                        </div>
+                        <div style="background: rgba(255,255,255,0.03); padding: 6px 8px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.07);">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 3px;">
+                                <label style="color: #94a3b8;">ש״ב ומעבדה (% / ציון)</label>
+                                <select id="magen-sim-hw-mode" aria-label="סוג שיעורי בית" style="background: #1e293b; color: #34d399; border: none; border-radius: 4px; font-size: 0.68rem; font-weight: 700;">
+                                    <option value="takaf" ${simHwMode === 'takaf' ? 'selected' : ''}>📌 תקף</option>
+                                    <option value="magen" ${simHwMode === 'magen' ? 'selected' : ''}>🛡️ מגן</option>
+                                </select>
+                            </div>
+                            <div style="display: flex; gap: 4px;">
+                                <input type="number" id="magen-sim-hw-w" min="0" max="40" value="${simHwW}" title="משקל ש״ב (%)" style="width: 48%; background: #0f172a; color: #f8fafc; border: 1px solid rgba(255,255,255,0.15); border-radius: 4px; padding: 3px 5px; font-weight: 700;">
+                                <input type="number" id="magen-sim-hw-score" min="0" max="100" value="${simHwScore}" title="ציון ש״ב" style="width: 52%; background: #0f172a; color: #34d399; border: 1px solid rgba(16,185,129,0.35); border-radius: 4px; padding: 3px 5px; font-weight: 700;">
+                            </div>
+                        </div>
+                        <div style="background: rgba(255,255,255,0.03); padding: 6px 8px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.07);">
+                            <label style="color: #fde047; display: block; margin-bottom: 3px; font-weight: 700;">🎯 ציון יעד סופי בקורס</label>
+                            <input type="number" id="magen-sim-target" min="55" max="100" value="${simTarget}" style="width: 100%; background: #0f172a; color: #fde047; border: 1px solid rgba(234,179,8,0.45); border-radius: 4px; padding: 3px 6px; font-weight: 800;">
+                        </div>
+                    </div>
+                    <div id="magen-sim-results-banner" style="background: rgba(2, 132, 199, 0.12); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 8px; padding: 8px 12px; font-size: 0.78rem; color: #f1f5f9;"></div>
+                </div>
+            `;
+        }
+
         cfContainer.innerHTML = `
             <div class="modal-cheesefork-section">
                 <div class="modal-cheesefork-header" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
@@ -14837,13 +14924,85 @@ function openCourseDetails(code) {
                         <div><strong>ללא זיכוי נוסף (איסור כפל נק״ז):</strong> ${cfMatch.antiRequisites}</div>
                     </div>
                 ` : ''}
+                ${bottleneckBannerHtml}
                 ${perpetualDitchBoxHtml}
+                ${magenShieldCardHtml}
                 ${hasSchedule ? `<div class="modal-cheesefork-grid">${scheduleItemsHtml}</div>` : scheduleStatusNotice}
                 ${examsHtml}
                 ${moodleSyllabusHtml}
                 ${syllabusHtml}
             </div>
         `;
+
+        // Bind live Magen / Takaf Simulator (N-03)
+        const simCard = cfContainer.querySelector('#modal-magen-shield-calculator-card');
+        if (simCard) {
+            const evalTechnionFinalForExam = (examScore, cfg) => {
+                if (examScore < 55) return examScore; // Technion hard exam pass gate
+                const midCounts = cfg.midW > 0 && (cfg.midMode === 'takaf' || cfg.midScore > examScore);
+                const hwCounts = cfg.hwW > 0 && (cfg.hwMode === 'takaf' || cfg.hwScore > examScore);
+                const effMidW = midCounts ? cfg.midW : 0;
+                const effHwW = hwCounts ? cfg.hwW : 0;
+                const effExamW = Math.max(0, 100 - effMidW - effHwW);
+                return (examScore * effExamW + cfg.midScore * effMidW + cfg.hwScore * effHwW) / 100.0;
+            };
+
+            const findMinExamForTarget = (targetGrade, cfg) => {
+                for (let ex = 55; ex <= 100; ex++) {
+                    if (Math.round(evalTechnionFinalForExam(ex, cfg)) >= targetGrade) {
+                        return ex;
+                    }
+                }
+                return 101;
+            };
+
+            const refreshMagenSim = () => {
+                const cfg = {
+                    examW: Math.max(0, Math.min(100, Number(simCard.querySelector('#magen-sim-exam-w')?.value) || 75)),
+                    midW: Math.max(0, Math.min(50, Number(simCard.querySelector('#magen-sim-mid-w')?.value) || 0)),
+                    midMode: simCard.querySelector('#magen-sim-mid-mode')?.value || 'magen',
+                    midScore: Math.max(0, Math.min(100, Number(simCard.querySelector('#magen-sim-mid-score')?.value) || 0)),
+                    hwW: Math.max(0, Math.min(40, Number(simCard.querySelector('#magen-sim-hw-w')?.value) || 0)),
+                    hwMode: simCard.querySelector('#magen-sim-hw-mode')?.value || 'takaf',
+                    hwScore: Math.max(0, Math.min(100, Number(simCard.querySelector('#magen-sim-hw-score')?.value) || 0)),
+                    target: Math.max(55, Math.min(100, Number(simCard.querySelector('#magen-sim-target')?.value) || 85))
+                };
+                gameState.courseGradeSimulators = gameState.courseGradeSimulators || {};
+                gameState.courseGradeSimulators[course.code] = cfg;
+
+                const minForPass = findMinExamForTarget(55, cfg);
+                const minForTarget = findMinExamForTarget(cfg.target, cfg);
+                const shieldActiveAtTarget = cfg.midW > 0 && cfg.midMode === 'magen' && minForTarget <= 100 && cfg.midScore > minForTarget;
+                const bannerEl = simCard.querySelector('#magen-sim-results-banner');
+                if (bannerEl) {
+                    const targetText = minForTarget <= 100
+                        ? `<strong style="color:#fde047; font-size:0.9rem;">${minForTarget} במבחן</strong>`
+                        : `<strong style="color:#f87171;">בלתי אפשרי (מקסימום ${Math.round(evalTechnionFinalForExam(100, cfg))})</strong>`;
+                    bannerEl.innerHTML = `
+                        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+                            <span>✅ מינימום במבחן למעבר קורס (55): <strong style="color:#34d399;">${minForPass <= 100 ? minForPass : '55'}</strong></span>
+                            <span>🎯 מינימום במבחן ליעד (${cfg.target}): ${targetText}</span>
+                        </div>
+                        <div style="font-size:0.72rem; color:#bae6fd; margin-top:4px;">
+                            ${shieldActiveAtTarget
+                                ? `🛡️ <strong>בוחן המגן (${cfg.midScore}) פעיל ביעד זה!</strong> משקל המבחן המשוכלל יורד ל-${100 - cfg.midW - cfg.hwW}% ומגן עליך.`
+                                : (cfg.midW > 0 && cfg.midMode === 'magen'
+                                    ? `⚡ ביעד זה ציון המבחן הנדרש עוקף את בוחן המגן (${cfg.midScore}), ולכן משקל הבוחן מתאפס לטובת המבחן.`
+                                    : `📌 שקלול תקף: מבחן + ${cfg.midW > 0 ? `בוחן (${cfg.midW}%) + ` : ''}ש״ב (${cfg.hwW}%) בכפוף לציון ≥55 במבחן.`)}
+                        </div>
+                    `;
+                }
+            };
+
+            simCard.querySelectorAll('input, select').forEach(el => {
+                el.addEventListener('input', refreshMagenSim);
+                el.addEventListener('change', () => {
+                    refreshMagenSim();
+                    if (typeof saveState === 'function') saveState();
+                });
+            });
+            refreshMagenSim();
+        }
     }
 
     // UW Flow-style Peer Difficulty & Workload Consensus Section
@@ -23744,11 +23903,11 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.11.11-v2.12.0",
-    version: "2.12.0",
-    build: "20261111_05",
-    date: "2026-11-11 23:18",
-    description: "v2.12.0: שדרוג ארכיטקטוני מקיף (ARGON 4.0 Audit, ADR-109) — מנוע קורסים צמודים (Corequisites), שער 110.0 נק״ז לפרויקט גמר, איחוד ומניעת כפילויות מפתחות 6/8 ספרות, בידוד רב-דיירים מלא, תקינות אקדמית בטכניון (66% הצלחה ו-65 ממוצע), ותיקון אזור זמן במודל."
+    code: "REV-2026.11.12-v2.12.1",
+    version: "2.12.1",
+    build: "20261112_01",
+    date: "2026-11-12 06:20",
+    description: "v2.12.1: סנכרון מלא ומדויק לשעון Galaxy Watch 8 (ADR-110) — תיקון מיקומים, מרצים וקבוצות תרגול (אולמן 501, שרמן 107, אולמן 205), סנכרון מערכת 7-ימים דינמית בזמן אמת ללא דריסת נתונים ישנים, דפדוף ימים אינטראקטיבי על השעון (◀/▶), הצגת מועדי הגשה למשימות, וכרטיס סטטוס אקדמי (ממוצע וש״ס)."
 };
 window.APP_VERSION = APP_CURRENT_REVISION.version;
 
@@ -26710,6 +26869,9 @@ function getRemainingClassesToday() {
     const curMin = now.getHours() * 60 + now.getMinutes();
     
     const schedule = getActiveTimetableSchedule();
+    if (schedule && typeof enrichTimetableWithAuthenticRooms === 'function') {
+        enrichTimetableWithAuthenticRooms(schedule);
+    }
     const hasSchedule = !!(schedule && schedule.days && schedule.days.length > 0);
     const dayConfig = (schedule && schedule.days)
         ? schedule.days.find(d => d.dayIndex === dayOfWeek)
@@ -27161,13 +27323,45 @@ function syncNativeAndroidWidgets(classData, tasksData) {
                 ? `${Math.round(totalSchedHours)} ש״ס • ${freeDaysCount > 0 ? freeDaysCount + ' ימי חופש 🏖️' : 'שבוע לימודים מלא'}`
                 : "0 ש״ס • טרם הוגדרה מערכת";
 
+            const fullTimetableDays = [];
+            if (activeSched && Array.isArray(activeSched.days)) {
+                if (typeof enrichTimetableWithAuthenticRooms === 'function') {
+                    enrichTimetableWithAuthenticRooms(activeSched);
+                }
+                for (let dIdx = 0; dIdx < 7; dIdx++) {
+                    const dayObj = activeSched.days.find(d => d.dayIndex === dIdx);
+                    const classes = (dayObj && !dayObj.isFree && Array.isArray(dayObj.classes)) ? dayObj.classes.map(c => {
+                        const [sh, sm] = (c.startTime || '08:30').split(':').map(Number);
+                        const [eh, em] = (c.endTime || '10:30').split(':').map(Number);
+                        const isDitched = (typeof window.isSlotPerpetuallyDitched === 'function')
+                            ? Boolean(window.isSlotPerpetuallyDitched(c.courseId, c.type, dIdx, c.startTime))
+                            : Boolean(c.isDitched);
+                        return {
+                            courseId: c.courseId || '',
+                            title: c.courseName || c.name || c.title || c.courseId || 'שיעור',
+                            startTime: c.startTime || '08:30',
+                            endTime: c.endTime || '10:30',
+                            time: `${c.startTime || '08:30'} - ${c.endTime || '10:30'}`,
+                            startMin: (sh || 8) * 60 + (sm || 0),
+                            endMin: (eh || 10) * 60 + (em || 0),
+                            room: c.room || 'טכניון',
+                            lecturer: c.lecturer || 'סגל הקורס',
+                            type: c.type || 'הרצאה',
+                            isDitched
+                        };
+                    }) : [];
+                    fullTimetableDays.push({ dayIndex: dIdx, classes });
+                }
+            }
+
             window.SemesteroWidgetBridge.updateScheduleWidget(
                 weeklySummary,
                 dayStrings[0] || "אין שיעורים מתוזמנים",
                 dayStrings[1] || "אין שיעורים מתוזמנים",
                 dayStrings[2] || "אין שיעורים מתוזמנים",
                 dayStrings[3] || "אין שיעורים מתוזמנים",
-                dayStrings[4] || "אין שיעורים מתוזמנים"
+                dayStrings[4] || "אין שיעורים מתוזמנים",
+                JSON.stringify(fullTimetableDays)
             );
         }
 

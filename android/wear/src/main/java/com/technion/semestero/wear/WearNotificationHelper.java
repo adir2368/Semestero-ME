@@ -11,6 +11,7 @@ import android.os.VibrationEffect;
 import android.os.Vibrator;
 import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
+import java.util.Calendar;
 
 /**
  * Semestero ME • Wear OS Notification Engine
@@ -65,10 +66,14 @@ public class WearNotificationHelper {
         NotificationCompat.WearableExtender wearableExtender = new NotificationCompat.WearableExtender()
             .setHintShowBackgroundOnly(false);
 
+        String cleanRoom = room != null && room.startsWith("📍") ? room : ("📍 " + (room != null ? room : ""));
+        String bodyText = cleanRoom + (time != null && !time.isEmpty() ? (" • 🕒 " + time) : "");
+
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_stat_notification)
             .setContentTitle("⏰ בעוד 10 דקות: " + title)
-            .setContentText("📍 " + room + " • 🕒 " + time)
+            .setContentText(bodyText)
+            .setStyle(new NotificationCompat.BigTextStyle().bigText(bodyText))
             .setPriority(NotificationCompat.PRIORITY_MAX)
             .setCategory(NotificationCompat.CATEGORY_REMINDER)
             .setAutoCancel(true)
@@ -90,6 +95,12 @@ public class WearNotificationHelper {
         // Physical haptic trigger
         triggerHaptic(context);
 
+        WearScheduleHelper.ScheduleResolution res = WearScheduleHelper.resolve(context, Calendar.getInstance());
+        String notifTitle = "🎓 סמסטרו ME • " + (res.courseTitle != null && !res.courseTitle.isEmpty() ? res.courseTitle : "בדיקת התראה");
+        String notifBody = "📍 " + (res.roomText != null ? res.roomText : "אולמן 506")
+            + " • 🕒 " + (res.timeText != null ? res.timeText : "11:30")
+            + (res.lecturerText != null && !res.lecturerText.isEmpty() ? ("\n" + res.lecturerText) : "");
+
         Intent intent = new Intent(context, MainActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
         PendingIntent pendingIntent = PendingIntent.getActivity(
@@ -104,8 +115,9 @@ public class WearNotificationHelper {
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_stat_notification)
-            .setContentTitle("🎓 סמסטרו ME • בדיקת רטט בשעון")
-            .setContentText("📍 אולמן 506 • משוואות דיפרנציאליות (בעוד 10 דק׳)")
+            .setContentTitle(notifTitle)
+            .setContentText(notifBody)
+            .setStyle(new NotificationCompat.BigTextStyle().bigText(notifBody))
             .setPriority(NotificationCompat.PRIORITY_MAX)
             .setCategory(NotificationCompat.CATEGORY_ALARM)
             .setAutoCancel(true)

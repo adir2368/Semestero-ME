@@ -30,12 +30,13 @@ import java.util.Calendar;
  */
 public class SemesteroClassTileService extends TileService {
 
-    private static final String RESOURCES_VERSION = "4";
+    private static final String RESOURCES_VERSION = "5";
 
     @Override
     protected ListenableFuture<TileBuilders.Tile> onTileRequest(RequestBuilders.TileRequest requestParams) {
         Calendar now = Calendar.getInstance();
         WearScheduleHelper.ScheduleResolution res = WearScheduleHelper.resolve(this, now);
+        WearScheduleHelper.scheduleNextBoundaryUpdate(this);
 
         // Click action: tap anywhere opens MainActivity directly
         ActionBuilders.LaunchAction launchAction = new ActionBuilders.LaunchAction.Builder()
@@ -119,6 +120,7 @@ public class SemesteroClassTileService extends TileService {
             .build();
 
         // 5. Room Tag (Dark pill container matching card_timeline_item)
+        String roomDisplay = res.roomText.startsWith("📍") ? res.roomText : ("📍 " + res.roomText);
         LayoutElementBuilders.Box roomBox = new LayoutElementBuilders.Box.Builder()
             .setModifiers(new ModifiersBuilders.Modifiers.Builder()
                 .setBackground(new ModifiersBuilders.Background.Builder()
@@ -140,7 +142,7 @@ public class SemesteroClassTileService extends TileService {
                 .build())
             .addContent(
                 new LayoutElementBuilders.Text.Builder()
-                    .setText(res.roomText)
+                    .setText(roomDisplay)
                     .setFontStyle(new LayoutElementBuilders.FontStyle.Builder()
                         .setSize(DimensionBuilders.sp(11))
                         .setColor(ColorBuilders.argb(0xFFF8FAFC))
@@ -153,6 +155,8 @@ public class SemesteroClassTileService extends TileService {
         // 6. Lecturer & Type Subtitle
         LayoutElementBuilders.Text lecturerText = new LayoutElementBuilders.Text.Builder()
             .setText(res.lecturerText)
+            .setMaxLines(2)
+            .setMultilineAlignment(LayoutElementBuilders.TEXT_ALIGN_CENTER)
             .setFontStyle(new LayoutElementBuilders.FontStyle.Builder()
                 .setSize(DimensionBuilders.sp(9.5f))
                 .setColor(ColorBuilders.argb(0xFF94A3B8))
@@ -196,6 +200,7 @@ public class SemesteroClassTileService extends TileService {
         TileBuilders.Tile tile = new TileBuilders.Tile.Builder()
             .setResourcesVersion(RESOURCES_VERSION)
             .setTileTimeline(timeline)
+            .setFreshnessIntervalMillis(60000) // Refresh every 60s so class status is always live
             .build();
 
         return Futures.immediateFuture(tile);

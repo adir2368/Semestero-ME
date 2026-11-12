@@ -130,7 +130,19 @@ assert.strictEqual(
     true,
     'SemesteroComplicationService must dynamically parse room numbers for both established and new locations'
 );
-console.log('   ✓ PASS: SemesteroComplicationService ultra-minimalist schedule implementation verified.');
+assert.strictEqual(
+    scheduleCodeWithoutComments.includes('r.contains("שרמן")'),
+    true,
+    'SemesteroComplicationService must support Sherman 107 room abbreviation'
+);
+
+const wearHelperPath = path.join(__dirname, '..', 'android', 'wear', 'src', 'main', 'java', 'com', 'technion', 'semestero', 'wear', 'WearScheduleHelper.java');
+const wearHelperContent = fs.readFileSync(wearHelperPath, 'utf8');
+assert.strictEqual(wearHelperContent.includes('מר גיא ארבר') && wearHelperContent.includes('אולמן 501'), true, 'Tuesday Computing Tutorial 11 must have Guy Arber in Ullmann 501');
+assert.strictEqual(wearHelperContent.includes('גב\' נעם הנץ גמליאל') && wearHelperContent.includes('שרמן - חינוך למדע וטכנולוגיה 107'), true, 'Wednesday Physics 2 Tutorial 13 must have Noam Hentz Gamliel in Sherman 107');
+assert.strictEqual(wearHelperContent.includes('מר יובל בר-רצון') && wearHelperContent.includes('אולמן 205'), true, 'Thursday Solids 2 Tutorial 21 must have Yuval Bar-Ratson in Ullmann 205');
+assert.strictEqual(wearHelperContent.includes('full_timetable_json'), true, 'WearScheduleHelper must dynamically parse synced 7-day full_timetable_json');
+console.log('   ✓ PASS: SemesteroComplicationService & WearScheduleHelper 1:1 authentic schedule verified.');
 
 // -------------------------------------------------------------
 // Test 2: Wear OS Reactive Updates from Sync Service & Task Checkoff

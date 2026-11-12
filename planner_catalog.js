@@ -762,6 +762,109 @@
             (list || []).forEach(indexCourse);
         });
     }
+    // Alias legacy CheeseFork 01340058 to 00340058 (הסתברות וסטטיסטיקה מה' מכ')
+    if (ALL_COURSES_MAP['00340058'] && !ALL_COURSES_MAP['01340058']) {
+        ALL_COURSES_MAP['01340058'] = ALL_COURSES_MAP['00340058'];
+        ALL_COURSES_MAP['1340058'] = ALL_COURSES_MAP['00340058'];
+    }
+
+    // ==========================================================================
+    // Critical Path & Bottleneck Radar (N-02: Transitive Downstream Unlocks)
+    // ==========================================================================
+    const BOTTLENECK_MAP = {};
+    (function buildBottleneckRadar() {
+        const uniqueCourses = new Map();
+        Object.values(ALL_COURSES_MAP).forEach(c => {
+            if (c && c.code && !uniqueCourses.has(c.code)) {
+                uniqueCourses.set(c.code, c);
+            }
+        });
+
+        const resolveCanonical = (rawCode) => {
+            if (!rawCode) return null;
+            const c = ALL_COURSES_MAP[String(rawCode)] || ALL_COURSES_MAP[String(rawCode).replace(/^0+/, '')];
+            return c ? c.code : null;
+        };
+
+        const directAdj = new Map();
+        uniqueCourses.forEach((_, code) => directAdj.set(code, new Set()));
+
+        uniqueCourses.forEach((course, code) => {
+            const deps = [].concat(course.prereqs || [], course.coreqs || []);
+            deps.forEach(prereqRaw => {
+                const pCanon = resolveCanonical(prereqRaw);
+                if (pCanon && pCanon !== code && directAdj.has(pCanon)) {
+                    directAdj.get(pCanon).add(code);
+                }
+            });
+        });
+
+        uniqueCourses.forEach((course, code) => {
+            const directSet = directAdj.get(code) || new Set();
+            const visited = new Set();
+            const queue = Array.from(directSet);
+            while (queue.length > 0) {
+                const curr = queue.shift();
+                if (visited.has(curr)) continue;
+                visited.add(curr);
+                const nextSet = directAdj.get(curr);
+                if (nextSet) {
+                    nextSet.forEach(n => {
+                        if (!visited.has(n)) queue.push(n);
+                    });
+                }
+            }
+
+            const directDependents = Array.from(directSet).map(cCode => {
+                const cObj = uniqueCourses.get(cCode);
+                return { code: cCode, altCode: cObj.altCode || cCode, name: cObj.name, type: cObj.type };
+            });
+            const transitiveDependents = Array.from(visited).map(cCode => {
+                const cObj = uniqueCourses.get(cCode);
+                return { code: cCode, altCode: cObj.altCode || cCode, name: cObj.name, type: cObj.type };
+            });
+            const mandatoryUnlockCount = transitiveDependents.filter(d => d.type === 'mandatory' || d.type === 'final_project').length;
+            const transitiveUnlockCount = transitiveDependents.length;
+            const directUnlockCount = directDependents.length;
+
+            let severity = 'leaf';
+            if (mandatoryUnlockCount >= 5 || transitiveUnlockCount >= 8) {
+                severity = 'critical';
+            } else if (mandatoryUnlockCount >= 3 || transitiveUnlockCount >= 4) {
+                severity = 'high';
+            } else if (transitiveUnlockCount >= 1) {
+                severity = 'moderate';
+            }
+
+            const info = {
+                code: course.code,
+                altCode: course.altCode || course.code,
+                name: course.name,
+                directUnlockCount,
+                transitiveUnlockCount,
+                mandatoryUnlockCount,
+                isCriticalBottleneck: (severity === 'critical' || severity === 'high'),
+                severity,
+                directDependents,
+                transitiveDependents
+            };
+
+            BOTTLENECK_MAP[course.code] = info;
+            if (course.altCode) BOTTLENECK_MAP[course.altCode] = info;
+            const norm1 = course.code.replace(/^0+/, '');
+            if (norm1) BOTTLENECK_MAP[norm1] = info;
+            if (course.altCode) {
+                const norm2 = course.altCode.replace(/^0+/, '');
+                if (norm2) BOTTLENECK_MAP[norm2] = info;
+            }
+        });
+    })();
+
+    function getBottleneckInfo(courseCode) {
+        if (!courseCode) return null;
+        const s = String(courseCode).trim();
+        return BOTTLENECK_MAP[s] || BOTTLENECK_MAP[s.replace(/^0+/, '')] || null;
+    }
 
     // Default authentic Technion Mechanical Engineering syllabus (with Python, Chemistry Lab, Physics 2 in Sem 3)
     const SUGGESTED_MANDATORY_SYLLABUS = SUGGESTED_MANDATORY_SYLLABUS_2026;
@@ -1167,6 +1270,8 @@
         SEASONAL_COURSE_MAPPINGS: SEASONAL_COURSE_MAPPINGS,
         COURSE_TERM_OFFERINGS: COURSE_TERM_OFFERINGS,
         SUMMER_CONFIRMED_COURSES: SUMMER_CONFIRMED_COURSES,
+        BOTTLENECK_MAP: BOTTLENECK_MAP,
+        getBottleneckInfo: getBottleneckInfo,
         isCourseOfferedInSummer: isCourseOfferedInSummer,
         checkMeetingConflict: checkMeetingConflict,
         isCourseOfferedInSemester: isCourseOfferedInSemester

@@ -269,16 +269,25 @@ public class MainActivity extends BridgeActivity {
 
         @JavascriptInterface
         public void updateScheduleWidget(String totalHours, String sun, String mon, String tue, String wed, String thu) {
+            updateScheduleWidget(totalHours, sun, mon, tue, wed, thu, "[]");
+        }
+
+        @JavascriptInterface
+        public void updateScheduleWidget(String totalHours, String sun, String mon, String tue, String wed, String thu, String fullTimetableJson) {
             SharedPreferences prefs = context.getSharedPreferences(SemesteroScheduleWidget.PREFS_NAME, Context.MODE_PRIVATE);
-            prefs.edit()
+            SharedPreferences.Editor editor = prefs.edit()
                 .putString("sched_total_hours", totalHours)
                 .putString("sched_sun", sun)
                 .putString("sched_mon", mon)
                 .putString("sched_tue", tue)
                 .putString("sched_wed", wed)
-                .putString("sched_thu", thu)
-                .apply();
+                .putString("sched_thu", thu);
+            if (fullTimetableJson != null && !fullTimetableJson.trim().isEmpty() && !fullTimetableJson.equals("[]")) {
+                editor.putString("full_timetable_json", fullTimetableJson);
+            }
+            editor.apply();
             SemesteroScheduleWidget.pushUpdate(context);
+            WearSyncManager.syncAllToWatch(context);
         }
 
         @JavascriptInterface

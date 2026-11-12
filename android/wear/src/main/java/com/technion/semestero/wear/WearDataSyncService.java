@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.util.Log;
-import androidx.wear.tiles.TileService;
 import com.google.android.gms.wearable.DataEvent;
 import com.google.android.gms.wearable.DataEventBuffer;
 import com.google.android.gms.wearable.DataItem;
@@ -16,8 +15,8 @@ import java.nio.charset.StandardCharsets;
 import org.json.JSONObject;
 
 /**
- * WearDataSyncService ? Listens for background data changes and real-time direct messages from phone companion.
- * Updates local Wear OS preferences, broadcasts refresh to MainActivity, and updates Glanceable Tiles.
+ * WearDataSyncService — Listens for background data changes and real-time direct messages from phone companion.
+ * Updates local Wear OS preferences, broadcasts refresh to MainActivity, and updates Glanceable Tiles & Complications.
  */
 public class WearDataSyncService extends WearableListenerService {
     private static final String TAG = "WearDataSyncService";
@@ -61,9 +60,13 @@ public class WearDataSyncService extends WearableListenerService {
             try {
                 String jsonStr = new String(messageEvent.getData(), StandardCharsets.UTF_8);
                 JSONObject json = new JSONObject(jsonStr);
-                String title = json.optString("title", "🎓 סמסטרו ME • בדיקת התראה");
-                String message = json.optString("message", "📍 אולמן 506 • משוואות דיפרנציאליות (בעוד 10 דק׳)");
-                WearNotificationHelper.sendClassReminder(this, title, "12:30", message);
+                String title = json.optString("title", "");
+                String message = json.optString("message", "");
+                if (!title.isEmpty() && !message.isEmpty()) {
+                    WearNotificationHelper.sendClassReminder(this, title, "", message);
+                } else {
+                    WearNotificationHelper.sendTestNotification(this);
+                }
             } catch (Exception e) {
                 WearNotificationHelper.sendTestNotification(this);
             }
@@ -76,18 +79,12 @@ public class WearDataSyncService extends WearableListenerService {
         sendBroadcast(updateIntent);
 
         try {
-            TileService.getUpdater(this).requestUpdate(SemesteroClassTileService.class);
-            TileService.getUpdater(this).requestUpdate(SemesteroTasksTileService.class);
-        } catch (Exception ignored) {}
-
-        try {
-            androidx.wear.watchface.complications.datasource.ComplicationDataSourceUpdateRequester
-                .create(this, new android.content.ComponentName(this, SemesteroComplicationService.class))
-                .requestUpdateAll();
             androidx.wear.watchface.complications.datasource.ComplicationDataSourceUpdateRequester
                 .create(this, new android.content.ComponentName(this, SemesteroTasksComplicationService.class))
                 .requestUpdateAll();
         } catch (Exception ignored) {}
+        WearScheduleHelper.requestComplicationAndTileRefresh(this);
+        WearScheduleHelper.scheduleNextBoundaryUpdate(this);
     }
 
     public static void applyDataMapToPrefs(Context context, DataMap dataMap) {
@@ -100,7 +97,7 @@ public class WearDataSyncService extends WearableListenerService {
         if (dataMap.containsKey("date_formatted")) editor.putString("date_formatted", dataMap.getString("date_formatted"));
         if (dataMap.containsKey("day_index")) editor.putInt("day_index", dataMap.getInt("day_index"));
 
-        // 2. Class & Schedule
+        // 2. Class & Full 7-Day Schedule
         if (dataMap.containsKey("class_title")) editor.putString("class_title", dataMap.getString("class_title"));
         if (dataMap.containsKey("class_time")) editor.putString("class_time", dataMap.getString("class_time"));
         if (dataMap.containsKey("class_details")) editor.putString("class_details", dataMap.getString("class_details"));
@@ -108,6 +105,7 @@ public class WearDataSyncService extends WearableListenerService {
         if (dataMap.containsKey("class_status")) editor.putString("class_status", dataMap.getString("class_status"));
         if (dataMap.containsKey("all_classes_json")) editor.putString("all_classes_json", dataMap.getString("all_classes_json"));
         if (dataMap.containsKey("all_classes_count")) editor.putInt("all_classes_count", dataMap.getInt("all_classes_count"));
+        if (dataMap.containsKey("full_timetable_json")) editor.putString("full_timetable_json", dataMap.getString("full_timetable_json"));
 
         // 3. Tasks & Exams
         if (dataMap.containsKey("exam_days")) editor.putString("exam_days", dataMap.getString("exam_days"));
@@ -148,7 +146,7 @@ public class WearDataSyncService extends WearableListenerService {
         if (json.has("date_formatted")) editor.putString("date_formatted", json.optString("date_formatted"));
         if (json.has("day_index")) editor.putInt("day_index", json.optInt("day_index"));
 
-        // 2. Class & Schedule
+        // 2. Class & Full 7-Day Schedule
         if (json.has("class_title")) editor.putString("class_title", json.optString("class_title"));
         if (json.has("class_time")) editor.putString("class_time", json.optString("class_time"));
         if (json.has("class_details")) editor.putString("class_details", json.optString("class_details"));
@@ -156,6 +154,7 @@ public class WearDataSyncService extends WearableListenerService {
         if (json.has("class_status")) editor.putString("class_status", json.optString("class_status"));
         if (json.has("all_classes_json")) editor.putString("all_classes_json", json.optString("all_classes_json"));
         if (json.has("all_classes_count")) editor.putInt("all_classes_count", json.optInt("all_classes_count"));
+        if (json.has("full_timetable_json")) editor.putString("full_timetable_json", json.optString("full_timetable_json"));
 
         // 3. Tasks & Exams
         if (json.has("exam_days")) editor.putString("exam_days", json.optString("exam_days"));
