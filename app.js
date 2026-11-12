@@ -17811,7 +17811,7 @@ function renderNotionTasksTable() {
                         ${moodleLinkHtml}
                         ${pangeaLinkHtml}
                         ${facultyDriveLinkHtml}
-                        <button class="notion-open-peek-btn" title="פתח תצוגת צד">🔲 OPEN</button>
+                        <button class="notion-open-peek-btn" title="פתח תצוגת צד">🔲 פתח</button>
                     </div>
                 </td>
                 <td>
@@ -21377,8 +21377,19 @@ function renderFlowchartTree() {
             badgeY = topY + 72;
         }
 
+        const bInfo = (window.PLANNER_CATALOG && typeof window.PLANNER_CATALOG.getBottleneckInfo === 'function')
+            ? window.PLANNER_CATALOG.getBottleneckInfo(course.code)
+            : null;
+        const bottleneckSvg = (bInfo && bInfo.isCriticalBottleneck)
+            ? `<g class="fc-node-bottleneck-pill" title="צוואר בקבוק קריטי: פותח ${bInfo.transitiveUnlockCount} קורסי המשך בתואר">
+                   <rect x="${leftX + 6}" y="${topY + 5}" width="44" height="16" rx="4" fill="rgba(239,68,68,0.22)" stroke="rgba(248,113,113,0.55)" stroke-width="1" />
+                   <text x="${leftX + 28}" y="${topY + 16}" text-anchor="middle" direction="rtl" fill="#fca5a5" style="fill: #fca5a5 !important; font-size: 9.5px; font-weight: 800; direction: rtl; unicode-bidi: isolate;">🔥 ${bInfo.transitiveUnlockCount}</text>
+               </g>`
+            : '';
+
         g.innerHTML = `
             <rect x="${leftX}" y="${topY}" width="${pos.w}" height="${pos.h}" rx="8" fill="${rectFill}" stroke="${rectStroke}" class="fc-node-rect" />
+            ${bottleneckSvg}
             <!-- Line 1: Course Title (Isolated independent text nodes for flawless WebKit/iOS Safari BiDi) -->
             ${titleSvg}
             <!-- Line 2: Subtitle: Code + Credits -->
@@ -21403,13 +21414,56 @@ function renderFlowchartTree() {
         nodesGroup.appendChild(g);
     });
 
+    window.FLOWCHART_SEMESTER_ROWS = SEMESTER_ROWS;
+    window.FLOWCHART_ROW_HEIGHT = ROW_HEIGHT;
+
     if (!window.flowchartInitialZoomDone) {
         window.flowchartInitialZoomDone = true;
         setTimeout(() => {
             initFlowchartZoom();
+            if (typeof window.centerFlowchartOnActiveSemester === 'function') {
+                window.centerFlowchartOnActiveSemester({ silent: true });
+            }
         }, 50);
     }
 }
+
+window.centerFlowchartOnActiveSemester = function(opts = {}) {
+    const scrollWrap = document.getElementById("flowchart-scroll-wrapper");
+    const svgEl = document.getElementById("flowchart-svg");
+    if (!scrollWrap || !svgEl) return;
+
+    const rows = window.FLOWCHART_SEMESTER_ROWS || [
+        { sem: 1 }, { sem: 2 }, { sem: 3 }, { sem: 4 }, { sem: 5 }, { sem: 6 }, { sem: 7 }, { sem: 8 }
+    ];
+    let activeIdx = rows.findIndex(r =>
+        Object.values(gameState.courses || {}).some(c => Number(c.semester || 1) === Number(r.sem) && c.status === 'active')
+    );
+    if (activeIdx === -1) activeIdx = 2; // Default to Semester 3 (Spring 2026)
+
+    const rowHeight = window.FLOWCHART_ROW_HEIGHT || 168;
+    const totalSvgUnitsH = Math.max(BASE_FLOWCHART_HEIGHT, rows.length * rowHeight + 36);
+    const renderedH = svgEl.clientHeight || (BASE_FLOWCHART_HEIGHT * FLOWCHART_ZOOM_MULTIPLIER * (window.flowchartZoom || 0.8));
+    const scaleY = renderedH / totalSvgUnitsH;
+    const rowCenterPx = (activeIdx * rowHeight + rowHeight / 2) * scaleY;
+    const targetScrollTop = Math.max(0, Math.round(rowCenterPx - (scrollWrap.clientHeight / 2)));
+
+    scrollWrap.scrollTo({
+        top: targetScrollTop,
+        behavior: opts.silent ? 'auto' : 'smooth'
+    });
+};
+
+window.pulseFlowchartPrereqNode = function(courseCode) {
+    if (!courseCode) return;
+    highlightFlowchartPath(courseCode);
+    const scrollWrap = document.getElementById("flowchart-scroll-wrapper");
+    const targetNode = document.querySelector(`.fc-node-group[data-code="${courseCode}"]`)
+        || document.querySelector(`.fc-node-group[data-code="${normalizeCourseCodeForFlowchart(courseCode)}"]`);
+    if (targetNode && scrollWrap) {
+        targetNode.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+    }
+};
 
 // Normalizes any course code to standard 6-digit root for flowchart operations
 function normalizeCourseCodeForFlowchart(code) {
@@ -23903,11 +23957,11 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.11.12-v2.12.1",
-    version: "2.12.1",
-    build: "20261112_01",
-    date: "2026-11-12 06:20",
-    description: "v2.12.1: סנכרון מלא ומדויק לשעון Galaxy Watch 8 (ADR-110) — תיקון מיקומים, מרצים וקבוצות תרגול (אולמן 501, שרמן 107, אולמן 205), סנכרון מערכת 7-ימים דינמית בזמן אמת ללא דריסת נתונים ישנים, דפדוף ימים אינטראקטיבי על השעון (◀/▶), הצגת מועדי הגשה למשימות, וכרטיס סטטוס אקדמי (ממוצע וש״ס)."
+    code: "REV-2026.11.12-v2.13.0",
+    version: "2.13.0",
+    build: "20261112_02",
+    date: "2026-11-12 06:35",
+    description: "v2.13.0: מנתח צפיפות מבחנים ואסטרטגיית פיצול למועד ב׳ (N-01), מכ״ם נתיב קריטי וצווארי בקבוק בתואר (N-02), מחשבון מגן/תקף טכניוני (N-03), אשכולות התמחות בביקורת תואר (U-02), השוואת קורסים 2.0 (U-03), מיקוד אוטומטי לסמסטר פעיל בתרשים הזרימה (U-01), ותיקוני סנכרון ותצוגה (L-01–L-05)."
 };
 window.APP_VERSION = APP_CURRENT_REVISION.version;
 

@@ -2221,15 +2221,15 @@
         (semObj.courses || []).forEach((c, idx) => {
             if (c.type === 'sports' || c.list === 'SPORTS' || Number(c.credits) === 0) return;
             const cKeys = getNormalizedCodes(c.code, c.altCode);
-            let moedAStr = c.moedA || '';
-            let moedBStr = c.moedB || '';
+            let moedAStr = c.moedA || c.examDateA || '';
+            let moedBStr = c.moedB || c.examDateB || '';
 
             if (global.gameState && global.gameState.courses) {
                 for (const k of cKeys) {
                     const gc = global.gameState.courses[k];
                     if (gc) {
-                        if (!moedAStr && (gc.moedA || gc.examDate)) moedAStr = gc.moedA || gc.examDate;
-                        if (!moedBStr && gc.moedB) moedBStr = gc.moedB;
+                        if (!moedAStr && (gc.moedA || gc.examDateA || gc.examDate)) moedAStr = gc.moedA || gc.examDateA || gc.examDate;
+                        if (!moedBStr && (gc.moedB || gc.examDateB)) moedBStr = gc.moedB || gc.examDateB;
                     }
                 }
             }
@@ -5757,6 +5757,11 @@
         global.DegreePlanner.updatePlannerCollapsedPills = updatePlannerCollapsedPills;
         global.DegreePlanner.setPlannerMobileView = setPlannerMobileView;
         global.DegreePlanner.scheduleCourseFromCatalog = promptAddCourseToSemester;
+        global.DegreePlanner.evaluateDegreeRules = evaluateDegreeRules;
+        global.DegreePlanner.openGraduationClearanceModal = openGraduationClearanceModal;
+        global.DegreePlanner.analyzeSemesterExamDensity = analyzeSemesterExamDensity;
+        global.DegreePlanner.openExamDensityModal = openExamDensityModal;
+        global.DegreePlanner.togglePlannedMoedBSplit = togglePlannedMoedBSplit;
     }
 
     // Auto initialize events on DOM load
