@@ -11,14 +11,15 @@ import re
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 REPO = "adir2368/Semestero-ME"
 APK_PATH = os.path.join(ROOT, "Semestero-ME.apk")
+TABLET_APK_PATH = os.path.join(ROOT, "Semestero-ME-Tablet-Clean.apk")
 WATCH_APK_PATH = os.path.join(ROOT, "Semestero-ME-Watch.apk")
 ZIP_PATH = os.path.join(ROOT, "Semestero-ME-Windows-x64.zip")
 
 with open(os.path.join(ROOT, "package.json"), "r", encoding="utf-8") as f:
     pkg = json.load(f)
-VERSION = pkg.get("version", "2.13.1")
+VERSION = pkg.get("version", "2.13.2")
 TAG = f"v{VERSION}"
-NAME = f"Semestero ME v{VERSION} - Tasks Engine Overhaul, Persistent Filters, Urgency Colors & Miluim 3010 Lock (ADR-112)"
+NAME = f"Semestero ME v{VERSION} - Tablet Compatibility Fix, v1+v2+v3 Signed & Tasks Engine Overhaul (ADR-112)"
 
 def get_github_token():
     try:
@@ -107,7 +108,8 @@ def main():
 - **תיקון חפיפת חלון נגישות (`L-06`)**: העלאת שכבת חלון הנגישות מעל סרגל הלשוניות העליון.
 
 ### 📦 2. קובצי הפצה ועדכון:
-- `Semestero-ME.apk` (Android Native App `versionCode 96`, `versionName {VERSION}` — Release Signed, מומלץ לטאבלט ולמובייל)
+- `Semestero-ME-Tablet-Clean.apk` (Android Conflict-Free Tablet Edition `com.technion.semestero.tablet`, `versionCode 97`, `versionName {VERSION}` — מומלץ לטאבלטים)
+- `Semestero-ME.apk` (Android Native App `com.technion.semestero`, `versionCode 97`, `versionName {VERSION}` — `v1+v2+v3` Signed, `targetSdk 34`, ללא הרשאות חוסמות Play Protect)
 - `Semestero-ME-Watch.apk` (Wear OS Companion)
 - `Semestero-ME-Windows-x64.zip` (Electron Desktop Client {VERSION})
 """
@@ -172,19 +174,23 @@ def main():
 
     # Clean existing assets if present before uploading fresh binaries
     delete_existing_asset_if_any(release["id"], "Semestero-ME.apk", headers)
+    delete_existing_asset_if_any(release["id"], "Semestero-ME-Tablet-Clean.apk", headers)
     delete_existing_asset_if_any(release["id"], "Semestero-ME-Watch.apk", headers)
     delete_existing_asset_if_any(release["id"], "Semestero-ME-Windows-x64.zip", headers)
 
     # 1. Upload Android Mobile APK
     upload_asset(upload_url, APK_PATH, "application/vnd.android.package-archive", headers)
 
-    # 2. Upload Galaxy Watch Companion APK
+    # 2. Upload Conflict-Free Tablet Clean APK
+    upload_asset(upload_url, TABLET_APK_PATH, "application/vnd.android.package-archive", headers)
+
+    # 3. Upload Galaxy Watch Companion APK
     upload_asset(upload_url, WATCH_APK_PATH, "application/vnd.android.package-archive", headers)
 
-    # 3. Upload Windows x64 Desktop ZIP
+    # 4. Upload Windows x64 Desktop ZIP
     upload_asset(upload_url, ZIP_PATH, "application/zip", headers)
 
-    print(f"\n🚀 Release {TAG} published successfully with all 3 assets attached!")
+    print(f"\n🚀 Release {TAG} published successfully with all 4 assets attached!")
 
 if __name__ == "__main__":
     main()

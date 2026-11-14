@@ -4,11 +4,11 @@ android {
     namespace = "com.technion.semestero"
     compileSdk = rootProject.ext.compileSdkVersion
     defaultConfig {
-        applicationId "com.technion.semestero"
+        applicationId project.hasProperty('tabletEdition') ? "com.technion.semestero.tablet" : "com.technion.semestero"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 96
-        versionName "2.13.1"
+        versionCode 97
+        versionName "2.13.2"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
