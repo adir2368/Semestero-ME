@@ -16,9 +16,9 @@ ZIP_PATH = os.path.join(ROOT, "Semestero-ME-Windows-x64.zip")
 
 with open(os.path.join(ROOT, "package.json"), "r", encoding="utf-8") as f:
     pkg = json.load(f)
-VERSION = pkg.get("version", "2.11.4")
+VERSION = pkg.get("version", "2.13.1")
 TAG = f"v{VERSION}"
-NAME = f"Semestero ME v{VERSION} - Perpetual Ditch In-Schedule Relocation (העברת מתג הברזה נצחית לכרטיסיית מערכת השעות)"
+NAME = f"Semestero ME v{VERSION} - Tasks Engine Overhaul, Persistent Filters, Urgency Colors & Miluim 3010 Lock (ADR-112)"
 
 def get_github_token():
     try:
@@ -98,25 +98,18 @@ def main():
 
     body_notes = f"""# Semestero ME {TAG} Release Notes
 
-### 🚀 1. העברת מתג מצב למידה עצמית (הברזה נצחית) ישירות לתוך כרטיסיית מערכת השעות ופרטי הקורס (ADR-108)
-- **מיקום אינטואיטיבי ומדויק (In-Schedule Placement)**:
-  * המתג `🚀 מצב למידה עצמית (הברזה נצחית)` הועבר ישירות לתוך כרטיסיית **"🧀 מערכת שעות ופרטי קורס"** (CheeseFork Schedule Section) בדף הקורס, בדיוק מעל כרטיסיות ההרצאות והתרגולים השבועיים.
-  * הוסר לחלוטין מתיבת בחירת הסמסטרים של תוכנית הלימודים (`#modal-semester-select-container`).
-  * חיבור ישיר וברור בין ההחלטה על למידה עצמית לבין זמני המפגשים הפרונטליים המוצגים מול עיני הסטודנט.
-- **כרטיסיית למידה עצמית דינמית ומשאבים ישירים**:
-  * בעת הפעלה, הכרטיסייה נצבעת בסגול זוהר (`פעיל ✨`) וחושפת גישה מיידית בלחיצה אחת ל-`📺 הרצאות בפנאופטו ↗` ו-`📖 סיכומי פנגיאה ↗`.
-  * שיעורי ההרצאה והתרגול שמתחתיה מקבלים תגית סגולה מובלטת `🚀 למידה עצמית` ליד שעת המפגש.
-- **סנכרון מלא למערכת השעות והתראות**:
-  * שיעורי הקורס במערכת השעות הראשית מותאמים אוטומטית לכרטיסיות סגולות עם כפתור `⚙️ דף הקורס`.
-  * השתקה אוטומטית של התראות הגעה לכיתה (10 דקות לפני שיעור).
-  * פטור מקנסות נוכחות במרכז הנוכחות.
+### 🚀 1. שדרוג מנוע המשימות, שמירת סינונים וקידוד דחיפות (ADR-112)
+- **סמסטר נוכחי בלבד והחרגת מבחנים**: הצגת משימות הסמסטר הפעיל בלבד בברירת מחדל והחרגת מבחנים ובחנים מספירת המשימות הפתוחות.
+- **תאריכים בפורמט `DD/MM/YYYY`**: הצגת תאריכי הגשה בעברית/ישראלית ברורה `DD/MM/YYYY` בכל שורות הטבלה ורשימות העדיפויות.
+- **שמירת העדפות סינון (`U-05`)**: שמירה אוטומטית ב-`localStorage` של מסנני הקורסים, הסמסטרים, הסטטוס, הסוג והאורגנית כך ששום פעולה לא תאפס את התצוגה.
+- **קידוד צבעי דחיפות (`U-06`)**: משימות שנפתחו ולא התחילו בצבע אפור, משימות דחופות (`≤ 3` ימים) בסגול, ויום לפני / היום / באיחור באדום בוהק (משימות שטרם נפתחו נשארות כפי שהן).
+- **סיווג מילואים וטופס 3010 + נעילת השלמה/מחיקה (`L-07`)**: סיווג אוטומטי תחת קטגוריית 🪖 מילואים ונעילה קשיחה של משימות שבוצעו או נמחקו (כולל בסנכרון ענן CRDT).
+- **תיקון חפיפת חלון נגישות (`L-06`)**: העלאת שכבת חלון הנגישות מעל סרגל הלשוניות העליון.
 
 ### 📦 2. קובצי הפצה ועדכון:
-- `Semestero-ME.apk` (Android Native App `versionCode 92`, `versionName 2.11.4`)
-- `Semestero-ME-Watch.apk` (Wear OS Companion `versionCode 92`, `versionName 2.11.4`)
-- `Semestero-ME-Windows-x64.zip` (Electron Desktop Client v2.11.4)
-- כל 22 חבילות בדיקות הרגרסיה של המערכת ובדיקות הנוכחות עברו בהצלחה מלאה.
-- תיעוד ארכיטקטוני מלא: [[02_Architecture_ADR/ADR-108-Perpetual-Ditch-Self-Study-Mode-And-Attendance-Quote-Hardening|ADR-108]] עודכן ב-Obsidian Second Brain.
+- `Semestero-ME.apk` (Android Native App `versionCode 96`, `versionName {VERSION}` — Release Signed, מומלץ לטאבלט ולמובייל)
+- `Semestero-ME-Watch.apk` (Wear OS Companion)
+- `Semestero-ME-Windows-x64.zip` (Electron Desktop Client {VERSION})
 """
 
     req_tag = urllib.request.Request(f"https://api.github.com/repos/{REPO}/releases/tags/{TAG}", headers=headers)

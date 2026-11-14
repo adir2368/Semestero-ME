@@ -22,6 +22,8 @@ android {
             storePassword 'semestero2026'
             keyAlias 'semestero'
             keyPassword 'semestero2026'
+            v1SigningEnabled true
+            v2SigningEnabled true
         }
     }
     buildTypes {
