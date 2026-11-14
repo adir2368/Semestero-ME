@@ -17829,6 +17829,32 @@ tr.is-task-pinned {
     color: #ffffff;
 }
 
+/* U-06: Task Tracking Urgency & Status Color Coding */
+.notion-status-pill.not_started.is-opened-gray {
+    background: rgba(148, 163, 184, 0.16);
+    color: #cbd5e1;
+    border-color: rgba(148, 163, 184, 0.35);
+}
+.time-remaining.urgent-purple {
+    color: #c084fc;
+    font-weight: 700;
+    background: rgba(168, 85, 247, 0.16);
+    border: 1px solid rgba(168, 85, 247, 0.38);
+    padding: 2px 8px;
+    border-radius: 8px;
+    display: inline-block;
+}
+.time-remaining.critical-red {
+    color: #ff3b3b;
+    font-weight: 800;
+    background: rgba(255, 45, 85, 0.18);
+    border: 1px solid rgba(255, 59, 59, 0.55);
+    padding: 2px 8px;
+    border-radius: 8px;
+    display: inline-block;
+    text-shadow: 0 0 8px rgba(255, 59, 59, 0.35);
+}
+
 .btn-attendance-action.btn-perpetual-revert {
     background: rgba(168, 85, 247, 0.16);
     border-color: rgba(168, 85, 247, 0.4);
@@ -17877,5 +17903,31 @@ tr.is-task-pinned {
     background: rgba(56, 189, 248, 0.3);
     border-color: #38bdf8;
     color: #ffffff;
+}
+
+/* U-06: Task Tracking Urgency & Status Color Coding */
+.notion-status-pill.not_started.is-opened-gray {
+    background: rgba(148, 163, 184, 0.16);
+    color: #cbd5e1;
+    border-color: rgba(148, 163, 184, 0.35);
+}
+.time-remaining.urgent-purple {
+    color: #c084fc;
+    font-weight: 700;
+    background: rgba(168, 85, 247, 0.16);
+    border: 1px solid rgba(168, 85, 247, 0.38);
+    padding: 2px 8px;
+    border-radius: 8px;
+    display: inline-block;
+}
+.time-remaining.critical-red {
+    color: #ff3b3b;
+    font-weight: 800;
+    background: rgba(255, 45, 85, 0.18);
+    border: 1px solid rgba(255, 59, 59, 0.55);
+    padding: 2px 8px;
+    border-radius: 8px;
+    display: inline-block;
+    text-shadow: 0 0 8px rgba(255, 59, 59, 0.35);
 }
 

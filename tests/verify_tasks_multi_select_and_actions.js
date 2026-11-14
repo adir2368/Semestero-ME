@@ -169,8 +169,12 @@ async function runTasksQaSuite() {
         await cdp.send('Page.enable');
         await cdp.send('Runtime.enable');
 
+        if (!pageTarget.url || pageTarget.url === 'about:blank') {
+            await cdp.send('Page.navigate', { url: TARGET_URL });
+            await delay(2500);
+        }
         await cdp.eval(`sessionStorage.setItem('sw_last_controller_reload', String(Date.now()));`);
-        await delay(2500);
+        await delay(1000);
 
         // 3. Navigate to Tasks Tab
         console.log('\n[Test 3] Navigating to Tasks Tab...');

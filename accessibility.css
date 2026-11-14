@@ -16,7 +16,7 @@
     bottom: 0;
     background: rgba(10, 15, 29, 0.75);
     backdrop-filter: blur(8px);
-    z-index: 10000;
+    z-index: 100080 !important;
     display: none;
     align-items: center;
     justify-content: center;
@@ -27,6 +27,9 @@
 }
 
 .a11y-modal-card {
+    position: relative;
+    z-index: 100081;
+    max-height: 90vh;
     background: #0f172a;
     border: 1px solid rgba(56, 189, 248, 0.4);
     border-radius: 18px;

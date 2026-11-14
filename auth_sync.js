@@ -2733,9 +2733,26 @@
                                     remoteState.userProfile.phone = scopedPhone;
                                 }
 
-                                // CRDT Monotonic Merge: preserve completed tasks across local and remote
+                                // CRDT Monotonic Merge: preserve completed & dismissed/deleted tasks across local and remote
                                 remoteState.courses = mergeCoursesPreservingTaskCompletion(localState.courses, remoteState.courses);
                                 remoteState.completedTaskRegistry = Object.assign({}, localState.completedTaskRegistry || {}, remoteState.completedTaskRegistry || {});
+                                remoteState.dismissedTaskRegistry = Object.assign({}, localState.dismissedTaskRegistry || {}, remoteState.dismissedTaskRegistry || {});
+                                remoteState.deletedTaskIds = Array.from(new Set([...(Array.isArray(localState.deletedTaskIds) ? localState.deletedTaskIds : []), ...(Array.isArray(remoteState.deletedTaskIds) ? remoteState.deletedTaskIds : [])]));
+                                // Purge dismissed/deleted tasks from merged courses
+                                if (remoteState.courses && typeof remoteState.courses === 'object') {
+                                    const deletedSet = new Set(remoteState.deletedTaskIds.map(String));
+                                    Object.values(remoteState.courses).forEach(c => {
+                                        if (c && Array.isArray(c.tasks)) {
+                                            c.tasks = c.tasks.filter(t => {
+                                                if (!t) return false;
+                                                if (t.id && deletedSet.has(String(t.id))) return false;
+                                                if (t.moodleUid && deletedSet.has(String(t.moodleUid))) return false;
+                                                if (t.moodleEventId && deletedSet.has(String(t.moodleEventId))) return false;
+                                                return true;
+                                            });
+                                        }
+                                    });
+                                }
 
                                 // Sync Attendance bidirectionally if remote carries it
                                 if (remoteState.attendance && window.AttendanceHub && typeof window.AttendanceHub.loadFromGameState === 'function') {
@@ -2861,9 +2878,25 @@
                         remoteState.userProfile.phone = scopedPhone;
                     }
 
-                    // CRDT Monotonic Merge: preserve completed tasks across local and remote
+                    // CRDT Monotonic Merge: preserve completed & dismissed/deleted tasks across local and remote
                     remoteState.courses = mergeCoursesPreservingTaskCompletion(localState.courses, remoteState.courses);
                     remoteState.completedTaskRegistry = Object.assign({}, localState.completedTaskRegistry || {}, remoteState.completedTaskRegistry || {});
+                    remoteState.dismissedTaskRegistry = Object.assign({}, localState.dismissedTaskRegistry || {}, remoteState.dismissedTaskRegistry || {});
+                    remoteState.deletedTaskIds = Array.from(new Set([...(Array.isArray(localState.deletedTaskIds) ? localState.deletedTaskIds : []), ...(Array.isArray(remoteState.deletedTaskIds) ? remoteState.deletedTaskIds : [])]));
+                    if (remoteState.courses && typeof remoteState.courses === 'object') {
+                        const deletedSet = new Set(remoteState.deletedTaskIds.map(String));
+                        Object.values(remoteState.courses).forEach(c => {
+                            if (c && Array.isArray(c.tasks)) {
+                                c.tasks = c.tasks.filter(t => {
+                                    if (!t) return false;
+                                    if (t.id && deletedSet.has(String(t.id))) return false;
+                                    if (t.moodleUid && deletedSet.has(String(t.moodleUid))) return false;
+                                    if (t.moodleEventId && deletedSet.has(String(t.moodleEventId))) return false;
+                                    return true;
+                                });
+                            }
+                        });
+                    }
 
                     // Sync Attendance bidirectionally if remote carries it
                     if (remoteState.attendance && window.AttendanceHub && typeof window.AttendanceHub.loadFromGameState === 'function') {

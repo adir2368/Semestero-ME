@@ -379,6 +379,7 @@
         },
         {
           "id": "114052_miluim_3010",
+          "isMiluim": true,
           "moodleUid": "9572@moodle26.technion.ac.il",
           "title": "אישור מילואים (טופס 3010) חורף",
           "type": "hw",
@@ -1118,6 +1119,7 @@
         },
         {
           "id": "034056_miluim",
+          "isMiluim": true,
           "moodleUid": "15247@moodle26.technion.ac.il",
           "title": "שאלון מילואים",
           "type": "quiz",

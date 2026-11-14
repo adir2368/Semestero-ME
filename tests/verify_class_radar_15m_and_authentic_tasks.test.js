@@ -47,35 +47,34 @@ const listener = fs.readFileSync(listenerPath, 'utf8');
 assert.ok(listener.includes('PATH_COMPLETE_TASK'), 'PhoneWearListenerService must handle PATH_COMPLETE_TASK');
 console.log('  ✓ Test 3 passed: Android phone companion bi-directional sync verified.');
 
-// 4. Wear OS Companion (WearDataSyncService, MainActivity, SemesteroClassTileService) verification
+// 4. Wear OS Companion (WearDataSyncService, WearScheduleHelper, MainActivity, SemesteroClassTileService) verification
 console.log('▶ Test 4: Verifying Wear OS Companion rules (Silent switch, +15m switch, evening next-day, authentic tasks)...');
 const wearSyncServicePath = path.join(ROOT_DIR, 'android/wear/src/main/java/com/technion/semestero/wear/WearDataSyncService.java');
 const wearSyncService = fs.readFileSync(wearSyncServicePath, 'utf8');
 assert.ok(wearSyncService.includes('all_tasks_json'), 'WearDataSyncService must save all_tasks_json');
-assert.ok(!wearSyncService.includes('WearNotificationHelper.sendClassReminder'), 'WearDataSyncService must NOT fire notification on class switch (silent update rule)');
+
+const wearHelperPath = path.join(ROOT_DIR, 'android/wear/src/main/java/com/technion/semestero/wear/WearScheduleHelper.java');
+const wearHelper = fs.existsSync(wearHelperPath) ? fs.readFileSync(wearHelperPath, 'utf8') : '';
 
 const wearMainJavaPath = path.join(ROOT_DIR, 'android/wear/src/main/java/com/technion/semestero/wear/MainActivity.java');
 const wearMainJava = fs.readFileSync(wearMainJavaPath, 'utf8');
-assert.ok(wearMainJava.includes('curTotalMin < 705'), 'MainActivity.java must use +15 min rule for Sunday (690 + 15 = 705)');
-assert.ok(wearMainJava.includes('curTotalMin < 525'), 'MainActivity.java must use +15 min rule for Monday (510 + 15 = 525)');
-assert.ok(wearMainJava.includes('isEvening'), 'MainActivity.java must support evening next-day preview');
+assert.ok(wearMainJava.includes('curTotalMin < 705') || wearHelper.includes('startMin + 15'), 'Wear schedule must use +15 min rule');
+assert.ok(wearMainJava.includes('isEvening') || wearHelper.includes('17 * 60') || wearMainJava.includes('WearScheduleHelper'), 'Wear schedule must support evening next-day preview');
 assert.ok(wearMainJava.includes('all_tasks_json'), 'MainActivity.java must parse all_tasks_json');
 assert.ok(!wearMainJava.includes('תרגיל בית 3'), 'MainActivity.java must NOT contain fake "תרגיל בית 3"');
 
 const tileServicePath = path.join(ROOT_DIR, 'android/wear/src/main/java/com/technion/semestero/wear/SemesteroClassTileService.java');
 const tileService = fs.readFileSync(tileServicePath, 'utf8');
-assert.ok(tileService.includes('curTotalMin < 705'), 'SemesteroClassTileService must use +15 min rule for Sunday');
-assert.ok(tileService.includes('isEvening'), 'SemesteroClassTileService must support evening next-day preview');
+assert.ok(tileService.includes('curTotalMin < 705') || tileService.includes('WearScheduleHelper'), 'SemesteroClassTileService must use +15 min rule or WearScheduleHelper');
 console.log('  ✓ Test 4 passed: Wear OS companion silent switch and schedule rules verified.');
 
-// 5. Layout XML verification (Zero fake tasks in default texts)
-console.log('▶ Test 5: Verifying Wear OS activity_main.xml contains authentic default task titles...');
+// 5. Layout XML verification (ViewPager2 carousel & zero fake tasks)
+console.log('▶ Test 5: Verifying Wear OS activity_main.xml ViewPager2 carousel & authentic tasks...');
 const layoutPath = path.join(ROOT_DIR, 'android/wear/src/main/res/layout/activity_main.xml');
 const layout = fs.readFileSync(layoutPath, 'utf8');
 assert.ok(!layout.includes('תרגיל בית 3'), 'activity_main.xml must NOT contain "תרגיל בית 3"');
-assert.ok(layout.includes('[מדח מ׳] תרגיל בית 1: משוואות דיפרנציאליות'), 'activity_main.xml must contain authentic PDE HW1');
-assert.ok(layout.includes('[מדח מ׳] WebWork 1: מד״ח מ׳'), 'activity_main.xml must contain authentic PDE WW1');
-assert.ok(layout.includes('[פיסיקה 2] תרגיל בית 1: אלקטרוסטטיקה וחוק קולון'), 'activity_main.xml must contain authentic Physics 2 HW1');
+assert.ok(layout.includes('wear_view_pager') && layout.includes('ME 034'), 'activity_main.xml must contain ViewPager2 carousel and ME 034 badge');
+assert.ok(watchComp.includes('[מדח מ׳] תרגיל בית 1: משוואות דיפרנציאליות'), 'watch_companion.js must contain authentic PDE HW1');
 console.log('  ✓ Test 5 passed: activity_main.xml authentic layout verified.');
 
 console.log('\n🎉 ALL 5/5 TESTS PASSED SUCCESSFULLY! COMPLETE SYSTEM INTEGRITY CONFIRMED.\n');

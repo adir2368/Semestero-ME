@@ -547,6 +547,13 @@
             return t;
         },
 
+        isMiluimTask(task) {
+            if (!task) return false;
+            if (task.isMiluim === true || task.miluim === true) return true;
+            const title = String(task.title || '').trim();
+            return /מילואים|3010|צווים|צו\s*8|שירות\s*מילואים/i.test(title);
+        },
+
         getTaskCompletionKeys(courseCode, task) {
             const keys = [];
             if (!task) return keys;
@@ -558,13 +565,24 @@
             
             const title = task.title || '';
             if (title) {
-                const cToken = this.getCanonicalTaskToken(title, courseCode);
-                if (cToken && courseCode) {
-                    keys.push(`canonical:${courseCode}:${cToken}`);
+                const rawCode = String(courseCode || '').trim();
+                const strippedCode = rawCode.replace(/^0+/, '');
+                const cToken = this.getCanonicalTaskToken(title, rawCode);
+                if (cToken && rawCode) {
+                    keys.push(`canonical:${rawCode}:${cToken}`);
+                    if (strippedCode && strippedCode !== rawCode) {
+                        keys.push(`canonical:${strippedCode}:${cToken}`);
+                    }
                 }
-                const norm = this.normalizeTaskTitle(title, courseCode);
-                if (norm && courseCode) {
-                    keys.push(`norm:${courseCode}:${norm}`);
+                const norm = this.normalizeTaskTitle(title, rawCode);
+                if (norm && rawCode) {
+                    keys.push(`norm:${rawCode}:${norm}`);
+                    if (strippedCode && strippedCode !== rawCode) {
+                        keys.push(`norm:${strippedCode}:${norm}`);
+                    }
+                }
+                if (norm && this.isMiluimTask(task)) {
+                    keys.push(`miluim_norm:${norm}`);
                 }
             }
             return keys;
@@ -812,6 +830,7 @@
                 moodleUid: primary.moodleUid || secondary.moodleUid,
                 moodleUrl: primary.moodleUrl || secondary.moodleUrl,
                 source: (primary.source === 'manual' || secondary.source === 'manual') ? 'manual' : (primary.source || secondary.source || (this.extractMoodleId(primary) ? 'moodle' : undefined)),
+                isMiluim: !!(primary.isMiluim || primary.miluim || secondary.isMiluim || secondary.miluim || this.isMiluimTask(primary) || this.isMiluimTask(secondary)),
                 pinned: !!(primary.pinned || secondary.pinned),
                 notes: primary.notes || secondary.notes || undefined,
                 comments: (Array.isArray(primary.comments) || Array.isArray(secondary.comments))
@@ -1257,6 +1276,9 @@
                     primary.moodleUid = uid;
                     primary.moodleEventId = eventId;
                     primary.source = 'moodle';
+                    if (this.isMiluimTask(primary) || this.isMiluimTask(incomingMock)) {
+                        primary.isMiluim = true;
+                    }
 
                     if (modified) {
                         updatedCount++;
@@ -1285,6 +1307,7 @@
                         id: `task_moodle_${eventId}_${Date.now()}`,
                         title: cleanTitle,
                         type: this.detectTaskType(cleanTitle),
+                        isMiluim: this.isMiluimTask({ title: cleanTitle }),
                         dueDate: formattedDate,
                         dueTimestamp: dueDateObj.getTime(),
                         xp: 50,

@@ -10461,7 +10461,23 @@ function recalculateCourseStates() {
     
     // Calculate total open tasks count (STRICTLY across actively registered/enrolled courses, EXCLUDING exams and tests)
     let openTasksCount = 0;
+    const deletedIdsSet = new Set(Array.isArray(gameState.deletedTaskIds) ? gameState.deletedTaskIds.map(String) : []);
     uniqueCourses.forEach(course => {
+        if (Array.isArray(course.tasks)) {
+            course.tasks = course.tasks.filter(t => {
+                if (!t) return false;
+                if (t.id && deletedIdsSet.has(String(t.id))) return false;
+                if (t.moodleUid && deletedIdsSet.has(String(t.moodleUid))) return false;
+                if (t.moodleEventId && deletedIdsSet.has(String(t.moodleEventId))) return false;
+                if (window.MoodleSync && typeof window.MoodleSync.isTaskDismissedInRegistry === 'function' && window.MoodleSync.isTaskDismissedInRegistry(course.code, t)) {
+                    return false;
+                }
+                if (/מילואים|3010|צווים|צו\s*8|שירות\s*מילואים/i.test(t.title || '')) {
+                    t.isMiluim = true;
+                }
+                return true;
+            });
+        }
         const isBinary = (course.isBinaryPass === true || course.grade === 'עובר' || course.grade === 'PASS');
         const hasPassingGrade = isBinary || (course.grade !== undefined && course.grade !== null && course.grade !== '' && !isNaN(Number(course.grade)) && Number(course.grade) >= 55);
         if (course.status === 'active' && !hasPassingGrade && course.tasks && Array.isArray(course.tasks)) {
@@ -16947,6 +16963,17 @@ function populateNotionCourseFilter() {
 
     const courseFilterBody = document.getElementById("notion-course-filter-body");
     if (courseFilterBody) {
+        let savedCoursesSet = null;
+        try {
+            const rawPrefs = localStorage.getItem('semestero_tasks_filters_v1');
+            if (rawPrefs) {
+                const parsed = JSON.parse(rawPrefs);
+                if (Array.isArray(parsed.courses)) {
+                    savedCoursesSet = new Set(parsed.courses);
+                }
+            }
+        } catch (e) {}
+
         courseFilterBody.innerHTML = '';
         const activeCourses = Object.values(gameState.courses).filter(c => {
             const hasTasks = Array.isArray(c.tasks) && c.tasks.length > 0;
@@ -16954,6 +16981,7 @@ function populateNotionCourseFilter() {
         });
         activeCourses.forEach(course => {
             const shortName = (typeof COURSE_SHORT_NAMES !== 'undefined' && COURSE_SHORT_NAMES[course.code]) || course.name;
+            const isChecked = savedCoursesSet ? savedCoursesSet.has(course.code) : true;
             const row = document.createElement("div");
             row.className = "notion-filter-item-row flat";
             row.innerHTML = `
@@ -16961,7 +16989,7 @@ function populateNotionCourseFilter() {
                     <span class="course-color-dot" style="width: 8px; height: 8px; border-radius: 50%; background: ${course.color || '#38bdf8'}; display: inline-block; flex-shrink: 0;"></span>
                     <span title="${course.name} (${course.code})">${shortName} (${course.code})</span>
                 </label>
-                <input type="checkbox" id="filter-course-${course.code}" class="notion-filter-cb notion-course-opt-cb" data-course-code="${course.code}" checked>
+                <input type="checkbox" id="filter-course-${course.code}" class="notion-filter-cb notion-course-opt-cb" data-course-code="${course.code}" ${isChecked ? 'checked' : ''}>
             `;
             courseFilterBody.appendChild(row);
         });
@@ -16969,6 +16997,7 @@ function populateNotionCourseFilter() {
         courseFilterBody.querySelectorAll(".notion-course-opt-cb").forEach(cb => {
             cb.addEventListener("change", () => {
                 updateCourseFilterSummary();
+                if (typeof saveNotionFilterPreferences === 'function') saveNotionFilterPreferences();
                 renderNotionTasksTable();
             });
         });
@@ -16977,12 +17006,12 @@ function populateNotionCourseFilter() {
 }
 
 // Compute days remaining and return a styled info object
-function calculateTimeRemaining(dueDateStr, isCompleted) {
+function calculateTimeRemaining(dueDateStr, isCompleted, taskObj = null) {
     if (isCompleted) {
-        return { text: "הושלם (Completed)", className: "completed" };
+        return { text: "הושלם (Completed)", className: "completed", diffDays: 999, isOpened: true };
     }
     if (!dueDateStr) {
-        return { text: "ללא תאריך", className: "normal" };
+        return { text: "ללא תאריך", className: "normal", diffDays: 999, isOpened: true };
     }
     
     const today = new Date();
@@ -16992,17 +17021,22 @@ function calculateTimeRemaining(dueDateStr, isCompleted) {
     
     const diffTime = due - today;
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    let isOpened = diffDays <= 14;
+    if (taskObj && taskObj.openDate) {
+        const openTs = Date.parse(taskObj.openDate);
+        if (!isNaN(openTs)) isOpened = Date.now() >= openTs;
+    }
     
     if (diffDays < 0) {
-        return { text: `באיחור של ${Math.abs(diffDays)} ימים`, className: "late" };
+        return { text: `באיחור של ${Math.abs(diffDays)} ימים`, className: "critical-red", diffDays, isOpened: true };
     } else if (diffDays === 0) {
-        return { text: "היום! (Today)", className: "warning" };
+        return { text: "היום! (Today)", className: "critical-red", diffDays, isOpened: true };
     } else if (diffDays === 1) {
-        return { text: "מחר! (Tomorrow)", className: "warning" };
+        return { text: "מחר! (Tomorrow)", className: "critical-red", diffDays, isOpened: true };
     } else if (diffDays <= 3) {
-        return { text: `נותרו עוד ${diffDays} ימים`, className: "warning" };
+        return { text: `נותרו עוד ${diffDays} ימים`, className: "urgent-purple", diffDays, isOpened: true };
     } else {
-        return { text: `נותרו עוד ${diffDays} ימים`, className: "normal" };
+        return { text: `נותרו עוד ${diffDays} ימים`, className: "normal", diffDays, isOpened };
     }
 }
 
@@ -17033,6 +17067,7 @@ function setupOrganitCategoryPills() {
                 pill.setAttribute("aria-selected", "true");
                 window.activeOrganitCategory = pill.dataset.category || 'all';
             }
+            if (typeof saveNotionFilterPreferences === 'function') saveNotionFilterPreferences();
             renderNotionTasksTable();
         });
     });
@@ -17043,10 +17078,15 @@ function updateOrganitCategoryCounts(allTasks) {
     let counts = { all: allTasks.length, hw: 0, exam: 0, project: 0, miluim: 0 };
     allTasks.forEach(item => {
         const t = item.task;
+        const isMiluim = !!(t.isMiluim === true || t.miluim === true || (t.title && /מילואים|3010|צווים|צו\s*8|שירות\s*מילואים/i.test(t.title)));
+        if (isMiluim) {
+            t.isMiluim = true;
+            counts.miluim++;
+            return; // Miluim tasks belong strictly under Miluim
+        }
         if (t.type === 'hw' || t.type === 'homework' || t.type === 'assignment' || t.type === 'quiz' || t.type === 'webwork' || t.type === 'hw_digital' || t.type === 'hw_written' || (t.title && /תרגיל|מטלה|גיליון|גליון|שאלון|לומדה|scorm|webwork/i.test(t.title))) counts.hw++;
         if (t.type === 'exam' || t.type === 'midterm' || t.type === 'moed_a' || t.type === 'moed_b') counts.exam++;
         if (t.type === 'project' || t.type === 'lab') counts.project++;
-        if (t.isMiluim === true || t.miluim === true) counts.miluim++;
     });
 
     const elAll = document.getElementById("organit-count-all");
@@ -17261,13 +17301,17 @@ function deleteSelectedTasks() {
         const course = resolveCourseForTask(cCode);
         if (!course || !Array.isArray(course.tasks)) return;
         const set = byCourse[cCode];
-        if (window.MoodleSync && typeof window.MoodleSync.markTaskDismissedInRegistry === 'function') {
-            course.tasks.forEach(t => {
-                if (set.has(t.id)) {
+        if (!gameState.deletedTaskIds) gameState.deletedTaskIds = [];
+        course.tasks.forEach(t => {
+            if (set.has(t.id)) {
+                if (t.id && !gameState.deletedTaskIds.includes(t.id)) gameState.deletedTaskIds.push(t.id);
+                if (t.moodleEventId && !gameState.deletedTaskIds.includes(String(t.moodleEventId))) gameState.deletedTaskIds.push(String(t.moodleEventId));
+                if (t.moodleUid && !gameState.deletedTaskIds.includes(String(t.moodleUid))) gameState.deletedTaskIds.push(String(t.moodleUid));
+                if (window.MoodleSync && typeof window.MoodleSync.markTaskDismissedInRegistry === 'function') {
                     window.MoodleSync.markTaskDismissedInRegistry(course.code || cCode, t);
                 }
-            });
-        }
+            }
+        });
         const prevLen = course.tasks.length;
         course.tasks = course.tasks.filter(t => !set.has(t.id));
         deletedCount += (prevLen - course.tasks.length);
@@ -17601,8 +17645,11 @@ function renderNotionTasksTable() {
     const tableBody = document.getElementById("notion-tasks-table-body");
     if (!tableBody) return;
     
-    // Ensure Organit pills are hooked up
+    // Ensure Organit pills are hooked up & restore saved filter preferences once
     setupOrganitCategoryPills();
+    if (!window._notionFiltersRestored && typeof restoreNotionFilterPreferences === 'function') {
+        restoreNotionFilterPreferences();
+    }
     
     tableBody.innerHTML = "";
     
@@ -17645,29 +17692,23 @@ function renderNotionTasksTable() {
             return;
         }
         
-        // Semester Multi-select Filter
+        // Semester Multi-select Filter (strictly current semester when active/default)
         const cSem = course.semester || 1;
         const isCourseActiveNow = (course.status === 'active');
-        const hasTasks = Array.isArray(course.tasks) && course.tasks.length > 0;
 
         if (activeSemesterFilters) {
             if (activeSemesterFilters.size > 0 && activeSemesterFilters.size < 6) {
-                const matchesSem = activeSemesterFilters.has(cSem) || 
-                                   (isCourseActiveNow && activeSemesterFilters.has(curActiveSem)) ||
-                                   (hasTasks && activeSemesterFilters.has(curActiveSem));
+                const matchesSem = activeSemesterFilters.has(cSem) ||
+                                   (isCourseActiveNow && activeSemesterFilters.has(curActiveSem));
                 if (!matchesSem) return;
             }
         } else if (semesterFilter === 'active') {
-            if (cSem < curActiveSem && course.status === 'mastered' && !hasTasks) {
-                return; // Hide past completed semesters only if no tasks exist
-            }
-            if (cSem > curActiveSem && course.status !== 'active' && course.status !== 'available' && !hasTasks) {
-                return; // Hide future semesters unless active, available, or has tasks
+            if (cSem !== curActiveSem && !isCourseActiveNow) {
+                return;
             }
         } else if (semesterFilter !== 'all') {
-            const matchesSem = (String(cSem) === String(semesterFilter)) || 
-                               (isCourseActiveNow && String(curActiveSem) === String(semesterFilter)) ||
-                               (hasTasks && String(curActiveSem) === String(semesterFilter));
+            const matchesSem = (String(cSem) === String(semesterFilter)) ||
+                               (isCourseActiveNow && String(curActiveSem) === String(semesterFilter));
             if (!matchesSem) return;
         }
 
@@ -17694,8 +17735,10 @@ function renderNotionTasksTable() {
         
         // 0. Organit++ Category Filter
         const organitCat = window.activeOrganitCategory || 'all';
+        const isMiluimTask = !!(t.isMiluim === true || t.miluim === true || (t.title && /מילואים|3010|צווים|צו\s*8|שירות\s*מילואים/i.test(t.title)));
+        if (isMiluimTask) t.isMiluim = true;
         if (organitCat !== 'all') {
-            if (organitCat === 'hw' && !(t.type === 'hw' || t.type === 'homework' || t.type === 'assignment' || t.type === 'quiz' || t.type === 'webwork' || t.type === 'hw_digital' || t.type === 'hw_written' || (t.title && /תרגיל|מטלה|גיליון|גליון|שאלון|לומדה|scorm|webwork/i.test(t.title)))) {
+            if (organitCat === 'hw' && (isMiluimTask || !(t.type === 'hw' || t.type === 'homework' || t.type === 'assignment' || t.type === 'quiz' || t.type === 'webwork' || t.type === 'hw_digital' || t.type === 'hw_written' || (t.title && /תרגיל|מטלה|גיליון|גליון|שאלון|לומדה|scorm|webwork/i.test(t.title))))) {
                 return false;
             }
             if (organitCat === 'exam' && !(t.type === 'exam' || t.type === 'midterm' || t.type === 'moed_a' || t.type === 'moed_b')) {
@@ -17704,7 +17747,7 @@ function renderNotionTasksTable() {
             if (organitCat === 'project' && !(t.type === 'project' || t.type === 'lab')) {
                 return false;
             }
-            if (organitCat === 'miluim' && !(t.isMiluim === true || t.miluim === true)) {
+            if (organitCat === 'miluim' && !isMiluimTask) {
                 return false;
             }
         }
@@ -17821,7 +17864,7 @@ function renderNotionTasksTable() {
         const c = item.course;
         const t = item.task;
         const isDone = (t.status === 'done' || t.status === 'submitted');
-        const timeInfo = calculateTimeRemaining(t.dueDate, isDone);
+        const timeInfo = calculateTimeRemaining(t.dueDate, isDone, t);
         
         const taskBadgeHtml = getTaskTypeBadgeHtml(t);
         const isPinned = !!t.pinned;
@@ -17897,11 +17940,14 @@ function renderNotionTasksTable() {
                     <span class="notion-semester-pill sem-${semNum}">${semLabel}</span>
                 </td>
                 <td class="notion-table-date-cell">
-                    <input type="date" class="notion-inline-date-input" value="${toIsoDateOnly(t.dueDate)}" title="לחץ לעריכת תאריך הגשה">
+                    <div class="notion-date-display-wrap" style="display: flex; align-items: center; gap: 6px;">
+                        <span class="notion-date-formatted" style="font-variant-numeric: tabular-nums; font-size: 0.82rem; color: #e2e8f0; min-width: 78px;">${formatDateToDisplay(t.dueDate) || 'ללא תאריך'}</span>
+                        <input type="date" class="notion-inline-date-input" value="${toIsoDateOnly(t.dueDate)}" title="לחץ לעריכת תאריך הגשה" style="width: 24px; padding: 2px; border: none; background: transparent; color-scheme: dark; cursor: pointer;">
+                    </div>
                 </td>
                 <td><span class="time-remaining ${timeInfo.className}">${timeInfo.text}</span></td>
                 <td style="position: relative;">
-                    <span class="notion-status-pill ${statusClass}" title="שנה סטטוס ישירות מהרשימה">${displayLabel}</span>
+                    <span class="notion-status-pill ${statusClass} ${(statusClass === 'not_started' && timeInfo.isOpened) ? 'is-opened-gray' : ''}" title="שנה סטטוס ישירות מהרשימה">${displayLabel}</span>
                 </td>
             </tr>
         `;
@@ -19152,6 +19198,91 @@ function handleCreateTaskSubmit() {
 }
 
 
+const NOTION_FILTERS_STORAGE_KEY = 'semestero_tasks_filters_v1';
+
+function saveNotionFilterPreferences() {
+    if (window._isRestoringNotionFilters) return;
+    try {
+        const courseFilterObj = (typeof getActiveCourseFilters === 'function') ? getActiveCourseFilters() : null;
+        const semFilterObj = (typeof getActiveSemesterFilters === 'function') ? getActiveSemesterFilters() : null;
+        const prefs = {
+            statuses: (typeof getActiveStatusFilters === 'function') ? getActiveStatusFilters() : ['not_started', 'in_progress', 'done', 'submitted'],
+            types: (typeof getActiveTypeFilters === 'function') ? getActiveTypeFilters() : ['hw', 'project', 'exam'],
+            semesters: semFilterObj ? Array.from(semFilterObj) : null,
+            courses: courseFilterObj ? Array.from(courseFilterObj) : null,
+            organitCategory: window.activeOrganitCategory || 'all'
+        };
+        localStorage.setItem(NOTION_FILTERS_STORAGE_KEY, JSON.stringify(prefs));
+    } catch (e) {}
+}
+
+function restoreNotionFilterPreferences() {
+    window._notionFiltersRestored = true;
+    try {
+        const raw = localStorage.getItem(NOTION_FILTERS_STORAGE_KEY);
+        if (!raw) return;
+        const prefs = JSON.parse(raw);
+        if (!prefs || typeof prefs !== 'object') return;
+        window._isRestoringNotionFilters = true;
+
+        if (Array.isArray(prefs.statuses)) {
+            const statusPopover = document.getElementById("notion-status-filter-popover");
+            if (statusPopover) {
+                const sSet = new Set(prefs.statuses);
+                statusPopover.querySelectorAll(".notion-filter-opt-cb").forEach(cb => {
+                    cb.checked = sSet.has(cb.dataset.status);
+                });
+                if (typeof updateFilterSummary === 'function') updateFilterSummary();
+            }
+        }
+        if (Array.isArray(prefs.types)) {
+            const typePopover = document.getElementById("notion-type-filter-popover");
+            if (typePopover) {
+                const tSet = new Set(prefs.types);
+                typePopover.querySelectorAll(".notion-filter-type-cb").forEach(cb => {
+                    cb.checked = tSet.has(cb.dataset.type);
+                });
+                if (typeof updateTypeFilterSummary === 'function') updateTypeFilterSummary();
+            }
+        }
+        if (Array.isArray(prefs.semesters)) {
+            const semPopover = document.getElementById("notion-semester-filter-popover");
+            if (semPopover) {
+                const semSet = new Set(prefs.semesters.map(Number));
+                semPopover.querySelectorAll(".notion-sem-opt-cb").forEach(cb => {
+                    cb.checked = semSet.has(parseInt(cb.getAttribute("data-sem"), 10));
+                });
+                if (typeof updateSemesterFilterSummary === 'function') updateSemesterFilterSummary();
+            }
+        }
+        if (Array.isArray(prefs.courses)) {
+            const coursePopover = document.getElementById("notion-course-filter-popover");
+            if (coursePopover) {
+                const cSet = new Set(prefs.courses);
+                coursePopover.querySelectorAll(".notion-course-opt-cb").forEach(cb => {
+                    cb.checked = cSet.has(cb.getAttribute("data-course-code"));
+                });
+                if (typeof updateCourseFilterSummary === 'function') updateCourseFilterSummary();
+            }
+        }
+        if (prefs.organitCategory) {
+            window.activeOrganitCategory = prefs.organitCategory;
+            const organitContainer = document.getElementById("organit-category-pills");
+            if (organitContainer) {
+                organitContainer.querySelectorAll(".organit-pill").forEach(p => {
+                    const isMatch = p.dataset.category === prefs.organitCategory;
+                    p.classList.toggle("active", isMatch);
+                    p.setAttribute("aria-selected", isMatch ? "true" : "false");
+                });
+            }
+        }
+    } catch (e) {} finally {
+        window._isRestoringNotionFilters = false;
+    }
+}
+window.saveNotionFilterPreferences = saveNotionFilterPreferences;
+window.restoreNotionFilterPreferences = restoreNotionFilterPreferences;
+
 // Setup Notion Filter Popover listeners
 function setupNotionFilterPopover() {
     const btn = document.getElementById("notion-status-filter-btn");
@@ -19180,6 +19311,7 @@ function setupNotionFilterPopover() {
     optCheckboxes.forEach(optCb => {
         optCb.addEventListener("change", () => {
             updateFilterSummary();
+            saveNotionFilterPreferences();
             renderNotionTasksTable();
         });
     });
@@ -19190,6 +19322,7 @@ function setupNotionFilterPopover() {
             e.stopPropagation();
             optCheckboxes.forEach(cb => cb.checked = false);
             updateFilterSummary();
+            saveNotionFilterPreferences();
             renderNotionTasksTable();
         });
     }
@@ -19245,6 +19378,7 @@ function setupNotionSemesterFilterPopover() {
     semCheckboxes.forEach(cb => {
         cb.addEventListener("change", () => {
             updateSemesterFilterSummary();
+            saveNotionFilterPreferences();
             renderNotionTasksTable();
         });
     });
@@ -19256,6 +19390,7 @@ function setupNotionSemesterFilterPopover() {
             semCheckboxes.forEach(cb => cb.checked = !allChecked);
             selectAllBtn.innerText = allChecked ? "בחר הכל" : "בטל הכל";
             updateSemesterFilterSummary();
+            saveNotionFilterPreferences();
             renderNotionTasksTable();
         });
     }
@@ -19333,6 +19468,7 @@ function setupNotionCourseFilterPopover() {
             courseCbs.forEach(cb => cb.checked = !allChecked);
             selectAllBtn.innerText = allChecked ? "בחר הכל" : "בטל הכל";
             updateCourseFilterSummary();
+            saveNotionFilterPreferences();
             renderNotionTasksTable();
         });
     }
@@ -19401,6 +19537,7 @@ function setupNotionTypeFilterPopover() {
     optCheckboxes.forEach(optCb => {
         optCb.addEventListener("change", () => {
             updateTypeFilterSummary();
+            saveNotionFilterPreferences();
             renderNotionTasksTable();
         });
     });
@@ -19410,6 +19547,7 @@ function setupNotionTypeFilterPopover() {
             e.stopPropagation();
             optCheckboxes.forEach(cb => cb.checked = false);
             updateTypeFilterSummary();
+            saveNotionFilterPreferences();
             renderNotionTasksTable();
         });
     }
@@ -24030,11 +24168,11 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.11.12-v2.13.0",
-    version: "2.13.0",
-    build: "20261112_02",
-    date: "2026-11-12 06:35",
-    description: "v2.13.0: מנתח צפיפות מבחנים ואסטרטגיית פיצול למועד ב׳ (N-01), מכ״ם נתיב קריטי וצווארי בקבוק בתואר (N-02), מחשבון מגן/תקף טכניוני (N-03), אשכולות התמחות בביקורת תואר (U-02), השוואת קורסים 2.0 (U-03), מיקוד אוטומטי לסמסטר פעיל בתרשים הזרימה (U-01), ותיקוני סנכרון ותצוגה (L-01–L-05)."
+    code: "REV-2026.11.14-v2.13.1",
+    version: "2.13.1",
+    build: "20261114_01",
+    date: "2026-11-14 15:45",
+    description: "v2.13.1: סינון משימות לסמסטר נוכחי בלבד, החרגת מבחנים ובחנים ממשימות פתוחות, תאריכים בפורמט DD/MM/YYYY, שמירת העדפות סינון בלוח המשימות (U-05), קידוד צבעי דחיפות סגול/אדום בוהק/אפור (U-06), סיווג ונעילת משימות מילואים וטופס 3010 (L-07), ותיקון חפיפת חלון נגישות (L-06)."
 };
 window.APP_VERSION = APP_CURRENT_REVISION.version;
 
@@ -27073,6 +27211,11 @@ function getUpcomingPriorityTasks(limit = 8) {
         (course.tasks || []).forEach(task => {
             const isDone = task.completed || task.status === 'done' || task.status === 'submitted';
             if (isDone) return;
+            const tType = String(task.type || '').toLowerCase();
+            const tTitle = String(task.title || '').toLowerCase();
+            const isExamOrQuiz = tType === 'exam' || tType === 'midterm' || tType === 'quiz' || tType === 'moed_a' || tType === 'moed_b' ||
+                tTitle.includes('מבחן') || tTitle.includes('בחינה') || tTitle.includes('מועד א') || tTitle.includes('מועד ב') || tTitle.includes('בוחן');
+            if (isExamOrQuiz) return; // Open priority tasks strictly exclude exams and quizzes
 
             let diffDays = 999;
             let timingText = 'ללא תאריך יעד';
@@ -27120,6 +27263,7 @@ function getUpcomingPriorityTasks(limit = 8) {
                 type: task.type,
                 xp: task.xp || 50,
                 dueDate: task.dueDate,
+                dueDateDisplay: formatDateToDisplay(task.dueDate),
                 diffDays,
                 urgencyRank,
                 timingCode,
@@ -30237,6 +30381,7 @@ window.resetAllNotionFilters = function() {
         });
     }
 
+    try { localStorage.removeItem('semestero_tasks_filters_v1'); } catch (e) {}
     renderNotionTasksTable();
     if (typeof showToastNotification === 'function') {
         showToastNotification("🔄 כל הסינונים אופסו - כל המשימות מוצגות!", "success");
