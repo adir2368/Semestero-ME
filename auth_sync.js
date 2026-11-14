@@ -229,73 +229,238 @@
         return !!(m && m[1] && sha256Hex(m[1]) === DEV_MOODLE_UID_HASH);
     }
 
-    // Inbound state sanitization against accidental test infiltrators & cross-account PII leaks
-    // Monotonic CRDT task completion merge (ADR-093): Once a task is completed on ANY device,
-    // it MUST remain completed and never be resurrected or uncompleted by an older snapshot.
-    function mergeCoursesPreservingTaskCompletion(localCourses = {}, remoteCourses = {}) {
+    // Check whether a task is marked deleted or dismissed in deletedTaskIds / dismissedTaskRegistry
+    function isTaskDeletedOrDismissedForSync(courseCode, task, deletedSet, dismissedRegistry) {
+        if (!task) return true;
+        if (deletedSet && deletedSet.size > 0) {
+            if (task.id && deletedSet.has(String(task.id))) return true;
+            if (task.moodleUid && deletedSet.has(String(task.moodleUid))) return true;
+            if (task.moodleEventId && deletedSet.has(String(task.moodleEventId))) return true;
+            if (typeof window !== 'undefined' && window.MoodleSync && typeof window.MoodleSync.extractMoodleId === 'function') {
+                const mId = window.MoodleSync.extractMoodleId(task);
+                if (mId && deletedSet.has(String(mId))) return true;
+            }
+        }
+        if (dismissedRegistry && typeof dismissedRegistry === 'object') {
+            if (task.id && dismissedRegistry['task_id:' + String(task.id)]) return true;
+            if (task.moodleUid && dismissedRegistry['moodle_uid:' + String(task.moodleUid)]) return true;
+            if (task.moodleEventId && dismissedRegistry['moodle_event:' + String(task.moodleEventId)]) return true;
+            if (typeof window !== 'undefined' && window.MoodleSync && typeof window.MoodleSync.getTaskCompletionKeys === 'function') {
+                const keys = window.MoodleSync.getTaskCompletionKeys(courseCode, task);
+                for (let i = 0; i < keys.length; i++) {
+                    if (dismissedRegistry[keys[i]]) return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    function isTaskInCompletedRegistry(courseCode, task, completedRegistry) {
+        if (!task || !completedRegistry || typeof completedRegistry !== 'object') return false;
+        if (task.id && completedRegistry['task_id:' + String(task.id)]) return true;
+        if (task.moodleUid && completedRegistry['moodle_uid:' + String(task.moodleUid)]) return true;
+        if (task.moodleEventId && completedRegistry['moodle_event:' + String(task.moodleEventId)]) return true;
+        if (typeof window !== 'undefined' && window.MoodleSync && typeof window.MoodleSync.getTaskCompletionKeys === 'function') {
+            const keys = window.MoodleSync.getTaskCompletionKeys(courseCode, task);
+            for (let i = 0; i < keys.length; i++) {
+                if (completedRegistry[keys[i]]) return true;
+            }
+        }
+        return false;
+    }
+
+    function tasksMatchForSync(t1, t2, courseName) {
+        if (!t1 || !t2) return false;
+        if (t1.id && t2.id && String(t1.id) === String(t2.id)) return true;
+        if (t1.moodleUid && t2.moodleUid && String(t1.moodleUid) === String(t2.moodleUid)) return true;
+        if (t1.moodleEventId && t2.moodleEventId && String(t1.moodleEventId) === String(t2.moodleEventId)) return true;
+        if (t1.title && t2.title && t1.title.trim().toLowerCase() === t2.title.trim().toLowerCase()) return true;
+        if (typeof window !== 'undefined' && window.MoodleSync && typeof window.MoodleSync.areTasksDuplicates === 'function') {
+            return window.MoodleSync.areTasksDuplicates(t1, t2, courseName || '');
+        }
+        return false;
+    }
+
+    // Bidirectional CRDT task status & dismissal merge (ADR-093):
+    // Respects newer statusUpdatedAt timestamps when changing between not_started, in_progress, submitted, and done;
+    // deduplicates seed vs Moodle tasks via areTasksDuplicates; and strips deleted/dismissed tasks across devices.
+    function mergeCoursesPreservingTaskCompletion(localCourses = {}, remoteCourses = {}, completedRegistry = {}, dismissedRegistry = {}, deletedTaskIds = []) {
         if (!localCourses || typeof localCourses !== 'object') return remoteCourses || {};
         if (!remoteCourses || typeof remoteCourses !== 'object') return localCourses || {};
 
-        const merged = { ...remoteCourses };
+        const deletedSet = new Set((Array.isArray(deletedTaskIds) ? deletedTaskIds : []).map(String));
+        const merged = JSON.parse(JSON.stringify(remoteCourses));
+
+        // First strip dismissed/deleted tasks from remote baseline courses
+        Object.keys(merged).forEach(code => {
+            const rCourse = merged[code];
+            if (rCourse && Array.isArray(rCourse.tasks)) {
+                rCourse.tasks = rCourse.tasks.filter(rt => !isTaskDeletedOrDismissedForSync(rCourse.code || code, rt, deletedSet, dismissedRegistry));
+            }
+        });
 
         Object.keys(localCourses).forEach(code => {
             const lCourse = localCourses[code];
             if (!lCourse) return;
             if (!merged[code]) {
-                merged[code] = lCourse;
+                const clonedCourse = JSON.parse(JSON.stringify(lCourse));
+                if (Array.isArray(clonedCourse.tasks)) {
+                    clonedCourse.tasks = clonedCourse.tasks.filter(lt => !isTaskDeletedOrDismissedForSync(clonedCourse.code || code, lt, deletedSet, dismissedRegistry));
+                }
+                merged[code] = clonedCourse;
                 return;
             }
             const rCourse = merged[code];
             if (!Array.isArray(lCourse.tasks)) return;
             if (!Array.isArray(rCourse.tasks)) {
-                rCourse.tasks = [...lCourse.tasks];
+                rCourse.tasks = lCourse.tasks
+                    .filter(lt => !isTaskDeletedOrDismissedForSync(rCourse.code || code, lt, deletedSet, dismissedRegistry))
+                    .map(lt => JSON.parse(JSON.stringify(lt)));
                 return;
             }
 
-            // Map of local completed tasks by ID, moodleUid, and clean normalized title
-            const localDoneMap = new Map();
-            lCourse.tasks.forEach(lt => {
-                if (!lt) return;
-                const isDone = (lt.completed === true || lt.status === 'done' || lt.status === 'submitted');
-                if (isDone) {
-                    if (lt.id) localDoneMap.set(String(lt.id), lt);
-                    if (lt.moodleUid) localDoneMap.set('muid_' + String(lt.moodleUid), lt);
-                    if (lt.moodleEventId) localDoneMap.set('mevt_' + String(lt.moodleEventId), lt);
-                    if (lt.title) localDoneMap.set('title_' + lt.title.trim().toLowerCase(), lt);
-                }
-            });
+            const courseName = rCourse.name || lCourse.name || '';
+            const courseCode = rCourse.code || code;
+            const liveLocalTasks = lCourse.tasks.filter(lt => !isTaskDeletedOrDismissedForSync(courseCode, lt, deletedSet, dismissedRegistry));
 
-            // Apply completion locks to remote tasks
+            // Reconcile matching tasks between remote and local using statusUpdatedAt first
             rCourse.tasks.forEach(rt => {
                 if (!rt) return;
+                const matches = liveLocalTasks.filter(lt => tasksMatchForSync(lt, rt, courseName));
                 let matchedLocal = null;
-                if (rt.id && localDoneMap.has(String(rt.id))) matchedLocal = localDoneMap.get(String(rt.id));
-                else if (rt.moodleUid && localDoneMap.has('muid_' + String(rt.moodleUid))) matchedLocal = localDoneMap.get('muid_' + String(rt.moodleUid));
-                else if (rt.moodleEventId && localDoneMap.has('mevt_' + String(rt.moodleEventId))) matchedLocal = localDoneMap.get('mevt_' + String(rt.moodleEventId));
-                else if (rt.title && localDoneMap.has('title_' + rt.title.trim().toLowerCase())) matchedLocal = localDoneMap.get('title_' + rt.title.trim().toLowerCase());
+                if (matches.length > 0) {
+                    // Pick the local match with the highest statusUpdatedAt / completedAt
+                    matchedLocal = matches.reduce((best, cur) => {
+                        const bTime = Number((best && (best.statusUpdatedAt || best.completedAt)) || 0);
+                        const cTime = Number((cur && (cur.statusUpdatedAt || cur.completedAt)) || 0);
+                        return cTime > bTime ? cur : best;
+                    }, matches[0]);
+                }
 
                 if (matchedLocal) {
-                    rt.completed = true;
-                    rt.status = 'done';
-                    rt.completedAt = rt.completedAt || matchedLocal.completedAt || Date.now();
+                    const lTime = Number(matchedLocal.statusUpdatedAt || matchedLocal.completedAt || 0);
+                    const rTime = Number(rt.statusUpdatedAt || rt.completedAt || 0);
+                    if (lTime > 0 || rTime > 0) {
+                        if (lTime > rTime) {
+                            const lDone = !!(matchedLocal.completed === true || matchedLocal.status === 'done' || matchedLocal.status === 'submitted');
+                            rt.status = matchedLocal.status || (lDone ? 'done' : 'not_started');
+                            rt.completed = lDone;
+                            rt.statusUpdatedAt = lTime;
+                            if (lDone) {
+                                rt.completedAt = matchedLocal.completedAt || lTime;
+                            } else {
+                                delete rt.completedAt;
+                            }
+                        } else {
+                            const rDone = !!(rt.completed === true || rt.status === 'done' || rt.status === 'submitted');
+                            rt.completed = rDone;
+                            rt.status = rt.status || (rDone ? 'done' : 'not_started');
+                            if (!rt.statusUpdatedAt && rTime > 0) rt.statusUpdatedAt = rTime;
+                            if (!rDone) delete rt.completedAt;
+                        }
+                    } else {
+                        const isAnyDone = !!(matchedLocal.completed === true || matchedLocal.status === 'done' || matchedLocal.status === 'submitted' ||
+                                             rt.completed === true || rt.status === 'done' || rt.status === 'submitted' ||
+                                             isTaskInCompletedRegistry(courseCode, rt, completedRegistry) ||
+                                             isTaskInCompletedRegistry(courseCode, matchedLocal, completedRegistry));
+                        if (isAnyDone) {
+                            rt.completed = true;
+                            rt.status = (rt.status === 'submitted' || matchedLocal.status === 'submitted') ? 'submitted' : 'done';
+                            rt.completedAt = rt.completedAt || matchedLocal.completedAt || Date.now();
+                        } else if (rt.status === 'in_progress' || matchedLocal.status === 'in_progress') {
+                            rt.status = 'in_progress';
+                            rt.completed = false;
+                        }
+                    }
+                    if (matchedLocal.pinned) rt.pinned = true;
+                    if (matchedLocal.dueDate && !rt.dueDate) rt.dueDate = matchedLocal.dueDate;
+                } else {
+                    const hasExplicitReset = !!(rt.statusUpdatedAt && !rt.completed && (rt.status === 'not_started' || rt.status === 'in_progress'));
+                    if (!hasExplicitReset && !rt.completed && isTaskInCompletedRegistry(courseCode, rt, completedRegistry)) {
+                        rt.completed = true;
+                        rt.status = 'done';
+                    }
+                }
+
+                if (rt.isMiluim || rt.miluim || (matchedLocal && (matchedLocal.isMiluim || matchedLocal.miluim)) || /מילואי|3010|צווים|צו\s*8|שירות\s*מילואי/i.test(rt.title || '')) {
+                    rt.isMiluim = true;
                 }
             });
 
-            // Preserve local custom tasks not present in remote
-            lCourse.tasks.forEach(lt => {
+            // Preserve genuine local tasks not present in remote, but NEVER resurrect duplicates or uncompleted preloaded seed tasks
+            const remoteHasSyncedTasks = rCourse.tasks.some(rt => rt && (rt.moodleUid || rt.statusUpdatedAt || (rt.id && String(rt.id).startsWith('task_moodle_'))));
+            liveLocalTasks.forEach(lt => {
                 if (!lt) return;
-                const exists = rCourse.tasks.some(rt =>
-                    (rt.id && lt.id && rt.id === lt.id) ||
-                    (rt.moodleUid && lt.moodleUid && rt.moodleUid === lt.moodleUid) ||
-                    (rt.title && lt.title && rt.title.trim().toLowerCase() === lt.title.trim().toLowerCase())
+                const exists = rCourse.tasks.some(rt => tasksMatchForSync(lt, rt, courseName));
+                if (exists) return;
+
+                const isUserOrActiveLocal = !!(
+                    lt.isCustom ||
+                    lt.source === 'manual' ||
+                    (lt.id && String(lt.id).startsWith('task-')) ||
+                    lt.statusUpdatedAt ||
+                    lt.completed === true ||
+                    lt.status === 'done' ||
+                    lt.status === 'submitted' ||
+                    lt.status === 'in_progress'
                 );
-                if (!exists) {
-                    rCourse.tasks.push(lt);
+                if (!isUserOrActiveLocal && remoteHasSyncedTasks) {
+                    return; // Do not resurrect stale uncompleted seed tasks from PRELOADED_USER_STATE
                 }
+                const copy = JSON.parse(JSON.stringify(lt));
+                if (/מילואי|3010|צווים|צו\s*8|שירות\s*מילואי/i.test(copy.title || '')) {
+                    copy.isMiluim = true;
+                }
+                rCourse.tasks.push(copy);
             });
         });
 
         return merged;
+    }
+
+    function reconcileCompletedRegistryWithMergedCourses(courses, completedRegistry) {
+        if (!courses || typeof courses !== 'object' || !completedRegistry || typeof completedRegistry !== 'object') return;
+        Object.keys(courses).forEach(code => {
+            const c = courses[code];
+            if (!c || !Array.isArray(c.tasks)) return;
+            c.tasks.forEach(t => {
+                if (!t) return;
+                const isExplicitReset = !!(t.statusUpdatedAt && !t.completed && (t.status === 'not_started' || t.status === 'in_progress' || t.status === 'open'));
+                if (isExplicitReset) {
+                    if (t.id) delete completedRegistry['task_id:' + String(t.id)];
+                    if (t.moodleUid) delete completedRegistry['moodle_uid:' + String(t.moodleUid)];
+                    if (t.moodleEventId) delete completedRegistry['moodle_event:' + String(t.moodleEventId)];
+                    if (typeof window !== 'undefined' && window.MoodleSync && typeof window.MoodleSync.getTaskCompletionKeys === 'function') {
+                        window.MoodleSync.getTaskCompletionKeys(c.code || code, t).forEach(k => {
+                            delete completedRegistry[k];
+                        });
+                    }
+                }
+            });
+        });
+    }
+
+    function applyMergedSyncMetadata(localState, remoteState) {
+        const safeLocal = localState || {};
+        const mergedCompleted = Object.assign({}, safeLocal.completedTaskRegistry || {}, remoteState.completedTaskRegistry || {});
+        const mergedDismissed = Object.assign({}, safeLocal.dismissedTaskRegistry || {}, remoteState.dismissedTaskRegistry || {});
+        const mergedDeleted = Array.from(new Set([
+            ...(Array.isArray(safeLocal.deletedTaskIds) ? safeLocal.deletedTaskIds : []),
+            ...(Array.isArray(remoteState.deletedTaskIds) ? remoteState.deletedTaskIds : [])
+        ]));
+
+        remoteState.courses = mergeCoursesPreservingTaskCompletion(
+            safeLocal.courses || {},
+            remoteState.courses || {},
+            mergedCompleted,
+            mergedDismissed,
+            mergedDeleted
+        );
+        reconcileCompletedRegistryWithMergedCourses(remoteState.courses, mergedCompleted);
+        remoteState.completedTaskRegistry = mergedCompleted;
+        remoteState.dismissedTaskRegistry = mergedDismissed;
+        remoteState.deletedTaskIds = mergedDeleted;
+        return remoteState;
     }
 
     function sanitizeInboundState(state, targetUid) {
@@ -709,13 +874,18 @@
         },
 
         // Save state for active user
-        saveActiveUserState(state) {
+        saveActiveUserState(state, options = {}) {
             if (!state) return;
             const user = this.getActiveUser();
             const key = this.getUserStorageKey(user.id);
+            const skipCloud = !!(options && options.skipCloudSync) || !!(typeof window !== 'undefined' && window._isInitialBootLoading);
             try {
                 state = sanitizeInboundState(state, user.id);
-                state.lastModified = Math.max(state.lastModified || 0, Date.now());
+                if (!skipCloud) {
+                    state.lastModified = Math.max(state.lastModified || 0, Date.now());
+                } else if (!state.lastModified) {
+                    state.lastModified = 0;
+                }
 
                 if (user.id && user.id !== 'guest') {
                     const scopedPhone = localStorage.getItem(getScopedPhoneKey(user.id));
@@ -748,7 +918,7 @@
                 if (user.id === 'adir_moshe' && this.isAdirActive()) {
                     localStorage.setItem(LEGACY_SAVE_KEY, JSON.stringify(state));
                 }
-                if (this.isLoggedIn()) {
+                if (!skipCloud && this.isLoggedIn()) {
                     this.triggerDebouncedCloudSync(state);
                 }
             } catch (e) {
@@ -2656,7 +2826,7 @@
                     console.log('[AuthSync] Supabase Cloud connected to:', url);
                     if (this.isLoggedIn()) {
                         this.setupRealtimeSubscription();
-                        this.pullLatestStateFromCloud();
+                        this.pullLatestStateFromCloud(true);
                     }
                     return;
                 } catch (e) {
@@ -2711,21 +2881,6 @@
                                 const localLastMod = (localState && localState.lastModified) || 0;
                                 const remoteLastMod = (remoteState && remoteState.lastModified) || (payload && payload.new && payload.new.updated_at ? new Date(payload.new.updated_at).getTime() : 0);
 
-                                const localRemovedSet = new Set(Array.isArray(localState && localState.removedCourses) ? localState.removedCourses : []);
-                                const localCourses = (localState && localState.courses) ? Object.keys(localState.courses).length : 0;
-                                const effectiveRemoteCourses = (remoteState && remoteState.courses)
-                                    ? Object.keys(remoteState.courses).filter(k => !localRemovedSet.has(k)).length
-                                    : 0;
-                                const remoteHasMoreCourses = effectiveRemoteCourses > localCourses;
-                                const remoteHasRemovedTracking = Array.isArray(remoteState.removedCourses) && remoteState.removedCourses.length > 0 && (!localState || !localState.removedCourses || localState.removedCourses.length === 0);
-
-                                // Guard against clobbering newer local state UNLESS remote genuinely has more non-tombstoned courses
-                                if (!remoteHasMoreCourses && !remoteHasRemovedTracking && localLastMod > 0 && remoteLastMod < localLastMod) {
-                                    console.warn('[AuthSync Realtime] Ignored outdated remote update. Local is newer:', { localLastMod, remoteLastMod });
-                                    this.triggerDebouncedCloudSync(localState);
-                                    return;
-                                }
-
                                 // Preserve strictly user-scoped phone number if remote state lacks it
                                 const scopedPhone = localStorage.getItem(getScopedPhoneKey(user.id));
                                 if (scopedPhone && (!remoteState.userProfile || !remoteState.userProfile.phone)) {
@@ -2733,26 +2888,9 @@
                                     remoteState.userProfile.phone = scopedPhone;
                                 }
 
-                                // CRDT Monotonic Merge: preserve completed & dismissed/deleted tasks across local and remote
-                                remoteState.courses = mergeCoursesPreservingTaskCompletion(localState.courses, remoteState.courses);
-                                remoteState.completedTaskRegistry = Object.assign({}, localState.completedTaskRegistry || {}, remoteState.completedTaskRegistry || {});
-                                remoteState.dismissedTaskRegistry = Object.assign({}, localState.dismissedTaskRegistry || {}, remoteState.dismissedTaskRegistry || {});
-                                remoteState.deletedTaskIds = Array.from(new Set([...(Array.isArray(localState.deletedTaskIds) ? localState.deletedTaskIds : []), ...(Array.isArray(remoteState.deletedTaskIds) ? remoteState.deletedTaskIds : [])]));
-                                // Purge dismissed/deleted tasks from merged courses
-                                if (remoteState.courses && typeof remoteState.courses === 'object') {
-                                    const deletedSet = new Set(remoteState.deletedTaskIds.map(String));
-                                    Object.values(remoteState.courses).forEach(c => {
-                                        if (c && Array.isArray(c.tasks)) {
-                                            c.tasks = c.tasks.filter(t => {
-                                                if (!t) return false;
-                                                if (t.id && deletedSet.has(String(t.id))) return false;
-                                                if (t.moodleUid && deletedSet.has(String(t.moodleUid))) return false;
-                                                if (t.moodleEventId && deletedSet.has(String(t.moodleEventId))) return false;
-                                                return true;
-                                            });
-                                        }
-                                    });
-                                }
+                                // Non-destructive bidirectional task & dismissal merge
+                                const rawRemoteBeforeMerge = JSON.stringify(remoteState);
+                                applyMergedSyncMetadata(localState, remoteState);
 
                                 // Sync Attendance bidirectionally if remote carries it
                                 if (remoteState.attendance && window.AttendanceHub && typeof window.AttendanceHub.loadFromGameState === 'function') {
@@ -2764,10 +2902,14 @@
                                 }
 
                                 const mergedRemoteJson = JSON.stringify(remoteState);
+                                const localContributedNewerData = (mergedRemoteJson !== rawRemoteBeforeMerge) && (localLastMod > remoteLastMod);
+
                                 if (localRaw !== mergedRemoteJson) {
                                     isApplyingRemoteUpdate = true;
                                     try {
-                                        lastUploadedStateJson = mergedRemoteJson;
+                                        if (!localContributedNewerData) {
+                                            lastUploadedStateJson = mergedRemoteJson;
+                                        }
                                         localStorage.setItem(key, mergedRemoteJson);
                                         if (user.id === 'adir_moshe' && this.isAdirActive()) {
                                             localStorage.setItem(LEGACY_SAVE_KEY, mergedRemoteJson);
@@ -2799,6 +2941,9 @@
                                     } finally {
                                         setTimeout(() => {
                                             isApplyingRemoteUpdate = false;
+                                            if (localContributedNewerData) {
+                                                this.triggerDebouncedCloudSync(remoteState);
+                                            }
                                         }, 1000);
                                     }
                                 }
@@ -2856,21 +3001,6 @@
                     const localLastMod = (localState && localState.lastModified) || 0;
                     const remoteLastMod = (remoteState && remoteState.lastModified) || (data && data.updated_at ? new Date(data.updated_at).getTime() : 0);
 
-                    const localRemovedSet = new Set(Array.isArray(localState && localState.removedCourses) ? localState.removedCourses : []);
-                    const localCourses = (localState && localState.courses) ? Object.keys(localState.courses).length : 0;
-                    const effectiveRemoteCourses = (remoteState && remoteState.courses)
-                        ? Object.keys(remoteState.courses).filter(k => !localRemovedSet.has(k)).length
-                        : 0;
-                    const remoteHasMoreCourses = effectiveRemoteCourses > localCourses;
-                    const remoteHasRemovedTracking = Array.isArray(remoteState.removedCourses) && remoteState.removedCourses.length > 0 && (!localState || !localState.removedCourses || localState.removedCourses.length === 0);
-
-                    // If local state is newer than remote AND has equal/more non-tombstoned courses AND not forced, preserve local state!
-                    if (!force && !remoteHasMoreCourses && !remoteHasRemovedTracking && localLastMod > 0 && remoteLastMod < localLastMod) {
-                        console.log('[AuthSync] Local state is newer than cloud copy. Preserving local state.');
-                        this.triggerDebouncedCloudSync(localState);
-                        return localState;
-                    }
-
                     // Preserve strictly user-scoped phone number if remote state lacks it
                     const scopedPhone = localStorage.getItem(getScopedPhoneKey(user.id));
                     if (scopedPhone && (!remoteState.userProfile || !remoteState.userProfile.phone)) {
@@ -2878,63 +3008,78 @@
                         remoteState.userProfile.phone = scopedPhone;
                     }
 
-                    // CRDT Monotonic Merge: preserve completed & dismissed/deleted tasks across local and remote
-                    remoteState.courses = mergeCoursesPreservingTaskCompletion(localState.courses, remoteState.courses);
-                    remoteState.completedTaskRegistry = Object.assign({}, localState.completedTaskRegistry || {}, remoteState.completedTaskRegistry || {});
-                    remoteState.dismissedTaskRegistry = Object.assign({}, localState.dismissedTaskRegistry || {}, remoteState.dismissedTaskRegistry || {});
-                    remoteState.deletedTaskIds = Array.from(new Set([...(Array.isArray(localState.deletedTaskIds) ? localState.deletedTaskIds : []), ...(Array.isArray(remoteState.deletedTaskIds) ? remoteState.deletedTaskIds : [])]));
-                    if (remoteState.courses && typeof remoteState.courses === 'object') {
-                        const deletedSet = new Set(remoteState.deletedTaskIds.map(String));
-                        Object.values(remoteState.courses).forEach(c => {
-                            if (c && Array.isArray(c.tasks)) {
-                                c.tasks = c.tasks.filter(t => {
-                                    if (!t) return false;
-                                    if (t.id && deletedSet.has(String(t.id))) return false;
-                                    if (t.moodleUid && deletedSet.has(String(t.moodleUid))) return false;
-                                    if (t.moodleEventId && deletedSet.has(String(t.moodleEventId))) return false;
-                                    return true;
+                    // Always run non-destructive bidirectional merge between local and remote (even if localLastMod >= remoteLastMod)
+                    const rawRemoteBeforeMerge = JSON.stringify(remoteState);
+                    let finalState = remoteState;
+                    if (!force && localLastMod > 0 && remoteLastMod < localLastMod && localState) {
+                        const localBased = JSON.parse(JSON.stringify(localState));
+                        localBased.courses = mergeCoursesPreservingTaskCompletion(
+                            localBased.courses || {},
+                            remoteState.courses || {},
+                            Object.assign({}, remoteState.completedTaskRegistry || {}, localBased.completedTaskRegistry || {}),
+                            Object.assign({}, remoteState.dismissedTaskRegistry || {}, localBased.dismissedTaskRegistry || {}),
+                            Array.from(new Set([...(localBased.deletedTaskIds || []), ...(remoteState.deletedTaskIds || [])]))
+                        );
+                        localBased.completedTaskRegistry = Object.assign({}, remoteState.completedTaskRegistry || {}, localBased.completedTaskRegistry || {});
+                        localBased.dismissedTaskRegistry = Object.assign({}, remoteState.dismissedTaskRegistry || {}, localBased.dismissedTaskRegistry || {});
+                        localBased.deletedTaskIds = Array.from(new Set([...(remoteState.deletedTaskIds || []), ...(localBased.deletedTaskIds || [])]));
+                        reconcileCompletedRegistryWithMergedCourses(localBased.courses, localBased.completedTaskRegistry);
+                        finalState = localBased;
+                    } else {
+                        applyMergedSyncMetadata(localState, remoteState);
+                        finalState = remoteState;
+                    }
+
+                    // Sync Attendance bidirectionally if merged state carries it
+                    if (finalState.attendance && window.AttendanceHub && typeof window.AttendanceHub.loadFromGameState === 'function') {
+                        window.AttendanceHub.loadFromGameState(finalState.attendance);
+                    }
+                    // Sync Exam Readiness & Past Exams bidirectionally if merged state carries it
+                    if (finalState.examPrep && window.ExamReadinessHub && typeof window.ExamReadinessHub.loadFromGameState === 'function') {
+                        window.ExamReadinessHub.loadFromGameState(finalState.examPrep);
+                    }
+
+                    const mergedStateJson = JSON.stringify(finalState);
+                    const hasLocalMergeUpdates = (!force && localLastMod > remoteLastMod) || (mergedStateJson !== rawRemoteBeforeMerge);
+
+                    isApplyingRemoteUpdate = true;
+                    try {
+                        if (!hasLocalMergeUpdates) {
+                            lastUploadedStateJson = mergedStateJson;
+                        }
+                        localStorage.setItem(key, mergedStateJson);
+                        if (user.id === 'adir_moshe' && this.isAdirActive()) {
+                            localStorage.setItem(LEGACY_SAVE_KEY, mergedStateJson);
+                        }
+                        this.syncScopedIntegrationKeys(user.id, finalState);
+                        if (window.setGlobalGameState) {
+                            window.setGlobalGameState(finalState);
+                        }
+                        if (finalState.degreePlan && Array.isArray(finalState.degreePlan)) {
+                            try {
+                                const v2Key = user.id === 'adir_moshe' ? 'atlas_me_custom_degree_plan_v2_adir' : `atlas_me_custom_degree_plan_v2_${user.id}`;
+                                const v1Key = user.id === 'adir_moshe' ? 'atlas_me_custom_degree_plan_v1_adir' : `atlas_me_custom_degree_plan_v1_${user.id}`;
+                                const planPayload = JSON.stringify({
+                                    semesters: finalState.degreePlan,
+                                    unassigned: finalState.degreePlanUnassigned || []
                                 });
-                            }
-                        });
-                    }
+                                localStorage.setItem(v2Key, planPayload);
+                                localStorage.setItem(v1Key, JSON.stringify(finalState.degreePlan));
 
-                    // Sync Attendance bidirectionally if remote carries it
-                    if (remoteState.attendance && window.AttendanceHub && typeof window.AttendanceHub.loadFromGameState === 'function') {
-                        window.AttendanceHub.loadFromGameState(remoteState.attendance);
+                                if (window.DegreePlanner && typeof window.DegreePlanner.adoptPlanFromState === 'function') {
+                                    window.DegreePlanner.adoptPlanFromState(finalState.degreePlan, finalState.degreePlanUnassigned);
+                                }
+                            } catch (e) {}
+                        }
+                        this.refreshAllAppViews();
+                        console.log('[AuthSync] Pulled and merged remote state for:', user.name);
+                    } finally {
+                        isApplyingRemoteUpdate = false;
                     }
-                    // Sync Exam Readiness & Past Exams bidirectionally if remote carries it
-                    if (remoteState.examPrep && window.ExamReadinessHub && typeof window.ExamReadinessHub.loadFromGameState === 'function') {
-                        window.ExamReadinessHub.loadFromGameState(remoteState.examPrep);
+                    if (hasLocalMergeUpdates && localLastMod > remoteLastMod) {
+                        this.triggerDebouncedCloudSync(finalState);
                     }
-
-                    // Adopt remote state
-                    localStorage.setItem(key, JSON.stringify(remoteState));
-                    if (user.id === 'adir_moshe' && this.isAdirActive()) {
-                        localStorage.setItem(LEGACY_SAVE_KEY, JSON.stringify(remoteState));
-                    }
-                    this.syncScopedIntegrationKeys(user.id, remoteState);
-                    if (window.setGlobalGameState) {
-                        window.setGlobalGameState(remoteState);
-                    }
-                    if (remoteState.degreePlan && Array.isArray(remoteState.degreePlan)) {
-                        try {
-                            const v2Key = user.id === 'adir_moshe' ? 'atlas_me_custom_degree_plan_v2_adir' : `atlas_me_custom_degree_plan_v2_${user.id}`;
-                            const v1Key = user.id === 'adir_moshe' ? 'atlas_me_custom_degree_plan_v1_adir' : `atlas_me_custom_degree_plan_v1_${user.id}`;
-                            const planPayload = JSON.stringify({
-                                semesters: remoteState.degreePlan,
-                                unassigned: remoteState.degreePlanUnassigned || []
-                            });
-                            localStorage.setItem(v2Key, planPayload);
-                            localStorage.setItem(v1Key, JSON.stringify(remoteState.degreePlan));
-
-                            if (window.DegreePlanner && typeof window.DegreePlanner.adoptPlanFromState === 'function') {
-                                window.DegreePlanner.adoptPlanFromState(remoteState.degreePlan, remoteState.degreePlanUnassigned);
-                            }
-                        } catch (e) {}
-                    }
-                    this.refreshAllAppViews();
-                    console.log('[AuthSync] Pulled remote state for:', user.name);
-                    return remoteState;
+                    return finalState;
                 } else if (user.id === 'adir_moshe' && this.isAdirActive()) {
                     // Upload initial local state to cloud if missing
                     this.syncToCloud();

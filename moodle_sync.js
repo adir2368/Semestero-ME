@@ -551,7 +551,7 @@
             if (!task) return false;
             if (task.isMiluim === true || task.miluim === true) return true;
             const title = String(task.title || '').trim();
-            return /מילואים|3010|צווים|צו\s*8|שירות\s*מילואים/i.test(title);
+            return /מילואי|3010|צווים|צו\s*8|שירות\s*מילואי/i.test(title);
         },
 
         getTaskCompletionKeys(courseCode, task) {
@@ -811,10 +811,28 @@
                 }
             }
 
-            // Completed status: completed progress is strictly preserved across all sources & registries
-            const isDone = primary.completed === true || primary.status === 'done' || primary.status === 'submitted' ||
-                           secondary.completed === true || secondary.status === 'done' || secondary.status === 'submitted' ||
-                           this.isTaskCompletedInRegistry(null, primary) || this.isTaskCompletedInRegistry(null, secondary);
+            // Status resolution: respect explicit statusUpdatedAt when newer; otherwise preserve completed progress
+            const t1Updated = Number(primary.statusUpdatedAt || 0);
+            const t2Updated = Number(secondary.statusUpdatedAt || 0);
+            const newestStatusTs = Math.max(t1Updated, t2Updated);
+            let isDone = false;
+            let resolvedStatus = 'not_started';
+            let resolvedCompletedAt = primary.completedAt || secondary.completedAt || undefined;
+
+            if (newestStatusTs > 0) {
+                const winner = (t1Updated >= t2Updated) ? primary : secondary;
+                const winnerDone = winner.completed === true || winner.status === 'done' || winner.status === 'submitted';
+                isDone = winnerDone;
+                resolvedStatus = winnerDone ? (winner.status === 'submitted' ? 'submitted' : 'done') : (winner.status || 'not_started');
+                if (!isDone) {
+                    resolvedCompletedAt = undefined;
+                }
+            } else {
+                isDone = primary.completed === true || primary.status === 'done' || primary.status === 'submitted' ||
+                         secondary.completed === true || secondary.status === 'done' || secondary.status === 'submitted' ||
+                         this.isTaskCompletedInRegistry(null, primary) || this.isTaskCompletedInRegistry(null, secondary);
+                resolvedStatus = isDone ? ((primary.status === 'submitted' || secondary.status === 'submitted') ? 'submitted' : 'done') : (primary.status !== 'not_started' ? primary.status : (secondary.status || 'not_started'));
+            }
 
             const merged = {
                 id: primary.id || secondary.id,
@@ -824,7 +842,9 @@
                 dueTimestamp: chosenTimestamp,
                 xp: Math.max(primary.xp || 50, secondary.xp || 50),
                 completed: isDone,
-                status: isDone ? 'done' : (primary.status !== 'not_started' ? primary.status : secondary.status),
+                status: resolvedStatus,
+                ...(newestStatusTs > 0 ? { statusUpdatedAt: newestStatusTs } : {}),
+                ...(resolvedCompletedAt ? { completedAt: resolvedCompletedAt } : {}),
                 grade: (primary.grade !== undefined && primary.grade !== null) ? primary.grade : secondary.grade,
                 moodleEventId: primary.moodleEventId || secondary.moodleEventId || this.extractMoodleId(secondary) || this.extractMoodleId(primary),
                 moodleUid: primary.moodleUid || secondary.moodleUid,
@@ -1245,13 +1265,15 @@
                     const primary = targetCourse.tasks[matchingIndices[0]];
                     let modified = false;
 
-                    // Strictly lock and preserve completed status across manual/moodle sources & registries
-                    const isAlreadyDone = primary.completed === true || primary.status === 'done' || primary.status === 'submitted' ||
+                    // Preserve completion across Moodle/manual sources UNLESS user explicitly reset status after last completion
+                    const hasExplicitNonDoneStatus = !!(primary.statusUpdatedAt && primary.completed === false && (primary.status === 'in_progress' || primary.status === 'not_started'));
+                    const isAlreadyDone = !hasExplicitNonDoneStatus && (
+                                         primary.completed === true || primary.status === 'done' || primary.status === 'submitted' ||
                                          this.isTaskCompletedInRegistry(targetCourse.code, primary) ||
-                                         this.isTaskCompletedInRegistry(targetCourse.code, incomingMock);
+                                         this.isTaskCompletedInRegistry(targetCourse.code, incomingMock));
                     if (isAlreadyDone) {
                         primary.completed = true;
-                        primary.status = 'done';
+                        primary.status = primary.status === 'submitted' ? 'submitted' : 'done';
                         this.markTaskCompletedInRegistry(targetCourse.code, primary);
                     }
 

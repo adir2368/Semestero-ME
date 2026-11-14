@@ -9130,6 +9130,15 @@ window.openCheeseFork = openCheeseFork;
 
 // Load state from local storage or AuthSync
 function loadSavedState() {
+    window._isInitialBootLoading = true;
+    try {
+        return _loadSavedStateImpl();
+    } finally {
+        window._isInitialBootLoading = false;
+    }
+}
+
+function _loadSavedStateImpl() {
     let loadedFromAuthSync = false;
 
     // Comprehensive self-healing cleanup for accidental QA test courses across ALL storage keys
@@ -9689,8 +9698,11 @@ function loadSavedState() {
                 else { c.tasks.push({ id: '034056_ex_b', title: "חישוב מדעי והנדסי - מועד ב'", type: 'exam', xp: 500, completed: false, status: 'not_started', dueDate: '2027-03-10' }); }
 
                 // Active Moodle 26 Homework: לומדת MATLAB (2 bonus points)
-                let matlabTask = c.tasks.find(t => t.id === 'task_moodle_43952' || t.title.includes('MATLAB') || t.title.includes('מטלאב'));
-                if (!matlabTask) {
+                let matlabTask = c.tasks.find(t => t.id === 'task_moodle_43952' || t.id === '034056_matlab_bonus' || t.id === '034056_matlab' || (t.title && (t.title.includes('MATLAB') || t.title.includes('מטלאב'))));
+                const matlabSeedMock = { id: 'task_moodle_43952', moodleEventId: '43952', moodleUrl: 'https://moodle26.technion.ac.il/mod/assign/view.php?id=43952', title: "לומדת MATLAB (בונוס 2 נקודות לציון)" };
+                const isMatlabDismissed = window.MoodleSync && typeof window.MoodleSync.isTaskDismissedInRegistry === 'function' && window.MoodleSync.isTaskDismissedInRegistry('034056', matlabSeedMock);
+                if (!matlabTask && !isMatlabDismissed) {
+                    const isMatlabDone = !!(window.MoodleSync && typeof window.MoodleSync.isTaskCompletedInRegistry === 'function' && window.MoodleSync.isTaskCompletedInRegistry('034056', matlabSeedMock));
                     c.tasks.unshift({
                         id: 'task_moodle_43952',
                         moodleEventId: '43952',
@@ -9699,10 +9711,13 @@ function loadSavedState() {
                         title: "לומדת MATLAB (בונוס 2 נקודות לציון)",
                         type: 'hw',
                         xp: 100,
-                        completed: false,
-                        status: 'not_started',
+                        completed: isMatlabDone,
+                        status: isMatlabDone ? 'done' : 'not_started',
                         dueDate: '2026-11-19'
                     });
+                } else if (matlabTask && window.MoodleSync && typeof window.MoodleSync.isTaskCompletedInRegistry === 'function' && !matlabTask.statusUpdatedAt && window.MoodleSync.isTaskCompletedInRegistry('034056', matlabTask)) {
+                    matlabTask.completed = true;
+                    matlabTask.status = 'done';
                 }
             }
             if (gameState.courses['034053']) {
@@ -9725,8 +9740,11 @@ function loadSavedState() {
                 else { c.tasks.push({ id: '104228_ex_b', title: "מד\"ח - מועד ב'", type: 'exam', xp: 500, completed: false, status: 'not_started', dueDate: '2027-03-26' }); }
 
                 // Active Moodle 26 SCORM Electronic Exercise: תרגיל אלקטרוני 1 - סיווג מד"ח (חבילת לומדה - SCORM)
-                let scormTask = c.tasks.find(t => t.id === 'task_moodle_scorm_95378' || t.title.includes('סיווג מד"ח') || t.title.includes('תרגיל אלקטרוני 1'));
-                if (!scormTask) {
+                let scormTask = c.tasks.find(t => t.id === 'task_moodle_scorm_95378' || (t.title && (t.title.includes('סיווג מד"ח') || t.title.includes('סיווג מד״ח') || t.title.includes('תרגיל אלקטרוני 1'))));
+                const scormSeedMock = { id: 'task_moodle_scorm_95378', moodleEventId: '95378', moodleUrl: 'https://moodle26.technion.ac.il/mod/scorm/view.php?id=95378', title: 'תרגיל אלקטרוני 1 - סיווג מד"ח (חבילת לומדה)' };
+                const isScormDismissed = window.MoodleSync && typeof window.MoodleSync.isTaskDismissedInRegistry === 'function' && window.MoodleSync.isTaskDismissedInRegistry('104228', scormSeedMock);
+                if (!scormTask && !isScormDismissed) {
+                    const isScormDone = !!(window.MoodleSync && typeof window.MoodleSync.isTaskCompletedInRegistry === 'function' && window.MoodleSync.isTaskCompletedInRegistry('104228', scormSeedMock));
                     c.tasks.unshift({
                         id: 'task_moodle_scorm_95378',
                         moodleEventId: '95378',
@@ -9735,13 +9753,17 @@ function loadSavedState() {
                         title: 'תרגיל אלקטרוני 1 - סיווג מד"ח (חבילת לומדה)',
                         type: 'hw',
                         xp: 50,
-                        completed: false,
-                        status: 'not_started',
+                        completed: isScormDone,
+                        status: isScormDone ? 'done' : 'not_started',
                         dueDate: '2026-11-09 23:59'
                     });
-                } else {
+                } else if (scormTask) {
                     scormTask.dueDate = '2026-11-09 23:59';
                     if (!scormTask.moodleUrl) scormTask.moodleUrl = 'https://moodle26.technion.ac.il/mod/scorm/view.php?id=95378';
+                    if (window.MoodleSync && typeof window.MoodleSync.isTaskCompletedInRegistry === 'function' && !scormTask.statusUpdatedAt && window.MoodleSync.isTaskCompletedInRegistry('104228', scormTask)) {
+                        scormTask.completed = true;
+                        scormTask.status = 'done';
+                    }
                 }
             }
             if (gameState.courses['03940805']) {
@@ -10089,8 +10111,13 @@ function markInactiveViewsDirty(activeView) {
 
 // Save state to local storage safely
 function saveState(skipNotify = false) {
+    const isBootLoading = !!window._isInitialBootLoading;
     try {
-        gameState.lastModified = Date.now();
+        if (!isBootLoading) {
+            gameState.lastModified = Date.now();
+        } else if (!gameState.lastModified) {
+            gameState.lastModified = 0;
+        }
 
         // Keep strictly user-scoped phone in sync (never write to global unscoped key)
         localStorage.removeItem('ast_persistent_user_phone');
@@ -10107,7 +10134,7 @@ function saveState(skipNotify = false) {
         }
 
         if (window.AuthSync && typeof window.AuthSync.saveActiveUserState === 'function') {
-            window.AuthSync.saveActiveUserState(gameState);
+            window.AuthSync.saveActiveUserState(gameState, { skipCloudSync: isBootLoading });
         }
         // L1 Instant-On Dashboard Snapshot (ADR-075)
         try {
@@ -10134,7 +10161,7 @@ function saveState(skipNotify = false) {
             }
         }
     }
-    if (typeof triggerCloudGistSyncDebounced === "function") {
+    if (!isBootLoading && typeof triggerCloudGistSyncDebounced === "function") {
         triggerCloudGistSyncDebounced();
     }
     if (!skipNotify && !isStateNotifying) {
@@ -10220,37 +10247,19 @@ function notifyStateChanged(options = {}) {
 }
 
 
-// Automatically changes tasks with less than 1 week (<= 7 days) remaining to 'in_progress'
+// Normalizes completed task flags while strictly preserving user-selected task statuses (never overrides not_started -> in_progress)
 function autoUpdateTaskStatusesByDueDate() {
+    if (!gameState || !gameState.courses) return false;
     let changed = false;
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
     Object.values(gameState.courses).forEach(course => {
-        if (!course.tasks || !Array.isArray(course.tasks)) return;
-        const isBinary = (course.isBinaryPass === true || course.grade === 'עובר' || course.grade === 'PASS');
-        const hasPassingGrade = isBinary || (course.grade !== undefined && course.grade !== null && course.grade !== '' && !isNaN(Number(course.grade)) && Number(course.grade) >= 55);
-        if (!isWinterSemesterStarted() && (course.semester || 1) > (gameState.currentActiveSemester || 2)) return;
-        if (course.status === 'mastered' || course.status === 'locked' || hasPassingGrade) return;
-
+        if (!course || !Array.isArray(course.tasks)) return;
         course.tasks.forEach(task => {
-            if (task.completed || task.status === 'done' || task.status === 'submitted') return;
-
-            if (task.dueDate) {
-                const due = new Date(task.dueDate);
-                due.setHours(0, 0, 0, 0);
-                const diffTime = due - today;
-                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-                // If less than or equal to 7 days remaining (<= 7 days), auto transition to in_progress
-                if (diffDays <= 7 && (task.status === 'not_started' || task.status === 'todo' || !task.status)) {
-                    task.status = 'in_progress';
-                    changed = true;
-                }
+            if (task && task.completed && task.status !== 'done' && task.status !== 'submitted') {
+                task.status = 'done';
+                changed = true;
             }
         });
     });
-
     return changed;
 }
 
@@ -10472,7 +10481,7 @@ function recalculateCourseStates() {
                 if (window.MoodleSync && typeof window.MoodleSync.isTaskDismissedInRegistry === 'function' && window.MoodleSync.isTaskDismissedInRegistry(course.code, t)) {
                     return false;
                 }
-                if (/מילואים|3010|צווים|צו\s*8|שירות\s*מילואים/i.test(t.title || '')) {
+                if (/מילואי|3010|צווים|צו\s*8|שירות\s*מילואי/i.test(t.title || '')) {
                     t.isMiluim = true;
                 }
                 return true;
@@ -15264,9 +15273,24 @@ function renderModalTaskList(course) {
             statusSelect.addEventListener("change", (e) => {
                 const oldStatus = task.status;
                 const newStatus = e.target.value;
+                const isDone = (newStatus === 'done' || newStatus === 'submitted');
+                const nowTs = Date.now();
 
                 task.status = newStatus;
-                task.completed = (newStatus === 'done');
+                task.completed = isDone;
+                task.statusUpdatedAt = nowTs;
+                if (isDone) {
+                    task.completedAt = nowTs;
+                } else {
+                    delete task.completedAt;
+                }
+                if (window.MoodleSync) {
+                    if (isDone && typeof window.MoodleSync.markTaskCompletedInRegistry === 'function') {
+                        window.MoodleSync.markTaskCompletedInRegistry(course.code, task);
+                    } else if (!isDone && typeof window.MoodleSync.unmarkTaskCompletedInRegistry === 'function') {
+                        window.MoodleSync.unmarkTaskCompletedInRegistry(course.code, task);
+                    }
+                }
 
                 // Adjust status classes
                 statusSelect.className = `quest-status-select ${newStatus.replace('_', '-')}`;
@@ -17010,8 +17034,9 @@ function calculateTimeRemaining(dueDateStr, isCompleted, taskObj = null) {
     if (isCompleted) {
         return { text: "הושלם (Completed)", className: "completed", diffDays: 999, isOpened: true };
     }
+    const hasExplicitOpenPassed = !!(taskObj && taskObj.openDate && !isNaN(Date.parse(taskObj.openDate)) && Date.parse(taskObj.openDate) <= Date.now());
     if (!dueDateStr) {
-        return { text: "ללא תאריך", className: "normal", diffDays: 999, isOpened: true };
+        return { text: "ללא תאריך", className: "normal", diffDays: 999, isOpened: hasExplicitOpenPassed };
     }
     
     const today = new Date();
@@ -17021,7 +17046,7 @@ function calculateTimeRemaining(dueDateStr, isCompleted, taskObj = null) {
     
     const diffTime = due - today;
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    let isOpened = diffDays <= 14;
+    let isOpened = diffDays <= 21;
     if (taskObj && taskObj.openDate) {
         const openTs = Date.parse(taskObj.openDate);
         if (!isNaN(openTs)) isOpened = Date.now() >= openTs;
@@ -17078,7 +17103,7 @@ function updateOrganitCategoryCounts(allTasks) {
     let counts = { all: allTasks.length, hw: 0, exam: 0, project: 0, miluim: 0 };
     allTasks.forEach(item => {
         const t = item.task;
-        const isMiluim = !!(t.isMiluim === true || t.miluim === true || (t.title && /מילואים|3010|צווים|צו\s*8|שירות\s*מילואים/i.test(t.title)));
+        const isMiluim = !!(t.isMiluim === true || t.miluim === true || (t.title && /מילואי|3010|צווים|צו\s*8|שירות\s*מילואי/i.test(t.title)));
         if (isMiluim) {
             t.isMiluim = true;
             counts.miluim++;
@@ -17735,7 +17760,7 @@ function renderNotionTasksTable() {
         
         // 0. Organit++ Category Filter
         const organitCat = window.activeOrganitCategory || 'all';
-        const isMiluimTask = !!(t.isMiluim === true || t.miluim === true || (t.title && /מילואים|3010|צווים|צו\s*8|שירות\s*מילואים/i.test(t.title)));
+        const isMiluimTask = !!(t.isMiluim === true || t.miluim === true || (t.title && /מילואי|3010|צווים|צו\s*8|שירות\s*מילואי/i.test(t.title)));
         if (isMiluimTask) t.isMiluim = true;
         if (organitCat !== 'all') {
             if (organitCat === 'hw' && (isMiluimTask || !(t.type === 'hw' || t.type === 'homework' || t.type === 'assignment' || t.type === 'quiz' || t.type === 'webwork' || t.type === 'hw_digital' || t.type === 'hw_written' || (t.title && /תרגיל|מטלה|גיליון|גליון|שאלון|לומדה|scorm|webwork/i.test(t.title))))) {
@@ -17875,13 +17900,16 @@ function renderNotionTasksTable() {
         `;
 
         let statusClass = t.status || 'not_started';
+        if (statusClass === 'todo' || statusClass === 'pending' || statusClass === 'open' || !statusClass) {
+            statusClass = 'not_started';
+        }
         let displayLabel = 'not started';
-        if (t.status === 'in_progress') displayLabel = 'In progress';
-        else if (t.status === 'submitted') displayLabel = 'Submitted';
-        else if (t.status === 'done') displayLabel = 'done';
-        else if (t.status === 'late') displayLabel = 'Late';
-        else if (t.status === 'not_started' || !t.status) displayLabel = 'not started';
-        else displayLabel = (typeof STATUS_LABELS !== 'undefined' && STATUS_LABELS[t.status]) || t.status || 'not started';
+        if (statusClass === 'in_progress') displayLabel = 'In progress';
+        else if (statusClass === 'submitted') displayLabel = 'Submitted';
+        else if (statusClass === 'done') displayLabel = 'done';
+        else if (statusClass === 'late') displayLabel = 'Late';
+        else if (statusClass === 'not_started') displayLabel = 'not started';
+        else displayLabel = (typeof STATUS_LABELS !== 'undefined' && STATUS_LABELS[statusClass]) || statusClass || 'not started';
         
         const moodleUrl = resolveDirectMoodleTaskUrl(c.code, t);
         const moodleLinkHtml = moodleUrl ? `
@@ -18084,7 +18112,7 @@ function showNotionStatusDropdown(event, courseCode, taskId, currentStatus) {
 
 
 function showTaskCompletionVerificationModal(courseCode, task, newStatus) {
-    const isMiluim = !!(task.isMiluim || task.miluim || (task.title && task.title.includes('מילואים')));
+    const isMiluim = !!(task.isMiluim || task.miluim || (task.title && /מילואי|3010|צווים|צו\s*8|שירות\s*מילואי/i.test(task.title)));
     const reasonText = isMiluim 
         ? `המשימה "${task.title}" מוגדרת כמשימת מילואים ואינה מסומנת כהוגשה במודל.`
         : `המשימה "${task.title}" אינה מסומנת כהוגשה או בעלת ציון במודל.`;
@@ -18148,8 +18176,8 @@ window.showTaskCompletionVerificationModal = showTaskCompletionVerificationModal
 
 // Modify status inside our global game state and handle XP triggers
 function toggleTaskStatusInState(courseCode, taskId, newStatus, skipRecalcAndSave = false, forceConfirmed = false) {
-    const course = gameState.courses[courseCode];
-    if (!course) return;
+    const course = (typeof resolveCourseForTask === 'function' ? resolveCourseForTask(courseCode) : null) || (gameState && gameState.courses && gameState.courses[courseCode]);
+    if (!course || !Array.isArray(course.tasks)) return;
     const task = course.tasks.find(t => t.id === taskId);
     if (!task) return;
     
@@ -18159,21 +18187,23 @@ function toggleTaskStatusInState(courseCode, taskId, newStatus, skipRecalcAndSav
     // Task completion and status update (ADR-093)
     const wasComplete = (oldStatus === 'done' || oldStatus === 'submitted');
     const isComplete = (newStatus === 'done' || newStatus === 'submitted');
+    const nowTs = Date.now();
 
     task.status = newStatus;
     task.completed = isComplete;
+    task.statusUpdatedAt = nowTs;
     if (isComplete) {
-        task.completedAt = Date.now();
+        task.completedAt = nowTs;
     } else {
         delete task.completedAt;
     }
 
-    // Maintain completion lock in MoodleSync registry so subsequent Moodle syncs never revert this task
-    if (window.MoodleSync && typeof window.MoodleSync.markTaskCompletedInRegistry === 'function') {
-        if (isComplete) {
-            window.MoodleSync.markTaskCompletedInRegistry(courseCode, task);
-        } else {
-            window.MoodleSync.unmarkTaskCompletedInRegistry(courseCode, task);
+    // Maintain bi-directional completion lock in MoodleSync registry so subsequent syncs respect both completions AND intentional resets
+    if (window.MoodleSync) {
+        if (isComplete && typeof window.MoodleSync.markTaskCompletedInRegistry === 'function') {
+            window.MoodleSync.markTaskCompletedInRegistry(course.code || courseCode, task);
+        } else if (!isComplete && typeof window.MoodleSync.unmarkTaskCompletedInRegistry === 'function') {
+            window.MoodleSync.unmarkTaskCompletedInRegistry(course.code || courseCode, task);
         }
     }
 
@@ -18221,8 +18251,8 @@ function toggleTaskStatusInState(courseCode, taskId, newStatus, skipRecalcAndSav
 
 // Slide-in Side Peek panel rendering and control binding
 function openTaskSidePeek(courseCode, taskId) {
-    const course = gameState.courses[courseCode];
-    if (!course) return;
+    const course = (typeof resolveCourseForTask === 'function' ? resolveCourseForTask(courseCode) : null) || (gameState && gameState.courses && gameState.courses[courseCode]);
+    if (!course || !Array.isArray(course.tasks)) return;
     const task = course.tasks.find(t => t.id === taskId);
     if (!task) return;
     
@@ -24168,11 +24198,11 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.11.14-v2.13.2",
-    version: "2.13.2",
-    build: "20261114_02",
-    date: "2026-11-14 16:10",
-    description: "v2.13.2: שדרוג תאימות APK לטאבלטים (הסרת הרשאות חוסמות Play Protect, תמיכת חתימה v1+v2+v3 ו-targetSdk 34, וגרסת Tablet Clean נפרדת), לצד סינון משימות סמסטר נוכחי, קידוד דחיפות ונעילת מילואים 3010."
+    code: "REV-2026.11.14-v2.13.3",
+    version: "2.13.3",
+    build: "20261114_03",
+    date: "2026-11-14 17:00",
+    description: "v2.13.3: סנכרון דו-כיווני מלא של מצבי משימות ומחיקות בין כל המכשירים (תמיכה בחזרה אחורה בזמן real-time באמצעות statusUpdatedAt), תיקון U-06 לצביעה אפורה למשימות שנפתחו בלבד (ושימור משימות שטרם נפתחו), תיקון L-07 לזיהוי 'שאלון מילואימניקים' ומניעת חזרת משימות 3010 שנמחקו."
 };
 window.APP_VERSION = APP_CURRENT_REVISION.version;
 
@@ -30085,6 +30115,7 @@ function setHomeworkComponentLifecycle(courseCode, sheetIndex, compType, newStat
         }
     });
 
+    const nowTs = Date.now();
     if (!targetTask) {
         const isWritten = (compType === 'written');
         targetTask = {
@@ -30092,17 +30123,25 @@ function setHomeworkComponentLifecycle(courseCode, sheetIndex, compType, newStat
             title: isWritten ? `הגשת פתרון תרגיל בית ${sheetIndex}` : `HW ${sheetIndex} - ${sheetName}`,
             type: 'hw',
             xp: 50,
-            completed: (newStatus === 'done'),
-            status: newStatus
+            completed: (newStatus === 'done' || newStatus === 'submitted'),
+            status: newStatus,
+            statusUpdatedAt: nowTs,
+            ...(newStatus === 'done' || newStatus === 'submitted' ? { completedAt: nowTs } : {})
         };
         course.tasks.push(targetTask);
     } else {
         targetTask.status = newStatus;
-        targetTask.completed = (newStatus === 'done');
+        targetTask.completed = (newStatus === 'done' || newStatus === 'submitted');
+        targetTask.statusUpdatedAt = nowTs;
+        if (targetTask.completed) {
+            targetTask.completedAt = nowTs;
+        } else {
+            delete targetTask.completedAt;
+        }
         if (newStatus === 'in_progress') {
             targetTask.started = true;
             if (!targetTask.progress) targetTask.progress = 25;
-        } else if (newStatus === 'open') {
+        } else if (newStatus === 'open' || newStatus === 'not_started') {
             targetTask.started = false;
             targetTask.progress = 0;
             targetTask.completed = false;
@@ -30139,6 +30178,7 @@ function setHomeworkSheetLifecycle(courseCode, sheetIndex, newStatus) {
 
     const hwTasks = course.tasks.filter(t => t.type === 'hw' || (t.title && /תרגיל|מטלה|גיליון|גליון|hw/i.test(t.title)));
     let targetTask = hwTasks.find(t => extractHomeworkSheetIndex(t.title) === sheetIndex);
+    const nowTs = Date.now();
 
     if (!targetTask) {
         targetTask = {
@@ -30146,17 +30186,25 @@ function setHomeworkSheetLifecycle(courseCode, sheetIndex, newStatus) {
             title: `תרגיל בית ${sheetIndex}: ${sheetName}`,
             type: 'hw',
             xp: 50,
-            completed: (newStatus === 'done'),
-            status: newStatus
+            completed: (newStatus === 'done' || newStatus === 'submitted'),
+            status: newStatus,
+            statusUpdatedAt: nowTs,
+            ...(newStatus === 'done' || newStatus === 'submitted' ? { completedAt: nowTs } : {})
         };
         course.tasks.push(targetTask);
     } else {
         targetTask.status = newStatus;
-        targetTask.completed = (newStatus === 'done');
+        targetTask.completed = (newStatus === 'done' || newStatus === 'submitted');
+        targetTask.statusUpdatedAt = nowTs;
+        if (targetTask.completed) {
+            targetTask.completedAt = nowTs;
+        } else {
+            delete targetTask.completedAt;
+        }
         if (newStatus === 'in_progress') {
             targetTask.started = true;
             if (!targetTask.progress) targetTask.progress = 25;
-        } else if (newStatus === 'open') {
+        } else if (newStatus === 'open' || newStatus === 'not_started') {
             targetTask.started = false;
             targetTask.progress = 0;
             targetTask.completed = false;
@@ -30205,6 +30253,7 @@ function toggleHomeworkSheetComponent(courseCode, sheetIndex, compType) {
         }
     });
 
+    const nowTs = Date.now();
     if (!targetTask) {
         const isWritten = (compType === 'written');
         targetTask = {
@@ -30213,13 +30262,19 @@ function toggleHomeworkSheetComponent(courseCode, sheetIndex, compType) {
             type: 'hw',
             xp: 50,
             completed: true,
-            status: 'done'
+            status: 'done',
+            statusUpdatedAt: nowTs,
+            completedAt: nowTs
         };
         course.tasks.push(targetTask);
     } else {
         targetTask.completed = !targetTask.completed;
         targetTask.status = targetTask.completed ? 'done' : 'open';
-        if (!targetTask.completed) {
+        targetTask.statusUpdatedAt = nowTs;
+        if (targetTask.completed) {
+            targetTask.completedAt = nowTs;
+        } else {
+            delete targetTask.completedAt;
             targetTask.started = false;
             targetTask.progress = 0;
         }
@@ -30255,17 +30310,35 @@ function toggleHomeworkSheetStatus(courseCode, sheetIndex) {
     if (!sheet) return;
 
     const nextCompleted = (sheet.status !== 'done');
+    const nowTs = Date.now();
+    const syncSheetTaskRegistry = (tObj) => {
+        if (!tObj) return;
+        tObj.statusUpdatedAt = nowTs;
+        if (tObj.completed) {
+            tObj.completedAt = nowTs;
+            if (window.MoodleSync && typeof window.MoodleSync.markTaskCompletedInRegistry === 'function') {
+                window.MoodleSync.markTaskCompletedInRegistry(course.code, tObj);
+            }
+        } else {
+            delete tObj.completedAt;
+            if (window.MoodleSync && typeof window.MoodleSync.unmarkTaskCompletedInRegistry === 'function') {
+                window.MoodleSync.unmarkTaskCompletedInRegistry(course.code, tObj);
+            }
+        }
+    };
 
     if (sheet.isDual) {
         if (sheet.digitalTask) {
             sheet.digitalTask.completed = nextCompleted;
             sheet.digitalTask.status = nextCompleted ? 'done' : 'open';
+            syncSheetTaskRegistry(sheet.digitalTask);
         } else if (nextCompleted) {
             toggleHomeworkSheetComponent(courseCode, sheetIndex, 'digital');
         }
         if (sheet.writtenTask) {
             sheet.writtenTask.completed = nextCompleted;
             sheet.writtenTask.status = nextCompleted ? 'done' : 'open';
+            syncSheetTaskRegistry(sheet.writtenTask);
         } else if (nextCompleted) {
             toggleHomeworkSheetComponent(courseCode, sheetIndex, 'written');
         }
@@ -30273,6 +30346,7 @@ function toggleHomeworkSheetStatus(courseCode, sheetIndex) {
         if (sheet.singleTask) {
             sheet.singleTask.completed = nextCompleted;
             sheet.singleTask.status = nextCompleted ? 'done' : 'open';
+            syncSheetTaskRegistry(sheet.singleTask);
         } else if (nextCompleted) {
             toggleHomeworkSheetComponent(courseCode, sheetIndex, 'single');
         }

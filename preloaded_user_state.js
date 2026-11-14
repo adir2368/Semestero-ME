@@ -228,26 +228,43 @@
       "moedB": "2027-03-26",
       "tasks": [
         {
-          "id": "104228_h1",
+          "id": "task_moodle_scorm_95378",
+          "moodleUid": "23208@moodle26.technion.ac.il",
           "xp": 50,
           "type": "hw",
-          "title": "תרגיל אלקטרוני 1 - סיווג מד״ח",
-          "status": "in_progress",
-          "dueDate": "2026-11-09T23:59:00",
+          "title": "תאריך סגירה: תרגיל אלקטרוני 1 - סיווג מד\"ח",
+          "status": "done",
+          "dueDate": "2026-11-09 23:59",
           "moodleUrl": "https://moodle26.technion.ac.il/mod/scorm/view.php?id=95378",
           "pangeaUrl": "https://idofangbentov.uk/Technion/PDE1/PDE1_000-104228-%D7%9E%D7%93%D7%97-%D7%9E",
-          "completed": false
+          "completed": true,
+          "source": "moodle"
+        },
+        {
+          "id": "104228_h1",
+          "moodleUid": "26778@moodle26.technion.ac.il",
+          "xp": 50,
+          "type": "hw",
+          "title": "הגשת גיליון בית 1",
+          "status": "done",
+          "dueDate": "2026-11-12 23:59",
+          "moodleUrl": "https://moodle26.technion.ac.il/course/view.php?id=643",
+          "pangeaUrl": "https://idofangbentov.uk/Technion/PDE1/PDE1_000-104228-%D7%9E%D7%93%D7%97-%D7%9E",
+          "completed": true,
+          "source": "moodle"
         },
         {
           "id": "104228_h2",
+          "moodleUid": "28730@moodle26.technion.ac.il",
           "xp": 50,
           "type": "hw",
-          "title": "תרגיל אלקטרוני 2",
-          "status": "not_started",
-          "dueDate": "2026-11-16T23:59:00",
+          "title": "תאריך סגירה: תרגיל אלקטרוני 2 - שיטת האופיינים",
+          "status": "in_progress",
+          "dueDate": "2026-11-19 23:59",
           "moodleUrl": "https://moodle26.technion.ac.il/course/view.php?id=643",
           "pangeaUrl": "https://idofangbentov.uk/Technion/PDE1/PDE1_000-104228-%D7%9E%D7%93%D7%97-%D7%9E",
-          "completed": false
+          "completed": false,
+          "source": "moodle"
         },
         {
           "id": "104228_ww1",
@@ -373,31 +390,31 @@
           "xp": 30,
           "dueDate": "2027-01-28 23:59",
           "dueTimestamp": 1801173540000,
-          "status": "not_started",
-          "completed": false,
+          "status": "done",
+          "completed": true,
           "source": "moodle"
         },
         {
-          "id": "114052_miluim_3010",
-          "isMiluim": true,
-          "moodleUid": "9572@moodle26.technion.ac.il",
-          "title": "אישור מילואים (טופס 3010) חורף",
-          "type": "hw",
-          "xp": 30,
-          "dueDate": "2027-02-01 23:59",
-          "dueTimestamp": 1801519140000,
-          "status": "not_started",
-          "completed": false,
-          "source": "moodle"
-        },
-        {
-          "id": "114052_h1",
+          "id": "task_moodle_9581_1794472563220",
+          "moodleUid": "9581@moodle26.technion.ac.il",
           "xp": 50,
           "type": "hw",
-          "title": "תרגיל בית 1: שדה חשמלי וחוק גאוס",
-          "status": "not_started",
-          "dueDate": "",
-          "completed": false
+          "title": "תרגיל בית 1 - תזכורת והכנה מתמטית",
+          "status": "done",
+          "dueDate": "2026-11-13 23:59",
+          "completed": true,
+          "source": "moodle"
+        },
+        {
+          "id": "task_moodle_9582_1794472563221",
+          "moodleUid": "9582@moodle26.technion.ac.il",
+          "xp": 50,
+          "type": "hw",
+          "title": "תרגיל בית 2 - חוק קולון\\, שדה חשמלי",
+          "status": "done",
+          "dueDate": "2026-11-15 23:59",
+          "completed": true,
+          "source": "moodle"
         },
         {
           "id": "114052_ww1",
@@ -927,41 +944,42 @@
       "moedB": "2027-03-18",
       "tasks": [
         {
-          "id": "034053_hw1",
-          "moodleUid": "00340053_hw1",
+          "id": "034053_h1",
+          "moodleUid": "13215@moodle26.technion.ac.il",
           "title": "HW 1 - Stress Tensor (הגשת פתרון תרגיל בית 1)",
           "type": "hw",
           "xp": 60,
           "dueDate": "2026-11-12 23:59",
           "dueTimestamp": 1794520740000,
-          "status": "not_started",
-          "completed": false,
+          "status": "done",
+          "completed": true,
           "source": "moodle",
           "moodleUrl": "https://moodle26.technion.ac.il/course/view.php?id=116"
         },
         {
           "id": "034053_miluim_survey",
+          "isMiluim": true,
           "moodleUid": "15386@moodle26.technion.ac.il",
           "title": "שאלון מילואימניקים",
           "type": "quiz",
           "xp": 30,
           "dueDate": "2026-11-13 14:41",
           "dueTimestamp": 1794573660000,
-          "status": "not_started",
-          "completed": false,
+          "status": "done",
+          "completed": true,
           "source": "moodle",
           "moodleUrl": "https://moodle26.technion.ac.il/course/view.php?id=116"
         },
         {
-          "id": "034053_hw2",
-          "moodleUid": "00340053_hw2",
+          "id": "task_moodle_26381_1794472563222",
+          "moodleUid": "26381@moodle26.technion.ac.il",
           "title": "HW 2 - Principle Stresses (הגשת פתרון תרגיל בית 2)",
           "type": "hw",
           "xp": 60,
-          "dueDate": "2026-11-26 23:59",
+          "dueDate": "2026-11-19 23:59",
           "dueTimestamp": 1795730340000,
-          "status": "not_started",
-          "completed": false,
+          "status": "done",
+          "completed": true,
           "source": "moodle",
           "moodleUrl": "https://moodle26.technion.ac.il/course/view.php?id=116"
         },
@@ -1106,28 +1124,28 @@
       "moedB": "2027-03-10",
       "tasks": [
         {
-          "id": "034056_matlab",
+          "id": "034056_matlab_bonus",
           "moodleUid": "9032@moodle26.technion.ac.il",
           "title": "לומדת MATLAB",
           "type": "hw",
           "xp": 60,
           "dueDate": "2026-11-19 23:59",
           "dueTimestamp": 1795125540000,
-          "status": "not_started",
-          "completed": false,
+          "status": "done",
+          "completed": true,
           "source": "moodle"
         },
         {
-          "id": "034056_miluim",
+          "id": "task_moodle_15247_1793133274239",
           "isMiluim": true,
           "moodleUid": "15247@moodle26.technion.ac.il",
-          "title": "שאלון מילואים",
+          "title": "שאלון מילואים (תאריך סגירת שאלון)",
           "type": "quiz",
           "xp": 30,
-          "dueDate": "2026-11-20 11:16",
+          "dueDate": "2026-11-20 13:16",
           "dueTimestamp": 1795166160000,
-          "status": "not_started",
-          "completed": false,
+          "status": "done",
+          "completed": true,
           "source": "moodle"
         },
         {
@@ -4684,7 +4702,7 @@
     "phone": ""
   },
   "isFinalsMode": false,
-  "lastModified": 1789657339323,
+  "lastModified": 1794666702946,
   "pastExamsBank": {
     "104043": {
       "name": "חדו״א 2 (104043)",
@@ -5853,6 +5871,30 @@
   },
   "hasLoadedGoogleCalendarAugust": true,
   "hasLoadedGoogleCalendarAugustV3": true,
+  "deletedTaskIds": [
+    "114052_miluim_3010",
+    "task_moodle_9572_1793526029052",
+    "9572",
+    "9572@moodle26.technion.ac.il"
+  ],
+  "dismissedTaskRegistry": {
+    "moodle_event:9572": {
+      "title": "אישור מילואים (טופס 3010) חורף",
+      "courseCode": "114052"
+    },
+    "canonical:114052:hw_3010": {
+      "title": "אישור מילואים (טופס 3010) חורף",
+      "courseCode": "114052"
+    },
+    "task_id:114052_miluim_3010": {
+      "title": "אישור מילואים (טופס 3010) חורף",
+      "courseCode": "114052"
+    },
+    "moodle_uid:9572@moodle26.technion.ac.il": {
+      "title": "אישור מילואים (טופס 3010) חורף",
+      "courseCode": "114052"
+    }
+  },
   "examPrep": {}
 };
 

@@ -17,9 +17,9 @@ ZIP_PATH = os.path.join(ROOT, "Semestero-ME-Windows-x64.zip")
 
 with open(os.path.join(ROOT, "package.json"), "r", encoding="utf-8") as f:
     pkg = json.load(f)
-VERSION = pkg.get("version", "2.13.2")
+VERSION = pkg.get("version", "2.13.3")
 TAG = f"v{VERSION}"
-NAME = f"Semestero ME v{VERSION} - Tablet Compatibility Fix, v1+v2+v3 Signed & Tasks Engine Overhaul (ADR-112)"
+NAME = f"Semestero ME v{VERSION} - Cross-Device Task Sync, U-06 Opened-Gray & L-07 Miluim Fix"
 
 def get_github_token():
     try:
@@ -99,18 +99,15 @@ def main():
 
     body_notes = f"""# Semestero ME {TAG} Release Notes
 
-### 🚀 1. שדרוג מנוע המשימות, שמירת סינונים וקידוד דחיפות (ADR-112)
-- **סמסטר נוכחי בלבד והחרגת מבחנים**: הצגת משימות הסמסטר הפעיל בלבד בברירת מחדל והחרגת מבחנים ובחנים מספירת המשימות הפתוחות.
-- **תאריכים בפורמט `DD/MM/YYYY`**: הצגת תאריכי הגשה בעברית/ישראלית ברורה `DD/MM/YYYY` בכל שורות הטבלה ורשימות העדיפויות.
-- **שמירת העדפות סינון (`U-05`)**: שמירה אוטומטית ב-`localStorage` של מסנני הקורסים, הסמסטרים, הסטטוס, הסוג והאורגנית כך ששום פעולה לא תאפס את התצוגה.
-- **קידוד צבעי דחיפות (`U-06`)**: משימות שנפתחו ולא התחילו בצבע אפור, משימות דחופות (`≤ 3` ימים) בסגול, ויום לפני / היום / באיחור באדום בוהק (משימות שטרם נפתחו נשארות כפי שהן).
-- **סיווג מילואים וטופס 3010 + נעילת השלמה/מחיקה (`L-07`)**: סיווג אוטומטי תחת קטגוריית 🪖 מילואים ונעילה קשיחה של משימות שבוצעו או נמחקו (כולל בסנכרון ענן CRDT).
-- **תיקון חפיפת חלון נגישות (`L-06`)**: העלאת שכבת חלון הנגישות מעל סרגל הלשוניות העליון.
+### 🔄 1. סנכרון דו-כיווני מלא בין מכשירים, תיקון U-06 וסיווג מילואים (L-07)
+- **סנכרון מצבי משימות ומחיקות בין PC, טלפון וטאבלט**: מעקב `statusUpdatedAt` מדויק בכל החלפת סטטוס (כולל חזרה מ-`הושלם` ל-`בתהליך` או `טרם התחיל`), סנכרון `Realtime` ומניעת החזרת משימות ישנות בעלייה או מ-`PRELOADED_USER_STATE`.
+- **תיקון U-06 (צביעה אפורה למשימות שנפתחו)**: משימות ללא תאריך הגשה או עתידיות שטרם נפתחו נשארות בסגנון ברירת המחדל ואינן מומרצות אוטומטית ל-`בתהליך`; משימות שנפתחו (`≤ 21` יום או מעבר ל-`openDate`) ועדיין ב-`טרם התחיל` נצבעות באפור.
+- **תיקון L-07 לסיווג מילואים ומניעת חזרת 3010**: הרחבת הביטוי ל-`/מילואי|3010|צווים|צו\\s*8|שירות\\s*מילואי/i` לזיהוי מלא של `"שאלון מילואימניקים"` וסנכרון `deletedTaskIds` ו-`dismissedTaskRegistry` לטופס 3010.
 
 ### 📦 2. קובצי הפצה ועדכון:
-- `Semestero-ME-Tablet-Clean.apk` (Android Conflict-Free Tablet Edition `com.technion.semestero.tablet`, `versionCode 97`, `versionName {VERSION}` — מומלץ לטאבלטים)
-- `Semestero-ME.apk` (Android Native App `com.technion.semestero`, `versionCode 97`, `versionName {VERSION}` — `v1+v2+v3` Signed, `targetSdk 34`, ללא הרשאות חוסמות Play Protect)
-- `Semestero-ME-Watch.apk` (Wear OS Companion)
+- `Semestero-ME-Tablet-Clean.apk` (Android Conflict-Free Tablet Edition `com.technion.semestero.tablet`, `versionCode 98`, `versionName {VERSION}` — מומלץ לטאבלטים, `v1+v2+v3` Signed)
+- `Semestero-ME.apk` (Android Native App `com.technion.semestero`, `versionCode 98`, `versionName {VERSION}` — `v1+v2+v3` Signed, `targetSdk 34`)
+- `Semestero-ME-Watch.apk` (Wear OS Companion, `versionCode 98`, `versionName {VERSION}`)
 - `Semestero-ME-Windows-x64.zip` (Electron Desktop Client {VERSION})
 """
 
