@@ -48,6 +48,7 @@ class CDPClient {
                 if (msg.id && this.callbacks.has(msg.id)) {
                     const cb = this.callbacks.get(msg.id);
                     this.callbacks.delete(msg.id);
+                    if (cb.timer) clearTimeout(cb.timer);
                     if (msg.error) cb.reject(new Error(msg.error.message || JSON.stringify(msg.error)));
                     else cb.resolve(msg.result);
                 }
@@ -58,7 +59,13 @@ class CDPClient {
     send(method, params = {}) {
         return new Promise((resolve, reject) => {
             const id = this.id++;
-            this.callbacks.set(id, { resolve, reject });
+            const timer = setTimeout(() => {
+                if (this.callbacks.has(id)) {
+                    this.callbacks.delete(id);
+                    reject(new Error(`CDP timeout (15s) waiting for ${method}`));
+                }
+            }, 15000);
+            this.callbacks.set(id, { resolve, reject, timer });
             this.ws.send(JSON.stringify({ id, method, params }));
         });
     }
@@ -270,8 +277,8 @@ async function runExtendedTourSuite() {
         console.log('========================================================================\n');
 
     } finally {
-        try { chrome.kill(); } catch (e) {}
-        try { server.kill(); } catch (e) {}
+        try { if (chrome && !chrome.killed) chrome.kill('SIGKILL'); } catch (e) {}
+        try { if (server && !server.killed) server.kill('SIGKILL'); } catch (e) {}
     }
 }
 

@@ -17,9 +17,9 @@ ZIP_PATH = os.path.join(ROOT, "Semestero-ME-Windows-x64.zip")
 
 with open(os.path.join(ROOT, "package.json"), "r", encoding="utf-8") as f:
     pkg = json.load(f)
-VERSION = pkg.get("version", "2.13.3")
+VERSION = pkg.get("version", "2.13.4")
 TAG = f"v{VERSION}"
-NAME = f"Semestero ME v{VERSION} - Cross-Device Task Sync, U-06 Opened-Gray & L-07 Miluim Fix"
+NAME = f"Semestero ME v{VERSION} - @ui_motion_prompts UI Motion Suite & Frosted Glass"
 
 def get_github_token():
     try:
@@ -99,15 +99,17 @@ def main():
 
     body_notes = f"""# Semestero ME {TAG} Release Notes
 
-### 🔄 1. סנכרון דו-כיווני מלא בין מכשירים, תיקון U-06 וסיווג מילואים (L-07)
-- **סנכרון מצבי משימות ומחיקות בין PC, טלפון וטאבלט**: מעקב `statusUpdatedAt` מדויק בכל החלפת סטטוס (כולל חזרה מ-`הושלם` ל-`בתהליך` או `טרם התחיל`), סנכרון `Realtime` ומניעת החזרת משימות ישנות בעלייה או מ-`PRELOADED_USER_STATE`.
-- **תיקון U-06 (צביעה אפורה למשימות שנפתחו)**: משימות ללא תאריך הגשה או עתידיות שטרם נפתחו נשארות בסגנון ברירת המחדל ואינן מומרצות אוטומטית ל-`בתהליך`; משימות שנפתחו (`≤ 21` יום או מעבר ל-`openDate`) ועדיין ב-`טרם התחיל` נצבעות באפור.
-- **תיקון L-07 לסיווג מילואים ומניעת חזרת 3010**: הרחבת הביטוי ל-`/מילואי|3010|צווים|צו\\s*8|שירות\\s*מילואי/i` לזיהוי מלא של `"שאלון מילואימניקים"` וסנכרון `deletedTaskIds` ו-`dismissedTaskRegistry` לטופס 3010.
+### ✨ 1. שדרוג ממשק ומיקרו-אנימציות (@ui_motion_prompts Suite)
+- **זכוכית מט ב-6 שכבות (`DfrsFnLD6im`)**: טשטוש עומק `blur(20px) saturate(160%)`, שכבות גוון והבהק אלכסוני 112° בסרגל העליון, סרגל הניווט והודעות הצפות.
+- **קפסולת טאבים גולשת (`DfLt74CjduQ`)**: `.nav-sliding-pill` עם מתיחה קפיצית במעבר בין לשוניות (דסקטופ + Dock נייד) והנפשת אייקון `uiMotionIconPop`.
+- **מד XP קפיצי + ראש שביט (`Dft1amuEyn7`)**: אוברשוט אלסטי במילוי מד ה-XP והילת Comet Glow בקצה ההתקדמות (תומך RTL/LTR).
+- **טבעת סונאר לבועת התראות (`Dfs3pG9AeUh`)**: פעימת קנה מידה וטבעת סונאר מתרחבת בעת עדכון `#bell-badge-count`.
+- **מחסנית Toasts חכמה (`Dfq8Fx9gmNY`)**: מיזוג הודעות זהות עם תג `×2`/`×3`, ערימת עד 3 הודעות ופס ספירה לאחור `ast-toast-progress`, תוך כיבוד מלא של `body.a11y-stop-animations` ו-`prefers-reduced-motion`.
 
 ### 📦 2. קובצי הפצה ועדכון:
-- `Semestero-ME-Tablet-Clean.apk` (Android Conflict-Free Tablet Edition `com.technion.semestero.tablet`, `versionCode 98`, `versionName {VERSION}` — מומלץ לטאבלטים, `v1+v2+v3` Signed)
-- `Semestero-ME.apk` (Android Native App `com.technion.semestero`, `versionCode 98`, `versionName {VERSION}` — `v1+v2+v3` Signed, `targetSdk 34`)
-- `Semestero-ME-Watch.apk` (Wear OS Companion, `versionCode 98`, `versionName {VERSION}`)
+- `Semestero-ME-Tablet-Clean.apk` (Android Conflict-Free Tablet Edition `com.technion.semestero.tablet`, `versionCode 99`, `versionName {VERSION}` — מומלץ לטאבלטים, `v1+v2+v3` Signed)
+- `Semestero-ME.apk` (Android Native App `com.technion.semestero`, `versionCode 99`, `versionName {VERSION}` — `v1+v2+v3` Signed, `targetSdk 34`)
+- `Semestero-ME-Watch.apk` (Wear OS Companion, `versionCode 99`, `versionName {VERSION}`)
 - `Semestero-ME-Windows-x64.zip` (Electron Desktop Client {VERSION})
 """
 

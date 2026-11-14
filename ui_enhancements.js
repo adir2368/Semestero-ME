@@ -1760,6 +1760,203 @@
         }
     };
 
+    // 11.5 UI Motion Prompts Suite (v2.13.4)
+    // =========================================================================
+    const UiMotionPromptsSuite = {
+        getReducedMotion() {
+            try {
+                if (document.body && document.body.classList.contains('a11y-stop-animations')) return true;
+                if (typeof window.matchMedia === 'function' && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                    return true;
+                }
+            } catch (e) {}
+            return false;
+        },
+
+        syncSlidingPill(container, animateStretch = true) {
+            if (!container) return null;
+            const doc = container.ownerDocument || document;
+            if (!container.classList.contains('has-sliding-pill')) {
+                container.classList.add('has-sliding-pill');
+            }
+            let pill = container.querySelector('.nav-sliding-pill');
+            if (!pill) {
+                pill = doc.createElement('div');
+                pill.className = 'nav-sliding-pill';
+                pill.setAttribute('aria-hidden', 'true');
+                container.insertBefore(pill, container.firstChild);
+            }
+
+            const activeTab = container.querySelector('.nav-tab.active') || container.querySelector('.nav-tab');
+            if (!activeTab) {
+                if (pill.classList.contains('is-visible')) {
+                    pill.classList.remove('is-visible');
+                }
+                return pill;
+            }
+
+            let targetLeft = Number(activeTab.offsetLeft) || 0;
+            let targetTop = Number(activeTab.offsetTop) || 0;
+            let targetWidth = Number(activeTab.offsetWidth) || 0;
+            let targetHeight = Number(activeTab.offsetHeight) || 0;
+
+            if ((!targetWidth || !targetHeight) && typeof activeTab.getBoundingClientRect === 'function' && typeof container.getBoundingClientRect === 'function') {
+                const tabRect = activeTab.getBoundingClientRect();
+                const wrapRect = container.getBoundingClientRect();
+                if (tabRect && wrapRect && tabRect.width > 0 && tabRect.height > 0) {
+                    targetLeft = tabRect.left - wrapRect.left + (container.scrollLeft || 0);
+                    targetTop = tabRect.top - wrapRect.top + (container.scrollTop || 0);
+                    targetWidth = tabRect.width;
+                    targetHeight = tabRect.height;
+                }
+            }
+
+            const prevLeft = pill.dataset ? pill.dataset.lastLeft : undefined;
+            const prevTop = pill.dataset ? pill.dataset.lastTop : undefined;
+            const nextLeftStr = String(Math.round(targetLeft));
+            const nextTopStr = String(Math.round(targetTop));
+            const hasMoved = prevLeft !== undefined && (prevLeft !== nextLeftStr || prevTop !== nextTopStr);
+
+            if (hasMoved && animateStretch && !this.getReducedMotion()) {
+                if (!pill.classList.contains('is-stretching')) {
+                    pill.classList.add('is-stretching');
+                }
+                if (pill._stretchTimer) clearTimeout(pill._stretchTimer);
+                pill._stretchTimer = setTimeout(() => {
+                    pill.classList.remove('is-stretching');
+                }, 220);
+            }
+
+            pill.style.left = targetLeft + 'px';
+            pill.style.top = targetTop + 'px';
+            pill.style.width = targetWidth + 'px';
+            pill.style.height = targetHeight + 'px';
+            if (!pill.classList.contains('is-visible')) {
+                pill.classList.add('is-visible');
+            }
+
+            if (pill.dataset) {
+                pill.dataset.lastLeft = nextLeftStr;
+                pill.dataset.lastTop = nextTopStr;
+            }
+            container._uiMotionLastActiveTab = activeTab;
+            return pill;
+        },
+
+        observeTabs(rootDoc = document) {
+            const containers = rootDoc.querySelectorAll('.nav-tabs-left');
+            containers.forEach((container) => {
+                this.syncSlidingPill(container, false);
+                if (container.dataset && container.dataset.uiMotionTabsObserved === '1') return;
+                if (container.dataset) container.dataset.uiMotionTabsObserved = '1';
+
+                container.addEventListener('click', (e) => {
+                    const tab = e.target && e.target.closest ? e.target.closest('.nav-tab') : null;
+                    if (!tab) return;
+                    const sched = typeof requestAnimationFrame === 'function' ? requestAnimationFrame : (cb) => setTimeout(cb, 0);
+                    sched(() => this.syncSlidingPill(container, true));
+                });
+
+                if (typeof MutationObserver !== 'undefined') {
+                    const tabObserver = new MutationObserver((mutations) => {
+                        const pill = container.querySelector('.nav-sliding-pill');
+                        const touchedTab = !mutations || !mutations.length
+                            ? true
+                            : mutations.some((m) => (
+                                m.target &&
+                                m.target !== pill &&
+                                m.target !== container &&
+                                m.target.classList &&
+                                m.target.classList.contains('nav-tab')
+                            ));
+                        if (!touchedTab) return;
+                        const nextActiveTab = container.querySelector('.nav-tab.active');
+                        if (nextActiveTab && nextActiveTab !== container._uiMotionLastActiveTab) {
+                            this.syncSlidingPill(container, true);
+                        }
+                    });
+                    tabObserver.observe(container, {
+                        attributes: true,
+                        attributeFilter: ['class'],
+                        subtree: true
+                    });
+                    container._uiMotionTabObserver = tabObserver;
+                }
+            });
+
+            if (!window._uiMotionResizeBound) {
+                window._uiMotionResizeBound = true;
+                let resizeRaf = null;
+                const onResize = () => {
+                    if (resizeRaf) return;
+                    const sched = typeof requestAnimationFrame === 'function' ? requestAnimationFrame : (cb) => setTimeout(cb, 16);
+                    resizeRaf = sched(() => {
+                        resizeRaf = null;
+                        document.querySelectorAll('.nav-tabs-left').forEach((c) => this.syncSlidingPill(c, false));
+                    });
+                };
+                window.addEventListener('resize', onResize);
+                if (document.fonts && document.fonts.ready && typeof document.fonts.ready.then === 'function') {
+                    document.fonts.ready.then(onResize).catch(() => {});
+                }
+            }
+        },
+
+        triggerBadgeBump(badgeEl) {
+            const badge = badgeEl || document.getElementById('bell-badge-count');
+            if (!badge || this.getReducedMotion()) return;
+            const rawText = (badge.textContent || '').trim();
+            if (!rawText || rawText === '0') return;
+            badge.classList.remove('is-bumping');
+            void badge.offsetWidth;
+            badge.classList.add('is-bumping');
+            if (badge._uiMotionBumpTimer) clearTimeout(badge._uiMotionBumpTimer);
+            badge._uiMotionBumpTimer = setTimeout(() => {
+                badge.classList.remove('is-bumping');
+            }, 660);
+        },
+
+        observeBadge(rootDoc = document) {
+            const badge = rootDoc.getElementById('bell-badge-count');
+            if (!badge) return;
+            if (badge.dataset && badge.dataset.uiMotionBadgeObserved === '1') return;
+            if (badge.dataset) badge.dataset.uiMotionBadgeObserved = '1';
+
+            let lastText = (badge.textContent || '').trim();
+            if (typeof MutationObserver !== 'undefined') {
+                const badgeObserver = new MutationObserver(() => {
+                    const nextText = (badge.textContent || '').trim();
+                    const isVisible = !badge.style || badge.style.display !== 'none';
+                    if (nextText !== lastText) {
+                        lastText = nextText;
+                        if (isVisible && nextText && nextText !== '0') {
+                            this.triggerBadgeBump(badge);
+                        }
+                    }
+                });
+                badgeObserver.observe(badge, {
+                    childList: true,
+                    characterData: true,
+                    subtree: true,
+                    attributes: true,
+                    attributeFilter: ['style']
+                });
+                badge._uiMotionBadgeObserver = badgeObserver;
+            }
+        },
+
+        init(rootDoc = document) {
+            this.observeTabs(rootDoc);
+            this.observeBadge(rootDoc);
+        }
+    };
+
+    function initUiMotionPromptsSuite() {
+        UiMotionPromptsSuite.init(document);
+    }
+
+    window.UiMotionPromptsSuite = UiMotionPromptsSuite;
+
     // 12. Main Initialization on DOM Ready
     // =========================================================================
     function initAllEnhancements() {
@@ -1769,6 +1966,7 @@
         MobileBackNavigationManager.init();
         CourseWishlist.renderWishlistPillCount();
         RecentlyViewed.renderRecentChips();
+        initUiMotionPromptsSuite();
 
         // Monitor any opening modals to attach reading progress bar if long
         let modalObserverRaf = null;

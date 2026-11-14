@@ -16161,22 +16161,115 @@ function toggleCourseCompletion(code) {
 let currentNotionTask = null; // Holds the {courseCode, taskId} of the currently peeking task
 
 // Initialize overlay, tab selectors, and filter events
-// Toast notification helper
+// Toast notification helper (Dfq8Fx9gmNY stacked toasts + merge counter + countdown bar)
+function repackAstToastStack(priorityToast = null) {
+    const active = Array.from(document.querySelectorAll('.ast-toast'))
+        .filter((el) => !el.classList.contains('is-exiting'))
+        .sort((a, b) => Number(a.dataset.stackIndex || 0) - Number(b.dataset.stackIndex || 0));
+    const ordered = priorityToast
+        ? [priorityToast, ...active.filter((el) => el !== priorityToast)]
+        : active;
+    ordered.forEach((el, idx) => {
+        if (idx >= 3) {
+            if (el._toastHideTimer) clearTimeout(el._toastHideTimer);
+            if (el._toastRemoveTimer) clearTimeout(el._toastRemoveTimer);
+            el.remove();
+            return;
+        }
+        el.dataset.stackIndex = String(idx);
+        el.setAttribute('data-stack-index', String(idx));
+    });
+}
+
+function scheduleAstToastRemoval(toast, durationMs = 3500) {
+    if (toast._toastHideTimer) clearTimeout(toast._toastHideTimer);
+    if (toast._toastRemoveTimer) clearTimeout(toast._toastRemoveTimer);
+    toast._toastHideTimer = setTimeout(() => {
+        toast.classList.add('is-exiting');
+        repackAstToastStack();
+        toast._toastRemoveTimer = setTimeout(() => {
+            if (typeof toast.remove === 'function') toast.remove();
+        }, 300);
+    }, durationMs);
+}
+
 function showToastNotification(msg, type = 'info') {
-    const existing = document.querySelector('.ast-toast');
-    if (existing) existing.remove();
-    
+    const rawMsg = String(msg ?? '');
+    const toastType = String(type || 'info');
+    const DURATION_MS = 3500;
+    const active = Array.from(document.querySelectorAll('.ast-toast'))
+        .filter((el) => !el.classList.contains('is-exiting'));
+
+    const matched = active.find(
+        (el) => el.dataset && el.dataset.rawMsg === rawMsg && el.dataset.toastType === toastType
+    );
+
+    if (matched) {
+        const nextCount = (Number(matched.dataset.mergeCount) || 1) + 1;
+        matched.dataset.mergeCount = String(nextCount);
+        let badge = matched.querySelector('.ast-toast-merge-badge');
+        if (!badge) {
+            badge = document.createElement('span');
+            badge.className = 'ast-toast-merge-badge';
+            const bar = matched.querySelector('.ast-toast-progress');
+            if (bar && matched.insertBefore) {
+                matched.insertBefore(badge, bar);
+            } else {
+                matched.appendChild(badge);
+            }
+        }
+        badge.textContent = `×${nextCount}`;
+        badge.style.animation = 'none';
+        void badge.offsetWidth;
+        badge.style.animation = '';
+
+        const progress = matched.querySelector('.ast-toast-progress');
+        if (progress) {
+            progress.style.animation = 'none';
+            void progress.offsetWidth;
+            progress.style.animation = '';
+        }
+
+        repackAstToastStack(matched);
+        scheduleAstToastRemoval(matched, DURATION_MS);
+        return matched;
+    }
+
     const toast = document.createElement('div');
     toast.className = 'ast-toast';
-    const icon = type === 'success' ? '✅' : (type === 'warning' ? '⚠️' : 'ℹ️');
-    toast.innerHTML = `<span>${icon}</span> <span>${msg}</span>`;
+    toast.dataset.rawMsg = rawMsg;
+    toast.dataset.toastType = toastType;
+    toast.dataset.mergeCount = '1';
+    toast.dataset.stackIndex = '0';
+    toast.setAttribute('data-stack-index', '0');
+    if (toast.style && typeof toast.style.setProperty === 'function') {
+        toast.style.setProperty('--toast-duration', `${DURATION_MS}ms`);
+    }
+
+    const icon = toastType === 'success'
+        ? '✅'
+        : (toastType === 'warning' ? '⚠️' : (toastType === 'error' ? '❌' : 'ℹ️'));
+
+    const iconSpan = document.createElement('span');
+    iconSpan.className = 'ast-toast-icon';
+    iconSpan.textContent = icon;
+
+    const textSpan = document.createElement('span');
+    textSpan.className = 'ast-toast-text';
+    textSpan.textContent = rawMsg;
+
+    const progressBar = document.createElement('div');
+    progressBar.className = 'ast-toast-progress';
+    progressBar.setAttribute('aria-hidden', 'true');
+
+    toast.appendChild(iconSpan);
+    toast.appendChild(textSpan);
+    toast.appendChild(progressBar);
     document.body.appendChild(toast);
-    
-    setTimeout(() => {
-        toast.style.opacity = '0';
-        toast.style.transition = 'opacity 0.3s ease';
-        setTimeout(() => toast.remove(), 300);
-    }, 3500);
+
+    repackAstToastStack(toast);
+    scheduleAstToastRemoval(toast, DURATION_MS);
+    return toast;
 }
 
 
@@ -24198,11 +24291,11 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.11.14-v2.13.3",
-    version: "2.13.3",
-    build: "20261114_03",
-    date: "2026-11-14 17:00",
-    description: "v2.13.3: סנכרון דו-כיווני מלא של מצבי משימות ומחיקות בין כל המכשירים (תמיכה בחזרה אחורה בזמן real-time באמצעות statusUpdatedAt), תיקון U-06 לצביעה אפורה למשימות שנפתחו בלבד (ושימור משימות שטרם נפתחו), תיקון L-07 לזיהוי 'שאלון מילואימניקים' ומניעת חזרת משימות 3010 שנמחקו."
+    code: "REV-2026.11.14-v2.13.4",
+    version: "2.13.4",
+    build: "20261114_04",
+    date: "2026-11-14 18:10",
+    description: "v2.13.4: שדרוג חוויית הממשק והמיקרו-אנימציות בהשראת @ui_motion_prompts — קפסולת טאבים גולשת עם מתיחה דינמית (Sliding Pill), זכוכית מט בת 6 שכבות לסרגלים והודעות, תופעת Comet Glow ואוברשוט אלסטי למד XP, טבעת סונאר להתראות ומחסנית Toasts חכמה עם מיזוג הודעות כפולות ופס ספירה לאחור."
 };
 window.APP_VERSION = APP_CURRENT_REVISION.version;
 
