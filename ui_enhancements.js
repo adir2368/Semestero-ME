@@ -1689,7 +1689,7 @@
             }
 
             // G. Check Grade Sheet / What-If Simulator
-            const gradeSheetModal = document.getElementById('grade-sheet-modal');
+            const gradeSheetModal = document.getElementById('modal-grade-sheet');
             if (gradeSheetModal && this.isElementVisible(gradeSheetModal)) {
                 if (window.GradeSheetModal && typeof window.GradeSheetModal.close === 'function') {
                     window.GradeSheetModal.close();

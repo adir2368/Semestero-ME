@@ -2687,7 +2687,9 @@ document.addEventListener("DOMContentLoaded", () => {
     loadSavedState();
     setupEventListeners();
     setupNotionDashboard();
-    setupStudyRunway();
+    if (window.AuthSync && typeof window.AuthSync.isAdirActive === 'function' && window.AuthSync.isAdirActive()) {
+        syncCheeseforkExamDates(false);
+    }
     setupFinalsMode();
     setupNotionIconPickerEvents();
     renderUI();
@@ -2699,9 +2701,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if (window.MiluimRightsAdvisor && typeof window.MiluimRightsAdvisor.init === 'function') {
         window.MiluimRightsAdvisor.init();
     }
-    
-    // Periodically update paths on window resize
-    window.addEventListener("resize", drawConnections);
 
     // Warm up CheeseFork course database lazily well after page load or on user intent (unblocking first paint & TBT)
     const warmUpCheeseFork = () => {
@@ -2792,9 +2791,11 @@ async function performMoodleSync(moodleUrl, token) {
 }
 
 function runMockMoodleSync() {
-    const statusDiv = document.getElementById("moodle-sync-status");
-    statusDiv.style.color = "var(--text-light)";
-    statusDiv.innerText = "Running Mock Sync...";
+    const statusDiv = document.getElementById("modal-moodle-sync-status") || document.getElementById("moodle-sync-status");
+    if (statusDiv) {
+        statusDiv.style.color = "var(--text-light)";
+        statusDiv.innerText = "Running Mock Sync...";
+    }
 
     setTimeout(() => {
         let loadedNew = false;
@@ -10203,7 +10204,6 @@ function notifyStateChanged(options = {}) {
         // 3. Instant update for active views
         if (options.forceAll) {
             if (typeof renderFlowchartTree === 'function') renderFlowchartTree();
-            if (typeof renderActiveQuestsSidebar === 'function') renderActiveQuestsSidebar();
             if (typeof renderNotionTasksTable === 'function') renderNotionTasksTable();
             if (typeof populateNotionCourseFilter === 'function') populateNotionCourseFilter();
             if (typeof renderFinalsCalendar === 'function') renderFinalsCalendar();
@@ -10229,7 +10229,6 @@ function notifyStateChanged(options = {}) {
                 if (typeof renderExamGapRunway === 'function') renderExamGapRunway();
             } else if (currentTab === 'curriculum') {
                 if (typeof renderFlowchartTree === 'function') renderFlowchartTree();
-                if (typeof renderActiveQuestsSidebar === 'function') renderActiveQuestsSidebar();
             } else if (currentTab === 'timetable') {
                 if (typeof updateDailyTimetableFocus === 'function') updateDailyTimetableFocus();
                 if (typeof renderTodayTimetableBanner === 'function') renderTodayTimetableBanner();
@@ -11110,16 +11109,6 @@ if (typeof window !== 'undefined') {
 // ==============================================================================
 let _activePrereqCodes = [];
 
-function escapeHtmlPrereq(str) {
-    if (!str) return '';
-    return String(str)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;');
-}
-
 function getCourseDisplayNameByCode(code) {
     if (!code) return '';
     const norm = String(code).trim();
@@ -11169,7 +11158,7 @@ function renderPrereqChips() {
         chip.dataset.code = code;
         chip.innerHTML = `
             <span class="prereq-chip-badge">${code}</span>
-            <span class="prereq-chip-title" title="${escapeHtmlPrereq(name || code)}">${escapeHtmlPrereq(name || code)}</span>
+            <span class="prereq-chip-title" title="${escapeHtml(name || code)}">${escapeHtml(name || code)}</span>
             <button type="button" class="prereq-chip-del" title="הסר קורס קדם ${code}" aria-label="הסר ${code}">&times;</button>
         `;
         const delBtn = chip.querySelector('.prereq-chip-del');
@@ -11325,7 +11314,7 @@ function initPrereqChipsSearch() {
         if (items.length === 0) {
             dropdown.innerHTML = `
                 <div class="prereq-dropdown-item" id="prereq-dropdown-custom-add" style="color: #38bdf8; justify-content: center;">
-                    <span>➕ הוסף קוד מותאם אישית: <strong>${escapeHtmlPrereq(query)}</strong></span>
+                    <span>➕ הוסף קוד מותאם אישית: <strong>${escapeHtml(query)}</strong></span>
                 </div>
             `;
             const customAdd = document.getElementById("prereq-dropdown-custom-add");
@@ -11352,7 +11341,7 @@ function initPrereqChipsSearch() {
             el.innerHTML = `
                 <div class="prereq-dropdown-info">
                     <span class="prereq-chip-badge">${item.code}</span>
-                    <span class="prereq-dropdown-name">${escapeHtmlPrereq(item.name || item.code)}</span>
+                    <span class="prereq-dropdown-name">${escapeHtml(item.name || item.code)}</span>
                 </div>
                 <div class="prereq-dropdown-meta">
                     ${isAlready ? '<span>✓ נבחר</span>' : `<span>${metaText}</span>`}
@@ -11871,32 +11860,6 @@ function setupEventListeners() {
         }
     });
 
-    // Moodle Sync Button Delegator
-    const btnMoodleSync = document.getElementById("btn-moodle-sync");
-    if (btnMoodleSync) {
-        btnMoodleSync.addEventListener("click", () => {
-            if (window.MoodleSync && typeof window.MoodleSync.sync === 'function') {
-                const urlInput = document.getElementById("moodle-calendar-url");
-                const url = urlInput ? urlInput.value.trim() : (window.MoodleSync.config.url || "");
-                if (url) {
-                    window.MoodleSync.config.url = url;
-                    window.MoodleSync.saveConfig();
-                    window.MoodleSync.sync({ isSilent: false });
-                } else {
-                    if (typeof showToastNotification === 'function') {
-                        showToastNotification('⚠️ אינך מחובר למודל הטכניון! נא להזין קישור יומן תחילה.', 'warning');
-                    }
-                    if (typeof window.MoodleSync.setStatus === 'function') {
-                        window.MoodleSync.setStatus('⚠️ אינך מחובר למודל הטכניון! נא להזין קישור יומן תחילה.', 'error');
-                    }
-                    if (typeof window.MoodleSync.openModal === 'function') {
-                        window.MoodleSync.openModal();
-                    }
-                }
-            }
-        });
-    }
-
     // Cheesefork Import Button
     const btnCfImport = document.getElementById("btn-cheesefork-import");
     if (btnCfImport) {
@@ -12323,232 +12286,6 @@ function handleAddCourseSubmit(e) {
 function renderUI() {
     renderFlowchartTree();
     updateHud();
-    renderActiveQuestsSidebar();
-}
-
-// Render the 8 Semester Columns with cards
-function renderSemestersGrid() {
-    const grid = document.getElementById("semesters-grid");
-    if (!grid) return;
-    grid.innerHTML = "";
-
-    // Generate 8 semesters
-    for (let sem = 1; sem <= 8; sem++) {
-        const col = document.createElement("div");
-        col.className = "semester-column";
-        col.dataset.semester = sem;
-
-        // Find courses for this semester
-        const semCourses = Object.values(gameState.courses).filter(c => c.semester === sem);
-        
-        // Calculate semester weighted average (excluding failing grades < 55 and binary pass)
-        const gradedSemCourses = semCourses.filter(c => {
-            const isBinary = (c.isBinaryPass === true || c.grade === 'עובר' || c.grade === 'PASS');
-            return c.status === 'mastered' && !isBinary && c.grade !== undefined && c.grade !== null && c.grade !== '' && !isNaN(Number(c.grade)) && Number(c.grade) >= 55;
-        });
-        let semAverageText = "";
-        if (gradedSemCourses.length > 0) {
-            let weightedSum = 0;
-            let creditsSum = 0;
-            gradedSemCourses.forEach(c => {
-                weightedSum += (c.grade * c.credits);
-                creditsSum += c.credits;
-            });
-            const semAvg = weightedSum / creditsSum;
-            semAverageText = ` (ממוצע: ${semAvg.toFixed(1)})`;
-        }
-
-        const header = document.createElement("div");
-        header.className = "semester-header";
-        header.innerText = (SEMESTER_LABELS[sem] || `סמסטר ${sem}`) + semAverageText;
-        col.appendChild(header);
-        
-        semCourses.forEach(course => {
-            const card = document.createElement("div");
-            card.className = `course-card ${course.status} type-${course.type || 'core'}`;
-            card.id = `node-${course.code}`;
-            card.dataset.code = course.code;
-
-            // Icon for status
-            let statusIcon = "🔒";
-            if (course.status === 'available') statusIcon = "📖";
-            if (course.status === 'active') statusIcon = "⚔️";
-            if (course.status === 'mastered') statusIcon = "🏆";
-
-            let typeLabel = "";
-            const type = course.type || 'core';
-            if (type === 'elective') typeLabel = "בחירה";
-            else if (type === 'humanities') typeLabel = "מל״ג/הומניסטי";
-            else if (type === 'sports') typeLabel = "ספורט";
-            else typeLabel = "חובה";
-
-            // Generate semester options for quick shift
-            let semOptions = "";
-            for (let i = 1; i <= 8; i++) {
-                semOptions += `<option value="${i}" ${course.semester === i ? 'selected' : ''}>סמסטר ${i}</option>`;
-            }
-
-            card.innerHTML = `
-                <div class="course-header-row">
-                    <div class="course-code">${course.code.toUpperCase()}</div>
-                    <div class="course-card-actions">
-                        <select class="card-sem-select" title="הזז סמסטר">
-                            ${semOptions}
-                        </select>
-                    </div>
-                </div>
-                <div class="course-name">${course.name}</div>
-                <div class="course-meta-row">
-                    <span class="course-type-tag type-${type}">${typeLabel}</span>
-                    <span class="course-credits">${course.credits} נק״ז</span>
-                    <span class="course-status-icon">${statusIcon}</span>
-                </div>
-            `;
-
-            // Semester select listener
-            const semSelect = card.querySelector(".card-sem-select");
-            semSelect.addEventListener("click", (e) => e.stopPropagation());
-            semSelect.addEventListener("change", (e) => {
-                e.stopPropagation();
-                const newSem = parseInt(e.target.value);
-                course.semester = newSem;
-                recalculateCourseStates();
-                saveState();
-                renderUI();
-            });
-
-            // Card click event
-            card.addEventListener("click", () => openCourseDetails(course.code));
-            col.appendChild(card);
-        });
-
-        grid.appendChild(col);
-    }
-}
-
-// Render missing pre-req tree connector lines
-function drawConnections() {
-    const svg = document.getElementById("connections-svg");
-    if (!svg) return;
-    svg.innerHTML = "";
-    
-    const viewport = document.getElementById("tree-viewport");
-    if (!viewport) return;
-    const viewportRect = viewport.getBoundingClientRect();
-    
-    // Make SVG overlay match scrolling container width & height
-    svg.style.width = `${viewport.scrollWidth}px`;
-    svg.style.height = `${viewport.scrollHeight}px`;
-
-    // Define standard arrow marker in SVG
-    const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
-    defs.innerHTML = `
-        <marker id="arrow-green" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-            <path d="M 0 1 L 10 5 L 0 9 z" fill="#10b981"/>
-        </marker>
-        <marker id="arrow-blue" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-            <path d="M 0 1 L 10 5 L 0 9 z" fill="#38bdf8"/>
-        </marker>
-        <marker id="arrow-gray" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-            <path d="M 0 1 L 10 5 L 0 9 z" fill="#4b5563"/>
-        </marker>
-    `;
-    svg.appendChild(defs);
-
-    Object.values(gameState.courses).forEach(course => {
-        const destCard = document.getElementById(`node-${course.code}`);
-        if (!destCard) return;
-
-        const destRect = destCard.getBoundingClientRect();
-        
-        course.prerequisites.forEach(preCode => {
-            const srcCard = document.getElementById(`node-${preCode}`);
-            if (!srcCard) return;
-
-            const srcRect = srcCard.getBoundingClientRect();
-
-            // Calculate coordinate offsets relative to the scrolling viewport container
-            // Since we're in RTL, pre-req columns sit on the right and move left.
-            // Source card (prerequisite) is on the right, target card is on the left.
-            // Point A (source): left edge of source card
-            // Point B (destination): right edge of destination card
-            const scrollLeft = viewport.scrollLeft;
-            const scrollTop = viewport.scrollTop;
-
-            const xSource = (srcRect.left - viewportRect.left) + scrollLeft;
-            const ySource = (srcRect.top - viewportRect.top) + (srcRect.height / 2) + scrollTop;
-
-            const xDest = (destRect.right - viewportRect.left) + scrollLeft;
-            const yDest = (destRect.top - viewportRect.top) + (destRect.height / 2) + scrollTop;
-
-            // Draw pretty bezier curve or clean linear steps
-            const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-            
-            // Control points for curve
-            const dx = Math.abs(xSource - xDest) * 0.4;
-            // Curves start at source and direct left (in RTL: source left -> dest right)
-            const d = `M ${xSource} ${ySource} C ${xSource - dx} ${ySource}, ${xDest + dx} ${yDest}, ${xDest} ${yDest}`;
-            
-            path.setAttribute("d", d);
-            path.setAttribute("fill", "none");
-            path.setAttribute("stroke-width", "2.5");
-
-            // Line colors matching prerequisite completion state
-            const prereqCourse = gameState.courses[preCode];
-            if (prereqCourse && prereqCourse.status === 'mastered') {
-                path.setAttribute("stroke", "#10b981");
-                                path.style.strokeDasharray = "none";
-            } else if (course.status !== 'locked') {
-                path.setAttribute("stroke", "#38bdf8");
-                                path.style.strokeDasharray = "5,5";
-            } else {
-                path.setAttribute("stroke", "#4b5563");
-                                path.style.strokeDasharray = "5,5";
-            }
-
-            svg.appendChild(path);
-        });
-    });
-}
-
-// Side-bar listing of all homework/tasks for active courses
-function renderActiveQuestsSidebar() {
-    const list = document.getElementById("active-quests-list");
-    if (!list) return;
-    list.innerHTML = "";
-
-    let hasQuests = false;
-
-    Object.values(gameState.courses).forEach(course => {
-        if (course.status !== 'active') return;
-
-        course.tasks.forEach(task => {
-            if (task.completed) return;
-
-            hasQuests = true;
-
-            const qEl = document.createElement("div");
-            qEl.className = "quest-item-sidebar";
-            
-            let questTypeLabel = "📝 שיעורי בית / גיליון";
-            if (task.type === 'project') questTypeLabel = "🚀 עבודה / פרויקט";
-            if (task.type === 'exam') questTypeLabel = "🎓 מבחן";
-            if (task.type === 'lab') questTypeLabel = "🧪 מעבדה";
-
-            qEl.innerHTML = `
-                <div class="quest-sidebar-title">${task.title}</div>
-                <div class="quest-sidebar-desc">${course.name} (${questTypeLabel})</div>
-            `;
-
-            // Clicking sidebar item opens course details modal
-            qEl.addEventListener("click", () => openCourseDetails(course.code));
-            list.appendChild(qEl);
-        });
-    });
-
-    if (!hasQuests) {
-        list.innerHTML = `<div class="empty-quests">אין משימות פעילות כרגע.</div>`;
-    }
 }
 
 // Technion Moodle 26 (תשפ״ז - Winter 2026/2027) Real Course Portal IDs
@@ -12856,6 +12593,9 @@ function renderTechnionPlusQuickBar(course) {
 }
 
 function escapeHtml(str) {
+    if (typeof window !== 'undefined' && window.__semesteroUtils && window.__semesteroUtils.escapeHtml) {
+        return window.__semesteroUtils.escapeHtml(str);
+    }
     if (str === null || str === undefined) return '';
     return String(str)
         .replace(/&/g, '&amp;')
@@ -15627,18 +15367,16 @@ function parseCheeseForkUrl(url) {
 }
 
 function cleanTechnionCourseCode(raw) {
+    if (typeof window !== 'undefined' && window.__semesteroUtils && window.__semesteroUtils.normalizeTechnionCourseCode) {
+        return window.__semesteroUtils.normalizeTechnionCourseCode(raw, { preserve03SevenDigit: true });
+    }
     if (!raw) return '';
-    raw = String(raw).trim();
-    if (raw.length === 8 && (raw.startsWith('00') || raw.startsWith('01'))) {
-        return raw.substring(1, 4) + raw.substring(5);
+    const str = String(raw).trim();
+    if (str.length === 8) {
+        if (str.startsWith('03')) return str.substring(1);
+        return str.substring(1, 4) + str.substring(5);
     }
-    if (raw.length === 8 && raw.startsWith('03')) {
-        return raw.substring(1);
-    }
-    if (raw.length === 8) {
-        return raw.substring(1, 4) + raw.substring(5);
-    }
-    return raw;
+    return str;
 }
 
 function formatCheeseForkDateToIso(dStr) {
@@ -16001,7 +15739,6 @@ window.syncLiveCheeseForkData = async function(customUrl = null, isManual = fals
         // 7. Refresh Active Views
         if (typeof updateDailyTimetableFocus === 'function') updateDailyTimetableFocus();
         if (typeof renderTimetableGrid === 'function') renderTimetableGrid();
-        if (typeof renderStudyRunway === 'function') renderStudyRunway();
         if (typeof renderNotionTasksTable === 'function') renderNotionTasksTable();
         if (typeof renderUI === 'function') renderUI();
 
@@ -16658,7 +16395,6 @@ window.switchTab = function(tabNameOrNumber) {
                 DegreePlanner.syncPlannerToTree();
             }
             renderFlowchartTree();
-            renderActiveQuestsSidebar();
             viewsDirtyState.curriculum = false;
         } else if (activeTabId === 'planner') {
             if (curriculumWorkspace) curriculumWorkspace.style.display = "none";
@@ -20396,456 +20132,6 @@ window.MiluimRightsAdvisor = {
     }
 };
 
-/* ==========================================================================
-   Star Wars Jedi Radial Constellation Skill Tree Engine (Spacious Radial Layout)
-   ========================================================================== */
-
-// Global view modes declared at top
-
-// 8 Generously Spaced Concentric Semester Radii (Origin: cx=750, cy=750)
-const SEMESTER_RADII = {
-    1: 160, // סמסטר א'
-    2: 240, // סמסטר ב'
-    3: 320, // סמסטר ג'
-    4: 400, // סמסטר ד'
-    5: 480, // סמסטר ה'
-    6: 560, // סמסטר ו'
-    7: 640, // סמסטר ז'
-    8: 720  // סמסטר ח'
-};
-
-const SEMESTER_RING_NAMES = {
-    1: "סמסטר א'",
-    2: "סמסטר ב'",
-    3: "סמסטר ג'",
-    4: "סמסטר ד'",
-    5: "סמסטר ה'",
-    6: "סמסטר ו'",
-    7: "סמסטר ז'",
-    8: "סמסטר ח'"
-};
-
-// Handcrafted wide-span angular placements (Zero Collisions guaranteed!)
-const DEGREE_CONSTELLATION_ANGLES = {
-    // === LEFT PILLAR: Mathematics & Sciences (115° - 165°) ===
-    "125001": { sem: 1, angle: 165, branch: "math" }, // כימיה כללית
-    "104065": { sem: 1, angle: 140, branch: "math" }, // אלגברה ליניארית
-    "104041": { sem: 1, angle: 115, branch: "math" }, // חדו״א 1מ1
-    "114051": { sem: 2, angle: 165, branch: "math" }, // פיזיקה 1
-    "104131": { sem: 2, angle: 140, branch: "math" }, // מד״ר
-    "104043": { sem: 2, angle: 115, branch: "math" }, // חדו״א 2מ'
-    "114052": { sem: 3, angle: 160, branch: "math" }, // פיזיקה 2
-    "104228": { sem: 3, angle: 130, branch: "math" }, // שיטות נומריות
-    "125013": { sem: 2, angle: 180, branch: "math" }, // מעבדה בכימיה
-    "114032": { sem: 5, angle: 150, branch: "math" }, // מעבדה בפיזיקה
-
-    // === CENTER PILLAR: Mechanics, Design & Materials (75° - 105°) ===
-    "034061": { sem: 2, angle: 105, branch: "mechanics" }, // גרפיקה ותכן
-    "034028": { sem: 2, angle: 90,  branch: "mechanics" }, // מוצקים 1
-    "314533": { sem: 2, angle: 75,  branch: "mechanics" }, // מבוא לחומרים
-    "034053": { sem: 3, angle: 95,  branch: "mechanics" }, // מוצקים 2
-    "034056": { sem: 3, angle: 75,  branch: "mechanics" }, // שיטות ייצור
-    "034030": { sem: 4, angle: 105, branch: "mechanics" }, // אלסטיות
-    "034010": { sem: 4, angle: 85,  branch: "mechanics" }, // דינמיקה
-    "034054": { sem: 5, angle: 105, branch: "mechanics" }, // תכן מכני 1
-    "034051": { sem: 5, angle: 90,  branch: "mechanics" }, // מוצקים 3
-    "034058": { sem: 5, angle: 75,  branch: "mechanics" }, // תהליכי ייצור
-    "034057": { sem: 6, angle: 105, branch: "mechanics" }, // מעבדה מתקדמת
-    "034371": { sem: 6, angle: 88,  branch: "mechanics" }, // תכן מכני 2
-    "034379": { sem: 7, angle: 90,  branch: "mechanics" }, // פרויקט תכן 1
-    "034380": { sem: 8, angle: 90,  branch: "mechanics" }, // פרויקט תכן 2
-
-    // === RIGHT PILLAR: Thermo-Fluids, Energy & Electives (25° - 65°) ===
-    "234128": { sem: 1, angle: 60,  branch: "thermo" }, // פייתון
-    "034035": { sem: 3, angle: 45,  branch: "thermo" }, // תרמודינמיקה 1
-    "034055": { sem: 4, angle: 50,  branch: "thermo" }, // תורת הזרימה 1
-    "034032": { sem: 4, angle: 25,  branch: "thermo" }, // מערכות תרמיות
-    "034041": { sem: 5, angle: 50,  branch: "thermo" }, // תרמו 2 / חום
-    "034040": { sem: 5, angle: 25,  branch: "thermo" }, // בקרה
-    "034060": { sem: 6, angle: 35,  branch: "thermo" }, // מעבדה לתרמו
-    "034382": { sem: 7, angle: 35,  branch: "thermo" }, // פרויקט אנרגיה 1
-    "034383": { sem: 8, angle: 35,  branch: "thermo" }  // פרויקט אנרגיה 2
-};
-
-function setupConstellationViewMode() {
-    const btnConstellation = document.getElementById("btn-mode-constellation");
-    const btnGrid = document.getElementById("btn-mode-grid");
-    const constellationViewport = document.getElementById("constellation-viewport");
-    const gridViewport = document.getElementById("tree-viewport");
-    
-    if (btnConstellation && btnGrid && constellationViewport && gridViewport) {
-        btnConstellation.addEventListener("click", () => {
-            currentViewMode = 'constellation';
-            btnConstellation.classList.add("active");
-            btnGrid.classList.remove("active");
-            constellationViewport.style.display = "block";
-            gridViewport.style.display = "none";
-            renderConstellationTree();
-        });
-        
-        btnGrid.addEventListener("click", () => {
-            currentViewMode = 'grid';
-            btnGrid.classList.add("active");
-            btnConstellation.classList.remove("active");
-            gridViewport.style.display = "block";
-            constellationViewport.style.display = "none";
-            setTimeout(drawConnections, 50);
-        });
-    }
-}
-
-// Computes exact (x, y) sitting directly on concentric semester ring
-function getCourseConstellationPosition(course, customIndex) {
-    const originX = 750;
-    const originY = 750;
-    
-    let sem = course.semester || 1;
-    if (sem < 1) sem = 1;
-    if (sem > 8) sem = 8;
-    
-    const r = SEMESTER_RADII[sem] || (sem * 80 + 80);
-    
-    let angle = 90;
-    let branch = "mechanics";
-    
-    if (DEGREE_CONSTELLATION_ANGLES[course.code]) {
-        angle = DEGREE_CONSTELLATION_ANGLES[course.code].angle;
-        branch = DEGREE_CONSTELLATION_ANGLES[course.code].branch;
-    } else {
-        const code = (course.code || "").toLowerCase();
-        const name = (course.name || "").toLowerCase();
-        if (code.startsWith("104") || code.startsWith("114") || name.includes('מתמטיקה') || name.includes('פיזיקה')) {
-            branch = "math";
-            angle = 145 + ((customIndex % 3) - 1) * 15;
-        } else if (code.includes("034005") || name.includes("תרמו") || name.includes("זרימה") || course.type === 'elective') {
-            branch = "thermo";
-            angle = 40 + ((customIndex % 3) - 1) * 15;
-        } else {
-            branch = "mechanics";
-            angle = 90 + ((customIndex % 3) - 1) * 16;
-        }
-    }
-    
-    const rad = angle * (Math.PI / 180);
-    const x = Math.round(originX + r * Math.cos(rad));
-    const y = Math.round(originY - r * Math.sin(rad));
-    
-    return { x, y, r, angle, branch, sem };
-}
-
-// Renders the Star Wars Radial Constellation Skill Tree (Concentric Semester Rings)
-function renderConstellationTree() {
-    const bgGuides = document.getElementById("constellation-bg-guides");
-    const connectionsGroup = document.getElementById("constellation-connections");
-    
-    if (!bgGuides || !connectionsGroup) return;
-    
-    bgGuides.innerHTML = "";
-    connectionsGroup.innerHTML = "";
-    
-    const originX = 750;
-    const originY = 750;
-    
-    // 1. Draw Concentric Semester Orbit Rings and Sector Titles
-    let bgHtml = `
-        <text x="750" y="440" class="constellation-watermark-text">SKILL TREE</text>
-        <text x="350" y="50" class="constellation-sector-label">MATH & SCIENCE</text>
-        <text x="750" y="35" class="constellation-sector-label">MECHANICS & DESIGN</text>
-        <text x="1150" y="50" class="constellation-sector-label">THERMO & ENERGY</text>
-    `;
-    
-    // Draw 8 Concentric Semester Orbit Rings from 170° (Left) to 10° (Right)
-    for (let sem = 1; sem <= 8; sem++) {
-        const r = SEMESTER_RADII[sem];
-        const startX = originX + r * Math.cos(170 * Math.PI / 180);
-        const startY = originY - r * Math.sin(170 * Math.PI / 180);
-        const endX = originX + r * Math.cos(10 * Math.PI / 180);
-        const endY = originY - r * Math.sin(10 * Math.PI / 180);
-        
-        bgHtml += `
-            <path d="M ${startX} ${startY} A ${r} ${r} 0 0 1 ${endX} ${endY}" 
-                  class="semester-orbit-arc" 
-                  id="orbit-sem-${sem}" 
-                  data-semester="${sem}" />
-            <!-- Left Arc Semester Label -->
-            <text x="${startX - 12}" y="${startY + 4}" class="semester-orbit-label" text-anchor="end">${SEMESTER_RING_NAMES[sem]}</text>
-            <!-- Right Arc Semester Label -->
-            <text x="${endX + 12}" y="${endY + 4}" class="semester-orbit-label" text-anchor="start">${SEMESTER_RING_NAMES[sem]}</text>
-        `;
-    }
-    
-    // Sector dividing dotted radial rays
-    [64, 116].forEach(angle => {
-        const rad = angle * Math.PI / 180;
-        const x2 = originX + 740 * Math.cos(rad);
-        const y2 = originY - 740 * Math.sin(rad);
-        bgHtml += `<line x1="${originX}" y1="${originY}" x2="${x2}" y2="${y2}" stroke="rgba(255,255,255,0.04)" stroke-width="1.5" stroke-dasharray="8 6" />`;
-    });
-    
-    // Central Root Origin Icon
-    bgHtml += `
-        <circle cx="${originX}" cy="${originY}" r="22" fill="#0f172a" stroke="#38bdf8" stroke-width="2.5" />
-        <text x="${originX}" y="${originY + 5}" text-anchor="middle" font-size="14" fill="#38bdf8">🎓</text>
-    `;
-    
-    bgGuides.innerHTML = bgHtml;
-    
-    // 2. Resolve coordinates for each course
-    const courseCoords = {};
-    let customIdx = 0;
-    
-    Object.values(gameState.courses).forEach(course => {
-        courseCoords[course.code] = getCourseConstellationPosition(course, customIdx++);
-    });
-    
-    // 3. Draw Connecting Constellation Beams
-    let beamsHtml = "";
-    Object.values(gameState.courses).forEach(course => {
-        const targetPos = courseCoords[course.code];
-        if (!targetPos) return;
-        
-        if (course.prerequisites && course.prerequisites.length > 0) {
-            course.prerequisites.forEach(preCode => {
-                const sourcePos = courseCoords[preCode];
-                if (!sourcePos) return;
-                
-                const preCourse = gameState.courses[preCode];
-                let beamClass = "locked";
-                if (preCourse && preCourse.status === 'mastered' && course.status === 'mastered') {
-                    beamClass = "mastered";
-                } else if (preCourse && (preCourse.status === 'mastered' || preCourse.status === 'active')) {
-                    beamClass = "active";
-                }
-                
-                const midX = (sourcePos.x + targetPos.x) / 2;
-                const midY = (sourcePos.y + targetPos.y) / 2;
-                
-                beamsHtml += `
-                    <path d="M ${sourcePos.x} ${sourcePos.y} Q ${midX} ${midY} ${targetPos.x} ${targetPos.y}" 
-                          class="constellation-beam ${beamClass}" 
-                          data-from="${preCode}" 
-                          data-to="${course.code}" 
-                          fill="none" />
-                `;
-            });
-        } else if (course.semester === 1) {
-            // Foundational trunk beam to origin
-            const beamClass = course.status === 'mastered' ? 'mastered' : (course.status === 'active' ? 'active' : 'locked');
-            const midX = (originX + targetPos.x) / 2;
-            const midY = (originY + targetPos.y) / 2 + 10;
-            
-            beamsHtml += `
-                <path d="M ${originX} ${originY} Q ${midX} ${midY} ${targetPos.x} ${targetPos.y}" 
-                      class="constellation-beam ${beamClass}" 
-                      data-from="root" 
-                      data-to="${course.code}" 
-                      fill="none" />
-            `;
-        }
-    });
-    connectionsGroup.innerHTML = beamsHtml;
-    
-    // 4. Render Nodes inside SVG Layer
-    let nodesSvg = document.getElementById("constellation-svg-nodes");
-    if (!nodesSvg) {
-        nodesSvg = document.createElementNS("http://www.w3.org/2000/svg", "g");
-        nodesSvg.id = "constellation-svg-nodes";
-        document.getElementById("constellation-svg").appendChild(nodesSvg);
-    }
-    nodesSvg.innerHTML = "";
-    
-    Object.values(gameState.courses).forEach(course => {
-        const pos = courseCoords[course.code];
-        if (!pos) return;
-        
-        let icon = "⚙️";
-        const branch = pos.branch;
-        if (branch === "math") icon = "📐";
-        else if (branch === "thermo") icon = "🌊";
-        else if (branch === "mechanics") icon = "⚙️";
-        if (course.type === 'sports') icon = "⚽";
-        if (course.status === 'mastered') icon = "🏆";
-        
-        const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
-        g.setAttribute("class", `constellation-node-group ${course.status || 'locked'}`);
-        g.setAttribute("data-code", course.code);
-        g.setAttribute("transform", `translate(${pos.x}, ${pos.y})`);
-        
-        const labelText = course.name.length > 13 ? (course.name.substring(0, 11) + "..") : course.name;
-        
-        g.innerHTML = `
-            <circle class="node-outer-ring" r="26" fill="none" />
-            <circle class="node-body" r="21" />
-            <text class="node-icon-svg" text-anchor="middle" dy=".35em">${icon}</text>
-            <text class="node-label-svg" y="34" text-anchor="middle">${labelText}</text>
-        `;
-        
-        // Hover listeners: Update inspector, highlight path & highlight semester orbit ring
-        g.addEventListener("mouseenter", () => {
-            updateSkillInspector(course);
-            highlightConstellationPath(course.code);
-            highlightSemesterOrbit(pos.sem);
-            g.classList.add("selected");
-        });
-        
-        g.addEventListener("mouseleave", () => {
-            g.classList.remove("selected");
-            clearConstellationHighlight();
-            clearSemesterOrbitHighlight();
-        });
-        
-        g.addEventListener("click", () => {
-            openCourseDetails(course.code);
-        });
-        
-        nodesSvg.appendChild(g);
-    });
-    
-    // 5. Update Credits Counter & Progress Fill
-    const creditsCounter = document.getElementById("constellation-credits-count");
-    const xpFill = document.getElementById("constellation-xp-fill");
-    if (creditsCounter) {
-        creditsCounter.innerText = gameState.credits || 0;
-    }
-    if (xpFill) {
-        const maxCredits = 120;
-        const pct = Math.min(100, Math.round(((gameState.credits || 0) / maxCredits) * 100));
-        xpFill.style.width = `${pct}%`;
-    }
-}
-
-// Updates the Star Wars HUD Inspector Card in Bottom-Left
-function updateSkillInspector(course) {
-    const nameEl = document.getElementById("inspector-course-name");
-    const creditsEl = document.getElementById("inspector-course-credits");
-    const codeEl = document.getElementById("inspector-course-code");
-    const descEl = document.getElementById("inspector-course-desc");
-    const statusValEl = document.getElementById("inspector-status-val");
-    const semValEl = document.getElementById("inspector-sem-val");
-    const openBtn = document.getElementById("inspector-open-btn");
-    
-    if (!nameEl) return;
-    
-    nameEl.innerText = course.name;
-    creditsEl.innerText = `${course.credits} נק״ז | דרג ${course.semester || 1}`;
-    codeEl.innerText = `קוד: ${course.code.toUpperCase()} • ${course.type === 'core' ? 'חובה' : 'בחירה'}`;
-    
-    let desc = "";
-    if (course.prerequisites && course.prerequisites.length > 0) {
-        const preNames = course.prerequisites.map(pCode => {
-            const p = gameState.courses[pCode];
-            return p ? p.name : pCode.toUpperCase();
-        });
-        desc += `🔗 דרישות קדם: ${preNames.join(", ")}.
-
-`;
-    } else {
-        desc += `✨ קורס יסוד (ללא דרישות קדם).
-
-`;
-    }
-    
-    const completedTasks = course.tasks ? course.tasks.filter(t => t.completed || t.status === 'done').length : 0;
-    const totalTasks = course.tasks ? course.tasks.length : 0;
-    desc += `🎯 משימות: ${completedTasks} / ${totalTasks}`;
-    
-    descEl.innerText = desc;
-    
-    let statusText = "🔒 נעול (Locked)";
-    if (course.status === 'available') statusText = "🔓 פתוח לרישום (Available)";
-    else if (course.status === 'active') statusText = "⚔️ בלמידה פעילה (In Progress)";
-    else if (course.status === 'mastered') statusText = `🏆 הושלם (ציון: ${course.grade || '--'})`;
-    
-    statusValEl.innerText = statusText;
-    semValEl.innerText = SEMESTER_RING_NAMES[course.semester || 1] || `סמסטר ${course.semester || 1}`;
-    
-    if (openBtn) {
-        openBtn.style.display = "block";
-        openBtn.onclick = () => openCourseDetails(course.code);
-    }
-}
-
-// Highlights incoming and outgoing connection paths on hover
-function highlightConstellationPath(courseCode) {
-    const beams = document.querySelectorAll(".constellation-beam");
-    beams.forEach(beam => {
-        if (beam.dataset.from === courseCode || beam.dataset.to === courseCode) {
-            beam.classList.add("highlighted");
-        } else {
-            beam.classList.remove("highlighted");
-        }
-    });
-}
-
-function clearConstellationHighlight() {
-    const beams = document.querySelectorAll(".constellation-beam");
-    beams.forEach(beam => beam.classList.remove("highlighted"));
-}
-
-// Highlights the corresponding semester orbit ring on hover
-function highlightSemesterOrbit(sem) {
-    const orbit = document.getElementById(`orbit-sem-${sem}`);
-    if (orbit) orbit.classList.add("highlighted");
-}
-
-function clearSemesterOrbitHighlight() {
-    const orbits = document.querySelectorAll(".semester-orbit-arc");
-    orbits.forEach(o => o.classList.remove("highlighted"));
-}
-
-
-/* ==========================================================================
-   Cheesefork-Style Study Runway Logic
-   ========================================================================== */
-
-let currentRunwayMoedFilter = 'a'; // 'a' | 'b' | 'all'
-
-// Reference to consolidated Technion Exam Dates Dictionary (declared above)
-// Window global window.CHEESEFORK_EXAM_DATES is active.
-
-function setupStudyRunway() {
-    // 1. Hook Moed filter buttons
-    const filterBtns = document.querySelectorAll(".runway-btn-filter");
-    filterBtns.forEach(btn => {
-        btn.addEventListener("click", () => {
-            filterBtns.forEach(b => b.classList.remove("active"));
-            btn.classList.add("active");
-            currentRunwayMoedFilter = btn.dataset.moed || 'a';
-            renderStudyRunway();
-        });
-    });
-
-    // 2. Hook Term End Date picker
-    const termEndInput = document.getElementById("runway-term-end-input");
-    if (termEndInput) {
-        if (!gameState.termEndDate) {
-            gameState.termEndDate = "2027-01-20";
-        }
-        termEndInput.value = gameState.termEndDate;
-        termEndInput.addEventListener("change", (e) => {
-            gameState.termEndDate = e.target.value;
-            saveState();
-            renderStudyRunway();
-        });
-    }
-
-    // 3. Hook Cheesefork Sync Button
-    const syncBtn = document.getElementById("btn-sync-cheesefork-exams");
-    if (syncBtn) {
-        syncBtn.addEventListener("click", () => {
-            syncCheeseforkExamDates();
-            renderStudyRunway();
-            renderNotionTasksTable();
-            alert("🧀 סונכרנו בהצלחה תאריכי מבחנים מקובץ צ'יזפורק עבור הקורסים הפעילים (חורף תשפ״ז)!");
-        });
-    }
-
-    // Auto-seed exam dates from Cheesefork on first load if missing (Adir only)
-    if (window.AuthSync && typeof window.AuthSync.isAdirActive === 'function' && window.AuthSync.isAdirActive()) {
-        syncCheeseforkExamDates(false);
-    }
-}
-
 // Syncs official Technion Cheesefork exam dates into gameState.courses (strictly current semester)
 function syncCheeseforkExamDates(forceNotify = true) {
     const isAdir = (window.AuthSync && typeof window.AuthSync.isAdirActive === 'function') ? window.AuthSync.isAdirActive() : false;
@@ -20920,139 +20206,6 @@ function syncCheeseforkExamDates(forceNotify = true) {
     }
 }
 
-// Renders the horizontal Study Runway track
-function renderStudyRunway() {
-    const track = document.getElementById("study-runway-track");
-    if (!track) return;
-
-    track.innerHTML = "";
-
-    const termEndDateStr = (gameState && gameState.termEndDate) ? gameState.termEndDate : "2027-01-20";
-    
-    // 1. Gather all scheduled exam tasks across active courses only
-    const allExams = [];
-
-    Object.values(gameState.courses || {}).forEach(course => {
-        if (course.status !== 'active') return; // Strictly active courses only
-        if (!course.tasks) return;
-
-        course.tasks.forEach(task => {
-            if (task.type !== 'exam') return;
-            if (!task.dueDate) return; // Only show exams that have a scheduled date
-            if (!isCurrentOrUpcomingDate(task.dueDate)) return; // Strictly ignore stale/expired exam dates (< Oct 2026)
-
-            const isMoedB = task.title.includes("מועד ב") || task.title.toLowerCase().includes("moed b");
-            const moedType = isMoedB ? 'b' : 'a';
-
-            // Filter check
-            if (currentRunwayMoedFilter === 'a' && moedType !== 'a') return;
-            if (currentRunwayMoedFilter === 'b' && moedType !== 'b') return;
-
-            allExams.push({
-                courseCode: course.code,
-                courseName: course.name,
-                task: task,
-                date: new Date(task.dueDate),
-                dateStr: task.dueDate,
-                moedType: moedType
-            });
-        });
-    });
-
-    // 2. Sort chronologically
-    allExams.sort((a, b) => a.date - b.date);
-
-    // 3. Render Start Node (Term end / Today)
-    const termEndDate = new Date(termEndDateStr);
-    const termEndFmt = !isNaN(termEndDate) ? `${termEndDate.getMonth() + 1}/${termEndDate.getDate()}` : "--";
-
-    let html = `
-        <div class="runway-node-card term-end" title="תאריך סיום הסמסטר">
-            <div class="runway-node-title">Term end</div>
-            <div class="runway-node-date">${termEndFmt}</div>
-        </div>
-    `;
-
-    if (allExams.length === 0) {
-        html += `
-            <div style="color: var(--text-muted); font-size: 0.8rem; padding: 0 25px;">
-                אין מבחנים מתוזמנים להצגה. לחץ על "🧀 סנכרן תאריכים" או הוסף תאריכי יעד למבחנים.
-            </div>
-        `;
-        track.innerHTML = html;
-        return;
-    }
-
-    // 4. Render Gaps and Exam Cards
-    let prevDate = termEndDate;
-
-    allExams.forEach((item, index) => {
-        // Calculate days between previous exam/term-end and this exam
-        const diffMs = item.date - prevDate;
-        let diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
-        if (diffDays < 0) diffDays = 0;
-
-        // Color class: 0d clash (pulsing red/black), 1d squeeze, 2d red, 3-4d yellow, 5d+ green
-        let colorClass = "green";
-        let labelText = `${diffDays}d`;
-        if (diffDays === 0 && index > 0) {
-            colorClass = "clash";
-            labelText = "🛑 0d CLASH";
-        } else if (diffDays === 1 && index > 0) {
-            colorClass = "red";
-            labelText = "⚠️ 1d SQUEEZE";
-        } else if (diffDays <= 2) {
-            colorClass = "red";
-        } else if (diffDays <= 4) {
-            colorClass = "yellow";
-        }
-
-        // Format exam date e.g. "2/1" or "02/01"
-        const examFmt = `${item.date.getMonth() + 1}/${item.date.getDate()}`;
-        const moedLabel = item.moedType === 'b' ? "Moed B" : "Moed A";
-
-        html += `
-            <!-- Runway Gap Connector -->
-            <div class="runway-gap-connector">
-                <div class="runway-gap-pill ${colorClass}">
-                    ${labelText}
-                </div>
-                <div class="runway-gap-label">TO STUDY</div>
-            </div>
-
-            <!-- Exam Card -->
-            <div class="runway-node-card" data-course-code="${item.courseCode}" data-task-id="${item.task.id}" title="${item.courseName} - ${item.task.title} (לחץ לפתיחה)">
-                <div class="runway-node-title">
-                    <span class="runway-node-moed-badge">${moedLabel}</span>
-                    ${item.courseName}
-                </div>
-                <div class="runway-node-date">
-                    📅 ${examFmt}
-                </div>
-            </div>
-        `;
-
-        prevDate = item.date;
-    });
-
-    track.innerHTML = html;
-
-    // 5. Bind click listener on cards to open course or task peek
-    const cards = track.querySelectorAll(".runway-node-card:not(.term-end)");
-    cards.forEach(card => {
-        card.addEventListener("click", () => {
-            const courseCode = card.dataset.courseCode;
-            const taskId = card.dataset.taskId;
-            if (taskId) {
-                openTaskSidePeek(courseCode, taskId);
-            } else {
-                openCourseDetails(courseCode);
-            }
-        });
-    });
-}
-
-
 /* ==========================================================================
    Mermaid-Style Flowchart DAG Engine (Dynamic, Aligned Columns & Smooth Zoom)
    ========================================================================== */
@@ -21076,37 +20229,20 @@ function isMobileView() {
 
 function setupFlowchartViewMode() {
     const btnFlowchart = document.getElementById("btn-mode-flowchart");
-    const btnConstellation = document.getElementById("btn-mode-constellation");
-    const btnGrid = document.getElementById("btn-mode-grid");
-
     const fcViewport = document.getElementById("flowchart-viewport");
-    const constViewport = document.getElementById("constellation-viewport");
-    const gridViewport = document.getElementById("tree-viewport");
 
     function setMode(mode) {
         currentViewMode = mode;
         if (btnFlowchart) btnFlowchart.classList.toggle("active", mode === 'flowchart');
-        if (btnConstellation) btnConstellation.classList.toggle("active", mode === 'constellation');
-        if (btnGrid) btnGrid.classList.toggle("active", mode === 'grid');
-
         if (fcViewport) fcViewport.style.display = (mode === 'flowchart') ? 'flex' : 'none';
-        if (constViewport) constViewport.style.display = (mode === 'constellation') ? 'block' : 'none';
-        if (gridViewport) gridViewport.style.display = (mode === 'grid') ? 'block' : 'none';
 
         if (mode === 'flowchart') {
             renderFlowchartTree();
             initFlowchartZoom();
-        } else if (mode === 'constellation') {
-            renderConstellationTree();
-        } else if (mode === 'grid') {
-            renderSemestersGrid();
-            setTimeout(drawConnections, 50);
         }
     }
 
     if (btnFlowchart) btnFlowchart.addEventListener("click", () => setMode('flowchart'));
-    if (btnConstellation) btnConstellation.addEventListener("click", () => setMode('constellation'));
-    if (btnGrid) btnGrid.addEventListener("click", () => setMode('grid'));
 
     // Zoom Buttons
     const zoomInBtn = document.getElementById("btn-fc-zoom-in");
@@ -21844,6 +20980,9 @@ window.pulseFlowchartPrereqNode = function(courseCode) {
 
 // Normalizes any course code to standard 6-digit root for flowchart operations
 function normalizeCourseCodeForFlowchart(code) {
+    if (typeof window !== 'undefined' && window.__semesteroUtils && window.__semesteroUtils.normalizeTechnionCourseCode) {
+        return window.__semesteroUtils.normalizeTechnionCourseCode(code, { preserve03SevenDigit: false });
+    }
     if (!code) return '';
     let str = String(code).trim();
     if (/^\d{8}$/.test(str) && str.startsWith('0') && !str.startsWith('0394')) {
@@ -24334,11 +23473,11 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.11.15-v2.13.10",
-    version: "2.13.10",
-    build: "20261115_06",
-    date: "2026-11-15 18:15",
-    description: "v2.13.10: הסרת סרגלי 'משימות פעילות' ו'סנכרון מודל' ממפת הקורסים, הסרת פסי גלילה מיותרים/חיצוניים והסמל צוואר הבקבוק מתרשים הזרימה, ניקוי אייקון היומן החתוך בלוח המשימות (לחיצה ישירה על התאריך) והצמדת כפתורי הפעולה לשמאל העמודה."
+    code: "REV-2026.11.15-v2.13.11",
+    version: "2.13.11",
+    build: "20261115_07",
+    date: "2026-11-15 18:40",
+    description: "v2.13.11: ייעול והקשחת בסיס הקוד — תיקון parity של קבצי המניפסט ו-Service Worker, הסרת קוד ו-CSS מתים מהעצים הישנים ומהסרגל, איחוד תשתיות ב-utils.js, תיקון ניווט חזור בגיליון הציונים והעברת סקריפטים חד-פעמיים לארכיון (ADR-121)."
 };
 window.APP_VERSION = APP_CURRENT_REVISION.version;
 
@@ -24694,12 +23833,10 @@ function saveCalendarsSection() {
     if (moodleCalInput) {
         const val = moodleCalInput.value.trim();
         gameState.moodleCalendarUrl = val;
-        if (window.MoodleSync) {
+        if (typeof window.MoodleSync !== 'undefined' && window.MoodleSync) {
             window.MoodleSync.config.url = val;
             window.MoodleSync.saveConfig();
         }
-        const sidebarMoodleInput = document.getElementById("moodle-calendar-url");
-        if (sidebarMoodleInput) sidebarMoodleInput.value = val;
     }
 
     notifyStateChanged({ tab: 'settings' });

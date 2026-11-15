@@ -12,7 +12,6 @@ const path = require('path');
 
 const ROOT_DIR = path.resolve(__dirname, '..');
 const CHEESEFORK_DB_PATH = path.join(ROOT_DIR, 'cheesefork_database.js');
-const TECHNION_SAP_DB_PATH = path.join(ROOT_DIR, 'technion_sap_database.js');
 
 const SAP_BASE_URL = 'https://portalex.technion.ac.il/sap/opu/odata/sap/Z_CM_EV_CDIR_DATA_SRV';
 const GH_PAGES_SAP_URL = 'https://raw.githubusercontent.com/michael-maltsev/technion-sap-info-fetcher/gh-pages/courses_2026_200.json';
@@ -228,7 +227,7 @@ async function run() {
 
     console.log(`[SAP Ingest] Consolidated database has ${finalCourses.length} courses (${updatedCount} updated, ${newCount} newly added).`);
 
-    // 6. Output to cheesefork_database.js and technion_sap_database.js
+    // 6. Output to cheesefork_database.js (single consolidated catalog)
     const headerCheesefork = `/**
  * Semestero Consolidated Academic Course Catalog
  * Authoritative data sourced directly from Technion SAP SLcM (portalex.technion.ac.il)
@@ -241,18 +240,6 @@ async function run() {
     const contentCheesefork = headerCheesefork + JSON.stringify(finalCourses, null, 2) + ';\n';
     fs.writeFileSync(CHEESEFORK_DB_PATH, contentCheesefork, 'utf8');
     console.log(`[SAP Ingest] Successfully written to ${CHEESEFORK_DB_PATH} (${(contentCheesefork.length / 1024 / 1024).toFixed(2)} MB).`);
-
-    const headerSap = `/**
- * Semestero Technion SAP SLcM Course & Exam Database
- * Sourced directly from Technion SAP Gateway (portalex.technion.ac.il / sap-client=700)
- * Includes official anti-requisites, syllabus, instructors, classrooms, and digital exam flags.
- * Semester: Winter 2026-2027 (תשפ״ז)
- */
-(typeof window !== 'undefined' ? window : global).TECHNION_SAP_DB = `;
-
-    const contentSap = headerSap + JSON.stringify(finalCourses, null, 2) + ';\n';
-    fs.writeFileSync(TECHNION_SAP_DB_PATH, contentSap, 'utf8');
-    console.log(`[SAP Ingest] Successfully written to ${TECHNION_SAP_DB_PATH} (${(contentSap.length / 1024 / 1024).toFixed(2)} MB).`);
 
     console.log('=== Ingestion & Consolidation Complete ===');
 }

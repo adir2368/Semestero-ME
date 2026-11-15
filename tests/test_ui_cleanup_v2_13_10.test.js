@@ -12,7 +12,7 @@ console.log('Running v2.13.10 UI Cleanup Regression Checks...');
 // 1. Sidebar panels ("משימות פעילות" & "סנכרון מודל") removed from Flowchart sidebar
 assert.ok(!html.includes('id="active-quests-list"'), 'index.html must not contain #active-quests-list sidebar panel');
 assert.ok(!html.includes('class="sidebar-section moodle-sync"'), 'index.html must not contain sidebar moodle-sync panel');
-assert.ok(appJs.includes('if (!list) return;'), 'renderActiveQuestsSidebar must guard against missing #active-quests-list');
+assert.ok(!appJs.includes('active-quests-list') && !appJs.includes('renderActiveQuestsSidebar'), 'Dead sidebar #active-quests-list and renderActiveQuestsSidebar must be removed from app.js');
 
 // 2. Scrollbar cleanup: zero-arrow webkit rules + hidden scrollbars on Flowchart/Sidebar panes
 assert.ok(!css.includes('--color-scrollbar-track: #0b0d14;\r\n    /* Cool Ink thumb'), 'Old blocking @supports scrollbar override must be removed');

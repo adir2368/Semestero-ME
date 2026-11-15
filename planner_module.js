@@ -1722,6 +1722,9 @@
     }
 
     function escapeHtml(str) {
+        if (typeof window !== 'undefined' && window.__semesteroUtils && window.__semesteroUtils.escapeHtml) {
+            return window.__semesteroUtils.escapeHtml(str);
+        }
         if (typeof global !== 'undefined') global.escapeHtml = escapeHtml;
         if (typeof window !== 'undefined') window.escapeHtml = escapeHtml;
         if (!str) return '';

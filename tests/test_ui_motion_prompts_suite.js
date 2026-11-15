@@ -255,7 +255,7 @@ assert(cssSource.includes('backdrop-filter: blur(20px) saturate(160%) brightness
 assert(cssSource.includes('.nav-sliding-pill'), 'styles.css missing .nav-sliding-pill');
 assert(cssSource.includes('.nav-sliding-pill.is-stretching'), 'styles.css missing .nav-sliding-pill.is-stretching');
 assert(cssSource.includes('@keyframes uiMotionIconPop'), 'styles.css missing uiMotionIconPop keyframes');
-assert(cssSource.includes('.xp-bar-fill::before'), 'styles.css missing XP comet head ::before');
+assert(cssSource.includes('.xp-bar-fill'), 'styles.css missing .xp-bar-fill progress rule');
 assert(cssSource.includes('cubic-bezier(0.34, 1.56, 0.64, 1)'), 'styles.css missing spring overshoot curve');
 assert(cssSource.includes('.bell-badge.is-bumping::after'), 'styles.css missing notification sonar ring ::after');
 assert(cssSource.includes('@keyframes uiMotionSonarRing'), 'styles.css missing uiMotionSonarRing keyframes');

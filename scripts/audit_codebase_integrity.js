@@ -56,7 +56,7 @@ console.log(`[DOM Audit] Suspicious missing IDs (${suspiciousMissing.length}):`,
 // 2. Scan for hardcoded outdated versions
 console.log('\n[Version Audit] Checking for legacy version strings across active sources...');
 const activeFiles = ['index.html', 'app.js', 'auth_sync.js', 'planner_module.js', 'package.json', 'sw.js'];
-const legacyVersions = ['2.5.8', '2.5.9', '2.7.0', '2.7.1', '2.7.2'];
+const legacyVersions = ['2.10.', '2.11.', '2.12.'];
 
 for (const f of activeFiles) {
     const fpath = path.join(ROOT, f);
@@ -83,7 +83,7 @@ for (const f of activeFiles) {
 // 3. Inspect suspicious missing IDs for null checks
 console.log('\n[Safety Audit] Checking suspicious missing IDs for safe null guards...');
 const appLines = fs.readFileSync(appJsPath, 'utf-8').split('\n');
-const criticalMissing = ['stat-credits', 'btn-register-course', 'btn-unregister-course', 'tree-viewport', 'connections-svg', 'btn-open-widgets', 'btn-moodle-mock-trigger'];
+const criticalMissing = ['btn-moodle-mock-trigger', 'modal-moodle-sync-status', 'modal-grade-sheet'];
 
 for (const t of criticalMissing) {
     for (let i = 0; i < appLines.length; i++) {

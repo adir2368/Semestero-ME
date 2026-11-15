@@ -148,13 +148,6 @@
         },
 
         bindUI() {
-            const urlInput = document.getElementById('moodle-calendar-url');
-            const autoSyncCheck = document.getElementById('moodle-auto-sync-toggle');
-            const syncBtn = document.getElementById('btn-moodle-sync');
-            const fileInput = document.getElementById('moodle-ics-file-input');
-            const guideToggle = document.getElementById('moodle-guide-toggle');
-            const guideContainer = document.getElementById('moodle-guide-container');
-
             // Modal elements
             const modalUrlInput = document.getElementById('modal-moodle-calendar-url');
             const modalAutoSyncCheck = document.getElementById('modal-moodle-auto-sync-toggle');
@@ -164,7 +157,6 @@
             const modalOverlay = document.getElementById('moodle-sync-modal');
 
             const syncAllInputs = (val) => {
-                if (urlInput) urlInput.value = val;
                 if (modalUrlInput) modalUrlInput.value = val;
                 const settingInput = document.getElementById('setting-moodle-calendar-url');
                 if (settingInput) settingInput.value = val;
@@ -182,40 +174,16 @@
                 this.saveConfig();
             };
 
-            if (urlInput) {
-                urlInput.value = this.config.url || '';
-                urlInput.addEventListener('input', () => handleUrlInput(urlInput));
-            }
-
             if (modalUrlInput) {
                 modalUrlInput.value = this.config.url || '';
                 modalUrlInput.addEventListener('input', () => handleUrlInput(modalUrlInput));
-            }
-
-            if (autoSyncCheck) {
-                autoSyncCheck.checked = this.config.autoSync !== false;
-                autoSyncCheck.addEventListener('change', () => {
-                    this.config.autoSync = autoSyncCheck.checked;
-                    if (modalAutoSyncCheck) modalAutoSyncCheck.checked = this.config.autoSync;
-                    this.saveConfig();
-                });
             }
 
             if (modalAutoSyncCheck) {
                 modalAutoSyncCheck.checked = this.config.autoSync !== false;
                 modalAutoSyncCheck.addEventListener('change', () => {
                     this.config.autoSync = modalAutoSyncCheck.checked;
-                    if (autoSyncCheck) autoSyncCheck.checked = this.config.autoSync;
                     this.saveConfig();
-                });
-            }
-
-            if (guideToggle && guideContainer) {
-                guideToggle.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    const isHidden = guideContainer.style.display === 'none';
-                    guideContainer.style.display = isHidden ? 'block' : 'none';
-                    guideToggle.textContent = isHidden ? '▲ הסתר הדרכת חיבור' : '▼ איך להוציא קישור ממודל (3 קליקים)';
                 });
             }
 
@@ -227,11 +195,10 @@
                 }
             };
 
-            if (fileInput) fileInput.addEventListener('change', handleFile);
             if (modalFileInput) modalFileInput.addEventListener('change', handleFile);
 
             const triggerSyncAction = () => {
-                const inputVal = (modalUrlInput && modalUrlInput.value.trim()) || (urlInput && urlInput.value.trim()) || this.config.url;
+                const inputVal = (modalUrlInput && modalUrlInput.value.trim()) || this.config.url;
                 const cleaned = this.sanitizeUrl(inputVal);
                 if (cleaned) {
                     this.config.url = cleaned;
@@ -254,7 +221,6 @@
                 }
             };
 
-            if (syncBtn) syncBtn.addEventListener('click', triggerSyncAction);
             if (modalSyncBtn) modalSyncBtn.addEventListener('click', triggerSyncAction);
             if (modalMockBtn) modalMockBtn.addEventListener('click', () => this.runMockSync());
 
@@ -315,7 +281,6 @@
         },
 
         setStatus(message, type = 'info') {
-            const statusDiv = document.getElementById('moodle-sync-status');
             const modalStatusDiv = document.getElementById('modal-moodle-sync-status');
 
             let color = 'var(--text-muted)';
@@ -323,10 +288,6 @@
             if (type === 'error') color = '#ef4444';
             if (type === 'working') color = 'var(--accent-blue, #38bdf8)';
 
-            if (statusDiv) {
-                statusDiv.style.color = color;
-                statusDiv.innerHTML = message;
-            }
             if (modalStatusDiv) {
                 modalStatusDiv.style.color = color;
                 modalStatusDiv.innerHTML = message;
@@ -955,12 +916,7 @@
                 return;
             }
 
-            const syncBtn = document.getElementById('btn-moodle-sync');
             const modalSyncBtn = document.getElementById('modal-btn-moodle-sync');
-            if (syncBtn) {
-                syncBtn.disabled = true;
-                syncBtn.innerText = '🔄 מסנכרן ממודל...';
-            }
             if (modalSyncBtn) {
                 modalSyncBtn.disabled = true;
                 modalSyncBtn.innerText = '🔄 מסנכרן...';
@@ -1031,10 +987,6 @@
                     }, 100);
                 }
             } finally {
-                if (syncBtn) {
-                    syncBtn.disabled = false;
-                    syncBtn.innerText = '🔄 סנכרן מטלות ממודל עכשיו';
-                }
                 if (modalSyncBtn) {
                     modalSyncBtn.disabled = false;
                     modalSyncBtn.innerText = '🔄 סנכרן מטלות ממודל עכשיו';

@@ -10,7 +10,9 @@
     'use strict';
 
     const encArg = (val) => encodeURIComponent(String(val || '')).replace(/'/g, '%27');
-    const escHtml = (val) => String(val || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    const escHtml = (val) => (typeof window !== 'undefined' && window.__semesteroUtils && window.__semesteroUtils.escapeHtml)
+        ? window.__semesteroUtils.escapeHtml(val)
+        : String(val || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 
     const STORAGE_KEY_RECORDS = 'semestero_attendance_records_v2';
     const STORAGE_KEY_CATCHUP = 'semestero_catchup_queue_v2';

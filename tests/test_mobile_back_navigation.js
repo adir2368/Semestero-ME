@@ -36,7 +36,7 @@ const mockElements = {
     'pangea-search-modal': new MockElement('pangea-search-modal', 'modal-overlay'),
     'notif-drawer-overlay': new MockElement('notif-drawer-overlay', 'drawer-overlay'),
     'modal-attendance-hub': new MockElement('modal-attendance-hub', 'modal-overlay'),
-    'grade-sheet-modal': new MockElement('grade-sheet-modal', 'modal-overlay'),
+    'modal-grade-sheet': new MockElement('modal-grade-sheet', 'modal-overlay'),
     'course-modal': new MockElement('course-modal', 'modal-overlay')
 };
 
@@ -123,6 +123,13 @@ handled = navManager.handleBack();
 assert.strictEqual(handled, true, 'handleBack should return true when Attendance Hub is open');
 assert.strictEqual(mockElements['modal-attendance-hub'].style.display, 'none', 'Attendance Hub should be closed');
 console.log('✅ Test 5: Attendance Hub modal intercepted and closed on back.');
+
+// Test 5b: Grade Sheet modal (#modal-grade-sheet) is closed on back
+mockElements['modal-grade-sheet'].style.display = 'flex';
+handled = navManager.handleBack();
+assert.strictEqual(handled, true, 'handleBack should return true when Grade Sheet modal is open');
+assert.strictEqual(mockElements['modal-grade-sheet'].style.display, 'none', 'Grade Sheet modal should be closed');
+console.log('✅ Test 5b: Grade Sheet modal intercepted and closed on back.');
 
 // Test 6: Course details modal is closed on back
 mockElements['course-modal'].classList.add('active');

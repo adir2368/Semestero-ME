@@ -490,56 +490,6 @@ body {
     color: var(--text-light);
 }
 
-.active-quests-list {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    max-height: 300px;
-    overflow-y: auto;
-}
-
-.empty-quests {
-    color: var(--text-muted);
-    font-size: 0.8rem;
-    text-align: center;
-    padding: 10px 0;
-    line-height: 1.4;
-}
-
-.quest-item-sidebar {
-    background: var(--bg-card);
-    border: 1px solid var(--border-color);
-    border-right: 3px solid var(--accent-gold);
-    border-radius: 4px;
-    padding: 8px;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    cursor: pointer;
-    transition: background 0.2s;
-}
-
-.quest-item-sidebar:hover {
-    background: rgba(255, 255, 255, 0.05);
-}
-
-.quest-sidebar-title {
-    font-size: 0.8rem;
-    font-weight: 700;
-}
-
-.quest-sidebar-desc {
-    font-size: 0.75rem;
-    color: var(--text-muted);
-}
-
-.quest-sidebar-xp {
-    font-size: 0.7rem;
-    color: var(--accent-gold);
-    font-weight: bold;
-    align-self: flex-end;
-}
-
 .sidebar-section.controls {
     display: flex;
     flex-direction: column;
@@ -2416,380 +2366,6 @@ body:has(#academic-faq-modal.active) {
     border-color: var(--accent-blue);
     box-shadow: 0 0 10px rgba(14, 165, 233, 0.4);
 }
-
-.constellation-viewport {
-    position: relative;
-    width: 100%;
-    height: 750px;
-    background: radial-gradient(circle at 50% 85%, #151a26 0%, #0a0d14 65%, #040508 100%);
-    border-radius: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: inset 0 0 80px rgba(0, 0, 0, 0.8), 0 12px 36px rgba(0,0,0,0.5);
-    overflow: hidden;
-    user-select: none;
-}
-
-.constellation-svg {
-    width: 100%;
-    height: 100%;
-    display: block;
-}
-
-/* Watermark background radial text */
-.constellation-watermark-text {
-    font-family: var(--font-display);
-    font-size: 7.5rem;
-    font-weight: 900;
-    letter-spacing: 18px;
-    fill: rgba(255, 255, 255, 0.02);
-    text-anchor: middle;
-    pointer-events: none;
-}
-
-.constellation-sector-label {
-    font-family: var(--font-display);
-    font-size: 0.85rem;
-    font-weight: 700;
-    letter-spacing: 3px;
-    fill: rgba(255, 255, 255, 0.45);
-    text-anchor: middle;
-    text-shadow: 0 0 12px rgba(255,255,255,0.2);
-    pointer-events: none;
-}
-
-/* Skill Inspector Card */
-.skill-inspector-card {
-    position: absolute;
-    bottom: 20px;
-    left: 20px;
-    width: 280px;
-    background: rgba(10, 14, 24, 0.88);
-    backdrop-filter: blur(20px);
-    border: 1px solid rgba(56, 189, 248, 0.25);
-    border-radius: 10px;
-    padding: 14px 16px;
-    box-shadow: 0 16px 36px rgba(0,0,0,0.85), inset 0 0 15px rgba(56, 189, 248, 0.06);
-    z-index: 40;
-    text-align: right;
-    transition: all 0.25s ease;
-    pointer-events: auto;
-}
-
-.skill-inspector-card.collapsed {
-    transform: translateX(-280px);
-    opacity: 0;
-    pointer-events: none;
-}
-
-.inspector-toggle-btn {
-    position: absolute;
-    top: 15px;
-    left: 15px;
-    z-index: 51;
-    background: rgba(15, 23, 42, 0.85);
-    border: 1px solid rgba(56, 189, 248, 0.3);
-    color: #38bdf8;
-    padding: 4px 8px;
-    border-radius: 6px;
-    font-size: 0.72rem;
-    cursor: pointer;
-    backdrop-filter: blur(8px);
-    transition: all 0.2s;
-}
-
-.inspector-toggle-btn:hover {
-    background: var(--accent-blue);
-    color: #fff;
-}
-
-/* Concentric Semester Ring Guides */
-.semester-orbit-arc {
-    stroke: rgba(56, 189, 248, 0.12);
-    stroke-width: 1.5;
-    fill: none;
-    stroke-dasharray: 6 6;
-    transition: stroke 0.3s;
-}
-
-.semester-orbit-arc.highlighted {
-    stroke: rgba(56, 189, 248, 0.5);
-    stroke-width: 2.5;
-    stroke-dasharray: none;
-    filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.6));
-}
-
-.semester-orbit-label {
-    font-family: var(--font-display);
-    font-size: 11px;
-    font-weight: 700;
-    fill: rgba(56, 189, 248, 0.65);
-    letter-spacing: 0.5px;
-    user-select: none;
-    pointer-events: none;
-}
-
-.inspector-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    gap: 8px;
-    margin-bottom: 2px;
-}
-
-.inspector-header h3 {
-    margin: 0;
-    font-size: 1.05rem;
-    font-weight: 700;
-    color: #fff;
-    letter-spacing: 0.5px;
-}
-
-.inspector-tier {
-    font-family: var(--font-display);
-    font-size: 0.75rem;
-    color: #f59e0b;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-
-.inspector-domain {
-    font-size: 0.72rem;
-    color: var(--text-muted);
-    font-weight: 500;
-    margin-bottom: 10px;
-}
-
-.inspector-desc {
-    font-size: 0.78rem;
-    line-height: 1.4;
-    color: #cbd5e1;
-    margin: 0 0 12px 0;
-    white-space: pre-line;
-}
-
-.inspector-stats {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 6px;
-    background: rgba(255, 255, 255, 0.03);
-    padding: 8px;
-    border-radius: 6px;
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    margin-bottom: 12px;
-}
-
-.inspector-stat {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-}
-
-.inspector-stat .lbl {
-    font-size: 0.65rem;
-    color: var(--text-muted);
-}
-
-.inspector-stat .val {
-    font-size: 0.78rem;
-    font-weight: 600;
-    color: #fff;
-}
-
-/* Bottom Skill Points HUD */
-.constellation-bottom-hud {
-    position: absolute;
-    top: 20px;
-    right: 25px;
-    text-align: right;
-    z-index: 40;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 3px;
-    pointer-events: none;
-    background: rgba(10, 14, 24, 0.7);
-    backdrop-filter: blur(12px);
-    padding: 8px 16px;
-    border-radius: 8px;
-    border: 1px solid rgba(245, 158, 11, 0.25);
-}
-
-.skill-points-num {
-    font-family: var(--font-display);
-    font-size: 1.9rem;
-    font-weight: 900;
-    color: #f59e0b;
-    text-shadow: 0 0 16px rgba(245, 158, 11, 0.6);
-    line-height: 1;
-}
-
-.skill-points-label {
-    font-family: var(--font-display);
-    font-size: 0.7rem;
-    font-weight: 700;
-    letter-spacing: 2px;
-    color: #94a3b8;
-    text-transform: uppercase;
-}
-
-.constellation-xp-progress {
-    width: 200px;
-    height: 4px;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 2px;
-    margin-top: 4px;
-    overflow: hidden;
-}
-
-.constellation-xp-fill {
-    height: 100%;
-    background: linear-gradient(90deg, #f59e0b, #fbbf24);
-    box-shadow: 0 0 8px rgba(245, 158, 11, 0.8);
-    transition: width 0.4s ease;
-}
-
-/* SVG Node Group Styles */
-.constellation-node-group {
-    cursor: pointer;
-}
-
-.constellation-node-group .node-body,
-.constellation-node-group .node-outer-ring,
-.constellation-node-group .node-icon-svg {
-    transition: all 0.2s ease-out;
-}
-
-.constellation-node-group.locked .node-body {
-    fill: #11151f;
-    stroke: #252c3d;
-    stroke-width: 2;
-    opacity: 0.5;
-}
-
-.constellation-node-group.available .node-body {
-    fill: #182234;
-    stroke: #94a3b8;
-    stroke-width: 2.2;
-    filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.25));
-}
-
-.constellation-node-group.active .node-body {
-    fill: #09263f;
-    stroke: #0ea5e9;
-    stroke-width: 2.5;
-    filter: drop-shadow(0 0 12px rgba(14, 165, 233, 0.7));
-}
-
-.constellation-node-group.mastered .node-body {
-    fill: #043828;
-    stroke: #10b981;
-    stroke-width: 2.5;
-    filter: drop-shadow(0 0 12px rgba(16, 185, 129, 0.7));
-}
-
-.constellation-node-group:hover .node-body,
-.constellation-node-group.selected .node-body {
-    r: 25;
-    filter: drop-shadow(0 0 16px rgba(56, 189, 248, 0.9));
-}
-
-.constellation-node-group .node-outer-ring {
-    stroke: transparent;
-    stroke-width: 1.5;
-    transition: stroke 0.2s, stroke-dasharray 0.2s, r 0.2s;
-}
-
-.constellation-node-group.active .node-outer-ring {
-    stroke: rgba(14, 165, 233, 0.5);
-    stroke-dasharray: 4 3;
-    animation: ringSpin 12s linear infinite;
-}
-
-.constellation-node-group:hover .node-outer-ring,
-.constellation-node-group.selected .node-outer-ring {
-    r: 30;
-    stroke: #38bdf8;
-    stroke-dasharray: 5 3;
-    animation: ringSpin 8s linear infinite;
-}
-
-.constellation-node-group .node-icon-svg {
-    font-size: 15px;
-    fill: #fff;
-    user-select: none;
-    pointer-events: none;
-}
-
-.constellation-node-group:hover .node-icon-svg,
-.constellation-node-group.selected .node-icon-svg {
-    font-size: 17px;
-}
-
-.constellation-node-group.locked .node-icon-svg {
-    opacity: 0.35;
-}
-
-.constellation-node-group .node-label-svg {
-    font-family: var(--font-body);
-    font-size: 10px;
-    font-weight: 500;
-    fill: #94a3b8;
-    user-select: none;
-    pointer-events: none;
-    transition: fill 0.2s, font-size 0.2s;
-}
-
-.constellation-node-group:hover .node-label-svg,
-.constellation-node-group.selected .node-label-svg {
-    fill: #ffffff;
-    font-weight: 700;
-    font-size: 11px;
-}
-
-@keyframes ringSpin {
-    from { transform: rotate(0deg); transform-origin: center; }
-    to { transform: rotate(360deg); transform-origin: center; }
-}
-
-/* Constellation Beam Connections */
-.constellation-beam {
-    stroke-linecap: round;
-    transition: stroke 0.3s, stroke-width 0.3s;
-}
-
-.constellation-beam.mastered {
-    stroke: url(#beam-grad-mastered);
-    stroke-width: 3;
-    filter: drop-shadow(0 0 5px rgba(52, 211, 153, 0.6));
-}
-
-.constellation-beam.active {
-    stroke: url(#beam-grad-active);
-    stroke-width: 2.5;
-    stroke-dasharray: 6 4;
-    animation: beamDashAnimation 1.2s linear infinite;
-}
-
-.constellation-beam.locked {
-    stroke: #222938;
-    stroke-width: 1.5;
-    stroke-dasharray: 4 4;
-    opacity: 0.45;
-}
-
-.constellation-beam.highlighted {
-    stroke: #ffffff !important;
-    stroke-width: 4 !important;
-    filter: drop-shadow(0 0 10px #ffffff) !important;
-    stroke-dasharray: none !important;
-}
-
-@keyframes beamDashAnimation {
-    from { stroke-dashoffset: 20; }
-    to { stroke-dashoffset: 0; }
-}
-
 
 /* ==========================================================================
    Cheesefork-Style Study Runway Component
@@ -4707,7 +4283,6 @@ body:has(#academic-faq-modal.active) {
 .quest-sidebar-xp,
 .task-xp,
 .quest-xp,
-.constellation-xp-progress,
 .level-up-splash,
 .boss-battle-section,
 #peek-property-xp,
@@ -11640,7 +11215,6 @@ html.is-iphone .app-global-footer {
     padding: 12px 14px !important;
 }
 
-.sidebar-section.moodle-sync input[type="text"],
 .sidebar-section.cheesefork-import input[type="text"] {
     background: #090e1a !important;
     border: 1px solid rgba(56, 189, 248, 0.35) !important;
@@ -11880,9 +11454,7 @@ html.is-iphone .app-global-footer {
     overflow: hidden;
 }
 
-.xp-bar-fill::after {
-    display: none !important;
-}
+
 
 @keyframes xpShimmer {
     0% { left: -100%; }
@@ -18132,17 +17704,7 @@ html.is-iphone .nav-tabs-left.has-sliding-pill .nav-tab.active {
     position: relative;
 }
 
-.xp-bar-fill::before {
-    display: none !important;
-    width: 0 !important;
-    opacity: 0 !important;
-    box-shadow: none !important;
-}
 
-@keyframes uiMotionCometPulse {
-    0%, 100% { opacity: 0.78; transform: scaleY(0.92); }
-    50% { opacity: 1; transform: scaleY(1.06); }
-}
 
 /* 4. Notification Badge Spring Scale & Sonar Ring (Dfs3pG9AeUh) */
 .bell-badge.is-bumping {
@@ -18279,7 +17841,6 @@ html.is-iphone .nav-tabs-left.has-sliding-pill .nav-tab.active {
     }
 
     .nav-tabs-left .nav-tab.active .nav-tab-icon,
-    .xp-bar-fill::before,
     .bell-badge.is-bumping,
     .bell-badge.is-bumping::after,
     .ast-toast-merge-badge,
@@ -18299,7 +17860,6 @@ body.a11y-stop-animations .nav-sliding-pill.is-stretching {
 }
 
 body.a11y-stop-animations .nav-tabs-left .nav-tab.active .nav-tab-icon,
-body.a11y-stop-animations .xp-bar-fill::before,
 body.a11y-stop-animations .bell-badge.is-bumping,
 body.a11y-stop-animations .bell-badge.is-bumping::after,
 body.a11y-stop-animations .ast-toast-merge-badge,

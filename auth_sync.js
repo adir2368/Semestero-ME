@@ -22,6 +22,9 @@
 
     // #1 Stored XSS Protection: Escape HTML entities and strip active vector tokens
     function escapeAuthHtml(str) {
+        if (typeof window !== 'undefined' && window.__semesteroUtils && window.__semesteroUtils.escapeHtml) {
+            return window.__semesteroUtils.escapeHtml(str);
+        }
         return String(str ?? '')
             .replace(/&/g, '&amp;')
             .replace(/</g, '&lt;')
@@ -1850,7 +1853,6 @@
                 if (typeof renderNotionTasksTable === 'function') renderNotionTasksTable();
                 if (typeof updateDailyTimetableFocus === 'function') updateDailyTimetableFocus();
                 if (typeof renderTodayTimetableBanner === 'function') renderTodayTimetableBanner();
-                if (typeof renderStudyRunway === 'function') renderStudyRunway();
                 if (typeof updateNotificationBadge === 'function') updateNotificationBadge();
             }
             if (typeof DegreePlanner !== 'undefined' && DegreePlanner.renderDegreePlanner) {
