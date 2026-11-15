@@ -936,6 +936,10 @@
                 renderTimetableGrid();
             }
             this.updateBadgeCounts();
+            const modalEl = (typeof document !== 'undefined') ? document.getElementById('modal-attendance-hub') : null;
+            if (modalEl && modalEl.classList && modalEl.classList.contains('active')) {
+                this.renderModalBody();
+            }
         },
 
         openModal: function(tab = 'catchup') {
@@ -961,6 +965,8 @@
                         </div>
                         <button type="button" class="btn-close-attendance-modal" aria-label="סגור חלון" style="background: transparent; border: none; font-size: 1.4rem; color: #94a3b8; cursor: pointer; padding: 4px;">✕</button>
                     </div>
+
+                    <div class="timetable-week-navigator" id="attendance-hub-week-navigator" style="margin-bottom: 14px;"></div>
 
                     <!-- Segmented Tab Switcher -->
                     <div style="display: flex; gap: 6px; margin-bottom: 16px; background: rgba(255,255,255,0.04); padding: 4px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.08); flex-wrap: wrap;">
@@ -1008,6 +1014,9 @@
         },
 
         renderModalBody: function() {
+            if (typeof window.renderTimetableWeekNavigator === 'function') {
+                window.renderTimetableWeekNavigator();
+            }
             const bodyEl = document.getElementById('attendance-hub-modal-body');
             if (!bodyEl) return;
 
@@ -1026,7 +1035,53 @@
 
         renderStatsTab: function(bodyEl) {
             const analytics = this.getSemesterAnalytics();
+            const selectedWeek = analytics.selectedWeek || this.getSelectedWeek();
+            const selectedWeekRange = (analytics.weeks && analytics.weeks[selectedWeek]) ? analytics.weeks[selectedWeek].dateRange : this.getWeekDateRangeLabel(selectedWeek);
             const fmtPct = (v) => (v === null || v === undefined) ? '—' : `${v}%`;
+            const encArg = (val) => encodeURIComponent(String(val || '')).replace(/'/g, '%27');
+            const escHtml = (val) => String(val || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
+            const selectedWeekSlotsHtml = analytics.matrixRows.length === 0
+                ? '<div style="color: #94a3b8; font-size: 0.78rem; padding: 12px; background: rgba(255,255,255,0.02); border-radius: 10px; border: 1px dashed rgba(255,255,255,0.1);">אין שיעורים במערכת השעות לסימון בשבוע זה.</div>'
+                : analytics.matrixRows.map(row => {
+                    const st = row.weeks ? row.weeks[selectedWeek] : 'unmarked';
+                    const canonicalDate = (typeof this.getCanonicalDateForSemesterWeekDay === 'function')
+                        ? this.getCanonicalDateForSemesterWeekDay(selectedWeek, row.dayIndex)
+                        : '';
+                    const shortDate = canonicalDate ? canonicalDate.split('-').slice(1).reverse().join('.') : '';
+                    const isAtt = st === 'attended';
+                    const isMis = st === 'missed';
+                    const isPerp = row.isPerpetual && st === 'perpetual';
+                    const baseArgs = `decodeURIComponent('${encArg(row.courseId)}'), decodeURIComponent('${encArg(row.courseName)}'), decodeURIComponent('${encArg(row.type)}'), ${row.dayIndex}, '${encArg(row.startTime)}', '${encArg(row.endTime)}', decodeURIComponent('${encArg(row.room)}')`;
+                    return `
+                        <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; padding: 10px 12px; border-radius: 10px; background: ${isAtt ? 'rgba(16, 185, 129, 0.09)' : (isMis ? 'rgba(244, 63, 94, 0.09)' : 'rgba(255,255,255,0.03)')}; border: 1px solid ${isAtt ? 'rgba(16, 185, 129, 0.45)' : (isMis ? 'rgba(244, 63, 94, 0.45)' : 'rgba(255,255,255,0.08)')};">
+                            <div style="min-width: 180px;">
+                                <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+                                    <strong style="color: #f8fafc; font-size: 0.85rem;">${escHtml(row.courseName)}</strong>
+                                    <span style="font-size: 0.7rem; color: #94a3b8; font-family: monospace;">(${escHtml(row.courseId)})</span>
+                                    ${isPerp ? '<span style="font-size: 0.68rem; background: rgba(168, 85, 247, 0.2); color: #e9d5ff; padding: 1px 6px; border-radius: 999px; font-weight: 700;">🚀 למידה עצמית</span>' : ''}
+                                </div>
+                                <div style="font-size: 0.73rem; color: #94a3b8; margin-top: 2px;">
+                                    ${escHtml(row.type)} • יום ${escHtml(row.dayName)}${shortDate ? ` (${shortDate})` : ''} • ${escHtml(row.startTime)}${row.endTime ? `–${escHtml(row.endTime)}` : ''}${row.room ? ` • ${escHtml(row.room)}` : ''}
+                                </div>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 6px; flex-shrink: 0;">
+                                <button type="button"
+                                        class="btn-att-quick-attended"
+                                        onclick="window.AttendanceHub.toggleAttendance(${baseArgs}, 'attended', ${selectedWeek})"
+                                        style="padding: 5px 10px; border-radius: 8px; font-size: 0.74rem; font-weight: 700; cursor: pointer; font-family: inherit; border: 1px solid ${isAtt ? '#10b981' : 'rgba(16, 185, 129, 0.35)'}; background: ${isAtt ? '#10b981' : 'rgba(16, 185, 129, 0.12)'}; color: ${isAtt ? '#ffffff' : '#6ee7b7'};">
+                                    ✓ נכחתי
+                                </button>
+                                <button type="button"
+                                        class="btn-att-quick-missed"
+                                        onclick="window.AttendanceHub.toggleAttendance(${baseArgs}, 'missed', ${selectedWeek})"
+                                        style="padding: 5px 10px; border-radius: 8px; font-size: 0.74rem; font-weight: 700; cursor: pointer; font-family: inherit; border: 1px solid ${isMis ? '#f43f5e' : 'rgba(244, 63, 94, 0.35)'}; background: ${isMis ? '#f43f5e' : 'rgba(244, 63, 94, 0.12)'}; color: ${isMis ? '#ffffff' : '#fda4af'};">
+                                    ✗ החסרתי
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
 
             let weekMatrixHeaders = '';
             for (let w = 1; w <= 13; w++) {
@@ -1137,6 +1192,16 @@
                         <div style="font-size: 0.72rem; color: #fbbf24; font-weight: 700;">📅 שבוע אקדמי נוכחי</div>
                         <div style="font-size: 1.25rem; font-weight: 900; color: #f8fafc; margin: 3px 0;">שבוע ${analytics.currentWeek} / 13</div>
                         <div style="font-size: 0.72rem; color: #cbd5e1;">${analytics.weeks[analytics.currentWeek].dateRange}</div>
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 16px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 8px; flex-wrap: wrap;">
+                        <strong style="font-size: 0.86rem; color: #f1f5f9;">⚡ סימון מהיר לשבוע ${selectedWeek}${selectedWeekRange ? ` (${selectedWeekRange})` : ''}</strong>
+                        <span style="font-size: 0.72rem; color: #94a3b8;">סימון ישיר עבור השיעורים של שבוע ${selectedWeek}</span>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                        ${selectedWeekSlotsHtml}
                     </div>
                 </div>
 

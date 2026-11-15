@@ -15040,7 +15040,9 @@ function openCourseDetails(code) {
         `;
 
         // Bind live Magen / Takaf Simulator (N-03)
-        const simCard = cfContainer.querySelector('#modal-magen-shield-calculator-card');
+        const simCard = (typeof cfContainer.querySelector === 'function')
+            ? cfContainer.querySelector('#modal-magen-shield-calculator-card')
+            : null;
         if (simCard) {
             const evalTechnionFinalForExam = (examScore, cfg) => {
                 if (examScore < 55) return examScore; // Technion hard exam pass gate
@@ -24311,11 +24313,11 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.11.15-v2.13.7",
-    version: "2.13.7",
-    build: "20261115_03",
-    date: "2026-11-15 13:42",
-    description: "v2.13.7: תיקון עומס גלילה והתנגשויות כפתורים במובייל (קורסים, משימות ויומן), הברזה נצחית ממוקדת להרצאה או תרגול בנפרד, מעקב נוכחות שבועי על פני 13 שבועות הסמסטר עם מטריצה וסטטיסטיקות, הפרדת סטטוס 'בוצע (Done)' לפני 'הוגש (Submitted)' ושינוי תווית 'קומבו' בהתראות ממוזגות (ADR-117)."
+    code: "REV-2026.11.15-v2.13.8",
+    version: "2.13.8",
+    build: "20261115_04",
+    date: "2026-11-15 13:57",
+    description: "v2.13.8: איחוד מלא של בורר 13 השבועות, הסימון השבועי המהיר, המטריצה והסטטיסטיקות הסמסטריאליות תחת חלון 'נוכחות והשלמות' לניקוי מערכת השעות."
 };
 window.APP_VERSION = APP_CURRENT_REVISION.version;
 
@@ -26945,13 +26947,17 @@ window.handleTimetableAttendance = function(btn, dayIdx, classIdx, targetStatus)
 };
 
 function renderTimetableWeekNavigator(schedule) {
-    const navEl = document.getElementById('timetable-week-navigator');
+    const navEl = document.getElementById('attendance-hub-week-navigator');
     if (!navEl) return;
 
     const hub = window.AttendanceHub;
     if (!hub || typeof hub.getSelectedWeek !== 'function') {
         navEl.innerHTML = '';
         return;
+    }
+
+    if (!schedule && typeof getActiveTimetableSchedule === 'function') {
+        schedule = getActiveTimetableSchedule();
     }
 
     const currentWeek = (typeof hub.getCurrentAcademicWeek === 'function') ? hub.getCurrentAcademicWeek() : 4;
@@ -27002,7 +27008,7 @@ function renderTimetableWeekNavigator(schedule) {
                 <span class="week-stat-chip" title="ממוצע נוכחות מצטבר בכל שבועות הסמסטר">
                     מצטבר סמסטר: <strong style="color: #34d399;">${semPctText}</strong>
                 </span>
-                <button type="button" class="btn-week-stats-open" onclick="if (window.AttendanceHub) window.AttendanceHub.openModal('stats');">
+                <button type="button" class="btn-week-stats-open" onclick="if (window.AttendanceHub) window.AttendanceHub.switchTab('stats');">
                     📊 סטטיסטיקות ומעקב סמסטריאלי
                 </button>
             </div>
@@ -27020,8 +27026,9 @@ function renderTimetableGrid() {
     if (!container) return;
 
     const schedule = getActiveTimetableSchedule();
-    // Update week navigator strip BEFORE assigning container.innerHTML so DOM mocks retain container HTML as final write
-    renderTimetableWeekNavigator(schedule);
+    if (document.getElementById('attendance-hub-week-navigator')) {
+        renderTimetableWeekNavigator(schedule);
+    }
 
     if (!schedule || !schedule.days || schedule.days.length === 0) {
         container.innerHTML = `
