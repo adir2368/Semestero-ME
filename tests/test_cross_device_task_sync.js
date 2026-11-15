@@ -272,6 +272,7 @@ const surveyTask = (pre034053.tasks || []).find(t => t.id === '034053_miluim_sur
 assert(surveyTask && surveyTask.isMiluim === true, 'PRELOADED 034053_miluim_survey must have isMiluim: true');
 const pre114052 = PRELOADED.courses['114052'];
 assert(!(pre114052.tasks || []).some(t => t.id === '114052_miluim_3010'), 'PRELOADED 114052 must not contain dismissed 114052_miluim_3010');
+assert(!(pre114052.tasks || []).some(t => t.id === '114052_ww1'), 'PRELOADED 114052 must not contain retired non-existent 114052_ww1');
 assert(PRELOADED.dismissedTaskRegistry && PRELOADED.dismissedTaskRegistry['moodle_uid:9572@moodle26.technion.ac.il'], 'PRELOADED dismissedTaskRegistry must lock 9572@moodle26.technion.ac.il');
 console.log('  ✅ PASS: L-07 regex & PRELOADED_USER_STATE hygiene verified.\n');
 
@@ -332,6 +333,13 @@ console.log('  ✅ PASS: L-07 regex & PRELOADED_USER_STATE hygiene verified.\n')
                         moodleUid: '9572@moodle26.technion.ac.il',
                         status: 'not_started',
                         completed: false
+                    },
+                    {
+                        id: '114052_ww1',
+                        title: 'WebWork 1: חוק קולון ושדה חשמלי',
+                        type: 'webwork',
+                        status: 'not_started',
+                        completed: false
                     }
                 ]
             }
@@ -388,7 +396,15 @@ console.log('  ✅ PASS: L-07 regex & PRELOADED_USER_STATE hygiene verified.\n')
                     code: '114052',
                     name: 'פיסיקה 2',
                     status: 'active',
-                    tasks: []
+                    tasks: [
+                        {
+                            id: '114052_ww1',
+                            title: 'WebWork 1: חוק קולון ושדה חשמלי',
+                            type: 'webwork',
+                            status: 'not_started',
+                            completed: false
+                        }
+                    ]
                 }
             }
         }
@@ -419,7 +435,7 @@ console.log('  ✅ PASS: L-07 regex & PRELOADED_USER_STATE hygiene verified.\n')
     assert(resetTask && resetTask.status === 'not_started' && resetTask.completed === false, 'Local newer reset to not_started at 9000 must beat remote done at 4000');
     assert.strictEqual(active.completedTaskRegistry['task_id:034053_reset'], undefined, 'Reconcile must clear stale completedTaskRegistry entry for reset task');
 
-    assert.strictEqual(active.courses['114052'].tasks.length, 0, 'Deleted/dismissed 114052_miluim_3010 must be stripped from merged courses');
+    assert.strictEqual(active.courses['114052'].tasks.length, 0, 'Deleted/dismissed 114052_miluim_3010 and retired 114052_ww1 must be stripped from merged courses');
     assert.strictEqual(upsertCalls.length, 0, 'Boot hydration must NOT echo-upload back to cloud');
 
     // Scenario 4b: Realtime update from another device

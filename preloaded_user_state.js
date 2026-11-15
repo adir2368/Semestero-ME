@@ -417,15 +417,6 @@
           "source": "moodle"
         },
         {
-          "id": "114052_ww1",
-          "xp": 40,
-          "type": "webwork",
-          "title": "WebWork 1: חוק קולון ושדה חשמלי",
-          "status": "not_started",
-          "dueDate": "",
-          "completed": false
-        },
-        {
           "id": "114052_ex",
           "xp": 500,
           "type": "exam",
@@ -1924,15 +1915,6 @@
                 "xp": 50,
                 "type": "hw",
                 "title": "תרגיל בית 1: שדה חשמלי וחוק גאוס",
-                "status": "not_started",
-                "dueDate": "",
-                "completed": false
-              },
-              {
-                "id": "114052_ww1",
-                "xp": 40,
-                "type": "webwork",
-                "title": "WebWork 1: חוק קולון ושדה חשמלי",
                 "status": "not_started",
                 "dueDate": "",
                 "completed": false

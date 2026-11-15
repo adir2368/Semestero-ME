@@ -17,9 +17,9 @@ ZIP_PATH = os.path.join(ROOT, "Semestero-ME-Windows-x64.zip")
 
 with open(os.path.join(ROOT, "package.json"), "r", encoding="utf-8") as f:
     pkg = json.load(f)
-VERSION = pkg.get("version", "2.13.12")
+VERSION = pkg.get("version", "2.13.13")
 TAG = f"v{VERSION}"
-NAME = f"Semestero ME v{VERSION} - Mobile Back Navigation, Unofficial Grade Sheet & Honors Cleanup"
+NAME = f"Semestero ME v{VERSION} - Remove Non-Existent Physics 2 WebWork 1 Task"
 
 def get_github_token():
     try:
@@ -99,20 +99,14 @@ def main():
 
     body_notes = f"""# Semestero ME {TAG} Release Notes
 
-### 🔙 1. ניווט חזור מלא במובייל, Android ובחלונות פנימיים (`MainActivity.java`, `ui_enhancements.js`, `grade_sheet.js`, `attendance_hub.js`)
-- **מניעת יציאה פתאומית בלחיצה על Back במובייל**: הטמעת `OnBackPressedCallback` ב-Android `MainActivity` עם אישור לחיצה כפולה (2.2 שניות + הודעת Toast) במסך הראשי בלבד, לצד גיבוי `popstate` לניווט בתוך הדפדפן.
-- **כפתורי חזור ושחזור הקשר בין חלונות**: כפתור `→ חזרה למרכז ביצועים` בגיליון הציונים (שמחזיר בדיוק ללשונית הפעילה במרכז הביצועים גם בלחיצה וגם בכפתור Back של המכשיר), כפתור `→ חזרה לתקציר` בתצוגת העומק, וכפתורי חזור בקורא פנגייה ובמרכז הנוכחות.
-- **תיקון קריאות סגירה**: תיקון `GradeSheet.goBack()`, `AttendanceHub.close()` ו-`AttendanceHub.goBack()` וכיסוי מורחב לחלונות המשניים ולחזרה לעץ הקורסים.
+### 🧹 1. הסרת מטלה לא קיימת בקורס פיסיקה 2 (`app.js`, `auth_sync.js`, `preloaded_user_state.js`, `watch_companion.js`)
+- הסרת מטלת השווא הלא-קיימת `WebWork 1: חוק קולון ושדה חשמלי` (`114052_ww1`) מכל תבניות הקורסים, ממצב ההתחלה של פיסיקה 2 ומברירת המחדל של השעון.
+- הוספת ניקוי יזום ב-`recalculateStats()` (`app.js`) וב-`isTaskDeletedOrDismissedForSync()` (`auth_sync.js`) כך שהמשימה תוסר אוטומטית גם ממשתמשים ומכשירים שכבר שמרו אותה בזיכרון המקומי או בענן.
 
-### 🎓 2. ניקוי גיליון הציונים והסרת אובססיית ההצטיינות (`index.html`, `grade_sheet.js`, `app.js`, `styles.css`, `ui_enhancements.js`)
-- **הסרת תווית ״רשמי״ מגיליון הציונים**: הבהרה ברורה כי גיליון הציונים הוא תדפיס אישי וסימולטור ממוצע בלבד ואינו מסמך רשמי של הטכניון.
-- **הסרת כרטיס ״מעמד אקדמי״ (undefined)**: הסרת השדה הלא-תקין מגיליון הציונים.
-- **הסרת חישובי ותגיות הצטיינות דיקן/נשיא**: הסרת כרטיס תחזית ההצטיינות ממרכז הביצועים, הסרת משבצת ה-KPI והתגיות בגיליון הציונים, הסרת תגית ״מצטיין דיקן/נשיא״ בווידג׳ט, והחלפת ספי ההצטיינות בהגדרות ליעד ממוצע אישי.
-
-### 📦 3. קובצי הפצה ועדכון:
-- `Semestero-ME-Tablet-Clean.apk` (Android Conflict-Free Tablet Edition `com.technion.semestero.tablet`, `versionCode 107`, `versionName {VERSION}`, `v1+v2+v3` Signed)
-- `Semestero-ME.apk` (Android Native App `com.technion.semestero`, `versionCode 107`, `versionName {VERSION}`, `v1+v2+v3` Signed, `targetSdk 34`)
-- `Semestero-ME-Watch.apk` (Wear OS Companion, `versionCode 107`, `versionName {VERSION}`, `v1+v2+v3` Signed)
+### 📦 2. קובצי הפצה ועדכון:
+- `Semestero-ME-Tablet-Clean.apk` (`com.technion.semestero.tablet`, `versionCode 108`, `versionName {VERSION}`, `v1+v2+v3` Signed)
+- `Semestero-ME.apk` (`com.technion.semestero`, `versionCode 108`, `versionName {VERSION}`, `v1+v2+v3` Signed, `targetSdk 34`)
+- `Semestero-ME-Watch.apk` (`versionCode 108`, `versionName {VERSION}`, `v1+v2+v3` Signed)
 - `Semestero-ME-Windows-x64.zip` (Electron Desktop Client {VERSION})
 """
 

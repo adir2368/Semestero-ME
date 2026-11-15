@@ -3239,15 +3239,6 @@ const PRELOADED_USER_STATE = (typeof window !== 'undefined' && window.PRELOADED_
           "completed": false
         },
         {
-          "id": "114052_ww1",
-          "xp": 40,
-          "type": "webwork",
-          "title": "WebWork 1: חוק קולון ושדה חשמלי",
-          "status": "not_started",
-          "dueDate": "",
-          "completed": false
-        },
-        {
           "id": "114052_ex",
           "xp": 500,
           "type": "exam",
@@ -4675,15 +4666,6 @@ const PRELOADED_USER_STATE = (typeof window !== 'undefined' && window.PRELOADED_
                 "xp": 50,
                 "type": "hw",
                 "title": "תרגיל בית 1: שדה חשמלי וחוק גאוס",
-                "status": "not_started",
-                "dueDate": "",
-                "completed": false
-              },
-              {
-                "id": "114052_ww1",
-                "xp": 40,
-                "type": "webwork",
-                "title": "WebWork 1: חוק קולון ושדה חשמלי",
                 "status": "not_started",
                 "dueDate": "",
                 "completed": false
@@ -10476,10 +10458,13 @@ function recalculateCourseStates() {
     // Calculate total open tasks count (STRICTLY across actively registered/enrolled courses, EXCLUDING exams and tests)
     let openTasksCount = 0;
     const deletedIdsSet = new Set(Array.isArray(gameState.deletedTaskIds) ? gameState.deletedTaskIds.map(String) : []);
+    // Retired non-existent seed tasks to purge from any legacy cached/cloud state
+    const RETIRED_SEED_TASK_IDS = new Set(['114052_ww1']);
     uniqueCourses.forEach(course => {
         if (Array.isArray(course.tasks)) {
             course.tasks = course.tasks.filter(t => {
                 if (!t) return false;
+                if (t.id && RETIRED_SEED_TASK_IDS.has(String(t.id))) return false;
                 if (t.id && deletedIdsSet.has(String(t.id))) return false;
                 if (t.moodleUid && deletedIdsSet.has(String(t.moodleUid))) return false;
                 if (t.moodleEventId && deletedIdsSet.has(String(t.moodleEventId))) return false;
@@ -23473,11 +23458,11 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.11.15-v2.13.12",
-    version: "2.13.12",
-    build: "20261115_08",
-    date: "2026-11-15 19:35",
-    description: "v2.13.12: ניווט חזור אמין במובייל ובאפליקציית Android (שימור חזרה דו-שלבי ביציאה, חזרה ממרכז ביצועים ↔ גיליון ציונים ↔ תקציר ונוכחות), הסרת תווית ״רשמי״ מגיליון הציונים, הסרת כרטיס ״מעמד אקדמי״ (undefined) והסרת חישובי ותוויות הצטיינות דיקן/נשיא (ADR-122)."
+    code: "REV-2026.11.15-v2.13.13",
+    version: "2.13.13",
+    build: "20261115_09",
+    date: "2026-11-15 21:08",
+    description: "v2.13.13: הסרת משימת השווא ״WebWork 1: חוק קולון ושדה חשמלי״ (114052_ww1) מכל מאגרי המערכת וניקוי אוטומטי בסנכרון הענן ובמצב השמור עבור פיסיקה 2 (ADR-123)."
 };
 window.APP_VERSION = APP_CURRENT_REVISION.version;
 

@@ -328,6 +328,7 @@
     // Check whether a task is marked deleted or dismissed in deletedTaskIds / dismissedTaskRegistry
     function isTaskDeletedOrDismissedForSync(courseCode, task, deletedSet, dismissedRegistry) {
         if (!task) return true;
+        if (task.id && String(task.id) === '114052_ww1') return true;
         if (deletedSet && deletedSet.size > 0) {
             if (task.id && deletedSet.has(String(task.id))) return true;
             if (task.moodleUid && deletedSet.has(String(task.moodleUid))) return true;
