@@ -10719,7 +10719,7 @@ function updateHud() {
     const xpFill = document.getElementById("xp-bar-fill");
     if (xpFill) {
         xpFill.style.width = `${progressPercent}%`;
-        xpFill.style.background = 'linear-gradient(90deg, #059669, #10b981, #34d399)';
+        xpFill.style.background = 'linear-gradient(90deg, #0369a1, #0284c7, #059669)';
     }
 
     const xpText = document.getElementById("xp-text");
@@ -24313,11 +24313,11 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.11.15-v2.13.8",
-    version: "2.13.8",
-    build: "20261115_04",
-    date: "2026-11-15 13:57",
-    description: "v2.13.8: איחוד מלא של בורר 13 השבועות, הסימון השבועי המהיר, המטריצה והסטטיסטיקות הסמסטריאליות תחת חלון 'נוכחות והשלמות' לניקוי מערכת השעות."
+    code: "REV-2026.11.15-v2.13.9",
+    version: "2.13.9",
+    build: "20261115_05",
+    date: "2026-11-15 14:57",
+    description: "v2.13.9: תיקון עיצוב סרגל הנק\"ז בסרגל העליון (גופן עברי קריא, ניגודיות וביטול חפיפת כדורית האור) ותיקון קליק במטריצת הנוכחות עבור שמות חדרים עם גרשיים כפולים (כגון פיזיקה 2 בטאוב מדמ\"ח 1)."
 };
 window.APP_VERSION = APP_CURRENT_REVISION.version;
 

@@ -226,5 +226,45 @@ window.AttendanceHub.setSelectedWeek(3);
 window.handleTimetableAttendance(null, 1, 0, 'missed');
 window.AttendanceHub.setSelectedWeek(window.AttendanceHub.getCurrentAcademicWeek());
 
+// 11. Verify .att-matrix-cell-btn onclick handles double quotes in room name (e.g. Physics 2 'טאוב - מדמ"ח 1')
+let statsRenderedHtml = '';
+const mockStatsBody = {
+    set innerHTML(val) { statsRenderedHtml = val; },
+    get innerHTML() { return statsRenderedHtml; }
+};
+window.AttendanceHub.renderStatsTab(mockStatsBody);
+assert.ok(!statsRenderedHtml.includes("טאוב - מדמ\"ח 1'"), 'Matrix onclick must not contain raw double quotes from room name');
+const matrixBtnRegex = /<button[^>]*class="att-matrix-cell-btn([^"]*)"[^>]*onclick="([^"]*)"/g;
+let matrixMatch;
+let physicsButtonsCount = 0;
+let unmarkedPhysicsClick = null;
+let unmarkedPhysicsWeek = null;
+while ((matrixMatch = matrixBtnRegex.exec(statsRenderedHtml)) !== null) {
+    const btnClasses = matrixMatch[1];
+    const onclickJs = matrixMatch[2];
+    assert.ok(onclickJs.includes('cycleMatrixCellAttendance(') && onclickJs.endsWith(')'), `Matrix onclick must be intact: ${onclickJs}`);
+    assert.doesNotThrow(() => new Function(onclickJs), 'Matrix cell onclick JS must compile cleanly without SyntaxError');
+    if (onclickJs.includes("decodeURIComponent('114052')")) {
+        physicsButtonsCount++;
+        const weekMatch = onclickJs.match(/,\s*(\d+)\)$/);
+        if (btnClasses.includes('unmarked') && weekMatch && !unmarkedPhysicsClick) {
+            unmarkedPhysicsClick = onclickJs;
+            unmarkedPhysicsWeek = parseInt(weekMatch[1], 10);
+        }
+    }
+}
+assert.ok(physicsButtonsCount >= 13, `Expected at least 13 Physics 2 matrix buttons, got ${physicsButtonsCount}`);
+assert.ok(unmarkedPhysicsClick && unmarkedPhysicsWeek, 'Expected an unmarked Physics 2 matrix button');
+new Function(unmarkedPhysicsClick)();
+let analyticsAfterMatrixClick = window.AttendanceHub.getSemesterAnalytics();
+let physicsRow = analyticsAfterMatrixClick.matrixRows.find(r => r.courseId === '114052');
+assert.ok(physicsRow, 'Physics 2 row must exist in analytics matrixRows');
+assert.strictEqual(physicsRow.weeks[unmarkedPhysicsWeek], 'attended', 'Clicking Physics 2 unmarked matrix cell must mark attended');
+new Function(unmarkedPhysicsClick)();
+new Function(unmarkedPhysicsClick)();
+analyticsAfterMatrixClick = window.AttendanceHub.getSemesterAnalytics();
+physicsRow = analyticsAfterMatrixClick.matrixRows.find(r => r.courseId === '114052');
+assert.strictEqual(physicsRow.weeks[unmarkedPhysicsWeek], 'unmarked', 'Clicking Physics 2 matrix cell through cycle must return to unmarked');
+
 console.log('✅ ALL TESTS PASSED: Physics attendance click, granular Perpetual Ditch, and 13-week analytics verified successfully!');
 process.exit(0);

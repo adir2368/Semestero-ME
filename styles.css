@@ -28,7 +28,7 @@
     
     --font-header: 'Rubik', system-ui, -apple-system, sans-serif;
     --font-body: 'Rubik', system-ui, -apple-system, sans-serif;
-    --font-mono: 'JetBrains Mono', 'IBM Plex Mono', ui-monospace, SFMono-Regular, monospace;
+    --font-mono: 'JetBrains Mono', 'Rubik', 'Assistant', 'IBM Plex Mono', ui-monospace, SFMono-Regular, monospace;
     
     --shadow-main: 0 8px 24px rgba(0, 0, 0, 0.45);
     --shadow-glow-blue: 0 0 0 1px rgba(56, 189, 248, 0.25);
@@ -366,20 +366,20 @@ body {
 .xp-bar-container {
     position: relative;
     height: 22px;
-    background-color: #090d16;
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 11px;
+    background-color: rgba(15, 23, 42, 0.92);
+    border: 1px solid rgba(56, 189, 248, 0.28);
+    border-radius: 999px;
     overflow: hidden;
-    box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.6);
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.65);
 }
 
 .xp-bar-fill {
     height: 100%;
-    background: linear-gradient(90deg, #059669, #10b981, #34d399) !important;
-    box-shadow: 0 0 12px rgba(16, 185, 129, 0.45);
+    background: linear-gradient(90deg, #0369a1, #0284c7, #059669) !important;
+    box-shadow: none;
     transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
     will-change: width;
-    border-radius: 11px;
+    border-radius: 999px;
 }
 
 .xp-text {
@@ -387,12 +387,14 @@ body {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    font-size: 0.82rem;
-    font-weight: 800;
-    font-family: 'Assistant', 'Rubik', 'Segoe UI', system-ui, sans-serif;
-    color: #ffffff;
-    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
-    letter-spacing: 0.5px;
+    z-index: 5;
+    font-size: 0.78rem;
+    font-weight: 700;
+    font-family: 'Rubik', 'Assistant', system-ui, sans-serif !important;
+    font-variant-numeric: tabular-nums;
+    color: #f8fafc;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.95), 0 0 6px rgba(0, 0, 0, 0.8);
+    letter-spacing: 0.01em;
     pointer-events: none;
     white-space: nowrap;
 }
@@ -11884,15 +11886,7 @@ html.is-iphone .app-global-footer {
 }
 
 .xp-bar-fill::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 60%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.45), transparent);
-    transform: skewX(-25deg);
-    animation: xpShimmer 3.8s infinite ease-in-out;
+    display: none !important;
 }
 
 @keyframes xpShimmer {
@@ -18144,26 +18138,10 @@ html.is-iphone .nav-tabs-left.has-sliding-pill .nav-tab.active {
 }
 
 .xp-bar-fill::before {
-    content: '';
-    position: absolute;
-    top: -1px;
-    bottom: -1px;
-    inset-inline-end: 0;
-    width: 14px;
-    border-radius: 50%;
-    background: radial-gradient(
-        circle at 30% 50%,
-        #ffffff 0%,
-        rgba(167, 243, 208, 0.92) 42%,
-        rgba(16, 185, 129, 0.35) 75%,
-        transparent 100%
-    );
-    box-shadow:
-        0 0 12px rgba(255, 255, 255, 0.9),
-        0 0 22px rgba(52, 211, 153, 0.8);
-    pointer-events: none;
-    z-index: 2;
-    animation: uiMotionCometPulse 2.2s ease-in-out infinite;
+    display: none !important;
+    width: 0 !important;
+    opacity: 0 !important;
+    box-shadow: none !important;
 }
 
 @keyframes uiMotionCometPulse {
@@ -18664,8 +18642,6 @@ h1, h2, h3,
     font-weight: 500 !important;
 }
 
-.char-level,
-.xp-text,
 .stat-value,
 #stat-gpa,
 .pill-value,
@@ -18701,16 +18677,16 @@ h1, h2, h3,
 
 /* Pass 8: Moment #1 (Prerequisite DAG) & Moment #2 (Telemetry Bar) */
 .xp-bar-container {
-    background: var(--bg-deep);
-    border: 1px solid var(--border-color);
-    border-radius: 6px;
+    background: rgba(15, 23, 42, 0.92);
+    border: 1px solid rgba(56, 189, 248, 0.28);
+    border-radius: 999px;
     box-shadow: none;
-    height: 18px;
+    height: 22px;
 }
 
 .xp-bar-fill {
-    background: linear-gradient(90deg, #0284c7, #38bdf8);
-    border-radius: 5px;
+    background: linear-gradient(90deg, #0369a1, #0284c7, #059669) !important;
+    border-radius: 999px;
     box-shadow: none;
 }
 

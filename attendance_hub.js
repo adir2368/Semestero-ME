@@ -9,6 +9,9 @@
 (function(global) {
     'use strict';
 
+    const encArg = (val) => encodeURIComponent(String(val || '')).replace(/'/g, '%27');
+    const escHtml = (val) => String(val || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
     const STORAGE_KEY_RECORDS = 'semestero_attendance_records_v2';
     const STORAGE_KEY_CATCHUP = 'semestero_catchup_queue_v2';
     const STORAGE_KEY_QUOTAS = 'semestero_mandatory_quotas_v2';
@@ -1038,8 +1041,6 @@
             const selectedWeek = analytics.selectedWeek || this.getSelectedWeek();
             const selectedWeekRange = (analytics.weeks && analytics.weeks[selectedWeek]) ? analytics.weeks[selectedWeek].dateRange : this.getWeekDateRangeLabel(selectedWeek);
             const fmtPct = (v) => (v === null || v === undefined) ? '—' : `${v}%`;
-            const encArg = (val) => encodeURIComponent(String(val || '')).replace(/'/g, '%27');
-            const escHtml = (val) => String(val || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
             const selectedWeekSlotsHtml = analytics.matrixRows.length === 0
                 ? '<div style="color: #94a3b8; font-size: 0.78rem; padding: 12px; background: rgba(255,255,255,0.02); border-radius: 10px; border: 1px dashed rgba(255,255,255,0.1);">אין שיעורים במערכת השעות לסימון בשבוע זה.</div>'
@@ -1052,7 +1053,7 @@
                     const isAtt = st === 'attended';
                     const isMis = st === 'missed';
                     const isPerp = row.isPerpetual && st === 'perpetual';
-                    const baseArgs = `decodeURIComponent('${encArg(row.courseId)}'), decodeURIComponent('${encArg(row.courseName)}'), decodeURIComponent('${encArg(row.type)}'), ${row.dayIndex}, '${encArg(row.startTime)}', '${encArg(row.endTime)}', decodeURIComponent('${encArg(row.room)}')`;
+                    const baseArgs = `decodeURIComponent('${encArg(row.courseId)}'), decodeURIComponent('${encArg(row.courseName)}'), decodeURIComponent('${encArg(row.type)}'), ${row.dayIndex}, decodeURIComponent('${encArg(row.startTime)}'), decodeURIComponent('${encArg(row.endTime)}'), decodeURIComponent('${encArg(row.room)}')`;
                     return `
                         <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; padding: 10px 12px; border-radius: 10px; background: ${isAtt ? 'rgba(16, 185, 129, 0.09)' : (isMis ? 'rgba(244, 63, 94, 0.09)' : 'rgba(255,255,255,0.03)')}; border: 1px solid ${isAtt ? 'rgba(16, 185, 129, 0.45)' : (isMis ? 'rgba(244, 63, 94, 0.45)' : 'rgba(255,255,255,0.08)')};">
                             <div style="min-width: 180px;">
@@ -1112,15 +1113,13 @@
                             symbol = '🚀';
                             titleText = `שבוע ${w}: בלמידה עצמית — לחץ לעדכון ידני`;
                         }
-                        const safeCourseName = String(row.courseName || '').replace(/'/g, "\\'");
-                        const safeType = String(row.type || '').replace(/'/g, "\\'");
-                        const safeRoom = String(row.room || '').replace(/'/g, "\\'");
+                        const baseCellArgs = `decodeURIComponent('${encArg(row.courseId)}'), decodeURIComponent('${encArg(row.courseName)}'), decodeURIComponent('${encArg(row.type)}'), ${row.dayIndex}, decodeURIComponent('${encArg(row.startTime)}'), decodeURIComponent('${encArg(row.endTime)}'), decodeURIComponent('${encArg(row.room)}')`;
                         cellsHtml += `
                             <td>
                                 <button type="button"
                                         class="att-matrix-cell-btn ${st} ${isCur ? 'is-current-col' : ''}"
-                                        title="${titleText}"
-                                        onclick="window.AttendanceHub.cycleMatrixCellAttendance('${row.courseId}', '${safeCourseName}', '${safeType}', ${row.dayIndex}, '${row.startTime}', '${row.endTime}', '${safeRoom}', ${w})">
+                                        title="${escHtml(titleText)}"
+                                        onclick="window.AttendanceHub.cycleMatrixCellAttendance(${baseCellArgs}, ${w})">
                                     ${symbol}
                                 </button>
                             </td>
@@ -1129,8 +1128,8 @@
                     matrixBodyHtml += `
                         <tr>
                             <td style="text-align: right; min-width: 155px; white-space: nowrap;">
-                                <strong style="color: #f8fafc;">${row.courseName}</strong>
-                                <div style="font-size: 0.68rem; color: #94a3b8;">${row.type} • יום ${row.dayName} ${row.startTime}</div>
+                                <strong style="color: #f8fafc;">${escHtml(row.courseName)}</strong>
+                                <div style="font-size: 0.68rem; color: #94a3b8;">${escHtml(row.type)} • יום ${escHtml(row.dayName)} ${escHtml(row.startTime)}</div>
                             </td>
                             ${cellsHtml}
                             <td style="font-weight: 800; color: ${rowPct === null ? '#94a3b8' : (rowPct >= 80 ? '#34d399' : '#fbbf24')};">
@@ -1385,7 +1384,7 @@
 
                                 <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
                                     ${item.pangeaUrl ? `
-                                        <button type="button" class="btn btn-sm btn-outline" onclick="if(window.PangeaHub) window.PangeaHub.openQuickPeek('${item.pangeaUrl}', '${item.pangeaTitle || item.topic}')" style="font-size: 0.74rem; padding: 4px 10px; color: #38bdf8; border-color: rgba(56, 189, 248, 0.4); border-radius: 6px;" title="קרא סיכום הרצאה מהיר בפנגייה">
+                                        <button type="button" class="btn btn-sm btn-outline" onclick="if(window.PangeaHub) window.PangeaHub.openQuickPeek(decodeURIComponent('${encArg(item.pangeaUrl)}'), decodeURIComponent('${encArg(item.pangeaTitle || item.topic)}'))" style="font-size: 0.74rem; padding: 4px 10px; color: #38bdf8; border-color: rgba(56, 189, 248, 0.4); border-radius: 6px;" title="קרא סיכום הרצאה מהיר בפנגייה">
                                             📖 סיכום בפנגייה
                                         </button>
                                     ` : ''}
@@ -1511,7 +1510,7 @@
                             <span style="font-size: 0.72rem; color: #38bdf8;">
                                 ${stats.remainingAllowed !== null ? `יתרת היעדרויות מותרת: <strong>${stats.remainingAllowed}</strong>` : ''}
                             </span>
-                            <button type="button" onclick="window.AttendanceHub.quickAddSession('${code}', '${quota.name}')" style="font-size: 0.72rem; padding: 3px 8px; background: rgba(255,255,255,0.08); border: none; border-radius: 4px; color: #cbd5e1; cursor: pointer;">
+                            <button type="button" onclick="window.AttendanceHub.quickAddSession(decodeURIComponent('${encArg(code)}'), decodeURIComponent('${encArg(quota.name)}'))" style="font-size: 0.72rem; padding: 3px 8px; background: rgba(255,255,255,0.08); border: none; border-radius: 4px; color: #cbd5e1; cursor: pointer;">
                                 + רשום נוכחות ידנית
                             </button>
                         </div>
@@ -1555,7 +1554,7 @@
                                     <span style="font-size: 0.75rem; font-weight: 700; color: ${r.status === 'attended' ? '#34d399' : '#f87171'};">
                                         ${r.status === 'attended' ? '✓ נוכחתי' : '✗ הוחסר'}
                                     </span>
-                                    <button type="button" onclick="window.AttendanceHub.deleteRecord('${r.slotKey}')" style="background: none; border: none; color: #64748b; cursor: pointer; font-size: 0.85rem;" title="מחק רשומה זו">&times;</button>
+                                    <button type="button" onclick="window.AttendanceHub.deleteRecord(decodeURIComponent('${encArg(r.slotKey)}'))" style="background: none; border: none; color: #64748b; cursor: pointer; font-size: 0.85rem;" title="מחק רשומה זו">&times;</button>
                                 </div>
                             </div>
                         `).join('')}
