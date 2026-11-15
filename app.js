@@ -24291,11 +24291,11 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.11.15-v2.13.5",
-    version: "2.13.5",
-    build: "20261115_01",
-    date: "2026-11-15 12:15",
-    description: "v2.13.5: הקשחת אבטחת מידע מלאה לפי רשימת 15 הווקטורים של @softwarebyjoe — הגנת Stored XSS בהגדרות חשבון וסמלים, סינון PostgREST Injection בחיפושי Supabase, חסימת Brute-Force (נעילה מעל 5 ניסיונות כושלים), אכיפת גבולות סמסטר (1–12), וולידציית ייבוא רוויזיות JSON (עד 5MB, חסימת SVG/HTML ומניעת Prototype Pollution)."
+    code: "REV-2026.11.15-v2.13.6",
+    version: "2.13.6",
+    build: "20261115_02",
+    date: "2026-11-15 13:15",
+    description: "v2.13.6: מהפכת ממשק משתמש מלאה בשיטת 9-Pass Unslop, Stageshow Craft ו-Modern Web Guidance — מערכת צבעי Ink (כחול-דיו כהה, טקסט Slate קריא ודגשי ציאן וחשמל חדים), הסרת אימוג'ים רועשים מכפתורים וטאבים והחלפתם באייקוני Lucide Vector חדים 16px, גופן JetBrains Mono לנק״ז ומספרים, טיפול במתגי כפתור ומיקרו-אנימציות קפיציות, והתאמת content-visibility ו-color-scheme: dark (ADR-116)."
 };
 window.APP_VERSION = APP_CURRENT_REVISION.version;
 

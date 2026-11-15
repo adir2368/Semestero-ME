@@ -1,37 +1,39 @@
-/* Reset and CSS Variables */
+/* Reset and CSS Variables - Unslop Ink Instrument World */
 :root {
-    --bg-deep: #0a0d14;
-    --bg-dark: #101524;
-    --bg-panel: #182035;
-    --bg-card: #202b48;
+    --bg-deep: #07080d;
+    --bg-dark: #0b0d14;
+    --bg-panel: #11141c;
+    --bg-card: #1a1e28;
     
-    --text-light: #f1f5f9;
-    --text-muted: #94a3b8;
+    --text-light: #eef0f5;
+    --text-secondary: #a3a9b8;
+    --text-muted: #7a8296;
     
-    /* RPG State Colors */
-    --color-locked: #4b5563;
-    --color-locked-bg: rgba(31, 41, 55, 0.6);
+    /* Toned Academic State Colors (Unslop Pass) */
+    --color-locked: #525866;
+    --color-locked-bg: rgba(82, 88, 102, 0.14);
     --color-available: #38bdf8;
-    --color-available-bg: rgba(56, 189, 248, 0.1);
-    --color-active: #fbbf24;
-    --color-active-bg: rgba(251, 191, 36, 0.15);
-    --color-mastered: #10b981;
-    --color-mastered-bg: rgba(16, 185, 129, 0.15);
+    --color-available-bg: rgba(56, 189, 248, 0.08);
+    --color-active: #f59e0b;
+    --color-active-bg: rgba(245, 158, 11, 0.11);
+    --color-mastered: #4cc38a;
+    --color-mastered-bg: rgba(76, 195, 138, 0.11);
     
-    /* UI Accent Colors */
-    --accent-gold: #fbbf24;
+    /* Single Chrome Accent + Muted Semantics */
+    --accent-gold: #f59e0b;
     --accent-gold-dark: #d97706;
-    --accent-blue: #0ea5e9;
-    --border-color: #2e3c60;
-    --border-hover: #4b5f90;
+    --accent-blue: #38bdf8;
+    --border-color: rgba(238, 240, 245, 0.08);
+    --border-hover: rgba(238, 240, 245, 0.18);
     
-    --font-header: 'Orbitron', 'Rubik', sans-serif;
-    --font-body: 'Rubik', sans-serif;
+    --font-header: 'Rubik', system-ui, -apple-system, sans-serif;
+    --font-body: 'Rubik', system-ui, -apple-system, sans-serif;
+    --font-mono: 'JetBrains Mono', 'IBM Plex Mono', ui-monospace, SFMono-Regular, monospace;
     
-    --shadow-main: 0 4px 20px rgba(0, 0, 0, 0.5);
-    --shadow-glow-blue: 0 0 15px rgba(14, 165, 233, 0.4);
-    --shadow-glow-gold: 0 0 15px rgba(251, 191, 36, 0.4);
-    --shadow-glow-green: 0 0 15px rgba(16, 185, 129, 0.4);
+    --shadow-main: 0 8px 24px rgba(0, 0, 0, 0.45);
+    --shadow-glow-blue: 0 0 0 1px rgba(56, 189, 248, 0.25);
+    --shadow-glow-gold: 0 0 0 1px rgba(245, 158, 11, 0.25);
+    --shadow-glow-green: 0 0 0 1px rgba(76, 195, 138, 0.25);
 }
 
 * {
@@ -105,39 +107,40 @@ body {
 /* Header & HUD Bar */
 .hud-header {
     background-color: var(--bg-dark);
-    border-bottom: 2px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
     padding: 8px 24px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    min-height: 86px;
-    height: 86px;
-    gap: 20px;
+    min-height: 76px;
+    height: 76px;
+    gap: 16px;
     flex-shrink: 0;
-    box-shadow: var(--shadow-main);
+    box-shadow: none;
     z-index: 10;
 }
 
 .hud-logo {
     font-family: var(--font-header);
-    font-weight: 900;
-    font-size: 1.5rem;
-    letter-spacing: 2px;
+    font-weight: 600;
+    font-size: 1.125rem;
+    letter-spacing: 0;
 }
 
 .hud-brand-logo-img {
-    width: 54px;
-    height: 54px;
+    width: 44px;
+    height: 44px;
     object-fit: contain;
-    filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.45));
-    border-radius: 12px;
-    transition: transform 0.25s ease, filter 0.25s ease;
+    filter: none;
+    border-radius: 8px;
+    transition: opacity 0.18s cubic-bezier(0.22, 1, 0.36, 1);
     flex-shrink: 0;
 }
 
 .hud-brand-logo-img:hover {
-    transform: scale(1.05);
-    filter: drop-shadow(0 0 16px rgba(56, 189, 248, 0.75));
+    transform: none;
+    filter: none;
+    opacity: 0.9;
 }
 
 .glitch-text {
@@ -18291,5 +18294,650 @@ body.a11y-stop-animations .ast-toast-merge-badge,
 body.a11y-stop-animations .ast-toast-progress {
     animation: none !important;
 }
+
+/* ============================================================================
+   UNSLOP 9-PASS CRAFT SYSTEM (Ink / Technion Instrumentation)
+   Character: Exact, instrumental, calm | World: #07080d / #0b0d14 / #11141c / #1a1e28
+   Note: Preserves all @ui_motion_prompts classes, tokens, and reduced-motion rules above.
+   ============================================================================ */
+
+/* Pass 1 & 2: Spacing Grid (4px multiples), Radii Hierarchy & Quiet Ink Surfaces */
+body {
+    background-color: var(--bg-deep);
+    color: var(--text-light);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+}
+
+.sidebar {
+    background-color: var(--bg-dark);
+    border-inline-end: 1px solid var(--border-color);
+    gap: 16px;
+    padding: 16px;
+}
+
+.sidebar-section {
+    background-color: var(--bg-panel);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: none;
+}
+
+.tree-controls,
+.flowchart-toolbar {
+    background-color: var(--bg-dark);
+    border-bottom: 1px solid var(--border-color);
+    padding: 8px 16px;
+    gap: 12px;
+}
+
+.fc-zoom-control-pill {
+    background-color: var(--bg-panel) !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: 8px !important;
+    padding: 2px 4px !important;
+    gap: 2px !important;
+}
+
+.btn,
+button.btn {
+    border-radius: 8px;
+    font-family: var(--font-body);
+    font-weight: 500;
+    letter-spacing: 0;
+    box-shadow: none;
+    transition: background-color 0.18s cubic-bezier(0.22, 1, 0.36, 1),
+                border-color 0.18s cubic-bezier(0.22, 1, 0.36, 1),
+                color 0.18s cubic-bezier(0.22, 1, 0.36, 1),
+                opacity 0.18s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.btn-primary,
+#btn-sidebar-add-course,
+#btn-fc-add-course,
+#btn-open-moodle-sync-modal {
+    background: #0284c7;
+    background-image: none;
+    border: 1px solid rgba(56, 189, 248, 0.45);
+    color: #f8fafc;
+    box-shadow: none;
+    font-weight: 600;
+}
+
+.btn-primary:hover,
+#btn-sidebar-add-course:hover,
+#btn-fc-add-course:hover,
+#btn-open-moodle-sync-modal:hover {
+    background: #0369a1;
+    border-color: #38bdf8;
+    box-shadow: none;
+}
+
+#btn-planner-save,
+#btn-save-all-settings,
+#btn-open-graduation-clearance {
+    background: #166534;
+    background-image: none;
+    border: 1px solid rgba(76, 195, 138, 0.45);
+    color: #ecfdf5;
+    box-shadow: none;
+    font-weight: 600;
+}
+
+#btn-planner-save:hover,
+#btn-save-all-settings:hover,
+#btn-open-graduation-clearance:hover {
+    background: #15803d;
+    border-color: rgba(76, 195, 138, 0.7);
+    box-shadow: none;
+}
+
+.btn-outline {
+    background: var(--bg-panel);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+}
+
+.btn-outline:hover {
+    background: var(--bg-card);
+    border-color: var(--border-hover);
+    color: var(--text-light);
+}
+
+input[type="text"],
+input[type="url"],
+input[type="number"],
+input[type="search"],
+select,
+textarea {
+    background-color: var(--bg-deep);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    color: var(--text-light);
+    font-family: var(--font-body);
+    transition: border-color 0.18s cubic-bezier(0.22, 1, 0.36, 1),
+                background-color 0.18s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+input[type="text"]:focus,
+input[type="url"]:focus,
+input[type="number"]:focus,
+input[type="search"]:focus,
+select:focus,
+textarea:focus {
+    outline: none;
+    border-color: rgba(56, 189, 248, 0.55);
+    box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.14);
+}
+
+/* Cards, Planner Columns, Settings & Modals */
+.character-card {
+    background: var(--bg-panel);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 8px 12px;
+    gap: 12px;
+    box-shadow: none;
+}
+
+.char-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+    box-shadow: none;
+    flex-shrink: 0;
+}
+
+.char-avatar:hover {
+    border-color: var(--border-hover);
+    color: var(--text-light);
+}
+
+.planner-column,
+.semester-card,
+.settings-section,
+.task-card,
+.analytics-card {
+    background-color: var(--bg-panel);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    box-shadow: none;
+}
+
+.modal-content {
+    background-color: var(--bg-panel);
+    border: 1px solid rgba(238, 240, 245, 0.12);
+    border-radius: 16px;
+    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.65);
+}
+
+.side-peek-panel {
+    background-color: var(--bg-panel);
+    border-inline-start: 1px solid rgba(238, 240, 245, 0.12);
+    border-radius: 16px 0 0 16px;
+    box-shadow: -12px 0 40px rgba(0, 0, 0, 0.55);
+}
+
+/* Pass 3 & 4: Iconography Alignment & Tab Hygiene */
+.unslop-icon {
+    width: 16px;
+    height: 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: currentColor;
+}
+
+.unslop-icon svg {
+    width: 16px;
+    height: 16px;
+    display: block;
+}
+
+.hud-nav-tabs {
+    background-color: var(--bg-dark);
+    border-bottom: 1px solid var(--border-color);
+    padding: 6px 24px;
+}
+
+.nav-tabs-left {
+    gap: 4px;
+}
+
+.nav-tab {
+    border-radius: 8px;
+    padding: 8px 12px;
+    gap: 8px;
+    color: var(--text-secondary);
+    font-weight: 500;
+    letter-spacing: 0;
+    transition: color 0.18s cubic-bezier(0.22, 1, 0.36, 1),
+                background-color 0.18s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.nav-tab:hover {
+    color: var(--text-light);
+    background-color: rgba(238, 240, 245, 0.04);
+}
+
+.nav-tab.active {
+    color: var(--text-light);
+    font-weight: 600;
+}
+
+.nav-tab-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    color: var(--text-muted);
+    transition: color 0.18s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.nav-tab.active .nav-tab-icon {
+    color: var(--color-available);
+}
+
+.nav-tab .nav-tab-sublabel {
+    display: none;
+}
+
+.hud-card-actions {
+    gap: 8px;
+}
+
+.btn-hud-bell {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    box-shadow: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    transition: background-color 0.18s cubic-bezier(0.22, 1, 0.36, 1),
+                border-color 0.18s cubic-bezier(0.22, 1, 0.36, 1),
+                color 0.18s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.btn-hud-bell:hover {
+    background: #232836;
+    border-color: var(--border-hover);
+    color: var(--text-light);
+    transform: none;
+    box-shadow: none;
+}
+
+.btn-hud-bell .bell-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+}
+
+.moodle-badge-live {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    font-size: 0.68rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: rgba(56, 189, 248, 0.1);
+    border: 1px solid rgba(56, 189, 248, 0.25);
+    color: var(--color-available);
+    box-shadow: none;
+}
+
+/* Pass 5 & 6: Hebrew Typography Weights, Zero RTL Tracking & Tabular Figures */
+h1, h2, h3, h4,
+.settings-page-title,
+.modal-course-name,
+.degree-title-text,
+.hud-sub-faculty,
+.nav-tab-label {
+    letter-spacing: 0;
+}
+
+h1, h2, h3,
+.settings-page-title,
+.modal-course-name,
+.degree-title-text {
+    font-weight: 600;
+    color: var(--text-light);
+}
+
+.hud-sub-faculty {
+    color: var(--text-muted) !important;
+    font-weight: 500 !important;
+}
+
+.char-level,
+.xp-text,
+.stat-value,
+#stat-gpa,
+.pill-value,
+#planner-electives-credits-val,
+#footer-version-badge,
+#btn-fc-zoom-reset,
+.tt-time-cell {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+}
+
+/* Pass 7: Signature Detail — Monospace 6-Digit Technion Course Keycaps */
+#modal-course-code,
+.course-code,
+.course-code-dim,
+.fc-node-code,
+.prereq-chip-code,
+.planner-course-code,
+.tt-course-code {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    direction: ltr;
+    unicode-bidi: isolate;
+    padding: 1px 6px;
+    border: 1px solid rgba(238, 240, 245, 0.1);
+    border-radius: 4px;
+    background: rgba(7, 8, 13, 0.65);
+    color: var(--text-secondary);
+}
+
+/* Pass 8: Moment #1 (Prerequisite DAG) & Moment #2 (Telemetry Bar) */
+.xp-bar-container {
+    background: var(--bg-deep);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    box-shadow: none;
+    height: 18px;
+}
+
+.xp-bar-fill {
+    background: linear-gradient(90deg, #0284c7, #38bdf8);
+    border-radius: 5px;
+    box-shadow: none;
+}
+
+.hud-stats {
+    gap: 12px;
+}
+
+.hud-stats .stat-item {
+    background: var(--bg-panel);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 6px 12px;
+    box-shadow: none;
+}
+
+.stat-label {
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.stat-value {
+    color: var(--text-light);
+    font-weight: 600;
+}
+
+/* Flowchart Nodes — Calm CAD Telemetry Polish */
+.flowchart-node,
+.fc-course-node {
+    border-radius: 10px;
+    box-shadow: none;
+}
+
+/* Footer Chrome Restraint */
+.app-footer {
+    background-color: var(--bg-dark);
+    border-top: 1px solid var(--border-color);
+    padding: 8px 24px;
+}
+
+.app-version-badge {
+    background: var(--bg-panel) !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: 8px !important;
+    color: var(--text-secondary) !important;
+    box-shadow: none !important;
+    font-weight: 500;
+    padding: 4px 10px;
+    transition: background-color 0.18s cubic-bezier(0.22, 1, 0.36, 1),
+                border-color 0.18s cubic-bezier(0.22, 1, 0.36, 1),
+                color 0.18s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.app-version-badge:hover {
+    background: var(--bg-card) !important;
+    border-color: var(--border-hover) !important;
+    color: var(--text-light) !important;
+}
+
+#footer-version-badge {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+}
+
+/* Neutralized Perpetual Ditch & Timetable Slot Chrome */
+.modal-perpetual-ditch-card {
+    background: var(--bg-card) !important;
+    border: 1px solid rgba(56, 189, 248, 0.25) !important;
+    border-radius: 12px !important;
+    box-shadow: none !important;
+    transition: border-color 0.18s cubic-bezier(0.22, 1, 0.36, 1),
+                background-color 0.18s cubic-bezier(0.22, 1, 0.36, 1) !important;
+}
+
+.modal-perpetual-ditch-card:hover {
+    border-color: rgba(56, 189, 248, 0.45) !important;
+}
+
+.modal-schedule-item.is-perpetual-slot {
+    background: rgba(26, 30, 40, 0.85) !important;
+    border: 1px solid rgba(56, 189, 248, 0.24) !important;
+    border-radius: 10px !important;
+}
+
+.btn-perpetual-panopto,
+.btn-perpetual-pangea {
+    background: var(--bg-panel) !important;
+    border: 1px solid rgba(238, 240, 245, 0.14) !important;
+    border-radius: 6px !important;
+    color: var(--text-light) !important;
+    font-weight: 500 !important;
+    box-shadow: none !important;
+}
+
+.btn-perpetual-panopto:hover,
+.btn-perpetual-pangea:hover {
+    background: var(--bg-deep) !important;
+    border-color: rgba(56, 189, 248, 0.45) !important;
+    color: var(--color-available) !important;
+}
+
+.tt-event-card.is-perpetual-ditch {
+    background: rgba(26, 30, 40, 0.92) !important;
+    border-color: rgba(56, 189, 248, 0.32) !important;
+    box-shadow: none !important;
+}
+
+/* ============================================================================
+   MODERN WEB GUIDANCE & STAGESHOW CRAFT PASS
+   - dark-mode, brand-consistent-forms, interactions-in-complex-layouts, defer-rendering-heavy-content
+   - stageshow: non-shrinking even icon slots, cap-height optical trim, concentric geometry
+   ============================================================================ */
+
+:root,
+html {
+    color-scheme: dark;
+    accent-color: var(--accent-blue);
+    --color-scrollbar-track: #0b0d14;
+    /* Cool Ink thumb tuned >= 3:1 contrast against #0b0d14 track */
+    --color-scrollbar-thumb: #6b7385;
+    scrollbar-color: var(--color-scrollbar-thumb) var(--color-scrollbar-track);
+    scrollbar-width: thin;
+}
+
+body,
+input[type="checkbox"],
+input[type="radio"],
+input[type="range"],
+progress {
+    accent-color: var(--accent-blue);
+}
+
+@supports not (scrollbar-color: auto) {
+    *::-webkit-scrollbar {
+        width: 10px;
+        height: 10px;
+    }
+
+    *::-webkit-scrollbar-thumb {
+        background: var(--color-scrollbar-thumb);
+        border-radius: 999px;
+    }
+
+    *::-webkit-scrollbar-track {
+        background: var(--color-scrollbar-track);
+    }
+}
+
+@supports not (accent-color: #38bdf8) {
+    input[type="range"] {
+        -webkit-appearance: none;
+        appearance: none;
+        background: transparent;
+    }
+
+    input[type="range"]::-webkit-slider-runnable-track {
+        width: 100%;
+        height: 8px;
+        background: var(--border-hover);
+        border-radius: 4px;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: var(--accent-blue);
+        margin-top: -4px;
+        cursor: pointer;
+    }
+
+    input[type="range"]::-moz-range-track {
+        width: 100%;
+        height: 8px;
+        background: var(--border-hover);
+        border-radius: 4px;
+    }
+
+    input[type="range"]::-moz-range-thumb {
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: var(--accent-blue);
+        cursor: pointer;
+    }
+
+    progress {
+        -webkit-appearance: none;
+        appearance: none;
+        border: none;
+        background: var(--bg-deep);
+        height: 8px;
+        border-radius: 4px;
+    }
+
+    progress::-webkit-progress-bar {
+        background: var(--bg-deep);
+        border-radius: 4px;
+    }
+
+    progress::-webkit-progress-value {
+        background: var(--accent-blue);
+        border-radius: 4px;
+    }
+
+    progress::-moz-progress-bar {
+        background: var(--accent-blue);
+        border-radius: 4px;
+    }
+}
+
+/* Isolate multi-column board reflows & defer strictly below-the-fold settings blocks */
+.semester-card,
+.planner-column {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 280px auto 520px;
+}
+
+@supports not (content-visibility: auto) {
+    .semester-card,
+    .planner-column {
+        contain: layout style paint;
+    }
+}
+
+.settings-section:nth-of-type(n+3) {
+    content-visibility: auto;
+    contain-intrinsic-size: auto none auto 320px;
+}
+
+/* Stageshow Craft: non-shrinking icon/badge boxes & optical cap-height alignment */
+.unslop-icon,
+.nav-tab-icon,
+.btn-hud-bell,
+.char-avatar,
+.moodle-badge-live,
+.app-version-badge,
+#modal-course-code,
+.course-code {
+    flex: none;
+}
+
+.hud-logo-text-col {
+    gap: 2px;
+    line-height: 1.3;
+}
+
+.settings-header-banner .settings-page-title {
+    line-height: 1.3;
+    margin-bottom: 2px;
+}
+
+@supports (text-box: trim-both cap alphabetic) {
+    .nav-tab-label,
+    .moodle-badge-live,
+    .app-version-badge,
+    #modal-course-code,
+    .course-code,
+    .course-code-dim,
+    .pill-label,
+    .pill-value {
+        text-box: trim-both cap alphabetic;
+    }
+}
+
+
 
 
