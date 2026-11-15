@@ -2725,9 +2725,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // Moodle Sync Logic
 async function performMoodleSync(moodleUrl, token) {
-    const statusDiv = document.getElementById("moodle-sync-status");
-    statusDiv.style.color = "var(--text-light)";
-    statusDiv.innerText = "Connecting to Moodle...";
+    const statusDiv = document.getElementById("moodle-sync-status") || document.getElementById("modal-moodle-sync-status");
+    if (statusDiv) {
+        statusDiv.style.color = "var(--text-light)";
+        statusDiv.innerText = "Connecting to Moodle...";
+    }
 
     try {
         const coursesUrl = `${moodleUrl}/webservice/rest/server.php?wstoken=${token}&wsfunction=core_enrol_get_users_courses&moodlewsrestformat=json`;
@@ -2765,13 +2767,17 @@ async function performMoodleSync(moodleUrl, token) {
         saveState();
         renderUI();
 
-        statusDiv.style.color = "var(--color-mastered)";
-        statusDiv.innerText = `Synced ${syncCount} courses from Moodle successfully!`;
+        if (statusDiv) {
+            statusDiv.style.color = "var(--color-mastered)";
+            statusDiv.innerText = `Synced ${syncCount} courses from Moodle successfully!`;
+        }
 
     } catch (e) {
         console.error("Moodle sync error:", e);
-        statusDiv.style.color = "#ef4444";
-        statusDiv.innerHTML = `Moodle connection error (CORS or Invalid Token).<br><span style="cursor:pointer;text-decoration:underline;" id="btn-moodle-mock-trigger">Click here to run Mock Sync Simulation</span>`;
+        if (statusDiv) {
+            statusDiv.style.color = "#ef4444";
+            statusDiv.innerHTML = `Moodle connection error (CORS or Invalid Token).<br><span style="cursor:pointer;text-decoration:underline;" id="btn-moodle-mock-trigger">Click here to run Mock Sync Simulation</span>`;
+        }
         
         // Wait a tick to bind the mock trigger event listener
         setTimeout(() => {
@@ -12508,6 +12514,7 @@ function drawConnections() {
 // Side-bar listing of all homework/tasks for active courses
 function renderActiveQuestsSidebar() {
     const list = document.getElementById("active-quests-list");
+    if (!list) return;
     list.innerHTML = "";
 
     let hasQuests = false;
@@ -16851,9 +16858,30 @@ window.switchTab = function(tabNameOrNumber) {
             }
 
             // 3. Open Peek button
-            if (e.target.classList.contains("notion-open-peek-btn")) {
+            if (e.target.classList.contains("notion-open-peek-btn") || e.target.closest(".notion-open-peek-btn")) {
                 e.stopPropagation();
                 openTaskSidePeek(courseCode, taskId);
+                return;
+            }
+
+            // 4. Date text click -> open hidden native date picker cleanly
+            const dateCell = e.target.closest(".notion-table-date-cell");
+            if (dateCell) {
+                e.stopPropagation();
+                const dateInput = dateCell.querySelector(".notion-inline-date-input");
+                if (dateInput) {
+                    try {
+                        if (typeof dateInput.showPicker === 'function') {
+                            dateInput.showPicker();
+                        } else {
+                            dateInput.focus();
+                            dateInput.click();
+                        }
+                    } catch (_) {
+                        dateInput.focus();
+                        dateInput.click();
+                    }
+                }
                 return;
             }
         });
@@ -18059,16 +18087,20 @@ function renderNotionTasksTable() {
                 <td class="notion-table-select-cell"><input type="checkbox" class="notion-row-checkbox" data-course-code="${c.code}" data-task-id="${t.id}" title="בחר משימה לפעולות מרובות" ${isSelected ? 'checked' : ''}></td>
                 <td>
                     <div class="notion-title-cell">
-                        ${pinBtnHtml}
-                        <span class="notion-course-tag">
-                            ${taskBadgeHtml}
-                            ${miluimBadgeHtml}
-                            <span class="notion-title-editable" contenteditable="true" spellcheck="false" title="לחץ לעריכת שם המשימה">${t.title}</span>
-                        </span>
-                        ${moodleLinkHtml}
-                        ${pangeaLinkHtml}
-                        ${facultyDriveLinkHtml}
-                        <button class="notion-open-peek-btn" title="פתח תצוגת צד">🔲 פתח</button>
+                        <div class="notion-title-main">
+                            ${pinBtnHtml}
+                            <span class="notion-course-tag">
+                                ${taskBadgeHtml}
+                                ${miluimBadgeHtml}
+                                <span class="notion-title-editable" contenteditable="true" spellcheck="false" title="לחץ לעריכת שם המשימה">${t.title}</span>
+                            </span>
+                        </div>
+                        <div class="notion-title-actions">
+                            ${moodleLinkHtml}
+                            ${pangeaLinkHtml}
+                            ${facultyDriveLinkHtml}
+                            <button type="button" class="notion-open-peek-btn" title="פתח תצוגת צד">🔲 פתח</button>
+                        </div>
                     </div>
                 </td>
                 <td>
@@ -18081,9 +18113,9 @@ function renderNotionTasksTable() {
                     <span class="notion-semester-pill sem-${semNum}">${semLabel}</span>
                 </td>
                 <td class="notion-table-date-cell">
-                    <div class="notion-date-display-wrap" style="display: flex; align-items: center; gap: 6px;">
-                        <span class="notion-date-formatted" style="font-variant-numeric: tabular-nums; font-size: 0.82rem; color: #e2e8f0; min-width: 78px;">${formatDateToDisplay(t.dueDate) || 'ללא תאריך'}</span>
-                        <input type="date" class="notion-inline-date-input" value="${toIsoDateOnly(t.dueDate)}" title="לחץ לעריכת תאריך הגשה" style="width: 24px; padding: 2px; border: none; background: transparent; color-scheme: dark; cursor: pointer;">
+                    <div class="notion-date-display-wrap" title="לחץ לעריכת תאריך הגשה">
+                        <span class="notion-date-formatted">${formatDateToDisplay(t.dueDate) || 'ללא תאריך'}</span>
+                        <input type="date" class="notion-inline-date-input" value="${toIsoDateOnly(t.dueDate)}" aria-label="עריכת תאריך הגשה">
                     </div>
                 </td>
                 <td><span class="time-remaining ${timeInfo.className}">${timeInfo.text}</span></td>
@@ -21733,19 +21765,8 @@ function renderFlowchartTree() {
             badgeY = topY + 72;
         }
 
-        const bInfo = (window.PLANNER_CATALOG && typeof window.PLANNER_CATALOG.getBottleneckInfo === 'function')
-            ? window.PLANNER_CATALOG.getBottleneckInfo(course.code)
-            : null;
-        const bottleneckSvg = (bInfo && bInfo.isCriticalBottleneck)
-            ? `<g class="fc-node-bottleneck-pill" title="צוואר בקבוק קריטי: פותח ${bInfo.transitiveUnlockCount} קורסי המשך בתואר">
-                   <rect x="${leftX + 6}" y="${topY + 5}" width="44" height="16" rx="4" fill="rgba(239,68,68,0.22)" stroke="rgba(248,113,113,0.55)" stroke-width="1" />
-                   <text x="${leftX + 28}" y="${topY + 16}" text-anchor="middle" direction="rtl" fill="#fca5a5" style="fill: #fca5a5 !important; font-size: 9.5px; font-weight: 800; direction: rtl; unicode-bidi: isolate;">🔥 ${bInfo.transitiveUnlockCount}</text>
-               </g>`
-            : '';
-
         g.innerHTML = `
             <rect x="${leftX}" y="${topY}" width="${pos.w}" height="${pos.h}" rx="8" fill="${rectFill}" stroke="${rectStroke}" class="fc-node-rect" />
-            ${bottleneckSvg}
             <!-- Line 1: Course Title (Isolated independent text nodes for flawless WebKit/iOS Safari BiDi) -->
             ${titleSvg}
             <!-- Line 2: Subtitle: Code + Credits -->
@@ -24313,11 +24334,11 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.11.15-v2.13.9",
-    version: "2.13.9",
-    build: "20261115_05",
-    date: "2026-11-15 14:57",
-    description: "v2.13.9: תיקון עיצוב סרגל הנק\"ז בסרגל העליון (גופן עברי קריא, ניגודיות וביטול חפיפת כדורית האור) ותיקון קליק במטריצת הנוכחות עבור שמות חדרים עם גרשיים כפולים (כגון פיזיקה 2 בטאוב מדמ\"ח 1)."
+    code: "REV-2026.11.15-v2.13.10",
+    version: "2.13.10",
+    build: "20261115_06",
+    date: "2026-11-15 18:15",
+    description: "v2.13.10: הסרת סרגלי 'משימות פעילות' ו'סנכרון מודל' ממפת הקורסים, הסרת פסי גלילה מיותרים/חיצוניים והסמל צוואר הבקבוק מתרשים הזרימה, ניקוי אייקון היומן החתוך בלוח המשימות (לחיצה ישירה על התאריך) והצמדת כפתורי הפעולה לשמאל העמודה."
 };
 window.APP_VERSION = APP_CURRENT_REVISION.version;
 

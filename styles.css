@@ -4876,8 +4876,7 @@ label[for="new-task-xp-input"],
     overflow: auto;
     position: relative;
     direction: ltr;
-    scrollbar-width: thin;
-    scrollbar-color: rgba(56, 189, 248, 0.4) transparent;
+    scrollbar-width: none;
     cursor: grab;
 }
 
@@ -11614,8 +11613,6 @@ html.is-iphone .app-global-footer {
 
 .planner-sidebar {
     overflow-y: auto !important;
-    scrollbar-width: thin !important;
-    scrollbar-color: rgba(56, 189, 248, 0.35) transparent !important;
     padding-bottom: 32px !important;
 }
 
@@ -11637,8 +11634,6 @@ html.is-iphone .app-global-footer {
     padding: 14px !important;
     gap: 14px !important;
     overflow-y: auto !important;
-    scrollbar-width: thin !important;
-    scrollbar-color: rgba(56, 189, 248, 0.35) transparent !important;
 }
 
 .sidebar-section {
@@ -18803,11 +18798,8 @@ h1, h2, h3,
 html {
     color-scheme: dark;
     accent-color: var(--accent-blue);
-    --color-scrollbar-track: #0b0d14;
-    /* Cool Ink thumb tuned >= 3:1 contrast against #0b0d14 track */
-    --color-scrollbar-thumb: #6b7385;
-    scrollbar-color: var(--color-scrollbar-thumb) var(--color-scrollbar-track);
-    scrollbar-width: thin;
+    --color-scrollbar-track: transparent;
+    --color-scrollbar-thumb: rgba(148, 163, 184, 0.28);
 }
 
 body,
@@ -18818,20 +18810,117 @@ progress {
     accent-color: var(--accent-blue);
 }
 
-@supports not (scrollbar-color: auto) {
-    *::-webkit-scrollbar {
-        width: 10px;
-        height: 10px;
-    }
+/* Clean zero-arrow sleek overlay scrollbars globally, and hide extra chrome scrollbars on Flowchart/Sidebar */
+*::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
 
-    *::-webkit-scrollbar-thumb {
-        background: var(--color-scrollbar-thumb);
-        border-radius: 999px;
-    }
+*::-webkit-scrollbar-button {
+    display: none;
+    width: 0;
+    height: 0;
+}
 
-    *::-webkit-scrollbar-track {
-        background: var(--color-scrollbar-track);
-    }
+*::-webkit-scrollbar-thumb {
+    background: var(--color-scrollbar-thumb);
+    border-radius: 999px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+    background: rgba(148, 163, 184, 0.45);
+}
+
+*::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.hud-sidebar,
+.planner-sidebar,
+.flowchart-scroll-wrapper,
+.study-runway-scroll-wrapper {
+    scrollbar-width: none !important;
+    scrollbar-color: transparent transparent !important;
+}
+
+.hud-sidebar::-webkit-scrollbar,
+.planner-sidebar::-webkit-scrollbar,
+.flowchart-scroll-wrapper::-webkit-scrollbar,
+.study-runway-scroll-wrapper::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+}
+
+/* Tasks Table: Left-Aligned Action Pills & Seamless Date Trigger (v2.13.10) */
+.notion-title-cell {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    width: 100%;
+}
+
+.notion-title-main {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+    flex: 1 1 auto;
+}
+
+.notion-title-actions {
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 6px;
+    flex-shrink: 0;
+    margin-inline-start: auto;
+    flex-wrap: nowrap;
+}
+
+.notion-title-actions .notion-moodle-link-btn,
+.notion-title-actions .notion-pangea-link-btn,
+.notion-title-actions .notion-drive-link-btn,
+.notion-title-actions .notion-open-peek-btn {
+    margin-right: 0;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.notion-date-display-wrap {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.notion-date-formatted {
+    font-variant-numeric: tabular-nums;
+    font-size: 0.82rem;
+    color: #e2e8f0;
+    padding: 3px 6px;
+    border-radius: 6px;
+    white-space: nowrap;
+    transition: background-color 0.16s ease, color 0.16s ease;
+}
+
+.notion-table-date-cell:hover .notion-date-formatted {
+    background: rgba(56, 189, 248, 0.12);
+    color: #7dd3fc;
+}
+
+.notion-inline-date-input {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    color-scheme: dark;
+    pointer-events: none;
 }
 
 @supports not (accent-color: #38bdf8) {

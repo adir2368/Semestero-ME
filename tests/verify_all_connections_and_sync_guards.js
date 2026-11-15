@@ -179,7 +179,7 @@ async function run() {
                 const syncBtn = document.getElementById('btn-sync-moodle-tasks');
                 if (syncBtn) syncBtn.click();
 
-                const sidebarStatus = document.getElementById('moodle-sync-status');
+                const sidebarStatus = document.getElementById('modal-moodle-sync-status') || document.getElementById('moodle-sync-status');
                 const sidebarText = sidebarStatus ? sidebarStatus.innerText.trim() : '';
 
                 setTimeout(() => {
