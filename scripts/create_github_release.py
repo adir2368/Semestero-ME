@@ -17,9 +17,9 @@ ZIP_PATH = os.path.join(ROOT, "Semestero-ME-Windows-x64.zip")
 
 with open(os.path.join(ROOT, "package.json"), "r", encoding="utf-8") as f:
     pkg = json.load(f)
-VERSION = pkg.get("version", "2.13.4")
+VERSION = pkg.get("version", "2.13.5")
 TAG = f"v{VERSION}"
-NAME = f"Semestero ME v{VERSION} - @ui_motion_prompts UI Motion Suite & Frosted Glass"
+NAME = f"Semestero ME v{VERSION} - @softwarebyjoe 15-Point Security Hardening & Import Guard"
 
 def get_github_token():
     try:
@@ -99,17 +99,18 @@ def main():
 
     body_notes = f"""# Semestero ME {TAG} Release Notes
 
-### ✨ 1. שדרוג ממשק ומיקרו-אנימציות (@ui_motion_prompts Suite)
-- **זכוכית מט ב-6 שכבות (`DfrsFnLD6im`)**: טשטוש עומק `blur(20px) saturate(160%)`, שכבות גוון והבהק אלכסוני 112° בסרגל העליון, סרגל הניווט והודעות הצפות.
-- **קפסולת טאבים גולשת (`DfLt74CjduQ`)**: `.nav-sliding-pill` עם מתיחה קפיצית במעבר בין לשוניות (דסקטופ + Dock נייד) והנפשת אייקון `uiMotionIconPop`.
-- **מד XP קפיצי + ראש שביט (`Dft1amuEyn7`)**: אוברשוט אלסטי במילוי מד ה-XP והילת Comet Glow בקצה ההתקדמות (תומך RTL/LTR).
-- **טבעת סונאר לבועת התראות (`Dfs3pG9AeUh`)**: פעימת קנה מידה וטבעת סונאר מתרחבת בעת עדכון `#bell-badge-count`.
-- **מחסנית Toasts חכמה (`Dfq8Fx9gmNY`)**: מיזוג הודעות זהות עם תג `×2`/`×3`, ערימת עד 3 הודעות ופס ספירה לאחור `ast-toast-progress`, תוך כיבוד מלא של `body.a11y-stop-animations` ו-`prefers-reduced-motion`.
+### 🛡️ 1. הקשחת אבטחת מידע מלאה (@softwarebyjoe 15-Point Security Hardening)
+- **הגנת Stored XSS (`auth_sync.js`)**: הוספת `escapeAuthHtml` ו-`sanitizeAvatarSymbol` בכל מוקדי רינדור פרטי משתמש, סמלי פרופיל ואינטגרציות (`renderAuthModal`, `updateHudAuthControls`, `getIntegrationsHubCardsHtml`).
+- **מניעת PostgREST Filter & Wildcard Injection (`auth_sync.js`)**: הוספת `sanitizePostgrestLiteral` לפני שאילתות Supabase `.or()` ו-`.ilike()` ב-`loginWithPassword`, `resetPassword` ו-`registerStudent`.
+- **הגנת Brute-Force ונעילה הדרגתית (`auth_sync.js`)**: מנגנון Rate Limiting (`checkAuthRateLimit`, `recordAuthFailure`, `clearAuthFailures`) הנועל התחברות ואיפוס סיסמה ל-15 שניות ומעלה (Exponential Backoff עד 15 דקות) לאחר 5 ניסיונות כושלים.
+- **אכיפת גבולות סמסטר (`auth_sync.js`, `app.js`)**: קיבוע סמסטרים לטווח חוקי `1–12` בהרשמה, עדכון פרופיל וייבוא.
+- **מגן ייבוא קבצי רוויזיה (`app.js`)**: הוספת `validateAndSanitizeImportedRevision` — בדיקת סיומת `.json`, מגבלת נפח `5MB`, חסימת תגיות HTML/SVG, ניקוי מפתחות Prototype Pollution (`__proto__`, `constructor`, `prototype`), הגבלת נק״ז (`0–30`) וציונים (`0–100`) וסינון תסריטים בשמות קורסים.
+- **אוטומציית בדיקות אבטחה (`tests/test_vibe_security_hardening.js`)**: חבילת בדיקות ייעודית המשולבת ישירות ב-`npm test`.
 
 ### 📦 2. קובצי הפצה ועדכון:
-- `Semestero-ME-Tablet-Clean.apk` (Android Conflict-Free Tablet Edition `com.technion.semestero.tablet`, `versionCode 99`, `versionName {VERSION}` — מומלץ לטאבלטים, `v1+v2+v3` Signed)
-- `Semestero-ME.apk` (Android Native App `com.technion.semestero`, `versionCode 99`, `versionName {VERSION}` — `v1+v2+v3` Signed, `targetSdk 34`)
-- `Semestero-ME-Watch.apk` (Wear OS Companion, `versionCode 99`, `versionName {VERSION}`)
+- `Semestero-ME-Tablet-Clean.apk` (Android Conflict-Free Tablet Edition `com.technion.semestero.tablet`, `versionCode 100`, `versionName {VERSION}` — מומלץ לטאבלטים, `v1+v2+v3` Signed)
+- `Semestero-ME.apk` (Android Native App `com.technion.semestero`, `versionCode 100`, `versionName {VERSION}` — `v1+v2+v3` Signed, `targetSdk 34`)
+- `Semestero-ME-Watch.apk` (Wear OS Companion, `versionCode 100`, `versionName {VERSION}`)
 - `Semestero-ME-Windows-x64.zip` (Electron Desktop Client {VERSION})
 """
 

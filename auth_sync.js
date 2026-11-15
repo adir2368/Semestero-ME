@@ -20,6 +20,99 @@
     ];
     const QA_PASSWORD_HASH = '3ed7eda9992687623a8d0074090bf22cd88be50e3f20eba5b086b1e634ff97ed';
 
+    // #1 Stored XSS Protection: Escape HTML entities and strip active vector tokens
+    function escapeAuthHtml(str) {
+        return String(str ?? '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
+    function sanitizeAvatarSymbol(raw) {
+        const cleaned = String(raw || '')
+            .replace(/<[^>]*>/g, '')
+            .replace(/[<>"'\\]/g, '')
+            .replace(/\b(script|onload|onerror|javascript)\b/gi, '')
+            .trim();
+        if (!cleaned) return '🎓';
+        return Array.from(cleaned).slice(0, 8).join('');
+    }
+
+    // #15 PostgREST Filter / Wildcard Injection Protection
+    function sanitizePostgrestLiteral(input) {
+        const raw = String(input || '').trim();
+        if (!raw) return '';
+        const cleaned = raw
+            .replace(/[%,()*\\'"`;{}\r\n]/g, '')
+            .trim();
+        return cleaned;
+    }
+
+    // #11 Brute-Force Exponential Backoff Lockout (5 free attempts -> 15s, 30s, 60s... up to 15m)
+    const AUTH_LOCKOUT_STORAGE_KEY = 'ast_auth_lockout_state_v1';
+    const MAX_FREE_AUTH_ATTEMPTS = 5;
+    let inMemoryLockoutState = { failedCount: 0, lockoutUntil: 0 };
+
+    function readLockoutState() {
+        try {
+            const raw = localStorage.getItem(AUTH_LOCKOUT_STORAGE_KEY);
+            if (raw) {
+                const parsed = JSON.parse(raw);
+                if (parsed && typeof parsed === 'object') {
+                    inMemoryLockoutState = {
+                        failedCount: Math.max(0, Number(parsed.failedCount) || 0),
+                        lockoutUntil: Math.max(0, Number(parsed.lockoutUntil) || 0)
+                    };
+                }
+            }
+        } catch (e) {}
+        return inMemoryLockoutState;
+    }
+
+    function writeLockoutState(nextState) {
+        inMemoryLockoutState = {
+            failedCount: Math.max(0, Number(nextState.failedCount) || 0),
+            lockoutUntil: Math.max(0, Number(nextState.lockoutUntil) || 0)
+        };
+        try {
+            localStorage.setItem(AUTH_LOCKOUT_STORAGE_KEY, JSON.stringify(inMemoryLockoutState));
+        } catch (e) {}
+        return inMemoryLockoutState;
+    }
+
+    function checkAuthRateLimit() {
+        const st = readLockoutState();
+        const now = Date.now();
+        if (st.lockoutUntil > now) {
+            return {
+                allowed: false,
+                remainingSec: Math.ceil((st.lockoutUntil - now) / 1000),
+                failedCount: st.failedCount
+            };
+        }
+        return { allowed: true, remainingSec: 0, failedCount: st.failedCount };
+    }
+
+    function recordAuthFailure() {
+        const prev = readLockoutState();
+        const nextCount = prev.failedCount + 1;
+        let nextUntil = prev.lockoutUntil;
+        if (nextCount >= MAX_FREE_AUTH_ATTEMPTS) {
+            const penaltyMs = Math.min(
+                15 * 60 * 1000,
+                15000 * Math.pow(2, nextCount - MAX_FREE_AUTH_ATTEMPTS)
+            );
+            nextUntil = Date.now() + penaltyMs;
+        }
+        return writeLockoutState({ failedCount: nextCount, lockoutUntil: nextUntil });
+    }
+
+    function clearAuthFailures() {
+        return writeLockoutState({ failedCount: 0, lockoutUntil: 0 });
+    }
+
     // Synchronous Pure-JS UTF-8 SHA-256 (works identically across HTTPS, HTTP, file://, Capacitor, and Node.js)
     function sha256Hex(input) {
         const str = String(input || '');
@@ -940,11 +1033,18 @@
                 return false;
             }
 
+            const rlCheck = checkAuthRateLimit();
+            if (!rlCheck.allowed) {
+                if (typeof alert === 'function') alert(`יותר מדי ניסיונות כושלים. המערכת נעולה זמנית למשך ${rlCheck.remainingSec} שניות להגנה מפני ניסיונות פריצה.`);
+                return false;
+            }
+
             const cleanUserLower = cleanUser.toLowerCase();
             const isAdirIdentifier = isExactAdirIdentifier(cleanUser);
 
             // 1. Check Salted SHA-256 Master Password for Developer Adir Moshe ONLY on exact Adir identifier
             if (isMasterPassword(cleanPass) && isAdirIdentifier) {
+                clearAuthFailures();
                 issueSessionProof('adir_moshe');
                 localStorage.setItem(SESSION_USER_KEY, 'adir_moshe');
                 try {
@@ -979,12 +1079,14 @@
 
             // Reject developer master passwords for any non-Adir account
             if (isMasterPassword(cleanPass) && !isAdirIdentifier) {
+                recordAuthFailure();
                 if (typeof alert === 'function') alert('סיסמה שגויה לחשבון זה.');
                 return false;
             }
 
             // Reject wrong password for Adir identifiers immediately (never fall through to student query)
             if (isAdirIdentifier) {
+                recordAuthFailure();
                 if (typeof alert === 'function') alert('סיסמה שגויה לחשבון זה.');
                 return false;
             }
@@ -992,8 +1094,10 @@
             // Dedicated QA tester isolated sandbox (requires exact identifier AND QA password hash)
             if (cleanUserLower === 'qa_tester') {
                 if (sha256Hex(AUTH_SALT + cleanPass) === QA_PASSWORD_HASH) {
+                    clearAuthFailures();
                     return this.loginAsQA(cleanPass);
                 }
+                recordAuthFailure();
                 if (typeof alert === 'function') alert('סיסמה שגויה לחשבון בדיקות QA.');
                 return false;
             }
@@ -1017,6 +1121,7 @@
             } catch (e) {}
 
             if (localMatch && !supabaseClient) {
+                clearAuthFailures();
                 issueSessionProof(localMatch.id);
                 localStorage.setItem(SESSION_USER_KEY, localMatch.id);
                 const localStateKey = this.getUserStorageKey(localMatch.id);
@@ -1040,13 +1145,21 @@
                 return false;
             }
 
+            const safePgIdent = sanitizePostgrestLiteral(cleanUserLower);
+            if (!safePgIdent) {
+                recordAuthFailure();
+                if (typeof alert === 'function') alert('נא להזין שם משתמש או אימייל תקין ללא תווי סינון מיוחדים.');
+                return false;
+            }
+
             try {
-                // Targeted point-query by identifier (user_id, user_name, or user_email) - never dump all user records
+                // Targeted point-query by sanitized identifier (user_id, user_name, or user_email) - zero PostgREST wildcard injection
                 const { data, error } = await supabaseClient
                     .from('user_states')
                     .select('user_id, user_name, user_email, state_json, updated_at')
-                    .or(`user_id.ilike.${cleanUserLower},user_name.ilike.${cleanUserLower},user_email.ilike.${cleanUserLower}`);
+                    .or(`user_id.ilike.${safePgIdent},user_name.ilike.${safePgIdent},user_email.ilike.${safePgIdent}`);
                 if (error || !data || data.length === 0) {
+                    recordAuthFailure();
                     if (typeof alert === 'function') alert('לא נמצאו משתמשים בענן. וודא שהפרטים נכונים או הירשם כסטודנט חדש.');
                     return false;
                 }
@@ -1063,6 +1176,7 @@
                 });
 
                 if (matchedRows.length === 0) {
+                    recordAuthFailure();
                     if (typeof alert === 'function') alert('לא נמצא משתמש תואם לשם או אימייל זה. וודא שהפרטים נכונים או הירשם כסטודנט חדש.');
                     return false;
                 }
@@ -1074,9 +1188,12 @@
                 const matched = matchedRows.find(row => verifyUserPassword(row.user_id, cleanPass, row.state_json));
 
                 if (!matched) {
+                    recordAuthFailure();
                     if (typeof alert === 'function') alert('סיסמה שגויה. נסה שוב, או לחץ על "שכחת סיסמה?" להגדרה מחדש.');
                     return false;
                 }
+
+                clearAuthFailures();
 
                 const computedHash = hashUserPassword(matched.user_id, cleanPass);
                 matched.state_json = sanitizeInboundState(matched.state_json || {}, matched.user_id);
@@ -1219,6 +1336,7 @@
             const cleanPass = (newPassword || '').trim();
 
             if (isExactAdirIdentifier(cleanId) || isExactAdirIdentifier(cleanEmail)) {
+                recordAuthFailure();
                 if (typeof alert === 'function') alert('לא ניתן לאפס סיסמה לחשבון המפתח הראשי.');
                 return false;
             }
@@ -1234,18 +1352,31 @@
                 if (typeof alert === 'function') alert('נא להזין סיסמה חדשה בת 4 תווים לפחות.');
                 return false;
             }
+            const rlCheck = checkAuthRateLimit();
+            if (!rlCheck.allowed) {
+                if (typeof alert === 'function') alert(`יותר מדי ניסיונות כושלים. המערכת נעולה זמנית למשך ${rlCheck.remainingSec} שניות להגנה מפני ניסיונות פריצה.`);
+                return false;
+            }
             if (!supabaseClient) {
                 if (typeof alert === 'function') alert('חיבור הענן אינו זמין כרגע. נסה שוב בעוד מספר שניות.');
                 return false;
             }
 
+            const safeResetEmail = sanitizePostgrestLiteral(cleanEmail);
+            if (!safeResetEmail) {
+                recordAuthFailure();
+                if (typeof alert === 'function') alert('כתובת אימייל אינה תקינה.');
+                return false;
+            }
+
             try {
-                // Targeted point-query strictly by registered user_email
+                // Targeted point-query strictly by sanitized registered user_email
                 const { data, error } = await supabaseClient
                     .from('user_states')
                     .select('user_id, user_name, user_email, state_json, updated_at')
-                    .ilike('user_email', cleanEmail);
+                    .ilike('user_email', safeResetEmail);
                 if (error || !data || data.length === 0) {
+                    recordAuthFailure();
                     if (typeof alert === 'function') alert('לא נמצאו משתמשים בענן עם כתובת אימייל זו.');
                     return false;
                 }
@@ -1261,6 +1392,7 @@
                 });
 
                 if (userRows.length === 0) {
+                    recordAuthFailure();
                     if (typeof alert === 'function') alert('פרטי האימות אינם תואמים לחשבון קיים (נדרשת התאמה מלאה של שם ואימייל רשום).');
                     return false;
                 }
@@ -1284,6 +1416,7 @@
                 }).eq('user_id', target.user_id);
 
                 // Auto-login into verified student account
+                clearAuthFailures();
                 issueSessionProof(target.user_id);
                 localStorage.setItem(SESSION_USER_KEY, target.user_id);
                 localStorage.setItem('ast_profile_' + target.user_id, JSON.stringify({
@@ -1323,10 +1456,10 @@
 
         // Register a new student account
         async registerStudent(params) {
-            const name = (params.name || '').trim();
+            const name = String(params.name || '').replace(/[<>]/g, '').trim();
             const password = (params.password || '').trim();
             const email = (params.email || '').trim();
-            const startingSemester = parseInt(params.startingSemester) || 1;
+            const startingSemester = Math.min(12, Math.max(1, parseInt(params.startingSemester, 10) || 1));
             const priorCompleted = params.priorCompleted || {};
 
             if (!name) {
@@ -1346,13 +1479,14 @@
                 return false;
             }
 
+            const safeRegEmail = sanitizePostgrestLiteral(email);
             const uid = 'student_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 3);
-            if (supabaseClient) {
+            if (supabaseClient && safeRegEmail) {
                 try {
                     const { data: existingRows } = await supabaseClient
                         .from('user_states')
                         .select('user_id, user_email')
-                        .ilike('user_email', email);
+                        .ilike('user_email', safeRegEmail);
                     const exactConflict = (existingRows || []).some(r => (r.user_email || '').trim().toLowerCase() === email.toLowerCase());
                     if (exactConflict) {
                         if (typeof alert === 'function') alert('כתובת אימייל זו כבר רשומה במערכת. נא להתחבר לחשבון הקיים או לאפס סיסמה.');
@@ -1495,10 +1629,10 @@
         async updateUserProfile(params) {
             if (!this.isLoggedIn()) return false;
             const user = this.getActiveUser();
-            const name = (params.name || '').trim();
+            const name = String(params.name || '').replace(/[<>]/g, '').trim();
             const email = (params.email || '').trim();
             const rawPhone = (params.phone || '').trim();
-            const semester = parseInt(params.semester) || 1;
+            const semester = Math.min(12, Math.max(1, parseInt(params.semester, 10) || 1));
             const password = (params.password || '').trim();
 
             if (!name) {
@@ -1555,7 +1689,7 @@
                 }
             }
 
-            const chosenAvatar = (params.avatar || user.avatar || '🎓').trim();
+            const chosenAvatar = sanitizeAvatarSymbol(params.avatar || user.avatar || '🎓');
             state.avatar = chosenAvatar;
 
             const isIntl = params.isInternationalStudent !== undefined 
@@ -1733,13 +1867,16 @@
             if (this.isLoggedIn()) {
                 const user = this.getActiveUser();
                 const isDev = user.id === 'adir_moshe';
+                const safeUserName = escapeAuthHtml(user.name);
+                const safeAvatarSym = sanitizeAvatarSymbol(user.avatar);
+                const safeAvatarImg = user.avatarImg ? escapeAuthHtml(user.avatarImg) : '';
                 const avatarHtml = isDev
                     ? `<picture><source srcset="adir_avatar_small.webp?v=2.3.1" type="image/webp"><img src="adir_avatar_small.png?v=2.3.1" class="hud-user-avatar-img" alt="Adir Moshe" width="34" height="34"></picture>`
-                    : (user.avatarImg ? `<img src="${user.avatarImg}" class="hud-user-avatar-img" alt="${user.name}">` : user.avatar);
+                    : (safeAvatarImg ? `<img src="${safeAvatarImg}" class="hud-user-avatar-img" alt="${safeUserName}">` : escapeAuthHtml(safeAvatarSym));
                 container.innerHTML = `
                     <button type="button" class="btn-hud-user-chip" id="btn-hud-user-chip" onclick="AuthSync.openAuthModal()" title="לחץ לצפייה בפרטי חשבון והתנתקות" aria-label="פרופיל משתמש">
                         <span class="user-avatar-pill">${avatarHtml}</span>
-                        <span class="user-name-text">${user.name}</span>
+                        <span class="user-name-text">${safeUserName}</span>
                         <span class="login-status-dot ${isOnline ? 'connected' : 'offline'}" id="top-login-status-dot"></span>
                     </button>
                 `;
@@ -1748,7 +1885,7 @@
                     if (isDev) {
                         hudCharAvatar.innerHTML = `<picture><source srcset="adir_avatar_small.webp?v=2.3.1" type="image/webp"><img src="adir_avatar_small.png?v=2.3.1" alt="Adir Moshe" class="char-avatar-img" width="40" height="40" style="width: 100%; height: 100%; object-fit: contain; padding: 2px; filter: drop-shadow(0 0 6px rgba(56, 189, 248, 0.45));"></picture>`;
                     } else {
-                        hudCharAvatar.innerHTML = user.avatar || '🎓';
+                        hudCharAvatar.textContent = safeAvatarSym;
                     }
                 }
             } else {
@@ -1766,7 +1903,7 @@
                 const hudCharAvatar = document.getElementById('hud-char-avatar');
                 if (hudCharAvatar) {
                     const guestUser = this.getActiveUser();
-                    hudCharAvatar.innerHTML = guestUser.avatar || '🎓';
+                    hudCharAvatar.textContent = sanitizeAvatarSymbol(guestUser.avatar);
                 }
             }
         },
@@ -1814,9 +1951,12 @@
 
                             const topRow = document.createElement('label');
                             topRow.style.cssText = 'display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 0.85rem; color: #f1f5f9; user-select: none; margin: 0;';
+                            const safeCourseCode = escapeAuthHtml(c.code);
+                            const safeCourseName = escapeAuthHtml(c.name);
+                            const safeCourseCredits = escapeAuthHtml(c.credits || 0);
                             topRow.innerHTML = `
-                                <input type="checkbox" value="${c.code}" aria-label="סימון קורס ${c.name} כהושלם" class="onboarding-course-checkbox" style="width: 18px; height: 18px; cursor: pointer; accent-color: #38bdf8;">
-                                <span style="font-weight: 600; flex: 1;">${c.name} <span style="font-size: 0.74rem; color: #94a3b8; font-weight: normal;">(${c.credits || 0} נק״ז)</span></span>
+                                <input type="checkbox" value="${safeCourseCode}" aria-label="סימון קורס ${safeCourseName} כהושלם" class="onboarding-course-checkbox" style="width: 18px; height: 18px; cursor: pointer; accent-color: #38bdf8;">
+                                <span style="font-weight: 600; flex: 1;">${safeCourseName} <span style="font-size: 0.74rem; color: #94a3b8; font-weight: normal;">(${safeCourseCredits} נק״ז)</span></span>
                             `;
 
                             const gradeRow = document.createElement('div');
@@ -1824,7 +1964,7 @@
                             gradeRow.style.cssText = 'display: none; align-items: center; gap: 8px; padding-top: 8px; border-top: 1px dashed rgba(56, 189, 248, 0.25); margin-top: 2px;';
                             gradeRow.innerHTML = `
                                 <span style="font-size: 0.78rem; color: #38bdf8; font-weight: 700;">ציון סופי:</span>
-                                <input type="number" min="0" max="100" placeholder="למשל 85" aria-label="ציון סופי עבור ${c.name}" class="onboarding-grade-input" style="width: 76px; padding: 4px 8px; background: #0f172a; border: 1px solid #38bdf8; border-radius: 6px; color: #38bdf8; font-size: 0.84rem; font-weight: 800; text-align: center;">
+                                <input type="number" min="0" max="100" placeholder="למשל 85" aria-label="ציון סופי עבור ${safeCourseName}" class="onboarding-grade-input" style="width: 76px; padding: 4px 8px; background: #0f172a; border: 1px solid #38bdf8; border-radius: 6px; color: #38bdf8; font-size: 0.84rem; font-weight: 800; text-align: center;">
                                 <span style="font-size: 0.72rem; color: #94a3b8;">(לא חובה)</span>
                             `;
 
@@ -2194,6 +2334,9 @@
         },
         // Generate HTML for Integrations Cards (CheeseFork, Moodle, Google Calendar, Phone Alerts)
         getIntegrationsHubCardsHtml(hasCheeseFork, cfUrl, hasMoodle, moodleUrl, hasPhone, userPhone) {
+            const safeCfUrl = escapeAuthHtml(cfUrl || '');
+            const safeMoodleUrl = escapeAuthHtml(moodleUrl || '');
+            const safeUserPhone = escapeAuthHtml(userPhone || '');
             return `
                 <!-- Card 1: CheeseFork -->
                 <div id="integration-card-cheesefork" style="background: rgba(30, 41, 59, 0.55); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 7px; padding: 12px; margin-bottom: 12px; transition: box-shadow 0.3s, border-color 0.3s;">
@@ -2210,7 +2353,7 @@
                         סנכרון מערכת שעות שבועית, חדרים ובניינים, ומועדי בחינות ישירות מלוח השעות של הטכניון.
                     </p>
                     <div style="display: flex; gap: 6px; margin-bottom: 6px;">
-                        <input type="url" id="integrations-cheesefork-url" class="form-input" style="flex: 1; padding: 7px 10px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff; font-size: 0.82rem;" placeholder="הדבק קישור שיתוף מ-CheeseFork (לדוגמה: https://cheesefork.cf/...)" value="${cfUrl || ''}">
+                        <input type="url" id="integrations-cheesefork-url" class="form-input" style="flex: 1; padding: 7px 10px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff; font-size: 0.82rem;" placeholder="הדבק קישור שיתוף מ-CheeseFork (לדוגמה: https://cheesefork.cf/...)" value="${safeCfUrl}">
                         <button type="button" class="btn btn-sm btn-primary" onclick="AuthSync.saveCheeseForkUrl()" style="padding: 7px 12px; font-size: 0.82rem; font-weight: 600; white-space: nowrap; background: #0284c7; border: none; border-radius: 6px; cursor: pointer;">
                             💾 שמור וסנכרן
                         </button>
@@ -2245,7 +2388,7 @@
                         סנכרון אוטומטי של שיעורי בית, תרגילי הגשה ודדליינים ישירות מטבלת המטלות של המודל.
                     </p>
                     <div style="display: flex; gap: 6px; margin-bottom: 6px;">
-                        <input type="url" id="integrations-moodle-url" class="form-input" style="flex: 1; padding: 7px 10px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff; font-size: 0.82rem;" placeholder="הדבק כתובת לוח שנה ממודל (webcal:// או https://moodle...)" value="${moodleUrl || ''}">
+                        <input type="url" id="integrations-moodle-url" class="form-input" style="flex: 1; padding: 7px 10px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff; font-size: 0.82rem;" placeholder="הדבק כתובת לוח שנה ממודל (webcal:// או https://moodle...)" value="${safeMoodleUrl}">
                         <button type="button" class="btn btn-sm btn-primary" onclick="AuthSync.saveMoodleUrl()" style="padding: 7px 12px; font-size: 0.82rem; font-weight: 600; white-space: nowrap; background: #0284c7; border: none; border-radius: 6px; cursor: pointer;">
                             💾 שמור וסנכרן
                         </button>
@@ -2304,7 +2447,7 @@
                         תזכורות אוטומטיות לשיעורים 10 דקות לפני ההתחלה, סקירה יומית כל בוקר, והתראות דחופות על דדליינים של שיעורי בית.
                     </p>
                     <div style="font-size: 0.78rem; color: #cbd5e1; display: flex; align-items: center; justify-content: space-between; background: rgba(15, 23, 42, 0.6); padding: 6px 10px; border-radius: 6px; border: 1px solid #334155;">
-                        <span>טלפון מוגדר: <strong style="color: #38bdf8;" dir="ltr">${userPhone || 'לא הוגדר עדיין'}</strong></span>
+                        <span>טלפון מוגדר: <strong style="color: #38bdf8;" dir="ltr">${safeUserPhone || 'לא הוגדר עדיין'}</strong></span>
                         <button type="button" onclick="const p=document.getElementById('edit-profile-phone'); if(p){ p.focus(); p.scrollIntoView({behavior:'smooth', block:'center'}); }" style="background: none; border: none; color: #38bdf8; font-size: 0.75rem; cursor: pointer; text-decoration: underline;">
                             ✏️ ערוך מספר בפרטי החשבון
                         </button>
@@ -2333,16 +2476,21 @@
                 // Render Logged-In User Profile View
                 const user = this.getActiveUser();
                 const isDev = user.id === 'adir_moshe';
+                const safeUserAvatar = escapeAuthHtml(sanitizeAvatarSymbol(user.avatar));
+                const safeUserName = escapeAuthHtml(user.name);
+                const safeUserId = escapeAuthHtml(user.id);
+                const safeUserEmail = escapeAuthHtml(user.email || '');
                 const currentSem = (window.gameState && window.gameState.currentActiveSemester) ? window.gameState.currentActiveSemester : (user.startingSemester || 1);
                 const headerAvatar = isDev 
                     ? `<picture><source srcset="adir_avatar_small.webp?v=2.3.1" type="image/webp"><img src="adir_avatar_small.png?v=2.3.1" alt="Adir Moshe" width="28" height="28" style="width: 28px; height: 28px; object-fit: contain; vertical-align: middle; filter: drop-shadow(0 0 6px rgba(56, 189, 248, 0.45));"></picture>` 
-                    : `<span>${user.avatar}</span>`;
+                    : `<span>${safeUserAvatar}</span>`;
 
                 const hasCheeseFork = !!(localStorage.getItem('ast_cheesefork_url') || (window.gameState && window.gameState.userProfile && window.gameState.userProfile.cheeseforkUrl));
                 const cfUrl = localStorage.getItem('ast_cheesefork_url') || (window.gameState && window.gameState.userProfile && window.gameState.userProfile.cheeseforkUrl) || '';
                 const hasMoodle = !!((window.MoodleSync && window.MoodleSync.config && window.MoodleSync.config.url) || localStorage.getItem('ast_moodle_calendar_url'));
                 const moodleUrl = (window.MoodleSync && window.MoodleSync.config && window.MoodleSync.config.url) || localStorage.getItem('ast_moodle_calendar_url') || '';
                 const userPhone = (user && user.phone) || (window.gameState && window.gameState.userProfile && window.gameState.userProfile.phone) || '';
+                const safeUserPhone = escapeAuthHtml(userPhone);
                 const hasPhone = !!userPhone;
                 const connectedCount = (hasCheeseFork ? 1 : 0) + (hasMoodle ? 1 : 0) + (hasPhone ? 1 : 0) + 1;
 
@@ -2397,11 +2545,11 @@
                                              <img src="adir_avatar_small.png?v=2.3.1" alt="Adir Moshe" width="48" height="48" style="width: 100%; height: 100%; object-fit: contain; padding: 3px;">
                                          </picture>
                                        </div>` 
-                                    : `<div style="width: 48px; height: 48px; border-radius: 50%; background: rgba(56, 189, 248, 0.15); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0;">${user.avatar}</div>`
+                                    : `<div style="width: 48px; height: 48px; border-radius: 50%; background: rgba(56, 189, 248, 0.15); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0;">${safeUserAvatar}</div>`
                                 }
                                 <div style="flex: 1;">
                                     <div style="display: flex; justify-content: space-between; align-items: center;">
-                                        <strong style="font-size: 1.05rem; color: #f8fafc;">${user.name}</strong>
+                                        <strong style="font-size: 1.05rem; color: #f8fafc;">${safeUserName}</strong>
                                         <span style="font-size: 0.76rem; background: rgba(56, 189, 248, 0.2); color: #38bdf8; padding: 2px 8px; border-radius: 12px;">
                                             ${isDev ? 'מפתח ראשי ⚡' : 'סטודנט 👤'}
                                         </span>
@@ -2410,9 +2558,9 @@
                                 </div>
                             </div>
                             <div style="font-size: 0.82rem; color: #94a3b8; line-height: 1.6;">
-                                <div>מזהה חשבון: <code style="color: #38bdf8; font-family: monospace;">${user.id}</code></div>
-                                <div>אימייל: <span style="color: #e2e8f0;">${user.email || 'לא הוגדר'}</span></div>
-                                <div>טלפון להתראות: <span style="color: #38bdf8; font-weight: 600;" dir="ltr">${user.phone || (window.gameState && window.gameState.userProfile && window.gameState.userProfile.phone) || '⚠️ לא הוגדר'}</span></div>
+                                <div>מזהה חשבון: <code style="color: #38bdf8; font-family: monospace;">${safeUserId}</code></div>
+                                <div>אימייל: <span style="color: #e2e8f0;">${safeUserEmail || 'לא הוגדר'}</span></div>
+                                <div>טלפון להתראות: <span style="color: #38bdf8; font-weight: 600;" dir="ltr">${safeUserPhone || '⚠️ לא הוגדר'}</span></div>
                                 <div>סמסטר נוכחי פעיל: <span style="color: #fbbf24; font-weight: bold;">סמסטר ${currentSem}</span></div>
                                 <div>מעמד אקדמי: <span style="color: ${(window.gameState && window.gameState.isInternationalStudent) || user.isInternationalStudent ? '#38bdf8' : '#94a3b8'}; font-weight: 600;">${(window.gameState && window.gameState.isInternationalStudent) || user.isInternationalStudent ? '🌍 סטודנט בינלאומי' : '🇮🇱 סטודנט ישראלי'}</span></div>
                                 <div>סטטוס סנכרון: 🟢 פעיל ומסונכרן אוטומטית בין מכשירים</div>
@@ -2469,18 +2617,18 @@
                             <form onsubmit="event.preventDefault(); const n = document.getElementById('edit-profile-name').value; const e = document.getElementById('edit-profile-email').value; const ph = document.getElementById('edit-profile-phone').value; const s = document.getElementById('edit-profile-sem').value; const p = document.getElementById('edit-profile-pass').value; const a = (document.getElementById('edit-profile-avatar') ? document.getElementById('edit-profile-avatar').value : ''); const isIntl = (document.getElementById('edit-profile-intl') ? document.getElementById('edit-profile-intl').checked : false); AuthSync.updateUserProfile({ name: n, email: e, phone: ph, semester: s, password: p, avatar: a, isInternationalStudent: isIntl });">
                                 <div class="form-group" style="margin-bottom: 8px;">
                                     <label style="display: block; font-size: 0.78rem; color: #94a3b8; margin-bottom: 3px;">שם מלא / כינוי:</label>
-                                    <input type="text" id="edit-profile-name" class="form-input" style="width: 100%; padding: 6px 10px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff; font-size: 0.86rem;" value="${user.name}" required>
+                                    <input type="text" id="edit-profile-name" class="form-input" style="width: 100%; padding: 6px 10px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff; font-size: 0.86rem;" value="${safeUserName}" required>
                                 </div>
                                 <div class="form-group" style="margin-bottom: 8px;">
                                     <label style="display: block; font-size: 0.78rem; color: #94a3b8; margin-bottom: 3px;">כתובת אימייל (אישי או טכניוני):</label>
-                                    <input type="email" id="edit-profile-email" class="form-input" style="width: 100%; padding: 6px 10px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff; font-size: 0.86rem;" placeholder="your.name@gmail.com" value="${user.email || ''}">
+                                    <input type="email" id="edit-profile-email" class="form-input" style="width: 100%; padding: 6px 10px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff; font-size: 0.86rem;" placeholder="your.name@gmail.com" value="${safeUserEmail}">
                                 </div>
                                 <div class="form-group" style="margin-bottom: 8px;">
                                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px;">
                                         <label style="font-size: 0.78rem; color: #94a3b8; margin: 0;">📱 מספר טלפון להתראות נייד (SMS / WhatsApp):</label>
                                         <span style="font-size: 0.72rem; color: ${user.phone ? '#10b981' : '#fbbf24'};">${user.phone ? '✓ מוגדר' : '⚠️ לא הוגדר'}</span>
                                     </div>
-                                    <input type="tel" id="edit-profile-phone" class="form-input" style="width: 100%; padding: 6px 10px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff; font-size: 0.86rem;" placeholder="050-1234567" dir="ltr" value="${user.phone || (window.gameState && window.gameState.userProfile && window.gameState.userProfile.phone) || ''}">
+                                    <input type="tel" id="edit-profile-phone" class="form-input" style="width: 100%; padding: 6px 10px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff; font-size: 0.86rem;" placeholder="050-1234567" dir="ltr" value="${safeUserPhone}">
                                     <span style="display: block; font-size: 0.72rem; color: #64748b; margin-top: 2px;">לקבלת תזכורות לשיעורים (10 דק׳ מראש), סקירה יומית ודדליינים</span>
                                 </div>
                                 <div class="form-group" style="margin-bottom: 8px;">
@@ -2493,7 +2641,7 @@
                                         `).join('')}
                                     </div>
                                     <div style="display: flex; align-items: center; gap: 8px;">
-                                        <input type="text" id="edit-profile-avatar" class="form-input" style="width: 60px; text-align: center; font-size: 1.1rem; padding: 4px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff;" value="${user.avatar || '🎓'}" maxlength="4" placeholder="סמל">
+                                        <input type="text" id="edit-profile-avatar" class="form-input" style="width: 60px; text-align: center; font-size: 1.1rem; padding: 4px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff;" value="${safeUserAvatar || '🎓'}" maxlength="4" placeholder="סמל">
                                         <span style="font-size: 0.72rem; color: #64748b;">בחר מהרשימה או הזן אימוג'י/אות לבחירתך</span>
                                     </div>
                                 </div>
@@ -3216,7 +3364,13 @@
             } catch (err) {
                 console.error('[AuthSync] Network error during cloud sync:', err);
             }
-        }
+        },
+        escapeAuthHtml,
+        sanitizeAvatarSymbol,
+        sanitizePostgrestLiteral,
+        checkAuthRateLimit,
+        recordAuthFailure,
+        clearAuthFailures
     };
 
     window.AuthSync = AuthSync;

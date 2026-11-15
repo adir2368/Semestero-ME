@@ -14776,7 +14776,7 @@ function openCourseDetails(code) {
                 const roomInfo = (s.building || s.room) ? `• ${s.building ? s.building : ''}${(s.building && s.room) ? ' ' : ''}${s.room ? ('חדר ' + s.room) : ''}` : '';
                 return `
                 <div class="modal-schedule-item ${isPerpetual ? 'is-perpetual-slot' : ''}">
-                    <div class="modal-schedule-item-time">⏰ יום ${s.day} | ${s.hours} ${isPerpetual ? '<span style="font-size: 0.65rem; color: #d8b4fe; background: rgba(168,85,247,0.22); padding: 1px 6px; border-radius: 8px; margin-right: 4px; font-weight: 700;">🚀 למידה עצמית</span>' : ''}</div>
+                    <div class="modal-schedule-item-time">⏰ יום ${s.day} | ${s.hours} ${isPerpetual ? '<span style="font-size: 0.68rem; color: #38bdf8; background: rgba(56,189,248,0.12); border: 1px solid rgba(56,189,248,0.28); padding: 1px 6px; border-radius: 6px; margin-right: 4px; font-weight: 600;">🚀 למידה עצמית</span>' : ''}</div>
                     <div class="modal-schedule-item-desc">${s.type} ${s.group ? `(קבוצה ${s.group})` : ''} ${roomInfo}</div>
                     ${s.lecturer ? `<div class="modal-schedule-item-lecturer">מרצה/מתרגל: ${s.lecturer}</div>` : ''}
                 </div>
@@ -14866,26 +14866,26 @@ function openCourseDetails(code) {
         let perpetualDitchBoxHtml = '';
         if (!isMasteredCourse) {
             perpetualDitchBoxHtml = `
-                <label class="modal-perpetual-ditch-card" style="display: flex; align-items: center; justify-content: space-between; gap: 10px; cursor: pointer; margin: 8px 0 10px 0; padding: 10px 12px; background: ${isPerpetual ? 'rgba(168, 85, 247, 0.16)' : 'rgba(168, 85, 247, 0.06)'}; border: 1px solid ${isPerpetual ? 'rgba(168, 85, 247, 0.65)' : 'rgba(168, 85, 247, 0.28)'}; border-radius: 8px; transition: all 0.2s ease;">
-                    <div style="display: flex; align-items: flex-start; gap: 8px; flex: 1;">
-                        <span style="font-size: 1.25rem; line-height: 1.2;">🚀</span>
+                <label class="modal-perpetual-ditch-card" style="display: flex; align-items: center; justify-content: space-between; gap: 12px; cursor: pointer; margin: 8px 0 12px 0; padding: 12px; background: ${isPerpetual ? 'rgba(56, 189, 248, 0.08)' : 'rgba(26, 30, 40, 0.75)'}; border: 1px solid ${isPerpetual ? 'rgba(56, 189, 248, 0.35)' : 'rgba(238, 240, 245, 0.1)'}; border-radius: 12px; transition: border-color 0.18s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.18s cubic-bezier(0.22, 1, 0.36, 1);">
+                    <div style="display: flex; align-items: flex-start; gap: 10px; flex: 1;">
+                        <span style="font-size: 1.15rem; line-height: 1.2;">🚀</span>
                         <div style="flex: 1;">
-                            <div style="font-size: 0.86rem; color: #f1f5f9; font-weight: 700; display: flex; align-items: center; gap: 6px;">
+                            <div style="font-size: 0.86rem; color: #eef0f5; font-weight: 600; display: flex; align-items: center; gap: 6px;">
                                 <span>מצב למידה עצמית (הברזה נצחית)</span>
-                                ${isPerpetual ? `<span style="font-size: 0.66rem; background: #a855f7; color: #fff; padding: 1px 6px; border-radius: 10px; font-weight: 800;">פעיל ✨</span>` : ''}
+                                ${isPerpetual ? `<span style="font-size: 0.68rem; background: rgba(56, 189, 248, 0.16); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.35); padding: 1px 6px; border-radius: 6px; font-weight: 600;">פעיל ✨</span>` : ''}
                             </div>
-                            <div style="font-size: 0.72rem; color: ${isPerpetual ? '#e9d5ff' : '#cbd5e1'}; margin-top: 2px; line-height: 1.4;">
+                            <div style="font-size: 0.74rem; color: ${isPerpetual ? '#eef0f5' : '#a3a9b8'}; margin-top: 4px; line-height: 1.45;">
                                 ${isPerpetual 
                                     ? 'הקורס נלמד עצמאית במקום שיעורים פרונטליים • התראות הגעה מושתקות • קישורי פנאופטו ופנגיאה זמינים במערכת השעות'
                                     : 'למידה עצמאית במקום שיעורים פרונטליים (פנאופטו ופנגיאה) • מבטל התראות הגעה ואי-נוכחות בכל המפגשים השבועיים של הקורס'}
                             </div>
                             ${isPerpetual ? `
                                 <div style="display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap;" onclick="event.stopPropagation()">
-                                    <a href="${resUrls.panoptoUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-xs btn-perpetual-panopto" style="text-decoration: none; padding: 3px 10px; border-radius: 6px; font-size: 0.74rem; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;">
-                                        📺 הרצאות בפנאופטו ↗
+                                    <a href="${resUrls.panoptoUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-xs btn-perpetual-panopto" style="text-decoration: none; padding: 4px 10px; border-radius: 6px; font-size: 0.74rem; font-weight: 500; display: inline-flex; align-items: center; gap: 4px;">
+                                        הרצאות בפנאופטו ↗
                                     </a>
-                                    <a href="${resUrls.pangeaUrl}" onclick="event.preventDefault(); if (window.PangeaHub) window.PangeaHub.openQuickPeek('${resUrls.pangeaUrl}', '${(course.name || '').replace(/'/g, "\\'")} - סיכומי פנגיאה', '${resUrls.pangeaUrl}'); else window.open('${resUrls.pangeaUrl}', '_blank');" target="_blank" rel="noopener noreferrer" class="btn btn-xs btn-perpetual-pangea" style="text-decoration: none; padding: 3px 10px; border-radius: 6px; font-size: 0.74rem; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;">
-                                        📖 סיכומי פנגיאה ↗
+                                    <a href="${resUrls.pangeaUrl}" onclick="event.preventDefault(); if (window.PangeaHub) window.PangeaHub.openQuickPeek('${resUrls.pangeaUrl}', '${(course.name || '').replace(/'/g, "\\'")} - סיכומי פנגיאה', '${resUrls.pangeaUrl}'); else window.open('${resUrls.pangeaUrl}', '_blank');" target="_blank" rel="noopener noreferrer" class="btn btn-xs btn-perpetual-pangea" style="text-decoration: none; padding: 4px 10px; border-radius: 6px; font-size: 0.74rem; font-weight: 500; display: inline-flex; align-items: center; gap: 4px;">
+                                        סיכומי פנגיאה ↗
                                     </a>
                                 </div>
                             ` : ''}
@@ -14894,7 +14894,7 @@ function openCourseDetails(code) {
                     <input type="checkbox" id="modal-course-perpetual-ditch-checkbox" ${isPerpetual ? 'checked' : ''} 
                            onchange="if (typeof toggleCoursePerpetualDitch === 'function') { toggleCoursePerpetualDitch('${course.code}', this.checked); if (typeof openCourseDetails === 'function') openCourseDetails('${course.code}'); }"
                            aria-label="הפעל מצב למידה עצמית לקורס זה"
-                           style="width: 22px; height: 22px; accent-color: #a855f7; cursor: pointer; flex-shrink: 0; margin-right: 8px;">
+                           style="width: 20px; height: 20px; accent-color: #38bdf8; cursor: pointer; flex-shrink: 0; margin-right: 8px;">
                 </label>
             `;
         }
@@ -24291,11 +24291,11 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.11.14-v2.13.4",
-    version: "2.13.4",
-    build: "20261114_04",
-    date: "2026-11-14 18:10",
-    description: "v2.13.4: שדרוג חוויית הממשק והמיקרו-אנימציות בהשראת @ui_motion_prompts — קפסולת טאבים גולשת עם מתיחה דינמית (Sliding Pill), זכוכית מט בת 6 שכבות לסרגלים והודעות, תופעת Comet Glow ואוברשוט אלסטי למד XP, טבעת סונאר להתראות ומחסנית Toasts חכמה עם מיזוג הודעות כפולות ופס ספירה לאחור."
+    code: "REV-2026.11.15-v2.13.5",
+    version: "2.13.5",
+    build: "20261115_01",
+    date: "2026-11-15 12:15",
+    description: "v2.13.5: הקשחת אבטחת מידע מלאה לפי רשימת 15 הווקטורים של @softwarebyjoe — הגנת Stored XSS בהגדרות חשבון וסמלים, סינון PostgREST Injection בחיפושי Supabase, חסימת Brute-Force (נעילה מעל 5 ניסיונות כושלים), אכיפת גבולות סמסטר (1–12), וולידציית ייבוא רוויזיות JSON (עד 5MB, חסימת SVG/HTML ומניעת Prototype Pollution)."
 };
 window.APP_VERSION = APP_CURRENT_REVISION.version;
 
@@ -25048,6 +25048,117 @@ function toggleRemindersBannerCollapse() {
     saveState();
 }
 
+function sanitizeImportedCourseText(val) {
+    return String(val)
+        .replace(/<\s*\/?\s*(?:script|svg|iframe|object|embed)[^>]*>/gi, "")
+        .replace(/\bon[a-z]+\s*=/gi, "");
+}
+
+function stripDangerousJsonKeys(node) {
+    if (Array.isArray(node)) {
+        return node.map(item => stripDangerousJsonKeys(item));
+    }
+    if (!node || typeof node !== "object") {
+        return node;
+    }
+    const cleanObj = {};
+    const keys = Object.keys(node);
+    for (let i = 0; i < keys.length; i++) {
+        const key = keys[i];
+        if (key === "__proto__" || key === "constructor" || key === "prototype") {
+            continue;
+        }
+        cleanObj[key] = stripDangerousJsonKeys(node[key]);
+    }
+    return cleanObj;
+}
+
+function validateAndSanitizeImportedRevision(rawText, fileMeta = {}) {
+    const MAX_IMPORT_BYTES = 5 * 1024 * 1024;
+    if (fileMeta && typeof fileMeta.name === "string" && fileMeta.name.trim() !== "") {
+        if (!/\.json$/i.test(fileMeta.name.trim())) {
+            throw new Error("סוג קובץ לא תקין — ניתן לייבא קבצי JSON בלבד.");
+        }
+    }
+    if (fileMeta && typeof fileMeta.size === "number" && fileMeta.size > MAX_IMPORT_BYTES) {
+        throw new Error("קובץ הייבוא גדול מדי (המגבלה היא 5MB).");
+    }
+    if (typeof rawText !== "string" || rawText.trim() === "") {
+        throw new Error("קובץ הייבוא ריק או אינו קריא.");
+    }
+    if (rawText.length > MAX_IMPORT_BYTES) {
+        throw new Error("תוכן קובץ הייבוא חורג ממגבלת 5MB.");
+    }
+    if (/^\s*<(?:svg|!doctype|html|script)/i.test(rawText)) {
+        throw new Error("תוכן הקובץ אינו JSON תקין (זוהה תג HTML/SVG לא חוקי).");
+    }
+
+    let parsed;
+    try {
+        parsed = JSON.parse(rawText);
+    } catch (err) {
+        throw new Error("שגיאה בפענוח קובץ ה-JSON: " + err.message);
+    }
+
+    const sanitized = stripDangerousJsonKeys(parsed);
+    if (
+        !sanitized ||
+        typeof sanitized !== "object" ||
+        Array.isArray(sanitized) ||
+        !sanitized.courses ||
+        typeof sanitized.courses !== "object" ||
+        Array.isArray(sanitized.courses)
+    ) {
+        throw new Error("מבנה הקובץ אינו תואם לרוויזיית Academic Skill Tree.");
+    }
+
+    if (sanitized.currentActiveSemester !== undefined && sanitized.currentActiveSemester !== null) {
+        const parsedSem = parseInt(sanitized.currentActiveSemester, 10);
+        sanitized.currentActiveSemester = Number.isFinite(parsedSem)
+            ? Math.min(12, Math.max(1, parsedSem))
+            : 1;
+    }
+
+    const courseIds = Object.keys(sanitized.courses);
+    for (let i = 0; i < courseIds.length; i++) {
+        const cid = courseIds[i];
+        const course = sanitized.courses[cid];
+        if (!course || typeof course !== "object" || Array.isArray(course)) {
+            delete sanitized.courses[cid];
+            continue;
+        }
+        if (course.credits !== undefined && course.credits !== null && course.credits !== "") {
+            const numCredits = Number(course.credits);
+            course.credits = Number.isFinite(numCredits)
+                ? Math.min(30, Math.max(0, numCredits))
+                : 0;
+        }
+        if (course.grade !== undefined && course.grade !== null && course.grade !== "") {
+            if (typeof course.grade === "number" || (typeof course.grade === "string" && /^-?\d+(?:\.\d+)?$/.test(course.grade.trim()))) {
+                const numGrade = Number(course.grade);
+                if (Number.isFinite(numGrade)) {
+                    course.grade = Math.min(100, Math.max(0, numGrade));
+                }
+            } else if (typeof course.grade === "string") {
+                course.grade = sanitizeImportedCourseText(course.grade);
+            }
+        }
+        const propNames = Object.keys(course);
+        for (let j = 0; j < propNames.length; j++) {
+            const prop = propNames[j];
+            if (typeof course[prop] === "string") {
+                course[prop] = sanitizeImportedCourseText(course[prop]);
+            }
+        }
+    }
+
+    return sanitized;
+}
+
+if (typeof window !== "undefined") {
+    window.validateAndSanitizeImportedRevision = validateAndSanitizeImportedRevision;
+}
+
 function setupSettingsPageButtons() {
     const btnSaveAll = document.getElementById("btn-save-all-settings");
     if (btnSaveAll) btnSaveAll.onclick = saveAllSettings;
@@ -25094,26 +25205,37 @@ function setupSettingsPageButtons() {
         fileInput.onchange = (e) => {
             const file = e.target.files[0];
             if (!file) return;
+            if (!/\.json$/i.test(String(file.name || ""))) {
+                alert("סוג קובץ לא תקין — ניתן לייבא קבצי JSON בלבד.");
+                fileInput.value = "";
+                return;
+            }
+            if (typeof file.size === "number" && file.size > 5 * 1024 * 1024) {
+                alert("קובץ הייבוא גדול מדי (המגבלה היא 5MB).");
+                fileInput.value = "";
+                return;
+            }
             const reader = new FileReader();
             reader.onload = (event) => {
                 try {
-                    const imported = JSON.parse(event.target.result);
-                    if (imported && imported.courses) {
-                        if (confirm(`האם לייבא רוויזיה מקובץ "${file.name}"?`)) {
-                            const revs = gameState.revisions || [];
-                            gameState = imported;
-                            gameState.revisions = revs;
-                            recalculateCourseStates();
-                            saveState();
-                            renderUI();
-                            renderSettingsPage();
-                            showToastNotification("רוויזיה יובאה בהצלחה!", "success");
-                        }
-                    } else {
-                        alert("מבנה הקובץ אינו תואם לרוויזיית Academic Skill Tree.");
+                    const imported = validateAndSanitizeImportedRevision(event.target.result, {
+                        name: file.name,
+                        size: file.size
+                    });
+                    if (confirm(`האם לייבא רוויזיה מקובץ "${file.name}"?`)) {
+                        const revs = gameState.revisions || [];
+                        gameState = imported;
+                        gameState.revisions = revs;
+                        recalculateCourseStates();
+                        saveState();
+                        renderUI();
+                        renderSettingsPage();
+                        showToastNotification("רוויזיה יובאה בהצלחה!", "success");
                     }
                 } catch (err) {
-                    alert("שגיאה בפענוח קובץ ה-JSON: " + err.message);
+                    alert(err && err.message ? err.message : "שגיאה בפענוח קובץ ה-JSON.");
+                } finally {
+                    fileInput.value = "";
                 }
             };
             reader.readAsText(file, "UTF-8");
