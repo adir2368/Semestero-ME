@@ -623,7 +623,10 @@
             btn.innerHTML = '?';
 
             if (modalId === 'course-modal') {
-                btn.style.marginRight = '8px';
+                btn.style.marginRight = '0px';
+                btn.style.width = '24px';
+                btn.style.height = '24px';
+                btn.style.fontSize = '0.78rem';
             } else if (modalId.includes('-workspace') || modalId.includes('-pane')) {
                 btn.style.marginLeft = '8px';
                 btn.style.alignSelf = 'center';

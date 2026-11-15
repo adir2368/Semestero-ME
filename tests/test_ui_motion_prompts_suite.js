@@ -414,7 +414,7 @@ const t1Dup = toastSandbox.showToastNotification('Task synced successfully', 'su
 assert.strictEqual(t1Dup, t1, 'Identical toast should merge into existing element');
 const mergeBadge = t1.querySelector('.ast-toast-merge-badge');
 assert(mergeBadge, 'Merged toast should show .ast-toast-merge-badge');
-assert.strictEqual(mergeBadge.textContent, '×2');
+assert.strictEqual(mergeBadge.textContent, 'קומבו ×2');
 
 const t2 = toastSandbox.showToastNotification('Calendar sync finished', 'info');
 assert.notStrictEqual(t2, t1);

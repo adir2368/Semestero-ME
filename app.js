@@ -14764,7 +14764,10 @@ function openCourseDetails(code) {
             course.moedB = '';
         }
 
-        const isPerpetual = (typeof isCoursePerpetualDitch === 'function') && isCoursePerpetualDitch(course.code);
+        const ditchMode = (typeof getCoursePerpetualDitchMode === 'function')
+            ? getCoursePerpetualDitchMode(course.code)
+            : ((typeof isCoursePerpetualDitch === 'function' && isCoursePerpetualDitch(course.code)) ? 'all' : 'none');
+        const isPerpetual = ditchMode !== 'none';
         const resUrls = (typeof getCourseResourceUrls === 'function') ? getCourseResourceUrls(course.code) : { panoptoUrl: '#', pangeaUrl: '#' };
 
         const hasSchedule = !isMasteredCourse && Array.isArray(course.schedule) && course.schedule.length > 0;
@@ -14774,9 +14777,10 @@ function openCourseDetails(code) {
         if (hasSchedule) {
             scheduleItemsHtml = course.schedule.map(s => {
                 const roomInfo = (s.building || s.room) ? `• ${s.building ? s.building : ''}${(s.building && s.room) ? ' ' : ''}${s.room ? ('חדר ' + s.room) : ''}` : '';
+                const isSlotPerpetual = (typeof isCoursePerpetualDitch === 'function') && isCoursePerpetualDitch(course.code, s.type);
                 return `
-                <div class="modal-schedule-item ${isPerpetual ? 'is-perpetual-slot' : ''}">
-                    <div class="modal-schedule-item-time">⏰ יום ${s.day} | ${s.hours} ${isPerpetual ? '<span style="font-size: 0.68rem; color: #38bdf8; background: rgba(56,189,248,0.12); border: 1px solid rgba(56,189,248,0.28); padding: 1px 6px; border-radius: 6px; margin-right: 4px; font-weight: 600;">🚀 למידה עצמית</span>' : ''}</div>
+                <div class="modal-schedule-item ${isSlotPerpetual ? 'is-perpetual-slot' : ''}">
+                    <div class="modal-schedule-item-time">⏰ יום ${s.day} | ${s.hours} ${isSlotPerpetual ? '<span style="font-size: 0.68rem; color: #38bdf8; background: rgba(56,189,248,0.12); border: 1px solid rgba(56,189,248,0.28); padding: 1px 6px; border-radius: 6px; margin-right: 4px; font-weight: 600;">🚀 למידה עצמית</span>' : ''}</div>
                     <div class="modal-schedule-item-desc">${s.type} ${s.group ? `(קבוצה ${s.group})` : ''} ${roomInfo}</div>
                     ${s.lecturer ? `<div class="modal-schedule-item-lecturer">מרצה/מתרגל: ${s.lecturer}</div>` : ''}
                 </div>
@@ -14865,37 +14869,54 @@ function openCourseDetails(code) {
 
         let perpetualDitchBoxHtml = '';
         if (!isMasteredCourse) {
+            const modeDescMap = {
+                all: 'כל המפגשים של הקורס בלמידה עצמית • התראות הגעה מושתקות • קישורי פנאופטו ופנגיאה זמינים',
+                lecture: 'רק ההרצאות של הקורס בלמידה עצמית (התרגולים נשארים פרונטליים) • התראות הגעה להרצאות מושתקות',
+                tutorial: 'רק התרגולים/מעבדות של הקורס בלמידה עצמית (ההרצאות נשארות פרונטליות) • התראות לתרגולים מושתקות',
+                none: 'למידה עצמאית במקום הגעה פרונטלית (ניתן לבחור הרצאות בלבד, תרגולים בלבד, או את כל הקורס)'
+            };
+            const modeLabelBadgeMap = {
+                all: 'פעיל ✨ (כל הקורס)',
+                lecture: 'פעיל ✨ (הרצאות בלבד)',
+                tutorial: 'פעיל ✨ (תרגולים בלבד)'
+            };
             perpetualDitchBoxHtml = `
-                <label class="modal-perpetual-ditch-card" style="display: flex; align-items: center; justify-content: space-between; gap: 12px; cursor: pointer; margin: 8px 0 12px 0; padding: 12px; background: ${isPerpetual ? 'rgba(56, 189, 248, 0.08)' : 'rgba(26, 30, 40, 0.75)'}; border: 1px solid ${isPerpetual ? 'rgba(56, 189, 248, 0.35)' : 'rgba(238, 240, 245, 0.1)'}; border-radius: 12px; transition: border-color 0.18s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.18s cubic-bezier(0.22, 1, 0.36, 1);">
-                    <div style="display: flex; align-items: flex-start; gap: 10px; flex: 1;">
-                        <span style="font-size: 1.15rem; line-height: 1.2;">🚀</span>
-                        <div style="flex: 1;">
-                            <div style="font-size: 0.86rem; color: #eef0f5; font-weight: 600; display: flex; align-items: center; gap: 6px;">
-                                <span>מצב למידה עצמית (הברזה נצחית)</span>
-                                ${isPerpetual ? `<span style="font-size: 0.68rem; background: rgba(56, 189, 248, 0.16); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.35); padding: 1px 6px; border-radius: 6px; font-weight: 600;">פעיל ✨</span>` : ''}
-                            </div>
-                            <div style="font-size: 0.74rem; color: ${isPerpetual ? '#eef0f5' : '#a3a9b8'}; margin-top: 4px; line-height: 1.45;">
-                                ${isPerpetual 
-                                    ? 'הקורס נלמד עצמאית במקום שיעורים פרונטליים • התראות הגעה מושתקות • קישורי פנאופטו ופנגיאה זמינים במערכת השעות'
-                                    : 'למידה עצמאית במקום שיעורים פרונטליים (פנאופטו ופנגיאה) • מבטל התראות הגעה ואי-נוכחות בכל המפגשים השבועיים של הקורס'}
-                            </div>
-                            ${isPerpetual ? `
-                                <div style="display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap;" onclick="event.stopPropagation()">
-                                    <a href="${resUrls.panoptoUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-xs btn-perpetual-panopto" style="text-decoration: none; padding: 4px 10px; border-radius: 6px; font-size: 0.74rem; font-weight: 500; display: inline-flex; align-items: center; gap: 4px;">
-                                        הרצאות בפנאופטו ↗
-                                    </a>
-                                    <a href="${resUrls.pangeaUrl}" onclick="event.preventDefault(); if (window.PangeaHub) window.PangeaHub.openQuickPeek('${resUrls.pangeaUrl}', '${(course.name || '').replace(/'/g, "\\'")} - סיכומי פנגיאה', '${resUrls.pangeaUrl}'); else window.open('${resUrls.pangeaUrl}', '_blank');" target="_blank" rel="noopener noreferrer" class="btn btn-xs btn-perpetual-pangea" style="text-decoration: none; padding: 4px 10px; border-radius: 6px; font-size: 0.74rem; font-weight: 500; display: inline-flex; align-items: center; gap: 4px;">
-                                        סיכומי פנגיאה ↗
-                                    </a>
+                <div class="modal-perpetual-ditch-card" style="display: flex; flex-direction: column; gap: 10px; margin: 8px 0 12px 0; padding: 12px; background: ${isPerpetual ? 'rgba(56, 189, 248, 0.08)' : 'rgba(26, 30, 40, 0.75)'}; border: 1px solid ${isPerpetual ? 'rgba(56, 189, 248, 0.35)' : 'rgba(238, 240, 245, 0.1)'}; border-radius: 12px; transition: border-color 0.18s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.18s cubic-bezier(0.22, 1, 0.36, 1);">
+                    <label style="display: flex; align-items: center; justify-content: space-between; gap: 12px; cursor: pointer;">
+                        <div style="display: flex; align-items: flex-start; gap: 10px; flex: 1;">
+                            <span style="font-size: 1.15rem; line-height: 1.2;">🚀</span>
+                            <div style="flex: 1;">
+                                <div style="font-size: 0.86rem; color: #eef0f5; font-weight: 600; display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+                                    <span>מצב למידה עצמית (הברזה נצחית)</span>
+                                    ${isPerpetual ? `<span style="font-size: 0.68rem; background: rgba(56, 189, 248, 0.16); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.35); padding: 1px 6px; border-radius: 6px; font-weight: 600;">${modeLabelBadgeMap[ditchMode] || 'פעיל ✨'}</span>` : ''}
                                 </div>
-                            ` : ''}
+                                <div style="font-size: 0.74rem; color: ${isPerpetual ? '#eef0f5' : '#a3a9b8'}; margin-top: 4px; line-height: 1.45;">
+                                    ${modeDescMap[ditchMode] || modeDescMap.none}
+                                </div>
+                            </div>
                         </div>
+                        <input type="checkbox" id="modal-course-perpetual-ditch-checkbox" ${isPerpetual ? 'checked' : ''} 
+                               onchange="if (typeof toggleCoursePerpetualDitch === 'function') { toggleCoursePerpetualDitch('${course.code}', this.checked); if (typeof openCourseDetails === 'function') openCourseDetails('${course.code}'); }"
+                               aria-label="הפעל מצב למידה עצמית לקורס זה"
+                               style="width: 20px; height: 20px; accent-color: #38bdf8; cursor: pointer; flex-shrink: 0; margin-right: 8px;">
+                    </label>
+                    <div class="perpetual-mode-bar" onclick="event.stopPropagation()">
+                        <button type="button" class="perpetual-mode-pill mode-none ${ditchMode === 'none' ? 'active' : ''}" onclick="if (typeof setCoursePerpetualDitchMode === 'function') { setCoursePerpetualDitchMode('${course.code}', 'none'); if (typeof openCourseDetails === 'function') openCourseDetails('${course.code}'); }">🏛️ פרונטלי רגיל</button>
+                        <button type="button" class="perpetual-mode-pill mode-lecture ${ditchMode === 'lecture' ? 'active' : ''}" onclick="if (typeof setCoursePerpetualDitchMode === 'function') { setCoursePerpetualDitchMode('${course.code}', 'lecture'); if (typeof openCourseDetails === 'function') openCourseDetails('${course.code}'); }">👨‍🏫 הרצאות בלבד</button>
+                        <button type="button" class="perpetual-mode-pill mode-tutorial ${ditchMode === 'tutorial' ? 'active' : ''}" onclick="if (typeof setCoursePerpetualDitchMode === 'function') { setCoursePerpetualDitchMode('${course.code}', 'tutorial'); if (typeof openCourseDetails === 'function') openCourseDetails('${course.code}'); }">🧑‍🏫 תרגולים בלבד</button>
+                        <button type="button" class="perpetual-mode-pill mode-all ${ditchMode === 'all' ? 'active' : ''}" onclick="if (typeof setCoursePerpetualDitchMode === 'function') { setCoursePerpetualDitchMode('${course.code}', 'all'); if (typeof openCourseDetails === 'function') openCourseDetails('${course.code}'); }">🚀 כל הקורס</button>
                     </div>
-                    <input type="checkbox" id="modal-course-perpetual-ditch-checkbox" ${isPerpetual ? 'checked' : ''} 
-                           onchange="if (typeof toggleCoursePerpetualDitch === 'function') { toggleCoursePerpetualDitch('${course.code}', this.checked); if (typeof openCourseDetails === 'function') openCourseDetails('${course.code}'); }"
-                           aria-label="הפעל מצב למידה עצמית לקורס זה"
-                           style="width: 20px; height: 20px; accent-color: #38bdf8; cursor: pointer; flex-shrink: 0; margin-right: 8px;">
-                </label>
+                    ${isPerpetual ? `
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap;" onclick="event.stopPropagation()">
+                            <a href="${resUrls.panoptoUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-xs btn-perpetual-panopto" style="text-decoration: none; padding: 4px 10px; border-radius: 6px; font-size: 0.74rem; font-weight: 500; display: inline-flex; align-items: center; gap: 4px;">
+                                הרצאות בפנאופטו ↗
+                            </a>
+                            <a href="${resUrls.pangeaUrl}" onclick="event.preventDefault(); if (window.PangeaHub) window.PangeaHub.openQuickPeek('${resUrls.pangeaUrl}', '${(course.name || '').replace(/'/g, "\\'")} - סיכומי פנגיאה', '${resUrls.pangeaUrl}'); else window.open('${resUrls.pangeaUrl}', '_blank');" target="_blank" rel="noopener noreferrer" class="btn btn-xs btn-perpetual-pangea" style="text-decoration: none; padding: 4px 10px; border-radius: 6px; font-size: 0.74rem; font-weight: 500; display: inline-flex; align-items: center; gap: 4px;">
+                                סיכומי פנגיאה ↗
+                            </a>
+                        </div>
+                    ` : ''}
+                </div>
             `;
         }
 
@@ -14997,12 +15018,6 @@ function openCourseDetails(code) {
                            style="background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.4); color: #38bdf8; text-decoration: none; padding: 5px 10px; border-radius: 6px; font-size: 0.76rem; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;"
                            title="פתח בספר הקורסים הרשמי של הטכניון ב-SAP SLcM">
                             <span>🏛️</span> ספר הקורסים ב-SAP ↗
-                        </a>
-                        <a href="${cfUrl}" target="_blank" rel="noopener noreferrer" 
-                           class="btn btn-xs" 
-                           style="background: rgba(245, 158, 11, 0.22); border: 1px solid #f59e0b; color: #fbbf24; text-decoration: none; padding: 5px 12px; border-radius: 6px; font-size: 0.78rem; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s;" 
-                           title="פתח את דף הקורס ב-CheeseFork לצפייה בביקורות סטודנטים, דירוגי הוראה והיסטוגרמות ציונים">
-                            <span>🧀</span> CheeseFork ↗
                         </a>
                     </div>
                 </div>
@@ -15222,12 +15237,13 @@ function renderModalTaskList(course) {
         if (task.type === 'lab') icon = "🧪";
         if (task.title && task.title.toLowerCase().includes('webwork')) icon = "🌐";
 
-        // Generate status select options
+        // Generate status select options (Done strictly before Submitted)
         const statuses = [
-            { value: 'not_started', label: '🔴 טרם התחיל' },
-            { value: 'in_progress', label: '🟡 בתהליך' },
-            { value: 'done', label: '🟢 הוגש' },
-            { value: 'late', label: '❌ באיחור' }
+            { value: 'not_started', label: '🔴 טרם התחיל (Not Started)' },
+            { value: 'in_progress', label: '🟡 בתהליך (In Progress)' },
+            { value: 'done', label: '🟢 בוצע (Done)' },
+            { value: 'submitted', label: '🔵 הוגש (Submitted)' },
+            { value: 'late', label: '❌ באיחור (Late)' }
         ];
         let statusOptions = "";
         statuses.forEach(s => {
@@ -15293,8 +15309,10 @@ function renderModalTaskList(course) {
                 }
 
                 // Adjust status classes
+                const isCompletedStatus = (s) => s === 'done' || s === 'submitted';
+                const wasCompleted = isCompletedStatus(oldStatus);
                 statusSelect.className = `quest-status-select ${newStatus.replace('_', '-')}`;
-                if (newStatus === 'done') {
+                if (isDone) {
                     row.classList.add("done");
                     row.classList.remove("in-progress");
                 } else if (newStatus === 'in_progress') {
@@ -15305,19 +15323,19 @@ function renderModalTaskList(course) {
                 }
 
                 // XP changes
-                if (newStatus === 'done' && oldStatus !== 'done') {
+                if (isDone && !wasCompleted) {
                     addXp(task.xp);
-                } else if (oldStatus === 'done' && newStatus !== 'done') {
+                } else if (wasCompleted && !isDone) {
                     addXp(-task.xp);
                 }
 
-                // Journey check: If the final exam / boss battle is marked 'done', check grade, but do NOT complete course automatically
+                // Journey check: If the final exam / boss battle is marked 'done' or 'submitted', check grade, but do NOT complete course automatically
                 if (task.type === 'exam') {
-                    if (newStatus === 'done') {
+                    if (isDone) {
                         if (task.grade !== undefined && task.grade !== null && task.grade < 55) {
                             showToastNotification(`⚠️ הציון במבחן (${task.grade}) נמוך מ-55. נכשלת במבחן ונדרש מועד ב'! הקורס לא יושלם.`, 'error');
-                            // Allow marking exam as done even if failed, but course remains unmastered
-                            task.status = 'done';
+                            // Allow marking exam as done/submitted even if failed, but course remains unmastered
+                            task.status = newStatus;
                             task.completed = true;
                             
                             const hasMoedB = course.tasks.some(t => t.title.includes("מועד ב") || t.title.toLowerCase().includes("moed b"));
@@ -15345,7 +15363,7 @@ function renderModalTaskList(course) {
                         renderUI();
                         openCourseDetails(course.code);
                         return;
-                    } else if (newStatus !== 'done' && course.status === 'mastered') {
+                    } else if (!isDone && course.status === 'mastered') {
                         course.status = 'active';
                         uncompleteAllTasks(course);
                         recalculateCourseStates();
@@ -16218,7 +16236,7 @@ function showToastNotification(msg, type = 'info') {
                 matched.appendChild(badge);
             }
         }
-        badge.textContent = `×${nextCount}`;
+        badge.textContent = `קומבו ×${nextCount}`;
         badge.style.animation = 'none';
         void badge.offsetWidth;
         badge.style.animation = '';
@@ -17997,11 +18015,11 @@ function renderNotionTasksTable() {
             statusClass = 'not_started';
         }
         let displayLabel = 'not started';
-        if (statusClass === 'in_progress') displayLabel = 'In progress';
-        else if (statusClass === 'submitted') displayLabel = 'Submitted';
-        else if (statusClass === 'done') displayLabel = 'done';
-        else if (statusClass === 'late') displayLabel = 'Late';
-        else if (statusClass === 'not_started') displayLabel = 'not started';
+        if (statusClass === 'in_progress') displayLabel = 'בתהליך (In progress)';
+        else if (statusClass === 'done') displayLabel = 'בוצע (Done)';
+        else if (statusClass === 'submitted') displayLabel = 'הוגש (Submitted)';
+        else if (statusClass === 'late') displayLabel = 'באיחור (Late)';
+        else if (statusClass === 'not_started') displayLabel = 'טרם התחיל';
         else displayLabel = (typeof STATUS_LABELS !== 'undefined' && STATUS_LABELS[statusClass]) || statusClass || 'not started';
         
         const moodleUrl = resolveDirectMoodleTaskUrl(c.code, t);
@@ -18147,10 +18165,10 @@ function showNotionStatusDropdown(event, courseCode, taskId, currentStatus) {
     globalNotionDropdown.style.display = "flex";
     
     const options = [
-        { id: "not_started", label: "not started", group: "To-do", pillClass: "not_started" },
-        { id: "in_progress", label: "In progress", group: "In progress", pillClass: "in_progress" },
-        { id: "done", label: "done", group: "Complete", pillClass: "done" },
-        { id: "submitted", label: "Submitted", group: "Complete", pillClass: "submitted" }
+        { id: "not_started", label: "טרם התחיל (Not started)", group: "To-do", pillClass: "not_started" },
+        { id: "in_progress", label: "בתהליך (In progress)", group: "In progress", pillClass: "in_progress" },
+        { id: "done", label: "בוצע (Done)", group: "Complete", pillClass: "done" },
+        { id: "submitted", label: "הוגש (Submitted)", group: "Complete", pillClass: "submitted" }
     ];
     
     let html = ``;
@@ -18372,9 +18390,11 @@ function openTaskSidePeek(courseCode, taskId) {
     statusSelect.innerHTML = "";
     
     const statuses = [
-        { val: 'not_started', label: '🔴 Not Started' },
-        { val: 'in_progress', label: '🟡 In Progress' },
-        { val: 'done', label: '🟢 Submitted / Done' }
+        { val: 'not_started', label: '🔴 טרם התחיל (Not Started)' },
+        { val: 'in_progress', label: '🟡 בתהליך (In Progress)' },
+        { val: 'done', label: '🟢 בוצע (Done)' },
+        { val: 'submitted', label: '🔵 הוגש (Submitted)' },
+        { val: 'late', label: '❌ באיחור (Late)' }
     ];
     
     statuses.forEach(s => {
@@ -24291,11 +24311,11 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.11.15-v2.13.6",
-    version: "2.13.6",
-    build: "20261115_02",
-    date: "2026-11-15 13:15",
-    description: "v2.13.6: מהפכת ממשק משתמש מלאה בשיטת 9-Pass Unslop, Stageshow Craft ו-Modern Web Guidance — מערכת צבעי Ink (כחול-דיו כהה, טקסט Slate קריא ודגשי ציאן וחשמל חדים), הסרת אימוג'ים רועשים מכפתורים וטאבים והחלפתם באייקוני Lucide Vector חדים 16px, גופן JetBrains Mono לנק״ז ומספרים, טיפול במתגי כפתור ומיקרו-אנימציות קפיציות, והתאמת content-visibility ו-color-scheme: dark (ADR-116)."
+    code: "REV-2026.11.15-v2.13.7",
+    version: "2.13.7",
+    build: "20261115_03",
+    date: "2026-11-15 13:42",
+    description: "v2.13.7: תיקון עומס גלילה והתנגשויות כפתורים במובייל (קורסים, משימות ויומן), הברזה נצחית ממוקדת להרצאה או תרגול בנפרד, מעקב נוכחות שבועי על פני 13 שבועות הסמסטר עם מטריצה וסטטיסטיקות, הפרדת סטטוס 'בוצע (Done)' לפני 'הוגש (Submitted)' ושינוי תווית 'קומבו' בהתראות ממוזגות (ADR-117)."
 };
 window.APP_VERSION = APP_CURRENT_REVISION.version;
 
@@ -26770,55 +26790,97 @@ function getCourseResourceUrls(courseId) {
 }
 window.getCourseResourceUrls = getCourseResourceUrls;
 
-function isCoursePerpetualDitch(courseId) {
-    if (!courseId) return false;
+function normalizePerpetualDitchMode(val) {
+    if (!val || val === 'none' || val === 'false') return 'none';
+    if (val === true || val === 'all' || val === 'course' || val === 'full' || val === 'true') return 'all';
+    const str = String(val).trim().toLowerCase();
+    if (str === 'lecture' || str === 'lectures') return 'lecture';
+    if (str === 'tutorial' || str === 'tutorials' || str === 'recitation' || str === 'lab') return 'tutorial';
+    return 'none';
+}
+window.normalizePerpetualDitchMode = normalizePerpetualDitchMode;
+
+function classifySessionDitchCategory(sessionType) {
+    if (!sessionType) return 'other';
+    const lower = String(sessionType).toLowerCase();
+    if (lower.includes('תרגול') || lower.includes('מעבדה') || lower.includes('tutorial') || lower.includes('recitation') || lower.includes('lab')) {
+        return 'tutorial';
+    }
+    if (lower.includes('הרצאה') || lower.includes('lecture') || lower.includes('פרונטלי') || lower.includes('שיעור')) {
+        return 'lecture';
+    }
+    return 'other';
+}
+window.classifySessionDitchCategory = classifySessionDitchCategory;
+
+function getCoursePerpetualDitchMode(courseId) {
+    if (!courseId) return 'none';
     const strId = String(courseId).trim();
     const cleanId = strId.replace(/\D/g, '').replace(/^0+/, '');
     const curState = (window.getGlobalGameState ? window.getGlobalGameState() : window.gameState);
     if (curState && curState.perpetualDitchCourses) {
-        if (curState.perpetualDitchCourses[strId]) return true;
-        if (curState.perpetualDitchCourses[cleanId]) return true;
-        if (curState.perpetualDitchCourses['0' + cleanId]) return true;
-        if (curState.perpetualDitchCourses['00' + cleanId]) return true;
+        const candidates = [strId, cleanId, '0' + cleanId, '00' + cleanId];
+        for (const k of candidates) {
+            if (curState.perpetualDitchCourses[k] !== undefined && curState.perpetualDitchCourses[k] !== false) {
+                const mode = normalizePerpetualDitchMode(curState.perpetualDitchCourses[k]);
+                if (mode !== 'none') return mode;
+            }
+        }
     }
     if (curState && curState.courses) {
-        const c = curState.courses[strId] || 
-                  curState.courses[cleanId] || 
+        const c = curState.courses[strId] ||
+                  curState.courses[cleanId] ||
                   curState.courses['0' + cleanId];
-        if (c && c.isPerpetualDitch) return true;
+        if (c) {
+            const cMode = normalizePerpetualDitchMode(c.perpetualDitchMode !== undefined ? c.perpetualDitchMode : c.isPerpetualDitch);
+            if (cMode !== 'none') return cMode;
+        }
     }
+    return 'none';
+}
+window.getCoursePerpetualDitchMode = getCoursePerpetualDitchMode;
+
+function isCoursePerpetualDitch(courseId, sessionType) {
+    const mode = getCoursePerpetualDitchMode(courseId);
+    if (mode === 'none') return false;
+    if (!sessionType) return true;
+    if (mode === 'all') return true;
+    const cat = classifySessionDitchCategory(sessionType);
+    if (mode === 'lecture') return cat === 'lecture';
+    if (mode === 'tutorial') return cat === 'tutorial';
     return false;
 }
 window.isCoursePerpetualDitch = isCoursePerpetualDitch;
 
-function toggleCoursePerpetualDitch(courseId, forceVal) {
-    if (!courseId) return false;
+function setCoursePerpetualDitchMode(courseId, modeInput) {
+    if (!courseId) return 'none';
     const strId = String(courseId).trim();
     const cleanId = strId.replace(/\D/g, '').replace(/^0+/, '');
     const curState = (window.getGlobalGameState ? window.getGlobalGameState() : window.gameState);
-    if (!curState) return false;
+    if (!curState) return 'none';
     if (!curState.perpetualDitchCourses) curState.perpetualDitchCourses = {};
-    
-    const current = isCoursePerpetualDitch(courseId);
-    const nextVal = (typeof forceVal === 'boolean') ? forceVal : !current;
 
-    curState.perpetualDitchCourses[strId] = nextVal;
-    curState.perpetualDitchCourses[cleanId] = nextVal;
+    const nextMode = normalizePerpetualDitchMode(modeInput);
+    const idVariants = [strId, cleanId];
     if (cleanId.length === 5 || cleanId.length === 6) {
-        curState.perpetualDitchCourses['0' + cleanId] = nextVal;
+        idVariants.push('0' + cleanId);
     }
 
-    // Sync to course objects
-    [strId, cleanId, '0' + cleanId].forEach(id => {
+    idVariants.forEach(id => {
+        if (nextMode === 'none') {
+            curState.perpetualDitchCourses[id] = false;
+        } else {
+            curState.perpetualDitchCourses[id] = nextMode;
+        }
         if (curState.courses && curState.courses[id]) {
-            curState.courses[id].isPerpetualDitch = nextVal;
+            curState.courses[id].perpetualDitchMode = nextMode;
+            curState.courses[id].isPerpetualDitch = (nextMode !== 'none');
         }
     });
 
     if (typeof saveState === 'function') {
         saveState();
     }
-
     if (typeof renderTimetableGrid === 'function') {
         renderTimetableGrid();
     }
@@ -26829,17 +26891,33 @@ function toggleCoursePerpetualDitch(courseId, forceVal) {
         window.AttendanceHub.refreshUI();
     }
 
-    const cName = (curState.courses && (curState.courses[strId] || curState.courses[cleanId]))
-        ? (curState.courses[strId] || curState.courses[cleanId]).name
+    const cName = (curState.courses && (curState.courses[strId] || curState.courses[cleanId] || curState.courses['0' + cleanId]))
+        ? (curState.courses[strId] || curState.courses[cleanId] || curState.courses['0' + cleanId]).name
         : ((typeof COURSE_SHORT_NAMES !== 'undefined' && COURSE_SHORT_NAMES[cleanId]) || courseId);
 
     if (typeof showToastNotification === 'function') {
-        if (nextVal) {
-            showToastNotification(`🚀 [${cName}] הוגדר במצב למידה עצמית (הברזה נצחית)! התראות הגעה מבוטלות ומשאבי פנאופטו/פנגיאה זמינים.`, 'success');
+        if (nextMode === 'all') {
+            showToastNotification(`🚀 [${cName}] הוגדר בלמידה עצמית מלאה (הרצאות + תרגולים). התראות הגעה מבוטלות.`, 'success');
+        } else if (nextMode === 'lecture') {
+            showToastNotification(`🚀 [${cName}] הוגדר בלמידה עצמית להרצאות בלבד (התרגולים נשארים פרונטליים).`, 'success');
+        } else if (nextMode === 'tutorial') {
+            showToastNotification(`🚀 [${cName}] הוגדר בלמידה עצמית לתרגולים בלבד (ההרצאות נשארות פרונטליות).`, 'success');
         } else {
             showToastNotification(`↩️ [${cName}] הוחזר למצב נוכחות פרונטלית רגילה.`, 'info');
         }
     }
+    return nextMode;
+}
+window.setCoursePerpetualDitchMode = setCoursePerpetualDitchMode;
+
+function toggleCoursePerpetualDitch(courseId, forceVal) {
+    if (!courseId) return false;
+    if (typeof forceVal === 'string') {
+        return setCoursePerpetualDitchMode(courseId, forceVal);
+    }
+    const current = isCoursePerpetualDitch(courseId);
+    const nextVal = (typeof forceVal === 'boolean') ? forceVal : !current;
+    setCoursePerpetualDitchMode(courseId, nextVal ? 'all' : 'none');
     return nextVal;
 }
 window.toggleCoursePerpetualDitch = toggleCoursePerpetualDitch;
@@ -26866,11 +26944,85 @@ window.handleTimetableAttendance = function(btn, dayIdx, classIdx, targetStatus)
     );
 };
 
+function renderTimetableWeekNavigator(schedule) {
+    const navEl = document.getElementById('timetable-week-navigator');
+    if (!navEl) return;
+
+    const hub = window.AttendanceHub;
+    if (!hub || typeof hub.getSelectedWeek !== 'function') {
+        navEl.innerHTML = '';
+        return;
+    }
+
+    const currentWeek = (typeof hub.getCurrentAcademicWeek === 'function') ? hub.getCurrentAcademicWeek() : 4;
+    const selectedWeek = hub.getSelectedWeek();
+    const weekDateRange = (typeof hub.getWeekDateRangeLabel === 'function') ? hub.getWeekDateRangeLabel(selectedWeek) : '';
+    const weekStats = (typeof hub.getWeekStats === 'function') ? hub.getWeekStats(selectedWeek, schedule) : { attended: 0, missed: 0, marked: 0, totalSlots: 0, pct: null };
+    const analytics = (typeof hub.getSemesterAnalytics === 'function') ? hub.getSemesterAnalytics(schedule) : { overallPct: null, weeks: {} };
+
+    let pillsHtml = '';
+    for (let w = 1; w <= 13; w++) {
+        const wInfo = (analytics.weeks && analytics.weeks[w]) ? analytics.weeks[w] : { attended: 0, missed: 0, marked: 0 };
+        const isCur = w === currentWeek;
+        const isSel = w === selectedWeek;
+        let dotHtml = '';
+        if (wInfo.marked > 0) {
+            const dotCls = wInfo.missed > 0 ? (wInfo.attended > 0 ? 'partial' : 'has-missed') : 'all-good';
+            dotHtml = `<span class="week-pill-dot ${dotCls}"></span>`;
+        }
+        pillsHtml += `
+            <button type="button"
+                    class="week-pill-btn ${isCur ? 'is-current-week' : ''} ${isSel ? 'is-selected' : ''}"
+                    onclick="if (window.AttendanceHub) window.AttendanceHub.setSelectedWeek(${w});"
+                    title="שבוע ${w} (${wInfo.dateRange || ''}) — ${wInfo.attended || 0} נכחתי, ${wInfo.missed || 0} הוחסר">
+                ${dotHtml}
+                <span>${w}</span>
+            </button>
+        `;
+    }
+
+    const weekPctText = weekStats.pct === null ? '—' : `${weekStats.pct}%`;
+    const semPctText = analytics.overallPct === null ? '—' : `${analytics.overallPct}%`;
+
+    navEl.innerHTML = `
+        <div class="week-nav-top-row">
+            <div class="week-nav-controls">
+                <button type="button" class="btn-week-step" ${selectedWeek <= 1 ? 'disabled' : ''} onclick="if (window.AttendanceHub) window.AttendanceHub.setSelectedWeek(${selectedWeek - 1});" title="עבור לשבוע הקודם">▶ קודם</button>
+                <div class="week-nav-current-badge">
+                    <span>📅 שבוע ${selectedWeek} מתוך 13</span>
+                    ${weekDateRange ? `<span class="week-nav-date-range">(${weekDateRange})</span>` : ''}
+                </div>
+                <button type="button" class="btn-week-step" ${selectedWeek >= 13 ? 'disabled' : ''} onclick="if (window.AttendanceHub) window.AttendanceHub.setSelectedWeek(${selectedWeek + 1});" title="עבור לשבוע הבא">הבא ◀</button>
+                ${selectedWeek !== currentWeek ? `<button type="button" class="btn-week-jump-current" onclick="if (window.AttendanceHub) window.AttendanceHub.setSelectedWeek(${currentWeek});">📍 חזור להשבוע (${currentWeek})</button>` : ''}
+            </div>
+            <div class="week-nav-stats-strip">
+                <span class="week-stat-chip" title="סימון נוכחות בשבוע ${selectedWeek}">
+                    שבוע ${selectedWeek}: <strong style="color: #38bdf8;">${weekStats.attended}✓ / ${weekStats.missed}✗</strong> (${weekPctText})
+                </span>
+                <span class="week-stat-chip" title="ממוצע נוכחות מצטבר בכל שבועות הסמסטר">
+                    מצטבר סמסטר: <strong style="color: #34d399;">${semPctText}</strong>
+                </span>
+                <button type="button" class="btn-week-stats-open" onclick="if (window.AttendanceHub) window.AttendanceHub.openModal('stats');">
+                    📊 סטטיסטיקות ומעקב סמסטריאלי
+                </button>
+            </div>
+        </div>
+        <div class="week-pills-rail" aria-label="בחירת שבוע בסמסטר">
+            <span style="font-size: 0.72rem; color: #94a3b8; font-weight: 700; flex-shrink: 0;">שבועות:</span>
+            ${pillsHtml}
+        </div>
+    `;
+}
+window.renderTimetableWeekNavigator = renderTimetableWeekNavigator;
+
 function renderTimetableGrid() {
     const container = document.getElementById('timetable-grid-container');
     if (!container) return;
 
     const schedule = getActiveTimetableSchedule();
+    // Update week navigator strip BEFORE assigning container.innerHTML so DOM mocks retain container HTML as final write
+    renderTimetableWeekNavigator(schedule);
+
     if (!schedule || !schedule.days || schedule.days.length === 0) {
         container.innerHTML = `
             <div class="timetable-empty-state-box" style="grid-column: 1 / -1; padding: 48px 24px; text-align: center; background: rgba(15, 23, 42, 0.45); border: 1px dashed rgba(148, 163, 184, 0.25); border-radius: 16px; margin: 12px 0;">
@@ -26883,6 +27035,10 @@ function renderTimetableGrid() {
         `;
         return;
     }
+
+    const selectedWeek = (window.AttendanceHub && typeof window.AttendanceHub.getSelectedWeek === 'function')
+        ? window.AttendanceHub.getSelectedWeek()
+        : 1;
 
     let html = '';
     schedule.days.forEach(day => {
@@ -26924,11 +27080,11 @@ function renderTimetableGrid() {
                     c.duration = durMeta.text;
                 }
 
-                const isPerpetual = isCoursePerpetualDitch(c.courseId);
+                const isPerpetual = isCoursePerpetualDitch(c.courseId, c.type);
                 const perpetualClass = isPerpetual ? 'is-perpetual-ditch' : '';
 
                 const attRecord = (window.AttendanceHub && typeof window.AttendanceHub.getRecord === 'function')
-                    ? window.AttendanceHub.getRecord(c.courseId, day.dayIndex, c.startTime)
+                    ? window.AttendanceHub.getRecord(c.courseId, day.dayIndex, c.startTime, null, selectedWeek)
                     : null;
                 const attStatus = attRecord ? attRecord.status : null;
                 const attBorderClass = attStatus === 'attended' ? 'attendance-card-attended' : (attStatus === 'missed' ? 'attendance-card-missed' : '');
@@ -26940,7 +27096,7 @@ function renderTimetableGrid() {
                         <!-- שורה 1: תגית סוג שיעור + תגית משך זמן שיעור מובלטת -->
                         <div class="timetable-card-top">
                             <span class="timetable-tag">${c.type}</span>
-                            ${isPerpetual ? `<span class="timetable-perpetual-badge" title="קורס זה מוגדר בלמידה עצמית (הברזה נצחית) - הסטודנט לומד עצמאית">🚀 למידה עצמית</span>` : ''}
+                            ${isPerpetual ? `<span class="timetable-perpetual-badge" title="שיעור זה מוגדר בלמידה עצמית (הברזה נצחית) - הסטודנט לומד עצמאית">🚀 למידה עצמית</span>` : ''}
                             <span class="timetable-duration-pill ${durMeta.pillClass}">⏱️ ${durMeta.text}</span>
                         </div>
                         <!-- שורה 2: שעות השיעור -->
@@ -26979,12 +27135,12 @@ function renderTimetableGrid() {
                             <div class="attendance-card-actions" onclick="event.stopPropagation()">
                                 <button type="button" class="btn-attendance-action ${attStatus === 'attended' ? 'is-attended' : ''}" 
                                         onclick="window.handleTimetableAttendance(this, ${day.dayIndex}, ${idx}, 'attended')"
-                                        title="סמן נוכחות בשיעור זה">
+                                        title="סמן נוכחות בשיעור זה (שבוע ${selectedWeek})">
                                     ${attStatus === 'attended' ? '✓ נוכחתי' : '✓ הייתי'}
                                 </button>
                                 <button type="button" class="btn-attendance-action ${attStatus === 'missed' ? 'is-missed' : ''}" 
                                         onclick="window.handleTimetableAttendance(this, ${day.dayIndex}, ${idx}, 'missed')"
-                                        title="סמן כהוחסר והוסף אוטומטית לתור השלמות ופנאופטו">
+                                        title="סמן כהוחסר לשבוע ${selectedWeek} והוסף אוטומטית לתור השלמות">
                                     ${attStatus === 'missed' ? '✗ הוחסר (בתור)' : '✗ החסרתי'}
                                 </button>
                             </div>
@@ -27089,7 +27245,7 @@ function renderTodayTimetableBanner() {
         bodyHtml = '<div class="today-classes-list">';
         classes.forEach(c => {
             const status = getLiveClassStatus(c.startTime, c.endTime);
-            const isPerpetual = isCoursePerpetualDitch(c.courseId);
+            const isPerpetual = isCoursePerpetualDitch(c.courseId, c.type);
             let itemClass = 'today-class-item';
             if (isPerpetual) itemClass += ' is-perpetual-ditch';
             if (status.code === 'live') itemClass += ' current-live';
@@ -28494,8 +28650,8 @@ async function trigger10MinClassAlert(classItem, isTest = false) {
         return false;
     }
 
-    if (!isTest && (typeof isCoursePerpetualDitch === 'function') && isCoursePerpetualDitch(classItem.courseId)) {
-        console.log(`[Notifications] Skipping 10-min arrival alert: course [${classItem.courseId}] is in Perpetual Ditch (Self-Study Mode).`);
+    if (!isTest && (typeof isCoursePerpetualDitch === 'function') && isCoursePerpetualDitch(classItem.courseId, classItem.type)) {
+        console.log(`[Notifications] Skipping 10-min arrival alert: course [${classItem.courseId}] (${classItem.type || 'session'}) is in Perpetual Ditch (Self-Study Mode).`);
         return false;
     }
 
@@ -30078,7 +30234,7 @@ function renderNotionHomeworkPolicyStrip() {
             </div>
             <div style="display: flex; align-items: center; gap: 8px;">
                 <div class="hw-strip-hint">
-                    💡 מקרא צבעים: 🔴 לא התחיל | 🟡 בתהליך | 🔵 הוגש | 🟢 הסתיים | 🔒 טרם נפתח
+                    💡 מקרא צבעים: 🔴 לא התחיל | 🟡 בתהליך | 🟢 בוצע (הסתיים) | 🔵 הוגש | 🔒 טרם נפתח
                 </div>
                 <button type="button" class="btn-toggle-hw-collapse" onclick="if(window.toggleHomeworkPolicyStripCollapse) window.toggleHomeworkPolicyStripCollapse(event);" title="מזער / הרחב מעקב הגשת שיעורי בית לצמצום ויזואלי">
                     <span id="hw-collapse-icon">${isCollapsed ? '▼' : '▲'}</span>

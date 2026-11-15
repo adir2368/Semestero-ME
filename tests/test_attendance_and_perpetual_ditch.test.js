@@ -182,5 +182,49 @@ assert.ok(cfRenderedHtml.includes('is-perpetual-slot'), 'Schedule items must hav
 window.toggleCoursePerpetualDitch('034056', false);
 document.getElementById = originalGetElementById;
 
-console.log('✅ ALL TESTS PASSED: Physics attendance click and Perpetual Ditch verified successfully!');
+// 9. Test Granular Perpetual Ditch Modes ('lecture' | 'tutorial' | 'all' | 'none')
+assert.strictEqual(typeof window.getCoursePerpetualDitchMode, 'function', 'getCoursePerpetualDitchMode must be defined');
+assert.strictEqual(typeof window.setCoursePerpetualDitchMode, 'function', 'setCoursePerpetualDitchMode must be defined');
+
+window.setCoursePerpetualDitchMode('114052', 'lecture');
+assert.strictEqual(window.getCoursePerpetualDitchMode('114052'), 'lecture', 'Mode should be lecture');
+assert.strictEqual(window.isCoursePerpetualDitch('114052', 'הרצאה'), true, 'Lectures should be self-study in lecture mode');
+assert.strictEqual(window.isCoursePerpetualDitch('114052', 'תרגול'), false, 'Tutorials should remain in-person in lecture mode');
+
+window.setCoursePerpetualDitchMode('114052', 'tutorial');
+assert.strictEqual(window.getCoursePerpetualDitchMode('114052'), 'tutorial', 'Mode should be tutorial');
+assert.strictEqual(window.isCoursePerpetualDitch('114052', 'הרצאה'), false, 'Lectures should remain in-person in tutorial mode');
+assert.strictEqual(window.isCoursePerpetualDitch('114052', 'תרגול'), true, 'Tutorials should be self-study in tutorial mode');
+assert.strictEqual(window.isCoursePerpetualDitch('114052', 'מעבדה'), true, 'Labs should be self-study in tutorial mode');
+
+window.setCoursePerpetualDitchMode('114052', 'none');
+assert.strictEqual(window.isCoursePerpetualDitch('114052'), false, 'Mode none reverts all sessions');
+
+// 10. Test Multi-Week Semester Attendance Tracking & Analytics
+assert.strictEqual(window.AttendanceHub.getCanonicalDateForSemesterWeekDay(4, 1), '2026-11-16', 'Week 4 Monday canonical date must be 2026-11-16');
+window.AttendanceHub.setSelectedWeek(2);
+window.handleTimetableAttendance(null, 1, 0, 'attended');
+window.AttendanceHub.setSelectedWeek(3);
+window.handleTimetableAttendance(null, 1, 0, 'missed');
+
+const recW2 = window.AttendanceHub.getRecord('114052', 1, '08:30', null, 2);
+const recW3 = window.AttendanceHub.getRecord('114052', 1, '08:30', null, 3);
+const recW4 = window.AttendanceHub.getRecord('114052', 1, '08:30', null, 4);
+assert.ok(recW2 && recW2.status === 'attended' && recW2.week === 2, 'Week 2 record must remain attended');
+assert.ok(recW3 && recW3.status === 'missed' && recW3.week === 3, 'Week 3 record must be missed independently of Week 2');
+assert.strictEqual(recW4, null, 'Week 4 must remain unmarked when only weeks 2 and 3 are marked');
+
+const semAnalytics = window.AttendanceHub.getSemesterAnalytics();
+assert.ok(semAnalytics && semAnalytics.weeks[2].attended >= 1, 'Analytics must count Week 2 attendance');
+assert.ok(semAnalytics.weeks[3].missed >= 1, 'Analytics must count Week 3 missed');
+assert.ok(semAnalytics.lectureAttended >= 1 && semAnalytics.lectureMissed >= 1, 'Analytics must split lecture stats');
+
+// Cleanup multi-week test records
+window.AttendanceHub.setSelectedWeek(2);
+window.handleTimetableAttendance(null, 1, 0, 'attended');
+window.AttendanceHub.setSelectedWeek(3);
+window.handleTimetableAttendance(null, 1, 0, 'missed');
+window.AttendanceHub.setSelectedWeek(window.AttendanceHub.getCurrentAcademicWeek());
+
+console.log('✅ ALL TESTS PASSED: Physics attendance click, granular Perpetual Ditch, and 13-week analytics verified successfully!');
 process.exit(0);

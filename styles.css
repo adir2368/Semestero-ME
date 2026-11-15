@@ -6003,7 +6003,7 @@ label[for="new-task-xp-input"],
         -webkit-overflow-scrolling: touch !important;
         touch-action: pan-y !important;
         overscroll-behavior-y: contain;
-        padding: 6px 6px calc(130px + env(safe-area-inset-bottom, 0px)) 6px !important;
+        padding: 6px 6px calc(82px + env(safe-area-inset-bottom, 0px)) 6px !important;
     }
 
     .notion-tasks-container {
@@ -6131,8 +6131,8 @@ label[for="new-task-xp-input"],
     .finals-calendar-card {
         display: flex !important;
         flex-direction: column !important;
-        min-height: calc(100vh - 165px) !important;
-        margin-bottom: 24px !important;
+        min-height: auto !important;
+        margin-bottom: 10px !important;
     }
 
     .finals-calendar-container {
@@ -6156,7 +6156,7 @@ label[for="new-task-xp-input"],
     }
 
     .finals-calendar-grid.is-week-view .cal-day-cell {
-        min-height: calc(100vh - 275px) !important;
+        min-height: 220px !important;
         padding: 6px 3px !important;
     }
 
@@ -7527,7 +7527,7 @@ html.is-iphone .app-global-footer {
     }
 
     .timetable-container {
-        padding: 4px 6px calc(75px + env(safe-area-inset-bottom)) !important;
+        padding: 4px 6px 12px !important;
         touch-action: pan-y !important;
     }
 
@@ -7849,23 +7849,25 @@ html.is-iphone .app-global-footer {
 
 .timetable-lecturer {
     font-size: 0.78rem;
-    color: #e2e8f0;
-    margin-top: 6px;
+    color: #cbd5e1;
+    margin-top: 3px;
     font-style: normal;
-    font-weight: 700;
-    padding: 3px 8px;
-    border-radius: 6px;
-    background: rgba(56, 189, 248, 0.12);
-    border: 1px solid rgba(56, 189, 248, 0.3);
+    font-weight: 600;
+    padding: 1px 8px 1px 0;
+    border: none;
+    border-right: 2px solid rgba(56, 189, 248, 0.45);
+    border-radius: 0;
+    background: transparent;
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 5px;
+    line-height: 1.3;
 }
 
 .timetable-lecturer.is-tutorial {
-    background: rgba(168, 85, 247, 0.14);
-    border-color: rgba(168, 85, 247, 0.35);
-    color: #f1f5f9;
+    background: transparent;
+    border-right-color: rgba(168, 85, 247, 0.65);
+    color: #e2e8f0;
 }
 
 .timetable-lecturer.is-tutorial strong {
@@ -7877,9 +7879,9 @@ html.is-iphone .app-global-footer {
 }
 
 .timetable-lecturer.is-sport {
-    background: rgba(16, 185, 129, 0.14);
-    border-color: rgba(16, 185, 129, 0.35);
-    color: #f1f5f9;
+    background: transparent;
+    border-right-color: rgba(16, 185, 129, 0.65);
+    color: #e2e8f0;
 }
 
 .timetable-lecturer.is-sport strong {
@@ -10377,7 +10379,7 @@ html.is-iphone .app-global-footer {
         height: 100% !important;
         overflow-y: auto !important;
         -webkit-overflow-scrolling: touch !important;
-        padding: 6px 6px calc(140px + env(safe-area-inset-bottom, 0px)) 6px !important;
+        padding: 6px 6px calc(82px + env(safe-area-inset-bottom, 0px)) 6px !important;
         box-sizing: border-box !important;
         display: flex !important;
         flex-direction: column !important;
@@ -13901,18 +13903,19 @@ tr.is-task-pinned {
 
 /* 4-Line Class Card Components */
 .timetable-card-room-bar {
-    font-size: 0.82rem;
-    font-weight: 700;
+    font-size: 0.78rem;
+    font-weight: 600;
     color: #38bdf8;
-    background: rgba(56, 189, 248, 0.12);
-    border: 1px solid rgba(56, 189, 248, 0.28);
-    border-radius: 6px;
-    padding: 3px 8px;
-    margin: 5px 0;
+    background: transparent;
+    border: none;
+    border-right: 2px solid rgba(56, 189, 248, 0.45);
+    border-radius: 0;
+    padding: 1px 8px 1px 0;
+    margin: 3px 0;
     display: flex;
     align-items: center;
-    gap: 6px;
-    line-height: 1.25;
+    gap: 5px;
+    line-height: 1.3;
 }
 
 .timetable-card-room-bar .room-icon {
@@ -14458,7 +14461,43 @@ tr.is-task-pinned {
     #notion-tasks-workspace,
     #timetable-workspace,
     #settings-workspace {
-        padding-bottom: calc(140px + env(safe-area-inset-bottom, 0px)) !important;
+        padding-bottom: calc(82px + env(safe-area-inset-bottom, 0px)) !important;
+    }
+
+    /* Single-row horizontal scroll strip for category filter pills & compact task action buttons */
+    .organit-category-pills {
+        flex-wrap: nowrap !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        scrollbar-width: none !important;
+        gap: 6px !important;
+        padding-bottom: 4px !important;
+        margin-bottom: 8px !important;
+    }
+
+    .organit-category-pills::-webkit-scrollbar {
+        display: none;
+    }
+
+    .organit-pill {
+        flex-shrink: 0 !important;
+        white-space: nowrap !important;
+        padding: 5px 10px !important;
+        font-size: 0.74rem !important;
+    }
+
+    .notion-tasks-header-actions {
+        gap: 6px !important;
+    }
+
+    .notion-tasks-header-actions .btn-sm,
+    .notion-tasks-header-actions .btn-sync-action {
+        padding: 5px 9px !important;
+        font-size: 0.74rem !important;
+    }
+
+    #course-modal .modal-badges-strip {
+        padding-left: 110px !important;
     }
 }
 
@@ -17130,7 +17169,7 @@ tr.is-task-pinned {
         height: 100% !important;
         overflow-y: auto !important;
         -webkit-overflow-scrolling: touch !important;
-        padding: 6px 6px calc(140px + env(safe-area-inset-bottom, 0px)) 6px !important;
+        padding: 6px 6px calc(82px + env(safe-area-inset-bottom, 0px)) 6px !important;
         box-sizing: border-box !important;
         display: flex !important;
         flex-direction: column !important;
@@ -18936,6 +18975,269 @@ progress {
     .pill-value {
         text-box: trim-both cap alphabetic;
     }
+}
+
+/* ==========================================================================
+   v2.13.7: Semester Week Navigator, Granular Perpetual Ditch & Weekly Matrix
+   ========================================================================== */
+.timetable-week-navigator {
+    background: rgba(15, 23, 42, 0.72);
+    border: 1px solid rgba(56, 189, 248, 0.24);
+    border-radius: 12px;
+    padding: 10px 12px;
+    margin: 8px 0 10px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    direction: rtl;
+}
+
+.week-nav-top-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.week-nav-controls {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.btn-week-step {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(148, 163, 184, 0.25);
+    color: #e2e8f0;
+    border-radius: 8px;
+    padding: 4px 10px;
+    font-size: 0.76rem;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.15s ease;
+}
+
+.btn-week-step:hover:not(:disabled) {
+    background: rgba(56, 189, 248, 0.16);
+    border-color: #38bdf8;
+    color: #38bdf8;
+}
+
+.btn-week-step:disabled {
+    opacity: 0.38;
+    cursor: not-allowed;
+}
+
+.week-nav-current-badge {
+    font-size: 0.84rem;
+    font-weight: 800;
+    color: #f8fafc;
+    background: rgba(56, 189, 248, 0.12);
+    border: 1px solid rgba(56, 189, 248, 0.35);
+    border-radius: 8px;
+    padding: 4px 10px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.week-nav-date-range {
+    font-size: 0.74rem;
+    font-weight: 600;
+    color: #94a3b8;
+}
+
+.btn-week-jump-current {
+    background: rgba(16, 185, 129, 0.15);
+    border: 1px solid rgba(16, 185, 129, 0.45);
+    color: #34d399;
+    border-radius: 8px;
+    padding: 4px 9px;
+    font-size: 0.73rem;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.week-nav-stats-strip {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.week-stat-chip {
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 4px 9px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #cbd5e1;
+}
+
+.btn-week-stats-open {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(56, 189, 248, 0.18));
+    border: 1px solid rgba(52, 211, 153, 0.45);
+    color: #6ee7b7;
+    border-radius: 8px;
+    padding: 5px 11px;
+    font-size: 0.76rem;
+    font-weight: 800;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.btn-week-stats-open:hover {
+    background: rgba(16, 185, 129, 0.28);
+    color: #ffffff;
+}
+
+.week-pills-rail {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    padding: 2px 0;
+}
+
+.week-pills-rail::-webkit-scrollbar {
+    display: none;
+}
+
+.week-pill-btn {
+    flex-shrink: 0;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(148, 163, 184, 0.18);
+    color: #94a3b8;
+    border-radius: 999px;
+    padding: 3px 9px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.14s ease;
+}
+
+.week-pill-btn.is-current-week {
+    border-color: rgba(56, 189, 248, 0.45);
+    color: #e0f2fe;
+}
+
+.week-pill-btn.is-selected {
+    background: rgba(56, 189, 248, 0.22);
+    border-color: #38bdf8;
+    color: #ffffff;
+}
+
+.week-pill-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.week-pill-dot.all-good { background: #10b981; }
+.week-pill-dot.has-missed { background: #f43f5e; }
+.week-pill-dot.partial { background: #f59e0b; }
+
+.perpetual-mode-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 8px;
+}
+
+.perpetual-mode-pill {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(148, 163, 184, 0.22);
+    color: #cbd5e1;
+    border-radius: 8px;
+    padding: 4px 9px;
+    font-size: 0.73rem;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.15s ease;
+}
+
+.perpetual-mode-pill.active {
+    background: rgba(56, 189, 248, 0.2);
+    border-color: #38bdf8;
+    color: #e0f2fe;
+}
+
+.perpetual-mode-pill.active.mode-all,
+.perpetual-mode-pill.active.mode-lecture,
+.perpetual-mode-pill.active.mode-tutorial {
+    background: rgba(168, 85, 247, 0.22);
+    border-color: #c084fc;
+    color: #f3e8ff;
+}
+
+.att-matrix-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.75rem;
+}
+
+.att-matrix-table th,
+.att-matrix-table td {
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 5px 4px;
+    text-align: center;
+}
+
+.att-matrix-table th {
+    background: rgba(15, 23, 42, 0.9);
+    color: #94a3b8;
+    font-weight: 700;
+    position: sticky;
+    top: 0;
+}
+
+.att-matrix-cell-btn {
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    border: 1px solid rgba(148, 163, 184, 0.22);
+    background: rgba(255, 255, 255, 0.04);
+    color: #94a3b8;
+    font-size: 0.74rem;
+    font-weight: 800;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.att-matrix-cell-btn.attended {
+    background: rgba(16, 185, 129, 0.2);
+    border-color: rgba(16, 185, 129, 0.6);
+    color: #34d399;
+}
+
+.att-matrix-cell-btn.missed {
+    background: rgba(244, 63, 94, 0.2);
+    border-color: rgba(244, 63, 94, 0.6);
+    color: #fb7185;
+}
+
+.att-matrix-cell-btn.perpetual {
+    background: rgba(168, 85, 247, 0.16);
+    border-color: rgba(168, 85, 247, 0.45);
+    color: #d8b4fe;
+}
+
+.att-matrix-cell-btn.is-current-col {
+    box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.55);
 }
 
 

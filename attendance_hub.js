@@ -85,6 +85,7 @@
         catchupQueue: [],
         quotas: {},
         activeTab: 'catchup',
+        selectedWeek: null,
 
         init: function() {
             try {
@@ -103,6 +104,7 @@
                 this.quotas = JSON.parse(JSON.stringify(DEFAULT_MANDATORY_QUOTAS));
             }
 
+            this.selectedWeek = Math.max(1, Math.min(13, this.getCurrentAcademicWeek()));
             this.updateBadgeCounts();
         },
 
@@ -312,8 +314,38 @@
             return recommendations;
         },
 
+        getSelectedWeek: function() {
+            const w = Number(this.selectedWeek || this.getCurrentAcademicWeek());
+            return Math.max(1, Math.min(13, w));
+        },
+
+        setSelectedWeek: function(weekNum) {
+            const w = Math.max(1, Math.min(13, Number(weekNum) || this.getCurrentAcademicWeek()));
+            this.selectedWeek = w;
+            this.refreshUI();
+            const modalEl = document.getElementById('modal-attendance-hub');
+            if (modalEl && modalEl.classList && modalEl.classList.contains('active')) {
+                this.renderModalBody();
+            }
+            return w;
+        },
+
+        getCanonicalDateForSemesterWeekDay: function(weekNum, dayIndex, refDate) {
+            const w = Math.max(1, Math.min(13, Number(weekNum || this.getSelectedWeek())));
+            const fallbackDay = refDate ? new Date(refDate).getDay() : new Date().getDay();
+            const targetDay = Number(dayIndex !== undefined && dayIndex !== null ? dayIndex : fallbackDay);
+            const dt = new Date(Date.UTC(2026, 9, 25 + (w - 1) * 7 + targetDay));
+            const y = dt.getUTCFullYear();
+            const m = String(dt.getUTCMonth() + 1).padStart(2, '0');
+            const dayNum = String(dt.getUTCDate()).padStart(2, '0');
+            return `${y}-${m}-${dayNum}`;
+        },
+
         getCanonicalDateForWeekDay: function(dayIndex, refDate) {
-            const d = refDate ? new Date(refDate) : new Date();
+            if (!refDate) {
+                return this.getCanonicalDateForSemesterWeekDay(this.getSelectedWeek(), dayIndex);
+            }
+            const d = new Date(refDate);
             const currentDay = d.getDay(); // 0 = Sunday, 1 = Monday, ...
             const targetDay = Number(dayIndex !== undefined && dayIndex !== null ? dayIndex : currentDay);
             const diff = targetDay - currentDay;
@@ -324,8 +356,27 @@
             return `${y}-${m}-${dayNum}`;
         },
 
-        makeSlotKey: function(courseId, dayIndex, startTime, dateStr) {
-            const canonicalDate = dateStr || this.getCanonicalDateForWeekDay(dayIndex);
+        getWeekDateRangeLabel: function(weekNum) {
+            const w = Math.max(1, Math.min(13, Number(weekNum || this.getSelectedWeek())));
+            const sun = new Date(Date.UTC(2026, 9, 25 + (w - 1) * 7));
+            const thu = new Date(Date.UTC(2026, 9, 25 + (w - 1) * 7 + 4));
+            const fmt = (dt) => `${String(dt.getUTCDate()).padStart(2, '0')}.${String(dt.getUTCMonth() + 1).padStart(2, '0')}`;
+            return `${fmt(sun)} – ${fmt(thu)}`;
+        },
+
+        getAcademicWeekForDateStr: function(dateStr) {
+            if (!dateStr || typeof dateStr !== 'string') return this.getCurrentAcademicWeek();
+            const parts = dateStr.split('-').map(Number);
+            if (parts.length !== 3 || parts.some(isNaN)) return this.getCurrentAcademicWeek();
+            const targetUtc = Date.UTC(parts[0], parts[1] - 1, parts[2]);
+            const w1Utc = Date.UTC(2026, 9, 25); // Sunday of Week 1 (Winter 2026/27)
+            const diffDays = Math.round((targetUtc - w1Utc) / 86400000);
+            return Math.max(1, Math.min(13, Math.floor(diffDays / 7) + 1));
+        },
+
+        makeSlotKey: function(courseId, dayIndex, startTime, dateStr, weekNum) {
+            const targetWeek = Number(weekNum || this.getSelectedWeek());
+            const canonicalDate = dateStr || this.getCanonicalDateForSemesterWeekDay(targetWeek, dayIndex);
             return `${String(courseId).trim()}_d${dayIndex}_${(startTime || '00:00').replace(':', '')}_${canonicalDate}`;
         },
 
@@ -337,43 +388,57 @@
             return `${y}-${m}-${d}`;
         },
 
-        getRecord: function(courseId, dayIndex, startTime, dateStr) {
-            const key = this.makeSlotKey(courseId, dayIndex, startTime, dateStr);
+        getRecord: function(courseId, dayIndex, startTime, dateStr, weekNum) {
+            const targetWeek = Number(weekNum || this.getSelectedWeek());
+            const canonicalDate = dateStr || this.getCanonicalDateForSemesterWeekDay(targetWeek, dayIndex);
+            const key = this.makeSlotKey(courseId, dayIndex, startTime, canonicalDate, targetWeek);
             if (this.records[key]) return this.records[key];
 
-            // Resilience fallback: if no dateStr provided, check if a record exists for this dayIndex & startTime in the current week
+            // Same-week resilience fallback: only match a record belonging to the SAME semester week (never reset/leak across weeks)
             if (!dateStr) {
                 const prefix = `${String(courseId).trim()}_d${dayIndex}_${(startTime || '00:00').replace(':', '')}_`;
-                const matchedKey = Object.keys(this.records).find(k => k.startsWith(prefix));
+                const matchedKey = Object.keys(this.records).find(k => {
+                    if (!k.startsWith(prefix)) return false;
+                    const rec = this.records[k];
+                    if (!rec) return false;
+                    const recWeek = rec.week ? Number(rec.week) : this.getAcademicWeekForDateStr(rec.date);
+                    return recWeek === targetWeek;
+                });
                 if (matchedKey) return this.records[matchedKey];
             }
             return null;
         },
 
         /**
-         * Toggle between attended / missed / un-marked
+         * Toggle between attended / missed / un-marked for a specific semester week
          */
-        toggleAttendance: function(courseId, courseName, type, dayIndex, startTime, endTime, room, targetStatus) {
-            const dateStr = this.getCurrentDateString();
-            const key = this.makeSlotKey(courseId, dayIndex, startTime, dateStr);
-            const current = this.records[key];
+        toggleAttendance: function(courseId, courseName, type, dayIndex, startTime, endTime, room, targetStatus, weekNum) {
+            const targetWeek = Number(weekNum || this.getSelectedWeek());
+            const dateStr = this.getCanonicalDateForSemesterWeekDay(targetWeek, dayIndex);
+            const key = this.makeSlotKey(courseId, dayIndex, startTime, dateStr, targetWeek);
+            const existingSameWeek = this.records[key] || this.getRecord(courseId, dayIndex, startTime, null, targetWeek);
 
-            if (current && current.status === targetStatus) {
-                // Clicking again removes mark
+            if (existingSameWeek && existingSameWeek.status === targetStatus) {
+                const removeKey = existingSameWeek.slotKey || key;
+                delete this.records[removeKey];
                 delete this.records[key];
-                // Remove pending catchup item if this was missed
                 if (targetStatus === 'missed') {
-                    this.catchupQueue = this.catchupQueue.filter(item => item.slotKey !== key);
+                    this.catchupQueue = this.catchupQueue.filter(item => item.slotKey !== removeKey && item.slotKey !== key);
                 }
                 this.save();
                 this.refreshUI();
                 if (typeof showToastNotification === 'function') {
-                    showToastNotification(`בוטל סימון הנוכחות עבור [${courseName}]`, 'info');
+                    showToastNotification(`בוטל סימון הנוכחות עבור [${courseName}] (שבוע ${targetWeek})`, 'info');
                 }
                 return;
             }
 
-            // Set new record
+            if (existingSameWeek && existingSameWeek.slotKey && existingSameWeek.slotKey !== key) {
+                delete this.records[existingSameWeek.slotKey];
+                this.catchupQueue = this.catchupQueue.filter(item => item.slotKey !== existingSameWeek.slotKey);
+            }
+
+            // Set new canonical week-pinned record
             this.records[key] = {
                 slotKey: key,
                 courseId: String(courseId).trim(),
@@ -384,6 +449,7 @@
                 endTime: endTime,
                 room: room || '',
                 date: dateStr,
+                week: targetWeek,
                 status: targetStatus,
                 timestamp: Date.now()
             };
@@ -399,17 +465,18 @@
                     startTime: startTime,
                     endTime: endTime,
                     date: dateStr,
+                    week: targetWeek,
                     parallelRecs: parallelRecs
                 });
                 if (typeof showToastNotification === 'function') {
                     const recSuffix = parallelRecs.length > 0 ? (' (נמצאו ' + parallelRecs.length + ' השלמות פרונטליות פנויות במערכת! 💡)') : '';
-                    showToastNotification('⚠️ [' + courseName + '] סומן כהוחסר ונוסף לתור ההשלמות!' + recSuffix + ' 📹', 'warning');
+                    showToastNotification('⚠️ [' + courseName + '] (שבוע ' + targetWeek + ') סומן כהוחסר ונוסף לתור ההשלמות!' + recSuffix + ' 📹', 'warning');
                 }
             } else {
                 // If it was attended, remove any pending catchup for this exact slot
                 this.catchupQueue = this.catchupQueue.filter(item => item.slotKey !== key);
                 if (typeof showToastNotification === 'function') {
-                    showToastNotification(`✓ נוכחות נרשמה בהצלחה עבור [${courseName}]! ✨`, 'success');
+                    showToastNotification(`✓ נוכחות נרשמה עבור [${courseName}] (שבוע ${targetWeek})! ✨`, 'success');
                 }
             }
 
@@ -426,14 +493,13 @@
             if (exists) return;
 
             const cleanCode = String(meta.courseId).replace(/\D/g, '');
+            const itemWeek = Number(meta.week || this.getSelectedWeek());
             let pangeaChapter = null;
 
             if (window.PangeaHub && typeof window.PangeaHub.getCourseData === 'function') {
                 const cData = window.PangeaHub.getCourseData(cleanCode);
                 if (cData && cData.lectures && cData.lectures.length > 0) {
-                    // Try to guess week or pick first relevant lecture
-                    const currentWeek = this.getCurrentAcademicWeek();
-                    pangeaChapter = cData.lectures.find(l => l.number === currentWeek) || cData.lectures[0];
+                    pangeaChapter = cData.lectures.find(l => l.number === itemWeek) || cData.lectures[0];
                 }
             }
 
@@ -455,8 +521,8 @@
                 dayIndex: meta.dayIndex !== undefined ? meta.dayIndex : null,
                 parallelRecs: meta.parallelRecs || this.findParallelSlotRecommendations(cleanCode, meta.type, meta.dayIndex, meta.startTime),
                 startTime: meta.startTime,
-                week: this.getCurrentAcademicWeek(),
-                topic: pangeaChapter ? pangeaChapter.displayTitle : `${meta.type} שבוע ${this.getCurrentAcademicWeek()}`,
+                week: itemWeek,
+                topic: pangeaChapter ? pangeaChapter.displayTitle : `${meta.type} שבוע ${itemWeek}`,
                 pangeaUrl: pangeaChapter ? (pangeaChapter.url ? pangeaChapter.url.replace(/%20/g, '-').replace(/\s+/g, '-').replace(/-+/g, '-') : null) : null,
                 pangeaTitle: pangeaChapter ? pangeaChapter.displayTitle : null,
                 panoptoUrl: panoptoUrl,
@@ -470,12 +536,13 @@
             this.catchupQueue.unshift(newItem);
         },
 
-        getCurrentAcademicWeek: function() {
-            // Aligned with Technion Winter 2026/27 semester start (October 28, 2026)
-            const now = new Date();
-            const start = new Date(2026, 9, 28); // Oct 28, 2026
-            const diffDays = Math.floor((now - start) / (1000 * 60 * 60 * 24));
-            const week = Math.max(1, Math.min(14, Math.floor(diffDays / 7) + 1));
+        getCurrentAcademicWeek: function(refDate) {
+            // Aligned with Technion Winter 2026/27 semester (Week 1 starts Sunday Oct 25, 2026 for Oct 28 kickoff)
+            const now = refDate ? new Date(refDate) : new Date();
+            const nowUtc = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
+            const week1SundayUtc = Date.UTC(2026, 9, 25);
+            const diffDays = Math.round((nowUtc - week1SundayUtc) / 86400000);
+            const week = Math.max(1, Math.min(13, Math.floor(diffDays / 7) + 1));
             return week;
         },
 
@@ -523,6 +590,7 @@
             let remainingAllowed = null;
 
             const isPerpetual = (typeof window.isCoursePerpetualDitch === 'function') && window.isCoursePerpetualDitch(cleanCode);
+            const ditchMode = (typeof window.getCoursePerpetualDitchMode === 'function') ? window.getCoursePerpetualDitchMode(cleanCode) : (isPerpetual ? 'all' : 'none');
             if (isPerpetual) {
                 safety = 'perpetual';
             } else if (quota) {
@@ -545,8 +613,298 @@
                 quota,
                 remainingAllowed,
                 safety,
-                isPerpetualDitch: isPerpetual
+                isPerpetualDitch: isPerpetual,
+                perpetualDitchMode: ditchMode
             };
+        },
+
+        classifySlotCategory: function(type) {
+            if (typeof window.classifySessionDitchCategory === 'function') {
+                return window.classifySessionDitchCategory(type);
+            }
+            const lower = String(type || '').toLowerCase();
+            if (lower.includes('תרגול') || lower.includes('מעבדה') || lower.includes('tutorial') || lower.includes('recitation') || lower.includes('lab')) {
+                return 'tutorial';
+            }
+            if (lower.includes('הרצאה') || lower.includes('lecture') || lower.includes('פרונטלי') || lower.includes('שיעור')) {
+                return 'lecture';
+            }
+            return 'other';
+        },
+
+        getWeekStats: function(weekNum, scheduleOverride) {
+            const targetWeek = Number(weekNum || this.getSelectedWeek());
+            let schedule = scheduleOverride || null;
+            if (!schedule) {
+                if (typeof getActiveTimetableSchedule === 'function') {
+                    schedule = getActiveTimetableSchedule();
+                } else if (typeof window !== 'undefined' && window.gameState && window.gameState.timetable) {
+                    schedule = window.gameState.timetable;
+                } else if (typeof CHEESEFORK_SEMESTER_SCHEDULE !== 'undefined') {
+                    schedule = CHEESEFORK_SEMESTER_SCHEDULE;
+                }
+            }
+            let totalSlots = 0;
+            let attended = 0;
+            let missed = 0;
+            let perpetual = 0;
+            let unmarked = 0;
+
+            if (schedule && Array.isArray(schedule.days)) {
+                schedule.days.forEach(day => {
+                    if (!day || !Array.isArray(day.classes)) return;
+                    day.classes.forEach(c => {
+                        totalSlots++;
+                        const rec = this.getRecord(c.courseId, day.dayIndex, c.startTime, null, targetWeek);
+                        const isPerp = (typeof window.isCoursePerpetualDitch === 'function') && window.isCoursePerpetualDitch(c.courseId, c.type);
+                        if (rec && rec.status === 'attended') attended++;
+                        else if (rec && rec.status === 'missed') missed++;
+                        else if (isPerp) perpetual++;
+                        else unmarked++;
+                    });
+                });
+            }
+
+            // Include any recorded entries in targetWeek not already covered if schedule was absent
+            if (totalSlots === 0) {
+                Object.values(this.records).forEach(r => {
+                    if (!r) return;
+                    const recWeek = r.week ? Number(r.week) : this.getAcademicWeekForDateStr(r.date);
+                    if (recWeek !== targetWeek) return;
+                    totalSlots++;
+                    if (r.status === 'attended') attended++;
+                    else if (r.status === 'missed') missed++;
+                });
+            }
+
+            const marked = attended + missed;
+            const pct = marked > 0 ? Math.round((attended / marked) * 100) : null;
+            return { week: targetWeek, totalSlots, attended, missed, perpetual, unmarked, marked, pct };
+        },
+
+        getSemesterAnalytics: function(scheduleOverride) {
+            let schedule = scheduleOverride || null;
+            if (!schedule) {
+                if (typeof getActiveTimetableSchedule === 'function') {
+                    schedule = getActiveTimetableSchedule();
+                } else if (typeof window !== 'undefined' && window.gameState && window.gameState.timetable) {
+                    schedule = window.gameState.timetable;
+                } else if (typeof CHEESEFORK_SEMESTER_SCHEDULE !== 'undefined') {
+                    schedule = CHEESEFORK_SEMESTER_SCHEDULE;
+                }
+            }
+
+            const dayNames = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'];
+            const slotMap = new Map();
+
+            if (schedule && Array.isArray(schedule.days)) {
+                schedule.days.forEach(day => {
+                    if (!day || !Array.isArray(day.classes)) return;
+                    day.classes.forEach(c => {
+                        const cleanCode = String(c.courseId || '').trim();
+                        const sKey = `${cleanCode}|${day.dayIndex}|${c.startTime || ''}`;
+                        if (!slotMap.has(sKey)) {
+                            slotMap.set(sKey, {
+                                courseId: cleanCode,
+                                courseName: c.courseName || cleanCode,
+                                type: c.type || 'שיעור',
+                                dayIndex: Number(day.dayIndex),
+                                dayName: day.name || dayNames[Number(day.dayIndex)] || '',
+                                startTime: c.startTime || '',
+                                endTime: c.endTime || '',
+                                room: c.room || ''
+                            });
+                        }
+                    });
+                });
+            }
+
+            // Include recurring non-manual records that might belong to courses not currently in schedule
+            Object.values(this.records).forEach(r => {
+                if (!r || !r.courseId || String(r.slotKey || '').startsWith('manual_')) return;
+                if (r.dayIndex === undefined || r.dayIndex === null || isNaN(Number(r.dayIndex))) return;
+                const cleanCode = String(r.courseId).trim();
+                const sKey = `${cleanCode}|${Number(r.dayIndex)}|${r.startTime || ''}`;
+                if (!slotMap.has(sKey)) {
+                    slotMap.set(sKey, {
+                        courseId: cleanCode,
+                        courseName: r.courseName || cleanCode,
+                        type: r.type || 'שיעור',
+                        dayIndex: Number(r.dayIndex),
+                        dayName: dayNames[Number(r.dayIndex)] || '',
+                        startTime: r.startTime || '',
+                        endTime: r.endTime || '',
+                        room: r.room || ''
+                    });
+                }
+            });
+
+            const weeks = {};
+            for (let w = 1; w <= 13; w++) {
+                weeks[w] = {
+                    week: w,
+                    dateRange: this.getWeekDateRangeLabel(w),
+                    attended: 0,
+                    missed: 0,
+                    perpetual: 0,
+                    unmarked: 0,
+                    marked: 0,
+                    pct: null
+                };
+            }
+
+            const courseMap = new Map();
+            const matrixRows = [];
+            let totalAttended = 0;
+            let totalMissed = 0;
+            let lectureAttended = 0;
+            let lectureMissed = 0;
+            let tutorialAttended = 0;
+            let tutorialMissed = 0;
+
+            const ensureCourse = (courseId, courseName) => {
+                const normCode = String(courseId).replace(/\D/g, '').replace(/^0+/, '') || String(courseId);
+                if (!courseMap.has(normCode)) {
+                    const mode = (typeof window.getCoursePerpetualDitchMode === 'function')
+                        ? window.getCoursePerpetualDitchMode(courseId)
+                        : ((typeof window.isCoursePerpetualDitch === 'function' && window.isCoursePerpetualDitch(courseId)) ? 'all' : 'none');
+                    courseMap.set(normCode, {
+                        courseId: String(courseId),
+                        courseName: courseName || String(courseId),
+                        attended: 0,
+                        missed: 0,
+                        marked: 0,
+                        pct: null,
+                        lectureAttended: 0,
+                        lectureMissed: 0,
+                        tutorialAttended: 0,
+                        tutorialMissed: 0,
+                        perpetualDitchMode: mode
+                    });
+                }
+                return courseMap.get(normCode);
+            };
+
+            slotMap.forEach(slot => {
+                const cat = this.classifySlotCategory(slot.type);
+                const isSlotPerp = (typeof window.isCoursePerpetualDitch === 'function') && window.isCoursePerpetualDitch(slot.courseId, slot.type);
+                const cStats = ensureCourse(slot.courseId, slot.courseName);
+                const row = {
+                    courseId: slot.courseId,
+                    courseName: slot.courseName,
+                    type: slot.type,
+                    category: cat,
+                    dayIndex: slot.dayIndex,
+                    dayName: slot.dayName,
+                    startTime: slot.startTime,
+                    endTime: slot.endTime,
+                    room: slot.room,
+                    isPerpetual: isSlotPerp,
+                    weeks: {},
+                    attended: 0,
+                    missed: 0
+                };
+
+                for (let w = 1; w <= 13; w++) {
+                    const rec = this.getRecord(slot.courseId, slot.dayIndex, slot.startTime, null, w);
+                    if (rec && rec.status === 'attended') {
+                        row.weeks[w] = 'attended';
+                        row.attended++;
+                        weeks[w].attended++;
+                        cStats.attended++;
+                        totalAttended++;
+                        if (cat === 'lecture') { lectureAttended++; cStats.lectureAttended++; }
+                        else if (cat === 'tutorial') { tutorialAttended++; cStats.tutorialAttended++; }
+                    } else if (rec && rec.status === 'missed') {
+                        row.weeks[w] = 'missed';
+                        row.missed++;
+                        weeks[w].missed++;
+                        cStats.missed++;
+                        totalMissed++;
+                        if (cat === 'lecture') { lectureMissed++; cStats.lectureMissed++; }
+                        else if (cat === 'tutorial') { tutorialMissed++; cStats.tutorialMissed++; }
+                    } else if (isSlotPerp) {
+                        row.weeks[w] = 'perpetual';
+                        weeks[w].perpetual++;
+                    } else {
+                        row.weeks[w] = 'unmarked';
+                        weeks[w].unmarked++;
+                    }
+                }
+                matrixRows.push(row);
+            });
+
+            // Include manual quickAdd records in totals
+            Object.values(this.records).forEach(r => {
+                if (!r || !String(r.slotKey || '').startsWith('manual_')) return;
+                const w = Math.max(1, Math.min(13, Number(r.week || this.getAcademicWeekForDateStr(r.date))));
+                const cStats = ensureCourse(r.courseId, r.courseName);
+                if (r.status === 'attended') {
+                    totalAttended++;
+                    cStats.attended++;
+                    weeks[w].attended++;
+                } else if (r.status === 'missed') {
+                    totalMissed++;
+                    cStats.missed++;
+                    weeks[w].missed++;
+                }
+            });
+
+            matrixRows.sort((a, b) => {
+                if (a.dayIndex !== b.dayIndex) return a.dayIndex - b.dayIndex;
+                return String(a.startTime).localeCompare(String(b.startTime));
+            });
+
+            for (let w = 1; w <= 13; w++) {
+                weeks[w].marked = weeks[w].attended + weeks[w].missed;
+                weeks[w].pct = weeks[w].marked > 0 ? Math.round((weeks[w].attended / weeks[w].marked) * 100) : null;
+            }
+
+            const courses = Array.from(courseMap.values()).map(c => {
+                c.marked = c.attended + c.missed;
+                c.pct = c.marked > 0 ? Math.round((c.attended / c.marked) * 100) : null;
+                return c;
+            });
+
+            const totalMarked = totalAttended + totalMissed;
+            const overallPct = totalMarked > 0 ? Math.round((totalAttended / totalMarked) * 100) : null;
+            const lectureTotal = lectureAttended + lectureMissed;
+            const lecturePct = lectureTotal > 0 ? Math.round((lectureAttended / lectureTotal) * 100) : null;
+            const tutorialTotal = tutorialAttended + tutorialMissed;
+            const tutorialPct = tutorialTotal > 0 ? Math.round((tutorialAttended / tutorialTotal) * 100) : null;
+
+            return {
+                currentWeek: this.getCurrentAcademicWeek(),
+                selectedWeek: this.getSelectedWeek(),
+                totalAttended,
+                totalMissed,
+                totalMarked,
+                overallPct,
+                lectureAttended,
+                lectureMissed,
+                lectureTotal,
+                lecturePct,
+                tutorialAttended,
+                tutorialMissed,
+                tutorialTotal,
+                tutorialPct,
+                weeks,
+                courses,
+                matrixRows
+            };
+        },
+
+        cycleMatrixCellAttendance: function(courseId, courseName, type, dayIndex, startTime, endTime, room, weekNum) {
+            const w = Number(weekNum || this.getSelectedWeek());
+            const existing = this.getRecord(courseId, dayIndex, startTime, null, w);
+            if (!existing) {
+                this.toggleAttendance(courseId, courseName, type, dayIndex, startTime, endTime, room, 'attended', w);
+            } else if (existing.status === 'attended') {
+                this.toggleAttendance(courseId, courseName, type, dayIndex, startTime, endTime, room, 'missed', w);
+            } else {
+                this.toggleAttendance(courseId, courseName, type, dayIndex, startTime, endTime, room, 'missed', w);
+            }
+            this.renderModalBody();
         },
 
         updateBadgeCounts: function() {
@@ -592,31 +950,34 @@
             document.body.appendChild(modal);
 
             modal.innerHTML = `
-                <div class="modal-card" style="background: #0f172a; border: 1px solid #10b981; border-radius: 16px; padding: 24px; width: 100%; max-width: 760px; max-height: 90vh; overflow-y: auto; direction: rtl; box-shadow: 0 15px 40px rgba(0,0,0,0.85);">
+                <div class="modal-card" style="background: #0f172a; border: 1px solid #10b981; border-radius: 16px; padding: 20px; width: 100%; max-width: 860px; max-height: 90vh; overflow-y: auto; direction: rtl; box-shadow: 0 15px 40px rgba(0,0,0,0.85);">
                     <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 12px;">
                         <div>
-                            <h2 style="margin: 0; font-size: 1.25rem; font-weight: 800; color: #f8fafc; display: flex; align-items: center; gap: 8px;">
+                            <h2 style="margin: 0; font-size: 1.2rem; font-weight: 800; color: #f8fafc; display: flex; align-items: center; gap: 8px;">
                                 <span>📋</span>
-                                <span>מרכז נוכחות והשלמות שיעורים (Attendance & Catch-Up)</span>
+                                <span>מרכז נוכחות, מעקב שבועי והשלמות שיעורים</span>
                             </h2>
-                            <span style="font-size: 0.76rem; color: #94a3b8;">מעקב חובת נוכחות, סגירת פערים בהקלטות פנאופטו, וסיכומי פנגייה ישירים</span>
+                            <span style="font-size: 0.76rem; color: #94a3b8;">מעקב נוכחות לפי 13 שבועות הסמסטר, סטטיסטיקות, השלמות פנאופטו ופנגייה</span>
                         </div>
                         <button type="button" class="btn-close-attendance-modal" aria-label="סגור חלון" style="background: transparent; border: none; font-size: 1.4rem; color: #94a3b8; cursor: pointer; padding: 4px;">✕</button>
                     </div>
 
                     <!-- Segmented Tab Switcher -->
-                    <div style="display: flex; gap: 8px; margin-bottom: 16px; background: rgba(255,255,255,0.04); padding: 4px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.08); flex-wrap: wrap;">
-                        <button type="button" class="attendance-tab-btn ${this.activeTab === 'catchup' ? 'active' : ''}" onclick="window.AttendanceHub.switchTab('catchup')" style="flex: 1; min-width: 140px; padding: 8px 10px; border: none; border-radius: 8px; font-weight: 700; font-size: 0.82rem; cursor: pointer; background: ${this.activeTab === 'catchup' ? '#10b981' : 'transparent'}; color: ${this.activeTab === 'catchup' ? '#fff' : '#94a3b8'}; transition: all 0.15s ease;">
-                            📹 תור השלמות ופנאופטו (${this.catchupQueue.filter(i => i.status !== 'completed').length})
+                    <div style="display: flex; gap: 6px; margin-bottom: 16px; background: rgba(255,255,255,0.04); padding: 4px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.08); flex-wrap: wrap;">
+                        <button type="button" class="attendance-tab-btn ${this.activeTab === 'catchup' ? 'active' : ''}" onclick="window.AttendanceHub.switchTab('catchup')" style="flex: 1; min-width: 125px; padding: 8px 8px; border: none; border-radius: 8px; font-weight: 700; font-size: 0.78rem; cursor: pointer; background: ${this.activeTab === 'catchup' ? '#10b981' : 'transparent'}; color: ${this.activeTab === 'catchup' ? '#fff' : '#94a3b8'}; transition: all 0.15s ease;">
+                            📹 תור השלמות (${this.catchupQueue.filter(i => i.status !== 'completed').length})
                         </button>
-                        <button type="button" class="attendance-tab-btn ${this.activeTab === 'selfstudy' ? 'active' : ''}" onclick="window.AttendanceHub.switchTab('selfstudy')" style="flex: 1; min-width: 140px; padding: 8px 10px; border: none; border-radius: 8px; font-weight: 700; font-size: 0.82rem; cursor: pointer; background: ${this.activeTab === 'selfstudy' ? '#a855f7' : 'transparent'}; color: ${this.activeTab === 'selfstudy' ? '#fff' : '#94a3b8'}; transition: all 0.15s ease;">
+                        <button type="button" class="attendance-tab-btn ${this.activeTab === 'stats' ? 'active' : ''}" onclick="window.AttendanceHub.switchTab('stats')" style="flex: 1; min-width: 145px; padding: 8px 8px; border: none; border-radius: 8px; font-weight: 700; font-size: 0.78rem; cursor: pointer; background: ${this.activeTab === 'stats' ? '#0284c7' : 'transparent'}; color: ${this.activeTab === 'stats' ? '#fff' : '#94a3b8'}; transition: all 0.15s ease;">
+                            📊 סטטיסטיקות ומעקב שבועי
+                        </button>
+                        <button type="button" class="attendance-tab-btn ${this.activeTab === 'selfstudy' ? 'active' : ''}" onclick="window.AttendanceHub.switchTab('selfstudy')" style="flex: 1; min-width: 125px; padding: 8px 8px; border: none; border-radius: 8px; font-weight: 700; font-size: 0.78rem; cursor: pointer; background: ${this.activeTab === 'selfstudy' ? '#a855f7' : 'transparent'}; color: ${this.activeTab === 'selfstudy' ? '#fff' : '#94a3b8'}; transition: all 0.15s ease;">
                             🚀 למידה עצמית (${this.getSelfStudyCount()})
                         </button>
-                        <button type="button" class="attendance-tab-btn ${this.activeTab === 'mandatory' ? 'active' : ''}" onclick="window.AttendanceHub.switchTab('mandatory')" style="flex: 1; min-width: 140px; padding: 8px 10px; border: none; border-radius: 8px; font-weight: 700; font-size: 0.82rem; cursor: pointer; background: ${this.activeTab === 'mandatory' ? '#10b981' : 'transparent'}; color: ${this.activeTab === 'mandatory' ? '#fff' : '#94a3b8'}; transition: all 0.15s ease;">
-                            🛡️ נוכחות חובה
+                        <button type="button" class="attendance-tab-btn ${this.activeTab === 'mandatory' ? 'active' : ''}" onclick="window.AttendanceHub.switchTab('mandatory')" style="flex: 1; min-width: 115px; padding: 8px 8px; border: none; border-radius: 8px; font-weight: 700; font-size: 0.78rem; cursor: pointer; background: ${this.activeTab === 'mandatory' ? '#10b981' : 'transparent'}; color: ${this.activeTab === 'mandatory' ? '#fff' : '#94a3b8'}; transition: all 0.15s ease;">
+                            🛡️ חובה
                         </button>
-                        <button type="button" class="attendance-tab-btn ${this.activeTab === 'history' ? 'active' : ''}" onclick="window.AttendanceHub.switchTab('history')" style="flex: 1; min-width: 120px; padding: 8px 10px; border: none; border-radius: 8px; font-weight: 700; font-size: 0.82rem; cursor: pointer; background: ${this.activeTab === 'history' ? '#10b981' : 'transparent'}; color: ${this.activeTab === 'history' ? '#fff' : '#94a3b8'}; transition: all 0.15s ease;">
-                            📅 יומן מלא (${Object.keys(this.records).length})
+                        <button type="button" class="attendance-tab-btn ${this.activeTab === 'history' ? 'active' : ''}" onclick="window.AttendanceHub.switchTab('history')" style="flex: 1; min-width: 110px; padding: 8px 8px; border: none; border-radius: 8px; font-weight: 700; font-size: 0.78rem; cursor: pointer; background: ${this.activeTab === 'history' ? '#10b981' : 'transparent'}; color: ${this.activeTab === 'history' ? '#fff' : '#94a3b8'}; transition: all 0.15s ease;">
+                            📅 יומן (${Object.keys(this.records).length})
                         </button>
                     </div>
 
@@ -652,6 +1013,8 @@
 
             if (this.activeTab === 'catchup') {
                 this.renderCatchupTab(bodyEl);
+            } else if (this.activeTab === 'stats') {
+                this.renderStatsTab(bodyEl);
             } else if (this.activeTab === 'selfstudy') {
                 this.renderSelfStudyTab(bodyEl);
             } else if (this.activeTab === 'mandatory') {
@@ -659,6 +1022,152 @@
             } else if (this.activeTab === 'history') {
                 this.renderHistoryTab(bodyEl);
             }
+        },
+
+        renderStatsTab: function(bodyEl) {
+            const analytics = this.getSemesterAnalytics();
+            const fmtPct = (v) => (v === null || v === undefined) ? '—' : `${v}%`;
+
+            let weekMatrixHeaders = '';
+            for (let w = 1; w <= 13; w++) {
+                const isCur = w === analytics.currentWeek;
+                weekMatrixHeaders += `<th title="שבוע ${w}: ${analytics.weeks[w].dateRange}" style="${isCur ? 'color: #38bdf8; border-bottom: 2px solid #38bdf8;' : ''}">ש׳${w}</th>`;
+            }
+
+            let matrixBodyHtml = '';
+            if (analytics.matrixRows.length === 0) {
+                matrixBodyHtml = `<tr><td colspan="15" style="padding: 20px; color: #94a3b8;">אין מערכת שעות פעילה להצגה. סנכרן מ-CheeseFork כדי לראות את מטריצת 13 השבועות.</td></tr>`;
+            } else {
+                analytics.matrixRows.forEach(row => {
+                    const rowMarked = row.attended + row.missed;
+                    const rowPct = rowMarked > 0 ? Math.round((row.attended / rowMarked) * 100) : null;
+                    let cellsHtml = '';
+                    for (let w = 1; w <= 13; w++) {
+                        const st = row.weeks[w];
+                        const isCur = w === analytics.currentWeek;
+                        let symbol = '·';
+                        let titleText = `שבוע ${w} (${analytics.weeks[w].dateRange}): לא סומן — לחץ לסימון נוכחות`;
+                        if (st === 'attended') {
+                            symbol = '✓';
+                            titleText = `שבוע ${w}: נכחתי — לחץ להעברה להוחסר`;
+                        } else if (st === 'missed') {
+                            symbol = '✗';
+                            titleText = `שבוע ${w}: הוחסר — לחץ לביטול סימון`;
+                        } else if (st === 'perpetual') {
+                            symbol = '🚀';
+                            titleText = `שבוע ${w}: בלמידה עצמית — לחץ לעדכון ידני`;
+                        }
+                        const safeCourseName = String(row.courseName || '').replace(/'/g, "\\'");
+                        const safeType = String(row.type || '').replace(/'/g, "\\'");
+                        const safeRoom = String(row.room || '').replace(/'/g, "\\'");
+                        cellsHtml += `
+                            <td>
+                                <button type="button"
+                                        class="att-matrix-cell-btn ${st} ${isCur ? 'is-current-col' : ''}"
+                                        title="${titleText}"
+                                        onclick="window.AttendanceHub.cycleMatrixCellAttendance('${row.courseId}', '${safeCourseName}', '${safeType}', ${row.dayIndex}, '${row.startTime}', '${row.endTime}', '${safeRoom}', ${w})">
+                                    ${symbol}
+                                </button>
+                            </td>
+                        `;
+                    }
+                    matrixBodyHtml += `
+                        <tr>
+                            <td style="text-align: right; min-width: 155px; white-space: nowrap;">
+                                <strong style="color: #f8fafc;">${row.courseName}</strong>
+                                <div style="font-size: 0.68rem; color: #94a3b8;">${row.type} • יום ${row.dayName} ${row.startTime}</div>
+                            </td>
+                            ${cellsHtml}
+                            <td style="font-weight: 800; color: ${rowPct === null ? '#94a3b8' : (rowPct >= 80 ? '#34d399' : '#fbbf24')};">
+                                ${fmtPct(rowPct)}
+                            </td>
+                        </tr>
+                    `;
+                });
+            }
+
+            let coursesBreakdownHtml = analytics.courses.map(c => {
+                const pctVal = c.pct === null ? 0 : c.pct;
+                const modeLabels = {
+                    all: '🚀 למידה עצמית מלאה',
+                    lecture: '👨‍🏫 הרצאות בלמידה עצמית',
+                    tutorial: '🧑‍🏫 תרגולים בלמידה עצמית',
+                    none: '🏛️ פרונטלי רגיל'
+                };
+                return `
+                    <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.09); border-radius: 10px; padding: 12px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 6px;">
+                            <div>
+                                <strong style="color: #f8fafc; font-size: 0.88rem;">${c.courseName}</strong>
+                                <span style="font-size: 0.7rem; color: #94a3b8; font-family: monospace;">(${c.courseId})</span>
+                            </div>
+                            <span style="font-size: 0.75rem; font-weight: 800; color: ${c.pct === null ? '#94a3b8' : (c.pct >= 80 ? '#34d399' : '#f59e0b')};">
+                                ${c.pct === null ? 'טרם סומן' : `${c.pct}% (${c.attended}/${c.marked})`}
+                            </span>
+                        </div>
+                        <div style="background: rgba(255,255,255,0.08); height: 6px; border-radius: 999px; overflow: hidden; margin-bottom: 8px;">
+                            <div style="height: 100%; width: ${pctVal}%; background: ${pctVal >= 80 ? '#10b981' : '#f59e0b'};"></div>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; font-size: 0.72rem; color: #94a3b8; flex-wrap: wrap; gap: 6px;">
+                            <span>הרצאות: ${c.lectureAttended}/${c.lectureAttended + c.lectureMissed} • תרגולים: ${c.tutorialAttended}/${c.tutorialAttended + c.tutorialMissed}</span>
+                            <span style="color: ${c.perpetualDitchMode !== 'none' ? '#c084fc' : '#64748b'}; font-weight: 700;">${modeLabels[c.perpetualDitchMode] || modeLabels.none}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            bodyEl.innerHTML = `
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(155px, 1fr)); gap: 10px; margin-bottom: 16px;">
+                    <div style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 10px; padding: 12px;">
+                        <div style="font-size: 0.72rem; color: #6ee7b7; font-weight: 700;">📊 נוכחות סמסטריאלית</div>
+                        <div style="font-size: 1.45rem; font-weight: 900; color: #f8fafc; margin: 2px 0;">${fmtPct(analytics.overallPct)}</div>
+                        <div style="font-size: 0.72rem; color: #cbd5e1;">${analytics.totalAttended} נכחתי • ${analytics.totalMissed} החסרתי</div>
+                    </div>
+                    <div style="background: rgba(56, 189, 248, 0.08); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 10px; padding: 12px;">
+                        <div style="font-size: 0.72rem; color: #38bdf8; font-weight: 700;">👨‍🏫 הרצאות</div>
+                        <div style="font-size: 1.45rem; font-weight: 900; color: #f8fafc; margin: 2px 0;">${fmtPct(analytics.lecturePct)}</div>
+                        <div style="font-size: 0.72rem; color: #cbd5e1;">${analytics.lectureAttended} מתוך ${analytics.lectureTotal} מסומנות</div>
+                    </div>
+                    <div style="background: rgba(168, 85, 247, 0.08); border: 1px solid rgba(168, 85, 247, 0.3); border-radius: 10px; padding: 12px;">
+                        <div style="font-size: 0.72rem; color: #d8b4fe; font-weight: 700;">🧑‍🏫 תרגולים ומעבדות</div>
+                        <div style="font-size: 1.45rem; font-weight: 900; color: #f8fafc; margin: 2px 0;">${fmtPct(analytics.tutorialPct)}</div>
+                        <div style="font-size: 0.72rem; color: #cbd5e1;">${analytics.tutorialAttended} מתוך ${analytics.tutorialTotal} מסומנים</div>
+                    </div>
+                    <div style="background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 10px; padding: 12px;">
+                        <div style="font-size: 0.72rem; color: #fbbf24; font-weight: 700;">📅 שבוע אקדמי נוכחי</div>
+                        <div style="font-size: 1.25rem; font-weight: 900; color: #f8fafc; margin: 3px 0;">שבוע ${analytics.currentWeek} / 13</div>
+                        <div style="font-size: 0.72rem; color: #cbd5e1;">${analytics.weeks[analytics.currentWeek].dateRange}</div>
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 16px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 8px; flex-wrap: wrap;">
+                        <strong style="font-size: 0.86rem; color: #f1f5f9;">🗓️ מטריצת נוכחות סמסטריאלית לפי שבוע (שבועות 1–13)</strong>
+                        <span style="font-size: 0.72rem; color: #94a3b8;">לחץ על כל משבצת שבועית להחלפת מצב: · לא סומן → ✓ נכחתי → ✗ הוחסר</span>
+                    </div>
+                    <div style="overflow-x: auto; border: 1px solid rgba(255,255,255,0.09); border-radius: 10px; background: rgba(15, 23, 42, 0.5);">
+                        <table class="att-matrix-table">
+                            <thead>
+                                <tr>
+                                    <th style="text-align: right; padding-right: 8px;">שיעור</th>
+                                    ${weekMatrixHeaders}
+                                    <th>%</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${matrixBodyHtml}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div>
+                    <div style="font-size: 0.85rem; font-weight: 700; color: #f1f5f9; margin-bottom: 8px;">📚 פילוח נוכחות לפי קורס:</div>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px;">
+                        ${coursesBreakdownHtml || '<div style="color: #94a3b8; font-size: 0.8rem;">אין קורסים זמינים.</div>'}
+                    </div>
+                </div>
+            `;
         },
 
         renderSelfStudyTab: function(bodyEl) {
@@ -671,8 +1180,7 @@
                         <span style="font-size: 1.2rem;">🚀</span>
                         <strong style="color: #e9d5ff; font-size: 0.92rem;">מצב למידה עצמית (הברזה נצחית - Perpetual Ditch Mode):</strong>
                     </div>
-                    הגדר קורסים שבהם בחרת ללמוד באופן עצמאי במקום להגיע להרצאות פרונטליות (למשל כאשר המרצה/מתרגל אינם אפקטיביים והלמידה נעשית מספרים, פנאופטו ופנגיאה). 
-                    קורסים אלו מסומנים ישירות במערכת השעות, פטורים מהתראות הגעה לכיתה, ומספקים גישה מהירה בלחיצה אחת לכל המקורות המוקלטים.
+                    ניתן להגדיר למידה עצמית לקורס המלא, **להרצאות בלבד** (הגעה פרונטלית לתרגולים), או **לתרגולים בלבד** (הגעה פרונטלית להרצאות).
                 </div>
                 <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 12px;">
             `;
@@ -685,27 +1193,30 @@
                 `;
             } else {
                 courses.forEach(c => {
-                    const isSelfStudy = (typeof window.isCoursePerpetualDitch === 'function') && window.isCoursePerpetualDitch(c.code);
+                    const ditchMode = (typeof window.getCoursePerpetualDitchMode === 'function')
+                        ? window.getCoursePerpetualDitchMode(c.code)
+                        : (((typeof window.isCoursePerpetualDitch === 'function') && window.isCoursePerpetualDitch(c.code)) ? 'all' : 'none');
+                    const isSelfStudy = ditchMode !== 'none';
                     const resUrls = (typeof window.getCourseResourceUrls === 'function') ? window.getCourseResourceUrls(c.code) : { panoptoUrl: '#', pangeaUrl: '#' };
                     const borderColor = isSelfStudy ? '#a855f7' : 'rgba(255,255,255,0.1)';
                     const bgColor = isSelfStudy ? 'rgba(168, 85, 247, 0.08)' : 'rgba(255,255,255,0.03)';
+                    const modeBadgeMap = {
+                        all: '🚀 כל הקורס (הרצאות + תרגולים)',
+                        lecture: '👨‍🏫 הרצאות בלבד בלמידה עצמית',
+                        tutorial: '🧑‍🏫 תרגולים בלבד בלמידה עצמית',
+                        none: '🏛️ שיעור פרונטלי רגיל'
+                    };
 
                     html += `
                         <div style="background: ${bgColor}; border: 1px solid ${borderColor}; border-radius: 12px; padding: 14px; position: relative; transition: all 0.2s ease;">
-                            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; gap: 6px;">
                                 <div>
                                     <strong style="font-size: 0.95rem; color: #f8fafc;">${c.name}</strong>
                                     <span style="font-size: 0.72rem; color: #94a3b8; font-family: monospace; display: block; margin-top: 2px;">(${c.code}) • סמסטר ${c.semester || 3}</span>
                                 </div>
-                                <span style="font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px; background: ${isSelfStudy ? '#a855f7' : 'rgba(255,255,255,0.1)'}; color: ${isSelfStudy ? '#fff' : '#94a3b8'};">
-                                    ${isSelfStudy ? '🚀 למידה עצמית פעילה' : '🏛️ שיעור פרונטלי'}
+                                <span style="font-size: 0.7rem; font-weight: 700; padding: 2px 8px; border-radius: 4px; background: ${isSelfStudy ? '#a855f7' : 'rgba(255,255,255,0.1)'}; color: ${isSelfStudy ? '#fff' : '#94a3b8'};">
+                                    ${modeBadgeMap[ditchMode] || modeBadgeMap.none}
                                 </span>
-                            </div>
-
-                            <div style="font-size: 0.76rem; color: #cbd5e1; margin-bottom: 10px; line-height: 1.4;">
-                                ${isSelfStudy 
-                                    ? 'הקורס מוגדר בלמידה עצמאית. התראות הגעה מבוטלות ואי-הגעה לא נספרת כחיסור שלילי.' 
-                                    : 'הקורס במעקב נוכחות פרונטלי רגיל.'}
                             </div>
 
                             <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px;">
@@ -720,10 +1231,11 @@
                                 </a>
                             </div>
 
-                            <div style="border-top: 1px dashed rgba(255,255,255,0.08); padding-top: 8px; display: flex; justify-content: flex-end;">
-                                <button type="button" onclick="window.toggleCoursePerpetualDitch('${c.code}'); window.AttendanceHub.renderModalBody();" style="font-size: 0.76rem; padding: 5px 12px; border-radius: 6px; border: none; font-weight: 700; cursor: pointer; background: ${isSelfStudy ? 'rgba(239, 68, 68, 0.2)' : '#a855f7'}; color: ${isSelfStudy ? '#f87171' : '#fff'}; transition: all 0.15s ease;">
-                                    ${isSelfStudy ? '↩️ בטל והחזר לנוכחות פרונטלית' : '🚀 הפעל מצב למידה עצמית'}
-                                </button>
+                            <div class="perpetual-mode-bar" style="border-top: 1px dashed rgba(255,255,255,0.08); padding-top: 8px;">
+                                <button type="button" class="perpetual-mode-pill mode-none ${ditchMode === 'none' ? 'active' : ''}" onclick="window.setCoursePerpetualDitchMode('${c.code}', 'none'); window.AttendanceHub.renderModalBody();">🏛️ פרונטלי</button>
+                                <button type="button" class="perpetual-mode-pill mode-lecture ${ditchMode === 'lecture' ? 'active' : ''}" onclick="window.setCoursePerpetualDitchMode('${c.code}', 'lecture'); window.AttendanceHub.renderModalBody();">👨‍🏫 הרצאות בלבד</button>
+                                <button type="button" class="perpetual-mode-pill mode-tutorial ${ditchMode === 'tutorial' ? 'active' : ''}" onclick="window.setCoursePerpetualDitchMode('${c.code}', 'tutorial'); window.AttendanceHub.renderModalBody();">🧑‍🏫 תרגולים בלבד</button>
+                                <button type="button" class="perpetual-mode-pill mode-all ${ditchMode === 'all' ? 'active' : ''}" onclick="window.setCoursePerpetualDitchMode('${c.code}', 'all'); window.AttendanceHub.renderModalBody();">🚀 כל הקורס</button>
                             </div>
                         </div>
                     `;
