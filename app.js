@@ -13763,9 +13763,9 @@ function openCourseDetails(code) {
 
         if (targetFinalInput) {
             targetFinalInput.oninput = updateTargetExamCalculator;
-            // Pre-fill target if course has Dean's Honor or standard 85 target
+            // Pre-fill target with personal target GPA or default 85
             if (!targetFinalInput.value) {
-                targetFinalInput.value = (gameState.deansHonorThreshold || 85);
+                targetFinalInput.value = (gameState.targetGpa || 85);
             }
             updateTargetExamCalculator();
         }
@@ -23473,11 +23473,11 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.11.15-v2.13.11",
-    version: "2.13.11",
-    build: "20261115_07",
-    date: "2026-11-15 18:40",
-    description: "v2.13.11: ייעול והקשחת בסיס הקוד — תיקון parity של קבצי המניפסט ו-Service Worker, הסרת קוד ו-CSS מתים מהעצים הישנים ומהסרגל, איחוד תשתיות ב-utils.js, תיקון ניווט חזור בגיליון הציונים והעברת סקריפטים חד-פעמיים לארכיון (ADR-121)."
+    code: "REV-2026.11.15-v2.13.12",
+    version: "2.13.12",
+    build: "20261115_08",
+    date: "2026-11-15 19:35",
+    description: "v2.13.12: ניווט חזור אמין במובייל ובאפליקציית Android (שימור חזרה דו-שלבי ביציאה, חזרה ממרכז ביצועים ↔ גיליון ציונים ↔ תקציר ונוכחות), הסרת תווית ״רשמי״ מגיליון הציונים, הסרת כרטיס ״מעמד אקדמי״ (undefined) והסרת חישובי ותוויות הצטיינות דיקן/נשיא (ADR-122)."
 };
 window.APP_VERSION = APP_CURRENT_REVISION.version;
 
@@ -23657,13 +23657,11 @@ function renderSettingsPage() {
 
     // 3. Populate Section 4: Academic Goals & Reminders
     const degreeCreditsInput = document.getElementById("setting-degree-credits");
-    const deansInput = document.getElementById("setting-deans-honor");
-    const presidentsInput = document.getElementById("setting-presidents-honor");
+    const targetGpaInput = document.getElementById("setting-target-gpa");
     const reminderDaysSelect = document.getElementById("setting-reminder-days-advance");
 
     if (degreeCreditsInput) degreeCreditsInput.value = gameState.totalDegreeCredits || 157.5;
-    if (deansInput) deansInput.value = gameState.deansHonorThreshold || 85.0;
-    if (presidentsInput) presidentsInput.value = gameState.presidentsHonorThreshold || 90.0;
+    if (targetGpaInput) targetGpaInput.value = gameState.targetGpa || 85.0;
     if (reminderDaysSelect) reminderDaysSelect.value = gameState.reminderAdvanceDays || 1;
 
     // 4. Render Revisions List with Inline Edit capabilities
@@ -23877,8 +23875,7 @@ function saveCalendarsSection() {
 // Save Section 4: Academic Goals
 function saveGoalsSection() {
     const degreeCreditsInput = document.getElementById("setting-degree-credits");
-    const deansInput = document.getElementById("setting-deans-honor");
-    const presidentsInput = document.getElementById("setting-presidents-honor");
+    const targetGpaInput = document.getElementById("setting-target-gpa");
     const reminderDaysSelect = document.getElementById("setting-reminder-days-advance");
 
     if (!gameState.academicGoals) gameState.academicGoals = {};
@@ -23888,15 +23885,10 @@ function saveGoalsSection() {
         gameState.totalDegreeCredits = c;
         gameState.academicGoals.degreeCredits = c;
     }
-    if (deansInput) {
-        const d = parseFloat(deansInput.value) || 85.0;
-        gameState.deansHonorThreshold = d;
-        gameState.academicGoals.deansHonor = d;
-    }
-    if (presidentsInput) {
-        const p = parseFloat(presidentsInput.value) || 90.0;
-        gameState.presidentsHonorThreshold = p;
-        gameState.academicGoals.presidentsHonor = p;
+    if (targetGpaInput) {
+        const tg = parseFloat(targetGpaInput.value) || 85.0;
+        gameState.targetGpa = tg;
+        gameState.academicGoals.targetGpa = tg;
     }
     if (reminderDaysSelect) gameState.reminderAdvanceDays = parseInt(reminderDaysSelect.value) || 1;
 
@@ -24618,13 +24610,18 @@ async function triggerManualCalendarPull() {
 // Degree Analytics, Interactive GPA Spline & Visualizations (v2.0.0)
 // ==============================================================================
 
-window.switchAnalyticsTab = function(tab) {
+window._currentAnalyticsTab = 'summary';
+
+window.switchAnalyticsTab = function(tab, isNavBack = false) {
+    const normalized = (tab === 'deep') ? 'deep' : 'summary';
+    window._currentAnalyticsTab = normalized;
+
     const summaryBtn = document.getElementById('tab-btn-analytics-summary');
     const deepBtn = document.getElementById('tab-btn-analytics-deep');
     const summarySec = document.getElementById('analytics-section-summary');
     const deepSec = document.getElementById('analytics-section-deep');
 
-    if (tab === 'summary') {
+    if (normalized === 'summary') {
         if (summaryBtn) {
             summaryBtn.style.borderBottomColor = '#38bdf8';
             summaryBtn.style.color = '#38bdf8';
@@ -24646,19 +24643,39 @@ window.switchAnalyticsTab = function(tab) {
         }
         if (summarySec) summarySec.style.display = 'none';
         if (deepSec) deepSec.style.display = 'block';
+        if (!isNavBack && typeof window.pushMobileBackHistory === 'function') {
+            window.pushMobileBackHistory('analytics-deep');
+        }
     }
 };
 
-window.openAnalyticsModal = function() {
+window.openAnalyticsModal = function(initialTab = 'summary') {
     const modal = document.getElementById("analytics-modal");
     if (modal) {
         modal.style.display = "flex";
         modal.classList.add("active");
     }
     if (typeof window.switchAnalyticsTab === 'function') {
-        window.switchAnalyticsTab('summary');
+        window.switchAnalyticsTab(initialTab, true);
+    }
+    if (typeof window.pushMobileBackHistory === 'function') {
+        window.pushMobileBackHistory('analytics-modal');
     }
     window.renderAnalyticsCharts();
+};
+
+window.openGradeSheetFromAnalytics = function() {
+    const prevTab = window._currentAnalyticsTab || 'summary';
+    window.closeAnalyticsModal();
+    if (typeof window.openGradeSheetModal === 'function') {
+        window.openGradeSheetModal({
+            returnTarget: {
+                id: 'analytics-modal',
+                label: 'חזרה למרכז ביצועים',
+                restore: () => window.openAnalyticsModal(prevTab)
+            }
+        });
+    }
 };
 
 window.closeAnalyticsModal = function() {
@@ -24773,118 +24790,7 @@ window.renderAnalyticsCharts = function() {
 
     // 5. Render Grade Buckets Histogram
     renderGradeDistributionHistogram(completedCourses);
-
-    // 6. Render Dean's & President's Honors Standing and Forecaster
-    renderHonorsStandingAndForecaster(semesterData, activeCourses, cumulativeGpa);
 };
-
-function renderHonorsStandingAndForecaster(semesterData, activeCourses, cumulativeGpa) {
-    const container = document.getElementById("analytics-honors-card");
-    if (!container) return;
-
-    const deansThreshold = Number(gameState.deansHonorThreshold) || 85.0;
-    const presidentsThreshold = Number(gameState.presidentsHonorThreshold) || 90.0;
-    const minGradedCredits = 18.0;
-
-    // 1. Evaluate past semester honors
-    const earnedHonors = [];
-    semesterData.forEach(d => {
-        if (d.hasData && d.gradedCredits >= minGradedCredits) {
-            if (d.gpa >= presidentsThreshold) {
-                earnedHonors.push({
-                    type: 'president',
-                    icon: '🏆',
-                    name: `הצטיינות נשיא - ${d.name}`,
-                    gpa: d.gpa.toFixed(2),
-                    credits: d.gradedCredits.toFixed(1),
-                    color: '#fbbf24'
-                });
-            } else if (d.gpa >= deansThreshold) {
-                earnedHonors.push({
-                    type: 'dean',
-                    icon: '🎖️',
-                    name: `הצטיינות דיקן - ${d.name}`,
-                    gpa: d.gpa.toFixed(2),
-                    credits: d.gradedCredits.toFixed(1),
-                    color: '#38bdf8'
-                });
-            }
-        }
-    });
-
-    // 2. Active Semester Evaluation & Forecast
-    let activeGradedCredits = 0;
-    activeCourses.forEach(c => {
-        const isBinary = (c.isBinaryPass === true || c.grade === 'עובר' || c.grade === 'PASS');
-        if (!isBinary) {
-            activeGradedCredits += (Number(c.credits) || 0);
-        }
-    });
-
-    const isCreditsEligible = activeGradedCredits >= minGradedCredits;
-    const missingCredits = Math.max(0, minGradedCredits - activeGradedCredits);
-
-    let html = `
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 10px; flex-wrap: wrap; gap: 8px;">
-            <div style="display: flex; align-items: center; gap: 8px;">
-                <span style="font-size: 1.3rem;">🎖️</span>
-                <h3 style="margin: 0; font-size: 1.05rem; font-weight: 800; color: #f8fafc;">
-                    סימולטור הצטיינות דיקן ונשיא (Academic Honors Forecaster)
-                </h3>
-            </div>
-            <div style="font-size: 0.74rem; color: #94a3b8; display: flex; gap: 12px;">
-                <span>סף דיקן: <strong style="color: #38bdf8;">${deansThreshold.toFixed(1)}</strong></span>
-                <span>סף נשיא: <strong style="color: #fbbf24;">${presidentsThreshold.toFixed(1)}</strong></span>
-                <span>מינימום נק״ז: <strong style="color: #10b981;">18.0</strong></span>
-            </div>
-        </div>
-
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px;">
-            <!-- Past Honors Column -->
-            <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 12px 14px;">
-                <div style="font-size: 0.8rem; font-weight: 700; color: #cbd5e1; margin-bottom: 8px;">
-                    🏅 אותות הצטיינות שנצברו:
-                </div>
-                ${earnedHonors.length === 0 ? `
-                    <div style="font-size: 0.78rem; color: #94a3b8; padding: 8px 0;">
-                        טרם נצברו אותות הצטיינות (דרוש ממוצע 85.0+ עם לפחות 18.0 נק״ז מדורגות בסמסטר).
-                    </div>
-                ` : `
-                    <div style="display: flex; flex-direction: column; gap: 6px;">
-                        ${earnedHonors.map(h => `
-                            <div style="display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.25); border: 1px solid ${h.color}; border-radius: 6px; padding: 6px 10px;">
-                                <div style="display: flex; align-items: center; gap: 6px;">
-                                    <span>${h.icon}</span>
-                                    <span style="font-size: 0.82rem; font-weight: 700; color: ${h.color};">${h.name}</span>
-                                </div>
-                                <div style="font-size: 0.80rem; font-weight: 800; color: #f8fafc; direction: ltr;">
-                                    ${h.gpa} (${h.credits} cr)
-                                </div>
-                            </div>
-                        `).join('')}
-                    </div>
-                `}
-            </div>
-
-            <!-- Active Semester Forecaster Column -->
-            <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 12px 14px;">
-                <div style="font-size: 0.8rem; font-weight: 700; color: #cbd5e1; margin-bottom: 8px;">
-                    🎯 תחזית הצטיינות לסמסטר הפעיל:
-                </div>
-                <div style="font-size: 0.82rem; color: #cbd5e1; line-height: 1.45;">
-                    <div>נק״ז מדורגות פעילות: <strong style="color: ${isCreditsEligible ? '#10b981' : '#f59e0b'}; direction: ltr;">${activeGradedCredits.toFixed(1)} / 18.0 נק״ז</strong> ${isCreditsEligible ? '✅' : '⚠️'}</div>
-                    <div style="font-size: 0.74rem; color: #94a3b8; margin-top: 3px;">
-                        ${isCreditsEligible 
-                            ? `עומד בסף הזכאות להצטיינות! ציוני בחינות של ${deansThreshold.toFixed(1)}+ יזכו בהצטיינות דיקן, ו-${presidentsThreshold.toFixed(1)}+ בהצטיינות נשיא.` 
-                            : `חסרות ${missingCredits.toFixed(1)} נק״ז להגעה לסף המינימום של 18.0 נק״ז לקבלת הצטיינות דיקן/נשיא בסמסטר זה.`}
-                    </div>
-                </div>
-            </div>
-        </div>
-    `;
-
-    container.innerHTML = html;
-}
 
 function renderGpaTrajectorySvg(semesterData, cumulativeGpa) {
     const svg = document.getElementById("analytics-gpa-svg");
@@ -25691,6 +25597,9 @@ window.openDownloadModal = function() {
     if (modal) {
         modal.style.display = "flex";
         modal.classList.add("active");
+        if (typeof window.pushMobileBackHistory === 'function') {
+            window.pushMobileBackHistory('download-modal');
+        }
     }
 };
 
@@ -27202,16 +27111,14 @@ function syncNativeAndroidWidgets(classData, tasksData) {
             );
         }
 
-        // 5. Update Finals Runway & GPA Target Widget (Dynamic GPA & Honor Status; clean 0.0 nominal state)
+        // 5. Update Finals Runway & GPA Target Widget (clean neutral academic tracking badge)
         if (window.SemesteroWidgetBridge.updateFinalsGpaWidget) {
             const rawAvg = Number((typeof gameState !== 'undefined' && gameState && (gameState.calculatedAverage || gameState.gpa)) || 0);
             const currentGpa = rawAvg > 0 ? rawAvg.toFixed(1) : "0.0";
             const targetGpaText = (typeof gameState !== 'undefined' && gameState && gameState.targetGpa)
                 ? `יעד סמסטר: ${Number(gameState.targetGpa).toFixed(1)}`
                 : "יעד סמסטר: --";
-            const gpaBadge = rawAvg >= 91
-                ? "🏆 מצטיין נשיא"
-                : (rawAvg >= 84 ? "🏆 מצטיין דיקן" : (rawAvg > 0 ? "📈 במעקב אקדמי" : "✨ מצב התחלתי"));
+            const gpaBadge = rawAvg > 0 ? "📈 במעקב אקדמי" : "✨ מצב התחלתי";
             window.SemesteroWidgetBridge.updateFinalsGpaWidget(
                 currentGpa,
                 targetGpaText,

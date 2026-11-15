@@ -17,9 +17,9 @@ ZIP_PATH = os.path.join(ROOT, "Semestero-ME-Windows-x64.zip")
 
 with open(os.path.join(ROOT, "package.json"), "r", encoding="utf-8") as f:
     pkg = json.load(f)
-VERSION = pkg.get("version", "2.13.11")
+VERSION = pkg.get("version", "2.13.12")
 TAG = f"v{VERSION}"
-NAME = f"Semestero ME v{VERSION} - Codebase Simplification, Manifest Parity & utils.js"
+NAME = f"Semestero ME v{VERSION} - Mobile Back Navigation, Unofficial Grade Sheet & Honors Cleanup"
 
 def get_github_token():
     try:
@@ -99,17 +99,20 @@ def main():
 
     body_notes = f"""# Semestero ME {TAG} Release Notes
 
-### 🧹 1. ייעול, הקשחה ופישוט בסיס הקוד (Five-Step Codebase Audit)
-- **Manifest & Service Worker Parity**: סנכרון מלא של `sw.js`, `scripts/build_mobile_dist.js` והמניפסט של `index.html` (`exam_readiness_hub.js`, `calendar_sync_engine.js`, `utils.js`, `sentry_logger.js`). הסרת מאגרי קורסים כפולים (`technion_sap_database.js`, `cheesefork_courses*.min.js`) וקבצי גיבוי מיותרים (~9.56MB) תוך השארת `cheesefork_database.js` כמקור יחיד סמכותי.
-- **תיקון באגי IDs וניווט חזור במובייל (`ui_enhancements.js`, `app.js`, `moodle_sync.js`)**: תיקון מנגנון כפתור חזור עבור גיליון הציונים (`modal-grade-sheet` במקום `grade-sheet-modal`), הוספת null-guard ל-`runMockMoodleSync()` וניקוי חיווט ו-CSS מתים מהסרגל הצידי.
-- **ניקוי תצוגות עץ ישנות והסרת קוד מת (`app.js`, `styles.css`)**: הסרת לוגיקת ה-Grid הישנה, Constellation Tree ו-Study Runway שאינה נגישה, תוך שימור סנכרון בחינות CheeseFork באתחול ותמיכה מלאה במתכנן התואר ובסיור המודרך.
-- **מודול תשתיות משותף (`utils.js`)**: איחוד `escapeHtml` ו-`normalizeTechnionCourseCode` במקום כפילויות ב-4 קבצים, והסרת CSS tombstones מיותרים של `.xp-bar-fill::before`/`::after`.
-- **ארכוב סקריפטים (`scripts/archive/`)**: העברת 49 סקריפטים חד-פעמיים מהשורש ומתיקיית `scripts/` לארכיון מסודר.
+### 🔙 1. ניווט חזור מלא במובייל, Android ובחלונות פנימיים (`MainActivity.java`, `ui_enhancements.js`, `grade_sheet.js`, `attendance_hub.js`)
+- **מניעת יציאה פתאומית בלחיצה על Back במובייל**: הטמעת `OnBackPressedCallback` ב-Android `MainActivity` עם אישור לחיצה כפולה (2.2 שניות + הודעת Toast) במסך הראשי בלבד, לצד גיבוי `popstate` לניווט בתוך הדפדפן.
+- **כפתורי חזור ושחזור הקשר בין חלונות**: כפתור `→ חזרה למרכז ביצועים` בגיליון הציונים (שמחזיר בדיוק ללשונית הפעילה במרכז הביצועים גם בלחיצה וגם בכפתור Back של המכשיר), כפתור `→ חזרה לתקציר` בתצוגת העומק, וכפתורי חזור בקורא פנגייה ובמרכז הנוכחות.
+- **תיקון קריאות סגירה**: תיקון `GradeSheet.goBack()`, `AttendanceHub.close()` ו-`AttendanceHub.goBack()` וכיסוי מורחב לחלונות המשניים ולחזרה לעץ הקורסים.
 
-### 📦 2. קובצי הפצה ועדכון:
-- `Semestero-ME-Tablet-Clean.apk` (Android Conflict-Free Tablet Edition `com.technion.semestero.tablet`, `versionCode 106`, `versionName {VERSION}`, `v1+v2+v3` Signed)
-- `Semestero-ME.apk` (Android Native App `com.technion.semestero`, `versionCode 106`, `versionName {VERSION}`, `v1+v2+v3` Signed, `targetSdk 34`)
-- `Semestero-ME-Watch.apk` (Wear OS Companion, `versionCode 106`, `versionName {VERSION}`, `v1+v2+v3` Signed)
+### 🎓 2. ניקוי גיליון הציונים והסרת אובססיית ההצטיינות (`index.html`, `grade_sheet.js`, `app.js`, `styles.css`, `ui_enhancements.js`)
+- **הסרת תווית ״רשמי״ מגיליון הציונים**: הבהרה ברורה כי גיליון הציונים הוא תדפיס אישי וסימולטור ממוצע בלבד ואינו מסמך רשמי של הטכניון.
+- **הסרת כרטיס ״מעמד אקדמי״ (undefined)**: הסרת השדה הלא-תקין מגיליון הציונים.
+- **הסרת חישובי ותגיות הצטיינות דיקן/נשיא**: הסרת כרטיס תחזית ההצטיינות ממרכז הביצועים, הסרת משבצת ה-KPI והתגיות בגיליון הציונים, הסרת תגית ״מצטיין דיקן/נשיא״ בווידג׳ט, והחלפת ספי ההצטיינות בהגדרות ליעד ממוצע אישי.
+
+### 📦 3. קובצי הפצה ועדכון:
+- `Semestero-ME-Tablet-Clean.apk` (Android Conflict-Free Tablet Edition `com.technion.semestero.tablet`, `versionCode 107`, `versionName {VERSION}`, `v1+v2+v3` Signed)
+- `Semestero-ME.apk` (Android Native App `com.technion.semestero`, `versionCode 107`, `versionName {VERSION}`, `v1+v2+v3` Signed, `targetSdk 34`)
+- `Semestero-ME-Watch.apk` (Wear OS Companion, `versionCode 107`, `versionName {VERSION}`, `v1+v2+v3` Signed)
 - `Semestero-ME-Windows-x64.zip` (Electron Desktop Client {VERSION})
 """
 

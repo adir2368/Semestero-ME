@@ -947,7 +947,35 @@
             }
         },
 
+        _tabHistory: [],
+        _fromSwitchTab: false,
+
+        close: function() {
+            const modal = document.getElementById('modal-attendance-hub');
+            if (modal) modal.remove();
+            this._tabHistory = [];
+        },
+
+        goBack: function() {
+            if (this._tabHistory && this._tabHistory.length > 0) {
+                const prevTab = this._tabHistory.pop();
+                if (prevTab && prevTab !== this.activeTab) {
+                    this.switchTab(prevTab, true);
+                    return true;
+                }
+            }
+            this.close();
+            return true;
+        },
+
         openModal: function(tab = 'catchup') {
+            const wasOpen = !!document.getElementById('modal-attendance-hub');
+            if (!wasOpen && !this._fromSwitchTab) {
+                this._tabHistory = [];
+                if (typeof window.pushMobileBackHistory === 'function') {
+                    window.pushMobileBackHistory('attendance-hub');
+                }
+            }
             this.activeTab = tab;
             let modal = document.getElementById('modal-attendance-hub');
             if (modal) modal.remove();
@@ -958,9 +986,10 @@
             modal.style.cssText = "position: fixed; inset: 0; background: rgba(10, 15, 29, 0.88); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 100000; padding: 16px;";
             document.body.appendChild(modal);
 
+            const hasTabBack = this._tabHistory && this._tabHistory.length > 0;
             modal.innerHTML = `
                 <div class="modal-card" style="background: #0f172a; border: 1px solid #10b981; border-radius: 16px; padding: 20px; width: 100%; max-width: 860px; max-height: 90vh; overflow-y: auto; direction: rtl; box-shadow: 0 15px 40px rgba(0,0,0,0.85);">
-                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 12px;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 12px; gap: 10px;">
                         <div>
                             <h2 style="margin: 0; font-size: 1.2rem; font-weight: 800; color: #f8fafc; display: flex; align-items: center; gap: 8px;">
                                 <span>📋</span>
@@ -968,7 +997,10 @@
                             </h2>
                             <span style="font-size: 0.76rem; color: #94a3b8;">מעקב נוכחות לפי 13 שבועות הסמסטר, סטטיסטיקות, השלמות פנאופטו ופנגייה</span>
                         </div>
-                        <button type="button" class="btn-close-attendance-modal" aria-label="סגור חלון" style="background: transparent; border: none; font-size: 1.4rem; color: #94a3b8; cursor: pointer; padding: 4px;">✕</button>
+                        <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
+                            <button type="button" onclick="window.AttendanceHub.goBack()" class="btn-back-attendance-modal" aria-label="חזרה" style="background: rgba(16, 185, 129, 0.14); border: 1px solid rgba(16, 185, 129, 0.45); color: #6ee7b7; border-radius: 8px; font-size: 0.8rem; font-weight: 700; cursor: pointer; padding: 5px 10px;">${hasTabBack ? '→ חזרה ללשונית הקודמת' : '→ חזרה'}</button>
+                            <button type="button" class="btn-close-attendance-modal" aria-label="סגור חלון" style="background: transparent; border: none; font-size: 1.4rem; color: #94a3b8; cursor: pointer; padding: 4px;">✕</button>
+                        </div>
                     </div>
 
                     <div class="timetable-week-navigator" id="attendance-hub-week-navigator" style="margin-bottom: 14px;"></div>
@@ -996,7 +1028,7 @@
                 </div>
             `;
 
-            const closeModal = () => modal.remove();
+            const closeModal = () => this.close();
             modal.querySelectorAll('.btn-close-attendance-modal').forEach(b => b.addEventListener('click', closeModal));
             modal.addEventListener('click', (e) => {
                 if (e.target === modal) closeModal();
@@ -1013,9 +1045,19 @@
             return activeCourses.filter(c => window.isCoursePerpetualDitch(c.code)).length;
         },
 
-        switchTab: function(tabName) {
+        switchTab: function(tabName, isNavBack = false) {
+            if (!isNavBack && this.activeTab && this.activeTab !== tabName) {
+                if (!this._tabHistory) this._tabHistory = [];
+                this._tabHistory.push(this.activeTab);
+                if (this._tabHistory.length > 10) this._tabHistory.shift();
+                if (typeof window.pushMobileBackHistory === 'function') {
+                    window.pushMobileBackHistory('attendance-tab');
+                }
+            }
             this.activeTab = tabName;
+            this._fromSwitchTab = true;
             this.openModal(tabName);
+            this._fromSwitchTab = false;
         },
 
         renderModalBody: function() {

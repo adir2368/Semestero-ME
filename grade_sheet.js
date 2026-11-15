@@ -2,24 +2,21 @@
 // Semestero ME - Technion Academic Grade Sheet & What-If Simulator Engine
 // Module: grade_sheet.js
 // Handles:
-// 1. Official Technion-style Academic Transcript calculations (Quality Points,
-//    Semester GPAs, Degree Cumulative GPA, Graded vs Binary Credits).
-// 2. Honors classification (Dean's List >= 84 + >= 18 cr, President's List >= 91 + >= 18 cr).
-// 3. Interactive What-If Simulator (Target GPA solver, scenario presets, live grade projection).
-// 4. A4 Printable Transcript Layout & Export (Clean A4 print/PDF with Technion styling).
-// 5. UTF-8 BOM CSV Export for Excel & external transcript verification.
+// 1. Academic Transcript calculations (Quality Points, Semester GPAs,
+//    Degree Cumulative GPA, Graded vs Binary Credits). (Unofficial tracking)
+// 2. Interactive What-If Simulator (Target GPA solver, scenario presets, live grade projection).
+// 3. A4 Printable Transcript Layout & Export (Clean A4 print/PDF).
+// 4. UTF-8 BOM CSV Export for Excel & personal tracking.
 // ==============================================================================
 
 (function(window) {
     'use strict';
 
     const DEGREE_TOTAL_CREDITS = 157.5;
-    const DEAN_HONORS_MIN_GPA = 84.0;
-    const PRESIDENT_HONORS_MIN_GPA = 91.0;
-    const HONORS_MIN_CREDITS = 18.0;
 
     const GradeSheet = {
         isOpen: false,
+        returnTarget: null,
         isSimActive: false,
         simGrades: {}, // Map of courseCode -> numeric grade
         targetGpa: 85.0,
@@ -242,18 +239,6 @@
                 const semGpa = semGradedCredits > 0 ? (semQualityPoints / semGradedCredits) : null;
                 const simSemGpa = simSemGradedCredits > 0 ? (simSemQualityPoints / simSemGradedCredits) : null;
 
-                // Honors calculation
-                let honors = null;
-                const checkGpa = this.isSimActive ? (simSemGpa || semGpa) : semGpa;
-                const checkCredits = this.isSimActive ? (simSemGradedCredits || semGradedCredits) : semGradedCredits;
-                if (checkGpa !== null && checkCredits >= HONORS_MIN_CREDITS) {
-                    if (checkGpa >= PRESIDENT_HONORS_MIN_GPA) {
-                        honors = { type: 'president', label: 'הצטיינות נשיא ⭐' };
-                    } else if (checkGpa >= DEAN_HONORS_MIN_GPA) {
-                        honors = { type: 'dean', label: 'הצטיינות דיקן 🎖️' };
-                    }
-                }
-
                 totalEarnedCredits += semEarnedCredits;
                 totalGradedCredits += semGradedCredits;
                 totalQualityPoints += semQualityPoints;
@@ -271,8 +256,7 @@
                     gpa: semGpa,
                     simGpa: simSemGpa,
                     simGradedCredits: simSemGradedCredits,
-                    simQualityPoints: simSemQualityPoints,
-                    honors
+                    simQualityPoints: simSemQualityPoints
                 };
             });
 
@@ -295,13 +279,9 @@
             const evalGpa = this.isSimActive ? simCumulativeGpa : cumulativeGpa;
             const isAcademicStandingValid = (totalGradedCredits === 0 || evalGpa >= 65.0) && successRatio >= 0.66;
 
-            // Cumulative Honors & Academic Standing
+            // Technion Academic Standing (תקינות אקדמית)
             let cumulativeStanding = `תקין ✓ (מקדם הצלחה ${(successRatio * 100).toFixed(0)}%)`;
-            if (evalGpa >= PRESIDENT_HONORS_MIN_GPA) {
-                cumulativeStanding = 'הצטיינות יתרה (Summa Cum Laude) ⭐';
-            } else if (evalGpa >= DEAN_HONORS_MIN_GPA) {
-                cumulativeStanding = 'הצטיינות (Cum Laude) 🎖️';
-            } else if ((evalGpa < 65.0 && totalGradedCredits > 0) || successRatio < 0.66) {
+            if ((evalGpa < 65.0 && totalGradedCredits > 0) || successRatio < 0.66) {
                 cumulativeStanding = `מעקב אקדמי ⚠️ (${evalGpa < 65.0 ? 'ממוצע < 65' : 'מקדם הצלחה < 66%'})`;
             }
 
@@ -337,12 +317,24 @@
             return names[num] || `סמסטר ${num}`;
         },
 
-        openModal() {
+        openModal(options = {}) {
             this.loadStoredStudentInfo();
             const modal = document.getElementById('modal-grade-sheet');
             if (!modal) {
                 console.error('[GradeSheet] Modal element #modal-grade-sheet not found.');
                 return;
+            }
+
+            this.returnTarget = (options && options.returnTarget) ? options.returnTarget : null;
+            const backBtn = document.getElementById('btn-back-grade-sheet');
+            if (backBtn) {
+                if (this.returnTarget && typeof this.returnTarget.restore === 'function') {
+                    backBtn.style.display = 'inline-flex';
+                    backBtn.innerText = `→ ${this.returnTarget.label || 'חזרה למרכז ביצועים'}`;
+                } else {
+                    backBtn.style.display = 'inline-flex';
+                    backBtn.innerText = '→ חזרה';
+                }
             }
 
             // Populate issue date
@@ -373,13 +365,28 @@
             modal.classList.add('active');
             this.isOpen = true;
             document.body.style.overflow = 'hidden';
+            if (typeof window.pushMobileBackHistory === 'function') {
+                window.pushMobileBackHistory('grade-sheet');
+            }
         },
 
-        closeModal() {
+        goBack() {
+            const target = this.returnTarget;
+            this.returnTarget = null;
+            this.closeModal(true);
+            if (target && typeof target.restore === 'function') {
+                target.restore();
+            }
+        },
+
+        closeModal(skipReturnClear = false) {
             const modal = document.getElementById('modal-grade-sheet');
             if (modal) {
                 modal.style.display = 'none';
                 modal.classList.remove('active');
+            }
+            if (!skipReturnClear) {
+                this.returnTarget = null;
             }
             this.isOpen = false;
             document.body.style.overflow = '';
@@ -515,8 +522,6 @@
             const earnedPctEl = document.getElementById('gs-kpi-earned-pct');
             const gradedCrEl = document.getElementById('gs-kpi-graded-credits');
             const qpEl = document.getElementById('gs-kpi-quality-points');
-            const honorsEl = document.getElementById('gs-kpi-honors');
-            const standingEl = document.getElementById('grade-sheet-academic-standing');
 
             if (gpaEl) {
                 if (this.isSimActive && data.simCumulativeGpa !== data.cumulativeGpa) {
@@ -552,23 +557,6 @@
                 }
             }
 
-            if (honorsEl) {
-                const evalGpa = this.isSimActive ? data.simCumulativeGpa : data.cumulativeGpa;
-                if (evalGpa >= PRESIDENT_HONORS_MIN_GPA) {
-                    honorsEl.innerHTML = '<span style="color: #fbbf24;">הצטיינות יתרה ⭐</span>';
-                } else if (evalGpa >= DEAN_HONORS_MIN_GPA) {
-                    honorsEl.innerHTML = '<span style="color: #38bdf8;">הצטיינות דיקן 🎖️</span>';
-                } else {
-                    honorsEl.innerHTML = `<span style="color: #94a3b8;">רף דיקן: ${DEAN_HONORS_MIN_GPA.toFixed(1)}</span>`;
-                }
-            }
-
-            if (standingEl) {
-                const standingPct = Math.round((data.creditSuccessRatio || 1) * 100);
-                const standingColor = data.isAcademicStandingOk ? '#34d399' : '#f87171';
-                standingEl.innerHTML = `<bdi dir="rtl">${data.cumulativeStanding} • <span style="color:${standingColor}; font-weight:700;" title="תקנון הטכניון: נדרש ממוצע ≥ 65.0 וצבירת ≥ 66% מהנק״ז">${data.academicStanding} (${standingPct}% נק״ז)</span></bdi>`;
-            }
-
             // 2. Render Semester Tables
             const container = document.getElementById('grade-sheet-semesters-container');
             if (!container) return;
@@ -587,7 +575,6 @@
                             <div class="sem-header-title">
                                 <span class="sem-icon">📅</span>
                                 <h4><bdi dir="rtl">${sem.name}</bdi></h4>
-                                ${sem.honors ? `<span class="sem-honors-badge ${sem.honors.type}">${sem.honors.label}</span>` : ''}
                             </div>
                             <div class="sem-header-stats">
                                 <span>נק״ז: <strong>${sem.earnedCredits.toFixed(1)}</strong></span>
@@ -734,7 +721,7 @@
             const BOM = '\uFEFF';
 
             // Transcript Header Metadata
-            lines.push(`גיליון ציונים אקדמי רשמי - הטכניון מכון טכנולוגי לישראל`);
+            lines.push(`גיליון ציונים אישי ומעקב ממוצע (אינו מסמך רשמי של הטכניון)`);
             lines.push(`הפקולטה להנדסת מכונות (תוכנית 034)`);
             lines.push(`שם הסטודנט,${this.studentInfo.name || 'אדיר משה'},מספר ת.ז/סטודנט,${this.studentInfo.id || '318942516'}`);
             lines.push(`תאריך הפקה,${new Date().toLocaleDateString('he-IL')},מעמד אקדמי,${data.cumulativeStanding}`);
@@ -788,8 +775,9 @@
 
     // Global Window Bindings
     window.GradeSheet = GradeSheet;
-    window.openGradeSheetModal = () => GradeSheet.openModal();
+    window.openGradeSheetModal = (options) => GradeSheet.openModal(options);
     window.closeGradeSheetModal = () => GradeSheet.closeModal();
+    window.closeGradeSheetOrGoBack = () => GradeSheet.goBack();
     window.printGradeSheet = () => GradeSheet.printTranscript();
     window.exportGradeSheetCSV = () => GradeSheet.exportCSV();
     window.toggleGradeSheetSimulation = (state) => GradeSheet.toggleSimulation(state);

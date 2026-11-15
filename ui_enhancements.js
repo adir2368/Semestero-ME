@@ -367,7 +367,7 @@
         // 2. Global Actions
         const actions = [
             { id: 'act-tour', title: 'מדריך מערכת וסיור אינטראקטיבי (Tutorial Academy)', icon: '🧭', shortcut: 'T', action: () => (window.openTutorialHubModal ? window.openTutorialHubModal() : window.startInteractiveTour && window.startInteractiveTour()) },
-            { id: 'act-grade-sheet', title: 'גיליון ציונים אקדמי רשמי (Academic Grade Sheet & What-If)', icon: '🎓', shortcut: 'Ctrl+Shift+G', action: () => window.openGradeSheetModal && window.openGradeSheetModal() },
+            { id: 'act-grade-sheet', title: 'גיליון ציונים אישי וסימולטור ציונים (Academic Grade Sheet & What-If)', icon: '🎓', shortcut: 'Ctrl+Shift+G', action: () => window.openGradeSheetModal && window.openGradeSheetModal() },
             { id: 'act-audit', title: 'בדיקת זכאות לתואר ודרישות סיום (Graduation Audit)', icon: '🎓', shortcut: 'Ctrl+G', action: () => window.DegreePlanner && (window.DegreePlanner.openGraduationClearanceModal ? window.DegreePlanner.openGraduationClearanceModal() : window.DegreePlanner.openGraduationAuditModal && window.DegreePlanner.openGraduationAuditModal()) },
             { id: 'act-faq', title: 'מרכז זכויות ושאלות נפוצות (Technion FAQ & Rights)', icon: '📖', shortcut: 'Ctrl+H', action: () => window.openFaqModal() },
             { id: 'act-compare', title: 'השוואת קורסי בחירה צד-מול-צד (Course Comparator)', icon: '⚖️', shortcut: '', action: () => window.openCourseComparisonModal() },
@@ -1563,6 +1563,8 @@
     // 11.5 Mobile Hardware & Gesture Back Button Navigation Shield
     // =========================================================================
     const MobileBackNavigationManager = {
+        _lastRootBackPressMs: 0,
+
         init: function() {
             // 1. Seed browser history state so back gestures don't abruptly exit
             if (typeof history !== 'undefined' && history.pushState) {
@@ -1572,10 +1574,22 @@
                 } catch (e) {}
             }
 
-            // 2. Intercept browser / swipe-to-back popstate
-            window.addEventListener('popstate', (e) => {
+            // 2. Intercept browser / swipe-to-back popstate with double-back guard at root
+            window.addEventListener('popstate', () => {
                 const handled = this.handleBack();
                 if (handled) {
+                    this._lastRootBackPressMs = 0;
+                    try {
+                        history.pushState({ semesteroApp: true, depth: 1 }, '');
+                    } catch (err) {}
+                    return;
+                }
+                const now = Date.now();
+                if (now - this._lastRootBackPressMs > 2200) {
+                    this._lastRootBackPressMs = now;
+                    if (typeof window.showToast === 'function') {
+                        window.showToast('לחץ שוב ליציאה מהאפליקציה', 'info');
+                    }
                     try {
                         history.pushState({ semesteroApp: true, depth: 1 }, '');
                     } catch (err) {}
@@ -1606,6 +1620,13 @@
 
             // Expose globally
             window.handleMobileBackAction = () => this.handleBack();
+            window.pushMobileBackHistory = (tag) => {
+                if (typeof history !== 'undefined' && history.pushState) {
+                    try {
+                        history.pushState({ semesteroApp: true, depth: 1, tag: tag || 'nav' }, '');
+                    } catch (e) {}
+                }
+            };
             window.MobileBackNavigationManager = this;
         },
 
@@ -1676,10 +1697,12 @@
                 return true;
             }
 
-            // F. Check Attendance Hub
+            // F. Check Attendance Hub (step back through internal tabs first, then close)
             const attendanceModal = document.getElementById('modal-attendance-hub');
             if (attendanceModal && this.isElementVisible(attendanceModal)) {
-                if (window.AttendanceHub && typeof window.AttendanceHub.close === 'function') {
+                if (window.AttendanceHub && typeof window.AttendanceHub.goBack === 'function') {
+                    window.AttendanceHub.goBack();
+                } else if (window.AttendanceHub && typeof window.AttendanceHub.close === 'function') {
                     window.AttendanceHub.close();
                 } else {
                     attendanceModal.classList.remove('active');
@@ -1688,14 +1711,32 @@
                 return true;
             }
 
-            // G. Check Grade Sheet / What-If Simulator
+            // G. Check Grade Sheet / What-If Simulator (restore parent modal e.g. Performance Hub if opened from there)
             const gradeSheetModal = document.getElementById('modal-grade-sheet');
             if (gradeSheetModal && this.isElementVisible(gradeSheetModal)) {
-                if (window.GradeSheetModal && typeof window.GradeSheetModal.close === 'function') {
-                    window.GradeSheetModal.close();
+                if (window.GradeSheet && typeof window.GradeSheet.goBack === 'function') {
+                    window.GradeSheet.goBack();
+                } else if (typeof window.closeGradeSheetModal === 'function') {
+                    window.closeGradeSheetModal();
                 } else {
                     gradeSheetModal.classList.remove('active');
                     gradeSheetModal.style.display = 'none';
+                }
+                return true;
+            }
+
+            // G2. Check Performance & Analytics Hub (step back from 'deep' sub-tab -> 'summary' before closing)
+            const analyticsModal = document.getElementById('analytics-modal');
+            if (analyticsModal && this.isElementVisible(analyticsModal)) {
+                const deepSec = document.getElementById('analytics-section-deep');
+                const isDeepActive = window._currentAnalyticsTab === 'deep' || (deepSec && deepSec.style && deepSec.style.display === 'block');
+                if (isDeepActive && typeof window.switchAnalyticsTab === 'function') {
+                    window.switchAnalyticsTab('summary', true);
+                } else if (typeof window.closeAnalyticsModal === 'function') {
+                    window.closeAnalyticsModal();
+                } else {
+                    analyticsModal.classList.remove('active');
+                    analyticsModal.style.display = 'none';
                 }
                 return true;
             }
@@ -1726,8 +1767,9 @@
 
             // J. Check All Other Open Modals / Overlays
             const openModals = Array.from(document.querySelectorAll(
-                '.modal-overlay.active, .modal.active, ' +
+                '.modal-overlay.active, .modal.active, .modal-backdrop.active, ' +
                 '.modal-overlay[style*="display: flex"], .modal-overlay[style*="display: block"], ' +
+                '[id$="-modal"][style*="display: flex"], [id$="-modal"][style*="display: block"], ' +
                 '.planner-export-modal.active, .planner-semesters-mgr-modal-overlay.active, ' +
                 '#accessibility-modal.active, #notion-icon-picker-modal[style*="display: flex"], ' +
                 '#notion-icon-picker-modal[style*="display: block"]'
@@ -1736,7 +1778,7 @@
             if (openModals.length > 0) {
                 // Topmost modal (last in DOM or active)
                 const topmost = openModals[openModals.length - 1];
-                const closeBtn = topmost.querySelector('.modal-close, .export-modal-close, .a11y-close-btn, .btn-close, [data-dismiss="modal"]');
+                const closeBtn = topmost.querySelector('.modal-close, .close-btn, .export-modal-close, .a11y-close-btn, .btn-close, [data-dismiss="modal"]');
                 if (closeBtn) {
                     closeBtn.click();
                 } else {
@@ -1747,7 +1789,7 @@
             }
 
             // K. If No Modal is Open -> Navigate to Previous Tab
-            if (window._tabHistoryStack && window._tabHistoryStack.length > 0) {
+            while (window._tabHistoryStack && window._tabHistoryStack.length > 0) {
                 const prevTab = window._tabHistoryStack.pop();
                 if (prevTab && prevTab !== window.currentActiveTab && typeof window.setActiveMainTab === 'function') {
                     window.setActiveMainTab(prevTab, true);
@@ -1755,7 +1797,13 @@
                 }
             }
 
-            // L. Root state reached (no modal, no tab history)
+            // K2. Fallback from any non-home main tab back to Flowchart ('curriculum')
+            if (window.currentActiveTab && window.currentActiveTab !== 'curriculum' && typeof window.setActiveMainTab === 'function') {
+                window.setActiveMainTab('curriculum', true);
+                return true;
+            }
+
+            // L. Root state reached (no modal, no tab history, on 'curriculum')
             return false;
         }
     };

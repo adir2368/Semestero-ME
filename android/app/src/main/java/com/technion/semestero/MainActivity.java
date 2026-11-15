@@ -10,6 +10,7 @@ import com.getcapacitor.BridgeActivity;
 
 public class MainActivity extends BridgeActivity {
     private static MainActivity instance;
+    private long lastRootBackPressMs = 0L;
 
     public static MainActivity getInstance() {
         return instance;
@@ -68,6 +69,40 @@ public class MainActivity extends BridgeActivity {
         configureWebView();
         handleWidgetIntent(getIntent());
         WearSyncManager.syncAllToWatch(this);
+
+        getOnBackPressedDispatcher().addCallback(this, new androidx.activity.OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                handleAppBackNavigation();
+            }
+        });
+    }
+
+    private void handleAppBackNavigation() {
+        if (getBridge() != null && getBridge().getWebView() != null) {
+            WebView webView = getBridge().getWebView();
+            webView.evaluateJavascript(
+                "(function(){ try { return (typeof window.handleMobileBackAction === 'function') ? Boolean(window.handleMobileBackAction()) : false; } catch(e) { return false; } })()",
+                result -> {
+                    if ("true".equals(result)) {
+                        return;
+                    }
+                    long now = android.os.SystemClock.elapsedRealtime();
+                    if (now - lastRootBackPressMs <= 2200L) {
+                        moveTaskToBack(true);
+                    } else {
+                        lastRootBackPressMs = now;
+                        android.widget.Toast.makeText(
+                            MainActivity.this,
+                            "לחץ שוב ליציאה מהאפליקציה",
+                            android.widget.Toast.LENGTH_SHORT
+                        ).show();
+                    }
+                }
+            );
+        } else {
+            moveTaskToBack(true);
+        }
     }
 
     @Override

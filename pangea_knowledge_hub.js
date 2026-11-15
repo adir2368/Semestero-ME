@@ -6235,6 +6235,9 @@
 
             modal.style.display = 'flex';
             document.body.style.overflow = 'hidden';
+            if (typeof window.pushMobileBackHistory === 'function') {
+                window.pushMobileBackHistory('pangea-reader');
+            }
         },
 
         /**
@@ -6263,6 +6266,9 @@
             modal.style.zIndex = '2000010';
             modal.style.display = 'flex';
             document.body.style.overflow = 'hidden';
+            if (typeof window.pushMobileBackHistory === 'function') {
+                window.pushMobileBackHistory('pangea-search');
+            }
             if (input) {
                 input.value = initialQuery || '';
                 setTimeout(() => input.focus(), 100);

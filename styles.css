@@ -12900,14 +12900,6 @@ html.is-iphone .app-global-footer {
     animation: fadeIn 0.25s ease;
 }
 
-.analytics-honors-card {
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.analytics-honors-card:hover {
-    box-shadow: 0 6px 24px rgba(251, 191, 36, 0.15);
-}
-
 /* ==========================================================================
    Technion++ & Organit++ Integration Styles (v2.4.11)
    ========================================================================== */
@@ -15352,26 +15344,15 @@ tr.is-task-pinned {
     color: #f8fafc;
 }
 
-.sem-honors-badge {
-    padding: 2px 9px;
-    border-radius: 10px;
-    font-size: 0.74rem;
-    font-weight: 700;
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
+.grade-sheet-tool-btn.analytics-back-btn {
+    border-color: rgba(56, 189, 248, 0.45);
+    background: rgba(56, 189, 248, 0.14);
+    color: #7dd3fc;
 }
 
-.sem-honors-badge.president {
-    background: rgba(251, 191, 36, 0.2);
-    border: 1px solid rgba(251, 191, 36, 0.5);
-    color: #fbbf24;
-}
-
-.sem-honors-badge.dean {
-    background: rgba(56, 189, 248, 0.2);
-    border: 1px solid rgba(56, 189, 248, 0.5);
-    color: #38bdf8;
+.grade-sheet-tool-btn.analytics-back-btn:hover {
+    background: rgba(56, 189, 248, 0.24);
+    color: #f8fafc;
 }
 
 .sem-header-stats {
