@@ -17,9 +17,9 @@ ZIP_PATH = os.path.join(ROOT, "Semestero-ME-Windows-x64.zip")
 
 with open(os.path.join(ROOT, "package.json"), "r", encoding="utf-8") as f:
     pkg = json.load(f)
-VERSION = pkg.get("version", "2.13.5")
+VERSION = pkg.get("version", "2.13.11")
 TAG = f"v{VERSION}"
-NAME = f"Semestero ME v{VERSION} - @softwarebyjoe 15-Point Security Hardening & Import Guard"
+NAME = f"Semestero ME v{VERSION} - Codebase Simplification, Manifest Parity & utils.js"
 
 def get_github_token():
     try:
@@ -99,18 +99,17 @@ def main():
 
     body_notes = f"""# Semestero ME {TAG} Release Notes
 
-### 🛡️ 1. הקשחת אבטחת מידע מלאה (@softwarebyjoe 15-Point Security Hardening)
-- **הגנת Stored XSS (`auth_sync.js`)**: הוספת `escapeAuthHtml` ו-`sanitizeAvatarSymbol` בכל מוקדי רינדור פרטי משתמש, סמלי פרופיל ואינטגרציות (`renderAuthModal`, `updateHudAuthControls`, `getIntegrationsHubCardsHtml`).
-- **מניעת PostgREST Filter & Wildcard Injection (`auth_sync.js`)**: הוספת `sanitizePostgrestLiteral` לפני שאילתות Supabase `.or()` ו-`.ilike()` ב-`loginWithPassword`, `resetPassword` ו-`registerStudent`.
-- **הגנת Brute-Force ונעילה הדרגתית (`auth_sync.js`)**: מנגנון Rate Limiting (`checkAuthRateLimit`, `recordAuthFailure`, `clearAuthFailures`) הנועל התחברות ואיפוס סיסמה ל-15 שניות ומעלה (Exponential Backoff עד 15 דקות) לאחר 5 ניסיונות כושלים.
-- **אכיפת גבולות סמסטר (`auth_sync.js`, `app.js`)**: קיבוע סמסטרים לטווח חוקי `1–12` בהרשמה, עדכון פרופיל וייבוא.
-- **מגן ייבוא קבצי רוויזיה (`app.js`)**: הוספת `validateAndSanitizeImportedRevision` — בדיקת סיומת `.json`, מגבלת נפח `5MB`, חסימת תגיות HTML/SVG, ניקוי מפתחות Prototype Pollution (`__proto__`, `constructor`, `prototype`), הגבלת נק״ז (`0–30`) וציונים (`0–100`) וסינון תסריטים בשמות קורסים.
-- **אוטומציית בדיקות אבטחה (`tests/test_vibe_security_hardening.js`)**: חבילת בדיקות ייעודית המשולבת ישירות ב-`npm test`.
+### 🧹 1. ייעול, הקשחה ופישוט בסיס הקוד (Five-Step Codebase Audit)
+- **Manifest & Service Worker Parity**: סנכרון מלא של `sw.js`, `scripts/build_mobile_dist.js` והמניפסט של `index.html` (`exam_readiness_hub.js`, `calendar_sync_engine.js`, `utils.js`, `sentry_logger.js`). הסרת מאגרי קורסים כפולים (`technion_sap_database.js`, `cheesefork_courses*.min.js`) וקבצי גיבוי מיותרים (~9.56MB) תוך השארת `cheesefork_database.js` כמקור יחיד סמכותי.
+- **תיקון באגי IDs וניווט חזור במובייל (`ui_enhancements.js`, `app.js`, `moodle_sync.js`)**: תיקון מנגנון כפתור חזור עבור גיליון הציונים (`modal-grade-sheet` במקום `grade-sheet-modal`), הוספת null-guard ל-`runMockMoodleSync()` וניקוי חיווט ו-CSS מתים מהסרגל הצידי.
+- **ניקוי תצוגות עץ ישנות והסרת קוד מת (`app.js`, `styles.css`)**: הסרת לוגיקת ה-Grid הישנה, Constellation Tree ו-Study Runway שאינה נגישה, תוך שימור סנכרון בחינות CheeseFork באתחול ותמיכה מלאה במתכנן התואר ובסיור המודרך.
+- **מודול תשתיות משותף (`utils.js`)**: איחוד `escapeHtml` ו-`normalizeTechnionCourseCode` במקום כפילויות ב-4 קבצים, והסרת CSS tombstones מיותרים של `.xp-bar-fill::before`/`::after`.
+- **ארכוב סקריפטים (`scripts/archive/`)**: העברת 49 סקריפטים חד-פעמיים מהשורש ומתיקיית `scripts/` לארכיון מסודר.
 
 ### 📦 2. קובצי הפצה ועדכון:
-- `Semestero-ME-Tablet-Clean.apk` (Android Conflict-Free Tablet Edition `com.technion.semestero.tablet`, `versionCode 100`, `versionName {VERSION}` — מומלץ לטאבלטים, `v1+v2+v3` Signed)
-- `Semestero-ME.apk` (Android Native App `com.technion.semestero`, `versionCode 100`, `versionName {VERSION}` — `v1+v2+v3` Signed, `targetSdk 34`)
-- `Semestero-ME-Watch.apk` (Wear OS Companion, `versionCode 100`, `versionName {VERSION}`)
+- `Semestero-ME-Tablet-Clean.apk` (Android Conflict-Free Tablet Edition `com.technion.semestero.tablet`, `versionCode 106`, `versionName {VERSION}`, `v1+v2+v3` Signed)
+- `Semestero-ME.apk` (Android Native App `com.technion.semestero`, `versionCode 106`, `versionName {VERSION}`, `v1+v2+v3` Signed, `targetSdk 34`)
+- `Semestero-ME-Watch.apk` (Wear OS Companion, `versionCode 106`, `versionName {VERSION}`, `v1+v2+v3` Signed)
 - `Semestero-ME-Windows-x64.zip` (Electron Desktop Client {VERSION})
 """
 
