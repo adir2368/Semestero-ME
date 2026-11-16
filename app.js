@@ -12540,6 +12540,207 @@ const OFFICIAL_MOODLE26_SYLLABUS_DATA = {
     }
 };
 
+// Preloaded verified Moodle 26 office hours (only explicitly published reception hours)
+const DEFAULT_OFFICE_HOURS_BY_COURSE = {
+    '034053': [
+        { id: 'oh_034053_givli', staffName: 'פרופ׳ ספי גבלי', role: 'מרצה', dayIndex: 2, dayName: 'שלישי', startTime: '12:30', endTime: '13:30', location: 'קאהן 219' },
+        { id: 'oh_034053_mordechai', staffName: 'פרופ׳ דן מרדכי', role: 'מרצה', dayIndex: 4, dayName: 'חמישי', startTime: '12:30', endTime: '13:30', location: 'קאהן 225' }
+    ],
+    '034035': [
+        { id: 'oh_034035_tartakovsky', staffName: 'פרופ׳ לאוניד טרטקובסקי', role: 'מרצה אחראי', dayIndex: 2, dayName: 'שלישי', startTime: '11:30', endTime: '12:30', location: 'קאהן 209' }
+    ]
+};
+DEFAULT_OFFICE_HOURS_BY_COURSE['00340053'] = DEFAULT_OFFICE_HOURS_BY_COURSE['034053'];
+DEFAULT_OFFICE_HOURS_BY_COURSE['00340035'] = DEFAULT_OFFICE_HOURS_BY_COURSE['034035'];
+
+const OFFICE_HOURS_DAYS = [
+    { dayIndex: 0, dayName: 'ראשון' },
+    { dayIndex: 1, dayName: 'שני' },
+    { dayIndex: 2, dayName: 'שלישי' },
+    { dayIndex: 3, dayName: 'רביעי' },
+    { dayIndex: 4, dayName: 'חמישי' },
+    { dayIndex: 5, dayName: 'שישי' }
+];
+
+function getCourseOfficeHours(courseOrCode) {
+    const course = (typeof courseOrCode === 'string')
+        ? (resolveCourseForTask ? resolveCourseForTask(courseOrCode) : (gameState.courses && gameState.courses[courseOrCode]))
+        : courseOrCode;
+    if (!course) return [];
+    if (course._officeHoursInitialized || Array.isArray(course.officeHours)) {
+        return Array.isArray(course.officeHours) ? course.officeHours : [];
+    }
+    const rawCode = String(course.code || '');
+    const cleanCode = rawCode.replace(/^0+/, '');
+    const defaults = DEFAULT_OFFICE_HOURS_BY_COURSE[rawCode] || DEFAULT_OFFICE_HOURS_BY_COURSE[cleanCode] || DEFAULT_OFFICE_HOURS_BY_COURSE['0' + cleanCode];
+    return Array.isArray(defaults) ? JSON.parse(JSON.stringify(defaults)) : [];
+}
+
+function ensureCourseOfficeHoursArray(course) {
+    if (!course) return [];
+    if (!course._officeHoursInitialized && !Array.isArray(course.officeHours)) {
+        course.officeHours = getCourseOfficeHours(course);
+    } else if (!Array.isArray(course.officeHours)) {
+        course.officeHours = [];
+    }
+    course._officeHoursInitialized = true;
+    return course.officeHours;
+}
+
+function addCourseOfficeHour(courseCode, entry) {
+    const course = (typeof resolveCourseForTask === 'function')
+        ? resolveCourseForTask(courseCode)
+        : (gameState.courses && gameState.courses[courseCode]);
+    if (!course) return false;
+    const list = ensureCourseOfficeHoursArray(course);
+    const dayIdx = Number(entry.dayIndex);
+    const dayObj = OFFICE_HOURS_DAYS.find(d => d.dayIndex === dayIdx) || OFFICE_HOURS_DAYS[0];
+    const staffName = String(entry.staffName || '').trim();
+    if (!staffName) return false;
+
+    const newItem = {
+        id: `oh_${course.code}_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+        staffName: staffName,
+        role: String(entry.role || 'מרצה').trim(),
+        dayIndex: dayObj.dayIndex,
+        dayName: dayObj.dayName,
+        startTime: String(entry.startTime || '12:30').trim(),
+        endTime: String(entry.endTime || '13:30').trim(),
+        location: String(entry.location || '').trim()
+    };
+    list.push(newItem);
+    saveState();
+    notifyStateChanged({ tab: window.currentActiveTab || 'timetable', recalculate: false });
+    if (typeof renderTimetableGrid === 'function') renderTimetableGrid();
+    return true;
+}
+
+function deleteCourseOfficeHour(courseCode, ohId) {
+    const course = (typeof resolveCourseForTask === 'function')
+        ? resolveCourseForTask(courseCode)
+        : (gameState.courses && gameState.courses[courseCode]);
+    if (!course) return false;
+    const list = ensureCourseOfficeHoursArray(course);
+    course.officeHours = list.filter(it => String(it.id) !== String(ohId));
+    course._officeHoursInitialized = true;
+    saveState();
+    notifyStateChanged({ tab: window.currentActiveTab || 'timetable', recalculate: false });
+    if (typeof renderTimetableGrid === 'function') renderTimetableGrid();
+    return true;
+}
+
+function isOfficeHoursOverlayEnabled() {
+    if (typeof gameState !== 'undefined' && gameState && typeof gameState.showOfficeHoursInTimetable === 'boolean') {
+        return gameState.showOfficeHoursInTimetable;
+    }
+    try {
+        const stored = localStorage.getItem('semestero_show_office_hours');
+        if (stored === 'false') return false;
+    } catch (e) {}
+    return true;
+}
+
+window.toggleOfficeHoursTimetable = function(forceVal) {
+    const next = (typeof forceVal === 'boolean') ? forceVal : !isOfficeHoursOverlayEnabled();
+    if (typeof gameState !== 'undefined' && gameState) {
+        gameState.showOfficeHoursInTimetable = next;
+    }
+    try { localStorage.setItem('semestero_show_office_hours', next ? 'true' : 'false'); } catch (e) {}
+    const btn = document.getElementById('btn-toggle-office-hours-timetable');
+    if (btn) btn.classList.toggle('active', next);
+    if (typeof saveState === 'function') saveState();
+    if (typeof renderTimetableGrid === 'function') renderTimetableGrid();
+};
+
+function buildCourseOfficeHoursCardHtml(course) {
+    const items = getCourseOfficeHours(course);
+    const listHtml = items.length === 0
+        ? `<div style="font-size: 0.77rem; color: #94a3b8; padding: 6px 0;">טרם הוזנו שעות קבלה לקורס זה. לחץ <strong>״+ הוסף שעת קבלה״</strong> להוספה.</div>`
+        : items.map(it => `
+            <div class="oh-entry-row" data-oh-id="${escapeHtml(it.id)}">
+                <div style="display: flex; flex-direction: column; gap: 2px;">
+                    <span style="font-weight: 700; color: #f8fafc;">${escapeHtml(it.staffName)} <span style="color: #fbbf24; font-weight: 600;">(${escapeHtml(it.role || 'מרצה')})</span></span>
+                    <span style="color: #cbd5e1; font-size: 0.73rem;">יום ${escapeHtml(it.dayName)} • ${escapeHtml(it.startTime)}${it.endTime ? ' - ' + escapeHtml(it.endTime) : ''}${it.location ? ' • 📍 ' + escapeHtml(it.location) : ''}</span>
+                </div>
+                <button type="button" class="btn-del-course-oh" data-oh-id="${escapeHtml(it.id)}" title="הסר שעת קבלה" style="background: rgba(239, 68, 68, 0.14); border: 1px solid rgba(239, 68, 68, 0.35); color: #fca5a5; border-radius: 6px; padding: 3px 7px; font-size: 0.72rem; cursor: pointer;">✕</button>
+            </div>
+        `).join('');
+
+    return `
+        <div class="course-office-hours-card" id="course-modal-office-hours-card">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; flex-wrap: wrap; gap: 6px;">
+                <div style="font-weight: 800; color: #fbbf24; font-size: 0.86rem; display: flex; align-items: center; gap: 6px;">
+                    <span>🕐</span> <span>שעות קבלה (מרצים ומתרגלים)</span>
+                </div>
+                <button type="button" id="btn-toggle-course-oh-form" class="btn btn-xs" style="background: rgba(245, 158, 11, 0.16); border: 1px solid rgba(245, 158, 11, 0.4); color: #fde68a; border-radius: 6px; padding: 3px 9px; font-size: 0.74rem; font-weight: 700; cursor: pointer;">+ הוסף שעת קבלה</button>
+            </div>
+            <div id="course-oh-items-list" style="display: flex; flex-direction: column; gap: 6px;">${listHtml}</div>
+            <div id="course-oh-add-form" class="oh-form-grid" style="display: none;">
+                <input type="text" id="course-oh-staff" class="oh-form-input" placeholder="שם מרצה / מתרגל">
+                <select id="course-oh-role" class="oh-form-select">
+                    <option value="מרצה">מרצה</option>
+                    <option value="מתרגל/ת">מתרגל/ת</option>
+                    <option value="מרצה אחראי">מרצה אחראי</option>
+                    <option value="סגל">סגל הוראה</option>
+                </select>
+                <select id="course-oh-day" class="oh-form-select">
+                    ${OFFICE_HOURS_DAYS.map(d => `<option value="${d.dayIndex}">יום ${d.dayName}</option>`).join('')}
+                </select>
+                <input type="text" id="course-oh-start" class="oh-form-input" value="12:30" placeholder="שעת התחלה (12:30)">
+                <input type="text" id="course-oh-end" class="oh-form-input" value="13:30" placeholder="שעת סיום (13:30)">
+                <input type="text" id="course-oh-location" class="oh-form-input" placeholder="חדר / זום (למשל קאהן 219)">
+                <button type="button" id="btn-save-course-oh" style="background: #f59e0b; color: #0f172a; border: none; border-radius: 6px; font-weight: 800; padding: 6px 12px; cursor: pointer; font-size: 0.78rem;">✓ שמור שעת קבלה</button>
+            </div>
+        </div>
+    `;
+}
+
+function bindCourseOfficeHoursEvents(containerEl, course) {
+    if (!containerEl || !course) return;
+    const toggleBtn = containerEl.querySelector('#btn-toggle-course-oh-form');
+    const formEl = containerEl.querySelector('#course-oh-add-form');
+    if (toggleBtn && formEl) {
+        toggleBtn.onclick = () => {
+            formEl.style.display = formEl.style.display === 'none' ? 'grid' : 'none';
+        };
+    }
+    const saveBtn = containerEl.querySelector('#btn-save-course-oh');
+    if (saveBtn) {
+        saveBtn.onclick = () => {
+            const staff = containerEl.querySelector('#course-oh-staff')?.value || '';
+            const role = containerEl.querySelector('#course-oh-role')?.value || 'מרצה';
+            const dayIndex = parseInt(containerEl.querySelector('#course-oh-day')?.value || '0', 10);
+            const startTime = containerEl.querySelector('#course-oh-start')?.value || '12:30';
+            const endTime = containerEl.querySelector('#course-oh-end')?.value || '';
+            const location = containerEl.querySelector('#course-oh-location')?.value || '';
+            if (!staff.trim()) {
+                if (typeof showToastNotification === 'function') showToastNotification('נא להזין שם מרצה או מתרגל', 'warning');
+                return;
+            }
+            addCourseOfficeHour(course.code, { staffName: staff, role, dayIndex, startTime, endTime, location });
+            openCourseDetails(course.code);
+            if (typeof showToastNotification === 'function') showToastNotification('🕐 שעת הקבלה נשמרה בהצלחה!', 'success');
+        };
+    }
+    containerEl.querySelectorAll('.btn-del-course-oh').forEach(btn => {
+        btn.onclick = (e) => {
+            e.stopPropagation();
+            const ohId = btn.getAttribute('data-oh-id');
+            deleteCourseOfficeHour(course.code, ohId);
+            openCourseDetails(course.code);
+            if (typeof showToastNotification === 'function') showToastNotification('שעת הקבלה הוסרה', 'info');
+        };
+    });
+}
+
+window.OfficeHoursEngine = {
+    DEFAULT_OFFICE_HOURS_BY_COURSE,
+    getCourseOfficeHours,
+    addCourseOfficeHour,
+    deleteCourseOfficeHour,
+    isTimetableOverlayEnabled: isOfficeHoursOverlayEnabled
+};
+
 function renderTechnionPlusQuickBar(course) {
     const groupEl = document.getElementById("technion-plus-links-group");
     if (!groupEl || !course) return;
@@ -14766,6 +14967,7 @@ function openCourseDetails(code) {
                 ${magenShieldCardHtml}
                 ${hasSchedule ? `<div class="modal-cheesefork-grid">${scheduleItemsHtml}</div>` : scheduleStatusNotice}
                 ${examsHtml}
+                ${buildCourseOfficeHoursCardHtml(course)}
                 ${moodleSyllabusHtml}
                 ${syllabusHtml}
             </div>
@@ -14842,6 +15044,7 @@ function openCourseDetails(code) {
             });
             refreshMagenSim();
         }
+        bindCourseOfficeHoursEvents(cfContainer, course);
     }
 
     // UW Flow-style Peer Difficulty & Workload Consensus Section
@@ -16463,9 +16666,18 @@ window.switchTab = function(tabNameOrNumber) {
     const filterSemester = document.getElementById("filter-semester");
     const searchInput = document.getElementById("search-tasks");
     
-    if (filterCourse) filterCourse.addEventListener("change", renderNotionTasksTable);
-    if (filterSemester) filterSemester.addEventListener("change", renderNotionTasksTable);
-    if (searchInput) searchInput.addEventListener("input", renderNotionTasksTable);
+    if (filterCourse) filterCourse.addEventListener("change", () => {
+        if (typeof saveNotionFilterPreferences === 'function') saveNotionFilterPreferences();
+        renderNotionTasksTable();
+    });
+    if (filterSemester) filterSemester.addEventListener("change", () => {
+        if (typeof saveNotionFilterPreferences === 'function') saveNotionFilterPreferences();
+        renderNotionTasksTable();
+    });
+    if (searchInput) searchInput.addEventListener("input", () => {
+        if (typeof saveNotionFilterPreferences === 'function') saveNotionFilterPreferences();
+        renderNotionTasksTable();
+    });
     
     setupNotionFilterPopover();
     setupNotionTypeFilterPopover();
@@ -16473,6 +16685,9 @@ window.switchTab = function(tabNameOrNumber) {
     setupNotionCourseFilterPopover();
     setupNotionFocusToggle();
     setupFlowchartViewMode();
+    if (typeof restoreNotionFilterPreferences === 'function') {
+        restoreNotionFilterPreferences(true);
+    }
 
     try {
         const lastActiveTab = localStorage.getItem('semestero_last_active_tab');
@@ -16490,6 +16705,7 @@ window.switchTab = function(tabNameOrNumber) {
             const isOpen = taskFiltersToolbar.classList.toggle("is-open");
             if (taskFilterArrow) taskFilterArrow.innerText = isOpen ? "▴" : "▾";
             toggleTaskFiltersBtn.classList.toggle("active", isOpen);
+            if (typeof saveNotionFilterPreferences === 'function') saveNotionFilterPreferences();
         });
     }
 
@@ -16849,16 +17065,8 @@ function populateNotionCourseFilter() {
 
     const courseFilterBody = document.getElementById("notion-course-filter-body");
     if (courseFilterBody) {
-        let savedCoursesSet = null;
-        try {
-            const rawPrefs = localStorage.getItem('semestero_tasks_filters_v1');
-            if (rawPrefs) {
-                const parsed = JSON.parse(rawPrefs);
-                if (Array.isArray(parsed.courses)) {
-                    savedCoursesSet = new Set(parsed.courses);
-                }
-            }
-        } catch (e) {}
+        const savedPrefs = (typeof getSavedTaskFilterPreferences === 'function') ? getSavedTaskFilterPreferences() : null;
+        const savedCoursesSet = (savedPrefs && Array.isArray(savedPrefs.courses)) ? new Set(savedPrefs.courses) : null;
 
         courseFilterBody.innerHTML = '';
         const activeCourses = Object.values(gameState.courses).filter(c => {
@@ -17561,6 +17769,7 @@ function renderNotionTasksTable() {
                 e.stopPropagation();
                 searchInput.value = '';
                 clearSearchBtn.style.display = 'none';
+                if (typeof saveNotionFilterPreferences === 'function') saveNotionFilterPreferences();
                 renderNotionTasksTable();
             };
         }
@@ -17572,8 +17781,8 @@ function renderNotionTasksTable() {
     // Gather tasks and pre-compute timestamp for high-performance sorting (deduplicated across alias keys)
     const curActiveSem = (gameState && gameState.currentActiveSemester) ? gameState.currentActiveSemester : 3;
     getDeduplicatedCoursesList(gameState.courses).forEach(course => {
-        // Course Multi-select Filter
-        if (activeCourseFilters && activeCourseFilters.size > 0) {
+        // Course Multi-select Filter (null = all courses checked; Set(0) = user deselected all courses)
+        if (activeCourseFilters !== null) {
             if (!activeCourseFilters.has(course.code)) return;
         } else if (courseFilter !== 'all' && course.code !== courseFilter) {
             return;
@@ -19098,28 +19307,78 @@ function handleCreateTaskSubmit() {
 
 const NOTION_FILTERS_STORAGE_KEY = 'semestero_tasks_filters_v1';
 
+function getTaskFiltersUserStorageKey() {
+    try {
+        const uid = (window.AuthSync && typeof window.AuthSync.getCurrentUserId === 'function')
+            ? window.AuthSync.getCurrentUserId()
+            : null;
+        return uid ? `${NOTION_FILTERS_STORAGE_KEY}_${uid}` : NOTION_FILTERS_STORAGE_KEY;
+    } catch (e) {
+        return NOTION_FILTERS_STORAGE_KEY;
+    }
+}
+
+function getSavedTaskFilterPreferences() {
+    let localPrefs = null;
+    try {
+        const userKey = getTaskFiltersUserStorageKey();
+        const rawUser = localStorage.getItem(userKey);
+        const rawGlobal = (userKey !== NOTION_FILTERS_STORAGE_KEY) ? localStorage.getItem(NOTION_FILTERS_STORAGE_KEY) : null;
+        const raw = rawUser || rawGlobal;
+        if (raw) {
+            const parsed = JSON.parse(raw);
+            if (parsed && typeof parsed === 'object') localPrefs = parsed;
+        }
+    } catch (e) {}
+
+    const cloudPrefs = (typeof gameState !== 'undefined' && gameState && gameState.taskFilterPreferences && typeof gameState.taskFilterPreferences === 'object')
+        ? gameState.taskFilterPreferences
+        : null;
+
+    if (cloudPrefs && localPrefs) {
+        const cloudTs = Number(cloudPrefs.updatedAt) || 0;
+        const localTs = Number(localPrefs.updatedAt) || 0;
+        return cloudTs >= localTs ? cloudPrefs : localPrefs;
+    }
+    return cloudPrefs || localPrefs || null;
+}
+
 function saveNotionFilterPreferences() {
     if (window._isRestoringNotionFilters) return;
     try {
         const courseFilterObj = (typeof getActiveCourseFilters === 'function') ? getActiveCourseFilters() : null;
         const semFilterObj = (typeof getActiveSemesterFilters === 'function') ? getActiveSemesterFilters() : null;
+        const focusBtn = document.getElementById("notion-focus-toggle-btn");
+        const searchInput = document.getElementById("search-tasks");
+        const toolbarEl = document.getElementById("notion-filters-toolbar");
         const prefs = {
             statuses: (typeof getActiveStatusFilters === 'function') ? getActiveStatusFilters() : ['not_started', 'in_progress', 'done', 'submitted'],
             types: (typeof getActiveTypeFilters === 'function') ? getActiveTypeFilters() : ['hw', 'project', 'exam'],
             semesters: semFilterObj ? Array.from(semFilterObj) : null,
             courses: courseFilterObj ? Array.from(courseFilterObj) : null,
-            organitCategory: window.activeOrganitCategory || 'all'
+            organitCategory: window.activeOrganitCategory || 'all',
+            focusMode: focusBtn ? focusBtn.classList.contains("active") : (localStorage.getItem("semestero_notion_focus_mode") === "true"),
+            searchQuery: searchInput ? String(searchInput.value || '') : '',
+            toolbarOpen: toolbarEl ? toolbarEl.classList.contains("is-open") : false,
+            updatedAt: Date.now()
         };
-        localStorage.setItem(NOTION_FILTERS_STORAGE_KEY, JSON.stringify(prefs));
+        const userKey = getTaskFiltersUserStorageKey();
+        localStorage.setItem(userKey, JSON.stringify(prefs));
+        if (userKey !== NOTION_FILTERS_STORAGE_KEY) {
+            localStorage.setItem(NOTION_FILTERS_STORAGE_KEY, JSON.stringify(prefs));
+        }
+        if (typeof gameState !== 'undefined' && gameState) {
+            gameState.taskFilterPreferences = prefs;
+            if (typeof saveState === 'function') saveState(true);
+        }
     } catch (e) {}
 }
 
-function restoreNotionFilterPreferences() {
+function restoreNotionFilterPreferences(forceReapply = false) {
+    if (window._notionFiltersRestored && !forceReapply) return;
     window._notionFiltersRestored = true;
     try {
-        const raw = localStorage.getItem(NOTION_FILTERS_STORAGE_KEY);
-        if (!raw) return;
-        const prefs = JSON.parse(raw);
+        const prefs = getSavedTaskFilterPreferences();
         if (!prefs || typeof prefs !== 'object') return;
         window._isRestoringNotionFilters = true;
 
@@ -19153,15 +19412,19 @@ function restoreNotionFilterPreferences() {
                 if (typeof updateSemesterFilterSummary === 'function') updateSemesterFilterSummary();
             }
         }
-        if (Array.isArray(prefs.courses)) {
-            const coursePopover = document.getElementById("notion-course-filter-popover");
-            if (coursePopover) {
+        const coursePopover = document.getElementById("notion-course-filter-popover");
+        if (coursePopover) {
+            if (Array.isArray(prefs.courses)) {
                 const cSet = new Set(prefs.courses);
                 coursePopover.querySelectorAll(".notion-course-opt-cb").forEach(cb => {
                     cb.checked = cSet.has(cb.getAttribute("data-course-code"));
                 });
-                if (typeof updateCourseFilterSummary === 'function') updateCourseFilterSummary();
+            } else if (prefs.courses === null) {
+                coursePopover.querySelectorAll(".notion-course-opt-cb").forEach(cb => {
+                    cb.checked = true;
+                });
             }
+            if (typeof updateCourseFilterSummary === 'function') updateCourseFilterSummary();
         }
         if (prefs.organitCategory) {
             window.activeOrganitCategory = prefs.organitCategory;
@@ -19174,10 +19437,34 @@ function restoreNotionFilterPreferences() {
                 });
             }
         }
+        if (typeof prefs.focusMode === 'boolean') {
+            const focusBtn = document.getElementById("notion-focus-toggle-btn");
+            if (focusBtn) focusBtn.classList.toggle("active", prefs.focusMode);
+            localStorage.setItem("semestero_notion_focus_mode", prefs.focusMode ? "true" : "false");
+        }
+        if (typeof prefs.searchQuery === 'string') {
+            const searchInput = document.getElementById("search-tasks");
+            const clearSearchBtn = document.getElementById("btn-clear-task-search");
+            if (searchInput && document.activeElement !== searchInput) {
+                searchInput.value = prefs.searchQuery;
+            }
+            if (clearSearchBtn) {
+                clearSearchBtn.style.display = prefs.searchQuery ? 'block' : 'none';
+            }
+        }
+        if (typeof prefs.toolbarOpen === 'boolean') {
+            const toolbarEl = document.getElementById("notion-filters-toolbar");
+            const toggleBtn = document.getElementById("btn-toggle-task-filters");
+            const arrowEl = document.getElementById("task-filter-arrow");
+            if (toolbarEl) toolbarEl.classList.toggle("is-open", prefs.toolbarOpen);
+            if (toggleBtn) toggleBtn.classList.toggle("active", prefs.toolbarOpen);
+            if (arrowEl) arrowEl.innerText = prefs.toolbarOpen ? "▴" : "▾";
+        }
     } catch (e) {} finally {
         window._isRestoringNotionFilters = false;
     }
 }
+window.getSavedTaskFilterPreferences = getSavedTaskFilterPreferences;
 window.saveNotionFilterPreferences = saveNotionFilterPreferences;
 window.restoreNotionFilterPreferences = restoreNotionFilterPreferences;
 
@@ -19494,6 +19781,7 @@ function setupNotionFocusToggle() {
         const nextState = !focusBtn.classList.contains("active");
         focusBtn.classList.toggle("active", nextState);
         localStorage.setItem("semestero_notion_focus_mode", nextState ? "true" : "false");
+        if (typeof saveNotionFilterPreferences === 'function') saveNotionFilterPreferences();
         renderNotionTasksTable();
     };
 }
@@ -22736,6 +23024,25 @@ function copyScheduleToGoogleTasks() {
 window.currentCalendarItemsByDate = {};
 let currentSelectedDayModalDate = null;
 
+// Normalizes YYYY-MM-DD / YYYY-MM-DD HH:MM / ISO timestamps / DD/MM/YYYY into { dateOnly, timeStr }
+function parseTaskDueDateParts(rawDueDate) {
+    if (!rawDueDate) return { dateOnly: '', timeStr: '' };
+    const str = String(rawDueDate).trim();
+    const isoMatch = str.match(/^(\d{4}-\d{2}-\d{2})(?:[T\s](\d{2}:\d{2}))?/);
+    if (isoMatch) {
+        return { dateOnly: isoMatch[1], timeStr: isoMatch[2] || '' };
+    }
+    const ilMatch = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(\d{2}:\d{2}))?/);
+    if (ilMatch) {
+        return {
+            dateOnly: `${ilMatch[3]}-${ilMatch[2].padStart(2, '0')}-${ilMatch[1].padStart(2, '0')}`,
+            timeStr: ilMatch[4] || ''
+        };
+    }
+    return { dateOnly: '', timeStr: '' };
+}
+window.parseTaskDueDateParts = parseTaskDueDateParts;
+
 // Renders the Google Calendar-style daily past exams grid (6 columns: Sun-Fri, with Month & Week views)
 function renderFinalsCalendar() {
     const grid = document.getElementById("finals-calendar-grid");
@@ -22792,13 +23099,16 @@ function renderFinalsCalendar() {
         if (!course.tasks) return;
         course.tasks.forEach(task => {
             if (!task.dueDate) return;
-            if (!itemsByDate[task.dueDate]) itemsByDate[task.dueDate] = [];
+            const parsedDue = parseTaskDueDateParts(task.dueDate);
+            const dateKey = parsedDue.dateOnly;
+            if (!dateKey) return;
+            if (!itemsByDate[dateKey]) itemsByDate[dateKey] = [];
 
             if (task.type === 'exam') {
                 const isExamDone = task.completed || task.status === 'done' || task.status === 'submitted';
                 const todayObj = new Date();
                 todayObj.setHours(0, 0, 0, 0);
-                const taskDateObj = new Date(task.dueDate);
+                const taskDateObj = new Date(dateKey);
                 taskDateObj.setHours(0, 0, 0, 0);
                 const isPassed = isExamDone || (taskDateObj < todayObj);
 
@@ -22821,11 +23131,12 @@ function renderFinalsCalendar() {
                 const prefix = isPassed ? "🟢" : "🔴";
                 const titleStr = `${prefix} ${displayTitle}`;
 
-                itemsByDate[task.dueDate].push({
+                itemsByDate[dateKey].push({
                     isExamEvent: true,
                     isPassed: isPassed,
                     title: titleStr,
                     rawTitle: rawTitleStr,
+                    dueTime: parsedDue.timeStr || task.dueTime || '',
                     courseCode: course.code,
                     courseName: course.name,
                     taskId: task.id
@@ -22852,14 +23163,15 @@ function renderFinalsCalendar() {
                     icon = "📋";
                 }
 
-                const isDone = task.completed || task.status === 'completed' || task.status === 'done';
+                const isDone = task.completed || task.status === 'completed' || task.status === 'done' || task.status === 'submitted';
                 const shortCourse = (typeof COURSE_SHORT_NAMES !== 'undefined' && COURSE_SHORT_NAMES[course.code]) || course.name;
                 const displayTitle = `${icon} [${shortCourse}] ${task.title}`;
 
-                itemsByDate[task.dueDate].push({
+                itemsByDate[dateKey].push({
                     isTaskEvent: true,
                     title: task.title,
                     displayTitle: displayTitle,
+                    dueTime: parsedDue.timeStr || task.dueTime || '',
                     courseCode: course.code,
                     courseName: course.name,
                     taskId: task.id,
@@ -23066,9 +23378,11 @@ function createCalendarDayCell(dateStr, dayNum, isToday, itemsByDate, isOtherMon
         } else if (item.isTaskEvent) {
             const doneClass = item.completed ? "done" : "";
             const checkIcon = item.completed ? "☑" : "⚪";
+            const timeBadge = item.dueTime ? `<span class="cal-event-time-badge">${escapeHtml(item.dueTime)}</span>` : '';
             cellHtml += `
-                <div class="cal-event-pill task-event ${item.typeClass} ${doneClass}" data-course-code="${item.courseCode}" data-task-id="${item.taskId}" title="משימה (${item.courseName}): לחץ לצפייה בעמוד המשימה">
+                <div class="cal-event-pill task-event ${item.typeClass} ${doneClass}" data-course-code="${item.courseCode}" data-task-id="${item.taskId}" title="משימה (${item.courseName})${item.dueTime ? ' • עד ' + item.dueTime : ''}: לחץ לצפייה בעמוד המשימה">
                     <span class="cal-task-check" data-course-code="${item.courseCode}" data-task-id="${item.taskId}" title="לחץ לסימון הושלם/לא הושלם">${checkIcon}</span>
+                    ${timeBadge}
                     <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${item.displayTitle}</span>
                 </div>
             `;
@@ -23303,8 +23617,8 @@ function renderDayModalEventsList(dateStr) {
             timeHtml = `<span class="day-modal-event-time-tag" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; border-color: rgba(245, 158, 11, 0.4);">יום שלם</span>`;
         } else if (item.startTime && item.endTime) {
             timeHtml = `<span class="day-modal-event-time-tag">${item.startTime}-${item.endTime}</span>`;
-        } else if (item.time) {
-            timeHtml = `<span class="day-modal-event-time-tag">${item.time}</span>`;
+        } else if (item.time || item.dueTime) {
+            timeHtml = `<span class="day-modal-event-time-tag">${escapeHtml(item.time || item.dueTime)}</span>`;
         } else {
             timeHtml = `<span style="font-size: 0.72rem; color: #64748b; font-family: monospace;">--:--</span>`;
         }
@@ -23458,11 +23772,11 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.11.15-v2.13.13",
-    version: "2.13.13",
-    build: "20261115_09",
-    date: "2026-11-15 21:08",
-    description: "v2.13.13: הסרת משימת השווא ״WebWork 1: חוק קולון ושדה חשמלי״ (114052_ww1) מכל מאגרי המערכת וניקוי אוטומטי בסנכרון הענן ובמצב השמור עבור פיסיקה 2 (ADR-123)."
+    code: "REV-2026.11.16-v2.13.14",
+    version: "2.13.14",
+    build: "20261116_01",
+    date: "2026-11-16 17:18",
+    description: "v2.13.14: הוספת שעות קבלה עריכות ומוצגות במערכת השעות ובדף הקורס, תיקון והצגת משימות מתוזמנות במודל בתוך לוח השנה ובייצוא .ics, ושמירת כל סינוני המשימות בין כניסות ומכשירים (ADR-124)."
 };
 window.APP_VERSION = APP_CURRENT_REVISION.version;
 
@@ -26073,37 +26387,99 @@ function renderTimetableWeekNavigator(schedule) {
 }
 window.renderTimetableWeekNavigator = renderTimetableWeekNavigator;
 
+function getCoursesForTimetableOfficeHours(schedule) {
+    if (typeof gameState === 'undefined' || !gameState || !gameState.courses) return [];
+    const timetableIds = new Set();
+    if (schedule && Array.isArray(schedule.days)) {
+        schedule.days.forEach(d => {
+            (d.classes || []).forEach(c => {
+                if (c && c.courseId) {
+                    const norm = normalizeTechnionCourseCode ? normalizeTechnionCourseCode(c.courseId) : String(c.courseId);
+                    timetableIds.add(String(c.courseId));
+                    if (norm) timetableIds.add(norm);
+                }
+            });
+        });
+    }
+    return getDeduplicatedCoursesList(gameState.courses).filter(course => {
+        if (!course || course.status === 'mastered') return false;
+        const normCode = normalizeTechnionCourseCode ? normalizeTechnionCourseCode(course.code) : String(course.code);
+        const inTimetable = timetableIds.has(String(course.code)) || (normCode && timetableIds.has(normCode));
+        const hasCustomOh = !!(course._officeHoursInitialized && Array.isArray(course.officeHours) && course.officeHours.length > 0);
+        return course.status === 'active' || inTimetable || hasCustomOh || course.status === 'available';
+    });
+}
+
 function renderTimetableGrid() {
     const container = document.getElementById('timetable-grid-container');
     if (!container) return;
 
-    const schedule = getActiveTimetableSchedule();
+    let schedule = getActiveTimetableSchedule();
     if (document.getElementById('attendance-hub-week-navigator')) {
         renderTimetableWeekNavigator(schedule);
-    }
-
-    if (!schedule || !schedule.days || schedule.days.length === 0) {
-        container.innerHTML = `
-            <div class="timetable-empty-state-box" style="grid-column: 1 / -1; padding: 48px 24px; text-align: center; background: rgba(15, 23, 42, 0.45); border: 1px dashed rgba(148, 163, 184, 0.25); border-radius: 16px; margin: 12px 0;">
-                <div style="font-size: 2.5rem; margin-bottom: 12px;">📅</div>
-                <h3 style="color: #f1f5f9; font-size: 1.15rem; font-weight: 700; margin-bottom: 8px;">טרם הוגדרה מערכת שעות לחשבון זה</h3>
-                <p style="color: #94a3b8; font-size: 0.88rem; max-width: 480px; margin: 0 auto; line-height: 1.5;">
-                    חשבונך מופרד ומבודד לחלוטין. כשתסנכרן או תזין את מערכת השעות שלך מ-CheeseFork, השיעורים והתזכורות יופיעו כאן אוטומטית.
-                </p>
-            </div>
-        `;
-        return;
     }
 
     const selectedWeek = (window.AttendanceHub && typeof window.AttendanceHub.getSelectedWeek === 'function')
         ? window.AttendanceHub.getSelectedWeek()
         : 1;
 
+    const showOhOverlay = isOfficeHoursOverlayEnabled();
+    const ohBtn = document.getElementById('btn-toggle-office-hours-timetable');
+    if (ohBtn) ohBtn.classList.toggle('active', showOhOverlay);
+
+    const officeHoursByDay = {};
+    if (showOhOverlay) {
+        getCoursesForTimetableOfficeHours(schedule).forEach(course => {
+            const ohList = getCourseOfficeHours(course);
+            ohList.forEach(oh => {
+                const dIdx = Number(oh.dayIndex);
+                if (!officeHoursByDay[dIdx]) officeHoursByDay[dIdx] = [];
+                officeHoursByDay[dIdx].push(Object.assign({}, oh, {
+                    isOfficeHour: true,
+                    courseCode: course.code,
+                    courseName: course.name
+                }));
+            });
+        });
+    }
+
+    const hasAnyOh = Object.keys(officeHoursByDay).length > 0;
+    if (!schedule || !schedule.days || schedule.days.length === 0) {
+        if (!hasAnyOh) {
+            container.innerHTML = `
+                <div class="timetable-empty-state-box" style="grid-column: 1 / -1; padding: 48px 24px; text-align: center; background: rgba(15, 23, 42, 0.45); border: 1px dashed rgba(148, 163, 184, 0.25); border-radius: 16px; margin: 12px 0;">
+                    <div style="font-size: 2.5rem; margin-bottom: 12px;">📅</div>
+                    <h3 style="color: #f1f5f9; font-size: 1.15rem; font-weight: 700; margin-bottom: 8px;">טרם הוגדרה מערכת שעות לחשבון זה</h3>
+                    <p style="color: #94a3b8; font-size: 0.88rem; max-width: 480px; margin: 0 auto; line-height: 1.5;">
+                        חשבונך מופרד ומבודד לחלוטין. כשתסנכרן או תזין את מערכת השעות שלך מ-CheeseFork, השיעורים והתזכורות יופיעו כאן אוטומטית.
+                    </p>
+                </div>
+            `;
+            if (typeof renderTimetableOfficeHoursPanel === 'function') {
+                renderTimetableOfficeHoursPanel();
+            }
+            return;
+        }
+        schedule = {
+            days: [
+                { dayIndex: 0, name: 'יום ראשון', classes: [] },
+                { dayIndex: 1, name: 'יום שני', classes: [] },
+                { dayIndex: 2, name: 'יום שלישי', classes: [] },
+                { dayIndex: 3, name: 'יום רביעי', classes: [] },
+                { dayIndex: 4, name: 'יום חמישי', classes: [] }
+            ]
+        };
+    }
+
     let html = '';
     schedule.days.forEach(day => {
-        const isFree = day.isFree || !day.classes || day.classes.length === 0;
+        const dayOhList = officeHoursByDay[day.dayIndex] || [];
+        const hasClasses = day.classes && day.classes.length > 0;
+        const isFree = !hasClasses && dayOhList.length === 0;
         const badgeClass = isFree ? 'free-day' : 'active-day';
-        const badgeText = isFree ? 'יום חופשי ✨' : `${day.classes.length} שיעורים`;
+        const badgeText = !hasClasses
+            ? (dayOhList.length > 0 ? `${dayOhList.length} קבלה 🕐` : 'יום חופשי ✨')
+            : (dayOhList.length > 0 ? `${day.classes.length} שיעורים • ${dayOhList.length} קבלה` : `${day.classes.length} שיעורים`);
 
         let bodyHtml = '';
         if (isFree) {
@@ -26115,18 +26491,42 @@ function renderTimetableGrid() {
                 </div>
             `;
         } else {
-            day.classes.forEach((c, idx) => {
-                if (idx > 0) {
-                    const prevClass = day.classes[idx - 1];
-                    if (prevClass.endTime && c.startTime && prevClass.endTime < c.startTime) {
-                        const [ph, pm] = prevClass.endTime.split(':').map(Number);
-                        const [ch, cm] = c.startTime.split(':').map(Number);
-                        const gapMin = (ch * 60 + cm) - (ph * 60 + pm);
-                        if (gapMin >= 30) {
-                            bodyHtml += `<div class="timetable-break-gap">☕ הפסקה (${prevClass.endTime} - ${c.startTime})</div>`;
-                        }
+            const timelineItems = [
+                ...(day.classes || []).map((c, origIdx) => ({ isClass: true, startTime: c.startTime || '99:99', c, origIdx })),
+                ...dayOhList.map(oh => ({ isClass: false, startTime: oh.startTime || '99:99', oh }))
+            ].sort((a, b) => String(a.startTime).localeCompare(String(b.startTime)));
+
+            let prevClassEnd = null;
+            timelineItems.forEach(entry => {
+                if (!entry.isClass) {
+                    const oh = entry.oh;
+                    bodyHtml += `
+                        <div class="timetable-office-hour-card" onclick="if (typeof openCourseDetails === 'function') openCourseDetails('${escapeHtml(oh.courseCode)}')" title="לחץ לניהול ועריכת שעות הקבלה של הקורס">
+                            <div class="oh-card-top">
+                                <span class="oh-badge">🕐 שעת קבלה • ${escapeHtml(oh.role || 'מרצה')}</span>
+                                <span class="oh-time">${escapeHtml(oh.startTime)}${oh.endTime ? ' - ' + escapeHtml(oh.endTime) : ''}</span>
+                            </div>
+                            <div class="oh-staff">${escapeHtml(oh.staffName)}</div>
+                            <div class="oh-meta">
+                                <span>📚 ${escapeHtml(oh.courseName)} (${escapeHtml(oh.courseCode)})</span>
+                                ${oh.location ? `<span>📍 ${escapeHtml(oh.location)}</span>` : ''}
+                            </div>
+                        </div>
+                    `;
+                    return;
+                }
+
+                const c = entry.c;
+                const idx = entry.origIdx;
+                if (prevClassEnd && c.startTime && prevClassEnd < c.startTime) {
+                    const [ph, pm] = prevClassEnd.split(':').map(Number);
+                    const [ch, cm] = c.startTime.split(':').map(Number);
+                    const gapMin = (ch * 60 + cm) - (ph * 60 + pm);
+                    if (gapMin >= 30) {
+                        bodyHtml += `<div class="timetable-break-gap">☕ הפסקה (${prevClassEnd} - ${c.startTime})</div>`;
                     }
                 }
+                if (c.endTime) prevClassEnd = c.endTime;
 
                 const isTut = (c.type && (c.type.includes('תרגול') || c.type.includes('מעבדה')));
                 const isSport = (c.type && (c.type.includes('אימון') || c.type.includes('ספורט')));
@@ -26223,8 +26623,121 @@ function renderTimetableGrid() {
     });
 
     container.innerHTML = html;
+    if (typeof renderTimetableOfficeHoursPanel === 'function') {
+        renderTimetableOfficeHoursPanel();
+    }
 }
 window.renderTimetableGrid = renderTimetableGrid;
+
+function renderTimetableOfficeHoursPanel() {
+    const panel = document.getElementById('timetable-office-hours-panel');
+    if (!panel || typeof gameState === 'undefined' || !gameState || !gameState.courses) return;
+
+    const eligibleCourses = getCoursesForTimetableOfficeHours(getActiveTimetableSchedule());
+    const prioritizedCourses = eligibleCourses.filter(c => c.status === 'active' || (c._officeHoursInitialized && Array.isArray(c.officeHours) && c.officeHours.length > 0));
+    const coursesToShow = prioritizedCourses.length > 0 ? prioritizedCourses : eligibleCourses.slice(0, 8);
+    const allSelectableCourses = getDeduplicatedCoursesList(gameState.courses).filter(c => c && c.status !== 'mastered');
+
+    const cardsHtml = coursesToShow.map(c => {
+        const list = getCourseOfficeHours(c);
+        const rowsHtml = list.length === 0
+            ? `<div style="font-size: 0.74rem; color: #64748b;">לא הוגדרו שעות קבלה</div>`
+            : list.map(it => `
+                <div class="oh-entry-row">
+                    <div style="display: flex; flex-direction: column; gap: 1px;">
+                        <span style="font-weight: 700; color: #f8fafc;">${escapeHtml(it.staffName)} <span style="color: #fbbf24; font-weight: 600;">(${escapeHtml(it.role || 'מרצה')})</span></span>
+                        <span style="color: #cbd5e1; font-size: 0.72rem;">יום ${escapeHtml(it.dayName)} • ${escapeHtml(it.startTime)}${it.endTime ? ' - ' + escapeHtml(it.endTime) : ''}${it.location ? ' • 📍 ' + escapeHtml(it.location) : ''}</span>
+                    </div>
+                    <button type="button" class="btn-del-tt-oh" data-course-code="${escapeHtml(c.code)}" data-oh-id="${escapeHtml(it.id)}" title="הסר שעת קבלה" style="background: rgba(239, 68, 68, 0.14); border: 1px solid rgba(239, 68, 68, 0.35); color: #fca5a5; border-radius: 6px; padding: 3px 7px; font-size: 0.7rem; cursor: pointer;">✕</button>
+                </div>
+            `).join('');
+
+        return `
+            <div class="oh-course-box">
+                <div class="oh-course-box-header">
+                    <span style="cursor: pointer;" onclick="if(typeof openCourseDetails==='function') openCourseDetails('${escapeHtml(c.code)}')">📚 ${escapeHtml(c.name)} <span style="color: #94a3b8; font-size: 0.74rem;">(${escapeHtml(c.code)})</span></span>
+                    <button type="button" class="btn-quick-course-oh" data-course-code="${escapeHtml(c.code)}" style="background: rgba(245, 158, 11, 0.14); border: 1px solid rgba(245, 158, 11, 0.35); color: #fde68a; border-radius: 6px; padding: 2px 7px; font-size: 0.72rem; cursor: pointer;">+ הוסף</button>
+                </div>
+                ${rowsHtml}
+            </div>
+        `;
+    }).join('');
+
+    panel.innerHTML = `
+        <div class="oh-panel-header">
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 1.15rem;">🕐</span>
+                <div>
+                    <h3 style="margin: 0; font-size: 1rem; font-weight: 800; color: #f8fafc;">שעות קבלה — מרצים ומתרגלים</h3>
+                    <span style="font-size: 0.74rem; color: #94a3b8;">הוסף או ערוך שעות קבלה לכל קורס (מוצגות גם בתוך מערכת השעות לפי ימים)</span>
+                </div>
+            </div>
+            <button type="button" id="btn-toggle-tt-oh-form" class="btn btn-xs" style="background: rgba(245, 158, 11, 0.18); border: 1px solid rgba(245, 158, 11, 0.45); color: #fde68a; border-radius: 8px; padding: 6px 12px; font-weight: 700; cursor: pointer;">+ הוסף שעת קבלה</button>
+        </div>
+        <div id="tt-oh-add-form" class="oh-form-grid" style="display: none; margin-bottom: 12px;">
+            <select id="tt-oh-course" class="oh-form-select">
+                ${allSelectableCourses.map(c => `<option value="${escapeHtml(c.code)}">${escapeHtml(c.name)} (${escapeHtml(c.code)})</option>`).join('')}
+            </select>
+            <input type="text" id="tt-oh-staff" class="oh-form-input" placeholder="שם מרצה / מתרגל">
+            <select id="tt-oh-role" class="oh-form-select">
+                <option value="מרצה">מרצה</option>
+                <option value="מתרגל/ת">מתרגל/ת</option>
+                <option value="מרצה אחראי">מרצה אחראי</option>
+                <option value="סגל">סגל הוראה</option>
+            </select>
+            <select id="tt-oh-day" class="oh-form-select">
+                ${OFFICE_HOURS_DAYS.map(d => `<option value="${d.dayIndex}">יום ${d.dayName}</option>`).join('')}
+            </select>
+            <input type="text" id="tt-oh-start" class="oh-form-input" value="12:30" placeholder="שעת התחלה (12:30)">
+            <input type="text" id="tt-oh-end" class="oh-form-input" value="13:30" placeholder="שעת סיום (13:30)">
+            <input type="text" id="tt-oh-location" class="oh-form-input" placeholder="חדר / זום">
+            <button type="button" id="btn-save-tt-oh" style="background: #f59e0b; color: #0f172a; border: none; border-radius: 6px; font-weight: 800; padding: 6px 12px; cursor: pointer; font-size: 0.78rem;">✓ שמור שעת קבלה</button>
+        </div>
+        <div class="oh-panel-grid">${cardsHtml || '<div style="color:#94a3b8;font-size:0.8rem;">אין קורסים פעילים עדיין.</div>'}</div>
+    `;
+
+    const toggleFormBtn = panel.querySelector('#btn-toggle-tt-oh-form');
+    const formEl = panel.querySelector('#tt-oh-add-form');
+    if (toggleFormBtn && formEl) {
+        toggleFormBtn.onclick = () => {
+            formEl.style.display = formEl.style.display === 'none' ? 'grid' : 'none';
+        };
+    }
+    panel.querySelectorAll('.btn-quick-course-oh').forEach(b => {
+        b.onclick = () => {
+            if (formEl) formEl.style.display = 'grid';
+            const sel = panel.querySelector('#tt-oh-course');
+            if (sel) sel.value = b.getAttribute('data-course-code');
+            const staffInp = panel.querySelector('#tt-oh-staff');
+            if (staffInp) staffInp.focus();
+        };
+    });
+    const saveBtn = panel.querySelector('#btn-save-tt-oh');
+    if (saveBtn) {
+        saveBtn.onclick = () => {
+            const cCode = panel.querySelector('#tt-oh-course')?.value;
+            const staffName = panel.querySelector('#tt-oh-staff')?.value || '';
+            const role = panel.querySelector('#tt-oh-role')?.value || 'מרצה';
+            const dayIndex = parseInt(panel.querySelector('#tt-oh-day')?.value || '0', 10);
+            const startTime = panel.querySelector('#tt-oh-start')?.value || '12:30';
+            const endTime = panel.querySelector('#tt-oh-end')?.value || '';
+            const location = panel.querySelector('#tt-oh-location')?.value || '';
+            if (!staffName.trim()) {
+                if (typeof showToastNotification === 'function') showToastNotification('נא להזין שם מרצה או מתרגל', 'warning');
+                return;
+            }
+            addCourseOfficeHour(cCode, { staffName, role, dayIndex, startTime, endTime, location });
+            if (typeof showToastNotification === 'function') showToastNotification('🕐 שעת הקבלה נוספה למערכת!', 'success');
+        };
+    }
+    panel.querySelectorAll('.btn-del-tt-oh').forEach(b => {
+        b.onclick = () => {
+            deleteCourseOfficeHour(b.getAttribute('data-course-code'), b.getAttribute('data-oh-id'));
+            if (typeof showToastNotification === 'function') showToastNotification('שעת הקבלה הוסרה', 'info');
+        };
+    });
+}
+window.renderTimetableOfficeHoursPanel = renderTimetableOfficeHoursPanel;
 
 function renderTodayTimetableBanner() {
     const banner = document.getElementById('timetable-today-banner');
@@ -29883,7 +30396,16 @@ window.resetAllNotionFilters = function() {
         });
     }
 
-    try { localStorage.removeItem('semestero_tasks_filters_v1'); } catch (e) {}
+    try {
+        localStorage.removeItem('semestero_tasks_filters_v1');
+        if (typeof getTaskFiltersUserStorageKey === 'function') {
+            localStorage.removeItem(getTaskFiltersUserStorageKey());
+        }
+        if (typeof gameState !== 'undefined' && gameState) {
+            gameState.taskFilterPreferences = null;
+            if (typeof saveState === 'function') saveState(true);
+        }
+    } catch (e) {}
     renderNotionTasksTable();
     if (typeof showToastNotification === 'function') {
         showToastNotification("🔄 כל הסינונים אופסו - כל המשימות מוצגות!", "success");

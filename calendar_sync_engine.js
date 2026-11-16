@@ -169,13 +169,17 @@
 
                 taskList.forEach(task => {
                     if (!task.dueDate) return;
-                    const cleanDueDate = task.dueDate.replace(/-/g, '');
+                    const rawDue = String(task.dueDate).trim();
+                    const dueMatch = rawDue.match(/^(\d{4}-\d{2}-\d{2})(?:[T\s](\d{2}:\d{2}))?/);
+                    const datePart = dueMatch ? dueMatch[1] : rawDue.split(/[T\s]/)[0];
+                    const cleanDueDate = datePart.replace(/-/g, '');
                     if (!/^\d{8}$/.test(cleanDueDate)) return;
                     countTasks++;
 
                     const isDone = Boolean(task.completed || task.status === 'done' || task.status === 'submitted');
                     const courseLabel = task.courseName || task.course || task.courseCode || 'כללי';
-                    const timeClean = task.dueTime ? CalendarSyncEngine.cleanTime(task.dueTime) : '235900';
+                    const extractedTime = task.dueTime || (dueMatch && dueMatch[2]) || '';
+                    const timeClean = extractedTime ? CalendarSyncEngine.cleanTime(extractedTime) : '235900';
                     const uid = `task-${task.id || cleanDueDate}@semesterome.local`;
 
                     icsLines.push(
@@ -185,7 +189,7 @@
                         `DTSTART;TZID=Asia/Jerusalem:${cleanDueDate}T${timeClean}`,
                         `DTEND;TZID=Asia/Jerusalem:${cleanDueDate}T${timeClean}`,
                         `SUMMARY:📝 ${isDone ? '[הושלם ✓] ' : 'הגשה: '}[${CalendarSyncEngine.escapeIcsText(courseLabel)}] ${CalendarSyncEngine.escapeIcsText(task.title || 'משימה')}`,
-                        `DESCRIPTION:${CalendarSyncEngine.escapeIcsText(`קורס: ${courseLabel}\nמשימה: ${task.title || ''}\nמועד הגשה: ${task.dueDate} ${task.dueTime || ''}\nסטטוס: ${isDone ? 'הושלם במלואו ✓' : 'ממתין להגשה'}\nסנכרון משימות Semestero ME`)}`,
+                        `DESCRIPTION:${CalendarSyncEngine.escapeIcsText(`קורס: ${courseLabel}\nמשימה: ${task.title || ''}\nמועד הגשה: ${datePart}${extractedTime ? ' ' + extractedTime : ''}\nסטטוס: ${isDone ? 'הושלם במלואו ✓' : 'ממתין להגשה'}\nסנכרון משימות Semestero ME`)}`,
                         'CATEGORIES:Homework,Tasks,Moodle',
                         `STATUS:${isDone ? 'COMPLETED' : 'CONFIRMED'}`
                     );

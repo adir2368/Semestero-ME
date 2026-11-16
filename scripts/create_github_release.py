@@ -17,9 +17,9 @@ ZIP_PATH = os.path.join(ROOT, "Semestero-ME-Windows-x64.zip")
 
 with open(os.path.join(ROOT, "package.json"), "r", encoding="utf-8") as f:
     pkg = json.load(f)
-VERSION = pkg.get("version", "2.13.13")
+VERSION = pkg.get("version", "2.13.14")
 TAG = f"v{VERSION}"
-NAME = f"Semestero ME v{VERSION} - Remove Non-Existent Physics 2 WebWork 1 Task"
+NAME = f"Semestero ME v{VERSION} - Office Hours, Timed Calendar Tasks & Persistent Task Filters"
 
 def get_github_token():
     try:
@@ -99,14 +99,20 @@ def main():
 
     body_notes = f"""# Semestero ME {TAG} Release Notes
 
-### 🧹 1. הסרת מטלה לא קיימת בקורס פיסיקה 2 (`app.js`, `auth_sync.js`, `preloaded_user_state.js`, `watch_companion.js`)
-- הסרת מטלת השווא הלא-קיימת `WebWork 1: חוק קולון ושדה חשמלי` (`114052_ww1`) מכל תבניות הקורסים, ממצב ההתחלה של פיסיקה 2 ומברירת המחדל של השעון.
-- הוספת ניקוי יזום ב-`recalculateStats()` (`app.js`) וב-`isTaskDeletedOrDismissedForSync()` (`auth_sync.js`) כך שהמשימה תוסר אוטומטית גם ממשתמשים ומכשירים שכבר שמרו אותה בזיכרון המקומי או בענן.
+### 🕐 1. שעות קבלה במערכת השעות ובדף הקורס (`app.js`, `index.html`, `styles.css`, `auth_sync.js`)
+- טעינה מוקדמת של שעות קבלה מאומתות מסילבוס מודל 26 (מכניקת מוצקים 2: פרופ׳ ספי גבלי ג׳ 12:30 קאהן 219 ופרופ׳ דן מרדכי ה׳ 12:30 קאהן 225; תרמודינמיקה 1: פרופ׳ לאוניד טרטקובסקי ג׳ 11:30 קאהן 209) + אפשרות הוספה ומחיקה חופשית לכל קורס עם סנכרון לענן.
+- שכבה אינטראקטיבית ניתנת להפעלה/כיבוי (`🕐 שעות קבלה`) ישירות בתוך עמודות מערכת השעות + פאנל ניהול מרוכז בתחתית המערכת וכרטיס עריכה בתוך פרטי הקורס.
 
-### 📦 2. קובצי הפצה ועדכון:
-- `Semestero-ME-Tablet-Clean.apk` (`com.technion.semestero.tablet`, `versionCode 108`, `versionName {VERSION}`, `v1+v2+v3` Signed)
-- `Semestero-ME.apk` (`com.technion.semestero`, `versionCode 108`, `versionName {VERSION}`, `v1+v2+v3` Signed, `targetSdk 34`)
-- `Semestero-ME-Watch.apk` (`versionCode 108`, `versionName {VERSION}`, `v1+v2+v3` Signed)
+### 📅 2. הכנסת משימות מתוזמנות ללוח השנה ולייצוא `.ics` (`app.js`, `calendar_sync_engine.js`)
+- נרמול תאריכי הגשה (`YYYY-MM-DD HH:MM` / `ISO` / `DD/MM/YYYY`) באמצעות `parseTaskDueDateParts()` כך שכל משימות מודל והמשימות הידניות בעלות שעה יופיעו ישירות בתאי החודש והשבוע בלוח השנה, בפירוט היום ובקובצי `.ics` ל-Google / Apple Calendar (כולל שעת ההגשה).
+
+### 💾 3. שמירת סינון משימות לכניסה הבאה (`app.js`, `auth_sync.js`)
+- שמירה ושחזור של כל רכיבי הסינון (סמסטר, סטטוס, סוג, קורסים מרובים, קטגוריות ארגונית++, מצב מיקוד, חיפוש ומצב סרגל הסינון) הן מקומית פר-משתמש והן בענן (`gameState.taskFilterPreferences`), תוך תיקון מרוץ הטעינה מול בניית רשימת הקורסים.
+
+### 📦 4. קובצי הפצה ועדכון:
+- `Semestero-ME-Tablet-Clean.apk` (`com.technion.semestero.tablet`, `versionCode 109`, `versionName {VERSION}`, `v1+v2+v3` Signed)
+- `Semestero-ME.apk` (`com.technion.semestero`, `versionCode 109`, `versionName {VERSION}`, `v1+v2+v3` Signed, `targetSdk 34`)
+- `Semestero-ME-Watch.apk` (`versionCode 109`, `versionName {VERSION}`, `v1+v2+v3` Signed)
 - `Semestero-ME-Windows-x64.zip` (Electron Desktop Client {VERSION})
 """
 

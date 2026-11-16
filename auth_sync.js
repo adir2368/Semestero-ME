@@ -408,6 +408,12 @@
                 return;
             }
             const rCourse = merged[code];
+            if (lCourse._officeHoursInitialized && !rCourse._officeHoursInitialized) {
+                rCourse.officeHours = Array.isArray(lCourse.officeHours) ? JSON.parse(JSON.stringify(lCourse.officeHours)) : [];
+                rCourse._officeHoursInitialized = true;
+            } else if (!rCourse._officeHoursInitialized && !Array.isArray(rCourse.officeHours) && Array.isArray(lCourse.officeHours)) {
+                rCourse.officeHours = JSON.parse(JSON.stringify(lCourse.officeHours));
+            }
             if (!Array.isArray(lCourse.tasks)) return;
             if (!Array.isArray(rCourse.tasks)) {
                 rCourse.tasks = lCourse.tasks
@@ -557,6 +563,11 @@
         remoteState.completedTaskRegistry = mergedCompleted;
         remoteState.dismissedTaskRegistry = mergedDismissed;
         remoteState.deletedTaskIds = mergedDeleted;
+        const localFilterTs = Number(safeLocal.taskFilterPreferences && safeLocal.taskFilterPreferences.updatedAt) || 0;
+        const remoteFilterTs = Number(remoteState.taskFilterPreferences && remoteState.taskFilterPreferences.updatedAt) || 0;
+        if (localFilterTs > remoteFilterTs && safeLocal.taskFilterPreferences) {
+            remoteState.taskFilterPreferences = JSON.parse(JSON.stringify(safeLocal.taskFilterPreferences));
+        }
         return remoteState;
     }
 
@@ -1845,6 +1856,9 @@
 
         // Force UI re-render across all application modules
         refreshAllAppViews() {
+            if (typeof window !== 'undefined' && typeof window.restoreNotionFilterPreferences === 'function') {
+                window.restoreNotionFilterPreferences(true);
+            }
             if (typeof notifyStateChanged === 'function') {
                 notifyStateChanged({ forceAll: true });
             } else {

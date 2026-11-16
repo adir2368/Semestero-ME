@@ -7464,6 +7464,165 @@ html.is-iphone .app-global-footer {
     color: #34d399;
 }
 
+/* Office Hours (שעות קבלה) Timetable & Course Modal Cards */
+.btn-office-hours-toggle {
+    background: rgba(245, 158, 11, 0.12);
+    border-color: rgba(245, 158, 11, 0.38);
+    color: #fbbf24;
+    transition: all 0.16s ease;
+}
+
+.btn-office-hours-toggle:not(.active) {
+    background: rgba(15, 23, 42, 0.55);
+    border-color: rgba(148, 163, 184, 0.25);
+    color: #94a3b8;
+}
+
+.timetable-office-hour-card {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.11), rgba(15, 23, 42, 0.85));
+    border: 1px dashed rgba(245, 158, 11, 0.48);
+    border-right: 3px solid #f59e0b;
+    border-radius: 10px;
+    padding: 9px 11px;
+    cursor: pointer;
+    transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.timetable-office-hour-card:hover {
+    transform: translateY(-1px);
+    border-color: #fbbf24;
+    background: rgba(245, 158, 11, 0.16);
+}
+
+.oh-card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+}
+
+.oh-badge {
+    font-size: 0.68rem;
+    font-weight: 800;
+    color: #fde68a;
+    background: rgba(245, 158, 11, 0.22);
+    padding: 2px 7px;
+    border-radius: 999px;
+}
+
+.oh-time {
+    font-size: 0.74rem;
+    font-weight: 700;
+    color: #fbbf24;
+    font-family: 'JetBrains Mono', monospace;
+}
+
+.oh-staff {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #f8fafc;
+}
+
+.oh-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    font-size: 0.72rem;
+    color: #cbd5e1;
+}
+
+.timetable-office-hours-panel {
+    margin-top: 18px;
+    background: rgba(15, 23, 42, 0.72);
+    border: 1px solid rgba(245, 158, 11, 0.28);
+    border-radius: 14px;
+    padding: 16px 18px;
+}
+
+.oh-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.oh-panel-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 10px;
+}
+
+.oh-course-box {
+    background: rgba(10, 15, 29, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.oh-course-box-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    font-weight: 800;
+    font-size: 0.86rem;
+    color: #f8fafc;
+}
+
+.oh-entry-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    background: rgba(245, 158, 11, 0.07);
+    border: 1px solid rgba(245, 158, 11, 0.22);
+    border-radius: 8px;
+    padding: 7px 9px;
+    font-size: 0.77rem;
+}
+
+.oh-form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(135px, 1fr));
+    gap: 8px;
+    margin-top: 10px;
+    padding: 10px;
+    background: rgba(2, 6, 23, 0.65);
+    border: 1px solid rgba(245, 158, 11, 0.25);
+    border-radius: 10px;
+}
+
+.oh-form-input, .oh-form-select {
+    background: #0f172a;
+    border: 1px solid rgba(148, 163, 184, 0.28);
+    color: #f8fafc;
+    border-radius: 6px;
+    padding: 6px 8px;
+    font-size: 0.78rem;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.course-office-hours-card {
+    margin-top: 10px;
+    background: rgba(245, 158, 11, 0.07);
+    border: 1px solid rgba(245, 158, 11, 0.32);
+    border-radius: 10px;
+    padding: 11px 13px;
+    text-align: right;
+    direction: rtl;
+}
+
 .timetable-free-state {
     display: flex;
     flex-direction: column;

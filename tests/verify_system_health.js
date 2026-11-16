@@ -996,6 +996,116 @@ async function run() {
             assert(result.tabBackHandled && result.tabIsPlanner, 'handleMobileBackAction must navigate back in tab history when no modal is open');
         });
 
+        await test('Test 23: Office Hours (Timetable + Course Modal), Timed Calendar Tasks & Persistent Task Filters (v2.13.14)', async () => {
+            const result = await cdp.eval(`(() => {
+                // 1. Timed task dueDate parsing & Calendar rendering + ICS export
+                const p1 = window.parseTaskDueDateParts('2026-11-18 23:59');
+                const p2 = window.parseTaskDueDateParts('2026-11-22T14:30:00Z');
+                const c53 = window.gameState.courses['034053'];
+                let calRenderedTimedTask = false;
+                let icsHasTimedTask = false;
+                if (c53) {
+                    const prevStatus = c53.status;
+                    c53.status = 'active';
+                    c53.tasks = c53.tasks || [];
+                    const testTaskId = 'test_timed_cal_task_v21314';
+                    c53.tasks.push({
+                        id: testTaskId,
+                        title: 'Timed Moodle HW Test',
+                        type: 'hw',
+                        dueDate: '2026-11-18 23:59',
+                        status: 'not_started',
+                        completed: false
+                    });
+                    if (typeof setActiveMainTab === 'function') setActiveMainTab('calendar');
+                    if (typeof renderFinalsCalendar === 'function') renderFinalsCalendar();
+                    const dayItems = (window.currentCalendarItemsByDate && window.currentCalendarItemsByDate['2026-11-18']) || [];
+                    calRenderedTimedTask = dayItems.some(it => it.isTaskEvent && it.taskId === testTaskId && it.dueTime === '23:59');
+                    if (window.CalendarSyncEngine && typeof window.CalendarSyncEngine.generateUnifiedICS === 'function') {
+                        const icsOut = window.CalendarSyncEngine.generateUnifiedICS({ includeTimetable: false, includeExams: false, includeTasks: true });
+                        icsHasTimedTask = icsOut.icsString.includes('Timed Moodle HW Test') && icsOut.icsString.includes('20261118T235900');
+                    }
+                    c53.tasks = c53.tasks.filter(t => t.id !== testTaskId);
+                    c53.status = prevStatus;
+                }
+
+                // 2. Office Hours Engine + Timetable Grid & Panel + Course Details Modal
+                const hasOhEngine = typeof window.OfficeHoursEngine !== 'undefined';
+                const defaults53 = window.OfficeHoursEngine ? window.OfficeHoursEngine.getCourseOfficeHours('034053') : [];
+                const addedCustom = window.OfficeHoursEngine ? window.OfficeHoursEngine.addCourseOfficeHour('114052', {
+                    staffName: 'ד"ר בדיקה',
+                    role: 'מרצה',
+                    dayIndex: 1,
+                    startTime: '14:30',
+                    endTime: '15:30',
+                    location: 'אולמן 301'
+                }) : false;
+                if (typeof setActiveMainTab === 'function') setActiveMainTab('timetable');
+                if (typeof renderTimetableGrid === 'function') renderTimetableGrid();
+                const ttGrid = document.getElementById('timetable-grid-container');
+                const ttPanel = document.getElementById('timetable-office-hours-panel');
+                const gridHasOh = !!(ttGrid && ttGrid.innerHTML.includes('timetable-office-hour-card'));
+                const panelHasCustom = !!(ttPanel && ttPanel.innerHTML.includes('ד"ר בדיקה'));
+                window.toggleOfficeHoursTimetable(false);
+                const gridHidesWhenToggled = !(document.getElementById('timetable-grid-container')?.innerHTML.includes('timetable-office-hour-card'));
+                window.toggleOfficeHoursTimetable(true);
+                if (typeof openCourseDetails === 'function') openCourseDetails('034053');
+                const modalOhCard = document.getElementById('course-modal-office-hours-card');
+                const modalHasOh = !!(modalOhCard && modalOhCard.innerHTML.includes('פרופ׳ ספי גבלי'));
+                const courseModalEl = document.getElementById('course-modal');
+                if (courseModalEl) courseModalEl.classList.remove('active');
+                const customList = window.OfficeHoursEngine.getCourseOfficeHours('114052');
+                customList.filter(o => o.staffName === 'ד"ר בדיקה').forEach(o => window.OfficeHoursEngine.deleteCourseOfficeHour('114052', o.id));
+                delete window.gameState.courses['114052']._officeHoursInitialized;
+
+                // 3. Persistent Task Filters across reload simulation
+                if (typeof setActiveMainTab === 'function') setActiveMainTab('tasks');
+                const hwTypeCb = document.querySelector('#notion-type-filter-popover .notion-filter-type-cb[data-type="exam"]');
+                const statusDoneCb = document.querySelector('#notion-status-filter-popover .notion-filter-opt-cb[data-status="done"]');
+                const focusBtn = document.getElementById('notion-focus-toggle-btn');
+                const searchEl = document.getElementById('search-tasks');
+                if (hwTypeCb) hwTypeCb.checked = false;
+                if (statusDoneCb) statusDoneCb.checked = false;
+                if (focusBtn) focusBtn.classList.add('active');
+                if (searchEl) searchEl.value = 'בדיקת סינון';
+                window.activeOrganitCategory = 'hw';
+                window.saveNotionFilterPreferences();
+
+                // Simulate fresh session DOM state and restore
+                if (hwTypeCb) hwTypeCb.checked = true;
+                if (statusDoneCb) statusDoneCb.checked = true;
+                if (focusBtn) focusBtn.classList.remove('active');
+                if (searchEl) searchEl.value = '';
+                window.activeOrganitCategory = 'all';
+                window._notionFiltersRestored = false;
+                window.restoreNotionFilterPreferences(true);
+
+                const restoredExamUnchecked = hwTypeCb ? hwTypeCb.checked === false : false;
+                const restoredDoneUnchecked = statusDoneCb ? statusDoneCb.checked === false : false;
+                const restoredFocusActive = focusBtn ? focusBtn.classList.contains('active') === true : false;
+                const restoredSearch = searchEl ? searchEl.value === 'בדיקת סינון' : false;
+                const restoredOrganit = window.activeOrganitCategory === 'hw';
+                const cloudHasFilterPrefs = !!(window.gameState && window.gameState.taskFilterPreferences && window.gameState.taskFilterPreferences.organitCategory === 'hw');
+
+                window.resetAllNotionFilters();
+                if (typeof setActiveMainTab === 'function') setActiveMainTab('curriculum');
+
+                return {
+                    p1, p2, calRenderedTimedTask, icsHasTimedTask,
+                    hasOhEngine, defaultsCount53: defaults53.length, addedCustom, gridHasOh, panelHasCustom, gridHidesWhenToggled, modalHasOh,
+                    restoredExamUnchecked, restoredDoneUnchecked, restoredFocusActive, restoredSearch, restoredOrganit, cloudHasFilterPrefs
+                };
+            })()`);
+
+            assert(result.p1.dateOnly === '2026-11-18' && result.p1.timeStr === '23:59', 'parseTaskDueDateParts must parse space-separated date+time');
+            assert(result.p2.dateOnly === '2026-11-22' && result.p2.timeStr === '14:30', 'parseTaskDueDateParts must parse ISO T-separated date+time');
+            assert(result.calRenderedTimedTask, 'Calendar must render timed Moodle tasks under YYYY-MM-DD with dueTime');
+            assert(result.icsHasTimedTask, 'CalendarSyncEngine.generateUnifiedICS must include timed Moodle tasks');
+            assert(result.hasOhEngine && result.defaultsCount53 >= 2 && result.addedCustom, 'OfficeHoursEngine must provide defaults and support adding custom entries: ' + JSON.stringify(result));
+            assert(result.gridHasOh && result.panelHasCustom && result.gridHidesWhenToggled && result.modalHasOh, 'Office Hours must render in Timetable grid, panel, toggle cleanly, and render in Course modal: ' + JSON.stringify(result));
+            assert(result.restoredExamUnchecked && result.restoredDoneUnchecked && result.restoredFocusActive && result.restoredSearch && result.restoredOrganit && result.cloudHasFilterPrefs, 'All task filters + focus + search + cloud state must persist and restore');
+        });
+
     } finally {
         console.log(`\n========================================================================`);
         console.log(`SUMMARY: ${passed} passed, ${failed} failed.`);
