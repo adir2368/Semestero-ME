@@ -1912,8 +1912,9 @@ let currentViewMode = 'flowchart'; // 'flowchart' | 'constellation' | 'grid'
 let currentHoveredCourseCode = null;
 let currentCalendarMonth = new Date().getMonth(); // 0-indexed current month
 let currentCalendarYear = new Date().getFullYear();
-let currentCalendarViewMode = 'month'; // 'month' | 'week'
+let currentCalendarViewMode = 'month'; // 'month' | 'week' | 'day'
 let currentCalendarWeekStart = null;
+let currentCalendarDayDate = new Date();
 let currentRunwayView = 'calendar';
 
 function getSundayOfWeek(d) {
@@ -21609,13 +21610,51 @@ function setupFinalsMode() {
         });
     }
 
-    // 3. Calendar Navigation (Month & Single Week)
+    // 3. Calendar Navigation (Month, Single Week & Single Day)
+    const syncCalViewToggleButtons = () => {
+        const bM = document.getElementById("btn-view-month");
+        const bW = document.getElementById("btn-view-week");
+        const bD = document.getElementById("btn-view-day");
+        if (bM) bM.classList.toggle("active", currentCalendarViewMode === 'month');
+        if (bW) bW.classList.toggle("active", currentCalendarViewMode === 'week');
+        if (bD) bD.classList.toggle("active", currentCalendarViewMode === 'day');
+    };
+
+    window.setCalendarViewMode = function(mode, optionalDateStr) {
+        const nextMode = (mode === 'week' || mode === 'day') ? mode : 'month';
+        currentCalendarViewMode = nextMode;
+        if (optionalDateStr && /^\d{4}-\d{2}-\d{2}$/.test(String(optionalDateStr))) {
+            const [yy, mm, dd] = String(optionalDateStr).split('-').map(Number);
+            const targetDate = new Date(yy, mm - 1, dd);
+            currentCalendarDayDate = targetDate;
+            currentCalendarMonth = targetDate.getMonth();
+            currentCalendarYear = targetDate.getFullYear();
+            currentCalendarWeekStart = getSundayOfWeek(targetDate);
+        } else if (nextMode === 'week' && !currentCalendarWeekStart) {
+            const now = new Date();
+            currentCalendarWeekStart = (now.getMonth() === currentCalendarMonth && now.getFullYear() === currentCalendarYear)
+                ? getSundayOfWeek(now)
+                : getSundayOfWeek(new Date(currentCalendarYear, currentCalendarMonth, 1));
+        } else if (nextMode === 'day' && !currentCalendarDayDate) {
+            currentCalendarDayDate = new Date();
+        }
+        syncCalViewToggleButtons();
+        renderFinalsCalendar();
+    };
+
     const prevBtn = document.getElementById("cal-nav-prev");
     const nextBtn = document.getElementById("cal-nav-next");
     const todayBtn = document.getElementById("cal-nav-today");
     if (prevBtn) {
         prevBtn.addEventListener("click", () => {
-            if (currentCalendarViewMode === 'week') {
+            if (currentCalendarViewMode === 'day') {
+                if (!currentCalendarDayDate) currentCalendarDayDate = new Date();
+                currentCalendarDayDate = new Date(currentCalendarDayDate);
+                currentCalendarDayDate.setDate(currentCalendarDayDate.getDate() - 1);
+                currentCalendarMonth = currentCalendarDayDate.getMonth();
+                currentCalendarYear = currentCalendarDayDate.getFullYear();
+                currentCalendarWeekStart = getSundayOfWeek(currentCalendarDayDate);
+            } else if (currentCalendarViewMode === 'week') {
                 if (!currentCalendarWeekStart) currentCalendarWeekStart = getSundayOfWeek(new Date(currentCalendarYear, currentCalendarMonth, 1));
                 currentCalendarWeekStart.setDate(currentCalendarWeekStart.getDate() - 7);
                 currentCalendarMonth = currentCalendarWeekStart.getMonth();
@@ -21632,7 +21671,14 @@ function setupFinalsMode() {
     }
     if (nextBtn) {
         nextBtn.addEventListener("click", () => {
-            if (currentCalendarViewMode === 'week') {
+            if (currentCalendarViewMode === 'day') {
+                if (!currentCalendarDayDate) currentCalendarDayDate = new Date();
+                currentCalendarDayDate = new Date(currentCalendarDayDate);
+                currentCalendarDayDate.setDate(currentCalendarDayDate.getDate() + 1);
+                currentCalendarMonth = currentCalendarDayDate.getMonth();
+                currentCalendarYear = currentCalendarDayDate.getFullYear();
+                currentCalendarWeekStart = getSundayOfWeek(currentCalendarDayDate);
+            } else if (currentCalendarViewMode === 'week') {
                 if (!currentCalendarWeekStart) currentCalendarWeekStart = getSundayOfWeek(new Date(currentCalendarYear, currentCalendarMonth, 1));
                 currentCalendarWeekStart.setDate(currentCalendarWeekStart.getDate() + 7);
                 currentCalendarMonth = currentCalendarWeekStart.getMonth();
@@ -21653,33 +21699,22 @@ function setupFinalsMode() {
             currentCalendarMonth = now.getMonth();
             currentCalendarYear = now.getFullYear();
             currentCalendarWeekStart = getSundayOfWeek(now);
+            currentCalendarDayDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
             renderFinalsCalendar();
         });
     }
 
     const btnViewMonth = document.getElementById("btn-view-month");
     const btnViewWeek = document.getElementById("btn-view-week");
-    if (btnViewMonth && btnViewWeek) {
-        btnViewMonth.addEventListener("click", () => {
-            currentCalendarViewMode = 'month';
-            btnViewMonth.classList.add("active");
-            btnViewWeek.classList.remove("active");
-            renderFinalsCalendar();
-        });
-        btnViewWeek.addEventListener("click", () => {
-            currentCalendarViewMode = 'week';
-            btnViewWeek.classList.add("active");
-            btnViewMonth.classList.remove("active");
-            if (!currentCalendarWeekStart) {
-                const now = new Date();
-                if (now.getMonth() === currentCalendarMonth && now.getFullYear() === currentCalendarYear) {
-                    currentCalendarWeekStart = getSundayOfWeek(now);
-                } else {
-                    currentCalendarWeekStart = getSundayOfWeek(new Date(currentCalendarYear, currentCalendarMonth, 1));
-                }
-            }
-            renderFinalsCalendar();
-        });
+    const btnViewDay = document.getElementById("btn-view-day");
+    if (btnViewMonth) {
+        btnViewMonth.addEventListener("click", () => window.setCalendarViewMode('month'));
+    }
+    if (btnViewWeek) {
+        btnViewWeek.addEventListener("click", () => window.setCalendarViewMode('week'));
+    }
+    if (btnViewDay) {
+        btnViewDay.addEventListener("click", () => window.setCalendarViewMode('day'));
     }
 
     const addCalEventBtn = document.getElementById("btn-add-cal-event");
@@ -23220,7 +23255,9 @@ function renderFinalsCalendar() {
 
     // Toggle grid view-mode class
     const isWeekView = (currentCalendarViewMode === 'week');
+    const isDayView = (currentCalendarViewMode === 'day');
     grid.classList.toggle("is-week-view", isWeekView);
+    grid.classList.toggle("is-day-view", isDayView);
 
     // Days of week header: Sunday through Friday (6 columns - SATURDAY EXCLUDED)
     const daysOfWeek = isMobile
@@ -23234,7 +23271,103 @@ function renderFinalsCalendar() {
     const todayDay = now.getDate();
     const todayStr = `${todayYear}-${String(todayMonth + 1).padStart(2, '0')}-${String(todayDay).padStart(2, '0')}`;
 
-    if (isWeekView) {
+    if (isDayView) {
+        // --- SINGLE DAY VIEW MODE ---
+        if (!currentCalendarDayDate || isNaN(currentCalendarDayDate.getTime())) {
+            currentCalendarDayDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        }
+        const dObj = new Date(currentCalendarDayDate);
+        const dYear = dObj.getFullYear();
+        const dMonth = dObj.getMonth();
+        const dDay = dObj.getDate();
+        const dateStr = `${dYear}-${String(dMonth + 1).padStart(2, '0')}-${String(dDay).padStart(2, '0')}`;
+        const isToday = (dateStr === todayStr);
+        const hebrewFullDays = ["יום ראשון", "יום שני", "יום שלישי", "יום רביעי", "יום חמישי", "יום שישי", "יום שבת"];
+        const hebrewMonthsFull = ["ינואר", "פברואר", "מרץ", "אפריל", "מאי", "יוני", "יולי", "אוגוסט", "ספטמבר", "אוקטובר", "נובמבר", "דצמבר"];
+        const dayTitleName = hebrewFullDays[dObj.getDay()] || "";
+        const monthHe = hebrewMonthsFull[dMonth] || monthNames[dMonth];
+        if (titleEl) {
+            titleEl.innerText = `${dayTitleName}, ${dDay} ${monthNames[dMonth]} ${dYear}`;
+        }
+
+        const dayItems = itemsByDate[dateStr] || [];
+        const sortedDayItems = [...dayItems].sort((a, b) => {
+            const order = (it) => it.isTechnionEvent ? 1 : it.isExamEvent ? 2 : it.isTaskEvent ? 3 : it.isPersonalEvent ? 4 : 5;
+            return order(a) - order(b);
+        });
+
+        const dayCard = document.createElement("div");
+        dayCard.className = "cal-day-view-card";
+        dayCard.dataset.date = dateStr;
+
+        const schedule = (typeof getActiveTimetableSchedule === 'function') ? getActiveTimetableSchedule() : null;
+        const ttDay = (schedule && Array.isArray(schedule.days)) ? schedule.days.find(d => d.dayIndex === dObj.getDay()) : null;
+        const classesList = (ttDay && Array.isArray(ttDay.classes)) ? ttDay.classes : [];
+
+        let classesHtml = '';
+        if (classesList.length > 0) {
+            classesHtml = `
+                <div>
+                    <div class="cal-day-view-section-title">📚 שיעורים במערכת השעות (${classesList.length})</div>
+                    <div style="display: flex; flex-direction: column; gap: 6px;">
+                        ${classesList.map(cls => {
+                            const cTime = escapeHtml(cls.time || (cls.startTime && cls.endTime ? `${cls.startTime}-${cls.endTime}` : ''));
+                            const cTitle = escapeHtml(cls.courseName || cls.name || cls.courseCode || 'שיעור');
+                            const cType = cls.type ? `<span style="color:#94a3b8;font-size:0.74rem;">${escapeHtml(cls.type)}</span>` : '';
+                            const cLoc = cls.room ? `<span style="color:#64748b;font-size:0.74rem;">📍 ${escapeHtml(cls.room)}</span>` : '';
+                            return `
+                                <div class="cal-day-schedule-slot">
+                                    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                                        <strong>${cTitle}</strong> ${cType} ${cLoc}
+                                    </div>
+                                    <span class="cal-day-schedule-time">${cTime}</span>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        const eventsCell = createCalendarDayCell(dateStr, dDay, isToday, itemsByDate, false, { isDayView: true, dateObj: dObj });
+        const eventsListEl = eventsCell.querySelector('.cal-events-list');
+
+        dayCard.innerHTML = `
+            <div class="cal-day-view-header">
+                <div class="cal-day-view-title">
+                    <span>📍 ${dayTitleName}, ${dDay} ב${monthHe} ${dYear}</span>
+                    ${isToday ? `<span class="oh-badge" style="background:rgba(56,189,248,0.18);color:#38bdf8;border:1px solid rgba(56,189,248,0.4);">היום</span>` : ''}
+                </div>
+                <div style="display:flex;gap:8px;align-items:center;">
+                    <button type="button" class="btn btn-sm btn-outline" id="btn-day-view-add-event" style="color:#38bdf8;border-color:rgba(56,189,248,0.4);">➕ הוסף אירוע ליום זה</button>
+                </div>
+            </div>
+            ${classesHtml}
+            <div>
+                <div class="cal-day-view-section-title">🗓️ משימות, מבחנים ואירועים (${sortedDayItems.length})</div>
+                <div class="cal-day-view-events" id="cal-day-view-events-host"></div>
+            </div>
+        `;
+
+        const host = dayCard.querySelector('#cal-day-view-events-host');
+        if (host) {
+            if (sortedDayItems.length === 0) {
+                host.innerHTML = `<div style="padding:14px;border-radius:8px;background:rgba(30,41,59,0.45);color:#94a3b8;font-size:0.84rem;text-align:center;">אין משימות או אירועים מתוזמנים ליום זה ✨</div>`;
+            } else if (eventsListEl) {
+                host.appendChild(eventsListEl);
+            }
+        }
+
+        const addDayViewBtn = dayCard.querySelector('#btn-day-view-add-event');
+        if (addDayViewBtn) {
+            addDayViewBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                openCalendarDayModal(dateStr);
+            });
+        }
+
+        grid.appendChild(dayCard);
+    } else if (isWeekView) {
         // --- SINGLE WEEK VIEW MODE ---
         if (!currentCalendarWeekStart) {
             currentCalendarWeekStart = getSundayOfWeek(now);
@@ -23278,7 +23411,7 @@ function renderFinalsCalendar() {
             const dateStr = `${dYear}-${String(dMonth + 1).padStart(2, '0')}-${String(dDay).padStart(2, '0')}`;
             const isToday = (dateStr === todayStr);
 
-            const cell = createCalendarDayCell(dateStr, dDay, isToday, itemsByDate, false);
+            const cell = createCalendarDayCell(dateStr, dDay, isToday, itemsByDate, false, { isWeekView: true, dateObj: dObj });
             grid.appendChild(cell);
         });
 
@@ -23340,7 +23473,7 @@ function renderFinalsCalendar() {
 }
 
 // Builds an interactive calendar day cell with all event pills and listeners
-function createCalendarDayCell(dateStr, dayNum, isToday, itemsByDate, isOtherMonth) {
+function createCalendarDayCell(dateStr, dayNum, isToday, itemsByDate, isOtherMonth, opts = {}) {
     const dayItems = itemsByDate[dateStr] || [];
     const hasActiveExam = dayItems.some(it => it.isExamEvent && !it.isPassed);
     const hasPassedExam = dayItems.some(it => it.isExamEvent && it.isPassed);
@@ -23358,8 +23491,30 @@ function createCalendarDayCell(dateStr, dayNum, isToday, itemsByDate, isOtherMon
     cell.className = cellClasses.join(" ");
     cell.dataset.date = dateStr;
 
-    const todayBadgeHtml = '';
+    let weekMobileHeaderHtml = '';
+    if (opts && opts.isWeekView) {
+        const heDays = ["יום ראשון", "יום שני", "יום שלישי", "יום רביעי", "יום חמישי", "יום שישי", "יום שבת"];
+        const dObj = opts.dateObj || new Date(dateStr + 'T00:00:00');
+        const dayTitle = heDays[dObj.getDay()] || '';
+        const dateShort = `${dObj.getDate()}/${dObj.getMonth() + 1}`;
+        weekMobileHeaderHtml = `
+            <div class="cal-week-mobile-day-header">
+                <div class="cal-week-mobile-day-title">
+                    <span>${dayTitle}</span>
+                    <span style="opacity:0.75;font-family:var(--font-mono);">${dateShort}</span>
+                    ${isToday ? `<span class="oh-badge" style="background:rgba(56,189,248,0.18);color:#38bdf8;border:1px solid rgba(56,189,248,0.4);">היום</span>` : ''}
+                </div>
+                <div class="cal-week-mobile-day-meta">
+                    <span style="font-size:0.72rem;color:#94a3b8;font-family:var(--font-mono);">${dayItems.length > 0 ? dayItems.length + ' פריטים' : ''}</span>
+                    <button type="button" class="cal-mobile-open-day-btn" data-date="${dateStr}" title="פתח תצוגת יום">📍 יום</button>
+                    <button type="button" class="cal-mobile-open-day-btn btn-add-day-item" data-date="${dateStr}" title="הוסף אירוע ליום זה">+</button>
+                </div>
+            </div>
+        `;
+    }
+
     let cellHtml = `
+        ${weekMobileHeaderHtml}
         <div class="cal-day-num">
             <span class="cal-day-number-label ${isToday ? 'is-today-num' : ''}">${dayNum}</span>
         </div>
@@ -23378,6 +23533,10 @@ function createCalendarDayCell(dateStr, dayNum, isToday, itemsByDate, isOtherMon
         };
         return order(a) - order(b);
     });
+
+    if (opts && opts.isWeekView && sortedDayItems.length === 0) {
+        cellHtml += `<div class="cal-week-empty-msg">אין אירועים או הגשות מתוזמנות</div>`;
+    }
 
     sortedDayItems.forEach(item => {
         if (item.isTechnionEvent) {
@@ -23443,8 +23602,7 @@ function createCalendarDayCell(dateStr, dayNum, isToday, itemsByDate, isOtherMon
     // Clicking anywhere on the day cell opens the Day Details Modal!
     cell.addEventListener("click", (e) => {
         if (e.target.closest(".btn-del-cal-event") ||
-            e.target.closest(".cal-personal-check") ||
-            e.target.closest(".cal-task-check") ||
+            e.target.closest(".cal-mobile-open-day-btn") ||
             e.target.closest(".exam-event") ||
             e.target.closest(".task-event")) {
             return;
@@ -23452,14 +23610,24 @@ function createCalendarDayCell(dateStr, dayNum, isToday, itemsByDate, isOtherMon
         openCalendarDayModal(dateStr);
     });
 
+    // Quick switch into Single Day View from Week View day pill button
+    cell.querySelectorAll(".cal-mobile-open-day-btn:not(.btn-add-day-item)").forEach(dayBtn => {
+        dayBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            const dStr = dayBtn.dataset.date || dateStr;
+            if (typeof window.setCalendarViewMode === 'function') {
+                window.setCalendarViewMode('day', dStr);
+            }
+        });
+    });
+
     // Add item button listener -> Open Day Details Modal
-    const addBtn = cell.querySelector(".btn-add-day-item");
-    if (addBtn) {
+    cell.querySelectorAll(".btn-add-day-item").forEach(addBtn => {
         addBtn.addEventListener("click", (e) => {
             e.stopPropagation();
             openCalendarDayModal(dateStr);
         });
-    }
+    });
 
     // Personal event delete listener
     cell.querySelectorAll(".btn-del-cal-event").forEach(delBtn => {
@@ -23475,19 +23643,12 @@ function createCalendarDayCell(dateStr, dayNum, isToday, itemsByDate, isOtherMon
         });
     });
 
-    // Personal event checkbox listener
-    cell.querySelectorAll(".cal-personal-check").forEach(checkSpan => {
-        checkSpan.addEventListener("click", (e) => {
+    // Clicking a personal event always opens it inside the Day Details Modal (never marks completed)
+    cell.querySelectorAll(".cal-event-pill.personal-event").forEach(pill => {
+        pill.addEventListener("click", (e) => {
+            if (e.target.closest(".btn-del-cal-event")) return;
             e.stopPropagation();
-            const peId = checkSpan.dataset.peId;
-            if (!peId) return;
-            const targetEv = (gameState.customCalendarEvents || []).find(it => it.id === peId);
-            if (targetEv) {
-                targetEv.completed = !targetEv.completed;
-                saveState();
-                notifyStateChanged();
-                renderFinalsCalendar();
-            }
+            openCalendarDayModal(dateStr);
         });
     });
 
@@ -23510,52 +23671,25 @@ function createCalendarDayCell(dateStr, dayNum, isToday, itemsByDate, isOtherMon
         });
     });
 
-    // Task event click listener -> Open task side peek
+    // Task event click listener (including its icon) -> Open task side peek, never mark completed on click
     cell.querySelectorAll(".cal-event-pill.task-event").forEach(pill => {
         pill.addEventListener("click", (e) => {
             e.stopPropagation();
             const cCode = pill.dataset.courseCode;
             const tId = pill.dataset.taskId;
-            if (cCode && tId) openTaskSidePeek(cCode, tId);
+            if (cCode && tId && typeof openTaskSidePeek === 'function') {
+                openTaskSidePeek(cCode, tId);
+            } else if (cCode) {
+                openCourseDetails(cCode);
+            }
         });
     });
 
-    // Task checkbox listener inside calendar pill -> Toggle done / not_started
-    cell.querySelectorAll(".cal-task-check").forEach(checkSpan => {
-        checkSpan.addEventListener("click", (e) => {
-            e.stopPropagation();
-            const cCode = checkSpan.dataset.courseCode;
-            const tId = checkSpan.dataset.taskId;
-            const course = gameState.courses[cCode];
-            if (!course) return;
-            const task = (course.tasks || []).find(t => t.id === tId);
-            if (!task) return;
-            const isDone = task.completed || task.status === 'completed' || task.status === 'done';
-            toggleTaskStatusInState(cCode, tId, isDone ? 'not_started' : 'done');
-            saveState();
-            renderFinalsCalendar();
-            renderNotionTasksTable();
-            renderExamGapRunway();
-            renderUI();
-        });
-    });
-
-    // Toggle completed listener for past exams
-    cell.querySelectorAll(".cal-event-pill.past-exam").forEach(pill => {
+    // Clicking a past exam pill or Technion calendar item opens the Day Details Modal (never toggles completed)
+    cell.querySelectorAll(".cal-event-pill.past-exam, .cal-event-pill.technion-event").forEach(pill => {
         pill.addEventListener("click", (e) => {
             e.stopPropagation();
-            const peId = pill.dataset.peId;
-            const peItem = gameState.pastExamSchedule.find(p => p.id === peId);
-            if (peItem) {
-                peItem.completed = !peItem.completed;
-                if (peItem.completed) {
-                    addXp(40);
-                } else {
-                    addXp(-40);
-                }
-                saveState();
-                renderFinalsCalendar();
-            }
+            openCalendarDayModal(dateStr);
         });
     });
 
@@ -23791,11 +23925,11 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.11.16-v2.13.15",
-    version: "2.13.15",
-    build: "20261116_02",
-    date: "2026-11-16 22:12",
-    description: "v2.13.15: החלת 10 כללי הטיפוגרפיה והליטוש החזותי בכל ממשק Semestero ME — שמירת רוחב Bold בטאבים למניעת קפיצות, מרכוז אופטי עם text-box-trim, הפרדת קו תחתי בקישורים, ריווח תגי sup, כותרות רספונסיביות ב-clamp(), ראשי תיבות ב-all-small-caps, מרכאות טיפוגרפיות, קיצור שמות קבצים באמצע עם שימור סיומת, מיקוף אוטומטי והגבלת כותרות כרטיסים ל-2 שורות (ADR-125)."
+    code: "REV-2026.11.16-v2.13.16",
+    version: "2.13.16",
+    build: "20261116_03",
+    date: "2026-11-16 22:35",
+    description: "v2.13.16: תיקון כפתור חזור במובייל ובאפליקציית אנדרואיד (Predictive Back + User-Activated History + סגירת תצוגה צדדית), הזזת הודעות סנכרון מעל הסרגל התחתון ומניעת סנכרון סרק חוזר, תצוגת שבוע קריאה במובייל, תצוגת יום ייעודית חדשה (📍 יום), ופתיחת פריטי לוח שנה בלחיצה במקום סימון כהושלם (ADR-126)."
 };
 window.APP_VERSION = APP_CURRENT_REVISION.version;
 

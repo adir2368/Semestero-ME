@@ -1142,6 +1142,67 @@ async function run() {
             assert(stylesCss.includes('font-feature-settings: "tnum" 1'), 'Global monospace/tabular digits must enable tnum');
         });
 
+        await test('Test 25: Mobile Back History Shield, Toast Clearance, Day View & Safe Calendar Clicks (v2.13.16)', async () => {
+            const manifestXml = fs.readFileSync(path.join(__dirname, '..', 'android', 'app', 'src', 'main', 'AndroidManifest.xml'), 'utf8');
+            const stylesCss = fs.readFileSync(path.join(__dirname, '..', 'styles.css'), 'utf8');
+            const uiEnhJs = fs.readFileSync(path.join(__dirname, '..', 'ui_enhancements.js'), 'utf8');
+
+            assert(manifestXml.includes('enableOnBackInvokedCallback="false"'), 'AndroidManifest must opt out of Predictive Back to keep OnBackPressedDispatcher intact');
+            assert(stylesCss.includes('calc(96px + env(safe-area-inset-bottom'), 'Mobile .ast-toast must clear bottom nav bar and footer');
+            assert(stylesCss.includes('finals-calendar-grid.is-day-view'), 'styles.css must define Calendar Day View rules');
+            assert(uiEnhJs.includes('armActiveHistoryEntry'), 'MobileBackNavigationManager must arm history on active user gesture');
+
+            const res = await cdp.eval(`(() => {
+                if (typeof window.setActiveMainTab === 'function') window.setActiveMainTab('calendar');
+                const dayBtn = document.getElementById('btn-view-day');
+                if (dayBtn) dayBtn.click();
+                const grid = document.getElementById('finals-calendar-grid');
+                const hasDayClass = !!(grid && grid.classList.contains('is-day-view'));
+                const dayCardCount = document.querySelectorAll('.cal-day-view-card').length;
+
+                // Switch to week view and ensure clicking a task or check span opens peek WITHOUT marking completed
+                if (typeof window.setCalendarViewMode === 'function') window.setCalendarViewMode('week');
+                const weekTask = Array.from(document.querySelectorAll('.cal-event-pill.task-event')).find(p => p.dataset && p.dataset.courseCode && p.dataset.taskId);
+                let completedBefore = null;
+                let completedAfter = null;
+                let peekOpened = false;
+                if (weekTask) {
+                    const cCode = weekTask.dataset.courseCode;
+                    const tId = weekTask.dataset.taskId;
+                    const course = window.gameState && window.gameState.courses && window.gameState.courses[cCode];
+                    const task = course && (course.tasks || []).find(t => t.id === tId);
+                    completedBefore = !!(task && (task.completed || task.status === 'done'));
+                    const iconTarget = weekTask.querySelector('.cal-task-check') || weekTask;
+                    iconTarget.click();
+                    completedAfter = !!(task && (task.completed || task.status === 'done'));
+                    const peekEl = document.getElementById('task-side-peek');
+                    peekOpened = !!(peekEl && peekEl.classList.contains('active'));
+                }
+
+                // Back button must close task side peek BEFORE leaving calendar tab
+                const backClosedPeek = (typeof window.handleMobileBackAction === 'function') ? window.handleMobileBackAction() : false;
+                const peekAfterBack = !!(document.getElementById('task-side-peek') && document.getElementById('task-side-peek').classList.contains('active'));
+
+                // Next Back must step back from calendar tab (never exit at non-root)
+                const backLeftTab = (typeof window.handleMobileBackAction === 'function') ? window.handleMobileBackAction() : false;
+
+                return {
+                    hasDayBtn: !!dayBtn,
+                    hasDayClass,
+                    dayCardCount,
+                    hadWeekTask: !!weekTask,
+                    completedUnchanged: completedBefore === completedAfter,
+                    peekOpened,
+                    backClosedPeek,
+                    peekAfterBack,
+                    backLeftTab
+                };
+            })()`);
+            assert(res.hasDayBtn && res.hasDayClass && res.dayCardCount === 1, 'Calendar Day View toggle & card must render: ' + JSON.stringify(res));
+            assert(!res.hadWeekTask || (res.completedUnchanged && res.peekOpened && res.backClosedPeek && !res.peekAfterBack), 'Clicking calendar task must open peek WITHOUT marking completed, and Back must close peek: ' + JSON.stringify(res));
+            assert(res.backLeftTab === true, 'Back button from calendar must navigate back within app: ' + JSON.stringify(res));
+        });
+
     } finally {
         console.log(`\n========================================================================`);
         console.log(`SUMMARY: ${passed} passed, ${failed} failed.`);

@@ -3100,7 +3100,10 @@
                                             } catch (e) {}
                                         }
                                         this.refreshAllAppViews();
-                                        if (typeof showHudToast === 'function') {
+                                        const nowTs = Date.now();
+                                        const silentCooldownOk = !window._lastRealtimeSyncToastAt || (nowTs - window._lastRealtimeSyncToastAt >= 45000);
+                                        if (silentCooldownOk && typeof showHudToast === 'function') {
+                                            window._lastRealtimeSyncToastAt = nowTs;
                                             showHudToast('סונכרן בזמן אמת מענן Semestero ME ☁️', 'info');
                                         }
                                     } finally {
@@ -3340,13 +3343,27 @@
                 }
             }
 
-            // Ensure Attendance state is packaged into cloud payload
+            // Ensure Attendance state is packaged into cloud payload without mutating updatedAt on idle syncs
             if (window.AttendanceHub && typeof window.AttendanceHub.records === 'object') {
+                const nextRecords = window.AttendanceHub.records || {};
+                const nextQueue = window.AttendanceHub.catchupQueue || [];
+                const nextQuotas = window.AttendanceHub.quotas || {};
+                const prevAtt = state.attendance || {};
+                const prevSignature = JSON.stringify({
+                    records: prevAtt.records || {},
+                    catchupQueue: prevAtt.catchupQueue || [],
+                    quotas: prevAtt.quotas || {}
+                });
+                const nextSignature = JSON.stringify({
+                    records: nextRecords,
+                    catchupQueue: nextQueue,
+                    quotas: nextQuotas
+                });
                 state.attendance = {
-                    records: window.AttendanceHub.records || {},
-                    catchupQueue: window.AttendanceHub.catchupQueue || [],
-                    quotas: window.AttendanceHub.quotas || {},
-                    updatedAt: Date.now()
+                    records: nextRecords,
+                    catchupQueue: nextQueue,
+                    quotas: nextQuotas,
+                    updatedAt: (prevSignature === nextSignature && prevAtt.updatedAt) ? prevAtt.updatedAt : Date.now()
                 };
             }
 

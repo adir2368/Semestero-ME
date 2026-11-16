@@ -19,7 +19,7 @@ with open(os.path.join(ROOT, "package.json"), "r", encoding="utf-8") as f:
     pkg = json.load(f)
 VERSION = pkg.get("version", "2.13.15")
 TAG = f"v{VERSION}"
-NAME = f"Semestero ME v{VERSION} - UI Typography Craft & Monospace Digits"
+NAME = f"Semestero ME v{VERSION} - Mobile Back Fix, Readable Calendar & Day View"
 
 def get_github_token():
     try:
@@ -99,17 +99,15 @@ def main():
 
     body_notes = f"""# Semestero ME {TAG} Release Notes
 
-### ✍️ 1. ליטוש טיפוגרפי מקיף + ספרות מונוספייס (`styles.css`, `index.html`, `app.js`)
-- **ספרות מונוספייס (`tabular-nums` + `JetBrains Mono`)**: יישור אחיד של כל הספרות במערכת (`font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1`) וגופן `JetBrains Mono` ממוקד במדדי ביצועים, טבלאות ציונים, תגים מספריים, שעות, ימי לוח שנה, שדות מספר ומוני מטלות למניעת ריצוד אופקי.
-- **מניעת קפיצות פריסה בטאבים**: שמירת רוחב מצב מודגש מראש (`display: inline-grid` + `::after` מוסתר עם `data-text`) בלשוניות הניווט ובבורר הימים במערכת השעות.
-- **מרכוז אופטי וריווח שורות**: `text-box-trim: trim-both` + `text-box-edge: cap alphabetic` בכפתורים ותגיות, `text-underline-offset: 0.2em` בקישורים, וייצוב תגי `sup` (`line-height: 0; top: -0.5em`).
-- **כותרות רספונסיביות, ראשי תיבות ומיקוף**: כותרות ראשיות וכותרות מודאל ב-`clamp()`, ראשי תיבות ב-`all-small-caps`, ו-`hyphens: auto` בבלוקי תוכן צרים.
-- **קיצור שמות קבצים באמצע, מרכאות טיפוגרפיות וקיבוע כרטיסים**: שמירת סיומת `.pdf` בקובצי סילבוס (`formatMiddleTruncatedFileNameHtml`), המרת מרכאות טיפוגרפיות בטקסט UI, וקיבוע כותרות כרטיסים לעד 2 שורות (`-webkit-line-clamp: 2`).
+### 📱 1. תיקון ניווט חזור, הודעות סנכרון ושיפורי לוח שנה במובייל
+- **ניווט חזור אמין במובייל ובאפליקציית אנדרואיד**: הוספת `android:enableOnBackInvokedCallback="false"` ב-`AndroidManifest.xml`, סינון לחיצות כפולות ב-`MainActivity.java`, סגירת `#task-side-peek` ו-`#calendar-day-modal` בחזור, ושמירת רשומות היסטוריה ביוזמת משתמש כדי ש-PWA בדפדפני Chromium לא ייצא בלחיצת חזור ראשונה.
+- **ללא הסתרת הסרגל התחתון**: הזזת הודעות `.ast-toast` במובייל מעל לסרגל הניווט התחתון (`bottom: calc(96px + env(safe-area-inset-bottom))`) ומניעת סנכרון סרק חוזר של `attendance.updatedAt` והקפצת הודעות Realtime חוזרות.
+- **תצוגת שבוע קריאה ותצוגת יום ייעודית (`📍 יום`) בלוח השנה**: מעבר במובייל לתצוגת כרטיסי יום נערמים בשבוע ללא קיצוץ ל-`...`, הוספת מצב תצוגת יום ייעודית עם מערכת שעות ורשימת משימות, ופתיחת פרטי משימה/אירוע בלחיצה במקום סימון כהושלם.
 
 ### 📦 2. קובצי הפצה ועדכון:
-- `Semestero-ME-Tablet-Clean.apk` (`com.technion.semestero.tablet`, `versionCode 110`, `versionName {VERSION}`, `v1+v2+v3` Signed)
-- `Semestero-ME.apk` (`com.technion.semestero`, `versionCode 110`, `versionName {VERSION}`, `v1+v2+v3` Signed, `targetSdk 34`)
-- `Semestero-ME-Watch.apk` (`versionCode 110`, `versionName {VERSION}`, `v1+v2+v3` Signed)
+- `Semestero-ME-Tablet-Clean.apk` (`com.technion.semestero.tablet`, `versionCode 111`, `versionName {VERSION}`, `v1+v2+v3` Signed)
+- `Semestero-ME.apk` (`com.technion.semestero`, `versionCode 111`, `versionName {VERSION}`, `v1+v2+v3` Signed, `targetSdk 34`)
+- `Semestero-ME-Watch.apk` (`versionCode 111`, `versionName {VERSION}`, `v1+v2+v3` Signed)
 - `Semestero-ME-Windows-x64.zip` (Electron Desktop Client {VERSION})
 """
 

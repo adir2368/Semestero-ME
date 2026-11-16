@@ -1564,24 +1564,54 @@
     // =========================================================================
     const MobileBackNavigationManager = {
         _lastRootBackPressMs: 0,
+        _needsHistoryRearm: true,
+        _lastHistoryPushMs: 0,
+
+        armActiveHistoryEntry: function(force = false) {
+            if (typeof history === 'undefined' || typeof history.pushState !== 'function') return;
+            const now = Date.now();
+            if (!force && !this._needsHistoryRearm) return;
+            if (!force && (now - this._lastHistoryPushMs < 150)) return;
+            // Only pushState during an active user gesture when possible so Chromium History Intervention does not skip it
+            const hasActiveGesture = (typeof navigator !== 'undefined' && navigator.userActivation)
+                ? (navigator.userActivation.isActive || navigator.userActivation.hasBeenActive)
+                : true;
+            if (!hasActiveGesture && !force) return;
+            try {
+                history.pushState({ semesteroApp: true, guard: true, ts: now }, '');
+                this._needsHistoryRearm = false;
+                this._lastHistoryPushMs = now;
+            } catch (e) {}
+        },
 
         init: function() {
-            // 1. Seed browser history state so back gestures don't abruptly exit
-            if (typeof history !== 'undefined' && history.pushState) {
+            // 1. Seed initial history state + arm genuine user-activated entry on first interaction
+            //    (Chromium skips unactivated DOMContentLoaded pushState entries under History Intervention)
+            if (typeof history !== 'undefined' && history.replaceState) {
                 try {
                     history.replaceState({ semesteroRoot: true, depth: 0 }, '');
-                    history.pushState({ semesteroApp: true, depth: 1 }, '');
                 } catch (e) {}
+            }
+
+            const onUserGesture = () => {
+                if (this._needsHistoryRearm) {
+                    this.armActiveHistoryEntry(false);
+                }
+            };
+            if (typeof document !== 'undefined' && document.addEventListener) {
+                document.addEventListener('pointerdown', onUserGesture, { capture: true, passive: true });
+                document.addEventListener('touchstart', onUserGesture, { capture: true, passive: true });
+                document.addEventListener('keydown', onUserGesture, { capture: true, passive: true });
             }
 
             // 2. Intercept browser / swipe-to-back popstate with double-back guard at root
             window.addEventListener('popstate', () => {
                 const handled = this.handleBack();
+                this._needsHistoryRearm = true;
                 if (handled) {
                     this._lastRootBackPressMs = 0;
-                    try {
-                        history.pushState({ semesteroApp: true, depth: 1 }, '');
-                    } catch (err) {}
+                    // Push fallback entry immediately and also re-arm on next gesture if Chromium marks it skippable
+                    this.armActiveHistoryEntry(true);
                     return;
                 }
                 const now = Date.now();
@@ -1589,10 +1619,10 @@
                     this._lastRootBackPressMs = now;
                     if (typeof window.showToast === 'function') {
                         window.showToast('לחץ שוב ליציאה מהאפליקציה', 'info');
+                    } else if (typeof window.showToastNotification === 'function') {
+                        window.showToastNotification('לחץ שוב ליציאה מהאפליקציה', 'info');
                     }
-                    try {
-                        history.pushState({ semesteroApp: true, depth: 1 }, '');
-                    } catch (err) {}
+                    this.armActiveHistoryEntry(true);
                 }
             });
 
@@ -1624,6 +1654,8 @@
                 if (typeof history !== 'undefined' && history.pushState) {
                     try {
                         history.pushState({ semesteroApp: true, depth: 1, tag: tag || 'nav' }, '');
+                        this._needsHistoryRearm = false;
+                        this._lastHistoryPushMs = Date.now();
                     } catch (e) {}
                 }
             };
@@ -1661,6 +1693,31 @@
                 } else {
                     pangeaReader.style.display = 'none';
                     pangeaReader.classList.remove('active');
+                }
+                return true;
+            }
+
+            // B2. Check Slide-in Task Side Peek Drawer
+            const taskSidePeek = document.getElementById('task-side-peek');
+            if (taskSidePeek && taskSidePeek.classList.contains('active')) {
+                if (typeof window.closeTaskSidePeek === 'function') {
+                    window.closeTaskSidePeek();
+                } else {
+                    taskSidePeek.classList.remove('active');
+                    const peekOv = document.getElementById('peek-overlay');
+                    if (peekOv) peekOv.classList.remove('active');
+                }
+                return true;
+            }
+
+            // B3. Check Calendar Day Details Modal
+            const calDayModal = document.getElementById('calendar-day-modal');
+            if (calDayModal && this.isElementVisible(calDayModal)) {
+                if (typeof window.closeCalendarDayModal === 'function') {
+                    window.closeCalendarDayModal();
+                } else {
+                    calDayModal.style.display = 'none';
+                    calDayModal.classList.remove('active');
                 }
                 return true;
             }

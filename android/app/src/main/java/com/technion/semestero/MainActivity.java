@@ -85,12 +85,14 @@ public class MainActivity extends BridgeActivity {
                 "(function(){ try { return (typeof window.handleMobileBackAction === 'function') ? Boolean(window.handleMobileBackAction()) : false; } catch(e) { return false; } })()",
                 result -> {
                     if ("true".equals(result)) {
+                        lastRootBackPressMs = 0L;
                         return;
                     }
                     long now = android.os.SystemClock.elapsedRealtime();
-                    if (now - lastRootBackPressMs <= 2200L) {
+                    long elapsed = now - lastRootBackPressMs;
+                    if (lastRootBackPressMs > 0L && elapsed >= 250L && elapsed <= 2200L) {
                         moveTaskToBack(true);
-                    } else {
+                    } else if (elapsed >= 250L || lastRootBackPressMs == 0L) {
                         lastRootBackPressMs = now;
                         android.widget.Toast.makeText(
                             MainActivity.this,
