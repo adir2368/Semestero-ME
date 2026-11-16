@@ -1106,6 +1106,42 @@ async function run() {
             assert(result.restoredExamUnchecked && result.restoredDoneUnchecked && result.restoredFocusActive && result.restoredSearch && result.restoredOrganit && result.cloudHasFilterPrefs, 'All task filters + focus + search + cloud state must persist and restore');
         });
 
+        await test('Test 24: UI Typography Craft Rules & Monospace Digits (v2.13.15)', async () => {
+            const result = await cdp.eval(`(() => {
+                const navLabels = Array.from(document.querySelectorAll('.nav-tab-label[data-text]'));
+                const dayPills = Array.from(document.querySelectorAll('#timetable-day-selector .tab-label-reserve[data-text]'));
+                const fnHtml = (typeof window.formatMiddleTruncatedFileNameHtml === 'function')
+                    ? window.formatMiddleTruncatedFileNameHtml('Syllabus_Thermo_Winter 2026-2027_LT.pdf')
+                    : '';
+                const hasMiddleTrunc = fnHtml.includes('ui-file-name-stem') && fnHtml.includes('ui-file-name-ext') && fnHtml.includes('>.pdf<');
+                const htmlLang = document.documentElement.getAttribute('lang');
+                const bodyNum = getComputedStyle(document.body).fontVariantNumeric;
+                const kpiEl = document.querySelector('.stat-value, .analytics-kpi-value');
+                const kpiFont = kpiEl ? getComputedStyle(kpiEl).fontFamily : '';
+                return {
+                    navLabelCount: navLabels.length,
+                    dayPillCount: dayPills.length,
+                    hasMiddleTrunc,
+                    htmlLang,
+                    bodyNum,
+                    kpiFont
+                };
+            })()`);
+            const stylesCss = fs.readFileSync(path.join(__dirname, '..', 'styles.css'), 'utf8');
+            assert(result.navLabelCount >= 6, 'All 6 top nav tabs must reserve bold width via data-text');
+            assert(result.dayPillCount >= 7, 'Day selector tabs must reserve bold width via tab-label-reserve');
+            assert(result.hasMiddleTrunc, 'formatMiddleTruncatedFileNameHtml must split stem & extension cleanly');
+            assert(result.htmlLang === 'he', 'Root html must declare lang for hyphenation');
+            assert(String(result.bodyNum).includes('tabular-nums'), 'Body must compute font-variant-numeric: tabular-nums');
+            assert(String(result.kpiFont).includes('JetBrains Mono'), 'KPI counters must use JetBrains Mono monospace digits');
+            assert(stylesCss.includes('text-underline-offset: 0.2em'), 'Links must set text-underline-offset: 0.2em');
+            assert(stylesCss.includes('text-box-trim: trim-both'), 'Labels/buttons must declare text-box-trim: trim-both');
+            assert(stylesCss.includes('font-variant-caps: all-small-caps'), 'Acronyms must use all-small-caps');
+            assert(stylesCss.includes('hyphens: auto'), 'Narrow columns must enable hyphens: auto');
+            assert(stylesCss.includes('-webkit-line-clamp: 2'), 'Card titles must clamp to 2 lines');
+            assert(stylesCss.includes('font-feature-settings: "tnum" 1'), 'Global monospace/tabular digits must enable tnum');
+        });
+
     } finally {
         console.log(`\n========================================================================`);
         console.log(`SUMMARY: ${passed} passed, ${failed} failed.`);

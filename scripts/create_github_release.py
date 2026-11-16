@@ -17,9 +17,9 @@ ZIP_PATH = os.path.join(ROOT, "Semestero-ME-Windows-x64.zip")
 
 with open(os.path.join(ROOT, "package.json"), "r", encoding="utf-8") as f:
     pkg = json.load(f)
-VERSION = pkg.get("version", "2.13.14")
+VERSION = pkg.get("version", "2.13.15")
 TAG = f"v{VERSION}"
-NAME = f"Semestero ME v{VERSION} - Office Hours, Timed Calendar Tasks & Persistent Task Filters"
+NAME = f"Semestero ME v{VERSION} - UI Typography Craft & Monospace Digits"
 
 def get_github_token():
     try:
@@ -99,20 +99,17 @@ def main():
 
     body_notes = f"""# Semestero ME {TAG} Release Notes
 
-### 🕐 1. שעות קבלה במערכת השעות ובדף הקורס (`app.js`, `index.html`, `styles.css`, `auth_sync.js`)
-- טעינה מוקדמת של שעות קבלה מאומתות מסילבוס מודל 26 (מכניקת מוצקים 2: פרופ׳ ספי גבלי ג׳ 12:30 קאהן 219 ופרופ׳ דן מרדכי ה׳ 12:30 קאהן 225; תרמודינמיקה 1: פרופ׳ לאוניד טרטקובסקי ג׳ 11:30 קאהן 209) + אפשרות הוספה ומחיקה חופשית לכל קורס עם סנכרון לענן.
-- שכבה אינטראקטיבית ניתנת להפעלה/כיבוי (`🕐 שעות קבלה`) ישירות בתוך עמודות מערכת השעות + פאנל ניהול מרוכז בתחתית המערכת וכרטיס עריכה בתוך פרטי הקורס.
+### ✍️ 1. ליטוש טיפוגרפי מקיף + ספרות מונוספייס (`styles.css`, `index.html`, `app.js`)
+- **ספרות מונוספייס (`tabular-nums` + `JetBrains Mono`)**: יישור אחיד של כל הספרות במערכת (`font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1`) וגופן `JetBrains Mono` ממוקד במדדי ביצועים, טבלאות ציונים, תגים מספריים, שעות, ימי לוח שנה, שדות מספר ומוני מטלות למניעת ריצוד אופקי.
+- **מניעת קפיצות פריסה בטאבים**: שמירת רוחב מצב מודגש מראש (`display: inline-grid` + `::after` מוסתר עם `data-text`) בלשוניות הניווט ובבורר הימים במערכת השעות.
+- **מרכוז אופטי וריווח שורות**: `text-box-trim: trim-both` + `text-box-edge: cap alphabetic` בכפתורים ותגיות, `text-underline-offset: 0.2em` בקישורים, וייצוב תגי `sup` (`line-height: 0; top: -0.5em`).
+- **כותרות רספונסיביות, ראשי תיבות ומיקוף**: כותרות ראשיות וכותרות מודאל ב-`clamp()`, ראשי תיבות ב-`all-small-caps`, ו-`hyphens: auto` בבלוקי תוכן צרים.
+- **קיצור שמות קבצים באמצע, מרכאות טיפוגרפיות וקיבוע כרטיסים**: שמירת סיומת `.pdf` בקובצי סילבוס (`formatMiddleTruncatedFileNameHtml`), המרת מרכאות טיפוגרפיות בטקסט UI, וקיבוע כותרות כרטיסים לעד 2 שורות (`-webkit-line-clamp: 2`).
 
-### 📅 2. הכנסת משימות מתוזמנות ללוח השנה ולייצוא `.ics` (`app.js`, `calendar_sync_engine.js`)
-- נרמול תאריכי הגשה (`YYYY-MM-DD HH:MM` / `ISO` / `DD/MM/YYYY`) באמצעות `parseTaskDueDateParts()` כך שכל משימות מודל והמשימות הידניות בעלות שעה יופיעו ישירות בתאי החודש והשבוע בלוח השנה, בפירוט היום ובקובצי `.ics` ל-Google / Apple Calendar (כולל שעת ההגשה).
-
-### 💾 3. שמירת סינון משימות לכניסה הבאה (`app.js`, `auth_sync.js`)
-- שמירה ושחזור של כל רכיבי הסינון (סמסטר, סטטוס, סוג, קורסים מרובים, קטגוריות ארגונית++, מצב מיקוד, חיפוש ומצב סרגל הסינון) הן מקומית פר-משתמש והן בענן (`gameState.taskFilterPreferences`), תוך תיקון מרוץ הטעינה מול בניית רשימת הקורסים.
-
-### 📦 4. קובצי הפצה ועדכון:
-- `Semestero-ME-Tablet-Clean.apk` (`com.technion.semestero.tablet`, `versionCode 109`, `versionName {VERSION}`, `v1+v2+v3` Signed)
-- `Semestero-ME.apk` (`com.technion.semestero`, `versionCode 109`, `versionName {VERSION}`, `v1+v2+v3` Signed, `targetSdk 34`)
-- `Semestero-ME-Watch.apk` (`versionCode 109`, `versionName {VERSION}`, `v1+v2+v3` Signed)
+### 📦 2. קובצי הפצה ועדכון:
+- `Semestero-ME-Tablet-Clean.apk` (`com.technion.semestero.tablet`, `versionCode 110`, `versionName {VERSION}`, `v1+v2+v3` Signed)
+- `Semestero-ME.apk` (`com.technion.semestero`, `versionCode 110`, `versionName {VERSION}`, `v1+v2+v3` Signed, `targetSdk 34`)
+- `Semestero-ME-Watch.apk` (`versionCode 110`, `versionName {VERSION}`, `v1+v2+v3` Signed)
 - `Semestero-ME-Windows-x64.zip` (Electron Desktop Client {VERSION})
 """
 

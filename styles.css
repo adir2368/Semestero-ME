@@ -19005,6 +19005,183 @@ progress {
     box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.55);
 }
 
+/* ==========================================================================
+   10 UI Typography Craft Rules (Reserve bold width, trim-both, underline
+   offset, sup row spacing, fluid clamp, all-small-caps, curly punctuation,
+   middle filename truncation, auto hyphenation, 2-line card title clamp)
+   ========================================================================== */
 
+/* 1. Reserve bold width on tabs so selecting one never shifts neighboring items */
+.nav-tab-label[data-text],
+.tab-label-reserve[data-text] {
+    display: inline-grid;
+    place-items: center;
+}
 
+.nav-tab-label[data-text]::after,
+.tab-label-reserve[data-text]::after {
+    content: attr(data-text);
+    grid-area: 1 / 1;
+    font-weight: 800;
+    visibility: hidden;
+    height: 0;
+    overflow: hidden;
+    pointer-events: none;
+    user-select: none;
+}
+
+/* 2. Optical cap-height / baseline label centering inside buttons & badges */
+@supports (text-box-trim: trim-both) {
+    .btn,
+    .btn-xs,
+    .btn-sm,
+    .btn-sync-action,
+    .day-tab-pill,
+    .organit-pill,
+    .notion-task-badge,
+    .notion-status-pill,
+    .notion-semester-pill,
+    .grade-sheet-tool-btn,
+    .oh-badge {
+        text-box-trim: trim-both;
+        text-box-edge: cap alphabetic;
+    }
+}
+
+@supports (text-box: trim-both cap alphabetic) {
+    .btn,
+    .btn-xs,
+    .btn-sm,
+    .btn-sync-action,
+    .day-tab-pill,
+    .organit-pill,
+    .notion-task-badge,
+    .notion-status-pill,
+    .notion-semester-pill,
+    .grade-sheet-tool-btn,
+    .oh-badge {
+        text-box: trim-both cap alphabetic;
+    }
+}
+
+/* 3. Clear descenders cleanly under underlined links */
+a {
+    text-underline-offset: 0.2em;
+    text-decoration-skip-ink: auto;
+}
+
+/* 4. Superscripts without distorting row line-height */
+sup {
+    line-height: 0;
+    position: relative;
+    vertical-align: baseline;
+    top: -0.5em;
+}
+
+/* 5. Fluid headlines across mobile/tablet/desktop viewports */
+.settings-page-title {
+    font-size: clamp(1.1rem, 0.96rem + 0.65vw, 1.45rem);
+}
+
+#timetable-header-title {
+    font-size: clamp(1.08rem, 0.94rem + 0.6vw, 1.38rem);
+}
+
+.finals-calendar-title {
+    font-size: clamp(1.02rem, 0.92rem + 0.45vw, 1.25rem) !important;
+}
+
+.analytics-header-title h2,
+#modal-course-name {
+    font-size: clamp(1.06rem, 0.94rem + 0.55vw, 1.36rem);
+}
+
+/* 6. Subtle small-caps for acronym elements */
+abbr,
+.small-caps-acronym {
+    font-variant-caps: all-small-caps;
+    letter-spacing: 0.03em;
+}
+
+/* 8. Middle truncation utility keeping file extensions (.pdf, .ics, .csv) visible */
+.ui-file-name-wrap {
+    display: inline-flex;
+    align-items: center;
+    max-width: 100%;
+    min-width: 0;
+    direction: ltr;
+}
+
+.ui-file-name-stem {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
+}
+
+.ui-file-name-ext {
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+/* 9. Graceful hyphenation in narrow syllabus/FAQ prose blocks (html[lang] is set) */
+.faq-list p,
+.modal-moodle26-syllabus-card,
+.planner-col-desc,
+[lang="en"] {
+    hyphens: auto;
+}
+
+/* 10. Cap grid card titles cleanly at 2 lines for uniform row alignment */
+.timetable-card-title,
+.planner-course-card .course-name,
+.today-class-name,
+.oh-course-box-header > span:first-child {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    overflow: hidden;
+}
+
+/* 11. Monospace / Tabular Digits (tabular-nums + JetBrains Mono numeric readouts) */
+body,
+input,
+select,
+textarea,
+button,
+table,
+th,
+td {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1;
+}
+
+.analytics-kpi-value,
+.analytics-kpi-sub,
+.gs-kpi-value,
+.gs-kpi-sub,
+.sem-gpa-badge,
+.sem-header-stats,
+.grade-value-cell,
+.grade-sheet-table td:not(.cell-name),
+.cal-day-num,
+.cal-day-number-label,
+.runway-badge,
+.runway-exam-date,
+.modal-exam-date-badge,
+.today-class-time,
+.oh-time,
+.fc-sem-status-text,
+.nav-tab-badge,
+.notif-badge-lectures,
+.notif-badge-tasks,
+.hw-strip-badge,
+.hw-dot,
+.toast-merge-badge,
+input[type="number"] {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1;
+}
 

@@ -12741,6 +12741,19 @@ window.OfficeHoursEngine = {
     isTimetableOverlayEnabled: isOfficeHoursOverlayEnabled
 };
 
+function formatMiddleTruncatedFileNameHtml(rawName) {
+    if (!rawName) return '';
+    const str = String(rawName);
+    const dotIdx = str.lastIndexOf('.');
+    if (dotIdx <= 0 || dotIdx === str.length - 1) {
+        return `<span class="ui-file-name-wrap" title="${escapeHtml(str)}"><span class="ui-file-name-stem">${escapeHtml(str)}</span></span>`;
+    }
+    const stem = str.slice(0, dotIdx);
+    const ext = str.slice(dotIdx);
+    return `<span class="ui-file-name-wrap" title="${escapeHtml(str)}"><span class="ui-file-name-stem">${escapeHtml(stem)}</span><span class="ui-file-name-ext">${escapeHtml(ext)}</span></span>`;
+}
+if (typeof window !== 'undefined') window.formatMiddleTruncatedFileNameHtml = formatMiddleTruncatedFileNameHtml;
+
 function renderTechnionPlusQuickBar(course) {
     const groupEl = document.getElementById("technion-plus-links-group");
     if (!groupEl || !course) return;
@@ -14774,6 +14787,12 @@ function openCourseDetails(code) {
                     <div style="font-size: 0.80rem; color: #cbd5e1; margin-bottom: 6px; line-height: 1.5;">
                         <strong style="color: #94a3b8;">👨‍🏫 סגל ושעות קבלה:</strong> ${moodleSyllabus.staff}
                     </div>
+                    ${moodleSyllabus.fileName ? `
+                        <div style="font-size: 0.74rem; color: #94a3b8; margin-bottom: 6px; display: flex; align-items: center; gap: 6px; min-width: 0;">
+                            <span style="flex-shrink: 0;">📄 מקור:</span>
+                            ${formatMiddleTruncatedFileNameHtml(moodleSyllabus.fileName)}
+                        </div>
+                    ` : ''}
                     ${moodleSyllabus.notices ? `
                         <div style="font-size: 0.79rem; color: #fbbf24; background: rgba(245, 158, 11, 0.09); border: 1px dashed rgba(245, 158, 11, 0.35); border-radius: 6px; padding: 8px 10px; margin-top: 6px; line-height: 1.5;">
                             <strong style="color: #f59e0b;">📢 הודעות פתיחה והנחיות:</strong> ${moodleSyllabus.notices}
@@ -23772,11 +23791,11 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.11.16-v2.13.14",
-    version: "2.13.14",
-    build: "20261116_01",
-    date: "2026-11-16 17:18",
-    description: "v2.13.14: הוספת שעות קבלה עריכות ומוצגות במערכת השעות ובדף הקורס, תיקון והצגת משימות מתוזמנות במודל בתוך לוח השנה ובייצוא .ics, ושמירת כל סינוני המשימות בין כניסות ומכשירים (ADR-124)."
+    code: "REV-2026.11.16-v2.13.15",
+    version: "2.13.15",
+    build: "20261116_02",
+    date: "2026-11-16 22:12",
+    description: "v2.13.15: החלת 10 כללי הטיפוגרפיה והליטוש החזותי בכל ממשק Semestero ME — שמירת רוחב Bold בטאבים למניעת קפיצות, מרכוז אופטי עם text-box-trim, הפרדת קו תחתי בקישורים, ריווח תגי sup, כותרות רספונסיביות ב-clamp(), ראשי תיבות ב-all-small-caps, מרכאות טיפוגרפיות, קיצור שמות קבצים באמצע עם שימור סיומת, מיקוף אוטומטי והגבלת כותרות כרטיסים ל-2 שורות (ADR-125)."
 };
 window.APP_VERSION = APP_CURRENT_REVISION.version;
 
