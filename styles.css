@@ -17324,6 +17324,22 @@ tr.is-task-pinned {
     background: rgba(14, 165, 233, 0.2);
     border-color: #38bdf8;
 }
+.pangea-project-chip {
+    border-color: rgba(168, 85, 247, 0.35);
+    color: #e9d5ff;
+}
+.pangea-project-chip:hover {
+    background: rgba(168, 85, 247, 0.22);
+    border-color: #a855f7;
+}
+.pangea-other-chip {
+    border-color: rgba(20, 184, 166, 0.35);
+    color: #99f6e4;
+}
+.pangea-other-chip:hover {
+    background: rgba(20, 184, 166, 0.22);
+    border-color: #2dd4bf;
+}
 
 @media (max-width: 768px) {
     .pangea-reader-container {

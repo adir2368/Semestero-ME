@@ -19,7 +19,7 @@ with open(os.path.join(ROOT, "package.json"), "r", encoding="utf-8") as f:
     pkg = json.load(f)
 VERSION = pkg.get("version", "2.13.15")
 TAG = f"v{VERSION}"
-NAME = f"Semestero ME v{VERSION} - HUD Tasks Jump & Horizontal Swipe Tabs"
+NAME = f"Semestero ME v{VERSION} - technion_second_brain Full Sync & Formula Hubs"
 
 def get_github_token():
     try:
@@ -99,15 +99,14 @@ def main():
 
     body_notes = f"""# Semestero ME {TAG} Release Notes
 
-### ⚡ 1. ניווט מהיר בין לשוניות והגעה ללוח המשימות (`index.html`, `app.js`, `ui_enhancements.js`, `styles.css`)
-- **מעבר בלחיצה על מדד "משימות פתוחות"**: לחיצה (או מקלדת Enter/Space) על כרטיס ״משימות פתוחות״ ב-HUD העליון מעבירה מיידית אל לשונית ״לוח משימות״ (`#stat-item-open-tasks`).
-- **מעבר בין החלונות בהחלקה / גלילה אופקית ימין-שמאל**: הוספת `HorizontalTabSwipeManager` למעבר חלק בין כל לשוניות האפליקציה בהחלקת אצבע אופקית במובייל או בגלילת טראקפד ימין-שמאל במחשב, כולל זיהוי גבולות גלילה, מניעת הפעלה בעת פתיחת מודאלים והגנה על גרירת מפת הקורסים.
-- **כרטיסיית ״מה חדש?״ ממוקדת**: הצגת העדכון האחרון בלבד כברירת מחדל (`WhatsNewAccordionManager` + כלל CSS אוטומטי) עם קיפול אוטומטי של כל הגרסאות הקודמות תחת כפתור ההיסטוריה.
+### 🧠 1. סנכרון מלא מול מאגר `NuclearGandhi/technion_second_brain` (פנגייה)
+- **כיסוי מלא של 39 קורסי הטכניון (557 פריטים)**: תיקון 44 קישורים שבורים (קידוד גרש `'` ו-`מעבר-חום`), עדכון פרקים, מבחנים ושיעורי בית חדשים, והוספת קורסים חדשים למיפוי הישיר (`LRB1` 00340401, `MCP1` 00350032, `ICE1` 00350146, `MPL1` 00360014 ו-`IMT1` 03140533).
+- **מושגי מפתח, פרויקטים ונספחים בכרטיס הקורס**: הצגת נוסחאות מרכזיות של מד״ח (`PDE1`) ופיזיקה 2 (`PHY2`), טבלאות נוסחאות/מעבדות (`SLD2_A1`, `HTF1`, `LMA1`) ופרויקטים ישירות במרכז הלמידה של פנגייה + קישור ישיר למאגר ה-GitHub.
 
 ### 📦 2. קובצי הפצה ועדכון:
-- `Semestero-ME-Tablet-Clean.apk` (`com.technion.semestero.tablet`, `versionCode 113`, `versionName {VERSION}`, `v1+v2+v3` Signed)
-- `Semestero-ME.apk` (`com.technion.semestero`, `versionCode 113`, `versionName {VERSION}`, `v1+v2+v3` Signed, `targetSdk 34`)
-- `Semestero-ME-Watch.apk` (`versionCode 113`, `versionName {VERSION}`, `v1+v2+v3` Signed)
+- `Semestero-ME-Tablet-Clean.apk` (`com.technion.semestero.tablet`, `versionCode 114`, `versionName {VERSION}`, `v1+v2+v3` Signed)
+- `Semestero-ME.apk` (`com.technion.semestero`, `versionCode 114`, `versionName {VERSION}`, `v1+v2+v3` Signed, `targetSdk 34`)
+- `Semestero-ME-Watch.apk` (`versionCode 114`, `versionName {VERSION}`, `v1+v2+v3` Signed)
 - `Semestero-ME-Windows-x64.zip` (Electron Desktop Client {VERSION})
 """
 

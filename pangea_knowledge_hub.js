@@ -13,83 +13,84 @@
     "course_tag": "ALG1",
     "title": "ALG1",
     "url": "https://idofangbentov.uk/Technion/ALG1/",
+    "githubUrl": "https://github.com/NuclearGandhi/technion_second_brain/tree/master/Technion/ALG1",
     "lectures": [
       {
         "slug": "ALG1_000-104016-אלגברה-1מ",
         "name": "ALG1_000-104016-אלגברה-1מ",
-        "url": "https://idofangbentov.uk/Technion/ALG1/ALG1_000-104016-אלגברה-1מ",
         "displayTitle": "פרק 0: 104016 אלגברה 1מ",
-        "number": 0
+        "number": 0,
+        "url": "https://idofangbentov.uk/Technion/ALG1/ALG1_000-104016-אלגברה-1מ"
       },
       {
         "slug": "ALG1_001-שדות",
         "name": "ALG1_001-שדות",
-        "url": "https://idofangbentov.uk/Technion/ALG1/ALG1_001-שדות",
         "displayTitle": "פרק 1: שדות",
-        "number": 1
+        "number": 1,
+        "url": "https://idofangbentov.uk/Technion/ALG1/ALG1_001-שדות"
       },
       {
         "slug": "ALG1_002-פולינומים",
         "name": "ALG1_002-פולינומים",
-        "url": "https://idofangbentov.uk/Technion/ALG1/ALG1_002-פולינומים",
         "displayTitle": "פרק 2: פולינומים",
-        "number": 2
+        "number": 2,
+        "url": "https://idofangbentov.uk/Technion/ALG1/ALG1_002-פולינומים"
       },
       {
         "slug": "ALG1_003-מטריצות",
         "name": "ALG1_003-מטריצות",
-        "url": "https://idofangbentov.uk/Technion/ALG1/ALG1_003-מטריצות",
         "displayTitle": "פרק 3: מטריצות",
-        "number": 3
+        "number": 3,
+        "url": "https://idofangbentov.uk/Technion/ALG1/ALG1_003-מטריצות"
       },
       {
         "slug": "ALG1_004-מערכות-משוואות-לינאריות",
         "name": "ALG1_004-מערכות-משוואות-לינאריות",
-        "url": "https://idofangbentov.uk/Technion/ALG1/ALG1_004-מערכות-משוואות-לינאריות",
         "displayTitle": "פרק 4: מערכות משוואות לינאריות",
-        "number": 4
+        "number": 4,
+        "url": "https://idofangbentov.uk/Technion/ALG1/ALG1_004-מערכות-משוואות-לינאריות"
       },
       {
         "slug": "ALG1_005-מרחבים-וקטוריים",
         "name": "ALG1_005-מרחבים-וקטוריים",
-        "url": "https://idofangbentov.uk/Technion/ALG1/ALG1_005-מרחבים-וקטוריים",
         "displayTitle": "פרק 5: מרחבים וקטוריים",
-        "number": 5
+        "number": 5,
+        "url": "https://idofangbentov.uk/Technion/ALG1/ALG1_005-מרחבים-וקטוריים"
       },
       {
         "slug": "ALG1_006-בסיס-ומימד",
         "name": "ALG1_006-בסיס-ומימד",
-        "url": "https://idofangbentov.uk/Technion/ALG1/ALG1_006-בסיס-ומימד",
         "displayTitle": "פרק 6: בסיס ומימד",
-        "number": 6
+        "number": 6,
+        "url": "https://idofangbentov.uk/Technion/ALG1/ALG1_006-בסיס-ומימד"
       },
       {
         "slug": "ALG1_007-מטריצות-הפיכות",
         "name": "ALG1_007-מטריצות-הפיכות",
-        "url": "https://idofangbentov.uk/Technion/ALG1/ALG1_007-מטריצות-הפיכות",
         "displayTitle": "פרק 7: מטריצות הפיכות",
-        "number": 7
+        "number": 7,
+        "url": "https://idofangbentov.uk/Technion/ALG1/ALG1_007-מטריצות-הפיכות"
       },
       {
         "slug": "ALG1_008-הדטרמיננטה",
         "name": "ALG1_008-הדטרמיננטה",
-        "url": "https://idofangbentov.uk/Technion/ALG1/ALG1_008-הדטרמיננטה",
         "displayTitle": "פרק 8: הדטרמיננטה",
-        "number": 8
+        "number": 8,
+        "url": "https://idofangbentov.uk/Technion/ALG1/ALG1_008-הדטרמיננטה"
       },
       {
         "slug": "ALG1_009-טרנספורמציות-לינאריות",
         "name": "ALG1_009-טרנספורמציות-לינאריות",
-        "url": "https://idofangbentov.uk/Technion/ALG1/ALG1_009-טרנספורמציות-לינאריות",
         "displayTitle": "פרק 9: טרנספורמציות לינאריות",
-        "number": 9
+        "number": 9,
+        "url": "https://idofangbentov.uk/Technion/ALG1/ALG1_009-טרנספורמציות-לינאריות"
       },
       {
         "slug": "ALG1_010-וקטורים-עצמיים-וערכים-עצמיים",
         "name": "ALG1_010-וקטורים-עצמיים-וערכים-עצמיים",
-        "url": "https://idofangbentov.uk/Technion/ALG1/ALG1_010-וקטורים-עצמיים-וערכים-עצמיים",
         "displayTitle": "פרק 10: וקטורים עצמיים וערכים עצמיים",
-        "number": 10
+        "number": 10,
+        "url": "https://idofangbentov.uk/Technion/ALG1/ALG1_010-וקטורים-עצמיים-וערכים-עצמיים"
       }
     ],
     "homework": [],
@@ -102,83 +103,84 @@
     "course_tag": "BMA1",
     "title": "BMA1",
     "url": "https://idofangbentov.uk/Technion/BMA1/",
+    "githubUrl": "https://github.com/NuclearGandhi/technion_second_brain/tree/master/Technion/BMA1",
     "lectures": [
       {
         "slug": "BMA1_000-הקדמה-למתמטיקה",
         "name": "BMA1_000-הקדמה-למתמטיקה",
-        "url": "https://idofangbentov.uk/Technion/BMA1/BMA1_000-הקדמה-למתמטיקה",
         "displayTitle": "פרק 0: הקדמה למתמטיקה",
-        "number": 0
+        "number": 0,
+        "url": "https://idofangbentov.uk/Technion/BMA1/BMA1_000-הקדמה-למתמטיקה"
       },
       {
         "slug": "BMA1_001-סימונים-לוגיים",
         "name": "BMA1_001-סימונים-לוגיים",
-        "url": "https://idofangbentov.uk/Technion/BMA1/BMA1_001-סימונים-לוגיים",
         "displayTitle": "פרק 1: סימונים לוגיים",
-        "number": 1
+        "number": 1,
+        "url": "https://idofangbentov.uk/Technion/BMA1/BMA1_001-סימונים-לוגיים"
       },
       {
         "slug": "BMA1_002-קבוצה",
         "name": "BMA1_002-קבוצה",
-        "url": "https://idofangbentov.uk/Technion/BMA1/BMA1_002-קבוצה",
         "displayTitle": "פרק 2: קבוצה",
-        "number": 2
+        "number": 2,
+        "url": "https://idofangbentov.uk/Technion/BMA1/BMA1_002-קבוצה"
       },
       {
         "slug": "BMA1_003-אינדוקציה",
         "name": "BMA1_003-אינדוקציה",
-        "url": "https://idofangbentov.uk/Technion/BMA1/BMA1_003-אינדוקציה",
         "displayTitle": "פרק 3: אינדוקציה",
-        "number": 3
+        "number": 3,
+        "url": "https://idofangbentov.uk/Technion/BMA1/BMA1_003-אינדוקציה"
       },
       {
         "slug": "BMA1_004-אלגוריתמים-נפוצים",
         "name": "BMA1_004-אלגוריתמים-נפוצים",
-        "url": "https://idofangbentov.uk/Technion/BMA1/BMA1_004-אלגוריתמים-נפוצים",
         "displayTitle": "פרק 4: אלגוריתמים נפוצים",
-        "number": 4
+        "number": 4,
+        "url": "https://idofangbentov.uk/Technion/BMA1/BMA1_004-אלגוריתמים-נפוצים"
       },
       {
         "slug": "BMA1_005-ערך-מוחלט",
         "name": "BMA1_005-ערך-מוחלט",
-        "url": "https://idofangbentov.uk/Technion/BMA1/BMA1_005-ערך-מוחלט",
         "displayTitle": "פרק 5: ערך מוחלט",
-        "number": 5
+        "number": 5,
+        "url": "https://idofangbentov.uk/Technion/BMA1/BMA1_005-ערך-מוחלט"
       },
       {
         "slug": "BMA1_006-ממוצעים",
         "name": "BMA1_006-ממוצעים",
-        "url": "https://idofangbentov.uk/Technion/BMA1/BMA1_006-ממוצעים",
         "displayTitle": "פרק 6: ממוצעים",
-        "number": 6
+        "number": 6,
+        "url": "https://idofangbentov.uk/Technion/BMA1/BMA1_006-ממוצעים"
       },
       {
         "slug": "BMA1_007-נוסחת-הבינום-של-ניוטון",
         "name": "BMA1_007-נוסחת-הבינום-של-ניוטון",
-        "url": "https://idofangbentov.uk/Technion/BMA1/BMA1_007-נוסחת-הבינום-של-ניוטון",
         "displayTitle": "פרק 7: נוסחת הבינום של ניוטון",
-        "number": 7
+        "number": 7,
+        "url": "https://idofangbentov.uk/Technion/BMA1/BMA1_007-נוסחת-הבינום-של-ניוטון"
       },
       {
         "slug": "BMA1_008-פונקציות-היפרבוליות",
         "name": "BMA1_008-פונקציות-היפרבוליות",
-        "url": "https://idofangbentov.uk/Technion/BMA1/BMA1_008-פונקציות-היפרבוליות",
         "displayTitle": "פרק 8: פונקציות היפרבוליות",
-        "number": 8
+        "number": 8,
+        "url": "https://idofangbentov.uk/Technion/BMA1/BMA1_008-פונקציות-היפרבוליות"
       },
       {
         "slug": "BMA1_009-זהויות-טריגונומטריות",
         "name": "BMA1_009-זהויות-טריגונומטריות",
-        "url": "https://idofangbentov.uk/Technion/BMA1/BMA1_009-זהויות-טריגונומטריות",
         "displayTitle": "פרק 9: זהויות טריגונומטריות",
-        "number": 9
+        "number": 9,
+        "url": "https://idofangbentov.uk/Technion/BMA1/BMA1_009-זהויות-טריגונומטריות"
       },
       {
         "slug": "BMA1_010-מספרים-מרוכבים",
         "name": "BMA1_010-מספרים-מרוכבים",
-        "url": "https://idofangbentov.uk/Technion/BMA1/BMA1_010-מספרים-מרוכבים",
         "displayTitle": "פרק 10: מספרים מרוכבים",
-        "number": 10
+        "number": 10,
+        "url": "https://idofangbentov.uk/Technion/BMA1/BMA1_010-מספרים-מרוכבים"
       }
     ],
     "homework": [],
@@ -191,90 +193,91 @@
     "course_tag": "CAL1",
     "title": "CAL1",
     "url": "https://idofangbentov.uk/Technion/CAL1/",
+    "githubUrl": "https://github.com/NuclearGandhi/technion_second_brain/tree/master/Technion/CAL1",
     "lectures": [
       {
         "slug": "CAL1_000-104041-חדוא-1מ",
         "name": "CAL1_000-104041-חדוא-1מ",
-        "url": "https://idofangbentov.uk/Technion/CAL1/CAL1_000-104041-חדוא-1מ",
         "displayTitle": "פרק 0: 104041 חדוא 1מ",
-        "number": 0
+        "number": 0,
+        "url": "https://idofangbentov.uk/Technion/CAL1/CAL1_000-104041-חדוא-1מ"
       },
       {
         "slug": "CAL1_001-פונקציה",
         "name": "CAL1_001-פונקציה",
-        "url": "https://idofangbentov.uk/Technion/CAL1/CAL1_001-פונקציה",
         "displayTitle": "פרק 1: פונקציה",
-        "number": 1
+        "number": 1,
+        "url": "https://idofangbentov.uk/Technion/CAL1/CAL1_001-פונקציה"
       },
       {
         "slug": "CAL1_002-גבול-של-פונקציה",
         "name": "CAL1_002-גבול-של-פונקציה",
-        "url": "https://idofangbentov.uk/Technion/CAL1/CAL1_002-גבול-של-פונקציה",
         "displayTitle": "פרק 2: גבול של פונקציה",
-        "number": 2
+        "number": 2,
+        "url": "https://idofangbentov.uk/Technion/CAL1/CAL1_002-גבול-של-פונקציה"
       },
       {
         "slug": "CAL1_003-גבולות-של-סדרות",
         "name": "CAL1_003-גבולות-של-סדרות",
-        "url": "https://idofangbentov.uk/Technion/CAL1/CAL1_003-גבולות-של-סדרות",
         "displayTitle": "פרק 3: גבולות של סדרות",
-        "number": 3
+        "number": 3,
+        "url": "https://idofangbentov.uk/Technion/CAL1/CAL1_003-גבולות-של-סדרות"
       },
       {
         "slug": "CAL1_004-רציפות",
         "name": "CAL1_004-רציפות",
-        "url": "https://idofangbentov.uk/Technion/CAL1/CAL1_004-רציפות",
         "displayTitle": "פרק 4: רציפות",
-        "number": 4
+        "number": 4,
+        "url": "https://idofangbentov.uk/Technion/CAL1/CAL1_004-רציפות"
       },
       {
         "slug": "CAL1_005-נגזרות",
         "name": "CAL1_005-נגזרות",
-        "url": "https://idofangbentov.uk/Technion/CAL1/CAL1_005-נגזרות",
         "displayTitle": "פרק 5: נגזרות",
-        "number": 5
+        "number": 5,
+        "url": "https://idofangbentov.uk/Technion/CAL1/CAL1_005-נגזרות"
       },
       {
         "slug": "CAL1_006-פולינום-טיילור",
         "name": "CAL1_006-פולינום-טיילור",
-        "url": "https://idofangbentov.uk/Technion/CAL1/CAL1_006-פולינום-טיילור",
         "displayTitle": "פרק 6: פולינום טיילור",
-        "number": 6
+        "number": 6,
+        "url": "https://idofangbentov.uk/Technion/CAL1/CAL1_006-פולינום-טיילור"
       },
       {
         "slug": "CAL1_007-אינטגרל-לא-מסוים",
         "name": "CAL1_007-אינטגרל-לא-מסוים",
-        "url": "https://idofangbentov.uk/Technion/CAL1/CAL1_007-אינטגרל-לא-מסוים",
         "displayTitle": "פרק 7: אינטגרל לא מסוים",
-        "number": 7
+        "number": 7,
+        "url": "https://idofangbentov.uk/Technion/CAL1/CAL1_007-אינטגרל-לא-מסוים"
       },
       {
         "slug": "CAL1_008-אינטגרל-מסוים",
         "name": "CAL1_008-אינטגרל-מסוים",
-        "url": "https://idofangbentov.uk/Technion/CAL1/CAL1_008-אינטגרל-מסוים",
         "displayTitle": "פרק 8: אינטגרל מסוים",
-        "number": 8
+        "number": 8,
+        "url": "https://idofangbentov.uk/Technion/CAL1/CAL1_008-אינטגרל-מסוים"
       },
       {
         "slug": "CAL1_009-אינטגרל-מוכלל",
         "name": "CAL1_009-אינטגרל-מוכלל",
-        "url": "https://idofangbentov.uk/Technion/CAL1/CAL1_009-אינטגרל-מוכלל",
         "displayTitle": "פרק 9: אינטגרל מוכלל",
-        "number": 9
+        "number": 9,
+        "url": "https://idofangbentov.uk/Technion/CAL1/CAL1_009-אינטגרל-מוכלל"
       },
       {
         "slug": "CAL1_010-טורי-מספרים",
         "name": "CAL1_010-טורי-מספרים",
-        "url": "https://idofangbentov.uk/Technion/CAL1/CAL1_010-טורי-מספרים",
         "displayTitle": "פרק 10: טורי מספרים",
-        "number": 10
+        "number": 10,
+        "url": "https://idofangbentov.uk/Technion/CAL1/CAL1_010-טורי-מספרים"
       },
       {
         "slug": "CAL1_011-טורי-חזקות",
         "name": "CAL1_011-טורי-חזקות",
-        "url": "https://idofangbentov.uk/Technion/CAL1/CAL1_011-טורי-חזקות",
         "displayTitle": "פרק 11: טורי חזקות",
-        "number": 11
+        "number": 11,
+        "url": "https://idofangbentov.uk/Technion/CAL1/CAL1_011-טורי-חזקות"
       }
     ],
     "homework": [],
@@ -287,111 +290,112 @@
     "course_tag": "CAL2",
     "title": "CAL2",
     "url": "https://idofangbentov.uk/Technion/CAL2/",
+    "githubUrl": "https://github.com/NuclearGandhi/technion_second_brain/tree/master/Technion/CAL2",
     "lectures": [
       {
         "slug": "CAL2_000-104043-חדוא-2מ",
         "name": "CAL2_000-104043-חדוא-2מ",
-        "url": "https://idofangbentov.uk/Technion/CAL2/CAL2_000-104043-חדוא-2מ",
         "displayTitle": "פרק 0: 104043 חדוא 2מ",
-        "number": 0
+        "number": 0,
+        "url": "https://idofangbentov.uk/Technion/CAL2/CAL2_000-104043-חדוא-2מ"
       },
       {
         "slug": "CAL2_001-וקטורים",
         "name": "CAL2_001-וקטורים",
-        "url": "https://idofangbentov.uk/Technion/CAL2/CAL2_001-וקטורים",
         "displayTitle": "פרק 1: וקטורים",
-        "number": 1
+        "number": 1,
+        "url": "https://idofangbentov.uk/Technion/CAL2/CAL2_001-וקטורים"
       },
       {
         "slug": "CAL2_002-מישורים-וישרים",
         "name": "CAL2_002-מישורים-וישרים",
-        "url": "https://idofangbentov.uk/Technion/CAL2/CAL2_002-מישורים-וישרים",
         "displayTitle": "פרק 2: מישורים וישרים",
-        "number": 2
+        "number": 2,
+        "url": "https://idofangbentov.uk/Technion/CAL2/CAL2_002-מישורים-וישרים"
       },
       {
         "slug": "CAL2_003-משטחים-ריבועיים",
         "name": "CAL2_003-משטחים-ריבועיים",
-        "url": "https://idofangbentov.uk/Technion/CAL2/CAL2_003-משטחים-ריבועיים",
         "displayTitle": "פרק 3: משטחים ריבועיים",
-        "number": 3
+        "number": 3,
+        "url": "https://idofangbentov.uk/Technion/CAL2/CAL2_003-משטחים-ריבועיים"
       },
       {
         "slug": "CAL2_004-עקומים-במרחב",
         "name": "CAL2_004-עקומים-במרחב",
-        "url": "https://idofangbentov.uk/Technion/CAL2/CAL2_004-עקומים-במרחב",
         "displayTitle": "פרק 4: עקומים במרחב",
-        "number": 4
+        "number": 4,
+        "url": "https://idofangbentov.uk/Technion/CAL2/CAL2_004-עקומים-במרחב"
       },
       {
         "slug": "CAL2_005-פונקציה-בשני-משתנים,-טופולוגיה",
         "name": "CAL2_005-פונקציה-בשני-משתנים,-טופולוגיה",
-        "url": "https://idofangbentov.uk/Technion/CAL2/CAL2_005-פונקציה-בשני-משתנים,-טופולוגיה",
         "displayTitle": "פרק 5: פונקציה בשני משתנים, טופולוגיה",
-        "number": 5
+        "number": 5,
+        "url": "https://idofangbentov.uk/Technion/CAL2/CAL2_005-פונקציה-בשני-משתנים,-טופולוגיה"
       },
       {
         "slug": "CAL2_006-נגזרות-של-פונקציות-בשני-משתנים",
         "name": "CAL2_006-נגזרות-של-פונקציות-בשני-משתנים",
-        "url": "https://idofangbentov.uk/Technion/CAL2/CAL2_006-נגזרות-של-פונקציות-בשני-משתנים",
         "displayTitle": "פרק 6: נגזרות של פונקציות בשני משתנים",
-        "number": 6
+        "number": 6,
+        "url": "https://idofangbentov.uk/Technion/CAL2/CAL2_006-נגזרות-של-פונקציות-בשני-משתנים"
       },
       {
         "slug": "CAL2_007-נגזרות-מכוונות-וגרדיאנט",
         "name": "CAL2_007-נגזרות-מכוונות-וגרדיאנט",
-        "url": "https://idofangbentov.uk/Technion/CAL2/CAL2_007-נגזרות-מכוונות-וגרדיאנט",
         "displayTitle": "פרק 7: נגזרות מכוונות וגרדיאנט",
-        "number": 7
+        "number": 7,
+        "url": "https://idofangbentov.uk/Technion/CAL2/CAL2_007-נגזרות-מכוונות-וגרדיאנט"
       },
       {
         "slug": "CAL2_008-טיילור-2.0",
         "name": "CAL2_008-טיילור-2.0",
-        "url": "https://idofangbentov.uk/Technion/CAL2/CAL2_008-טיילור-2.0",
         "displayTitle": "פרק 8: טיילור 2.0",
-        "number": 8
+        "number": 8,
+        "url": "https://idofangbentov.uk/Technion/CAL2/CAL2_008-טיילור-2.0"
       },
       {
         "slug": "CAL2_009-פונקציות-סתומות",
         "name": "CAL2_009-פונקציות-סתומות",
-        "url": "https://idofangbentov.uk/Technion/CAL2/CAL2_009-פונקציות-סתומות",
         "displayTitle": "פרק 9: פונקציות סתומות",
-        "number": 9
+        "number": 9,
+        "url": "https://idofangbentov.uk/Technion/CAL2/CAL2_009-פונקציות-סתומות"
       },
       {
         "slug": "CAL2_010-נקודות-אקסטרמום",
         "name": "CAL2_010-נקודות-אקסטרמום",
-        "url": "https://idofangbentov.uk/Technion/CAL2/CAL2_010-נקודות-אקסטרמום",
         "displayTitle": "פרק 10: נקודות אקסטרמום",
-        "number": 10
+        "number": 10,
+        "url": "https://idofangbentov.uk/Technion/CAL2/CAL2_010-נקודות-אקסטרמום"
       },
       {
         "slug": "CAL2_011-אינטגרל-רב-ממדי",
         "name": "CAL2_011-אינטגרל-רב-ממדי",
-        "url": "https://idofangbentov.uk/Technion/CAL2/CAL2_011-אינטגרל-רב-ממדי",
         "displayTitle": "פרק 11: אינטגרל רב ממדי",
-        "number": 11
+        "number": 11,
+        "url": "https://idofangbentov.uk/Technion/CAL2/CAL2_011-אינטגרל-רב-ממדי"
       },
       {
         "slug": "CAL2_012-אינטגרלים-קוויים-ומשפט-גרין",
         "name": "CAL2_012-אינטגרלים-קוויים-ומשפט-גרין",
-        "url": "https://idofangbentov.uk/Technion/CAL2/CAL2_012-אינטגרלים-קוויים-ומשפט-גרין",
         "displayTitle": "פרק 12: אינטגרלים קוויים ומשפט גרין",
-        "number": 12
+        "number": 12,
+        "url": "https://idofangbentov.uk/Technion/CAL2/CAL2_012-אינטגרלים-קוויים-ומשפט-גרין"
       },
       {
         "slug": "CAL2_013-שדות-משמרים",
         "name": "CAL2_013-שדות-משמרים",
-        "url": "https://idofangbentov.uk/Technion/CAL2/CAL2_013-שדות-משמרים",
         "displayTitle": "פרק 13: שדות משמרים",
-        "number": 13
+        "number": 13,
+        "url": "https://idofangbentov.uk/Technion/CAL2/CAL2_013-שדות-משמרים"
       },
       {
         "slug": "CAL2_014-אינטגרלים-משטחיים",
         "name": "CAL2_014-אינטגרלים-משטחיים",
-        "url": "https://idofangbentov.uk/Technion/CAL2/CAL2_014-אינטגרלים-משטחיים",
         "displayTitle": "פרק 14: אינטגרלים משטחיים",
-        "number": 14
+        "number": 14,
+        "url": "https://idofangbentov.uk/Technion/CAL2/CAL2_014-אינטגרלים-משטחיים"
       }
     ],
     "homework": [],
@@ -404,212 +408,211 @@
     "course_tag": "DEQ1",
     "title": "DEQ1",
     "url": "https://idofangbentov.uk/Technion/DEQ1/",
+    "githubUrl": "https://github.com/NuclearGandhi/technion_second_brain/tree/master/Technion/DEQ1",
     "lectures": [
       {
         "slug": "DEQ1_000-104131-מדר-ח",
         "name": "DEQ1_000-104131-מדר-ח",
-        "url": "https://idofangbentov.uk/Technion/DEQ1/DEQ1_000-104131-מדר-ח",
         "displayTitle": "פרק 0: 104131 מדר ח",
-        "number": 0
+        "number": 0,
+        "url": "https://idofangbentov.uk/Technion/DEQ1/DEQ1_000-104131-מדר-ח"
       },
       {
         "slug": "DEQ1_001-מבוא",
         "name": "DEQ1_001-מבוא",
-        "url": "https://idofangbentov.uk/Technion/DEQ1/DEQ1_001-מבוא",
         "displayTitle": "פרק 1: מבוא",
-        "number": 1
+        "number": 1,
+        "url": "https://idofangbentov.uk/Technion/DEQ1/DEQ1_001-מבוא"
       },
       {
         "slug": "DEQ1_002-גורם-אינטגרציה,-משוואה-פרידה",
         "name": "DEQ1_002-גורם-אינטגרציה,-משוואה-פרידה",
-        "url": "https://idofangbentov.uk/Technion/DEQ1/DEQ1_002-גורם-אינטגרציה,-משוואה-פרידה",
         "displayTitle": "פרק 2: גורם אינטגרציה, משוואה פרידה",
-        "number": 2
+        "number": 2,
+        "url": "https://idofangbentov.uk/Technion/DEQ1/DEQ1_002-גורם-אינטגרציה,-משוואה-פרידה"
       },
       {
         "slug": "DEQ1_003-משוואת-ברנולי-ומשוואה-מטיפוס-הומוגני",
         "name": "DEQ1_003-משוואת-ברנולי-ומשוואה-מטיפוס-הומוגני",
-        "url": "https://idofangbentov.uk/Technion/DEQ1/DEQ1_003-משוואת-ברנולי-ומשוואה-מטיפוס-הומוגני",
         "displayTitle": "פרק 3: משוואת ברנולי ומשוואה מטיפוס הומוגני",
-        "number": 3
+        "number": 3,
+        "url": "https://idofangbentov.uk/Technion/DEQ1/DEQ1_003-משוואת-ברנולי-ומשוואה-מטיפוס-הומוגני"
       },
       {
         "slug": "DEQ1_004-משוואות-מדויקות-ומשפחות-אורתוגונליות",
         "name": "DEQ1_004-משוואות-מדויקות-ומשפחות-אורתוגונליות",
-        "url": "https://idofangbentov.uk/Technion/DEQ1/DEQ1_004-משוואות-מדויקות-ומשפחות-אורתוגונליות",
         "displayTitle": "פרק 4: משוואות מדויקות ומשפחות אורתוגונליות",
-        "number": 4
+        "number": 4,
+        "url": "https://idofangbentov.uk/Technion/DEQ1/DEQ1_004-משוואות-מדויקות-ומשפחות-אורתוגונליות"
       },
       {
         "slug": "DEQ1_005-משפט-קיום-ויחידות",
         "name": "DEQ1_005-משפט-קיום-ויחידות",
-        "url": "https://idofangbentov.uk/Technion/DEQ1/DEQ1_005-משפט-קיום-ויחידות",
         "displayTitle": "פרק 5: משפט קיום ויחידות",
-        "number": 5
+        "number": 5,
+        "url": "https://idofangbentov.uk/Technion/DEQ1/DEQ1_005-משפט-קיום-ויחידות"
       },
       {
         "slug": "DEQ1_006-משוואות-לינאריות-הומוגניות-מסדר-גבוה",
         "name": "DEQ1_006-משוואות-לינאריות-הומוגניות-מסדר-גבוה",
-        "url": "https://idofangbentov.uk/Technion/DEQ1/DEQ1_006-משוואות-לינאריות-הומוגניות-מסדר-גבוה",
         "displayTitle": "פרק 6: משוואות לינאריות הומוגניות מסדר גבוה",
-        "number": 6
+        "number": 6,
+        "url": "https://idofangbentov.uk/Technion/DEQ1/DEQ1_006-משוואות-לינאריות-הומוגניות-מסדר-גבוה"
       },
       {
         "slug": "DEQ1_007-משוואות-לא-הומוגניות",
         "name": "DEQ1_007-משוואות-לא-הומוגניות",
-        "url": "https://idofangbentov.uk/Technion/DEQ1/DEQ1_007-משוואות-לא-הומוגניות",
         "displayTitle": "פרק 7: משוואות לא הומוגניות",
-        "number": 7
+        "number": 7,
+        "url": "https://idofangbentov.uk/Technion/DEQ1/DEQ1_007-משוואות-לא-הומוגניות"
       },
       {
         "slug": "DEQ1_008-פתרונות-טוריים-למשוואות-דיפרנציאליות-רגילות",
         "name": "DEQ1_008-פתרונות-טוריים-למשוואות-דיפרנציאליות-רגילות",
-        "url": "https://idofangbentov.uk/Technion/DEQ1/DEQ1_008-פתרונות-טוריים-למשוואות-דיפרנציאליות-רגילות",
         "displayTitle": "פרק 8: פתרונות טוריים למשוואות דיפרנציאליות רגילות",
-        "number": 8
+        "number": 8,
+        "url": "https://idofangbentov.uk/Technion/DEQ1/DEQ1_008-פתרונות-טוריים-למשוואות-דיפרנציאליות-רגילות"
       },
       {
         "slug": "DEQ1_009-טרנספורמציית-לפלס",
         "name": "DEQ1_009-טרנספורמציית-לפלס",
-        "url": "https://idofangbentov.uk/Technion/DEQ1/DEQ1_009-טרנספורמציית-לפלס",
         "displayTitle": "פרק 9: טרנספורמציית לפלס",
-        "number": 9
+        "number": 9,
+        "url": "https://idofangbentov.uk/Technion/DEQ1/DEQ1_009-טרנספורמציית-לפלס"
       },
       {
         "slug": "DEQ1_010-מערכת-משוואות",
         "name": "DEQ1_010-מערכת-משוואות",
-        "url": "https://idofangbentov.uk/Technion/DEQ1/DEQ1_010-מערכת-משוואות",
         "displayTitle": "פרק 10: מערכת משוואות",
-        "number": 10
+        "number": 10,
+        "url": "https://idofangbentov.uk/Technion/DEQ1/DEQ1_010-מערכת-משוואות"
       }
     ],
     "homework": [],
     "exams": [],
     "projects": [],
     "other": [],
-    "hebrewName": "מד״ר 1 (104131)"
+    "hebrewName": "משוואות דיפרנציאליות רגילות (104131)"
   },
   "DVI1": {
     "course_tag": "DVI1",
     "title": "DVI1",
     "url": "https://idofangbentov.uk/Technion/DVI1/",
+    "githubUrl": "https://github.com/NuclearGandhi/technion_second_brain/tree/master/Technion/DVI1",
     "lectures": [
       {
         "slug": "DVI1_000-00340051-דינמיקה-ותנודות",
         "name": "DVI1_000-00340051-דינמיקה-ותנודות",
-        "url": "https://idofangbentov.uk/Technion/DVI1/DVI1_000-00340051-דינמיקה-ותנודות",
         "displayTitle": "פרק 0: 00340051 דינמיקה ותנודות",
-        "number": 0
+        "number": 0,
+        "url": "https://idofangbentov.uk/Technion/DVI1/DVI1_000-00340051-דינמיקה-ותנודות"
       },
       {
-        "slug": "DVI1_001-מושגי-יסוד-ומכניקת-לגראנז",
-        "name": "DVI1_001-מושגי-יסוד-ומכניקת-לגראנז",
-        "url": "https://idofangbentov.uk/Technion/DVI1/DVI1_001-מושגי-יסוד-ומכניקת-לגראנז",
-        "displayTitle": "פרק 1: מושגי יסוד ומכניקת לגראנז",
-        "number": 1
+        "slug": "DVI1_001-מושגי-יסוד-ומכניקת-לגראנז'",
+        "name": "DVI1_001-מושגי-יסוד-ומכניקת-לגראנז'",
+        "displayTitle": "פרק 1: מושגי יסוד ומכניקת לגראנז'",
+        "number": 1,
+        "url": "https://idofangbentov.uk/Technion/DVI1/DVI1_001-מושגי-יסוד-ומכניקת-לגראנז%27"
       },
       {
         "slug": "DVI1_002-רטט-חופשי-של-מערכת--בדרגת-חופש-אחת",
         "name": "DVI1_002-רטט-חופשי-של-מערכת--בדרגת-חופש-אחת",
-        "url": "https://idofangbentov.uk/Technion/DVI1/DVI1_002-רטט-חופשי-של-מערכת--בדרגת-חופש-אחת",
         "displayTitle": "פרק 2: רטט חופשי של מערכת  בדרגת חופש אחת",
-        "number": 2
+        "number": 2,
+        "url": "https://idofangbentov.uk/Technion/DVI1/DVI1_002-רטט-חופשי-של-מערכת--בדרגת-חופש-אחת"
       },
       {
         "slug": "DVI1_003-עירורים-הרמוניים",
         "name": "DVI1_003-עירורים-הרמוניים",
-        "url": "https://idofangbentov.uk/Technion/DVI1/DVI1_003-עירורים-הרמוניים",
         "displayTitle": "פרק 3: עירורים הרמוניים",
-        "number": 3
+        "number": 3,
+        "url": "https://idofangbentov.uk/Technion/DVI1/DVI1_003-עירורים-הרמוניים"
       },
       {
         "slug": "DVI1_004-ריסון-וקשיחות-לא-לינארית",
         "name": "DVI1_004-ריסון-וקשיחות-לא-לינארית",
-        "url": "https://idofangbentov.uk/Technion/DVI1/DVI1_004-ריסון-וקשיחות-לא-לינארית",
         "displayTitle": "פרק 4: ריסון וקשיחות לא לינארית",
-        "number": 4
+        "number": 4,
+        "url": "https://idofangbentov.uk/Technion/DVI1/DVI1_004-ריסון-וקשיחות-לא-לינארית"
       },
       {
         "slug": "DVI1_005-אוסילטור-פרמטרי",
         "name": "DVI1_005-אוסילטור-פרמטרי",
-        "url": "https://idofangbentov.uk/Technion/DVI1/DVI1_005-אוסילטור-פרמטרי",
         "displayTitle": "פרק 5: אוסילטור פרמטרי",
-        "number": 5
+        "number": 5,
+        "url": "https://idofangbentov.uk/Technion/DVI1/DVI1_005-אוסילטור-פרמטרי"
       },
       {
         "slug": "DVI1_006-מערכות-מרובות-דרגות-חופש",
         "name": "DVI1_006-מערכות-מרובות-דרגות-חופש",
-        "url": "https://idofangbentov.uk/Technion/DVI1/DVI1_006-מערכות-מרובות-דרגות-חופש",
         "displayTitle": "פרק 6: מערכות מרובות דרגות חופש",
-        "number": 6
+        "number": 6,
+        "url": "https://idofangbentov.uk/Technion/DVI1/DVI1_006-מערכות-מרובות-דרגות-חופש"
       },
       {
         "slug": "DVI1_007-רטט-עקב-עירור-עצמי",
         "name": "DVI1_007-רטט-עקב-עירור-עצמי",
-        "url": "https://idofangbentov.uk/Technion/DVI1/DVI1_007-רטט-עקב-עירור-עצמי",
         "displayTitle": "פרק 7: רטט עקב עירור עצמי",
-        "number": 7
+        "number": 7,
+        "url": "https://idofangbentov.uk/Technion/DVI1/DVI1_007-רטט-עקב-עירור-עצמי"
       },
       {
         "slug": "DVI1_008-רטט-במערכות-רציפות",
         "name": "DVI1_008-רטט-במערכות-רציפות",
-        "url": "https://idofangbentov.uk/Technion/DVI1/DVI1_008-רטט-במערכות-רציפות",
         "displayTitle": "פרק 8: רטט במערכות רציפות",
-        "number": 8
+        "number": 8,
+        "url": "https://idofangbentov.uk/Technion/DVI1/DVI1_008-רטט-במערכות-רציפות"
       }
     ],
     "homework": [
       {
         "slug": "DVI1_HW001-פרויקטון-1",
         "name": "DVI1_HW001-פרויקטון-1",
-        "url": "https://idofangbentov.uk/Technion/DVI1/DVI1_HW001-פרויקטון-1",
         "displayTitle": "תרגיל בית 1: פרויקטון 1",
-        "hwNumber": 1
+        "hwNumber": 1,
+        "url": "https://idofangbentov.uk/Technion/DVI1/DVI1_HW001-פרויקטון-1"
       },
       {
         "slug": "DVI1_HW002-פרויקטון-2",
         "name": "DVI1_HW002-פרויקטון-2",
-        "url": "https://idofangbentov.uk/Technion/DVI1/DVI1_HW002-פרויקטון-2",
         "displayTitle": "תרגיל בית 2: פרויקטון 2",
-        "hwNumber": 2
+        "hwNumber": 2,
+        "url": "https://idofangbentov.uk/Technion/DVI1/DVI1_HW002-פרויקטון-2"
       }
     ],
     "exams": [
       {
-        "slug": "DVI1_E2017SA-2017-אביב-מועד-א",
-        "name": "DVI1_E2017SA-2017-אביב-מועד-א",
-        "url": "https://idofangbentov.uk/Technion/DVI1/DVI1_E2017SA-2017-אביב-מועד-א",
-        "displayTitle": "DVI1_E2017SA 2017 אביב מועד א",
+        "slug": "DVI1_E2017SA-2017-אביב-מועד-א'",
+        "name": "DVI1_E2017SA-2017-אביב-מועד-א'",
+        "displayTitle": "DVI1_E2017SA 2017 אביב מועד א׳",
         "year": "2017",
         "season": "אביב",
-        "moed": "מועד א׳"
+        "moed": "מועד א׳",
+        "url": "https://idofangbentov.uk/Technion/DVI1/DVI1_E2017SA-2017-אביב-מועד-א%27"
       },
       {
-        "slug": "DVI1_E2020SA-2020-אביב-מועד-א",
-        "name": "DVI1_E2020SA-2020-אביב-מועד-א",
-        "url": "https://idofangbentov.uk/Technion/DVI1/DVI1_E2020SA-2020-אביב-מועד-א",
-        "displayTitle": "DVI1_E2020SA 2020 אביב מועד א",
+        "slug": "DVI1_E2020SA-2020-אביב-מועד-א'",
+        "name": "DVI1_E2020SA-2020-אביב-מועד-א'",
+        "displayTitle": "DVI1_E2020SA 2020 אביב מועד א׳",
         "year": "2020",
         "season": "אביב",
-        "moed": "מועד א׳"
+        "moed": "מועד א׳",
+        "url": "https://idofangbentov.uk/Technion/DVI1/DVI1_E2020SA-2020-אביב-מועד-א%27"
       },
       {
-        "slug": "DVI1_E2022WA-2022-חורף-מועד-א",
-        "name": "DVI1_E2022WA-2022-חורף-מועד-א",
-        "url": "https://idofangbentov.uk/Technion/DVI1/DVI1_E2022WA-2022-חורף-מועד-א",
-        "displayTitle": "DVI1_E2022WA 2022 חורף מועד א",
+        "slug": "DVI1_E2022WA-2022-חורף-מועד-א'",
+        "name": "DVI1_E2022WA-2022-חורף-מועד-א'",
+        "displayTitle": "DVI1_E2022WA 2022 חורף מועד א׳",
         "year": "2022",
         "season": "חורף",
-        "moed": "מועד א׳"
+        "moed": "מועד א׳",
+        "url": "https://idofangbentov.uk/Technion/DVI1/DVI1_E2022WA-2022-חורף-מועד-א%27"
       },
       {
         "slug": "DVI1_EEQ-Exam-Example-Questions",
         "name": "DVI1_EEQ-Exam-Example-Questions",
-        "url": "https://idofangbentov.uk/Technion/DVI1/DVI1_EEQ-Exam-Example-Questions",
         "displayTitle": "DVI1_EEQ Exam Example Questions",
-        "year": "",
-        "season": "",
-        "moed": ""
+        "url": "https://idofangbentov.uk/Technion/DVI1/DVI1_EEQ-Exam-Example-Questions"
       }
     ],
     "projects": [],
@@ -617,6 +620,7 @@
       {
         "slug": "DVI1_A11-טבלאות-מערכות-רציפות",
         "name": "DVI1_A11-טבלאות-מערכות-רציפות",
+        "displayTitle": "📊 DVI1_A11 טבלאות מערכות רציפות",
         "url": "https://idofangbentov.uk/Technion/DVI1/DVI1_A11-טבלאות-מערכות-רציפות"
       }
     ],
@@ -626,317 +630,321 @@
     "course_tag": "DYN1",
     "title": "DYN1",
     "url": "https://idofangbentov.uk/Technion/DYN1/",
+    "githubUrl": "https://github.com/NuclearGandhi/technion_second_brain/tree/master/Technion/DYN1",
     "lectures": [
       {
         "slug": "DYN1_000-034010-דינמיקה",
         "name": "DYN1_000-034010-דינמיקה",
-        "url": "https://idofangbentov.uk/Technion/DYN1/DYN1_000-034010-דינמיקה",
         "displayTitle": "פרק 0: 034010 דינמיקה",
-        "number": 0
+        "number": 0,
+        "url": "https://idofangbentov.uk/Technion/DYN1/DYN1_000-034010-דינמיקה"
       },
       {
         "slug": "DYN1_001--קינמטיקה-של-חלקיק---מבוא",
         "name": "DYN1_001--קינמטיקה-של-חלקיק---מבוא",
-        "url": "https://idofangbentov.uk/Technion/DYN1/DYN1_001--קינמטיקה-של-חלקיק---מבוא",
-        "displayTitle": "פרק 1:  קינמטיקה של חלקיק   מבוא",
-        "number": 1
+        "displayTitle": "פרק 1: קינמטיקה של חלקיק   מבוא",
+        "number": 1,
+        "url": "https://idofangbentov.uk/Technion/DYN1/DYN1_001--קינמטיקה-של-חלקיק---מבוא"
       },
       {
         "slug": "DYN1_002-קינמטיקה-של-חלקיק---מערכת-צירים-סובבת",
         "name": "DYN1_002-קינמטיקה-של-חלקיק---מערכת-צירים-סובבת",
-        "url": "https://idofangbentov.uk/Technion/DYN1/DYN1_002-קינמטיקה-של-חלקיק---מערכת-צירים-סובבת",
         "displayTitle": "פרק 2: קינמטיקה של חלקיק   מערכת צירים סובבת",
-        "number": 2
+        "number": 2,
+        "url": "https://idofangbentov.uk/Technion/DYN1/DYN1_002-קינמטיקה-של-חלקיק---מערכת-צירים-סובבת"
       },
       {
         "slug": "DYN1_003-קינמטיקה-של-גוף-קשיח",
         "name": "DYN1_003-קינמטיקה-של-גוף-קשיח",
-        "url": "https://idofangbentov.uk/Technion/DYN1/DYN1_003-קינמטיקה-של-גוף-קשיח",
         "displayTitle": "פרק 3: קינמטיקה של גוף קשיח",
-        "number": 3
+        "number": 3,
+        "url": "https://idofangbentov.uk/Technion/DYN1/DYN1_003-קינמטיקה-של-גוף-קשיח"
       },
       {
         "slug": "DYN1_004-קינמטיקה-של-מערכת-גופים-קשיחים",
         "name": "DYN1_004-קינמטיקה-של-מערכת-גופים-קשיחים",
-        "url": "https://idofangbentov.uk/Technion/DYN1/DYN1_004-קינמטיקה-של-מערכת-גופים-קשיחים",
         "displayTitle": "פרק 4: קינמטיקה של מערכת גופים קשיחים",
-        "number": 4
+        "number": 4,
+        "url": "https://idofangbentov.uk/Technion/DYN1/DYN1_004-קינמטיקה-של-מערכת-גופים-קשיחים"
       },
       {
         "slug": "DYN1_005-קינטיקה-של-חלקיק",
         "name": "DYN1_005-קינטיקה-של-חלקיק",
-        "url": "https://idofangbentov.uk/Technion/DYN1/DYN1_005-קינטיקה-של-חלקיק",
         "displayTitle": "פרק 5: קינטיקה של חלקיק",
-        "number": 5
+        "number": 5,
+        "url": "https://idofangbentov.uk/Technion/DYN1/DYN1_005-קינטיקה-של-חלקיק"
       },
       {
         "slug": "DYN1_006-קינטיקה-של-מערכת-חלקיקים",
         "name": "DYN1_006-קינטיקה-של-מערכת-חלקיקים",
-        "url": "https://idofangbentov.uk/Technion/DYN1/DYN1_006-קינטיקה-של-מערכת-חלקיקים",
         "displayTitle": "פרק 6: קינטיקה של מערכת חלקיקים",
-        "number": 6
+        "number": 6,
+        "url": "https://idofangbentov.uk/Technion/DYN1/DYN1_006-קינטיקה-של-מערכת-חלקיקים"
       },
       {
         "slug": "DYN1_007-קינטיקה-של-גוף-קשיח",
         "name": "DYN1_007-קינטיקה-של-גוף-קשיח",
-        "url": "https://idofangbentov.uk/Technion/DYN1/DYN1_007-קינטיקה-של-גוף-קשיח",
         "displayTitle": "פרק 7: קינטיקה של גוף קשיח",
-        "number": 7
+        "number": 7,
+        "url": "https://idofangbentov.uk/Technion/DYN1/DYN1_007-קינטיקה-של-גוף-קשיח"
       },
       {
         "slug": "DYN1_008-טנזור-האינרציה",
         "name": "DYN1_008-טנזור-האינרציה",
-        "url": "https://idofangbentov.uk/Technion/DYN1/DYN1_008-טנזור-האינרציה",
         "displayTitle": "פרק 8: טנזור האינרציה",
-        "number": 8
+        "number": 8,
+        "url": "https://idofangbentov.uk/Technion/DYN1/DYN1_008-טנזור-האינרציה"
       },
       {
         "slug": "DYN1_009-קינטיקה-של-מערכת-גופים-קשיחים",
         "name": "DYN1_009-קינטיקה-של-מערכת-גופים-קשיחים",
-        "url": "https://idofangbentov.uk/Technion/DYN1/DYN1_009-קינטיקה-של-מערכת-גופים-קשיחים",
         "displayTitle": "פרק 9: קינטיקה של מערכת גופים קשיחים",
-        "number": 9
+        "number": 9,
+        "url": "https://idofangbentov.uk/Technion/DYN1/DYN1_009-קינטיקה-של-מערכת-גופים-קשיחים"
       }
     ],
     "homework": [
       {
         "slug": "DYN1_HW001-תרגיל-בית-1",
         "name": "DYN1_HW001-תרגיל-בית-1",
-        "url": "https://idofangbentov.uk/Technion/DYN1/DYN1_HW001-תרגיל-בית-1",
-        "displayTitle": "תרגיל בית 1: תרגיל בית 1",
-        "hwNumber": 1
+        "displayTitle": "תרגיל בית 1: DYN1_HW001 תרגיל בית 1",
+        "hwNumber": 1,
+        "url": "https://idofangbentov.uk/Technion/DYN1/DYN1_HW001-תרגיל-בית-1"
       },
       {
         "slug": "DYN1_HW002-תרגיל-בית-2",
         "name": "DYN1_HW002-תרגיל-בית-2",
-        "url": "https://idofangbentov.uk/Technion/DYN1/DYN1_HW002-תרגיל-בית-2",
-        "displayTitle": "תרגיל בית 2: תרגיל בית 2",
-        "hwNumber": 2
+        "displayTitle": "תרגיל בית 2: DYN1_HW002 תרגיל בית 2",
+        "hwNumber": 2,
+        "url": "https://idofangbentov.uk/Technion/DYN1/DYN1_HW002-תרגיל-בית-2"
       },
       {
         "slug": "DYN1_HW003-תרגיל-בית-3",
         "name": "DYN1_HW003-תרגיל-בית-3",
-        "url": "https://idofangbentov.uk/Technion/DYN1/DYN1_HW003-תרגיל-בית-3",
-        "displayTitle": "תרגיל בית 3: תרגיל בית 3",
-        "hwNumber": 3
+        "displayTitle": "תרגיל בית 3: DYN1_HW003 תרגיל בית 3",
+        "hwNumber": 3,
+        "url": "https://idofangbentov.uk/Technion/DYN1/DYN1_HW003-תרגיל-בית-3"
       },
       {
         "slug": "DYN1_HW004-תרגיל-בית-4",
         "name": "DYN1_HW004-תרגיל-בית-4",
-        "url": "https://idofangbentov.uk/Technion/DYN1/DYN1_HW004-תרגיל-בית-4",
-        "displayTitle": "תרגיל בית 4: תרגיל בית 4",
-        "hwNumber": 4
+        "displayTitle": "תרגיל בית 4: DYN1_HW004 תרגיל בית 4",
+        "hwNumber": 4,
+        "url": "https://idofangbentov.uk/Technion/DYN1/DYN1_HW004-תרגיל-בית-4"
       },
       {
         "slug": "DYN1_HW005-תרגיל-בית-5",
         "name": "DYN1_HW005-תרגיל-בית-5",
-        "url": "https://idofangbentov.uk/Technion/DYN1/DYN1_HW005-תרגיל-בית-5",
-        "displayTitle": "תרגיל בית 5: תרגיל בית 5",
-        "hwNumber": 5
+        "displayTitle": "תרגיל בית 5: DYN1_HW005 תרגיל בית 5",
+        "hwNumber": 5,
+        "url": "https://idofangbentov.uk/Technion/DYN1/DYN1_HW005-תרגיל-בית-5"
       },
       {
         "slug": "DYN1_HW006-תרגיל-בית-6",
         "name": "DYN1_HW006-תרגיל-בית-6",
-        "url": "https://idofangbentov.uk/Technion/DYN1/DYN1_HW006-תרגיל-בית-6",
-        "displayTitle": "תרגיל בית 6: תרגיל בית 6",
-        "hwNumber": 6
+        "displayTitle": "תרגיל בית 6: DYN1_HW006 תרגיל בית 6",
+        "hwNumber": 6,
+        "url": "https://idofangbentov.uk/Technion/DYN1/DYN1_HW006-תרגיל-בית-6"
       },
       {
         "slug": "DYN1_HW007-תרגיל-בית-7",
         "name": "DYN1_HW007-תרגיל-בית-7",
-        "url": "https://idofangbentov.uk/Technion/DYN1/DYN1_HW007-תרגיל-בית-7",
-        "displayTitle": "תרגיל בית 7: תרגיל בית 7",
-        "hwNumber": 7
+        "displayTitle": "תרגיל בית 7: DYN1_HW007 תרגיל בית 7",
+        "hwNumber": 7,
+        "url": "https://idofangbentov.uk/Technion/DYN1/DYN1_HW007-תרגיל-בית-7"
       },
       {
         "slug": "DYN1_HW008-תרגיל-בית-8",
         "name": "DYN1_HW008-תרגיל-בית-8",
-        "url": "https://idofangbentov.uk/Technion/DYN1/DYN1_HW008-תרגיל-בית-8",
-        "displayTitle": "תרגיל בית 8: תרגיל בית 8",
-        "hwNumber": 8
+        "displayTitle": "תרגיל בית 8: DYN1_HW008 תרגיל בית 8",
+        "hwNumber": 8,
+        "url": "https://idofangbentov.uk/Technion/DYN1/DYN1_HW008-תרגיל-בית-8"
       },
       {
         "slug": "DYN1_HW009-תרגיל-בית-9",
         "name": "DYN1_HW009-תרגיל-בית-9",
-        "url": "https://idofangbentov.uk/Technion/DYN1/DYN1_HW009-תרגיל-בית-9",
-        "displayTitle": "תרגיל בית 9: תרגיל בית 9",
-        "hwNumber": 9
+        "displayTitle": "תרגיל בית 9: DYN1_HW009 תרגיל בית 9",
+        "hwNumber": 9,
+        "url": "https://idofangbentov.uk/Technion/DYN1/DYN1_HW009-תרגיל-בית-9"
       },
       {
         "slug": "DYN1_HW010-תרגיל-בית-10",
         "name": "DYN1_HW010-תרגיל-בית-10",
-        "url": "https://idofangbentov.uk/Technion/DYN1/DYN1_HW010-תרגיל-בית-10",
-        "displayTitle": "תרגיל בית 10: תרגיל בית 10",
-        "hwNumber": 10
+        "displayTitle": "תרגיל בית 10: DYN1_HW010 תרגיל בית 10",
+        "hwNumber": 10,
+        "url": "https://idofangbentov.uk/Technion/DYN1/DYN1_HW010-תרגיל-בית-10"
       }
     ],
     "exams": [
       {
-        "slug": "DYN1_E2015WA-2015-חורף-מועד-א",
-        "name": "DYN1_E2015WA-2015-חורף-מועד-א",
-        "url": "https://idofangbentov.uk/Technion/DYN1/DYN1_E2015WA-2015-חורף-מועד-א",
-        "displayTitle": "DYN1_E2015WA 2015 חורף מועד א",
+        "slug": "DYN1_E2015WA-2015-חורף-מועד-א'",
+        "name": "DYN1_E2015WA-2015-חורף-מועד-א'",
+        "displayTitle": "DYN1_E2015WA 2015 חורף מועד א׳",
         "year": "2015",
         "season": "חורף",
-        "moed": "מועד א׳"
+        "moed": "מועד א׳",
+        "url": "https://idofangbentov.uk/Technion/DYN1/DYN1_E2015WA-2015-חורף-מועד-א%27"
       },
       {
-        "slug": "DYN1_E2020SA-2020-אביב-מועד-א",
-        "name": "DYN1_E2020SA-2020-אביב-מועד-א",
-        "url": "https://idofangbentov.uk/Technion/DYN1/DYN1_E2020SA-2020-אביב-מועד-א",
-        "displayTitle": "DYN1_E2020SA 2020 אביב מועד א",
+        "slug": "DYN1_E2020SA-2020-אביב-מועד-א'",
+        "name": "DYN1_E2020SA-2020-אביב-מועד-א'",
+        "displayTitle": "DYN1_E2020SA 2020 אביב מועד א׳",
         "year": "2020",
         "season": "אביב",
-        "moed": "מועד א׳"
+        "moed": "מועד א׳",
+        "url": "https://idofangbentov.uk/Technion/DYN1/DYN1_E2020SA-2020-אביב-מועד-א%27"
       },
       {
-        "slug": "DYN1_E2022SA-2022-אביב-מועד-א",
-        "name": "DYN1_E2022SA-2022-אביב-מועד-א",
-        "url": "https://idofangbentov.uk/Technion/DYN1/DYN1_E2022SA-2022-אביב-מועד-א",
-        "displayTitle": "DYN1_E2022SA 2022 אביב מועד א",
+        "slug": "DYN1_E2022SA-2022-אביב-מועד-א'",
+        "name": "DYN1_E2022SA-2022-אביב-מועד-א'",
+        "displayTitle": "DYN1_E2022SA 2022 אביב מועד א׳",
         "year": "2022",
         "season": "אביב",
-        "moed": "מועד א׳"
+        "moed": "מועד א׳",
+        "url": "https://idofangbentov.uk/Technion/DYN1/DYN1_E2022SA-2022-אביב-מועד-א%27"
       },
       {
-        "slug": "DYN1_E2022SB-2022-אביב-מועד-ב",
-        "name": "DYN1_E2022SB-2022-אביב-מועד-ב",
-        "url": "https://idofangbentov.uk/Technion/DYN1/DYN1_E2022SB-2022-אביב-מועד-ב",
-        "displayTitle": "DYN1_E2022SB 2022 אביב מועד ב",
+        "slug": "DYN1_E2022SB-2022-אביב-מועד-ב'",
+        "name": "DYN1_E2022SB-2022-אביב-מועד-ב'",
+        "displayTitle": "DYN1_E2022SB 2022 אביב מועד ב׳",
         "year": "2022",
         "season": "אביב",
-        "moed": "מועד ב׳"
+        "moed": "מועד ב׳",
+        "url": "https://idofangbentov.uk/Technion/DYN1/DYN1_E2022SB-2022-אביב-מועד-ב%27"
       },
       {
-        "slug": "DYN1_E2023SA-2023-אביב-מועד-א",
-        "name": "DYN1_E2023SA-2023-אביב-מועד-א",
-        "url": "https://idofangbentov.uk/Technion/DYN1/DYN1_E2023SA-2023-אביב-מועד-א",
-        "displayTitle": "DYN1_E2023SA 2023 אביב מועד א",
+        "slug": "DYN1_E2023SA-2023-אביב-מועד-א'",
+        "name": "DYN1_E2023SA-2023-אביב-מועד-א'",
+        "displayTitle": "DYN1_E2023SA 2023 אביב מועד א׳",
         "year": "2023",
         "season": "אביב",
-        "moed": "מועד א׳"
+        "moed": "מועד א׳",
+        "url": "https://idofangbentov.uk/Technion/DYN1/DYN1_E2023SA-2023-אביב-מועד-א%27"
       }
     ],
     "projects": [],
     "other": [],
-    "hebrewName": "דינמיקה (034010)"
+    "hebrewName": "דינמיקה (034010 / 034015)"
   },
   "ELM1": {
     "course_tag": "ELM1",
     "title": "ELM1",
     "url": "https://idofangbentov.uk/Technion/ELM1/",
+    "githubUrl": "https://github.com/NuclearGandhi/technion_second_brain/tree/master/Technion/ELM1",
     "lectures": [
       {
         "slug": "ELM1_000-00340034-הנע-חשמלי",
         "name": "ELM1_000-00340034-הנע-חשמלי",
-        "url": "https://idofangbentov.uk/Technion/ELM1/ELM1_000-00340034-הנע-חשמלי",
         "displayTitle": "פרק 0: 00340034 הנע חשמלי",
-        "number": 0
+        "number": 0,
+        "url": "https://idofangbentov.uk/Technion/ELM1/ELM1_000-00340034-הנע-חשמלי"
       },
       {
         "slug": "ELM1_001-מעגלים-מגנטיים-בזרם-ישר",
         "name": "ELM1_001-מעגלים-מגנטיים-בזרם-ישר",
-        "url": "https://idofangbentov.uk/Technion/ELM1/ELM1_001-מעגלים-מגנטיים-בזרם-ישר",
         "displayTitle": "פרק 1: מעגלים מגנטיים בזרם ישר",
-        "number": 1
+        "number": 1,
+        "url": "https://idofangbentov.uk/Technion/ELM1/ELM1_001-מעגלים-מגנטיים-בזרם-ישר"
       },
       {
         "slug": "ELM1_002-הספק-פעיל,-הגבי-ונדמה",
         "name": "ELM1_002-הספק-פעיל,-הגבי-ונדמה",
-        "url": "https://idofangbentov.uk/Technion/ELM1/ELM1_002-הספק-פעיל,-הגבי-ונדמה",
         "displayTitle": "פרק 2: הספק פעיל, הגבי ונדמה",
-        "number": 2
+        "number": 2,
+        "url": "https://idofangbentov.uk/Technion/ELM1/ELM1_002-הספק-פעיל,-הגבי-ונדמה"
       },
       {
         "slug": "ELM1_003-עקרונות-המרת-אנרגיה-אלקטרומכנית",
         "name": "ELM1_003-עקרונות-המרת-אנרגיה-אלקטרומכנית",
-        "url": "https://idofangbentov.uk/Technion/ELM1/ELM1_003-עקרונות-המרת-אנרגיה-אלקטרומכנית",
         "displayTitle": "פרק 3: עקרונות המרת אנרגיה אלקטרומכנית",
-        "number": 3
+        "number": 3,
+        "url": "https://idofangbentov.uk/Technion/ELM1/ELM1_003-עקרונות-המרת-אנרגיה-אלקטרומכנית"
       },
       {
         "slug": "ELM1_004-גנרטור-DC",
         "name": "ELM1_004-גנרטור-DC",
-        "url": "https://idofangbentov.uk/Technion/ELM1/ELM1_004-גנרטור-DC",
         "displayTitle": "פרק 4: גנרטור DC",
-        "number": 4
+        "number": 4,
+        "url": "https://idofangbentov.uk/Technion/ELM1/ELM1_004-גנרטור-DC"
       },
       {
         "slug": "ELM1_005-מנוע-DC",
         "name": "ELM1_005-מנוע-DC",
-        "url": "https://idofangbentov.uk/Technion/ELM1/ELM1_005-מנוע-DC",
         "displayTitle": "פרק 5: מנוע DC",
-        "number": 5
+        "number": 5,
+        "url": "https://idofangbentov.uk/Technion/ELM1/ELM1_005-מנוע-DC"
       },
       {
         "slug": "ELM1_006-שנאים",
         "name": "ELM1_006-שנאים",
-        "url": "https://idofangbentov.uk/Technion/ELM1/ELM1_006-שנאים",
         "displayTitle": "פרק 6: שנאים",
-        "number": 6
+        "number": 6,
+        "url": "https://idofangbentov.uk/Technion/ELM1/ELM1_006-שנאים"
       },
       {
         "slug": "ELM1_007-מכונות-סינכרוניות",
         "name": "ELM1_007-מכונות-סינכרוניות",
-        "url": "https://idofangbentov.uk/Technion/ELM1/ELM1_007-מכונות-סינכרוניות",
         "displayTitle": "פרק 7: מכונות סינכרוניות",
-        "number": 7
+        "number": 7,
+        "url": "https://idofangbentov.uk/Technion/ELM1/ELM1_007-מכונות-סינכרוניות"
       },
       {
         "slug": "ELM1_008-מנועי-אינדוקציה",
         "name": "ELM1_008-מנועי-אינדוקציה",
-        "url": "https://idofangbentov.uk/Technion/ELM1/ELM1_008-מנועי-אינדוקציה",
         "displayTitle": "פרק 8: מנועי אינדוקציה",
-        "number": 8
+        "number": 8,
+        "url": "https://idofangbentov.uk/Technion/ELM1/ELM1_008-מנועי-אינדוקציה"
       }
     ],
     "homework": [
       {
         "slug": "ELM1_HW001-תרגיל-בית-1",
         "name": "ELM1_HW001-תרגיל-בית-1",
-        "url": "https://idofangbentov.uk/Technion/ELM1/ELM1_HW001-תרגיל-בית-1",
-        "displayTitle": "תרגיל בית 1: תרגיל בית 1",
-        "hwNumber": 1
+        "displayTitle": "תרגיל בית 1: ELM1_HW001 תרגיל בית 1",
+        "hwNumber": 1,
+        "url": "https://idofangbentov.uk/Technion/ELM1/ELM1_HW001-תרגיל-בית-1"
       },
       {
         "slug": "ELM1_HW002-תרגיל-בית-2",
         "name": "ELM1_HW002-תרגיל-בית-2",
-        "url": "https://idofangbentov.uk/Technion/ELM1/ELM1_HW002-תרגיל-בית-2",
         "displayTitle": "תרגיל בית 2: תרגיל בית 2",
-        "hwNumber": 2
+        "hwNumber": 2,
+        "url": "https://idofangbentov.uk/Technion/ELM1/ELM1_HW002-תרגיל-בית-2"
       },
       {
         "slug": "ELM1_HW003-תרגיל-בית-3",
         "name": "ELM1_HW003-תרגיל-בית-3",
-        "url": "https://idofangbentov.uk/Technion/ELM1/ELM1_HW003-תרגיל-בית-3",
         "displayTitle": "תרגיל בית 3: תרגיל בית 3",
-        "hwNumber": 3
+        "hwNumber": 3,
+        "url": "https://idofangbentov.uk/Technion/ELM1/ELM1_HW003-תרגיל-בית-3"
       }
     ],
     "exams": [
       {
         "slug": "ELM1_E2023SA-2023-אביב-מועד-א",
         "name": "ELM1_E2023SA-2023-אביב-מועד-א",
-        "url": "https://idofangbentov.uk/Technion/ELM1/ELM1_E2023SA-2023-אביב-מועד-א",
-        "displayTitle": "ELM1_E2023SA 2023 אביב מועד א",
+        "displayTitle": "ELM1_E2023SA 2023 אביב מועד א׳",
         "year": "2023",
         "season": "אביב",
-        "moed": "מועד א׳"
+        "moed": "מועד א׳",
+        "url": "https://idofangbentov.uk/Technion/ELM1/ELM1_E2023SA-2023-אביב-מועד-א"
       },
       {
         "slug": "ELM1_E2025SC-2025-אביב-מועד-ג",
         "name": "ELM1_E2025SC-2025-אביב-מועד-ג",
-        "url": "https://idofangbentov.uk/Technion/ELM1/ELM1_E2025SC-2025-אביב-מועד-ג",
-        "displayTitle": "ELM1_E2025SC 2025 אביב מועד ג",
+        "displayTitle": "ELM1_E2025SC 2025 אביב מועד ג׳",
         "year": "2025",
         "season": "אביב",
-        "moed": "מועד ג׳"
+        "moed": "מועד ג׳",
+        "url": "https://idofangbentov.uk/Technion/ELM1/ELM1_E2025SC-2025-אביב-מועד-ג"
       }
     ],
     "projects": [
       {
         "slug": "ELM1_P001-פרויקט-1",
         "name": "ELM1_P001-פרויקט-1",
+        "displayTitle": "פרויקט בהינע חשמלי - בניית מנוע DC",
+        "number": 1,
         "url": "https://idofangbentov.uk/Technion/ELM1/ELM1_P001-פרויקט-1"
       }
     ],
@@ -947,144 +955,145 @@
     "course_tag": "FEM1",
     "title": "FEM1",
     "url": "https://idofangbentov.uk/Technion/FEM1/",
+    "githubUrl": "https://github.com/NuclearGandhi/technion_second_brain/tree/master/Technion/FEM1",
     "lectures": [
       {
         "slug": "FEM1_000-00350022-אלמנטים-סופיים-לאנליזה-הנדסית",
         "name": "FEM1_000-00350022-אלמנטים-סופיים-לאנליזה-הנדסית",
-        "url": "https://idofangbentov.uk/Technion/FEM1/FEM1_000-00350022-אלמנטים-סופיים-לאנליזה-הנדסית",
         "displayTitle": "פרק 0: 00350022 אלמנטים סופיים לאנליזה הנדסית",
-        "number": 0
+        "number": 0,
+        "url": "https://idofangbentov.uk/Technion/FEM1/FEM1_000-00350022-אלמנטים-סופיים-לאנליזה-הנדסית"
       },
       {
         "slug": "FEM1_001-מבוא-ומידול-בעיה-חד-ממדית",
         "name": "FEM1_001-מבוא-ומידול-בעיה-חד-ממדית",
-        "url": "https://idofangbentov.uk/Technion/FEM1/FEM1_001-מבוא-ומידול-בעיה-חד-ממדית",
         "displayTitle": "פרק 1: מבוא ומידול בעיה חד ממדית",
-        "number": 1
+        "number": 1,
+        "url": "https://idofangbentov.uk/Technion/FEM1/FEM1_001-מבוא-ומידול-בעיה-חד-ממדית"
       },
       {
         "slug": "FEM1_002-אלסטוסטטיקה-חד-ממדית",
         "name": "FEM1_002-אלסטוסטטיקה-חד-ממדית",
-        "url": "https://idofangbentov.uk/Technion/FEM1/FEM1_002-אלסטוסטטיקה-חד-ממדית",
         "displayTitle": "פרק 2: אלסטוסטטיקה חד ממדית",
-        "number": 2
+        "number": 2,
+        "url": "https://idofangbentov.uk/Technion/FEM1/FEM1_002-אלסטוסטטיקה-חד-ממדית"
       },
       {
         "slug": "FEM1_003-מימוש-אלמנט-סופי-בחד-ממד",
         "name": "FEM1_003-מימוש-אלמנט-סופי-בחד-ממד",
-        "url": "https://idofangbentov.uk/Technion/FEM1/FEM1_003-מימוש-אלמנט-סופי-בחד-ממד",
         "displayTitle": "פרק 3: מימוש אלמנט סופי בחד ממד",
-        "number": 3
+        "number": 3,
+        "url": "https://idofangbentov.uk/Technion/FEM1/FEM1_003-מימוש-אלמנט-סופי-בחד-ממד"
       },
       {
         "slug": "FEM1_004-דיוק-שיטת-אלמנטים-סופיים-בחד-ממד",
         "name": "FEM1_004-דיוק-שיטת-אלמנטים-סופיים-בחד-ממד",
-        "url": "https://idofangbentov.uk/Technion/FEM1/FEM1_004-דיוק-שיטת-אלמנטים-סופיים-בחד-ממד",
         "displayTitle": "פרק 4: דיוק שיטת אלמנטים סופיים בחד ממד",
-        "number": 4
+        "number": 4,
+        "url": "https://idofangbentov.uk/Technion/FEM1/FEM1_004-דיוק-שיטת-אלמנטים-סופיים-בחד-ממד"
       },
       {
         "slug": "FEM1_005--בעיות-תלויות-בזמן",
         "name": "FEM1_005--בעיות-תלויות-בזמן",
-        "url": "https://idofangbentov.uk/Technion/FEM1/FEM1_005--בעיות-תלויות-בזמן",
-        "displayTitle": "פרק 5:  בעיות תלויות בזמן",
-        "number": 5
+        "displayTitle": "פרק 5: בעיות תלויות בזמן",
+        "number": 5,
+        "url": "https://idofangbentov.uk/Technion/FEM1/FEM1_005--בעיות-תלויות-בזמן"
       },
       {
         "slug": "FEM1_006-שיטת-אלמנטים-סופיים-בתלת-ממד",
         "name": "FEM1_006-שיטת-אלמנטים-סופיים-בתלת-ממד",
-        "url": "https://idofangbentov.uk/Technion/FEM1/FEM1_006-שיטת-אלמנטים-סופיים-בתלת-ממד",
         "displayTitle": "פרק 6: שיטת אלמנטים סופיים בתלת ממד",
-        "number": 6
+        "number": 6,
+        "url": "https://idofangbentov.uk/Technion/FEM1/FEM1_006-שיטת-אלמנטים-סופיים-בתלת-ממד"
       },
       {
         "slug": "FEM1_007-משוואת-פואסון-הדו-ממדית",
         "name": "FEM1_007-משוואת-פואסון-הדו-ממדית",
-        "url": "https://idofangbentov.uk/Technion/FEM1/FEM1_007-משוואת-פואסון-הדו-ממדית",
         "displayTitle": "פרק 7: משוואת פואסון הדו ממדית",
-        "number": 7
+        "number": 7,
+        "url": "https://idofangbentov.uk/Technion/FEM1/FEM1_007-משוואת-פואסון-הדו-ממדית"
       },
       {
         "slug": "FEM1_008-משוואת-האלסטיות-הדו-ממדית",
         "name": "FEM1_008-משוואת-האלסטיות-הדו-ממדית",
-        "url": "https://idofangbentov.uk/Technion/FEM1/FEM1_008-משוואת-האלסטיות-הדו-ממדית",
         "displayTitle": "פרק 8: משוואת האלסטיות הדו ממדית",
-        "number": 8
+        "number": 8,
+        "url": "https://idofangbentov.uk/Technion/FEM1/FEM1_008-משוואת-האלסטיות-הדו-ממדית"
       },
       {
         "slug": "FEM1_009-אלמנט-מוט-אלסטי-ומסבכים",
         "name": "FEM1_009-אלמנט-מוט-אלסטי-ומסבכים",
-        "url": "https://idofangbentov.uk/Technion/FEM1/FEM1_009-אלמנט-מוט-אלסטי-ומסבכים",
         "displayTitle": "פרק 9: אלמנט מוט אלסטי ומסבכים",
-        "number": 9
+        "number": 9,
+        "url": "https://idofangbentov.uk/Technion/FEM1/FEM1_009-אלמנט-מוט-אלסטי-ומסבכים"
       },
       {
         "slug": "FEM1_010-ניתוח-אלמנטים-סופיים-של-קורת-אוילר-ברנולי",
         "name": "FEM1_010-ניתוח-אלמנטים-סופיים-של-קורת-אוילר-ברנולי",
-        "url": "https://idofangbentov.uk/Technion/FEM1/FEM1_010-ניתוח-אלמנטים-סופיים-של-קורת-אוילר-ברנולי",
         "displayTitle": "פרק 10: ניתוח אלמנטים סופיים של קורת אוילר ברנולי",
-        "number": 10
+        "number": 10,
+        "url": "https://idofangbentov.uk/Technion/FEM1/FEM1_010-ניתוח-אלמנטים-סופיים-של-קורת-אוילר-ברנולי"
       }
     ],
     "homework": [
       {
         "slug": "FEM1_HW001-תרגיל-בית-1",
         "name": "FEM1_HW001-תרגיל-בית-1",
-        "url": "https://idofangbentov.uk/Technion/FEM1/FEM1_HW001-תרגיל-בית-1",
         "displayTitle": "תרגיל בית 1: תרגיל בית 1",
-        "hwNumber": 1
+        "hwNumber": 1,
+        "url": "https://idofangbentov.uk/Technion/FEM1/FEM1_HW001-תרגיל-בית-1"
       },
       {
         "slug": "FEM1_HW002-תרגיל-בית-2",
         "name": "FEM1_HW002-תרגיל-בית-2",
-        "url": "https://idofangbentov.uk/Technion/FEM1/FEM1_HW002-תרגיל-בית-2",
         "displayTitle": "תרגיל בית 2: תרגיל בית 2",
-        "hwNumber": 2
+        "hwNumber": 2,
+        "url": "https://idofangbentov.uk/Technion/FEM1/FEM1_HW002-תרגיל-בית-2"
       },
       {
         "slug": "FEM1_HW003-תרגיל-בית-3",
         "name": "FEM1_HW003-תרגיל-בית-3",
-        "url": "https://idofangbentov.uk/Technion/FEM1/FEM1_HW003-תרגיל-בית-3",
         "displayTitle": "תרגיל בית 3: תרגיל בית 3",
-        "hwNumber": 3
+        "hwNumber": 3,
+        "url": "https://idofangbentov.uk/Technion/FEM1/FEM1_HW003-תרגיל-בית-3"
       }
     ],
     "exams": [
       {
         "slug": "FEM1_E2020SA-2020-אביב-מועד-א",
         "name": "FEM1_E2020SA-2020-אביב-מועד-א",
-        "url": "https://idofangbentov.uk/Technion/FEM1/FEM1_E2020SA-2020-אביב-מועד-א",
-        "displayTitle": "FEM1_E2020SA 2020 אביב מועד א",
+        "displayTitle": "FEM1_E2020SA 2020 אביב מועד א׳",
         "year": "2020",
         "season": "אביב",
-        "moed": "מועד א׳"
+        "moed": "מועד א׳",
+        "url": "https://idofangbentov.uk/Technion/FEM1/FEM1_E2020SA-2020-אביב-מועד-א"
       },
       {
         "slug": "FEM1_E2020SB-2020-אביב-מועד-ב",
         "name": "FEM1_E2020SB-2020-אביב-מועד-ב",
-        "url": "https://idofangbentov.uk/Technion/FEM1/FEM1_E2020SB-2020-אביב-מועד-ב",
-        "displayTitle": "FEM1_E2020SB 2020 אביב מועד ב",
+        "displayTitle": "FEM1_E2020SB 2020 אביב מועד ב׳",
         "year": "2020",
         "season": "אביב",
-        "moed": "מועד ב׳"
+        "moed": "מועד ב׳",
+        "url": "https://idofangbentov.uk/Technion/FEM1/FEM1_E2020SB-2020-אביב-מועד-ב"
       },
       {
         "slug": "FEM1_E2024SA-2024-אביב-מועד-א",
         "name": "FEM1_E2024SA-2024-אביב-מועד-א",
-        "url": "https://idofangbentov.uk/Technion/FEM1/FEM1_E2024SA-2024-אביב-מועד-א",
-        "displayTitle": "FEM1_E2024SA 2024 אביב מועד א",
+        "displayTitle": "FEM1_E2024SA 2024 אביב מועד א׳",
         "year": "2024",
         "season": "אביב",
-        "moed": "מועד א׳"
+        "moed": "מועד א׳",
+        "url": "https://idofangbentov.uk/Technion/FEM1/FEM1_E2024SA-2024-אביב-מועד-א"
       },
       {
         "slug": "FEM1_E2024SB-2024-אביב-מועד-ב",
         "name": "FEM1_E2024SB-2024-אביב-מועד-ב",
-        "url": "https://idofangbentov.uk/Technion/FEM1/FEM1_E2024SB-2024-אביב-מועד-ב",
-        "displayTitle": "FEM1_E2024SB 2024 אביב מועד ב",
+        "displayTitle": "FEM1_E2024SB 2024 אביב מועד ב׳",
         "year": "2024",
         "season": "אביב",
-        "moed": "מועד ב׳"
+        "moed": "מועד ב׳",
+        "url": "https://idofangbentov.uk/Technion/FEM1/FEM1_E2024SB-2024-אביב-מועד-ב"
       }
     ],
     "projects": [],
@@ -1095,307 +1104,302 @@
     "course_tag": "FLD1",
     "title": "FLD1",
     "url": "https://idofangbentov.uk/Technion/FLD1/",
+    "githubUrl": "https://github.com/NuclearGandhi/technion_second_brain/tree/master/Technion/FLD1",
     "lectures": [
       {
         "slug": "FLD1_000-034055-תורת-הזרימה-1מ",
         "name": "FLD1_000-034055-תורת-הזרימה-1מ",
-        "url": "https://idofangbentov.uk/Technion/FLD1/FLD1_000-034055-תורת-הזרימה-1מ",
         "displayTitle": "פרק 0: 034055 תורת הזרימה 1מ",
-        "number": 0
+        "number": 0,
+        "url": "https://idofangbentov.uk/Technion/FLD1/FLD1_000-034055-תורת-הזרימה-1מ"
       },
       {
         "slug": "FLD1_001-מבוא",
         "name": "FLD1_001-מבוא",
-        "url": "https://idofangbentov.uk/Technion/FLD1/FLD1_001-מבוא",
         "displayTitle": "פרק 1: מבוא",
-        "number": 1
+        "number": 1,
+        "url": "https://idofangbentov.uk/Technion/FLD1/FLD1_001-מבוא"
       },
       {
         "slug": "FLD1_002-קווי-זרם,-קווי-סימון-וקווי-מסלול",
         "name": "FLD1_002-קווי-זרם,-קווי-סימון-וקווי-מסלול",
-        "url": "https://idofangbentov.uk/Technion/FLD1/FLD1_002-קווי-זרם,-קווי-סימון-וקווי-מסלול",
         "displayTitle": "פרק 2: קווי זרם, קווי סימון וקווי מסלול",
-        "number": 2
+        "number": 2,
+        "url": "https://idofangbentov.uk/Technion/FLD1/FLD1_002-קווי-זרם,-קווי-סימון-וקווי-מסלול"
       },
       {
         "slug": "FLD1_003-חוקי-שימור-אינטגרליים",
         "name": "FLD1_003-חוקי-שימור-אינטגרליים",
-        "url": "https://idofangbentov.uk/Technion/FLD1/FLD1_003-חוקי-שימור-אינטגרליים",
         "displayTitle": "פרק 3: חוקי שימור אינטגרליים",
-        "number": 3
+        "number": 3,
+        "url": "https://idofangbentov.uk/Technion/FLD1/FLD1_003-חוקי-שימור-אינטגרליים"
       },
       {
         "slug": "FLD1_004-משוואות-נאוויה-סטוקס",
         "name": "FLD1_004-משוואות-נאוויה-סטוקס",
-        "url": "https://idofangbentov.uk/Technion/FLD1/FLD1_004-משוואות-נאוויה-סטוקס",
         "displayTitle": "פרק 4: משוואות נאוויה סטוקס",
-        "number": 4
+        "number": 4,
+        "url": "https://idofangbentov.uk/Technion/FLD1/FLD1_004-משוואות-נאוויה-סטוקס"
       },
       {
         "slug": "FLD1_005-הידרוסטטיקה",
         "name": "FLD1_005-הידרוסטטיקה",
-        "url": "https://idofangbentov.uk/Technion/FLD1/FLD1_005-הידרוסטטיקה",
         "displayTitle": "פרק 5: הידרוסטטיקה",
-        "number": 5
+        "number": 5,
+        "url": "https://idofangbentov.uk/Technion/FLD1/FLD1_005-הידרוסטטיקה"
       },
       {
         "slug": "FLD1_006-צמיגות",
         "name": "FLD1_006-צמיגות",
-        "url": "https://idofangbentov.uk/Technion/FLD1/FLD1_006-צמיגות",
         "displayTitle": "פרק 6: צמיגות",
-        "number": 6
+        "number": 6,
+        "url": "https://idofangbentov.uk/Technion/FLD1/FLD1_006-צמיגות"
       },
       {
         "slug": "FLD1_007-אינרציה",
         "name": "FLD1_007-אינרציה",
-        "url": "https://idofangbentov.uk/Technion/FLD1/FLD1_007-אינרציה",
         "displayTitle": "פרק 7: אינרציה",
-        "number": 7
+        "number": 7,
+        "url": "https://idofangbentov.uk/Technion/FLD1/FLD1_007-אינרציה"
       },
       {
         "slug": "FLD1_008-תאוריית-הכנף-הדקה",
         "name": "FLD1_008-תאוריית-הכנף-הדקה",
-        "url": "https://idofangbentov.uk/Technion/FLD1/FLD1_008-תאוריית-הכנף-הדקה",
         "displayTitle": "פרק 8: תאוריית הכנף הדקה",
-        "number": 8
+        "number": 8,
+        "url": "https://idofangbentov.uk/Technion/FLD1/FLD1_008-תאוריית-הכנף-הדקה"
       },
       {
         "slug": "FLD1_009-שכבות-גבול",
         "name": "FLD1_009-שכבות-גבול",
-        "url": "https://idofangbentov.uk/Technion/FLD1/FLD1_009-שכבות-גבול",
         "displayTitle": "פרק 9: שכבות גבול",
-        "number": 9
+        "number": 9,
+        "url": "https://idofangbentov.uk/Technion/FLD1/FLD1_009-שכבות-גבול"
       },
       {
         "slug": "FLD1_010-ניתוק-זרימה",
         "name": "FLD1_010-ניתוק-זרימה",
-        "url": "https://idofangbentov.uk/Technion/FLD1/FLD1_010-ניתוק-זרימה",
         "displayTitle": "פרק 10: ניתוק זרימה",
-        "number": 10
+        "number": 10,
+        "url": "https://idofangbentov.uk/Technion/FLD1/FLD1_010-ניתוק-זרימה"
       }
     ],
     "homework": [
       {
         "slug": "FLD1_HW001-תרגיל-בית-1",
         "name": "FLD1_HW001-תרגיל-בית-1",
-        "url": "https://idofangbentov.uk/Technion/FLD1/FLD1_HW001-תרגיל-בית-1",
-        "displayTitle": "תרגיל בית 1: תרגיל בית 1",
-        "hwNumber": 1
+        "displayTitle": "תרגיל בית 1: FLD1_HW001 תרגיל בית 1",
+        "hwNumber": 1,
+        "url": "https://idofangbentov.uk/Technion/FLD1/FLD1_HW001-תרגיל-בית-1"
       },
       {
         "slug": "FLD1_HW002-תרגיל-בית-2",
         "name": "FLD1_HW002-תרגיל-בית-2",
-        "url": "https://idofangbentov.uk/Technion/FLD1/FLD1_HW002-תרגיל-בית-2",
-        "displayTitle": "תרגיל בית 2: תרגיל בית 2",
-        "hwNumber": 2
-      },
-      {
-        "slug": "FLD1_HW002/",
-        "name": "FLD1_HW002/",
-        "url": "https://idofangbentov.uk/Technion/FLD1/FLD1_HW002/",
-        "displayTitle": "FLD1_HW002/",
-        "hwNumber": 1
+        "displayTitle": "תרגיל בית 2: FLD1_HW002 תרגיל בית 2",
+        "hwNumber": 2,
+        "url": "https://idofangbentov.uk/Technion/FLD1/FLD1_HW002-תרגיל-בית-2"
       },
       {
         "slug": "FLD1_HW003-תרגיל-בית-3",
         "name": "FLD1_HW003-תרגיל-בית-3",
-        "url": "https://idofangbentov.uk/Technion/FLD1/FLD1_HW003-תרגיל-בית-3",
-        "displayTitle": "תרגיל בית 3: תרגיל בית 3",
-        "hwNumber": 3
+        "displayTitle": "תרגיל בית 3: FLD1_HW003 תרגיל בית 3",
+        "hwNumber": 3,
+        "url": "https://idofangbentov.uk/Technion/FLD1/FLD1_HW003-תרגיל-בית-3"
       },
       {
         "slug": "FLD1_HW004-תרגיל-בית-4",
         "name": "FLD1_HW004-תרגיל-בית-4",
-        "url": "https://idofangbentov.uk/Technion/FLD1/FLD1_HW004-תרגיל-בית-4",
-        "displayTitle": "תרגיל בית 4: תרגיל בית 4",
-        "hwNumber": 4
+        "displayTitle": "תרגיל בית 4: FLD1_HW004 תרגיל בית 4",
+        "hwNumber": 4,
+        "url": "https://idofangbentov.uk/Technion/FLD1/FLD1_HW004-תרגיל-בית-4"
       },
       {
         "slug": "FLD1_HW005-תרגיל-בית-5",
         "name": "FLD1_HW005-תרגיל-בית-5",
-        "url": "https://idofangbentov.uk/Technion/FLD1/FLD1_HW005-תרגיל-בית-5",
-        "displayTitle": "תרגיל בית 5: תרגיל בית 5",
-        "hwNumber": 5
+        "displayTitle": "תרגיל בית 5: FLD1_HW005 תרגיל בית 5",
+        "hwNumber": 5,
+        "url": "https://idofangbentov.uk/Technion/FLD1/FLD1_HW005-תרגיל-בית-5"
       },
       {
         "slug": "FLD1_HW006-תרגיל-בית-6",
         "name": "FLD1_HW006-תרגיל-בית-6",
-        "url": "https://idofangbentov.uk/Technion/FLD1/FLD1_HW006-תרגיל-בית-6",
-        "displayTitle": "תרגיל בית 6: תרגיל בית 6",
-        "hwNumber": 6
+        "displayTitle": "תרגיל בית 6: FLD1_HW006 תרגיל בית 6",
+        "hwNumber": 6,
+        "url": "https://idofangbentov.uk/Technion/FLD1/FLD1_HW006-תרגיל-בית-6"
       }
     ],
     "exams": [
       {
-        "slug": "FLD1_E2021WA-2021-חורף-מועד-א",
-        "name": "FLD1_E2021WA-2021-חורף-מועד-א",
-        "url": "https://idofangbentov.uk/Technion/FLD1/FLD1_E2021WA-2021-חורף-מועד-א",
-        "displayTitle": "FLD1_E2021WA 2021 חורף מועד א",
+        "slug": "FLD1_E2021WA-2021-חורף-מועד-א'",
+        "name": "FLD1_E2021WA-2021-חורף-מועד-א'",
+        "displayTitle": "FLD1_E2021WA 2021 חורף מועד א׳",
         "year": "2021",
         "season": "חורף",
-        "moed": "מועד א׳"
+        "moed": "מועד א׳",
+        "url": "https://idofangbentov.uk/Technion/FLD1/FLD1_E2021WA-2021-חורף-מועד-א%27"
       },
       {
-        "slug": "FLD1_E2021WB-2021-חורף-מועד-ב",
-        "name": "FLD1_E2021WB-2021-חורף-מועד-ב",
-        "url": "https://idofangbentov.uk/Technion/FLD1/FLD1_E2021WB-2021-חורף-מועד-ב",
-        "displayTitle": "FLD1_E2021WB 2021 חורף מועד ב",
+        "slug": "FLD1_E2021WB-2021-חורף-מועד-ב'",
+        "name": "FLD1_E2021WB-2021-חורף-מועד-ב'",
+        "displayTitle": "FLD1_E2021WB 2021 חורף מועד ב׳",
         "year": "2021",
         "season": "חורף",
-        "moed": "מועד ב׳"
+        "moed": "מועד ב׳",
+        "url": "https://idofangbentov.uk/Technion/FLD1/FLD1_E2021WB-2021-חורף-מועד-ב%27"
       },
       {
-        "slug": "FLD1_E2022WA-2022-חורף-מועד-א",
-        "name": "FLD1_E2022WA-2022-חורף-מועד-א",
-        "url": "https://idofangbentov.uk/Technion/FLD1/FLD1_E2022WA-2022-חורף-מועד-א",
-        "displayTitle": "FLD1_E2022WA 2022 חורף מועד א",
+        "slug": "FLD1_E2022WA-2022-חורף-מועד-א'",
+        "name": "FLD1_E2022WA-2022-חורף-מועד-א'",
+        "displayTitle": "FLD1_E2022WA 2022 חורף מועד א׳",
         "year": "2022",
         "season": "חורף",
-        "moed": "מועד א׳"
+        "moed": "מועד א׳",
+        "url": "https://idofangbentov.uk/Technion/FLD1/FLD1_E2022WA-2022-חורף-מועד-א%27"
       },
       {
-        "slug": "FLD1_E2022WB-2022-חורף-מועד-ב",
-        "name": "FLD1_E2022WB-2022-חורף-מועד-ב",
-        "url": "https://idofangbentov.uk/Technion/FLD1/FLD1_E2022WB-2022-חורף-מועד-ב",
-        "displayTitle": "FLD1_E2022WB 2022 חורף מועד ב",
+        "slug": "FLD1_E2022WB-2022-חורף-מועד-ב'",
+        "name": "FLD1_E2022WB-2022-חורף-מועד-ב'",
+        "displayTitle": "FLD1_E2022WB 2022 חורף מועד ב׳",
         "year": "2022",
         "season": "חורף",
-        "moed": "מועד ב׳"
+        "moed": "מועד ב׳",
+        "url": "https://idofangbentov.uk/Technion/FLD1/FLD1_E2022WB-2022-חורף-מועד-ב%27"
       },
       {
-        "slug": "FLD1_E2023WA-2023-חורף-מועד-א",
-        "name": "FLD1_E2023WA-2023-חורף-מועד-א",
-        "url": "https://idofangbentov.uk/Technion/FLD1/FLD1_E2023WA-2023-חורף-מועד-א",
-        "displayTitle": "FLD1_E2023WA 2023 חורף מועד א",
+        "slug": "FLD1_E2023WA-2023-חורף-מועד-א'",
+        "name": "FLD1_E2023WA-2023-חורף-מועד-א'",
+        "displayTitle": "FLD1_E2023WA 2023 חורף מועד א׳",
         "year": "2023",
         "season": "חורף",
-        "moed": "מועד א׳"
+        "moed": "מועד א׳",
+        "url": "https://idofangbentov.uk/Technion/FLD1/FLD1_E2023WA-2023-חורף-מועד-א%27"
       },
       {
-        "slug": "FLD1_E2023WB-2023-חורף-מועד-ב",
-        "name": "FLD1_E2023WB-2023-חורף-מועד-ב",
-        "url": "https://idofangbentov.uk/Technion/FLD1/FLD1_E2023WB-2023-חורף-מועד-ב",
-        "displayTitle": "FLD1_E2023WB 2023 חורף מועד ב",
+        "slug": "FLD1_E2023WB-2023-חורף-מועד-ב'",
+        "name": "FLD1_E2023WB-2023-חורף-מועד-ב'",
+        "displayTitle": "FLD1_E2023WB 2023 חורף מועד ב׳",
         "year": "2023",
         "season": "חורף",
-        "moed": "מועד ב׳"
+        "moed": "מועד ב׳",
+        "url": "https://idofangbentov.uk/Technion/FLD1/FLD1_E2023WB-2023-חורף-מועד-ב%27"
       },
       {
-        "slug": "FLD1_E2024SA-2024-אביב-מועד-א",
-        "name": "FLD1_E2024SA-2024-אביב-מועד-א",
-        "url": "https://idofangbentov.uk/Technion/FLD1/FLD1_E2024SA-2024-אביב-מועד-א",
-        "displayTitle": "FLD1_E2024SA 2024 אביב מועד א",
+        "slug": "FLD1_E2024SA-2024-אביב-מועד-א'",
+        "name": "FLD1_E2024SA-2024-אביב-מועד-א'",
+        "displayTitle": "FLD1_E2024SA 2024 אביב מועד א׳",
         "year": "2024",
         "season": "אביב",
-        "moed": "מועד א׳"
+        "moed": "מועד א׳",
+        "url": "https://idofangbentov.uk/Technion/FLD1/FLD1_E2024SA-2024-אביב-מועד-א%27"
       }
     ],
     "projects": [],
     "other": [],
-    "hebrewName": "תורת הזרימה 1 (034055)"
+    "hebrewName": "תורת הזרימה 1מ׳ (034055)"
   },
   "GCH1": {
     "course_tag": "GCH1",
     "title": "GCH1",
     "url": "https://idofangbentov.uk/Technion/GCH1/",
+    "githubUrl": "https://github.com/NuclearGandhi/technion_second_brain/tree/master/Technion/GCH1",
     "lectures": [
       {
         "slug": "GCH1_000-125001-כימיה-כללית",
         "name": "GCH1_000-125001-כימיה-כללית",
-        "url": "https://idofangbentov.uk/Technion/GCH1/GCH1_000-125001-כימיה-כללית",
         "displayTitle": "פרק 0: 125001 כימיה כללית",
-        "number": 0
+        "number": 0,
+        "url": "https://idofangbentov.uk/Technion/GCH1/GCH1_000-125001-כימיה-כללית"
       },
       {
         "slug": "GCH1_001-רקע-ומושגי-יסוד",
         "name": "GCH1_001-רקע-ומושגי-יסוד",
-        "url": "https://idofangbentov.uk/Technion/GCH1/GCH1_001-רקע-ומושגי-יסוד",
         "displayTitle": "פרק 1: רקע ומושגי יסוד",
-        "number": 1
+        "number": 1,
+        "url": "https://idofangbentov.uk/Technion/GCH1/GCH1_001-רקע-ומושגי-יסוד"
       },
       {
         "slug": "GCH1_002-תגובות-כימיות",
         "name": "GCH1_002-תגובות-כימיות",
-        "url": "https://idofangbentov.uk/Technion/GCH1/GCH1_002-תגובות-כימיות",
         "displayTitle": "פרק 2: תגובות כימיות",
-        "number": 2
+        "number": 2,
+        "url": "https://idofangbentov.uk/Technion/GCH1/GCH1_002-תגובות-כימיות"
       },
       {
         "slug": "GCH1_003-גזים",
         "name": "GCH1_003-גזים",
-        "url": "https://idofangbentov.uk/Technion/GCH1/GCH1_003-גזים",
         "displayTitle": "פרק 3: גזים",
-        "number": 3
+        "number": 3,
+        "url": "https://idofangbentov.uk/Technion/GCH1/GCH1_003-גזים"
       },
       {
         "slug": "GCH1_004-מבוא-לתרמודינמיקה",
         "name": "GCH1_004-מבוא-לתרמודינמיקה",
-        "url": "https://idofangbentov.uk/Technion/GCH1/GCH1_004-מבוא-לתרמודינמיקה",
         "displayTitle": "פרק 4: מבוא לתרמודינמיקה",
-        "number": 4
+        "number": 4,
+        "url": "https://idofangbentov.uk/Technion/GCH1/GCH1_004-מבוא-לתרמודינמיקה"
       },
       {
         "slug": "GCH1_005-מבוא-למכניקה-קוונטית",
         "name": "GCH1_005-מבוא-למכניקה-קוונטית",
-        "url": "https://idofangbentov.uk/Technion/GCH1/GCH1_005-מבוא-למכניקה-קוונטית",
         "displayTitle": "פרק 5: מבוא למכניקה קוונטית",
-        "number": 5
+        "number": 5,
+        "url": "https://idofangbentov.uk/Technion/GCH1/GCH1_005-מבוא-למכניקה-קוונטית"
       },
       {
         "slug": "GCH1_006-אלקטרונים-באטום",
         "name": "GCH1_006-אלקטרונים-באטום",
-        "url": "https://idofangbentov.uk/Technion/GCH1/GCH1_006-אלקטרונים-באטום",
         "displayTitle": "פרק 6: אלקטרונים באטום",
-        "number": 6
+        "number": 6,
+        "url": "https://idofangbentov.uk/Technion/GCH1/GCH1_006-אלקטרונים-באטום"
       },
       {
         "slug": "GCH1_007-הטבלה-המחזורית-והקונפיגורציה-של-האטום",
         "name": "GCH1_007-הטבלה-המחזורית-והקונפיגורציה-של-האטום",
-        "url": "https://idofangbentov.uk/Technion/GCH1/GCH1_007-הטבלה-המחזורית-והקונפיגורציה-של-האטום",
         "displayTitle": "פרק 7: הטבלה המחזורית והקונפיגורציה של האטום",
-        "number": 7
+        "number": 7,
+        "url": "https://idofangbentov.uk/Technion/GCH1/GCH1_007-הטבלה-המחזורית-והקונפיגורציה-של-האטום"
       },
       {
         "slug": "GCH1_008-הקשר-הכימי-I",
         "name": "GCH1_008-הקשר-הכימי-I",
-        "url": "https://idofangbentov.uk/Technion/GCH1/GCH1_008-הקשר-הכימי-I",
         "displayTitle": "פרק 8: הקשר הכימי I",
-        "number": 8
+        "number": 8,
+        "url": "https://idofangbentov.uk/Technion/GCH1/GCH1_008-הקשר-הכימי-I"
       },
       {
         "slug": "GCH1_009-הקשר-הכימי-II",
         "name": "GCH1_009-הקשר-הכימי-II",
-        "url": "https://idofangbentov.uk/Technion/GCH1/GCH1_009-הקשר-הכימי-II",
         "displayTitle": "פרק 9: הקשר הכימי II",
-        "number": 9
+        "number": 9,
+        "url": "https://idofangbentov.uk/Technion/GCH1/GCH1_009-הקשר-הכימי-II"
       },
       {
         "slug": "GCH1_010-כוחות-בין-מולקולריים-ומעברי-פאזה",
         "name": "GCH1_010-כוחות-בין-מולקולריים-ומעברי-פאזה",
-        "url": "https://idofangbentov.uk/Technion/GCH1/GCH1_010-כוחות-בין-מולקולריים-ומעברי-פאזה",
         "displayTitle": "פרק 10: כוחות בין מולקולריים ומעברי פאזה",
-        "number": 10
+        "number": 10,
+        "url": "https://idofangbentov.uk/Technion/GCH1/GCH1_010-כוחות-בין-מולקולריים-ומעברי-פאזה"
       },
       {
         "slug": "GCH1_011-שווי-משקל-כימי",
         "name": "GCH1_011-שווי-משקל-כימי",
-        "url": "https://idofangbentov.uk/Technion/GCH1/GCH1_011-שווי-משקל-כימי",
         "displayTitle": "פרק 11: שווי משקל כימי",
-        "number": 11
+        "number": 11,
+        "url": "https://idofangbentov.uk/Technion/GCH1/GCH1_011-שווי-משקל-כימי"
       },
       {
         "slug": "GCH1_012-חומצות-ובסיסים",
         "name": "GCH1_012-חומצות-ובסיסים",
-        "url": "https://idofangbentov.uk/Technion/GCH1/GCH1_012-חומצות-ובסיסים",
         "displayTitle": "פרק 12: חומצות ובסיסים",
-        "number": 12
+        "number": 12,
+        "url": "https://idofangbentov.uk/Technion/GCH1/GCH1_012-חומצות-ובסיסים"
       },
       {
         "slug": "GCH1_013-חמצון-חיזור",
         "name": "GCH1_013-חמצון-חיזור",
-        "url": "https://idofangbentov.uk/Technion/GCH1/GCH1_013-חמצון-חיזור",
         "displayTitle": "פרק 13: חמצון חיזור",
-        "number": 13
+        "number": 13,
+        "url": "https://idofangbentov.uk/Technion/GCH1/GCH1_013-חמצון-חיזור"
       }
     ],
     "homework": [],
@@ -1403,29 +1407,29 @@
       {
         "slug": "GCH1_E2019WA",
         "name": "GCH1_E2019WA",
-        "url": "https://idofangbentov.uk/Technion/GCH1/GCH1_E2019WA",
-        "displayTitle": "GCH1_E2019WA",
+        "displayTitle": "GCH1_E2019WA 2019 חורף מועד א׳",
         "year": "2019",
         "season": "חורף",
-        "moed": "מועד א׳"
+        "moed": "מועד א׳",
+        "url": "https://idofangbentov.uk/Technion/GCH1/GCH1_E2019WA"
       },
       {
         "slug": "GCH1_E2020WA",
         "name": "GCH1_E2020WA",
-        "url": "https://idofangbentov.uk/Technion/GCH1/GCH1_E2020WA",
-        "displayTitle": "GCH1_E2020WA",
+        "displayTitle": "GCH1_E2020WA 2020 חורף מועד א׳",
         "year": "2020",
         "season": "חורף",
-        "moed": "מועד א׳"
+        "moed": "מועד א׳",
+        "url": "https://idofangbentov.uk/Technion/GCH1/GCH1_E2020WA"
       },
       {
         "slug": "GCH1_E2023WA",
         "name": "GCH1_E2023WA",
-        "url": "https://idofangbentov.uk/Technion/GCH1/GCH1_E2023WA",
-        "displayTitle": "GCH1_E2023WA",
+        "displayTitle": "GCH1_E2023WA 2023 חורף מועד א׳",
         "year": "2023",
         "season": "חורף",
-        "moed": "מועד א׳"
+        "moed": "מועד א׳",
+        "url": "https://idofangbentov.uk/Technion/GCH1/GCH1_E2023WA"
       }
     ],
     "projects": [],
@@ -1436,266 +1440,279 @@
     "course_tag": "HDY1",
     "title": "HDY1",
     "url": "https://idofangbentov.uk/Technion/HDY1/",
+    "githubUrl": "https://github.com/NuclearGandhi/technion_second_brain/tree/master/Technion/HDY1",
     "lectures": [
       {
         "slug": "HDY1_000-00360087-Hybrid-Dynamics-in-Mechanical-Systems",
         "name": "HDY1_000-00360087-Hybrid-Dynamics-in-Mechanical-Systems",
-        "url": "https://idofangbentov.uk/Technion/HDY1/HDY1_000-00360087-Hybrid-Dynamics-in-Mechanical-Systems",
         "displayTitle": "פרק 0: 00360087 Hybrid Dynamics in Mechanical Systems",
-        "number": 0
+        "number": 0,
+        "url": "https://idofangbentov.uk/Technion/HDY1/HDY1_000-00360087-Hybrid-Dynamics-in-Mechanical-Systems"
       },
       {
         "slug": "HDY1_001-Introduction",
         "name": "HDY1_001-Introduction",
-        "url": "https://idofangbentov.uk/Technion/HDY1/HDY1_001-Introduction",
         "displayTitle": "פרק 1: Introduction",
-        "number": 1
+        "number": 1,
+        "url": "https://idofangbentov.uk/Technion/HDY1/HDY1_001-Introduction"
       },
       {
         "slug": "HDY1_002-Constrained-Lagrangian-Mechanics",
         "name": "HDY1_002-Constrained-Lagrangian-Mechanics",
-        "url": "https://idofangbentov.uk/Technion/HDY1/HDY1_002-Constrained-Lagrangian-Mechanics",
         "displayTitle": "פרק 2: Constrained Lagrangian Mechanics",
-        "number": 2
+        "number": 2,
+        "url": "https://idofangbentov.uk/Technion/HDY1/HDY1_002-Constrained-Lagrangian-Mechanics"
       },
       {
         "slug": "HDY1_003-Contact-Kinematics",
         "name": "HDY1_003-Contact-Kinematics",
-        "url": "https://idofangbentov.uk/Technion/HDY1/HDY1_003-Contact-Kinematics",
         "displayTitle": "פרק 3: Contact Kinematics",
-        "number": 3
+        "number": 3,
+        "url": "https://idofangbentov.uk/Technion/HDY1/HDY1_003-Contact-Kinematics"
       },
       {
         "slug": "HDY1_004-Unilateral-Contact-Dynamics",
         "name": "HDY1_004-Unilateral-Contact-Dynamics",
-        "url": "https://idofangbentov.uk/Technion/HDY1/HDY1_004-Unilateral-Contact-Dynamics",
         "displayTitle": "פרק 4: Unilateral Contact Dynamics",
-        "number": 4
+        "number": 4,
+        "url": "https://idofangbentov.uk/Technion/HDY1/HDY1_004-Unilateral-Contact-Dynamics"
       },
       {
         "slug": "HDY1_005-Impact",
         "name": "HDY1_005-Impact",
-        "url": "https://idofangbentov.uk/Technion/HDY1/HDY1_005-Impact",
         "displayTitle": "פרק 5: Impact",
-        "number": 5
+        "number": 5,
+        "url": "https://idofangbentov.uk/Technion/HDY1/HDY1_005-Impact"
       },
       {
         "slug": "HDY1_006-Poincaré-Maps",
         "name": "HDY1_006-Poincaré-Maps",
-        "url": "https://idofangbentov.uk/Technion/HDY1/HDY1_006-Poincaré-Maps",
         "displayTitle": "פרק 6: Poincaré Maps",
-        "number": 6
+        "number": 6,
+        "url": "https://idofangbentov.uk/Technion/HDY1/HDY1_006-Poincaré-Maps"
       }
     ],
-    "homework": [],
+    "homework": [
+      {
+        "slug": "HDY1_HW001-Homework-1",
+        "name": "HDY1_HW001-Homework-1",
+        "displayTitle": "תרגיל בית 1: Homework 1 [GitHub]",
+        "hwNumber": 1,
+        "url": "https://github.com/NuclearGandhi/technion_second_brain/blob/master/Technion/HDY1/HDY1_HW001%20Homework%201.md",
+        "source": "github"
+      }
+    ],
     "exams": [],
     "projects": [
       {
         "slug": "HDY1_P001-Final-Project-1",
         "name": "HDY1_P001-Final-Project-1",
+        "displayTitle": "Final Project 1",
+        "number": 1,
         "url": "https://idofangbentov.uk/Technion/HDY1/HDY1_P001-Final-Project-1"
       }
     ],
     "other": [],
-    "hebrewName": "דינמיקה היברידית במערכות מכניות (036087)"
+    "hebrewName": "דינמיקה היברידית במערכות מכניות (00360087)"
   },
   "HTF1": {
     "course_tag": "HTF1",
     "title": "HTF1",
     "url": "https://idofangbentov.uk/Technion/HTF1/",
+    "githubUrl": "https://github.com/NuclearGandhi/technion_second_brain/tree/master/Technion/HTF1",
     "lectures": [
       {
         "slug": "HTF1_000-00340041-מעבר-חום",
         "name": "HTF1_000-00340041-מעבר-חום",
-        "url": "https://idofangbentov.uk/Technion/HTF1/HTF1_000-00340041-מעבר-חום",
         "displayTitle": "פרק 0: 00340041 מעבר חום",
-        "number": 0
+        "number": 0,
+        "url": "https://idofangbentov.uk/Technion/HTF1/HTF1_000-00340041-מעבר-חום"
       },
       {
         "slug": "HTF1_001-מבוא",
         "name": "HTF1_001-מבוא",
-        "url": "https://idofangbentov.uk/Technion/HTF1/HTF1_001-מבוא",
         "displayTitle": "פרק 1: מבוא",
-        "number": 1
+        "number": 1,
+        "url": "https://idofangbentov.uk/Technion/HTF1/HTF1_001-מבוא"
       },
       {
         "slug": "HTF1_002-הולכה-חד-ממדית-במצב-מתמיד",
         "name": "HTF1_002-הולכה-חד-ממדית-במצב-מתמיד",
-        "url": "https://idofangbentov.uk/Technion/HTF1/HTF1_002-הולכה-חד-ממדית-במצב-מתמיד",
         "displayTitle": "פרק 2: הולכה חד ממדית במצב מתמיד",
-        "number": 2
+        "number": 2,
+        "url": "https://idofangbentov.uk/Technion/HTF1/HTF1_002-הולכה-חד-ממדית-במצב-מתמיד"
       },
       {
         "slug": "HTF1_003-הולכה-דו-ממדית-במצב-מתמיד",
         "name": "HTF1_003-הולכה-דו-ממדית-במצב-מתמיד",
-        "url": "https://idofangbentov.uk/Technion/HTF1/HTF1_003-הולכה-דו-ממדית-במצב-מתמיד",
         "displayTitle": "פרק 3: הולכה דו ממדית במצב מתמיד",
-        "number": 3
+        "number": 3,
+        "url": "https://idofangbentov.uk/Technion/HTF1/HTF1_003-הולכה-דו-ממדית-במצב-מתמיד"
       },
       {
         "slug": "HTF1_004-הולכה-במצב-לא-מתמיד",
         "name": "HTF1_004-הולכה-במצב-לא-מתמיד",
-        "url": "https://idofangbentov.uk/Technion/HTF1/HTF1_004-הולכה-במצב-לא-מתמיד",
         "displayTitle": "פרק 4: הולכה במצב לא מתמיד",
-        "number": 4
+        "number": 4,
+        "url": "https://idofangbentov.uk/Technion/HTF1/HTF1_004-הולכה-במצב-לא-מתמיד"
       },
       {
         "slug": "HTF1_005-מבוא-להסעה",
         "name": "HTF1_005-מבוא-להסעה",
-        "url": "https://idofangbentov.uk/Technion/HTF1/HTF1_005-מבוא-להסעה",
         "displayTitle": "פרק 5: מבוא להסעה",
-        "number": 5
+        "number": 5,
+        "url": "https://idofangbentov.uk/Technion/HTF1/HTF1_005-מבוא-להסעה"
       },
       {
         "slug": "HTF1_006-זרימה-פנימית",
         "name": "HTF1_006-זרימה-פנימית",
-        "url": "https://idofangbentov.uk/Technion/HTF1/HTF1_006-זרימה-פנימית",
         "displayTitle": "פרק 6: זרימה פנימית",
-        "number": 6
+        "number": 6,
+        "url": "https://idofangbentov.uk/Technion/HTF1/HTF1_006-זרימה-פנימית"
       },
       {
         "slug": "HTF1_007-מחליפי-חום",
         "name": "HTF1_007-מחליפי-חום",
-        "url": "https://idofangbentov.uk/Technion/HTF1/HTF1_007-מחליפי-חום",
         "displayTitle": "פרק 7: מחליפי חום",
-        "number": 7
+        "number": 7,
+        "url": "https://idofangbentov.uk/Technion/HTF1/HTF1_007-מחליפי-חום"
       },
       {
         "slug": "HTF1_008-הסעה-טבעית",
         "name": "HTF1_008-הסעה-טבעית",
-        "url": "https://idofangbentov.uk/Technion/HTF1/HTF1_008-הסעה-טבעית",
         "displayTitle": "פרק 8: הסעה טבעית",
-        "number": 8
+        "number": 8,
+        "url": "https://idofangbentov.uk/Technion/HTF1/HTF1_008-הסעה-טבעית"
       },
       {
         "slug": "HTF1_009-קרינה",
         "name": "HTF1_009-קרינה",
-        "url": "https://idofangbentov.uk/Technion/HTF1/HTF1_009-קרינה",
         "displayTitle": "פרק 9: קרינה",
-        "number": 9
+        "number": 9,
+        "url": "https://idofangbentov.uk/Technion/HTF1/HTF1_009-קרינה"
       }
     ],
     "homework": [
       {
         "slug": "HTF1_HW001-תרגיל-בית-1",
         "name": "HTF1_HW001-תרגיל-בית-1",
-        "url": "https://idofangbentov.uk/Technion/HTF1/HTF1_HW001-תרגיל-בית-1",
-        "displayTitle": "תרגיל בית 1: תרגיל בית 1",
-        "hwNumber": 1
+        "displayTitle": "תרגיל בית 1: HTF1_HW001 תרגיל בית 1",
+        "hwNumber": 1,
+        "url": "https://idofangbentov.uk/Technion/HTF1/HTF1_HW001-תרגיל-בית-1"
       },
       {
         "slug": "HTF1_HW002-תרגיל-בית-2",
         "name": "HTF1_HW002-תרגיל-בית-2",
-        "url": "https://idofangbentov.uk/Technion/HTF1/HTF1_HW002-תרגיל-בית-2",
-        "displayTitle": "תרגיל בית 2: תרגיל בית 2",
-        "hwNumber": 2
+        "displayTitle": "תרגיל בית 2: HTF1_HW002 תרגיל בית 2",
+        "hwNumber": 2,
+        "url": "https://idofangbentov.uk/Technion/HTF1/HTF1_HW002-תרגיל-בית-2"
       },
       {
         "slug": "HTF1_HW003-תרגיל-בית-3",
         "name": "HTF1_HW003-תרגיל-בית-3",
-        "url": "https://idofangbentov.uk/Technion/HTF1/HTF1_HW003-תרגיל-בית-3",
-        "displayTitle": "תרגיל בית 3: תרגיל בית 3",
-        "hwNumber": 3
+        "displayTitle": "תרגיל בית 3: HTF1_HW003 תרגיל בית 3",
+        "hwNumber": 3,
+        "url": "https://idofangbentov.uk/Technion/HTF1/HTF1_HW003-תרגיל-בית-3"
       },
       {
         "slug": "HTF1_HW004-תרגיל-בית-4",
         "name": "HTF1_HW004-תרגיל-בית-4",
-        "url": "https://idofangbentov.uk/Technion/HTF1/HTF1_HW004-תרגיל-בית-4",
-        "displayTitle": "תרגיל בית 4: תרגיל בית 4",
-        "hwNumber": 4
+        "displayTitle": "תרגיל בית 4: HTF1_HW004 תרגיל בית 4",
+        "hwNumber": 4,
+        "url": "https://idofangbentov.uk/Technion/HTF1/HTF1_HW004-תרגיל-בית-4"
       },
       {
         "slug": "HTF1_HW005-תרגיל-בית-5",
         "name": "HTF1_HW005-תרגיל-בית-5",
-        "url": "https://idofangbentov.uk/Technion/HTF1/HTF1_HW005-תרגיל-בית-5",
-        "displayTitle": "תרגיל בית 5: תרגיל בית 5",
-        "hwNumber": 5
+        "displayTitle": "תרגיל בית 5: HTF1_HW005 תרגיל בית 5",
+        "hwNumber": 5,
+        "url": "https://idofangbentov.uk/Technion/HTF1/HTF1_HW005-תרגיל-בית-5"
       },
       {
         "slug": "HTF1_HW006-תרגיל-בית-6",
         "name": "HTF1_HW006-תרגיל-בית-6",
-        "url": "https://idofangbentov.uk/Technion/HTF1/HTF1_HW006-תרגיל-בית-6",
-        "displayTitle": "תרגיל בית 6: תרגיל בית 6",
-        "hwNumber": 6
+        "displayTitle": "תרגיל בית 6: HTF1_HW006 תרגיל בית 6",
+        "hwNumber": 6,
+        "url": "https://idofangbentov.uk/Technion/HTF1/HTF1_HW006-תרגיל-בית-6"
       },
       {
         "slug": "HTF1_HW007-תרגיל-בית-7",
         "name": "HTF1_HW007-תרגיל-בית-7",
-        "url": "https://idofangbentov.uk/Technion/HTF1/HTF1_HW007-תרגיל-בית-7",
-        "displayTitle": "תרגיל בית 7: תרגיל בית 7",
-        "hwNumber": 7
+        "displayTitle": "תרגיל בית 7: HTF1_HW007 תרגיל בית 7",
+        "hwNumber": 7,
+        "url": "https://idofangbentov.uk/Technion/HTF1/HTF1_HW007-תרגיל-בית-7"
       },
       {
         "slug": "HTF1_HW008-תרגיל-בית-8",
         "name": "HTF1_HW008-תרגיל-בית-8",
-        "url": "https://idofangbentov.uk/Technion/HTF1/HTF1_HW008-תרגיל-בית-8",
-        "displayTitle": "תרגיל בית 8: תרגיל בית 8",
-        "hwNumber": 8
+        "displayTitle": "תרגיל בית 8: HTF1_HW008 תרגיל בית 8",
+        "hwNumber": 8,
+        "url": "https://idofangbentov.uk/Technion/HTF1/HTF1_HW008-תרגיל-בית-8"
       }
     ],
     "exams": [
       {
-        "slug": "HTF1_E2021WA-2021-חורף-מועד-א",
-        "name": "HTF1_E2021WA-2021-חורף-מועד-א",
-        "url": "https://idofangbentov.uk/Technion/HTF1/HTF1_E2021WA-2021-חורף-מועד-א",
-        "displayTitle": "HTF1_E2021WA 2021 חורף מועד א",
+        "slug": "HTF1_E2021WA-2021-חורף-מועד-א'",
+        "name": "HTF1_E2021WA-2021-חורף-מועד-א'",
+        "displayTitle": "HTF1_E2021WA 2021 חורף מועד א׳",
         "year": "2021",
         "season": "חורף",
-        "moed": "מועד א׳"
+        "moed": "מועד א׳",
+        "url": "https://idofangbentov.uk/Technion/HTF1/HTF1_E2021WA-2021-חורף-מועד-א%27"
       },
       {
-        "slug": "HTF1_E2021WB-2021-חורף-מועד-ב",
-        "name": "HTF1_E2021WB-2021-חורף-מועד-ב",
-        "url": "https://idofangbentov.uk/Technion/HTF1/HTF1_E2021WB-2021-חורף-מועד-ב",
-        "displayTitle": "HTF1_E2021WB 2021 חורף מועד ב",
+        "slug": "HTF1_E2021WB-2021-חורף-מועד-ב'",
+        "name": "HTF1_E2021WB-2021-חורף-מועד-ב'",
+        "displayTitle": "HTF1_E2021WB 2021 חורף מועד ב׳",
         "year": "2021",
         "season": "חורף",
-        "moed": "מועד ב׳"
+        "moed": "מועד ב׳",
+        "url": "https://idofangbentov.uk/Technion/HTF1/HTF1_E2021WB-2021-חורף-מועד-ב%27"
       },
       {
-        "slug": "HTF1_E2022WA-2022-חורף-מועד-א",
-        "name": "HTF1_E2022WA-2022-חורף-מועד-א",
-        "url": "https://idofangbentov.uk/Technion/HTF1/HTF1_E2022WA-2022-חורף-מועד-א",
-        "displayTitle": "HTF1_E2022WA 2022 חורף מועד א",
+        "slug": "HTF1_E2022WA-2022-חורף-מועד-א'",
+        "name": "HTF1_E2022WA-2022-חורף-מועד-א'",
+        "displayTitle": "HTF1_E2022WA 2022 חורף מועד א׳",
         "year": "2022",
         "season": "חורף",
-        "moed": "מועד א׳"
+        "moed": "מועד א׳",
+        "url": "https://idofangbentov.uk/Technion/HTF1/HTF1_E2022WA-2022-חורף-מועד-א%27"
       },
       {
-        "slug": "HTF1_E2022WB_2022-חורף-מועד-ב",
-        "name": "HTF1_E2022WB_2022-חורף-מועד-ב",
-        "url": "https://idofangbentov.uk/Technion/HTF1/HTF1_E2022WB_2022-חורף-מועד-ב",
-        "displayTitle": "HTF1_E2022WB_2022 חורף מועד ב",
+        "slug": "HTF1_E2022WB_2022-חורף-מועד-ב'",
+        "name": "HTF1_E2022WB_2022-חורף-מועד-ב'",
+        "displayTitle": "HTF1_E2022WB 2022 חורף מועד ב׳",
         "year": "2022",
         "season": "חורף",
-        "moed": "מועד ב׳"
+        "moed": "מועד ב׳",
+        "url": "https://idofangbentov.uk/Technion/HTF1/HTF1_E2022WB_2022-חורף-מועד-ב%27"
       },
       {
-        "slug": "HTF1_E2023WA-2023-חורף-מועד-א",
-        "name": "HTF1_E2023WA-2023-חורף-מועד-א",
-        "url": "https://idofangbentov.uk/Technion/HTF1/HTF1_E2023WA-2023-חורף-מועד-א",
-        "displayTitle": "HTF1_E2023WA 2023 חורף מועד א",
+        "slug": "HTF1_E2023WA-2023-חורף-מועד-א'",
+        "name": "HTF1_E2023WA-2023-חורף-מועד-א'",
+        "displayTitle": "HTF1_E2023WA 2023 חורף מועד א׳",
         "year": "2023",
         "season": "חורף",
-        "moed": "מועד א׳"
+        "moed": "מועד א׳",
+        "url": "https://idofangbentov.uk/Technion/HTF1/HTF1_E2023WA-2023-חורף-מועד-א%27"
       },
       {
-        "slug": "HTF1_E2023WB-2023-חורף-מועד-ב",
-        "name": "HTF1_E2023WB-2023-חורף-מועד-ב",
-        "url": "https://idofangbentov.uk/Technion/HTF1/HTF1_E2023WB-2023-חורף-מועד-ב",
-        "displayTitle": "HTF1_E2023WB 2023 חורף מועד ב",
+        "slug": "HTF1_E2023WB-2023-חורף-מועד-ב'",
+        "name": "HTF1_E2023WB-2023-חורף-מועד-ב'",
+        "displayTitle": "HTF1_E2023WB 2023 חורף מועד ב׳",
         "year": "2023",
         "season": "חורף",
-        "moed": "מועד ב׳"
+        "moed": "מועד ב׳",
+        "url": "https://idofangbentov.uk/Technion/HTF1/HTF1_E2023WB-2023-חורף-מועד-ב%27"
       },
       {
-        "slug": "HTF1_E2024WA-2024-חורף-מועד-א",
-        "name": "HTF1_E2024WA-2024-חורף-מועד-א",
-        "url": "https://idofangbentov.uk/Technion/HTF1/HTF1_E2024WA-2024-חורף-מועד-א",
-        "displayTitle": "HTF1_E2024WA 2024 חורף מועד א",
+        "slug": "HTF1_E2024WA-2024-חורף-מועד-א'",
+        "name": "HTF1_E2024WA-2024-חורף-מועד-א'",
+        "displayTitle": "HTF1_E2024WA 2024 חורף מועד א׳",
         "year": "2024",
         "season": "חורף",
-        "moed": "מועד א׳"
+        "moed": "מועד א׳",
+        "url": "https://idofangbentov.uk/Technion/HTF1/HTF1_E2024WA-2024-חורף-מועד-א%27"
       }
     ],
     "projects": [],
@@ -1703,46 +1720,55 @@
       {
         "slug": "HTF1_A11-טבלאות-מחליפי-חום",
         "name": "HTF1_A11-טבלאות-מחליפי-חום",
+        "displayTitle": "📊 HTF1_A11 טבלאות מחליפי חום",
         "url": "https://idofangbentov.uk/Technion/HTF1/HTF1_A11-טבלאות-מחליפי-חום"
       },
       {
         "slug": "HTF1_A12-טבלאות-קרינה",
         "name": "HTF1_A12-טבלאות-קרינה",
+        "displayTitle": "📊 HTF1_A12 טבלאות קרינה",
         "url": "https://idofangbentov.uk/Technion/HTF1/HTF1_A12-טבלאות-קרינה"
       },
       {
         "slug": "HTF1_A3-טבלאות-להולכה-חד-ממדית",
         "name": "HTF1_A3-טבלאות-להולכה-חד-ממדית",
+        "displayTitle": "📊 HTF1_A3 טבלאות להולכה חד-ממדית",
         "url": "https://idofangbentov.uk/Technion/HTF1/HTF1_A3-טבלאות-להולכה-חד-ממדית"
       },
       {
         "slug": "HTF1_A4-טבלאות-להולכה-דו-ממדית",
         "name": "HTF1_A4-טבלאות-להולכה-דו-ממדית",
+        "displayTitle": "📊 HTF1_A4 טבלאות להולכה דו-ממדית",
         "url": "https://idofangbentov.uk/Technion/HTF1/HTF1_A4-טבלאות-להולכה-דו-ממדית"
       },
       {
         "slug": "HTF1_A5-טבלאות-להולכה-במצב-לא-מתמיד",
         "name": "HTF1_A5-טבלאות-להולכה-במצב-לא-מתמיד",
+        "displayTitle": "📊 HTF1_A5 טבלאות להולכה במצב לא מתמיד",
         "url": "https://idofangbentov.uk/Technion/HTF1/HTF1_A5-טבלאות-להולכה-במצב-לא-מתמיד"
       },
       {
         "slug": "HTF1_A6-טבלאות-הסעה",
         "name": "HTF1_A6-טבלאות-הסעה",
+        "displayTitle": "📊 HTF1_A6 טבלאות הסעה",
         "url": "https://idofangbentov.uk/Technion/HTF1/HTF1_A6-טבלאות-הסעה"
       },
       {
         "slug": "HTF1_A7-טבלאות-לזרימה-חיצונית",
         "name": "HTF1_A7-טבלאות-לזרימה-חיצונית",
+        "displayTitle": "📊 HTF1_A7 טבלאות לזרימה חיצונית",
         "url": "https://idofangbentov.uk/Technion/HTF1/HTF1_A7-טבלאות-לזרימה-חיצונית"
       },
       {
         "slug": "HTF1_A8-טבלאות-לזרימה-פנימית",
         "name": "HTF1_A8-טבלאות-לזרימה-פנימית",
+        "displayTitle": "📊 HTF1_A8 טבלאות לזרימה פנימית",
         "url": "https://idofangbentov.uk/Technion/HTF1/HTF1_A8-טבלאות-לזרימה-פנימית"
       },
       {
         "slug": "HTF1_A9-טבלאות-הסעה-טבעית",
         "name": "HTF1_A9-טבלאות-הסעה-טבעית",
+        "displayTitle": "📊 HTF1_A9 טבלאות הסעה טבעית",
         "url": "https://idofangbentov.uk/Technion/HTF1/HTF1_A9-טבלאות-הסעה-טבעית"
       }
     ],
@@ -1752,136 +1778,135 @@
     "course_tag": "ICE1",
     "title": "ICE1",
     "url": "https://idofangbentov.uk/Technion/ICE1/",
+    "githubUrl": "https://github.com/NuclearGandhi/technion_second_brain/tree/master/Technion/ICE1",
     "lectures": [
       {
         "slug": "ICE1_000-מנועי-שריפה-פנימית-00350146",
         "name": "ICE1_000-מנועי-שריפה-פנימית-00350146",
-        "url": "https://idofangbentov.uk/Technion/ICE1/ICE1_000-מנועי-שריפה-פנימית-00350146",
         "displayTitle": "פרק 0: מנועי שריפה פנימית 00350146",
-        "number": 0
+        "number": 0,
+        "url": "https://idofangbentov.uk/Technion/ICE1/ICE1_000-מנועי-שריפה-פנימית-00350146"
       }
     ],
     "homework": [],
     "exams": [],
     "projects": [],
     "other": [],
-    "hebrewName": "מנועי שריפה פנימית"
+    "hebrewName": "מנועי שריפה פנימית (00350146)"
   },
   "ICT1": {
     "course_tag": "ICT1",
     "title": "ICT1",
     "url": "https://idofangbentov.uk/Technion/ICT1/",
+    "githubUrl": "https://github.com/NuclearGandhi/technion_second_brain/tree/master/Technion/ICT1",
     "lectures": [
       {
         "slug": "ICT1_000-00340040-מבוא-לבקרה",
         "name": "ICT1_000-00340040-מבוא-לבקרה",
-        "url": "https://idofangbentov.uk/Technion/ICT1/ICT1_000-00340040-מבוא-לבקרה",
         "displayTitle": "פרק 0: 00340040 מבוא לבקרה",
-        "number": 0
+        "number": 0,
+        "url": "https://idofangbentov.uk/Technion/ICT1/ICT1_000-00340040-מבוא-לבקרה"
       },
       {
         "slug": "ICT1_001-מבוא-למערכות-בקרה",
         "name": "ICT1_001-מבוא-למערכות-בקרה",
-        "url": "https://idofangbentov.uk/Technion/ICT1/ICT1_001-מבוא-למערכות-בקרה",
         "displayTitle": "פרק 1: מבוא למערכות בקרה",
-        "number": 1
+        "number": 1,
+        "url": "https://idofangbentov.uk/Technion/ICT1/ICT1_001-מבוא-למערכות-בקרה"
       },
       {
         "slug": "ICT1_002-מודלים-מתמטיים-של-מערכות",
         "name": "ICT1_002-מודלים-מתמטיים-של-מערכות",
-        "url": "https://idofangbentov.uk/Technion/ICT1/ICT1_002-מודלים-מתמטיים-של-מערכות",
         "displayTitle": "פרק 2: מודלים מתמטיים של מערכות",
-        "number": 2
+        "number": 2,
+        "url": "https://idofangbentov.uk/Technion/ICT1/ICT1_002-מודלים-מתמטיים-של-מערכות"
       },
       {
         "slug": "ICT1_003-בקרה-בחוג-פתוח",
         "name": "ICT1_003-בקרה-בחוג-פתוח",
-        "url": "https://idofangbentov.uk/Technion/ICT1/ICT1_003-בקרה-בחוג-פתוח",
         "displayTitle": "פרק 3: בקרה בחוג פתוח",
-        "number": 3
+        "number": 3,
+        "url": "https://idofangbentov.uk/Technion/ICT1/ICT1_003-בקרה-בחוג-פתוח"
       },
       {
         "slug": "ICT1_004-ניתוח-מודלי-וניתוח-תגובת-תדירות",
         "name": "ICT1_004-ניתוח-מודלי-וניתוח-תגובת-תדירות",
-        "url": "https://idofangbentov.uk/Technion/ICT1/ICT1_004-ניתוח-מודלי-וניתוח-תגובת-תדירות",
         "displayTitle": "פרק 4: ניתוח מודלי וניתוח תגובת תדירות",
-        "number": 4
+        "number": 4,
+        "url": "https://idofangbentov.uk/Technion/ICT1/ICT1_004-ניתוח-מודלי-וניתוח-תגובת-תדירות"
       },
       {
         "slug": "ICT1_005-מבוא-למשוב",
         "name": "ICT1_005-מבוא-למשוב",
-        "url": "https://idofangbentov.uk/Technion/ICT1/ICT1_005-מבוא-למשוב",
         "displayTitle": "פרק 5: מבוא למשוב",
-        "number": 5
+        "number": 5,
+        "url": "https://idofangbentov.uk/Technion/ICT1/ICT1_005-מבוא-למשוב"
       },
       {
         "slug": "ICT1_006-שיטת-מקום-גאומטרי-של-שורשים",
         "name": "ICT1_006-שיטת-מקום-גאומטרי-של-שורשים",
-        "url": "https://idofangbentov.uk/Technion/ICT1/ICT1_006-שיטת-מקום-גאומטרי-של-שורשים",
         "displayTitle": "פרק 6: שיטת מקום גאומטרי של שורשים",
-        "number": 6
+        "number": 6,
+        "url": "https://idofangbentov.uk/Technion/ICT1/ICT1_006-שיטת-מקום-גאומטרי-של-שורשים"
       },
       {
         "slug": "ICT1_007-משוב-בהגברים-גבוהים",
         "name": "ICT1_007-משוב-בהגברים-גבוהים",
-        "url": "https://idofangbentov.uk/Technion/ICT1/ICT1_007-משוב-בהגברים-גבוהים",
         "displayTitle": "פרק 7: משוב בהגברים גבוהים",
-        "number": 7
+        "number": 7,
+        "url": "https://idofangbentov.uk/Technion/ICT1/ICT1_007-משוב-בהגברים-גבוהים"
       },
       {
         "slug": "ICT1_008-עיצוב-חוג",
         "name": "ICT1_008-עיצוב-חוג",
-        "url": "https://idofangbentov.uk/Technion/ICT1/ICT1_008-עיצוב-חוג",
         "displayTitle": "פרק 8: עיצוב חוג",
-        "number": 8
+        "number": 8,
+        "url": "https://idofangbentov.uk/Technion/ICT1/ICT1_008-עיצוב-חוג"
       },
       {
         "slug": "ICT1_009-יציבות-בעיצוב-חוג",
         "name": "ICT1_009-יציבות-בעיצוב-חוג",
-        "url": "https://idofangbentov.uk/Technion/ICT1/ICT1_009-יציבות-בעיצוב-חוג",
         "displayTitle": "פרק 9: יציבות בעיצוב חוג",
-        "number": 9
+        "number": 9,
+        "url": "https://idofangbentov.uk/Technion/ICT1/ICT1_009-יציבות-בעיצוב-חוג"
       },
       {
         "slug": "ICT1_010-מערכות-השהייה",
         "name": "ICT1_010-מערכות-השהייה",
-        "url": "https://idofangbentov.uk/Technion/ICT1/ICT1_010-מערכות-השהייה",
         "displayTitle": "פרק 10: מערכות השהייה",
-        "number": 10
+        "number": 10,
+        "url": "https://idofangbentov.uk/Technion/ICT1/ICT1_010-מערכות-השהייה"
       },
       {
         "slug": "ICT1_011-בקר-קידום-ובקר-פיגור",
         "name": "ICT1_011-בקר-קידום-ובקר-פיגור",
-        "url": "https://idofangbentov.uk/Technion/ICT1/ICT1_011-בקר-קידום-ובקר-פיגור",
         "displayTitle": "פרק 11: בקר קידום ובקר פיגור",
-        "number": 11
+        "number": 11,
+        "url": "https://idofangbentov.uk/Technion/ICT1/ICT1_011-בקר-קידום-ובקר-פיגור"
       },
       {
         "slug": "ICT1_012-בקר-PID",
         "name": "ICT1_012-בקר-PID",
-        "url": "https://idofangbentov.uk/Technion/ICT1/ICT1_012-בקר-PID",
         "displayTitle": "פרק 12: בקר PID",
-        "number": 12
+        "number": 12,
+        "url": "https://idofangbentov.uk/Technion/ICT1/ICT1_012-בקר-PID"
       }
     ],
     "homework": [
       {
         "slug": "ICT1_HW001-פרויקטון-1",
         "name": "ICT1_HW001-פרויקטון-1",
-        "url": "https://idofangbentov.uk/Technion/ICT1/ICT1_HW001-פרויקטון-1",
         "displayTitle": "תרגיל בית 1: פרויקטון 1",
-        "hwNumber": 1
+        "hwNumber": 1,
+        "url": "https://idofangbentov.uk/Technion/ICT1/ICT1_HW001-פרויקטון-1"
       }
     ],
     "exams": [
       {
         "slug": "ICT1_EEQ-Exam-Example-Questions",
         "name": "ICT1_EEQ-Exam-Example-Questions",
-        "url": "https://idofangbentov.uk/Technion/ICT1/ICT1_EEQ-Exam-Example-Questions",
         "displayTitle": "ICT1_EEQ Exam Example Questions",
-        "year": "",
-        "season": "",
-        "moed": ""
+        "url": "https://idofangbentov.uk/Technion/ICT1/ICT1_EEQ-Exam-Example-Questions"
       }
     ],
     "projects": [],
@@ -1889,6 +1914,7 @@
       {
         "slug": "ICT1_L001-מעבדה-1",
         "name": "ICT1_L001-מעבדה-1",
+        "displayTitle": "🔬 ICT1_L001 מעבדה 1",
         "url": "https://idofangbentov.uk/Technion/ICT1/ICT1_L001-מעבדה-1"
       }
     ],
@@ -1898,108 +1924,111 @@
     "course_tag": "IME1",
     "title": "IME1",
     "url": "https://idofangbentov.uk/Technion/IME1/",
+    "githubUrl": "https://github.com/NuclearGandhi/technion_second_brain/tree/master/Technion/IME1",
     "lectures": [
       {
         "slug": "IME1_000-00340022-מבוא-למכטרוניקה",
         "name": "IME1_000-00340022-מבוא-למכטרוניקה",
-        "url": "https://idofangbentov.uk/Technion/IME1/IME1_000-00340022-מבוא-למכטרוניקה",
         "displayTitle": "פרק 0: 00340022 מבוא למכטרוניקה",
-        "number": 0
+        "number": 0,
+        "url": "https://idofangbentov.uk/Technion/IME1/IME1_000-00340022-מבוא-למכטרוניקה"
       },
       {
         "slug": "IME1_001-מבוא-ומושגי-יסוד",
         "name": "IME1_001-מבוא-ומושגי-יסוד",
-        "url": "https://idofangbentov.uk/Technion/IME1/IME1_001-מבוא-ומושגי-יסוד",
         "displayTitle": "פרק 1: מבוא ומושגי יסוד",
-        "number": 1
+        "number": 1,
+        "url": "https://idofangbentov.uk/Technion/IME1/IME1_001-מבוא-ומושגי-יסוד"
       },
       {
         "slug": "IME1_002-עיבוד-אותות-אנלוגיים-בעזרת-מגברים",
         "name": "IME1_002-עיבוד-אותות-אנלוגיים-בעזרת-מגברים",
-        "url": "https://idofangbentov.uk/Technion/IME1/IME1_002-עיבוד-אותות-אנלוגיים-בעזרת-מגברים",
         "displayTitle": "פרק 2: עיבוד אותות אנלוגיים בעזרת מגברים",
-        "number": 2
-      },
-      {
-        "slug": "IME1_002/",
-        "name": "IME1_002/",
-        "url": "https://idofangbentov.uk/Technion/IME1/IME1_002/",
-        "displayTitle": "IME1_002/",
-        "number": 0
+        "number": 2,
+        "url": "https://idofangbentov.uk/Technion/IME1/IME1_002-עיבוד-אותות-אנלוגיים-בעזרת-מגברים"
       },
       {
         "slug": "IME1_003-רכיבים-מוליכים-למחצה",
         "name": "IME1_003-רכיבים-מוליכים-למחצה",
-        "url": "https://idofangbentov.uk/Technion/IME1/IME1_003-רכיבים-מוליכים-למחצה",
         "displayTitle": "פרק 3: רכיבים מוליכים למחצה",
-        "number": 3
+        "number": 3,
+        "url": "https://idofangbentov.uk/Technion/IME1/IME1_003-רכיבים-מוליכים-למחצה"
       },
       {
         "slug": "IME1_004-מבוא-למעגלים-דיגיטליים",
         "name": "IME1_004-מבוא-למעגלים-דיגיטליים",
-        "url": "https://idofangbentov.uk/Technion/IME1/IME1_004-מבוא-למעגלים-דיגיטליים",
         "displayTitle": "פרק 4: מבוא למעגלים דיגיטליים",
-        "number": 4
+        "number": 4,
+        "url": "https://idofangbentov.uk/Technion/IME1/IME1_004-מבוא-למעגלים-דיגיטליים"
       }
     ],
     "homework": [
       {
+        "slug": "IME1_HW002-תרגיל-בית-2",
+        "name": "IME1_HW002-תרגיל-בית-2",
+        "displayTitle": "תרגיל בית 2: IME1_HW002 תרגיל בית 2",
+        "hwNumber": 2,
+        "url": "https://idofangbentov.uk/Technion/IME1/IME1_002/IME1_HW002-תרגיל-בית-2"
+      },
+      {
         "slug": "IME1_HW003-תרגיל-בית-3",
         "name": "IME1_HW003-תרגיל-בית-3",
-        "url": "https://idofangbentov.uk/Technion/IME1/IME1_HW003-תרגיל-בית-3",
-        "displayTitle": "תרגיל בית 3: תרגיל בית 3",
-        "hwNumber": 3
+        "displayTitle": "תרגיל בית 3: IME1_HW003 תרגיל בית 3",
+        "hwNumber": 3,
+        "url": "https://idofangbentov.uk/Technion/IME1/IME1_HW003-תרגיל-בית-3"
       },
       {
         "slug": "IME1_HW004-תרגיל-בית-4",
         "name": "IME1_HW004-תרגיל-בית-4",
-        "url": "https://idofangbentov.uk/Technion/IME1/IME1_HW004-תרגיל-בית-4",
-        "displayTitle": "תרגיל בית 4: תרגיל בית 4",
-        "hwNumber": 4
+        "displayTitle": "תרגיל בית 4: IME1_HW004 תרגיל בית 4",
+        "hwNumber": 4,
+        "url": "https://idofangbentov.uk/Technion/IME1/IME1_HW004-תרגיל-בית-4"
       }
     ],
     "exams": [
       {
-        "slug": "IME1_E2016SB-2016-אביב-מועד-ב",
-        "name": "IME1_E2016SB-2016-אביב-מועד-ב",
-        "url": "https://idofangbentov.uk/Technion/IME1/IME1_E2016SB-2016-אביב-מועד-ב",
-        "displayTitle": "IME1_E2016SB 2016 אביב מועד ב",
+        "slug": "IME1_E2016SB-2016-אביב-מועד-ב'",
+        "name": "IME1_E2016SB-2016-אביב-מועד-ב'",
+        "displayTitle": "IME1_E2016SB 2016 אביב מועד ב׳",
         "year": "2016",
         "season": "אביב",
-        "moed": "מועד ב׳"
+        "moed": "מועד ב׳",
+        "url": "https://idofangbentov.uk/Technion/IME1/IME1_E2016SB-2016-אביב-מועד-ב%27"
       },
       {
-        "slug": "IME1_E2016WA-2016-חורף-מועד-א",
-        "name": "IME1_E2016WA-2016-חורף-מועד-א",
-        "url": "https://idofangbentov.uk/Technion/IME1/IME1_E2016WA-2016-חורף-מועד-א",
-        "displayTitle": "IME1_E2016WA 2016 חורף מועד א",
+        "slug": "IME1_E2016WA-2016-חורף-מועד-א'",
+        "name": "IME1_E2016WA-2016-חורף-מועד-א'",
+        "displayTitle": "IME1_E2016WA 2016 חורף מועד א׳",
         "year": "2016",
         "season": "חורף",
-        "moed": "מועד א׳"
+        "moed": "מועד א׳",
+        "url": "https://idofangbentov.uk/Technion/IME1/IME1_E2016WA-2016-חורף-מועד-א%27"
       },
       {
-        "slug": "IME1_E2019WA-2019-חורף-מועד-א",
-        "name": "IME1_E2019WA-2019-חורף-מועד-א",
-        "url": "https://idofangbentov.uk/Technion/IME1/IME1_E2019WA-2019-חורף-מועד-א",
-        "displayTitle": "IME1_E2019WA 2019 חורף מועד א",
+        "slug": "IME1_E2019WA-2019-חורף-מועד-א'",
+        "name": "IME1_E2019WA-2019-חורף-מועד-א'",
+        "displayTitle": "IME1_E2019WA 2019 חורף מועד א׳",
         "year": "2019",
         "season": "חורף",
-        "moed": "מועד א׳"
+        "moed": "מועד א׳",
+        "url": "https://idofangbentov.uk/Technion/IME1/IME1_E2019WA-2019-חורף-מועד-א%27"
       },
       {
-        "slug": "IME1_E2020WA-2020-חורף-מועד-א",
-        "name": "IME1_E2020WA-2020-חורף-מועד-א",
-        "url": "https://idofangbentov.uk/Technion/IME1/IME1_E2020WA-2020-חורף-מועד-א",
-        "displayTitle": "IME1_E2020WA 2020 חורף מועד א",
+        "slug": "IME1_E2020WA-2020-חורף-מועד-א'",
+        "name": "IME1_E2020WA-2020-חורף-מועד-א'",
+        "displayTitle": "IME1_E2020WA 2020 חורף מועד א׳",
         "year": "2020",
         "season": "חורף",
-        "moed": "מועד א׳"
+        "moed": "מועד א׳",
+        "url": "https://idofangbentov.uk/Technion/IME1/IME1_E2020WA-2020-חורף-מועד-א%27"
       }
     ],
     "projects": [
       {
         "slug": "IME1_P001-פרויקט",
         "name": "IME1_P001-פרויקט",
+        "displayTitle": "פרויקט 1: פרויקט",
+        "number": 1,
         "url": "https://idofangbentov.uk/Technion/IME1/IME1_P001-פרויקט"
       }
     ],
@@ -2007,6 +2036,7 @@
       {
         "slug": "IME1_A6-טבלאות-מעגלים-דיגיטליים",
         "name": "IME1_A6-טבלאות-מעגלים-דיגיטליים",
+        "displayTitle": "📊 IME1_A6 טבלאות מעגלים דיגיטליים",
         "url": "https://idofangbentov.uk/Technion/IME1/IME1_A6-טבלאות-מעגלים-דיגיטליים"
       }
     ],
@@ -2016,275 +2046,280 @@
     "course_tag": "IMT1",
     "title": "IMT1",
     "url": "https://idofangbentov.uk/Technion/IMT1/",
+    "githubUrl": "https://github.com/NuclearGandhi/technion_second_brain/tree/master/Technion/IMT1",
     "lectures": [
       {
         "slug": "IMT1_000-314533-מבוא-להנדסת-חומרים-1מ",
         "name": "IMT1_000-314533-מבוא-להנדסת-חומרים-1מ",
-        "url": "https://idofangbentov.uk/Technion/IMT1/IMT1_000-314533-מבוא-להנדסת-חומרים-1מ",
         "displayTitle": "פרק 0: 314533 מבוא להנדסת חומרים 1מ",
-        "number": 0
+        "number": 0,
+        "url": "https://idofangbentov.uk/Technion/IMT1/IMT1_000-314533-מבוא-להנדסת-חומרים-1מ"
       },
       {
         "slug": "IMT1_001-מבוא",
         "name": "IMT1_001-מבוא",
-        "url": "https://idofangbentov.uk/Technion/IMT1/IMT1_001-מבוא",
         "displayTitle": "פרק 1: מבוא",
-        "number": 1
+        "number": 1,
+        "url": "https://idofangbentov.uk/Technion/IMT1/IMT1_001-מבוא"
       },
       {
         "slug": "IMT1_002-מבנה-האטום-וקשר-בין-אטומים",
         "name": "IMT1_002-מבנה-האטום-וקשר-בין-אטומים",
-        "url": "https://idofangbentov.uk/Technion/IMT1/IMT1_002-מבנה-האטום-וקשר-בין-אטומים",
         "displayTitle": "פרק 2: מבנה האטום וקשר בין אטומים",
-        "number": 2
+        "number": 2,
+        "url": "https://idofangbentov.uk/Technion/IMT1/IMT1_002-מבנה-האטום-וקשר-בין-אטומים"
       },
       {
         "slug": "IMT1_003-המבנה-של-גבישים",
         "name": "IMT1_003-המבנה-של-גבישים",
-        "url": "https://idofangbentov.uk/Technion/IMT1/IMT1_003-המבנה-של-גבישים",
         "displayTitle": "פרק 3: המבנה של גבישים",
-        "number": 3
+        "number": 3,
+        "url": "https://idofangbentov.uk/Technion/IMT1/IMT1_003-המבנה-של-גבישים"
       },
       {
         "slug": "IMT1_004-דיאגרמת-פאזות",
         "name": "IMT1_004-דיאגרמת-פאזות",
-        "url": "https://idofangbentov.uk/Technion/IMT1/IMT1_004-דיאגרמת-פאזות",
         "displayTitle": "פרק 4: דיאגרמת פאזות",
-        "number": 4
+        "number": 4,
+        "url": "https://idofangbentov.uk/Technion/IMT1/IMT1_004-דיאגרמת-פאזות"
       },
       {
         "slug": "IMT1_005-דיאגרמת-ברזל-פחמן",
         "name": "IMT1_005-דיאגרמת-ברזל-פחמן",
-        "url": "https://idofangbentov.uk/Technion/IMT1/IMT1_005-דיאגרמת-ברזל-פחמן",
         "displayTitle": "פרק 5: דיאגרמת ברזל פחמן",
-        "number": 5
+        "number": 5,
+        "url": "https://idofangbentov.uk/Technion/IMT1/IMT1_005-דיאגרמת-ברזל-פחמן"
       },
       {
         "slug": "IMT1_006-דאגרמות-TTT-ו-CTT",
         "name": "IMT1_006-דאגרמות-TTT-ו-CTT",
-        "url": "https://idofangbentov.uk/Technion/IMT1/IMT1_006-דאגרמות-TTT-ו-CTT",
         "displayTitle": "פרק 6: דאגרמות TTT ו CTT",
-        "number": 6
+        "number": 6,
+        "url": "https://idofangbentov.uk/Technion/IMT1/IMT1_006-דאגרמות-TTT-ו-CTT"
       },
       {
         "slug": "IMT1_007-תכונות-מכניות",
         "name": "IMT1_007-תכונות-מכניות",
-        "url": "https://idofangbentov.uk/Technion/IMT1/IMT1_007-תכונות-מכניות",
         "displayTitle": "פרק 7: תכונות מכניות",
-        "number": 7
+        "number": 7,
+        "url": "https://idofangbentov.uk/Technion/IMT1/IMT1_007-תכונות-מכניות"
       },
       {
         "slug": "IMT1_008-שבר-וחסינות-השבר",
         "name": "IMT1_008-שבר-וחסינות-השבר",
-        "url": "https://idofangbentov.uk/Technion/IMT1/IMT1_008-שבר-וחסינות-השבר",
         "displayTitle": "פרק 8: שבר וחסינות השבר",
-        "number": 8
+        "number": 8,
+        "url": "https://idofangbentov.uk/Technion/IMT1/IMT1_008-שבר-וחסינות-השבר"
       },
       {
         "slug": "IMT1_009-זחילה",
         "name": "IMT1_009-זחילה",
-        "url": "https://idofangbentov.uk/Technion/IMT1/IMT1_009-זחילה",
         "displayTitle": "פרק 9: זחילה",
-        "number": 9
+        "number": 9,
+        "url": "https://idofangbentov.uk/Technion/IMT1/IMT1_009-זחילה"
       },
       {
         "slug": "IMT1_010-התעייפות",
         "name": "IMT1_010-התעייפות",
-        "url": "https://idofangbentov.uk/Technion/IMT1/IMT1_010-התעייפות",
         "displayTitle": "פרק 10: התעייפות",
-        "number": 10
+        "number": 10,
+        "url": "https://idofangbentov.uk/Technion/IMT1/IMT1_010-התעייפות"
       },
       {
         "slug": "IMT1_011-חומרים-פולימריים",
         "name": "IMT1_011-חומרים-פולימריים",
-        "url": "https://idofangbentov.uk/Technion/IMT1/IMT1_011-חומרים-פולימריים",
         "displayTitle": "פרק 11: חומרים פולימריים",
-        "number": 11
+        "number": 11,
+        "url": "https://idofangbentov.uk/Technion/IMT1/IMT1_011-חומרים-פולימריים"
       },
       {
         "slug": "IMT1_012-עקרונות-חשובים",
         "name": "IMT1_012-עקרונות-חשובים",
-        "url": "https://idofangbentov.uk/Technion/IMT1/IMT1_012-עקרונות-חשובים",
         "displayTitle": "פרק 12: עקרונות חשובים",
-        "number": 12
+        "number": 12,
+        "url": "https://idofangbentov.uk/Technion/IMT1/IMT1_012-עקרונות-חשובים"
       }
     ],
     "homework": [],
     "exams": [],
     "projects": [],
     "other": [],
-    "hebrewName": "מבוא למדע החומרים (314533)"
+    "hebrewName": "מבוא להנדסת חומרים 1מ׳ (314533 / 03140533)"
   },
   "IPY1": {
     "course_tag": "IPY1",
     "title": "IPY1",
     "url": "https://idofangbentov.uk/Technion/IPY1/",
+    "githubUrl": "https://github.com/NuclearGandhi/technion_second_brain/tree/master/Technion/IPY1",
     "lectures": [
       {
         "slug": "IPY1_000-234128-מבוא-לפייתון",
         "name": "IPY1_000-234128-מבוא-לפייתון",
-        "url": "https://idofangbentov.uk/Technion/IPY1/IPY1_000-234128-מבוא-לפייתון",
         "displayTitle": "פרק 0: 234128 מבוא לפייתון",
-        "number": 0
+        "number": 0,
+        "url": "https://idofangbentov.uk/Technion/IPY1/IPY1_000-234128-מבוא-לפייתון"
       }
     ],
     "homework": [
       {
         "slug": "IPY1_HW010-תרגיל-בית-10",
         "name": "IPY1_HW010-תרגיל-בית-10",
-        "url": "https://idofangbentov.uk/Technion/IPY1/IPY1_HW010-תרגיל-בית-10",
-        "displayTitle": "תרגיל בית 10: תרגיל בית 10",
-        "hwNumber": 10
+        "displayTitle": "תרגיל בית 10: IPY1_HW010 תרגיל בית 10",
+        "hwNumber": 10,
+        "url": "https://idofangbentov.uk/Technion/IPY1/IPY1_HW010-תרגיל-בית-10"
       }
     ],
     "exams": [],
     "projects": [],
     "other": [],
-    "hebrewName": "מבוא לתכנות בפייתון (234128)"
+    "hebrewName": "מבוא למדעי המחשב / פייתון (234128)"
   },
   "IRB1": {
     "course_tag": "IRB1",
     "title": "IRB1",
     "url": "https://idofangbentov.uk/Technion/IRB1/",
+    "githubUrl": "https://github.com/NuclearGandhi/technion_second_brain/tree/master/Technion/IRB1",
     "lectures": [
       {
         "slug": "IRB1_000-00350001-מבוא-לרובוטיקה",
         "name": "IRB1_000-00350001-מבוא-לרובוטיקה",
-        "url": "https://idofangbentov.uk/Technion/IRB1/IRB1_000-00350001-מבוא-לרובוטיקה",
         "displayTitle": "פרק 0: 00350001 מבוא לרובוטיקה",
-        "number": 0
+        "number": 0,
+        "url": "https://idofangbentov.uk/Technion/IRB1/IRB1_000-00350001-מבוא-לרובוטיקה"
       },
       {
         "slug": "IRB1_001-טרנספורמציית-גוף-קשיח",
         "name": "IRB1_001-טרנספורמציית-גוף-קשיח",
-        "url": "https://idofangbentov.uk/Technion/IRB1/IRB1_001-טרנספורמציית-גוף-קשיח",
         "displayTitle": "פרק 1: טרנספורמציית גוף קשיח",
-        "number": 1
+        "number": 1,
+        "url": "https://idofangbentov.uk/Technion/IRB1/IRB1_001-טרנספורמציית-גוף-קשיח"
       },
       {
         "slug": "IRB1_002-Forward-Kinematics",
         "name": "IRB1_002-Forward-Kinematics",
-        "url": "https://idofangbentov.uk/Technion/IRB1/IRB1_002-Forward-Kinematics",
         "displayTitle": "פרק 2: Forward Kinematics",
-        "number": 2
+        "number": 2,
+        "url": "https://idofangbentov.uk/Technion/IRB1/IRB1_002-Forward-Kinematics"
       },
       {
         "slug": "IRB1_003-Inverse-Kinematics",
         "name": "IRB1_003-Inverse-Kinematics",
-        "url": "https://idofangbentov.uk/Technion/IRB1/IRB1_003-Inverse-Kinematics",
         "displayTitle": "פרק 3: Inverse Kinematics",
-        "number": 3
+        "number": 3,
+        "url": "https://idofangbentov.uk/Technion/IRB1/IRB1_003-Inverse-Kinematics"
       },
       {
         "slug": "IRB1_004-Velocity-Kinematics-and-Statics",
         "name": "IRB1_004-Velocity-Kinematics-and-Statics",
-        "url": "https://idofangbentov.uk/Technion/IRB1/IRB1_004-Velocity-Kinematics-and-Statics",
         "displayTitle": "פרק 4: Velocity Kinematics and Statics",
-        "number": 4
+        "number": 4,
+        "url": "https://idofangbentov.uk/Technion/IRB1/IRB1_004-Velocity-Kinematics-and-Statics"
       },
       {
         "slug": "IRB1_005-Dynamics-of-Open-Chains",
         "name": "IRB1_005-Dynamics-of-Open-Chains",
-        "url": "https://idofangbentov.uk/Technion/IRB1/IRB1_005-Dynamics-of-Open-Chains",
         "displayTitle": "פרק 5: Dynamics of Open Chains",
-        "number": 5
+        "number": 5,
+        "url": "https://idofangbentov.uk/Technion/IRB1/IRB1_005-Dynamics-of-Open-Chains"
       },
       {
         "slug": "IRB1_006-Motion-Planning",
         "name": "IRB1_006-Motion-Planning",
-        "url": "https://idofangbentov.uk/Technion/IRB1/IRB1_006-Motion-Planning",
         "displayTitle": "פרק 6: Motion Planning",
-        "number": 6
+        "number": 6,
+        "url": "https://idofangbentov.uk/Technion/IRB1/IRB1_006-Motion-Planning"
       }
     ],
     "homework": [
       {
         "slug": "IRB1_HW001-תרגיל-בית-1",
         "name": "IRB1_HW001-תרגיל-בית-1",
-        "url": "https://idofangbentov.uk/Technion/IRB1/IRB1_HW001-תרגיל-בית-1",
-        "displayTitle": "תרגיל בית 1: תרגיל בית 1",
-        "hwNumber": 1
+        "displayTitle": "תרגיל בית 1: Homework 1",
+        "hwNumber": 1,
+        "url": "https://idofangbentov.uk/Technion/IRB1/IRB1_HW001-תרגיל-בית-1"
       },
       {
         "slug": "IRB1_HW002-תרגיל-בית-2",
         "name": "IRB1_HW002-תרגיל-בית-2",
-        "url": "https://idofangbentov.uk/Technion/IRB1/IRB1_HW002-תרגיל-בית-2",
-        "displayTitle": "תרגיל בית 2: תרגיל בית 2",
-        "hwNumber": 2
+        "displayTitle": "תרגיל בית 2: Homework 2",
+        "hwNumber": 2,
+        "url": "https://idofangbentov.uk/Technion/IRB1/IRB1_HW002-תרגיל-בית-2"
       },
       {
         "slug": "IRB1_HW003-תרגיל-בית-3",
         "name": "IRB1_HW003-תרגיל-בית-3",
-        "url": "https://idofangbentov.uk/Technion/IRB1/IRB1_HW003-תרגיל-בית-3",
-        "displayTitle": "תרגיל בית 3: תרגיל בית 3",
-        "hwNumber": 3
+        "displayTitle": "תרגיל בית 3: Homework 3",
+        "hwNumber": 3,
+        "url": "https://idofangbentov.uk/Technion/IRB1/IRB1_HW003-תרגיל-בית-3"
       },
       {
         "slug": "IRB1_HW004-תרגיל-בית-4",
         "name": "IRB1_HW004-תרגיל-בית-4",
-        "url": "https://idofangbentov.uk/Technion/IRB1/IRB1_HW004-תרגיל-בית-4",
-        "displayTitle": "תרגיל בית 4: תרגיל בית 4",
-        "hwNumber": 4
+        "displayTitle": "תרגיל בית 4: Homework 4",
+        "hwNumber": 4,
+        "url": "https://idofangbentov.uk/Technion/IRB1/IRB1_HW004-תרגיל-בית-4"
       },
       {
         "slug": "IRB1_HW006-תרגיל-בית-6",
         "name": "IRB1_HW006-תרגיל-בית-6",
-        "url": "https://idofangbentov.uk/Technion/IRB1/IRB1_HW006-תרגיל-בית-6",
-        "displayTitle": "תרגיל בית 6: תרגיל בית 6",
-        "hwNumber": 6
+        "displayTitle": "תרגיל בית 6: IRB1_HW006 תרגיל בית 6",
+        "hwNumber": 6,
+        "url": "https://idofangbentov.uk/Technion/IRB1/IRB1_HW006-תרגיל-בית-6"
       }
     ],
     "exams": [
       {
         "slug": "IRB1_E2017WA-2017-חורף-מועד-א",
         "name": "IRB1_E2017WA-2017-חורף-מועד-א",
-        "url": "https://idofangbentov.uk/Technion/IRB1/IRB1_E2017WA-2017-חורף-מועד-א",
-        "displayTitle": "IRB1_E2017WA 2017 חורף מועד א",
+        "displayTitle": "IRB1_E2017WA 2017 חורף מועד א׳",
         "year": "2017",
         "season": "חורף",
-        "moed": "מועד א׳"
+        "moed": "מועד א׳",
+        "url": "https://idofangbentov.uk/Technion/IRB1/IRB1_E2017WA-2017-חורף-מועד-א"
       },
       {
         "slug": "IRB1_E2020WA-2020-חורף-מועד-א",
         "name": "IRB1_E2020WA-2020-חורף-מועד-א",
-        "url": "https://idofangbentov.uk/Technion/IRB1/IRB1_E2020WA-2020-חורף-מועד-א",
-        "displayTitle": "IRB1_E2020WA 2020 חורף מועד א",
+        "displayTitle": "IRB1_E2020WA 2020 חורף מועד א׳",
         "year": "2020",
         "season": "חורף",
-        "moed": "מועד א׳"
+        "moed": "מועד א׳",
+        "url": "https://idofangbentov.uk/Technion/IRB1/IRB1_E2020WA-2020-חורף-מועד-א"
       },
       {
         "slug": "IRB1_E2021WA-2021-חורף-מועד-א",
         "name": "IRB1_E2021WA-2021-חורף-מועד-א",
-        "url": "https://idofangbentov.uk/Technion/IRB1/IRB1_E2021WA-2021-חורף-מועד-א",
-        "displayTitle": "IRB1_E2021WA 2021 חורף מועד א",
+        "displayTitle": "IRB1_E2021WA 2021 חורף מועד א׳",
         "year": "2021",
         "season": "חורף",
-        "moed": "מועד א׳"
+        "moed": "מועד א׳",
+        "url": "https://idofangbentov.uk/Technion/IRB1/IRB1_E2021WA-2021-חורף-מועד-א"
       },
       {
         "slug": "IRB1_E2022WA-2022-חורף-מועד-א",
         "name": "IRB1_E2022WA-2022-חורף-מועד-א",
-        "url": "https://idofangbentov.uk/Technion/IRB1/IRB1_E2022WA-2022-חורף-מועד-א",
-        "displayTitle": "IRB1_E2022WA 2022 חורף מועד א",
+        "displayTitle": "IRB1_E2022WA 2022 חורף מועד א׳",
         "year": "2022",
         "season": "חורף",
-        "moed": "מועד א׳"
+        "moed": "מועד א׳",
+        "url": "https://idofangbentov.uk/Technion/IRB1/IRB1_E2022WA-2022-חורף-מועד-א"
       },
       {
         "slug": "IRB1_E2023WA-2023-חורף-מועד-א",
         "name": "IRB1_E2023WA-2023-חורף-מועד-א",
-        "url": "https://idofangbentov.uk/Technion/IRB1/IRB1_E2023WA-2023-חורף-מועד-א",
-        "displayTitle": "IRB1_E2023WA 2023 חורף מועד א",
+        "displayTitle": "IRB1_E2023WA 2023 חורף מועד א׳",
         "year": "2023",
         "season": "חורף",
-        "moed": "מועד א׳"
+        "moed": "מועד א׳",
+        "url": "https://idofangbentov.uk/Technion/IRB1/IRB1_E2023WA-2023-חורף-מועד-א"
       }
     ],
     "projects": [
       {
         "slug": "IRB1_P001-פרויקט",
         "name": "IRB1_P001-פרויקט",
+        "displayTitle": "Project - UR5e Robot Trajectory Planning for Triangle Painting",
+        "number": 1,
         "url": "https://idofangbentov.uk/Technion/IRB1/IRB1_P001-פרויקט"
       }
     ],
@@ -2295,13 +2330,14 @@
     "course_tag": "LMA1",
     "title": "LMA1",
     "url": "https://idofangbentov.uk/Technion/LMA1/",
+    "githubUrl": "https://github.com/NuclearGandhi/technion_second_brain/tree/master/Technion/LMA1",
     "lectures": [
       {
         "slug": "LMA1_000-00340057-מעבדה-מתקדמת-בהנדסת-מכונות",
         "name": "LMA1_000-00340057-מעבדה-מתקדמת-בהנדסת-מכונות",
-        "url": "https://idofangbentov.uk/Technion/LMA1/LMA1_000-00340057-מעבדה-מתקדמת-בהנדסת-מכונות",
         "displayTitle": "פרק 0: 00340057 מעבדה מתקדמת בהנדסת מכונות",
-        "number": 0
+        "number": 0,
+        "url": "https://idofangbentov.uk/Technion/LMA1/LMA1_000-00340057-מעבדה-מתקדמת-בהנדסת-מכונות"
       }
     ],
     "homework": [],
@@ -2310,16 +2346,22 @@
       {
         "slug": "LMA1_P001-פרויקט-1",
         "name": "LMA1_P001-פרויקט-1",
+        "displayTitle": "פרויקט 1: פרויקט 1",
+        "number": 1,
         "url": "https://idofangbentov.uk/Technion/LMA1/LMA1_P001-פרויקט-1"
       },
       {
         "slug": "LMA1_P002-פרויקט-2",
         "name": "LMA1_P002-פרויקט-2",
+        "displayTitle": "תכנון מערכת ניסוי לאפיון התנהגות מכנית של חומרים בקצבי עיבור גבוהים",
+        "number": 2,
         "url": "https://idofangbentov.uk/Technion/LMA1/LMA1_P002-פרויקט-2"
       },
       {
         "slug": "LMA1_P003-פרויקט-3",
         "name": "LMA1_P003-פרויקט-3",
+        "displayTitle": "פרויקט 3: פרויקט 3",
+        "number": 3,
         "url": "https://idofangbentov.uk/Technion/LMA1/LMA1_P003-פרויקט-3"
       }
     ],
@@ -2327,27 +2369,30 @@
       {
         "slug": "LMA1_L001-מעבדה-1",
         "name": "LMA1_L001-מעבדה-1",
+        "displayTitle": "🔬 מעבדה במדידת עיבורים",
         "url": "https://idofangbentov.uk/Technion/LMA1/LMA1_L001-מעבדה-1"
       },
       {
         "slug": "LMA1_L003-מעבדה-3",
         "name": "LMA1_L003-מעבדה-3",
+        "displayTitle": "🔬 מעבדה במעבר חום",
         "url": "https://idofangbentov.uk/Technion/LMA1/LMA1_L003-מעבדה-3"
       }
     ],
-    "hebrewName": "LMA1"
+    "hebrewName": "מעבדה מתקדמת בהנדסת מכונות (00340057)"
   },
   "LPH1": {
     "course_tag": "LPH1",
     "title": "LPH1",
     "url": "https://idofangbentov.uk/Technion/LPH1/",
+    "githubUrl": "https://github.com/NuclearGandhi/technion_second_brain/tree/master/Technion/LPH1",
     "lectures": [
       {
         "slug": "LPH1_000-01140032-מעבדה-לפיזיקה-1ח",
         "name": "LPH1_000-01140032-מעבדה-לפיזיקה-1ח",
-        "url": "https://idofangbentov.uk/Technion/LPH1/LPH1_000-01140032-מעבדה-לפיזיקה-1ח",
         "displayTitle": "פרק 0: 01140032 מעבדה לפיזיקה 1ח",
-        "number": 0
+        "number": 0,
+        "url": "https://idofangbentov.uk/Technion/LPH1/LPH1_000-01140032-מעבדה-לפיזיקה-1ח"
       }
     ],
     "homework": [],
@@ -2357,109 +2402,134 @@
       {
         "slug": "LPH1_L001-מטוטלת-פשוטה",
         "name": "LPH1_L001-מטוטלת-פשוטה",
+        "displayTitle": "🔬 הקשר בין זמן מחזור של מטוטלת לאורכה",
         "url": "https://idofangbentov.uk/Technion/LPH1/LPH1_L001-מטוטלת-פשוטה"
       },
       {
         "slug": "LPH1_L002-מהירות-ממוצעת",
         "name": "LPH1_L002-מהירות-ממוצעת",
+        "displayTitle": "🔬 השוואה בין מהירות ממוצעת נמדדת למהירות תאורטית של עגלה במסילה משופעת",
         "url": "https://idofangbentov.uk/Technion/LPH1/LPH1_L002-מהירות-ממוצעת"
       },
       {
         "slug": "LPH1_L003-מהירות-רגעית",
         "name": "LPH1_L003-מהירות-רגעית",
+        "displayTitle": "🔬 LPH1_L003 מהירות רגעית",
         "url": "https://idofangbentov.uk/Technion/LPH1/LPH1_L003-מהירות-רגעית"
       }
     ],
-    "hebrewName": "מעבדה בפיזיקה 1 (114032)"
+    "hebrewName": "מעבדה לפיזיקה 1ח׳ (114032)"
+  },
+  "LRB1": {
+    "course_tag": "LRB1",
+    "title": "LRB1",
+    "url": "https://github.com/NuclearGandhi/technion_second_brain/tree/master/Technion/LRB1",
+    "githubUrl": "https://github.com/NuclearGandhi/technion_second_brain/tree/master/Technion/LRB1",
+    "lectures": [
+      {
+        "slug": "LRB1_000-00340401-מעבדה-מתקדמת-לרובוטים",
+        "name": "LRB1_000-00340401-מעבדה-מתקדמת-לרובוטים",
+        "displayTitle": "פרק 0: 00340401 מעבדה מתקדמת לרובוטים [GitHub]",
+        "number": 0,
+        "url": "https://github.com/NuclearGandhi/technion_second_brain/blob/master/Technion/LRB1/LRB1_000%2000340401%20%D7%9E%D7%A2%D7%91%D7%93%D7%94%20%D7%9E%D7%AA%D7%A7%D7%93%D7%9E%D7%AA%20%D7%9C%D7%A8%D7%95%D7%91%D7%95%D7%98%D7%99%D7%9D.md",
+        "source": "github"
+      }
+    ],
+    "homework": [],
+    "exams": [],
+    "projects": [],
+    "other": [],
+    "hebrewName": "מעבדה מתקדמת לרובוטים (00340401)"
   },
   "LSY1": {
     "course_tag": "LSY1",
     "title": "LSY1",
     "url": "https://idofangbentov.uk/Technion/LSY1/",
+    "githubUrl": "https://github.com/NuclearGandhi/technion_second_brain/tree/master/Technion/LSY1",
     "lectures": [
       {
         "slug": "LSY1_000-034032-Linear-Systems-E",
         "name": "LSY1_000-034032-Linear-Systems-E",
-        "url": "https://idofangbentov.uk/Technion/LSY1/LSY1_000-034032-Linear-Systems-E",
         "displayTitle": "פרק 0: 034032 Linear Systems E",
-        "number": 0
+        "number": 0,
+        "url": "https://idofangbentov.uk/Technion/LSY1/LSY1_000-034032-Linear-Systems-E"
       },
       {
         "slug": "LSY1_001-Introduction",
         "name": "LSY1_001-Introduction",
-        "url": "https://idofangbentov.uk/Technion/LSY1/LSY1_001-Introduction",
         "displayTitle": "פרק 1: Introduction",
-        "number": 1
+        "number": 1,
+        "url": "https://idofangbentov.uk/Technion/LSY1/LSY1_001-Introduction"
       },
       {
         "slug": "LSY1_002-Signals-and-Convolutions",
         "name": "LSY1_002-Signals-and-Convolutions",
-        "url": "https://idofangbentov.uk/Technion/LSY1/LSY1_002-Signals-and-Convolutions",
         "displayTitle": "פרק 2: Signals and Convolutions",
-        "number": 2
+        "number": 2,
+        "url": "https://idofangbentov.uk/Technion/LSY1/LSY1_002-Signals-and-Convolutions"
       },
       {
         "slug": "LSY1_003-Classification-of-Systems",
         "name": "LSY1_003-Classification-of-Systems",
-        "url": "https://idofangbentov.uk/Technion/LSY1/LSY1_003-Classification-of-Systems",
         "displayTitle": "פרק 3: Classification of Systems",
-        "number": 3
+        "number": 3,
+        "url": "https://idofangbentov.uk/Technion/LSY1/LSY1_003-Classification-of-Systems"
       },
       {
         "slug": "LSY1_004-Linear-State-Space-Equation",
         "name": "LSY1_004-Linear-State-Space-Equation",
-        "url": "https://idofangbentov.uk/Technion/LSY1/LSY1_004-Linear-State-Space-Equation",
         "displayTitle": "פרק 4: Linear State Space Equation",
-        "number": 4
+        "number": 4,
+        "url": "https://idofangbentov.uk/Technion/LSY1/LSY1_004-Linear-State-Space-Equation"
       },
       {
         "slug": "LSY1_005-Linearization",
         "name": "LSY1_005-Linearization",
-        "url": "https://idofangbentov.uk/Technion/LSY1/LSY1_005-Linearization",
         "displayTitle": "פרק 5: Linearization",
-        "number": 5
+        "number": 5,
+        "url": "https://idofangbentov.uk/Technion/LSY1/LSY1_005-Linearization"
       },
       {
         "slug": "LSY1_006-Lyapunov-Stability",
         "name": "LSY1_006-Lyapunov-Stability",
-        "url": "https://idofangbentov.uk/Technion/LSY1/LSY1_006-Lyapunov-Stability",
         "displayTitle": "פרק 6: Lyapunov Stability",
-        "number": 6
+        "number": 6,
+        "url": "https://idofangbentov.uk/Technion/LSY1/LSY1_006-Lyapunov-Stability"
       },
       {
         "slug": "LSY1_007-Laplace-Transform",
         "name": "LSY1_007-Laplace-Transform",
-        "url": "https://idofangbentov.uk/Technion/LSY1/LSY1_007-Laplace-Transform",
         "displayTitle": "פרק 7: Laplace Transform",
-        "number": 7
+        "number": 7,
+        "url": "https://idofangbentov.uk/Technion/LSY1/LSY1_007-Laplace-Transform"
       },
       {
         "slug": "LSY1_008-Fourier-Transform",
         "name": "LSY1_008-Fourier-Transform",
-        "url": "https://idofangbentov.uk/Technion/LSY1/LSY1_008-Fourier-Transform",
         "displayTitle": "פרק 8: Fourier Transform",
-        "number": 8
+        "number": 8,
+        "url": "https://idofangbentov.uk/Technion/LSY1/LSY1_008-Fourier-Transform"
       },
       {
         "slug": "LSY1_009-Frequency-Domain-Analysis",
         "name": "LSY1_009-Frequency-Domain-Analysis",
-        "url": "https://idofangbentov.uk/Technion/LSY1/LSY1_009-Frequency-Domain-Analysis",
         "displayTitle": "פרק 9: Frequency Domain Analysis",
-        "number": 9
+        "number": 9,
+        "url": "https://idofangbentov.uk/Technion/LSY1/LSY1_009-Frequency-Domain-Analysis"
       },
       {
         "slug": "LSY1_010-Discrete-Time-System-Analysis",
         "name": "LSY1_010-Discrete-Time-System-Analysis",
-        "url": "https://idofangbentov.uk/Technion/LSY1/LSY1_010-Discrete-Time-System-Analysis",
         "displayTitle": "פרק 10: Discrete Time System Analysis",
-        "number": 10
+        "number": 10,
+        "url": "https://idofangbentov.uk/Technion/LSY1/LSY1_010-Discrete-Time-System-Analysis"
       },
       {
         "slug": "LSY1_011-Fourier-Analysis-of-Discrete-Time-Signals",
         "name": "LSY1_011-Fourier-Analysis-of-Discrete-Time-Signals",
-        "url": "https://idofangbentov.uk/Technion/LSY1/LSY1_011-Fourier-Analysis-of-Discrete-Time-Signals",
         "displayTitle": "פרק 11: Fourier Analysis of Discrete Time Signals",
-        "number": 11
+        "number": 11,
+        "url": "https://idofangbentov.uk/Technion/LSY1/LSY1_011-Fourier-Analysis-of-Discrete-Time-Signals"
       }
     ],
     "homework": [],
@@ -2467,207 +2537,256 @@
       {
         "slug": "LSY1_EEQ-Exam-Example-Questions",
         "name": "LSY1_EEQ-Exam-Example-Questions",
-        "url": "https://idofangbentov.uk/Technion/LSY1/LSY1_EEQ-Exam-Example-Questions",
         "displayTitle": "LSY1_EEQ Exam Example Questions",
-        "year": "",
-        "season": "",
-        "moed": ""
+        "url": "https://idofangbentov.uk/Technion/LSY1/LSY1_EEQ-Exam-Example-Questions"
       }
     ],
     "projects": [],
     "other": [],
-    "hebrewName": "מערכות לינאריות (034032)"
+    "hebrewName": "מערכות ליניאריות (034032)"
   },
   "MCP1": {
     "course_tag": "MCP1",
     "title": "MCP1",
     "url": "https://idofangbentov.uk/Technion/MCP1/",
+    "githubUrl": "https://github.com/NuclearGandhi/technion_second_brain/tree/master/Technion/MCP1",
     "lectures": [
       {
         "slug": "MCP1_000-00340032-תכן-מוצרים-מבוססי-מיקרו-מעבד-מ",
         "name": "MCP1_000-00340032-תכן-מוצרים-מבוססי-מיקרו-מעבד-מ",
-        "url": "https://idofangbentov.uk/Technion/MCP1/MCP1_000-00340032-תכן-מוצרים-מבוססי-מיקרו-מעבד-מ",
         "displayTitle": "פרק 0: 00340032 תכן מוצרים מבוססי מיקרו מעבד מ",
-        "number": 0
+        "number": 0,
+        "url": "https://idofangbentov.uk/Technion/MCP1/MCP1_000-00340032-תכן-מוצרים-מבוססי-מיקרו-מעבד-מ"
       }
     ],
     "homework": [
       {
         "slug": "MCP1_HW001-Homework-1",
         "name": "MCP1_HW001-Homework-1",
-        "url": "https://idofangbentov.uk/Technion/MCP1/MCP1_HW001-Homework-1",
         "displayTitle": "תרגיל בית 1: Homework 1",
-        "hwNumber": 1
+        "hwNumber": 1,
+        "url": "https://idofangbentov.uk/Technion/MCP1/MCP1_HW001-Homework-1"
       },
       {
         "slug": "MCP1_HW002P1-Homework-2-Part-1",
         "name": "MCP1_HW002P1-Homework-2-Part-1",
-        "url": "https://idofangbentov.uk/Technion/MCP1/MCP1_HW002P1-Homework-2-Part-1",
-        "displayTitle": "MCP1_HW002P1 Homework 2 Part 1",
-        "hwNumber": 1
+        "displayTitle": "תרגיל בית 2 P1: Homework 2 Part 1",
+        "hwNumber": 2,
+        "url": "https://idofangbentov.uk/Technion/MCP1/MCP1_HW002P1-Homework-2-Part-1"
       },
       {
         "slug": "MCP1_HW002P2-Homework-2-Part-2",
         "name": "MCP1_HW002P2-Homework-2-Part-2",
-        "url": "https://idofangbentov.uk/Technion/MCP1/MCP1_HW002P2-Homework-2-Part-2",
-        "displayTitle": "MCP1_HW002P2 Homework 2 Part 2",
-        "hwNumber": 1
+        "displayTitle": "תרגיל בית 2 P2: Homework 2 Part 2",
+        "hwNumber": 2,
+        "url": "https://idofangbentov.uk/Technion/MCP1/MCP1_HW002P2-Homework-2-Part-2"
       }
     ],
     "exams": [],
     "projects": [],
     "other": [],
-    "hebrewName": "מעבדה במכטרוניקה 1"
+    "hebrewName": "תכן מוצרים מבוססי מיקרו-מעבד (00350032)"
   },
   "MCS1": {
     "course_tag": "MCS1",
     "title": "MCS1",
     "url": "https://idofangbentov.uk/Technion/MCS1/",
+    "githubUrl": "https://github.com/NuclearGandhi/technion_second_brain/tree/master/Technion/MCS1",
     "lectures": [
       {
         "slug": "MCS1_000-00350041-מכניקת-מיקרו-מערכות",
         "name": "MCS1_000-00350041-מכניקת-מיקרו-מערכות",
-        "url": "https://idofangbentov.uk/Technion/MCS1/MCS1_000-00350041-מכניקת-מיקרו-מערכות",
         "displayTitle": "פרק 0: 00350041 מכניקת מיקרו מערכות",
-        "number": 0
+        "number": 0,
+        "url": "https://idofangbentov.uk/Technion/MCS1/MCS1_000-00350041-מכניקת-מיקרו-מערכות"
       },
       {
         "slug": "MCS1_001-מבוא",
         "name": "MCS1_001-מבוא",
-        "url": "https://idofangbentov.uk/Technion/MCS1/MCS1_001-מבוא",
         "displayTitle": "פרק 1: מבוא",
-        "number": 1
+        "number": 1,
+        "url": "https://idofangbentov.uk/Technion/MCS1/MCS1_001-מבוא"
       },
       {
         "slug": "MCS1_002-שדות-שוליים-ומשפעל-מסרק",
         "name": "MCS1_002-שדות-שוליים-ומשפעל-מסרק",
-        "url": "https://idofangbentov.uk/Technion/MCS1/MCS1_002-שדות-שוליים-ומשפעל-מסרק",
         "displayTitle": "פרק 2: שדות שוליים ומשפעל מסרק",
-        "number": 2
+        "number": 2,
+        "url": "https://idofangbentov.uk/Technion/MCS1/MCS1_002-שדות-שוליים-ומשפעל-מסרק"
       },
       {
         "slug": "MCS1_003-לינאריות-קורה-בכפיפה",
         "name": "MCS1_003-לינאריות-קורה-בכפיפה",
-        "url": "https://idofangbentov.uk/Technion/MCS1/MCS1_003-לינאריות-קורה-בכפיפה",
         "displayTitle": "פרק 3: לינאריות קורה בכפיפה",
-        "number": 3
+        "number": 3,
+        "url": "https://idofangbentov.uk/Technion/MCS1/MCS1_003-לינאריות-קורה-בכפיפה"
       },
       {
         "slug": "MCS1_004-Side-Pull-In",
         "name": "MCS1_004-Side-Pull-In",
-        "url": "https://idofangbentov.uk/Technion/MCS1/MCS1_004-Side-Pull-In",
         "displayTitle": "פרק 4: Side Pull In",
-        "number": 4
+        "number": 4,
+        "url": "https://idofangbentov.uk/Technion/MCS1/MCS1_004-Side-Pull-In"
       },
       {
         "slug": "MCS1_005-חומרים-דיאלקטריים",
         "name": "MCS1_005-חומרים-דיאלקטריים",
-        "url": "https://idofangbentov.uk/Technion/MCS1/MCS1_005-חומרים-דיאלקטריים",
         "displayTitle": "פרק 5: חומרים דיאלקטריים",
-        "number": 5
+        "number": 5,
+        "url": "https://idofangbentov.uk/Technion/MCS1/MCS1_005-חומרים-דיאלקטריים"
       },
       {
         "slug": "MCS1_006-קורות-בימורפיות",
         "name": "MCS1_006-קורות-בימורפיות",
-        "url": "https://idofangbentov.uk/Technion/MCS1/MCS1_006-קורות-בימורפיות",
         "displayTitle": "פרק 6: קורות בימורפיות",
-        "number": 6
+        "number": 6,
+        "url": "https://idofangbentov.uk/Technion/MCS1/MCS1_006-קורות-בימורפיות"
       },
       {
         "slug": "MCS1_007-רזונטורים",
         "name": "MCS1_007-רזונטורים",
-        "url": "https://idofangbentov.uk/Technion/MCS1/MCS1_007-רזונטורים",
         "displayTitle": "פרק 7: רזונטורים",
-        "number": 7
+        "number": 7,
+        "url": "https://idofangbentov.uk/Technion/MCS1/MCS1_007-רזונטורים"
       },
       {
         "slug": "MCS1_008-רזונטורים-לא-לינאריים",
         "name": "MCS1_008-רזונטורים-לא-לינאריים",
-        "url": "https://idofangbentov.uk/Technion/MCS1/MCS1_008-רזונטורים-לא-לינאריים",
         "displayTitle": "פרק 8: רזונטורים לא לינאריים",
-        "number": 8
+        "number": 8,
+        "url": "https://idofangbentov.uk/Technion/MCS1/MCS1_008-רזונטורים-לא-לינאריים"
       },
       {
         "slug": "MCS1_009-פיאזואלקטריות",
         "name": "MCS1_009-פיאזואלקטריות",
-        "url": "https://idofangbentov.uk/Technion/MCS1/MCS1_009-פיאזואלקטריות",
         "displayTitle": "פרק 9: פיאזואלקטריות",
-        "number": 9
+        "number": 9,
+        "url": "https://idofangbentov.uk/Technion/MCS1/MCS1_009-פיאזואלקטריות"
       },
       {
         "slug": "MCS1_010-משפעל-פיאזואלקטרי",
         "name": "MCS1_010-משפעל-פיאזואלקטרי",
-        "url": "https://idofangbentov.uk/Technion/MCS1/MCS1_010-משפעל-פיאזואלקטרי",
         "displayTitle": "פרק 10: משפעל פיאזואלקטרי",
-        "number": 10
+        "number": 10,
+        "url": "https://idofangbentov.uk/Technion/MCS1/MCS1_010-משפעל-פיאזואלקטרי"
       },
       {
         "slug": "MCS1_011-תרמואלסטיות",
         "name": "MCS1_011-תרמואלסטיות",
-        "url": "https://idofangbentov.uk/Technion/MCS1/MCS1_011-תרמואלסטיות",
         "displayTitle": "פרק 11: תרמואלסטיות",
-        "number": 11
+        "number": 11,
+        "url": "https://idofangbentov.uk/Technion/MCS1/MCS1_011-תרמואלסטיות"
       },
       {
         "slug": "MCS1_012-מודולציה-ודימודולציה",
         "name": "MCS1_012-מודולציה-ודימודולציה",
-        "url": "https://idofangbentov.uk/Technion/MCS1/MCS1_012-מודולציה-ודימודולציה",
         "displayTitle": "פרק 12: מודולציה ודימודולציה",
-        "number": 12
+        "number": 12,
+        "url": "https://idofangbentov.uk/Technion/MCS1/MCS1_012-מודולציה-ודימודולציה"
       }
     ],
-    "homework": [],
+    "homework": [
+      {
+        "slug": "MCS1_HW001-תרגיל-בית-1",
+        "name": "MCS1_HW001-תרגיל-בית-1",
+        "displayTitle": "תרגיל בית 1: MCS1_HW001 תרגיל בית 1 [GitHub]",
+        "hwNumber": 1,
+        "url": "https://github.com/NuclearGandhi/technion_second_brain/blob/master/Technion/MCS1/MCS1_HW001%20%D7%AA%D7%A8%D7%92%D7%99%D7%9C%20%D7%91%D7%99%D7%AA%201.md",
+        "source": "github"
+      },
+      {
+        "slug": "MCS1_HW002-תרגיל-בית-2",
+        "name": "MCS1_HW002-תרגיל-בית-2",
+        "displayTitle": "תרגיל בית 2: MCS1_HW002 תרגיל בית 2 [GitHub]",
+        "hwNumber": 2,
+        "url": "https://github.com/NuclearGandhi/technion_second_brain/blob/master/Technion/MCS1/MCS1_HW002%20%D7%AA%D7%A8%D7%92%D7%99%D7%9C%20%D7%91%D7%99%D7%AA%202.md",
+        "source": "github"
+      },
+      {
+        "slug": "MCS1_HW003-תרגיל-בית-3",
+        "name": "MCS1_HW003-תרגיל-בית-3",
+        "displayTitle": "תרגיל בית 3: MCS1_HW003 תרגיל בית 3 [GitHub]",
+        "hwNumber": 3,
+        "url": "https://github.com/NuclearGandhi/technion_second_brain/blob/master/Technion/MCS1/MCS1_HW003%20%D7%AA%D7%A8%D7%92%D7%99%D7%9C%20%D7%91%D7%99%D7%AA%203.md",
+        "source": "github"
+      },
+      {
+        "slug": "MCS1_HW004-תרגיל-בית-4",
+        "name": "MCS1_HW004-תרגיל-בית-4",
+        "displayTitle": "תרגיל בית 4: MCS1_HW004 תרגיל בית 4 [GitHub]",
+        "hwNumber": 4,
+        "url": "https://github.com/NuclearGandhi/technion_second_brain/blob/master/Technion/MCS1/MCS1_HW004%20%D7%AA%D7%A8%D7%92%D7%99%D7%9C%20%D7%91%D7%99%D7%AA%204.md",
+        "source": "github"
+      },
+      {
+        "slug": "MCS1_HW005-תרגיל-בית-5",
+        "name": "MCS1_HW005-תרגיל-בית-5",
+        "displayTitle": "תרגיל בית 5: MCS1_HW005 תרגיל בית 5 [GitHub]",
+        "hwNumber": 5,
+        "url": "https://github.com/NuclearGandhi/technion_second_brain/blob/master/Technion/MCS1/MCS1_HW005%20%D7%AA%D7%A8%D7%92%D7%99%D7%9C%20%D7%91%D7%99%D7%AA%205.md",
+        "source": "github"
+      },
+      {
+        "slug": "MCS1_HW006-תרגיל-בית-6",
+        "name": "MCS1_HW006-תרגיל-בית-6",
+        "displayTitle": "תרגיל בית 6: MCS1_HW006 תרגיל בית 6 [GitHub]",
+        "hwNumber": 6,
+        "url": "https://github.com/NuclearGandhi/technion_second_brain/blob/master/Technion/MCS1/MCS1_HW006%20%D7%AA%D7%A8%D7%92%D7%99%D7%9C%20%D7%91%D7%99%D7%AA%206.md",
+        "source": "github"
+      }
+    ],
     "exams": [],
     "projects": [],
     "other": [],
-    "hebrewName": "מכניקת מיקרו-מערכות (035041)"
+    "hebrewName": "מכניקת מיקרו-מערכות MEMS (00350041)"
   },
   "MCS2": {
     "course_tag": "MCS2",
     "title": "MCS2",
     "url": "https://idofangbentov.uk/Technion/MCS2/",
+    "githubUrl": "https://github.com/NuclearGandhi/technion_second_brain/tree/master/Technion/MCS2",
     "lectures": [
       {
         "slug": "MCS2_000-00380800-Advanced-Modeling-in-MEMS",
         "name": "MCS2_000-00380800-Advanced-Modeling-in-MEMS",
-        "url": "https://idofangbentov.uk/Technion/MCS2/MCS2_000-00380800-Advanced-Modeling-in-MEMS",
         "displayTitle": "פרק 0: 00380800 Advanced Modeling in MEMS",
-        "number": 0
+        "number": 0,
+        "url": "https://idofangbentov.uk/Technion/MCS2/MCS2_000-00380800-Advanced-Modeling-in-MEMS"
       },
       {
         "slug": "MCS2_001-DIPIE",
         "name": "MCS2_001-DIPIE",
-        "url": "https://idofangbentov.uk/Technion/MCS2/MCS2_001-DIPIE",
         "displayTitle": "פרק 1: DIPIE",
-        "number": 1
+        "number": 1,
+        "url": "https://idofangbentov.uk/Technion/MCS2/MCS2_001-DIPIE"
       },
       {
         "slug": "MCS2_002-Electromechanical-Systems-with-N-DOFs-and-K-Voltages",
         "name": "MCS2_002-Electromechanical-Systems-with-N-DOFs-and-K-Voltages",
-        "url": "https://idofangbentov.uk/Technion/MCS2/MCS2_002-Electromechanical-Systems-with-N-DOFs-and-K-Voltages",
         "displayTitle": "פרק 2: Electromechanical Systems with N DOFs and K Voltages",
-        "number": 2
+        "number": 2,
+        "url": "https://idofangbentov.uk/Technion/MCS2/MCS2_002-Electromechanical-Systems-with-N-DOFs-and-K-Voltages"
       },
       {
         "slug": "MCS2_003-Floating-Electrode-Actuator",
         "name": "MCS2_003-Floating-Electrode-Actuator",
-        "url": "https://idofangbentov.uk/Technion/MCS2/MCS2_003-Floating-Electrode-Actuator",
         "displayTitle": "פרק 3: Floating Electrode Actuator",
-        "number": 3
+        "number": 3,
+        "url": "https://idofangbentov.uk/Technion/MCS2/MCS2_003-Floating-Electrode-Actuator"
       },
       {
         "slug": "MCS2_004-Experimental-Validation-of-Electro-Mechanical-Buckling",
         "name": "MCS2_004-Experimental-Validation-of-Electro-Mechanical-Buckling",
-        "url": "https://idofangbentov.uk/Technion/MCS2/MCS2_004-Experimental-Validation-of-Electro-Mechanical-Buckling",
         "displayTitle": "פרק 4: Experimental Validation of Electro Mechanical Buckling",
-        "number": 4
+        "number": 4,
+        "url": "https://idofangbentov.uk/Technion/MCS2/MCS2_004-Experimental-Validation-of-Electro-Mechanical-Buckling"
       },
       {
         "slug": "MCS2_006-Dynamic-Pull-In",
         "name": "MCS2_006-Dynamic-Pull-In",
-        "url": "https://idofangbentov.uk/Technion/MCS2/MCS2_006-Dynamic-Pull-In",
         "displayTitle": "פרק 6: Dynamic Pull In",
-        "number": 6
+        "number": 6,
+        "url": "https://idofangbentov.uk/Technion/MCS2/MCS2_006-Dynamic-Pull-In"
       }
     ],
     "homework": [],
@@ -2676,210 +2795,218 @@
       {
         "slug": "MCS2_P001-Project-1",
         "name": "MCS2_P001-Project-1",
+        "displayTitle": "פרויקט 1: Project 1",
+        "number": 1,
         "url": "https://idofangbentov.uk/Technion/MCS2/MCS2_P001-Project-1"
+      },
+      {
+        "slug": "MCS2_P002-Project-2",
+        "name": "MCS2_P002-Project-2",
+        "displayTitle": "פרויקט 2: Project 2 [GitHub]",
+        "number": 2,
+        "url": "https://github.com/NuclearGandhi/technion_second_brain/blob/master/Technion/MCS2/MCS2_P002%20Project%202.md",
+        "source": "github"
       }
     ],
     "other": [],
-    "hebrewName": "מכניקת מערכות 2"
+    "hebrewName": "מודלים מתקדמים ב-MEMS (00380800)"
   },
   "MDN1": {
     "course_tag": "MDN1",
     "title": "MDN1",
     "url": "https://idofangbentov.uk/Technion/MDN1/",
+    "githubUrl": "https://github.com/NuclearGandhi/technion_second_brain/tree/master/Technion/MDN1",
     "lectures": [
       {
         "slug": "MDN1_000-00340054-תכן-מכני-1מ",
         "name": "MDN1_000-00340054-תכן-מכני-1מ",
-        "url": "https://idofangbentov.uk/Technion/MDN1/MDN1_000-00340054-תכן-מכני-1מ",
         "displayTitle": "פרק 0: 00340054 תכן מכני 1מ",
-        "number": 0
+        "number": 0,
+        "url": "https://idofangbentov.uk/Technion/MDN1/MDN1_000-00340054-תכן-מכני-1מ"
       },
       {
         "slug": "MDN1_001-מבוא-לתכן-מכני",
         "name": "MDN1_001-מבוא-לתכן-מכני",
-        "url": "https://idofangbentov.uk/Technion/MDN1/MDN1_001-מבוא-לתכן-מכני",
         "displayTitle": "פרק 1: מבוא לתכן מכני",
-        "number": 1
+        "number": 1,
+        "url": "https://idofangbentov.uk/Technion/MDN1/MDN1_001-מבוא-לתכן-מכני"
       },
       {
         "slug": "MDN1_002-כשלים-כתוצאה-מעומס-משתנה",
         "name": "MDN1_002-כשלים-כתוצאה-מעומס-משתנה",
-        "url": "https://idofangbentov.uk/Technion/MDN1/MDN1_002-כשלים-כתוצאה-מעומס-משתנה",
         "displayTitle": "פרק 2: כשלים כתוצאה מעומס משתנה",
-        "number": 2
+        "number": 2,
+        "url": "https://idofangbentov.uk/Technion/MDN1/MDN1_002-כשלים-כתוצאה-מעומס-משתנה"
       },
       {
         "slug": "MDN1_003-בורגי-הנעה-ובורגי-הידוק",
         "name": "MDN1_003-בורגי-הנעה-ובורגי-הידוק",
-        "url": "https://idofangbentov.uk/Technion/MDN1/MDN1_003-בורגי-הנעה-ובורגי-הידוק",
         "displayTitle": "פרק 3: בורגי הנעה ובורגי הידוק",
-        "number": 3
+        "number": 3,
+        "url": "https://idofangbentov.uk/Technion/MDN1/MDN1_003-בורגי-הנעה-ובורגי-הידוק"
       },
       {
         "slug": "MDN1_004-מחברים-מרותכים",
         "name": "MDN1_004-מחברים-מרותכים",
-        "url": "https://idofangbentov.uk/Technion/MDN1/MDN1_004-מחברים-מרותכים",
         "displayTitle": "פרק 4: מחברים מרותכים",
-        "number": 4
+        "number": 4,
+        "url": "https://idofangbentov.uk/Technion/MDN1/MDN1_004-מחברים-מרותכים"
       },
       {
         "slug": "MDN1_005-גלים-ומרכיביהם",
         "name": "MDN1_005-גלים-ומרכיביהם",
-        "url": "https://idofangbentov.uk/Technion/MDN1/MDN1_005-גלים-ומרכיביהם",
         "displayTitle": "פרק 5: גלים ומרכיביהם",
-        "number": 5
+        "number": 5,
+        "url": "https://idofangbentov.uk/Technion/MDN1/MDN1_005-גלים-ומרכיביהם"
       },
       {
         "slug": "MDN1_006-תמסורות-מכאניות",
         "name": "MDN1_006-תמסורות-מכאניות",
-        "url": "https://idofangbentov.uk/Technion/MDN1/MDN1_006-תמסורות-מכאניות",
         "displayTitle": "פרק 6: תמסורות מכאניות",
-        "number": 6
+        "number": 6,
+        "url": "https://idofangbentov.uk/Technion/MDN1/MDN1_006-תמסורות-מכאניות"
       },
       {
         "slug": "MDN1_007-פרופיל-השן",
         "name": "MDN1_007-פרופיל-השן",
-        "url": "https://idofangbentov.uk/Technion/MDN1/MDN1_007-פרופיל-השן",
         "displayTitle": "פרק 7: פרופיל השן",
-        "number": 7
+        "number": 7,
+        "url": "https://idofangbentov.uk/Technion/MDN1/MDN1_007-פרופיל-השן"
       },
       {
         "slug": "MDN1_008-כוחות-שילוב-ומאמצי-מגע-בשן",
         "name": "MDN1_008-כוחות-שילוב-ומאמצי-מגע-בשן",
-        "url": "https://idofangbentov.uk/Technion/MDN1/MDN1_008-כוחות-שילוב-ומאמצי-מגע-בשן",
         "displayTitle": "פרק 8: כוחות שילוב ומאמצי מגע בשן",
-        "number": 8
+        "number": 8,
+        "url": "https://idofangbentov.uk/Technion/MDN1/MDN1_008-כוחות-שילוב-ומאמצי-מגע-בשן"
       },
       {
         "slug": "MDN1_009-בלמים-ומצמדים",
         "name": "MDN1_009-בלמים-ומצמדים",
-        "url": "https://idofangbentov.uk/Technion/MDN1/MDN1_009-בלמים-ומצמדים",
         "displayTitle": "פרק 9: בלמים ומצמדים",
-        "number": 9
+        "number": 9,
+        "url": "https://idofangbentov.uk/Technion/MDN1/MDN1_009-בלמים-ומצמדים"
       },
       {
         "slug": "MDN1_010-קפיצים-מכנים",
         "name": "MDN1_010-קפיצים-מכנים",
-        "url": "https://idofangbentov.uk/Technion/MDN1/MDN1_010-קפיצים-מכנים",
         "displayTitle": "פרק 10: קפיצים מכנים",
-        "number": 10
+        "number": 10,
+        "url": "https://idofangbentov.uk/Technion/MDN1/MDN1_010-קפיצים-מכנים"
       },
       {
         "slug": "MDN1_011-מסבים",
         "name": "MDN1_011-מסבים",
-        "url": "https://idofangbentov.uk/Technion/MDN1/MDN1_011-מסבים",
         "displayTitle": "פרק 11: מסבים",
-        "number": 11
+        "number": 11,
+        "url": "https://idofangbentov.uk/Technion/MDN1/MDN1_011-מסבים"
       }
     ],
     "homework": [
       {
         "slug": "MDN1_HW001-תרגיל-בית-1",
         "name": "MDN1_HW001-תרגיל-בית-1",
-        "url": "https://idofangbentov.uk/Technion/MDN1/MDN1_HW001-תרגיל-בית-1",
-        "displayTitle": "תרגיל בית 1: תרגיל בית 1",
-        "hwNumber": 1
+        "displayTitle": "תרגיל בית 1: MDN1_HW001 תרגיל בית 1",
+        "hwNumber": 1,
+        "url": "https://idofangbentov.uk/Technion/MDN1/MDN1_HW001-תרגיל-בית-1"
       },
       {
         "slug": "MDN1_HW002-תרגיל-בית-2",
         "name": "MDN1_HW002-תרגיל-בית-2",
-        "url": "https://idofangbentov.uk/Technion/MDN1/MDN1_HW002-תרגיל-בית-2",
-        "displayTitle": "תרגיל בית 2: תרגיל בית 2",
-        "hwNumber": 2
+        "displayTitle": "תרגיל בית 2: MDN1_HW002 תרגיל בית 2",
+        "hwNumber": 2,
+        "url": "https://idofangbentov.uk/Technion/MDN1/MDN1_HW002-תרגיל-בית-2"
       },
       {
         "slug": "MDN1_HW003-תרגיל-בית-3",
         "name": "MDN1_HW003-תרגיל-בית-3",
-        "url": "https://idofangbentov.uk/Technion/MDN1/MDN1_HW003-תרגיל-בית-3",
-        "displayTitle": "תרגיל בית 3: תרגיל בית 3",
-        "hwNumber": 3
+        "displayTitle": "תרגיל בית 3: MDN1_HW003 תרגיל בית 3",
+        "hwNumber": 3,
+        "url": "https://idofangbentov.uk/Technion/MDN1/MDN1_HW003-תרגיל-בית-3"
       },
       {
         "slug": "MDN1_HW004-תרגיל-בית-4",
         "name": "MDN1_HW004-תרגיל-בית-4",
-        "url": "https://idofangbentov.uk/Technion/MDN1/MDN1_HW004-תרגיל-בית-4",
-        "displayTitle": "תרגיל בית 4: תרגיל בית 4",
-        "hwNumber": 4
+        "displayTitle": "תרגיל בית 4: MDN1_HW004 תרגיל בית 4",
+        "hwNumber": 4,
+        "url": "https://idofangbentov.uk/Technion/MDN1/MDN1_HW004-תרגיל-בית-4"
       },
       {
         "slug": "MDN1_HW005-תרגיל-בית-5",
         "name": "MDN1_HW005-תרגיל-בית-5",
-        "url": "https://idofangbentov.uk/Technion/MDN1/MDN1_HW005-תרגיל-בית-5",
-        "displayTitle": "תרגיל בית 5: תרגיל בית 5",
-        "hwNumber": 5
+        "displayTitle": "תרגיל בית 5: MDN1_HW005 תרגיל בית 5",
+        "hwNumber": 5,
+        "url": "https://idofangbentov.uk/Technion/MDN1/MDN1_HW005-תרגיל-בית-5"
       },
       {
         "slug": "MDN1_HW006-תרגיל-בית-6",
         "name": "MDN1_HW006-תרגיל-בית-6",
-        "url": "https://idofangbentov.uk/Technion/MDN1/MDN1_HW006-תרגיל-בית-6",
-        "displayTitle": "תרגיל בית 6: תרגיל בית 6",
-        "hwNumber": 6
+        "displayTitle": "תרגיל בית 6: MDN1_HW006 תרגיל בית 6",
+        "hwNumber": 6,
+        "url": "https://idofangbentov.uk/Technion/MDN1/MDN1_HW006-תרגיל-בית-6"
       },
       {
         "slug": "MDN1_HW007-תרגיל-בית-7",
         "name": "MDN1_HW007-תרגיל-בית-7",
-        "url": "https://idofangbentov.uk/Technion/MDN1/MDN1_HW007-תרגיל-בית-7",
-        "displayTitle": "תרגיל בית 7: תרגיל בית 7",
-        "hwNumber": 7
+        "displayTitle": "תרגיל בית 7: MDN1_HW007 תרגיל בית 7",
+        "hwNumber": 7,
+        "url": "https://idofangbentov.uk/Technion/MDN1/MDN1_HW007-תרגיל-בית-7"
       },
       {
         "slug": "MDN1_HW008-תרגיל-בית-8",
         "name": "MDN1_HW008-תרגיל-בית-8",
-        "url": "https://idofangbentov.uk/Technion/MDN1/MDN1_HW008-תרגיל-בית-8",
-        "displayTitle": "תרגיל בית 8: תרגיל בית 8",
-        "hwNumber": 8
+        "displayTitle": "תרגיל בית 8: MDN1_HW008 תרגיל בית 8",
+        "hwNumber": 8,
+        "url": "https://idofangbentov.uk/Technion/MDN1/MDN1_HW008-תרגיל-בית-8"
       },
       {
         "slug": "MDN1_HW009-תרגיל-בית-9",
         "name": "MDN1_HW009-תרגיל-בית-9",
-        "url": "https://idofangbentov.uk/Technion/MDN1/MDN1_HW009-תרגיל-בית-9",
-        "displayTitle": "תרגיל בית 9: תרגיל בית 9",
-        "hwNumber": 9
+        "displayTitle": "תרגיל בית 9: MDN1_HW009 תרגיל בית 9",
+        "hwNumber": 9,
+        "url": "https://idofangbentov.uk/Technion/MDN1/MDN1_HW009-תרגיל-בית-9"
       },
       {
         "slug": "MDN1_HW010-תרגיל-בית-10",
         "name": "MDN1_HW010-תרגיל-בית-10",
-        "url": "https://idofangbentov.uk/Technion/MDN1/MDN1_HW010-תרגיל-בית-10",
-        "displayTitle": "תרגיל בית 10: תרגיל בית 10",
-        "hwNumber": 10
+        "displayTitle": "תרגיל בית 10: MDN1_HW010 תרגיל בית 10",
+        "hwNumber": 10,
+        "url": "https://idofangbentov.uk/Technion/MDN1/MDN1_HW010-תרגיל-בית-10"
       }
     ],
     "exams": [
       {
-        "slug": "MDN1_E2020WA-2020-אביב-מועד-א",
-        "name": "MDN1_E2020WA-2020-אביב-מועד-א",
-        "url": "https://idofangbentov.uk/Technion/MDN1/MDN1_E2020WA-2020-אביב-מועד-א",
-        "displayTitle": "MDN1_E2020WA 2020 אביב מועד א",
+        "slug": "MDN1_E2020WA-2020-אביב-מועד-א'",
+        "name": "MDN1_E2020WA-2020-אביב-מועד-א'",
+        "displayTitle": "MDN1_E2020WA 2020 חורף מועד א׳",
         "year": "2020",
         "season": "חורף",
-        "moed": "מועד א׳"
+        "moed": "מועד א׳",
+        "url": "https://idofangbentov.uk/Technion/MDN1/MDN1_E2020WA-2020-אביב-מועד-א%27"
       },
       {
-        "slug": "MDN1_E2021WB-2021-2021-חורף-מועד-ב",
-        "name": "MDN1_E2021WB-2021-2021-חורף-מועד-ב",
-        "url": "https://idofangbentov.uk/Technion/MDN1/MDN1_E2021WB-2021-2021-חורף-מועד-ב",
-        "displayTitle": "MDN1_E2021WB 2021 2021 חורף מועד ב",
+        "slug": "MDN1_E2021WB-2021-2021-חורף-מועד-ב'",
+        "name": "MDN1_E2021WB-2021-2021-חורף-מועד-ב'",
+        "displayTitle": "MDN1_E2021WB 2021 חורף מועד ב׳",
         "year": "2021",
         "season": "חורף",
-        "moed": "מועד ב׳"
+        "moed": "מועד ב׳",
+        "url": "https://idofangbentov.uk/Technion/MDN1/MDN1_E2021WB-2021-2021-חורף-מועד-ב%27"
       },
       {
-        "slug": "MDN1_E2024WA-2024-חורף-מועד-א",
-        "name": "MDN1_E2024WA-2024-חורף-מועד-א",
-        "url": "https://idofangbentov.uk/Technion/MDN1/MDN1_E2024WA-2024-חורף-מועד-א",
-        "displayTitle": "MDN1_E2024WA 2024 חורף מועד א",
+        "slug": "MDN1_E2024WA-2024-חורף-מועד-א'",
+        "name": "MDN1_E2024WA-2024-חורף-מועד-א'",
+        "displayTitle": "MDN1_E2024WA 2024 חורף מועד א׳",
         "year": "2024",
         "season": "חורף",
-        "moed": "מועד א׳"
+        "moed": "מועד א׳",
+        "url": "https://idofangbentov.uk/Technion/MDN1/MDN1_E2024WA-2024-חורף-מועד-א%27"
       },
       {
         "slug": "MDN1_EEQ-Exam-Example-Questions",
         "name": "MDN1_EEQ-Exam-Example-Questions",
-        "url": "https://idofangbentov.uk/Technion/MDN1/MDN1_EEQ-Exam-Example-Questions",
         "displayTitle": "MDN1_EEQ Exam Example Questions",
-        "year": "",
-        "season": "",
-        "moed": ""
+        "url": "https://idofangbentov.uk/Technion/MDN1/MDN1_EEQ-Exam-Example-Questions"
       }
     ],
     "projects": [],
@@ -2887,183 +3014,196 @@
       {
         "slug": "MDN1_A15-טבלת-מקדמי-ריכוז-מאמצים",
         "name": "MDN1_A15-טבלת-מקדמי-ריכוז-מאמצים",
+        "displayTitle": "📊 MDN1_A15 טבלת מקדמי ריכוז מאמצים",
         "url": "https://idofangbentov.uk/Technion/MDN1/MDN1_A15-טבלת-מקדמי-ריכוז-מאמצים"
       },
       {
         "slug": "MDN1_A18-טבלת-תכונות-גאומטריות",
         "name": "MDN1_A18-טבלת-תכונות-גאומטריות",
+        "displayTitle": "📊 MDN1_A18 טבלת תכונות גאומטריות",
         "url": "https://idofangbentov.uk/Technion/MDN1/MDN1_A18-טבלת-תכונות-גאומטריות"
       },
       {
         "slug": "MDN1_A24-27-טבלת-תכונות-חומרים",
         "name": "MDN1_A24-27-טבלת-תכונות-חומרים",
+        "displayTitle": "📊 MDN1_A24-27 טבלת תכונות חומרים",
         "url": "https://idofangbentov.uk/Technion/MDN1/MDN1_A24-27-טבלת-תכונות-חומרים"
       },
       {
         "slug": "MDN1_A31-33-טבלאות-אומים-ודסקות",
         "name": "MDN1_A31-33-טבלאות-אומים-ודסקות",
+        "displayTitle": "📊 MDN1_A31-33 טבלאות אומים ודסקות",
         "url": "https://idofangbentov.uk/Technion/MDN1/MDN1_A31-33-טבלאות-אומים-ודסקות"
       },
       {
         "slug": "MDN1_C10-טבלאות-קפיצים",
         "name": "MDN1_C10-טבלאות-קפיצים",
+        "displayTitle": "MDN1_C10 טבלאות קפיצים",
         "url": "https://idofangbentov.uk/Technion/MDN1/MDN1_C10-טבלאות-קפיצים"
       },
       {
         "slug": "MDN1_C14-טבלאות-מאמצים-בגלגלי-שיניים",
         "name": "MDN1_C14-טבלאות-מאמצים-בגלגלי-שיניים",
+        "displayTitle": "MDN1_C14 טבלאות מאמצים בגלגלי שיניים",
         "url": "https://idofangbentov.uk/Technion/MDN1/MDN1_C14-טבלאות-מאמצים-בגלגלי-שיניים"
       },
       {
         "slug": "MDN1_C16-טבלאות-בלמים-ומצמדים",
         "name": "MDN1_C16-טבלאות-בלמים-ומצמדים",
+        "displayTitle": "MDN1_C16 טבלאות בלמים ומצמדים",
         "url": "https://idofangbentov.uk/Technion/MDN1/MDN1_C16-טבלאות-בלמים-ומצמדים"
       },
       {
         "slug": "MDN1_C3-טבלאות-ניתוח-מאמצים",
         "name": "MDN1_C3-טבלאות-ניתוח-מאמצים",
+        "displayTitle": "MDN1_C3 טבלאות ניתוח מאמצים",
         "url": "https://idofangbentov.uk/Technion/MDN1/MDN1_C3-טבלאות-ניתוח-מאמצים"
       },
       {
         "slug": "MDN1_C6-טבלאות-התעייפות",
         "name": "MDN1_C6-טבלאות-התעייפות",
+        "displayTitle": "MDN1_C6 טבלאות התעייפות",
         "url": "https://idofangbentov.uk/Technion/MDN1/MDN1_C6-טבלאות-התעייפות"
       },
       {
         "slug": "MDN1_C7-טבלאות-גלים",
         "name": "MDN1_C7-טבלאות-גלים",
+        "displayTitle": "MDN1_C7 טבלאות גלים",
         "url": "https://idofangbentov.uk/Technion/MDN1/MDN1_C7-טבלאות-גלים"
       },
       {
         "slug": "MDN1_C8-טבלאות-ברגים",
         "name": "MDN1_C8-טבלאות-ברגים",
+        "displayTitle": "MDN1_C8 טבלאות ברגים",
         "url": "https://idofangbentov.uk/Technion/MDN1/MDN1_C8-טבלאות-ברגים"
       },
       {
         "slug": "MDN1_C9-טבלאות-ריתוכים",
         "name": "MDN1_C9-טבלאות-ריתוכים",
+        "displayTitle": "MDN1_C9 טבלאות ריתוכים",
         "url": "https://idofangbentov.uk/Technion/MDN1/MDN1_C9-טבלאות-ריתוכים"
       }
     ],
-    "hebrewName": "תכן מכני 1 (034054)"
+    "hebrewName": "תכן מכני 1מ׳ (034054)"
   },
   "MNF1": {
     "course_tag": "MNF1",
     "title": "MNF1",
     "url": "https://idofangbentov.uk/Technion/MNF1/",
+    "githubUrl": "https://github.com/NuclearGandhi/technion_second_brain/tree/master/Technion/MNF1",
     "lectures": [
       {
         "slug": "MNF1_000-034030-Manufacturing-Processes",
         "name": "MNF1_000-034030-Manufacturing-Processes",
-        "url": "https://idofangbentov.uk/Technion/MNF1/MNF1_000-034030-Manufacturing-Processes",
         "displayTitle": "פרק 0: 034030 Manufacturing Processes",
-        "number": 0
+        "number": 0,
+        "url": "https://idofangbentov.uk/Technion/MNF1/MNF1_000-034030-Manufacturing-Processes"
       },
       {
         "slug": "MNF1_001-Introduction",
         "name": "MNF1_001-Introduction",
-        "url": "https://idofangbentov.uk/Technion/MNF1/MNF1_001-Introduction",
         "displayTitle": "פרק 1: Introduction",
-        "number": 1
+        "number": 1,
+        "url": "https://idofangbentov.uk/Technion/MNF1/MNF1_001-Introduction"
       },
       {
         "slug": "MNF1_002-Metal-Casting",
         "name": "MNF1_002-Metal-Casting",
-        "url": "https://idofangbentov.uk/Technion/MNF1/MNF1_002-Metal-Casting",
         "displayTitle": "פרק 2: Metal Casting",
-        "number": 2
+        "number": 2,
+        "url": "https://idofangbentov.uk/Technion/MNF1/MNF1_002-Metal-Casting"
       },
       {
         "slug": "MNF1_003-Bulk-Deformation-Processes",
         "name": "MNF1_003-Bulk-Deformation-Processes",
-        "url": "https://idofangbentov.uk/Technion/MNF1/MNF1_003-Bulk-Deformation-Processes",
         "displayTitle": "פרק 3: Bulk Deformation Processes",
-        "number": 3
+        "number": 3,
+        "url": "https://idofangbentov.uk/Technion/MNF1/MNF1_003-Bulk-Deformation-Processes"
       },
       {
         "slug": "MNF1_004-Machining-Processes",
         "name": "MNF1_004-Machining-Processes",
-        "url": "https://idofangbentov.uk/Technion/MNF1/MNF1_004-Machining-Processes",
         "displayTitle": "פרק 4: Machining Processes",
-        "number": 4
+        "number": 4,
+        "url": "https://idofangbentov.uk/Technion/MNF1/MNF1_004-Machining-Processes"
       },
       {
         "slug": "MNF1_005-Geometric-Dimensioning-and-Tolerancing",
         "name": "MNF1_005-Geometric-Dimensioning-and-Tolerancing",
-        "url": "https://idofangbentov.uk/Technion/MNF1/MNF1_005-Geometric-Dimensioning-and-Tolerancing",
         "displayTitle": "פרק 5: Geometric Dimensioning and Tolerancing",
-        "number": 5
+        "number": 5,
+        "url": "https://idofangbentov.uk/Technion/MNF1/MNF1_005-Geometric-Dimensioning-and-Tolerancing"
       },
       {
         "slug": "MNF1_006-Joining-and-Fastening-Processes",
         "name": "MNF1_006-Joining-and-Fastening-Processes",
-        "url": "https://idofangbentov.uk/Technion/MNF1/MNF1_006-Joining-and-Fastening-Processes",
         "displayTitle": "פרק 6: Joining and Fastening Processes",
-        "number": 6
+        "number": 6,
+        "url": "https://idofangbentov.uk/Technion/MNF1/MNF1_006-Joining-and-Fastening-Processes"
       },
       {
         "slug": "MNF1_007-Heat-Treatment",
         "name": "MNF1_007-Heat-Treatment",
-        "url": "https://idofangbentov.uk/Technion/MNF1/MNF1_007-Heat-Treatment",
         "displayTitle": "פרק 7: Heat Treatment",
-        "number": 7
+        "number": 7,
+        "url": "https://idofangbentov.uk/Technion/MNF1/MNF1_007-Heat-Treatment"
       },
       {
         "slug": "MNF1_008-Surface-Treatments,-Coatings,-and-Cleaning",
         "name": "MNF1_008-Surface-Treatments,-Coatings,-and-Cleaning",
-        "url": "https://idofangbentov.uk/Technion/MNF1/MNF1_008-Surface-Treatments,-Coatings,-and-Cleaning",
         "displayTitle": "פרק 8: Surface Treatments, Coatings, and Cleaning",
-        "number": 8
+        "number": 8,
+        "url": "https://idofangbentov.uk/Technion/MNF1/MNF1_008-Surface-Treatments,-Coatings,-and-Cleaning"
       },
       {
         "slug": "MNF1_009-Powder-Metallurgy-and-Processing-of-Ceramics-and-Glasses",
         "name": "MNF1_009-Powder-Metallurgy-and-Processing-of-Ceramics-and-Glasses",
-        "url": "https://idofangbentov.uk/Technion/MNF1/MNF1_009-Powder-Metallurgy-and-Processing-of-Ceramics-and-Glasses",
         "displayTitle": "פרק 9: Powder Metallurgy and Processing of Ceramics and Glasses",
-        "number": 9
+        "number": 9,
+        "url": "https://idofangbentov.uk/Technion/MNF1/MNF1_009-Powder-Metallurgy-and-Processing-of-Ceramics-and-Glasses"
       },
       {
         "slug": "MNF1_010-Additive-Manufacturing",
         "name": "MNF1_010-Additive-Manufacturing",
-        "url": "https://idofangbentov.uk/Technion/MNF1/MNF1_010-Additive-Manufacturing",
         "displayTitle": "פרק 10: Additive Manufacturing",
-        "number": 10
+        "number": 10,
+        "url": "https://idofangbentov.uk/Technion/MNF1/MNF1_010-Additive-Manufacturing"
       }
     ],
     "homework": [
       {
         "slug": "MNF1_HW001-Homework-1",
         "name": "MNF1_HW001-Homework-1",
-        "url": "https://idofangbentov.uk/Technion/MNF1/MNF1_HW001-Homework-1",
         "displayTitle": "תרגיל בית 1: Homework 1",
-        "hwNumber": 1
+        "hwNumber": 1,
+        "url": "https://idofangbentov.uk/Technion/MNF1/MNF1_HW001-Homework-1"
       },
       {
         "slug": "MNF1_HW002-Homework-2",
         "name": "MNF1_HW002-Homework-2",
-        "url": "https://idofangbentov.uk/Technion/MNF1/MNF1_HW002-Homework-2",
         "displayTitle": "תרגיל בית 2: Homework 2",
-        "hwNumber": 2
+        "hwNumber": 2,
+        "url": "https://idofangbentov.uk/Technion/MNF1/MNF1_HW002-Homework-2"
       }
     ],
     "exams": [
       {
-        "slug": "MNF1_E2020SA-2020-אביב-מועד-א",
-        "name": "MNF1_E2020SA-2020-אביב-מועד-א",
-        "url": "https://idofangbentov.uk/Technion/MNF1/MNF1_E2020SA-2020-אביב-מועד-א",
-        "displayTitle": "MNF1_E2020SA 2020 אביב מועד א",
+        "slug": "MNF1_E2020SA-2020-אביב-מועד-א'",
+        "name": "MNF1_E2020SA-2020-אביב-מועד-א'",
+        "displayTitle": "MNF1_E2020SA 2020 אביב מועד א׳",
         "year": "2020",
         "season": "אביב",
-        "moed": "מועד א׳"
+        "moed": "מועד א׳",
+        "url": "https://idofangbentov.uk/Technion/MNF1/MNF1_E2020SA-2020-אביב-מועד-א%27"
       },
       {
-        "slug": "MNF1_E2023SA-2023-אביב-מועד-א",
-        "name": "MNF1_E2023SA-2023-אביב-מועד-א",
-        "url": "https://idofangbentov.uk/Technion/MNF1/MNF1_E2023SA-2023-אביב-מועד-א",
-        "displayTitle": "MNF1_E2023SA 2023 אביב מועד א",
+        "slug": "MNF1_E2023SA-2023-אביב-מועד-א'",
+        "name": "MNF1_E2023SA-2023-אביב-מועד-א'",
+        "displayTitle": "MNF1_E2023SA 2023 אביב מועד א׳",
         "year": "2023",
         "season": "אביב",
-        "moed": "מועד א׳"
+        "moed": "מועד א׳",
+        "url": "https://idofangbentov.uk/Technion/MNF1/MNF1_E2023SA-2023-אביב-מועד-א%27"
       }
     ],
     "projects": [],
@@ -3071,11 +3211,13 @@
       {
         "slug": "MNF1_OB-Everything-Everywhere-All-at-Once",
         "name": "MNF1_OB-Everything-Everywhere-All-at-Once",
+        "displayTitle": "MNF1_OB Everything Everywhere All at Once",
         "url": "https://idofangbentov.uk/Technion/MNF1/MNF1_OB-Everything-Everywhere-All-at-Once"
       },
       {
         "slug": "MNF1_PB-שאלות-לתרגול",
         "name": "MNF1_PB-שאלות-לתרגול",
+        "displayTitle": "MNF1_PB שאלות לתרגול",
         "url": "https://idofangbentov.uk/Technion/MNF1/MNF1_PB-שאלות-לתרגול"
       }
     ],
@@ -3085,378 +3227,382 @@
     "course_tag": "MPL1",
     "title": "MPL1",
     "url": "https://idofangbentov.uk/Technion/MPL1/",
+    "githubUrl": "https://github.com/NuclearGandhi/technion_second_brain/tree/master/Technion/MPL1",
     "lectures": [
       {
         "slug": "MPL1_000-00360014-עיבודים-פלסטיים-של-מתכות",
         "name": "MPL1_000-00360014-עיבודים-פלסטיים-של-מתכות",
-        "url": "https://idofangbentov.uk/Technion/MPL1/MPL1_000-00360014-עיבודים-פלסטיים-של-מתכות",
         "displayTitle": "פרק 0: 00360014 עיבודים פלסטיים של מתכות",
-        "number": 0
+        "number": 0,
+        "url": "https://idofangbentov.uk/Technion/MPL1/MPL1_000-00360014-עיבודים-פלסטיים-של-מתכות"
       }
     ],
     "homework": [],
     "exams": [],
     "projects": [],
     "other": [],
-    "hebrewName": "מבוא לפלסטיקה"
+    "hebrewName": "עיבודים פלסטיים של מתכות (00360014)"
   },
   "NUM1": {
     "course_tag": "NUM1",
     "title": "NUM1",
     "url": "https://idofangbentov.uk/Technion/NUM1/",
+    "githubUrl": "https://github.com/NuclearGandhi/technion_second_brain/tree/master/Technion/NUM1",
     "lectures": [
       {
         "slug": "NUM1_000-034056-מבוא-לחישוב-מדעי-והנדסי",
         "name": "NUM1_000-034056-מבוא-לחישוב-מדעי-והנדסי",
-        "url": "https://idofangbentov.uk/Technion/NUM1/NUM1_000-034056-מבוא-לחישוב-מדעי-והנדסי",
         "displayTitle": "פרק 0: 034056 מבוא לחישוב מדעי והנדסי",
-        "number": 0
+        "number": 0,
+        "url": "https://idofangbentov.uk/Technion/NUM1/NUM1_000-034056-מבוא-לחישוב-מדעי-והנדסי"
       },
       {
         "slug": "NUM1_001-הקדמה-ומושגי-יסוד",
         "name": "NUM1_001-הקדמה-ומושגי-יסוד",
-        "url": "https://idofangbentov.uk/Technion/NUM1/NUM1_001-הקדמה-ומושגי-יסוד",
         "displayTitle": "פרק 1: הקדמה ומושגי יסוד",
-        "number": 1
+        "number": 1,
+        "url": "https://idofangbentov.uk/Technion/NUM1/NUM1_001-הקדמה-ומושגי-יסוד"
       },
       {
         "slug": "NUM1_002-שיטות-ישירות-לפתרון-מערכות-לינאריות",
         "name": "NUM1_002-שיטות-ישירות-לפתרון-מערכות-לינאריות",
-        "url": "https://idofangbentov.uk/Technion/NUM1/NUM1_002-שיטות-ישירות-לפתרון-מערכות-לינאריות",
         "displayTitle": "פרק 2: שיטות ישירות לפתרון מערכות לינאריות",
-        "number": 2
+        "number": 2,
+        "url": "https://idofangbentov.uk/Technion/NUM1/NUM1_002-שיטות-ישירות-לפתרון-מערכות-לינאריות"
       },
       {
         "slug": "NUM1_003-נורמה",
         "name": "NUM1_003-נורמה",
-        "url": "https://idofangbentov.uk/Technion/NUM1/NUM1_003-נורמה",
         "displayTitle": "פרק 3: נורמה",
-        "number": 3
+        "number": 3,
+        "url": "https://idofangbentov.uk/Technion/NUM1/NUM1_003-נורמה"
       },
       {
         "slug": "NUM1_004-שיטות-איטרטיביות-לפתרון-מערכות-לינאריות",
         "name": "NUM1_004-שיטות-איטרטיביות-לפתרון-מערכות-לינאריות",
-        "url": "https://idofangbentov.uk/Technion/NUM1/NUM1_004-שיטות-איטרטיביות-לפתרון-מערכות-לינאריות",
         "displayTitle": "פרק 4: שיטות איטרטיביות לפתרון מערכות לינאריות",
-        "number": 4
+        "number": 4,
+        "url": "https://idofangbentov.uk/Technion/NUM1/NUM1_004-שיטות-איטרטיביות-לפתרון-מערכות-לינאריות"
       },
       {
         "slug": "NUM1_005-משוואות-לא-לינאריות-במשתנה-אחד",
         "name": "NUM1_005-משוואות-לא-לינאריות-במשתנה-אחד",
-        "url": "https://idofangbentov.uk/Technion/NUM1/NUM1_005-משוואות-לא-לינאריות-במשתנה-אחד",
         "displayTitle": "פרק 5: משוואות לא לינאריות במשתנה אחד",
-        "number": 5
+        "number": 5,
+        "url": "https://idofangbentov.uk/Technion/NUM1/NUM1_005-משוואות-לא-לינאריות-במשתנה-אחד"
       },
       {
         "slug": "NUM1_006-מערכת-משוואות-לא-לינארית",
         "name": "NUM1_006-מערכת-משוואות-לא-לינארית",
-        "url": "https://idofangbentov.uk/Technion/NUM1/NUM1_006-מערכת-משוואות-לא-לינארית",
         "displayTitle": "פרק 6: מערכת משוואות לא לינארית",
-        "number": 6
+        "number": 6,
+        "url": "https://idofangbentov.uk/Technion/NUM1/NUM1_006-מערכת-משוואות-לא-לינארית"
       },
       {
         "slug": "NUM1_007-אינטרפולציה-פולינומית",
         "name": "NUM1_007-אינטרפולציה-פולינומית",
-        "url": "https://idofangbentov.uk/Technion/NUM1/NUM1_007-אינטרפולציה-פולינומית",
         "displayTitle": "פרק 7: אינטרפולציה פולינומית",
-        "number": 7
+        "number": 7,
+        "url": "https://idofangbentov.uk/Technion/NUM1/NUM1_007-אינטרפולציה-פולינומית"
       },
       {
         "slug": "NUM1_008-בעיית-הריבועים-הפחותים",
         "name": "NUM1_008-בעיית-הריבועים-הפחותים",
-        "url": "https://idofangbentov.uk/Technion/NUM1/NUM1_008-בעיית-הריבועים-הפחותים",
         "displayTitle": "פרק 8: בעיית הריבועים הפחותים",
-        "number": 8
+        "number": 8,
+        "url": "https://idofangbentov.uk/Technion/NUM1/NUM1_008-בעיית-הריבועים-הפחותים"
       },
       {
         "slug": "NUM1_009-אינטגרציה-נומרית",
         "name": "NUM1_009-אינטגרציה-נומרית",
-        "url": "https://idofangbentov.uk/Technion/NUM1/NUM1_009-אינטגרציה-נומרית",
         "displayTitle": "פרק 9: אינטגרציה נומרית",
-        "number": 9
+        "number": 9,
+        "url": "https://idofangbentov.uk/Technion/NUM1/NUM1_009-אינטגרציה-נומרית"
       },
       {
         "slug": "NUM1_010-גזירה-נומרית",
         "name": "NUM1_010-גזירה-נומרית",
-        "url": "https://idofangbentov.uk/Technion/NUM1/NUM1_010-גזירה-נומרית",
         "displayTitle": "פרק 10: גזירה נומרית",
-        "number": 10
+        "number": 10,
+        "url": "https://idofangbentov.uk/Technion/NUM1/NUM1_010-גזירה-נומרית"
       },
       {
         "slug": "NUM1_011-שיטות-נומריות-לפתרון-משוואות-דיפרנציאליות",
         "name": "NUM1_011-שיטות-נומריות-לפתרון-משוואות-דיפרנציאליות",
-        "url": "https://idofangbentov.uk/Technion/NUM1/NUM1_011-שיטות-נומריות-לפתרון-משוואות-דיפרנציאליות",
         "displayTitle": "פרק 11: שיטות נומריות לפתרון משוואות דיפרנציאליות",
-        "number": 11
+        "number": 11,
+        "url": "https://idofangbentov.uk/Technion/NUM1/NUM1_011-שיטות-נומריות-לפתרון-משוואות-דיפרנציאליות"
       },
       {
         "slug": "NUM1_012-אופטימיזציה",
         "name": "NUM1_012-אופטימיזציה",
-        "url": "https://idofangbentov.uk/Technion/NUM1/NUM1_012-אופטימיזציה",
         "displayTitle": "פרק 12: אופטימיזציה",
-        "number": 12
+        "number": 12,
+        "url": "https://idofangbentov.uk/Technion/NUM1/NUM1_012-אופטימיזציה"
       }
     ],
     "homework": [
       {
         "slug": "NUM1_HW001-תרגיל-בית-1",
         "name": "NUM1_HW001-תרגיל-בית-1",
-        "url": "https://idofangbentov.uk/Technion/NUM1/NUM1_HW001-תרגיל-בית-1",
-        "displayTitle": "תרגיל בית 1: תרגיל בית 1",
-        "hwNumber": 1
+        "displayTitle": "תרגיל בית 1: NUM1_HW001 תרגיל בית 1",
+        "hwNumber": 1,
+        "url": "https://idofangbentov.uk/Technion/NUM1/NUM1_HW001-תרגיל-בית-1"
       },
       {
         "slug": "NUM1_HW002-תרגיל-בית-2",
         "name": "NUM1_HW002-תרגיל-בית-2",
-        "url": "https://idofangbentov.uk/Technion/NUM1/NUM1_HW002-תרגיל-בית-2",
-        "displayTitle": "תרגיל בית 2: תרגיל בית 2",
-        "hwNumber": 2
+        "displayTitle": "תרגיל בית 2: NUM1_HW002 תרגיל בית 2",
+        "hwNumber": 2,
+        "url": "https://idofangbentov.uk/Technion/NUM1/NUM1_HW002-תרגיל-בית-2"
       },
       {
         "slug": "NUM1_HW003-תרגיל-בית-3",
         "name": "NUM1_HW003-תרגיל-בית-3",
-        "url": "https://idofangbentov.uk/Technion/NUM1/NUM1_HW003-תרגיל-בית-3",
-        "displayTitle": "תרגיל בית 3: תרגיל בית 3",
-        "hwNumber": 3
+        "displayTitle": "תרגיל בית 3: NUM1_HW003 תרגיל בית 3",
+        "hwNumber": 3,
+        "url": "https://idofangbentov.uk/Technion/NUM1/NUM1_HW003-תרגיל-בית-3"
       },
       {
         "slug": "NUM1_HW004-תרגיל-בית-4",
         "name": "NUM1_HW004-תרגיל-בית-4",
-        "url": "https://idofangbentov.uk/Technion/NUM1/NUM1_HW004-תרגיל-בית-4",
-        "displayTitle": "תרגיל בית 4: תרגיל בית 4",
-        "hwNumber": 4
+        "displayTitle": "תרגיל בית 4: NUM1_HW004 תרגיל בית 4",
+        "hwNumber": 4,
+        "url": "https://idofangbentov.uk/Technion/NUM1/NUM1_HW004-תרגיל-בית-4"
       },
       {
         "slug": "NUM1_HW005-תרגיל-בית-5",
         "name": "NUM1_HW005-תרגיל-בית-5",
-        "url": "https://idofangbentov.uk/Technion/NUM1/NUM1_HW005-תרגיל-בית-5",
-        "displayTitle": "תרגיל בית 5: תרגיל בית 5",
-        "hwNumber": 5
+        "displayTitle": "תרגיל בית 5: NUM1_HW005 תרגיל בית 5",
+        "hwNumber": 5,
+        "url": "https://idofangbentov.uk/Technion/NUM1/NUM1_HW005-תרגיל-בית-5"
       },
       {
         "slug": "NUM1_HW006-תרגיל-בית-6",
         "name": "NUM1_HW006-תרגיל-בית-6",
-        "url": "https://idofangbentov.uk/Technion/NUM1/NUM1_HW006-תרגיל-בית-6",
-        "displayTitle": "תרגיל בית 6: תרגיל בית 6",
-        "hwNumber": 6
+        "displayTitle": "תרגיל בית 6: NUM1_HW006 תרגיל בית 6",
+        "hwNumber": 6,
+        "url": "https://idofangbentov.uk/Technion/NUM1/NUM1_HW006-תרגיל-בית-6"
       }
     ],
     "exams": [
       {
         "slug": "NUM1_E2018WA-2018-חורף-מועד-א",
         "name": "NUM1_E2018WA-2018-חורף-מועד-א",
-        "url": "https://idofangbentov.uk/Technion/NUM1/NUM1_E2018WA-2018-חורף-מועד-א",
-        "displayTitle": "NUM1_E2018WA 2018 חורף מועד א",
+        "displayTitle": "NUM1_E2018WA 2018 חורף מועד א׳",
         "year": "2018",
         "season": "חורף",
-        "moed": "מועד א׳"
+        "moed": "מועד א׳",
+        "url": "https://idofangbentov.uk/Technion/NUM1/NUM1_E2018WA-2018-חורף-מועד-א"
       },
       {
         "slug": "NUM1_E2018WB-2018-חורף-מועד-ב",
         "name": "NUM1_E2018WB-2018-חורף-מועד-ב",
-        "url": "https://idofangbentov.uk/Technion/NUM1/NUM1_E2018WB-2018-חורף-מועד-ב",
-        "displayTitle": "NUM1_E2018WB 2018 חורף מועד ב",
+        "displayTitle": "NUM1_E2018WB 2018 חורף מועד ב׳",
         "year": "2018",
         "season": "חורף",
-        "moed": "מועד ב׳"
+        "moed": "מועד ב׳",
+        "url": "https://idofangbentov.uk/Technion/NUM1/NUM1_E2018WB-2018-חורף-מועד-ב"
       },
       {
         "slug": "NUM1_E2020WA-2020-חורף-מועד-א",
         "name": "NUM1_E2020WA-2020-חורף-מועד-א",
-        "url": "https://idofangbentov.uk/Technion/NUM1/NUM1_E2020WA-2020-חורף-מועד-א",
-        "displayTitle": "NUM1_E2020WA 2020 חורף מועד א",
+        "displayTitle": "NUM1_E2020WA 2020 חורף מועד א׳",
         "year": "2020",
         "season": "חורף",
-        "moed": "מועד א׳"
+        "moed": "מועד א׳",
+        "url": "https://idofangbentov.uk/Technion/NUM1/NUM1_E2020WA-2020-חורף-מועד-א"
       },
       {
         "slug": "NUM1_E2020WB-2020-חורף-מועד-ב",
         "name": "NUM1_E2020WB-2020-חורף-מועד-ב",
-        "url": "https://idofangbentov.uk/Technion/NUM1/NUM1_E2020WB-2020-חורף-מועד-ב",
-        "displayTitle": "NUM1_E2020WB 2020 חורף מועד ב",
+        "displayTitle": "NUM1_E2020WB 2020 חורף מועד ב׳",
         "year": "2020",
         "season": "חורף",
-        "moed": "מועד ב׳"
+        "moed": "מועד ב׳",
+        "url": "https://idofangbentov.uk/Technion/NUM1/NUM1_E2020WB-2020-חורף-מועד-ב"
       },
       {
         "slug": "NUM1_E2021WA-2021-חורף-מועד-א",
         "name": "NUM1_E2021WA-2021-חורף-מועד-א",
-        "url": "https://idofangbentov.uk/Technion/NUM1/NUM1_E2021WA-2021-חורף-מועד-א",
-        "displayTitle": "NUM1_E2021WA 2021 חורף מועד א",
+        "displayTitle": "NUM1_E2021WA 2021 חורף מועד א׳",
         "year": "2021",
         "season": "חורף",
-        "moed": "מועד א׳"
+        "moed": "מועד א׳",
+        "url": "https://idofangbentov.uk/Technion/NUM1/NUM1_E2021WA-2021-חורף-מועד-א"
       },
       {
         "slug": "NUM1_E2021WB-2021-חורף-מועד-ב",
         "name": "NUM1_E2021WB-2021-חורף-מועד-ב",
-        "url": "https://idofangbentov.uk/Technion/NUM1/NUM1_E2021WB-2021-חורף-מועד-ב",
-        "displayTitle": "NUM1_E2021WB 2021 חורף מועד ב",
+        "displayTitle": "NUM1_E2021WB 2021 חורף מועד ב׳",
         "year": "2021",
         "season": "חורף",
-        "moed": "מועד ב׳"
+        "moed": "מועד ב׳",
+        "url": "https://idofangbentov.uk/Technion/NUM1/NUM1_E2021WB-2021-חורף-מועד-ב"
       },
       {
         "slug": "NUM1_E2022WA-2022-חורף-מועד-א",
         "name": "NUM1_E2022WA-2022-חורף-מועד-א",
-        "url": "https://idofangbentov.uk/Technion/NUM1/NUM1_E2022WA-2022-חורף-מועד-א",
-        "displayTitle": "NUM1_E2022WA 2022 חורף מועד א",
+        "displayTitle": "NUM1_E2022WA 2022 חורף מועד א׳",
         "year": "2022",
         "season": "חורף",
-        "moed": "מועד א׳"
+        "moed": "מועד א׳",
+        "url": "https://idofangbentov.uk/Technion/NUM1/NUM1_E2022WA-2022-חורף-מועד-א"
       }
     ],
     "projects": [],
     "other": [],
-    "hebrewName": "מבוא לחישוב מדעי והנדסי (034056)"
+    "hebrewName": "מבוא לחישוב מדעי והנדסי / אנליזה נומרית (034056)"
   },
   "PDE1": {
     "course_tag": "PDE1",
     "title": "PDE1",
     "url": "https://idofangbentov.uk/Technion/PDE1/",
+    "githubUrl": "https://github.com/NuclearGandhi/technion_second_brain/tree/master/Technion/PDE1",
     "lectures": [
       {
         "slug": "PDE1_000-104228-מדח-מ",
         "name": "PDE1_000-104228-מדח-מ",
-        "url": "https://idofangbentov.uk/Technion/PDE1/PDE1_000-104228-מדח-מ",
         "displayTitle": "פרק 0: 104228 מדח מ",
-        "number": 0
+        "number": 0,
+        "url": "https://idofangbentov.uk/Technion/PDE1/PDE1_000-104228-מדח-מ"
       },
       {
         "slug": "PDE1_001-הקדמה-ומשוואות-מסדר-ראשון",
         "name": "PDE1_001-הקדמה-ומשוואות-מסדר-ראשון",
-        "url": "https://idofangbentov.uk/Technion/PDE1/PDE1_001-הקדמה-ומשוואות-מסדר-ראשון",
         "displayTitle": "פרק 1: הקדמה ומשוואות מסדר ראשון",
-        "number": 1
+        "number": 1,
+        "url": "https://idofangbentov.uk/Technion/PDE1/PDE1_001-הקדמה-ומשוואות-מסדר-ראשון"
       },
       {
         "slug": "PDE1_002-משוואות-קוואזילינאריות",
         "name": "PDE1_002-משוואות-קוואזילינאריות",
-        "url": "https://idofangbentov.uk/Technion/PDE1/PDE1_002-משוואות-קוואזילינאריות",
         "displayTitle": "פרק 2: משוואות קוואזילינאריות",
-        "number": 2
+        "number": 2,
+        "url": "https://idofangbentov.uk/Technion/PDE1/PDE1_002-משוואות-קוואזילינאריות"
       },
       {
         "slug": "PDE1_003-משוואות-לינאריות-מסדר-שני",
         "name": "PDE1_003-משוואות-לינאריות-מסדר-שני",
-        "url": "https://idofangbentov.uk/Technion/PDE1/PDE1_003-משוואות-לינאריות-מסדר-שני",
         "displayTitle": "פרק 3: משוואות לינאריות מסדר שני",
-        "number": 3
+        "number": 3,
+        "url": "https://idofangbentov.uk/Technion/PDE1/PDE1_003-משוואות-לינאריות-מסדר-שני"
       },
       {
         "slug": "PDE1_004-משוואת-הגלים",
         "name": "PDE1_004-משוואת-הגלים",
-        "url": "https://idofangbentov.uk/Technion/PDE1/PDE1_004-משוואת-הגלים",
         "displayTitle": "פרק 4: משוואת הגלים",
-        "number": 4
+        "number": 4,
+        "url": "https://idofangbentov.uk/Technion/PDE1/PDE1_004-משוואת-הגלים"
       },
       {
         "slug": "PDE1_005-בעיית-שטורם-ליוביל",
         "name": "PDE1_005-בעיית-שטורם-ליוביל",
-        "url": "https://idofangbentov.uk/Technion/PDE1/PDE1_005-בעיית-שטורם-ליוביל",
         "displayTitle": "פרק 5: בעיית שטורם ליוביל",
-        "number": 5
+        "number": 5,
+        "url": "https://idofangbentov.uk/Technion/PDE1/PDE1_005-בעיית-שטורם-ליוביל"
       },
       {
         "slug": "PDE1_006-שיטת-הפרדת-משתנים",
         "name": "PDE1_006-שיטת-הפרדת-משתנים",
-        "url": "https://idofangbentov.uk/Technion/PDE1/PDE1_006-שיטת-הפרדת-משתנים",
         "displayTitle": "פרק 6: שיטת הפרדת משתנים",
-        "number": 6
+        "number": 6,
+        "url": "https://idofangbentov.uk/Technion/PDE1/PDE1_006-שיטת-הפרדת-משתנים"
       },
       {
         "slug": "PDE1_007-משוואת-לפלס",
         "name": "PDE1_007-משוואת-לפלס",
-        "url": "https://idofangbentov.uk/Technion/PDE1/PDE1_007-משוואת-לפלס",
         "displayTitle": "פרק 7: משוואת לפלס",
-        "number": 7
+        "number": 7,
+        "url": "https://idofangbentov.uk/Technion/PDE1/PDE1_007-משוואת-לפלס"
       }
     ],
     "homework": [
       {
         "slug": "PDE1_HW010-תרגיל-בית-10",
         "name": "PDE1_HW010-תרגיל-בית-10",
-        "url": "https://idofangbentov.uk/Technion/PDE1/PDE1_HW010-תרגיל-בית-10",
-        "displayTitle": "תרגיל בית 10: תרגיל בית 10",
-        "hwNumber": 10
+        "displayTitle": "תרגיל בית 10: PDE1_HW010 תרגיל בית 10",
+        "hwNumber": 10,
+        "url": "https://idofangbentov.uk/Technion/PDE1/PDE1_HW010-תרגיל-בית-10"
       }
     ],
     "exams": [
       {
         "slug": "PDE1_E2022SA-2022-אביב-מועד-א",
         "name": "PDE1_E2022SA-2022-אביב-מועד-א",
-        "url": "https://idofangbentov.uk/Technion/PDE1/PDE1_E2022SA-2022-אביב-מועד-א",
-        "displayTitle": "PDE1_E2022SA 2022 אביב מועד א",
+        "displayTitle": "PDE1_E2022SA 2022 אביב מועד א׳",
         "year": "2022",
         "season": "אביב",
-        "moed": "מועד א׳"
+        "moed": "מועד א׳",
+        "url": "https://idofangbentov.uk/Technion/PDE1/PDE1_E2022SA-2022-אביב-מועד-א"
       },
       {
         "slug": "PDE1_E2022SB-2022-אביב-מועד-ב",
         "name": "PDE1_E2022SB-2022-אביב-מועד-ב",
-        "url": "https://idofangbentov.uk/Technion/PDE1/PDE1_E2022SB-2022-אביב-מועד-ב",
-        "displayTitle": "PDE1_E2022SB 2022 אביב מועד ב",
+        "displayTitle": "PDE1_E2022SB 2022 אביב מועד ב׳",
         "year": "2022",
         "season": "אביב",
-        "moed": "מועד ב׳"
+        "moed": "מועד ב׳",
+        "url": "https://idofangbentov.uk/Technion/PDE1/PDE1_E2022SB-2022-אביב-מועד-ב"
       },
       {
         "slug": "PDE1_E2022WA-2022-חורף-מועד-א",
         "name": "PDE1_E2022WA-2022-חורף-מועד-א",
-        "url": "https://idofangbentov.uk/Technion/PDE1/PDE1_E2022WA-2022-חורף-מועד-א",
-        "displayTitle": "PDE1_E2022WA 2022 חורף מועד א",
+        "displayTitle": "PDE1_E2022WA 2022 חורף מועד א׳",
         "year": "2022",
         "season": "חורף",
-        "moed": "מועד א׳"
+        "moed": "מועד א׳",
+        "url": "https://idofangbentov.uk/Technion/PDE1/PDE1_E2022WA-2022-חורף-מועד-א"
       },
       {
         "slug": "PDE1_E2022WB-2022-חורף-מועד-ב",
         "name": "PDE1_E2022WB-2022-חורף-מועד-ב",
-        "url": "https://idofangbentov.uk/Technion/PDE1/PDE1_E2022WB-2022-חורף-מועד-ב",
-        "displayTitle": "PDE1_E2022WB 2022 חורף מועד ב",
+        "displayTitle": "PDE1_E2022WB 2022 חורף מועד ב׳",
         "year": "2022",
         "season": "חורף",
-        "moed": "מועד ב׳"
+        "moed": "מועד ב׳",
+        "url": "https://idofangbentov.uk/Technion/PDE1/PDE1_E2022WB-2022-חורף-מועד-ב"
       },
       {
         "slug": "PDE1_E2023SA-2023-אביב-מועד-א",
         "name": "PDE1_E2023SA-2023-אביב-מועד-א",
-        "url": "https://idofangbentov.uk/Technion/PDE1/PDE1_E2023SA-2023-אביב-מועד-א",
-        "displayTitle": "PDE1_E2023SA 2023 אביב מועד א",
+        "displayTitle": "PDE1_E2023SA 2023 אביב מועד א׳",
         "year": "2023",
         "season": "אביב",
-        "moed": "מועד א׳"
+        "moed": "מועד א׳",
+        "url": "https://idofangbentov.uk/Technion/PDE1/PDE1_E2023SA-2023-אביב-מועד-א"
       }
     ],
     "projects": [],
     "other": [],
-    "hebrewName": "מד״ח 1 (104228)"
+    "hebrewName": "משוואות דיפרנציאליות חלקיות מ׳ (104228)"
   },
   "PDM1": {
     "course_tag": "PDM1",
     "title": "PDM1",
     "url": "https://idofangbentov.uk/Technion/PDM1/",
+    "githubUrl": "https://github.com/NuclearGandhi/technion_second_brain/tree/master/Technion/PDM1",
     "lectures": [
       {
         "slug": "PDM1_001-סקר-ספרות-ומפרט-דרישות",
         "name": "PDM1_001-סקר-ספרות-ומפרט-דרישות",
-        "url": "https://idofangbentov.uk/Technion/PDM1/PDM1_001-סקר-ספרות-ומפרט-דרישות",
         "displayTitle": "פרק 1: סקר ספרות ומפרט דרישות",
-        "number": 1
+        "number": 1,
+        "url": "https://idofangbentov.uk/Technion/PDM1/PDM1_001-סקר-ספרות-ומפרט-דרישות"
       },
       {
         "slug": "PDM1_002-הגשת-סקר-חלופות-וניהול-סיכונים",
         "name": "PDM1_002-הגשת-סקר-חלופות-וניהול-סיכונים",
-        "url": "https://idofangbentov.uk/Technion/PDM1/PDM1_002-הגשת-סקר-חלופות-וניהול-סיכונים",
         "displayTitle": "פרק 2: הגשת סקר חלופות וניהול סיכונים",
-        "number": 2
+        "number": 2,
+        "url": "https://idofangbentov.uk/Technion/PDM1/PDM1_002-הגשת-סקר-חלופות-וניהול-סיכונים"
       },
       {
         "slug": "PDM1_003-הגשה-סופית",
         "name": "PDM1_003-הגשה-סופית",
-        "url": "https://idofangbentov.uk/Technion/PDM1/PDM1_003-הגשה-סופית",
         "displayTitle": "פרק 3: הגשה סופית",
-        "number": 3
+        "number": 3,
+        "url": "https://idofangbentov.uk/Technion/PDM1/PDM1_003-הגשה-סופית"
       }
     ],
     "homework": [],
@@ -3465,6 +3611,7 @@
       {
         "slug": "PDM1_000-00340371-פרויקט-תכן-לייצור",
         "name": "PDM1_000-00340371-פרויקט-תכן-לייצור",
+        "displayTitle": "📋 סילבוס ומבוא: 00340371 פרויקט תכן לייצור",
         "url": "https://idofangbentov.uk/Technion/PDM1/PDM1_000-00340371-פרויקט-תכן-לייצור"
       }
     ],
@@ -3475,83 +3622,84 @@
     "course_tag": "PHY1",
     "title": "PHY1",
     "url": "https://idofangbentov.uk/Technion/PHY1/",
+    "githubUrl": "https://github.com/NuclearGandhi/technion_second_brain/tree/master/Technion/PHY1",
     "lectures": [
       {
         "slug": "PHY1_000-114051-פיזיקה-1",
         "name": "PHY1_000-114051-פיזיקה-1",
-        "url": "https://idofangbentov.uk/Technion/PHY1/PHY1_000-114051-פיזיקה-1",
         "displayTitle": "פרק 0: 114051 פיזיקה 1",
-        "number": 0
+        "number": 0,
+        "url": "https://idofangbentov.uk/Technion/PHY1/PHY1_000-114051-פיזיקה-1"
       },
       {
         "slug": "PHY1_001-מבוא",
         "name": "PHY1_001-מבוא",
-        "url": "https://idofangbentov.uk/Technion/PHY1/PHY1_001-מבוא",
         "displayTitle": "פרק 1: מבוא",
-        "number": 1
+        "number": 1,
+        "url": "https://idofangbentov.uk/Technion/PHY1/PHY1_001-מבוא"
       },
       {
         "slug": "PHY1_002-קינמטיקה",
         "name": "PHY1_002-קינמטיקה",
-        "url": "https://idofangbentov.uk/Technion/PHY1/PHY1_002-קינמטיקה",
         "displayTitle": "פרק 2: קינמטיקה",
-        "number": 2
+        "number": 2,
+        "url": "https://idofangbentov.uk/Technion/PHY1/PHY1_002-קינמטיקה"
       },
       {
         "slug": "PHY1_003-חוקי-ניוטון",
         "name": "PHY1_003-חוקי-ניוטון",
-        "url": "https://idofangbentov.uk/Technion/PHY1/PHY1_003-חוקי-ניוטון",
         "displayTitle": "פרק 3: חוקי ניוטון",
-        "number": 3
+        "number": 3,
+        "url": "https://idofangbentov.uk/Technion/PHY1/PHY1_003-חוקי-ניוטון"
       },
       {
         "slug": "PHY1_004-תנועה-הרמונית-ומערכות-ייחוס",
         "name": "PHY1_004-תנועה-הרמונית-ומערכות-ייחוס",
-        "url": "https://idofangbentov.uk/Technion/PHY1/PHY1_004-תנועה-הרמונית-ומערכות-ייחוס",
         "displayTitle": "פרק 4: תנועה הרמונית ומערכות ייחוס",
-        "number": 4
+        "number": 4,
+        "url": "https://idofangbentov.uk/Technion/PHY1/PHY1_004-תנועה-הרמונית-ומערכות-ייחוס"
       },
       {
         "slug": "PHY1_005-עבודה-ואנרגיה",
         "name": "PHY1_005-עבודה-ואנרגיה",
-        "url": "https://idofangbentov.uk/Technion/PHY1/PHY1_005-עבודה-ואנרגיה",
         "displayTitle": "פרק 5: עבודה ואנרגיה",
-        "number": 5
+        "number": 5,
+        "url": "https://idofangbentov.uk/Technion/PHY1/PHY1_005-עבודה-ואנרגיה"
       },
       {
         "slug": "PHY1_006-כוחות-משמרים-שימור-אנרגיה-מכנית,-הספק",
         "name": "PHY1_006-כוחות-משמרים-שימור-אנרגיה-מכנית,-הספק",
-        "url": "https://idofangbentov.uk/Technion/PHY1/PHY1_006-כוחות-משמרים-שימור-אנרגיה-מכנית,-הספק",
         "displayTitle": "פרק 6: כוחות משמרים שימור אנרגיה מכנית, הספק",
-        "number": 6
+        "number": 6,
+        "url": "https://idofangbentov.uk/Technion/PHY1/PHY1_006-כוחות-משמרים-שימור-אנרגיה-מכנית,-הספק"
       },
       {
         "slug": "PHY1_007-אנרגיה-פוטנציאלית-ושימור-אנרגיה",
         "name": "PHY1_007-אנרגיה-פוטנציאלית-ושימור-אנרגיה",
-        "url": "https://idofangbentov.uk/Technion/PHY1/PHY1_007-אנרגיה-פוטנציאלית-ושימור-אנרגיה",
         "displayTitle": "פרק 7: אנרגיה פוטנציאלית ושימור אנרגיה",
-        "number": 7
+        "number": 7,
+        "url": "https://idofangbentov.uk/Technion/PHY1/PHY1_007-אנרגיה-פוטנציאלית-ושימור-אנרגיה"
       },
       {
         "slug": "PHY1_008-תנע-קווי-ומרכז-מסה",
         "name": "PHY1_008-תנע-קווי-ומרכז-מסה",
-        "url": "https://idofangbentov.uk/Technion/PHY1/PHY1_008-תנע-קווי-ומרכז-מסה",
         "displayTitle": "פרק 8: תנע קווי ומרכז מסה",
-        "number": 8
+        "number": 8,
+        "url": "https://idofangbentov.uk/Technion/PHY1/PHY1_008-תנע-קווי-ומרכז-מסה"
       },
       {
         "slug": "PHY1_009-תנע-זוויתי",
         "name": "PHY1_009-תנע-זוויתי",
-        "url": "https://idofangbentov.uk/Technion/PHY1/PHY1_009-תנע-זוויתי",
         "displayTitle": "פרק 9: תנע זוויתי",
-        "number": 9
+        "number": 9,
+        "url": "https://idofangbentov.uk/Technion/PHY1/PHY1_009-תנע-זוויתי"
       },
       {
         "slug": "PHY1_010-תורת-היחסות-הפרטית",
         "name": "PHY1_010-תורת-היחסות-הפרטית",
-        "url": "https://idofangbentov.uk/Technion/PHY1/PHY1_010-תורת-היחסות-הפרטית",
         "displayTitle": "פרק 10: תורת היחסות הפרטית",
-        "number": 10
+        "number": 10,
+        "url": "https://idofangbentov.uk/Technion/PHY1/PHY1_010-תורת-היחסות-הפרטית"
       }
     ],
     "homework": [],
@@ -3564,183 +3712,184 @@
     "course_tag": "PHY2",
     "title": "PHY2",
     "url": "https://idofangbentov.uk/Technion/PHY2/",
+    "githubUrl": "https://github.com/NuclearGandhi/technion_second_brain/tree/master/Technion/PHY2",
     "lectures": [
       {
         "slug": "PHY2_000-114052-פיזיקה-2",
         "name": "PHY2_000-114052-פיזיקה-2",
-        "url": "https://idofangbentov.uk/Technion/PHY2/PHY2_000-114052-פיזיקה-2",
         "displayTitle": "פרק 0: 114052 פיזיקה 2",
-        "number": 0
+        "number": 0,
+        "url": "https://idofangbentov.uk/Technion/PHY2/PHY2_000-114052-פיזיקה-2"
       },
       {
         "slug": "PHY2_001-אלקטרוסטטיקה---חוק-קולון-והשדה-החשמלי",
         "name": "PHY2_001-אלקטרוסטטיקה---חוק-קולון-והשדה-החשמלי",
-        "url": "https://idofangbentov.uk/Technion/PHY2/PHY2_001-אלקטרוסטטיקה---חוק-קולון-והשדה-החשמלי",
         "displayTitle": "פרק 1: אלקטרוסטטיקה   חוק קולון והשדה החשמלי",
-        "number": 1
+        "number": 1,
+        "url": "https://idofangbentov.uk/Technion/PHY2/PHY2_001-אלקטרוסטטיקה---חוק-קולון-והשדה-החשמלי"
       },
       {
         "slug": "PHY2_002-אלקטרוסטטיקה---שטף-חשמלי,-חוק-גאוס-ופוטנציאל-חשמלי",
         "name": "PHY2_002-אלקטרוסטטיקה---שטף-חשמלי,-חוק-גאוס-ופוטנציאל-חשמלי",
-        "url": "https://idofangbentov.uk/Technion/PHY2/PHY2_002-אלקטרוסטטיקה---שטף-חשמלי,-חוק-גאוס-ופוטנציאל-חשמלי",
         "displayTitle": "פרק 2: אלקטרוסטטיקה   שטף חשמלי, חוק גאוס ופוטנציאל חשמלי",
-        "number": 2
+        "number": 2,
+        "url": "https://idofangbentov.uk/Technion/PHY2/PHY2_002-אלקטרוסטטיקה---שטף-חשמלי,-חוק-גאוס-ופוטנציאל-חשמלי"
       },
       {
         "slug": "PHY2_003-אלקטרוסטטיקה---מוליכים,-אנרגיה-אלקטרוסטטית,-קבלים",
         "name": "PHY2_003-אלקטרוסטטיקה---מוליכים,-אנרגיה-אלקטרוסטטית,-קבלים",
-        "url": "https://idofangbentov.uk/Technion/PHY2/PHY2_003-אלקטרוסטטיקה---מוליכים,-אנרגיה-אלקטרוסטטית,-קבלים",
         "displayTitle": "פרק 3: אלקטרוסטטיקה   מוליכים, אנרגיה אלקטרוסטטית, קבלים",
-        "number": 3
+        "number": 3,
+        "url": "https://idofangbentov.uk/Technion/PHY2/PHY2_003-אלקטרוסטטיקה---מוליכים,-אנרגיה-אלקטרוסטטית,-קבלים"
       },
       {
         "slug": "PHY2_004-מעגלים-חשמליים",
         "name": "PHY2_004-מעגלים-חשמליים",
-        "url": "https://idofangbentov.uk/Technion/PHY2/PHY2_004-מעגלים-חשמליים",
         "displayTitle": "פרק 4: מעגלים חשמליים",
-        "number": 4
+        "number": 4,
+        "url": "https://idofangbentov.uk/Technion/PHY2/PHY2_004-מעגלים-חשמליים"
       },
       {
         "slug": "PHY2_005-מגנטיות",
         "name": "PHY2_005-מגנטיות",
-        "url": "https://idofangbentov.uk/Technion/PHY2/PHY2_005-מגנטיות",
         "displayTitle": "פרק 5: מגנטיות",
-        "number": 5
+        "number": 5,
+        "url": "https://idofangbentov.uk/Technion/PHY2/PHY2_005-מגנטיות"
       },
       {
         "slug": "PHY2_006-דינמיקה-מגנטית",
         "name": "PHY2_006-דינמיקה-מגנטית",
-        "url": "https://idofangbentov.uk/Technion/PHY2/PHY2_006-דינמיקה-מגנטית",
         "displayTitle": "פרק 6: דינמיקה מגנטית",
-        "number": 6
+        "number": 6,
+        "url": "https://idofangbentov.uk/Technion/PHY2/PHY2_006-דינמיקה-מגנטית"
       },
       {
         "slug": "PHY2_007-גלים",
         "name": "PHY2_007-גלים",
-        "url": "https://idofangbentov.uk/Technion/PHY2/PHY2_007-גלים",
         "displayTitle": "פרק 7: גלים",
-        "number": 7
+        "number": 7,
+        "url": "https://idofangbentov.uk/Technion/PHY2/PHY2_007-גלים"
       }
     ],
     "homework": [
       {
         "slug": "PHY2_HW002-גיליון-בית-2",
         "name": "PHY2_HW002-גיליון-בית-2",
-        "url": "https://idofangbentov.uk/Technion/PHY2/PHY2_HW002-גיליון-בית-2",
         "displayTitle": "תרגיל בית 2: גיליון בית 2",
-        "hwNumber": 2
+        "hwNumber": 2,
+        "url": "https://idofangbentov.uk/Technion/PHY2/PHY2_HW002-גיליון-בית-2"
       },
       {
         "slug": "PHY2_HW003-גיליון-בית-3",
         "name": "PHY2_HW003-גיליון-בית-3",
-        "url": "https://idofangbentov.uk/Technion/PHY2/PHY2_HW003-גיליון-בית-3",
         "displayTitle": "תרגיל בית 3: גיליון בית 3",
-        "hwNumber": 3
+        "hwNumber": 3,
+        "url": "https://idofangbentov.uk/Technion/PHY2/PHY2_HW003-גיליון-בית-3"
       },
       {
         "slug": "PHY2_HW004-גיליון-בית-4",
         "name": "PHY2_HW004-גיליון-בית-4",
-        "url": "https://idofangbentov.uk/Technion/PHY2/PHY2_HW004-גיליון-בית-4",
         "displayTitle": "תרגיל בית 4: גיליון בית 4",
-        "hwNumber": 4
+        "hwNumber": 4,
+        "url": "https://idofangbentov.uk/Technion/PHY2/PHY2_HW004-גיליון-בית-4"
       },
       {
         "slug": "PHY2_HW005-גיליון-בית-5",
         "name": "PHY2_HW005-גיליון-בית-5",
-        "url": "https://idofangbentov.uk/Technion/PHY2/PHY2_HW005-גיליון-בית-5",
         "displayTitle": "תרגיל בית 5: גיליון בית 5",
-        "hwNumber": 5
+        "hwNumber": 5,
+        "url": "https://idofangbentov.uk/Technion/PHY2/PHY2_HW005-גיליון-בית-5"
       },
       {
         "slug": "PHY2_HW006-גיליון-בית-6",
         "name": "PHY2_HW006-גיליון-בית-6",
-        "url": "https://idofangbentov.uk/Technion/PHY2/PHY2_HW006-גיליון-בית-6",
         "displayTitle": "תרגיל בית 6: גיליון בית 6",
-        "hwNumber": 6
+        "hwNumber": 6,
+        "url": "https://idofangbentov.uk/Technion/PHY2/PHY2_HW006-גיליון-בית-6"
       },
       {
         "slug": "PHY2_HW007-גיליון-בית-7",
         "name": "PHY2_HW007-גיליון-בית-7",
-        "url": "https://idofangbentov.uk/Technion/PHY2/PHY2_HW007-גיליון-בית-7",
         "displayTitle": "תרגיל בית 7: גיליון בית 7",
-        "hwNumber": 7
+        "hwNumber": 7,
+        "url": "https://idofangbentov.uk/Technion/PHY2/PHY2_HW007-גיליון-בית-7"
       },
       {
         "slug": "PHY2_HW008-גיליון-בית-8",
         "name": "PHY2_HW008-גיליון-בית-8",
-        "url": "https://idofangbentov.uk/Technion/PHY2/PHY2_HW008-גיליון-בית-8",
         "displayTitle": "תרגיל בית 8: גיליון בית 8",
-        "hwNumber": 8
+        "hwNumber": 8,
+        "url": "https://idofangbentov.uk/Technion/PHY2/PHY2_HW008-גיליון-בית-8"
       },
       {
         "slug": "PHY2_HW009-גיליון-בית-9",
         "name": "PHY2_HW009-גיליון-בית-9",
-        "url": "https://idofangbentov.uk/Technion/PHY2/PHY2_HW009-גיליון-בית-9",
         "displayTitle": "תרגיל בית 9: גיליון בית 9",
-        "hwNumber": 9
+        "hwNumber": 9,
+        "url": "https://idofangbentov.uk/Technion/PHY2/PHY2_HW009-גיליון-בית-9"
       },
       {
         "slug": "PHY2_HW010-גיליון-בית-10",
         "name": "PHY2_HW010-גיליון-בית-10",
-        "url": "https://idofangbentov.uk/Technion/PHY2/PHY2_HW010-גיליון-בית-10",
         "displayTitle": "תרגיל בית 10: גיליון בית 10",
-        "hwNumber": 10
+        "hwNumber": 10,
+        "url": "https://idofangbentov.uk/Technion/PHY2/PHY2_HW010-גיליון-בית-10"
       }
     ],
     "exams": [
       {
-        "slug": "PHY2_E2022WB-2022-חורף-מועד-ב",
-        "name": "PHY2_E2022WB-2022-חורף-מועד-ב",
-        "url": "https://idofangbentov.uk/Technion/PHY2/PHY2_E2022WB-2022-חורף-מועד-ב",
-        "displayTitle": "PHY2_E2022WB 2022 חורף מועד ב",
+        "slug": "PHY2_E2022WB-2022-חורף-מועד-ב'",
+        "name": "PHY2_E2022WB-2022-חורף-מועד-ב'",
+        "displayTitle": "PHY2_E2022WB 2022 חורף מועד ב׳",
         "year": "2022",
         "season": "חורף",
-        "moed": "מועד ב׳"
+        "moed": "מועד ב׳",
+        "url": "https://idofangbentov.uk/Technion/PHY2/PHY2_E2022WB-2022-חורף-מועד-ב%27"
       },
       {
-        "slug": "PHY2_E2022WC-2022-חורף-מועד-ג",
-        "name": "PHY2_E2022WC-2022-חורף-מועד-ג",
-        "url": "https://idofangbentov.uk/Technion/PHY2/PHY2_E2022WC-2022-חורף-מועד-ג",
-        "displayTitle": "PHY2_E2022WC 2022 חורף מועד ג",
+        "slug": "PHY2_E2022WC-2022-חורף-מועד-ג'",
+        "name": "PHY2_E2022WC-2022-חורף-מועד-ג'",
+        "displayTitle": "PHY2_E2022WC 2022 חורף מועד ג׳",
         "year": "2022",
         "season": "חורף",
-        "moed": ""
+        "moed": "מועד ג׳",
+        "url": "https://idofangbentov.uk/Technion/PHY2/PHY2_E2022WC-2022-חורף-מועד-ג%27"
       },
       {
-        "slug": "PHY2_E2023WA-2023-חורף-מועד-א",
-        "name": "PHY2_E2023WA-2023-חורף-מועד-א",
-        "url": "https://idofangbentov.uk/Technion/PHY2/PHY2_E2023WA-2023-חורף-מועד-א",
-        "displayTitle": "PHY2_E2023WA 2023 חורף מועד א",
+        "slug": "PHY2_E2023WA-2023-חורף-מועד-א'",
+        "name": "PHY2_E2023WA-2023-חורף-מועד-א'",
+        "displayTitle": "PHY2_E2023WA 2023 חורף מועד א׳",
         "year": "2023",
         "season": "חורף",
-        "moed": "מועד א׳"
+        "moed": "מועד א׳",
+        "url": "https://idofangbentov.uk/Technion/PHY2/PHY2_E2023WA-2023-חורף-מועד-א%27"
       },
       {
-        "slug": "PHY2_E2023WB_2023-חורף-מועד-ב",
-        "name": "PHY2_E2023WB_2023-חורף-מועד-ב",
-        "url": "https://idofangbentov.uk/Technion/PHY2/PHY2_E2023WB_2023-חורף-מועד-ב",
-        "displayTitle": "PHY2_E2023WB_2023 חורף מועד ב",
+        "slug": "PHY2_E2023WB_2023-חורף-מועד-ב'",
+        "name": "PHY2_E2023WB_2023-חורף-מועד-ב'",
+        "displayTitle": "PHY2_E2023WB 2023 חורף מועד ב׳",
         "year": "2023",
         "season": "חורף",
-        "moed": "מועד ב׳"
+        "moed": "מועד ב׳",
+        "url": "https://idofangbentov.uk/Technion/PHY2/PHY2_E2023WB_2023-חורף-מועד-ב%27"
       },
       {
-        "slug": "PHY2_E2024WA-2024-חורף-מועד-א",
-        "name": "PHY2_E2024WA-2024-חורף-מועד-א",
-        "url": "https://idofangbentov.uk/Technion/PHY2/PHY2_E2024WA-2024-חורף-מועד-א",
-        "displayTitle": "PHY2_E2024WA 2024 חורף מועד א",
+        "slug": "PHY2_E2024WA-2024-חורף-מועד-א'",
+        "name": "PHY2_E2024WA-2024-חורף-מועד-א'",
+        "displayTitle": "PHY2_E2024WA 2024 חורף מועד א׳",
         "year": "2024",
         "season": "חורף",
-        "moed": "מועד א׳"
+        "moed": "מועד א׳",
+        "url": "https://idofangbentov.uk/Technion/PHY2/PHY2_E2024WA-2024-חורף-מועד-א%27"
       },
       {
-        "slug": "PHY2_E2024WB-2024-חורף-מועד-ב",
-        "name": "PHY2_E2024WB-2024-חורף-מועד-ב",
-        "url": "https://idofangbentov.uk/Technion/PHY2/PHY2_E2024WB-2024-חורף-מועד-ב",
-        "displayTitle": "PHY2_E2024WB 2024 חורף מועד ב",
+        "slug": "PHY2_E2024WB-2024-חורף-מועד-ב'",
+        "name": "PHY2_E2024WB-2024-חורף-מועד-ב'",
+        "displayTitle": "PHY2_E2024WB 2024 חורף מועד ב׳",
         "year": "2024",
         "season": "חורף",
-        "moed": "מועד ב׳"
+        "moed": "מועד ב׳",
+        "url": "https://idofangbentov.uk/Technion/PHY2/PHY2_E2024WB-2024-חורף-מועד-ב%27"
       }
     ],
     "projects": [],
@@ -3751,69 +3900,70 @@
     "course_tag": "PHY3",
     "title": "PHY3",
     "url": "https://idofangbentov.uk/Technion/PHY3/",
+    "githubUrl": "https://github.com/NuclearGandhi/technion_second_brain/tree/master/Technion/PHY3",
     "lectures": [
       {
         "slug": "PHY3_000-פיזיקה-3-01140054",
         "name": "PHY3_000-פיזיקה-3-01140054",
-        "url": "https://idofangbentov.uk/Technion/PHY3/PHY3_000-פיזיקה-3-01140054",
         "displayTitle": "פרק 0: פיזיקה 3 01140054",
-        "number": 0
+        "number": 0,
+        "url": "https://idofangbentov.uk/Technion/PHY3/PHY3_000-פיזיקה-3-01140054"
       },
       {
         "slug": "PHY3_001-מבוא-לפיזיקה-קוונטית-א",
         "name": "PHY3_001-מבוא-לפיזיקה-קוונטית-א",
-        "url": "https://idofangbentov.uk/Technion/PHY3/PHY3_001-מבוא-לפיזיקה-קוונטית-א",
         "displayTitle": "פרק 1: מבוא לפיזיקה קוונטית א",
-        "number": 1
+        "number": 1,
+        "url": "https://idofangbentov.uk/Technion/PHY3/PHY3_001-מבוא-לפיזיקה-קוונטית-א"
       },
       {
         "slug": "PHY3_002-מבוא-לפיזיקה-קוונטית-ב",
         "name": "PHY3_002-מבוא-לפיזיקה-קוונטית-ב",
-        "url": "https://idofangbentov.uk/Technion/PHY3/PHY3_002-מבוא-לפיזיקה-קוונטית-ב",
         "displayTitle": "פרק 2: מבוא לפיזיקה קוונטית ב",
-        "number": 2
+        "number": 2,
+        "url": "https://idofangbentov.uk/Technion/PHY3/PHY3_002-מבוא-לפיזיקה-קוונטית-ב"
       },
       {
         "slug": "PHY3_003-מכניקה-קוונטית-א",
         "name": "PHY3_003-מכניקה-קוונטית-א",
-        "url": "https://idofangbentov.uk/Technion/PHY3/PHY3_003-מכניקה-קוונטית-א",
         "displayTitle": "פרק 3: מכניקה קוונטית א",
-        "number": 3
+        "number": 3,
+        "url": "https://idofangbentov.uk/Technion/PHY3/PHY3_003-מכניקה-קוונטית-א"
       },
       {
         "slug": "PHY3_004-מכניקה-קוונטית-ב",
         "name": "PHY3_004-מכניקה-קוונטית-ב",
-        "url": "https://idofangbentov.uk/Technion/PHY3/PHY3_004-מכניקה-קוונטית-ב",
         "displayTitle": "פרק 4: מכניקה קוונטית ב",
-        "number": 4
+        "number": 4,
+        "url": "https://idofangbentov.uk/Technion/PHY3/PHY3_004-מכניקה-קוונטית-ב"
       },
       {
         "slug": "PHY3_005-פיזיקה-אטומית-א",
         "name": "PHY3_005-פיזיקה-אטומית-א",
-        "url": "https://idofangbentov.uk/Technion/PHY3/PHY3_005-פיזיקה-אטומית-א",
         "displayTitle": "פרק 5: פיזיקה אטומית א",
-        "number": 5
+        "number": 5,
+        "url": "https://idofangbentov.uk/Technion/PHY3/PHY3_005-פיזיקה-אטומית-א"
       },
       {
         "slug": "PHY3_006-פיזיקה-אטומית-ב",
         "name": "PHY3_006-פיזיקה-אטומית-ב",
-        "url": "https://idofangbentov.uk/Technion/PHY3/PHY3_006-פיזיקה-אטומית-ב",
         "displayTitle": "פרק 6: פיזיקה אטומית ב",
-        "number": 6
+        "number": 6,
+        "url": "https://idofangbentov.uk/Technion/PHY3/PHY3_006-פיזיקה-אטומית-ב"
       },
       {
         "slug": "PHY3_007-מולקולות-ומוצקים",
         "name": "PHY3_007-מולקולות-ומוצקים",
-        "url": "https://idofangbentov.uk/Technion/PHY3/PHY3_007-מולקולות-ומוצקים",
         "displayTitle": "פרק 7: מולקולות ומוצקים",
-        "number": 7
+        "number": 7,
+        "url": "https://idofangbentov.uk/Technion/PHY3/PHY3_007-מולקולות-ומוצקים"
       },
       {
         "slug": "PHY3_008-פיזיקה-גרעינית-א",
         "name": "PHY3_008-פיזיקה-גרעינית-א",
-        "url": "https://idofangbentov.uk/Technion/PHY3/PHY3_008-פיזיקה-גרעינית-א",
         "displayTitle": "פרק 8: פיזיקה גרעינית א",
-        "number": 8
+        "number": 8,
+        "url": "https://idofangbentov.uk/Technion/PHY3/PHY3_008-פיזיקה-גרעינית-א"
       }
     ],
     "homework": [],
@@ -3821,38 +3971,38 @@
       {
         "slug": "PHY3_E2024SA-2024-אביב-מועד-א",
         "name": "PHY3_E2024SA-2024-אביב-מועד-א",
-        "url": "https://idofangbentov.uk/Technion/PHY3/PHY3_E2024SA-2024-אביב-מועד-א",
-        "displayTitle": "PHY3_E2024SA 2024 אביב מועד א",
+        "displayTitle": "PHY3_E2024SA 2024 אביב מועד א׳",
         "year": "2024",
         "season": "אביב",
-        "moed": "מועד א׳"
+        "moed": "מועד א׳",
+        "url": "https://idofangbentov.uk/Technion/PHY3/PHY3_E2024SA-2024-אביב-מועד-א"
       },
       {
-        "slug": "PHY3_E2025SA-2025-אביב-מועד-א",
-        "name": "PHY3_E2025SA-2025-אביב-מועד-א",
-        "url": "https://idofangbentov.uk/Technion/PHY3/PHY3_E2025SA-2025-אביב-מועד-א",
-        "displayTitle": "PHY3_E2025SA 2025 אביב מועד א",
+        "slug": "PHY3_E2025SA-2025-אביב-מועד-א'",
+        "name": "PHY3_E2025SA-2025-אביב-מועד-א'",
+        "displayTitle": "PHY3_E2025SA 2025 אביב מועד א׳",
         "year": "2025",
         "season": "אביב",
-        "moed": "מועד א׳"
+        "moed": "מועד א׳",
+        "url": "https://idofangbentov.uk/Technion/PHY3/PHY3_E2025SA-2025-אביב-מועד-א%27"
       },
       {
-        "slug": "PHY3_E2025SB-2025-אביב-מועד-ב",
-        "name": "PHY3_E2025SB-2025-אביב-מועד-ב",
-        "url": "https://idofangbentov.uk/Technion/PHY3/PHY3_E2025SB-2025-אביב-מועד-ב",
-        "displayTitle": "PHY3_E2025SB 2025 אביב מועד ב",
+        "slug": "PHY3_E2025SB-2025-אביב-מועד-ב'",
+        "name": "PHY3_E2025SB-2025-אביב-מועד-ב'",
+        "displayTitle": "PHY3_E2025SB 2025 אביב מועד ב׳",
         "year": "2025",
         "season": "אביב",
-        "moed": "מועד ב׳"
+        "moed": "מועד ב׳",
+        "url": "https://idofangbentov.uk/Technion/PHY3/PHY3_E2025SB-2025-אביב-מועד-ב%27"
       },
       {
         "slug": "PHY3_E2025SC-2025-אביב-מועד-ג",
         "name": "PHY3_E2025SC-2025-אביב-מועד-ג",
-        "url": "https://idofangbentov.uk/Technion/PHY3/PHY3_E2025SC-2025-אביב-מועד-ג",
-        "displayTitle": "PHY3_E2025SC 2025 אביב מועד ג",
+        "displayTitle": "PHY3_E2025SC 2025 אביב מועד ג׳",
         "year": "2025",
         "season": "אביב",
-        "moed": "מועד ג׳"
+        "moed": "מועד ג׳",
+        "url": "https://idofangbentov.uk/Technion/PHY3/PHY3_E2025SC-2025-אביב-מועד-ג"
       }
     ],
     "projects": [],
@@ -3863,433 +4013,422 @@
     "course_tag": "PSM1",
     "title": "PSM1",
     "url": "https://idofangbentov.uk/Technion/PSM1/",
+    "githubUrl": "https://github.com/NuclearGandhi/technion_second_brain/tree/master/Technion/PSM1",
     "lectures": [
       {
         "slug": "PSM1_000-00340058-Probability-and-Statistics-for-Mechanical-Engineers",
         "name": "PSM1_000-00340058-Probability-and-Statistics-for-Mechanical-Engineers",
-        "url": "https://idofangbentov.uk/Technion/PSM1/PSM1_000-00340058-Probability-and-Statistics-for-Mechanical-Engineers",
         "displayTitle": "פרק 0: 00340058 Probability and Statistics for Mechanical Engineers",
-        "number": 0
+        "number": 0,
+        "url": "https://idofangbentov.uk/Technion/PSM1/PSM1_000-00340058-Probability-and-Statistics-for-Mechanical-Engineers"
       },
       {
         "slug": "PSM1_001-Introduction-and-Probability",
         "name": "PSM1_001-Introduction-and-Probability",
-        "url": "https://idofangbentov.uk/Technion/PSM1/PSM1_001-Introduction-and-Probability",
         "displayTitle": "פרק 1: Introduction and Probability",
-        "number": 1
+        "number": 1,
+        "url": "https://idofangbentov.uk/Technion/PSM1/PSM1_001-Introduction-and-Probability"
       },
       {
         "slug": "PSM1_002-Random-Variables",
         "name": "PSM1_002-Random-Variables",
-        "url": "https://idofangbentov.uk/Technion/PSM1/PSM1_002-Random-Variables",
         "displayTitle": "פרק 2: Random Variables",
-        "number": 2
+        "number": 2,
+        "url": "https://idofangbentov.uk/Technion/PSM1/PSM1_002-Random-Variables"
       },
       {
         "slug": "PSM1_003-Some-Discrete-Probability--Distributions",
         "name": "PSM1_003-Some-Discrete-Probability--Distributions",
-        "url": "https://idofangbentov.uk/Technion/PSM1/PSM1_003-Some-Discrete-Probability--Distributions",
         "displayTitle": "פרק 3: Some Discrete Probability  Distributions",
-        "number": 3
+        "number": 3,
+        "url": "https://idofangbentov.uk/Technion/PSM1/PSM1_003-Some-Discrete-Probability--Distributions"
       },
       {
         "slug": "PSM1_004-Some-Continuous-Probability-Distributions",
         "name": "PSM1_004-Some-Continuous-Probability-Distributions",
-        "url": "https://idofangbentov.uk/Technion/PSM1/PSM1_004-Some-Continuous-Probability-Distributions",
         "displayTitle": "פרק 4: Some Continuous Probability Distributions",
-        "number": 4
+        "number": 4,
+        "url": "https://idofangbentov.uk/Technion/PSM1/PSM1_004-Some-Continuous-Probability-Distributions"
       },
       {
         "slug": "PSM1_005-Fundamental-Sampling-Distributions-and-Data-Descriptions",
         "name": "PSM1_005-Fundamental-Sampling-Distributions-and-Data-Descriptions",
-        "url": "https://idofangbentov.uk/Technion/PSM1/PSM1_005-Fundamental-Sampling-Distributions-and-Data-Descriptions",
         "displayTitle": "פרק 5: Fundamental Sampling Distributions and Data Descriptions",
-        "number": 5
+        "number": 5,
+        "url": "https://idofangbentov.uk/Technion/PSM1/PSM1_005-Fundamental-Sampling-Distributions-and-Data-Descriptions"
       },
       {
         "slug": "PSM1_006-One--and-Two-Sample--Estimation-Problems",
         "name": "PSM1_006-One--and-Two-Sample--Estimation-Problems",
-        "url": "https://idofangbentov.uk/Technion/PSM1/PSM1_006-One--and-Two-Sample--Estimation-Problems",
         "displayTitle": "פרק 6: One  and Two Sample  Estimation Problems",
-        "number": 6
+        "number": 6,
+        "url": "https://idofangbentov.uk/Technion/PSM1/PSM1_006-One--and-Two-Sample--Estimation-Problems"
       },
       {
         "slug": "PSM1_007-One--and-Two-Sample-Tests-of--Hypotheses",
         "name": "PSM1_007-One--and-Two-Sample-Tests-of--Hypotheses",
-        "url": "https://idofangbentov.uk/Technion/PSM1/PSM1_007-One--and-Two-Sample-Tests-of--Hypotheses",
         "displayTitle": "פרק 7: One  and Two Sample Tests of  Hypotheses",
-        "number": 7
+        "number": 7,
+        "url": "https://idofangbentov.uk/Technion/PSM1/PSM1_007-One--and-Two-Sample-Tests-of--Hypotheses"
       },
       {
         "slug": "PSM1_008-Simple-Linear-Regression-and-Correlation",
         "name": "PSM1_008-Simple-Linear-Regression-and-Correlation",
-        "url": "https://idofangbentov.uk/Technion/PSM1/PSM1_008-Simple-Linear-Regression-and-Correlation",
         "displayTitle": "פרק 8: Simple Linear Regression and Correlation",
-        "number": 8
+        "number": 8,
+        "url": "https://idofangbentov.uk/Technion/PSM1/PSM1_008-Simple-Linear-Regression-and-Correlation"
       }
     ],
     "homework": [
       {
         "slug": "PSM1_HW001-Homework-1",
         "name": "PSM1_HW001-Homework-1",
-        "url": "https://idofangbentov.uk/Technion/PSM1/PSM1_HW001-Homework-1",
         "displayTitle": "תרגיל בית 1: Homework 1",
-        "hwNumber": 1
+        "hwNumber": 1,
+        "url": "https://idofangbentov.uk/Technion/PSM1/PSM1_HW001-Homework-1"
       },
       {
         "slug": "PSM1_HW002-Homework-2",
         "name": "PSM1_HW002-Homework-2",
-        "url": "https://idofangbentov.uk/Technion/PSM1/PSM1_HW002-Homework-2",
         "displayTitle": "תרגיל בית 2: Homework 2",
-        "hwNumber": 2
+        "hwNumber": 2,
+        "url": "https://idofangbentov.uk/Technion/PSM1/PSM1_HW002-Homework-2"
       },
       {
         "slug": "PSM1_HW003-Homework-3",
         "name": "PSM1_HW003-Homework-3",
-        "url": "https://idofangbentov.uk/Technion/PSM1/PSM1_HW003-Homework-3",
         "displayTitle": "תרגיל בית 3: Homework 3",
-        "hwNumber": 3
+        "hwNumber": 3,
+        "url": "https://idofangbentov.uk/Technion/PSM1/PSM1_HW003-Homework-3"
       },
       {
         "slug": "PSM1_HW004-Homework-4",
         "name": "PSM1_HW004-Homework-4",
-        "url": "https://idofangbentov.uk/Technion/PSM1/PSM1_HW004-Homework-4",
         "displayTitle": "תרגיל בית 4: Homework 4",
-        "hwNumber": 4
+        "hwNumber": 4,
+        "url": "https://idofangbentov.uk/Technion/PSM1/PSM1_HW004-Homework-4"
       },
       {
         "slug": "PSM1_HW005-Homework-5",
         "name": "PSM1_HW005-Homework-5",
-        "url": "https://idofangbentov.uk/Technion/PSM1/PSM1_HW005-Homework-5",
         "displayTitle": "תרגיל בית 5: Homework 5",
-        "hwNumber": 5
+        "hwNumber": 5,
+        "url": "https://idofangbentov.uk/Technion/PSM1/PSM1_HW005-Homework-5"
       }
     ],
     "exams": [
       {
         "slug": "PSM1_E2016SA-2016-Spring-Moed-A",
         "name": "PSM1_E2016SA-2016-Spring-Moed-A",
-        "url": "https://idofangbentov.uk/Technion/PSM1/PSM1_E2016SA-2016-Spring-Moed-A",
-        "displayTitle": "PSM1_E2016SA 2016 Spring Moed A",
+        "displayTitle": "PSM1_E2016SA 2016 אביב מועד א׳",
         "year": "2016",
         "season": "אביב",
-        "moed": "מועד א׳"
+        "moed": "מועד א׳",
+        "url": "https://idofangbentov.uk/Technion/PSM1/PSM1_E2016SA-2016-Spring-Moed-A"
       },
       {
         "slug": "PSM1_E2020SA-2020-Spring-Moed-A",
         "name": "PSM1_E2020SA-2020-Spring-Moed-A",
-        "url": "https://idofangbentov.uk/Technion/PSM1/PSM1_E2020SA-2020-Spring-Moed-A",
-        "displayTitle": "PSM1_E2020SA 2020 Spring Moed A",
+        "displayTitle": "PSM1_E2020SA 2020 אביב מועד א׳",
         "year": "2020",
         "season": "אביב",
-        "moed": "מועד א׳"
+        "moed": "מועד א׳",
+        "url": "https://idofangbentov.uk/Technion/PSM1/PSM1_E2020SA-2020-Spring-Moed-A"
       },
       {
         "slug": "PSM1_E2020SB-2020-Spring-Moed-B",
         "name": "PSM1_E2020SB-2020-Spring-Moed-B",
-        "url": "https://idofangbentov.uk/Technion/PSM1/PSM1_E2020SB-2020-Spring-Moed-B",
-        "displayTitle": "PSM1_E2020SB 2020 Spring Moed B",
+        "displayTitle": "PSM1_E2020SB 2020 אביב מועד ב׳",
         "year": "2020",
         "season": "אביב",
-        "moed": "מועד ב׳"
+        "moed": "מועד ב׳",
+        "url": "https://idofangbentov.uk/Technion/PSM1/PSM1_E2020SB-2020-Spring-Moed-B"
       },
       {
         "slug": "PSM1_E2021SA-2021-Spring-Moed-A",
         "name": "PSM1_E2021SA-2021-Spring-Moed-A",
-        "url": "https://idofangbentov.uk/Technion/PSM1/PSM1_E2021SA-2021-Spring-Moed-A",
-        "displayTitle": "PSM1_E2021SA 2021 Spring Moed A",
+        "displayTitle": "PSM1_E2021SA 2021 אביב מועד א׳",
         "year": "2021",
         "season": "אביב",
-        "moed": "מועד א׳"
+        "moed": "מועד א׳",
+        "url": "https://idofangbentov.uk/Technion/PSM1/PSM1_E2021SA-2021-Spring-Moed-A"
       }
     ],
     "projects": [],
     "other": [],
-    "hebrewName": "הסתברות וסטטיסטיקה למכונות (034058)"
+    "hebrewName": "הסתברות וסטטיסטיקה למהנדסי מכונות (00340058)"
   },
   "SLD1": {
     "course_tag": "SLD1",
     "title": "SLD1",
     "url": "https://idofangbentov.uk/Technion/SLD1/",
+    "githubUrl": "https://github.com/NuclearGandhi/technion_second_brain/tree/master/Technion/SLD1",
     "lectures": [
       {
         "slug": "SLD1_000-034028-מכניקת-מוצקים-1",
         "name": "SLD1_000-034028-מכניקת-מוצקים-1",
-        "url": "https://idofangbentov.uk/Technion/SLD1/SLD1_000-034028-מכניקת-מוצקים-1",
         "displayTitle": "פרק 0: 034028 מכניקת מוצקים 1",
-        "number": 0
+        "number": 0,
+        "url": "https://idofangbentov.uk/Technion/SLD1/SLD1_000-034028-מכניקת-מוצקים-1"
       },
       {
         "slug": "SLD1_001-הקדמה-ומושגי-יסוד",
         "name": "SLD1_001-הקדמה-ומושגי-יסוד",
-        "url": "https://idofangbentov.uk/Technion/SLD1/SLD1_001-הקדמה-ומושגי-יסוד",
         "displayTitle": "פרק 1: הקדמה ומושגי יסוד",
-        "number": 1
+        "number": 1,
+        "url": "https://idofangbentov.uk/Technion/SLD1/SLD1_001-הקדמה-ומושגי-יסוד"
       },
       {
         "slug": "SLD1_002-שיווי-משקל",
         "name": "SLD1_002-שיווי-משקל",
-        "url": "https://idofangbentov.uk/Technion/SLD1/SLD1_002-שיווי-משקל",
         "displayTitle": "פרק 2: שיווי משקל",
-        "number": 2
+        "number": 2,
+        "url": "https://idofangbentov.uk/Technion/SLD1/SLD1_002-שיווי-משקל"
       },
       {
         "slug": "SLD1_003-מסבכים,-מסגרות-ומכונות",
         "name": "SLD1_003-מסבכים,-מסגרות-ומכונות",
-        "url": "https://idofangbentov.uk/Technion/SLD1/SLD1_003-מסבכים,-מסגרות-ומכונות",
         "displayTitle": "פרק 3: מסבכים, מסגרות ומכונות",
-        "number": 3
+        "number": 3,
+        "url": "https://idofangbentov.uk/Technion/SLD1/SLD1_003-מסבכים,-מסגרות-ומכונות"
       },
       {
         "slug": "SLD1_004-עבודה-וירטואלית",
         "name": "SLD1_004-עבודה-וירטואלית",
-        "url": "https://idofangbentov.uk/Technion/SLD1/SLD1_004-עבודה-וירטואלית",
         "displayTitle": "פרק 4: עבודה וירטואלית",
-        "number": 4
+        "number": 4,
+        "url": "https://idofangbentov.uk/Technion/SLD1/SLD1_004-עבודה-וירטואלית"
       },
       {
         "slug": "SLD1_005-מהלכי-כוחות-ומומנטים-בקורות",
         "name": "SLD1_005-מהלכי-כוחות-ומומנטים-בקורות",
-        "url": "https://idofangbentov.uk/Technion/SLD1/SLD1_005-מהלכי-כוחות-ומומנטים-בקורות",
         "displayTitle": "פרק 5: מהלכי כוחות ומומנטים בקורות",
-        "number": 5
+        "number": 5,
+        "url": "https://idofangbentov.uk/Technion/SLD1/SLD1_005-מהלכי-כוחות-ומומנטים-בקורות"
       },
       {
         "slug": "SLD1_006-מרכז-כובד-ומרכז-מסה",
         "name": "SLD1_006-מרכז-כובד-ומרכז-מסה",
-        "url": "https://idofangbentov.uk/Technion/SLD1/SLD1_006-מרכז-כובד-ומרכז-מסה",
         "displayTitle": "פרק 6: מרכז כובד ומרכז מסה",
-        "number": 6
+        "number": 6,
+        "url": "https://idofangbentov.uk/Technion/SLD1/SLD1_006-מרכז-כובד-ומרכז-מסה"
       },
       {
         "slug": "SLD1_007-מאמץ-ועיבור",
         "name": "SLD1_007-מאמץ-ועיבור",
-        "url": "https://idofangbentov.uk/Technion/SLD1/SLD1_007-מאמץ-ועיבור",
         "displayTitle": "פרק 7: מאמץ ועיבור",
-        "number": 7
+        "number": 7,
+        "url": "https://idofangbentov.uk/Technion/SLD1/SLD1_007-מאמץ-ועיבור"
       },
       {
         "slug": "SLD1_008-פיתול",
         "name": "SLD1_008-פיתול",
-        "url": "https://idofangbentov.uk/Technion/SLD1/SLD1_008-פיתול",
         "displayTitle": "פרק 8: פיתול",
-        "number": 8
+        "number": 8,
+        "url": "https://idofangbentov.uk/Technion/SLD1/SLD1_008-פיתול"
       },
       {
         "slug": "SLD1_009-עקרונות-חשובים",
         "name": "SLD1_009-עקרונות-חשובים",
-        "url": "https://idofangbentov.uk/Technion/SLD1/SLD1_009-עקרונות-חשובים",
         "displayTitle": "פרק 9: עקרונות חשובים",
-        "number": 9
+        "number": 9,
+        "url": "https://idofangbentov.uk/Technion/SLD1/SLD1_009-עקרונות-חשובים"
       }
     ],
     "homework": [],
     "exams": [],
     "projects": [],
     "other": [],
-    "hebrewName": "מכניקת מוצקים 1 (034028)"
+    "hebrewName": "מכניקת מוצקים 1 (034028 / 034013)"
   },
   "SLD2": {
     "course_tag": "SLD2",
     "title": "SLD2",
     "url": "https://idofangbentov.uk/Technion/SLD2/",
+    "githubUrl": "https://github.com/NuclearGandhi/technion_second_brain/tree/master/Technion/SLD2",
     "lectures": [
       {
         "slug": "SLD2_000-034053-מכניקת-מוצקים-2מ",
         "name": "SLD2_000-034053-מכניקת-מוצקים-2מ",
-        "url": "https://idofangbentov.uk/Technion/SLD2/SLD2_000-034053-מכניקת-מוצקים-2מ",
         "displayTitle": "פרק 0: 034053 מכניקת מוצקים 2מ",
-        "number": 0
+        "number": 0,
+        "url": "https://idofangbentov.uk/Technion/SLD2/SLD2_000-034053-מכניקת-מוצקים-2מ"
       },
       {
         "slug": "SLD2_001-טנזור-המאמץ",
         "name": "SLD2_001-טנזור-המאמץ",
-        "url": "https://idofangbentov.uk/Technion/SLD2/SLD2_001-טנזור-המאמץ",
         "displayTitle": "פרק 1: טנזור המאמץ",
-        "number": 1
+        "number": 1,
+        "url": "https://idofangbentov.uk/Technion/SLD2/SLD2_001-טנזור-המאמץ"
       },
       {
         "slug": "SLD2_002-מישורים-ראשיים",
         "name": "SLD2_002-מישורים-ראשיים",
-        "url": "https://idofangbentov.uk/Technion/SLD2/SLD2_002-מישורים-ראשיים",
         "displayTitle": "פרק 2: מישורים ראשיים",
-        "number": 2
+        "number": 2,
+        "url": "https://idofangbentov.uk/Technion/SLD2/SLD2_002-מישורים-ראשיים"
       },
       {
         "slug": "SLD2_003-טרנספורמציה-של-מאמצים",
         "name": "SLD2_003-טרנספורמציה-של-מאמצים",
-        "url": "https://idofangbentov.uk/Technion/SLD2/SLD2_003-טרנספורמציה-של-מאמצים",
         "displayTitle": "פרק 3: טרנספורמציה של מאמצים",
-        "number": 3
+        "number": 3,
+        "url": "https://idofangbentov.uk/Technion/SLD2/SLD2_003-טרנספורמציה-של-מאמצים"
       },
       {
         "slug": "SLD2_004-טנזור-העיבור",
         "name": "SLD2_004-טנזור-העיבור",
-        "url": "https://idofangbentov.uk/Technion/SLD2/SLD2_004-טנזור-העיבור",
         "displayTitle": "פרק 4: טנזור העיבור",
-        "number": 4
+        "number": 4,
+        "url": "https://idofangbentov.uk/Technion/SLD2/SLD2_004-טנזור-העיבור"
       },
       {
         "slug": "SLD2_005-קשרי-מאמץ-עיבור",
         "name": "SLD2_005-קשרי-מאמץ-עיבור",
-        "url": "https://idofangbentov.uk/Technion/SLD2/SLD2_005-קשרי-מאמץ-עיבור",
         "displayTitle": "פרק 5: קשרי מאמץ עיבור",
-        "number": 5
+        "number": 5,
+        "url": "https://idofangbentov.uk/Technion/SLD2/SLD2_005-קשרי-מאמץ-עיבור"
       },
       {
         "slug": "SLD2_006-קריטריוני-כניעה-וכשל",
         "name": "SLD2_006-קריטריוני-כניעה-וכשל",
-        "url": "https://idofangbentov.uk/Technion/SLD2/SLD2_006-קריטריוני-כניעה-וכשל",
         "displayTitle": "פרק 6: קריטריוני כניעה וכשל",
-        "number": 6
+        "number": 6,
+        "url": "https://idofangbentov.uk/Technion/SLD2/SLD2_006-קריטריוני-כניעה-וכשל"
       },
       {
         "slug": "SLD2_007-מאמצים-נורמליים-בכפיפה",
         "name": "SLD2_007-מאמצים-נורמליים-בכפיפה",
-        "url": "https://idofangbentov.uk/Technion/SLD2/SLD2_007-מאמצים-נורמליים-בכפיפה",
         "displayTitle": "פרק 7: מאמצים נורמליים בכפיפה",
-        "number": 7
-      },
-      {
-        "slug": "SLD2_007/",
-        "name": "SLD2_007/",
-        "url": "https://idofangbentov.uk/Technion/SLD2/SLD2_007/",
-        "displayTitle": "SLD2_007/",
-        "number": 0
+        "number": 7,
+        "url": "https://idofangbentov.uk/Technion/SLD2/SLD2_007-מאמצים-נורמליים-בכפיפה"
       },
       {
         "slug": "SLD2_008-מאמצי-גזירה-בכפיפה",
         "name": "SLD2_008-מאמצי-גזירה-בכפיפה",
-        "url": "https://idofangbentov.uk/Technion/SLD2/SLD2_008-מאמצי-גזירה-בכפיפה",
         "displayTitle": "פרק 8: מאמצי גזירה בכפיפה",
-        "number": 8
+        "number": 8,
+        "url": "https://idofangbentov.uk/Technion/SLD2/SLD2_008-מאמצי-גזירה-בכפיפה"
       },
       {
         "slug": "SLD2_009-מבוא-לאלסטיות",
         "name": "SLD2_009-מבוא-לאלסטיות",
-        "url": "https://idofangbentov.uk/Technion/SLD2/SLD2_009-מבוא-לאלסטיות",
         "displayTitle": "פרק 9: מבוא לאלסטיות",
-        "number": 9
+        "number": 9,
+        "url": "https://idofangbentov.uk/Technion/SLD2/SLD2_009-מבוא-לאלסטיות"
       },
       {
         "slug": "SLD2_010-שקיעה-של-קורות",
         "name": "SLD2_010-שקיעה-של-קורות",
-        "url": "https://idofangbentov.uk/Technion/SLD2/SLD2_010-שקיעה-של-קורות",
         "displayTitle": "פרק 10: שקיעה של קורות",
-        "number": 10
-      },
-      {
-        "slug": "SLD2_010/",
-        "name": "SLD2_010/",
-        "url": "https://idofangbentov.uk/Technion/SLD2/SLD2_010/",
-        "displayTitle": "SLD2_010/",
-        "number": 0
+        "number": 10,
+        "url": "https://idofangbentov.uk/Technion/SLD2/SLD2_010-שקיעה-של-קורות"
       },
       {
         "slug": "SLD2_011-שיטות-אנרגיה",
         "name": "SLD2_011-שיטות-אנרגיה",
-        "url": "https://idofangbentov.uk/Technion/SLD2/SLD2_011-שיטות-אנרגיה",
         "displayTitle": "פרק 11: שיטות אנרגיה",
-        "number": 11
+        "number": 11,
+        "url": "https://idofangbentov.uk/Technion/SLD2/SLD2_011-שיטות-אנרגיה"
       }
     ],
     "homework": [
       {
         "slug": "SLD2_HW009-תרגיל-בית-9",
         "name": "SLD2_HW009-תרגיל-בית-9",
-        "url": "https://idofangbentov.uk/Technion/SLD2/SLD2_HW009-תרגיל-בית-9",
-        "displayTitle": "תרגיל בית 9: תרגיל בית 9",
-        "hwNumber": 9
+        "displayTitle": "תרגיל בית 9: SLD2_HW009 תרגיל בית 9",
+        "hwNumber": 9,
+        "url": "https://idofangbentov.uk/Technion/SLD2/SLD2_HW009-תרגיל-בית-9"
       },
       {
         "slug": "SLD2_HW010-תרגיל-בית-10",
         "name": "SLD2_HW010-תרגיל-בית-10",
-        "url": "https://idofangbentov.uk/Technion/SLD2/SLD2_HW010-תרגיל-בית-10",
-        "displayTitle": "תרגיל בית 10: תרגיל בית 10",
-        "hwNumber": 10
+        "displayTitle": "תרגיל בית 10: SLD2_HW010 תרגיל בית 10",
+        "hwNumber": 10,
+        "url": "https://idofangbentov.uk/Technion/SLD2/SLD2_HW010-תרגיל-בית-10"
       }
     ],
     "exams": [
       {
         "slug": "SLD2_E2014SA-2014-אביב-מועד-א",
         "name": "SLD2_E2014SA-2014-אביב-מועד-א",
-        "url": "https://idofangbentov.uk/Technion/SLD2/SLD2_E2014SA-2014-אביב-מועד-א",
-        "displayTitle": "SLD2_E2014SA 2014 אביב מועד א",
+        "displayTitle": "SLD2_E2014SA 2014 אביב מועד א׳",
         "year": "2014",
         "season": "אביב",
-        "moed": "מועד א׳"
+        "moed": "מועד א׳",
+        "url": "https://idofangbentov.uk/Technion/SLD2/SLD2_E2014SA-2014-אביב-מועד-א"
       },
       {
         "slug": "SLD2_E2014WA-2014-חורף-מועד-א",
         "name": "SLD2_E2014WA-2014-חורף-מועד-א",
-        "url": "https://idofangbentov.uk/Technion/SLD2/SLD2_E2014WA-2014-חורף-מועד-א",
-        "displayTitle": "SLD2_E2014WA 2014 חורף מועד א",
+        "displayTitle": "SLD2_E2014WA 2014 חורף מועד א׳",
         "year": "2014",
         "season": "חורף",
-        "moed": "מועד א׳"
+        "moed": "מועד א׳",
+        "url": "https://idofangbentov.uk/Technion/SLD2/SLD2_E2014WA-2014-חורף-מועד-א"
       },
       {
         "slug": "SLD2_E2015SA-2015-אביב-מועד-א",
         "name": "SLD2_E2015SA-2015-אביב-מועד-א",
-        "url": "https://idofangbentov.uk/Technion/SLD2/SLD2_E2015SA-2015-אביב-מועד-א",
-        "displayTitle": "SLD2_E2015SA 2015 אביב מועד א",
+        "displayTitle": "SLD2_E2015SA 2015 אביב מועד א׳",
         "year": "2015",
         "season": "אביב",
-        "moed": "מועד א׳"
+        "moed": "מועד א׳",
+        "url": "https://idofangbentov.uk/Technion/SLD2/SLD2_E2015SA-2015-אביב-מועד-א"
       },
       {
         "slug": "SLD2_E2015WA-2015-חורף-מועד-א",
         "name": "SLD2_E2015WA-2015-חורף-מועד-א",
-        "url": "https://idofangbentov.uk/Technion/SLD2/SLD2_E2015WA-2015-חורף-מועד-א",
-        "displayTitle": "SLD2_E2015WA 2015 חורף מועד א",
+        "displayTitle": "SLD2_E2015WA 2015 חורף מועד א׳",
         "year": "2015",
         "season": "חורף",
-        "moed": "מועד א׳"
+        "moed": "מועד א׳",
+        "url": "https://idofangbentov.uk/Technion/SLD2/SLD2_E2015WA-2015-חורף-מועד-א"
       },
       {
         "slug": "SLD2_E2016WA-2016-חורף-מועד-א",
         "name": "SLD2_E2016WA-2016-חורף-מועד-א",
-        "url": "https://idofangbentov.uk/Technion/SLD2/SLD2_E2016WA-2016-חורף-מועד-א",
-        "displayTitle": "SLD2_E2016WA 2016 חורף מועד א",
+        "displayTitle": "SLD2_E2016WA 2016 חורף מועד א׳",
         "year": "2016",
         "season": "חורף",
-        "moed": "מועד א׳"
+        "moed": "מועד א׳",
+        "url": "https://idofangbentov.uk/Technion/SLD2/SLD2_E2016WA-2016-חורף-מועד-א"
       },
       {
         "slug": "SLD2_E2016WB-2016-חורף-מועד-ב",
         "name": "SLD2_E2016WB-2016-חורף-מועד-ב",
-        "url": "https://idofangbentov.uk/Technion/SLD2/SLD2_E2016WB-2016-חורף-מועד-ב",
-        "displayTitle": "SLD2_E2016WB 2016 חורף מועד ב",
+        "displayTitle": "SLD2_E2016WB 2016 חורף מועד ב׳",
         "year": "2016",
         "season": "חורף",
-        "moed": "מועד ב׳"
+        "moed": "מועד ב׳",
+        "url": "https://idofangbentov.uk/Technion/SLD2/SLD2_E2016WB-2016-חורף-מועד-ב"
       },
       {
         "slug": "SLD2_E2019WA-2019-חורף-מועד-א",
         "name": "SLD2_E2019WA-2019-חורף-מועד-א",
-        "url": "https://idofangbentov.uk/Technion/SLD2/SLD2_E2019WA-2019-חורף-מועד-א",
-        "displayTitle": "SLD2_E2019WA 2019 חורף מועד א",
+        "displayTitle": "SLD2_E2019WA 2019 חורף מועד א׳",
         "year": "2019",
         "season": "חורף",
-        "moed": "מועד א׳"
+        "moed": "מועד א׳",
+        "url": "https://idofangbentov.uk/Technion/SLD2/SLD2_E2019WA-2019-חורף-מועד-א"
       },
       {
         "slug": "SLD2_E2020WA-2020-חורף-מועד-א",
         "name": "SLD2_E2020WA-2020-חורף-מועד-א",
-        "url": "https://idofangbentov.uk/Technion/SLD2/SLD2_E2020WA-2020-חורף-מועד-א",
-        "displayTitle": "SLD2_E2020WA 2020 חורף מועד א",
+        "displayTitle": "SLD2_E2020WA 2020 חורף מועד א׳",
         "year": "2020",
         "season": "חורף",
-        "moed": "מועד א׳"
+        "moed": "מועד א׳",
+        "url": "https://idofangbentov.uk/Technion/SLD2/SLD2_E2020WA-2020-חורף-מועד-א"
       },
       {
         "slug": "SLD2_E2023WA-2023-חורף-מועד-א",
         "name": "SLD2_E2023WA-2023-חורף-מועד-א",
-        "url": "https://idofangbentov.uk/Technion/SLD2/SLD2_E2023WA-2023-חורף-מועד-א",
-        "displayTitle": "SLD2_E2023WA 2023 חורף מועד א",
+        "displayTitle": "SLD2_E2023WA 2023 חורף מועד א׳",
         "year": "2023",
         "season": "חורף",
-        "moed": "מועד א׳"
+        "moed": "מועד א׳",
+        "url": "https://idofangbentov.uk/Technion/SLD2/SLD2_E2023WA-2023-חורף-מועד-א"
       }
     ],
     "projects": [],
@@ -4297,182 +4436,184 @@
       {
         "slug": "SLD2_A1-טבלת-שקיעות",
         "name": "SLD2_A1-טבלת-שקיעות",
+        "displayTitle": "📊 SLD2_A1 טבלת שקיעות",
         "url": "https://idofangbentov.uk/Technion/SLD2/SLD2_A1-טבלת-שקיעות"
       }
     ],
-    "hebrewName": "מכניקת מוצקים 2 (034053)"
+    "hebrewName": "מכניקת מוצקים 2מ׳ (034053)"
   },
   "THE1": {
     "course_tag": "THE1",
     "title": "THE1",
     "url": "https://idofangbentov.uk/Technion/THE1/",
+    "githubUrl": "https://github.com/NuclearGandhi/technion_second_brain/tree/master/Technion/THE1",
     "lectures": [
       {
         "slug": "THE1_000-034035-תרמודינמיקה-1",
         "name": "THE1_000-034035-תרמודינמיקה-1",
-        "url": "https://idofangbentov.uk/Technion/THE1/THE1_000-034035-תרמודינמיקה-1",
         "displayTitle": "פרק 0: 034035 תרמודינמיקה 1",
-        "number": 0
+        "number": 0,
+        "url": "https://idofangbentov.uk/Technion/THE1/THE1_000-034035-תרמודינמיקה-1"
       },
       {
         "slug": "THE1_001-הקדמה-ומושגי-יסוד",
         "name": "THE1_001-הקדמה-ומושגי-יסוד",
-        "url": "https://idofangbentov.uk/Technion/THE1/THE1_001-הקדמה-ומושגי-יסוד",
         "displayTitle": "פרק 1: הקדמה ומושגי יסוד",
-        "number": 1
+        "number": 1,
+        "url": "https://idofangbentov.uk/Technion/THE1/THE1_001-הקדמה-ומושגי-יסוד"
       },
       {
         "slug": "THE1_002-חישוב-תכונות-מערכת",
         "name": "THE1_002-חישוב-תכונות-מערכת",
-        "url": "https://idofangbentov.uk/Technion/THE1/THE1_002-חישוב-תכונות-מערכת",
         "displayTitle": "פרק 2: חישוב תכונות מערכת",
-        "number": 2
+        "number": 2,
+        "url": "https://idofangbentov.uk/Technion/THE1/THE1_002-חישוב-תכונות-מערכת"
       },
       {
         "slug": "THE1_003-אנליזת-נפח-בקרה",
         "name": "THE1_003-אנליזת-נפח-בקרה",
-        "url": "https://idofangbentov.uk/Technion/THE1/THE1_003-אנליזת-נפח-בקרה",
         "displayTitle": "פרק 3: אנליזת נפח בקרה",
-        "number": 3
+        "number": 3,
+        "url": "https://idofangbentov.uk/Technion/THE1/THE1_003-אנליזת-נפח-בקרה"
       },
       {
         "slug": "THE1_004-מכונות-חום",
         "name": "THE1_004-מכונות-חום",
-        "url": "https://idofangbentov.uk/Technion/THE1/THE1_004-מכונות-חום",
         "displayTitle": "פרק 4: מכונות חום",
-        "number": 4
+        "number": 4,
+        "url": "https://idofangbentov.uk/Technion/THE1/THE1_004-מכונות-חום"
       },
       {
         "slug": "THE1_005-החוק-השני-של-התרמודינמיקה",
         "name": "THE1_005-החוק-השני-של-התרמודינמיקה",
-        "url": "https://idofangbentov.uk/Technion/THE1/THE1_005-החוק-השני-של-התרמודינמיקה",
         "displayTitle": "פרק 5: החוק השני של התרמודינמיקה",
-        "number": 5
+        "number": 5,
+        "url": "https://idofangbentov.uk/Technion/THE1/THE1_005-החוק-השני-של-התרמודינמיקה"
       },
       {
         "slug": "THE1_006-אנטרופיה",
         "name": "THE1_006-אנטרופיה",
-        "url": "https://idofangbentov.uk/Technion/THE1/THE1_006-אנטרופיה",
         "displayTitle": "פרק 6: אנטרופיה",
-        "number": 6
+        "number": 6,
+        "url": "https://idofangbentov.uk/Technion/THE1/THE1_006-אנטרופיה"
       },
       {
         "slug": "THE1_007-מחזורי-קיטור",
         "name": "THE1_007-מחזורי-קיטור",
-        "url": "https://idofangbentov.uk/Technion/THE1/THE1_007-מחזורי-קיטור",
         "displayTitle": "פרק 7: מחזורי קיטור",
-        "number": 7
+        "number": 7,
+        "url": "https://idofangbentov.uk/Technion/THE1/THE1_007-מחזורי-קיטור"
       },
       {
         "slug": "THE1_008-מחזורי-גז",
         "name": "THE1_008-מחזורי-גז",
-        "url": "https://idofangbentov.uk/Technion/THE1/THE1_008-מחזורי-גז",
         "displayTitle": "פרק 8: מחזורי גז",
-        "number": 8
+        "number": 8,
+        "url": "https://idofangbentov.uk/Technion/THE1/THE1_008-מחזורי-גז"
       },
       {
         "slug": "THE1_009-מחזורי-בעירה-פנימית",
         "name": "THE1_009-מחזורי-בעירה-פנימית",
-        "url": "https://idofangbentov.uk/Technion/THE1/THE1_009-מחזורי-בעירה-פנימית",
         "displayTitle": "פרק 9: מחזורי בעירה פנימית",
-        "number": 9
+        "number": 9,
+        "url": "https://idofangbentov.uk/Technion/THE1/THE1_009-מחזורי-בעירה-פנימית"
       },
       {
         "slug": "THE1_010-מחזורי-קירור",
         "name": "THE1_010-מחזורי-קירור",
-        "url": "https://idofangbentov.uk/Technion/THE1/THE1_010-מחזורי-קירור",
         "displayTitle": "פרק 10: מחזורי קירור",
-        "number": 10
+        "number": 10,
+        "url": "https://idofangbentov.uk/Technion/THE1/THE1_010-מחזורי-קירור"
       }
     ],
     "homework": [
       {
         "slug": "THE1_HW008-תרגיל-בית-8",
         "name": "THE1_HW008-תרגיל-בית-8",
-        "url": "https://idofangbentov.uk/Technion/THE1/THE1_HW008-תרגיל-בית-8",
-        "displayTitle": "תרגיל בית 8: תרגיל בית 8",
-        "hwNumber": 8
+        "displayTitle": "תרגיל בית 8: THE1_HW008 תרגיל בית 8",
+        "hwNumber": 8,
+        "url": "https://idofangbentov.uk/Technion/THE1/THE1_HW008-תרגיל-בית-8"
       },
       {
         "slug": "THE1_HW009-תרגיל-בית-9",
         "name": "THE1_HW009-תרגיל-בית-9",
-        "url": "https://idofangbentov.uk/Technion/THE1/THE1_HW009-תרגיל-בית-9",
-        "displayTitle": "תרגיל בית 9: תרגיל בית 9",
-        "hwNumber": 9
+        "displayTitle": "תרגיל בית 9: THE1_HW009 תרגיל בית 9",
+        "hwNumber": 9,
+        "url": "https://idofangbentov.uk/Technion/THE1/THE1_HW009-תרגיל-בית-9"
       }
     ],
     "exams": [
       {
         "slug": "THE1_E2019WA-2019-חורף-מועד-א",
         "name": "THE1_E2019WA-2019-חורף-מועד-א",
-        "url": "https://idofangbentov.uk/Technion/THE1/THE1_E2019WA-2019-חורף-מועד-א",
-        "displayTitle": "THE1_E2019WA 2019 חורף מועד א",
+        "displayTitle": "THE1_E2019WA 2019 חורף מועד א׳",
         "year": "2019",
         "season": "חורף",
-        "moed": "מועד א׳"
+        "moed": "מועד א׳",
+        "url": "https://idofangbentov.uk/Technion/THE1/THE1_E2019WA-2019-חורף-מועד-א"
       },
       {
         "slug": "THE1_E2019WB-2019-חורף-מועד-ב",
         "name": "THE1_E2019WB-2019-חורף-מועד-ב",
-        "url": "https://idofangbentov.uk/Technion/THE1/THE1_E2019WB-2019-חורף-מועד-ב",
-        "displayTitle": "THE1_E2019WB 2019 חורף מועד ב",
+        "displayTitle": "THE1_E2019WB 2019 חורף מועד ב׳",
         "year": "2019",
         "season": "חורף",
-        "moed": "מועד ב׳"
+        "moed": "מועד ב׳",
+        "url": "https://idofangbentov.uk/Technion/THE1/THE1_E2019WB-2019-חורף-מועד-ב"
       },
       {
         "slug": "THE1_E2020WA-2020-חורף-מועד-א",
         "name": "THE1_E2020WA-2020-חורף-מועד-א",
-        "url": "https://idofangbentov.uk/Technion/THE1/THE1_E2020WA-2020-חורף-מועד-א",
-        "displayTitle": "THE1_E2020WA 2020 חורף מועד א",
+        "displayTitle": "THE1_E2020WA 2020 חורף מועד א׳",
         "year": "2020",
         "season": "חורף",
-        "moed": "מועד א׳"
+        "moed": "מועד א׳",
+        "url": "https://idofangbentov.uk/Technion/THE1/THE1_E2020WA-2020-חורף-מועד-א"
       },
       {
         "slug": "THE1_E2020WB-2020-חורף-מועד-ב",
         "name": "THE1_E2020WB-2020-חורף-מועד-ב",
-        "url": "https://idofangbentov.uk/Technion/THE1/THE1_E2020WB-2020-חורף-מועד-ב",
-        "displayTitle": "THE1_E2020WB 2020 חורף מועד ב",
+        "displayTitle": "THE1_E2020WB 2020 חורף מועד ב׳",
         "year": "2020",
         "season": "חורף",
-        "moed": "מועד ב׳"
+        "moed": "מועד ב׳",
+        "url": "https://idofangbentov.uk/Technion/THE1/THE1_E2020WB-2020-חורף-מועד-ב"
       },
       {
         "slug": "THE1_E2021WA-2021-חורף-מועד-א",
         "name": "THE1_E2021WA-2021-חורף-מועד-א",
-        "url": "https://idofangbentov.uk/Technion/THE1/THE1_E2021WA-2021-חורף-מועד-א",
-        "displayTitle": "THE1_E2021WA 2021 חורף מועד א",
+        "displayTitle": "THE1_E2021WA 2021 חורף מועד א׳",
         "year": "2021",
         "season": "חורף",
-        "moed": "מועד א׳"
+        "moed": "מועד א׳",
+        "url": "https://idofangbentov.uk/Technion/THE1/THE1_E2021WA-2021-חורף-מועד-א"
       },
       {
         "slug": "THE1_E2021WB-2021-חורף-מועד-ב",
         "name": "THE1_E2021WB-2021-חורף-מועד-ב",
-        "url": "https://idofangbentov.uk/Technion/THE1/THE1_E2021WB-2021-חורף-מועד-ב",
-        "displayTitle": "THE1_E2021WB 2021 חורף מועד ב",
+        "displayTitle": "THE1_E2021WB 2021 חורף מועד ב׳",
         "year": "2021",
         "season": "חורף",
-        "moed": "מועד ב׳"
+        "moed": "מועד ב׳",
+        "url": "https://idofangbentov.uk/Technion/THE1/THE1_E2021WB-2021-חורף-מועד-ב"
       },
       {
         "slug": "THE1_E2022WA-2022-חורף-מועד-א",
         "name": "THE1_E2022WA-2022-חורף-מועד-א",
-        "url": "https://idofangbentov.uk/Technion/THE1/THE1_E2022WA-2022-חורף-מועד-א",
-        "displayTitle": "THE1_E2022WA 2022 חורף מועד א",
+        "displayTitle": "THE1_E2022WA 2022 חורף מועד א׳",
         "year": "2022",
         "season": "חורף",
-        "moed": "מועד א׳"
+        "moed": "מועד א׳",
+        "url": "https://idofangbentov.uk/Technion/THE1/THE1_E2022WA-2022-חורף-מועד-א"
       },
       {
         "slug": "THE1_E2022WB-2022-חורף-מועד-ב",
         "name": "THE1_E2022WB-2022-חורף-מועד-ב",
-        "url": "https://idofangbentov.uk/Technion/THE1/THE1_E2022WB-2022-חורף-מועד-ב",
-        "displayTitle": "THE1_E2022WB 2022 חורף מועד ב",
+        "displayTitle": "THE1_E2022WB 2022 חורף מועד ב׳",
         "year": "2022",
         "season": "חורף",
-        "moed": "מועד ב׳"
+        "moed": "מועד ב׳",
+        "url": "https://idofangbentov.uk/Technion/THE1/THE1_E2022WB-2022-חורף-מועד-ב"
       }
     ],
     "projects": [],
@@ -4482,106 +4623,126 @@
 };
     const PANGEA_CODE_TO_TAG = {
   "00340010": "DYN1",
-  "00340022": "IME1",
-  "00340028": "SLD1",
-  "00340030": "MNF1",
-  "00340032": "LSY1",
-  "00340034": "ELM1",
-  "00340035": "THE1",
-  "00340040": "ICT1",
-  "00340041": "HTF1",
-  "00340051": "DVI1",
-  "00340053": "SLD2",
-  "00340054": "MDN1",
-  "00340055": "FLD1",
-  "00340056": "NUM1",
-  "00340057": "LMA1",
-  "00340058": "PSM1",
-  "00340371": "PDM1",
-  "00350001": "IRB1",
-  "00350022": "FEM1",
-  "00350041": "MCS1",
-  "00360087": "HDY1",
-  "00380800": "MCS2",
-  "01040016": "ALG1",
-  "01040041": "CAL1",
-  "01040043": "CAL2",
-  "01040065": "ALG1",
-  "01040131": "DEQ1",
-  "01040228": "PDE1",
-  "01140032": "LPH1",
-  "01140051": "PHY1",
-  "01140052": "PHY2",
-  "01140054": "PHY3",
-  "01140071": "PHY1",
-  "01140075": "PHY2",
-  "01250001": "GCH1",
-  "02340128": "IPY1",
-  "0314533": "IMT1",
   "034010": "DYN1",
-  "034013": "SLD1",
-  "034015": "DYN1",
-  "034022": "IME1",
-  "034028": "SLD1",
-  "034030": "MNF1",
-  "034032": "LSY1",
-  "034033": "FLD1",
-  "034034": "ELM1",
-  "034035": "THE1",
-  "034040": "ICT1",
-  "034041": "HTF1",
-  "034051": "DVI1",
-  "034053": "SLD2",
-  "034054": "MDN1",
-  "034055": "FLD1",
-  "034056": "NUM1",
-  "034057": "LMA1",
-  "034058": "PSM1",
-  "034371": "PDM1",
-  "035001": "IRB1",
-  "035022": "FEM1",
-  "035041": "MCS1",
-  "036087": "HDY1",
-  "038800": "MCS2",
-  "104016": "ALG1",
-  "104041": "CAL1",
-  "104043": "CAL2",
-  "104065": "ALG1",
-  "104131": "DEQ1",
-  "104228": "PDE1",
-  "114032": "LPH1",
-  "114051": "PHY1",
-  "114052": "PHY2",
-  "114054": "PHY3",
-  "114071": "PHY1",
-  "114075": "PHY2",
-  "125001": "GCH1",
-  "234128": "IPY1",
-  "314533": "IMT1",
   "34010": "DYN1",
-  "34013": "SLD1",
+  "034015": "DYN1",
   "34015": "DYN1",
+  "00340015": "DYN1",
+  "00340022": "IME1",
+  "034022": "IME1",
   "34022": "IME1",
+  "00340028": "SLD1",
+  "034028": "SLD1",
   "34028": "SLD1",
+  "034013": "SLD1",
+  "34013": "SLD1",
+  "00340030": "MNF1",
+  "034030": "MNF1",
   "34030": "MNF1",
+  "00340032": "LSY1",
+  "034032": "LSY1",
   "34032": "LSY1",
-  "34033": "FLD1",
+  "00340034": "ELM1",
+  "034034": "ELM1",
   "34034": "ELM1",
+  "00340035": "THE1",
+  "034035": "THE1",
   "34035": "THE1",
+  "00340040": "ICT1",
+  "034040": "ICT1",
   "34040": "ICT1",
+  "00340041": "HTF1",
+  "034041": "HTF1",
   "34041": "HTF1",
+  "00340051": "DVI1",
+  "034051": "DVI1",
   "34051": "DVI1",
+  "00340053": "SLD2",
+  "034053": "SLD2",
   "34053": "SLD2",
+  "00340054": "MDN1",
+  "034054": "MDN1",
   "34054": "MDN1",
+  "00340055": "FLD1",
+  "034055": "FLD1",
   "34055": "FLD1",
+  "034033": "FLD1",
+  "34033": "FLD1",
+  "00340033": "FLD1",
+  "00340056": "NUM1",
+  "034056": "NUM1",
   "34056": "NUM1",
+  "00340057": "LMA1",
+  "034057": "LMA1",
   "34057": "LMA1",
+  "00340058": "PSM1",
+  "034058": "PSM1",
   "34058": "PSM1",
+  "00340371": "PDM1",
+  "034371": "PDM1",
   "34371": "PDM1",
+  "00340401": "LRB1",
+  "034401": "LRB1",
+  "34401": "LRB1",
+  "00350001": "IRB1",
+  "035001": "IRB1",
   "35001": "IRB1",
+  "00350022": "FEM1",
+  "035022": "FEM1",
   "35022": "FEM1",
-  "35041": "MCS1"
+  "00350032": "MCP1",
+  "035032": "MCP1",
+  "35032": "MCP1",
+  "00350041": "MCS1",
+  "035041": "MCS1",
+  "35041": "MCS1",
+  "00350146": "ICE1",
+  "03501460": "ICE1",
+  "035146": "ICE1",
+  "35146": "ICE1",
+  "00360014": "MPL1",
+  "036014": "MPL1",
+  "36014": "MPL1",
+  "00360087": "HDY1",
+  "036087": "HDY1",
+  "36087": "HDY1",
+  "00380800": "MCS2",
+  "038800": "MCS2",
+  "38800": "MCS2",
+  "01040016": "ALG1",
+  "104016": "ALG1",
+  "01040065": "ALG1",
+  "104065": "ALG1",
+  "01040041": "CAL1",
+  "104041": "CAL1",
+  "01040043": "CAL2",
+  "104043": "CAL2",
+  "01040131": "DEQ1",
+  "104131": "DEQ1",
+  "01040228": "PDE1",
+  "104228": "PDE1",
+  "01140032": "LPH1",
+  "114032": "LPH1",
+  "01140051": "PHY1",
+  "114051": "PHY1",
+  "01140071": "PHY1",
+  "114071": "PHY1",
+  "01140052": "PHY2",
+  "114052": "PHY2",
+  "01140075": "PHY2",
+  "114075": "PHY2",
+  "01140054": "PHY3",
+  "114054": "PHY3",
+  "01250001": "GCH1",
+  "125001": "GCH1",
+  "02340128": "IPY1",
+  "234128": "IPY1",
+  "03140533": "IMT1",
+  "3140533": "IMT1",
+  "0314533": "IMT1",
+  "314533": "IMT1"
 };
+
 
 
     const PANGEA_CONCEPTS_INDEX = [
@@ -5920,7 +6081,7 @@
         "courseTitle": "תנודות (034051)",
         "formula": "\\omega_n = \\sqrt{\\frac{k}{m}}, \\quad \\zeta = \\frac{c}{c_c} = \\frac{c}{2 m \\omega_n}, \\quad \\omega_d = \\omega_n \\sqrt{1 - \\zeta^2}",
         "description": "פרמטרי היסוד של מתנד הרמוני בעל דרגת חופש אחת: תדירות התנודה הטבעית ללא ריסון והיחס בין השיכוך הקיים לשיכוך הקריטי.",
-        "url": "https://idofangbentov.uk/Technion/DVI1/DVI1_001-מבוא",
+        "url": "https://idofangbentov.uk/Technion/DVI1/DVI1_001-מושגי-יסוד-ומכניקת-לגראנז%27",
         "lectureName": "DVI1_001-מבוא"
     },
     {
@@ -5941,7 +6102,7 @@
         "courseTitle": "תנודות (034051)",
         "formula": "DMF = \\frac{1}{\\sqrt{(1-r^2)^2 + (2\\zeta r)^2}}, \\quad r = \\frac{\\omega}{\\omega_n}",
         "description": "היחס בין משרעת התנודה במצב מתמיד להעתק הסטטי. כאשר תדר העירור קרוב לתדירות העצמית (r=1), משרעת התנודה מגיעה לשיא קיצוני ומסוכן.",
-        "url": "https://idofangbentov.uk/Technion/DVI1/DVI1_004-תנודות-מאולצות",
+        "url": "https://idofangbentov.uk/Technion/DVI1/DVI1_003-עירורים-הרמוניים",
         "lectureName": "DVI1_004-תנודות-מאולצות"
     },
     {
@@ -5961,7 +6122,7 @@
         "courseTitle": "אנליזה נומרית (034056)",
         "formula": "x_{n+1} = x_n - \\frac{f(x_n)}{f'(x_n)}",
         "description": "אלגוריתם איטרטיבי בעל התכנסות ריבועית למציאת אפסים של משוואה f(x)=0 באמצעות קירוב המשיק בכל שלב.",
-        "url": "https://idofangbentov.uk/Technion/NUM1/NUM1_002-מציאת-שורשים",
+        "url": "https://idofangbentov.uk/Technion/NUM1/NUM1_005-משוואות-לא-לינאריות-במשתנה-אחד",
         "lectureName": "NUM1_002-מציאת-שורשים"
     },
     {
@@ -5981,8 +6142,177 @@
         "courseTitle": "אנליזה נומרית (034056)",
         "formula": "y_{n+1} = y_n + \\frac{h}{6}(k_1 + 2k_2 + 2k_3 + k_4)",
         "description": "שיטת הקירוב הנומרית המובילה לפתרון משוואות דיפרנציאליות רגילות. מספקת דיוק מסדר O(h^4) תוך שקלול 4 שיפועים בכל פסיעת זמן.",
-        "url": "https://idofangbentov.uk/Technion/NUM1/NUM1_007-פתרון-נומרי-של-מדר",
+        "url": "https://idofangbentov.uk/Technion/NUM1/NUM1_011-שיטות-נומריות-לפתרון-משוואות-דיפרנציאליות",
         "lectureName": "NUM1_007-פתרון-נומרי-של-מדר"
+    },
+    {
+        "id": "pde-wave-dalembert",
+        "name": "משוואת הגלים החד-ממדית ונוסחת ד'אלמבר",
+        "enName": "1D Wave Equation & D'Alembert's Formula",
+        "aliases": [
+            "משוואת הגלים",
+            "דאלמבר",
+            "ד'אלמבר",
+            "גלים",
+            "wave equation",
+            "dalembert"
+        ],
+        "category": "formula",
+        "categoryLabel": "🔢 נוסחה יסודית",
+        "courseTag": "PDE1",
+        "courseTitle": "מד״ח מ׳ (104228)",
+        "formula": "u_{tt} - c^2 u_{xx} = 0 \\implies u(x,t) = \\frac{f(x-ct)+f(x+ct)}{2} + \\frac{1}{2c}\\int_{x-ct}^{x+ct} g(s)\\,ds",
+        "description": "הפתרון האנליטי המלא למשוואת הגלים ההיפרבולית במישור אינסופי עבור תנאי התחלה u(x,0)=f(x) ו-u_t(x,0)=g(x).",
+        "url": "https://idofangbentov.uk/Technion/PDE1/PDE1_004-משוואת-הגלים",
+        "lectureName": "PDE1_004-משוואת-הגלים"
+    },
+    {
+        "id": "pde-sturm-liouville",
+        "name": "בעיית שטורם-ליוביל (ערכים עצמיים ואורתוגונליות)",
+        "enName": "Sturm-Liouville Problem",
+        "aliases": [
+            "שטורם ליוביל",
+            "שטורם-ליוביל",
+            "ערכים עצמיים מדח",
+            "אורתוגונליות",
+            "sturm liouville"
+        ],
+        "category": "theorem",
+        "categoryLabel": "📐 משפט מרכזי",
+        "courseTag": "PDE1",
+        "courseTitle": "מד״ח מ׳ (104228)",
+        "formula": "\\frac{d}{dx}\\left(p(x)y'\\right) - q(x)y + \\lambda w(x)y = 0 \\implies \\langle y_n, y_m \\rangle_w = 0 \\; (n \\neq m)",
+        "description": "תשתית הפרדת המשתנים במד״ח: פונקציות עצמיות של בעיית שטורם-ליוביל רגולרית הן אורתוגונליות ביחס למשקל w(x) ופורשות כל פונקציה חלקה למקוטעין.",
+        "url": "https://idofangbentov.uk/Technion/PDE1/PDE1_005-בעיית-שטורם-ליוביל",
+        "lectureName": "PDE1_005-בעיית-שטורם-ליוביל"
+    },
+    {
+        "id": "pde-heat-separation-of-variables",
+        "name": "משוואת החום ושיטת הפרדת המשתנים",
+        "enName": "Heat Equation & Separation of Variables",
+        "aliases": [
+            "משוואת החום",
+            "הפרדת משתנים",
+            "טור פורייה מדח",
+            "heat equation",
+            "separation of variables"
+        ],
+        "category": "method",
+        "categoryLabel": "🛠️ שיטת חישוב",
+        "courseTag": "PDE1",
+        "courseTitle": "מד״ח מ׳ (104228)",
+        "formula": "u_t - k u_{xx} = 0, \\quad u(x,t) = \\sum_{n=1}^{\\infty} b_n e^{-k\\left(\\frac{n\\pi}{L}\\right)^2 t} \\sin\\left(\\frac{n\\pi x}{L}\\right)",
+        "description": "פתרון משוואת החום ההומוגנית במוט באורך L עם תנאי שפה הומוגניים על ידי פירוק לבעיה זמנית ואופרטור שטורם-ליוביל.",
+        "url": "https://idofangbentov.uk/Technion/PDE1/PDE1_006-שיטת-הפרדת-משתנים",
+        "lectureName": "PDE1_006-שיטת-הפרדת-משתנים"
+    },
+    {
+        "id": "pde-laplace-harmonic",
+        "name": "משוואת לפלס ופונקציות הרמוניות",
+        "enName": "Laplace Equation & Harmonic Functions",
+        "aliases": [
+            "משוואת לפלס",
+            "לפלסיאן",
+            "עקרון המקסימום",
+            "דיריכלה",
+            "laplace equation",
+            "harmonic"
+        ],
+        "category": "theorem",
+        "categoryLabel": "📐 משפט מרכזי",
+        "courseTag": "PDE1",
+        "courseTitle": "מד״ח מ׳ (104228)",
+        "formula": "\\Delta u = u_{xx} + u_{yy} = 0, \\quad u(r,\\theta) = \\frac{a_0}{2} + \\sum_{n=1}^{\\infty} r^n (a_n \\cos n\\theta + b_n \\sin n\\theta)",
+        "description": "תיאור מצב מתמיד של פוטנציאל או טמפרטורה בתחום סגור (דיסק/מלבן) המקיים את תכונת הממוצע ועקרון המקסימום.",
+        "url": "https://idofangbentov.uk/Technion/PDE1/PDE1_007-משוואת-לפלס",
+        "lectureName": "PDE1_007-משוואת-לפלס"
+    },
+    {
+        "id": "phy2-gauss-law-electrostatics",
+        "name": "חוק גאוס לאלקטרוסטטיקה והפוטנציאל החשמלי",
+        "enName": "Electric Flux & Electrostatic Potential Law",
+        "aliases": [
+            "חוק גאוס",
+            "שטף חשמלי",
+            "שדה חשמלי",
+            "פוטנציאל חשמלי",
+            "קולון",
+            "electric flux"
+        ],
+        "category": "law",
+        "categoryLabel": "⚡ חוק פיזיקלי",
+        "courseTag": "PHY2",
+        "courseTitle": "פיזיקה 2 (114052)",
+        "formula": "\\oint_S \\mathbf{E} \\cdot d\\mathbf{A} = \\frac{Q_{\\text{enc}}}{\\varepsilon_0}, \\quad V(B)-V(A) = -\\int_A^B \\mathbf{E}\\cdot d\\mathbf{l}",
+        "description": "השטף החשמלי העובר דרך מעטפת סגורה נקבע רק על ידי המטען הכלוא בתוכה, ומאפשר חישוב שדה סימטרי בקלות.",
+        "url": "https://idofangbentov.uk/Technion/PHY2/PHY2_002-אלקטרוסטטיקה---שטף-חשמלי,-חוק-גאוס-ופוטנציאל-חשמלי",
+        "lectureName": "PHY2_002-אלקטרוסטטיקה---שטף-חשמלי,-חוק-גאוס-ופוטנציאל-חשמלי"
+    },
+    {
+        "id": "phy2-capacitors-electrostatic-energy",
+        "name": "קבלים ואנרגיה אלקטרוסטטית",
+        "enName": "Capacitance & Electrostatic Energy Density",
+        "aliases": [
+            "קבל",
+            "קיבול",
+            "אנרגיה אלקטרוסטטית",
+            "קבל לוחות",
+            "דיאלקטרי",
+            "capacitance"
+        ],
+        "category": "formula",
+        "categoryLabel": "🔢 נוסחה יסודית",
+        "courseTag": "PHY2",
+        "courseTitle": "פיזיקה 2 (114052)",
+        "formula": "C = \\frac{Q}{V}, \\quad U_E = \\frac{1}{2}CV^2 = \\int \\frac{1}{2}\\varepsilon_0 E^2\\,dV",
+        "description": "קשר הקיבול של מוליכים טעונים ואנרגיית השדה האלקטרוסטטי האצורה בנפח שבין הלוחות.",
+        "url": "https://idofangbentov.uk/Technion/PHY2/PHY2_003-אלקטרוסטטיקה---מוליכים,-אנרגיה-אלקטרוסטטית,-קבלים",
+        "lectureName": "PHY2_003-אלקטרוסטטיקה---מוליכים,-אנרגיה-אלקטרוסטטית,-קבלים"
+    },
+    {
+        "id": "phy2-ampere-biot-savart",
+        "name": "חוק ביו-סבר וחוק אמפר (מגנטוסטטיקה)",
+        "enName": "Biot-Savart Law & Ampere's Law",
+        "aliases": [
+            "חוק אמפר",
+            "ביו סבר",
+            "שדה מגנטי",
+            "סולנואיד",
+            "כוח לורנץ",
+            "ampere",
+            "biot savart"
+        ],
+        "category": "law",
+        "categoryLabel": "⚡ חוק פיזיקלי",
+        "courseTag": "PHY2",
+        "courseTitle": "פיזיקה 2 (114052)",
+        "formula": "\\oint \\mathbf{B} \\cdot d\\mathbf{l} = \\mu_0 I_{\\text{enc}}, \\quad \\mathbf{F} = q(\\mathbf{E} + \\mathbf{v} \\times \\mathbf{B})",
+        "description": "חישוב שדה מגנטי B מזרמים יציבים (תיל אינסופי, סולנואיד, טורואיד) וכוח לורנץ על מטענים נעים.",
+        "url": "https://idofangbentov.uk/Technion/PHY2/PHY2_005-מגנטיות",
+        "lectureName": "PHY2_005-מגנטיות"
+    },
+    {
+        "id": "phy2-faraday-induction",
+        "name": "חוק פאראדיי-לנץ להשראה אלקטרומגנטית",
+        "enName": "Faraday's Law of Induction & Lenz's Law",
+        "aliases": [
+            "חוק פאראדיי",
+            "פאראדיי",
+            "לנץ",
+            "כאמ מושרה",
+            "השראות",
+            "מקסוול",
+            "faraday",
+            "lenz"
+        ],
+        "category": "law",
+        "categoryLabel": "⚡ חוק פיזיקלי",
+        "courseTag": "PHY2",
+        "courseTitle": "פיזיקה 2 (114052)",
+        "formula": "\\mathcal{E} = -\\frac{d\\Phi_B}{dt} = -\\frac{d}{dt}\\iint_S \\mathbf{B} \\cdot d\\mathbf{A}",
+        "description": "שינוי בשטף המגנטי בזמן משרה שדה חשמלי לא-משמר וכא״מ המתנגד לשינוי השטף שיצר אותו.",
+        "url": "https://idofangbentov.uk/Technion/PHY2/PHY2_006-דינמיקה-מגנטית",
+        "lectureName": "PHY2_006-דינמיקה-מגנטית"
     }
 ];
     const PangeaHub = {
@@ -6147,9 +6477,64 @@
                         });
                     }
                 });
+
+                // Match in projects
+                (course.projects || []).forEach(p => {
+                    if (p.name.toLowerCase().includes(q) || (p.displayTitle && p.displayTitle.toLowerCase().includes(q))) {
+                        results.push({
+                            type: 'project',
+                            categoryLabel: '🛠️ פרויקט ועבודה',
+                            courseTag: tag,
+                            courseTitle: course.hebrewName || course.title,
+                            title: p.displayTitle || p.name,
+                            url: p.url,
+                            slug: p.slug
+                        });
+                    }
+                });
+
+                // Match in labs, appendixes & formula tables
+                (course.other || []).forEach(o => {
+                    if (o.name.toLowerCase().includes(q) || (o.displayTitle && o.displayTitle.toLowerCase().includes(q))) {
+                        results.push({
+                            type: 'other',
+                            categoryLabel: '📑 נספח / מעבדה',
+                            courseTag: tag,
+                            courseTitle: course.hebrewName || course.title,
+                            title: o.displayTitle || o.name,
+                            url: o.url,
+                            slug: o.slug
+                        });
+                    }
+                });
             });
 
             return [...conceptMatches, ...results].slice(0, 35); // Prioritize concept matches + catalog
+        },
+
+        _escAttrJs: function(str) {
+            return String(str || '')
+                .replace(/\\/g, '\\\\')
+                .replace(/'/g, "\\'")
+                .replace(/"/g, '&quot;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;');
+        },
+
+        _escHtml: function(str) {
+            return String(str || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        },
+
+        _renderResourceChip: function(item, extraClass) {
+            const safeUrl = this._escAttrJs(item.url);
+            const safeTitleAttr = this._escAttrJs(item.displayTitle || item.name);
+            const safeText = this._escHtml(item.displayTitle || item.name);
+            return `<button type="button" class="pangea-resource-chip ${extraClass}" onclick="window.PangeaHub.openQuickPeek('${safeUrl}', '${safeTitleAttr}', '${safeUrl}')"><span>${safeText}</span></button>`;
         },
 
         /**
@@ -6172,13 +6557,6 @@
             try {
                 targetExternalUrl = encodeURI(decodeURI(targetExternalUrl));
             } catch (e) {}
-            const modal = document.getElementById('pangea-reader-modal');
-            const iframe = document.getElementById('pangea-reader-iframe');
-            const titleEl = document.getElementById('pangea-reader-title');
-            const extBtn = document.getElementById('pangea-reader-ext-btn');
-            const fallbackCard = document.getElementById('pangea-reader-fallback');
-            const fallbackBtn = document.getElementById('pangea-fallback-btn');
-            const loadingEl = document.getElementById('pangea-reader-loading');
 
             const handleExtClick = function() {
                 if (window.SemesteroWidgetBridge && typeof window.SemesteroWidgetBridge.openExternalUrl === 'function') {
@@ -6190,17 +6568,27 @@
                 }
             };
 
+            // GitHub blocks iframe embedding (X-Frame-Options: DENY); dispatch directly to browser
+            if (cleanUrl.includes('github.com/')) {
+                handleExtClick();
+                return;
+            }
+
+            const modal = document.getElementById('pangea-reader-modal');
+            const iframe = document.getElementById('pangea-reader-iframe');
+            const titleEl = document.getElementById('pangea-reader-title');
+            const extBtn = document.getElementById('pangea-reader-ext-btn');
+            const fallbackCard = document.getElementById('pangea-reader-fallback');
+            const fallbackBtn = document.getElementById('pangea-fallback-btn');
+            const loadingEl = document.getElementById('pangea-reader-loading');
+
             if (!modal) {
                 handleExtClick();
                 return;
             }
 
             // Guarantee foreground layering by moving to document.body root
-            if (modal.parentElement !== document.body) {
-                document.body.appendChild(modal);
-            } else {
-                document.body.appendChild(modal);
-            }
+            document.body.appendChild(modal);
             modal.style.zIndex = '2000000';
 
             if (titleEl) titleEl.innerText = title || 'סיכומי פנגייה (Ido Fang Bentov)';
@@ -6258,11 +6646,7 @@
             const modal = document.getElementById('pangea-search-modal');
             const input = document.getElementById('pangea-global-search-input');
             if (!modal) return;
-            if (modal.parentElement !== document.body) {
-                document.body.appendChild(modal);
-            } else {
-                document.body.appendChild(modal);
-            }
+            document.body.appendChild(modal);
             modal.style.zIndex = '2000010';
             modal.style.display = 'flex';
             document.body.style.overflow = 'hidden';
@@ -6291,10 +6675,11 @@
         renderGlobalSearchResults: function(query) {
             const container = document.getElementById('pangea-global-search-results');
             if (!container) return;
+            const totalCourses = Object.keys(PANGEA_CATALOG).length;
             if (!query || !query.trim()) {
                 container.innerHTML = `
                     <div style="text-align: center; color: #94a3b8; padding: 30px 10px; font-size: 0.85rem;">
-                        <span>💡 הקלד מושג, משפט או נושא (למשל: <em>שטיינר</em>, <em>ברנולי</em>, <em>מור</em>, <em>פון מיזס</em>, <em>לפלס</em>, <em>קרנו</em>, <em>2024</em>) לחיפוש מיידי ב-38 קורסי הטכניון בפנגייה.</span>
+                        <span>💡 הקלד מושג, משפט או נושא (למשל: <em>שטיינר</em>, <em>ברנולי</em>, <em>מור</em>, <em>פון מיזס</em>, <em>שטורם-ליוביל</em>, <em>גאוס</em>, <em>2024</em>) לחיפוש מיידי ב-${totalCourses} קורסי הטכניון בפנגייה (<code style="color:#7dd3fc;">technion_second_brain</code>).</span>
                     </div>
                 `;
                 return;
@@ -6304,7 +6689,7 @@
             if (results.length === 0) {
                 container.innerHTML = `
                     <div style="text-align: center; color: #94a3b8; padding: 25px 10px;">
-                        <p style="font-size: 0.88rem; margin-bottom: 12px;">לא נמצאו תוצאות ישירות בפנגייה עבור <strong>"${query}"</strong></p>
+                        <p style="font-size: 0.88rem; margin-bottom: 12px;">לא נמצאו תוצאות ישירות בפנגייה עבור <strong>"${this._escHtml(query)}"</strong></p>
                         <a href="https://idofangbentov.uk/?q=${encodeURIComponent(query)}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline" style="border-color: #38bdf8; color: #38bdf8; text-decoration: none;">
                             🌐 חפש באתר הראשי של פנגייה ↗
                         </a>
@@ -6314,27 +6699,28 @@
             }
 
             container.innerHTML = results.map(r => {
-                const safeTitle = (r.title || '').replace(/'/g, "\\'");
+                const safeTitleAttr = this._escAttrJs(r.title);
+                const safeUrlAttr = this._escAttrJs(r.url);
                 if (r.type === 'concept') {
                     return `
-                        <div class="pangea-search-result-card pangea-concept-card" onclick="window.PangeaHub.openQuickPeek('${r.url}', '${safeTitle}', '${r.url}')" style="border: 1px solid rgba(56, 189, 248, 0.45); background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.85)); box-shadow: 0 4px 15px rgba(0,0,0,0.3); border-right: 4px solid #38bdf8; margin-bottom: 8px; padding: 12px 14px; border-radius: 8px; cursor: pointer; transition: all 0.2s;">
+                        <div class="pangea-search-result-card pangea-concept-card" onclick="window.PangeaHub.openQuickPeek('${safeUrlAttr}', '${safeTitleAttr}', '${safeUrlAttr}')" style="border: 1px solid rgba(56, 189, 248, 0.45); background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.85)); box-shadow: 0 4px 15px rgba(0,0,0,0.3); border-right: 4px solid #38bdf8; margin-bottom: 8px; padding: 12px 14px; border-radius: 8px; cursor: pointer; transition: all 0.2s;">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 4px;">
                                 <div style="display: flex; align-items: center; gap: 6px;">
-                                    <span class="pangea-result-badge" style="background: rgba(14, 165, 233, 0.2); color: #38bdf8; font-weight: 700; border: 1px solid rgba(56, 189, 248, 0.35); padding: 2px 7px; border-radius: 4px; font-size: 0.72rem;">${r.categoryLabel}</span>
-                                    <span style="font-size: 0.74rem; color: #94a3b8; font-style: italic;">${r.enName || ''}</span>
+                                    <span class="pangea-result-badge" style="background: rgba(14, 165, 233, 0.2); color: #38bdf8; font-weight: 700; border: 1px solid rgba(56, 189, 248, 0.35); padding: 2px 7px; border-radius: 4px; font-size: 0.72rem;">${this._escHtml(r.categoryLabel)}</span>
+                                    <span style="font-size: 0.74rem; color: #94a3b8; font-style: italic;">${this._escHtml(r.enName || '')}</span>
                                 </div>
-                                <span class="pangea-result-course" style="color: #a78bfa; font-weight: 600; font-size: 0.75rem;">${r.courseTitle}</span>
+                                <span class="pangea-result-course" style="color: #a78bfa; font-weight: 600; font-size: 0.75rem;">${this._escHtml(r.courseTitle)}</span>
                             </div>
                             <div class="pangea-result-title" style="font-size: 0.95rem; font-weight: 700; color: #f8fafc; margin-bottom: 6px;">
-                                ${r.title}
+                                ${this._escHtml(r.title)}
                             </div>
                             ${r.formula ? `
                                 <div class="pangea-concept-formula" style="background: rgba(2, 6, 23, 0.85); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 6px; padding: 6px 10px; font-family: 'JetBrains Mono', Consolas, monospace; font-size: 0.82rem; color: #38bdf8; direction: ltr; text-align: left; margin-bottom: 6px; overflow-x: auto;">
-                                    <code>${r.formula}</code>
+                                    <code>${this._escHtml(r.formula)}</code>
                                 </div>
                             ` : ''}
                             <div class="pangea-concept-desc" style="font-size: 0.8rem; color: #cbd5e1; line-height: 1.45; margin-bottom: 6px;">
-                                ${r.description}
+                                ${this._escHtml(r.description)}
                             </div>
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 6px; font-size: 0.72rem; color: #64748b;">
                                 <span>📖 לחץ לצפייה בסיכום המלא בפנגייה</span>
@@ -6345,12 +6731,12 @@
                 }
 
                 return `
-                    <div class="pangea-search-result-card" onclick="window.PangeaHub.openQuickPeek('${r.url}', '${safeTitle}', '${r.url}')">
+                    <div class="pangea-search-result-card" onclick="window.PangeaHub.openQuickPeek('${safeUrlAttr}', '${safeTitleAttr}', '${safeUrlAttr}')">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                            <span class="pangea-result-badge">${r.categoryLabel}</span>
-                            <span class="pangea-result-course">${r.courseTitle}</span>
+                            <span class="pangea-result-badge">${this._escHtml(r.categoryLabel)}</span>
+                            <span class="pangea-result-course">${this._escHtml(r.courseTitle)}</span>
                         </div>
-                        <div class="pangea-result-title">${r.title}</div>
+                        <div class="pangea-result-title">${this._escHtml(r.title)}</div>
                     </div>
                 `;
             }).join('');
@@ -6365,9 +6751,8 @@
             const cleanCode = String(courseCode).replace(/^0+/, '');
 
             if (!cData) {
-                // Course without a dedicated Pangea hub
                 containerEl.innerHTML = `
-                    <div class="pangea-course-hub-empty" style="margin-top: 14px; padding: 12px 14px; background: rgba(14, 165, 233, 0.08); border: 1px dashed rgba(56, 189, 248, 0.3); border-radius: 8px; display: flex; align-items: center; justify-content: space-between;">
+                    <div class="pangea-course-hub-empty" style="margin-top: 14px; padding: 12px 14px; background: rgba(14, 165, 233, 0.08); border: 1px dashed rgba(56, 189, 248, 0.3); border-radius: 8px; display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap;">
                         <div style="display: flex; align-items: center; gap: 8px;">
                             <img src="pangea_icon.png" alt="Pangea" width="20" height="20" style="object-fit: contain;">
                             <span style="font-size: 0.82rem; color: #cbd5e1;">חפש סיכומים לקורס זה בפנגייה:</span>
@@ -6383,6 +6768,10 @@
             const lectures = cData.lectures || [];
             const homework = cData.homework || [];
             const exams = cData.exams || [];
+            const projects = cData.projects || [];
+            const other = cData.other || [];
+            const courseConcepts = (this.concepts || PANGEA_CONCEPTS_INDEX || []).filter(c => c.courseTag === cData.course_tag);
+            const repoUrl = cData.githubUrl || `https://github.com/NuclearGandhi/technion_second_brain/tree/master/Technion/${cData.course_tag}`;
 
             const facultyDriveUrl = (typeof window !== 'undefined' && typeof window.getFacultyDriveCourseUrl === 'function')
                 ? window.getFacultyDriveCourseUrl(cleanCode)
@@ -6399,15 +6788,28 @@
                             <span class="pangea-chip-badge" style="background: rgba(14, 165, 233, 0.2); color: #7dd3fc; border: 1px solid rgba(56, 189, 248, 0.3); font-size: 0.72rem; padding: 2px 7px; border-radius: 6px; font-weight: 600;">📚 ${lectures.length} פרקים</span>
                             <span class="pangea-chip-badge" style="background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); font-size: 0.72rem; padding: 2px 7px; border-radius: 6px; font-weight: 600;">📝 ${homework.length} תרגילי בית</span>
                             <span class="pangea-chip-badge" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); font-size: 0.72rem; padding: 2px 7px; border-radius: 6px; font-weight: 600;">🎓 ${exams.length} מבחנים</span>
+                            ${projects.length > 0 ? `<span class="pangea-chip-badge" style="background: rgba(168, 85, 247, 0.2); color: #d8b4fe; border: 1px solid rgba(168, 85, 247, 0.35); font-size: 0.72rem; padding: 2px 7px; border-radius: 6px; font-weight: 600;">🛠️ ${projects.length} פרויקטים</span>` : ''}
+                            ${other.length > 0 ? `<span class="pangea-chip-badge" style="background: rgba(20, 184, 166, 0.2); color: #5eead4; border: 1px solid rgba(20, 184, 166, 0.35); font-size: 0.72rem; padding: 2px 7px; border-radius: 6px; font-weight: 600;">📑 ${other.length} נספחים</span>` : ''}
                         </div>
                     </div>
 
                     <!-- In-Course Search Input -->
                     <div style="margin-bottom: 12px;">
-                        <input type="text" id="pangea-filter-input-${cleanCode}" class="pangea-filter-input" placeholder="🔍 סנן פרקים, תרגילי בית או מבחנים..." oninput="window.PangeaHub.filterCourseHub('${cleanCode}', this.value)" style="width: 100%; box-sizing: border-box; background: rgba(11, 15, 25, 0.85); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 6px; padding: 7px 10px; color: #fff; font-size: 0.82rem;">
+                        <input type="text" id="pangea-filter-input-${cleanCode}" class="pangea-filter-input" placeholder="🔍 סנן פרקים, תרגילי בית, מבחנים, נספחים או נוסחאות..." oninput="window.PangeaHub.filterCourseHub('${cleanCode}', this.value)" style="width: 100%; box-sizing: border-box; background: rgba(11, 15, 25, 0.85); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 6px; padding: 7px 10px; color: #fff; font-size: 0.82rem;">
                     </div>
 
                     <div id="pangea-course-content-${cleanCode}">
+                        ${courseConcepts.length > 0 ? `
+                            <div class="pangea-hub-subsection" style="margin-bottom: 12px;">
+                                <div style="font-size: 0.82rem; font-weight: 700; color: #38bdf8; margin-bottom: 6px; display: flex; align-items: center; gap: 5px;">
+                                    <span>💡 מושגי מפתח ונוסחאות (${courseConcepts.length}):</span>
+                                </div>
+                                <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                                    ${courseConcepts.map(c => this._renderResourceChip({ url: c.url, displayTitle: c.name }, 'pangea-lecture-chip')).join('')}
+                                </div>
+                            </div>
+                        ` : ''}
+
                         <!-- Homework Section -->
                         ${homework.length > 0 ? `
                             <div class="pangea-hub-subsection" style="margin-bottom: 12px;">
@@ -6415,11 +6817,7 @@
                                     <span>📝 תרגילי בית פתורים (${homework.length}):</span>
                                 </div>
                                 <div style="display: flex; gap: 6px; flex-wrap: wrap;">
-                                    ${homework.map(h => `
-                                        <button type="button" class="pangea-resource-chip pangea-hw-chip" onclick="window.PangeaHub.openQuickPeek('${h.url}', '${h.displayTitle}', '${h.url}')">
-                                            <span>${h.displayTitle}</span>
-                                        </button>
-                                    `).join('')}
+                                    ${homework.map(h => this._renderResourceChip(h, 'pangea-hw-chip')).join('')}
                                 </div>
                             </div>
                         ` : ''}
@@ -6453,11 +6851,31 @@
                                     <span>🎓 מאגר מבחנים פתורים (${exams.length}):</span>
                                 </div>
                                 <div style="display: flex; gap: 6px; flex-wrap: wrap;">
-                                    ${exams.map(e => `
-                                        <button type="button" class="pangea-resource-chip pangea-exam-chip" onclick="window.PangeaHub.openQuickPeek('${e.url}', '${e.displayTitle}', '${e.url}')">
-                                            <span>${e.displayTitle}</span>
-                                        </button>
-                                    `).join('')}
+                                    ${exams.map(e => this._renderResourceChip(e, 'pangea-exam-chip')).join('')}
+                                </div>
+                            </div>
+                        ` : ''}
+
+                        <!-- Projects Section -->
+                        ${projects.length > 0 ? `
+                            <div class="pangea-hub-subsection" style="margin-bottom: 12px;">
+                                <div style="font-size: 0.82rem; font-weight: 700; color: #d8b4fe; margin-bottom: 6px; display: flex; align-items: center; gap: 5px;">
+                                    <span>🛠️ פרויקטים ועבודות (${projects.length}):</span>
+                                </div>
+                                <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                                    ${projects.map(p => this._renderResourceChip(p, 'pangea-project-chip')).join('')}
+                                </div>
+                            </div>
+                        ` : ''}
+
+                        <!-- Appendix Tables & Labs Section -->
+                        ${other.length > 0 ? `
+                            <div class="pangea-hub-subsection" style="margin-bottom: 12px;">
+                                <div style="font-size: 0.82rem; font-weight: 700; color: #5eead4; margin-bottom: 6px; display: flex; align-items: center; gap: 5px;">
+                                    <span>📑 טבלאות נוסחאות, נספחים ומעבדות (${other.length}):</span>
+                                </div>
+                                <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                                    ${other.map(o => this._renderResourceChip(o, 'pangea-other-chip')).join('')}
                                 </div>
                             </div>
                         ` : ''}
@@ -6469,22 +6887,28 @@
                                     <span>📚 פרקי הרצאה וסיכומים (${lectures.length}):</span>
                                 </div>
                                 <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 6px; max-height: 180px; overflow-y: auto; padding-left: 4px;">
-                                    ${lectures.map(l => `
-                                        <button type="button" class="pangea-resource-chip pangea-lecture-chip" onclick="window.PangeaHub.openQuickPeek('${l.url}', '${l.displayTitle}', '${l.url}')" style="text-align: right; justify-content: flex-start;">
-                                            <span>${l.displayTitle}</span>
-                                        </button>
-                                    `).join('')}
+                                    ${lectures.map(l => {
+                                        const safeUrl = this._escAttrJs(l.url);
+                                        const safeTitleAttr = this._escAttrJs(l.displayTitle || l.name);
+                                        const safeText = this._escHtml(l.displayTitle || l.name);
+                                        return `<button type="button" class="pangea-resource-chip pangea-lecture-chip" onclick="window.PangeaHub.openQuickPeek('${safeUrl}', '${safeTitleAttr}', '${safeUrl}')" style="text-align: right; justify-content: flex-start;"><span>${safeText}</span></button>`;
+                                    }).join('')}
                                 </div>
                             </div>
                         ` : ''}
                     </div>
 
                     <!-- Footer Link -->
-                    <div style="margin-top: 10px; border-top: 1px solid rgba(255, 255, 255, 0.08); padding-top: 8px; display: flex; justify-content: space-between; align-items: center;">
-                        <span style="font-size: 0.74rem; color: #94a3b8;">צפייה מהירה בתוך המערכת • נגיש גם אופליין</span>
-                        <a href="${cData.url}" target="_blank" rel="noopener noreferrer" style="font-size: 0.76rem; color: #38bdf8; text-decoration: underline; font-weight: 600;">
-                            פתח קורס שלם בפנגייה ↗
-                        </a>
+                    <div style="margin-top: 10px; border-top: 1px solid rgba(255, 255, 255, 0.08); padding-top: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                        <span style="font-size: 0.74rem; color: #94a3b8;">צפייה מהירה בתוך המערכת • סונכרן מול technion_second_brain</span>
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <a href="${repoUrl}" target="_blank" rel="noopener noreferrer" style="font-size: 0.74rem; color: #a78bfa; text-decoration: underline; font-weight: 600;">
+                                מאגר Obsidian (GitHub) ↗
+                            </a>
+                            <a href="${cData.url}" target="_blank" rel="noopener noreferrer" style="font-size: 0.76rem; color: #38bdf8; text-decoration: underline; font-weight: 600;">
+                                פתח קורס שלם בפנגייה ↗
+                            </a>
+                        </div>
                     </div>
                 </div>
             `;
@@ -6508,28 +6932,55 @@
             const matchedL = (cData.lectures || []).filter(l => l.name.toLowerCase().includes(q) || (l.displayTitle && l.displayTitle.toLowerCase().includes(q)));
             const matchedH = (cData.homework || []).filter(h => h.name.toLowerCase().includes(q) || (h.displayTitle && h.displayTitle.toLowerCase().includes(q)));
             const matchedE = (cData.exams || []).filter(e => e.name.toLowerCase().includes(q) || (e.displayTitle && e.displayTitle.toLowerCase().includes(q)));
+            const matchedP = (cData.projects || []).filter(p => p.name.toLowerCase().includes(q) || (p.displayTitle && p.displayTitle.toLowerCase().includes(q)));
+            const matchedO = (cData.other || []).filter(o => o.name.toLowerCase().includes(q) || (o.displayTitle && o.displayTitle.toLowerCase().includes(q)));
+            const matchedC = (this.concepts || PANGEA_CONCEPTS_INDEX || []).filter(c =>
+                c.courseTag === cData.course_tag && (
+                    (c.name && c.name.toLowerCase().includes(q)) ||
+                    (c.enName && c.enName.toLowerCase().includes(q)) ||
+                    (Array.isArray(c.aliases) && c.aliases.some(a => a.toLowerCase().includes(q)))
+                )
+            );
 
             contentEl.innerHTML = `
                 <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 6px;">
+                    ${matchedC.length > 0 ? `
+                        <div style="font-size: 0.8rem; font-weight: 700; color: #38bdf8;">💡 מושגי מפתח תואמים (${matchedC.length}):</div>
+                        <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                            ${matchedC.map(c => this._renderResourceChip({ url: c.url, displayTitle: c.name }, 'pangea-lecture-chip')).join('')}
+                        </div>
+                    ` : ''}
                     ${matchedH.length > 0 ? `
                         <div style="font-size: 0.8rem; font-weight: 700; color: #34d399;">📝 תרגילי בית תואמים (${matchedH.length}):</div>
                         <div style="display: flex; gap: 6px; flex-wrap: wrap;">
-                            ${matchedH.map(h => `<button type="button" class="pangea-resource-chip pangea-hw-chip" onclick="window.PangeaHub.openQuickPeek('${h.url}', '${h.displayTitle}', '${h.url}')"><span>${h.displayTitle}</span></button>`).join('')}
+                            ${matchedH.map(h => this._renderResourceChip(h, 'pangea-hw-chip')).join('')}
                         </div>
                     ` : ''}
                     ${matchedE.length > 0 ? `
                         <div style="font-size: 0.8rem; font-weight: 700; color: #fbbf24;">🎓 מבחנים תואמים (${matchedE.length}):</div>
                         <div style="display: flex; gap: 6px; flex-wrap: wrap;">
-                            ${matchedE.map(e => `<button type="button" class="pangea-resource-chip pangea-exam-chip" onclick="window.PangeaHub.openQuickPeek('${e.url}', '${e.displayTitle}', '${e.url}')"><span>${e.displayTitle}</span></button>`).join('')}
+                            ${matchedE.map(e => this._renderResourceChip(e, 'pangea-exam-chip')).join('')}
+                        </div>
+                    ` : ''}
+                    ${matchedP.length > 0 ? `
+                        <div style="font-size: 0.8rem; font-weight: 700; color: #d8b4fe;">🛠️ פרויקטים תואמים (${matchedP.length}):</div>
+                        <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                            ${matchedP.map(p => this._renderResourceChip(p, 'pangea-project-chip')).join('')}
+                        </div>
+                    ` : ''}
+                    ${matchedO.length > 0 ? `
+                        <div style="font-size: 0.8rem; font-weight: 700; color: #5eead4;">📑 נספחים וטבלאות תואמים (${matchedO.length}):</div>
+                        <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                            ${matchedO.map(o => this._renderResourceChip(o, 'pangea-other-chip')).join('')}
                         </div>
                     ` : ''}
                     ${matchedL.length > 0 ? `
                         <div style="font-size: 0.8rem; font-weight: 700; color: #7dd3fc;">📚 פרקים תואמים (${matchedL.length}):</div>
                         <div style="display: flex; gap: 6px; flex-wrap: wrap;">
-                            ${matchedL.map(l => `<button type="button" class="pangea-resource-chip pangea-lecture-chip" onclick="window.PangeaHub.openQuickPeek('${l.url}', '${l.displayTitle}', '${l.url}')"><span>${l.displayTitle}</span></button>`).join('')}
+                            ${matchedL.map(l => this._renderResourceChip(l, 'pangea-lecture-chip')).join('')}
                         </div>
                     ` : ''}
-                    ${matchedL.length === 0 && matchedH.length === 0 && matchedE.length === 0 ? `
+                    ${matchedL.length === 0 && matchedH.length === 0 && matchedE.length === 0 && matchedP.length === 0 && matchedO.length === 0 && matchedC.length === 0 ? `
                         <div style="text-align: center; color: #94a3b8; padding: 12px; font-size: 0.82rem;">לא נמצאו פריטים תואמים לחיפוש בקורס זה.</div>
                     ` : ''}
                 </div>

@@ -12465,7 +12465,7 @@ const PANGEA_COURSE_MAP = {
     '00340034': 'https://idofangbentov.uk/Technion/ELM1/ELM1_000-00340034-%D7%94%D7%A0%D7%A2-%D7%97%D7%A9%D7%9E%D7%9C%D7%99',
     '00340035': 'https://idofangbentov.uk/Technion/THE1/THE1_000-034035-%D7%AA%D7%A8%D7%9E%D7%95%D7%93%D7%99%D7%A0%D7%9E%D7%99%D7%A7%D7%94-1',
     '00340040': 'https://idofangbentov.uk/Technion/ICT1/ICT1_000-00340040-%D7%9E%D7%91%D7%95%D7%90-%D7%9C%D7%91%D7%A7%D7%A8%D7%94',
-    '00340041': 'https://idofangbentov.uk/Technion/HTF1/HTF1_000-00340041-%D7%9E%D7%A2%D7%91%D7%A8-%D7%97%D7%95%D7%9E',
+    '00340041': 'https://idofangbentov.uk/Technion/HTF1/HTF1_000-00340041-%D7%9E%D7%A2%D7%91%D7%A8-%D7%97%D7%95%D7%9D',
     '00340051': 'https://idofangbentov.uk/Technion/DVI1/DVI1_000-00340051-%D7%93%D7%99%D7%A0%D7%9E%D7%99%D7%A7%D7%94-%D7%95%D7%AA%D7%A0%D7%95%D7%93%D7%95%D7%AA',
     '00340053': 'https://idofangbentov.uk/Technion/SLD2/SLD2_000-034053-%D7%9E%D7%9B%D7%A0%D7%99%D7%A7%D7%AA-%D7%9E%D7%95%D7%A6%D7%A7%D7%99%D7%9D-2%D7%9E',
     '00340054': 'https://idofangbentov.uk/Technion/MDN1/MDN1_000-00340054-%D7%AA%D7%9B%D7%9F-%D7%9E%D7%9B%D7%A0%D7%99-1%D7%9E',
@@ -12505,7 +12505,7 @@ const PANGEA_COURSE_MAP = {
     '034034': 'https://idofangbentov.uk/Technion/ELM1/ELM1_000-00340034-%D7%94%D7%A0%D7%A2-%D7%97%D7%A9%D7%9E%D7%9C%D7%99',
     '034035': 'https://idofangbentov.uk/Technion/THE1/THE1_000-034035-%D7%AA%D7%A8%D7%9E%D7%95%D7%93%D7%99%D7%A0%D7%9E%D7%99%D7%A7%D7%94-1',
     '034040': 'https://idofangbentov.uk/Technion/ICT1/ICT1_000-00340040-%D7%9E%D7%91%D7%95%D7%90-%D7%9C%D7%91%D7%A7%D7%A8%D7%94',
-    '034041': 'https://idofangbentov.uk/Technion/HTF1/HTF1_000-00340041-%D7%9E%D7%A2%D7%91%D7%A8-%D7%97%D7%95%D7%9E',
+    '034041': 'https://idofangbentov.uk/Technion/HTF1/HTF1_000-00340041-%D7%9E%D7%A2%D7%91%D7%A8-%D7%97%D7%95%D7%9D',
     '034051': 'https://idofangbentov.uk/Technion/DVI1/DVI1_000-00340051-%D7%93%D7%99%D7%A0%D7%9E%D7%99%D7%A7%D7%94-%D7%95%D7%AA%D7%A0%D7%95%D7%93%D7%95%D7%AA',
     '034053': 'https://idofangbentov.uk/Technion/SLD2/SLD2_000-034053-%D7%9E%D7%9B%D7%A0%D7%99%D7%A7%D7%AA-%D7%9E%D7%95%D7%A6%D7%A7%D7%99%D7%9D-2%D7%9E',
     '034054': 'https://idofangbentov.uk/Technion/MDN1/MDN1_000-00340054-%D7%AA%D7%9B%D7%9F-%D7%9E%D7%9B%D7%A0%D7%99-1%D7%9E',
@@ -12545,7 +12545,7 @@ const PANGEA_COURSE_MAP = {
     '34034': 'https://idofangbentov.uk/Technion/ELM1/ELM1_000-00340034-%D7%94%D7%A0%D7%A2-%D7%97%D7%A9%D7%9E%D7%9C%D7%99',
     '34035': 'https://idofangbentov.uk/Technion/THE1/THE1_000-034035-%D7%AA%D7%A8%D7%9E%D7%95%D7%93%D7%99%D7%A0%D7%9E%D7%99%D7%A7%D7%94-1',
     '34040': 'https://idofangbentov.uk/Technion/ICT1/ICT1_000-00340040-%D7%9E%D7%91%D7%95%D7%90-%D7%9C%D7%91%D7%A7%D7%A8%D7%94',
-    '34041': 'https://idofangbentov.uk/Technion/HTF1/HTF1_000-00340041-%D7%9E%D7%A2%D7%91%D7%A8-%D7%97%D7%95%D7%9E',
+    '34041': 'https://idofangbentov.uk/Technion/HTF1/HTF1_000-00340041-%D7%9E%D7%A2%D7%91%D7%A8-%D7%97%D7%95%D7%9D',
     '34051': 'https://idofangbentov.uk/Technion/DVI1/DVI1_000-00340051-%D7%93%D7%99%D7%A0%D7%9E%D7%99%D7%A7%D7%94-%D7%95%D7%AA%D7%A0%D7%95%D7%93%D7%95%D7%AA',
     '34053': 'https://idofangbentov.uk/Technion/SLD2/SLD2_000-034053-%D7%9E%D7%9B%D7%A0%D7%99%D7%A7%D7%AA-%D7%9E%D7%95%D7%A6%D7%A7%D7%99%D7%9D-2%D7%9E',
     '34054': 'https://idofangbentov.uk/Technion/MDN1/MDN1_000-00340054-%D7%AA%D7%9B%D7%9F-%D7%9E%D7%9B%D7%A0%D7%99-1%D7%9E',
@@ -12557,6 +12557,21 @@ const PANGEA_COURSE_MAP = {
     '35001': 'https://idofangbentov.uk/Technion/IRB1/IRB1_000-00350001-%D7%9E%D7%91%D7%95%D7%90-%D7%9C%D7%A8%D7%95%D7%91%D7%95%D7%98%D7%99%D7%A7%D7%94',
     '35022': 'https://idofangbentov.uk/Technion/FEM1/FEM1_000-00350022-%D7%90%D7%9C%D7%9E%D7%A0%D7%98%D7%99%D7%9D-%D7%A1%D7%95%D7%A4%D7%99%D7%99%D7%9D-%D7%9C%D7%90%D7%A0%D7%9C%D7%99%D7%96%D7%94-%D7%94%D7%A0%D7%93%D7%A1%D7%99%D7%AA',
     '35041': 'https://idofangbentov.uk/Technion/MCS1/MCS1_000-00350041-%D7%9E%D7%9B%D7%A0%D7%99%D7%A7%D7%AA-%D7%9E%D7%99%D7%A7%D7%A8%D7%95-%D7%9E%D7%A2%D7%A8%D7%9B%D7%95%D7%AA',
+    '03140533': 'https://idofangbentov.uk/Technion/IMT1/IMT1_000-314533-%D7%9E%D7%91%D7%95%D7%90-%D7%9C%D7%94%D7%A0%D7%93%D7%A1%D7%AA-%D7%97%D7%95%D7%9E%D7%A8%D7%99%D7%9D-1%D7%9E',
+    '3140533': 'https://idofangbentov.uk/Technion/IMT1/IMT1_000-314533-%D7%9E%D7%91%D7%95%D7%90-%D7%9C%D7%94%D7%A0%D7%93%D7%A1%D7%AA-%D7%97%D7%95%D7%9E%D7%A8%D7%99%D7%9D-1%D7%9E',
+    '00340401': 'https://github.com/NuclearGandhi/technion_second_brain/blob/master/Technion/LRB1/LRB1_000%2000340401%20%D7%9E%D7%A2%D7%91%D7%93%D7%94%20%D7%9E%D7%AA%D7%A7%D7%93%D7%9E%D7%AA%20%D7%9C%D7%A8%D7%95%D7%91%D7%95%D7%98%D7%99%D7%9D.md',
+    '034401': 'https://github.com/NuclearGandhi/technion_second_brain/blob/master/Technion/LRB1/LRB1_000%2000340401%20%D7%9E%D7%A2%D7%91%D7%93%D7%94%20%D7%9E%D7%AA%D7%A7%D7%93%D7%9E%D7%AA%20%D7%9C%D7%A8%D7%95%D7%91%D7%95%D7%98%D7%99%D7%9D.md',
+    '34401': 'https://github.com/NuclearGandhi/technion_second_brain/blob/master/Technion/LRB1/LRB1_000%2000340401%20%D7%9E%D7%A2%D7%91%D7%93%D7%94%20%D7%9E%D7%AA%D7%A7%D7%93%D7%9E%D7%AA%20%D7%9C%D7%A8%D7%95%D7%91%D7%95%D7%98%D7%99%D7%9D.md',
+    '00350032': 'https://idofangbentov.uk/Technion/MCP1/MCP1_000-00340032-%D7%AA%D7%9B%D7%9F-%D7%9E%D7%95%D7%A6%D7%A8%D7%99%D7%9D-%D7%9E%D7%91%D7%95%D7%A1%D7%A1%D7%99-%D7%9E%D7%99%D7%A7%D7%A8%D7%95-%D7%9E%D7%A2%D7%91%D7%93-%D7%9E',
+    '035032': 'https://idofangbentov.uk/Technion/MCP1/MCP1_000-00340032-%D7%AA%D7%9B%D7%9F-%D7%9E%D7%95%D7%A6%D7%A8%D7%99%D7%9D-%D7%9E%D7%91%D7%95%D7%A1%D7%A1%D7%99-%D7%9E%D7%99%D7%A7%D7%A8%D7%95-%D7%9E%D7%A2%D7%91%D7%93-%D7%9E',
+    '35032': 'https://idofangbentov.uk/Technion/MCP1/MCP1_000-00340032-%D7%AA%D7%9B%D7%9F-%D7%9E%D7%95%D7%A6%D7%A8%D7%99%D7%9D-%D7%9E%D7%91%D7%95%D7%A1%D7%A1%D7%99-%D7%9E%D7%99%D7%A7%D7%A8%D7%95-%D7%9E%D7%A2%D7%91%D7%93-%D7%9E',
+    '00350146': 'https://idofangbentov.uk/Technion/ICE1/ICE1_000-%D7%9E%D7%A0%D7%95%D7%A2%D7%99-%D7%A9%D7%A8%D7%99%D7%A4%D7%94-%D7%A4%D7%A0%D7%99%D7%9E%D7%99%D7%AA-00350146',
+    '03501460': 'https://idofangbentov.uk/Technion/ICE1/ICE1_000-%D7%9E%D7%A0%D7%95%D7%A2%D7%99-%D7%A9%D7%A8%D7%99%D7%A4%D7%94-%D7%A4%D7%A0%D7%99%D7%9E%D7%99%D7%AA-00350146',
+    '035146': 'https://idofangbentov.uk/Technion/ICE1/ICE1_000-%D7%9E%D7%A0%D7%95%D7%A2%D7%99-%D7%A9%D7%A8%D7%99%D7%A4%D7%94-%D7%A4%D7%A0%D7%99%D7%9E%D7%99%D7%AA-00350146',
+    '35146': 'https://idofangbentov.uk/Technion/ICE1/ICE1_000-%D7%9E%D7%A0%D7%95%D7%A2%D7%99-%D7%A9%D7%A8%D7%99%D7%A4%D7%94-%D7%A4%D7%A0%D7%99%D7%9E%D7%99%D7%AA-00350146',
+    '00360014': 'https://idofangbentov.uk/Technion/MPL1/MPL1_000-00360014-%D7%A2%D7%99%D7%91%D7%95%D7%93%D7%99%D7%9D-%D7%A4%D7%9C%D7%A1%D7%98%D7%99%D7%99%D7%9D-%D7%A9%D7%9C-%D7%9E%D7%AA%D7%9B%D7%95%D7%AA',
+    '036014': 'https://idofangbentov.uk/Technion/MPL1/MPL1_000-00360014-%D7%A2%D7%99%D7%91%D7%95%D7%93%D7%99%D7%9D-%D7%A4%D7%9C%D7%A1%D7%98%D7%99%D7%99%D7%9D-%D7%A9%D7%9C-%D7%9E%D7%AA%D7%9B%D7%95%D7%AA',
+    '36014': 'https://idofangbentov.uk/Technion/MPL1/MPL1_000-00360014-%D7%A2%D7%99%D7%91%D7%95%D7%93%D7%99%D7%9D-%D7%A4%D7%9C%D7%A1%D7%98%D7%99%D7%99%D7%9D-%D7%A9%D7%9C-%D7%9E%D7%AA%D7%9B%D7%95%D7%AA',
 };
 if (typeof window !== 'undefined') {
     window.PANGEA_COURSE_MAP = PANGEA_COURSE_MAP;
@@ -23999,11 +24014,11 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.11.17-v2.13.18",
-    version: "2.13.18",
-    build: "20261117_02",
-    date: "2026-11-17 10:20",
-    description: "v2.13.18: לחיצה על מדד משימות פתוחות ב-HUD מעבירה ישירות ללוח המשימות, והוספת מעבר טבעי בין החלונות/לשוניות בהחלקה וגלילה אופקית ימין/שמאל (ADR-128)."
+    code: "REV-2026.11.17-v2.13.19",
+    version: "2.13.19",
+    build: "20261117_03",
+    date: "2026-11-17 19:00",
+    description: "v2.13.19: סנכרון מלא מול מאגר פנגייה (NuclearGandhi/technion_second_brain): תיקון 44 קישורים שבורים, הוספת LRB1/MCP1/ICE1/MPL1 (39 קורסים), נוסחאות מד״ח ופיזיקה 2, ותצוגת פרויקטים וטבלאות נוסחאות בחלון הקורס (ADR-129)."
 };
 window.APP_VERSION = APP_CURRENT_REVISION.version;
 

@@ -254,8 +254,8 @@ async function run() {
             assert.strictEqual(fnType, 'function', 'window.forceUpdateApp is not defined');
         });
 
-        // Test 8: Pangea course mapping covers all 34 courses with at least 100 aliases
-        await test('Pangea course map contains exhaustive coverage of all 34 courses', async () => {
+        // Test 8: Pangea course mapping covers all 38+ courses with at least 100 aliases
+        await test('Pangea course map contains exhaustive coverage of all 38+ courses', async () => {
             const mapStats = await cdp.eval(`(() => {
                 const map = window.PANGEA_COURSE_MAP;
                 if (!map || typeof map !== 'object') return null;
@@ -274,7 +274,7 @@ async function run() {
             })()`);
             assert(mapStats, 'window.PANGEA_COURSE_MAP is not defined on window');
             assert(mapStats.totalKeys >= 100, `Expected at least 100 aliases in PANGEA_COURSE_MAP, got ${mapStats?.totalKeys}`);
-            assert.strictEqual(mapStats.uniqueHubs, 34, `Expected 34 unique Pangea course hubs, got ${mapStats?.uniqueHubs}`);
+            assert(mapStats.uniqueHubs >= 38, `Expected at least 38 unique Pangea course hubs, got ${mapStats?.uniqueHubs}`);
             assert(mapStats.hasDynamics && mapStats.hasFluids && mapStats.hasManufacture && mapStats.hasCalculus1 && mapStats.hasPhysicsLab && mapStats.hasMaterials, 'Key mandatory courses missing from Pangea course map');
         });
         // Test 9: App-Performance Toolkit (Core Web Vitals RUM & Network Deduplication)
@@ -1341,6 +1341,42 @@ async function run() {
             assert(res.blockedInFlowchart !== true, 'Swipe inside .flowchart-viewport must not hijack map panning: ' + JSON.stringify(res));
             assert(res.blockedVertical === false, 'Mostly-vertical swipe must not switch tabs: ' + JSON.stringify(res));
             assert(res.whatsNewMainItems === 1 && res.olderCollapsedInitially && res.olderExpandedAfterClick, "What's New card must show ONLY the latest update by default and collapse/expand older updates: " + JSON.stringify(res));
+        });
+
+        await test('Test 28: technion_second_brain Sync (39 Courses, LRB1, PDE1/PHY2 Concepts & Appendixes)', async () => {
+            const res = await cdp.eval(`(() => {
+                const catalogKeys = window.PangeaHub ? Object.keys(window.PangeaHub.catalog) : [];
+                const lrbData = window.PangeaHub ? window.PangeaHub.getCourseData('00340401') : null;
+                const htfUrl = (window.PANGEA_COURSE_MAP && window.PANGEA_COURSE_MAP['00340041']) || '';
+                const sturmMatches = window.PangeaHub ? window.PangeaHub.search('שטורם-ליוביל') : [];
+                const gaussPhysMatches = window.PangeaHub ? window.PangeaHub.search('חוק גאוס') : [];
+
+                if (typeof openCourseDetails === 'function') openCourseDetails('034053');
+                const pangeaEl = document.getElementById('modal-pangea-container');
+                const html = pangeaEl ? pangeaEl.innerHTML : '';
+                const hasConceptsSection = html.includes('מושגי מפתח ונוסחאות');
+                const hasAppendixSection = html.includes('טבלאות נוסחאות, נספחים ומעבדות');
+                const hasGithubLink = html.includes('github.com/NuclearGandhi/technion_second_brain');
+
+                if (typeof closeCourseModal === 'function') closeCourseModal();
+
+                return {
+                    courseCount: catalogKeys.length,
+                    hasLrb: !!lrbData && lrbData.course_tag === 'LRB1',
+                    htfFixed: decodeURIComponent(htfUrl).endsWith('מעבר-חום'),
+                    hasPdeConcept: sturmMatches.length > 0 && sturmMatches[0].courseTag === 'PDE1',
+                    hasPhy2Concept: gaussPhysMatches.length > 0 && gaussPhysMatches[0].courseTag === 'PHY2',
+                    hasConceptsSection,
+                    hasAppendixSection,
+                    hasGithubLink
+                };
+            })()`);
+
+            assert(res.courseCount === 39, 'Expected 39 synced Fangia/technion_second_brain courses, got ' + res.courseCount);
+            assert(res.hasLrb, 'LRB1 (00340401) must resolve via PangeaHub.getCourseData: ' + JSON.stringify(res));
+            assert(res.htfFixed, 'HTF1 URL in PANGEA_COURSE_MAP must end with מעבר-חום: ' + JSON.stringify(res));
+            assert(res.hasPdeConcept && res.hasPhy2Concept, 'PDE1 & PHY2 deep concepts must be searchable: ' + JSON.stringify(res));
+            assert(res.hasConceptsSection && res.hasAppendixSection && res.hasGithubLink, 'Course modal must render key concepts, appendixes, and technion_second_brain GitHub link: ' + JSON.stringify(res));
         });
 
     } finally {
