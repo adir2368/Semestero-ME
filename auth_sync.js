@@ -477,6 +477,21 @@
                     }
                     if (matchedLocal.pinned) rt.pinned = true;
                     if (matchedLocal.dueDate && !rt.dueDate) rt.dueDate = matchedLocal.dueDate;
+
+                    // Reconcile homework/task grades independently using gradeUpdatedAt timestamps
+                    const lHasGrade = matchedLocal.grade !== undefined && matchedLocal.grade !== null && matchedLocal.grade !== '';
+                    const rHasGrade = rt.grade !== undefined && rt.grade !== null && rt.grade !== '';
+                    const lGradeTime = Number(matchedLocal.gradeUpdatedAt || 0);
+                    const rGradeTime = Number(rt.gradeUpdatedAt || 0);
+                    if (lGradeTime > rGradeTime) {
+                        rt.grade = matchedLocal.grade ?? null;
+                        rt.gradeUpdatedAt = lGradeTime;
+                    } else if (rGradeTime > lGradeTime) {
+                        if (rHasGrade) rt.gradeUpdatedAt = rGradeTime;
+                    } else if (!rHasGrade && lHasGrade) {
+                        rt.grade = matchedLocal.grade;
+                        if (lGradeTime > 0) rt.gradeUpdatedAt = lGradeTime;
+                    }
                 } else {
                     const hasExplicitReset = !!(rt.statusUpdatedAt && !rt.completed && (rt.status === 'not_started' || rt.status === 'in_progress'));
                     if (!hasExplicitReset && !rt.completed && isTaskInCompletedRegistry(courseCode, rt, completedRegistry)) {
@@ -502,6 +517,8 @@
                     lt.source === 'manual' ||
                     (lt.id && String(lt.id).startsWith('task-')) ||
                     lt.statusUpdatedAt ||
+                    lt.gradeUpdatedAt ||
+                    (lt.grade !== undefined && lt.grade !== null && lt.grade !== '') ||
                     lt.completed === true ||
                     lt.status === 'done' ||
                     lt.status === 'submitted' ||
@@ -3404,7 +3421,8 @@
         sanitizePostgrestLiteral,
         checkAuthRateLimit,
         recordAuthFailure,
-        clearAuthFailures
+        clearAuthFailures,
+        mergeCoursesPreservingTaskCompletion
     };
 
     window.AuthSync = AuthSync;

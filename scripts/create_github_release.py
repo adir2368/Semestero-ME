@@ -19,7 +19,7 @@ with open(os.path.join(ROOT, "package.json"), "r", encoding="utf-8") as f:
     pkg = json.load(f)
 VERSION = pkg.get("version", "2.13.15")
 TAG = f"v{VERSION}"
-NAME = f"Semestero ME v{VERSION} - technion_second_brain Full Sync & Formula Hubs"
+NAME = f"Semestero ME v{VERSION} - Homework Grade Entry & Best-N Average"
 
 def get_github_token():
     try:
@@ -99,14 +99,15 @@ def main():
 
     body_notes = f"""# Semestero ME {TAG} Release Notes
 
-### 🧠 1. סנכרון מלא מול מאגר `NuclearGandhi/technion_second_brain` (פנגייה)
-- **כיסוי מלא של 39 קורסי הטכניון (557 פריטים)**: תיקון 44 קישורים שבורים (קידוד גרש `'` ו-`מעבר-חום`), עדכון פרקים, מבחנים ושיעורי בית חדשים, והוספת קורסים חדשים למיפוי הישיר (`LRB1` 00340401, `MCP1` 00350032, `ICE1` 00350146, `MPL1` 00360014 ו-`IMT1` 03140533).
-- **מושגי מפתח, פרויקטים ונספחים בכרטיס הקורס**: הצגת נוסחאות מרכזיות של מד״ח (`PDE1`) ופיזיקה 2 (`PHY2`), טבלאות נוסחאות/מעבדות (`SLD2_A1`, `HTF1`, `LMA1`) ופרויקטים ישירות במרכז הלמידה של פנגייה + קישור ישיר למאגר ה-GitHub.
+### 💯 1. הזנת ציונים לשיעורי בית וממוצע "הטובים מ-N"
+- **עמודת ציון בלוח המשימות (`app.js`, `index.html`, `styles.css`)**: הזנה ישירה ומהירה של ציונים (0–100) ישירות בטבלת המשימות עם צביעת טווחים (`is-grade-high/mid/low`) ועדכון סטטוס אוטומטי ל-`בוצע`.
+- **מגירת צד (Quick Peek) וכרטיסיית הקורס**: שדה הציון (`#peek-property-grade-row` ו-`.quest-grade-input` / `.hw-grade-input`) זמין כעת עבור כל תרגילי הבית והמעבדות — כולל הזנה נפרדת לשאלון דיגיטלי ולפתרון בכתב בגריד "הטובים מ-N".
+- **חישוב ממוצע מגן אוטומטי וסנכרון ענן (`auth_sync.js`)**: `getCourseHomeworkStatus` מחשב אוטומטית את ממוצע הגיליונות הגבוהים ביותר (`bestNAverage`), מציג תגיות ציון וממוצע בחלונית הקורס ובשורת המעקב, ומשמר ציונים בין מכשירים עם `gradeUpdatedAt`.
 
 ### 📦 2. קובצי הפצה ועדכון:
-- `Semestero-ME-Tablet-Clean.apk` (`com.technion.semestero.tablet`, `versionCode 114`, `versionName {VERSION}`, `v1+v2+v3` Signed)
-- `Semestero-ME.apk` (`com.technion.semestero`, `versionCode 114`, `versionName {VERSION}`, `v1+v2+v3` Signed, `targetSdk 34`)
-- `Semestero-ME-Watch.apk` (`versionCode 114`, `versionName {VERSION}`, `v1+v2+v3` Signed)
+- `Semestero-ME-Tablet-Clean.apk` (`com.technion.semestero.tablet`, `versionCode 115`, `versionName {VERSION}`, `v1+v2+v3` Signed)
+- `Semestero-ME.apk` (`com.technion.semestero`, `versionCode 115`, `versionName {VERSION}`, `v1+v2+v3` Signed, `targetSdk 34`)
+- `Semestero-ME-Watch.apk` (`versionCode 115`, `versionName {VERSION}`, `v1+v2+v3` Signed)
 - `Semestero-ME-Windows-x64.zip` (Electron Desktop Client {VERSION})
 """
 

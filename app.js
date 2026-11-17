@@ -15285,12 +15285,15 @@ function renderModalTaskList(course) {
             statusOptions += `<option value="${s.value}" ${task.status === s.value ? 'selected' : ''}>${s.label}</option>`;
         });
 
-        const gradeInputHtml = task.type === 'exam' ? `
+        const gradeTierCls = (typeof getTaskGradeTierClass === 'function') ? getTaskGradeTierClass(task.grade) : '';
+        const gradeValStr = (task.grade !== undefined && task.grade !== null && task.grade !== '' && !isNaN(Number(task.grade))) ? task.grade : '';
+        const gradeInputClass = (task.type === 'exam') ? 'exam-grade-input' : `quest-grade-input ${gradeTierCls}`;
+        const gradeInputHtml = `
             <div style="display: flex; align-items: center; gap: 4px;">
                 <label style="font-size: 0.7rem; color: var(--text-muted);">ציון:</label>
-                <input type="number" class="exam-grade-input" min="0" max="100" value="${task.grade !== undefined && task.grade !== null ? task.grade : ''}" ${isInteractive ? '' : 'disabled'} placeholder="--" style="width: 45px; background: var(--bg-deep); border: 1px solid var(--border-color); color: var(--text-light); border-radius: 4px; padding: 2px 4px; font-size: 0.75rem; text-align: center; font-family: inherit;">
+                <input type="number" class="${gradeInputClass}" min="0" max="100" step="0.5" value="${gradeValStr}" ${isInteractive ? '' : 'disabled'} placeholder="--" title="${task.type === 'exam' ? 'ציון מבחן' : 'ציון ש״ב / מטלה'}" style="${task.type === 'exam' ? 'width: 45px; background: var(--bg-deep); border: 1px solid var(--border-color); color: var(--text-light); border-radius: 4px; padding: 2px 4px; font-size: 0.75rem; text-align: center; font-family: inherit;' : ''}">
             </div>
-        ` : '';
+        `;
 
         row.innerHTML = `
             <div class="quest-main">
@@ -15413,13 +15416,14 @@ function renderModalTaskList(course) {
                 renderUI();
             });
 
-            // Exam Grade input listener
+            // Exam or Homework/Task Grade input listener
             if (task.type === 'exam') {
                 const gradeInput = row.querySelector(".exam-grade-input");
                 if (gradeInput) {
                     gradeInput.addEventListener("change", (e) => {
                         const val = parseInt(e.target.value);
                         task.grade = (!isNaN(val) && val >= 0 && val <= 100) ? val : null;
+                        task.gradeUpdatedAt = Date.now();
                         
                         // Failing grade logic
                         if (task.grade !== null && task.grade < 55) {
@@ -15488,6 +15492,16 @@ function renderModalTaskList(course) {
                         saveState();
                         renderUI();
                         openCourseDetails(course.code);
+                    });
+                }
+            } else {
+                const hwGradeInput = row.querySelector(".quest-grade-input");
+                if (hwGradeInput) {
+                    hwGradeInput.addEventListener("change", (e) => {
+                        if (typeof window.updateTaskGrade === 'function') {
+                            const saved = window.updateTaskGrade(course.code, task.id, e.target.value);
+                            hwGradeInput.className = `quest-grade-input ${getTaskGradeTierClass(saved)}`;
+                        }
                     });
                 }
             }
@@ -16919,6 +16933,11 @@ window.switchTab = function(tabNameOrNumber) {
                 }
                 return;
             }
+            // 4.5. Inline grade input click -> do not trigger row click
+            if (e.target.classList.contains("notion-inline-grade-input")) {
+                e.stopPropagation();
+                return;
+            }
         });
 
         tableBody.addEventListener("change", (e) => {
@@ -16935,6 +16954,10 @@ window.switchTab = function(tabNameOrNumber) {
                     task.dueDate = e.target.value;
                     autoUpdateTaskStatusesByDueDate();
                     notifyStateChanged({ tab: 'tasks' });
+                }
+            } else if (e.target.classList.contains("notion-inline-grade-input")) {
+                if (typeof window.updateTaskGrade === 'function') {
+                    window.updateTaskGrade(courseCode, taskId, e.target.value, { toastOnSave: true });
                 }
             }
         });
@@ -18032,7 +18055,7 @@ function renderNotionTasksTable() {
     if (allTasks.length === 0) {
         tableBody.innerHTML = `
             <tr>
-                <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 40px 20px;">
+                <td colspan="8" style="text-align: center; color: var(--text-muted); padding: 40px 20px;">
                     <div style="font-size: 1.15rem; font-weight: 700; color: #cbd5e1; margin-bottom: 8px;">📭 לא נמצאו משימות לפי הסינון הנוכחי</div>
                     <div style="font-size: 0.86rem; color: #64748b; margin-bottom: 16px;">מסנני סמסטר, סטטוס, סוג, קורס או חיפוש מסתירים משימות קיימות.</div>
                     <button type="button" class="btn btn-primary btn-sm" onclick="window.resetAllNotionFilters()" style="background: #0284c7; border: none; padding: 8px 18px; border-radius: 6px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);">
@@ -18110,6 +18133,12 @@ function renderNotionTasksTable() {
         const semLabel = `סמסטר ${semHebrewMap[semNum] || semNum}`;
         const courseAccent = getCourseAccentColor(c.code);
 
+        const taskGradeVal = (t.grade !== undefined && t.grade !== null && t.grade !== '' && !isNaN(Number(t.grade))) ? t.grade : '';
+        const taskGradeTier = (typeof getTaskGradeTierClass === 'function') ? getTaskGradeTierClass(t.grade) : '';
+        const gradeCellHtml = `
+                <td class="notion-table-grade-cell">
+                    <input type="number" class="notion-inline-grade-input ${taskGradeTier}" min="0" max="100" step="0.5" value="${taskGradeVal}" placeholder="--" title="${t.type === 'exam' ? 'ציון מבחן (0-100)' : 'ציון ש״ב / מטלה (0-100)'}" aria-label="ציון משימה">
+                </td>`;
         const isSelected = window.selectedTasksMap && window.selectedTasksMap.has(`${c.code}:::${t.id}`);
         rowsHtml += `
             <tr data-course-code="${c.code}" data-task-id="${t.id}" style="--course-accent: ${courseAccent};" class="${isPinned ? 'is-task-pinned' : ''} ${isSelected ? 'is-row-selected' : ''} has-course-accent">
@@ -18149,6 +18178,7 @@ function renderNotionTasksTable() {
                     </div>
                 </td>
                 <td><span class="time-remaining ${timeInfo.className}">${timeInfo.text}</span></td>
+                ${gradeCellHtml}
                 <td style="position: relative;">
                     <span class="notion-status-pill ${statusClass} ${(statusClass === 'not_started' && timeInfo.isOpened) ? 'is-opened-gray' : ''}" title="שנה סטטוס ישירות מהרשימה">${displayLabel}</span>
                 </td>
@@ -18544,80 +18574,100 @@ function openTaskSidePeek(courseCode, taskId) {
     }
 
     const gradeRow = document.getElementById("peek-property-grade-row");
+    const gradeLabel = document.getElementById("peek-property-grade-label");
+    const gradeHint = document.getElementById("peek-property-grade-hint");
     const gradeInput = document.getElementById("peek-property-grade");
-    if (task.type === 'exam') {
+    if (gradeRow && gradeInput) {
         gradeRow.style.display = "grid";
-        gradeInput.value = (task.grade !== undefined && task.grade !== null && !isNaN(Number(task.grade))) ? task.grade : "";
-        
-        gradeInput.onchange = (e) => {
-            const val = parseInt(e.target.value);
-            task.grade = (!isNaN(val) && val >= 0 && val <= 100) ? val : null;
-            
-            if (task.grade !== null && task.grade < 55) {
-                const isMoedBOrC = task.title.includes("מועד ב") || task.title.includes("מועד ג");
-                if (isMoedBOrC) {
-                    showToastNotification(`⚠️ נכשלת ב${task.title} (ציון ${task.grade} מתוך 100). הקורס יועבר לסמסטר הבא.`, 'error');
-                    
-                    const moveTwo = false;
-                    const currentSem = course.semester;
-                    const nextSem = moveTwo ? Math.min(8, currentSem + 2) : Math.min(8, currentSem + 1);
-                    
-                    course.semester = nextSem;
-                    course.status = 'available';
-                    course.grade = null;
-                    
-                    course.tasks.forEach(t => {
-                        t.status = 'not_started';
-                        t.completed = false;
-                        t.grade = null;
-                    });
-                    course.tasks = course.tasks.filter(t => !t.title.includes("מועד ב") && !t.title.includes("מועד ג"));
-                    
-                    closeTaskSidePeek();
-                } else {
-                    showToastNotification(`⚠️ נכשל במבחן (ציון ${task.grade} מתוך 100). נדרש מועד ב'!`, 'warning');
+        gradeInput.value = (task.grade !== undefined && task.grade !== null && task.grade !== '' && !isNaN(Number(task.grade))) ? task.grade : "";
+
+        if (task.type === 'exam') {
+            if (gradeLabel) gradeLabel.innerText = "📝 ציון מבחן סוף (Exam Grade)";
+            if (gradeHint) gradeHint.innerText = "ציון המבחן בלבד — הציון הסופי בקורס מורכב מחלקו";
+            gradeInput.placeholder = "הזן ציון מבחן...";
+
+            gradeInput.onchange = (e) => {
+                const val = parseInt(e.target.value);
+                task.grade = (!isNaN(val) && val >= 0 && val <= 100) ? val : null;
+                task.gradeUpdatedAt = Date.now();
+                
+                if (task.grade !== null && task.grade < 55) {
+                    const isMoedBOrC = task.title.includes("מועד ב") || task.title.includes("מועד ג");
+                    if (isMoedBOrC) {
+                        showToastNotification(`⚠️ נכשלת ב${task.title} (ציון ${task.grade} מתוך 100). הקורס יועבר לסמסטר הבא.`, 'error');
+                        
+                        const moveTwo = false;
+                        const currentSem = course.semester;
+                        const nextSem = moveTwo ? Math.min(8, currentSem + 2) : Math.min(8, currentSem + 1);
+                        
+                        course.semester = nextSem;
+                        course.status = 'available';
+                        course.grade = null;
+                        
+                        course.tasks.forEach(t => {
+                            t.status = 'not_started';
+                            t.completed = false;
+                            t.grade = null;
+                        });
+                        course.tasks = course.tasks.filter(t => !t.title.includes("מועד ב") && !t.title.includes("מועד ג"));
+                        
+                        closeTaskSidePeek();
+                    } else {
+                        showToastNotification(`⚠️ נכשל במבחן (ציון ${task.grade} מתוך 100). נדרש מועד ב'!`, 'warning');
+                        if (task.status !== 'done') {
+                            task.status = 'done';
+                            task.completed = true;
+                            addXp(task.xp);
+                        }
+                        
+                        if (course.status === 'mastered') {
+                            course.status = 'active';
+                            uncompleteAllTasks(course);
+                        }
+                        
+                        const hasMoedB = course.tasks.some(t => t.title.includes("מועד ב") || t.title.toLowerCase().includes("moed b"));
+                        if (!hasMoedB) {
+                            course.tasks.push({
+                                id: `task-moed-b-${Date.now()}`,
+                                title: `${task.title.replace(" (מועד ב')", "")} (מועד ב')`,
+                                type: "exam",
+                                completed: false,
+                                status: "not_started",
+                                xp: 500,
+                                dueDate: ""
+                            });
+                        }
+                        openTaskSidePeek(courseCode, taskId);
+                    }
+                } else if (task.grade !== null && task.grade >= 55) {
                     if (task.status !== 'done') {
                         task.status = 'done';
                         task.completed = true;
                         addXp(task.xp);
+                        showToastNotification(`🔥 עברת את המבחן עם ציון ${task.grade}!`, 'success');
                     }
-                    
-                    if (course.status === 'mastered') {
-                        course.status = 'active';
-                        uncompleteAllTasks(course);
-                    }
-                    
-                    const hasMoedB = course.tasks.some(t => t.title.includes("מועד ב") || t.title.toLowerCase().includes("moed b"));
-                    if (!hasMoedB) {
-                        course.tasks.push({
-                            id: `task-moed-b-${Date.now()}`,
-                            title: `${task.title.replace(" (מועד ב')", "")} (מועד ב')`,
-                            type: "exam",
-                            completed: false,
-                            status: "not_started",
-                            xp: 500,
-                            dueDate: ""
-                        });
-                    }
-                    openTaskSidePeek(courseCode, taskId);
                 }
-            } else if (task.grade !== null && task.grade >= 55) {
-                if (task.status !== 'done') {
-                    task.status = 'done';
-                    task.completed = true;
-                    addXp(task.xp);
-                    showToastNotification(`🔥 עברת את המבחן עם ציון ${task.grade}!`, 'success');
+                
+                recalculateCourseStates();
+                saveState();
+                renderNotionTasksTable();
+                renderUI();
+            };
+        } else {
+            if (gradeLabel) gradeLabel.innerText = "💯 ציון ש״ב / מטלה (0–100)";
+            if (gradeHint) gradeHint.innerText = "הזנת ציון מסמנת כהסתיים ומעדכנת אוטומטית את ממוצע ההגשות (\"הטובים מ-N\")";
+            gradeInput.placeholder = "הזן ציון (0–100)...";
+
+            gradeInput.onchange = (e) => {
+                if (typeof window.updateTaskGrade === 'function') {
+                    const saved = window.updateTaskGrade(courseCode, taskId, e.target.value, { toastOnSave: true });
+                    // Keep peek status select in sync if task auto-promoted to 'done'
+                    if (saved !== null && statusSelect) {
+                        statusSelect.value = task.status;
+                    }
                 }
-            }
-            
-            recalculateCourseStates();
-            saveState();
-            renderNotionTasksTable();
-            renderUI();
-        };
-    } else {
-        gradeRow.style.display = "none";
-        gradeInput.onchange = null;
+            };
+        }
     }
 
     // Pin and Miluim Toggles in Side Peek
@@ -24014,11 +24064,11 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.11.17-v2.13.19",
-    version: "2.13.19",
-    build: "20261117_03",
-    date: "2026-11-17 19:00",
-    description: "v2.13.19: סנכרון מלא מול מאגר פנגייה (NuclearGandhi/technion_second_brain): תיקון 44 קישורים שבורים, הוספת LRB1/MCP1/ICE1/MPL1 (39 קורסים), נוסחאות מד״ח ופיזיקה 2, ותצוגת פרויקטים וטבלאות נוסחאות בחלון הקורס (ADR-129)."
+    code: "REV-2026.11.17-v2.13.20",
+    version: "2.13.20",
+    build: "20261117_04",
+    date: "2026-11-17 20:15",
+    description: "v2.13.20: הזנת ציונים ישירה לשיעורי בית ומשימות בלוח המשימות, במגירת הצד ובכרטיס הקורס + חישוב ממוצע הטובים מ-N במעקב שיעורי הבית וסנכרון ענן (ADR-130)."
 };
 window.APP_VERSION = APP_CURRENT_REVISION.version;
 
@@ -29803,6 +29853,71 @@ function extractHomeworkSheetIndex(rawTitle) {
     return null;
 }
 
+function parseTaskGradeValue(raw) {
+    if (raw === undefined || raw === null) return null;
+    const str = String(raw).trim();
+    if (!str) return null;
+    const num = Number(str);
+    if (!Number.isFinite(num) || num < 0 || num > 100) return null;
+    return Math.round(num * 10) / 10;
+}
+
+function getTaskGradeTierClass(grade) {
+    const val = parseTaskGradeValue(grade);
+    if (val === null) return '';
+    if (val >= 85) return 'is-grade-high';
+    if (val >= 65) return 'is-grade-mid';
+    return 'is-grade-low';
+}
+
+function updateTaskGrade(courseCode, taskId, rawGrade, opts = {}) {
+    const course = (typeof resolveCourseForTask === 'function' ? resolveCourseForTask(courseCode) : null) || (window.gameState && window.gameState.courses && window.gameState.courses[courseCode]);
+    if (!course || !Array.isArray(course.tasks)) return null;
+    const task = course.tasks.find(t => t.id === taskId);
+    if (!task) return null;
+
+    const parsed = parseTaskGradeValue(rawGrade);
+    const nowTs = Date.now();
+    task.grade = parsed;
+    task.gradeUpdatedAt = nowTs;
+
+    if (parsed !== null && task.type !== 'exam' && task.status !== 'done') {
+        const wasComplete = (task.status === 'done' || task.status === 'submitted' || task.completed === true);
+        task.status = 'done';
+        task.completed = true;
+        task.statusUpdatedAt = nowTs;
+        task.completedAt = nowTs;
+        if (!wasComplete && typeof addXp === 'function') addXp(task.xp || 50);
+        if (window.MoodleSync && typeof window.MoodleSync.markTaskCompletedInRegistry === 'function') {
+            window.MoodleSync.markTaskCompletedInRegistry(course.code || courseCode, task);
+        }
+    } else if (parsed !== null && task.type === 'exam' && parsed >= 55 && task.status !== 'done') {
+        const wasComplete = (task.status === 'done' || task.status === 'submitted' || task.completed === true);
+        task.status = 'done';
+        task.completed = true;
+        task.statusUpdatedAt = nowTs;
+        task.completedAt = nowTs;
+        if (!wasComplete && typeof addXp === 'function') addXp(task.xp || 500);
+    }
+
+    if (task.type === 'exam' && typeof recalculateCourseStates === 'function') recalculateCourseStates();
+    if (typeof saveState === 'function') saveState();
+    if (typeof renderNotionHomeworkPolicyStrip === 'function') renderNotionHomeworkPolicyStrip();
+    if (typeof renderNotionTasksTable === 'function') renderNotionTasksTable();
+    if (typeof renderUI === 'function') renderUI();
+
+    const courseModal = document.getElementById("course-modal");
+    if (courseModal && courseModal.classList.contains("active")) {
+        renderCourseModalHomeworkPolicy(course);
+        if (typeof renderModalTaskList === 'function') renderModalTaskList(course);
+    }
+
+    if (opts && opts.toastOnSave && typeof showHudToast === 'function') {
+        showHudToast(parsed !== null ? `💯 ציון ${parsed} נשמר עבור "${task.title}"` : `ציון הוסר מ-"${task.title}"`, parsed !== null ? 'success' : 'info');
+    }
+    return parsed;
+}
+
 function getCourseHomeworkStatus(courseCode) {
     if (!courseCode || !window.gameState || !window.gameState.courses) return null;
     const cleanCode = (typeof cleanTechnionCourseCode === 'function') ? cleanTechnionCourseCode(courseCode) : String(courseCode).replace(/^0+/, '');
@@ -29900,6 +30015,20 @@ function getCourseHomeworkStatus(courseCode) {
         else if (status === 'open') openCount++;
         else if (status === 'locked') lockedCount++;
 
+        const digGrade = parseTaskGradeValue(digitalTask && digitalTask.grade);
+        const writGrade = parseTaskGradeValue(writtenTask && writtenTask.grade);
+        const singleGrade = parseTaskGradeValue(singleTask && singleTask.grade);
+        let sheetGrade = null;
+        if (policy.isDualComponent) {
+            if (digGrade !== null && writGrade !== null) {
+                sheetGrade = Math.round(((digGrade + writGrade) / 2) * 10) / 10;
+            } else {
+                sheetGrade = (digGrade !== null) ? digGrade : writGrade;
+            }
+        } else {
+            sheetGrade = singleGrade;
+        }
+
         sheets.push({
             index: i,
             name: sheetName,
@@ -29908,6 +30037,9 @@ function getCourseHomeworkStatus(courseCode) {
             digitalTask: digitalTask,
             writtenTask: writtenTask,
             singleTask: singleTask,
+            grade: sheetGrade,
+            digitalGrade: digGrade,
+            writtenGrade: writGrade,
             isDigitalDone: isDigitalDone,
             isWrittenDone: isWrittenDone,
             isDigitalSubmitted: isDigitalSubmitted,
@@ -29916,6 +30048,20 @@ function getCourseHomeworkStatus(courseCode) {
             isWrittenInProgress: isWrittenInProgress
         });
     }
+
+    const gradedSheets = sheets.filter(s => s.grade !== null);
+    const gradedCount = gradedSheets.length;
+    const rawAverage = gradedCount > 0
+        ? Math.round((gradedSheets.reduce((sum, s) => sum + s.grade, 0) / gradedCount) * 10) / 10
+        : null;
+    const topRanked = [...gradedSheets].sort((a, b) => b.grade - a.grade || a.index - b.index).slice(0, policy.bestN);
+    const topIndexSet = new Set(topRanked.map(s => s.index));
+    const bestNAverage = topRanked.length > 0
+        ? Math.round((topRanked.reduce((sum, s) => sum + s.grade, 0) / topRanked.length) * 10) / 10
+        : null;
+    sheets.forEach(s => {
+        s.isInBestN = (s.grade !== null && topIndexSet.has(s.index));
+    });
 
     const isMet = completedCount >= policy.bestN;
     const remaining = Math.max(0, policy.bestN - completedCount);
@@ -29932,6 +30078,9 @@ function getCourseHomeworkStatus(courseCode) {
         lockedCount: lockedCount,
         totalSheets: policy.totalSheets,
         bestN: policy.bestN,
+        gradedCount: gradedCount,
+        rawAverage: rawAverage,
+        bestNAverage: bestNAverage,
         isMet: isMet,
         remaining: remaining,
         progressPct: progressPct
@@ -30002,6 +30151,9 @@ function renderNotionHomeworkPolicyStrip() {
         const ratioBadgeText = hwStatus.isMet ? `${hwStatus.completedCount}/${hwStatus.bestN} ✓` : `${hwStatus.completedCount}/${hwStatus.bestN}`;
 
         let chipDetails = "";
+        if (hwStatus.bestNAverage !== null) {
+            chipDetails += `<span style="color: #7dd3fc; font-size: 0.68rem; font-weight: 700; margin-right: 4px; font-family: 'JetBrains Mono', monospace;">ממוצע ${hwStatus.bestNAverage}</span>`;
+        }
         if (hwStatus.inProgressCount > 0) {
             chipDetails += `<span style="color: #eab308; font-size: 0.68rem; margin-right: 3px;">(${hwStatus.inProgressCount} בתהליך)</span>`;
         }
@@ -30018,6 +30170,9 @@ function renderNotionHomeworkPolicyStrip() {
         `;
 
         let metaExtra = "";
+        if (hwStatus.bestNAverage !== null) {
+            metaExtra += ` &bull; <strong style="color: #38bdf8;" title="ממוצע ${Math.min(hwStatus.bestN, hwStatus.gradedCount)} הגיליונות הגבוהים ביותר (ממוצע גולמי ${hwStatus.rawAverage})">ממוצע ש״ב: ${hwStatus.bestNAverage}</strong>`;
+        }
         if (hwStatus.inProgressCount > 0) {
             metaExtra += ` &bull; <strong style="color: #eab308;">${hwStatus.inProgressCount} בתהליך 🟡</strong>`;
         }
@@ -30160,6 +30315,7 @@ function renderCourseModalHomeworkPolicy(course) {
                             <span title="${sheet.digitalTask ? sheet.digitalTask.title : 'שאלון דיגיטלי'}">${sheet.digitalTask ? sheet.digitalTask.title : 'שאלון מקוון / דיגיטלי'}</span>
                         </span>
                         <div class="hw-component-actions">
+                            <input type="number" class="hw-grade-input ${getTaskGradeTierClass(sheet.digitalGrade)}" min="0" max="100" step="0.5" value="${sheet.digitalGrade !== null ? sheet.digitalGrade : ''}" placeholder="ציון" title="ציון שאלון דיגיטלי (0-100)" aria-label="ציון שאלון גיליון ${sheet.index}" onchange="if (window.setHomeworkSheetGrade) window.setHomeworkSheetGrade('${course.code}', ${sheet.index}, 'digital', this.value);">
                             ${digLink}
                             <button type="button" class="btn-hw-quick-status ${digInProg ? 'active-prog' : ''}" onclick="if (window.setHomeworkComponentLifecycle) window.setHomeworkComponentLifecycle('${course.code}', ${sheet.index}, 'digital', '${digInProg ? 'open' : 'in_progress'}');" title="${digInProg ? 'בטל סימון בתהליך' : 'סמן שהתחלת לעבוד'}">
                                 ${digInProg ? '🟡 בתהליך' : '🟡 התחל'}
@@ -30175,6 +30331,7 @@ function renderCourseModalHomeworkPolicy(course) {
                             <span title="${sheet.writtenTask ? sheet.writtenTask.title : 'הגשת פתרון בכתב'}">${sheet.writtenTask ? sheet.writtenTask.title : 'הגשת פתרון בכתב (סריקה)'}</span>
                         </span>
                         <div class="hw-component-actions">
+                            <input type="number" class="hw-grade-input ${getTaskGradeTierClass(sheet.writtenGrade)}" min="0" max="100" step="0.5" value="${sheet.writtenGrade !== null ? sheet.writtenGrade : ''}" placeholder="ציון" title="ציון פתרון בכתב (0-100)" aria-label="ציון פתרון גיליון ${sheet.index}" onchange="if (window.setHomeworkSheetGrade) window.setHomeworkSheetGrade('${course.code}', ${sheet.index}, 'written', this.value);">
                             ${writLink}
                             <button type="button" class="btn-hw-quick-status ${writInProg ? 'active-prog' : ''}" onclick="if (window.setHomeworkComponentLifecycle) window.setHomeworkComponentLifecycle('${course.code}', ${sheet.index}, 'written', '${writInProg ? 'open' : 'in_progress'}');" title="${writInProg ? 'בטל סימון בתהליך' : 'סמן שהתחלת לעבוד'}">
                                 ${writInProg ? '🟡 בתהליך' : '🟡 התחל'}
@@ -30205,6 +30362,7 @@ function renderCourseModalHomeworkPolicy(course) {
                             <span title="${sheet.singleTask ? sheet.singleTask.title : sheet.name}">${sheet.singleTask ? sheet.singleTask.title : sheet.name}</span>
                         </span>
                         <div class="hw-component-actions">
+                            <input type="number" class="hw-grade-input ${getTaskGradeTierClass(sheet.grade)}" min="0" max="100" step="0.5" value="${sheet.grade !== null ? sheet.grade : ''}" placeholder="ציון" title="ציון גיליון ${sheet.index} (0-100)" aria-label="ציון גיליון ${sheet.index}" onchange="if (window.setHomeworkSheetGrade) window.setHomeworkSheetGrade('${course.code}', ${sheet.index}, 'single', this.value);">
                             ${sLink}
                             <button type="button" class="btn-hw-quick-status ${sInProg ? 'active-prog' : ''}" onclick="if (window.setHomeworkSheetLifecycle) window.setHomeworkSheetLifecycle('${course.code}', ${sheet.index}, '${sInProg ? 'open' : 'in_progress'}');" title="${sInProg ? 'בטל סימון בתהליך' : 'סמן שהתחלת לעבוד'}">
                                 ${sInProg ? '🟡 בתהליך' : '🟡 התחל'}
@@ -30218,12 +30376,17 @@ function renderCourseModalHomeworkPolicy(course) {
             `;
         }
 
+        const sheetGradePill = sheet.grade !== null
+            ? `<span class="hw-sheet-grade-badge ${getTaskGradeTierClass(sheet.grade)}" title="${hwStatus.gradedCount > hwStatus.bestN && !sheet.isInBestN ? 'לא נכלל במכסת ' + hwStatus.bestN + ' הטובים ביותר' : 'נכלל בממוצע הטובים ביותר'}">💯 ${sheet.grade}</span>`
+            : '';
+
         sheetsGridHtml += `
             <div class="hw-sheet-card ${cardClass}">
                 <div class="hw-sheet-card-top">
-                    <div style="display: flex; align-items: center; gap: 6px;">
+                    <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
                         <span class="hw-sheet-index">גיליון ${sheet.index}</span>
                         <span class="hw-sheet-topic" title="${sheet.name}">${sheet.name}</span>
+                        ${sheetGradePill}
                     </div>
                     <span class="hw-sheet-status-badge ${sheet.status}">
                         ${statusBadgeLabel}
@@ -30274,6 +30437,12 @@ function renderCourseModalHomeworkPolicy(course) {
                     <span>🎯</span>
                     <span>יעד: ${hwStatus.bestN} מתוך ${hwStatus.totalSheets}</span>
                 </div>
+                ${hwStatus.bestNAverage !== null ? `
+                <div class="modal-hw-stat-pill avg" title="ממוצע ${Math.min(hwStatus.bestN, hwStatus.gradedCount)} הגיליונות הגבוהים ביותר מתוך ${hwStatus.gradedCount} גיליונות מדורגים (ממוצע גולמי: ${hwStatus.rawAverage})">
+                    <span>📊</span>
+                    <span>ממוצע ש״ב (${Math.min(hwStatus.bestN, hwStatus.gradedCount)} הטובים): ${hwStatus.bestNAverage}</span>
+                </div>
+                ` : ''}
             </div>
 
             <!-- Progress Bar -->
@@ -30590,6 +30759,79 @@ function toggleHomeworkPolicyStripCollapse(e) {
     if (text) text.innerText = isCollapsed ? "הרחב" : "מזער";
 }
 
+function setHomeworkSheetGrade(courseCode, sheetIndex, compType, rawGrade) {
+    if (!courseCode || !window.gameState || !window.gameState.courses) return null;
+    const cleanCode = (typeof cleanTechnionCourseCode === 'function') ? cleanTechnionCourseCode(courseCode) : String(courseCode).replace(/^0+/, '');
+    const course = window.gameState.courses[cleanCode] || window.gameState.courses['0' + cleanCode] || window.gameState.courses[courseCode];
+    if (!course) return null;
+
+    if (!Array.isArray(course.tasks)) course.tasks = [];
+
+    const policy = COURSE_HOMEWORK_POLICIES[cleanCode] || COURSE_HOMEWORK_POLICIES['0' + cleanCode] || getDynamicCourseHomeworkPolicy(course);
+    const sheetName = (policy && policy.sheetNames && policy.sheetNames[sheetIndex]) ? policy.sheetNames[sheetIndex] : `גיליון ${sheetIndex}`;
+    const parsed = parseTaskGradeValue(rawGrade);
+    const nowTs = Date.now();
+
+    let targetTask = null;
+    const hwTasks = course.tasks.filter(t => t.type === 'hw' || (t.title && /תרגיל|מטלה|גיליון|גליון|hw/i.test(t.title)));
+    if (compType === 'written' || compType === 'digital') {
+        hwTasks.forEach(t => {
+            if (extractHomeworkSheetIndex(t.title) !== sheetIndex) return;
+            const title = String(t.title || '').toLowerCase();
+            if (compType === 'written') {
+                if (/(הגשת\s*פתרון|פתרון\s*בכתב|סריקה|upload)/i.test(title)) targetTask = t;
+            } else {
+                if (!/(הגשת\s*פתרון|פתרון\s*בכתב|סריקה)/i.test(title)) targetTask = t;
+            }
+        });
+    } else {
+        targetTask = hwTasks.find(t => extractHomeworkSheetIndex(t.title) === sheetIndex) || null;
+    }
+
+    if (!targetTask) {
+        if (parsed === null) return null;
+        const isDual = compType === 'written' || compType === 'digital';
+        const isWritten = compType === 'written';
+        targetTask = {
+            id: isDual ? `${cleanCode}_hw_${sheetIndex}_${isWritten ? 'written' : 'dig'}` : `${cleanCode}_hw_${sheetIndex}`,
+            title: isWritten ? `הגשת פתרון תרגיל בית ${sheetIndex}` : (isDual ? `HW ${sheetIndex} - ${sheetName}` : `תרגיל בית ${sheetIndex}: ${sheetName}`),
+            type: 'hw',
+            xp: 50,
+            completed: true,
+            status: 'done',
+            statusUpdatedAt: nowTs,
+            completedAt: nowTs,
+            grade: parsed,
+            gradeUpdatedAt: nowTs
+        };
+        course.tasks.push(targetTask);
+    } else {
+        targetTask.grade = parsed;
+        targetTask.gradeUpdatedAt = nowTs;
+        if (parsed !== null && targetTask.status !== 'done') {
+            targetTask.status = 'done';
+            targetTask.completed = true;
+            targetTask.statusUpdatedAt = nowTs;
+            targetTask.completedAt = nowTs;
+        }
+    }
+
+    if (window.MoodleSync && parsed !== null && typeof window.MoodleSync.markTaskCompletedInRegistry === 'function') {
+        window.MoodleSync.markTaskCompletedInRegistry(course.code, targetTask);
+    }
+
+    if (typeof saveState === 'function') saveState();
+    renderCourseModalHomeworkPolicy(course);
+    if (typeof renderModalTaskList === 'function') renderModalTaskList(course);
+    renderNotionHomeworkPolicyStrip();
+    if (typeof renderNotionTasksTable === 'function') renderNotionTasksTable();
+    return parsed;
+}
+
+window.parseTaskGradeValue = parseTaskGradeValue;
+window.getTaskGradeTierClass = getTaskGradeTierClass;
+window.updateTaskGrade = updateTaskGrade;
+window.setHomeworkSheetGrade = setHomeworkSheetGrade;
 window.setHomeworkComponentLifecycle = setHomeworkComponentLifecycle;
 window.setHomeworkSheetLifecycle = setHomeworkSheetLifecycle;
 window.toggleHomeworkPolicyStripCollapse = toggleHomeworkPolicyStripCollapse;

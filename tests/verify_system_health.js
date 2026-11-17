@@ -1379,6 +1379,90 @@ async function run() {
             assert(res.hasConceptsSection && res.hasAppendixSection && res.hasGithubLink, 'Course modal must render key concepts, appendixes, and technion_second_brain GitHub link: ' + JSON.stringify(res));
         });
 
+        await test('Test 29: Homework Grade Entry, Side Peek, Best-N-of-M Average & Sync Preservation (v2.13.20)', async () => {
+            const res = await cdp.eval(`(() => {
+                if (typeof setActiveMainTab === 'function') setActiveMainTab('tasks');
+                const c034035 = (typeof window.resolveCourseForTask === 'function' ? window.resolveCourseForTask('034035') : null) || window.gameState.courses['034035'] || window.gameState.courses['00340035'];
+                if (!c034035) return { ok: false, reason: '034035 missing' };
+
+                const backupTasks = JSON.parse(JSON.stringify(c034035.tasks || []));
+                const backupStatus = c034035.status;
+                const backupGuard = window.gameState.semesterGuardMode;
+                try {
+                    window.gameState.semesterGuardMode = 'unlocked';
+                    // Ensure clean HW task on 034035 and enter grades via setHomeworkSheetGrade + updateTaskGrade
+                    c034035.status = 'active';
+                    c034035.tasks = [
+                        { id: 'test_hw_1', title: 'תרגיל בית 1', type: 'hw', status: 'not_started', completed: false, xp: 50, dueDate: '' }
+                    ];
+                    const saved1 = window.updateTaskGrade(c034035.code || '034035', 'test_hw_1', '94');
+                    const curCourse = (typeof window.resolveCourseForTask === 'function' ? window.resolveCourseForTask('034035') : c034035) || c034035;
+                    const t1 = (curCourse.tasks || []).find(t => t.id === 'test_hw_1');
+                    const promotedDone = !!(t1 && t1.status === 'done' && t1.grade === 94 && t1.gradeUpdatedAt);
+
+                    // Enter sheet 2 grade directly via Best-N-of-M sheet helper
+                    const saved2 = window.setHomeworkSheetGrade(c034035.code || '034035', 2, 'single', '86');
+                    const hwStatus = window.getCourseHomeworkStatus(c034035.code || '034035');
+
+                    // Open Notion Tasks table & verify inline grade input rendered
+                    if (typeof renderNotionTasksTable === 'function') renderNotionTasksTable();
+                    const inlineInput = document.querySelector('#notion-tasks-table-body tr[data-task-id="test_hw_1"] .notion-inline-grade-input');
+                    const hasInlineGrade = !!inlineInput && inlineInput.value === '94';
+
+                    // Open Task Side Peek & verify #peek-property-grade-row is visible for HW task
+                    if (typeof openTaskSidePeek === 'function') openTaskSidePeek('034035', 'test_hw_1');
+                    const peekRow = document.getElementById('peek-property-grade-row');
+                    const peekInput = document.getElementById('peek-property-grade');
+                    const peekVisibleForHw = !!(peekRow && peekRow.style.display === 'grid' && peekInput && peekInput.value === '94');
+                    if (typeof closeTaskSidePeek === 'function') closeTaskSidePeek();
+
+                    // Open Course Details Modal & verify HW Policy average pill renders
+                    if (typeof openCourseDetails === 'function') openCourseDetails('034035');
+                    const hwPolicyHtml = (document.getElementById('modal-hw-policy-section') || {}).innerHTML || '';
+                    const modalHasHwInput = !!document.querySelector('#modal-hw-policy-section .hw-grade-input');
+                    const modalHasAvgPill = hwPolicyHtml.includes('ממוצע ש״ב') && hwPolicyHtml.includes('90');
+                    if (typeof closeCourseModal === 'function') closeCourseModal();
+
+                    // Cloud sync merge must preserve newer grade
+                    const merged = window.AuthSync && typeof window.AuthSync.mergeCoursesPreservingTaskCompletion === 'function'
+                        ? window.AuthSync.mergeCoursesPreservingTaskCompletion(
+                            { '034035': { code: '034035', tasks: [{ id: 'test_hw_1', title: 'תרגיל בית 1', grade: 94, gradeUpdatedAt: 2000, status: 'done', completed: true, statusUpdatedAt: 2000 }] } },
+                            { '034035': { code: '034035', tasks: [{ id: 'test_hw_1', title: 'תרגיל בית 1', grade: 70, gradeUpdatedAt: 1000, status: 'done', completed: true, statusUpdatedAt: 2000 }] } }
+                        )
+                        : null;
+                    const syncPreservedNewerGrade = !!(merged && merged['034035'] && merged['034035'].tasks[0].grade === 94);
+
+                    return {
+                        ok: true,
+                        saved1,
+                        saved2,
+                        promotedDone,
+                        t1State: t1 ? { status: t1.status, grade: t1.grade, gradeUpdatedAt: t1.gradeUpdatedAt } : null,
+                        bestNAvg: hwStatus ? hwStatus.bestNAverage : null,
+                        hasInlineGrade,
+                        peekVisibleForHw,
+                        modalHasHwInput,
+                        modalHasAvgPill,
+                        syncPreservedNewerGrade
+                    };
+                } finally {
+                    c034035.tasks = backupTasks;
+                    c034035.status = backupStatus;
+                    window.gameState.semesterGuardMode = backupGuard;
+                    if (typeof saveState === 'function') saveState();
+                    if (typeof renderNotionTasksTable === 'function') renderNotionTasksTable();
+                }
+            })()`);
+
+            assert(res.ok && res.saved1 === 94 && res.saved2 === 86, 'Failed saving HW grades: ' + JSON.stringify(res));
+            assert(res.promotedDone, 'Entering HW grade must auto-promote status to done with timestamp: ' + JSON.stringify(res));
+            assert(res.bestNAvg === 90, 'Expected Best-N HW average 90 from (94, 86), got: ' + JSON.stringify(res));
+            assert(res.hasInlineGrade, 'Notion tasks table must render .notion-inline-grade-input with saved grade: ' + JSON.stringify(res));
+            assert(res.peekVisibleForHw, 'Task Side Peek must show #peek-property-grade-row for hw tasks: ' + JSON.stringify(res));
+            assert(res.modalHasHwInput && res.modalHasAvgPill, 'Course modal HW policy grid must show .hw-grade-input and HW average pill: ' + JSON.stringify(res));
+            assert(res.syncPreservedNewerGrade, 'AuthSync mergeCoursesPreservingTaskCompletion must keep newer HW grade: ' + JSON.stringify(res));
+        });
+
     } finally {
         console.log(`\n========================================================================`);
         console.log(`SUMMARY: ${passed} passed, ${failed} failed.`);
