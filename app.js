@@ -1432,6 +1432,67 @@ let activeIconPickerColor = '#3b82f6';
 let activeIconPickerCategory = 'all';
 let activeIconPickerSearch = '';
 
+const COURSE_ACCENT_COLORS = {
+    '114052': '#06b6d4', // Physics 2 - Cyan
+    '034053': '#a855f7', // Solids 2 - Purple
+    '034056': '#ec4899', // Scientific Computing - Pink
+    '034035': '#f97316', // Thermodynamics 1 - Orange
+    '104228': '#f43f5e', // PDEs - Rose
+    '03940805': '#84cc16', // PE / Yoga - Lime
+    '3940805': '#84cc16',
+    '104041': '#3b82f6', // Calc 1m - Blue
+    '104043': '#6366f1', // Calc 2m - Indigo
+    '104131': '#38bdf8', // ODE - Sky
+    '104166': '#8b5cf6', // Algebra A - Violet
+    '114051': '#f59e0b', // Physics 1 - Amber
+    '114032': '#14b8a6', // Physics Lab 1H - Teal
+    '034028': '#c084fc', // Solids 1 - Orchid
+    '034010': '#d97706', // Dynamics - Warm Amber
+    '034055': '#0284c7', // Fluids 1 - Deep Sky
+    '034032': '#a78bfa', // Linear Systems - Lavender
+    '034041': '#ea580c', // Heat Transfer - Burnt Orange
+    '034040': '#22d3ee', // Control - Bright Cyan
+    '034054': '#fbbf24', // Mechanical Design 1 - Gold
+    '034061': '#10b981', // Engineering Design - Emerald
+    '234128': '#60a5fa', // Python - Light Blue
+    '125001': '#10b981'  // Chemistry - Green
+};
+const COURSE_FALLBACK_ACCENT_PALETTE = ['#38bdf8', '#f97316', '#a855f7', '#ec4899', '#10b981', '#f43f5e', '#eab308', '#14b8a6'];
+
+function normalizeCourseAccentKey(rawCode) {
+    if (!rawCode) return '';
+    const s = String(rawCode).trim();
+    if (COURSE_ACCENT_COLORS[s] || COURSE_NOTION_ICONS[s]) return s;
+    if (/^\d{8}$/.test(s) && !s.startsWith('0394')) {
+        const six = (s.slice(1, 4) + s.slice(5)).padStart(6, '0');
+        if (COURSE_ACCENT_COLORS[six] || COURSE_NOTION_ICONS[six]) return six;
+        return six;
+    }
+    const sixPad = s.replace(/^0+/, '').padStart(6, '0');
+    if (COURSE_ACCENT_COLORS[sixPad] || COURSE_NOTION_ICONS[sixPad]) return sixPad;
+    return s;
+}
+
+function getCourseAccentColor(courseCode) {
+    const raw = courseCode ? String(courseCode).trim() : '';
+    const norm = normalizeCourseAccentKey(raw);
+    if (window.gameState && gameState.courseCustomIcons) {
+        const custom = gameState.courseCustomIcons[raw] || gameState.courseCustomIcons[norm];
+        if (custom && custom.color) return custom.color;
+    }
+    if (COURSE_ACCENT_COLORS[raw]) return COURSE_ACCENT_COLORS[raw];
+    if (COURSE_ACCENT_COLORS[norm]) return COURSE_ACCENT_COLORS[norm];
+    if (COURSE_NOTION_ICONS[raw] && COURSE_NOTION_ICONS[raw].color) return COURSE_NOTION_ICONS[raw].color;
+    if (COURSE_NOTION_ICONS[norm] && COURSE_NOTION_ICONS[norm].color) return COURSE_NOTION_ICONS[norm].color;
+    const str = norm || raw || '000000';
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+        hash = ((hash << 5) - hash + str.charCodeAt(i)) | 0;
+    }
+    return COURSE_FALLBACK_ACCENT_PALETTE[Math.abs(hash) % COURSE_FALLBACK_ACCENT_PALETTE.length];
+}
+window.getCourseAccentColor = getCourseAccentColor;
+
 function getCourseNotionIconHtml(courseCode) {
     if (!courseCode) return `<span class="notion-course-icon">📘</span>`;
     
@@ -8674,8 +8735,8 @@ const CHEESEFORK_SEMESTER_SCHEDULE = {
                     lecturer: "פרופ' לאוניד טרטקובסקי",
                     room: "הנדסה כימית 1",
                     startTime: "08:30",
-                    endTime: "10:30",
-                    duration: "שעתיים",
+                    endTime: "11:30",
+                    duration: "3 שעות",
                     cardClass: "timetable-card-thermo"
                 },
                 {
@@ -8986,10 +9047,10 @@ function enrichTimetableWithAuthenticRooms(timetable) {
                     enrichedCount++;
                 }
             }
-            // Auto-heal Tuesday Thermo 1 lecture to 08:30 - 10:30 (2 hours)
+            // Auto-heal Tuesday Thermo 1 lecture to 08:30 - 11:30 (3 hours)
             if (cleanCode === '34035' || cleanCode === '034035') {
-                if (day.dayIndex === 2 && c.startTime === '08:30' && c.endTime === '11:30') {
-                    c.endTime = '10:30';
+                if (day.dayIndex === 2 && c.type && c.type.includes('הרצאה') && c.startTime === '08:30' && c.endTime !== '11:30') {
+                    c.endTime = '11:30';
                     enrichedCount++;
                 }
             }
@@ -12636,10 +12697,12 @@ function isOfficeHoursOverlayEnabled() {
     }
     try {
         const stored = localStorage.getItem('semestero_show_office_hours');
+        if (stored === 'true') return true;
         if (stored === 'false') return false;
     } catch (e) {}
-    return true;
+    return false;
 }
+window.isOfficeHoursOverlayEnabled = isOfficeHoursOverlayEnabled;
 
 window.toggleOfficeHoursTimetable = function(forceVal) {
     const next = (typeof forceVal === 'boolean') ? forceVal : !isOfficeHoursOverlayEnabled();
@@ -12661,7 +12724,7 @@ function buildCourseOfficeHoursCardHtml(course) {
             <div class="oh-entry-row" data-oh-id="${escapeHtml(it.id)}">
                 <div style="display: flex; flex-direction: column; gap: 2px;">
                     <span style="font-weight: 700; color: #f8fafc;">${escapeHtml(it.staffName)} <span style="color: #fbbf24; font-weight: 600;">(${escapeHtml(it.role || 'מרצה')})</span></span>
-                    <span style="color: #cbd5e1; font-size: 0.73rem;">יום ${escapeHtml(it.dayName)} • ${escapeHtml(it.startTime)}${it.endTime ? ' - ' + escapeHtml(it.endTime) : ''}${it.location ? ' • 📍 ' + escapeHtml(it.location) : ''}</span>
+                    <span style="color: #cbd5e1; font-size: 0.73rem;">יום ${escapeHtml(it.dayName)} • <span class="ui-time-ltr" dir="ltr">${escapeHtml(it.startTime)}${it.endTime ? ' - ' + escapeHtml(it.endTime) : ''}</span>${it.location ? ' • 📍 ' + escapeHtml(it.location) : ''}</span>
                 </div>
                 <button type="button" class="btn-del-course-oh" data-oh-id="${escapeHtml(it.id)}" title="הסר שעת קבלה" style="background: rgba(239, 68, 68, 0.14); border: 1px solid rgba(239, 68, 68, 0.35); color: #fca5a5; border-radius: 6px; padding: 3px 7px; font-size: 0.72rem; cursor: pointer;">✕</button>
             </div>
@@ -14727,7 +14790,7 @@ function openCourseDetails(code) {
                 const isSlotPerpetual = (typeof isCoursePerpetualDitch === 'function') && isCoursePerpetualDitch(course.code, s.type);
                 return `
                 <div class="modal-schedule-item ${isSlotPerpetual ? 'is-perpetual-slot' : ''}">
-                    <div class="modal-schedule-item-time">⏰ יום ${s.day} | ${s.hours} ${isSlotPerpetual ? '<span style="font-size: 0.68rem; color: #38bdf8; background: rgba(56,189,248,0.12); border: 1px solid rgba(56,189,248,0.28); padding: 1px 6px; border-radius: 6px; margin-right: 4px; font-weight: 600;">🚀 למידה עצמית</span>' : ''}</div>
+                    <div class="modal-schedule-item-time">⏰ יום ${s.day} | <span class="ui-time-ltr" dir="ltr">${escapeHtml(s.hours)}</span> ${isSlotPerpetual ? '<span style="font-size: 0.68rem; color: #38bdf8; background: rgba(56,189,248,0.12); border: 1px solid rgba(56,189,248,0.28); padding: 1px 6px; border-radius: 6px; margin-right: 4px; font-weight: 600;">🚀 למידה עצמית</span>' : ''}</div>
                     <div class="modal-schedule-item-desc">${s.type} ${s.group ? `(קבוצה ${s.group})` : ''} ${roomInfo}</div>
                     ${s.lecturer ? `<div class="modal-schedule-item-lecturer">מרצה/מתרגל: ${s.lecturer}</div>` : ''}
                 </div>
@@ -18030,10 +18093,11 @@ function renderNotionTasksTable() {
         const semNum = c.semester || 1;
         const semHebrewMap = { 1: 'א׳', 2: 'ב׳', 3: 'ג׳', 4: 'ד׳', 5: 'ה׳', 6: 'ו׳', 7: 'ז׳', 8: 'ח׳' };
         const semLabel = `סמסטר ${semHebrewMap[semNum] || semNum}`;
+        const courseAccent = getCourseAccentColor(c.code);
 
         const isSelected = window.selectedTasksMap && window.selectedTasksMap.has(`${c.code}:::${t.id}`);
         rowsHtml += `
-            <tr data-course-code="${c.code}" data-task-id="${t.id}" class="${isPinned ? 'is-task-pinned' : ''} ${isSelected ? 'is-row-selected' : ''}">
+            <tr data-course-code="${c.code}" data-task-id="${t.id}" style="--course-accent: ${courseAccent};" class="${isPinned ? 'is-task-pinned' : ''} ${isSelected ? 'is-row-selected' : ''} has-course-accent">
                 <td class="notion-table-select-cell"><input type="checkbox" class="notion-row-checkbox" data-course-code="${c.code}" data-task-id="${t.id}" title="בחר משימה לפעולות מרובות" ${isSelected ? 'checked' : ''}></td>
                 <td>
                     <div class="notion-title-cell">
@@ -18054,7 +18118,8 @@ function renderNotionTasksTable() {
                     </div>
                 </td>
                 <td>
-                    <span class="notion-course-tag" data-course-code="${c.code}" style="cursor: pointer;" title="לחץ לשינוי סמל וצבע הקורס">
+                    <span class="notion-course-tag has-course-accent" data-course-code="${c.code}" style="--course-accent: ${courseAccent}; cursor: pointer;" title="לחץ לשינוי סמל וצבע הקורס">
+                        <span class="course-color-dot" style="background: ${courseAccent};"></span>
                         ${getCachedIcon(c.code)}
                         <span>${c.name}</span>
                     </span>
@@ -23311,16 +23376,18 @@ function renderFinalsCalendar() {
                     <div class="cal-day-view-section-title">📚 שיעורים במערכת השעות (${classesList.length})</div>
                     <div style="display: flex; flex-direction: column; gap: 6px;">
                         ${classesList.map(cls => {
-                            const cTime = escapeHtml(cls.time || (cls.startTime && cls.endTime ? `${cls.startTime}-${cls.endTime}` : ''));
+                            const cTime = escapeHtml(cls.time || (cls.startTime && cls.endTime ? `${cls.startTime} - ${cls.endTime}` : ''));
                             const cTitle = escapeHtml(cls.courseName || cls.name || cls.courseCode || 'שיעור');
                             const cType = cls.type ? `<span style="color:#94a3b8;font-size:0.74rem;">${escapeHtml(cls.type)}</span>` : '';
                             const cLoc = cls.room ? `<span style="color:#64748b;font-size:0.74rem;">📍 ${escapeHtml(cls.room)}</span>` : '';
+                            const slotAccent = getCourseAccentColor(cls.courseId || cls.courseCode || '');
                             return `
-                                <div class="cal-day-schedule-slot">
+                                <div class="cal-day-schedule-slot has-course-accent" style="--course-accent: ${slotAccent};">
                                     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                                        <span class="course-color-dot" style="background:${slotAccent};"></span>
                                         <strong>${cTitle}</strong> ${cType} ${cLoc}
                                     </div>
-                                    <span class="cal-day-schedule-time">${cTime}</span>
+                                    <span class="cal-day-schedule-time ui-time-ltr" dir="ltr">${cTime}</span>
                                 </div>
                             `;
                         }).join('')}
@@ -23548,17 +23615,19 @@ function createCalendarDayCell(dateStr, dayNum, isToday, itemsByDate, isOtherMon
             `;
         } else if (item.isExamEvent) {
             const passedClass = item.isPassed ? "passed" : "";
+            const itemAccent = getCourseAccentColor(item.courseCode);
             cellHtml += `
-                <div class="cal-event-pill exam-event ${passedClass}" data-course-code="${item.courseCode}" data-task-id="${item.taskId || ''}" title="מבחן: ${item.courseName || ''} (${item.courseCode}) | ${item.rawTitle || item.title} - לחץ לפתיחת פרטי משימה">
+                <div class="cal-event-pill exam-event ${passedClass} has-course-accent" style="--course-accent: ${itemAccent};" data-course-code="${item.courseCode}" data-task-id="${item.taskId || ''}" title="מבחן: ${item.courseName || ''} (${item.courseCode}) | ${item.rawTitle || item.title} - לחץ לפתיחת פרטי משימה">
                     <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: block;">${item.title}</span>
                 </div>
             `;
         } else if (item.isTaskEvent) {
             const doneClass = item.completed ? "done" : "";
             const checkIcon = item.completed ? "☑" : "⚪";
-            const timeBadge = item.dueTime ? `<span class="cal-event-time-badge">${escapeHtml(item.dueTime)}</span>` : '';
+            const timeBadge = item.dueTime ? `<span class="cal-event-time-badge ui-time-ltr" dir="ltr">${escapeHtml(item.dueTime)}</span>` : '';
+            const itemAccent = getCourseAccentColor(item.courseCode);
             cellHtml += `
-                <div class="cal-event-pill task-event ${item.typeClass} ${doneClass}" data-course-code="${item.courseCode}" data-task-id="${item.taskId}" title="משימה (${item.courseName})${item.dueTime ? ' • עד ' + item.dueTime : ''}: לחץ לצפייה בעמוד המשימה">
+                <div class="cal-event-pill task-event ${item.typeClass} ${doneClass} has-course-accent" style="--course-accent: ${itemAccent};" data-course-code="${item.courseCode}" data-task-id="${item.taskId}" title="משימה (${item.courseName})${item.dueTime ? ' • עד ' + item.dueTime : ''}: לחץ לצפייה בעמוד המשימה">
                     <span class="cal-task-check" data-course-code="${item.courseCode}" data-task-id="${item.taskId}" title="לחץ לסימון הושלם/לא הושלם">${checkIcon}</span>
                     ${timeBadge}
                     <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${item.displayTitle}</span>
@@ -23572,9 +23641,9 @@ function createCalendarDayCell(dateStr, dayNum, isToday, itemsByDate, isOtherMon
             if (item.isAllDay) {
                 timeBadge = `<span class="cal-event-time-badge" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.35);">יום שלם</span>`;
             } else if (item.startTime && item.endTime) {
-                timeBadge = `<span class="cal-event-time-badge">${item.startTime}-${item.endTime}</span>`;
+                timeBadge = `<span class="cal-event-time-badge ui-time-ltr" dir="ltr">${item.startTime} - ${item.endTime}</span>`;
             } else if (item.time) {
-                timeBadge = `<span class="cal-event-time-badge">${item.time}</span>`;
+                timeBadge = `<span class="cal-event-time-badge ui-time-ltr" dir="ltr">${item.time}</span>`;
             }
             cellHtml += `
                 <div class="cal-event-pill personal-event ${doneClass}" data-pe-id="${item.id || ''}" title="${item.time ? item.time + ' - ' : ''}${item.description ? item.description + ' - ' : ''}${item.title}">
@@ -23769,11 +23838,16 @@ function renderDayModalEventsList(dateStr) {
         if (item.isAllDay) {
             timeHtml = `<span class="day-modal-event-time-tag" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; border-color: rgba(245, 158, 11, 0.4);">יום שלם</span>`;
         } else if (item.startTime && item.endTime) {
-            timeHtml = `<span class="day-modal-event-time-tag">${item.startTime}-${item.endTime}</span>`;
+            timeHtml = `<span class="day-modal-event-time-tag ui-time-ltr" dir="ltr">${item.startTime} - ${item.endTime}</span>`;
         } else if (item.time || item.dueTime) {
-            timeHtml = `<span class="day-modal-event-time-tag">${escapeHtml(item.time || item.dueTime)}</span>`;
+            timeHtml = `<span class="day-modal-event-time-tag ui-time-ltr" dir="ltr">${escapeHtml(item.time || item.dueTime)}</span>`;
         } else {
             timeHtml = `<span style="font-size: 0.72rem; color: #64748b; font-family: monospace;">--:--</span>`;
+        }
+        if (item.courseCode) {
+            const modalAccent = getCourseAccentColor(item.courseCode);
+            itemRow.style.setProperty('--course-accent', modalAccent);
+            itemRow.classList.add('has-course-accent');
         }
         let delBtnHtml = item.isPersonalEvent ? `<button type="button" class="btn-del-modal-event" data-pe-id="${item.id}" title="מחק אירוע זה">🗑️</button>` : '';
 
@@ -23925,11 +23999,11 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.11.16-v2.13.16",
-    version: "2.13.16",
-    build: "20261116_03",
-    date: "2026-11-16 22:35",
-    description: "v2.13.16: תיקון כפתור חזור במובייל ובאפליקציית אנדרואיד (Predictive Back + User-Activated History + סגירת תצוגה צדדית), הזזת הודעות סנכרון מעל הסרגל התחתון ומניעת סנכרון סרק חוזר, תצוגת שבוע קריאה במובייל, תצוגת יום ייעודית חדשה (📍 יום), ופתיחת פריטי לוח שנה בלחיצה במקום סימון כהושלם (ADR-126)."
+    code: "REV-2026.11.17-v2.13.17",
+    version: "2.13.17",
+    build: "20261117_01",
+    date: "2026-11-17 09:50",
+    description: "v2.13.17: תיקון שעות הרצאת תרמודינמיקה 1 במערכת (08:30 - 11:30, 3 שעות) במחשב, במובייל ובשעון, יישור כל טווחי השעות משמאל לימין (LTR), הסרת שעות קבלה מהטבלה השבועית כברירת מחדל (השארת הטבלה למטה), וצביעת קורסים אחידה בכל המערכת לזיהוי מהיר (ADR-127)."
 };
 window.APP_VERSION = APP_CURRENT_REVISION.version;
 
@@ -26657,7 +26731,7 @@ function renderTimetableGrid() {
                         <div class="timetable-office-hour-card" onclick="if (typeof openCourseDetails === 'function') openCourseDetails('${escapeHtml(oh.courseCode)}')" title="לחץ לניהול ועריכת שעות הקבלה של הקורס">
                             <div class="oh-card-top">
                                 <span class="oh-badge">🕐 שעת קבלה • ${escapeHtml(oh.role || 'מרצה')}</span>
-                                <span class="oh-time">${escapeHtml(oh.startTime)}${oh.endTime ? ' - ' + escapeHtml(oh.endTime) : ''}</span>
+                                <span class="oh-time" dir="ltr">${escapeHtml(oh.startTime)}${oh.endTime ? ' - ' + escapeHtml(oh.endTime) : ''}</span>
                             </div>
                             <div class="oh-staff">${escapeHtml(oh.staffName)}</div>
                             <div class="oh-meta">
@@ -26702,9 +26776,10 @@ function renderTimetableGrid() {
                 const attBorderClass = attStatus === 'attended' ? 'attendance-card-attended' : (attStatus === 'missed' ? 'attendance-card-missed' : '');
 
                 const resUrls = getCourseResourceUrls(c.courseId);
+                const ttCardAccent = getCourseAccentColor(c.courseId);
 
                 bodyHtml += `
-                    <div class="timetable-card ${c.cardClass || ''} ${durMeta.blockClass} ${attBorderClass} ${perpetualClass}" onclick="if (typeof openCourseDetails === 'function') openCourseDetails('${c.courseId}')">
+                    <div class="timetable-card ${c.cardClass || ''} ${durMeta.blockClass} ${attBorderClass} ${perpetualClass} has-course-accent" style="--course-accent: ${ttCardAccent};" onclick="if (typeof openCourseDetails === 'function') openCourseDetails('${c.courseId}')">
                         <!-- שורה 1: תגית סוג שיעור + תגית משך זמן שיעור מובלטת -->
                         <div class="timetable-card-top">
                             <span class="timetable-tag">${c.type}</span>
@@ -26712,7 +26787,7 @@ function renderTimetableGrid() {
                             <span class="timetable-duration-pill ${durMeta.pillClass}">⏱️ ${durMeta.text}</span>
                         </div>
                         <!-- שורה 2: שעות השיעור -->
-                        <div class="timetable-card-time">⏰ ${c.startTime} - ${c.endTime}</div>
+                        <div class="timetable-card-time">⏰ <span class="ui-time-ltr" dir="ltr">${c.startTime} - ${c.endTime}</span></div>
                         <!-- שורה 3: חדר / מיקום -->
                         ${(c.room && c.room.trim() && c.room !== 'כיתת טכניון') ? `
                             <div class="timetable-card-room-bar">
@@ -26799,16 +26874,17 @@ function renderTimetableOfficeHoursPanel() {
                 <div class="oh-entry-row">
                     <div style="display: flex; flex-direction: column; gap: 1px;">
                         <span style="font-weight: 700; color: #f8fafc;">${escapeHtml(it.staffName)} <span style="color: #fbbf24; font-weight: 600;">(${escapeHtml(it.role || 'מרצה')})</span></span>
-                        <span style="color: #cbd5e1; font-size: 0.72rem;">יום ${escapeHtml(it.dayName)} • ${escapeHtml(it.startTime)}${it.endTime ? ' - ' + escapeHtml(it.endTime) : ''}${it.location ? ' • 📍 ' + escapeHtml(it.location) : ''}</span>
+                        <span style="color: #cbd5e1; font-size: 0.72rem;">יום ${escapeHtml(it.dayName)} • <span class="ui-time-ltr" dir="ltr">${escapeHtml(it.startTime)}${it.endTime ? ' - ' + escapeHtml(it.endTime) : ''}</span>${it.location ? ' • 📍 ' + escapeHtml(it.location) : ''}</span>
                     </div>
                     <button type="button" class="btn-del-tt-oh" data-course-code="${escapeHtml(c.code)}" data-oh-id="${escapeHtml(it.id)}" title="הסר שעת קבלה" style="background: rgba(239, 68, 68, 0.14); border: 1px solid rgba(239, 68, 68, 0.35); color: #fca5a5; border-radius: 6px; padding: 3px 7px; font-size: 0.7rem; cursor: pointer;">✕</button>
                 </div>
             `).join('');
 
+        const ohBoxAccent = getCourseAccentColor(c.code);
         return `
-            <div class="oh-course-box">
+            <div class="oh-course-box has-course-accent" style="--course-accent: ${ohBoxAccent};">
                 <div class="oh-course-box-header">
-                    <span style="cursor: pointer;" onclick="if(typeof openCourseDetails==='function') openCourseDetails('${escapeHtml(c.code)}')">📚 ${escapeHtml(c.name)} <span style="color: #94a3b8; font-size: 0.74rem;">(${escapeHtml(c.code)})</span></span>
+                    <span style="cursor: pointer; display: inline-flex; align-items: center; gap: 6px;" onclick="if(typeof openCourseDetails==='function') openCourseDetails('${escapeHtml(c.code)}')"><span class="course-color-dot" style="background: ${ohBoxAccent};"></span>📚 ${escapeHtml(c.name)} <span style="color: #94a3b8; font-size: 0.74rem;">(${escapeHtml(c.code)})</span></span>
                     <button type="button" class="btn-quick-course-oh" data-course-code="${escapeHtml(c.code)}" style="background: rgba(245, 158, 11, 0.14); border: 1px solid rgba(245, 158, 11, 0.35); color: #fde68a; border-radius: 6px; padding: 2px 7px; font-size: 0.72rem; cursor: pointer;">+ הוסף</button>
                 </div>
                 ${rowsHtml}
@@ -26977,10 +27053,11 @@ function renderTodayTimetableBanner() {
             else if (status.code === 'next') itemClass += ' next-upcoming';
 
             const durMeta = getClassDurationMetadata(c.startTime, c.endTime);
+            const todayAccent = getCourseAccentColor(c.courseId);
             bodyHtml += `
-                <div class="${itemClass}" onclick="openCourseDetails('${c.courseId}')">
+                <div class="${itemClass} has-course-accent" style="--course-accent: ${todayAccent};" onclick="openCourseDetails('${c.courseId}')">
                     <div class="today-class-top">
-                        <span class="today-class-time">⏰ ${c.startTime} - ${c.endTime} (${durMeta.text})</span>
+                        <span class="today-class-time">⏰ <span class="ui-time-ltr" dir="ltr">${c.startTime} - ${c.endTime}</span> (${durMeta.text})</span>
                         ${isPerpetual 
                             ? `<span class="today-class-status perpetual" title="בלמידה עצמית (הברזה נצחית)">🚀 למידה עצמית</span>` 
                             : `<span class="today-class-status ${status.code}">${status.text}</span>`
@@ -29922,8 +29999,9 @@ function renderNotionHomeworkPolicyStrip() {
             metaExtra += ` &bull; <span style="color: #94a3b8;">טרם נפתחו תרגילים 🔒</span>`;
         }
 
+        const hwAccent = getCourseAccentColor(course.code);
         capsulesHtml += `
-            <div class="course-hw-capsule" onclick="if (window.openCourseHomeworkDetail) window.openCourseHomeworkDetail('${course.code}');" title="לחץ לפירוט הגיליונות ומעקב ההגשות">
+            <div class="course-hw-capsule has-course-accent" style="--course-accent: ${hwAccent};" onclick="if (window.openCourseHomeworkDetail) window.openCourseHomeworkDetail('${course.code}');" title="לחץ לפירוט הגיליונות ומעקב ההגשות">
                 <div class="capsule-top">
                     <div class="capsule-course-info">
                         <span class="capsule-course-icon" style="display: inline-flex; align-items: center;">${iconHtml}</span>

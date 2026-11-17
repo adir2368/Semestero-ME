@@ -1044,11 +1044,12 @@ async function run() {
                 if (typeof renderTimetableGrid === 'function') renderTimetableGrid();
                 const ttGrid = document.getElementById('timetable-grid-container');
                 const ttPanel = document.getElementById('timetable-office-hours-panel');
-                const gridHasOh = !!(ttGrid && ttGrid.innerHTML.includes('timetable-office-hour-card'));
+                const gridHiddenByDefault = !(ttGrid && ttGrid.innerHTML.includes('timetable-office-hour-card'));
                 const panelHasCustom = !!(ttPanel && ttPanel.innerHTML.includes('ד"ר בדיקה'));
+                window.toggleOfficeHoursTimetable(true);
+                const gridShowsWhenToggled = !!(document.getElementById('timetable-grid-container')?.innerHTML.includes('timetable-office-hour-card'));
                 window.toggleOfficeHoursTimetable(false);
                 const gridHidesWhenToggled = !(document.getElementById('timetable-grid-container')?.innerHTML.includes('timetable-office-hour-card'));
-                window.toggleOfficeHoursTimetable(true);
                 if (typeof openCourseDetails === 'function') openCourseDetails('034053');
                 const modalOhCard = document.getElementById('course-modal-office-hours-card');
                 const modalHasOh = !!(modalOhCard && modalOhCard.innerHTML.includes('פרופ׳ ספי גבלי'));
@@ -1092,7 +1093,7 @@ async function run() {
 
                 return {
                     p1, p2, calRenderedTimedTask, icsHasTimedTask,
-                    hasOhEngine, defaultsCount53: defaults53.length, addedCustom, gridHasOh, panelHasCustom, gridHidesWhenToggled, modalHasOh,
+                    hasOhEngine, defaultsCount53: defaults53.length, addedCustom, gridHiddenByDefault, gridShowsWhenToggled, panelHasCustom, gridHidesWhenToggled, modalHasOh,
                     restoredExamUnchecked, restoredDoneUnchecked, restoredFocusActive, restoredSearch, restoredOrganit, cloudHasFilterPrefs
                 };
             })()`);
@@ -1102,7 +1103,7 @@ async function run() {
             assert(result.calRenderedTimedTask, 'Calendar must render timed Moodle tasks under YYYY-MM-DD with dueTime');
             assert(result.icsHasTimedTask, 'CalendarSyncEngine.generateUnifiedICS must include timed Moodle tasks');
             assert(result.hasOhEngine && result.defaultsCount53 >= 2 && result.addedCustom, 'OfficeHoursEngine must provide defaults and support adding custom entries: ' + JSON.stringify(result));
-            assert(result.gridHasOh && result.panelHasCustom && result.gridHidesWhenToggled && result.modalHasOh, 'Office Hours must render in Timetable grid, panel, toggle cleanly, and render in Course modal: ' + JSON.stringify(result));
+            assert(result.gridHiddenByDefault && result.gridShowsWhenToggled && result.panelHasCustom && result.gridHidesWhenToggled && result.modalHasOh, 'Office Hours must stay clean off grid by default, show in bottom panel + course modal, and toggle cleanly: ' + JSON.stringify(result));
             assert(result.restoredExamUnchecked && result.restoredDoneUnchecked && result.restoredFocusActive && result.restoredSearch && result.restoredOrganit && result.cloudHasFilterPrefs, 'All task filters + focus + search + cloud state must persist and restore');
         });
 
@@ -1201,6 +1202,79 @@ async function run() {
             assert(res.hasDayBtn && res.hasDayClass && res.dayCardCount === 1, 'Calendar Day View toggle & card must render: ' + JSON.stringify(res));
             assert(!res.hadWeekTask || (res.completedUnchanged && res.peekOpened && res.backClosedPeek && !res.peekAfterBack), 'Clicking calendar task must open peek WITHOUT marking completed, and Back must close peek: ' + JSON.stringify(res));
             assert(res.backLeftTab === true, 'Back button from calendar must navigate back within app: ' + JSON.stringify(res));
+        });
+
+        await test('Test 26: Thermo 1 3-Hour Lecture, LTR Hours, Clean Default Timetable & Unified Course Colors (v2.13.17)', async () => {
+            const wearHelper = fs.readFileSync(path.join(__dirname, '..', 'android', 'wear', 'src', 'main', 'java', 'com', 'technion', 'semestero', 'wear', 'WearScheduleHelper.java'), 'utf8');
+            assert(wearHelper.includes('"08:30 - 11:30"') && wearHelper.includes('510, 690'), 'WearScheduleHelper must define Thermo 1 Tuesday lecture as 08:30 - 11:30 (510..690)');
+
+            const appJsSrc = fs.readFileSync(path.join(__dirname, '..', 'app.js'), 'utf8');
+            const thermoBlockMatch = appJsSrc.match(/courseId:\s*"034035"[\s\S]{0,600}?cardClass:\s*"timetable-card-thermo"/);
+            assert(thermoBlockMatch && thermoBlockMatch[0].includes('endTime: "11:30"') && thermoBlockMatch[0].includes('duration: "3 שעות"'), 'CHEESEFORK_SEMESTER_SCHEDULE must set Tuesday Thermo 1 lecture to 08:30 - 11:30 (3 שעות)');
+
+            const res = await cdp.eval(`(() => {
+                const origTimetable = window.gameState ? window.gameState.timetable : undefined;
+                if (window.gameState) {
+                    window.gameState.timetable = {
+                        days: [{
+                            dayIndex: 2,
+                            name: 'שלישי',
+                            classes: [{
+                                courseId: '034035',
+                                courseName: 'תרמודינמיקה 1',
+                                type: 'הרצאה 10',
+                                lecturer: "פרופ' לאוניד טרטקובסקי",
+                                room: 'הנדסה כימית 1',
+                                startTime: '08:30',
+                                endTime: '10:30',
+                                cardClass: 'timetable-card-thermo'
+                            }]
+                        }]
+                    };
+                }
+                if (typeof setActiveMainTab === 'function') setActiveMainTab('timetable');
+                if (typeof renderTimetableGrid === 'function') renderTimetableGrid();
+
+                const tueCol = document.querySelector('.timetable-day-col[data-day-col="2"]');
+                const thermoCard = tueCol ? Array.from(tueCol.querySelectorAll('.timetable-card')).find(el => el.innerText.includes('תרמודינמיקה 1') && el.innerText.includes('הרצאה')) : null;
+                const timeSpan = thermoCard ? thermoCard.querySelector('.ui-time-ltr') : null;
+                const timeStyle = timeSpan ? getComputedStyle(timeSpan) : null;
+                const cardHtmlHasLtr = !!(thermoCard && thermoCard.innerHTML.includes('dir="ltr"') && thermoCard.innerText.includes('08:30 - 11:30') && thermoCard.innerText.includes('3 שעות'));
+                const healedEnd = window.gameState?.timetable?.days?.[0]?.classes?.[0]?.endTime;
+                const healedDur = window.gameState?.timetable?.days?.[0]?.classes?.[0]?.duration;
+
+                if (window.gameState) {
+                    if (origTimetable === undefined) delete window.gameState.timetable;
+                    else window.gameState.timetable = origTimetable;
+                }
+
+                // Test unified per-course accent color across Tasks & Calendar
+                if (typeof setActiveMainTab === 'function') setActiveMainTab('tasks');
+                const thermoColor = typeof window.getCourseAccentColor === 'function' ? window.getCourseAccentColor('034035') : '';
+                const physicsColor = typeof window.getCourseAccentColor === 'function' ? window.getCourseAccentColor('114052') : '';
+                const hasTaskRowAccent = document.querySelectorAll('tr.has-course-accent[style*="--course-accent"]').length > 0;
+                const ohDefault = typeof window.isOfficeHoursOverlayEnabled === 'function' ? window.isOfficeHoursOverlayEnabled() : null;
+
+                if (typeof setActiveMainTab === 'function') setActiveMainTab('curriculum');
+                return {
+                    hasThermo3hText: cardHtmlHasLtr,
+                    timeDir: timeStyle ? timeStyle.direction : '',
+                    timeBidi: timeStyle ? timeStyle.unicodeBidi : '',
+                    healedEnd,
+                    healedDur,
+                    thermoColor,
+                    physicsColor,
+                    distinctColors: Boolean(thermoColor && physicsColor && thermoColor !== physicsColor),
+                    hasTaskRowAccent,
+                    ohDefault
+                };
+            })()`);
+
+            assert(res.hasThermo3hText, 'Timetable Tuesday Thermo 1 lecture must show 08:30 - 11:30 & 3 שעות: ' + JSON.stringify(res));
+            assert(res.timeDir === 'ltr' && res.timeBidi.includes('isolate'), 'Time ranges must render LTR with unicode-bidi isolate: ' + JSON.stringify(res));
+            assert(res.healedEnd === '11:30' && res.healedDur === '3 שעות', 'enrichTimetableWithAuthenticRooms must heal stale 10:30 thermo slot to 11:30 / 3 שעות: ' + JSON.stringify(res));
+            assert(res.distinctColors && res.hasTaskRowAccent, 'Each course must apply its distinct --course-accent color in Tasks & UI: ' + JSON.stringify(res));
+            assert(res.ohDefault === false, 'Office Hours overlay inside Timetable grid must default to false (bottom panel remains primary): ' + JSON.stringify(res));
         });
 
     } finally {

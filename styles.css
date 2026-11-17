@@ -19389,3 +19389,75 @@ input[type="number"] {
     cursor: pointer;
 }
 
+/* 13. Strict Left-to-Right Hour Ranges & Unified Per-Course Accent Colors */
+.ui-time-ltr,
+.oh-time,
+.cal-event-time-badge,
+.day-modal-event-time-tag,
+.cal-day-schedule-time,
+.tt-time-cell {
+    direction: ltr;
+    unicode-bidi: isolate;
+    display: inline-block;
+    font-variant-numeric: tabular-nums;
+}
+
+.course-color-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    display: inline-block;
+    box-shadow: 0 0 8px currentColor;
+}
+
+.notion-course-tag.has-course-accent {
+    background: color-mix(in srgb, var(--course-accent, #38bdf8) 14%, rgba(15, 23, 42, 0.9)) !important;
+    border: 1px solid color-mix(in srgb, var(--course-accent, #38bdf8) 42%, transparent) !important;
+    border-radius: 8px;
+    padding: 3px 9px;
+}
+
+tr.has-course-accent td:first-child {
+    box-shadow: inset -3px 0 0 var(--course-accent, #38bdf8);
+}
+
+.cal-event-pill.has-course-accent {
+    border-inline-start: 3px solid var(--course-accent, #38bdf8) !important;
+    background: color-mix(in srgb, var(--course-accent, #38bdf8) 15%, rgba(15, 23, 42, 0.92)) !important;
+    border-color: color-mix(in srgb, var(--course-accent, #38bdf8) 38%, rgba(255, 255, 255, 0.12)) !important;
+}
+
+.cal-event-pill.exam-event.has-course-accent {
+    border-inline-start-width: 4px !important;
+}
+
+.cal-day-schedule-slot.has-course-accent,
+.day-modal-event-item.has-course-accent {
+    border-inline-start: 3px solid var(--course-accent, #38bdf8) !important;
+    background: color-mix(in srgb, var(--course-accent, #38bdf8) 12%, rgba(30, 41, 59, 0.72)) !important;
+}
+
+.today-class-item.has-course-accent {
+    border-inline-start: 4px solid var(--course-accent, #38bdf8) !important;
+    background: color-mix(in srgb, var(--course-accent, #38bdf8) 12%, rgba(15, 23, 42, 0.86)) !important;
+}
+
+.oh-course-box.has-course-accent {
+    border-top: 2px solid var(--course-accent, #38bdf8);
+}
+
+.course-hw-capsule.has-course-accent {
+    border-inline-start: 4px solid var(--course-accent, #38bdf8) !important;
+    background: color-mix(in srgb, var(--course-accent, #38bdf8) 10%, rgba(15, 23, 42, 0.85)) !important;
+}
+
+.timetable-card.has-course-accent:not(.timetable-card-physics):not(.timetable-card-solids):not(.timetable-card-computing):not(.timetable-card-thermo):not(.timetable-card-pde):not(.timetable-card-yoga) {
+    background: linear-gradient(135deg, color-mix(in srgb, var(--course-accent, #38bdf8) 18%, rgba(15, 23, 42, 0.92)) 0%, rgba(15, 23, 42, 0.88) 100%);
+    border-color: color-mix(in srgb, var(--course-accent, #38bdf8) 38%, transparent);
+}
+
+.timetable-card.has-course-accent:not(.timetable-card-physics):not(.timetable-card-solids):not(.timetable-card-computing):not(.timetable-card-thermo):not(.timetable-card-pde):not(.timetable-card-yoga)::before {
+    background: var(--course-accent, #38bdf8);
+}
+

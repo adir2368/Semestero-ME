@@ -160,10 +160,10 @@ public class WearScheduleHelper {
             if (room.isEmpty() || room.contains("כימית")) room = "דן קאהן - מכונות 6";
             if (lecturer.isEmpty()) lecturer = "פרופ' יוסף גבלי";
         }
-        // Tuesday (dayIndex 2): Thermo 1 Lecture 10 is 08:30-10:30 (2 hours)
-        if (dayIndex == 2 && title.contains("תרמו") && startMin == 510 && endMin == 690) {
-            endMin = 630;
-            time = "08:30 - 10:30";
+        // Tuesday (dayIndex 2): Thermo 1 Lecture 10 is 08:30-11:30 (3 hours)
+        if (dayIndex == 2 && title.contains("תרמו") && startMin == 510 && endMin == 630) {
+            endMin = 690;
+            time = "08:30 - 11:30";
         }
         // Tuesday (dayIndex 2) 14:30: If stale Solids 2 Tutorial 11 in Ullmann 103/602 leaked, heal to Computing Tutorial 11
         if (dayIndex == 2 && startMin == 870 && (room.contains("103") || room.contains("602") || lecturer.contains("טננבאום") || lecturer.contains("דואר"))) {
@@ -239,8 +239,8 @@ public class WearScheduleHelper {
             case Calendar.TUESDAY: // יום שלישי
                 list.add(new CourseSlot(
                     "תרמודינמיקה 1",
-                    "08:30 - 10:30",
-                    510, 630,
+                    "08:30 - 11:30",
+                    510, 690,
                     "הנדסה כימית 1",
                     "פרופ' לאוניד טרטקובסקי",
                     "הרצאה 10"

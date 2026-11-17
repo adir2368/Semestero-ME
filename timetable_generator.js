@@ -1729,7 +1729,7 @@
                                             <span class="timetable-tag" style="background: rgba(255, 255, 255, 0.08); padding: 2px 6px; border-radius: 4px; font-weight: 700;">${c.type}</span>
                                             ${anchorBadgeHtml}
                                         </div>
-                                        <span class="timetable-card-time">⏰ ${c.startTime} - ${c.endTime}</span>
+                                        <span class="timetable-card-time">⏰ <span class="ui-time-ltr" dir="ltr">${c.startTime} - ${c.endTime}</span></span>
                                     </div>
                                     <!-- שורה 2: חדר או מיקום (רק אם קיים) -->
                                     ${(c.room && c.room.trim() && c.room !== 'כיתת טכניון') ? `
