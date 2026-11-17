@@ -1865,6 +1865,210 @@
         }
     };
 
+    // =========================================================================
+    // 11.6 Horizontal Tab Swipe & Trackpad Navigation (ימין / שמאל)
+    // =========================================================================
+    const HorizontalTabSwipeManager = {
+        TAB_ORDER: ['curriculum', 'planner', 'tasks', 'calendar', 'timetable', 'settings'],
+        _lastSwitchMs: 0,
+        _touchStartX: 0,
+        _touchStartY: 0,
+        _touchStartTime: 0,
+        _touchStartTarget: null,
+        _touchActive: false,
+
+        hasBlockingOverlay: function() {
+            if (window.InteractiveTour && typeof window.InteractiveTour.isActive === 'function' && window.InteractiveTour.isActive()) {
+                return true;
+            }
+            const taskSidePeek = document.getElementById('task-side-peek');
+            if (taskSidePeek && taskSidePeek.classList.contains('active')) return true;
+
+            const overlayIds = [
+                'pangea-reader-modal', 'pangea-search-modal', 'notif-drawer-overlay',
+                'command-palette-modal', 'omni-command-palette-modal', 'modal-attendance-hub',
+                'modal-grade-sheet', 'analytics-modal', 'modal-miluim-rights',
+                'course-modal', 'calendar-day-modal'
+            ];
+            for (let i = 0; i < overlayIds.length; i++) {
+                const el = document.getElementById(overlayIds[i]);
+                if (el && MobileBackNavigationManager.isElementVisible(el)) return true;
+            }
+            const activeOverlays = document.querySelectorAll('.modal-overlay.active, .modal.active, .modal-overlay[style*="display: flex"], .modal-overlay[style*="display: block"]');
+            for (let i = 0; i < activeOverlays.length; i++) {
+                if (MobileBackNavigationManager.isElementVisible(activeOverlays[i])) return true;
+            }
+            return false;
+        },
+
+        isBlockedTarget: function(target, dx) {
+            if (!target || typeof target.closest !== 'function') return false;
+            if (target.closest('input, textarea, select, [contenteditable="true"], .no-tab-swipe')) {
+                return true;
+            }
+            // Allow flowchart canvas dragging (panning Semesters 1..8) without hijacking tab switches
+            if (target.closest('.flowchart-viewport, #flowchart-canvas, .tree-canvas-container .tree-svg, #flowchart-svg')) {
+                return true;
+            }
+            // Check horizontally scrollable ancestors (tables, timetable grid, etc.)
+            let node = target;
+            while (node && node !== document.body && node !== document.documentElement) {
+                if (node.nodeType === 1 && node.scrollWidth > node.clientWidth + 8) {
+                    const st = typeof window.getComputedStyle === 'function' ? window.getComputedStyle(node) : null;
+                    const ovX = st ? st.overflowX : '';
+                    if (ovX === 'auto' || ovX === 'scroll') {
+                        return true;
+                    }
+                }
+                node = node.parentElement;
+            }
+            return false;
+        },
+
+        handleSwipe: function(dx, dy, targetEl) {
+            const absX = Math.abs(dx || 0);
+            const absY = Math.abs(dy || 0);
+            if (absX < 68 || absX < absY * 1.45) return false;
+
+            const now = Date.now();
+            if (now - this._lastSwitchMs < 420) return false;
+            if (this.hasBlockingOverlay()) return false;
+            if (this.isBlockedTarget(targetEl, dx)) return false;
+
+            const curTab = window.currentActiveTab || 'curriculum';
+            const idx = this.TAB_ORDER.indexOf(curTab);
+            if (idx === -1) return false;
+
+            // RTL visual bar: [settings (5) ... timetable (4) ... calendar (3) ... tasks (2) ... planner (1) ... curriculum (0)]
+            // Swiping left->right (dx > 0) pulls adjacent tab on the left (idx + 1) into view;
+            // Swiping right->left (dx < 0) pulls adjacent tab on the right (idx - 1) into view.
+            const step = dx > 0 ? 1 : -1;
+            const nextIdx = idx + step;
+            if (nextIdx < 0 || nextIdx >= this.TAB_ORDER.length) return false;
+
+            const nextTab = this.TAB_ORDER[nextIdx];
+            if (typeof window.setActiveMainTab !== 'function') return false;
+
+            this._lastSwitchMs = now;
+            window.setActiveMainTab(nextTab);
+
+            // Subtle directional enter class on newly active workspace
+            const wsMap = {
+                curriculum: 'curriculum-workspace',
+                planner: 'planner-workspace',
+                tasks: 'tasks-workspace',
+                calendar: 'tasks-workspace',
+                timetable: 'timetable-workspace',
+                settings: 'settings-workspace'
+            };
+            const wsEl = document.getElementById(wsMap[nextTab]);
+            if (wsEl && !UiMotionPromptsSuite.getReducedMotion()) {
+                wsEl.classList.remove('workspace-swipe-enter-next', 'workspace-swipe-enter-prev');
+                void wsEl.offsetWidth;
+                wsEl.classList.add(step > 0 ? 'workspace-swipe-enter-next' : 'workspace-swipe-enter-prev');
+                setTimeout(() => {
+                    wsEl.classList.remove('workspace-swipe-enter-next', 'workspace-swipe-enter-prev');
+                }, 260);
+            }
+            return true;
+        },
+
+        init: function() {
+            if (typeof document === 'undefined') return;
+
+            document.addEventListener('touchstart', (e) => {
+                if (!e.touches || e.touches.length !== 1) {
+                    this._touchActive = false;
+                    return;
+                }
+                const t = e.touches[0];
+                this._touchStartX = t.clientX;
+                this._touchStartY = t.clientY;
+                this._touchStartTime = Date.now();
+                this._touchStartTarget = e.target;
+                this._touchActive = true;
+            }, { passive: true });
+
+            document.addEventListener('touchend', (e) => {
+                if (!this._touchActive || !e.changedTouches || e.changedTouches.length === 0) return;
+                this._touchActive = false;
+                const elapsed = Date.now() - this._touchStartTime;
+                if (elapsed > 750) return;
+                const t = e.changedTouches[0];
+                const dx = t.clientX - this._touchStartX;
+                const dy = t.clientY - this._touchStartY;
+                this.handleSwipe(dx, dy, this._touchStartTarget);
+            }, { passive: true });
+
+            document.addEventListener('touchcancel', () => {
+                this._touchActive = false;
+            }, { passive: true });
+
+            // Desktop trackpad two-finger horizontal swipe / horizontal scroll wheel
+            document.addEventListener('wheel', (e) => {
+                if (!e || e.ctrlKey || e.metaKey) return;
+                if (Math.abs(e.deltaX) >= 52 && Math.abs(e.deltaY) <= 18) {
+                    // Trackpad swipe right pushes deltaX positive in natural/reversed scrolling; normalize directly
+                    const dx = -e.deltaX;
+                    this.handleSwipe(dx, e.deltaY, e.target);
+                }
+            }, { passive: true });
+
+            window.HorizontalTabSwipeManager = this;
+            window.handleHorizontalTabSwipe = (dx, dy, targetEl) => this.handleSwipe(dx, dy, targetEl);
+        }
+    };
+
+    // =========================================================================
+    // 11.7 What's New Auto-Accordion (Latest update only; older updates collapsed)
+    // =========================================================================
+    const WhatsNewAccordionManager = {
+        sync: function() {
+            const card = document.getElementById('settings-card-whats-new');
+            const mainList = card ? card.querySelector('.whats-new-list') : null;
+            const olderWrap = document.getElementById('older-versions-list');
+            const olderUl = olderWrap ? olderWrap.querySelector('ul') : null;
+            const toggleBtn = document.getElementById('btn-toggle-older-versions');
+            if (!card || !mainList || !olderWrap || !toggleBtn) return;
+
+            // If future updates append extra <li> entries directly into .whats-new-list, fold all 2nd+ items into olderUl automatically
+            if (olderUl) {
+                const extraItems = Array.from(mainList.children).slice(1);
+                if (extraItems.length > 0) {
+                    extraItems.reverse().forEach(li => olderUl.insertBefore(li, olderUl.firstChild));
+                }
+            }
+
+            const archivedCount = olderUl ? olderUl.querySelectorAll('li').length : 0;
+            const isExpanded = card.classList.contains('is-history-expanded') || olderWrap.style.display === 'block';
+            if (archivedCount === 0) {
+                toggleBtn.style.display = 'none';
+            } else {
+                toggleBtn.style.display = '';
+                toggleBtn.innerHTML = isExpanded
+                    ? '▲ הסתר עדכונים קודמים'
+                    : `📜 הצג היסטוריית גרסאות קודמות (${archivedCount})`;
+            }
+        },
+
+        toggle: function(forceOpen) {
+            const card = document.getElementById('settings-card-whats-new');
+            const olderWrap = document.getElementById('older-versions-list');
+            if (!card || !olderWrap) return;
+            const currentlyOpen = card.classList.contains('is-history-expanded') || olderWrap.style.display === 'block';
+            const nextOpen = (typeof forceOpen === 'boolean') ? forceOpen : !currentlyOpen;
+            card.classList.toggle('is-history-expanded', nextOpen);
+            olderWrap.style.display = nextOpen ? 'block' : 'none';
+            this.sync();
+        },
+
+        init: function() {
+            this.sync();
+            window.WhatsNewAccordionManager = this;
+            window.toggleOlderWhatsNewVersions = (forceOpen) => this.toggle(forceOpen);
+        }
+    };
+
     // 11.5 UI Motion Prompts Suite (v2.13.4)
     // =========================================================================
     const UiMotionPromptsSuite = {
@@ -2069,6 +2273,8 @@
         initKeyboardShortcuts();
         initFontScaling();
         MobileBackNavigationManager.init();
+        HorizontalTabSwipeManager.init();
+        WhatsNewAccordionManager.init();
         CourseWishlist.renderWishlistPillCount();
         RecentlyViewed.renderRecentChips();
         initUiMotionPromptsSuite();

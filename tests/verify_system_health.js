@@ -1277,6 +1277,72 @@ async function run() {
             assert(res.ohDefault === false, 'Office Hours overlay inside Timetable grid must default to false (bottom panel remains primary): ' + JSON.stringify(res));
         });
 
+        await test('Test 27: Top HUD Open Tasks Jump & Horizontal Swipe Tab Switching (v2.13.18)', async () => {
+            const res = await cdp.eval(`(() => {
+                if (typeof setActiveMainTab === 'function') setActiveMainTab('curriculum');
+                const openTasksStat = document.getElementById('stat-item-open-tasks');
+                if (openTasksStat) openTasksStat.click();
+                const jumpedToTasks = (window.currentActiveTab === 'tasks');
+
+                // Bypass cooldown for deterministic swipe assertions
+                if (window.HorizontalTabSwipeManager) window.HorizontalTabSwipeManager._lastSwitchMs = 0;
+                const swipedRightToCalendar = (typeof window.handleHorizontalTabSwipe === 'function')
+                    ? window.handleHorizontalTabSwipe(120, 10, document.getElementById('tasks-workspace'))
+                    : false;
+                const tabAfterRight = window.currentActiveTab;
+
+                if (window.HorizontalTabSwipeManager) window.HorizontalTabSwipeManager._lastSwitchMs = 0;
+                const swipedLeftToTasks = (typeof window.handleHorizontalTabSwipe === 'function')
+                    ? window.handleHorizontalTabSwipe(-120, 8, document.getElementById('tasks-workspace'))
+                    : false;
+                const tabAfterLeft = window.currentActiveTab;
+
+                // Must block swipe inside flowchart canvas
+                if (window.HorizontalTabSwipeManager) window.HorizontalTabSwipeManager._lastSwitchMs = 0;
+                if (typeof setActiveMainTab === 'function') setActiveMainTab('curriculum');
+                const fcViewport = document.querySelector('.flowchart-viewport');
+                const blockedInFlowchart = (typeof window.handleHorizontalTabSwipe === 'function' && fcViewport)
+                    ? window.handleHorizontalTabSwipe(140, 5, fcViewport)
+                    : null;
+
+                // Must block vertical scroll swipes
+                if (window.HorizontalTabSwipeManager) window.HorizontalTabSwipeManager._lastSwitchMs = 0;
+                const blockedVertical = (typeof window.handleHorizontalTabSwipe === 'function')
+                    ? window.handleHorizontalTabSwipe(40, 140, document.getElementById('planner-workspace'))
+                    : null;
+
+                // What's New accordion must show ONLY latest item by default and fold older items on toggle
+                if (typeof setActiveMainTab === 'function') setActiveMainTab('settings');
+                const whatsNewMainItems = document.querySelectorAll('#settings-card-whats-new .whats-new-list > li').length;
+                const olderListEl = document.getElementById('older-versions-list');
+                const olderCollapsedInitially = !!(olderListEl && getComputedStyle(olderListEl).display === 'none');
+                if (typeof window.toggleOlderWhatsNewVersions === 'function') window.toggleOlderWhatsNewVersions(true);
+                const olderExpandedAfterClick = !!(olderListEl && getComputedStyle(olderListEl).display === 'block');
+                if (typeof window.toggleOlderWhatsNewVersions === 'function') window.toggleOlderWhatsNewVersions(false);
+
+                return {
+                    hasOpenTasksStat: !!openTasksStat,
+                    jumpedToTasks,
+                    swipedRightToCalendar,
+                    tabAfterRight,
+                    swipedLeftToTasks,
+                    tabAfterLeft,
+                    blockedInFlowchart,
+                    blockedVertical,
+                    whatsNewMainItems,
+                    olderCollapsedInitially,
+                    olderExpandedAfterClick
+                };
+            })()`);
+
+            assert(res.hasOpenTasksStat && res.jumpedToTasks, 'Clicking #stat-item-open-tasks must switch directly to tasks tab: ' + JSON.stringify(res));
+            assert(res.swipedRightToCalendar && res.tabAfterRight === 'calendar', 'Swiping right from tasks must advance to calendar: ' + JSON.stringify(res));
+            assert(res.swipedLeftToTasks && res.tabAfterLeft === 'tasks', 'Swiping left from calendar must return to tasks: ' + JSON.stringify(res));
+            assert(res.blockedInFlowchart !== true, 'Swipe inside .flowchart-viewport must not hijack map panning: ' + JSON.stringify(res));
+            assert(res.blockedVertical === false, 'Mostly-vertical swipe must not switch tabs: ' + JSON.stringify(res));
+            assert(res.whatsNewMainItems === 1 && res.olderCollapsedInitially && res.olderExpandedAfterClick, "What's New card must show ONLY the latest update by default and collapse/expand older updates: " + JSON.stringify(res));
+        });
+
     } finally {
         console.log(`\n========================================================================`);
         console.log(`SUMMARY: ${passed} passed, ${failed} failed.`);

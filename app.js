@@ -23999,11 +23999,11 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.11.17-v2.13.17",
-    version: "2.13.17",
-    build: "20261117_01",
-    date: "2026-11-17 09:50",
-    description: "v2.13.17: תיקון שעות הרצאת תרמודינמיקה 1 במערכת (08:30 - 11:30, 3 שעות) במחשב, במובייל ובשעון, יישור כל טווחי השעות משמאל לימין (LTR), הסרת שעות קבלה מהטבלה השבועית כברירת מחדל (השארת הטבלה למטה), וצביעת קורסים אחידה בכל המערכת לזיהוי מהיר (ADR-127)."
+    code: "REV-2026.11.17-v2.13.18",
+    version: "2.13.18",
+    build: "20261117_02",
+    date: "2026-11-17 10:20",
+    description: "v2.13.18: לחיצה על מדד משימות פתוחות ב-HUD מעבירה ישירות ללוח המשימות, והוספת מעבר טבעי בין החלונות/לשוניות בהחלקה וגלילה אופקית ימין/שמאל (ADR-128)."
 };
 window.APP_VERSION = APP_CURRENT_REVISION.version;
 
@@ -25106,6 +25106,19 @@ async function triggerManualCalendarPull() {
 
     const statCompletedItem = document.getElementById("stat-item-completed-courses");
     if (statCompletedItem) statCompletedItem.onclick = () => window.openAnalyticsModal();
+
+    const statOpenTasksItem = document.getElementById("stat-item-open-tasks");
+    if (statOpenTasksItem) {
+        statOpenTasksItem.onclick = () => {
+            if (typeof window.setActiveMainTab === 'function') window.setActiveMainTab('tasks');
+        };
+        statOpenTasksItem.onkeydown = (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                if (typeof window.setActiveMainTab === 'function') window.setActiveMainTab('tasks');
+            }
+        };
+    }
 
     const hudXpContainer = document.getElementById("hud-xp-bar-container");
     if (hudXpContainer) hudXpContainer.onclick = () => window.openAnalyticsModal();

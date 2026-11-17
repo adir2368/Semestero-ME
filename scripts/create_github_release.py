@@ -19,7 +19,7 @@ with open(os.path.join(ROOT, "package.json"), "r", encoding="utf-8") as f:
     pkg = json.load(f)
 VERSION = pkg.get("version", "2.13.15")
 TAG = f"v{VERSION}"
-NAME = f"Semestero ME v{VERSION} - Thermo 3h Schedule, LTR Hours & Course Colors"
+NAME = f"Semestero ME v{VERSION} - HUD Tasks Jump & Horizontal Swipe Tabs"
 
 def get_github_token():
     try:
@@ -99,16 +99,15 @@ def main():
 
     body_notes = f"""# Semestero ME {TAG} Release Notes
 
-### 🎨 1. צבע אחיד לכל קורס, שעות משמאל לימין, הרצאת תרמודינמיקה 3 שעות ומערכת שעות נקייה
-- **תרמודינמיקה 1 (034035) — 3 שעות במערכת השעות**: תיקון שעות ההרצאה בימי שלישי (`08:30 - 11:30`, 3 שעות) ב-`CHEESEFORK_SEMESTER_SCHEDULE`, במנגנון התיקון האוטומטי `enrichTimetableWithAuthenticRooms`, ובשעון Samsung Galaxy Watch (`WearScheduleHelper.java`).
-- **כיוון שעות משמאל לימין (LTR)**: יישור אחיד של כל טווחי השעות (`.ui-time-ltr`, מערכת שעות, פירוט קורס, שעות קבלה, היום במערכת, ולוח שנה) ב-`direction: ltr; unicode-bidi: isolate` כך ש-`08:30 - 11:30` לא יתהפך לעולם ב-RTL.
-- **מערכת שעות נקייה כברירת מחדל**: שעות הקבלה מוצגות בצורה מסודרת בטבלה ייעודית מתחת למערכת השעות ובכרטיס הקורס (וברירת המחדל של הצגתן בתוך הרשת השבועית כבויה, עם מתג אופציונלי).
-- **צביעה אחידה לפי קורס בכל המסכים**: פונקציית `getCourseAccentColor()` אחידה הצובעת כל קורס ומשימותיו בלוח המשימות, בלוח השנה (חודש/שבוע/יום/פירוט יום), במעקב שיעורי הבית, בשיעורי היום, בשעות הקבלה ובמערכת השעות.
+### ⚡ 1. ניווט מהיר בין לשוניות והגעה ללוח המשימות (`index.html`, `app.js`, `ui_enhancements.js`, `styles.css`)
+- **מעבר בלחיצה על מדד "משימות פתוחות"**: לחיצה (או מקלדת Enter/Space) על כרטיס ״משימות פתוחות״ ב-HUD העליון מעבירה מיידית אל לשונית ״לוח משימות״ (`#stat-item-open-tasks`).
+- **מעבר בין החלונות בהחלקה / גלילה אופקית ימין-שמאל**: הוספת `HorizontalTabSwipeManager` למעבר חלק בין כל לשוניות האפליקציה בהחלקת אצבע אופקית במובייל או בגלילת טראקפד ימין-שמאל במחשב, כולל זיהוי גבולות גלילה, מניעת הפעלה בעת פתיחת מודאלים והגנה על גרירת מפת הקורסים.
+- **כרטיסיית ״מה חדש?״ ממוקדת**: הצגת העדכון האחרון בלבד כברירת מחדל (`WhatsNewAccordionManager` + כלל CSS אוטומטי) עם קיפול אוטומטי של כל הגרסאות הקודמות תחת כפתור ההיסטוריה.
 
 ### 📦 2. קובצי הפצה ועדכון:
-- `Semestero-ME-Tablet-Clean.apk` (`com.technion.semestero.tablet`, `versionCode 112`, `versionName {VERSION}`, `v1+v2+v3` Signed)
-- `Semestero-ME.apk` (`com.technion.semestero`, `versionCode 112`, `versionName {VERSION}`, `v1+v2+v3` Signed, `targetSdk 34`)
-- `Semestero-ME-Watch.apk` (`versionCode 112`, `versionName {VERSION}`, `v1+v2+v3` Signed)
+- `Semestero-ME-Tablet-Clean.apk` (`com.technion.semestero.tablet`, `versionCode 113`, `versionName {VERSION}`, `v1+v2+v3` Signed)
+- `Semestero-ME.apk` (`com.technion.semestero`, `versionCode 113`, `versionName {VERSION}`, `v1+v2+v3` Signed, `targetSdk 34`)
+- `Semestero-ME-Watch.apk` (`versionCode 113`, `versionName {VERSION}`, `v1+v2+v3` Signed)
 - `Semestero-ME-Windows-x64.zip` (Electron Desktop Client {VERSION})
 """
 

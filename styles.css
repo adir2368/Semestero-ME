@@ -11718,7 +11718,9 @@ html.is-iphone .app-global-footer {
 }
 
 /* HUD Interactive KPI Badge Enhancements */
-#stat-item-gpa {
+#stat-item-gpa,
+#stat-item-open-tasks,
+#stat-item-completed-courses {
     cursor: pointer;
     border-radius: 8px;
     padding: 6px 12px;
@@ -11726,14 +11728,17 @@ html.is-iphone .app-global-footer {
     position: relative;
 }
 
-#stat-item-gpa:hover {
+#stat-item-gpa:hover,
+#stat-item-open-tasks:hover,
+#stat-item-completed-courses:hover {
     background: rgba(56, 189, 248, 0.14);
     box-shadow: 0 4px 16px rgba(56, 189, 248, 0.28);
     transform: translateY(-2px);
     border: 1px solid rgba(56, 189, 248, 0.4);
 }
 
-#stat-completed-courses {
+#stat-completed-courses,
+#stat-open-tasks {
     cursor: pointer;
 }
 
@@ -19459,5 +19464,36 @@ tr.has-course-accent td:first-child {
 
 .timetable-card.has-course-accent:not(.timetable-card-physics):not(.timetable-card-solids):not(.timetable-card-computing):not(.timetable-card-thermo):not(.timetable-card-pde):not(.timetable-card-yoga)::before {
     background: var(--course-accent, #38bdf8);
+}
+
+/* 14. Horizontal Tab Swipe Feedback Transition */
+@keyframes workspaceSwipeEnterNext {
+    from { opacity: 0.72; transform: translateX(-16px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes workspaceSwipeEnterPrev {
+    from { opacity: 0.72; transform: translateX(16px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+.workspace-swipe-enter-next {
+    animation: workspaceSwipeEnterNext 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.workspace-swipe-enter-prev {
+    animation: workspaceSwipeEnterPrev 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .workspace-swipe-enter-next,
+    .workspace-swipe-enter-prev {
+        animation: none !important;
+    }
+}
+
+/* 15. What's New Card — Show ONLY latest update by default; auto-collapse older updates */
+#settings-card-whats-new:not(.is-history-expanded) .whats-new-list > li:nth-child(n+2) {
+    display: none !important;
 }
 
