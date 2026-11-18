@@ -42,15 +42,15 @@
     "semantic_hash": ""
   },
   "app.js": {
-    "mtime": 1794760646.2291076,
-    "seen": 1794760772.3619835,
-    "ast_hash": "39bcddb08d0c704265e059f4e88795aa",
+    "mtime": 1795025971.2456937,
+    "seen": 1795027005.1958323,
+    "ast_hash": "26d01dc4f3e1edb478742a7ac69c4c34",
     "semantic_hash": ""
   },
   "auth_sync.js": {
-    "mtime": 1794760487.1354346,
-    "seen": 1794760772.3619885,
-    "ast_hash": "0bb98cc6a9126b92d72903deb103fb92",
+    "mtime": 1794939696.136669,
+    "seen": 1795027005.1958373,
+    "ast_hash": "8bb5245901125c904eabe4e21c77aa79",
     "semantic_hash": ""
   },
   "backups/adir_moshe_personal_state_v1.4.4.json": {
@@ -78,9 +78,9 @@
     "semantic_hash": ""
   },
   "interactive_tour.js": {
-    "mtime": 1794289978.3546736,
-    "seen": 1794314630.592246,
-    "ast_hash": "3707ac64482419de1139afb991311506",
+    "mtime": 1794769819.1373901,
+    "seen": 1795027005.1958528,
+    "ast_hash": "bf264a668133da6593ad8c765822ee74",
     "semantic_hash": ""
   },
   "main.js": {
@@ -108,9 +108,9 @@
     "semantic_hash": ""
   },
   "package.json": {
-    "mtime": 1794760636.944746,
-    "seen": 1794760772.3620179,
-    "ast_hash": "b39c47f26a59fe57bf2f65f8f8edb3d4",
+    "mtime": 1795025902.6646318,
+    "seen": 1795027005.1958685,
+    "ast_hash": "eb19c0caddeba7769a9e1b3a2f382c03",
     "semantic_hash": ""
   },
   "planner_catalog.js": {
@@ -150,9 +150,9 @@
     "semantic_hash": ""
   },
   "sw.js": {
-    "mtime": 1794760643.755305,
-    "seen": 1794760772.3626652,
-    "ast_hash": "3e30c178571c83b1f9e4f09462dec196",
+    "mtime": 1795025903.978615,
+    "seen": 1795027005.196442,
+    "ast_hash": "26c8900f05c6abc2e3cb1acd2de1744b",
     "semantic_hash": ""
   },
   "technion_academic_calendar.js": {
@@ -204,15 +204,15 @@
     "semantic_hash": ""
   },
   "timetable_generator.js": {
-    "mtime": 1794431617.9294157,
-    "seen": 1794747679.2816803,
-    "ast_hash": "29099ffa74e06bd0e93534956eb097d8",
+    "mtime": 1794901806.5176363,
+    "seen": 1795027005.1965287,
+    "ast_hash": "a6607ac754071554b0ce9b6e995b98c9",
     "semantic_hash": ""
   },
   "user_saved_state.json": {
-    "mtime": 1794132865.5024612,
-    "seen": 1794137657.5077715,
-    "ast_hash": "1bb58b8e9cb77401e160a51477b90bc5",
+    "mtime": 1794769699.8849597,
+    "seen": 1795027005.1965303,
+    "ast_hash": "3e696794570d4dfb2c527a1f7988a9a5",
     "semantic_hash": ""
   },
   "404.html": {
@@ -252,9 +252,9 @@
     "semantic_hash": ""
   },
   "index.html": {
-    "mtime": 1794760664.2932496,
-    "seen": 1794760772.3627934,
-    "ast_hash": "0b41d1796af2f9a41ac073c3d726bcd8",
+    "mtime": 1795026159.9733677,
+    "seen": 1795027005.196552,
+    "ast_hash": "eae807c5f1b17d7c70a77080c96cddbf",
     "semantic_hash": ""
   },
   "llms.txt": {
@@ -438,14 +438,14 @@
     "semantic_hash": ""
   },
   "android/app/build.gradle": {
-    "mtime": 1794760639.4319131,
-    "seen": 1794760772.3619254,
-    "ast_hash": "fac74fd3862324a4e2c7aa8ca46156c8",
+    "mtime": 1795025905.584799,
+    "seen": 1795027005.1957889,
+    "ast_hash": "d05b2614ed509cedf66be06947556c9f",
     "semantic_hash": ""
   },
   "android/app/capacitor.build.gradle": {
-    "mtime": 1794760701.7548614,
-    "seen": 1794760772.3619277,
+    "mtime": 1795026714.550143,
+    "seen": 1795027005.1957912,
     "ast_hash": "40ff4eb78cc563ba8310aef14d1256c5",
     "semantic_hash": ""
   },
@@ -456,9 +456,9 @@
     "semantic_hash": ""
   },
   "android/app/src/main/java/com/technion/semestero/MainActivity.java": {
-    "mtime": 1794457095.5437815,
-    "seen": 1794747679.2808268,
-    "ast_hash": "71703474b34d70daf57066663eff32cf",
+    "mtime": 1794861318.8624465,
+    "seen": 1795027005.1957946,
+    "ast_hash": "4f2980b25507d1ffff39dd42efa3a824",
     "semantic_hash": ""
   },
   "android/app/src/main/java/com/technion/semestero/SemesteroFinalsGpaWidget.java": {
@@ -522,8 +522,8 @@
     "semantic_hash": ""
   },
   "android/capacitor.settings.gradle": {
-    "mtime": 1794760701.7548614,
-    "seen": 1794760772.3619602,
+    "mtime": 1795026714.5491436,
+    "seen": 1795027005.1958108,
     "ast_hash": "d70c5b5a81b7362527e6d71aea3bd487",
     "semantic_hash": ""
   },
@@ -546,9 +546,9 @@
     "semantic_hash": ""
   },
   "android/wear/build.gradle": {
-    "mtime": 1794760641.4214423,
-    "seen": 1794760772.361966,
-    "ast_hash": "f5b0538d7b415103a81fdfe280b2a5f3",
+    "mtime": 1795025907.0427363,
+    "seen": 1795027005.1958163,
+    "ast_hash": "35a742c676d4a4e7feff3109a839cdd2",
     "semantic_hash": ""
   },
   "android/wear/src/main/java/com/technion/semestero/wear/MainActivity.java": {
@@ -582,9 +582,9 @@
     "semantic_hash": ""
   },
   "grade_sheet.js": {
-    "mtime": 1794456433.5154884,
-    "seen": 1794747679.2808964,
-    "ast_hash": "89aaf0d6bc212d245ff9c608824bc83a",
+    "mtime": 1794763870.043027,
+    "seen": 1795027005.1958518,
+    "ast_hash": "a8b7a4fa5d5c63c1bad66289648c1d15",
     "semantic_hash": ""
   },
   "ios/App/App/AppDelegate.swift": {
@@ -630,9 +630,9 @@
     "semantic_hash": ""
   },
   "preloaded_user_state.js": {
-    "mtime": 1794667979.4790046,
-    "seen": 1794747679.2809293,
-    "ast_hash": "b55cef64baab7448fbb7409f7cb2637d",
+    "mtime": 1794769694.2010999,
+    "seen": 1795027005.195875,
+    "ast_hash": "e1f50a004a93f962c998f413c9365a22",
     "semantic_hash": ""
   },
   "scripts/ad-hoc/apply_curriculum_separation.py": {
@@ -1542,9 +1542,9 @@
     "semantic_hash": ""
   },
   "scripts/create_github_release.py": {
-    "mtime": 1794737579.9615047,
-    "seen": 1794747679.2815151,
-    "ast_hash": "de8bf537dd16b9fbea297217c487d2d5",
+    "mtime": 1795026098.5341682,
+    "seen": 1795027005.1964006,
+    "ast_hash": "5e45bcd581579dc7139b8600d3bd93ab",
     "semantic_hash": ""
   },
   "scripts/deep_audit_ecosystem.js": {
@@ -1842,9 +1842,9 @@
     "semantic_hash": ""
   },
   "tests/verify_system_health.js": {
-    "mtime": 1794316752.9262116,
-    "seen": 1794377261.57818,
-    "ast_hash": "874733fdb9dd5881b30acac6e7cd0652",
+    "mtime": 1795026405.016896,
+    "seen": 1795027005.1965137,
+    "ast_hash": "93b2f6aef73cbb7bfb74f3f78c5b7b8a",
     "semantic_hash": ""
   },
   "tests/verify_tasks_multi_select_and_actions.js": {
@@ -1902,15 +1902,15 @@
     "semantic_hash": ""
   },
   "ui_enhancements.js": {
-    "mtime": 1794760077.5093932,
-    "seen": 1794760772.3627665,
-    "ast_hash": "be1af329a15ff5ff46445008f6ce61cc",
+    "mtime": 1795025901.427478,
+    "seen": 1795027005.1965294,
+    "ast_hash": "9d27a851ed4eddc57d1243e93e7d163e",
     "semantic_hash": ""
   },
   "watch_companion.js": {
-    "mtime": 1794474797.8414614,
-    "seen": 1794747679.2816854,
-    "ast_hash": "fc10437de26c4f9a91d5068b79a8dc55",
+    "mtime": 1794769702.7914464,
+    "seen": 1795027005.1965325,
+    "ast_hash": "e435a0578f4819a993f54a8bf61a1c18",
     "semantic_hash": ""
   },
   "widgets/data_exam.json": {
@@ -2466,9 +2466,9 @@
     "semantic_hash": ""
   },
   "android/wear/src/main/java/com/technion/semestero/wear/WearScheduleHelper.java": {
-    "mtime": 1794456793.8199458,
-    "seen": 1794747679.2808666,
-    "ast_hash": "90f0390fbe03ed077d5005757d08f6ff",
+    "mtime": 1794901811.032074,
+    "seen": 1795027005.1958308,
+    "ast_hash": "db967c1b5419471e211ed541cbcf17e8",
     "semantic_hash": ""
   },
   "scripts/install_watch_app.ps1": {
@@ -4098,9 +4098,9 @@
     "semantic_hash": ""
   },
   "pangea_knowledge_hub.js": {
-    "mtime": 1794292505.9237828,
-    "seen": 1794314630.5922666,
-    "ast_hash": "f4ccfe5545ed02f91bd51302e081464e",
+    "mtime": 1794934633.1034844,
+    "seen": 1795027005.1958697,
+    "ast_hash": "37a77217760a99ea3ed4216acb977086",
     "semantic_hash": ""
   },
   "scripts/build_pangea_knowledge_hub.py": {
@@ -4134,9 +4134,9 @@
     "semantic_hash": ""
   },
   "attendance_hub.js": {
-    "mtime": 1794760490.085746,
-    "seen": 1794760772.361987,
-    "ast_hash": "0362301c88da8baefa2650727cf65771",
+    "mtime": 1794763962.5095167,
+    "seen": 1795027005.1958358,
+    "ast_hash": "ece619f956b469e8edf28e6d6b0c7ccd",
     "semantic_hash": ""
   },
   "android/wear/src/main/java/com/technion/semestero/wear/SemesteroTasksTileService.java": {
@@ -4146,9 +4146,9 @@
     "semantic_hash": ""
   },
   "calendar_sync_engine.js": {
-    "mtime": 1794431621.3665397,
-    "seen": 1794747679.2808785,
-    "ast_hash": "6bd1553efd2fbe23604626da33ddf792",
+    "mtime": 1794842124.860547,
+    "seen": 1795027005.1958394,
+    "ast_hash": "d06ea76d02f61ecd62d72f0d9a75f2c4",
     "semantic_hash": ""
   },
   "exam_readiness_hub.js": {
@@ -4182,9 +4182,9 @@
     "semantic_hash": ""
   },
   "tests/test_mobile_back_navigation.js": {
-    "mtime": 1794760141.4563468,
-    "seen": 1794760772.3626966,
-    "ast_hash": "175f253bcb654225319ed199c6c07121",
+    "mtime": 1794764082.0958483,
+    "seen": 1795027005.1964695,
+    "ast_hash": "311d7362959052e928624e89892ee236",
     "semantic_hash": ""
   },
   "tests/test_notifications_and_wear_tasks_complication.js": {
@@ -4236,9 +4236,9 @@
     "semantic_hash": ""
   },
   "tests/test_cross_device_task_sync.js": {
-    "mtime": 1794668445.9932137,
-    "seen": 1794747679.28161,
-    "ast_hash": "0702891e4d4629eda68849a83e0b8597",
+    "mtime": 1794769834.6518679,
+    "seen": 1795027005.1964653,
+    "ast_hash": "faa1263ea43f26f15295a6a0e6a53223",
     "semantic_hash": ""
   },
   "tests/test_ui_motion_prompts_suite.js": {

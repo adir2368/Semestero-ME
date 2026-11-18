@@ -1539,6 +1539,45 @@ async function run() {
             assert(res.bellRang && res.reducedMotionBlockedRing, 'Badge bump must ring #btn-notification-bell via .is-ringing and respect reduced motion: ' + JSON.stringify(res));
         });
 
+        await test('Test 31: Curriculum Tree Sidebar/Flowchart-Pill Removal & Inline Legend Toolbar (v2.13.22)', async () => {
+            const res = await cdp.eval(`(() => {
+                if (typeof setActiveMainTab === 'function') setActiveMainTab('tree');
+                const sidebar = document.querySelector('#curriculum-tree-workspace .hud-sidebar');
+                const controls = document.querySelector('#curriculum-tree-workspace .tree-controls');
+                const modePill = document.getElementById('btn-mode-flowchart');
+                const toolbar = document.querySelector('#curriculum-tree-workspace .flowchart-toolbar');
+                const legend = toolbar ? toolbar.querySelector('.tree-legend') : null;
+                const actions = toolbar ? toolbar.querySelector('.flowchart-actions') : null;
+                const zoomInBtn = document.getElementById('btn-fc-zoom-in');
+                const zoomOutBtn = document.getElementById('btn-fc-zoom-out');
+                const legendItems = legend ? legend.querySelectorAll('.legend-item').length : 0;
+                const toolbarStyle = toolbar ? getComputedStyle(toolbar) : null;
+                const legendRect = legend ? legend.getBoundingClientRect() : null;
+                const zoomRect = zoomInBtn ? zoomInBtn.getBoundingClientRect() : null;
+                return {
+                    hasSidebar: !!sidebar,
+                    hasControls: !!controls,
+                    hasModePill: !!modePill,
+                    hasToolbar: !!toolbar,
+                    hasLegendInToolbar: !!legend,
+                    hasActionsInToolbar: !!actions,
+                    hasZoomBtns: !!(zoomInBtn && zoomOutBtn),
+                    legendItems,
+                    toolbarDisplay: toolbarStyle ? toolbarStyle.display : '',
+                    sameRowDeltaY: (legendRect && zoomRect) ? Math.abs(legendRect.top - zoomRect.top) : 999,
+                    legendHeight: legendRect ? legendRect.height : 0,
+                    zoomHeight: zoomRect ? zoomRect.height : 0
+                };
+            })()`);
+
+            assert(!res.hasSidebar, '.hud-sidebar must be removed from #curriculum-tree-workspace');
+            assert(!res.hasControls && !res.hasModePill, '.tree-controls and #btn-mode-flowchart must be removed from #curriculum-tree-workspace');
+            assert(res.hasToolbar && res.hasLegendInToolbar && res.hasActionsInToolbar && res.hasZoomBtns, '.flowchart-toolbar must contain .tree-legend and .flowchart-actions with zoom buttons: ' + JSON.stringify(res));
+            assert(res.legendItems === 4, 'Inline .tree-legend must have 4 .legend-item badges: ' + JSON.stringify(res));
+            assert(res.toolbarDisplay === 'flex', '.flowchart-toolbar must compute display: flex: ' + JSON.stringify(res));
+            assert(res.legendHeight > 0 && res.zoomHeight > 0 && res.sameRowDeltaY < 24, '.tree-legend and zoom buttons must align on the same horizontal row: ' + JSON.stringify(res));
+        });
+
     } finally {
         console.log(`\n========================================================================`);
         console.log(`SUMMARY: ${passed} passed, ${failed} failed.`);

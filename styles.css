@@ -19799,4 +19799,51 @@ body.a11y-stop-animations #btn-open-analytics .unslop-icon svg {
     animation: none !important;
 }
 
+/* ==========================================================================
+   18. Flowchart Toolbar & Legend Inline Alignment (v2.13.22)
+   ========================================================================== */
+.flowchart-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px 14px;
+}
+
+.flowchart-toolbar .flowchart-hint {
+    flex: 1 1 200px;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.flowchart-toolbar .tree-legend {
+    flex-shrink: 0;
+    white-space: nowrap;
+    gap: 12px;
+}
+
+@media (max-width: 1220px) {
+    .flowchart-toolbar .flowchart-hint {
+        display: none !important;
+    }
+}
+
+@media (max-width: 768px), screen and (max-device-width: 768px) {
+    .flowchart-toolbar {
+        flex-wrap: wrap !important;
+        gap: 4px !important;
+    }
+
+    .flowchart-toolbar .tree-legend {
+        width: 100% !important;
+        justify-content: center !important;
+        gap: 10px !important;
+        padding: 2px 0 !important;
+        overflow-x: visible !important;
+    }
+}
+
+
 

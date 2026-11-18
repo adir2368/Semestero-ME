@@ -17,9 +17,9 @@ ZIP_PATH = os.path.join(ROOT, "Semestero-ME-Windows-x64.zip")
 
 with open(os.path.join(ROOT, "package.json"), "r", encoding="utf-8") as f:
     pkg = json.load(f)
-VERSION = pkg.get("version", "2.13.21")
+VERSION = pkg.get("version", "2.13.22")
 TAG = f"v{VERSION}"
-NAME = f"Semestero ME v{VERSION} - UI Craft Completion & Lucide HUD Micro-Animations"
+NAME = f"Semestero ME v{VERSION} - Curriculum Tree Toolbar & Legend Streamlining"
 
 def get_github_token():
     try:
@@ -99,16 +99,15 @@ def main():
 
     body_notes = f"""# Semestero ME {TAG} Release Notes
 
-### ✨ 1. ליטוש UI משלים ומיקרו-אינטראקציות HUD (`styles.css`, `ui_enhancements.js`)
-- **מסיכות קצוות בגלילה אופקית (`mask-image`)**: דעיכת קצוות נקייה בפסי הגלילה האופקיים (פילטר השבועות, תקציר מעקב ש״ב, אפשרויות מערכת השעות, מסלולי המשימות וימי השבוע במובייל) לסימון ברור של תוכן נוסף לגלילה.
-- **איזון כותרות (`text-wrap: balance`)**: חלוקת שורות מאוזנת בכותרות מודאלים, כרטיסי הגדרות, קורסים ומסכים ריקים למניעת מילה בודדת יתומה.
-- **רדיוסים קונצנטריים (`calc(var(--outer-r) - var(--pad))`) וצללים מדורגים**: התאמה גאומטרית בין כרטיסים מקוננים וצללי עומק רכים ב-3 שכבות למודאלים, מגירת צד והודעות.
-- **מיקרו-אנימציות Lucide ב-HUD**: אנימציות CSS מדויקות בסגנון `animate-ui` על אייקוני ה-Lucide בסרגל העליון (כולל צלצול פעמון בעדכון התראה חדש) עם כיבוד מלא של `prefers-reduced-motion` ומצב הנגישות.
+### 🧹 1. ניקוי וייעול סרגל הכלים במפת הקורסים (`index.html`, `styles.css`)
+- **הסרת סרגל הצד המיותר במפת הקורסים**: הוסר `<aside class="hud-sidebar">` (סנכרון CheeseFork וכרטיס הוספת הקורס בצד) כדי לפנות מקום מרבי לתרשים הזרימה.
+- **הסרת כפתור המצב העליון (`📊 תרשים זרימה (Flowchart)`)**: הוסרה שורת `.tree-controls` המיותרת בראש מפת הקורסים.
+- **שילוב מקרא הסטטוסים בשורת הכפתורים**: מקרא הקורסים (`נעול · פתוח לרישום · פעיל · הושלם`) הועבר אל תוך `.flowchart-toolbar` ומוצג כעת בשורה אחת ישירות מול כפתורי ההגדלה/הקטנה והפעולות.
 
 ### 📦 2. קובצי הפצה ועדכון:
-- `Semestero-ME-Tablet-Clean.apk` (`com.technion.semestero.tablet`, `versionCode 116`, `versionName {VERSION}`, `v1+v2+v3` Signed)
-- `Semestero-ME.apk` (`com.technion.semestero`, `versionCode 116`, `versionName {VERSION}`, `v1+v2+v3` Signed, `targetSdk 34`)
-- `Semestero-ME-Watch.apk` (`versionCode 116`, `versionName {VERSION}`, `v1+v2+v3` Signed)
+- `Semestero-ME-Tablet-Clean.apk` (`com.technion.semestero.tablet`, `versionCode 117`, `versionName {VERSION}`, `v1+v2+v3` Signed)
+- `Semestero-ME.apk` (`com.technion.semestero`, `versionCode 117`, `versionName {VERSION}`, `v1+v2+v3` Signed, `targetSdk 34`)
+- `Semestero-ME-Watch.apk` (`versionCode 117`, `versionName {VERSION}`, `v1+v2+v3` Signed)
 - `Semestero-ME-Windows-x64.zip` (Electron Desktop Client {VERSION})
 """
 
