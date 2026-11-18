@@ -1463,6 +1463,82 @@ async function run() {
             assert(res.syncPreservedNewerGrade, 'AuthSync mergeCoursesPreservingTaskCompletion must keep newer HW grade: ' + JSON.stringify(res));
         });
 
+        await test('Test 30: UI Craft Completion (Scroll Edge Masks, Balanced Headlines, Concentric Radii, Layered Shadows & Bell Ring) (v2.13.21)', async () => {
+            const stylesCss = fs.readFileSync(path.join(__dirname, '..', 'styles.css'), 'utf8');
+            assert(stylesCss.includes('mask-image: linear-gradient('), 'styles.css must define horizontal scroll edge mask-image');
+            assert(stylesCss.includes('text-wrap: balance'), 'styles.css must define text-wrap: balance for titles');
+            assert(stylesCss.includes('calc(var(--outer-r) - var(--pad))'), 'styles.css must define concentric border-radius calculation');
+            assert(stylesCss.includes('@keyframes lucideBellSwing'), 'styles.css must define selective animate-ui Lucide HUD keyframes');
+
+            const res = await cdp.eval(`(() => {
+                if (typeof setActiveMainTab === 'function') setActiveMainTab('settings');
+                const titleEl = document.querySelector('.settings-page-title');
+                const titleTextWrap = titleEl ? (getComputedStyle(titleEl).textWrap || '') : '';
+
+                const modalEl = document.querySelector('#course-modal .modal-content');
+                const modalShadow = modalEl ? getComputedStyle(modalEl).boxShadow : '';
+                const shadowLayerCount = modalShadow ? modalShadow.split(/,(?![^()]*\\))/).length : 0;
+
+                if (typeof setActiveMainTab === 'function') setActiveMainTab('planner');
+                const colEl = document.querySelector('.planner-semester-col');
+                const cardEl = document.querySelector('.planner-semester-col .planner-course-card');
+                const colRadius = colEl ? parseFloat(getComputedStyle(colEl).borderTopLeftRadius) : 0;
+                const cardRadius = cardEl ? parseFloat(getComputedStyle(cardEl).borderTopLeftRadius) : 0;
+
+                if (typeof setActiveMainTab === 'function') setActiveMainTab('tasks');
+                const hwSummary = document.querySelector('.notion-hw-policy-strip .hw-collapsed-summary');
+                const hwMask = hwSummary ? (getComputedStyle(hwSummary).maskImage || getComputedStyle(hwSummary).webkitMaskImage || '') : '';
+
+                // Trigger notification bell bump and confirm #btn-notification-bell gets .is-ringing (and respects reduced motion)
+                const badgeEl = document.getElementById('bell-badge-count');
+                const bellBtn = document.getElementById('btn-notification-bell');
+                let bellRang = false;
+                let reducedMotionBlockedRing = false;
+                if (badgeEl && bellBtn && window.UiMotionPromptsSuite) {
+                    const prevText = badgeEl.textContent;
+                    const prevDisp = badgeEl.style.display;
+                    const origGetReduced = window.UiMotionPromptsSuite.getReducedMotion;
+                    try {
+                        badgeEl.textContent = '3';
+                        badgeEl.style.display = 'inline-flex';
+                        window.UiMotionPromptsSuite.getReducedMotion = () => false;
+                        window.UiMotionPromptsSuite.triggerBadgeBump(badgeEl);
+                        bellRang = bellBtn.classList.contains('is-ringing');
+                        bellBtn.classList.remove('is-ringing');
+                        badgeEl.classList.remove('is-bumping');
+
+                        window.UiMotionPromptsSuite.getReducedMotion = () => true;
+                        window.UiMotionPromptsSuite.triggerBadgeBump(badgeEl);
+                        reducedMotionBlockedRing = !bellBtn.classList.contains('is-ringing');
+                    } finally {
+                        window.UiMotionPromptsSuite.getReducedMotion = origGetReduced;
+                        badgeEl.textContent = prevText;
+                        badgeEl.style.display = prevDisp;
+                        bellBtn.classList.remove('is-ringing');
+                        badgeEl.classList.remove('is-bumping');
+                    }
+                }
+
+                if (typeof setActiveMainTab === 'function') setActiveMainTab('curriculum');
+                return {
+                    titleTextWrap,
+                    shadowLayerCount,
+                    colRadius,
+                    cardRadius,
+                    concentricValid: colRadius === 12 && cardRadius === 8,
+                    hwHasMask: hwMask.includes('linear-gradient'),
+                    bellRang,
+                    reducedMotionBlockedRing
+                };
+            })()`);
+
+            assert(res.titleTextWrap === 'balance', 'Headlines must compute text-wrap: balance: ' + JSON.stringify(res));
+            assert(res.shadowLayerCount >= 3, 'Modal must have layered ambient box-shadows (>=3 layers): ' + JSON.stringify(res));
+            assert(res.concentricValid, 'Planner card must use concentric inner radius (12px outer - 4px pad = 8px): ' + JSON.stringify(res));
+            assert(res.hwHasMask, 'Horizontal chip strip must apply linear-gradient edge mask: ' + JSON.stringify(res));
+            assert(res.bellRang && res.reducedMotionBlockedRing, 'Badge bump must ring #btn-notification-bell via .is-ringing and respect reduced motion: ' + JSON.stringify(res));
+        });
+
     } finally {
         console.log(`\n========================================================================`);
         console.log(`SUMMARY: ${passed} passed, ${failed} failed.`);

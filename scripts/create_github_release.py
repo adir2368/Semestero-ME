@@ -17,9 +17,9 @@ ZIP_PATH = os.path.join(ROOT, "Semestero-ME-Windows-x64.zip")
 
 with open(os.path.join(ROOT, "package.json"), "r", encoding="utf-8") as f:
     pkg = json.load(f)
-VERSION = pkg.get("version", "2.13.15")
+VERSION = pkg.get("version", "2.13.21")
 TAG = f"v{VERSION}"
-NAME = f"Semestero ME v{VERSION} - Homework Grade Entry & Best-N Average"
+NAME = f"Semestero ME v{VERSION} - UI Craft Completion & Lucide HUD Micro-Animations"
 
 def get_github_token():
     try:
@@ -99,15 +99,16 @@ def main():
 
     body_notes = f"""# Semestero ME {TAG} Release Notes
 
-### 💯 1. הזנת ציונים לשיעורי בית וממוצע "הטובים מ-N"
-- **עמודת ציון בלוח המשימות (`app.js`, `index.html`, `styles.css`)**: הזנה ישירה ומהירה של ציונים (0–100) ישירות בטבלת המשימות עם צביעת טווחים (`is-grade-high/mid/low`) ועדכון סטטוס אוטומטי ל-`בוצע`.
-- **מגירת צד (Quick Peek) וכרטיסיית הקורס**: שדה הציון (`#peek-property-grade-row` ו-`.quest-grade-input` / `.hw-grade-input`) זמין כעת עבור כל תרגילי הבית והמעבדות — כולל הזנה נפרדת לשאלון דיגיטלי ולפתרון בכתב בגריד "הטובים מ-N".
-- **חישוב ממוצע מגן אוטומטי וסנכרון ענן (`auth_sync.js`)**: `getCourseHomeworkStatus` מחשב אוטומטית את ממוצע הגיליונות הגבוהים ביותר (`bestNAverage`), מציג תגיות ציון וממוצע בחלונית הקורס ובשורת המעקב, ומשמר ציונים בין מכשירים עם `gradeUpdatedAt`.
+### ✨ 1. ליטוש UI משלים ומיקרו-אינטראקציות HUD (`styles.css`, `ui_enhancements.js`)
+- **מסיכות קצוות בגלילה אופקית (`mask-image`)**: דעיכת קצוות נקייה בפסי הגלילה האופקיים (פילטר השבועות, תקציר מעקב ש״ב, אפשרויות מערכת השעות, מסלולי המשימות וימי השבוע במובייל) לסימון ברור של תוכן נוסף לגלילה.
+- **איזון כותרות (`text-wrap: balance`)**: חלוקת שורות מאוזנת בכותרות מודאלים, כרטיסי הגדרות, קורסים ומסכים ריקים למניעת מילה בודדת יתומה.
+- **רדיוסים קונצנטריים (`calc(var(--outer-r) - var(--pad))`) וצללים מדורגים**: התאמה גאומטרית בין כרטיסים מקוננים וצללי עומק רכים ב-3 שכבות למודאלים, מגירת צד והודעות.
+- **מיקרו-אנימציות Lucide ב-HUD**: אנימציות CSS מדויקות בסגנון `animate-ui` על אייקוני ה-Lucide בסרגל העליון (כולל צלצול פעמון בעדכון התראה חדש) עם כיבוד מלא של `prefers-reduced-motion` ומצב הנגישות.
 
 ### 📦 2. קובצי הפצה ועדכון:
-- `Semestero-ME-Tablet-Clean.apk` (`com.technion.semestero.tablet`, `versionCode 115`, `versionName {VERSION}`, `v1+v2+v3` Signed)
-- `Semestero-ME.apk` (`com.technion.semestero`, `versionCode 115`, `versionName {VERSION}`, `v1+v2+v3` Signed, `targetSdk 34`)
-- `Semestero-ME-Watch.apk` (`versionCode 115`, `versionName {VERSION}`, `v1+v2+v3` Signed)
+- `Semestero-ME-Tablet-Clean.apk` (`com.technion.semestero.tablet`, `versionCode 116`, `versionName {VERSION}`, `v1+v2+v3` Signed)
+- `Semestero-ME.apk` (`com.technion.semestero`, `versionCode 116`, `versionName {VERSION}`, `v1+v2+v3` Signed, `targetSdk 34`)
+- `Semestero-ME-Watch.apk` (`versionCode 116`, `versionName {VERSION}`, `v1+v2+v3` Signed)
 - `Semestero-ME-Windows-x64.zip` (Electron Desktop Client {VERSION})
 """
 

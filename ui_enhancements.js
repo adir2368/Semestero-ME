@@ -2223,6 +2223,16 @@
             badge._uiMotionBumpTimer = setTimeout(() => {
                 badge.classList.remove('is-bumping');
             }, 660);
+            const bellBtn = document.getElementById('btn-notification-bell');
+            if (bellBtn) {
+                bellBtn.classList.remove('is-ringing');
+                void bellBtn.offsetWidth;
+                bellBtn.classList.add('is-ringing');
+                if (bellBtn._uiMotionRingTimer) clearTimeout(bellBtn._uiMotionRingTimer);
+                bellBtn._uiMotionRingTimer = setTimeout(() => {
+                    bellBtn.classList.remove('is-ringing');
+                }, 580);
+            }
         },
 
         observeBadge(rootDoc = document) {
