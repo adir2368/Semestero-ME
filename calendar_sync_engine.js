@@ -280,13 +280,74 @@
                 });
             }
 
+            // --- 4. CUSTOM PERSONAL & MILUIM CALENDAR EVENTS ---
+            let countCustom = 0;
+            const customEvents = (gameState && Array.isArray(gameState.customCalendarEvents)) ? gameState.customCalendarEvents : [];
+            customEvents.forEach(ev => {
+                if (!ev || !ev.date || !ev.title) return;
+                const cleanStart = String(ev.date).split('T')[0].replace(/-/g, '');
+                if (!/^\d{8}$/.test(cleanStart)) return;
+                const endRaw = (ev.endDate && ev.endDate >= ev.date) ? ev.endDate : ev.date;
+                const cleanEnd = String(endRaw).split('T')[0].replace(/-/g, '');
+                countCustom++;
+
+                const uidCustom = `custom-${ev.id || countCustom}-${cleanStart}@semesterome.local`;
+                const evLines = [
+                    'BEGIN:VEVENT',
+                    `UID:${uidCustom}`,
+                    `DTSTAMP:${nowUtc}`
+                ];
+
+                if (ev.isAllDay) {
+                    const endDateObj = new Date(Number(cleanEnd.slice(0, 4)), Number(cleanEnd.slice(4, 6)) - 1, Number(cleanEnd.slice(6, 8)));
+                    endDateObj.setDate(endDateObj.getDate() + 1);
+                    const exclEnd = `${endDateObj.getFullYear()}${String(endDateObj.getMonth() + 1).padStart(2, '0')}${String(endDateObj.getDate()).padStart(2, '0')}`;
+                    evLines.push(`DTSTART;VALUE=DATE:${cleanStart}`, `DTEND;VALUE=DATE:${exclEnd}`);
+                } else {
+                    const sHHMM = (ev.startTime || '10:00').replace(':', '').padStart(4, '0');
+                    const eHHMM = (ev.endTime || '11:30').replace(':', '').padStart(4, '0');
+                    evLines.push(
+                        `DTSTART;TZID=Asia/Jerusalem:${cleanStart}T${sHHMM}00`,
+                        `DTEND;TZID=Asia/Jerusalem:${cleanEnd}T${eHHMM}00`
+                    );
+                }
+
+                const rec = String(ev.recurrence || 'none').toLowerCase();
+                if (rec === 'daily') evLines.push('RRULE:FREQ=DAILY;COUNT=90');
+                else if (rec === 'weekly') evLines.push('RRULE:FREQ=WEEKLY;COUNT=20');
+                else if (rec === 'biweekly') evLines.push('RRULE:FREQ=WEEKLY;INTERVAL=2;COUNT=12');
+                else if (rec === 'monthly') evLines.push('RRULE:FREQ=MONTHLY;COUNT=12');
+                else if (rec === 'yearly') evLines.push('RRULE:FREQ=YEARLY;COUNT=5');
+
+                evLines.push(
+                    `SUMMARY:${ev.icon || '🔵'} ${CalendarSyncEngine.escapeIcsText(ev.title)}`,
+                    `DESCRIPTION:${CalendarSyncEngine.escapeIcsText(ev.description || 'אירוע אישי מ-Semestero ME')}`,
+                    `CATEGORIES:${CalendarSyncEngine.escapeIcsText(ev.category || 'Personal')}`,
+                    'STATUS:CONFIRMED'
+                );
+
+                const remMin = (ev.reminderMinutes !== undefined && ev.reminderMinutes !== null && ev.reminderMinutes !== '') ? Number(ev.reminderMinutes) : null;
+                if (remMin !== null && !isNaN(remMin) && remMin >= 0) {
+                    evLines.push(
+                        'BEGIN:VALARM',
+                        'ACTION:DISPLAY',
+                        `DESCRIPTION:${CalendarSyncEngine.escapeIcsText(`⏰ תזכורת: ${ev.title}`)}`,
+                        `TRIGGER:-PT${Math.round(remMin)}M`,
+                        'END:VALARM'
+                    );
+                }
+                evLines.push('END:VEVENT');
+                icsLines.push(...evLines);
+            });
+
             icsLines.push('END:VCALENDAR');
-            const totalCount = countClasses + countTasks + countExams;
+            const totalCount = countClasses + countTasks + countExams + countCustom;
             return {
                 icsString: icsLines.join('\r\n'),
                 countClasses,
                 countTasks,
                 countExams,
+                countCustom,
                 totalCount
             };
         },

@@ -259,21 +259,12 @@
           "xp": 50,
           "type": "hw",
           "title": "תאריך סגירה: תרגיל אלקטרוני 2 - שיטת האופיינים",
-          "status": "in_progress",
+          "status": "done",
           "dueDate": "2026-11-19 23:59",
           "moodleUrl": "https://moodle26.technion.ac.il/course/view.php?id=643",
           "pangeaUrl": "https://idofangbentov.uk/Technion/PDE1/PDE1_000-104228-%D7%9E%D7%93%D7%97-%D7%9E",
-          "completed": false,
+          "completed": true,
           "source": "moodle"
-        },
-        {
-          "id": "104228_ww1",
-          "xp": 40,
-          "type": "webwork",
-          "title": "WebWork 1: משוואת הגלים והפרדת משתנים",
-          "status": "not_started",
-          "dueDate": "",
-          "completed": false
         },
         {
           "id": "104228_ex",
@@ -1140,15 +1131,6 @@
           "source": "moodle"
         },
         {
-          "id": "034056_p1",
-          "xp": 150,
-          "type": "project",
-          "title": "פרוייקט חישובי: אנליזה נומרית של מערכת מכנית",
-          "status": "not_started",
-          "dueDate": "",
-          "completed": false
-        },
-        {
           "id": "034056_ex",
           "xp": 550,
           "type": "exam",
@@ -1790,15 +1772,6 @@
                 "xp": 50,
                 "type": "hw",
                 "title": "תרגיל בית 1: משוואות מסדר ראשון ומאפיינים",
-                "status": "not_started",
-                "dueDate": "",
-                "completed": false
-              },
-              {
-                "id": "104228_ww1",
-                "xp": 40,
-                "type": "webwork",
-                "title": "WebWork 1: משוואת הגלים והפרדת משתנים",
                 "status": "not_started",
                 "dueDate": "",
                 "completed": false
@@ -2576,15 +2549,6 @@
                 "xp": 50,
                 "type": "hw",
                 "title": "תרגיל בית 1: פתרון משוואות לא ליניאריות בפייתון",
-                "status": "not_started",
-                "dueDate": "",
-                "completed": false
-              },
-              {
-                "id": "034056_p1",
-                "xp": 200,
-                "type": "project",
-                "title": "פרוייקט חישובי: אנליזה נומרית של מערכת מכנית",
                 "status": "not_started",
                 "dueDate": "",
                 "completed": false

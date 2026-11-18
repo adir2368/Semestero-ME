@@ -342,9 +342,114 @@
 
     const TECHNION_DATE_EVENTS_MAP = expandScheduleToDateMap(RAW_ACADEMIC_SCHEDULE);
 
+    const ACADEMIC_TERMS = [
+        {
+            name: 'חורף תשפ״ו',
+            week1Sunday: '2025-10-26',
+            start: '2025-10-29',
+            end: '2026-01-29',
+            examStart: '2026-02-02',
+            examEnd: '2026-03-24',
+            totalWeeks: 13
+        },
+        {
+            name: 'אביב תשפ״ו',
+            week1Sunday: '2026-03-22',
+            start: '2026-03-25',
+            end: '2026-07-09',
+            examStart: '2026-07-13',
+            examEnd: '2026-09-10',
+            totalWeeks: 13
+        },
+        {
+            name: 'חורף תשפ״ז',
+            week1Sunday: '2026-10-25',
+            start: '2026-10-28',
+            end: '2027-01-28',
+            examStart: '2027-02-01',
+            examEnd: '2027-03-23',
+            totalWeeks: 13
+        },
+        {
+            name: 'אביב תשפ״ז',
+            week1Sunday: '2027-03-21',
+            start: '2027-03-24',
+            end: '2027-07-08',
+            examStart: '2027-07-12',
+            examEnd: '2027-09-09',
+            totalWeeks: 13
+        }
+    ];
+
+    function parseUtcDayMs(ymd) {
+        const parts = String(ymd || '').split('-').map(Number);
+        if (parts.length !== 3 || parts.some(isNaN)) return NaN;
+        return Date.UTC(parts[0], parts[1] - 1, parts[2]);
+    }
+
+    function getAcademicSemesterWeekInfo(refDate) {
+        const d = refDate ? new Date(refDate) : new Date();
+        const todayMs = Date.UTC(d.getFullYear(), d.getMonth(), d.getDate());
+
+        for (let i = 0; i < ACADEMIC_TERMS.length; i++) {
+            const term = ACADEMIC_TERMS[i];
+            const week1Ms = parseUtcDayMs(term.week1Sunday);
+            const startMs = parseUtcDayMs(term.start);
+            const endMs = parseUtcDayMs(term.end);
+            const examStartMs = parseUtcDayMs(term.examStart);
+            const examEndMs = parseUtcDayMs(term.examEnd);
+            const totalWeeks = term.totalWeeks || 13;
+
+            if (todayMs >= week1Ms && todayMs <= endMs) {
+                const diffDays = Math.floor((todayMs - week1Ms) / 86400000);
+                const week = Math.max(1, Math.min(totalWeeks, Math.floor(diffDays / 7) + 1));
+                return {
+                    phase: 'teaching',
+                    week: week,
+                    totalWeeks: totalWeeks,
+                    termLabel: term.name,
+                    badgeText: `שבוע ${week} / ${totalWeeks}`,
+                    hintText: `סמסטר ${term.name}`
+                };
+            }
+            if (todayMs > endMs && todayMs <= examEndMs) {
+                const inExams = todayMs >= examStartMs;
+                return {
+                    phase: inExams ? 'exams' : 'prep',
+                    week: totalWeeks,
+                    totalWeeks: totalWeeks,
+                    termLabel: term.name,
+                    badgeText: inExams ? 'תקופת בחינות' : 'הכנה לבחינות',
+                    hintText: `סמסטר ${term.name}`
+                };
+            }
+            if (todayMs < week1Ms) {
+                const daysUntil = Math.max(1, Math.ceil((startMs - todayMs) / 86400000));
+                return {
+                    phase: 'break',
+                    week: 0,
+                    totalWeeks: totalWeeks,
+                    termLabel: term.name,
+                    badgeText: 'חופשת סמסטר',
+                    hintText: `עוד ${daysUntil} ימים ל${term.name}`
+                };
+            }
+        }
+        return {
+            phase: 'teaching',
+            week: 1,
+            totalWeeks: 13,
+            termLabel: 'טכניון',
+            badgeText: 'שבוע 1 / 13',
+            hintText: 'לוח אקדמי'
+        };
+    }
+
     global.TechnionAcademicCalendar = {
         RAW_SCHEDULE: RAW_ACADEMIC_SCHEDULE,
         DATE_EVENTS_MAP: TECHNION_DATE_EVENTS_MAP,
+        ACADEMIC_TERMS: ACADEMIC_TERMS,
+        getAcademicSemesterWeekInfo: getAcademicSemesterWeekInfo,
         getEventsForDate: function(dateStr) {
             return TECHNION_DATE_EVENTS_MAP[dateStr] || [];
         },

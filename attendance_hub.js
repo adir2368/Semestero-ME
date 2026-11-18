@@ -1506,64 +1506,150 @@
             bodyEl.innerHTML = html;
         },
 
+        addCustomMandatoryCourse: function(courseCode) {
+            if (!courseCode || !global.gameState) return;
+            if (!Array.isArray(global.gameState.customMandatoryShields)) {
+                global.gameState.customMandatoryShields = [];
+            }
+            const norm = String(courseCode).trim();
+            if (!global.gameState.customMandatoryShields.includes(norm)) {
+                global.gameState.customMandatoryShields.push(norm);
+            }
+            if (!this.quotas[norm]) {
+                const c = (global.gameState.courses && global.gameState.courses[norm]) || {};
+                this.quotas[norm] = {
+                    name: c.name || norm,
+                    icon: '🛡️',
+                    category: 'מעקב חובה מותאם',
+                    minRequired: 10,
+                    maxAllowedAbsences: 2,
+                    rulesNote: 'מעקב נוכחות חובה שהוסף ידנית ע״י הסטודנט.'
+                };
+            }
+            if (typeof global.saveState === 'function') global.saveState();
+            this.renderModalContent();
+        },
+
         renderMandatoryTab: function(bodyEl) {
-            let html = `
-                <div style="margin-bottom: 14px; font-size: 0.82rem; color: #cbd5e1; line-height: 1.5; background: rgba(16, 185, 129, 0.06); border: 1px solid rgba(16, 185, 129, 0.25); border-radius: 10px; padding: 12px;">
-                    <strong>🛡️ מדדי בטיחות נוכחות חובה (Mandatory Attendance Shields):</strong>
-                    מעקב חי אחר קורסים עם דרישות נוכחות קשיחות בטכניון. המערכת מחשבת באופן מיידי את יתרת ההיעדרויות המותרת ומתריעה לפני הגעה לאזור הסכנה.
-                </div>
-                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 12px;">
-            `;
-
-            Object.entries(this.quotas).forEach(([code, quota]) => {
-                const stats = this.getCourseStats(code);
-                const isDanger = stats.safety === 'danger';
-                const isWarning = stats.safety === 'warning';
-                const borderColor = isDanger ? '#ef4444' : (isWarning ? '#f59e0b' : 'rgba(255,255,255,0.1)');
-                const bgColor = isDanger ? 'rgba(239, 68, 68, 0.08)' : (isWarning ? 'rgba(245, 158, 11, 0.08)' : 'rgba(255,255,255,0.03)');
-
-                html += `
-                    <div style="background: ${bgColor}; border: 1px solid ${borderColor}; border-radius: 12px; padding: 14px; position: relative; overflow: hidden;">
-                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
-                            <div>
-                                <span style="font-size: 1.2rem; margin-left: 6px;">${quota.icon || '📚'}</span>
-                                <strong style="font-size: 0.95rem; color: #f8fafc;">${quota.name}</strong>
-                                <span style="font-size: 0.72rem; color: #94a3b8; font-family: monospace; display: block; margin-top: 2px;">(${code}) • ${quota.category}</span>
-                            </div>
-                            <span style="font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px; background: ${isDanger ? '#ef4444' : (isWarning ? '#f59e0b' : '#10b981')}; color: #fff;">
-                                ${isDanger ? '⚠️ סכנת פסילת קורס!' : (isWarning ? '⚠️ התראה: גבולי' : 'תקין ✓')}
-                            </span>
-                        </div>
-
-                        <!-- Progress Stats -->
-                        <div style="display: flex; justify-content: space-between; font-size: 0.78rem; color: #cbd5e1; margin-bottom: 6px;">
-                            <span>נרשמה נוכחות: <strong>${stats.attended}</strong> שיעורים</span>
-                            <span>היעדרויות: <strong style="color: ${stats.missed > 0 ? '#fb7185' : '#cbd5e1'};">${stats.missed}</strong> / ${quota.maxAllowedAbsences}</span>
-                        </div>
-
-                        <!-- Progress Bar -->
-                        <div style="background: rgba(255, 255, 255, 0.08); border-radius: 6px; height: 8px; overflow: hidden; margin-bottom: 8px;">
-                            <div style="background: ${isDanger ? '#ef4444' : (isWarning ? '#f59e0b' : '#10b981')}; height: 100%; width: ${Math.min(100, Math.round((stats.attended / quota.minRequired) * 100))}%;"></div>
-                        </div>
-
-                        <div style="font-size: 0.74rem; color: #94a3b8; line-height: 1.4;">
-                            ${quota.rulesNote}
-                        </div>
-
-                        <div style="margin-top: 10px; border-top: 1px dashed rgba(255,255,255,0.08); padding-top: 8px; display: flex; justify-content: space-between; align-items: center;">
-                            <span style="font-size: 0.72rem; color: #38bdf8;">
-                                ${stats.remainingAllowed !== null ? `יתרת היעדרויות מותרת: <strong>${stats.remainingAllowed}</strong>` : ''}
-                            </span>
-                            <button type="button" onclick="window.AttendanceHub.quickAddSession(decodeURIComponent('${encArg(code)}'), decodeURIComponent('${encArg(quota.name)}'))" style="font-size: 0.72rem; padding: 3px 8px; background: rgba(255,255,255,0.08); border: none; border-radius: 4px; color: #cbd5e1; cursor: pointer;">
-                                + רשום נוכחות ידנית
-                            </button>
-                        </div>
-                    </div>
-                `;
+            const coursesMap = (global.gameState && global.gameState.courses) ? global.gameState.courses : {};
+            const activeCoursesList = Object.values(coursesMap).filter(c => c && c.status === 'active');
+            const activeCodesSet = new Set();
+            activeCoursesList.forEach(c => {
+                const raw = String(c.code || '').trim();
+                activeCodesSet.add(raw);
+                activeCodesSet.add(raw.replace(/^0+/, ''));
+                activeCodesSet.add(raw.padStart(6, '0'));
+            });
+            const customShields = (global.gameState && Array.isArray(global.gameState.customMandatoryShields))
+                ? global.gameState.customMandatoryShields
+                : [];
+            customShields.forEach(code => {
+                if (!this.quotas[code]) {
+                    const c = coursesMap[code] || activeCoursesList.find(x => String(x.code).replace(/^0+/, '') === String(code).replace(/^0+/, '')) || {};
+                    this.quotas[code] = {
+                        name: c.name || code,
+                        icon: '🛡️',
+                        category: 'מעקב חובה מותאם',
+                        minRequired: 10,
+                        maxAllowedAbsences: 2,
+                        rulesNote: 'מעקב נוכחות חובה שהוסף ידנית ע״י הסטודנט.'
+                    };
+                }
             });
 
-            html += `</div>`;
-            bodyEl.innerHTML = html;
+            const relevantEntries = Object.entries(this.quotas).filter(([code]) => {
+                const clean = String(code).replace(/^0+/, '');
+                const padded = clean.padStart(6, '0');
+                const isCustom = customShields.includes(code) || customShields.includes(clean);
+                const isEnrolledActive = activeCodesSet.has(code) || activeCodesSet.has(clean) || activeCodesSet.has(padded);
+                return isEnrolledActive || isCustom;
+            });
+
+            const shownCodesSet = new Set(relevantEntries.map(([c]) => String(c).replace(/^0+/, '')));
+            const addableActiveCourses = activeCoursesList.filter(c => !shownCodesSet.has(String(c.code).replace(/^0+/, '')));
+
+            let html = `
+                <div style="margin-bottom: 14px; font-size: 0.82rem; color: #cbd5e1; line-height: 1.5; background: rgba(16, 185, 129, 0.06); border: 1px solid rgba(16, 185, 129, 0.25); border-radius: 10px; padding: 12px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+                    <div>
+                        <strong>🛡️ מדדי בטיחות נוכחות חובה (מותאם לקורסים הפעילים שלך):</strong>
+                        מעקב חי אך ורק אחר קורסים פעילים במערכת שלך עם דרישות נוכחות חובה.
+                    </div>
+                    ${addableActiveCourses.length > 0 ? `
+                        <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+                            <select id="att-add-mandatory-select" style="background: rgba(15,23,42,0.9); border: 1px solid rgba(56,189,248,0.4); color: #f8fafc; border-radius: 6px; padding: 4px 8px; font-size: 0.78rem;">
+                                ${addableActiveCourses.map(c => `<option value="${c.code}">${c.name} (${c.code})</option>`).join('')}
+                            </select>
+                            <button type="button" id="btn-att-add-mandatory" class="btn btn-xs btn-outline" style="border-color: rgba(16,185,129,0.5); color: #34d399; padding: 4px 10px; border-radius: 6px; cursor: pointer;">+ הוסף למעקב חובה</button>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+
+            if (relevantEntries.length === 0) {
+                html += `
+                    <div style="text-align: center; padding: 28px 18px; background: rgba(30, 41, 59, 0.45); border: 1px dashed rgba(148, 163, 184, 0.25); border-radius: 12px; color: #94a3b8; font-size: 0.86rem;">
+                        ✨ אין בקורסים הפעילים שלך כרגע קורסים עם חובת נוכחות מוגדרת מראש.<br>
+                        <span style="font-size: 0.78rem; color: #64748b;">ניתן להוסיף כל קורס מהסמסטר הנוכחי למעקב חובה דרך הבורר למעלה.</span>
+                    </div>
+                `;
+                bodyEl.innerHTML = html;
+            } else {
+                html += `<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 12px;">`;
+                relevantEntries.forEach(([code, quota]) => {
+                    const stats = this.getCourseStats(code);
+                    const isDanger = stats.safety === 'danger';
+                    const isWarning = stats.safety === 'warning';
+                    const borderColor = isDanger ? '#ef4444' : (isWarning ? '#f59e0b' : 'rgba(255,255,255,0.1)');
+                    const bgColor = isDanger ? 'rgba(239, 68, 68, 0.08)' : (isWarning ? 'rgba(245, 158, 11, 0.08)' : 'rgba(255,255,255,0.03)');
+
+                    html += `
+                        <div class="att-mandatory-card" data-course-code="${code}" style="background: ${bgColor}; border: 1px solid ${borderColor}; border-radius: 12px; padding: 14px; position: relative; overflow: hidden;">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                                <div>
+                                    <span style="font-size: 1.2rem; margin-left: 6px;">${quota.icon || '📚'}</span>
+                                    <strong style="font-size: 0.95rem; color: #f8fafc;">${quota.name}</strong>
+                                    <span style="font-size: 0.72rem; color: #94a3b8; font-family: monospace; display: block; margin-top: 2px;">(${code}) • ${quota.category}</span>
+                                </div>
+                                <span style="font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px; background: ${isDanger ? '#ef4444' : (isWarning ? '#f59e0b' : '#10b981')}; color: #fff;">
+                                    ${isDanger ? '⚠️ סכנת פסילת קורס!' : (isWarning ? '⚠️ התראה: גבולי' : 'תקין ✓')}
+                                </span>
+                            </div>
+
+                            <div style="display: flex; justify-content: space-between; font-size: 0.78rem; color: #cbd5e1; margin-bottom: 6px;">
+                                <span>נרשמה נוכחות: <strong>${stats.attended}</strong> שיעורים</span>
+                                <span>היעדרויות: <strong style="color: ${stats.missed > 0 ? '#fb7185' : '#cbd5e1'};">${stats.missed}</strong> / ${quota.maxAllowedAbsences}</span>
+                            </div>
+
+                            <div style="background: rgba(255, 255, 255, 0.08); border-radius: 6px; height: 8px; overflow: hidden; margin-bottom: 8px;">
+                                <div style="background: ${isDanger ? '#ef4444' : (isWarning ? '#f59e0b' : '#10b981')}; height: 100%; width: ${Math.min(100, Math.round((stats.attended / quota.minRequired) * 100))}%;"></div>
+                            </div>
+
+                            <div style="font-size: 0.74rem; color: #94a3b8; line-height: 1.4;">
+                                ${quota.rulesNote}
+                            </div>
+
+                            <div style="margin-top: 10px; border-top: 1px dashed rgba(255,255,255,0.08); padding-top: 8px; display: flex; justify-content: space-between; align-items: center;">
+                                <span style="font-size: 0.72rem; color: #38bdf8;">
+                                    ${stats.remainingAllowed !== null ? `יתרת היעדרויות מותרת: <strong>${stats.remainingAllowed}</strong>` : ''}
+                                </span>
+                                <button type="button" onclick="window.AttendanceHub.quickAddSession(decodeURIComponent('${encArg(code)}'), decodeURIComponent('${encArg(quota.name)}'))" style="font-size: 0.72rem; padding: 3px 8px; background: rgba(255,255,255,0.08); border: none; border-radius: 4px; color: #cbd5e1; cursor: pointer;">
+                                    + רשום נוכחות ידנית
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                });
+                html += `</div>`;
+                bodyEl.innerHTML = html;
+            }
+
+            const addBtn = bodyEl.querySelector('#btn-att-add-mandatory');
+            const addSel = bodyEl.querySelector('#att-add-mandatory-select');
+            if (addBtn && addSel) {
+                addBtn.addEventListener('click', () => {
+                    if (addSel.value) this.addCustomMandatoryCourse(addSel.value);
+                });
+            }
         },
 
         renderHistoryTab: function(bodyEl) {

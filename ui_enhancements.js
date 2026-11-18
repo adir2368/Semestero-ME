@@ -201,22 +201,48 @@
             }
         }
 
+        function scrollActiveViewToTop(smooth = true) {
+            const behavior = smooth ? 'smooth' : 'auto';
+            const container = getActiveMainScrollContainer();
+            if (container) {
+                if (typeof container.scrollTo === 'function') {
+                    container.scrollTo({ top: 0, behavior });
+                } else {
+                    container.scrollTop = 0;
+                }
+                if (!smooth) container.scrollTop = 0;
+            }
+
+            // Reset any main workspace scroll containers cleanly
+            ['notion-tasks-workspace', 'timetable-workspace', 'planner-workspace', 'settings-workspace'].forEach((wsId) => {
+                const ws = document.getElementById(wsId);
+                if (ws) {
+                    if (typeof ws.scrollTo === 'function') ws.scrollTo({ top: 0, behavior });
+                    else ws.scrollTop = 0;
+                }
+            });
+
+            // Universal fallback
+            if (typeof window.scrollTo === 'function') window.scrollTo({ top: 0, behavior });
+            if (document.documentElement && typeof document.documentElement.scrollTo === 'function') {
+                document.documentElement.scrollTo({ top: 0, behavior });
+            } else if (document.documentElement) {
+                document.documentElement.scrollTop = 0;
+            }
+            if (document.body && typeof document.body.scrollTo === 'function') {
+                document.body.scrollTo({ top: 0, behavior });
+            } else if (document.body) {
+                document.body.scrollTop = 0;
+            }
+
+            setTimeout(updateVisibility, smooth ? 350 : 20);
+        }
+
         // On click, scroll ONLY the active main viewport to top
         btn.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
-
-            const container = getActiveMainScrollContainer();
-            if (container && typeof container.scrollTo === 'function') {
-                container.scrollTo({ top: 0, behavior: 'smooth' });
-            }
-
-            // Universal fallback
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-            if (document.documentElement) document.documentElement.scrollTo({ top: 0, behavior: 'smooth' });
-            if (document.body) document.body.scrollTo({ top: 0, behavior: 'smooth' });
-
-            setTimeout(updateVisibility, 350);
+            scrollActiveViewToTop(true);
         });
 
         // Capture scroll events anywhere in document
@@ -231,6 +257,7 @@
             }
         }, { passive: true });
 
+        window.scrollActiveViewToTop = scrollActiveViewToTop;
         window.updateBackToTopVisibility = updateVisibility;
         updateVisibility();
     }

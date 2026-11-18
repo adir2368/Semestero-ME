@@ -9790,6 +9790,14 @@ function _loadSavedStateImpl() {
                 if (exB) { exB.dueDate = '2027-03-26'; exB.title = "מד\"ח - מועד ב'"; }
                 else { c.tasks.push({ id: '104228_ex_b', title: "מד\"ח - מועד ב'", type: 'exam', xp: 500, completed: false, status: 'not_started', dueDate: '2027-03-26' }); }
 
+                // Synchronize closed WebWork H2 assignment unless manually reopened by student
+                const h2Task = c.tasks.find(t => t.id === '104228_h2' || (t.title && t.title.includes('WebWork - H2')));
+                if (h2Task && !h2Task.statusUpdatedAt) {
+                    h2Task.completed = true;
+                    h2Task.status = 'done';
+                    h2Task.grade = 100;
+                }
+
                 // Active Moodle 26 SCORM Electronic Exercise: תרגיל אלקטרוני 1 - סיווג מד"ח (חבילת לומדה - SCORM)
                 let scormTask = c.tasks.find(t => t.id === 'task_moodle_scorm_95378' || (t.title && (t.title.includes('סיווג מד"ח') || t.title.includes('סיווג מד״ח') || t.title.includes('תרגיל אלקטרוני 1'))));
                 const scormSeedMock = { id: 'task_moodle_scorm_95378', moodleEventId: '95378', moodleUrl: 'https://moodle26.technion.ac.il/mod/scorm/view.php?id=95378', title: 'תרגיל אלקטרוני 1 - סיווג מד"ח (חבילת לומדה)' };
@@ -10521,7 +10529,7 @@ function recalculateCourseStates() {
     let openTasksCount = 0;
     const deletedIdsSet = new Set(Array.isArray(gameState.deletedTaskIds) ? gameState.deletedTaskIds.map(String) : []);
     // Retired non-existent seed tasks to purge from any legacy cached/cloud state
-    const RETIRED_SEED_TASK_IDS = new Set(['114052_ww1']);
+    const RETIRED_SEED_TASK_IDS = new Set(['114052_ww1', '104228_ww1', '034056_p1']);
     uniqueCourses.forEach(course => {
         if (Array.isArray(course.tasks)) {
             course.tasks = course.tasks.filter(t => {
@@ -10786,6 +10794,22 @@ function updateHud() {
 
     const statCompleted = document.getElementById("stat-completed-courses");
     if (statCompleted) statCompleted.innerText = gameState.completedCourses || 0;
+
+    const statSemWeek = document.getElementById("stat-semester-week");
+    const statSemWeekHint = document.getElementById("stat-semester-week-hint");
+    if (statSemWeek && window.TechnionAcademicCalendar && typeof window.TechnionAcademicCalendar.getAcademicSemesterWeekInfo === 'function') {
+        const weekInfo = window.TechnionAcademicCalendar.getAcademicSemesterWeekInfo(new Date());
+        statSemWeek.innerText = weekInfo.badgeText || weekInfo.displayShort || '--';
+        if (statSemWeekHint) {
+            const hint = weekInfo.hintText || weekInfo.displayHint || '';
+            if (hint) {
+                statSemWeekHint.innerText = hint;
+                statSemWeekHint.style.display = "block";
+            } else {
+                statSemWeekHint.style.display = "none";
+            }
+        }
+    }
 
     const openTasksEl = document.getElementById("stat-open-tasks");
     if (openTasksEl) {
@@ -12401,12 +12425,21 @@ const COURSE_FACULTY_DRIVE_MAP = {
     "314533": "https://technionmail-my.sharepoint.com/personal/mech_info_asat_technion_ac_il/_layouts/15/onedrive.aspx?id=/personal/mech_info_asat_technion_ac_il/Documents/Mechanical%20Engineering%20Drive/General%20Drive/%D7%A1%D7%9E%D7%A1%D7%98%D7%A8%20%D7%91/%28314533%29%20%D7%9E%D7%91%D7%95%D7%90%20%D7%9C%D7%94%D7%A0%D7%93%D7%A1%D7%AA%20%D7%97%D7%95%D7%9E%D7%A8%D7%99%D7%9D/3.%20%D7%A8%D7%A4%D7%A8%D7%A0%D7%A1%D7%99%D7%9D",
     "034029": "https://technionmail-my.sharepoint.com/personal/mech_info_asat_technion_ac_il/_layouts/15/onedrive.aspx?id=/personal/mech_info_asat_technion_ac_il/Documents/Mechanical%20Engineering%20Drive/General%20Drive/%D7%A1%D7%9E%D7%A1%D7%98%D7%A8%20%D7%92/%28034029%29%20%D7%9E%D7%9B%D7%A0%D7%99%D7%A7%D7%AA%20%D7%9E%D7%95%D7%A6%D7%A7%D7%99%D7%9D%202/3.%20%D7%A8%D7%A4%D7%A8%D7%A0%D7%A1%D7%99%D7%9D",
     "34029": "https://technionmail-my.sharepoint.com/personal/mech_info_asat_technion_ac_il/_layouts/15/onedrive.aspx?id=/personal/mech_info_asat_technion_ac_il/Documents/Mechanical%20Engineering%20Drive/General%20Drive/%D7%A1%D7%9E%D7%A1%D7%98%D7%A8%20%D7%92/%28034029%29%20%D7%9E%D7%9B%D7%A0%D7%99%D7%A7%D7%AA%20%D7%9E%D7%95%D7%A6%D7%A7%D7%99%D7%9D%202/3.%20%D7%A8%D7%A4%D7%A8%D7%A0%D7%A1%D7%99%D7%9D",
+    "034053": "https://technionmail-my.sharepoint.com/personal/mech_info_asat_technion_ac_il/_layouts/15/onedrive.aspx?id=/personal/mech_info_asat_technion_ac_il/Documents/Mechanical%20Engineering%20Drive/General%20Drive/%D7%A1%D7%9E%D7%A1%D7%98%D7%A8%20%D7%92/%28034029%29%20%D7%9E%D7%9B%D7%A0%D7%99%D7%A7%D7%AA%20%D7%9E%D7%95%D7%A6%D7%A7%D7%99%D7%9D%202/3.%20%D7%A8%D7%A4%D7%A8%D7%A0%D7%A1%D7%99%D7%9D",
+    "34053": "https://technionmail-my.sharepoint.com/personal/mech_info_asat_technion_ac_il/_layouts/15/onedrive.aspx?id=/personal/mech_info_asat_technion_ac_il/Documents/Mechanical%20Engineering%20Drive/General%20Drive/%D7%A1%D7%9E%D7%A1%D7%98%D7%A8%20%D7%92/%28034029%29%20%D7%9E%D7%9B%D7%A0%D7%99%D7%A7%D7%AA%20%D7%9E%D7%95%D7%A6%D7%A7%D7%99%D7%9D%202/3.%20%D7%A8%D7%A4%D7%A8%D7%A0%D7%A1%D7%99%D7%9D",
     "034035": "https://technionmail-my.sharepoint.com/personal/mech_info_asat_technion_ac_il/_layouts/15/onedrive.aspx?id=/personal/mech_info_asat_technion_ac_il/Documents/Mechanical%20Engineering%20Drive/General%20Drive/%D7%A1%D7%9E%D7%A1%D7%98%D7%A8%20%D7%92/%28034035%29%20%D7%AA%D7%A8%D7%9E%D7%95%D7%93%D7%99%D7%A0%D7%9E%D7%99%D7%A7%D7%94%201/%D7%A8%D7%A4%D7%A8%D7%A0%D7%A1%D7%99%D7%9D",
     "34035": "https://technionmail-my.sharepoint.com/personal/mech_info_asat_technion_ac_il/_layouts/15/onedrive.aspx?id=/personal/mech_info_asat_technion_ac_il/Documents/Mechanical%20Engineering%20Drive/General%20Drive/%D7%A1%D7%9E%D7%A1%D7%98%D7%A8%20%D7%92/%28034035%29%20%D7%AA%D7%A8%D7%9E%D7%95%D7%93%D7%99%D7%A0%D7%9E%D7%99%D7%A7%D7%94%201/%D7%A8%D7%A4%D7%A8%D7%A0%D7%A1%D7%99%D7%9D",
     "034043": "https://technionmail-my.sharepoint.com/personal/mech_info_asat_technion_ac_il/_layouts/15/onedrive.aspx?id=/personal/mech_info_asat_technion_ac_il/Documents/Mechanical%20Engineering%20Drive/General%20Drive/%D7%A1%D7%9E%D7%A1%D7%98%D7%A8%20%D7%92/%28034043%29%20%D7%A9%D7%A8%D7%98%D7%95%D7%98%20%D7%94%D7%A0%D7%93%D7%A1%D7%99%20%D7%9E%D7%9E%D7%95%D7%97%D7%A9%D7%91",
     "34043": "https://technionmail-my.sharepoint.com/personal/mech_info_asat_technion_ac_il/_layouts/15/onedrive.aspx?id=/personal/mech_info_asat_technion_ac_il/Documents/Mechanical%20Engineering%20Drive/General%20Drive/%D7%A1%D7%9E%D7%A1%D7%98%D7%A8%20%D7%92/%28034043%29%20%D7%A9%D7%A8%D7%98%D7%95%D7%98%20%D7%94%D7%A0%D7%93%D7%A1%D7%99%20%D7%9E%D7%9E%D7%95%D7%97%D7%A9%D7%91",
     "104228": "https://technionmail-my.sharepoint.com/personal/mech_info_asat_technion_ac_il/_layouts/15/onedrive.aspx?id=/personal/mech_info_asat_technion_ac_il/Documents/Mechanical%20Engineering%20Drive/General%20Drive/%D7%A1%D7%9E%D7%A1%D7%98%D7%A8%20%D7%92/%28104228%29%20%D7%9E%D7%93%D7%97%20%D7%9E/3.%20%D7%A8%D7%A4%D7%A8%D7%A0%D7%A1%D7%99%D7%9D",
+    "104065": "https://technionmail-my.sharepoint.com/personal/mech_info_asat_technion_ac_il/_layouts/15/onedrive.aspx?id=/personal/mech_info_asat_technion_ac_il/Documents/Mechanical%20Engineering%20Drive/General%20Drive/%D7%A1%D7%9E%D7%A1%D7%98%D7%A8%20%D7%92/%28104228%29%20%D7%9E%D7%93%D7%97%20%D7%9E/3.%20%D7%A8%D7%A4%D7%A8%D7%A0%D7%A1%D7%99%D7%9D",
+    "034056": "https://technionmail-my.sharepoint.com/personal/mech_info_asat_technion_ac_il/_layouts/15/onedrive.aspx?id=/personal/mech_info_asat_technion_ac_il/Documents/Mechanical%20Engineering%20Drive/General%20Drive/%D7%A1%D7%9E%D7%A1%D7%98%D7%A8%20%D7%92/%D7%9E%D7%91%D7%95%D7%90%20%D7%9C%D7%97%D7%99%D7%A9%D7%95%D7%91%20%D7%9E%D7%93%D7%A2%D7%99%20%D7%95%D7%94%D7%A0%D7%93%D7%A1%D7%99%20%2034056/3.%20%D7%A8%D7%A4%D7%A8%D7%A0%D7%A1%D7%99%D7%9D",
     "34056": "https://technionmail-my.sharepoint.com/personal/mech_info_asat_technion_ac_il/_layouts/15/onedrive.aspx?id=/personal/mech_info_asat_technion_ac_il/Documents/Mechanical%20Engineering%20Drive/General%20Drive/%D7%A1%D7%9E%D7%A1%D7%98%D7%A8%20%D7%92/%D7%9E%D7%91%D7%95%D7%90%20%D7%9C%D7%97%D7%99%D7%A9%D7%95%D7%91%20%D7%9E%D7%93%D7%A2%D7%99%20%D7%95%D7%94%D7%A0%D7%93%D7%A1%D7%99%20%2034056/3.%20%D7%A8%D7%A4%D7%A8%D7%A0%D7%A1%D7%99%D7%9D",
+    "114052": "https://technionmail-my.sharepoint.com/personal/mech_info_asat_technion_ac_il/_layouts/15/onedrive.aspx?id=/personal/mech_info_asat_technion_ac_il/Documents/Mechanical%20Engineering%20Drive/General%20Drive/%D7%A1%D7%9E%D7%A1%D7%98%D7%A8%20%D7%93/%28114052%29%20%D7%A4%D7%99%D7%A1%D7%99%D7%A7%D7%94%202/3.%20%D7%A8%D7%A4%D7%A8%D7%A0%D7%A1%D7%99%D7%9D",
+    "114032": "https://technionmail-my.sharepoint.com/personal/mech_info_asat_technion_ac_il/_layouts/15/onedrive.aspx?id=/personal/mech_info_asat_technion_ac_il/Documents/Mechanical%20Engineering%20Drive/General%20Drive/%D7%A1%D7%9E%D7%A1%D7%98%D7%A8%20%D7%93/%28114052%29%20%D7%A4%D7%99%D7%A1%D7%99%D7%A7%D7%94%202/3.%20%D7%A8%D7%A4%D7%A8%D7%A0%D7%A1%D7%99%D7%9D",
+    "114075": "https://technionmail-my.sharepoint.com/personal/mech_info_asat_technion_ac_il/_layouts/15/onedrive.aspx?id=/personal/mech_info_asat_technion_ac_il/Documents/Mechanical%20Engineering%20Drive/General%20Drive/%D7%A1%D7%9E%D7%A1%D7%98%D7%A8%20%D7%93/%28114075%29%20%D7%A4%D7%99%D7%A1%D7%99%D7%A7%D7%94%202%D7%9E%D7%9E/3.%20%D7%A8%D7%A4%D7%A8%D7%A0%D7%A1%D7%99%D7%9D",
+    "104041": "https://technionmail-my.sharepoint.com/personal/mech_info_asat_technion_ac_il/_layouts/15/onedrive.aspx?id=/personal/mech_info_asat_technion_ac_il/Documents/Mechanical%20Engineering%20Drive/General%20Drive/%D7%A1%D7%9E%D7%A1%D7%98%D7%A8%20%D7%90/%28104018%29%20%D7%97%D7%93%D7%95%D7%90%201%D7%9E/%D7%A8%D7%A4%D7%A8%D7%A0%D7%A1%D7%99%D7%9D",
+    "104043": "https://technionmail-my.sharepoint.com/personal/mech_info_asat_technion_ac_il/_layouts/15/onedrive.aspx?id=/personal/mech_info_asat_technion_ac_il/Documents/Mechanical%20Engineering%20Drive/General%20Drive/%D7%A1%D7%9E%D7%A1%D7%98%D7%A8%20%D7%90/%28104016%29%20%D7%90%D7%9C%D7%92%D7%91%D7%A8%D7%94%201%D7%9E/%D7%A8%D7%A4%D7%A8%D7%A0%D7%A1%D7%99%D7%9D",
     "034010": "https://technionmail-my.sharepoint.com/personal/mech_info_asat_technion_ac_il/_layouts/15/onedrive.aspx?id=/personal/mech_info_asat_technion_ac_il/Documents/Mechanical%20Engineering%20Drive/General%20Drive/%D7%A1%D7%9E%D7%A1%D7%98%D7%A8%20%D7%93/%28034010%29%20%D7%93%D7%99%D7%A0%D7%9E%D7%99%D7%A7%D7%94/3.%20%D7%A8%D7%A4%D7%A8%D7%A0%D7%A1%D7%99%D7%9D",
     "34010": "https://technionmail-my.sharepoint.com/personal/mech_info_asat_technion_ac_il/_layouts/15/onedrive.aspx?id=/personal/mech_info_asat_technion_ac_il/Documents/Mechanical%20Engineering%20Drive/General%20Drive/%D7%A1%D7%9E%D7%A1%D7%98%D7%A8%20%D7%93/%28034010%29%20%D7%93%D7%99%D7%A0%D7%9E%D7%99%D7%A7%D7%94/3.%20%D7%A8%D7%A4%D7%A8%D7%A0%D7%A1%D7%99%D7%9D",
     "034030": "https://technionmail-my.sharepoint.com/personal/mech_info_asat_technion_ac_il/_layouts/15/onedrive.aspx?id=/personal/mech_info_asat_technion_ac_il/Documents/Mechanical%20Engineering%20Drive/General%20Drive/%D7%A1%D7%9E%D7%A1%D7%98%D7%A8%20%D7%93/%28034030%29%20%D7%AA%D7%94%D7%9C%D7%99%D7%9B%D7%99%20%D7%99%D7%A6%D7%95%D7%A8/3.%D7%A8%D7%A4%D7%A8%D7%A0%D7%A1%D7%99%D7%9D",
@@ -12445,10 +12478,60 @@ const FACULTY_DRIVE_LOCAL_PATH = 'C:\\Users\\user\\OneDrive - Technion\\Mechanic
 
 function getFacultyDriveCourseUrl(courseCode, task) {
     if (!courseCode) return FACULTY_DRIVE_WEB_URL;
-    const cleanCode = String(courseCode).replace(/^0+/, '');
-    const directUrl = COURSE_FACULTY_DRIVE_MAP[courseCode] || COURSE_FACULTY_DRIVE_MAP[cleanCode];
-    if (directUrl) return directUrl;
-    return FACULTY_DRIVE_WEB_URL;
+    const rawCode = String(courseCode).trim();
+    const cleanCode = rawCode.replace(/^0+/, '');
+    const normCode = (typeof normalizeCourseAccentKey === 'function') ? normalizeCourseAccentKey(rawCode) : rawCode;
+    const baseUrl = COURSE_FACULTY_DRIVE_MAP[rawCode] || COURSE_FACULTY_DRIVE_MAP[normCode] || COURSE_FACULTY_DRIVE_MAP[cleanCode];
+    if (!baseUrl) return FACULTY_DRIVE_WEB_URL;
+    if (!task) return baseUrl;
+
+    const title = String(task.title || task.name || '');
+    const lowerTitle = title.toLowerCase();
+    const tType = String(task.type || '').toLowerCase();
+    const numMatch = title.match(/(?:גיליון|תרגיל(?:\s*בית)?|דף|ת\.?ב\.?|homework|hw|ex|sheet|lab|h)\s*[-#:]?\s*(\d{1,2})\b/i)
+        || title.match(/\b(\d{1,2})\b/);
+    const itemNum = numMatch ? parseInt(numMatch[1], 10) : null;
+    const isExam = tType === 'exam' || tType === 'midterm' || tType === 'moed_a' || tType === 'moed_b'
+        || /מבחן|בחינה|מועד|בוחן|midterm|exam/i.test(lowerTitle);
+    const isLab = tType === 'lab' || /מעבדה|\blab\b/i.test(lowerTitle);
+    const isMatlab = /מטלב|matlab/i.test(lowerTitle);
+    const isProject = tType === 'project' || /פרויקט|project/i.test(lowerTitle);
+    const isExcel = /אקסל|excel/i.test(lowerTitle);
+
+    const courseRoot = baseUrl.replace(/\/3\.\s*%D7%A8%D7%A4%D7%A8%D7%A0%D7%A1%D7%99%D7%9D$|\/3\.%20%D7%A8%D7%A4%D7%A8%D7%A0%D7%A1%D7%99%D7%9D$|\/%D7%A8%D7%A4%D7%A8%D7%A0%D7%A1%D7%99%D7%9D$/i, '');
+
+    if (normCode === '034029' || normCode === '034053' || cleanCode === '34029' || cleanCode === '34053') {
+        if (isLab) return `${courseRoot}/0.%20%D7%9E%D7%A2%D7%91%D7%93%D7%94`;
+        if (isExam) return `${courseRoot}/4.%20%D7%9E%D7%91%D7%97%D7%A0%D7%99%D7%9D`;
+        if (itemNum && itemNum >= 1 && itemNum <= 12) {
+            return isExcel
+                ? `${baseUrl}/2.%20%D7%90%D7%A7%D7%A1%D7%9C/${itemNum}`
+                : `${baseUrl}/1.%20%D7%9B%D7%AA%D7%95%D7%91%D7%99%D7%9D/%D7%AA%D7%A8%D7%92%D7%99%D7%9C%20%D7%91%D7%99%D7%AA%20${Math.min(11, itemNum)}`;
+        }
+    } else if (normCode === '104228' || normCode === '104065' || cleanCode === '104228') {
+        if (isExam) return `${courseRoot}/4.%20%D7%9C%D7%9E%D7%91%D7%97%D7%9F`;
+        if (itemNum && itemNum >= 1 && itemNum <= 12) return `${baseUrl}/${itemNum}`;
+    } else if (normCode === '034035' || cleanCode === '34035') {
+        if (isExam) return `${courseRoot}/%D7%9C%D7%9E%D7%91%D7%97%D7%9F`;
+        if (itemNum && itemNum >= 1 && itemNum <= 12) return `${baseUrl}/${itemNum}`;
+    } else if (normCode === '034056' || cleanCode === '34056') {
+        if (isExam) return `${courseRoot}/4.%D7%9C%D7%9E%D7%91%D7%97%D7%9F`;
+        if (isMatlab) return `${courseRoot}/0.%D7%9E%D7%98%D7%9C%D7%91`;
+        if (isProject) return `${courseRoot}/0.%20%D7%A4%D7%A8%D7%95%D7%99%D7%A7%D7%98%D7%99%D7%9D`;
+        if (itemNum && itemNum >= 1 && itemNum <= 8) return `${baseUrl}/${itemNum}`;
+    } else if (normCode === '034043' || cleanCode === '34043') {
+        if (isExam) return `${courseRoot}/creo/4.%20%D7%9C%D7%9E%D7%91%D7%97%D7%9F`;
+        if (itemNum && itemNum >= 1 && itemNum <= 10) return `${courseRoot}/creo/3.%20%D7%A8%D7%A4%D7%A8%D7%A0%D7%A1%D7%99%D7%9D/hw_${itemNum}`;
+    } else if (normCode === '114052' || normCode === '114032') {
+        if (isExam) return `${courseRoot}/4.%20%D7%9C%D7%9E%D7%91%D7%97%D7%9F`;
+        if (itemNum && itemNum >= 1 && itemNum <= 13) return `${baseUrl}/${itemNum}`;
+    } else if (normCode === '114075') {
+        if (isExam) return `${courseRoot}/4.%20%D7%9E%D7%91%D7%97%D7%A0%D7%99%D7%9D`;
+        if (itemNum && itemNum >= 1 && itemNum <= 11) return `${baseUrl}/${itemNum}`;
+    } else if (isExam && baseUrl.includes('/3.%20%D7%A8%D7%A4%D7%A8%D7%A0%D7%A1%D7%99%D7%9D')) {
+        return `${courseRoot}/4.%20%D7%9C%D7%9E%D7%91%D7%97%D7%9F`;
+    }
+    return baseUrl;
 }
 if (typeof window !== 'undefined') {
     window.COURSE_FACULTY_DRIVE_MAP = COURSE_FACULTY_DRIVE_MAP;
@@ -16761,6 +16844,9 @@ window.switchTab = function(tabNameOrNumber) {
         if (typeof window.updateBackToTopVisibility === 'function') {
             window.updateBackToTopVisibility();
         }
+        if (typeof window.scrollActiveViewToTop === 'function') {
+            window.scrollActiveViewToTop(false);
+        }
     }
 
     window.setActiveMainTab = setActiveMainTab;
@@ -17043,6 +17129,18 @@ window.switchTab = function(tabNameOrNumber) {
     const btnBulkCancel = document.getElementById("btn-bulk-clear-selection");
     if (btnBulkCancel) btnBulkCancel.onclick = clearTasksSelection;
 
+    const btnToggleSelectMode = document.getElementById("btn-toggle-tasks-select-mode");
+    if (btnToggleSelectMode) {
+        btnToggleSelectMode.onclick = () => {
+            window._tasksSelectMode = !window._tasksSelectMode;
+            if (!window._tasksSelectMode && window.selectedTasksMap && window.selectedTasksMap.size > 0) {
+                clearTasksSelection();
+                return;
+            }
+            updateTasksBulkToolbar();
+        };
+    }
+
     // Wire Context Menu Actions
     const ctxDup = document.getElementById("ctx-task-duplicate");
     if (ctxDup) ctxDup.onclick = () => {
@@ -17164,16 +17262,37 @@ window.switchTab = function(tabNameOrNumber) {
     }
 }
 
-// Fill Course filter dropdown with currently active courses
+// Fill Course filter dropdown with currently active courses (cascaded by selected semesters)
 function populateNotionCourseFilter() {
+    const coursesMap = (typeof gameState !== 'undefined' && gameState && gameState.courses) ? gameState.courses : {};
+    const curActiveSem = (typeof gameState !== 'undefined' && gameState && gameState.currentActiveSemester) ? gameState.currentActiveSemester : 3;
+    const activeSemSet = (typeof getActiveSemesterFilters === 'function') ? getActiveSemesterFilters() : null;
+    const semCheckboxes = document.querySelectorAll("#notion-semester-filter-popover .notion-sem-opt-cb");
+    const totalSemOpts = semCheckboxes.length || 8;
+    const isSemFiltered = !!(activeSemSet && activeSemSet.size < totalSemOpts);
+
+    const courseMatchesSelectedSem = (course) => {
+        if (!course) return false;
+        if (!isSemFiltered) return true;
+        if (!activeSemSet || activeSemSet.size === 0) return false;
+        const cSem = Number(course.semester || 1);
+        const isCourseActiveNow = (course.status === 'active');
+        return activeSemSet.has(cSem) || (isCourseActiveNow && activeSemSet.has(Number(curActiveSem)));
+    };
+
+    const dedupedCourses = (typeof getDeduplicatedCoursesList === 'function')
+        ? getDeduplicatedCoursesList(coursesMap)
+        : Object.values(coursesMap);
+
     const select = document.getElementById("filter-course");
     if (select) {
         const currentVal = select.value || "all";
         select.innerHTML = '<option value="all">הכל (כל הקורסים)</option>';
-        Object.values(gameState.courses).forEach(course => {
+        dedupedCourses.forEach(course => {
+            if (!courseMatchesSelectedSem(course)) return;
             const hasManual = course.tasks && course.tasks.some(t => t.source === 'manual' || (t.id && String(t.id).startsWith('task-')));
             const hasPending = course.tasks && course.tasks.some(t => !t.completed && t.status !== 'done' && t.status !== 'submitted');
-            if (course.status === 'active' || hasManual || hasPending) {
+            if (course.status === 'active' || hasManual || hasPending || (course.tasks && course.tasks.length > 0)) {
                 const opt = document.createElement("option");
                 opt.value = course.code;
                 const shortName = (typeof COURSE_SHORT_NAMES !== 'undefined' && COURSE_SHORT_NAMES[course.code]) || course.name;
@@ -17181,27 +17300,45 @@ function populateNotionCourseFilter() {
                 select.appendChild(opt);
             }
         });
-        select.value = currentVal;
+        const stillExists = Array.from(select.options).some(o => o.value === currentVal);
+        select.value = stillExists ? currentVal : "all";
     }
 
     const courseFilterBody = document.getElementById("notion-course-filter-body");
     if (courseFilterBody) {
+        const existingCbs = courseFilterBody.querySelectorAll(".notion-course-opt-cb");
+        const hadExistingRendered = existingCbs.length > 0;
+        const prevUncheckedSet = new Set();
+        existingCbs.forEach(cb => {
+            if (!cb.checked) prevUncheckedSet.add(cb.getAttribute("data-course-code"));
+        });
         const savedPrefs = (typeof getSavedTaskFilterPreferences === 'function') ? getSavedTaskFilterPreferences() : null;
-        const savedCoursesSet = (savedPrefs && Array.isArray(savedPrefs.courses)) ? new Set(savedPrefs.courses) : null;
+        const savedCoursesSet = (!hadExistingRendered && savedPrefs && Array.isArray(savedPrefs.courses))
+            ? new Set(savedPrefs.courses)
+            : null;
 
         courseFilterBody.innerHTML = '';
-        const activeCourses = Object.values(gameState.courses).filter(c => {
-            const hasTasks = Array.isArray(c.tasks) && c.tasks.length > 0;
-            return c.status === 'active' || hasTasks;
-        });
-        activeCourses.forEach(course => {
+        const visibleCourses = dedupedCourses
+            .filter(c => {
+                const hasTasks = Array.isArray(c.tasks) && c.tasks.length > 0;
+                return (c.status === 'active' || hasTasks) && courseMatchesSelectedSem(c);
+            })
+            .sort((a, b) => (Number(a.semester || 1) - Number(b.semester || 1)) || String(a.code).localeCompare(String(b.code)));
+
+        visibleCourses.forEach(course => {
             const shortName = (typeof COURSE_SHORT_NAMES !== 'undefined' && COURSE_SHORT_NAMES[course.code]) || course.name;
-            const isChecked = savedCoursesSet ? savedCoursesSet.has(course.code) : true;
+            const cAccent = (typeof getCourseAccentColor === 'function') ? getCourseAccentColor(course.code) : (course.color || '#38bdf8');
+            let isChecked = true;
+            if (hadExistingRendered) {
+                isChecked = !prevUncheckedSet.has(course.code);
+            } else if (savedCoursesSet) {
+                isChecked = savedCoursesSet.has(course.code);
+            }
             const row = document.createElement("div");
             row.className = "notion-filter-item-row flat";
             row.innerHTML = `
                 <label for="filter-course-${course.code}" style="cursor: pointer; display: flex; align-items: center; gap: 8px; flex: 1; font-size: 0.8rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                    <span class="course-color-dot" style="width: 8px; height: 8px; border-radius: 50%; background: ${course.color || '#38bdf8'}; display: inline-block; flex-shrink: 0;"></span>
+                    <span class="course-color-dot" style="width: 8px; height: 8px; border-radius: 50%; background: ${cAccent}; display: inline-block; flex-shrink: 0;"></span>
                     <span title="${course.name} (${course.code})">${shortName} (${course.code})</span>
                 </label>
                 <input type="checkbox" id="filter-course-${course.code}" class="notion-filter-cb notion-course-opt-cb" data-course-code="${course.code}" ${isChecked ? 'checked' : ''}>
@@ -17329,6 +17466,12 @@ let activeTaskContextMenu = null;
 
 function updateTasksBulkToolbar() {
     const count = window.selectedTasksMap ? window.selectedTasksMap.size : 0;
+    const selectModeActive = !!(window._tasksSelectMode || count > 0);
+    const tasksTable = document.querySelector(".notion-tasks-table");
+    if (tasksTable) tasksTable.classList.toggle("is-select-mode-active", selectModeActive);
+    const selectModeBtn = document.getElementById("btn-toggle-tasks-select-mode");
+    if (selectModeBtn) selectModeBtn.classList.toggle("active", selectModeActive);
+
     const bar = document.getElementById("tasks-bulk-actions-bar");
     const countText = document.getElementById("bulk-selected-count-text");
     if (countText) {
@@ -17561,6 +17704,7 @@ function bulkSetTasksStatus(newStatus) {
 }
 
 function clearTasksSelection() {
+    window._tasksSelectMode = false;
     if (window.selectedTasksMap) window.selectedTasksMap.clear();
     const rows = document.querySelectorAll("#notion-tasks-table-body tr.is-row-selected");
     rows.forEach(r => {
@@ -17847,11 +17991,13 @@ function getPangeaTaskUrl(courseCode, task) {
 }
 window.getPangeaTaskUrl = getPangeaTaskUrl;
 
-function getTaskNormalizedCategory(type) {
-    if (!type) return 'hw';
-    const t = String(type).toLowerCase();
+function getTaskNormalizedCategory(type, taskObj = null) {
+    const t = String(type || '').toLowerCase();
+    const title = String((taskObj && (taskObj.title || taskObj.name)) || '');
+    if ((taskObj && (taskObj.isMiluim || taskObj.miluim)) || t === 'miluim' || /מילואי|צו\s*8|3010/i.test(title)) return 'miluim';
     if (t === 'exam' || t === 'midterm' || t === 'moed_a' || t === 'moed_b' || t === 'moed_c') return 'exam';
-    if (t === 'project' || t === 'lab' || t === 'work') return 'project';
+    if (t === 'lab' || (/מעבדה|\blab\b/i.test(title) && t !== 'hw')) return 'lab';
+    if (t === 'project' || t === 'work' || /פרויקט|project/i.test(title)) return 'project';
     return 'hw';
 }
 window.getTaskNormalizedCategory = getTaskNormalizedCategory;
@@ -17874,7 +18020,7 @@ function renderNotionTasksTable() {
     const semesterFilterEl = document.getElementById("filter-semester");
     const semesterFilter = (semesterFilterEl && semesterFilterEl.value) ? semesterFilterEl.value : "active";
     const activeStatusFilters = (typeof getActiveStatusFilters === 'function') ? getActiveStatusFilters() : [];
-    const activeTypeFilters = (typeof getActiveTypeFilters === 'function') ? getActiveTypeFilters() : ['hw', 'project', 'exam'];
+    const activeTypeFilters = (typeof getActiveTypeFilters === 'function') ? getActiveTypeFilters() : ['hw', 'lab', 'project', 'miluim', 'exam'];
     const activeSemesterFilters = (typeof getActiveSemesterFilters === 'function') ? getActiveSemesterFilters() : null;
     const activeCourseFilters = (typeof getActiveCourseFilters === 'function') ? getActiveCourseFilters() : null;
     const searchInput = document.getElementById("search-tasks");
@@ -17901,6 +18047,7 @@ function renderNotionTasksTable() {
     
     // Gather tasks and pre-compute timestamp for high-performance sorting (deduplicated across alias keys)
     const curActiveSem = (gameState && gameState.currentActiveSemester) ? gameState.currentActiveSemester : 3;
+    const semTotalOpts = document.querySelectorAll("#notion-semester-filter-popover .notion-sem-opt-cb").length || 8;
     getDeduplicatedCoursesList(gameState.courses).forEach(course => {
         // Course Multi-select Filter (null = all courses checked; Set(0) = user deselected all courses)
         if (activeCourseFilters !== null) {
@@ -17914,7 +18061,7 @@ function renderNotionTasksTable() {
         const isCourseActiveNow = (course.status === 'active');
 
         if (activeSemesterFilters) {
-            if (activeSemesterFilters.size > 0 && activeSemesterFilters.size < 6) {
+            if (activeSemesterFilters.size > 0 && activeSemesterFilters.size < semTotalOpts) {
                 const matchesSem = activeSemesterFilters.has(cSem) ||
                                    (isCourseActiveNow && activeSemesterFilters.has(curActiveSem));
                 if (!matchesSem) return;
@@ -17979,7 +18126,7 @@ function renderNotionTasksTable() {
         }
         
         // 2. Multi-Select Type Filter
-        const normCat = getTaskNormalizedCategory(t.type);
+        const normCat = getTaskNormalizedCategory(t.type, t);
         if (activeTypeFilters.length > 0 && !activeTypeFilters.includes(normCat)) {
             return false;
         }
@@ -18026,7 +18173,7 @@ function renderNotionTasksTable() {
                 return true;
             }
 
-            const cat = getTaskNormalizedCategory(item.task.type);
+            const cat = getTaskNormalizedCategory(item.task.type, item.task);
             const seqKey = `${item.course.code}:::${cat}`;
             if (uncompletedSeqSeen.has(seqKey)) {
                 return false; // Gate subsequent uncompleted tasks in this sequence
@@ -18055,7 +18202,7 @@ function renderNotionTasksTable() {
     if (allTasks.length === 0) {
         tableBody.innerHTML = `
             <tr>
-                <td colspan="8" style="text-align: center; color: var(--text-muted); padding: 40px 20px;">
+                <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 40px 20px;">
                     <div style="font-size: 1.15rem; font-weight: 700; color: #cbd5e1; margin-bottom: 8px;">📭 לא נמצאו משימות לפי הסינון הנוכחי</div>
                     <div style="font-size: 0.86rem; color: #64748b; margin-bottom: 16px;">מסנני סמסטר, סטטוס, סוג, קורס או חיפוש מסתירים משימות קיימות.</div>
                     <button type="button" class="btn btn-primary btn-sm" onclick="window.resetAllNotionFilters()" style="background: #0284c7; border: none; padding: 8px 18px; border-radius: 6px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);">
@@ -18128,20 +18275,22 @@ function renderNotionTasksTable() {
             </a>
         ` : '';
 
-        const semNum = c.semester || 1;
-        const semHebrewMap = { 1: 'א׳', 2: 'ב׳', 3: 'ג׳', 4: 'ד׳', 5: 'ה׳', 6: 'ו׳', 7: 'ז׳', 8: 'ח׳' };
-        const semLabel = `סמסטר ${semHebrewMap[semNum] || semNum}`;
         const courseAccent = getCourseAccentColor(c.code);
+        const taskCustomColor = (t.color && /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(t.color)) ? t.color : courseAccent;
 
         const taskGradeVal = (t.grade !== undefined && t.grade !== null && t.grade !== '' && !isNaN(Number(t.grade))) ? t.grade : '';
         const taskGradeTier = (typeof getTaskGradeTierClass === 'function') ? getTaskGradeTierClass(t.grade) : '';
-        const gradeCellHtml = `
-                <td class="notion-table-grade-cell">
+        const timeOrCompletedGradeHtml = isDone
+            ? `<div class="completed-inline-grade-wrap">
+                    <span class="time-remaining ${timeInfo.className}">הושלם</span>
+                    <span style="color: #64748b; font-size: 0.78rem;">|</span>
+                    <span class="completed-inline-grade-label">ציון:</span>
                     <input type="number" class="notion-inline-grade-input ${taskGradeTier}" min="0" max="100" step="0.5" value="${taskGradeVal}" placeholder="--" title="${t.type === 'exam' ? 'ציון מבחן (0-100)' : 'ציון ש״ב / מטלה (0-100)'}" aria-label="ציון משימה">
-                </td>`;
+               </div>`
+            : `<span class="time-remaining ${timeInfo.className}">${timeInfo.text}</span>`;
         const isSelected = window.selectedTasksMap && window.selectedTasksMap.has(`${c.code}:::${t.id}`);
         rowsHtml += `
-            <tr data-course-code="${c.code}" data-task-id="${t.id}" style="--course-accent: ${courseAccent};" class="${isPinned ? 'is-task-pinned' : ''} ${isSelected ? 'is-row-selected' : ''} has-course-accent">
+            <tr data-course-code="${c.code}" data-task-id="${t.id}" style="--course-accent: ${taskCustomColor};" class="${isPinned ? 'is-task-pinned' : ''} ${isSelected ? 'is-row-selected' : ''} has-course-accent">
                 <td class="notion-table-select-cell"><input type="checkbox" class="notion-row-checkbox" data-course-code="${c.code}" data-task-id="${t.id}" title="בחר משימה לפעולות מרובות" ${isSelected ? 'checked' : ''}></td>
                 <td>
                     <div class="notion-title-cell">
@@ -18168,17 +18317,13 @@ function renderNotionTasksTable() {
                         <span>${c.name}</span>
                     </span>
                 </td>
-                <td>
-                    <span class="notion-semester-pill sem-${semNum}">${semLabel}</span>
-                </td>
                 <td class="notion-table-date-cell">
                     <div class="notion-date-display-wrap" title="לחץ לעריכת תאריך הגשה">
                         <span class="notion-date-formatted">${formatDateToDisplay(t.dueDate) || 'ללא תאריך'}</span>
                         <input type="date" class="notion-inline-date-input" value="${toIsoDateOnly(t.dueDate)}" aria-label="עריכת תאריך הגשה">
                     </div>
                 </td>
-                <td><span class="time-remaining ${timeInfo.className}">${timeInfo.text}</span></td>
-                ${gradeCellHtml}
+                <td>${timeOrCompletedGradeHtml}</td>
                 <td style="position: relative;">
                     <span class="notion-status-pill ${statusClass} ${(statusClass === 'not_started' && timeInfo.isOpened) ? 'is-opened-gray' : ''}" title="שנה סטטוס ישירות מהרשימה">${displayLabel}</span>
                 </td>
@@ -18689,6 +18834,53 @@ function openTaskSidePeek(courseCode, taskId) {
             task.miluim = e.target.checked;
             renderNotionTasksTable();
             saveState();
+        };
+    }
+
+    // Color Picker in Side Peek (Task + Course sync)
+    const peekColorInput = document.getElementById("peek-task-color-input");
+    const peekApplyCourseColorBtn = document.getElementById("btn-peek-apply-course-color");
+    const peekResetColorBtn = document.getElementById("btn-peek-reset-color");
+    const currentAccentColor = (typeof getCourseAccentColor === 'function') ? getCourseAccentColor(courseCode) : '#38bdf8';
+    if (peekColorInput) {
+        peekColorInput.value = (task.color && /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(task.color)) ? task.color : currentAccentColor;
+        peekColorInput.onchange = (e) => {
+            task.color = e.target.value;
+            saveState();
+            renderNotionTasksTable();
+            if (typeof renderFinalsCalendar === 'function') renderFinalsCalendar();
+        };
+    }
+    if (peekApplyCourseColorBtn && peekColorInput) {
+        peekApplyCourseColorBtn.onclick = () => {
+            const chosen = peekColorInput.value || '#38bdf8';
+            const normKey = (typeof normalizeCourseAccentKey === 'function') ? normalizeCourseAccentKey(courseCode) : courseCode;
+            if (!gameState.courseCustomIcons) gameState.courseCustomIcons = {};
+            const baseIconKey = (typeof COURSE_NOTION_ICONS !== 'undefined' && (COURSE_NOTION_ICONS[courseCode]?.iconKey || COURSE_NOTION_ICONS[normKey]?.iconKey)) || 'book';
+            const prevRaw = gameState.courseCustomIcons[courseCode] || {};
+            const prevNorm = gameState.courseCustomIcons[normKey] || {};
+            const nextIconKey = prevRaw.iconKey || prevNorm.iconKey || baseIconKey;
+            gameState.courseCustomIcons[courseCode] = { iconKey: nextIconKey, color: chosen };
+            if (normKey && normKey !== courseCode) {
+                gameState.courseCustomIcons[normKey] = { iconKey: nextIconKey, color: chosen };
+            }
+            if (gameState.courses && gameState.courses[courseCode]) gameState.courses[courseCode].color = chosen;
+            delete task.color;
+            saveState();
+            renderNotionTasksTable();
+            if (typeof renderFinalsCalendar === 'function') renderFinalsCalendar();
+            if (typeof renderTimetableGrid === 'function') renderTimetableGrid();
+            if (typeof renderFlowchartTree === 'function') renderFlowchartTree();
+            if (typeof showToastNotification === 'function') showToastNotification('🎨 צבע הקורס עודכן בכל המערכת!', 'success');
+        };
+    }
+    if (peekResetColorBtn) {
+        peekResetColorBtn.onclick = () => {
+            delete task.color;
+            if (peekColorInput) peekColorInput.value = (typeof getCourseAccentColor === 'function') ? getCourseAccentColor(courseCode) : '#38bdf8';
+            saveState();
+            renderNotionTasksTable();
+            if (typeof renderFinalsCalendar === 'function') renderFinalsCalendar();
         };
     }
 
@@ -19503,7 +19695,7 @@ function saveNotionFilterPreferences() {
         const toolbarEl = document.getElementById("notion-filters-toolbar");
         const prefs = {
             statuses: (typeof getActiveStatusFilters === 'function') ? getActiveStatusFilters() : ['not_started', 'in_progress', 'done', 'submitted'],
-            types: (typeof getActiveTypeFilters === 'function') ? getActiveTypeFilters() : ['hw', 'project', 'exam'],
+            types: (typeof getActiveTypeFilters === 'function') ? getActiveTypeFilters() : ['hw', 'lab', 'project', 'miluim', 'exam'],
             semesters: semFilterObj ? Array.from(semFilterObj) : null,
             courses: courseFilterObj ? Array.from(courseFilterObj) : null,
             organitCategory: window.activeOrganitCategory || 'all',
@@ -19560,6 +19752,7 @@ function restoreNotionFilterPreferences(forceReapply = false) {
                     cb.checked = semSet.has(parseInt(cb.getAttribute("data-sem"), 10));
                 });
                 if (typeof updateSemesterFilterSummary === 'function') updateSemesterFilterSummary();
+                if (typeof populateNotionCourseFilter === 'function') populateNotionCourseFilter();
             }
         }
         const coursePopover = document.getElementById("notion-course-filter-popover");
@@ -19713,6 +19906,7 @@ function setupNotionSemesterFilterPopover() {
     semCheckboxes.forEach(cb => {
         cb.addEventListener("change", () => {
             updateSemesterFilterSummary();
+            if (typeof populateNotionCourseFilter === 'function') populateNotionCourseFilter();
             saveNotionFilterPreferences();
             renderNotionTasksTable();
         });
@@ -19725,6 +19919,7 @@ function setupNotionSemesterFilterPopover() {
             semCheckboxes.forEach(cb => cb.checked = !allChecked);
             selectAllBtn.innerText = allChecked ? "בחר הכל" : "בטל הכל";
             updateSemesterFilterSummary();
+            if (typeof populateNotionCourseFilter === 'function') populateNotionCourseFilter();
             saveNotionFilterPreferences();
             renderNotionTasksTable();
         });
@@ -19752,8 +19947,9 @@ function updateSemesterFilterSummary() {
     
     const checkboxes = popover.querySelectorAll(".notion-sem-opt-cb");
     const checked = popover.querySelectorAll(".notion-sem-opt-cb:checked");
+    const curActiveSem = String((typeof gameState !== 'undefined' && gameState && gameState.currentActiveSemester) ? gameState.currentActiveSemester : 3);
     
-    const semHebrewMap = { 1: 'א׳', 2: 'ב׳', 3: 'ג׳', 4: 'ד׳', 5: 'ה׳', 6: 'ו׳' };
+    const semHebrewMap = { 1: 'א׳', 2: 'ב׳', 3: 'ג׳', 4: 'ד׳', 5: 'ה׳', 6: 'ו׳', 7: 'ז׳', 8: 'ח׳' };
     
     if (checked.length === checkboxes.length) {
         summary.innerText = "כל הסמסטרים";
@@ -19763,7 +19959,7 @@ function updateSemesterFilterSummary() {
         if (hiddenSelect) hiddenSelect.value = "none";
     } else if (checked.length === 1) {
         const sem = checked[0].getAttribute("data-sem");
-        summary.innerText = `סמסטר ${semHebrewMap[sem] || sem}${sem === '3' ? ' (נוכחי)' : ''}`;
+        summary.innerText = `סמסטר ${semHebrewMap[sem] || sem}${sem === curActiveSem ? ' (נוכחי)' : ''}`;
         if (hiddenSelect) hiddenSelect.value = sem;
     } else {
         const names = Array.from(checked).map(cb => semHebrewMap[cb.getAttribute("data-sem")] || cb.getAttribute("data-sem"));
@@ -19890,7 +20086,7 @@ function setupNotionTypeFilterPopover() {
 
 function getActiveTypeFilters() {
     const popover = document.getElementById("notion-type-filter-popover");
-    if (!popover) return ['hw', 'project', 'exam'];
+    if (!popover) return ['hw', 'lab', 'project', 'miluim', 'exam'];
     
     const checkedOpts = popover.querySelectorAll(".notion-filter-type-cb:checked");
     return Array.from(checkedOpts).map(cb => cb.dataset.type);
@@ -19900,19 +20096,16 @@ function updateTypeFilterSummary() {
     const summarySpan = document.getElementById("notion-type-filter-summary");
     if (!summarySpan) return;
     
+    const popover = document.getElementById("notion-type-filter-popover");
+    const totalCount = popover ? popover.querySelectorAll(".notion-filter-type-cb").length : 5;
     const activeFilters = getActiveTypeFilters();
-    if (activeFilters.length === 3) {
-        summarySpan.innerText = "הכל (3)";
+    const labels = { hw: "ש״ב וגיליונות", lab: "מעבדה", project: "פרויקט", miluim: "מילואים", exam: "מבחני סוף" };
+    if (totalCount > 0 && activeFilters.length >= totalCount) {
+        summarySpan.innerText = `הכל (${totalCount})`;
     } else if (activeFilters.length === 0) {
         summarySpan.innerText = "ללא סוג";
-    } else if (activeFilters.length === 1) {
-        const labels = { hw: "ש״ב וגיליונות", project: "עבודה / פרויקט", exam: "מבחני סוף" };
-        summarySpan.innerText = labels[activeFilters[0]] || "1 נבחר";
-    } else if (activeFilters.length === 2) {
-        if (activeFilters.includes('hw') && activeFilters.includes('project')) summarySpan.innerText = "ש״ב + פרויקט";
-        else if (activeFilters.includes('hw') && activeFilters.includes('exam')) summarySpan.innerText = "ש״ב + מבחנים";
-        else if (activeFilters.includes('project') && activeFilters.includes('exam')) summarySpan.innerText = "פרויקט + מבחן";
-        else summarySpan.innerText = "2 נבחרו";
+    } else if (activeFilters.length <= 2) {
+        summarySpan.innerText = activeFilters.map(t => labels[t] || t).join(' + ');
     } else {
         summarySpan.innerText = `${activeFilters.length} נבחרו`;
     }
@@ -20787,8 +20980,9 @@ function setFlowchartZoom(zoomVal, cachedAvailableWidth) {
     }
 
     if (svgEl) {
+        const baseH = window.FLOWCHART_TOTAL_HEIGHT || BASE_FLOWCHART_HEIGHT;
         const targetW = Math.round(baseW * FLOWCHART_ZOOM_MULTIPLIER * flowchartZoom);
-        const targetH = Math.round(BASE_FLOWCHART_HEIGHT * FLOWCHART_ZOOM_MULTIPLIER * flowchartZoom);
+        const targetH = Math.round(baseH * FLOWCHART_ZOOM_MULTIPLIER * flowchartZoom);
         svgEl.style.width = `${targetW}px`;
         svgEl.style.minWidth = `${targetW}px`;
         svgEl.style.height = `${targetH}px`;
@@ -21047,7 +21241,8 @@ function renderFlowchartTree() {
     const TOTAL_WIDTH = Math.max(BASE_FLOWCHART_WIDTH, LEFT_MARGIN + NUM_COLS * colSpacing + RIGHT_MARGIN + 120);
     window.FLOWCHART_TOTAL_WIDTH = TOTAL_WIDTH;
     const ROW_HEIGHT = 168; // Golden ratio vertical spacing (84px card + 84px gap)
-    const TOTAL_HEIGHT = Math.max(BASE_FLOWCHART_HEIGHT, SEMESTER_ROWS.length * ROW_HEIGHT + 36);
+    const TOTAL_HEIGHT = SEMESTER_ROWS.length * ROW_HEIGHT + 24;
+    window.FLOWCHART_TOTAL_HEIGHT = TOTAL_HEIGHT;
     const nodeWidth = 196; // Generous card width so all Hebrew titles fit completely
     const nodeHeight = 84;
 
@@ -21378,8 +21573,8 @@ window.centerFlowchartOnActiveSemester = function(opts = {}) {
     if (activeIdx === -1) activeIdx = 2; // Default to Semester 3 (Spring 2026)
 
     const rowHeight = window.FLOWCHART_ROW_HEIGHT || 168;
-    const totalSvgUnitsH = Math.max(BASE_FLOWCHART_HEIGHT, rows.length * rowHeight + 36);
-    const renderedH = svgEl.clientHeight || (BASE_FLOWCHART_HEIGHT * FLOWCHART_ZOOM_MULTIPLIER * (window.flowchartZoom || 0.8));
+    const totalSvgUnitsH = window.FLOWCHART_TOTAL_HEIGHT || (rows.length * rowHeight + 24);
+    const renderedH = svgEl.clientHeight || (totalSvgUnitsH * FLOWCHART_ZOOM_MULTIPLIER * (window.flowchartZoom || 0.8));
     const scaleY = renderedH / totalSvgUnitsH;
     const rowCenterPx = (activeIdx * rowHeight + rowHeight / 2) * scaleY;
     const targetScrollTop = Math.max(0, Math.round(rowCenterPx - (scrollWrap.clientHeight / 2)));
@@ -21740,18 +21935,20 @@ function setupFinalsMode() {
         });
     }
 
-    // 3. Calendar Navigation (Month, Single Week & Single Day)
+    // 3. Calendar Navigation (Month, Workweek, Single Week & Single Day)
     const syncCalViewToggleButtons = () => {
         const bM = document.getElementById("btn-view-month");
         const bW = document.getElementById("btn-view-week");
+        const bWW = document.getElementById("btn-view-workweek");
         const bD = document.getElementById("btn-view-day");
         if (bM) bM.classList.toggle("active", currentCalendarViewMode === 'month');
         if (bW) bW.classList.toggle("active", currentCalendarViewMode === 'week');
+        if (bWW) bWW.classList.toggle("active", currentCalendarViewMode === 'workweek');
         if (bD) bD.classList.toggle("active", currentCalendarViewMode === 'day');
     };
 
     window.setCalendarViewMode = function(mode, optionalDateStr) {
-        const nextMode = (mode === 'week' || mode === 'day') ? mode : 'month';
+        const nextMode = (mode === 'week' || mode === 'workweek' || mode === 'day') ? mode : 'month';
         currentCalendarViewMode = nextMode;
         if (optionalDateStr && /^\d{4}-\d{2}-\d{2}$/.test(String(optionalDateStr))) {
             const [yy, mm, dd] = String(optionalDateStr).split('-').map(Number);
@@ -21760,7 +21957,7 @@ function setupFinalsMode() {
             currentCalendarMonth = targetDate.getMonth();
             currentCalendarYear = targetDate.getFullYear();
             currentCalendarWeekStart = getSundayOfWeek(targetDate);
-        } else if (nextMode === 'week' && !currentCalendarWeekStart) {
+        } else if ((nextMode === 'week' || nextMode === 'workweek') && !currentCalendarWeekStart) {
             const now = new Date();
             currentCalendarWeekStart = (now.getMonth() === currentCalendarMonth && now.getFullYear() === currentCalendarYear)
                 ? getSundayOfWeek(now)
@@ -21784,7 +21981,7 @@ function setupFinalsMode() {
                 currentCalendarMonth = currentCalendarDayDate.getMonth();
                 currentCalendarYear = currentCalendarDayDate.getFullYear();
                 currentCalendarWeekStart = getSundayOfWeek(currentCalendarDayDate);
-            } else if (currentCalendarViewMode === 'week') {
+            } else if (currentCalendarViewMode === 'week' || currentCalendarViewMode === 'workweek') {
                 if (!currentCalendarWeekStart) currentCalendarWeekStart = getSundayOfWeek(new Date(currentCalendarYear, currentCalendarMonth, 1));
                 currentCalendarWeekStart.setDate(currentCalendarWeekStart.getDate() - 7);
                 currentCalendarMonth = currentCalendarWeekStart.getMonth();
@@ -21808,7 +22005,7 @@ function setupFinalsMode() {
                 currentCalendarMonth = currentCalendarDayDate.getMonth();
                 currentCalendarYear = currentCalendarDayDate.getFullYear();
                 currentCalendarWeekStart = getSundayOfWeek(currentCalendarDayDate);
-            } else if (currentCalendarViewMode === 'week') {
+            } else if (currentCalendarViewMode === 'week' || currentCalendarViewMode === 'workweek') {
                 if (!currentCalendarWeekStart) currentCalendarWeekStart = getSundayOfWeek(new Date(currentCalendarYear, currentCalendarMonth, 1));
                 currentCalendarWeekStart.setDate(currentCalendarWeekStart.getDate() + 7);
                 currentCalendarMonth = currentCalendarWeekStart.getMonth();
@@ -21836,12 +22033,16 @@ function setupFinalsMode() {
 
     const btnViewMonth = document.getElementById("btn-view-month");
     const btnViewWeek = document.getElementById("btn-view-week");
+    const btnViewWorkweek = document.getElementById("btn-view-workweek");
     const btnViewDay = document.getElementById("btn-view-day");
     if (btnViewMonth) {
         btnViewMonth.addEventListener("click", () => window.setCalendarViewMode('month'));
     }
     if (btnViewWeek) {
         btnViewWeek.addEventListener("click", () => window.setCalendarViewMode('week'));
+    }
+    if (btnViewWorkweek) {
+        btnViewWorkweek.addEventListener("click", () => window.setCalendarViewMode('workweek'));
     }
     if (btnViewDay) {
         btnViewDay.addEventListener("click", () => window.setCalendarViewMode('day'));
@@ -23227,7 +23428,338 @@ function parseTaskDueDateParts(rawDueDate) {
 }
 window.parseTaskDueDateParts = parseTaskDueDateParts;
 
-// Renders the Google Calendar-style daily past exams grid (6 columns: Sun-Fri, with Month & Week views)
+function parseTimeToMinutes(hhmm) {
+    if (!hhmm) return null;
+    const m = String(hhmm).trim().match(/^(\d{1,2}):(\d{2})/);
+    if (!m) return null;
+    const h = parseInt(m[1], 10);
+    const min = parseInt(m[2], 10);
+    if (isNaN(h) || isNaN(min)) return null;
+    return Math.max(0, Math.min(24 * 60, h * 60 + min));
+}
+
+function cleanCalendarTaskTitle(rawTitle) {
+    if (!rawTitle) return '';
+    return String(rawTitle)
+        .replace(/^(?:תאריך\s*סגירה\s*[:\-]\s*|הגשת\s*פתרון\s*[:\-]?\s*|מועד\s*הגשה\s*[:\-]\s*)/i, '')
+        .replace(/\s*[-\/|•]\s*תאריך\s*סגירה$/i, '')
+        .trim();
+}
+
+function computeOverlapLayout(timedItems) {
+    if (!Array.isArray(timedItems) || timedItems.length === 0) return [];
+    const normalized = timedItems
+        .map((it, idx) => {
+            const s = Math.max(0, Math.min(24 * 60 - 15, Number(it.startMin) || 0));
+            const rawE = Number(it.endMin);
+            const e = Math.max(s + 20, Math.min(24 * 60, isNaN(rawE) ? s + 60 : rawE));
+            return Object.assign({}, it, { startMin: s, endMin: e, _origIdx: idx });
+        })
+        .sort((a, b) => (a.startMin - b.startMin) || ((b.endMin - b.startMin) - (a.endMin - a.startMin)) || (a._origIdx - b._origIdx));
+
+    // Partition into connected overlapping clusters
+    const clusters = [];
+    let currentCluster = [];
+    let clusterEnd = -1;
+    normalized.forEach(item => {
+        if (currentCluster.length === 0 || item.startMin < clusterEnd) {
+            currentCluster.push(item);
+            if (item.endMin > clusterEnd) clusterEnd = item.endMin;
+        } else {
+            clusters.push(currentCluster);
+            currentCluster = [item];
+            clusterEnd = item.endMin;
+        }
+    });
+    if (currentCluster.length > 0) clusters.push(currentCluster);
+
+    const laidOut = [];
+    clusters.forEach(cluster => {
+        const colEnds = [];
+        const assignedCols = [];
+        cluster.forEach(ev => {
+            let chosenCol = -1;
+            for (let c = 0; c < colEnds.length; c++) {
+                if (colEnds[c] <= ev.startMin) {
+                    chosenCol = c;
+                    break;
+                }
+            }
+            if (chosenCol === -1) {
+                chosenCol = colEnds.length;
+                colEnds.push(ev.endMin);
+            } else {
+                colEnds[chosenCol] = ev.endMin;
+            }
+            assignedCols.push(chosenCol);
+        });
+        const colCount = Math.max(1, colEnds.length);
+        const widthPct = 100 / colCount;
+        cluster.forEach((ev, idx) => {
+            const colIndex = assignedCols[idx];
+            ev.colIndex = colIndex;
+            ev.colCount = colCount;
+            ev.widthPct = widthPct;
+            ev.rightPct = colIndex * widthPct;
+            laidOut.push(ev);
+        });
+    });
+
+    return laidOut;
+}
+window.computeOverlapLayout = computeOverlapLayout;
+
+function getDefaultEventGroupColors() {
+    return {
+        '🔵': '#38bdf8',
+        '📚': '#6366f1',
+        '🏋️': '#10b981',
+        '🏢': '#f59e0b',
+        '🪖': '#84cc16',
+        '🎯': '#ec4899'
+    };
+}
+
+function resolveEventAccentColor(ev) {
+    if (!ev) return '#38bdf8';
+    if (ev.color && /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(String(ev.color))) return ev.color;
+    const key = ev.category || ev.icon || '🔵';
+    if (typeof gameState !== 'undefined' && gameState && gameState.eventGroupColors && gameState.eventGroupColors[key]) {
+        return gameState.eventGroupColors[key];
+    }
+    if (typeof gameState !== 'undefined' && gameState && gameState.eventGroupColors && ev.icon && gameState.eventGroupColors[ev.icon]) {
+        return gameState.eventGroupColors[ev.icon];
+    }
+    const defaults = getDefaultEventGroupColors();
+    return defaults[key] || defaults[ev.icon] || '#38bdf8';
+}
+
+function formatDateLocalYMD(dateObj) {
+    const y = dateObj.getFullYear();
+    const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+    const d = String(dateObj.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+}
+
+function parseYMDLocal(ymd) {
+    if (!ymd || !/^\d{4}-\d{2}-\d{2}$/.test(String(ymd))) return null;
+    const [y, m, d] = String(ymd).split('-').map(Number);
+    return new Date(y, m - 1, d, 0, 0, 0, 0);
+}
+
+function expandCustomCalendarEvents(eventsList, rangeStartStr, rangeEndStr) {
+    const out = [];
+    if (!Array.isArray(eventsList) || eventsList.length === 0) return out;
+    const rStart = parseYMDLocal(rangeStartStr);
+    const rEnd = parseYMDLocal(rangeEndStr);
+    if (!rStart || !rEnd) return out;
+
+    eventsList.forEach(ev => {
+        if (!ev || !ev.date) return;
+        const baseStart = parseYMDLocal(ev.date);
+        if (!baseStart) return;
+        const baseEndRaw = (ev.endDate && ev.endDate >= ev.date) ? parseYMDLocal(ev.endDate) : baseStart;
+        const baseEnd = baseEndRaw || baseStart;
+        const spanDays = Math.max(0, Math.min(60, Math.round((baseEnd.getTime() - baseStart.getTime()) / 86400000)));
+        const rec = String(ev.recurrence || 'none').toLowerCase();
+        const resolvedColor = resolveEventAccentColor(ev);
+
+        const pushOccurrence = (occStartDate) => {
+            for (let offset = 0; offset <= spanDays; offset++) {
+                const occDay = new Date(occStartDate);
+                occDay.setDate(occDay.getDate() + offset);
+                if (occDay < rStart || occDay > rEnd) continue;
+                const occStr = formatDateLocalYMD(occDay);
+                out.push(Object.assign({}, ev, {
+                    occurrenceDate: occStr,
+                    baseDate: ev.date,
+                    endDate: ev.endDate || ev.date,
+                    isMultiDay: spanDays > 0,
+                    daySpanIndex: offset,
+                    daySpanTotal: spanDays + 1,
+                    resolvedColor: resolvedColor
+                }));
+            }
+        };
+
+        if (!rec || rec === 'none') {
+            pushOccurrence(baseStart);
+            return;
+        }
+
+        let cursor = new Date(baseStart);
+        let guard = 0;
+        while (cursor <= rEnd && guard < 450) {
+            guard++;
+            const cursorEnd = new Date(cursor);
+            cursorEnd.setDate(cursorEnd.getDate() + spanDays);
+            if (cursorEnd >= rStart) {
+                pushOccurrence(cursor);
+            }
+            if (rec === 'daily') {
+                cursor.setDate(cursor.getDate() + 1);
+            } else if (rec === 'weekly') {
+                cursor.setDate(cursor.getDate() + 7);
+            } else if (rec === 'biweekly') {
+                cursor.setDate(cursor.getDate() + 14);
+            } else if (rec === 'monthly') {
+                const targetDay = baseStart.getDate();
+                cursor.setMonth(cursor.getMonth() + 1, 1);
+                const lastDay = new Date(cursor.getFullYear(), cursor.getMonth() + 1, 0).getDate();
+                cursor.setDate(Math.min(targetDay, lastDay));
+            } else if (rec === 'yearly') {
+                const targetMonth = baseStart.getMonth();
+                const targetDay = baseStart.getDate();
+                cursor.setFullYear(cursor.getFullYear() + 1, targetMonth, 1);
+                const lastDay = new Date(cursor.getFullYear(), targetMonth + 1, 0).getDate();
+                cursor.setDate(Math.min(targetDay, lastDay));
+            } else {
+                break;
+            }
+        }
+    });
+    return out;
+}
+window.expandCustomCalendarEvents = expandCustomCalendarEvents;
+
+function buildGoogleCalendarTimeGridHtml(columns, options = {}) {
+    const colCount = Math.max(1, columns.length);
+    let minMin = 8 * 60;
+    let maxMin = 20 * 60;
+    columns.forEach(col => {
+        (col.timedItems || []).forEach(it => {
+            if (typeof it.startMin === 'number' && !isNaN(it.startMin)) minMin = Math.min(minMin, it.startMin);
+            if (typeof it.endMin === 'number' && !isNaN(it.endMin)) maxMin = Math.max(maxMin, it.endMin);
+        });
+    });
+
+    const startHour = Math.max(0, Math.min(8, Math.floor(minMin / 60)));
+    const endHour = Math.min(24, Math.max(20, Math.ceil(maxMin / 60)));
+    const hourHeight = options.hourHeight || 56;
+    const pxPerMin = hourHeight / 60;
+    const totalHeight = Math.max(320, (endHour - startHour) * hourHeight);
+    const gridTemplateCols = `56px repeat(${colCount}, minmax(0, 1fr))`;
+
+    const now = new Date();
+    const nowMin = now.getHours() * 60 + now.getMinutes();
+    const showNowLineGlobal = nowMin >= startHour * 60 && nowMin <= endHour * 60;
+    const nowTopPx = Math.round((nowMin - startHour * 60) * pxPerMin);
+
+    const hasAnyAllday = columns.some(c => c.alldayHtml && c.alldayHtml.trim().length > 0);
+    const axisHours = [];
+    for (let h = startHour; h <= endHour; h++) {
+        axisHours.push(h);
+    }
+
+    const innerSizeClass = colCount === 7 ? 'cols-7' : (colCount === 5 ? 'cols-5' : 'cols-1');
+
+    let headerColsHtml = `<div class="cal-timegrid-corner">שעה</div>`;
+    columns.forEach(col => {
+        headerColsHtml += `
+            <div class="cal-timegrid-day-head ${col.isToday ? 'is-today' : ''}">
+                <span class="day-name">${col.dayTitle || ''}</span>
+                ${col.dateShort ? `<span class="day-num">${col.dateShort}</span>` : ''}
+            </div>
+        `;
+    });
+
+    let alldayRowHtml = '';
+    if (hasAnyAllday) {
+        let cellsHtml = '';
+        columns.forEach(col => {
+            cellsHtml += `<div class="cal-timegrid-allday-cell" data-date="${escapeHtml(col.dateStr || '')}">${col.alldayHtml || ''}</div>`;
+        });
+        alldayRowHtml = `
+            <div class="cal-timegrid-allday-row" style="grid-template-columns: ${gridTemplateCols};">
+                <div class="cal-timegrid-allday-label">${options.alldayLabel || 'משימות ואירועים'}</div>
+                ${cellsHtml}
+            </div>
+        `;
+    }
+
+    let axisLabelsHtml = '';
+    axisHours.forEach(h => {
+        if (h === endHour) return;
+        const top = (h - startHour) * hourHeight;
+        const label = `${String(h).padStart(2, '0')}:00`;
+        axisLabelsHtml += `<div class="cal-timegrid-hour-label" style="top: ${Math.max(8, top)}px;" dir="ltr">${label}</div>`;
+    });
+
+    let hourLinesHtml = '';
+    axisHours.forEach(h => {
+        if (h === startHour || h === endHour) return;
+        const top = (h - startHour) * hourHeight;
+        hourLinesHtml += `<div class="cal-timegrid-hour-line" style="top: ${top}px;"></div>`;
+    });
+
+    let bodyColsHtml = '';
+    columns.forEach(col => {
+        const positioned = computeOverlapLayout(col.timedItems || []);
+        let eventsHtml = '';
+        positioned.forEach(ev => {
+            const topPx = Math.max(0, Math.round((ev.startMin - startHour * 60) * pxPerMin));
+            const heightPx = Math.max(32, Math.round((ev.endMin - ev.startMin) * pxPerMin) - 2);
+            const widthStyle = `right: calc(${ev.rightPct.toFixed(2)}% + 2px); width: calc(${ev.widthPct.toFixed(2)}% - 4px);`;
+            const accent = ev.accentColor || '#38bdf8';
+            const clsList = `cal-timegrid-event ${ev.extraClasses || ''}`.trim();
+            const attrStr = ev.attrs || '';
+            const onclickStr = ev.onclickAttr ? ` onclick="${ev.onclickAttr}"` : '';
+
+            eventsHtml += `
+                <div class="${clsList}" ${attrStr}${onclickStr} style="top: ${topPx}px; height: ${heightPx}px; ${widthStyle} --ev-accent: ${accent}; --course-accent: ${accent};" title="${escapeHtml(ev.tooltip || ev.title || '')}">
+                    ${ev.innerHtml || `
+                        <div class="cal-timegrid-event-title">${escapeHtml(ev.title || '')}</div>
+                        ${ev.metaHtml || (ev.timeText ? `<div class="cal-timegrid-event-meta ui-time-ltr" dir="ltr">${escapeHtml(ev.timeText)}</div>` : '')}
+                    `}
+                </div>
+            `;
+        });
+
+        const emptyFreeBadge = (options.isTimetable && positioned.length === 0)
+            ? `<div class="timetable-free-state" style="margin: 24px 8px;"><span class="emoji">🏖️</span><div style="font-weight: 700; color: #f1f5f9; font-size: 0.88rem;">יום חופשי</div></div>`
+            : '';
+
+        const nowLineHtml = (col.isToday && showNowLineGlobal)
+            ? `<div class="cal-now-indicator-line" style="top: ${nowTopPx}px;" title="השעה כעת"><span class="cal-now-indicator-dot"></span></div>`
+            : '';
+
+        const colExtraClass = options.isTimetable ? ' timetable-day-col' : '';
+        const colDayAttr = (col.dayIndex !== undefined && col.dayIndex !== null) ? ` data-day-col="${col.dayIndex}"` : '';
+        const colDateAttr = col.dateStr ? ` data-date="${escapeHtml(col.dateStr)}"` : '';
+
+        bodyColsHtml += `
+            <div class="cal-timegrid-col${colExtraClass}${col.isToday ? ' is-today' : ''}${positioned.length === 0 ? ' is-free' : ''}"${colDayAttr}${colDateAttr} style="height: ${totalHeight}px;">
+                ${hourLinesHtml}
+                ${nowLineHtml}
+                ${emptyFreeBadge}
+                ${eventsHtml}
+            </div>
+        `;
+    });
+
+    return `
+        <div class="cal-timegrid-wrapper">
+            <div class="cal-timegrid-scroll-x">
+                <div class="cal-timegrid-inner ${innerSizeClass}">
+                    <div class="cal-timegrid-header" style="grid-template-columns: ${gridTemplateCols};">
+                        ${headerColsHtml}
+                    </div>
+                    ${alldayRowHtml}
+                    <div class="cal-timegrid-scroll-y">
+                        <div class="cal-timegrid-body" style="grid-template-columns: ${gridTemplateCols}; min-height: ${totalHeight}px;">
+                            <div class="cal-timegrid-axis" style="height: ${totalHeight}px;">
+                                ${axisLabelsHtml}
+                            </div>
+                            ${bodyColsHtml}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// Renders the Google Calendar-style calendar (7 columns Mon-Sat in Month/Week, 5 in Workweek, Day Time-Grid)
 function renderFinalsCalendar() {
     const grid = document.getElementById("finals-calendar-grid");
     const titleEl = document.getElementById("cal-current-month-title");
@@ -23248,9 +23780,38 @@ function renderFinalsCalendar() {
         if (headerExportBtn) headerExportBtn.innerText = "📤 ייצוא מרתון ל-Google";
     } else {
         if (headerTitleEl) headerTitleEl.innerText = "📅 לוח שנה: משימות ושיעורי בית לפי קורסים";
-        if (subTitleEl) subTitleEl.innerText = "סנכרון מלא של כל משימות הקורסים, שיעורי בית, WebWork, מעבדות ותאריכי יעד";
+        if (subTitleEl) subTitleEl.innerText = "סנכרון מלא של כל משימות הקורסים, שיעורי בית, WebWork, מעבדות, מילואים ואירועים";
         if (headerExportBtn) headerExportBtn.innerText = "📅 סנכרן משימות ליומן / Tasks";
     }
+
+    const now = new Date();
+    const todayYear = now.getFullYear();
+    const todayMonth = now.getMonth();
+    const todayDay = now.getDate();
+    const todayStr = `${todayYear}-${String(todayMonth + 1).padStart(2, '0')}-${String(todayDay).padStart(2, '0')}`;
+
+    const isWorkweekView = (currentCalendarViewMode === 'workweek');
+    const isWeekView = (currentCalendarViewMode === 'week');
+    const isDayView = (currentCalendarViewMode === 'day');
+    const isTimeGridView = isDayView || isWeekView || isWorkweekView;
+
+    // Determine visible date window so recurring & multi-day events expand across the entire view
+    let rangeStartDate = new Date(currentCalendarYear, currentCalendarMonth, 1);
+    let rangeEndDate = new Date(currentCalendarYear, currentCalendarMonth + 1, 0);
+    if (isDayView) {
+        if (!currentCalendarDayDate || isNaN(currentCalendarDayDate.getTime())) {
+            currentCalendarDayDate = new Date(todayYear, todayMonth, todayDay);
+        }
+        rangeStartDate = new Date(currentCalendarDayDate);
+        rangeEndDate = new Date(currentCalendarDayDate);
+    } else if (isWeekView || isWorkweekView) {
+        if (!currentCalendarWeekStart) currentCalendarWeekStart = getSundayOfWeek(now);
+        rangeStartDate = new Date(currentCalendarWeekStart);
+        rangeEndDate = new Date(currentCalendarWeekStart);
+        rangeEndDate.setDate(rangeEndDate.getDate() + 6);
+    }
+    const rangeStartStr = formatDateLocalYMD(rangeStartDate);
+    const rangeEndStr = formatDateLocalYMD(rangeEndDate);
 
     // Map scheduled items by date string (YYYY-MM-DD)
     const itemsByDate = {};
@@ -23269,7 +23830,7 @@ function renderFinalsCalendar() {
             evList.forEach(ev => {
                 itemsByDate[dStr].push({
                     isTechnionEvent: true,
-                    type: ev.type, // 'holiday' or 'academic'
+                    type: ev.type,
                     title: ev.title,
                     desc: ev.desc
                 });
@@ -23277,9 +23838,9 @@ function renderFinalsCalendar() {
         });
     }
 
-    // Also map real course exams and all active course tasks
+    // Map real course exams and active course tasks
     Object.values(gameState.courses || {}).forEach(course => {
-        if (course.status === 'locked' || course.status === 'mastered') return; // Only active and enrolled courses on the calendar!
+        if (course.status === 'locked' || course.status === 'mastered') return;
         if (!course.tasks) return;
         course.tasks.forEach(task => {
             if (!task.dueDate) return;
@@ -23287,6 +23848,8 @@ function renderFinalsCalendar() {
             const dateKey = parsedDue.dateOnly;
             if (!dateKey) return;
             if (!itemsByDate[dateKey]) itemsByDate[dateKey] = [];
+
+            const cleanTitle = cleanCalendarTaskTitle(task.title || "");
 
             if (task.type === 'exam') {
                 const isExamDone = task.completed || task.status === 'done' || task.status === 'submitted';
@@ -23298,7 +23861,7 @@ function renderFinalsCalendar() {
 
                 const shortCourse = (typeof COURSE_SHORT_NAMES !== 'undefined' && COURSE_SHORT_NAMES[course.code]) || course.name;
                 let moedTag = "";
-                const rawTitleStr = (task.title || "").trim();
+                const rawTitleStr = cleanTitle;
                 const rawLower = rawTitleStr.toLowerCase();
                 if (rawLower.includes("מועד א") || rawLower.includes("א'") || rawLower.includes("moed a")) moedTag = "א'";
                 else if (rawLower.includes("מועד ב") || rawLower.includes("ב'") || rawLower.includes("moed b")) moedTag = "ב'";
@@ -23313,24 +23876,26 @@ function renderFinalsCalendar() {
                 }
 
                 const prefix = isPassed ? "🟢" : "🔴";
-                const titleStr = `${prefix} ${displayTitle}`;
-
                 itemsByDate[dateKey].push({
                     isExamEvent: true,
                     isPassed: isPassed,
-                    title: titleStr,
+                    title: `${prefix} ${displayTitle}`,
                     rawTitle: rawTitleStr,
                     dueTime: parsedDue.timeStr || task.dueTime || '',
                     courseCode: course.code,
                     courseName: course.name,
-                    taskId: task.id
+                    taskId: task.id,
+                    color: task.color || ''
                 });
             } else {
-                const lowerTitle = (task.title || "").toLowerCase();
+                const lowerTitle = cleanTitle.toLowerCase();
                 let typeClass = "sheet";
                 let icon = "📝";
 
-                if (task.type === 'lab' || lowerTitle.includes('מעבדה') || lowerTitle.includes('lab')) {
+                if (task.isMiluim || task.miluim || /מילואי|צו\s*8|3010/i.test(lowerTitle)) {
+                    typeClass = "miluim";
+                    icon = "🪖";
+                } else if (task.type === 'lab' || lowerTitle.includes('מעבדה') || lowerTitle.includes('lab')) {
                     typeClass = "lab";
                     icon = "🧪";
                 } else if (lowerTitle.includes('webwork')) {
@@ -23349,33 +23914,49 @@ function renderFinalsCalendar() {
 
                 const isDone = task.completed || task.status === 'completed' || task.status === 'done' || task.status === 'submitted';
                 const shortCourse = (typeof COURSE_SHORT_NAMES !== 'undefined' && COURSE_SHORT_NAMES[course.code]) || course.name;
-                const displayTitle = `${icon} [${shortCourse}] ${task.title}`;
+                const displayTitle = `${icon} [${shortCourse}] ${cleanTitle}`;
 
                 itemsByDate[dateKey].push({
                     isTaskEvent: true,
-                    title: task.title,
+                    title: cleanTitle,
                     displayTitle: displayTitle,
                     dueTime: parsedDue.timeStr || task.dueTime || '',
                     courseCode: course.code,
                     courseName: course.name,
                     taskId: task.id,
                     typeClass: typeClass,
-                    completed: isDone
+                    completed: isDone,
+                    color: task.color || ''
                 });
             }
         });
     });
 
-    // Also map custom personal calendar events (with hour & category)
-    (gameState.customCalendarEvents || []).forEach(ev => {
-        if (!ev.date) return;
-        if (!itemsByDate[ev.date]) itemsByDate[ev.date] = [];
-        itemsByDate[ev.date].push({
+    // Map custom calendar events (expanded for multi-day & recurrence!)
+    const expandedCustomEvents = expandCustomCalendarEvents(gameState.customCalendarEvents || [], rangeStartStr, rangeEndStr);
+    expandedCustomEvents.forEach(ev => {
+        const occKey = ev.occurrenceDate || ev.date;
+        if (!occKey) return;
+        if (!itemsByDate[occKey]) itemsByDate[occKey] = [];
+        itemsByDate[occKey].push({
             isPersonalEvent: true,
             id: ev.id,
             title: ev.title,
             time: ev.time || '',
+            startTime: ev.startTime || '',
+            endTime: ev.endTime || '',
+            isAllDay: !!ev.isAllDay,
             icon: ev.icon || '🔵',
+            category: ev.category || ev.icon || '🔵',
+            color: ev.resolvedColor || resolveEventAccentColor(ev),
+            isMiluim: ev.icon === '🪖' || ev.category === '🪖',
+            isMultiDay: !!ev.isMultiDay,
+            daySpanIndex: ev.daySpanIndex || 0,
+            daySpanTotal: ev.daySpanTotal || 1,
+            baseDate: ev.baseDate || ev.date,
+            endDate: ev.endDate || ev.date,
+            recurrence: ev.recurrence || 'none',
+            reminderMinutes: ev.reminderMinutes,
             description: ev.description || '',
             completed: !!ev.completed
         });
@@ -23383,34 +23964,106 @@ function renderFinalsCalendar() {
 
     window.currentCalendarItemsByDate = itemsByDate;
 
-    // Toggle grid view-mode class
-    const isWeekView = (currentCalendarViewMode === 'week');
-    const isDayView = (currentCalendarViewMode === 'day');
+    // Toggle grid view-mode classes
     grid.classList.toggle("is-week-view", isWeekView);
+    grid.classList.toggle("is-workweek-view", isWorkweekView);
     grid.classList.toggle("is-day-view", isDayView);
+    grid.classList.toggle("is-timegrid-mode", isTimeGridView);
 
-    // Days of week header: Sunday through Friday (6 columns - SATURDAY EXCLUDED)
-    const daysOfWeek = isMobile
-        ? ["א'", "ב'", "ג'", "ד'", "ה'", "ו'"]
-        : ["ראשון (Sun)", "שני (Mon)", "שלישי (Tue)", "רביעי (Wed)", "חמישי (Thu)", "שישי (Fri)"];
+    const schedule = (typeof getActiveTimetableSchedule === 'function') ? getActiveTimetableSchedule() : null;
+    const ohOverlayEnabled = (typeof isOfficeHoursOverlayEnabled === 'function') ? isOfficeHoursOverlayEnabled() : false;
 
-    // Date references
-    const now = new Date();
-    const todayYear = now.getFullYear();
-    const todayMonth = now.getMonth();
-    const todayDay = now.getDate();
-    const todayStr = `${todayYear}-${String(todayMonth + 1).padStart(2, '0')}-${String(todayDay).padStart(2, '0')}`;
+    const collectTimedItemsForDate = (dateObj, dateStr) => {
+        const timed = [];
+        // 1. Weekday timetable classes
+        if (schedule && Array.isArray(schedule.days)) {
+            const ttDay = schedule.days.find(d => d.dayIndex === dateObj.getDay());
+            if (ttDay && Array.isArray(ttDay.classes)) {
+                ttDay.classes.forEach(cls => {
+                    const sMin = parseTimeToMinutes(cls.startTime);
+                    const eMin = parseTimeToMinutes(cls.endTime) || (sMin !== null ? sMin + 60 : null);
+                    if (sMin !== null) {
+                        const cCode = cls.courseId || cls.courseCode || '';
+                        const accent = getCourseAccentColor(cCode);
+                        const cName = cls.courseName || cls.name || cCode || 'שיעור';
+                        const timeTxt = `${cls.startTime || ''} - ${cls.endTime || ''}`.trim();
+                        timed.push({
+                            startMin: sMin,
+                            endMin: eMin,
+                            title: cName,
+                            timeText: timeTxt,
+                            accentColor: accent,
+                            extraClasses: 'cal-timegrid-class',
+                            tooltip: `${cName} (${cls.type || 'שיעור'}) • ${timeTxt}${cls.room ? ' • ' + cls.room : ''}`,
+                            onclickAttr: `if(typeof openCourseDetails==='function') openCourseDetails('${escapeHtml(cCode)}')`,
+                            innerHtml: `
+                                <div class="cal-timegrid-event-title">${escapeHtml(cName)}</div>
+                                <div class="cal-timegrid-event-meta">${escapeHtml(cls.type || '')}${cls.room ? ' • 📍 ' + escapeHtml(cls.room) : ''}</div>
+                                <div class="cal-timegrid-event-meta ui-time-ltr" dir="ltr">${escapeHtml(timeTxt)}</div>
+                            `
+                        });
+                    }
+                });
+            }
+        }
+        // 2. Office hours when overlay toggle is on
+        if (ohOverlayEnabled && typeof getCoursesForTimetableOfficeHours === 'function') {
+            getCoursesForTimetableOfficeHours(schedule).forEach(course => {
+                (getCourseOfficeHours(course) || []).forEach(oh => {
+                    if (Number(oh.dayIndex) === dateObj.getDay()) {
+                        const sMin = parseTimeToMinutes(oh.startTime);
+                        const eMin = parseTimeToMinutes(oh.endTime) || (sMin !== null ? sMin + 60 : null);
+                        if (sMin !== null) {
+                            timed.push({
+                                startMin: sMin,
+                                endMin: eMin,
+                                title: `🕐 קבלה: ${oh.staffName || course.name}`,
+                                timeText: `${oh.startTime}${oh.endTime ? ' - ' + oh.endTime : ''}`,
+                                accentColor: '#f59e0b',
+                                onclickAttr: `if(typeof openCourseDetails==='function') openCourseDetails('${escapeHtml(course.code)}')`
+                            });
+                        }
+                    }
+                });
+            });
+        }
+        // 3. Timed personal calendar events
+        (itemsByDate[dateStr] || []).forEach(it => {
+            if (!it.isPersonalEvent || it.isAllDay) return;
+            const sMin = parseTimeToMinutes(it.startTime || it.time);
+            const eMin = parseTimeToMinutes(it.endTime) || (sMin !== null ? sMin + 60 : null);
+            if (sMin !== null) {
+                const spanTag = it.isMultiDay ? ` (${it.daySpanIndex + 1}/${it.daySpanTotal})` : '';
+                const recTag = (it.recurrence && it.recurrence !== 'none') ? ' 🔁' : '';
+                timed.push({
+                    startMin: sMin,
+                    endMin: eMin,
+                    title: `${it.icon || '🔵'} ${it.title}${spanTag}${recTag}`,
+                    timeText: `${it.startTime || ''}${it.endTime ? ' - ' + it.endTime : ''}`,
+                    accentColor: it.color || '#38bdf8',
+                    extraClasses: 'cal-timegrid-personal',
+                    attrs: `data-pe-id="${escapeHtml(it.id || '')}"`,
+                    onclickAttr: `if(typeof openCalendarDayModal==='function') openCalendarDayModal('${escapeHtml(dateStr)}')`
+                });
+            }
+        });
+        return timed;
+    };
+
+    const buildAlldayColumnEl = (dateStr, dayNum, isToday, dateObj) => {
+        // Put Technion events, exams, academic tasks & all-day personal events in the top bar
+        const filteredMap = { [dateStr]: (itemsByDate[dateStr] || []).filter(it => !it.isPersonalEvent || it.isAllDay) };
+        const cell = createCalendarDayCell(dateStr, dayNum, isToday, filteredMap, false, { isWeekView: false, dateObj: dateObj, skipEmptyMsg: true });
+        const evList = cell.querySelector('.cal-events-list');
+        return evList || cell;
+    };
 
     if (isDayView) {
-        // --- SINGLE DAY VIEW MODE ---
-        if (!currentCalendarDayDate || isNaN(currentCalendarDayDate.getTime())) {
-            currentCalendarDayDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-        }
         const dObj = new Date(currentCalendarDayDate);
         const dYear = dObj.getFullYear();
         const dMonth = dObj.getMonth();
         const dDay = dObj.getDate();
-        const dateStr = `${dYear}-${String(dMonth + 1).padStart(2, '0')}-${String(dDay).padStart(2, '0')}`;
+        const dateStr = formatDateLocalYMD(dObj);
         const isToday = (dateStr === todayStr);
         const hebrewFullDays = ["יום ראשון", "יום שני", "יום שלישי", "יום רביעי", "יום חמישי", "יום שישי", "יום שבת"];
         const hebrewMonthsFull = ["ינואר", "פברואר", "מרץ", "אפריל", "מאי", "יוני", "יולי", "אוגוסט", "ספטמבר", "אוקטובר", "נובמבר", "דצמבר"];
@@ -23420,49 +24073,21 @@ function renderFinalsCalendar() {
             titleEl.innerText = `${dayTitleName}, ${dDay} ${monthNames[dMonth]} ${dYear}`;
         }
 
-        const dayItems = itemsByDate[dateStr] || [];
-        const sortedDayItems = [...dayItems].sort((a, b) => {
-            const order = (it) => it.isTechnionEvent ? 1 : it.isExamEvent ? 2 : it.isTaskEvent ? 3 : it.isPersonalEvent ? 4 : 5;
-            return order(a) - order(b);
-        });
-
         const dayCard = document.createElement("div");
         dayCard.className = "cal-day-view-card";
         dayCard.dataset.date = dateStr;
 
-        const schedule = (typeof getActiveTimetableSchedule === 'function') ? getActiveTimetableSchedule() : null;
-        const ttDay = (schedule && Array.isArray(schedule.days)) ? schedule.days.find(d => d.dayIndex === dObj.getDay()) : null;
-        const classesList = (ttDay && Array.isArray(ttDay.classes)) ? ttDay.classes : [];
-
-        let classesHtml = '';
-        if (classesList.length > 0) {
-            classesHtml = `
-                <div>
-                    <div class="cal-day-view-section-title">📚 שיעורים במערכת השעות (${classesList.length})</div>
-                    <div style="display: flex; flex-direction: column; gap: 6px;">
-                        ${classesList.map(cls => {
-                            const cTime = escapeHtml(cls.time || (cls.startTime && cls.endTime ? `${cls.startTime} - ${cls.endTime}` : ''));
-                            const cTitle = escapeHtml(cls.courseName || cls.name || cls.courseCode || 'שיעור');
-                            const cType = cls.type ? `<span style="color:#94a3b8;font-size:0.74rem;">${escapeHtml(cls.type)}</span>` : '';
-                            const cLoc = cls.room ? `<span style="color:#64748b;font-size:0.74rem;">📍 ${escapeHtml(cls.room)}</span>` : '';
-                            const slotAccent = getCourseAccentColor(cls.courseId || cls.courseCode || '');
-                            return `
-                                <div class="cal-day-schedule-slot has-course-accent" style="--course-accent: ${slotAccent};">
-                                    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-                                        <span class="course-color-dot" style="background:${slotAccent};"></span>
-                                        <strong>${cTitle}</strong> ${cType} ${cLoc}
-                                    </div>
-                                    <span class="cal-day-schedule-time ui-time-ltr" dir="ltr">${cTime}</span>
-                                </div>
-                            `;
-                        }).join('')}
-                    </div>
-                </div>
-            `;
-        }
-
-        const eventsCell = createCalendarDayCell(dateStr, dDay, isToday, itemsByDate, false, { isDayView: true, dateObj: dObj });
-        const eventsListEl = eventsCell.querySelector('.cal-events-list');
+        const alldayNode = buildAlldayColumnEl(dateStr, dDay, isToday, dObj);
+        const timedItems = collectTimedItemsForDate(dObj, dateStr);
+        const timegridHtml = buildGoogleCalendarTimeGridHtml([{
+            dayIndex: dObj.getDay(),
+            dateStr: dateStr,
+            dayTitle: dayTitleName,
+            dateShort: `${dDay}/${dMonth + 1}`,
+            isToday: isToday,
+            alldayHtml: `<div class="cal-dayview-allday-host"></div>`,
+            timedItems: timedItems
+        }], { hourHeight: 54 });
 
         dayCard.innerHTML = `
             <div class="cal-day-view-header">
@@ -23474,21 +24099,11 @@ function renderFinalsCalendar() {
                     <button type="button" class="btn btn-sm btn-outline" id="btn-day-view-add-event" style="color:#38bdf8;border-color:rgba(56,189,248,0.4);">➕ הוסף אירוע ליום זה</button>
                 </div>
             </div>
-            ${classesHtml}
-            <div>
-                <div class="cal-day-view-section-title">🗓️ משימות, מבחנים ואירועים (${sortedDayItems.length})</div>
-                <div class="cal-day-view-events" id="cal-day-view-events-host"></div>
-            </div>
+            <div class="cal-day-timegrid-mount">${timegridHtml}</div>
         `;
 
-        const host = dayCard.querySelector('#cal-day-view-events-host');
-        if (host) {
-            if (sortedDayItems.length === 0) {
-                host.innerHTML = `<div style="padding:14px;border-radius:8px;background:rgba(30,41,59,0.45);color:#94a3b8;font-size:0.84rem;text-align:center;">אין משימות או אירועים מתוזמנים ליום זה ✨</div>`;
-            } else if (eventsListEl) {
-                host.appendChild(eventsListEl);
-            }
-        }
+        const mountAlldayHost = dayCard.querySelector('.cal-dayview-allday-host');
+        if (mountAlldayHost && alldayNode) mountAlldayHost.appendChild(alldayNode);
 
         const addDayViewBtn = dayCard.querySelector('#btn-day-view-add-event');
         if (addDayViewBtn) {
@@ -23497,24 +24112,23 @@ function renderFinalsCalendar() {
                 openCalendarDayModal(dateStr);
             });
         }
-
         grid.appendChild(dayCard);
-    } else if (isWeekView) {
-        // --- SINGLE WEEK VIEW MODE ---
-        if (!currentCalendarWeekStart) {
-            currentCalendarWeekStart = getSundayOfWeek(now);
-        }
+    } else if (isWeekView || isWorkweekView) {
+        if (!currentCalendarWeekStart) currentCalendarWeekStart = getSundayOfWeek(now);
+        const numDays = isWorkweekView ? 5 : 7;
+        const shortHeDays = isMobile
+            ? ["א'", "ב'", "ג'", "ד'", "ה'", "ו'", "ש'"]
+            : ["ראשון (Sun)", "שני (Mon)", "שלישי (Tue)", "רביעי (Wed)", "חמישי (Thu)", "שישי (Fri)", "שבת (Sat)"];
 
-        // Build 6 days (Sun to Fri)
         const weekDates = [];
-        for (let i = 0; i < 6; i++) {
+        for (let i = 0; i < numDays; i++) {
             const d = new Date(currentCalendarWeekStart);
             d.setDate(d.getDate() + i);
             weekDates.push(d);
         }
 
         const firstDate = weekDates[0];
-        const lastDate = weekDates[5];
+        const lastDate = weekDates[weekDates.length - 1];
         if (titleEl) {
             const firstMName = monthNames[firstDate.getMonth()];
             const lastMName = monthNames[lastDate.getMonth()];
@@ -23525,59 +24139,55 @@ function renderFinalsCalendar() {
             }
         }
 
-        // Day Headers with date numbers
-        daysOfWeek.forEach((dName, idx) => {
-            const dObj = weekDates[idx];
-            const h = document.createElement("div");
-            h.className = "cal-day-header";
-            const dateNumStr = `${dObj.getDate()}/${dObj.getMonth() + 1}`;
-            h.innerHTML = `<div>${dName}</div><div style="font-size: 0.68rem; opacity: 0.85; font-weight: 700;">${dateNumStr}</div>`;
-            grid.appendChild(h);
-        });
-
-        // Day Cells for the week
-        weekDates.forEach(dObj => {
-            const dYear = dObj.getFullYear();
-            const dMonth = dObj.getMonth();
-            const dDay = dObj.getDate();
-            const dateStr = `${dYear}-${String(dMonth + 1).padStart(2, '0')}-${String(dDay).padStart(2, '0')}`;
+        const alldayNodes = [];
+        const timeGridCols = weekDates.map((dObj, idx) => {
+            const dateStr = formatDateLocalYMD(dObj);
             const isToday = (dateStr === todayStr);
-
-            const cell = createCalendarDayCell(dateStr, dDay, isToday, itemsByDate, false, { isWeekView: true, dateObj: dObj });
-            grid.appendChild(cell);
+            const alldayEl = buildAlldayColumnEl(dateStr, dObj.getDate(), isToday, dObj);
+            alldayNodes.push({ dateStr, el: alldayEl });
+            return {
+                dayIndex: dObj.getDay(),
+                dateStr: dateStr,
+                dayTitle: shortHeDays[idx] || "",
+                dateShort: `${dObj.getDate()}/${dObj.getMonth() + 1}`,
+                isToday: isToday,
+                alldayHtml: `<div class="cal-tg-allday-slot" data-slot-date="${dateStr}"></div>`,
+                timedItems: collectTimedItemsForDate(dObj, dateStr)
+            };
         });
 
+        grid.innerHTML = buildGoogleCalendarTimeGridHtml(timeGridCols, { hourHeight: 52, alldayLabel: 'דדליינים וכל היום' });
+        alldayNodes.forEach(({ dateStr, el }) => {
+            const targetSlot = grid.querySelector(`.cal-tg-allday-slot[data-slot-date="${dateStr}"]`);
+            if (targetSlot && el) targetSlot.appendChild(el);
+        });
     } else {
-        // --- MONTH VIEW MODE (6 COLUMNS, SUN-FRI) ---
+        // --- MONTH VIEW MODE (7 COLUMNS, SUN-SAT) ---
         if (titleEl) {
             titleEl.innerText = `${monthNames[currentCalendarMonth]} ${currentCalendarYear}`;
         }
 
-        // Day Headers
-        daysOfWeek.forEach((dName, idx) => {
+        const daysOfWeek7 = isMobile
+            ? ["א'", "ב'", "ג'", "ד'", "ה'", "ו'", "ש'"]
+            : ["ראשון (Sun)", "שני (Mon)", "שלישי (Tue)", "רביעי (Wed)", "חמישי (Thu)", "שישי (Fri)", "שבת (Sat)"];
+
+        daysOfWeek7.forEach((dName, idx) => {
             const h = document.createElement("div");
             h.className = "cal-day-header";
             h.innerText = dName;
             if (isMobile) {
-                h.title = ["יום ראשון", "יום שני", "יום שלישי", "יום רביעי", "יום חמישי", "יום שישי"][idx];
+                h.title = ["יום ראשון", "יום שני", "יום שלישי", "יום רביעי", "יום חמישי", "יום שישי", "יום שבת"][idx];
             }
             grid.appendChild(h);
         });
 
-        // Month calculations
-        const firstDayOfWeek = new Date(currentCalendarYear, currentCalendarMonth, 1).getDay(); // 0 for Sun ... 5 for Fri, 6 for Sat
+        const firstDayOfWeek = new Date(currentCalendarYear, currentCalendarMonth, 1).getDay(); // 0=Sun..6=Sat
         const daysInMonth = new Date(currentCalendarYear, currentCalendarMonth + 1, 0).getDate();
 
-        // 6-column padding: if first day is Saturday (6), month starts on Sunday 2nd at column 0 -> 0 padding!
-        const workingPadding = (firstDayOfWeek === 6) ? 0 : firstDayOfWeek;
-
-        // Previous month padding cells (excluding Saturdays)
         let prevDate = new Date(currentCalendarYear, currentCalendarMonth, 0);
         const prevPadDays = [];
-        while (prevPadDays.length < workingPadding) {
-            if (prevDate.getDay() !== 6) {
-                prevPadDays.unshift(prevDate.getDate());
-            }
+        for (let p = 0; p < firstDayOfWeek; p++) {
+            prevPadDays.unshift(prevDate.getDate());
             prevDate.setDate(prevDate.getDate() - 1);
         }
         prevPadDays.forEach(dNum => {
@@ -23587,17 +24197,9 @@ function renderFinalsCalendar() {
             grid.appendChild(cell);
         });
 
-        // Current month cells
         for (let day = 1; day <= daysInMonth; day++) {
-            const dObj = new Date(currentCalendarYear, currentCalendarMonth, day);
-            if (dObj.getDay() === 6) {
-                // Skip Saturday!
-                continue;
-            }
-
             const dateStr = `${currentCalendarYear}-${String(currentCalendarMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
             const isToday = (dateStr === todayStr);
-
             const cell = createCalendarDayCell(dateStr, day, isToday, itemsByDate, false);
             grid.appendChild(cell);
         }
@@ -23674,47 +24276,48 @@ function createCalendarDayCell(dateStr, dayNum, isToday, itemsByDate, isOtherMon
         if (item.isTechnionEvent) {
             const badgeTypeClass = item.type === 'holiday' ? 'holiday-event' : 'academic-event';
             cellHtml += `
-                <div class="cal-event-pill technion-event ${badgeTypeClass}" title="${item.desc || item.title}">
-                    <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${item.title}</span>
+                <div class="cal-event-pill technion-event ${badgeTypeClass}" title="${escapeHtml(item.desc || item.title)}">
+                    <span class="cal-pill-title-text" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${escapeHtml(item.title)}</span>
                 </div>
             `;
         } else if (item.isExamEvent) {
             const passedClass = item.isPassed ? "passed" : "";
-            const itemAccent = getCourseAccentColor(item.courseCode);
+            const itemAccent = (item.color && /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(item.color)) ? item.color : getCourseAccentColor(item.courseCode);
             cellHtml += `
-                <div class="cal-event-pill exam-event ${passedClass} has-course-accent" style="--course-accent: ${itemAccent};" data-course-code="${item.courseCode}" data-task-id="${item.taskId || ''}" title="מבחן: ${item.courseName || ''} (${item.courseCode}) | ${item.rawTitle || item.title} - לחץ לפתיחת פרטי משימה">
-                    <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: block;">${item.title}</span>
+                <div class="cal-event-pill exam-event is-academic-task ${passedClass} has-course-accent" style="--course-accent: ${itemAccent}; --ev-accent: ${itemAccent};" data-course-code="${item.courseCode}" data-task-id="${item.taskId || ''}" title="מבחן: ${escapeHtml(item.courseName || '')} (${item.courseCode}) | ${escapeHtml(item.rawTitle || item.title)} - לחץ לפתיחת פרטי משימה">
+                    <span class="cal-pill-title-text" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: block;">${escapeHtml(item.title)}</span>
                 </div>
             `;
         } else if (item.isTaskEvent) {
             const doneClass = item.completed ? "done" : "";
-            const checkIcon = item.completed ? "☑" : "⚪";
-            const timeBadge = item.dueTime ? `<span class="cal-event-time-badge ui-time-ltr" dir="ltr">${escapeHtml(item.dueTime)}</span>` : '';
-            const itemAccent = getCourseAccentColor(item.courseCode);
+            const itemAccent = (item.color && /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(item.color)) ? item.color : getCourseAccentColor(item.courseCode);
+            const hasCustomColorAttr = item.color ? 'data-custom-color="1"' : '';
             cellHtml += `
-                <div class="cal-event-pill task-event ${item.typeClass} ${doneClass} has-course-accent" style="--course-accent: ${itemAccent};" data-course-code="${item.courseCode}" data-task-id="${item.taskId}" title="משימה (${item.courseName})${item.dueTime ? ' • עד ' + item.dueTime : ''}: לחץ לצפייה בעמוד המשימה">
-                    <span class="cal-task-check" data-course-code="${item.courseCode}" data-task-id="${item.taskId}" title="לחץ לסימון הושלם/לא הושלם">${checkIcon}</span>
-                    ${timeBadge}
-                    <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${item.displayTitle}</span>
+                <div class="cal-event-pill task-event is-academic-task ${item.typeClass} ${doneClass} has-course-accent" ${hasCustomColorAttr} style="--course-accent: ${itemAccent}; --ev-accent: ${itemAccent};" data-course-code="${item.courseCode}" data-task-id="${item.taskId}" title="משימה (${escapeHtml(item.courseName)}): לחץ לצפייה בעמוד המשימה">
+                    <span class="cal-pill-title-text" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${escapeHtml(item.displayTitle)}</span>
                 </div>
             `;
         } else if (item.isPersonalEvent) {
             const doneClass = item.completed ? "done" : "";
             const checkIcon = item.completed ? "☑" : "⚪";
             const evIcon = item.icon || "🔵";
+            const evAccent = item.color || '#38bdf8';
+            const miluimCls = item.isMiluim ? 'cal-cat-miluim' : 'cal-cat-custom';
+            const spanTag = item.isMultiDay ? ` (${(item.daySpanIndex || 0) + 1}/${item.daySpanTotal || 1})` : '';
+            const recTag = (item.recurrence && item.recurrence !== 'none') ? ' 🔁' : '';
             let timeBadge = '';
             if (item.isAllDay) {
                 timeBadge = `<span class="cal-event-time-badge" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.35);">יום שלם</span>`;
             } else if (item.startTime && item.endTime) {
-                timeBadge = `<span class="cal-event-time-badge ui-time-ltr" dir="ltr">${item.startTime} - ${item.endTime}</span>`;
-            } else if (item.time) {
-                timeBadge = `<span class="cal-event-time-badge ui-time-ltr" dir="ltr">${item.time}</span>`;
+                timeBadge = `<span class="cal-event-time-badge ui-time-ltr" dir="ltr">${escapeHtml(item.startTime)} - ${escapeHtml(item.endTime)}</span>`;
+            } else if (item.time && !/יום שלם/.test(item.time)) {
+                timeBadge = `<span class="cal-event-time-badge ui-time-ltr" dir="ltr">${escapeHtml(item.time)}</span>`;
             }
             cellHtml += `
-                <div class="cal-event-pill personal-event ${doneClass}" data-pe-id="${item.id || ''}" title="${item.time ? item.time + ' - ' : ''}${item.description ? item.description + ' - ' : ''}${item.title}">
+                <div class="cal-event-pill personal-event ${miluimCls} ${doneClass}" style="--ev-accent: ${evAccent};" data-pe-id="${item.id || ''}" title="${escapeHtml((item.time ? item.time + ' - ' : '') + item.title)}">
                     <span class="cal-personal-check" data-pe-id="${item.id || ''}" title="סמן כהושלם/לא הושלם">${checkIcon}</span>
                     ${timeBadge}
-                    <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1;">${evIcon} ${item.title}</span>
+                    <span class="cal-pill-title-text" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1;">${evIcon} ${escapeHtml(item.title)}${spanTag}${recTag}</span>
                     <button type="button" class="btn-del-cal-event" data-pe-id="${item.id || ''}" title="מחק אירוע מלוח השנה">✕</button>
                 </div>
             `;
@@ -23724,7 +24327,7 @@ function createCalendarDayCell(dateStr, dayNum, isToday, itemsByDate, isOtherMon
             cellHtml += `
                 <div class="cal-event-pill past-exam ${completedClass}" data-pe-id="${item.id}" title="מבחן לתרגול (לחץ לסימון ביצוע)">
                     <span class="cal-event-cb">${checkIcon}</span>
-                    <span>${item.title}</span>
+                    <span class="cal-pill-title-text">${escapeHtml(item.title)}</span>
                 </div>
             `;
         }
@@ -23773,14 +24376,31 @@ function createCalendarDayCell(dateStr, dayNum, isToday, itemsByDate, isOtherMon
             saveState();
             notifyStateChanged();
             renderFinalsCalendar();
+            if (typeof renderTimetableGrid === 'function') renderTimetableGrid();
             if (typeof showHudToast === 'function') showHudToast("האירוע נמחק מלוח השנה 🗑️", "info");
+        });
+    });
+
+    // Clicking the checkbox inside a personal event toggles completion directly
+    cell.querySelectorAll(".cal-personal-check").forEach(cbSpan => {
+        cbSpan.addEventListener("click", (e) => {
+            e.stopPropagation();
+            const peId = cbSpan.dataset.peId;
+            if (!peId) return;
+            const targetEv = (gameState.customCalendarEvents || []).find(it => it.id === peId);
+            if (!targetEv) return;
+            targetEv.completed = !targetEv.completed;
+            saveState();
+            notifyStateChanged();
+            renderFinalsCalendar();
+            if (typeof renderTimetableGrid === 'function') renderTimetableGrid();
         });
     });
 
     // Clicking a personal event always opens it inside the Day Details Modal (never marks completed)
     cell.querySelectorAll(".cal-event-pill.personal-event").forEach(pill => {
         pill.addEventListener("click", (e) => {
-            if (e.target.closest(".btn-del-cal-event")) return;
+            if (e.target.closest(".btn-del-cal-event") || e.target.closest(".cal-personal-check")) return;
             e.stopPropagation();
             openCalendarDayModal(dateStr);
         });
@@ -23830,6 +24450,37 @@ function createCalendarDayCell(dateStr, dayNum, isToday, itemsByDate, isOtherMon
     return cell;
 }
 
+function syncDayModalCategoryOptions(selectedVal = null) {
+    const catSelect = document.getElementById("day-modal-event-cat");
+    if (!catSelect) return;
+    const prevVal = selectedVal || catSelect.value || "🔵";
+
+    const builtInGroups = [
+        { key: "🔵", label: "🔵 אירוע אישי" },
+        { key: "📚", label: "📚 חזרה / לימוד עצמי" },
+        { key: "🏋️", label: "🏋️ אימון / ספורט" },
+        { key: "🏢", label: "🏢 פגישה / סידורים" },
+        { key: "🪖", label: "🪖 מילואים" },
+        { key: "🎯", label: "🎯 יעד חשוב" }
+    ];
+    const customGroups = (typeof gameState !== 'undefined' && gameState && Array.isArray(gameState.customEventGroups))
+        ? gameState.customEventGroups
+        : [];
+
+    let optsHtml = builtInGroups.map(g => `<option value="${escapeHtml(g.key)}">${escapeHtml(g.label)}</option>`).join('');
+    customGroups.forEach(cg => {
+        if (!cg || !cg.name) return;
+        const val = cg.key || `custom:${cg.name}`;
+        const icon = cg.icon || '🏷️';
+        optsHtml += `<option value="${escapeHtml(val)}" data-custom-icon="${escapeHtml(icon)}">${escapeHtml(icon)} ${escapeHtml(cg.name)}</option>`;
+    });
+    optsHtml += `<option value="__add_new_group__">➕ הוסף קבוצה חדשה...</option>`;
+    catSelect.innerHTML = optsHtml;
+
+    const match = Array.from(catSelect.options).find(o => o.value === prevVal && o.value !== '__add_new_group__');
+    catSelect.value = match ? prevVal : "🔵";
+}
+
 // Opens the Day Details & Hourly Schedule Modal
 function openCalendarDayModal(dateStr) {
     currentSelectedDayModalDate = dateStr;
@@ -23855,11 +24506,28 @@ function openCalendarDayModal(dateStr) {
     const timesContainer = document.getElementById("day-modal-times-container");
     const startInput = document.getElementById("day-modal-event-time-start");
     const endInput = document.getElementById("day-modal-event-time-end");
+    const dateStartInput = document.getElementById("day-modal-event-date-start");
+    const dateEndInput = document.getElementById("day-modal-event-date-end");
+    const recSelect = document.getElementById("day-modal-event-recurrence");
+    const remSelect = document.getElementById("day-modal-event-reminder");
+    const newGroupRow = document.getElementById("day-modal-new-group-row");
+    const colorInput = document.getElementById("day-modal-event-color");
 
+    syncDayModalCategoryOptions();
     if (allDayCheckbox) allDayCheckbox.checked = false;
     if (timesContainer) timesContainer.style.display = "flex";
     if (startInput) startInput.value = "10:00";
     if (endInput) endInput.value = "11:30";
+    if (dateStartInput) dateStartInput.value = dateStr;
+    if (dateEndInput) dateEndInput.value = dateStr;
+    if (recSelect) recSelect.value = "none";
+    if (remSelect) remSelect.value = "";
+    if (newGroupRow) newGroupRow.style.display = "none";
+    if (colorInput) {
+        const catSel = document.getElementById("day-modal-event-cat");
+        const grpVal = catSel ? catSel.value : "🔵";
+        colorInput.value = resolveEventAccentColor({ category: grpVal, icon: grpVal });
+    }
 
     if (titleInput) {
         titleInput.value = "";
@@ -23987,10 +24655,79 @@ function initCalendarDayModal() {
     const saveBtn = document.getElementById("btn-save-day-event");
     const allDayCheckbox = document.getElementById("day-modal-event-allday");
     const timesContainer = document.getElementById("day-modal-times-container");
+    const catSelect = document.getElementById("day-modal-event-cat");
+    const newGroupRow = document.getElementById("day-modal-new-group-row");
+    const newGroupInput = document.getElementById("day-modal-new-group-input");
+    const confirmNewGroupBtn = document.getElementById("btn-confirm-new-event-group");
+    const colorInput = document.getElementById("day-modal-event-color");
+    const applyGroupColorBtn = document.getElementById("day-modal-apply-group-color");
+    const dateStartInput = document.getElementById("day-modal-event-date-start");
+    const dateEndInput = document.getElementById("day-modal-event-date-end");
 
     if (allDayCheckbox && timesContainer) {
         allDayCheckbox.addEventListener("change", () => {
             timesContainer.style.display = allDayCheckbox.checked ? "none" : "flex";
+        });
+    }
+
+    if (dateStartInput && dateEndInput) {
+        dateStartInput.addEventListener("change", () => {
+            if (dateStartInput.value && (!dateEndInput.value || dateEndInput.value < dateStartInput.value)) {
+                dateEndInput.value = dateStartInput.value;
+            }
+        });
+    }
+
+    if (catSelect) {
+        catSelect.addEventListener("change", () => {
+            if (catSelect.value === "__add_new_group__") {
+                if (newGroupRow) {
+                    newGroupRow.style.display = "flex";
+                    if (newGroupInput) newGroupInput.focus();
+                }
+            } else {
+                if (newGroupRow) newGroupRow.style.display = "none";
+                if (colorInput) {
+                    colorInput.value = resolveEventAccentColor({ category: catSelect.value, icon: catSelect.value });
+                }
+            }
+        });
+    }
+
+    if (confirmNewGroupBtn && newGroupInput) {
+        confirmNewGroupBtn.addEventListener("click", () => {
+            const gName = newGroupInput.value.trim();
+            if (!gName) return;
+            if (!gameState.customEventGroups) gameState.customEventGroups = [];
+            const key = `custom:${gName}`;
+            if (!gameState.customEventGroups.some(g => g.key === key)) {
+                gameState.customEventGroups.push({
+                    key: key,
+                    name: gName,
+                    icon: '🏷️',
+                    color: (colorInput && colorInput.value) || '#38bdf8'
+                });
+            }
+            if (!gameState.eventGroupColors) gameState.eventGroupColors = {};
+            if (colorInput && colorInput.value) gameState.eventGroupColors[key] = colorInput.value;
+            saveState();
+            syncDayModalCategoryOptions(key);
+            if (newGroupRow) newGroupRow.style.display = "none";
+            newGroupInput.value = "";
+            if (typeof showHudToast === 'function') showHudToast(`קבוצה "${gName}" נוספה! 🏷️`, "success");
+        });
+    }
+
+    if (applyGroupColorBtn && colorInput && catSelect) {
+        applyGroupColorBtn.addEventListener("click", () => {
+            const grpKey = catSelect.value;
+            if (!grpKey || grpKey === "__add_new_group__") return;
+            if (!gameState.eventGroupColors) gameState.eventGroupColors = {};
+            gameState.eventGroupColors[grpKey] = colorInput.value || '#38bdf8';
+            saveState();
+            renderFinalsCalendar();
+            if (typeof renderTimetableGrid === 'function') renderTimetableGrid();
+            if (typeof showHudToast === 'function') showHudToast("צבע הקבוצה עודכן לכל אירועי הקבוצה! 🎨", "success");
         });
     }
 
@@ -24009,13 +24746,17 @@ function initCalendarDayModal() {
             const titleInput = document.getElementById("day-modal-event-title");
             const startInput = document.getElementById("day-modal-event-time-start");
             const endInput = document.getElementById("day-modal-event-time-end");
-            const catSelect = document.getElementById("day-modal-event-cat");
+            const recSelect = document.getElementById("day-modal-event-recurrence");
+            const remSelect = document.getElementById("day-modal-event-reminder");
             const isAllDay = allDayCheckbox ? allDayCheckbox.checked : false;
 
             const title = (titleInput ? titleInput.value : "").trim();
             const startTime = startInput ? startInput.value : "10:00";
             const endTime = endInput ? endInput.value : "11:30";
-            const icon = catSelect ? catSelect.value : "🔵";
+            let rawCat = catSelect ? catSelect.value : "🔵";
+            if (rawCat === "__add_new_group__") rawCat = "🔵";
+            const selectedOpt = catSelect ? catSelect.options[catSelect.selectedIndex] : null;
+            const icon = (selectedOpt && selectedOpt.dataset && selectedOpt.dataset.customIcon) ? selectedOpt.dataset.customIcon : (rawCat.startsWith('custom:') ? '🏷️' : rawCat);
 
             if (!title) {
                 alert("נא להזין כותרת לאירוע!");
@@ -24025,20 +24766,31 @@ function initCalendarDayModal() {
 
             if (!currentSelectedDayModalDate) {
                 const now = new Date();
-                currentSelectedDayModalDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+                currentSelectedDayModalDate = formatDateLocalYMD(now);
             }
+            const evStartDate = (dateStartInput && dateStartInput.value) ? dateStartInput.value : currentSelectedDayModalDate;
+            const evEndDateRaw = (dateEndInput && dateEndInput.value) ? dateEndInput.value : evStartDate;
+            const evEndDate = evEndDateRaw >= evStartDate ? evEndDateRaw : evStartDate;
+            const recurrence = recSelect ? (recSelect.value || 'none') : 'none';
+            const reminderMinutes = (remSelect && remSelect.value !== '') ? Number(remSelect.value) : null;
+            const color = (colorInput && /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(colorInput.value)) ? colorInput.value : resolveEventAccentColor({ category: rawCat, icon: icon });
 
             const displayTime = isAllDay ? "יום שלם" : (startTime ? (endTime ? `${startTime}-${endTime}` : startTime) : "10:00");
 
             const newEv = {
                 id: "pe-" + Date.now(),
-                date: currentSelectedDayModalDate,
+                date: evStartDate,
+                endDate: evEndDate,
                 time: displayTime,
                 isAllDay: isAllDay,
                 startTime: isAllDay ? "" : startTime,
                 endTime: isAllDay ? "" : endTime,
                 title: title,
                 icon: icon,
+                category: rawCat,
+                color: color,
+                recurrence: recurrence,
+                reminderMinutes: reminderMinutes,
                 completed: false
             };
 
@@ -24047,11 +24799,12 @@ function initCalendarDayModal() {
             saveState();
             notifyStateChanged();
             renderFinalsCalendar();
+            if (typeof renderTimetableGrid === 'function') renderTimetableGrid();
             renderDayModalEventsList(currentSelectedDayModalDate);
 
             if (titleInput) titleInput.value = "";
             if (typeof showHudToast === 'function') {
-                const toastMsg = isAllDay ? `האירוע "${title}" נשמר לכל היום! ☀️` : `האירוע "${title}" נשמר (${displayTime})! 💾`;
+                const toastMsg = isAllDay ? `האירוע "${title}" נשמר! ☀️` : `האירוע "${title}" נשמר (${displayTime})! 💾`;
                 showHudToast(toastMsg, "success");
             }
         });
@@ -24064,11 +24817,11 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.11.18-v2.13.22",
-    version: "2.13.22",
-    build: "20261118_02",
-    date: "2026-11-18 21:00",
-    description: "v2.13.22: ניקוי סרגל צד ותווית מצב מיותרת במפת הקורסים, והטמעת מקרא הסטטוסים בשורה אחת עם כפתורי הזום והפעולות בסרגל התרשים."
+    code: "REV-2026.11.18-v3.0.0",
+    version: "3.0.0",
+    build: "20261118_03",
+    date: "2026-11-18 22:35",
+    description: "v3.0.0: מהפכת Google Calendar ומערכת השעות (גריד שעות, 7 ימים + שבוע עבודה, אירועים רב-יומיים/חוזרים/מילואים/צבעים/תזכורות), מדד שבוע בסמסטר, הטמעת ציון בעמודת זמן נותר וציון, התאמה אישית לכל סטודנט במחולל המערכות ובמדדי חובה, וקישורי דרייב ישירים לתתי-תיקיות."
 };
 window.APP_VERSION = APP_CURRENT_REVISION.version;
 
@@ -26776,159 +27529,164 @@ function renderTimetableGrid() {
         };
     }
 
-    let html = '';
-    schedule.days.forEach(day => {
-        const dayOhList = officeHoursByDay[day.dayIndex] || [];
-        const hasClasses = day.classes && day.classes.length > 0;
-        const isFree = !hasClasses && dayOhList.length === 0;
-        const badgeClass = isFree ? 'free-day' : 'active-day';
-        const badgeText = !hasClasses
-            ? (dayOhList.length > 0 ? `${dayOhList.length} קבלה 🕐` : 'יום חופשי ✨')
-            : (dayOhList.length > 0 ? `${day.classes.length} שיעורים • ${dayOhList.length} קבלה` : `${day.classes.length} שיעורים`);
+    // Build proportional hourly time-grid for Timetable (no synthetic ☕ הפסקה banners + current-week personal events overlay)
+    const now = new Date();
+    const curAcadWeek = (window.TechnionAcademicCalendar && typeof window.TechnionAcademicCalendar.getAcademicSemesterWeekInfo === 'function')
+        ? (window.TechnionAcademicCalendar.getAcademicSemesterWeekInfo(now).week || selectedWeek)
+        : selectedWeek;
+    const baseSun = getSundayOfWeek(now);
+    const activeWeekSun = new Date(baseSun);
+    activeWeekSun.setDate(activeWeekSun.getDate() + ((selectedWeek - curAcadWeek) * 7));
+    const weekStartStr = formatDateLocalYMD(activeWeekSun);
+    const activeWeekEnd = new Date(activeWeekSun);
+    activeWeekEnd.setDate(activeWeekEnd.getDate() + 6);
+    const weekEndStr = formatDateLocalYMD(activeWeekEnd);
+    const expandedWeekPersonal = (typeof expandCustomCalendarEvents === 'function')
+        ? expandCustomCalendarEvents((gameState && gameState.customCalendarEvents) || [], weekStartStr, weekEndStr)
+        : [];
+    const todayStr = formatDateLocalYMD(now);
 
-        let bodyHtml = '';
-        if (isFree) {
-            bodyHtml = `
-                <div class="timetable-free-state">
-                    <span class="emoji">🏖️</span>
-                    <div style="font-weight: 700; color: #f1f5f9; font-size: 0.95rem;">יום חופשי מלימודים פרונטליים</div>
-                    <div style="font-size: 0.78rem; line-height: 1.4;">זמן מומלץ לחזרה ותרגול עצמי, שיעורי בית, WebWork ופרויקטים הנדסיים.</div>
+    const timeGridCols = schedule.days.map(day => {
+        const dayOhList = officeHoursByDay[day.dayIndex] || [];
+        const dObj = new Date(activeWeekSun);
+        dObj.setDate(dObj.getDate() + Number(day.dayIndex || 0));
+        const dStr = formatDateLocalYMD(dObj);
+        const isToday = (dStr === todayStr);
+
+        const dayPersonal = expandedWeekPersonal.filter(ev => (ev.occurrenceDate || ev.date) === dStr);
+        const dayAlldayPersonal = dayPersonal.filter(ev => ev.isAllDay);
+        const dayTimedPersonal = dayPersonal.filter(ev => !ev.isAllDay);
+
+        let alldayHtml = '';
+        dayAlldayPersonal.forEach(ev => {
+            const evAccent = ev.resolvedColor || resolveEventAccentColor(ev);
+            alldayHtml += `
+                <div class="cal-event-pill personal-event ${ev.isMiluim ? 'cal-cat-miluim' : 'cal-cat-custom'}" style="--ev-accent: ${evAccent}; cursor: pointer;" onclick="if(typeof openCalendarDayModal==='function') openCalendarDayModal('${escapeHtml(dStr)}')" title="${escapeHtml(ev.title)}">
+                    <span class="cal-pill-title-text">${ev.icon || '🔵'} ${escapeHtml(ev.title)}</span>
                 </div>
             `;
-        } else {
-            const timelineItems = [
-                ...(day.classes || []).map((c, origIdx) => ({ isClass: true, startTime: c.startTime || '99:99', c, origIdx })),
-                ...dayOhList.map(oh => ({ isClass: false, startTime: oh.startTime || '99:99', oh }))
-            ].sort((a, b) => String(a.startTime).localeCompare(String(b.startTime)));
+        });
 
-            let prevClassEnd = null;
-            timelineItems.forEach(entry => {
-                if (!entry.isClass) {
-                    const oh = entry.oh;
-                    bodyHtml += `
-                        <div class="timetable-office-hour-card" onclick="if (typeof openCourseDetails === 'function') openCourseDetails('${escapeHtml(oh.courseCode)}')" title="לחץ לניהול ועריכת שעות הקבלה של הקורס">
-                            <div class="oh-card-top">
-                                <span class="oh-badge">🕐 שעת קבלה • ${escapeHtml(oh.role || 'מרצה')}</span>
-                                <span class="oh-time" dir="ltr">${escapeHtml(oh.startTime)}${oh.endTime ? ' - ' + escapeHtml(oh.endTime) : ''}</span>
-                            </div>
-                            <div class="oh-staff">${escapeHtml(oh.staffName)}</div>
-                            <div class="oh-meta">
-                                <span>📚 ${escapeHtml(oh.courseName)} (${escapeHtml(oh.courseCode)})</span>
-                                ${oh.location ? `<span>📍 ${escapeHtml(oh.location)}</span>` : ''}
-                            </div>
-                        </div>
-                    `;
-                    return;
-                }
+        const timedItems = [];
 
-                const c = entry.c;
-                const idx = entry.origIdx;
-                if (prevClassEnd && c.startTime && prevClassEnd < c.startTime) {
-                    const [ph, pm] = prevClassEnd.split(':').map(Number);
-                    const [ch, cm] = c.startTime.split(':').map(Number);
-                    const gapMin = (ch * 60 + cm) - (ph * 60 + pm);
-                    if (gapMin >= 30) {
-                        bodyHtml += `<div class="timetable-break-gap">☕ הפסקה (${prevClassEnd} - ${c.startTime})</div>`;
-                    }
-                }
-                if (c.endTime) prevClassEnd = c.endTime;
+        // 1. Classes
+        (day.classes || []).forEach((c, origIdx) => {
+            const sMin = parseTimeToMinutes(c.startTime);
+            const eMin = parseTimeToMinutes(c.endTime) || (sMin !== null ? sMin + 60 : null);
+            if (sMin === null) return;
 
-                const isTut = (c.type && (c.type.includes('תרגול') || c.type.includes('מעבדה')));
-                const isSport = (c.type && (c.type.includes('אימון') || c.type.includes('ספורט')));
-                const instructorRole = isTut ? 'מתרגל/ת' : (isSport ? 'מאמן/ת' : 'מרצה');
-                const instructorClass = isTut ? 'is-tutorial' : (isSport ? 'is-sport' : 'is-lecture');
-                const instructorIcon = isTut ? '🧑‍🏫' : (isSport ? '🏃' : '👨‍🏫');
+            const isTut = (c.type && (c.type.includes('תרגול') || c.type.includes('מעבדה')));
+            const isSport = (c.type && (c.type.includes('אימון') || c.type.includes('ספורט')));
+            const instructorRole = isTut ? 'מתרגל/ת' : (isSport ? 'מאמן/ת' : 'מרצה');
+            const instructorClass = isTut ? 'is-tutorial' : (isSport ? 'is-sport' : 'is-lecture');
+            const instructorIcon = isTut ? '🧑‍🏫' : (isSport ? '🏃' : '👨‍🏫');
 
-                const durMeta = getClassDurationMetadata(c.startTime, c.endTime);
-                if (!c.duration || c.duration.trim() === '') {
-                    c.duration = durMeta.text;
-                }
+            const durMeta = getClassDurationMetadata(c.startTime, c.endTime);
+            if (!c.duration || c.duration.trim() === '') c.duration = durMeta.text;
 
-                const isPerpetual = isCoursePerpetualDitch(c.courseId, c.type);
-                const perpetualClass = isPerpetual ? 'is-perpetual-ditch' : '';
+            const isPerpetual = isCoursePerpetualDitch(c.courseId, c.type);
+            const perpetualClass = isPerpetual ? 'is-perpetual-ditch' : '';
+            const attRecord = (window.AttendanceHub && typeof window.AttendanceHub.getRecord === 'function')
+                ? window.AttendanceHub.getRecord(c.courseId, day.dayIndex, c.startTime, null, selectedWeek)
+                : null;
+            const attStatus = attRecord ? attRecord.status : null;
+            const attBorderClass = attStatus === 'attended' ? 'attendance-card-attended' : (attStatus === 'missed' ? 'attendance-card-missed' : '');
+            const resUrls = getCourseResourceUrls(c.courseId);
+            const ttCardAccent = getCourseAccentColor(c.courseId);
 
-                const attRecord = (window.AttendanceHub && typeof window.AttendanceHub.getRecord === 'function')
-                    ? window.AttendanceHub.getRecord(c.courseId, day.dayIndex, c.startTime, null, selectedWeek)
-                    : null;
-                const attStatus = attRecord ? attRecord.status : null;
-                const attBorderClass = attStatus === 'attended' ? 'attendance-card-attended' : (attStatus === 'missed' ? 'attendance-card-missed' : '');
-
-                const resUrls = getCourseResourceUrls(c.courseId);
-                const ttCardAccent = getCourseAccentColor(c.courseId);
-
-                bodyHtml += `
-                    <div class="timetable-card ${c.cardClass || ''} ${durMeta.blockClass} ${attBorderClass} ${perpetualClass} has-course-accent" style="--course-accent: ${ttCardAccent};" onclick="if (typeof openCourseDetails === 'function') openCourseDetails('${c.courseId}')">
-                        <!-- שורה 1: תגית סוג שיעור + תגית משך זמן שיעור מובלטת -->
-                        <div class="timetable-card-top">
-                            <span class="timetable-tag">${c.type}</span>
-                            ${isPerpetual ? `<span class="timetable-perpetual-badge" title="שיעור זה מוגדר בלמידה עצמית (הברזה נצחית) - הסטודנט לומד עצמאית">🚀 למידה עצמית</span>` : ''}
-                            <span class="timetable-duration-pill ${durMeta.pillClass}">⏱️ ${durMeta.text}</span>
-                        </div>
-                        <!-- שורה 2: שעות השיעור -->
-                        <div class="timetable-card-time">⏰ <span class="ui-time-ltr" dir="ltr">${c.startTime} - ${c.endTime}</span></div>
-                        <!-- שורה 3: חדר / מיקום -->
-                        ${(c.room && c.room.trim() && c.room !== 'כיתת טכניון') ? `
-                            <div class="timetable-card-room-bar">
-                                <span class="room-icon">📍</span>
-                                <span class="room-text">${c.room}</span>
-                            </div>
-                        ` : ''}
-                        <!-- שורה 4: מרצה / מתרגל -->
-                        ${c.lecturer ? `
-                            <div class="timetable-lecturer ${instructorClass}">
-                                <span>${instructorIcon} ${instructorRole}:</span>
-                                <strong>${c.lecturer}</strong>
-                            </div>
-                        ` : ''}
-                        <!-- שורה 5: קורס -->
-                        <div class="timetable-card-title">${c.courseName} <span class="course-code-dim">(${c.courseId})</span></div>
-                        
-                        <!-- שורה 6: פעולות נוכחות והשלמות -->
-                        ${isPerpetual ? `
-                            <div class="attendance-card-actions is-perpetual-actions" onclick="event.stopPropagation()">
-                                <a href="${resUrls.panoptoUrl}" target="_blank" rel="noopener noreferrer" class="btn-attendance-action btn-perpetual-panopto" title="מעבר ישיר להרצאות מוקלטות בפנאופטו">
-                                    📺 פנאופטו
-                                </a>
-                                <a href="${resUrls.pangeaUrl}" onclick="event.preventDefault(); if (window.PangeaHub) window.PangeaHub.openQuickPeek('${resUrls.pangeaUrl}', '${(c.courseName || '').replace(/'/g, "\\'")} - סיכומי פנגייה', '${resUrls.pangeaUrl}'); else window.open('${resUrls.pangeaUrl}', '_blank');" target="_blank" rel="noopener noreferrer" class="btn-attendance-action btn-perpetual-pangea" title="צפייה מהירה בסיכומי פנגיאה ודרייב">
-                                    📖 פנגיאה
-                                </a>
-                                <button type="button" class="btn-attendance-action btn-perpetual-revert" onclick="if (typeof openCourseDetails === 'function') openCourseDetails('${c.courseId}')" title="פתח את דף הקורס לניהול מצב למידה עצמית">
-                                    ⚙️ דף הקורס
-                                </button>
-                            </div>
-                        ` : `
-                            <div class="attendance-card-actions" onclick="event.stopPropagation()">
-                                <button type="button" class="btn-attendance-action ${attStatus === 'attended' ? 'is-attended' : ''}" 
-                                        onclick="window.handleTimetableAttendance(this, ${day.dayIndex}, ${idx}, 'attended')"
-                                        title="סמן נוכחות בשיעור זה (שבוע ${selectedWeek})">
-                                    ${attStatus === 'attended' ? '✓ נוכחתי' : '✓ הייתי'}
-                                </button>
-                                <button type="button" class="btn-attendance-action ${attStatus === 'missed' ? 'is-missed' : ''}" 
-                                        onclick="window.handleTimetableAttendance(this, ${day.dayIndex}, ${idx}, 'missed')"
-                                        title="סמן כהוחסר לשבוע ${selectedWeek} והוסף אוטומטית לתור השלמות">
-                                    ${attStatus === 'missed' ? '✗ הוחסר (בתור)' : '✗ החסרתי'}
-                                </button>
-                            </div>
-                        `}
+            const innerHtml = `
+                <div class="timetable-card-top">
+                    <span class="timetable-tag">${c.type}</span>
+                    ${isPerpetual ? `<span class="timetable-perpetual-badge" title="למידה עצמית">🚀</span>` : ''}
+                    <span class="timetable-duration-pill ${durMeta.pillClass}">⏱️ ${durMeta.text}</span>
+                </div>
+                <div class="timetable-card-title">${escapeHtml(c.courseName)} <span class="course-code-dim">(${c.courseId})</span></div>
+                <div class="timetable-card-time">⏰ <span class="ui-time-ltr" dir="ltr">${c.startTime} - ${c.endTime}</span></div>
+                ${(c.room && c.room.trim() && c.room !== 'כיתת טכניון') ? `<div class="timetable-card-room-bar"><span class="room-icon">📍</span><span class="room-text">${escapeHtml(c.room)}</span></div>` : ''}
+                ${c.lecturer ? `<div class="timetable-lecturer ${instructorClass}"><span>${instructorIcon} ${instructorRole}:</span> <strong>${escapeHtml(c.lecturer)}</strong></div>` : ''}
+                ${isPerpetual ? `
+                    <div class="attendance-card-actions is-perpetual-actions" onclick="event.stopPropagation()">
+                        <a href="${resUrls.panoptoUrl}" target="_blank" rel="noopener noreferrer" class="btn-attendance-action btn-perpetual-panopto">📺 פנאופטו</a>
+                        <a href="${resUrls.pangeaUrl}" onclick="event.preventDefault(); if (window.PangeaHub) window.PangeaHub.openQuickPeek('${resUrls.pangeaUrl}', '${(c.courseName || '').replace(/'/g, "\\'")} - סיכומי פנגייה', '${resUrls.pangeaUrl}'); else window.open('${resUrls.pangeaUrl}', '_blank');" target="_blank" rel="noopener noreferrer" class="btn-attendance-action btn-perpetual-pangea">📖 פנגיאה</a>
                     </div>
-                `;
-            });
-        }
+                ` : `
+                    <div class="attendance-card-actions" onclick="event.stopPropagation()">
+                        <button type="button" class="btn-attendance-action ${attStatus === 'attended' ? 'is-attended' : ''}" onclick="window.handleTimetableAttendance(this, ${day.dayIndex}, ${origIdx}, 'attended')" title="סמן נוכחות (שבוע ${selectedWeek})">${attStatus === 'attended' ? '✓ נוכחתי' : '✓ הייתי'}</button>
+                        <button type="button" class="btn-attendance-action ${attStatus === 'missed' ? 'is-missed' : ''}" onclick="window.handleTimetableAttendance(this, ${day.dayIndex}, ${origIdx}, 'missed')" title="סמן הוחסר (שבוע ${selectedWeek})">${attStatus === 'missed' ? '✗ הוחסר' : '✗ החסרתי'}</button>
+                    </div>
+                `}
+            `;
 
-        html += `
-            <div class="timetable-day-col" data-day-col="${day.dayIndex}">
-                <div class="timetable-day-header">
-                    <span class="timetable-day-title">${day.name || day.fullName}</span>
-                    <span class="timetable-day-badge ${badgeClass}">${badgeText}</span>
-                </div>
-                <div class="timetable-day-body">
-                    ${bodyHtml}
-                </div>
-            </div>
-        `;
+            timedItems.push({
+                startMin: sMin,
+                endMin: eMin,
+                title: c.courseName,
+                timeText: `${c.startTime} - ${c.endTime}`,
+                accentColor: ttCardAccent,
+                extraClasses: `timetable-card ${c.cardClass || ''} ${durMeta.blockClass} ${attBorderClass} ${perpetualClass} has-course-accent`,
+                onclickAttr: `if (typeof openCourseDetails === 'function') openCourseDetails('${c.courseId}')`,
+                innerHtml: innerHtml
+            });
+        });
+
+        // 2. Office hours
+        dayOhList.forEach(oh => {
+            const sMin = parseTimeToMinutes(oh.startTime);
+            const eMin = parseTimeToMinutes(oh.endTime) || (sMin !== null ? sMin + 60 : null);
+            if (sMin === null) return;
+            timedItems.push({
+                startMin: sMin,
+                endMin: eMin,
+                title: `🕐 קבלה: ${oh.staffName}`,
+                timeText: `${oh.startTime}${oh.endTime ? ' - ' + oh.endTime : ''}`,
+                accentColor: '#f59e0b',
+                extraClasses: 'timetable-office-hour-card',
+                onclickAttr: `if (typeof openCourseDetails === 'function') openCourseDetails('${escapeHtml(oh.courseCode)}')`,
+                innerHtml: `
+                    <div class="oh-card-top">
+                        <span class="oh-badge">🕐 קבלה • ${escapeHtml(oh.role || 'מרצה')}</span>
+                        <span class="oh-time ui-time-ltr" dir="ltr">${escapeHtml(oh.startTime)}${oh.endTime ? ' - ' + escapeHtml(oh.endTime) : ''}</span>
+                    </div>
+                    <div class="oh-staff">${escapeHtml(oh.staffName)}</div>
+                    <div class="oh-meta"><span>📚 ${escapeHtml(oh.courseName)}</span>${oh.location ? `<span>📍 ${escapeHtml(oh.location)}</span>` : ''}</div>
+                `
+            });
+        });
+
+        // 3. Personal events overlaid onto Timetable
+        dayTimedPersonal.forEach(ev => {
+            const sMin = parseTimeToMinutes(ev.startTime || ev.time);
+            const eMin = parseTimeToMinutes(ev.endTime) || (sMin !== null ? sMin + 60 : null);
+            if (sMin === null) return;
+            const evAccent = ev.resolvedColor || resolveEventAccentColor(ev);
+            timedItems.push({
+                startMin: sMin,
+                endMin: eMin,
+                title: `${ev.icon || '🔵'} ${ev.title}`,
+                timeText: `${ev.startTime || ''}${ev.endTime ? ' - ' + ev.endTime : ''}`,
+                accentColor: evAccent,
+                extraClasses: `cal-timegrid-personal ${ev.icon === '🪖' ? 'cal-cat-miluim' : ''}`,
+                onclickAttr: `if(typeof openCalendarDayModal==='function') openCalendarDayModal('${escapeHtml(dStr)}')`
+            });
+        });
+
+        return {
+            dayIndex: day.dayIndex,
+            dateStr: dStr,
+            dayTitle: day.name || day.fullName,
+            dateShort: `${dObj.getDate()}/${dObj.getMonth() + 1}`,
+            isToday: isToday,
+            alldayHtml: alldayHtml,
+            timedItems: timedItems
+        };
     });
 
-    container.innerHTML = html;
+    container.classList.add('timetable-timegrid');
+    container.innerHTML = buildGoogleCalendarTimeGridHtml(timeGridCols, {
+        hourHeight: 56,
+        isTimetable: true,
+        alldayLabel: 'כל היום'
+    });
     if (typeof renderTimetableOfficeHoursPanel === 'function') {
         renderTimetableOfficeHoursPanel();
     }
@@ -28664,6 +29422,41 @@ function checkAndTrigger10MinReminders() {
             }
         }
     });
+
+    // Proactive reminder check for custom calendar events with reminders
+    if (typeof expandCustomCalendarEvents === 'function' && gameState && Array.isArray(gameState.customCalendarEvents)) {
+        const tomorrow = new Date(now);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        const tomorrowStr = `${tomorrow.getFullYear()}-${String(tomorrow.getMonth() + 1).padStart(2, '0')}-${String(tomorrow.getDate()).padStart(2, '0')}`;
+        const localTodayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+        const expanded = expandCustomCalendarEvents(gameState.customCalendarEvents, localTodayStr, tomorrowStr);
+        const nowMs = now.getTime();
+        expanded.forEach(ev => {
+            if (ev.completed) return;
+            const remMin = (ev.reminderMinutes !== undefined && ev.reminderMinutes !== null && ev.reminderMinutes !== '') ? Number(ev.reminderMinutes) : null;
+            if (remMin === null || isNaN(remMin) || remMin < 0) return;
+            const occDate = ev.occurrenceDate || ev.date;
+            if (!occDate) return;
+            const [ey, em, ed] = occDate.split('-').map(Number);
+            const [eh, emin] = (ev.startTime || '09:00').split(':').map(Number);
+            const evStartMs = new Date(ey, em - 1, ed, eh || 9, emin || 0, 0, 0).getTime();
+            const notifyAtMs = evStartMs - (remMin * 60000);
+            if (Math.abs(nowMs - notifyAtMs) <= 120000) {
+                const evKey = `ast_custom_rem_${ev.id}_${occDate}_${remMin}`;
+                if (!localStorage.getItem(evKey)) {
+                    localStorage.setItem(evKey, new Date().toISOString());
+                    const remText = remMin === 0 ? 'עכשיו!' : (remMin >= 1440 ? `בעוד ${Math.round(remMin / 1440)} ימים` : (remMin >= 60 ? `בעוד ${Math.round(remMin / 60)} שעות` : `בעוד ${remMin} דקות`));
+                    if (typeof showNativeNotification === 'function') {
+                        showNativeNotification(`${ev.icon || '📅'} תזכורת: ${ev.title}`, {
+                            body: `${remText}${ev.startTime ? ` • ⏰ ${ev.startTime}` : ''}`,
+                            tag: evKey,
+                            data: { tab: 'calendar' }
+                        });
+                    }
+                }
+            }
+        });
+    }
 }
 
 // 10. Schedule exact timeouts & native alarms for today's classes
@@ -30854,6 +31647,7 @@ window.resetAllNotionFilters = function() {
     if (semPopover) {
         semPopover.querySelectorAll(".notion-sem-opt-cb").forEach(cb => cb.checked = true);
         if (typeof updateSemesterFilterSummary === 'function') updateSemesterFilterSummary();
+        if (typeof populateNotionCourseFilter === 'function') populateNotionCourseFilter();
     }
     const hiddenSemSelect = document.getElementById("filter-semester");
     if (hiddenSemSelect) hiddenSemSelect.value = "all";

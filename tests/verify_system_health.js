@@ -1578,6 +1578,174 @@ async function run() {
             assert(res.legendHeight > 0 && res.zoomHeight > 0 && res.sameRowDeltaY < 24, '.tree-legend and zoom buttons must align on the same horizontal row: ' + JSON.stringify(res));
         });
 
+        await test('Test 32: Semestero ME v3.0.0 Overhaul (HUD Week, Tasks 3.0, Google Calendar Time-Grid, Drive Subfolders & Universal Personalization)', async () => {
+            const res = await cdp.eval(`(() => {
+                // Ensure clean filter state & fresh HUD update
+                if (typeof window.resetAllNotionFilters === 'function') window.resetAllNotionFilters();
+                if (typeof window.recalculateCourseStates === 'function') window.recalculateCourseStates();
+                if (typeof window.updateHud === 'function') window.updateHud();
+
+                // 1. HUD Semester Week & Open Tasks inspection
+                const semWeekText = document.getElementById('stat-semester-week')?.innerText || '';
+                const openTasksText = document.getElementById('stat-open-tasks')?.innerText?.trim() || '';
+                const openTaskDebug = [];
+                if (window.gameState && window.gameState.courses) {
+                    Object.values(window.gameState.courses).forEach(c => {
+                        if (c && c.status === 'active' && Array.isArray(c.tasks)) {
+                            c.tasks.forEach(t => {
+                                const tt = String(t.type || '').toLowerCase();
+                                const ttitle = String(t.title || '').toLowerCase();
+                                if (tt !== 'exam' && tt !== 'midterm' && tt !== 'quiz' && !ttitle.includes('מבחן') && !ttitle.includes('מועד') && !t.completed && t.status !== 'done' && t.status !== 'submitted') {
+                                    openTaskDebug.push(c.code + ':' + t.id);
+                                }
+                            });
+                        }
+                    });
+                }
+
+                // 2. Tasks Board: On-demand selection, removed Sem/Grade cols, inline completed grade, Drive deep link, 5 types, cascading Sem -> Course filters
+                if (typeof setActiveMainTab === 'function') setActiveMainTab('tasks');
+                // Ensure at least one active course has a completed graded task to verify inline completed-grade UX
+                const c53 = (window.gameState && window.gameState.courses && (window.gameState.courses['034053'] || window.gameState.courses['00340053'] || Object.values(window.gameState.courses).find(x => x && x.status === 'active')));
+                const origTasksBackup = c53 ? JSON.parse(JSON.stringify(c53.tasks || [])) : null;
+                const origStatusBackup = c53 ? c53.status : null;
+                if (c53) {
+                    c53.status = 'active';
+                    c53.tasks = (c53.tasks || []).concat([{
+                        id: 'v3_test_done_hw', title: 'תרגיל בית לבדיקה', type: 'hw', status: 'done', completed: true, grade: 96, xp: 50, dueDate: '2026-11-10'
+                    }]);
+                }
+                if (typeof renderNotionTasksTable === 'function') renderNotionTasksTable();
+                const tableEl = document.querySelector('.notion-tasks-table');
+                const headers = Array.from(document.querySelectorAll('.notion-tasks-table thead th')).map(th => th.innerText.trim());
+                const selectCellHiddenByDefault = (() => {
+                    const td = document.querySelector('.notion-table-select-cell');
+                    return td ? getComputedStyle(td).display === 'none' : true;
+                })();
+                const toggleBtn = document.getElementById('btn-toggle-tasks-select-mode');
+                if (toggleBtn) toggleBtn.click();
+                const selectModeActivated = !!(tableEl && tableEl.classList.contains('is-select-mode-active'));
+                if (toggleBtn) toggleBtn.click(); // toggle back off
+
+                const hasInlineCompletedGrade = document.querySelectorAll('.completed-inline-grade-wrap .notion-inline-grade-input').length > 0;
+                if (c53 && origTasksBackup) {
+                    c53.tasks = origTasksBackup;
+                    c53.status = origStatusBackup;
+                }
+                const typeCheckboxes = document.querySelectorAll('#notion-type-filter-popover .notion-filter-type-cb').length;
+                const semBtn = document.getElementById('notion-semester-filter-btn');
+                const courseBtn = document.getElementById('notion-course-filter-btn');
+                const semBeforeCourse = !!(semBtn && courseBtn && (semBtn.compareDocumentPosition(courseBtn) & Node.DOCUMENT_POSITION_FOLLOWING));
+                const driveDeepUrl = typeof window.getFacultyDriveCourseUrl === 'function'
+                    ? window.getFacultyDriveCourseUrl('034053', { title: 'HW 3 - Rotation Transformation', type: 'hw' })
+                    : '';
+                const hasPeekColors = !!(document.getElementById('peek-task-color-input') && document.getElementById('btn-peek-apply-course-color'));
+
+                // 3. Calendar: 7-col Month (Sun-Sat), clean task pills, Workweek 5-col & Week 7-col time-grid, overlap layout, recurrence expansion
+                if (typeof setActiveMainTab === 'function') setActiveMainTab('calendar');
+                if (typeof window.setCalendarViewMode === 'function') window.setCalendarViewMode('month');
+                const monthHeaders = Array.from(document.querySelectorAll('#finals-calendar-grid .cal-day-header')).map(h => h.innerText);
+                const taskPillHasNoCheckbox = !document.querySelector('.cal-event-pill.task-event .cal-task-check');
+
+                if (typeof window.setCalendarViewMode === 'function') window.setCalendarViewMode('workweek');
+                const workweekCols = document.querySelectorAll('#finals-calendar-grid .cal-timegrid-day-head').length;
+
+                if (typeof window.setCalendarViewMode === 'function') window.setCalendarViewMode('week');
+                const weekCols = document.querySelectorAll('#finals-calendar-grid .cal-timegrid-day-head').length;
+
+                const overlapRes = typeof window.computeOverlapLayout === 'function'
+                    ? window.computeOverlapLayout([{ startMin: 540, endMin: 660 }, { startMin: 600, endMin: 720 }])
+                    : [];
+                const overlapValid = overlapRes.length === 2 && overlapRes[0].colCount === 2 && overlapRes[1].colCount === 2 && overlapRes[0].colIndex !== overlapRes[1].colIndex;
+
+                const expandedRec = typeof window.expandCustomCalendarEvents === 'function'
+                    ? window.expandCustomCalendarEvents([{ id: 'test-rec', date: '2026-11-15', endDate: '2026-11-16', recurrence: 'weekly', title: 'מילואים' }], '2026-11-15', '2026-11-28')
+                    : [];
+
+                // Check enhanced Day Modal controls
+                const hasDayModalEnhancements = !!(
+                    document.getElementById('day-modal-event-date-start') &&
+                    document.getElementById('day-modal-event-date-end') &&
+                    document.getElementById('day-modal-event-recurrence') &&
+                    document.getElementById('day-modal-event-reminder') &&
+                    document.getElementById('day-modal-event-color')
+                );
+
+                // 4. Timetable: Populate temporary schedule -> verify Time-grid without ☕ הפסקה & prominent top-left Sync button
+                const origTtBackup = window.gameState ? window.gameState.timetable : undefined;
+                if (window.gameState) {
+                    window.gameState.timetable = {
+                        days: [
+                            { dayIndex: 0, name: 'יום ראשון', classes: [{ courseId: '034053', courseName: 'מכניקת מוצקים 2מ', type: 'הרצאה', startTime: '08:30', endTime: '10:30' }, { courseId: '034035', courseName: 'תרמודינמיקה 1', type: 'תרגול', startTime: '14:30', endTime: '16:30' }] },
+                            { dayIndex: 1, name: 'יום שני', classes: [] }
+                        ]
+                    };
+                }
+                if (typeof setActiveMainTab === 'function') setActiveMainTab('timetable');
+                if (typeof renderTimetableGrid === 'function') renderTimetableGrid();
+                const hasTimetableTimegrid = !!document.querySelector('#timetable-grid-container .cal-timegrid-wrapper');
+                const breakBannerCount = document.querySelectorAll('.timetable-break-gap').length;
+                const syncCornerBtn = document.querySelector('.timetable-sync-top-row #btn-sync-cheesefork-now.btn-sync-primary-corner');
+                if (window.gameState) {
+                    if (origTtBackup === undefined) delete window.gameState.timetable;
+                    else window.gameState.timetable = origTtBackup;
+                }
+
+                // 5. Personalization: AttendanceHub Mandatory shields strictly follow active courses; TimetableGenerator course search adder
+                let mandatoryFilteredOutSem5 = false;
+                if (window.AttendanceHub && typeof window.AttendanceHub.renderMandatoryTab === 'function') {
+                    const tmpDiv = document.createElement('div');
+                    window.AttendanceHub.renderMandatoryTab(tmpDiv);
+                    mandatoryFilteredOutSem5 = !tmpDiv.innerHTML.includes('(114032)');
+                }
+                const hasTtgCourseSearch = !!(document.getElementById('ttg-course-search-input') && document.getElementById('ttg-add-course-select'));
+
+                if (typeof setActiveMainTab === 'function') setActiveMainTab('curriculum');
+                return {
+                    semWeekText,
+                    openTasksText,
+                    openTaskDebug,
+                    hasSemHeaderCol: headers.some(h => h === 'סמסטר'),
+                    hasGradeHeaderCol: headers.some(h => h === 'ציון'),
+                    selectCellHiddenByDefault,
+                    selectModeActivated,
+                    hasInlineCompletedGrade,
+                    typeCheckboxes,
+                    semBeforeCourse,
+                    driveDeepUrl,
+                    hasPeekColors,
+                    monthColCount: monthHeaders.length,
+                    hasSaturdayHeader: monthHeaders.some(h => h.includes('שבת') || h.includes("ש'")),
+                    taskPillHasNoCheckbox,
+                    workweekCols,
+                    weekCols,
+                    overlapValid,
+                    expandedRecCount: expandedRec.length,
+                    hasDayModalEnhancements,
+                    hasTimetableTimegrid,
+                    breakBannerCount,
+                    hasSyncCornerBtn: !!syncCornerBtn,
+                    mandatoryFilteredOutSem5,
+                    hasTtgCourseSearch
+                };
+            })()`);
+
+            assert(res.semWeekText.includes('שבוע'), 'HUD must display current semester week: ' + JSON.stringify(res));
+            assert(!isNaN(Number(res.openTasksText)) && Number(res.openTasksText) <= 2, 'HUD open tasks count must be accurate: ' + JSON.stringify(res));
+            assert(!res.hasSemHeaderCol && !res.hasGradeHeaderCol, 'Tasks table must omit separate Semester and Grade columns: ' + JSON.stringify(res));
+            assert(res.selectCellHiddenByDefault && res.selectModeActivated, 'Tasks selection checkboxes must be hidden until toggle clicked: ' + JSON.stringify(res));
+            assert(res.hasInlineCompletedGrade, 'Completed tasks must show inline grade inside Remaining Time column: ' + JSON.stringify(res));
+            assert(res.typeCheckboxes === 5 && res.semBeforeCourse, 'Filters must have 5 task types and Semester before Course: ' + JSON.stringify(res));
+            assert(res.driveDeepUrl.includes('%D7%AA%D7%A8%D7%92%D7%99%D7%9C%20%D7%91%D7%99%D7%AA%203'), 'Drive resolver must link directly to HW 3 subfolder: ' + JSON.stringify(res));
+            assert(res.hasPeekColors, 'Task Side Peek must include color picker controls: ' + JSON.stringify(res));
+            assert(res.monthColCount === 7 && res.hasSaturdayHeader && res.taskPillHasNoCheckbox, 'Calendar Month view must render 7 days incl Saturday with clean task pills: ' + JSON.stringify(res));
+            assert(res.workweekCols === 5 && res.weekCols === 7 && res.overlapValid, 'Workweek (5) & Week (7) Google Calendar time-grids with overlap engine must work: ' + JSON.stringify(res));
+            assert(res.expandedRecCount === 4, 'Weekly 2-day event over 2 weeks must expand to 4 day occurrences: ' + JSON.stringify(res));
+            assert(res.hasDayModalEnhancements, 'Enhanced Day Modal controls must exist: ' + JSON.stringify(res));
+            assert(res.hasTimetableTimegrid && res.breakBannerCount === 0 && res.hasSyncCornerBtn, 'Timetable must use time-grid without ☕ הפסקה and with top-left Sync button: ' + JSON.stringify(res));
+            assert(res.mandatoryFilteredOutSem5 && res.hasTtgCourseSearch, 'Mandatory shields and Timetable Generator must be student-personalized: ' + JSON.stringify(res));
+        });
+
     } finally {
         console.log(`\n========================================================================`);
         console.log(`SUMMARY: ${passed} passed, ${failed} failed.`);

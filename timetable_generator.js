@@ -559,7 +559,7 @@
 
     };
 
-    // Master System Anchors (Fixed institutional requirements, e.g. dedicated Sport section)
+    // Master System Anchors (Only applied when that course is enrolled/selected by the user)
     const SYSTEM_ANCHORS = {
         '03940805_sport': {
             slotKey: '03940805_sport',
@@ -570,12 +570,104 @@
             groupId: '24',
             lecturer: 'שלומית בן-איש',
             title: 'יוגה (חמישי 07:30)',
-            isFixed: true,
+            isFixed: false,
             timeDesc: 'חמישי 07:30-09:00'
         }
     };
 
     const DAY_NAMES = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'];
+
+    function normalizeCodeKey(code) {
+        return String(code || '').trim().replace(/^0+/, '');
+    }
+
+    function ensureCourseCatalogEntry(catalog, rawCode) {
+        if (!rawCode) return null;
+        const clean = normalizeCodeKey(rawCode);
+        const existing = catalog[rawCode] || catalog[clean] || Object.values(catalog).find(c => normalizeCodeKey(c.code) === clean);
+        if (existing) return existing;
+
+        const gsCourses = (global.gameState && global.gameState.courses) || {};
+        const gsMatch = gsCourses[rawCode] || Object.values(gsCourses).find(c => c && normalizeCodeKey(c.code) === clean);
+        const plannerArr = Array.isArray(global.PLANNER_CATALOG) ? global.PLANNER_CATALOG : [];
+        const plannerMatch = plannerArr.find(c => c && normalizeCodeKey(c.code) === clean);
+        const meta = gsMatch || plannerMatch || {};
+        const canonicalCode = meta.code || rawCode;
+        const cName = meta.name || `קורס ${canonicalCode}`;
+        const credits = Number(meta.credits || 3);
+
+        // Try building groups from active timetable if course is scheduled there
+        const ttDays = (global.gameState && global.gameState.timetable && Array.isArray(global.gameState.timetable.days))
+            ? global.gameState.timetable.days : [];
+        const lecMeetings = [];
+        const tutMeetings = [];
+        ttDays.forEach(d => {
+            (d.classes || []).forEach(cls => {
+                if (normalizeCodeKey(cls.courseId) !== clean) return;
+                const mtg = {
+                    dayIndex: d.dayIndex,
+                    dayName: DAY_NAMES[d.dayIndex] || d.name || '',
+                    startTime: cls.startTime || '08:30',
+                    endTime: cls.endTime || '10:30',
+                    duration: cls.duration || 'שעתיים',
+                    room: cls.room || 'טכניון'
+                };
+                if ((cls.type || '').includes('תרגול') || (cls.type || '').includes('מעבדה')) {
+                    tutMeetings.push({ lecturer: cls.lecturer || 'מתרגל הקורס', mtg });
+                } else {
+                    lecMeetings.push({ lecturer: cls.lecturer || 'מרצה הקורס', mtg });
+                }
+            });
+        });
+
+        const slots = [];
+        if (lecMeetings.length > 0) {
+            slots.push({
+                slotType: 'lecture',
+                slotName: 'הרצאה',
+                options: [{
+                    groupId: '11',
+                    lecturer: lecMeetings[0].lecturer,
+                    room: lecMeetings[0].mtg.room,
+                    meetings: lecMeetings.map(x => x.mtg)
+                }]
+            });
+        } else {
+            // Flexible synthetic open-window options across days for planning courses outside hardcoded catalog
+            slots.push({
+                slotType: 'lecture',
+                slotName: 'הרצאה',
+                options: [
+                    { groupId: '11', lecturer: 'סגל הקורס (בוקר א׳/ג׳)', room: 'הנדסת מכונות', meetings: [{ dayIndex: 0, dayName: 'ראשון', startTime: '08:30', endTime: '10:30', duration: 'שעתיים', room: 'הנדסת מכונות' }] },
+                    { groupId: '12', lecturer: 'סגל הקורס (צהריים ב׳)', room: 'הנדסת מכונות', meetings: [{ dayIndex: 1, dayName: 'שני', startTime: '12:30', endTime: '14:30', duration: 'שעתיים', room: 'הנדסת מכונות' }] },
+                    { groupId: '13', lecturer: 'סגל הקורס (בוקר ה׳)', room: 'הנדסת מכונות', meetings: [{ dayIndex: 4, dayName: 'חמישי', startTime: '10:30', endTime: '12:30', duration: 'שעתיים', room: 'הנדסת מכונות' }] }
+                ]
+            });
+        }
+        if (tutMeetings.length > 0) {
+            slots.push({
+                slotType: 'tutorial',
+                slotName: 'תרגול',
+                options: [{
+                    groupId: '21',
+                    lecturer: tutMeetings[0].lecturer,
+                    room: tutMeetings[0].mtg.room,
+                    meetings: tutMeetings.map(x => x.mtg)
+                }]
+            });
+        }
+
+        const synthesized = {
+            code: canonicalCode,
+            name: cName,
+            credits: credits,
+            cardClass: 'timetable-card-default',
+            isSynthesized: true,
+            slots: slots
+        };
+        catalog[canonicalCode] = synthesized;
+        return synthesized;
+    }
 
     // Convert "HH:MM" to minutes from 00:00
     function timeToMinutes(tStr) {
@@ -633,7 +725,7 @@
 
         validCodes.forEach(code => {
             const cleanCode = code.replace(/^0+/, '');
-            const cInfo = catalog[code] || catalog[cleanCode];
+            const cInfo = catalog[code] || catalog[cleanCode] || ensureCourseCatalogEntry(catalog, code);
             if (!cInfo || !cInfo.slots) return;
 
             cInfo.slots.forEach(slot => {
@@ -1036,10 +1128,82 @@
     const TimetableStudio = {
         options: [],
         currentOptionIndex: 0,
-        selectedCourses: ['034056', '034053', '034035', '104228', '114052'],
+        selectedCourses: [],
+        customAddedCourses: [],
+        disabledSystemAnchors: {},
         currentSort: 'freeDays',
         userAnchors: {}, // Map of slotKey => { slotKey, courseCode, courseName, slotType, groupId, lecturer, isFixed }
         isInitialized: false,
+
+        getStudentDefaultSelectedCourses: function () {
+            const codes = [];
+            const seen = new Set();
+            const addCode = (raw) => {
+                if (!raw) return;
+                const clean = normalizeCodeKey(raw);
+                if (!clean || seen.has(clean)) return;
+                seen.add(clean);
+                const catalogMatch = TECH_COURSE_GROUPS_CATALOG[raw]
+                    || TECH_COURSE_GROUPS_CATALOG['0' + clean]
+                    || Object.values(TECH_COURSE_GROUPS_CATALOG).find(c => normalizeCodeKey(c.code) === clean);
+                codes.push(catalogMatch ? catalogMatch.code : String(raw));
+            };
+
+            if (global.gameState && global.gameState.courses) {
+                Object.values(global.gameState.courses).forEach(c => {
+                    if (c && c.status === 'active') addCode(c.code);
+                });
+            }
+            // Include courses currently in student's own active timetable (e.g. an enrolled sport section)
+            if (global.gameState && global.gameState.timetable && Array.isArray(global.gameState.timetable.days)) {
+                global.gameState.timetable.days.forEach(d => {
+                    (d.classes || []).forEach(cls => {
+                        if (cls && cls.courseId) addCode(cls.courseId);
+                    });
+                });
+            }
+            // Fallback only if student has zero active/timetable courses yet
+            if (codes.length === 0) {
+                return Object.keys(TECH_COURSE_GROUPS_CATALOG).filter(c => !TECH_COURSE_GROUPS_CATALOG[c].isSport);
+            }
+            return codes;
+        },
+
+        getMergedCatalog: function () {
+            const merged = Object.assign({}, TECH_COURSE_GROUPS_CATALOG);
+            ingestCheeseForkCourseGroups(merged, (global.gameState && global.gameState.courses) || {});
+            (this.selectedCourses || []).forEach(c => ensureCourseCatalogEntry(merged, c));
+            (this.customAddedCourses || []).forEach(c => ensureCourseCatalogEntry(merged, c));
+            return merged;
+        },
+
+        getAllSearchableCourses: function () {
+            const map = new Map();
+            const register = (code, name, credits, isSport) => {
+                if (!code) return;
+                const clean = normalizeCodeKey(code);
+                if (!clean || map.has(clean)) return;
+                map.set(clean, {
+                    code: String(code),
+                    cleanCode: clean,
+                    name: name || String(code),
+                    credits: Number(credits || 0),
+                    isSport: !!isSport
+                });
+            };
+            Object.values(TECH_COURSE_GROUPS_CATALOG).forEach(c => register(c.code, c.name, c.credits, c.isSport));
+            if (global.gameState && global.gameState.courses) {
+                Object.values(global.gameState.courses).forEach(c => {
+                    if (c) register(c.code, c.name, c.credits, c.type === 'sports');
+                });
+            }
+            if (Array.isArray(global.PLANNER_CATALOG)) {
+                global.PLANNER_CATALOG.forEach(c => {
+                    if (c) register(c.code, c.name, c.credits, false);
+                });
+            }
+            return Array.from(map.values()).sort((a, b) => String(a.name).localeCompare(String(b.name), 'he'));
+        },
 
         getScopedAnchorsKey: function () {
             let uid = 'guest';
@@ -1077,10 +1241,14 @@
 
         getActiveAnchorGroups: function () {
             const map = {};
-            // 1. Institutional system anchors (e.g. Yoga = 24)
+            const selectedClean = new Set((this.selectedCourses || []).map(c => normalizeCodeKey(c)));
+            // 1. Optional sport/system anchor ONLY when that course is actually selected by the user and not unlocked
             Object.values(SYSTEM_ANCHORS).forEach(a => {
-                map[a.slotKey] = String(a.groupId);
-                map[a.courseCode] = String(a.groupId);
+                const aClean = normalizeCodeKey(a.courseCode);
+                if (selectedClean.has(aClean) && !(this.disabledSystemAnchors && this.disabledSystemAnchors[a.slotKey])) {
+                    map[a.slotKey] = String(a.groupId);
+                    map[a.courseCode] = String(a.groupId);
+                }
             });
             // 2. User-chosen anchors
             if (this.userAnchors) {
@@ -1094,8 +1262,12 @@
         },
 
         isSlotAnchored: function (slotKey, groupId) {
-            if (SYSTEM_ANCHORS[slotKey] && (!groupId || String(SYSTEM_ANCHORS[slotKey].groupId) === String(groupId))) {
-                return true;
+            const sysAnchor = SYSTEM_ANCHORS[slotKey];
+            if (sysAnchor && !(this.disabledSystemAnchors && this.disabledSystemAnchors[slotKey])) {
+                const isSelected = (this.selectedCourses || []).some(c => normalizeCodeKey(c) === normalizeCodeKey(sysAnchor.courseCode));
+                if (isSelected && (!groupId || String(sysAnchor.groupId) === String(groupId))) {
+                    return true;
+                }
             }
             if (this.userAnchors && this.userAnchors[slotKey]) {
                 return !groupId || String(this.userAnchors[slotKey].groupId) === String(groupId);
@@ -1106,11 +1278,16 @@
         toggleAnchor: function (courseCode, slotType, groupId, lecturer, courseName) {
             const slotKey = `${courseCode}_${slotType}`;
 
-            // Prevent removing hard institutional system anchor (Sport/Yoga)
-            if (SYSTEM_ANCHORS[slotKey] && SYSTEM_ANCHORS[slotKey].isFixed) {
-                const msg = '🔒 עוגן זה הינו עוגן מערכתי קבוע (רישום לחוג ספורט בטכניון הינו לקבוצה ייעודית בלבד)';
-                if (typeof global.showHudToast === 'function') global.showHudToast(msg, 'warning');
-                else if (typeof global.showToastNotification === 'function') global.showToastNotification(msg, 'warning');
+            // Allow toggling optional system sport anchor if user chooses to unlock/flex
+            if (SYSTEM_ANCHORS[slotKey]) {
+                if (!this.disabledSystemAnchors) this.disabledSystemAnchors = {};
+                this.disabledSystemAnchors[slotKey] = !this.disabledSystemAnchors[slotKey];
+                this.computeAndRender();
+                const msg = this.disabledSystemAnchors[slotKey]
+                    ? `🔓 הוסר העוגן מהספורט (${courseName}). ניתן לבחור מועד אחר בחופשיות.`
+                    : `⚓ ${courseName} עוגן מחדש במערכת!`;
+                if (typeof global.showHudToast === 'function') global.showHudToast(msg, 'info');
+                else if (typeof global.showToastNotification === 'function') global.showToastNotification(msg, 'info');
                 return;
             }
 
@@ -1179,36 +1356,76 @@
             if (!modal) return;
 
             this.loadAnchors();
-
-            const isAdirUser = Boolean(global.AuthSync && typeof global.AuthSync.isAdirActive === 'function' && global.AuthSync.isAdirActive());
-            const catalogCodes = Object.keys(TECH_COURSE_GROUPS_CATALOG);
-            const defaultCatalogCodes = isAdirUser ? catalogCodes : catalogCodes.filter(c => c !== '03940805');
-
-            // Collect active courses from gameState if available and in catalog
-            if (global.gameState && global.gameState.courses) {
-                const activeMatching = Object.values(global.gameState.courses)
-                    .filter(c => c.status === 'active' || (isAdirUser && Number(c.semester) === 3))
-                    .map(c => {
-                        if (TECH_COURSE_GROUPS_CATALOG[c.code]) return c.code;
-                        if (TECH_COURSE_GROUPS_CATALOG['0' + c.code]) return '0' + c.code;
-                        const match = catalogCodes.find(k => k.replace(/^0+/, '') === String(c.code).replace(/^0+/, ''));
-                        return match || null;
-                    })
-                    .filter(Boolean);
-
-                if (activeMatching.length >= 2) {
-                    if (isAdirUser && !activeMatching.includes('03940805')) activeMatching.push('03940805');
-                    this.selectedCourses = Array.from(new Set(activeMatching));
-                } else {
-                    this.selectedCourses = [...defaultCatalogCodes];
+            const defaults = this.getStudentDefaultSelectedCourses();
+            const seen = new Set(defaults.map(normalizeCodeKey));
+            (this.customAddedCourses || []).forEach(c => {
+                const clean = normalizeCodeKey(c);
+                if (clean && !seen.has(clean)) {
+                    seen.add(clean);
+                    defaults.push(c);
                 }
-            } else if (!this.selectedCourses || this.selectedCourses.length === 0) {
-                this.selectedCourses = [...defaultCatalogCodes];
-            }
+            });
+            this.selectedCourses = defaults;
 
+            this.populateCourseAdder();
             this.computeAndRender();
             modal.style.display = 'flex';
             this.bindEventsOnce();
+        },
+
+        populateCourseAdder: function (searchText = '') {
+            const datalist = document.getElementById('ttg-add-course-datalist');
+            const select = document.getElementById('ttg-add-course-select');
+            const allCourses = this.getAllSearchableCourses();
+            const selectedClean = new Set((this.selectedCourses || []).map(normalizeCodeKey));
+            const q = String(searchText || '').trim().toLowerCase();
+
+            if (datalist) {
+                datalist.innerHTML = allCourses
+                    .map(c => `<option value="${c.code}">${c.name} (${c.code})</option>`)
+                    .join('');
+            }
+            if (select) {
+                const filtered = q
+                    ? allCourses.filter(c => c.name.toLowerCase().includes(q) || c.code.toLowerCase().includes(q) || c.cleanCode.includes(q.replace(/^0+/, '')))
+                    : allCourses;
+                const optsHtml = filtered.map(c => {
+                    const already = selectedClean.has(c.cleanCode);
+                    return `<option value="${c.code}">${already ? '✓ ' : ''}${c.name} (${c.code}) • ${c.credits} נק״ז</option>`;
+                }).join('');
+                select.innerHTML = `<option value="">-- בחר קורס להוספה (${filtered.length}) --</option>${optsHtml}`;
+            }
+        },
+
+        addCourseToSelection: function (rawValue) {
+            const val = String(rawValue || '').trim();
+            if (!val) return false;
+            const allCourses = this.getAllSearchableCourses();
+            const cleanQuery = normalizeCodeKey(val);
+            const match = allCourses.find(c =>
+                c.code === val
+                || c.cleanCode === cleanQuery
+                || val.includes(`(${c.code})`)
+                || c.name.toLowerCase() === val.toLowerCase()
+            ) || allCourses.find(c => c.name.toLowerCase().includes(val.toLowerCase()));
+
+            const finalCode = match ? match.code : (/^\d{5,8}$/.test(cleanQuery) ? val : null);
+            if (!finalCode) return false;
+
+            const finalClean = normalizeCodeKey(finalCode);
+            if (!this.selectedCourses.some(c => normalizeCodeKey(c) === finalClean)) {
+                this.selectedCourses.push(finalCode);
+            }
+            if (!this.customAddedCourses.some(c => normalizeCodeKey(c) === finalClean)) {
+                this.customAddedCourses.push(finalCode);
+            }
+            this.populateCourseAdder();
+            this.computeAndRender();
+            if (typeof global.showHudToast === 'function') {
+                const label = match ? `${match.name} (${match.code})` : finalCode;
+                global.showHudToast(`➕ הקורס "${label}" נוסף למחולל המערכות!`, 'success');
+            }
+            return true;
         },
 
         close: function () {
@@ -1217,9 +1434,16 @@
         },
 
         computeAndRender: function () {
-            const catalogCodes = Object.keys(TECH_COURSE_GROUPS_CATALOG);
             if (!this.selectedCourses || this.selectedCourses.length === 0) {
-                this.selectedCourses = [...catalogCodes];
+                this.options = [];
+                this.renderCourseChips();
+                this.renderPreAnchorHub();
+                this.renderActiveAnchorsStrip();
+                this.renderPillsCarousel();
+                this.renderActiveOption();
+                const resultsCountPreview = document.getElementById('ttg-results-count-preview');
+                if (resultsCountPreview) resultsCountPreview.innerText = `(0 מערכות — בחר לפחות קורס אחד)`;
+                return;
             }
             const activeAnchors = this.getActiveAnchorGroups();
             this.options = generateTimetableCombinations(this.selectedCourses, {
@@ -1250,8 +1474,9 @@
             let html = '';
             let totalAnchors = 0;
 
-            // 1. Fixed system anchor (Yoga)
-            const isYogaSelected = this.selectedCourses.includes('03940805') || this.selectedCourses.includes('3940805');
+            // 1. Optional sport anchor (only when selected and not unlocked)
+            const isYogaSelected = this.selectedCourses.some(c => normalizeCodeKey(c) === '3940805')
+                && !(this.disabledSystemAnchors && this.disabledSystemAnchors['03940805_sport']);
             if (isYogaSelected) {
                 totalAnchors++;
                 html += `
@@ -1312,17 +1537,33 @@
             const summary = document.getElementById('ttg-courses-summary');
             if (!container) return;
 
-            const catalog = TECH_COURSE_GROUPS_CATALOG;
+            const catalog = this.getMergedCatalog();
+            const defaultVisibleSet = new Set(this.getStudentDefaultSelectedCourses().map(normalizeCodeKey));
+            const selectedCleanSet = new Set((this.selectedCourses || []).map(normalizeCodeKey));
+            const customCleanSet = new Set((this.customAddedCourses || []).map(normalizeCodeKey));
+
+            // Personalized course chips: strictly student's active/timetable/selected/added courses (no unrelated courses/sports!)
+            const chipsMap = new Map();
+            Object.values(catalog).forEach(c => {
+                if (!c || !c.code) return;
+                const clean = normalizeCodeKey(c.code);
+                if (defaultVisibleSet.has(clean) || selectedCleanSet.has(clean) || customCleanSet.has(clean)) {
+                    if (!chipsMap.has(clean)) chipsMap.set(clean, c);
+                }
+            });
+
             let totalCredits = 0;
             let html = '';
 
-            Object.values(catalog).forEach(c => {
-                const isChecked = this.selectedCourses.includes(c.code) || this.selectedCourses.includes(c.code.replace(/^0+/, ''));
-                if (isChecked) totalCredits += (c.credits || 0);
+            chipsMap.forEach(c => {
+                const clean = normalizeCodeKey(c.code);
+                const isChecked = selectedCleanSet.has(clean);
+                if (isChecked) totalCredits += (Number(c.credits) || 0);
 
-                const courseAnchors = Object.values(this.userAnchors || {}).filter(a => a.courseCode === c.code || a.courseCode === c.code.replace(/^0+/, ''));
+                const courseAnchors = Object.values(this.userAnchors || {}).filter(a => normalizeCodeKey(a.courseCode) === clean);
                 let anchorChipBadge = '';
-                if (c.isAnchor) {
+                const sysAnchor = SYSTEM_ANCHORS[`${c.code}_sport`];
+                if (sysAnchor && !(this.disabledSystemAnchors && this.disabledSystemAnchors[sysAnchor.slotKey])) {
                     anchorChipBadge = `<span style="background: rgba(245, 158, 11, 0.22); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.45); padding: 1px 6px; border-radius: 4px; font-weight: 800; font-size: 0.68rem;" title="${c.anchorNote || 'עוגן במערכת'}">⚓ עוגן (חמישי 07:30)</span>`;
                 } else if (courseAnchors.length > 0) {
                     const aNames = courseAnchors.map(a => a.lecturer).join(', ');
@@ -1334,10 +1575,14 @@
                         <input type="checkbox" class="ttg-course-cb" value="${c.code}" ${isChecked ? 'checked' : ''} style="accent-color: #38bdf8;">
                         <span>${c.name} (${c.code})</span>
                         ${anchorChipBadge}
-                        <span style="opacity: 0.7; font-size: 0.70rem;">• ${c.credits} נק״ז</span>
+                        <span style="opacity: 0.7; font-size: 0.70rem;">• ${c.credits || 0} נק״ז</span>
                     </label>
                 `;
             });
+
+            if (chipsMap.size === 0) {
+                html = `<span style="font-size: 0.78rem; color: #94a3b8;">אין קורסים פעילים נבחרים — חפש והוסף קורסים משורת החיפוש למעלה.</span>`;
+            }
 
             container.innerHTML = html;
             if (summary) {
@@ -1347,11 +1592,13 @@
             container.querySelectorAll('.ttg-course-cb').forEach(cb => {
                 cb.onchange = () => {
                     const code = cb.value;
+                    const clean = normalizeCodeKey(code);
                     if (cb.checked) {
-                        if (!this.selectedCourses.includes(code)) this.selectedCourses.push(code);
+                        if (!this.selectedCourses.some(c => normalizeCodeKey(c) === clean)) this.selectedCourses.push(code);
                     } else {
-                        this.selectedCourses = this.selectedCourses.filter(c => c !== code && c !== code.replace(/^0+/, ''));
+                        this.selectedCourses = this.selectedCourses.filter(c => normalizeCodeKey(c) !== clean);
                     }
+                    this.populateCourseAdder();
                     this.computeAndRender();
                 };
             });
@@ -1362,21 +1609,22 @@
             const badge = document.getElementById('ttg-pre-anchor-summary-badge');
             if (!grid) return;
 
-            const catalog = TECH_COURSE_GROUPS_CATALOG;
+            const catalog = this.getMergedCatalog();
             let html = '';
             let totalLocked = 0;
 
-            const isYogaSelected = this.selectedCourses.includes('03940805') || this.selectedCourses.includes('3940805');
+            const isYogaSelected = (this.selectedCourses || []).some(c => normalizeCodeKey(c) === '3940805')
+                && !(this.disabledSystemAnchors && this.disabledSystemAnchors['03940805_sport']);
             if (isYogaSelected) totalLocked++;
 
             const customAnchors = Object.values(this.userAnchors || {});
             totalLocked += customAnchors.length;
 
             this.selectedCourses.forEach(code => {
-                const item = catalog[code] || Object.values(catalog).find(c => c.code.replace(/^0+/, '') === code.replace(/^0+/, ''));
+                const item = catalog[code] || Object.values(catalog).find(c => normalizeCodeKey(c.code) === normalizeCodeKey(code)) || ensureCourseCatalogEntry(catalog, code);
                 if (!item) return;
 
-                const isYoga = (item.code === '03940805' || item.code === '3940805');
+                const isYoga = (normalizeCodeKey(item.code) === '3940805');
 
                 html += `
                     <div class="ttg-pre-anchor-card" style="background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px; padding: 10px 12px; display: flex; flex-direction: column; gap: 8px;">
@@ -1389,11 +1637,11 @@
                         </div>
                 `;
 
-                if (isYoga) {
+                if (isYoga && !(this.disabledSystemAnchors && this.disabledSystemAnchors['03940805_sport'])) {
                     html += `
-                        <div style="background: rgba(245, 158, 11, 0.12); border: 1px solid rgba(245, 158, 11, 0.35); border-radius: 6px; padding: 8px 10px; font-size: 0.76rem; color: #fbbf24; display: flex; align-items: center; gap: 6px;">
-                            <span>🔒</span>
-                            <span><strong>עוגן קבוע:</strong> קבוצה 05 • שלומית בן-איש (חמישי 07:30)</span>
+                        <div style="background: rgba(245, 158, 11, 0.12); border: 1px solid rgba(245, 158, 11, 0.35); border-radius: 6px; padding: 8px 10px; font-size: 0.76rem; color: #fbbf24; display: flex; align-items: center; justify-content: space-between; gap: 6px;">
+                            <span>🔒 <strong>עוגן:</strong> קבוצה 05 • שלומית בן-איש (חמישי 07:30)</span>
+                            <button type="button" class="btn btn-xs" onclick="window.TimetableGenerator.studio.toggleAnchor('03940805','sport','24','שלומית בן-איש','${item.name}')" style="background:rgba(255,255,255,0.08);color:#fde68a;border:none;border-radius:4px;padding:2px 6px;cursor:pointer;">שחרר</button>
                         </div>
                     `;
                 } else if (item.slots && item.slots.length > 0) {
@@ -1563,7 +1811,8 @@
                     ? `<span style="background: rgba(56, 189, 248, 0.18); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.35); padding: 3px 8px; border-radius: 6px; font-size: 0.74rem; font-weight: 700;">🧘 קצב שפוי (ללא מרתונים)</span>`
                     : `<span style="background: rgba(239, 68, 68, 0.18); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.35); padding: 3px 8px; border-radius: 6px; font-size: 0.74rem; font-weight: 700;">⚠️ ${current.daysWithoutBreaksCount} ימים רצופים</span>`;
 
-                const isYogaSelected = this.selectedCourses.includes('03940805') || this.selectedCourses.includes('3940805');
+                const isYogaSelected = this.selectedCourses.some(c => normalizeCodeKey(c) === '3940805')
+                    && !(this.disabledSystemAnchors && this.disabledSystemAnchors['03940805_sport']);
                 let anchorsBadgeList = '';
                 if (isYogaSelected) {
                     anchorsBadgeList += `
@@ -1808,7 +2057,8 @@
 
             // Detailed Breakdown Card
             if (breakdownCard) {
-                const isYogaSelected = this.selectedCourses.includes('03940805') || this.selectedCourses.includes('3940805');
+                const isYogaSelected = this.selectedCourses.some(c => normalizeCodeKey(c) === '3940805')
+                    && !(this.disabledSystemAnchors && this.disabledSystemAnchors['03940805_sport']);
                 const groupList = current.selection.map(s => {
                     const isTut = (s.slotName && (s.slotName.includes('תרגול') || s.slotName.includes('מעבדה')));
                     const isSport = (s.slotName && (s.slotName.includes('אימון') || s.slotName.includes('ספורט') || s.courseCode === '03940805'));
@@ -1972,6 +2222,30 @@
             if (prevBtn) prevBtn.onclick = () => this.prev();
             if (nextBtn) nextBtn.onclick = () => this.next();
             if (applyBtn) applyBtn.onclick = () => this.applyActiveSchedule();
+
+            // Searchable Course Adder (#ttg-course-search-input, #ttg-add-course-select, #ttg-btn-add-course)
+            const courseSearchInput = document.getElementById('ttg-course-search-input');
+            const courseAddSelect = document.getElementById('ttg-add-course-select');
+            const courseAddBtn = document.getElementById('ttg-btn-add-course');
+            if (courseSearchInput) {
+                courseSearchInput.oninput = () => this.populateCourseAdder(courseSearchInput.value);
+                courseSearchInput.onchange = () => {
+                    if (this.addCourseToSelection(courseSearchInput.value)) {
+                        courseSearchInput.value = '';
+                    }
+                };
+            }
+            if (courseAddBtn) {
+                courseAddBtn.onclick = () => {
+                    const pick = (courseAddSelect && courseAddSelect.value) || (courseSearchInput && courseSearchInput.value) || '';
+                    if (this.addCourseToSelection(pick)) {
+                        if (courseSearchInput) courseSearchInput.value = '';
+                        if (courseAddSelect) courseAddSelect.value = '';
+                    } else if (courseSearchInput) {
+                        courseSearchInput.focus();
+                    }
+                };
+            }
 
             // Step 1: Pre-Anchoring Hub Controls
             const runGenerateBtn = document.getElementById('ttg-btn-run-generate');
