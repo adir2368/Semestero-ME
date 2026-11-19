@@ -1,5 +1,5 @@
-// Service Worker for Academic Skill Tree (Semestero ME) - v3.0.4
-const CACHE_NAME = 'semestero-me-v3.0.4';
+// Service Worker for Academic Skill Tree (Semestero ME) - v3.0.5
+const CACHE_NAME = 'semestero-me-v3.0.5';
 
 const STATIC_ASSETS = [
     './',
@@ -10,7 +10,6 @@ const STATIC_ASSETS = [
     './accessibility.css',
     './ui_enhancements.js',
     './accessibility.js',
-    './cheesefork_database.js',
     './preloaded_user_state.js',
     './curriculum_template.js',
     './planner_catalog.js',
@@ -44,7 +43,6 @@ const STATIC_ASSETS = [
     './web-app-manifest-512x512.png',
     './apple-touch-icon.png',
     './faculty_logo_cyan.png',
-    './adir_avatar.png',
     './adir_avatar_small.png',
     './adir_avatar_small.webp',
     './pangea_icon.png',
@@ -58,8 +56,7 @@ const STATIC_ASSETS = [
     './moodle_icon.svg',
     './notification-badge.png',
     './notification-badge-96.png',
-    './watch.html',
-    './user_saved_state.json'
+    './watch.html'
 ];
 
 // Install: Cache core application assets and activate immediately

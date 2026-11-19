@@ -17,9 +17,9 @@ ZIP_PATH = os.path.join(ROOT, "Semestero-ME-Windows-x64.zip")
 
 with open(os.path.join(ROOT, "package.json"), "r", encoding="utf-8") as f:
     pkg = json.load(f)
-VERSION = pkg.get("version", "3.0.4")
+VERSION = pkg.get("version", "3.0.5")
 TAG = f"v{VERSION}"
-NAME = f"Semestero ME v{VERSION} - PWA Shortcut Fix, Mobile Asset Parity, Watch Schedule Sync & Unified Changelog"
+NAME = f"Semestero ME v{VERSION} - Deep Performance, Bundle Size & Main-Thread Optimization Pass"
 
 def get_github_token():
     try:
@@ -99,19 +99,18 @@ def main():
 
     body_notes = f"""# Semestero ME {TAG} Release Notes
 
-### 🛠️ 1. הקשחת אינטגרציה, PWA ומובייל (`manifest.json`, `build_mobile_dist.js`, `sw.js`, `app.js`)
-- **תיקון קיצור הדרך `מבחנים` ב-PWA**: עדכון `manifest.json` מ-`?tab=runway` אל `?tab=calendar` + הוספת הפניית תאימות לאחור (`runway -> calendar`) ב-`app.js` לקיצורי דרך קיימים.
-- **תאימות נכסי APK (`www/`) ו-Service Worker**: צירוף `cheesefork_icon.webp` ו-`watch.html` לחבילת האנדרואיד ול-`sw.js`.
-- **יומן עדכונים ממקור אמת אחד**: `window.getFormattedChangelogHTML()` קורא כעת ישירות ממבנה המודאל העדכני ללא כרטיסי עבר מ-`v2.5.x`/`v2.6.x` וללא סחף בין גרסאות.
+### ⚡ 1. אופטימיזציית ביצועים, משקל אפליקציה ומהירות טעינה (`cheesefork_database.js`, `favicon.svg`, `sw.js`, `index.html`)
+- **כיווץ חבילות ונכסים**: כיווץ מאגר `cheesefork_database.js` (`-737 KB`, 2,784 קורסים זהים 1:1), אופטימיזציה של `favicon.svg` (`396 KB -> 25.8 KB`, חיסכון של `370.5 KB`), והסרת נכסים לא-בשימוש מחבילת ה-APK (`www/`, חיסכון `~1.44 MB` סה״כ).
+- **טעינת PWA ו-Service Worker מואצת**: הוצאת מאגרים עצלים (`cheesefork_database.js`, `user_saved_state.json`) מההתקנה הראשונית של ה-SW (`-4.09 MB` בהתקנה ראשונה, שמירה דינמית במטמון לפי דרישה), והסרת סקריפטים וגופנים חוסמי-רינדור ב-`<head>`.
 
-### ⌚ 2. שעון Galaxy Watch וניקיון סביבה (`WearScheduleHelper.java`)
-- **סנכרון 1:1 בלו״ז ברירת המחדל בשעון**: הסרת שיעורי `פיסיקה 2` הלא-פעילים מלוח ברירת המחדל בשעון (תוך שימור מנגנון התיקון האוטומטי לסטודנטים שרשומים אליו).
-- **ניקוי סביבת השורש**: הסרת קובצי APK ישנים מ-`v2.13.x` וקובצי Debug מיותרים מתיקיית השורש.
+### 🚀 2. האצת מעבר לשוניות, זיכרון וגלילת מובייל (`app.js`, `modal_help.js`, `ui_enhancements.js`, `styles.css`)
+- **חיסול סופות MutationObserver וכפילויות שמירה**: סינון ו-Debounce ל-`MutationObserver` ב-`modal_help.js` וב-`ui_enhancements.js`, מניעת שמירה כפולה ב-`saveState() -> notifyStateChanged()`, וביטול רינדור כפול של מערכת השעות והמסלול החבוי במעבר לשוניות.
+- **בידוד פריסה ו-GPU במובייל**: `contain: layout style`, `content-visibility: auto` על כרטיסי הגדרות, וביטול `backdrop-filter: blur` כבד על כרטיסים נגללים במובייל (`<= 768px`).
 
 ### 📦 3. קובצי הפצה ועדכון:
-- `Semestero-ME-Tablet-Clean.apk` (`com.technion.semestero.tablet`, `versionCode 122`, `versionName {VERSION}`, `v1+v2+v3` Signed)
-- `Semestero-ME.apk` (`com.technion.semestero`, `versionCode 122`, `versionName {VERSION}`, `v1+v2+v3` Signed, `targetSdk 34`)
-- `Semestero-ME-Watch.apk` (`versionCode 122`, `versionName {VERSION}`, `v1+v2+v3` Signed)
+- `Semestero-ME-Tablet-Clean.apk` (`com.technion.semestero.tablet`, `versionCode 123`, `versionName {VERSION}`, `v1+v2+v3` Signed)
+- `Semestero-ME.apk` (`com.technion.semestero`, `versionCode 123`, `versionName {VERSION}`, `v1+v2+v3` Signed, `targetSdk 34`)
+- `Semestero-ME-Watch.apk` (`versionCode 123`, `versionName {VERSION}`, `v1+v2+v3` Signed)
 - `Semestero-ME-Windows-x64.zip` (Electron Desktop Client {VERSION})
 """
 

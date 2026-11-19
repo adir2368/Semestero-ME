@@ -432,9 +432,32 @@
             this.injectHelpStyles();
             this.setupAllModalHelpTriggers();
 
-            // Observe DOM for dynamically opened modals
-            const observer = new MutationObserver(() => {
-                this.setupAllModalHelpTriggers();
+            // Observe DOM for dynamically opened modals (filtered + debounced to avoid layout thrash)
+            let helpObserverTimer = null;
+            const modalIdsSet = new Set(Object.keys(MODAL_HELP_REGISTRY));
+            const observer = new MutationObserver((mutations) => {
+                let relevant = false;
+                for (let i = 0; i < mutations.length && !relevant; i++) {
+                    const added = mutations[i].addedNodes;
+                    if (!added || !added.length) continue;
+                    for (let j = 0; j < added.length; j++) {
+                        const n = added[j];
+                        if (n.nodeType !== 1) continue;
+                        if (
+                            (n.id && modalIdsSet.has(n.id)) ||
+                            (n.classList && (n.classList.contains('modal-backdrop') || n.classList.contains('modal-overlay') || n.classList.contains('modal-header')))
+                        ) {
+                            relevant = true;
+                            break;
+                        }
+                    }
+                }
+                if (!relevant) return;
+                if (helpObserverTimer) clearTimeout(helpObserverTimer);
+                helpObserverTimer = setTimeout(() => {
+                    helpObserverTimer = null;
+                    this.setupAllModalHelpTriggers();
+                }, 80);
             });
             observer.observe(document.body, { childList: true, subtree: true });
         },

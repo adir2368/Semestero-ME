@@ -2316,10 +2316,28 @@
         RecentlyViewed.renderRecentChips();
         initUiMotionPromptsSuite();
 
-        // Monitor any opening modals to attach reading progress bar if long
+        // Monitor any opening modals to attach reading progress bar if long (filtered to avoid rAF wakeups on normal DOM edits)
         let modalObserverRaf = null;
-        const observer = new MutationObserver(() => {
-            if (modalObserverRaf) return;
+        const observer = new MutationObserver((mutations) => {
+            let relevant = false;
+            for (let i = 0; i < mutations.length && !relevant; i++) {
+                const m = mutations[i];
+                if (m.type === 'attributes') {
+                    const t = m.target;
+                    if (t && ((t.classList && t.classList.contains('modal-overlay')) || (t.id && t.id.endsWith('-modal')))) {
+                        relevant = true;
+                    }
+                } else if (m.addedNodes && m.addedNodes.length) {
+                    for (let j = 0; j < m.addedNodes.length; j++) {
+                        const n = m.addedNodes[j];
+                        if (n.nodeType === 1 && ((n.classList && (n.classList.contains('modal-overlay') || n.classList.contains('modal-backdrop'))) || (n.id && n.id.endsWith('-modal')))) {
+                            relevant = true;
+                            break;
+                        }
+                    }
+                }
+            }
+            if (!relevant || modalObserverRaf) return;
             modalObserverRaf = requestAnimationFrame(() => {
                 modalObserverRaf = null;
                 const openModals = document.querySelectorAll('.modal-overlay.active, .modal-overlay[style*="display: flex"], [id$="-modal"].active');

@@ -10225,7 +10225,7 @@ function saveState(skipNotify = false) {
         triggerCloudGistSyncDebounced();
     }
     if (!skipNotify && !isStateNotifying) {
-        notifyStateChanged({ recalculate: false });
+        notifyStateChanged({ recalculate: false, skipSave: true });
     }
 }
 
@@ -10238,7 +10238,9 @@ function notifyStateChanged(options = {}) {
             recalculateCourseStates();
         }
 
-        saveState(true);
+        if (options.skipSave !== true) {
+            saveState(true);
+        }
         window.gameState = gameState;
 
         // 1. Instant HUD update (<1ms)
@@ -16963,7 +16965,6 @@ window.switchTab = function(tabNameOrNumber) {
             populateNotionCourseFilter();
             renderNotionTasksTable();
             renderTasksReminderBanner();
-            renderExamGapRunway();
             viewsDirtyState.tasks = false;
         } else if (activeTabId === 'calendar') {
             if (curriculumWorkspace) curriculumWorkspace.style.display = "none";
@@ -16984,11 +16985,8 @@ window.switchTab = function(tabNameOrNumber) {
             if (tasksWorkspace) tasksWorkspace.style.display = "none";
             if (timetableWorkspace) timetableWorkspace.style.display = "flex";
             if (settingsWorkspace) settingsWorkspace.style.display = "none";
-            if (viewsDirtyState.timetable || true) {
-                if (typeof updateDailyTimetableFocus === 'function') updateDailyTimetableFocus();
-                if (typeof renderTodayTimetableBanner === 'function') renderTodayTimetableBanner();
-                viewsDirtyState.timetable = false;
-            }
+            if (typeof updateDailyTimetableFocus === 'function') updateDailyTimetableFocus();
+            viewsDirtyState.timetable = false;
         } else if (activeTabId === 'settings') {
             if (curriculumWorkspace) curriculumWorkspace.style.display = "none";
             if (plannerWorkspace) plannerWorkspace.style.display = "none";
@@ -17001,13 +16999,15 @@ window.switchTab = function(tabNameOrNumber) {
             }
         }
 
-        if (window.ModalHelp && typeof window.ModalHelp.setupAllModalHelpTriggers === 'function') {
-            window.ModalHelp.setupAllModalHelpTriggers();
-        }
-
-        if (typeof window.updateBackToTopVisibility === 'function') {
-            window.updateBackToTopVisibility();
-        }
+        const schedulePostTabWork = typeof requestAnimationFrame === 'function' ? requestAnimationFrame : (cb) => setTimeout(cb, 0);
+        schedulePostTabWork(() => {
+            if (window.ModalHelp && typeof window.ModalHelp.setupAllModalHelpTriggers === 'function') {
+                window.ModalHelp.setupAllModalHelpTriggers();
+            }
+            if (typeof window.updateBackToTopVisibility === 'function') {
+                window.updateBackToTopVisibility();
+            }
+        });
         if (typeof window.scrollActiveViewToTop === 'function') {
             window.scrollActiveViewToTop(false);
         }
@@ -25845,11 +25845,11 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.11.19-v3.0.4",
-    version: "3.0.4",
-    build: "20261119_04",
-    date: "2026-11-19 10:45",
-    description: "v3.0.4: תיקון קיצור PWA למבחנים (?tab=calendar + הפניית runway), הוספת cheesefork_icon.webp ו-watch.html לחבילת המובייל ול-SW, הסרת פיסיקה 2 מברירת המחדל בשעון, ואיחוד יומן העדכונים למקור אמת אחד ללא כרטיסים מיושנים."
+    code: "REV-2026.11.19-v3.0.5",
+    version: "3.0.5",
+    build: "20261119_05",
+    date: "2026-11-19 11:05",
+    description: "v3.0.5: אופטימיזציית ביצועים ומשקל מקיפה — כיווץ cheesefork_database.js (-737KB) ו-favicon.svg (-370KB), קיצוץ 4.09MB מהתקנת Service Worker, ביטול חסימות רינדור ב-<head>, סינון ו-Debounce ל-MutationObservers, מניעת כפילות שמירה ב-saveState, מניעת רינדור כפול במערכת השעות ובידוד פריסה/GPU במובייל."
 };
 window.APP_VERSION = APP_CURRENT_REVISION.version;
 
@@ -29149,11 +29149,11 @@ function updateDailyTimetableFocus() {
         }
     }
 
-    // 4. Update mobile filter attribute on grid
-    applyTimetableMobileFilter(currentMobileDayFilter);
+    // 4. Update mobile filter attribute on grid (skip duplicate renderTimetableGrid already executed in step 0)
+    applyTimetableMobileFilter(currentMobileDayFilter, true);
 }
 
-function applyTimetableMobileFilter(filter) {
+function applyTimetableMobileFilter(filter, skipRender = false) {
     currentMobileDayFilter = filter || 'today';
     const grid = document.getElementById('timetable-grid-container');
     if (grid) {
@@ -29167,12 +29167,12 @@ function applyTimetableMobileFilter(filter) {
     }
 
     // Update active state on day pills
-    document.querySelectorAll('#timetable-day-selector .day-tab-pill').forEach(pill => {
+    document.querySelectorAll('#timetable-day-selector .day-tab-pill[data-day]').forEach(pill => {
         const pDay = pill.getAttribute('data-day');
         pill.classList.toggle('active', pDay === currentMobileDayFilter);
     });
 
-    if (typeof renderTimetableGrid === 'function' && grid) {
+    if (!skipRender && typeof renderTimetableGrid === 'function' && grid) {
         renderTimetableGrid();
     }
 }

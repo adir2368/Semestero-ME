@@ -45,7 +45,6 @@ const FILES_TO_COPY = [
     'sw.js',
     'manifest.json',
     'cheesefork_database.js',
-    'adir_avatar.png',
     'adir_avatar_small.png',
     'adir_avatar_small.webp',
     'pangea_icon.png',
@@ -57,7 +56,6 @@ const FILES_TO_COPY = [
     'asat_icon.png',
     'panopto_icon.svg',
     'moodle_icon.svg',
-    'faculty_emblem_clean.png',
     'notification-badge.png',
     'widgets.html',
     'watch.html',
@@ -75,8 +73,7 @@ const FILES_TO_COPY = [
     'icon_small.png',
     'icon_small.webp',
     'web-app-manifest-192x192.png',
-    'web-app-manifest-512x512.png',
-    'og-preview.png'
+    'web-app-manifest-512x512.png'
 ];
 
 let copiedCount = 0;
