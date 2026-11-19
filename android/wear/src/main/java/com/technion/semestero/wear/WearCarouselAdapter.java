@@ -78,6 +78,7 @@ public class WearCarouselAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     public String examBannerTitle = "";
     public String examBannerSub = "";
     public List<TaskItem> tasksList;
+    public boolean hasSyncedWithPhone = false;
 
     private final Context context;
     private final LayoutInflater inflater;
@@ -311,6 +312,30 @@ public class WearCarouselAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
                 h.container.addView(item);
             }
+        } else {
+            View emptyItem = inflater.inflate(R.layout.item_task, h.container, false);
+            TextView tvTitle = emptyItem.findViewById(R.id.tv_task_title);
+            TextView tvDue = emptyItem.findViewById(R.id.tv_task_due);
+            View chkBg = emptyItem.findViewById(R.id.view_task_chk_bg);
+            TextView tvChkIcon = emptyItem.findViewById(R.id.tv_task_chk_icon);
+
+            if (hasSyncedWithPhone) {
+                tvTitle.setText("אין משימות פתוחות כרגע 🎉");
+                if (tvDue != null) tvDue.setText("סונכרן מהטלפון • הקש לסנכרון מחדש");
+                if (chkBg != null) chkBg.setBackgroundResource(R.drawable.chk_circle_done);
+                if (tvChkIcon != null) tvChkIcon.setVisibility(View.VISIBLE);
+            } else {
+                tvTitle.setText("ממתין לסנכרון משימות 🔄");
+                if (tvDue != null) tvDue.setText("פתח את סמסטרו בטלפון • הקש לסנכרון");
+                if (chkBg != null) chkBg.setBackgroundResource(R.drawable.chk_circle_idle);
+                if (tvChkIcon != null) tvChkIcon.setVisibility(View.GONE);
+            }
+            emptyItem.setOnClickListener(v -> {
+                if (actionListener != null) {
+                    actionListener.onRefreshRequested();
+                }
+            });
+            h.container.addView(emptyItem);
         }
     }
 

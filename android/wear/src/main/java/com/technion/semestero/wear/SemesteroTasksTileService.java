@@ -29,34 +29,57 @@ public class SemesteroTasksTileService extends TileService {
     protected ListenableFuture<TileBuilders.Tile> onTileRequest(RequestBuilders.TileRequest requestParams) {
         SharedPreferences prefs = getSharedPreferences(MainActivity.PREFS_NAME, Context.MODE_PRIVATE);
 
-        String task1 = prefs.getString("task_1", "");
-        boolean task1Done = prefs.getBoolean("wear_task_1_done", false);
-        String task2 = prefs.getString("task_2", "");
-        boolean task2Done = prefs.getBoolean("wear_task_2_done", false);
+        String task1 = "";
+        boolean task1Done = false;
+        String task2 = "";
+        boolean task2Done = false;
         String summary = prefs.getString("tasks_summary", "");
 
-        // If task1 is empty or corrupted, dynamically extract from all_tasks_json
-        if (task1.isEmpty() || isCorrupted(task1)) {
-            String allTasks = prefs.getString("all_tasks_json", "[]");
+        // Always prioritize live all_tasks_json first so placeholder strings in task_1 never hide real tasks
+        int openCount = 0;
+        boolean parsedJson = false;
+        String allTasks = prefs.getString("all_tasks_json", "[]");
+        if (allTasks != null && !allTasks.trim().isEmpty() && !allTasks.trim().equals("[]")) {
             try {
                 org.json.JSONArray arr = new org.json.JSONArray(allTasks);
                 if (arr.length() > 0) {
-                    org.json.JSONObject o1 = arr.getJSONObject(0);
-                    String c1 = o1.optString("course", "");
-                    String t1 = o1.optString("title", "");
-                    if (!isCorrupted(t1) && !t1.isEmpty()) {
-                        task1 = (!c1.isEmpty() && !t1.startsWith("[")) ? ("📌 [" + c1 + "] " + t1) : t1;
+                    parsedJson = true;
+                    for (int i = 0; i < arr.length(); i++) {
+                        org.json.JSONObject obj = arr.getJSONObject(i);
+                        boolean isDone = obj.optBoolean("completed", false)
+                            || (i < 15 && prefs.getBoolean("wear_task_" + (i + 1) + "_done", false));
+                        if (isDone) continue;
+                        String c = obj.optString("course", "");
+                        String t = obj.optString("title", "");
+                        if (isCorrupted(t) || t.isEmpty()) continue;
+                        openCount++;
+                        String formatted = (!c.isEmpty() && !t.startsWith("["))
+                            ? ((openCount == 1 ? "📌 [" : "⚡ [") + c + "] " + t)
+                            : t;
+                        if (task1.isEmpty()) {
+                            task1 = formatted;
+                        } else if (task2.isEmpty()) {
+                            task2 = formatted;
+                        }
                     }
-                }
-                if (arr.length() > 1) {
-                    org.json.JSONObject o2 = arr.getJSONObject(1);
-                    String c2 = o2.optString("course", "");
-                    String t2 = o2.optString("title", "");
-                    if (!isCorrupted(t2) && !t2.isEmpty()) {
-                        task2 = (!c2.isEmpty() && !t2.startsWith("[")) ? ("⚡ [" + c2 + "] " + t2) : t2;
-                    }
+                    summary = (openCount > 0) ? (openCount + " משימות פתוחות") : "אין משימות פתוחות";
                 }
             } catch (Exception ignored) {}
+        }
+
+        if (!parsedJson) {
+            String rawT1 = prefs.getString("task_1", "");
+            boolean rawT1Done = prefs.getBoolean("wear_task_1_done", false) || prefs.getBoolean("task_1_done", false);
+            if (!rawT1.isEmpty() && !isCorrupted(rawT1) && !rawT1.contains("אין משימות")) {
+                task1 = rawT1;
+                task1Done = rawT1Done;
+            }
+            String rawT2 = prefs.getString("task_2", "");
+            boolean rawT2Done = prefs.getBoolean("wear_task_2_done", false) || prefs.getBoolean("task_2_done", false);
+            if (!rawT2.isEmpty() && !isCorrupted(rawT2) && !rawT2.contains("אין משימות")) {
+                task2 = rawT2;
+                task2Done = rawT2Done;
+            }
         }
 
         if (isCorrupted(task1)) task1 = "";

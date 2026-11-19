@@ -263,8 +263,16 @@ public class MainActivity extends BridgeActivity {
                     editor.putString("task_3", fullT3);
                     editor.putString("task_3_id", o3.optString("id", ""));
                     editor.putBoolean("task_3_done", false);
+                } else {
+                    editor.putString("task_3", "");
+                    editor.putString("task_3_id", "");
+                    editor.putBoolean("task_3_done", false);
                 }
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+                editor.putString("task_3", "");
+                editor.putString("task_3_id", "");
+                editor.putBoolean("task_3_done", false);
+            }
             editor.apply();
 
             SemesteroTasksExamWidget.pushUpdate(context);

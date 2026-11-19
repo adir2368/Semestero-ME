@@ -2759,6 +2759,18 @@ document.addEventListener("DOMContentLoaded", () => {
     setupMobileNotifications();
     if (typeof syncNativeAndroidWidgets === 'function') {
         setTimeout(syncNativeAndroidWidgets, 500);
+        if (window.SemesteroWidgetBridge) {
+            document.addEventListener('visibilitychange', () => {
+                if (!document.hidden && typeof scheduleNativeAndroidWidgetsSync === 'function') {
+                    scheduleNativeAndroidWidgetsSync(250);
+                }
+            });
+            window.addEventListener('focus', () => {
+                if (typeof scheduleNativeAndroidWidgetsSync === 'function') {
+                    scheduleNativeAndroidWidgetsSync(250);
+                }
+            });
+        }
     }
     if (window.MiluimRightsAdvisor && typeof window.MiluimRightsAdvisor.init === 'function') {
         window.MiluimRightsAdvisor.init();
@@ -10301,6 +10313,11 @@ function notifyStateChanged(options = {}) {
             if (activeCourse && typeof renderModalTaskList === 'function') {
                 renderModalTaskList(activeCourse);
             }
+        }
+
+        // 5. Push updated tasks, exams & timetable to Native Android Widgets + Galaxy Watch (debounced)
+        if (typeof scheduleNativeAndroidWidgetsSync === 'function') {
+            scheduleNativeAndroidWidgetsSync(350);
         }
     } finally {
         isStateNotifying = false;
@@ -25855,11 +25872,11 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.11.19-v3.0.7",
-    version: "3.0.7",
-    build: "20261119_07",
-    date: "2026-11-19 13:30",
-    description: "v3.0.7: תיקון זיהוי גיליונות שיעורי בית (מניעת זיהוי בונוס/לומדת MATLAB כגיליון 2 ושמירה יציבה של סימוני הגשה ללא חזרה למצב קודם), ייצוב רוחב כותרת לוח השנה לאפס קפיצות במעבר חודש/שבוע/יום, וצמצום רווחים ב-שבוע 4/13 ב-HUD העליון."
+    code: "REV-2026.11.19-v3.0.8",
+    version: "3.0.8",
+    build: "20261119_08",
+    date: "2026-11-19 14:00",
+    description: "v3.0.8: תיקון סנכרון המשימות לשעון Galaxy Watch 8 ולווידג׳טים באנדרואיד — תיקון קריסת ReferenceError (now) ב-syncNativeAndroidWidgets לאחר שעות הלימודים, הפעלת סנכרון אוטומטי בכל טעינת ענן/מודל ושינוי משימה, איפוס דגלי השלמה ישנים בשעון והסרת משימות דמה מיושנות."
 };
 window.APP_VERSION = APP_CURRENT_REVISION.version;
 
@@ -29492,18 +29509,34 @@ window.markTaskCompletedById = function(taskId, isDone) {
         });
     });
     if (changed) {
-        if (typeof saveState === 'function') saveState();
+        if (typeof notifyStateChanged === 'function') {
+            notifyStateChanged({ recalculate: false });
+        } else if (typeof saveState === 'function') {
+            saveState();
+        }
         if (typeof syncNativeAndroidWidgets === 'function') syncNativeAndroidWidgets();
         if (typeof showHudToast === 'function') {
-            showHudToast(isDone ? '? ????? ????? ??????? ??????!' : '?? ????? ????? ???? ??????', 'success');
+            showHudToast(isDone ? '✓ המשימה סומנה כהושלמה מהשעון!' : '↩️ סימון המשימה בוטל מהשעון', 'success');
         }
     }
 };
+
+let _nativeWidgetSyncTimer = null;
+function scheduleNativeAndroidWidgetsSync(delayMs = 350) {
+    if (!window.SemesteroWidgetBridge) return;
+    if (_nativeWidgetSyncTimer) clearTimeout(_nativeWidgetSyncTimer);
+    _nativeWidgetSyncTimer = setTimeout(() => {
+        _nativeWidgetSyncTimer = null;
+        syncNativeAndroidWidgets();
+    }, delayMs);
+}
+window.scheduleNativeAndroidWidgetsSync = scheduleNativeAndroidWidgetsSync;
 
 function syncNativeAndroidWidgets(classData, tasksData) {
     if (!window.SemesteroWidgetBridge) return;
 
     try {
+        const now = new Date();
         const cData = classData || (typeof getRemainingClassesToday === 'function' ? getRemainingClassesToday() : null);
         let classTitle = "אין שיעורים קרובים היום";
         let classTime = "--:--";
@@ -29520,7 +29553,6 @@ function syncNativeAndroidWidgets(classData, tasksData) {
             classDetails = `${roomStr}${typeStr}`;
             classLecturer = nc.lecturer ? `👨‍🏫 ${nc.lecturer}` : "טכניון • סמסטר חורף";
 
-            const now = new Date();
             const curMin = now.getHours() * 60 + now.getMinutes();
             if (nc.startTime) {
                 const parts = nc.startTime.split(':');
@@ -29595,7 +29627,7 @@ function syncNativeAndroidWidgets(classData, tasksData) {
             );
         }
 
-        const tData = tasksData || (typeof getUpcomingPriorityTasks === 'function' ? getUpcomingPriorityTasks(5) : null);
+        const tData = tasksData || (typeof getUpcomingPriorityTasks === 'function' ? getUpcomingPriorityTasks(15) : null);
         let examDays = "--";
         let examTitle = "אין בחינות קרובות";
         let examSub = "סמסטר חורף תשפ״ז";

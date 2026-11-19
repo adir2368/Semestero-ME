@@ -108,7 +108,7 @@ public class SemesteroTasksComplicationService extends ComplicationDataSourceSer
                         JSONObject obj = arr.getJSONObject(i);
                         boolean isDone = obj.optBoolean("completed", false);
                         // Check if checked off directly on the wrist
-                        if (i < 5 && prefs.getBoolean("wear_task_" + (i + 1) + "_done", false)) {
+                        if (i < 15 && prefs.getBoolean("wear_task_" + (i + 1) + "_done", false)) {
                             isDone = true;
                         }
                         if (!isDone) {

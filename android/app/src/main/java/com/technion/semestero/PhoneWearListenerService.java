@@ -53,24 +53,27 @@ public class PhoneWearListenerService extends WearableListenerService {
             try {
                 String payload = new String(messageEvent.getData(), StandardCharsets.UTF_8);
                 Log.d(TAG, "Galaxy Watch toggled task: " + payload);
-                String[] parts = payload.split(":");
                 String taskId = "";
                 boolean isDone = false;
                 int taskIndex = 1;
 
-                if (parts.length >= 3) {
-                    taskId = parts[0];
-                    isDone = "1".equals(parts[1]);
-                    try { taskIndex = Integer.parseInt(parts[2]); } catch (Exception ignored) {}
-                } else if (parts.length == 2) {
-                    if (parts[0].length() <= 2) {
-                        taskIndex = Integer.parseInt(parts[0]);
-                        isDone = "1".equals(parts[1]);
+                int lastColon = payload.lastIndexOf(':');
+                int prevColon = (lastColon > 0) ? payload.lastIndexOf(':', lastColon - 1) : -1;
+                if (prevColon >= 0 && lastColon > prevColon) {
+                    taskId = payload.substring(0, prevColon);
+                    isDone = "1".equals(payload.substring(prevColon + 1, lastColon));
+                    try { taskIndex = Integer.parseInt(payload.substring(lastColon + 1)); } catch (Exception ignored) {}
+                } else if (lastColon > 0) {
+                    String left = payload.substring(0, lastColon);
+                    String right = payload.substring(lastColon + 1);
+                    if (left.length() <= 2 && left.matches("\\d+")) {
+                        taskIndex = Integer.parseInt(left);
+                        isDone = "1".equals(right);
                         SharedPreferences tasksPrefs = getSharedPreferences(SemesteroTasksExamWidget.PREFS_NAME, Context.MODE_PRIVATE);
                         taskId = tasksPrefs.getString("task_" + taskIndex + "_id", "");
                     } else {
-                        taskId = parts[0];
-                        isDone = "1".equals(parts[1]);
+                        taskId = left;
+                        isDone = "1".equals(right);
                     }
                 }
 
@@ -82,6 +85,25 @@ public class PhoneWearListenerService extends WearableListenerService {
                     editor.putBoolean("task_2_done", isDone);
                 } else if (taskIndex == 3) {
                     editor.putBoolean("task_3_done", isDone);
+                }
+
+                // Also update cached all_tasks_json so background syncs stay consistent before WebView opens
+                if (taskId != null && !taskId.isEmpty()) {
+                    try {
+                        String existingJson = prefs.getString("all_tasks_json", "[]");
+                        org.json.JSONArray arr = new org.json.JSONArray(existingJson);
+                        boolean updatedJson = false;
+                        for (int i = 0; i < arr.length(); i++) {
+                            org.json.JSONObject obj = arr.getJSONObject(i);
+                            if (taskId.equals(obj.optString("id", ""))) {
+                                obj.put("completed", isDone);
+                                updatedJson = true;
+                            }
+                        }
+                        if (updatedJson) {
+                            editor.putString("all_tasks_json", arr.toString());
+                        }
+                    } catch (Exception ignored) {}
                 }
 
                 // Manage completed_from_widget_ids for two-way sync with phone web app (gameState)

@@ -223,7 +223,18 @@ public class MainActivity extends Activity implements MessageClient.OnMessageRec
             vibrator.vibrate(newDone ? 45 : 20);
         }
 
-        String taskId = prefs.getString("wear_task_" + taskIndex + "_id", "task_" + taskIndex);
+        String taskId = prefs.getString("wear_task_" + taskIndex + "_id", "");
+        if (taskId == null || taskId.trim().isEmpty()) {
+            try {
+                JSONArray arr = new JSONArray(prefs.getString("all_tasks_json", "[]"));
+                if (taskIndex >= 1 && taskIndex <= arr.length()) {
+                    taskId = arr.getJSONObject(taskIndex - 1).optString("id", "");
+                }
+            } catch (Exception ignored) {}
+        }
+        if (taskId == null || taskId.trim().isEmpty()) {
+            taskId = "task_" + taskIndex;
+        }
         notifyPhoneTaskStatus(taskId, taskIndex, newDone);
 
         try {
@@ -524,19 +535,13 @@ public class MainActivity extends Activity implements MessageClient.OnMessageRec
             for (int i = 1; i <= 3; i++) {
                 String t = prefs.getString("task_" + i, "");
                 if (t != null && !t.trim().isEmpty() && !isCorruptedText(t) && !t.contains("אין משימות")) {
-                    boolean done = prefs.getBoolean("wear_task_" + i + "_done", false);
+                    boolean done = prefs.getBoolean("wear_task_" + i + "_done", prefs.getBoolean("task_" + i + "_done", false));
                     tasks.add(new WearCarouselAdapter.TaskItem(t, "⏳ מודל טכניון", done));
                 }
             }
         }
 
-        if (tasks.isEmpty()) {
-            tasks.add(new WearCarouselAdapter.TaskItem("[מד״ח מ׳] גיליון WebWork 2", "⏳ מערכת WebWork", prefs.getBoolean("wear_task_1_done", false)));
-            tasks.add(new WearCarouselAdapter.TaskItem("[מוצקים 2מ׳] תרגיל בית 2 (דיגיטלי + כתב)", "⏳ מודל טכניון", prefs.getBoolean("wear_task_2_done", false)));
-            tasks.add(new WearCarouselAdapter.TaskItem("[פיסיקה 2] גיליון תרגיל 2: שדה ופוטנציאל", "⏳ מערכת WebWork", prefs.getBoolean("wear_task_3_done", false)));
-            tasks.add(new WearCarouselAdapter.TaskItem("[תרמו 1] תרגיל בית 2: חוק ראשון ותהליכים", "⏳ מודל טכניון", prefs.getBoolean("wear_task_4_done", false)));
-            tasks.add(new WearCarouselAdapter.TaskItem("[חישוב הנדסי] תרגיל בית 2 ב-MATLAB", "⏳ מודל טכניון", prefs.getBoolean("wear_task_5_done", false)));
-        }
+        adapter.hasSyncedWithPhone = (prefs.getLong("last_sync_timestamp", 0L) > 0L);
         adapter.tasksList = tasks;
 
         adapter.notifyDataSetChanged();

@@ -17,9 +17,9 @@ ZIP_PATH = os.path.join(ROOT, "Semestero-ME-Windows-x64.zip")
 
 with open(os.path.join(ROOT, "package.json"), "r", encoding="utf-8") as f:
     pkg = json.load(f)
-VERSION = pkg.get("version", "3.0.7")
+VERSION = pkg.get("version", "3.0.8")
 TAG = f"v{VERSION}"
-NAME = f"Semestero ME v{VERSION} - Homework Sheet Parsing Fix (034056), Zero-Jump Calendar Bar & Compact HUD Week"
+NAME = f"Semestero ME v{VERSION} - Galaxy Watch 8 Live Tasks Sync Fix & Reactive Android Bridge"
 
 def get_github_token():
     try:
@@ -99,18 +99,15 @@ def main():
 
     body_notes = f"""# Semestero ME {TAG} Release Notes
 
-### 🎯 1. תיקון מדויק למעקב שיעורי הבית (`הטובים מ-N`) ו-`034056` (`app.js`)
-- **חיסול "גיליון 2 מדומה" ממשימות בונוס/לומדה**: תיקון `extractHomeworkSheetIndex()` ו-`isHomeworkPolicyTask()` כך שמשימות בונוס/לומדה ללא מספר גיליון מפורש (כגון `לומדת MATLAB (בונוס 2 נקודות לציון)`) לא יתפסו את `2` מתוך `בונוס 2 נקודות` כגיליון 2 אדום.
-- **זיהוי מורחב ושמירה יציבה ללא חזרה לאחור**: תמיכה מלאה גם ב-`מטלת תכנות 1`, `מטלת בית 1`, `HW1_...` ואותיות עבריות (`גיליון א׳`), עדכון כל הכפילויות של אותו גיליון בעת סימון הגשה, סימון משימות ידניות ב-`source: 'manual'`/`isCustom: true` לשימור בסנכרון ענן, ורענון מיידי של רצועת שיעורי הבית בכל שינוי משימה.
+### ⌚ 1. תיקון יסודי לסנכרון המשימות בשעון Galaxy Watch 8 ובווידג׳טים באנדרואיד (`app.js`, `WearDataSyncService.java`)
+- **חיסול קריסת `ReferenceError: now is not defined` ב-`syncNativeAndroidWidgets()`**: הצהרת `const now = new Date()` הועברה לראש הפונקציה כך שבשעות הערב, בסופ״ש או לאחר סיום השיעורים הסנכרון לא נקטע לפני עדכון המשימות (`updateTasksWidget`) והשעון.
+- **סנכרון ריאקטיבי רציף (עד 15 משימות)**: חיבור אוטומטי של `scheduleNativeAndroidWidgetsSync()` לכל שינוי ב-`notifyStateChanged()` (סנכרון ענן/מודל, הוספה/עריכה/השלמת משימה) ולחזרה לפוקוס באפליקציה, והרחבת התור הנשלח לשעון מ-5 ל-15 משימות פתוחות.
+- **איפוס דגלי השלמה ישנים והסרת משימות דמה בשעון**: איפוס `wear_task_1..15_done` בכל סנכרון חדש מהטלפון, תעדוף `all_tasks_json` ב-`SemesteroTasksTileService` ו-`SemesteroTasksComplicationService`, והחלפת רשימת הדמה המיושנת (`פיסיקה 2`) בכרטיס מצב נקי הלחיץ לסנכרון מיידי.
 
-### 📅 2. אפס קפיצות בסרגל לוח השנה וצמצום רווחים ב-HUD (`styles.css`, `app.js`, `index.html`)
-- **ייצוב מוחלט של סרגל לוח השנה**: קביעת רוחב קבוע (`248px`) לכותרת התאריך `#cal-current-month-title` בדסקטופ וקיצור חודשים במעבר חוצה-חודשים — **`0px` קפיצה** של כפתורי `חודש` / `שבוע` / `שבוע עבודה` / `יום` / `+ אירוע חדש` בעת החלפת תצוגה.
-- **ליטוש מדד `שבוע 4/13` ב-HUD העליון**: הסרת הרווחים הרחבים סביב `/` (`4/13` במקום `4 / 13`) וטיפוגרפיה מהודקת (`Rubik` + `JetBrains Mono`).
-
-### 📦 3. קובצי הפצה ועדכון:
-- `Semestero-ME-Tablet-Clean.apk` (`com.technion.semestero.tablet`, `versionCode 125`, `versionName {VERSION}`, `v1+v2+v3` Signed)
-- `Semestero-ME.apk` (`com.technion.semestero`, `versionCode 125`, `versionName {VERSION}`, `v1+v2+v3` Signed, `targetSdk 34`)
-- `Semestero-ME-Watch.apk` (`versionCode 125`, `versionName {VERSION}`, `v1+v2+v3` Signed)
+### 📦 2. קובצי הפצה ועדכון:
+- `Semestero-ME-Tablet-Clean.apk` (`com.technion.semestero.tablet`, `versionCode 126`, `versionName {VERSION}`, `v1+v2+v3` Signed)
+- `Semestero-ME.apk` (`com.technion.semestero`, `versionCode 126`, `versionName {VERSION}`, `v1+v2+v3` Signed, `targetSdk 34`)
+- `Semestero-ME-Watch.apk` (`versionCode 126`, `versionName {VERSION}`, `v1+v2+v3` Signed)
 - `Semestero-ME-Windows-x64.zip` (Electron Desktop Client {VERSION})
 """
 

@@ -119,6 +119,15 @@ public class WearDataSyncService extends WearableListenerService {
         if (dataMap.containsKey("task_3_id")) editor.putString("wear_task_3_id", dataMap.getString("task_3_id"));
         if (dataMap.containsKey("tasks_summary")) editor.putString("tasks_summary", dataMap.getString("tasks_summary"));
         if (dataMap.containsKey("all_tasks_json")) editor.putString("all_tasks_json", dataMap.getString("all_tasks_json"));
+        if (dataMap.containsKey("all_tasks_json") || dataMap.containsKey("task_1")) {
+            syncTaskSlotsFromPayload(
+                editor,
+                dataMap.containsKey("all_tasks_json") ? dataMap.getString("all_tasks_json") : null,
+                dataMap.containsKey("task_1_done") && dataMap.getBoolean("task_1_done"),
+                dataMap.containsKey("task_2_done") && dataMap.getBoolean("task_2_done"),
+                dataMap.containsKey("task_3_done") && dataMap.getBoolean("task_3_done")
+            );
+        }
 
         // 4. GPA & Standing
         if (dataMap.containsKey("gpa_current")) editor.putString("gpa_current", dataMap.getString("gpa_current"));
@@ -168,6 +177,15 @@ public class WearDataSyncService extends WearableListenerService {
         if (json.has("task_3_id")) editor.putString("wear_task_3_id", json.optString("task_3_id"));
         if (json.has("tasks_summary")) editor.putString("tasks_summary", json.optString("tasks_summary"));
         if (json.has("all_tasks_json")) editor.putString("all_tasks_json", json.optString("all_tasks_json"));
+        if (json.has("all_tasks_json") || json.has("task_1")) {
+            syncTaskSlotsFromPayload(
+                editor,
+                json.has("all_tasks_json") ? json.optString("all_tasks_json", "[]") : null,
+                json.optBoolean("task_1_done", false),
+                json.optBoolean("task_2_done", false),
+                json.optBoolean("task_3_done", false)
+            );
+        }
 
         // 4. GPA & Standing
         if (json.has("gpa_current")) editor.putString("gpa_current", json.optString("gpa_current"));
@@ -183,5 +201,54 @@ public class WearDataSyncService extends WearableListenerService {
 
         editor.putLong("last_sync_timestamp", System.currentTimeMillis());
         editor.apply();
+    }
+
+    /**
+     * Resets stale positional wear_task_N_done flags whenever fresh tasks arrive from the phone
+     * and maps task IDs + completion flags for up to 15 synced tasks.
+     */
+    private static void syncTaskSlotsFromPayload(
+        SharedPreferences.Editor editor,
+        String allTasksJson,
+        boolean t1Done,
+        boolean t2Done,
+        boolean t3Done
+    ) {
+        for (int i = 1; i <= 15; i++) {
+            editor.putBoolean("wear_task_" + i + "_done", false);
+            if (i > 3) {
+                editor.remove("wear_task_" + i + "_id");
+            }
+        }
+        editor.putBoolean("task_1_done", t1Done);
+        editor.putBoolean("task_2_done", t2Done);
+        editor.putBoolean("task_3_done", t3Done);
+
+        boolean populatedFromJson = false;
+        if (allTasksJson != null && !allTasksJson.trim().isEmpty() && !allTasksJson.trim().equals("[]")) {
+            try {
+                org.json.JSONArray arr = new org.json.JSONArray(allTasksJson);
+                if (arr.length() > 0) {
+                    populatedFromJson = true;
+                    int limit = Math.min(arr.length(), 15);
+                    for (int i = 0; i < limit; i++) {
+                        org.json.JSONObject obj = arr.getJSONObject(i);
+                        int slot = i + 1;
+                        String id = obj.optString("id", "");
+                        boolean done = obj.optBoolean("completed", false);
+                        if (!id.isEmpty()) {
+                            editor.putString("wear_task_" + slot + "_id", id);
+                        }
+                        editor.putBoolean("wear_task_" + slot + "_done", done);
+                    }
+                }
+            } catch (Exception ignored) {}
+        }
+
+        if (!populatedFromJson) {
+            editor.putBoolean("wear_task_1_done", t1Done);
+            editor.putBoolean("wear_task_2_done", t2Done);
+            editor.putBoolean("wear_task_3_done", t3Done);
+        }
     }
 }

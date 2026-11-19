@@ -1,11 +1,11 @@
-param(
+﻿param(
     [Parameter(Mandatory=$false)]
     [string]$Port
 )
 
 $adb = "C:\Users\user\AppData\Local\Android\Sdk\platform-tools\adb.exe"
-$apk = "C:\Users\user\.gemini\antigravity\scratch\academic-skill-tree\Semestero-Wear.apk"
-$watchIp = "10.0.0.14"
+$apk = "C:\Users\user\.gemini\antigravity\scratch\academic-skill-tree\Semestero-ME-Watch.apk"
+$watchIp = "10.0.0.20"
 
 Write-Host "==========================================================" -ForegroundColor Cyan
 Write-Host "⌚ Semestero ME • Galaxy Watch 8 Wireless Installer" -ForegroundColor Cyan
