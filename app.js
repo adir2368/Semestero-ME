@@ -25872,11 +25872,11 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.11.19-v3.0.8",
-    version: "3.0.8",
-    build: "20261119_08",
-    date: "2026-11-19 14:00",
-    description: "v3.0.8: תיקון סנכרון המשימות לשעון Galaxy Watch 8 ולווידג׳טים באנדרואיד — תיקון קריסת ReferenceError (now) ב-syncNativeAndroidWidgets לאחר שעות הלימודים, הפעלת סנכרון אוטומטי בכל טעינת ענן/מודל ושינוי משימה, איפוס דגלי השלמה ישנים בשעון והסרת משימות דמה מיושנות."
+    code: "REV-2026.11.19-v3.0.9",
+    version: "3.0.9",
+    build: "20261119_09",
+    date: "2026-11-19 14:20",
+    description: "v3.0.9: הסרת נעילת כיוון המסך (nosensor) באפליקציית Galaxy Watch 8 לשמירה על כיוון הענידה של השעון, הרחבת זיהוי המשימות הדחופות לסנכרון השעון (כולל קורסי הסמסטר הפעיל, מטלות שאלון/WebWork ותאריכי DD/MM/YYYY), וסנכרון אוטומטי מובנה ב-onResume של האפליקציה בטלפון."
 };
 window.APP_VERSION = APP_CURRENT_REVISION.version;
 
@@ -29396,7 +29396,7 @@ function getRemainingClassesToday() {
 }
 
 // 2. Calculates upcoming prioritized tasks from active courses
-function getUpcomingPriorityTasks(limit = 8) {
+function getUpcomingPriorityTasks(limit = 15) {
     if (!gameState || !gameState.courses) {
         return { totalDueSoon: 0, totalOpen: 0, tasks: [] };
     }
@@ -29405,23 +29405,31 @@ function getUpcomingPriorityTasks(limit = 8) {
     today.setHours(0, 0, 0, 0);
 
     const allTasks = [];
+    const curActiveSem = Number(gameState.currentActiveSemester || 3);
+    const coursesList = (typeof getDeduplicatedCoursesList === 'function')
+        ? getDeduplicatedCoursesList(gameState.courses)
+        : Object.values(gameState.courses);
 
-    Object.values(gameState.courses).forEach(course => {
+    coursesList.forEach(course => {
+        if (!course) return;
         const isBinary = (course.isBinaryPass === true || course.grade === 'עובר' || course.grade === 'PASS');
         const hasPassingGrade = isBinary || (course.grade !== undefined && course.grade !== null && course.grade !== '' && !isNaN(Number(course.grade)) && Number(course.grade) >= 55);
-        const isCurrentSemCourse = (course.status === 'active') || 
-            (course.status === 'available' && (course.semester === (gameState.currentActiveSemester || 3) || !course.semester));
+        const cSem = Number(course.semester || 0);
+        const isCompletedCourse = course.status === 'mastered' || course.status === 'completed' || hasPassingGrade;
+        const isCurrentSemCourse = (course.status === 'active') ||
+            (!isCompletedCourse && (cSem === curActiveSem || (!cSem && course.status === 'available')));
         if (!isCurrentSemCourse || hasPassingGrade) return;
-        if (!isWinterSemesterStarted() && (course.semester || 1) > (gameState.currentActiveSemester || 2)) return;
+        if (!isWinterSemesterStarted() && (cSem || 1) > Number(gameState.currentActiveSemester || 2)) return;
 
         (course.tasks || []).forEach(task => {
+            if (!task) return;
             const isDone = task.completed || task.status === 'done' || task.status === 'submitted';
             if (isDone) return;
             const tType = String(task.type || '').toLowerCase();
             const tTitle = String(task.title || '').toLowerCase();
-            const isExamOrQuiz = tType === 'exam' || tType === 'midterm' || tType === 'quiz' || tType === 'moed_a' || tType === 'moed_b' ||
-                tTitle.includes('מבחן') || tTitle.includes('בחינה') || tTitle.includes('מועד א') || tTitle.includes('מועד ב') || tTitle.includes('בוחן');
-            if (isExamOrQuiz) return; // Open priority tasks strictly exclude exams and quizzes
+            const isExamOrMidterm = tType === 'exam' || tType === 'midterm' || tType === 'moed_a' || tType === 'moed_b' ||
+                tTitle.includes('מבחן') || tTitle.includes('בחינה') || tTitle.includes('מועד א') || tTitle.includes('מועד ב') || tTitle.includes('בוחן אמצע');
+            if (isExamOrMidterm) return; // Open priority tasks exclude final/midterm exams
 
             let diffDays = 999;
             let timingText = 'ללא תאריך יעד';
@@ -29429,30 +29437,46 @@ function getUpcomingPriorityTasks(limit = 8) {
             let urgencyRank = 5;
 
             if (task.dueDate) {
-                const due = new Date(task.dueDate);
-                due.setHours(0, 0, 0, 0);
-                diffDays = Math.ceil((due - today) / (1000 * 60 * 60 * 24));
-
-                if (diffDays < 0) {
-                    urgencyRank = 1;
-                    timingCode = 'overdue';
-                    timingText = `באיחור של ${Math.abs(diffDays)} ימים`;
-                } else if (diffDays === 0) {
-                    urgencyRank = 2;
-                    timingCode = 'today';
-                    timingText = 'להגשה היום!';
-                } else if (diffDays === 1) {
-                    urgencyRank = 3;
-                    timingCode = 'today';
-                    timingText = 'להגשה מחר!';
-                } else if (diffDays <= 7) {
-                    urgencyRank = 4;
-                    timingCode = 'upcoming';
-                    timingText = `בעוד ${diffDays} ימים`;
+                let due = null;
+                const rawDue = String(task.dueDate).trim();
+                const dmyMatch = rawDue.match(/^(\d{1,2})[./-](\d{1,2})[./-](\d{2,4})/);
+                if (dmyMatch) {
+                    const yr = dmyMatch[3].length === 2 ? (2000 + parseInt(dmyMatch[3], 10)) : parseInt(dmyMatch[3], 10);
+                    due = new Date(yr, parseInt(dmyMatch[2], 10) - 1, parseInt(dmyMatch[1], 10));
                 } else {
-                    urgencyRank = 5;
-                    timingCode = 'upcoming';
-                    timingText = `בעוד ${diffDays} ימים`;
+                    const iso = (typeof parseDateToIso === 'function') ? parseDateToIso(rawDue) : rawDue.split(' ')[0];
+                    const ymdMatch = String(iso || '').match(/^(\d{4})-(\d{2})-(\d{2})/);
+                    if (ymdMatch) {
+                        due = new Date(parseInt(ymdMatch[1], 10), parseInt(ymdMatch[2], 10) - 1, parseInt(ymdMatch[3], 10));
+                    } else {
+                        due = new Date(rawDue);
+                    }
+                }
+                if (due && !isNaN(due.getTime())) {
+                    due.setHours(0, 0, 0, 0);
+                    diffDays = Math.ceil((due - today) / (1000 * 60 * 60 * 24));
+
+                    if (diffDays < 0) {
+                        urgencyRank = 1;
+                        timingCode = 'overdue';
+                        timingText = `באיחור של ${Math.abs(diffDays)} ימים`;
+                    } else if (diffDays === 0) {
+                        urgencyRank = 2;
+                        timingCode = 'today';
+                        timingText = 'להגשה היום!';
+                    } else if (diffDays === 1) {
+                        urgencyRank = 3;
+                        timingCode = 'today';
+                        timingText = 'להגשה מחר!';
+                    } else if (diffDays <= 7) {
+                        urgencyRank = 4;
+                        timingCode = 'upcoming';
+                        timingText = `בעוד ${diffDays} ימים`;
+                    } else {
+                        urgencyRank = 5;
+                        timingCode = 'upcoming';
+                        timingText = `בעוד ${diffDays} ימים`;
+                    }
                 }
             }
 

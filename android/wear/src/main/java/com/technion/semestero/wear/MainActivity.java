@@ -91,7 +91,6 @@ public class MainActivity extends Activity implements MessageClient.OnMessageRec
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setRequestedOrientation(android.content.pm.ActivityInfo.SCREEN_ORIENTATION_NOSENSOR);
         setContentView(R.layout.activity_main);
 
         vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);

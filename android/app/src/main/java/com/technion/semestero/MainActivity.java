@@ -122,6 +122,14 @@ public class MainActivity extends BridgeActivity {
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        if (getBridge() != null && getBridge().getWebView() != null) {
+            getBridge().getWebView().postDelayed(MainActivity::requestWidgetRefreshFromWear, 600);
+        }
+    }
+
+    @Override
     public void onNewIntent(android.content.Intent intent) {
         super.onNewIntent(intent);
         setIntent(intent);
