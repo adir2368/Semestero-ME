@@ -318,6 +318,12 @@
                 else if (rec === 'biweekly') evLines.push('RRULE:FREQ=WEEKLY;INTERVAL=2;COUNT=12');
                 else if (rec === 'monthly') evLines.push('RRULE:FREQ=MONTHLY;COUNT=12');
                 else if (rec === 'yearly') evLines.push('RRULE:FREQ=YEARLY;COUNT=5');
+                else if (rec === 'custom') {
+                    const iv = Math.max(1, parseInt(ev.recurrenceInterval || 1, 10));
+                    const unitMap = { days: 'DAILY', weeks: 'WEEKLY', months: 'MONTHLY', years: 'YEARLY' };
+                    const freq = unitMap[ev.recurrenceUnit] || 'WEEKLY';
+                    evLines.push(`RRULE:FREQ=${freq};INTERVAL=${iv};COUNT=24`);
+                }
 
                 evLines.push(
                     `SUMMARY:${ev.icon || '🔵'} ${CalendarSyncEngine.escapeIcsText(ev.title)}`,

@@ -940,11 +940,11 @@
         if (creditsPill) {
             if (rulesEval && typeof rulesEval.totalDegreeCredits === 'number') {
                 const reqDegree = rulesEval.requiredDegreeCredits || 157.5;
-                creditsPill.innerText = `${rulesEval.totalDegreeCredits.toFixed(1)} / ${reqDegree.toFixed(1)} נק״ז`;
+                creditsPill.innerHTML = `<bdi dir="ltr">${rulesEval.totalDegreeCredits.toFixed(1)} / ${reqDegree.toFixed(1)}</bdi> נק״ז`;
             } else {
                 const totalEl = document.getElementById('planner-total-credits-val');
                 if (totalEl && totalEl.innerText) {
-                    creditsPill.innerText = `${totalEl.innerText} נק״ז`;
+                    creditsPill.innerHTML = `<bdi dir="ltr">${escapeHtml(totalEl.innerText)}</bdi> נק״ז`;
                 }
             }
         }
@@ -1962,13 +1962,13 @@
         const ruleCapstone_met = hasCapstone === true;
 
         const clearanceRules = [
-            { id: 'degreeTotal', name: 'סה״כ נק״ז לתואר', score: `${totalDegreeCredits.toFixed(1)} / ${requiredDegreeCredits.toFixed(1)} נק״ז`, isMet: ruleDegreeTotal_met, hint: `מינימום 157.5 נק״ז (${isReservistDeduction ? '155.5 למשרתי מילואים' : '155.5 למילואים'}${isAtudaTironut ? ' • כולל 2 נק״ז טירונות עתודאים' : ''})` },
-            { id: 'totalElectives', name: 'נקודות בחירה פקולטיות', score: `${totalElectiveCredits.toFixed(1)} / ${requiredElectiveCredits.toFixed(1)} נק״ז`, isMet: ruleTotalElectives_met, hint: 'לפחות 32.5 נק״ז מרשימות הבחירה' },
-            { id: 'creditsBCD', name: 'סל רשימות ב׳+ג׳+ד׳', score: `${creditsBCD.toFixed(1)} / 14.0 נק״ז`, isMet: ruleBCD_met, hint: 'חובת עומק והתמחות הנדסית' },
-            { id: 'facultyLists', name: 'חלוקת רשימות (א׳, ב׳, ג׳, ד׳)', score: `א׳: ${countA}/1 • ב׳: ${countB}/2 • ג׳: ${countC}/2 • ד׳: ${countD}/1`, isMet: ruleFacultyLists_met, hint: '1 חישובי, 2 ליבה, 2 יישומי, 1 סמינר' },
-            { id: 'englishContent', name: 'קורסים באנגלית (תוכן/מל״ג)', score: `${countEnglishContent} / 2`, isMet: ruleEnglishContent_met, hint: 'חובת הטכניון: 2 קורסים הנלמדים באנגלית' },
-            { id: 'malag', name: 'קורסי מל״ג / מדעי הרוח', score: `${creditsMalag.toFixed(1)} / 6.0 נק״ז`, isMet: ruleMalag_met, hint: 'בין 6.0 ל-10.0 נק״ז מל״ג (מילואים מקנה 2 נק״ז)' },
-            { id: 'sport', name: 'חינוך גופני (ספורט)', score: `${countSport} / 2 קורסים`, isMet: ruleSport_met, hint: '2 קורסי ספורט בינאריים ללא ציון מספרי' },
+            { id: 'degreeTotal', name: 'סה״כ נק״ז לתואר', score: `<bdi dir="ltr">${totalDegreeCredits.toFixed(1)} / ${requiredDegreeCredits.toFixed(1)}</bdi> נק״ז`, isMet: ruleDegreeTotal_met, hint: `מינימום 157.5 נק״ז (${isReservistDeduction ? '155.5 למשרתי מילואים' : '155.5 למילואים'}${isAtudaTironut ? ' • כולל 2 נק״ז טירונות עתודאים' : ''})` },
+            { id: 'totalElectives', name: 'נקודות בחירה פקולטיות', score: `<bdi dir="ltr">${totalElectiveCredits.toFixed(1)} / ${requiredElectiveCredits.toFixed(1)}</bdi> נק״ז`, isMet: ruleTotalElectives_met, hint: 'לפחות 32.5 נק״ז מרשימות הבחירה' },
+            { id: 'creditsBCD', name: 'סל רשימות ב׳+ג׳+ד׳', score: `<bdi dir="ltr">${creditsBCD.toFixed(1)} / 14.0</bdi> נק״ז`, isMet: ruleBCD_met, hint: 'חובת עומק והתמחות הנדסית' },
+            { id: 'facultyLists', name: 'חלוקת רשימות (א׳, ב׳, ג׳, ד׳)', score: `א׳: <bdi dir="ltr">${countA}/1</bdi> • ב׳: <bdi dir="ltr">${countB}/2</bdi> • ג׳: <bdi dir="ltr">${countC}/2</bdi> • ד׳: <bdi dir="ltr">${countD}/1</bdi>`, isMet: ruleFacultyLists_met, hint: '1 חישובי, 2 ליבה, 2 יישומי, 1 סמינר' },
+            { id: 'englishContent', name: 'קורסים באנגלית (תוכן/מל״ג)', score: `<bdi dir="ltr">${countEnglishContent} / 2</bdi>`, isMet: ruleEnglishContent_met, hint: 'חובת הטכניון: 2 קורסים הנלמדים באנגלית' },
+            { id: 'malag', name: 'קורסי מל״ג / מדעי הרוח', score: `<bdi dir="ltr">${creditsMalag.toFixed(1)} / 6.0</bdi> נק״ז`, isMet: ruleMalag_met, hint: 'בין 6.0 ל-10.0 נק״ז מל״ג (מילואים מקנה 2 נק״ז)' },
+            { id: 'sport', name: 'חינוך גופני (ספורט)', score: `<bdi dir="ltr">${countSport} / 2</bdi> קורסים`, isMet: ruleSport_met, hint: '2 קורסי ספורט בינאריים ללא ציון מספרי' },
             { id: 'scienceCapstone', name: 'בחירה מדעית ופרויקט גמר', score: `מדעי: ${hasScienceElective ? '✅' : '⏳'} • פרויקט: ${hasCapstone ? '✅' : '⏳'}`, isMet: hasScienceElective && hasCapstone, hint: 'כימיה/ביולוגיה/פיזיקה 3 + פרויקט גמר' }
         ];
 
@@ -2798,11 +2798,11 @@
         const reqDegree = rulesEval.requiredDegreeCredits || 157.5;
 
         if (totalCredsEl) {
-            totalCredsEl.innerText = `${rulesEval.totalDegreeCredits.toFixed(1)} / ${reqDegree.toFixed(1)}`;
+            totalCredsEl.innerHTML = `<bdi dir="ltr">${rulesEval.totalDegreeCredits.toFixed(1)} / ${reqDegree.toFixed(1)}</bdi>`;
             totalCredsEl.style.color = rulesEval.ruleDegreeTotal_met ? '#10b981' : '#38bdf8';
         }
         if (electivesCredsEl) {
-            electivesCredsEl.innerText = `${rulesEval.totalElectiveCredits.toFixed(1)} / 32.5`;
+            electivesCredsEl.innerHTML = `<bdi dir="ltr">${rulesEval.totalElectiveCredits.toFixed(1)} / 32.5</bdi>`;
             electivesCredsEl.style.color = rulesEval.ruleTotalElectives_met ? '#10b981' : '#38bdf8';
         }
 
@@ -2892,8 +2892,8 @@
                             <span class="semester-col-title">${escapeHtml(semTitle)}</span>
                         </div>
                         <div style="display: flex; align-items: center; gap: 6px;">
-                            <button type="button" onclick="window.DegreePlanner.openExamDensityModal(${semNum})" title="נתח צפיפות מבחנים וימי למידה נטו בסמסטר ${semNum}" style="background: rgba(245, 158, 11, 0.14); border: 1px solid rgba(245, 158, 11, 0.4); color: #fbbf24; font-size: 0.68rem; font-weight: 700; padding: 2px 6px; border-radius: 5px; cursor: pointer;">📅 מבחנים</button>
-                            <span class="semester-col-credits">${semCredits.toFixed(1)} נק״ז</span>
+                            <button type="button" onclick="window.DegreePlanner.openExamDensityModal(${semNum})" title="נתח צפיפות מבחנים וימי למידה נטו בסמסטר ${semNum}" style="background: rgba(245, 158, 11, 0.14); border: 1px solid rgba(245, 158, 11, 0.4); color: #fbbf24; font-size: 0.68rem; font-weight: 700; padding: 2px 6px; border-radius: 5px; cursor: pointer; white-space: nowrap;">📅 מבחנים</button>
+                            <span class="semester-col-credits" style="white-space: nowrap;"><bdi dir="ltr">${semCredits.toFixed(1)}</bdi> נק״ז</span>
                         </div>
                     </div>
                     ${semWorkload.meterHtml}
@@ -3067,26 +3067,26 @@
     }
 
     function renderRulesCard(rulesEval) {
-        const updateRuleRow = (idPrefix, valText, isMet) => {
+        const updateRuleRow = (idPrefix, valHtml, isMet) => {
             const valEl = document.getElementById(`rule-val-${idPrefix}`);
             const statusEl = document.getElementById(`rule-status-${idPrefix}`);
             const rowEl = document.getElementById(`rule-row-${idPrefix}`);
-            if (valEl) valEl.innerText = valText;
+            if (valEl) valEl.innerHTML = valHtml;
             if (statusEl) statusEl.innerText = isMet ? '✅' : '⏳';
             if (rowEl) rowEl.classList.toggle('rule-completed', isMet);
         };
 
-        updateRuleRow('A', `${rulesEval.countA} / 1`, rulesEval.ruleA_met);
-        updateRuleRow('B', `${rulesEval.countB} / 2`, rulesEval.ruleB_met);
-        updateRuleRow('D', `${rulesEval.countD} / 1`, rulesEval.ruleD_met);
-        updateRuleRow('C', `${rulesEval.countC} / 2`, rulesEval.ruleC_met);
-        updateRuleRow('BCD', `${rulesEval.creditsBCD.toFixed(1)} / 14.0 נק״ז`, rulesEval.ruleBCD_met);
-        updateRuleRow('total', `${rulesEval.totalElectiveCredits.toFixed(1)} / 32.5 נק״ז`, rulesEval.ruleTotalElectives_met);
-        updateRuleRow('english-content', `${rulesEval.countEnglishContent} / 2`, rulesEval.ruleEnglishContent_met);
+        updateRuleRow('A', `<bdi dir="ltr">${rulesEval.countA} / 1</bdi>`, rulesEval.ruleA_met);
+        updateRuleRow('B', `<bdi dir="ltr">${rulesEval.countB} / 2</bdi>`, rulesEval.ruleB_met);
+        updateRuleRow('D', `<bdi dir="ltr">${rulesEval.countD} / 1</bdi>`, rulesEval.ruleD_met);
+        updateRuleRow('C', `<bdi dir="ltr">${rulesEval.countC} / 2</bdi>`, rulesEval.ruleC_met);
+        updateRuleRow('BCD', `<bdi dir="ltr">${rulesEval.creditsBCD.toFixed(1)} / 14.0</bdi> נק״ז`, rulesEval.ruleBCD_met);
+        updateRuleRow('total', `<bdi dir="ltr">${rulesEval.totalElectiveCredits.toFixed(1)} / 32.5</bdi> נק״ז`, rulesEval.ruleTotalElectives_met);
+        updateRuleRow('english-content', `<bdi dir="ltr">${rulesEval.countEnglishContent} / 2</bdi>`, rulesEval.ruleEnglishContent_met);
 
         const summaryBadge = document.getElementById('planner-rules-summary-badge');
         if (summaryBadge) {
-            summaryBadge.innerText = `${rulesEval.totalElectiveCredits.toFixed(1)} / 32.5 נק״ז ${rulesEval.ruleTotalElectives_met ? '✅' : '⏳'}`;
+            summaryBadge.innerHTML = `<bdi dir="ltr">${rulesEval.totalElectiveCredits.toFixed(1)} / 32.5</bdi> נק״ז ${rulesEval.ruleTotalElectives_met ? '✅' : '⏳'}`;
             summaryBadge.style.color = rulesEval.ruleTotalElectives_met ? '#10b981' : '#38bdf8';
         }
     }

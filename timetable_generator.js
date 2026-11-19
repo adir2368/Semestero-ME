@@ -343,7 +343,7 @@
             cardClass: 'timetable-card-yoga',
             isAnchor: true,
             anchorGroupId: '24',
-            anchorNote: 'עוגן במערכת: יוגה (יום חמישי 07:30-08:30)',
+            anchorNote: 'עוגן במערכת: יוגה (יום חמישי 07:30-09:00)',
             slots: [
                 {
                     slotType: 'sport',
@@ -358,7 +358,7 @@
                             room: 'חינוך גופני - אתלטיקה קלה',
                             isAnchor: true,
                             meetings: [
-                                { dayIndex: 4, dayName: 'חמישי', startTime: '07:30', endTime: '08:30', duration: 'שעה', room: 'חינוך גופני - אתלטיקה קלה' }
+                                { dayIndex: 4, dayName: 'חמישי', startTime: '07:30', endTime: '09:00', duration: 'שעה וחצי', room: 'חינוך גופני - אתלטיקה קלה' }
                             ]
                         },
                         {
@@ -581,11 +581,255 @@
         return String(code || '').trim().replace(/^0+/, '');
     }
 
+    const CHEESEFORK_GROUPS_CACHE_KEY = 'ast_cheesefork_groups_cache_v1';
+    const HEB_DAY_TO_INDEX = { 'ראשון': 0, 'שני': 1, 'שלישי': 2, 'רביעי': 3, 'חמישי': 4, 'שישי': 5, 'שבת': 6 };
+
+    function computeHebrewDurationLabel(startStr, endStr) {
+        const s = timeToMinutes(startStr);
+        const e = timeToMinutes(endStr);
+        const diff = Math.max(30, e - s);
+        if (diff <= 60) return 'שעה';
+        if (diff <= 90) return 'שעה וחצי';
+        if (diff <= 120) return 'שעתיים';
+        const hrs = Math.round((diff / 60) * 10) / 10;
+        return `${hrs} שעות`;
+    }
+
+    function readCheeseForkGroupsCache() {
+        try {
+            if (typeof localStorage === 'undefined') return {};
+            const raw = localStorage.getItem(CHEESEFORK_GROUPS_CACHE_KEY);
+            return raw ? JSON.parse(raw) : {};
+        } catch (e) {
+            return {};
+        }
+    }
+
+    function writeCheeseForkGroupsCache(cleanCode, parsedEntry) {
+        try {
+            if (typeof localStorage === 'undefined' || !cleanCode || !parsedEntry) return;
+            const cache = readCheeseForkGroupsCache();
+            cache[cleanCode] = parsedEntry;
+            localStorage.setItem(CHEESEFORK_GROUPS_CACHE_KEY, JSON.stringify(cache));
+        } catch (e) {
+            // Ignore storage quota warnings
+        }
+    }
+
+    function parseRawScheduleItemsToSlots(scheduleItems) {
+        if (!Array.isArray(scheduleItems) || scheduleItems.length === 0) return [];
+        const bySlotAndGroup = new Map();
+        scheduleItems.forEach((ev, idx) => {
+            if (!ev) return;
+            const rawType = String(ev.type || ev['סוג'] || 'הרצאה').trim();
+            let slotType = 'lecture';
+            let slotName = 'הרצאה';
+            if (rawType.includes('תרגול')) {
+                slotType = 'tutorial';
+                slotName = 'תרגול';
+            } else if (rawType.includes('מעבדה')) {
+                slotType = 'lab';
+                slotName = 'מעבדה';
+            } else if (rawType.includes('ספורט') || rawType.includes('אימון')) {
+                slotType = 'sport';
+                slotName = 'אימון';
+            } else if (rawType.includes('סדנה') || rawType.includes('פרויקט')) {
+                slotType = 'workshop';
+                slotName = rawType;
+            }
+
+            let startTime = String(ev.startTime || '').trim();
+            let endTime = String(ev.endTime || '').trim();
+            const hoursStr = String(ev.hours || ev['שעות'] || '').trim();
+            if ((!startTime || !endTime) && hoursStr.includes('-')) {
+                const parts = hoursStr.split('-').map(p => p.trim());
+                if (parts.length === 2) {
+                    const mA = parts[0].match(/\d{1,2}:\d{2}/);
+                    const mB = parts[1].match(/\d{1,2}:\d{2}/);
+                    if (mA && mB) {
+                        const t1 = mA[0].padStart(5, '0');
+                        const t2 = mB[0].padStart(5, '0');
+                        if (timeToMinutes(t1) < timeToMinutes(t2)) {
+                            startTime = t1;
+                            endTime = t2;
+                        } else {
+                            startTime = t2;
+                            endTime = t1;
+                        }
+                    }
+                }
+            }
+            if (!startTime || !endTime) return;
+
+            let dayIndex = typeof ev.dayIndex === 'number' ? ev.dayIndex : -1;
+            const dayHeb = String(ev.day || ev.dayName || ev['יום'] || '').replace(/יום\s+/g, '').trim();
+            if (dayIndex < 0 && dayHeb) {
+                for (const [k, dIdx] of Object.entries(HEB_DAY_TO_INDEX)) {
+                    if (dayHeb.includes(k)) {
+                        dayIndex = dIdx;
+                        break;
+                    }
+                }
+            }
+            if (dayIndex < 0 || dayIndex > 5) return;
+
+            const groupId = String(ev.group || ev.groupId || ev['קבוצה'] || (10 + idx)).trim();
+            const building = String(ev.building || ev['בניין'] || '').trim();
+            const roomNum = String(ev.room || ev['חדר'] || '').trim();
+            const fullRoom = (building && roomNum && !building.includes(roomNum))
+                ? `${building} ${roomNum}`.trim()
+                : (roomNum || building || 'טכניון');
+            const lecturer = String(ev.lecturer || ev.instructor || ev['מרצה'] || 'סגל הקורס').trim();
+
+            if (!bySlotAndGroup.has(slotType)) {
+                bySlotAndGroup.set(slotType, { slotType, slotName, groups: new Map() });
+            }
+            const bucket = bySlotAndGroup.get(slotType);
+            if (!bucket.groups.has(groupId)) {
+                bucket.groups.set(groupId, {
+                    groupId,
+                    lecturer,
+                    room: fullRoom,
+                    meetings: []
+                });
+            }
+            const grp = bucket.groups.get(groupId);
+            const dup = grp.meetings.some(m => m.dayIndex === dayIndex && m.startTime === startTime && m.endTime === endTime);
+            if (!dup) {
+                grp.meetings.push({
+                    dayIndex,
+                    dayName: DAY_NAMES[dayIndex] || dayHeb || '',
+                    startTime,
+                    endTime,
+                    duration: ev.duration || computeHebrewDurationLabel(startTime, endTime),
+                    room: fullRoom
+                });
+            }
+        });
+
+        const slots = [];
+        ['lecture', 'tutorial', 'lab', 'workshop', 'sport'].forEach(st => {
+            const b = bySlotAndGroup.get(st);
+            if (b && b.groups.size > 0) {
+                const options = Array.from(b.groups.values()).filter(o => o.meetings.length > 0);
+                if (options.length > 0) {
+                    slots.push({ slotType: b.slotType, slotName: b.slotName, options });
+                }
+            }
+        });
+        return slots;
+    }
+
+    function buildAuthenticCatalogEntryFromSources(rawCode, clean) {
+        const gsCourses = (global.gameState && global.gameState.courses) || {};
+        const gsMatch = gsCourses[rawCode] || Object.values(gsCourses).find(c => c && (normalizeCodeKey(c.code) === clean || normalizeCodeKey(c.altCode) === clean));
+        const plannerArr = Array.isArray(global.PLANNER_CATALOG) ? global.PLANNER_CATALOG : [];
+        const plannerMatch = plannerArr.find(c => c && (normalizeCodeKey(c.code) === clean || normalizeCodeKey(c.altCode) === clean));
+        const cfDbArr = Array.isArray(global.CHEESEFORK_DB) ? global.CHEESEFORK_DB : [];
+        const cfDbMatch = cfDbArr.find(c => c && (normalizeCodeKey(c.code6) === clean || normalizeCodeKey(c.rawNum) === clean));
+
+        const cachedMap = readCheeseForkGroupsCache();
+        const cachedMatch = cachedMap[clean];
+
+        const meta = cfDbMatch || gsMatch || plannerMatch || {};
+        const canonicalCode = (gsMatch && gsMatch.code) || (plannerMatch && plannerMatch.code) || (cfDbMatch && cfDbMatch.code6) || rawCode;
+        const cName = (gsMatch && gsMatch.name) || (plannerMatch && plannerMatch.name) || (cfDbMatch && cfDbMatch.name) || (cachedMatch && cachedMatch.name) || `קורס ${canonicalCode}`;
+        const credits = Number((gsMatch && gsMatch.credits) || (plannerMatch && plannerMatch.credits) || (cfDbMatch && cfDbMatch.credits) || (cachedMatch && cachedMatch.credits) || 3);
+
+        // 1. Check cached fetched groups first
+        if (cachedMatch && Array.isArray(cachedMatch.slots) && cachedMatch.slots.length > 0) {
+            return {
+                code: canonicalCode,
+                name: cName,
+                credits,
+                cardClass: 'timetable-card-default',
+                isSynthesized: false,
+                source: cachedMatch.source || 'CheeseFork Live Cache',
+                slots: cachedMatch.slots
+            };
+        }
+
+        // 2. Check gsMatch.cheeseforkGroups or cfDbMatch.schedule (Technion SAP 2,784 courses catalog)
+        const rawSchedule = (gsMatch && Array.isArray(gsMatch.cheeseforkGroups) && gsMatch.cheeseforkGroups.length > 0)
+            ? gsMatch.cheeseforkGroups
+            : (cfDbMatch && Array.isArray(cfDbMatch.schedule) ? cfDbMatch.schedule : []);
+        if (rawSchedule.length > 0) {
+            const parsedSlots = parseRawScheduleItemsToSlots(rawSchedule);
+            if (parsedSlots.length > 0) {
+                return {
+                    code: canonicalCode,
+                    name: cName,
+                    credits,
+                    cardClass: 'timetable-card-default',
+                    isSynthesized: false,
+                    source: 'Technion SAP / CheeseFork Catalog',
+                    slots: parsedSlots
+                };
+            }
+        }
+        return null;
+    }
+
+    const _inFlightCheeseForkFetches = {};
+    async function fetchAuthenticCourseGroupsFromCheeseFork(rawCode) {
+        const clean = normalizeCodeKey(rawCode);
+        if (!clean || typeof fetch !== 'function') return null;
+        if (_inFlightCheeseForkFetches[clean]) return _inFlightCheeseForkFetches[clean];
+
+        _inFlightCheeseForkFetches[clean] = (async () => {
+            const padded8 = clean.length === 6 ? `00${clean}` : (clean.length === 7 ? `0${clean}` : clean);
+            const candidates = [
+                `https://raw.githubusercontent.com/MichaelMaltsev/cheesefork/gh-pages/courses/courses_${padded8}.json`,
+                `https://cheesefork.cf/courses/courses_${padded8}.json`
+            ];
+            for (let i = 0; i < candidates.length; i++) {
+                try {
+                    const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+                    const timer = controller ? setTimeout(() => controller.abort(), 5000) : null;
+                    const resp = await fetch(candidates[i], controller ? { signal: controller.signal } : undefined);
+                    if (timer) clearTimeout(timer);
+                    if (!resp || !resp.ok) continue;
+                    const json = await resp.json();
+                    const schedArr = Array.isArray(json?.schedule) ? json.schedule : (Array.isArray(json) ? json : []);
+                    const slots = parseRawScheduleItemsToSlots(schedArr);
+                    if (slots.length > 0) {
+                        const entry = {
+                            code: rawCode,
+                            name: json?.general?.['שם מקצוע'] || json?.name || `קורס ${rawCode}`,
+                            credits: Number(json?.general?.['נקודות'] || json?.credits || 3),
+                            cardClass: 'timetable-card-default',
+                            isSynthesized: false,
+                            source: 'CheeseFork Live Fetch',
+                            slots
+                        };
+                        writeCheeseForkGroupsCache(clean, entry);
+                        return entry;
+                    }
+                } catch (e) {
+                    // Try next endpoint quietly
+                }
+            }
+            return null;
+        })();
+
+        try {
+            return await _inFlightCheeseForkFetches[clean];
+        } finally {
+            delete _inFlightCheeseForkFetches[clean];
+        }
+    }
+
     function ensureCourseCatalogEntry(catalog, rawCode) {
         if (!rawCode) return null;
         const clean = normalizeCodeKey(rawCode);
-        const existing = catalog[rawCode] || catalog[clean] || Object.values(catalog).find(c => normalizeCodeKey(c.code) === clean);
+        const existing = catalog[rawCode] || catalog[clean] || Object.values(catalog).find(c => normalizeCodeKey(c.code) === clean || normalizeCodeKey(c.altCode) === clean);
         if (existing) return existing;
+
+        const authenticEntry = buildAuthenticCatalogEntryFromSources(rawCode, clean);
+        if (authenticEntry) {
+            catalog[authenticEntry.code] = authenticEntry;
+            return authenticEntry;
+        }
 
         const gsCourses = (global.gameState && global.gameState.courses) || {};
         const gsMatch = gsCourses[rawCode] || Object.values(gsCourses).find(c => c && normalizeCodeKey(c.code) === clean);
@@ -609,7 +853,7 @@
                     dayName: DAY_NAMES[d.dayIndex] || d.name || '',
                     startTime: cls.startTime || '08:30',
                     endTime: cls.endTime || '10:30',
-                    duration: cls.duration || 'שעתיים',
+                    duration: cls.duration || computeHebrewDurationLabel(cls.startTime || '08:30', cls.endTime || '10:30'),
                     room: cls.room || 'טכניון'
                 };
                 if ((cls.type || '').includes('תרגול') || (cls.type || '').includes('מעבדה')) {
@@ -633,7 +877,7 @@
                 }]
             });
         } else {
-            // Flexible synthetic open-window options across days for planning courses outside hardcoded catalog
+            // Flexible synthetic open-window options across days ONLY when neither SAP/CheeseFork nor active timetable has groups
             slots.push({
                 slotType: 'lecture',
                 slotName: 'הרצאה',
@@ -662,7 +906,7 @@
             name: cName,
             credits: credits,
             cardClass: 'timetable-card-default',
-            isSynthesized: true,
+            isSynthesized: lecMeetings.length === 0,
             slots: slots
         };
         catalog[canonicalCode] = synthesized;
@@ -1421,6 +1665,15 @@
             }
             this.populateCourseAdder();
             this.computeAndRender();
+            const mergedAfter = this.getMergedCatalog();
+            const addedEntry = mergedAfter[finalCode] || Object.values(mergedAfter).find(c => normalizeCodeKey(c.code) === finalClean);
+            if (!addedEntry || addedEntry.isSynthesized) {
+                fetchAuthenticCourseGroupsFromCheeseFork(finalCode).then(realEntry => {
+                    if (realEntry && realEntry.slots && realEntry.slots.length > 0) {
+                        this.computeAndRender();
+                    }
+                }).catch(() => {});
+            }
             if (typeof global.showHudToast === 'function') {
                 const label = match ? `${match.name} (${match.code})` : finalCode;
                 global.showHudToast(`➕ הקורס "${label}" נוסף למחולל המערכות!`, 'success');
@@ -2359,6 +2612,8 @@
     global.TimetableGenerator = {
         catalog: TECH_COURSE_GROUPS_CATALOG,
         generateTimetableCombinations: generateTimetableCombinations,
+        fetchAuthenticCourseGroupsFromCheeseFork: fetchAuthenticCourseGroupsFromCheeseFork,
+        ensureCourseCatalogEntry: ensureCourseCatalogEntry,
         studio: TimetableStudio,
         open: function () {
             TimetableStudio.open();

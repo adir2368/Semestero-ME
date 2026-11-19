@@ -17,9 +17,9 @@ ZIP_PATH = os.path.join(ROOT, "Semestero-ME-Windows-x64.zip")
 
 with open(os.path.join(ROOT, "package.json"), "r", encoding="utf-8") as f:
     pkg = json.load(f)
-VERSION = pkg.get("version", "3.0.0")
+VERSION = pkg.get("version", "3.0.1")
 TAG = f"v{VERSION}"
-NAME = f"Semestero ME v{VERSION} - Google Calendar Time-Grid, Universal Personalization & Tasks 3.0"
+NAME = f"Semestero ME v{VERSION} - Interactive Time-Grid, Single-Day Timetable, 20-Color Spectrum & Technion Retake Workflow"
 
 def get_github_token():
     try:
@@ -99,20 +99,18 @@ def main():
 
     body_notes = f"""# Semestero ME {TAG} Release Notes
 
-### 🗓️ 1. לוח שנה ומערכת שעות בסגנון Google Calendar (`app.js`, `styles.css`, `calendar_sync_engine.js`)
-- **גריד שעות פרופורציונלי וחפיפות חכמות (`computeOverlapLayout`)**: פריסת שיעורים, שעות קבלה ואירועים אישיים לפי משך זמן אמיתי עם סידור עמודות אוטומטי בחפיפות וקו שעה נוכחית אדום.
-- **תצוגות מורחבות (7 ימים + שבוע עבודה)**: תוספת כפתור **`💼 שבוע עבודה`** (א׳–ה׳) והרחבת **`📆 שבוע`** ו-**`📅 חודש`** לשבוע מלא (א׳–שבת). הסרת באנרי הפסקה מיותרים והזזת כפתור **🔄 סנכרון** לגדול בפינה השמאלית העליונה.
-- **אירועים מתקדמים (`➕ אירוע חדש`)**: תאריך התחלה וסיום רב-יומי, חזרות (`יומי/שבועי/דו-שבועי/חודשי/שנתי`), תזכורות, `🪖 מילואים`, הוספת קבוצות מותאמות, בחירת צבע מלאה וייצוא מלא ב-ICS.
+### 🗓️ 1. גריד שעות אינטראקטיבי, 20 צבעים וסמלים וקטוריים (`app.js`, `styles.css`, `calendar_sync_engine.js`)
+- **אינטראקציית גריד שעות מלאה**: קליק על משבצת שעה פותח אירוע של שעה; גרירה אנכית מציירת טווח מותאם (קפיצות של 15 דקות); אירועים אישיים תומכים בגרירה לשינוי יום/שעה, מתיחת קצה תחתון לשינוי אורך, ועריכה במקום (ללא שינוי של הרצאות/תרגולים).
+- **דפדוף, ספקטרום ואירועים מותאמים**: חיצי דפדוף זמינים תמיד בכל מצבי התצוגה (`חודש`, `שבוע`, `שבוע עבודה`, `יום`), קיפול אוטומטי של שורת `כל היום` כשהיא ריקה, בחירה מספקטרום 20 צבעים ב-`+ אירוע חדש` ובפאנל צד, התראות/חזרות `Custom` (`RRULE`), סמלי SVG וקטוריים במקום אימוג׳ים סטנדרטיים, וסגירת מודאלים וחלוניות צפות בלחיצה מחוץ לחלונית.
 
-### 📋 2. לוח משימות, מפת קורסים והתאמה אישית (`attendance_hub.js`, `timetable_generator.js`)
-- **ניקוי עמודות והזנת ציון מוטמעת**: הסרת עמודות `סמסטר` ו-`ציון` נפרדות ושילוב `"הושלם | ציון:"` ישירות תחת `זמן נותר וציון`, בחירה מרובה לפי דרישה (`☑️ בחירה`), וקישורי דרייב ישירים לתתי-תיקיות גיליונות/מבחנים.
-- **סנכרון מלא וסמסטר חי בראש המסך**: החלפת `קורסים שהושלמו` ב-**`שבוע בסמסטר`** (`שבוע N / 13`), איפוס משימות פתוחות מדויק, סינון כרונולוגי (א׳–ח׳) ומדורג לפי קורס וסוג מורחב (5 קטגוריות).
-- **התאמה אישית לכל סטודנט**: סינון `🛡️ חובה` לקורסים פעילים של המשתמש והוספה דינמית, + התאמת מחולל המערכות לקורסי המשתמש עם חיפוש והוספת כל קורס מהקטלוג.
+### 📋 2. מערכת שעות חכמה, מד משימות מדויק ותקנון חזרה על קורס (`timetable_generator.js`, `planner_module.js`, `WearScheduleHelper.java`)
+- **מערכת שעות**: תצוגת יום בודד כברירת מחדל (+ כפתור `📅 כל השבוע` במובייל ובדסקטופ), תיקון שעת יוגה (`07:30 - 09:00`), סינון `114052` כשאינו פעיל, ושליפת קבוצות רישום מ-SAP / CheeseFork במחולל המערכות.
+- **תאימות אקדמית מלאה**: סנכרון 1:1 ב-`משימות פתוחות`, אינדקס דרייב לסמסטרים 5–8 וקורסי בחירה, סינון מחברת מבחני עבר לקורסים פעילים בלבד, ומסלול `🔄 חזרה על קורס / שיפור ציון` הנפתח אחרי מועד ב׳ (או מועד ג׳ למילואים / תקנון 2 מועדים).
 
 ### 📦 3. קובצי הפצה ועדכון:
-- `Semestero-ME-Tablet-Clean.apk` (`com.technion.semestero.tablet`, `versionCode 118`, `versionName {VERSION}`, `v1+v2+v3` Signed)
-- `Semestero-ME.apk` (`com.technion.semestero`, `versionCode 118`, `versionName {VERSION}`, `v1+v2+v3` Signed, `targetSdk 34`)
-- `Semestero-ME-Watch.apk` (`versionCode 118`, `versionName {VERSION}`, `v1+v2+v3` Signed)
+- `Semestero-ME-Tablet-Clean.apk` (`com.technion.semestero.tablet`, `versionCode 119`, `versionName {VERSION}`, `v1+v2+v3` Signed)
+- `Semestero-ME.apk` (`com.technion.semestero`, `versionCode 119`, `versionName {VERSION}`, `v1+v2+v3` Signed, `targetSdk 34`)
+- `Semestero-ME-Watch.apk` (`versionCode 119`, `versionName {VERSION}`, `v1+v2+v3` Signed)
 - `Semestero-ME-Windows-x64.zip` (Electron Desktop Client {VERSION})
 """
 

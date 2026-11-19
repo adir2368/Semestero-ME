@@ -178,10 +178,10 @@ public class WearScheduleHelper {
             lecturer = "גב' נעם הנץ גמליאל";
             type = "תרגול 13";
         }
-        // Thursday (dayIndex 4) 07:30: Yoga is 07:30-08:30
-        if (dayIndex == 4 && startMin == 450 && endMin == 540) {
-            endMin = 510;
-            time = "07:30 - 08:30";
+        // Thursday (dayIndex 4) 07:30: Yoga is 07:30-09:00 (90 min)
+        if (dayIndex == 4 && startMin == 450 && endMin == 510) {
+            endMin = 540;
+            time = "07:30 - 09:00";
         }
         // Thursday (dayIndex 4) 10:30: PDE Lecture 20 in ChemEng 1 with Dr. Roi Bar-On
         if (dayIndex == 4 && title.contains("דיפרנציאליות") && startMin == 630 && (lecturer.contains("גובר") || room.contains("שרמן"))) {
@@ -293,8 +293,8 @@ public class WearScheduleHelper {
             case Calendar.THURSDAY: // יום חמישי
                 list.add(new CourseSlot(
                     "חינוך גופני - אתלטיקה קלה",
-                    "07:30 - 08:30",
-                    450, 510,
+                    "07:30 - 09:00",
+                    450, 540,
                     "חינוך גופני - אתלטיקה קלה",
                     "שלומית בן-איש",
                     "יוגה 24"

@@ -19861,9 +19861,28 @@ body.a11y-stop-animations #btn-open-analytics .unslop-icon svg {
     .hud-nav-tabs .nav-tabs-left .nav-tab,
     .hud-nav-tabs .nav-tabs-left .nav-tab-btn {
         flex: 1 1 0;
-        justify-content: center;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 7px !important;
+        padding: 7px 14px !important;
+        border: 1px solid rgba(148, 163, 184, 0.24) !important;
+        background: rgba(15, 23, 42, 0.58) !important;
+        border-radius: 10px !important;
         text-align: center;
         white-space: nowrap;
+        transition: border-color 0.16s ease, background 0.16s ease, box-shadow 0.16s ease !important;
+    }
+    .hud-nav-tabs .nav-tabs-left .nav-tab:hover,
+    .hud-nav-tabs .nav-tabs-left .nav-tab-btn:hover {
+        border-color: rgba(56, 189, 248, 0.45) !important;
+        background: rgba(30, 41, 59, 0.78) !important;
+    }
+    .hud-nav-tabs .nav-tabs-left .nav-tab.active,
+    .hud-nav-tabs .nav-tabs-left .nav-tab-btn.active {
+        border-color: rgba(56, 189, 248, 0.72) !important;
+        background: rgba(56, 189, 248, 0.16) !important;
+        box-shadow: 0 0 12px rgba(56, 189, 248, 0.22) !important;
     }
 }
 
@@ -19979,8 +19998,12 @@ body.is-mobile-view .finals-calendar-grid.is-timegrid-mode {
 }
 
 .cal-timegrid-scroll-x {
-    overflow-x: auto;
+    overflow-x: auto !important;
+    overflow-y: visible;
+    -webkit-overflow-scrolling: touch !important;
+    touch-action: pan-x pan-y !important;
     width: 100%;
+    max-width: 100%;
 }
 
 .cal-timegrid-inner {
@@ -19990,11 +20013,17 @@ body.is-mobile-view .finals-calendar-grid.is-timegrid-mode {
 }
 
 .cal-timegrid-inner.cols-5 {
-    min-width: 580px;
+    min-width: 680px;
 }
 
 .cal-timegrid-inner.cols-7 {
-    min-width: 740px;
+    min-width: 880px;
+}
+
+.cal-timegrid-inner.cols-1,
+.cal-timegrid-inner.is-single-day-grid {
+    min-width: 100% !important;
+    width: 100% !important;
 }
 
 .cal-timegrid-header {
@@ -20284,3 +20313,260 @@ body.is-mobile-view .finals-calendar-grid.is-timegrid-mode {
 
 
 
+
+
+/* ==========================================================================
+   20. Semestero ME v3.0.1 Upgrades (Single-Day Timetable, Interactive Grid,
+       Mobile Reachability, Bidi Numbers, 20-Color Spectrum, Retake Section)
+   ========================================================================== */
+
+/* Always expose day filter tabs on desktop & mobile so 📅 כל השבוע works everywhere */
+#timetable-day-selector {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    gap: 6px !important;
+    margin-bottom: 10px !important;
+}
+
+/* Single-day timetable filtering & calendar single-day grid support */
+.cal-timegrid-col.is-hidden-day-col,
+.cal-timegrid-day-head.is-hidden-day-col,
+.cal-timegrid-allday-cell.is-hidden-day-col {
+    display: none !important;
+}
+
+.cal-timegrid-inner.is-single-day-grid {
+    min-width: 100% !important;
+    width: 100% !important;
+}
+
+.cal-timegrid-inner.is-single-day-grid .cal-timegrid-header,
+.cal-timegrid-inner.is-single-day-grid .cal-timegrid-allday-row,
+.cal-timegrid-inner.is-single-day-grid .cal-timegrid-body {
+    grid-template-columns: 54px minmax(0, 1fr) !important;
+}
+
+/* Dedicated always-visible Calendar paging controls bar */
+.cal-month-nav-row {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    flex-wrap: wrap !important;
+    gap: 10px !important;
+}
+
+.cal-paging-bar {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    flex-wrap: nowrap !important;
+    visibility: visible !important;
+}
+
+.cal-paging-bar .cal-current-month,
+.cal-paging-bar bdi[dir="ltr"],
+bdi[dir="ltr"] {
+    unicode-bidi: isolate;
+    white-space: nowrap;
+}
+
+/* Time-Grid Interactive Creation Preview & Personal Event Drag / Resize */
+.cal-timegrid-col {
+    user-select: none;
+    touch-action: pan-x pan-y;
+}
+
+.cal-timegrid-drag-preview {
+    position: absolute;
+    left: 4px;
+    right: 4px;
+    background: rgba(56, 189, 248, 0.24);
+    border: 2px dashed #38bdf8;
+    border-radius: 7px;
+    pointer-events: none;
+    z-index: 28;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.74rem;
+    font-weight: 800;
+    color: #e0f2fe;
+    direction: ltr;
+    box-shadow: 0 4px 14px rgba(2, 132, 199, 0.28);
+}
+
+.cal-timegrid-personal {
+    cursor: grab;
+    touch-action: none;
+}
+
+.cal-timegrid-personal:active,
+.cal-timegrid-personal.is-dragging-personal {
+    cursor: grabbing;
+    opacity: 0.9;
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.45);
+    z-index: 32 !important;
+}
+
+.cal-event-resize-handle {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 10px;
+    cursor: ns-resize;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(to top, rgba(255, 255, 255, 0.2), transparent);
+    border-radius: 0 0 6px 6px;
+    z-index: 6;
+    touch-action: none;
+}
+
+.cal-event-resize-handle::after {
+    content: '';
+    width: 24px;
+    height: 2px;
+    border-radius: 2px;
+    background: rgba(255, 255, 255, 0.7);
+}
+
+/* 20-Color Spectrum Palette (replaces native OS color input popup) */
+.spectrum-color-palette-20 {
+    display: grid;
+    grid-template-columns: repeat(10, minmax(0, 1fr));
+    gap: 6px;
+    width: 100%;
+    max-width: 340px;
+    align-items: center;
+}
+
+.spectrum-color-palette-20.spectrum-compact {
+    max-width: 280px;
+    gap: 5px;
+}
+
+.spectrum-swatch {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    min-width: 22px;
+    max-width: 30px;
+    border-radius: 7px;
+    border: 2px solid rgba(255, 255, 255, 0.18);
+    cursor: pointer;
+    padding: 0;
+    transition: transform 0.12s ease, border-color 0.12s ease, box-shadow 0.12s ease;
+    box-sizing: border-box;
+    outline: none;
+}
+
+.spectrum-swatch:hover {
+    transform: scale(1.12);
+    border-color: rgba(255, 255, 255, 0.75);
+}
+
+.spectrum-swatch.active {
+    transform: scale(1.14);
+    border-color: #ffffff;
+    box-shadow: 0 0 0 2px #0f172a, 0 0 0 4px #38bdf8;
+}
+
+/* Course Modal: Technion Retake & Grade Improvement Section */
+.modal-retake-section {
+    margin-top: 12px;
+    border: 1px solid rgba(56, 189, 248, 0.35);
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.92), rgba(30, 41, 59, 0.8));
+    border-radius: 10px;
+    padding: 12px 14px;
+    color: #e2e8f0;
+}
+
+/* Mobile Responsive & Reachability Fixes (<= 768px / <= 900px) */
+@media (max-width: 900px) {
+    .hud-header {
+        padding-top: max(10px, env(safe-area-inset-top, 12px)) !important;
+    }
+
+    html.is-mobile-device .hud-header,
+    html.is-android .hud-header,
+    html.is-iphone .hud-header {
+        padding-top: max(14px, env(safe-area-inset-top, 16px)) !important;
+    }
+
+    .organit-category-pills {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        overflow-x: visible !important;
+        gap: 6px !important;
+        justify-content: flex-start !important;
+        mask-image: none !important;
+        -webkit-mask-image: none !important;
+    }
+
+    .organit-cat-pill {
+        flex: 0 0 auto !important;
+        max-width: 100% !important;
+    }
+
+    .notion-hw-policy-strip {
+        flex-wrap: wrap !important;
+        gap: 6px !important;
+    }
+
+    .cal-paging-bar {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .cal-timegrid-scroll-x {
+        overflow-x: auto !important;
+        touch-action: pan-x pan-y !important;
+    }
+
+    .cal-timegrid-inner.cols-5 {
+        min-width: 680px !important;
+    }
+
+    .cal-timegrid-inner.cols-7 {
+        min-width: 880px !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .planner-semesters-grid {
+        display: flex !important;
+        flex-direction: column !important;
+        flex-wrap: nowrap !important;
+        gap: 14px !important;
+        overflow-x: visible !important;
+    }
+
+    .planner-semester-col {
+        flex: 1 1 100% !important;
+        min-width: 100% !important;
+        max-width: 100% !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    .planner-stat-val,
+    .planner-col-credits,
+    .planner-exam-load-badge,
+    .planner-stat-fraction,
+    .planner-rule-val {
+        white-space: nowrap !important;
+        unicode-bidi: isolate;
+    }
+
+    .planner-course-card {
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    .spectrum-color-palette-20 {
+        grid-template-columns: repeat(10, minmax(0, 1fr));
+        max-width: 100%;
+    }
+}

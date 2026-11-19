@@ -1585,9 +1585,29 @@ async function run() {
                 if (typeof window.recalculateCourseStates === 'function') window.recalculateCourseStates();
                 if (typeof window.updateHud === 'function') window.updateHud();
 
-                // 1. HUD Semester Week & Open Tasks inspection
+                // 1. HUD Semester Week & Open Tasks 1:1 parity inspection (verify exact parity with reminders banner at 0 and 1 open task)
                 const semWeekText = document.getElementById('stat-semester-week')?.innerText || '';
                 const openTasksText = document.getElementById('stat-open-tasks')?.innerText?.trim() || '';
+                if (typeof renderTasksReminderBanner === 'function') renderTasksReminderBanner();
+                const remCountBefore = parseInt(document.getElementById('reminders-total-count')?.innerText || '0', 10);
+                let parityWithOneDueTask = false;
+                const parityCourse = (window.gameState && window.gameState.courses && Object.values(window.gameState.courses).find(x => x && x.status === 'active'));
+                if (parityCourse) {
+                    const origPTasks = JSON.parse(JSON.stringify(parityCourse.tasks || []));
+                    const dueIn3 = new Date(Date.now() + 3 * 86400000);
+                    const dueYmd = dueIn3.getFullYear() + '-' + String(dueIn3.getMonth() + 1).padStart(2, '0') + '-' + String(dueIn3.getDate()).padStart(2, '0') + ' 23:59';
+                    parityCourse.tasks = (parityCourse.tasks || []).concat([{ id: 'v301_parity_due', title: 'תרגיל בדיקת סנכרון 1:1', type: 'hw', status: 'in_progress', completed: false, dueDate: dueYmd, xp: 40 }]);
+                    if (typeof window.recalculateCourseStates === 'function') window.recalculateCourseStates();
+                    if (typeof window.updateHud === 'function') window.updateHud();
+                    if (typeof window.renderTasksReminderBanner === 'function') window.renderTasksReminderBanner();
+                    const hudAfterAdd = Number(document.getElementById('stat-open-tasks')?.innerText?.trim());
+                    const remAfterAdd = parseInt(document.getElementById('reminders-total-count')?.innerText || '-1', 10);
+                    parityWithOneDueTask = (hudAfterAdd === Number(openTasksText) + 1) && (hudAfterAdd === remAfterAdd);
+                    parityCourse.tasks = origPTasks;
+                    if (typeof window.recalculateCourseStates === 'function') window.recalculateCourseStates();
+                    if (typeof window.updateHud === 'function') window.updateHud();
+                    if (typeof window.renderTasksReminderBanner === 'function') window.renderTasksReminderBanner();
+                }
                 const openTaskDebug = [];
                 if (window.gameState && window.gameState.courses) {
                     Object.values(window.gameState.courses).forEach(c => {
@@ -1671,19 +1691,32 @@ async function run() {
                     document.getElementById('day-modal-event-color')
                 );
 
-                // 4. Timetable: Populate temporary schedule -> verify Time-grid without ☕ הפסקה & prominent top-left Sync button
+                // 4. Timetable: Single-day default + All-week toggle + Yoga 09:00 + Un-enrolled 114052 filtered
                 const origTtBackup = window.gameState ? window.gameState.timetable : undefined;
                 if (window.gameState) {
                     window.gameState.timetable = {
                         days: [
-                            { dayIndex: 0, name: 'יום ראשון', classes: [{ courseId: '034053', courseName: 'מכניקת מוצקים 2מ', type: 'הרצאה', startTime: '08:30', endTime: '10:30' }, { courseId: '034035', courseName: 'תרמודינמיקה 1', type: 'תרגול', startTime: '14:30', endTime: '16:30' }] },
-                            { dayIndex: 1, name: 'יום שני', classes: [] }
+                            { dayIndex: 0, name: 'יום ראשון', classes: [{ courseId: '034053', courseName: 'מכניקת מוצקים 2מ', type: 'הרצאה', startTime: '08:30', endTime: '10:30' }, { courseId: '034035', courseName: 'תרמודינמיקה 1', type: 'תרגול', startTime: '14:30', endTime: '16:30' }, { courseId: '114052', courseName: 'פיסיקה 2', type: 'הרצאה', startTime: '10:30', endTime: '12:30' }] },
+                            { dayIndex: 1, name: 'יום שני', classes: [] },
+                            { dayIndex: 4, name: 'יום חמישי', classes: [{ courseId: '03940805', courseName: 'חינוך גופני - אתלטיקה קלה', type: 'יוגה 24', startTime: '07:30', endTime: '08:30' }] }
                         ]
                     };
                 }
+                if (typeof applyTimetableMobileFilter === 'function') applyTimetableMobileFilter('today');
                 if (typeof setActiveMainTab === 'function') setActiveMainTab('timetable');
                 if (typeof renderTimetableGrid === 'function') renderTimetableGrid();
                 const hasTimetableTimegrid = !!document.querySelector('#timetable-grid-container .cal-timegrid-wrapper');
+                const singleDayDefaultGrid = !!document.querySelector('#timetable-grid-container .cal-timegrid-inner.is-single-day-grid');
+                const hiddenColsInSingleDay = document.querySelectorAll('#timetable-grid-container .cal-timegrid-col.is-hidden-day-col').length;
+                const filteredActiveSched = (typeof getActiveTimetableSchedule === 'function') ? getActiveTimetableSchedule() : null;
+                const phys2FilteredOut = !!(filteredActiveSched && Array.isArray(filteredActiveSched.days) && !filteredActiveSched.days[0].classes.some(c => c.courseId === '114052'));
+                const yogaHealed09 = !!(filteredActiveSched && filteredActiveSched.days[2] && filteredActiveSched.days[2].classes.some(c => c.courseId === '03940805' && c.endTime === '09:00'));
+
+                const allWeekPill = document.querySelector('#timetable-day-selector [data-day="all"]');
+                if (allWeekPill) allWeekPill.click();
+                const allWeekGridExpanded = !document.querySelector('#timetable-grid-container .cal-timegrid-inner.is-single-day-grid');
+                if (typeof applyTimetableMobileFilter === 'function') applyTimetableMobileFilter('today');
+
                 const breakBannerCount = document.querySelectorAll('.timetable-break-gap').length;
                 const syncCornerBtn = document.querySelector('.timetable-sync-top-row #btn-sync-cheesefork-now.btn-sync-primary-corner');
                 if (window.gameState) {
@@ -1700,10 +1733,58 @@ async function run() {
                 }
                 const hasTtgCourseSearch = !!(document.getElementById('ttg-course-search-input') && document.getElementById('ttg-add-course-select'));
 
+                // 6. v3.0.1 Upgrades: Drive Sem5/Electives, 20-color Spectrum, Custom RRULE, Empty Allday Collapse, Active Past Exams, Post-Moed-B Retake
+                const sem5DriveUrl = (typeof window.getFacultyDriveCourseUrl === 'function') ? window.getFacultyDriveCourseUrl('034015', { title: 'מבחן מועד א', type: 'exam' }) : '';
+                const elecDriveUrl = (typeof window.getFacultyDriveCourseUrl === 'function') ? window.getFacultyDriveCourseUrl('036001', { title: 'Homework 3', type: 'hw' }) : '';
+                if (typeof openCalendarDayModal === 'function') openCalendarDayModal('2026-11-19');
+                const dayModalSwatches = document.querySelectorAll('#day-modal-color-spectrum .spectrum-swatch').length;
+                const remDefaultNone = (document.getElementById('day-modal-event-reminder') && document.getElementById('day-modal-event-reminder').value === 'none');
+                if (typeof closeCalendarDayModal === 'function') closeCalendarDayModal();
+
+                if (typeof openTaskSidePeek === 'function') openTaskSidePeek('034053', '034053_hw3');
+                const peekSwatches = document.querySelectorAll('#peek-task-color-spectrum .spectrum-swatch').length;
+                if (typeof closeTaskSidePeek === 'function') closeTaskSidePeek();
+
+                const customRecExpanded = (typeof window.expandCustomCalendarEvents === 'function')
+                    ? window.expandCustomCalendarEvents([{ id: 'pe-c', date: '2026-11-01', endDate: '2026-11-01', recurrence: 'custom', recurrenceInterval: 3, recurrenceUnit: 'days', title: 'CustomRec' }], '2026-11-01', '2026-11-10').length
+                    : 0;
+                const hasCalPagingBar = !!(document.getElementById('cal-paging-bar') && document.getElementById('cal-nav-prev') && document.getElementById('cal-nav-next') && document.getElementById('cal-nav-today'));
+                const emptyAlldayCollapsed = (typeof buildGoogleCalendarTimeGridHtml === 'function')
+                    ? !buildGoogleCalendarTimeGridHtml([{ dayIndex: 0, dateStr: '2099-01-01', dayTitle: 'א', alldayHtml: '', timedItems: [] }], {}).includes('cal-timegrid-allday-row')
+                    : false;
+
+                if (typeof renderPastExamsModal === 'function') renderPastExamsModal();
+                const pemTabsText = document.getElementById('pem-course-tabs') ? document.getElementById('pem-course-tabs').innerText : '';
+                const pemFilteredActiveOnly = !pemTabsText.includes('104131') && !pemTabsText.includes('104043');
+
+                let activeRetakeHidden = false;
+                let completedRetakeVisible = false;
+                const retakeBox = document.getElementById('modal-course-retake-section');
+                if (typeof renderCourseModalRetakeSection === 'function' && retakeBox && window.gameState && window.gameState.courses) {
+                    const activeC = window.gameState.courses['034053'];
+                    if (activeC) {
+                        renderCourseModalRetakeSection(activeC);
+                        activeRetakeHidden = retakeBox.style.display === 'none';
+                    }
+                    const completedC = window.gameState.courses['104131'];
+                    if (completedC) {
+                        const backup131 = JSON.parse(JSON.stringify(completedC));
+                        completedC.status = 'mastered';
+                        completedC.semester = 2;
+                        completedC.grade = 74;
+                        completedC.moedB = '2026-08-13';
+                        renderCourseModalRetakeSection(completedC);
+                        completedRetakeVisible = retakeBox.style.display === 'block' && !!document.getElementById('btn-schedule-course-retake');
+                        Object.assign(completedC, backup131);
+                    }
+                }
+
                 if (typeof setActiveMainTab === 'function') setActiveMainTab('curriculum');
                 return {
                     semWeekText,
                     openTasksText,
+                    remCountBefore,
+                    parityWithOneDueTask,
                     openTaskDebug,
                     hasSemHeaderCol: headers.some(h => h === 'סמסטר'),
                     hasGradeHeaderCol: headers.some(h => h === 'ציון'),
@@ -1723,27 +1804,44 @@ async function run() {
                     expandedRecCount: expandedRec.length,
                     hasDayModalEnhancements,
                     hasTimetableTimegrid,
+                    singleDayDefaultGrid,
+                    hiddenColsInSingleDay,
+                    phys2FilteredOut,
+                    yogaHealed09,
+                    allWeekGridExpanded,
                     breakBannerCount,
                     hasSyncCornerBtn: !!syncCornerBtn,
                     mandatoryFilteredOutSem5,
-                    hasTtgCourseSearch
+                    hasTtgCourseSearch,
+                    sem5DriveOk: sem5DriveUrl.includes('%D7%9E%D7%91%D7%97%D7%A0%D7%99%D7%9D'),
+                    elecDriveOk: elecDriveUrl.includes('Homework%203'),
+                    dayModalSwatches,
+                    peekSwatches,
+                    remDefaultNone,
+                    customRecExpanded,
+                    hasCalPagingBar,
+                    emptyAlldayCollapsed,
+                    pemFilteredActiveOnly,
+                    activeRetakeHidden,
+                    completedRetakeVisible
                 };
             })()`);
 
             assert(res.semWeekText.includes('שבוע'), 'HUD must display current semester week: ' + JSON.stringify(res));
-            assert(!isNaN(Number(res.openTasksText)) && Number(res.openTasksText) <= 2, 'HUD open tasks count must be accurate: ' + JSON.stringify(res));
+            assert(Number(res.openTasksText) === res.remCountBefore && res.parityWithOneDueTask, 'HUD open tasks count must stay in 1:1 parity with active reminders banner: ' + JSON.stringify(res));
             assert(!res.hasSemHeaderCol && !res.hasGradeHeaderCol, 'Tasks table must omit separate Semester and Grade columns: ' + JSON.stringify(res));
             assert(res.selectCellHiddenByDefault && res.selectModeActivated, 'Tasks selection checkboxes must be hidden until toggle clicked: ' + JSON.stringify(res));
             assert(res.hasInlineCompletedGrade, 'Completed tasks must show inline grade inside Remaining Time column: ' + JSON.stringify(res));
             assert(res.typeCheckboxes === 5 && res.semBeforeCourse, 'Filters must have 5 task types and Semester before Course: ' + JSON.stringify(res));
             assert(res.driveDeepUrl.includes('%D7%AA%D7%A8%D7%92%D7%99%D7%9C%20%D7%91%D7%99%D7%AA%203'), 'Drive resolver must link directly to HW 3 subfolder: ' + JSON.stringify(res));
-            assert(res.hasPeekColors, 'Task Side Peek must include color picker controls: ' + JSON.stringify(res));
+            assert(res.hasPeekColors && res.peekSwatches === 20, 'Task Side Peek must include 20-color spectrum controls: ' + JSON.stringify(res));
             assert(res.monthColCount === 7 && res.hasSaturdayHeader && res.taskPillHasNoCheckbox, 'Calendar Month view must render 7 days incl Saturday with clean task pills: ' + JSON.stringify(res));
             assert(res.workweekCols === 5 && res.weekCols === 7 && res.overlapValid, 'Workweek (5) & Week (7) Google Calendar time-grids with overlap engine must work: ' + JSON.stringify(res));
-            assert(res.expandedRecCount === 4, 'Weekly 2-day event over 2 weeks must expand to 4 day occurrences: ' + JSON.stringify(res));
-            assert(res.hasDayModalEnhancements, 'Enhanced Day Modal controls must exist: ' + JSON.stringify(res));
-            assert(res.hasTimetableTimegrid && res.breakBannerCount === 0 && res.hasSyncCornerBtn, 'Timetable must use time-grid without ☕ הפסקה and with top-left Sync button: ' + JSON.stringify(res));
+            assert(res.expandedRecCount === 4 && res.customRecExpanded === 4, 'Weekly and custom recurrence expansion must yield expected occurrences: ' + JSON.stringify(res));
+            assert(res.hasDayModalEnhancements && res.dayModalSwatches === 20 && res.remDefaultNone, 'Enhanced Day Modal with 20-color spectrum and default none reminder must work: ' + JSON.stringify(res));
+            assert(res.hasTimetableTimegrid && res.singleDayDefaultGrid && res.hiddenColsInSingleDay >= 1 && res.allWeekGridExpanded && res.phys2FilteredOut && res.yogaHealed09 && res.breakBannerCount === 0 && res.hasSyncCornerBtn, 'Timetable v3.0.1 single-day default, all-week toggle, 114052 filter, Yoga 09:00 & time-grid must work: ' + JSON.stringify(res));
             assert(res.mandatoryFilteredOutSem5 && res.hasTtgCourseSearch, 'Mandatory shields and Timetable Generator must be student-personalized: ' + JSON.stringify(res));
+            assert(res.sem5DriveOk && res.elecDriveOk && res.hasCalPagingBar && res.emptyAlldayCollapsed && res.pemFilteredActiveOnly && res.activeRetakeHidden && res.completedRetakeVisible, 'v3.0.1 Drive Sem5/Electives, paging bar, collapsed empty allday row, active past-exams filter & post-Moed B retake must pass: ' + JSON.stringify(res));
         });
 
     } finally {
