@@ -17,9 +17,9 @@ ZIP_PATH = os.path.join(ROOT, "Semestero-ME-Windows-x64.zip")
 
 with open(os.path.join(ROOT, "package.json"), "r", encoding="utf-8") as f:
     pkg = json.load(f)
-VERSION = pkg.get("version", "3.0.3")
+VERSION = pkg.get("version", "3.0.4")
 TAG = f"v{VERSION}"
-NAME = f"Semestero ME v{VERSION} - HUD Semester Week Direct Attendance Stats Navigation & Changelog Cleanup"
+NAME = f"Semestero ME v{VERSION} - PWA Shortcut Fix, Mobile Asset Parity, Watch Schedule Sync & Unified Changelog"
 
 def get_github_token():
     try:
@@ -99,14 +99,19 @@ def main():
 
     body_notes = f"""# Semestero ME {TAG} Release Notes
 
-### 📊 1. ניווט ישיר מכפתור שבוע הסמסטר לסטטיסטיקות ומעקב שבועי (`app.js`, `index.html`)
-- **קיצור דרך ב-HUD העליון**: תיקון לחיצה על מד `שבוע בסמסטר (שבוע 4 / 13)` כך שתיפתח ישירות ללשונית `📊 סטטיסטיקות ומעקב שבועי` במרכז הנוכחות (ללא דריסה למסך ביצועים כללי), וכן הפיכת תג `שבוע N מתוך 13` בחלון הניווט לקישור לחיץ לאותה לשונית.
-- **ניקוי יומן העדכונים (`מה חדש?`)**: הסרת כרטיסי הגרסאות הישנות (`v2.6` ו-`v2.6.2`) והצגת חידושי סדרת `v3.0.x` העדכניים במודאל העדכון.
+### 🛠️ 1. הקשחת אינטגרציה, PWA ומובייל (`manifest.json`, `build_mobile_dist.js`, `sw.js`, `app.js`)
+- **תיקון קיצור הדרך `מבחנים` ב-PWA**: עדכון `manifest.json` מ-`?tab=runway` אל `?tab=calendar` + הוספת הפניית תאימות לאחור (`runway -> calendar`) ב-`app.js` לקיצורי דרך קיימים.
+- **תאימות נכסי APK (`www/`) ו-Service Worker**: צירוף `cheesefork_icon.webp` ו-`watch.html` לחבילת האנדרואיד ול-`sw.js`.
+- **יומן עדכונים ממקור אמת אחד**: `window.getFormattedChangelogHTML()` קורא כעת ישירות ממבנה המודאל העדכני ללא כרטיסי עבר מ-`v2.5.x`/`v2.6.x` וללא סחף בין גרסאות.
 
-### 📦 2. קובצי הפצה ועדכון:
-- `Semestero-ME-Tablet-Clean.apk` (`com.technion.semestero.tablet`, `versionCode 121`, `versionName {VERSION}`, `v1+v2+v3` Signed)
-- `Semestero-ME.apk` (`com.technion.semestero`, `versionCode 121`, `versionName {VERSION}`, `v1+v2+v3` Signed, `targetSdk 34`)
-- `Semestero-ME-Watch.apk` (`versionCode 121`, `versionName {VERSION}`, `v1+v2+v3` Signed)
+### ⌚ 2. שעון Galaxy Watch וניקיון סביבה (`WearScheduleHelper.java`)
+- **סנכרון 1:1 בלו״ז ברירת המחדל בשעון**: הסרת שיעורי `פיסיקה 2` הלא-פעילים מלוח ברירת המחדל בשעון (תוך שימור מנגנון התיקון האוטומטי לסטודנטים שרשומים אליו).
+- **ניקוי סביבת השורש**: הסרת קובצי APK ישנים מ-`v2.13.x` וקובצי Debug מיותרים מתיקיית השורש.
+
+### 📦 3. קובצי הפצה ועדכון:
+- `Semestero-ME-Tablet-Clean.apk` (`com.technion.semestero.tablet`, `versionCode 122`, `versionName {VERSION}`, `v1+v2+v3` Signed)
+- `Semestero-ME.apk` (`com.technion.semestero`, `versionCode 122`, `versionName {VERSION}`, `v1+v2+v3` Signed, `targetSdk 34`)
+- `Semestero-ME-Watch.apk` (`versionCode 122`, `versionName {VERSION}`, `v1+v2+v3` Signed)
 - `Semestero-ME-Windows-x64.zip` (Electron Desktop Client {VERSION})
 """
 

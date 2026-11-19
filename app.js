@@ -25845,11 +25845,11 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.11.19-v3.0.3",
-    version: "3.0.3",
-    build: "20261119_03",
-    date: "2026-11-19 10:15",
-    description: "v3.0.3: ניווט ישיר מכפתור שבוע 4 מתוך 13 ב-HUD העליון ללשונית סטטיסטיקות ומעקב שבועי במרכז הנוכחות (ללא דריסה למסך ביצועים כללי), וניקוי יומן העדכונים מהגרסאות הישנות (v2.6 / v2.6.2)."
+    code: "REV-2026.11.19-v3.0.4",
+    version: "3.0.4",
+    build: "20261119_04",
+    date: "2026-11-19 10:45",
+    description: "v3.0.4: תיקון קיצור PWA למבחנים (?tab=calendar + הפניית runway), הוספת cheesefork_icon.webp ו-watch.html לחבילת המובייל ול-SW, הסרת פיסיקה 2 מברירת המחדל בשעון, ואיחוד יומן העדכונים למקור אמת אחד ללא כרטיסים מיושנים."
 };
 window.APP_VERSION = APP_CURRENT_REVISION.version;
 
@@ -27905,71 +27905,29 @@ window.forceAppUpdate = async function() {
 
 
 window.getFormattedChangelogHTML = function() {
+    if (!window.__canonicalChangelogHtml && typeof document !== 'undefined') {
+        const descEl = document.getElementById('update-modal-description');
+        if (descEl && descEl.innerHTML && descEl.innerHTML.trim()) {
+            window.__canonicalChangelogHtml = descEl.innerHTML.trim();
+        }
+    }
+    if (window.__canonicalChangelogHtml) {
+        return window.__canonicalChangelogHtml;
+    }
+    const ver = (typeof APP_CURRENT_REVISION !== 'undefined' && APP_CURRENT_REVISION && APP_CURRENT_REVISION.version) || '3.0.4';
+    const desc = (typeof APP_CURRENT_REVISION !== 'undefined' && APP_CURRENT_REVISION && APP_CURRENT_REVISION.description) || '';
     return `<div style="display: flex; flex-direction: column; gap: 10px;">
         <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 10px; padding: 12px;">
             <div style="font-weight: 700; color: #34d399; display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
-                <span>🗂️</span> <span>מערכת שעות: כרטיסיות מפורטות + נוכחות נגישה (<bdi dir="ltr">v3.0.2</bdi>)</span>
+                <span>🚀</span> <span>חידושי גרסה <bdi dir="ltr">v${escapeHtml(ver)}</bdi></span>
             </div>
-            <ul style="margin: 0; padding-right: 20px; font-size: 0.82rem; color: #cbd5e1; line-height: 1.55;">
-                <li>כפתור <code>🗂️ תצוגת כרטיסיות מפורטת</code> מחליף בלחיצה בין תצוגת הכרטיסיות המלאה (כל פרטי הקורס, חדר, מרצה ונוכחות) לבין לו״ז השעות.</li>
-                <li>סימון הנוכחות (<code>✓ הייתי</code> / <code>✗ החסרתי</code>) זמין ומוצמד לתחתית הכרטיס גם בקורסים של שעה אחת בתצוגת הלו״ז.</li>
-                <li>הסרת גרירת יצירה/הזזה מיותרת ממערכת השעות (גרירה ושינוי אורך זמינים כרגיל בלוח השנה), ומתכנן התואר במובייל מציג הצצה לסמסטר הבא (<bdi dir="ltr">82%</bdi>).</li>
-            </ul>
-        </div>
-        <div style="background: rgba(2, 132, 199, 0.1); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 10px; padding: 12px;">
-            <div style="font-weight: 700; color: #38bdf8; display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
-                <span>🗓️</span> <span>יומן Google Calendar אינטראקטיבי ואקדמיה (<bdi dir="ltr">v3.0.1</bdi>)</span>
-            </div>
-            <ul style="margin: 0; padding-right: 20px; font-size: 0.82rem; color: #cbd5e1; line-height: 1.55;">
-                <li>גרירה והזזת אירועים אישיים ביומן, ספקטרום 20 צבעים, חזרות/תזכורות Custom וקיפול שורת <code>כל היום</code> ריקה.</li>
-                <li>אינדקס דרייב לסמסטרים 5–8 ובחירה, סינון מבחני עבר לקורסים פעילים ומסלול <code>🔄 חזרה על קורס / שיפור ציון</code>.</li>
-            </ul>
-        </div>
-
-        <div style="background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.4); border-radius: 10px; padding: 12px;">
-            <div style="font-weight: 700; color: #34d399; display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
-                <span>✨</span> <span>עידון ופינוי סרגל הכלים העליון (HUD Clean & Minimalist)</span>
-            </div>
-            <ul style="margin: 0; padding-right: 20px; font-size: 0.82rem; color: #cbd5e1; line-height: 1.55;">
-                <li>הסרת כפתורי הקיצור העודפים (ווידג'טים וסיור) מסרגל הכלים העליון למניעת עומס וצפיפות, ומעבר למראה נקי ומרווח.</li>
-                <li>מרכז הווידג'טים האינטראקטיביים למסך הבית מרוכז וזמין תמיד ישירות בהגדרות המערכת (Settings ⚙️).</li>
-            </ul>
-        </div>
-
-        <div style="background: rgba(2, 132, 199, 0.12); border: 1px solid rgba(56, 189, 248, 0.35); border-radius: 10px; padding: 12px;">
-            <div style="font-weight: 700; color: #38bdf8; display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
-                <span>🧭</span> <span>מרכז הדרכה וסיור אינטראקטיבי חדש (Tutorial Academy)</span>
-            </div>
-            <ul style="margin: 0; padding-right: 20px; font-size: 0.82rem; color: #cbd5e1; line-height: 1.55;">
-                <li>סיור מודרך בן 10 שלבים עם מעבר אוטומטי חי בין כל מסכי המערכת: עץ קורסים, תכנון תואר, מערכת שעות, משימות, חיפוש חכם והשוואת קורסים.</li>
-                <li>כפתורי התנסות אינטראקטיביים ישירות מתוך כרטיסי הסיור (בדיקת זכאות לתואר, חיפוש חכם, השוואה ומדריך זכויות).</li>
-                <li>זמין להפעלה בכל עת דרך ההגדרות (Settings), שורת הפקודות (Ctrl+K -> "סיור") ובקיצור מקלדת <kbd>T</kbd>.</li>
-            </ul>
-        </div>
-
-        <div style="background: rgba(245, 158, 11, 0.12); border: 1px solid rgba(245, 158, 11, 0.35); border-radius: 10px; padding: 12px;">
-            <div style="font-weight: 700; color: #fbbf24; display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
-                <span>🔍</span> <span>שורת פקודות וחיפוש חכם מהיר (Ctrl+K / ⌘K)</span>
-            </div>
-            <ul style="margin: 0; padding-right: 20px; font-size: 0.82rem; color: #cbd5e1; line-height: 1.55;">
-                <li>חיפוש מיידי וניווט מהיר בכל 350+ הקורסים האקדמיים, משימות, טאבים ופעולות מערכת עם תמיכה מלאה בחצים ו-Enter.</li>
-            </ul>
-        </div>
-
-        <div style="background: rgba(139, 92, 246, 0.12); border: 1px solid rgba(139, 92, 246, 0.35); border-radius: 10px; padding: 12px;">
-            <div style="font-weight: 700; color: #a78bfa; display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
-                <span>⚖️</span> <span>השוואת קורסי בחירה צד-מול-צד ומדריך זכויות בטכניון</span>
-            </div>
-            <ul style="margin: 0; padding-right: 20px; font-size: 0.82rem; color: #cbd5e1; line-height: 1.55;">
-                <li>השוואה מקיפה בין קורסים וזיהוי אוטומטי של התנגשויות תאריכי בחינה (מועד א׳ ו-ב׳).</li>
-                <li>מדריך זכויות מסונן: מילואים (הפחתת 2 נק״ז), טירונות עתודה (2 נק״ז בינארי), ופורמולה SAE (2 נק״ז לסמסטר או 6 נק״ז פרויקט גמר).</li>
-            </ul>
+            <div style="font-size: 0.82rem; color: #cbd5e1; line-height: 1.55;">${escapeHtml(desc)}</div>
         </div>
     </div>`;
 };
 
 window.openChangelogModal = function(ver) {
-    const currentVer = ver || (typeof APP_CURRENT_REVISION !== 'undefined' && APP_CURRENT_REVISION && APP_CURRENT_REVISION.version) || "2.9.5";
+    const currentVer = ver || (typeof APP_CURRENT_REVISION !== 'undefined' && APP_CURRENT_REVISION && APP_CURRENT_REVISION.version) || "3.0.4";
     const updateModal = document.getElementById("version-update-modal");
     if (!updateModal) return;
     const modTitle = document.getElementById("update-modal-title");
@@ -31296,7 +31254,8 @@ function setupMobileNotifications() {
     // G. Deep linking from URL query params (e.g. ./?tab=timetable or ./?tab=tasks)
     try {
         const params = new URLSearchParams(window.location.search);
-        const requestedTab = params.get('tab');
+        const rawTab = params.get('tab');
+        const requestedTab = rawTab === 'runway' ? 'calendar' : rawTab;
         if (requestedTab && ['curriculum', 'planner', 'tasks', 'calendar', 'timetable', 'settings'].includes(requestedTab)) {
             setTimeout(() => {
                 if (typeof setActiveMainTab === 'function') {

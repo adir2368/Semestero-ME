@@ -219,14 +219,6 @@ public class WearScheduleHelper {
 
             case Calendar.MONDAY: // יום שני
                 list.add(new CourseSlot(
-                    "פיסיקה 2",
-                    "08:30 - 10:30",
-                    510, 630,
-                    "טאוב - מדמ\"ח 1",
-                    "ד\"ר גדעון אלון",
-                    "הרצאה 10"
-                ));
-                list.add(new CourseSlot(
                     "מכניקת מוצקים 2מ'",
                     "10:30 - 14:30",
                     630, 870,
@@ -264,22 +256,6 @@ public class WearScheduleHelper {
                 break;
 
             case Calendar.WEDNESDAY: // יום רביעי
-                list.add(new CourseSlot(
-                    "פיסיקה 2",
-                    "08:30 - 09:30",
-                    510, 570,
-                    "פיזיקה 1",
-                    "ד\"ר גדעון אלון",
-                    "הרצאה 10"
-                ));
-                list.add(new CourseSlot(
-                    "פיסיקה 2",
-                    "09:30 - 10:30",
-                    570, 630,
-                    "שרמן - חינוך למדע וטכנולוגיה 107",
-                    "גב' נעם הנץ גמליאל",
-                    "תרגול 13"
-                ));
                 list.add(new CourseSlot(
                     "מבוא לחישוב מדעי והנדסי",
                     "14:30 - 17:30",

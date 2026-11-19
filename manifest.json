@@ -77,7 +77,7 @@
       "name": "ספירה למבחנים",
       "short_name": "מבחנים",
       "description": "לוח בחינות וספירה לאחור",
-      "url": "./index.html?tab=runway",
+      "url": "./index.html?tab=calendar",
       "icons": [{ "src": "shortcut-exam-192.png", "sizes": "192x192" }]
     }
   ]

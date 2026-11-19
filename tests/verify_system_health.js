@@ -1799,9 +1799,11 @@ async function run() {
                     }
                 }
 
-                const changelogCleanNoLegacy26 = typeof window.getFormattedChangelogHTML === 'function'
-                    && !window.getFormattedChangelogHTML().includes('2.6.2')
-                    && !window.getFormattedChangelogHTML().includes('גרסה 2.6:');
+                const changelogHtml = typeof window.getFormattedChangelogHTML === 'function' ? window.getFormattedChangelogHTML() : '';
+                const changelogCleanNoLegacy26 = changelogHtml.includes(window.APP_VERSION || '3.0.4')
+                    && !changelogHtml.includes('2.6.2')
+                    && !changelogHtml.includes('גרסה 2.6:')
+                    && !changelogHtml.includes('HUD Clean');
 
                 if (typeof setActiveMainTab === 'function') setActiveMainTab('curriculum');
                 return {
