@@ -24283,13 +24283,14 @@ function buildGoogleCalendarTimeGridHtml(columns, options = {}) {
         let eventsHtml = '';
         positioned.forEach(ev => {
             const topPx = Math.max(0, Math.round((ev.startMin - startHour * 60) * pxPerMin));
-            const heightPx = Math.max(32, Math.round((ev.endMin - ev.startMin) * pxPerMin) - 2);
+            const minEvHeight = options.isTimetable ? 98 : 32;
+            const heightPx = Math.max(minEvHeight, Math.round((ev.endMin - ev.startMin) * pxPerMin) - 2);
             const widthStyle = `right: calc(${ev.rightPct.toFixed(2)}% + 2px); width: calc(${ev.widthPct.toFixed(2)}% - 4px);`;
             const accent = ev.accentColor || '#38bdf8';
             const clsList = `cal-timegrid-event ${ev.extraClasses || ''}`.trim();
             const attrStr = ev.attrs || '';
             const onclickStr = ev.onclickAttr ? ` onclick="${ev.onclickAttr}"` : '';
-            const isPersonal = clsList.includes('cal-timegrid-personal');
+            const isPersonal = !options.isTimetable && clsList.includes('cal-timegrid-personal');
             const resizeHandleHtml = isPersonal
                 ? `<div class="cal-event-resize-handle" data-pe-id="${escapeHtml(ev.peId || '')}" title="גרור לשינוי אורך"></div>`
                 : '';
@@ -24351,6 +24352,14 @@ function buildGoogleCalendarTimeGridHtml(columns, options = {}) {
 
 function bindTimeGridInteractiveHandlers(rootEl) {
     if (!rootEl) return;
+    if (
+        rootEl.id === 'timetable-grid-container' ||
+        rootEl.id === 'timetable-grid' ||
+        (rootEl.classList && rootEl.classList.contains('timetable-timegrid')) ||
+        (typeof rootEl.closest === 'function' && rootEl.closest('#timetable-grid-container, #timetable-grid, .timetable-timegrid'))
+    ) {
+        return;
+    }
     const innerEl = rootEl.querySelector('.cal-timegrid-inner');
     if (!innerEl || innerEl.dataset.tgInteractiveBound) return;
     innerEl.dataset.tgInteractiveBound = 'true';
@@ -25836,11 +25845,11 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.11.19-v3.0.1",
-    version: "3.0.1",
-    build: "20261119_01",
-    date: "2026-11-19 07:30",
-    description: "v3.0.1: תצוגת יום בודד במערכת השעות (+ כל השבוע), גריד שעות אינטראקטיבי מלא (קליק שעה/גרירת טווח/הזזה ושינוי אורך/עריכה במקום לאירועים אישיים), ספקטרום 20 צבעים וסמלים וקטוריים, חיצי דפדוף בכל מצבי היומן, קיפול שורת כל היום ריקה, מד משימות פתוחות 1:1, אינדקס דרייב לסמסטרים 5-8 וקורסי בחירה, סינון מבחני עבר לקורסים פעילים ומסלול חזרה על קורס/שיפור ציון."
+    code: "REV-2026.11.19-v3.0.2",
+    version: "3.0.2",
+    build: "20261119_02",
+    date: "2026-11-19 09:45",
+    description: "v3.0.2: הסרת גרירת יצירה/הזזה ממערכת השעות (נותרת פעילה בלוח השנה), כפתור החלפת תצוגה במערכת השעות בין לו״ז שעות לכרטיסיות מפורטות עם כל פרטי הקורס והנוכחות, הנגשת כפתורי נוכחות גם לקורסי שעה אחת בלו״ז השעות, והחזרת הצצת סמסטר הבא (82%) במתכנן התואר במובייל."
 };
 window.APP_VERSION = APP_CURRENT_REVISION.version;
 
@@ -28171,6 +28180,51 @@ setInterval(() => {
 // =======================================================
 
 let currentMobileDayFilter = 'today';
+let timetableViewMode = (() => {
+    try {
+        const saved = localStorage.getItem('ast_timetable_view_mode');
+        return saved === 'cards' ? 'cards' : 'timegrid';
+    } catch (e) {
+        return 'timegrid';
+    }
+})();
+
+function syncTimetableViewModeUI() {
+    const isCards = timetableViewMode === 'cards';
+    const topBtn = document.getElementById('btn-toggle-timetable-view-mode');
+    const topIcon = document.getElementById('timetable-view-mode-icon');
+    const topLabel = document.getElementById('timetable-view-mode-label');
+    if (topBtn) topBtn.classList.toggle('active', isCards);
+    if (topIcon) topIcon.textContent = isCards ? '🕒' : '🗂️';
+    if (topLabel) topLabel.textContent = isCards ? 'תצוגת לו״ז שעות' : 'תצוגת כרטיסיות מפורטת';
+
+    const pillBtn = document.getElementById('btn-pill-timetable-view-mode');
+    const pillIcon = document.getElementById('pill-timetable-view-icon');
+    const pillLabel = document.getElementById('pill-timetable-view-label');
+    if (pillBtn) pillBtn.classList.toggle('active', isCards);
+    if (pillIcon) pillIcon.textContent = isCards ? '🕒' : '🗂️';
+    if (pillLabel) {
+        const nextText = isCards ? 'לו״ז שעות' : 'כרטיסיות';
+        pillLabel.setAttribute('data-text', nextText);
+        pillLabel.textContent = nextText;
+    }
+}
+
+window.getTimetableViewMode = function() {
+    return timetableViewMode;
+};
+
+window.toggleTimetableViewMode = function(explicitMode) {
+    if (explicitMode === 'cards' || explicitMode === 'timegrid') {
+        timetableViewMode = explicitMode;
+    } else {
+        timetableViewMode = (timetableViewMode === 'cards') ? 'timegrid' : 'cards';
+    }
+    try { localStorage.setItem('ast_timetable_view_mode', timetableViewMode); } catch (e) {}
+    syncTimetableViewModeUI();
+    if (typeof renderTimetableGrid === 'function') renderTimetableGrid();
+    return timetableViewMode;
+};
 
 function getLiveClassStatus(startTime, endTime) {
     const now = new Date();
@@ -28514,6 +28568,8 @@ function renderTimetableGrid() {
     const container = document.getElementById('timetable-grid-container');
     if (!container) return;
 
+    syncTimetableViewModeUI();
+
     let schedule = getActiveTimetableSchedule();
     if (document.getElementById('attendance-hub-week-navigator')) {
         renderTimetableWeekNavigator(schedule);
@@ -28736,6 +28792,7 @@ function renderTimetableGrid() {
             dateStr: dStr,
             dayTitle: day.name || day.fullName,
             dateShort: `${dObj.getDate()}/${dObj.getMonth() + 1}`,
+            classCount: (day.classes || []).length,
             isToday: isToday,
             hidden: (activeSingleDayIndex !== null && Number(day.dayIndex) !== Number(activeSingleDayIndex)),
             alldayHtml: alldayHtml,
@@ -28743,17 +28800,54 @@ function renderTimetableGrid() {
         };
     });
 
-    container.classList.add('timetable-timegrid');
-    container.innerHTML = buildGoogleCalendarTimeGridHtml(timeGridCols, {
-        hourHeight: 56,
-        isTimetable: true,
-        isSingleDay: (activeSingleDayIndex !== null),
-        alldayLabel: 'כל היום'
-    });
-    if (typeof bindTimeGridInteractiveHandlers === 'function') {
-        bindTimeGridInteractiveHandlers(container);
+    if (timetableViewMode === 'cards') {
+        container.classList.remove('timetable-timegrid');
+        container.classList.add('timetable-cards-mode');
+        container.classList.toggle('is-single-day-cards', activeSingleDayIndex !== null);
+
+        container.innerHTML = timeGridCols.map(col => {
+            const sortedItems = [...(col.timedItems || [])].sort((a, b) => (a.startMin || 0) - (b.startMin || 0));
+            const cardsHtml = sortedItems.map(ev => {
+                const body = ev.innerHtml || `
+                    <div class="timetable-card-title">${escapeHtml(ev.title || '')}</div>
+                    ${ev.timeText ? `<div class="timetable-card-time">⏰ <span class="ui-time-ltr" dir="ltr">${escapeHtml(ev.timeText)}</span></div>` : ''}
+                `;
+                return `
+                    <div class="${ev.extraClasses || 'timetable-card'}" ${ev.attrs || ''} style="--ev-accent: ${ev.accentColor || '#38bdf8'}; --course-accent: ${ev.accentColor || '#38bdf8'};" onclick="${ev.onclickAttr || ''}">
+                        ${body}
+                    </div>
+                `;
+            }).join('');
+
+            const emptyHtml = (!cardsHtml && !col.alldayHtml)
+                ? `<div class="timetable-free-state"><span class="emoji">🏖️</span><div style="font-weight: 700; color: #f1f5f9; font-size: 0.9rem;">יום חופשי מלימודים פרונטליים</div></div>`
+                : '';
+
+            return `
+                <div class="timetable-day-col${col.isToday ? ' is-today' : ''}${col.hidden ? ' is-hidden-day-col' : ''}" data-day-col="${col.dayIndex}" data-date="${escapeHtml(col.dateStr)}">
+                    <div class="timetable-day-header">
+                        ${col.isToday ? '<span class="today-star-indicator">⭐ היום</span>' : ''}
+                        <span class="timetable-day-title">${escapeHtml(col.dayTitle)} <span class="ui-time-ltr" dir="ltr" style="font-size: 0.78rem; color: #94a3b8; font-weight: 500;">${escapeHtml(col.dateShort)}</span></span>
+                        <span class="timetable-day-badge ${col.classCount > 0 ? 'active-day' : 'free-day'}">${col.classCount > 0 ? `${col.classCount} שיעורים` : 'חופשי'}</span>
+                    </div>
+                    <div class="timetable-day-body">
+                        ${col.alldayHtml ? `<div class="cal-cards-allday-strip" style="display:flex;flex-direction:column;gap:4px;">${col.alldayHtml}</div>` : ''}
+                        ${cardsHtml || emptyHtml}
+                    </div>
+                </div>
+            `;
+        }).join('');
+    } else {
+        container.classList.remove('timetable-cards-mode', 'is-single-day-cards');
+        container.classList.add('timetable-timegrid');
+        container.innerHTML = buildGoogleCalendarTimeGridHtml(timeGridCols, {
+            hourHeight: 104,
+            isTimetable: true,
+            isSingleDay: (activeSingleDayIndex !== null),
+            alldayLabel: 'כל היום'
+        });
     }
-    document.querySelectorAll('#timetable-day-selector .day-tab-pill').forEach(pill => {
+    document.querySelectorAll('#timetable-day-selector .day-tab-pill[data-day]').forEach(pill => {
         const pDay = pill.getAttribute('data-day');
         pill.classList.toggle('active', pDay === currentMobileDayFilter);
     });

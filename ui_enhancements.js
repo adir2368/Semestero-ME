@@ -1933,8 +1933,8 @@
             if (target.closest('input, textarea, select, [contenteditable="true"], .no-tab-swipe')) {
                 return true;
             }
-            // Allow flowchart canvas dragging and time-grid / spectrum scrolling/dragging without hijacking tab switches
-            if (target.closest('.flowchart-viewport, #flowchart-canvas, .tree-canvas-container .tree-svg, #flowchart-svg, .cal-timegrid-scroll-x, .cal-timegrid-wrapper, .cal-timegrid-inner, .cal-timegrid-col, .timetable-grid, .spectrum-color-palette-20')) {
+            // Allow flowchart canvas dragging and time-grid / spectrum / degree planner scrolling/dragging without hijacking tab switches
+            if (target.closest('.flowchart-viewport, #flowchart-canvas, .tree-canvas-container .tree-svg, #flowchart-svg, .cal-timegrid-scroll-x, .cal-timegrid-wrapper, .cal-timegrid-inner, .cal-timegrid-col, .timetable-grid, .spectrum-color-palette-20, .planner-semesters-scroll, #planner-semesters-container')) {
                 return true;
             }
             // Check horizontally scrollable ancestors (tables, timetable grid, etc.)

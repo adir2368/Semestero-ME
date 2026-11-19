@@ -1672,6 +1672,7 @@ async function run() {
 
                 if (typeof window.setCalendarViewMode === 'function') window.setCalendarViewMode('week');
                 const weekCols = document.querySelectorAll('#finals-calendar-grid .cal-timegrid-day-head').length;
+                const calWeekBound = document.querySelector('#finals-calendar-grid .cal-timegrid-inner')?.dataset?.tgInteractiveBound === 'true';
 
                 const overlapRes = typeof window.computeOverlapLayout === 'function'
                     ? window.computeOverlapLayout([{ startMin: 540, endMin: 660 }, { startMin: 600, endMin: 720 }])
@@ -1691,20 +1692,26 @@ async function run() {
                     document.getElementById('day-modal-event-color')
                 );
 
-                // 4. Timetable: Single-day default + All-week toggle + Yoga 09:00 + Un-enrolled 114052 filtered
+                // 4. Timetable: Single-day default + All-week toggle + Yoga 09:00 + Un-enrolled 114052 filtered + No Drag-Create + 1h Attendance + View Toggle
                 const origTtBackup = window.gameState ? window.gameState.timetable : undefined;
                 if (window.gameState) {
                     window.gameState.timetable = {
                         days: [
-                            { dayIndex: 0, name: 'יום ראשון', classes: [{ courseId: '034053', courseName: 'מכניקת מוצקים 2מ', type: 'הרצאה', startTime: '08:30', endTime: '10:30' }, { courseId: '034035', courseName: 'תרמודינמיקה 1', type: 'תרגול', startTime: '14:30', endTime: '16:30' }, { courseId: '114052', courseName: 'פיסיקה 2', type: 'הרצאה', startTime: '10:30', endTime: '12:30' }] },
+                            { dayIndex: 0, name: 'יום ראשון', classes: [{ courseId: '034053', courseName: 'מכניקת מוצקים 2מ', type: 'הרצאה', startTime: '08:30', endTime: '10:30' }, { courseId: '034035', courseName: 'תרמודינמיקה 1 - תרגול שעה', type: 'תרגול', startTime: '12:30', endTime: '13:30' }, { courseId: '114052', courseName: 'פיסיקה 2', type: 'הרצאה', startTime: '10:30', endTime: '12:30' }] },
                             { dayIndex: 1, name: 'יום שני', classes: [] },
                             { dayIndex: 4, name: 'יום חמישי', classes: [{ courseId: '03940805', courseName: 'חינוך גופני - אתלטיקה קלה', type: 'יוגה 24', startTime: '07:30', endTime: '08:30' }] }
                         ]
                     };
                 }
+                if (typeof window.toggleTimetableViewMode === 'function') window.toggleTimetableViewMode('timegrid');
                 if (typeof applyTimetableMobileFilter === 'function') applyTimetableMobileFilter('today');
                 if (typeof setActiveMainTab === 'function') setActiveMainTab('timetable');
                 if (typeof renderTimetableGrid === 'function') renderTimetableGrid();
+                const ttGridEl = document.getElementById('timetable-grid-container');
+                if (typeof bindTimeGridInteractiveHandlers === 'function' && ttGridEl) {
+                    bindTimeGridInteractiveHandlers(ttGridEl);
+                }
+                const ttNotInteractiveBound = !(document.querySelector('#timetable-grid-container .cal-timegrid-inner')?.dataset?.tgInteractiveBound);
                 const hasTimetableTimegrid = !!document.querySelector('#timetable-grid-container .cal-timegrid-wrapper');
                 const singleDayDefaultGrid = !!document.querySelector('#timetable-grid-container .cal-timegrid-inner.is-single-day-grid');
                 const hiddenColsInSingleDay = document.querySelectorAll('#timetable-grid-container .cal-timegrid-col.is-hidden-day-col').length;
@@ -1715,6 +1722,14 @@ async function run() {
                 const allWeekPill = document.querySelector('#timetable-day-selector [data-day="all"]');
                 if (allWeekPill) allWeekPill.click();
                 const allWeekGridExpanded = !document.querySelector('#timetable-grid-container .cal-timegrid-inner.is-single-day-grid');
+                const oneHrCard = document.querySelector('#timetable-grid-container .timetable-card.duration-block-1h');
+                const oneHrAttBtn = oneHrCard ? oneHrCard.querySelector('.btn-attendance-action') : null;
+                const oneHrAttVisible = !!(oneHrCard && oneHrAttBtn && oneHrAttBtn.getBoundingClientRect().height > 0 && oneHrAttBtn.getBoundingClientRect().bottom <= oneHrCard.getBoundingClientRect().bottom + 2);
+
+                if (typeof window.toggleTimetableViewMode === 'function') window.toggleTimetableViewMode('cards');
+                const cardsModeActive = !!(document.getElementById('timetable-grid-container')?.classList.contains('timetable-cards-mode') && document.querySelector('#timetable-grid-container .timetable-day-col .timetable-card.duration-block-1h .btn-attendance-action'));
+                if (typeof window.toggleTimetableViewMode === 'function') window.toggleTimetableViewMode('timegrid');
+                const revertedToTimegrid = !document.getElementById('timetable-grid-container')?.classList.contains('timetable-cards-mode');
                 if (typeof applyTimetableMobileFilter === 'function') applyTimetableMobileFilter('today');
 
                 const breakBannerCount = document.querySelectorAll('.timetable-break-gap').length;
@@ -1800,10 +1815,15 @@ async function run() {
                     taskPillHasNoCheckbox,
                     workweekCols,
                     weekCols,
+                    calWeekBound,
                     overlapValid,
                     expandedRecCount: expandedRec.length,
                     hasDayModalEnhancements,
                     hasTimetableTimegrid,
+                    ttNotInteractiveBound,
+                    oneHrAttVisible,
+                    cardsModeActive,
+                    revertedToTimegrid,
                     singleDayDefaultGrid,
                     hiddenColsInSingleDay,
                     phys2FilteredOut,
@@ -1839,9 +1859,47 @@ async function run() {
             assert(res.workweekCols === 5 && res.weekCols === 7 && res.overlapValid, 'Workweek (5) & Week (7) Google Calendar time-grids with overlap engine must work: ' + JSON.stringify(res));
             assert(res.expandedRecCount === 4 && res.customRecExpanded === 4, 'Weekly and custom recurrence expansion must yield expected occurrences: ' + JSON.stringify(res));
             assert(res.hasDayModalEnhancements && res.dayModalSwatches === 20 && res.remDefaultNone, 'Enhanced Day Modal with 20-color spectrum and default none reminder must work: ' + JSON.stringify(res));
-            assert(res.hasTimetableTimegrid && res.singleDayDefaultGrid && res.hiddenColsInSingleDay >= 1 && res.allWeekGridExpanded && res.phys2FilteredOut && res.yogaHealed09 && res.breakBannerCount === 0 && res.hasSyncCornerBtn, 'Timetable v3.0.1 single-day default, all-week toggle, 114052 filter, Yoga 09:00 & time-grid must work: ' + JSON.stringify(res));
+            assert(res.hasTimetableTimegrid && res.calWeekBound && res.ttNotInteractiveBound && res.oneHrAttVisible && res.cardsModeActive && res.revertedToTimegrid && res.singleDayDefaultGrid && res.hiddenColsInSingleDay >= 1 && res.allWeekGridExpanded && res.phys2FilteredOut && res.yogaHealed09 && res.breakBannerCount === 0 && res.hasSyncCornerBtn, 'Timetable v3.0.2 single-day default, no-drag-create, 1h attendance, cards view toggle, all-week toggle, 114052 filter, Yoga 09:00 & time-grid must work: ' + JSON.stringify(res));
             assert(res.mandatoryFilteredOutSem5 && res.hasTtgCourseSearch, 'Mandatory shields and Timetable Generator must be student-personalized: ' + JSON.stringify(res));
             assert(res.sem5DriveOk && res.elecDriveOk && res.hasCalPagingBar && res.emptyAlldayCollapsed && res.pemFilteredActiveOnly && res.activeRetakeHidden && res.completedRetakeVisible, 'v3.0.1 Drive Sem5/Electives, paging bar, collapsed empty allday row, active past-exams filter & post-Moed B retake must pass: ' + JSON.stringify(res));
+        });
+
+        await test('Test 33: Mobile Viewport Degree Planner Semester Peek UX (390px)', async () => {
+            await cdp.send('Emulation.setDeviceMetricsOverride', {
+                width: 390,
+                height: 844,
+                deviceScaleFactor: 2,
+                mobile: true
+            });
+            try {
+                const mobileRes = await cdp.eval(`(() => {
+                    if (typeof setActiveMainTab === 'function') setActiveMainTab('planner');
+                    if (typeof window.setPlannerMobileView === 'function') window.setPlannerMobileView('board');
+                    if (window.DegreePlanner && typeof window.DegreePlanner.render === 'function') window.DegreePlanner.render();
+                    const scroll = document.getElementById('planner-semesters-container');
+                    const cols = scroll ? Array.from(scroll.querySelectorAll('.planner-semester-col')) : [];
+                    const scrollRect = scroll ? scroll.getBoundingClientRect() : null;
+                    const firstRect = cols[0] ? cols[0].getBoundingClientRect() : null;
+                    const secondRect = cols[1] ? cols[1].getBoundingClientRect() : null;
+                    const canScrollHoriz = !!(scroll && scroll.scrollWidth > scroll.clientWidth + 20);
+                    const isNarrowerThanScreen = !!(firstRect && scrollRect && firstRect.width >= 240 && firstRect.width <= scrollRect.width * 0.9);
+                    const sameRowPeek = !!(firstRect && secondRect && Math.abs(firstRect.top - secondRect.top) < 10);
+                    if (typeof setActiveMainTab === 'function') setActiveMainTab('curriculum');
+                    return {
+                        colCount: cols.length,
+                        scrollWidth: scroll ? scroll.scrollWidth : 0,
+                        clientWidth: scroll ? scroll.clientWidth : 0,
+                        firstWidth: firstRect ? Math.round(firstRect.width) : 0,
+                        secondLeft: secondRect ? Math.round(secondRect.left) : 0,
+                        canScrollHoriz,
+                        isNarrowerThanScreen,
+                        sameRowPeek
+                    };
+                })()`);
+                assert(mobileRes.colCount >= 2 && mobileRes.canScrollHoriz && mobileRes.isNarrowerThanScreen && mobileRes.sameRowPeek, 'Mobile Degree Planner must render semesters horizontally at ~82% width so next semester peeks: ' + JSON.stringify(mobileRes));
+            } finally {
+                await cdp.send('Emulation.clearDeviceMetricsOverride');
+            }
         });
 
     } finally {

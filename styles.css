@@ -20332,8 +20332,100 @@ body.is-mobile-view .finals-calendar-grid.is-timegrid-mode {
 /* Single-day timetable filtering & calendar single-day grid support */
 .cal-timegrid-col.is-hidden-day-col,
 .cal-timegrid-day-head.is-hidden-day-col,
-.cal-timegrid-allday-cell.is-hidden-day-col {
+.cal-timegrid-allday-cell.is-hidden-day-col,
+.timetable-day-col.is-hidden-day-col {
     display: none !important;
+}
+
+.timetable-grid.timetable-cards-mode {
+    display: grid !important;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 14px;
+    padding: 0;
+}
+
+.timetable-grid.timetable-cards-mode.is-single-day-cards {
+    grid-template-columns: minmax(0, 1fr) !important;
+}
+
+.timetable-grid.timetable-cards-mode .timetable-day-col {
+    min-height: 240px;
+}
+
+.btn-timetable-view-toggle.active,
+.day-tab-pill.day-tab-view-toggle.active {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.25), rgba(56, 189, 248, 0.22)) !important;
+    border-color: rgba(52, 211, 153, 0.65) !important;
+    color: #6ee7b7 !important;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.22);
+}
+
+.timetable-grid.timetable-timegrid .cal-timegrid-event.timetable-card {
+    position: absolute !important;
+    margin: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    padding: 5px 7px !important;
+    gap: 2px !important;
+    overflow: hidden;
+}
+
+.timetable-grid.timetable-timegrid .cal-timegrid-event.timetable-card .timetable-card-top {
+    margin-bottom: 1px;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+.timetable-grid.timetable-timegrid .cal-timegrid-event.timetable-card .timetable-tag,
+.timetable-grid.timetable-timegrid .cal-timegrid-event.timetable-card .timetable-duration-pill {
+    font-size: 0.64rem;
+    padding: 1px 5px;
+}
+
+.timetable-grid.timetable-timegrid .cal-timegrid-event.timetable-card .timetable-card-title {
+    font-size: 0.78rem;
+    line-height: 1.2;
+    margin-bottom: 1px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.timetable-grid.timetable-timegrid .cal-timegrid-event.timetable-card .timetable-card-time,
+.timetable-grid.timetable-timegrid .cal-timegrid-event.timetable-card .timetable-card-room-bar,
+.timetable-grid.timetable-timegrid .cal-timegrid-event.timetable-card .timetable-lecturer {
+    font-size: 0.68rem;
+    margin-bottom: 1px;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.timetable-grid.timetable-timegrid .cal-timegrid-event.timetable-card.duration-block-1h .timetable-card-title {
+    -webkit-line-clamp: 1;
+}
+
+.timetable-grid.timetable-timegrid .cal-timegrid-event.timetable-card.duration-block-1h .timetable-lecturer {
+    display: none;
+}
+
+.timetable-grid.timetable-timegrid .cal-timegrid-event.timetable-card .attendance-card-actions {
+    margin-top: auto !important;
+    padding-top: 3px !important;
+    gap: 4px;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 4;
+    background: linear-gradient(to top, rgba(15, 23, 42, 0.9), rgba(15, 23, 42, 0.55));
+    border-radius: 0 0 6px 6px;
+}
+
+.timetable-grid.timetable-timegrid .cal-timegrid-event.timetable-card .btn-attendance-action {
+    font-size: 0.67rem;
+    padding: 2px 5px;
+    min-height: 22px;
 }
 
 .cal-timegrid-inner.is-single-day-grid {
@@ -20396,13 +20488,19 @@ bdi[dir="ltr"] {
     box-shadow: 0 4px 14px rgba(2, 132, 199, 0.28);
 }
 
-.cal-timegrid-personal {
+#finals-calendar-grid .cal-timegrid-personal {
     cursor: grab;
     touch-action: none;
 }
 
-.cal-timegrid-personal:active,
-.cal-timegrid-personal.is-dragging-personal {
+.timetable-timegrid .cal-timegrid-personal,
+.timetable-cards-mode .cal-timegrid-personal {
+    cursor: pointer;
+    touch-action: pan-x pan-y;
+}
+
+#finals-calendar-grid .cal-timegrid-personal:active,
+#finals-calendar-grid .cal-timegrid-personal.is-dragging-personal {
     cursor: grabbing;
     opacity: 0.9;
     box-shadow: 0 8px 22px rgba(0, 0, 0, 0.45);
@@ -20535,19 +20633,28 @@ bdi[dir="ltr"] {
 }
 
 @media (max-width: 768px) {
-    .planner-semesters-grid {
+    .timetable-grid.timetable-cards-mode {
+        grid-template-columns: minmax(0, 1fr) !important;
+        gap: 10px !important;
+    }
+
+    .planner-semesters-scroll {
         display: flex !important;
-        flex-direction: column !important;
+        flex-direction: row !important;
         flex-wrap: nowrap !important;
-        gap: 14px !important;
-        overflow-x: visible !important;
+        gap: 12px !important;
+        overflow-x: auto !important;
+        scroll-snap-type: x proximity;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: 10px !important;
     }
 
     .planner-semester-col {
-        flex: 1 1 100% !important;
-        min-width: 100% !important;
-        max-width: 100% !important;
-        width: 100% !important;
+        flex: 0 0 82% !important;
+        width: 82% !important;
+        min-width: 245px !important;
+        max-width: 310px !important;
+        scroll-snap-align: start;
         box-sizing: border-box !important;
     }
 
