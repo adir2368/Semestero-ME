@@ -1,5 +1,5 @@
-// Service Worker for Academic Skill Tree (Semestero ME) - v3.0.5
-const CACHE_NAME = 'semestero-me-v3.0.5';
+// Service Worker for Academic Skill Tree (Semestero ME) - v3.0.6
+const CACHE_NAME = 'semestero-me-v3.0.6';
 
 const STATIC_ASSETS = [
     './',
@@ -123,9 +123,9 @@ self.addEventListener('fetch', (event) => {
         return;
     }
 
-// Cache-first for images, fonts, and icons
+// Cache-first for images, fonts, and icons (ignoreSearch ensures ?v=3.0.x hits precached icons offline)
     event.respondWith(
-        caches.match(event.request).then((cachedResponse) => {
+        caches.match(event.request, { ignoreSearch: true }).then((cachedResponse) => {
             if (cachedResponse) return cachedResponse;
 
             return fetch(event.request).then((networkResponse) => {

@@ -17,9 +17,9 @@ ZIP_PATH = os.path.join(ROOT, "Semestero-ME-Windows-x64.zip")
 
 with open(os.path.join(ROOT, "package.json"), "r", encoding="utf-8") as f:
     pkg = json.load(f)
-VERSION = pkg.get("version", "3.0.5")
+VERSION = pkg.get("version", "3.0.6")
 TAG = f"v{VERSION}"
-NAME = f"Semestero ME v{VERSION} - Deep Performance, Bundle Size & Main-Thread Optimization Pass"
+NAME = f"Semestero ME v{VERSION} - Post-Optimization Stability, Fixed Overlays, Light Mode & Modal Observer Fixes"
 
 def get_github_token():
     try:
@@ -99,18 +99,19 @@ def main():
 
     body_notes = f"""# Semestero ME {TAG} Release Notes
 
-### ⚡ 1. אופטימיזציית ביצועים, משקל אפליקציה ומהירות טעינה (`cheesefork_database.js`, `favicon.svg`, `sw.js`, `index.html`)
-- **כיווץ חבילות ונכסים**: כיווץ מאגר `cheesefork_database.js` (`-737 KB`, 2,784 קורסים זהים 1:1), אופטימיזציה של `favicon.svg` (`396 KB -> 25.8 KB`, חיסכון של `370.5 KB`), והסרת נכסים לא-בשימוש מחבילת ה-APK (`www/`, חיסכון `~1.44 MB` סה״כ).
-- **טעינת PWA ו-Service Worker מואצת**: הוצאת מאגרים עצלים (`cheesefork_database.js`, `user_saved_state.json`) מההתקנה הראשונית של ה-SW (`-4.09 MB` בהתקנה ראשונה, שמירה דינמית במטמון לפי דרישה), והסרת סקריפטים וגופנים חוסמי-רינדור ב-`<head>`.
+### 🛠️ 1. תיקון רגרסיות פונקציונליות לאחר האופטימיזציה (`styles.css`, `modal_help.js`, `ui_enhancements.js`, `app.js`, `index.html`, `sw.js`)
+- **שחרור שכבות צפות (`position: fixed`) ו-Stacking Context**: הסרת `contain: layout style` מ-5 סביבות העבודה שגרמה ללכידת סרגל הפעולות המרובות במשימות (`#tasks-bulk-actions-bar`) וחלוניות צפות באמצע המסך.
+- **שיקום מצב בהיר, נגישות וכרטיסי הגדרות**: הסרת `content-visibility: auto` מ-`.settings-card` והסרת דריסת הצבע הכהה הקשיחה במובייל (`<= 768px`), למניעת חיתוך תפריטים ושבירת Light Mode / High Contrast.
+- **הרחבת `MutationObserver` למודאלים וכפתורי עזרה (`?`)**: תמיכה מלאה בכל המודאלים (`#modal-*` כגון `modal-attendance-hub`, `modal-timetable-generator` וגם `#*-modal`) ורינדורים דינמיים של כותרות, תוך שמירה על Debounce למניעת עומס.
+- **הקשחת טעינה מוקדמת ורינדור**: טעינה סינכרונית מוקדמת של `sentry_logger.js` ו-`utils.js`, הגנת רינדור מיידית ללוח השנה ולמסלול המבחנים במעבר מהיר, סנכרון מסנן מערכת השעות לפני רינדור הגריד, ו-`ignoreSearch: true` במטמון האייקונים של Service Worker.
 
-### 🚀 2. האצת מעבר לשוניות, זיכרון וגלילת מובייל (`app.js`, `modal_help.js`, `ui_enhancements.js`, `styles.css`)
-- **חיסול סופות MutationObserver וכפילויות שמירה**: סינון ו-Debounce ל-`MutationObserver` ב-`modal_help.js` וב-`ui_enhancements.js`, מניעת שמירה כפולה ב-`saveState() -> notifyStateChanged()`, וביטול רינדור כפול של מערכת השעות והמסלול החבוי במעבר לשוניות.
-- **בידוד פריסה ו-GPU במובייל**: `contain: layout style`, `content-visibility: auto` על כרטיסי הגדרות, וביטול `backdrop-filter: blur` כבד על כרטיסים נגללים במובייל (`<= 768px`).
+### ⚡ 2. שימור מלא של רווחי האופטימיזציה מ-`v3.0.5`
+- שמירת כל החיסכון בנפח (`cheesefork_database.js` `-737KB`, `favicon.svg` `-370KB`, חבילת APK `5.87MB`, והתקנת SW ראשונית `-4.09MB`), גופנים אסינכרוניים ומניעת שמירות ורינדורים כפולים.
 
 ### 📦 3. קובצי הפצה ועדכון:
-- `Semestero-ME-Tablet-Clean.apk` (`com.technion.semestero.tablet`, `versionCode 123`, `versionName {VERSION}`, `v1+v2+v3` Signed)
-- `Semestero-ME.apk` (`com.technion.semestero`, `versionCode 123`, `versionName {VERSION}`, `v1+v2+v3` Signed, `targetSdk 34`)
-- `Semestero-ME-Watch.apk` (`versionCode 123`, `versionName {VERSION}`, `v1+v2+v3` Signed)
+- `Semestero-ME-Tablet-Clean.apk` (`com.technion.semestero.tablet`, `versionCode 124`, `versionName {VERSION}`, `v1+v2+v3` Signed)
+- `Semestero-ME.apk` (`com.technion.semestero`, `versionCode 124`, `versionName {VERSION}`, `v1+v2+v3` Signed, `targetSdk 34`)
+- `Semestero-ME-Watch.apk` (`versionCode 124`, `versionName {VERSION}`, `v1+v2+v3` Signed)
 - `Semestero-ME-Windows-x64.zip` (Electron Desktop Client {VERSION})
 """
 

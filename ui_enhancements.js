@@ -2316,23 +2316,36 @@
         RecentlyViewed.renderRecentChips();
         initUiMotionPromptsSuite();
 
-        // Monitor any opening modals to attach reading progress bar if long (filtered to avoid rAF wakeups on normal DOM edits)
+        // Monitor any opening modals to attach reading progress bar if long (covers both #modal-* and #*-modal conventions)
         let modalObserverRaf = null;
+        const isModalContainer = (el) => {
+            if (!el || el.nodeType !== 1) return false;
+            if (el.classList && (el.classList.contains('modal-overlay') || el.classList.contains('modal-backdrop'))) return true;
+            if (el.id && (el.id.endsWith('-modal') || el.id.startsWith('modal-'))) return true;
+            return false;
+        };
         const observer = new MutationObserver((mutations) => {
             let relevant = false;
             for (let i = 0; i < mutations.length && !relevant; i++) {
                 const m = mutations[i];
                 if (m.type === 'attributes') {
-                    const t = m.target;
-                    if (t && ((t.classList && t.classList.contains('modal-overlay')) || (t.id && t.id.endsWith('-modal')))) {
+                    if (isModalContainer(m.target)) {
                         relevant = true;
                     }
                 } else if (m.addedNodes && m.addedNodes.length) {
                     for (let j = 0; j < m.addedNodes.length; j++) {
                         const n = m.addedNodes[j];
-                        if (n.nodeType === 1 && ((n.classList && (n.classList.contains('modal-overlay') || n.classList.contains('modal-backdrop'))) || (n.id && n.id.endsWith('-modal')))) {
+                        if (n.nodeType !== 1) continue;
+                        if (n.classList && n.classList.contains('modal-reading-progress-bar')) continue;
+                        if (isModalContainer(n) || (n.classList && (n.classList.contains('modal-body') || n.classList.contains('modal-content')))) {
                             relevant = true;
                             break;
+                        }
+                    }
+                    if (!relevant && m.target && m.target.nodeType === 1 && m.target.closest) {
+                        const openHost = m.target.closest('.modal-overlay.active, .modal-backdrop.active, [id$="-modal"].active, [id^="modal-"]');
+                        if (openHost && !openHost.querySelector('.modal-reading-progress-bar')) {
+                            relevant = true;
                         }
                     }
                 }
@@ -2340,7 +2353,9 @@
             if (!relevant || modalObserverRaf) return;
             modalObserverRaf = requestAnimationFrame(() => {
                 modalObserverRaf = null;
-                const openModals = document.querySelectorAll('.modal-overlay.active, .modal-overlay[style*="display: flex"], [id$="-modal"].active');
+                const openModals = document.querySelectorAll(
+                    '.modal-overlay.active, .modal-overlay[style*="display: flex"], .modal-backdrop.active, .modal-backdrop[style*="display: flex"], [id$="-modal"].active, [id^="modal-"].active, [id^="modal-"][style*="display: flex"]'
+                );
                 openModals.forEach(modal => {
                     const body = modal.querySelector('.modal-body');
                     let progress = modal.querySelector('.modal-reading-progress-bar');
@@ -2356,7 +2371,7 @@
                 });
             });
         });
-        observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] });
+        observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['class', 'style'] });
     }
 
     if (document.readyState === 'loading') {

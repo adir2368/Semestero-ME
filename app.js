@@ -16974,11 +16974,17 @@ window.switchTab = function(tabNameOrNumber) {
             if (settingsWorkspace) settingsWorkspace.style.display = "none";
             if (tablePane) tablePane.style.display = "none";
             if (calPane) calPane.style.display = "block";
-            if (viewsDirtyState.calendar) {
+            const calGridEl = document.getElementById("finals-calendar-grid");
+            const runwayTrackEl = document.getElementById("exam-gap-runway-track");
+            const needsCalRender = viewsDirtyState.calendar || !calGridEl || calGridEl.children.length === 0;
+            const needsRunwayRender = viewsDirtyState.calendar || !runwayTrackEl || runwayTrackEl.children.length === 0;
+            if (needsCalRender) {
                 renderFinalsCalendar();
-                renderExamGapRunway();
-                viewsDirtyState.calendar = false;
             }
+            if (needsRunwayRender) {
+                renderExamGapRunway();
+            }
+            viewsDirtyState.calendar = false;
         } else if (activeTabId === 'timetable') {
             if (curriculumWorkspace) curriculumWorkspace.style.display = "none";
             if (plannerWorkspace) plannerWorkspace.style.display = "none";
@@ -16999,18 +17005,18 @@ window.switchTab = function(tabNameOrNumber) {
             }
         }
 
+        if (typeof window.scrollActiveViewToTop === 'function') {
+            window.scrollActiveViewToTop(false);
+        }
+        if (typeof window.updateBackToTopVisibility === 'function') {
+            window.updateBackToTopVisibility();
+        }
         const schedulePostTabWork = typeof requestAnimationFrame === 'function' ? requestAnimationFrame : (cb) => setTimeout(cb, 0);
         schedulePostTabWork(() => {
             if (window.ModalHelp && typeof window.ModalHelp.setupAllModalHelpTriggers === 'function') {
                 window.ModalHelp.setupAllModalHelpTriggers();
             }
-            if (typeof window.updateBackToTopVisibility === 'function') {
-                window.updateBackToTopVisibility();
-            }
         });
-        if (typeof window.scrollActiveViewToTop === 'function') {
-            window.scrollActiveViewToTop(false);
-        }
     }
 
     window.setActiveMainTab = setActiveMainTab;
@@ -25845,11 +25851,11 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.11.19-v3.0.5",
-    version: "3.0.5",
-    build: "20261119_05",
-    date: "2026-11-19 11:05",
-    description: "v3.0.5: אופטימיזציית ביצועים ומשקל מקיפה — כיווץ cheesefork_database.js (-737KB) ו-favicon.svg (-370KB), קיצוץ 4.09MB מהתקנת Service Worker, ביטול חסימות רינדור ב-<head>, סינון ו-Debounce ל-MutationObservers, מניעת כפילות שמירה ב-saveState, מניעת רינדור כפול במערכת השעות ובידוד פריסה/GPU במובייל."
+    code: "REV-2026.11.19-v3.0.6",
+    version: "3.0.6",
+    build: "20261119_06",
+    date: "2026-11-19 11:38",
+    description: "v3.0.6: תיקון רגרסיות לאחר האופטימיזציה — הסרת contain:layout שכלאה סרגלים צפים (כגון פעולות מרובות במשימות), הסרת content-visibility ודריסת צבע רקע במובייל שהפריעו למצב בהיר וגלילת הגדרות, הרחבת MutationObservers עבור מודאלים (#modal-*) וכפתורי עזרה, טעינה מוקדמת של sentry_logger ו-utils, והגנת רינדור מיידית ללוח השנה ולמסנן מערכת השעות."
 };
 window.APP_VERSION = APP_CURRENT_REVISION.version;
 
@@ -29056,8 +29062,11 @@ function updateDailyTimetableFocus() {
     const now = new Date();
     const dayOfWeek = now.getDay();
     const dateFormatted = now.toLocaleDateString('he-IL', { day: 'numeric', month: 'numeric', year: 'numeric' });
-    
-    // 0. Render timetable columns dynamically
+
+    // 0a. Sync mobile filter attribute & active day pills BEFORE rendering grid (prevents stale filter on first render)
+    applyTimetableMobileFilter(currentMobileDayFilter, true);
+
+    // 0b. Render timetable columns dynamically (single render with up-to-date filter)
     renderTimetableGrid();
 
     // 1. Render Today's dynamic live banner
@@ -29148,9 +29157,6 @@ function updateDailyTimetableFocus() {
             `;
         }
     }
-
-    // 4. Update mobile filter attribute on grid (skip duplicate renderTimetableGrid already executed in step 0)
-    applyTimetableMobileFilter(currentMobileDayFilter, true);
 }
 
 function applyTimetableMobileFilter(filter, skipRender = false) {

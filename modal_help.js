@@ -432,23 +432,46 @@
             this.injectHelpStyles();
             this.setupAllModalHelpTriggers();
 
-            // Observe DOM for dynamically opened modals (filtered + debounced to avoid layout thrash)
+            // Observe DOM for dynamically opened modals & re-rendered workspace headers (debounced to avoid layout thrash)
             let helpObserverTimer = null;
             const modalIdsSet = new Set(Object.keys(MODAL_HELP_REGISTRY));
+            const headerTriggerSelector = '.modal-header, .planner-header-right, .planner-header-banner, .cal-actions-row, .notion-tasks-header-actions, .settings-header-actions, .flowchart-actions, #timetable-day-selector, [id^="modal-"], [id$="-modal"]';
+            const isHelpRelevantNode = (n) => {
+                if (!n || n.nodeType !== 1) return false;
+                if (n.classList && n.classList.contains('btn-modal-help')) return false;
+                if (n.id && (modalIdsSet.has(n.id) || n.id.startsWith('modal-') || n.id.endsWith('-modal'))) return true;
+                if (n.classList && (
+                    n.classList.contains('modal-backdrop') ||
+                    n.classList.contains('modal-overlay') ||
+                    n.classList.contains('modal-header') ||
+                    n.classList.contains('modal-content') ||
+                    n.classList.contains('planner-header-right') ||
+                    n.classList.contains('planner-header-banner') ||
+                    n.classList.contains('cal-actions-row') ||
+                    n.classList.contains('notion-tasks-header-actions') ||
+                    n.classList.contains('settings-header-actions') ||
+                    n.classList.contains('flowchart-actions')
+                )) return true;
+                if (typeof n.querySelector === 'function' && n.querySelector(headerTriggerSelector)) return true;
+                return false;
+            };
             const observer = new MutationObserver((mutations) => {
                 let relevant = false;
                 for (let i = 0; i < mutations.length && !relevant; i++) {
-                    const added = mutations[i].addedNodes;
-                    if (!added || !added.length) continue;
-                    for (let j = 0; j < added.length; j++) {
-                        const n = added[j];
-                        if (n.nodeType !== 1) continue;
-                        if (
-                            (n.id && modalIdsSet.has(n.id)) ||
-                            (n.classList && (n.classList.contains('modal-backdrop') || n.classList.contains('modal-overlay') || n.classList.contains('modal-header')))
-                        ) {
+                    const m = mutations[i];
+                    const added = m.addedNodes;
+                    if (added && added.length) {
+                        for (let j = 0; j < added.length; j++) {
+                            if (isHelpRelevantNode(added[j])) {
+                                relevant = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (!relevant && m.target && m.target.nodeType === 1) {
+                        const host = m.target.closest ? m.target.closest('[id]') : null;
+                        if (host && modalIdsSet.has(host.id) && !host.querySelector(`.btn-modal-help[data-help-target="${host.id}"]`)) {
                             relevant = true;
-                            break;
                         }
                     }
                 }
