@@ -17,9 +17,9 @@ ZIP_PATH = os.path.join(ROOT, "Semestero-ME-Windows-x64.zip")
 
 with open(os.path.join(ROOT, "package.json"), "r", encoding="utf-8") as f:
     pkg = json.load(f)
-VERSION = pkg.get("version", "3.0.2")
+VERSION = pkg.get("version", "3.0.3")
 TAG = f"v{VERSION}"
-NAME = f"Semestero ME v{VERSION} - Detailed Timetable Toggle, 1h Attendance & Mobile Degree Planner Peek"
+NAME = f"Semestero ME v{VERSION} - HUD Semester Week Direct Attendance Stats Navigation & Changelog Cleanup"
 
 def get_github_token():
     try:
@@ -99,18 +99,14 @@ def main():
 
     body_notes = f"""# Semestero ME {TAG} Release Notes
 
-### 🗂️ 1. מערכת שעות: כרטיסיות מפורטות + סימון נוכחות לקורסי שעה (`app.js`, `styles.css`, `index.html`)
-- **הסרת גרירת יצירה/הזזה במערכת השעות**: גרירת שעות, הזזה ושינוי אורך זמינים אך ורק בלוח השנה (Google Calendar Time-Grid) ואינם מופעלים בטעות במערכת השעות.
-- **כפתור החלפת תצוגה במערכת השעות**: מעבר מהיר בין `🕒 תצוגת לו״ז שעות` לבין `🗂️ תצוגת כרטיסיות מפורטת` המציגה את כל פרטי השיעור (מרצה, מתרגל, מיקום וכפתורי נוכחות במלואם) ללא אובדן מידע.
-- **נגישות נוכחות בקורסי שעה אחת**: גם בקורסים של שעה אחת בתצוגת לו״ז השעות, כפתורי `✓ הייתי` ו-`✗ החסרתי` מוצמדים לתחתית הכרטיס ונשארים גלויים ונוחים ללחיצה.
+### 📊 1. ניווט ישיר מכפתור שבוע הסמסטר לסטטיסטיקות ומעקב שבועי (`app.js`, `index.html`)
+- **קיצור דרך ב-HUD העליון**: תיקון לחיצה על מד `שבוע בסמסטר (שבוע 4 / 13)` כך שתיפתח ישירות ללשונית `📊 סטטיסטיקות ומעקב שבועי` במרכז הנוכחות (ללא דריסה למסך ביצועים כללי), וכן הפיכת תג `שבוע N מתוך 13` בחלון הניווט לקישור לחיץ לאותה לשונית.
+- **ניקוי יומן העדכונים (`מה חדש?`)**: הסרת כרטיסי הגרסאות הישנות (`v2.6` ו-`v2.6.2`) והצגת חידושי סדרת `v3.0.x` העדכניים במודאל העדכון.
 
-### 📱 2. הצצה אופקית בין סמסטרים במובייל (`styles.css`, `ui_enhancements.js`)
-- **תכנון תואר במובייל**: עמודות הסמסטרים במכשירים ניידים (`<= 768px`) מוצגות ברוחב ~`82%` עם גלילה אופקית והצמדת Snap, כך שהסמסטר הבא מציץ מהצד וממחיש מיד שיש סמסטרים נוספים בהמשך.
-
-### 📦 3. קובצי הפצה ועדכון:
-- `Semestero-ME-Tablet-Clean.apk` (`com.technion.semestero.tablet`, `versionCode 120`, `versionName {VERSION}`, `v1+v2+v3` Signed)
-- `Semestero-ME.apk` (`com.technion.semestero`, `versionCode 120`, `versionName {VERSION}`, `v1+v2+v3` Signed, `targetSdk 34`)
-- `Semestero-ME-Watch.apk` (`versionCode 120`, `versionName {VERSION}`, `v1+v2+v3` Signed)
+### 📦 2. קובצי הפצה ועדכון:
+- `Semestero-ME-Tablet-Clean.apk` (`com.technion.semestero.tablet`, `versionCode 121`, `versionName {VERSION}`, `v1+v2+v3` Signed)
+- `Semestero-ME.apk` (`com.technion.semestero`, `versionCode 121`, `versionName {VERSION}`, `v1+v2+v3` Signed, `targetSdk 34`)
+- `Semestero-ME-Watch.apk` (`versionCode 121`, `versionName {VERSION}`, `v1+v2+v3` Signed)
 - `Semestero-ME-Windows-x64.zip` (Electron Desktop Client {VERSION})
 """
 

@@ -25845,11 +25845,11 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.11.19-v3.0.2",
-    version: "3.0.2",
-    build: "20261119_02",
-    date: "2026-11-19 09:45",
-    description: "v3.0.2: הסרת גרירת יצירה/הזזה ממערכת השעות (נותרת פעילה בלוח השנה), כפתור החלפת תצוגה במערכת השעות בין לו״ז שעות לכרטיסיות מפורטות עם כל פרטי הקורס והנוכחות, הנגשת כפתורי נוכחות גם לקורסי שעה אחת בלו״ז השעות, והחזרת הצצת סמסטר הבא (82%) במתכנן התואר במובייל."
+    code: "REV-2026.11.19-v3.0.3",
+    version: "3.0.3",
+    build: "20261119_03",
+    date: "2026-11-19 10:15",
+    description: "v3.0.3: ניווט ישיר מכפתור שבוע 4 מתוך 13 ב-HUD העליון ללשונית סטטיסטיקות ומעקב שבועי במרכז הנוכחות (ללא דריסה למסך ביצועים כללי), וניקוי יומן העדכונים מהגרסאות הישנות (v2.6 / v2.6.2)."
 };
 window.APP_VERSION = APP_CURRENT_REVISION.version;
 
@@ -26951,7 +26951,26 @@ async function triggerManualCalendarPull() {
     if (statGpaItem) statGpaItem.onclick = () => window.openAnalyticsModal();
 
     const statCompletedItem = document.getElementById("stat-item-completed-courses");
-    if (statCompletedItem) statCompletedItem.onclick = () => window.openAnalyticsModal();
+    if (statCompletedItem) {
+        statCompletedItem.onclick = (e) => {
+            if (e) e.stopPropagation();
+            if (window.AttendanceHub && typeof window.AttendanceHub.openModal === 'function') {
+                window.AttendanceHub.openModal('stats');
+            } else if (typeof window.setActiveMainTab === 'function') {
+                window.setActiveMainTab('calendar');
+            }
+        };
+        statCompletedItem.onkeydown = (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                if (window.AttendanceHub && typeof window.AttendanceHub.openModal === 'function') {
+                    window.AttendanceHub.openModal('stats');
+                } else if (typeof window.setActiveMainTab === 'function') {
+                    window.setActiveMainTab('calendar');
+                }
+            }
+        };
+    }
 
     const statOpenTasksItem = document.getElementById("stat-item-open-tasks");
     if (statOpenTasksItem) {
@@ -28512,7 +28531,7 @@ function renderTimetableWeekNavigator(schedule) {
         <div class="week-nav-top-row">
             <div class="week-nav-controls">
                 <button type="button" class="btn-week-step" ${selectedWeek <= 1 ? 'disabled' : ''} onclick="if (window.AttendanceHub) window.AttendanceHub.setSelectedWeek(${selectedWeek - 1});" title="עבור לשבוע הקודם">▶ קודם</button>
-                <div class="week-nav-current-badge">
+                <div class="week-nav-current-badge" onclick="if (window.AttendanceHub) { if (document.getElementById('modal-attendance-hub')) window.AttendanceHub.switchTab('stats'); else window.AttendanceHub.openModal('stats'); }" style="cursor: pointer;" title="לחץ לפתיחת סטטיסטיקות ומעקב שבועי">
                     <span>📅 שבוע ${selectedWeek} מתוך 13</span>
                     ${weekDateRange ? `<span class="week-nav-date-range">(${weekDateRange})</span>` : ''}
                 </div>

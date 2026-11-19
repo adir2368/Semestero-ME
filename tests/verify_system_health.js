@@ -1585,7 +1585,12 @@ async function run() {
                 if (typeof window.recalculateCourseStates === 'function') window.recalculateCourseStates();
                 if (typeof window.updateHud === 'function') window.updateHud();
 
-                // 1. HUD Semester Week & Open Tasks 1:1 parity inspection (verify exact parity with reminders banner at 0 and 1 open task)
+                // 1. HUD Semester Week click -> Attendance Stats & Weekly Tracking + Open Tasks 1:1 parity inspection
+                const semWeekBoxEl = document.getElementById('stat-item-completed-courses');
+                if (semWeekBoxEl) semWeekBoxEl.click();
+                const semWeekOpensStats = !!(document.getElementById('modal-attendance-hub') && window.AttendanceHub && window.AttendanceHub.activeTab === 'stats');
+                const semWeekBadgeClickable = !!document.querySelector('#modal-attendance-hub .week-nav-current-badge[onclick*="stats"]');
+                if (window.AttendanceHub && typeof window.AttendanceHub.close === 'function') window.AttendanceHub.close();
                 const semWeekText = document.getElementById('stat-semester-week')?.innerText || '';
                 const openTasksText = document.getElementById('stat-open-tasks')?.innerText?.trim() || '';
                 if (typeof renderTasksReminderBanner === 'function') renderTasksReminderBanner();
@@ -1801,6 +1806,8 @@ async function run() {
                 if (typeof setActiveMainTab === 'function') setActiveMainTab('curriculum');
                 return {
                     semWeekText,
+                    semWeekOpensStats,
+                    semWeekBadgeClickable,
                     openTasksText,
                     remCountBefore,
                     parityWithOneDueTask,
@@ -1852,7 +1859,7 @@ async function run() {
                 };
             })()`);
 
-            assert(res.semWeekText.includes('שבוע'), 'HUD must display current semester week: ' + JSON.stringify(res));
+            assert(res.semWeekText.includes('שבוע') && res.semWeekOpensStats && res.semWeekBadgeClickable, 'HUD semester week must display week and open AttendanceHub stats tab directly on click: ' + JSON.stringify(res));
             assert(Number(res.openTasksText) === res.remCountBefore && res.parityWithOneDueTask, 'HUD open tasks count must stay in 1:1 parity with active reminders banner: ' + JSON.stringify(res));
             assert(!res.hasSemHeaderCol && !res.hasGradeHeaderCol, 'Tasks table must omit separate Semester and Grade columns: ' + JSON.stringify(res));
             assert(res.selectCellHiddenByDefault && res.selectModeActivated, 'Tasks selection checkboxes must be hidden until toggle clicked: ' + JSON.stringify(res));
