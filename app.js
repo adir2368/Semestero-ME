@@ -10274,6 +10274,7 @@ function notifyStateChanged(options = {}) {
                 if (typeof DegreePlanner !== 'undefined' && DegreePlanner.renderDegreePlanner) DegreePlanner.renderDegreePlanner();
             } else if (currentTab === 'tasks') {
                 if (typeof renderNotionTasksTable === 'function') renderNotionTasksTable();
+                if (typeof renderNotionHomeworkPolicyStrip === 'function') renderNotionHomeworkPolicyStrip();
                 if (typeof populateNotionCourseFilter === 'function') populateNotionCourseFilter();
                 if (typeof renderExamGapRunway === 'function') renderExamGapRunway();
             } else if (currentTab === 'calendar') {
@@ -10790,10 +10791,10 @@ function updateHud() {
     if (statSemWeek && window.TechnionAcademicCalendar && typeof window.TechnionAcademicCalendar.getAcademicSemesterWeekInfo === 'function') {
         const weekInfo = window.TechnionAcademicCalendar.getAcademicSemesterWeekInfo(new Date());
         if (weekInfo.phase === 'teaching' && weekInfo.week && weekInfo.totalWeeks) {
-            statSemWeek.innerHTML = `שבוע <bdi dir="ltr">${weekInfo.week} / ${weekInfo.totalWeeks}</bdi>`;
+            statSemWeek.innerHTML = `שבוע <bdi dir="ltr">${weekInfo.week}/${weekInfo.totalWeeks}</bdi>`;
         } else {
             const rawBadge = String(weekInfo.badgeText || weekInfo.displayShort || '--');
-            statSemWeek.innerHTML = rawBadge.replace(/(\d+\s*\/\s*\d+)/g, '<bdi dir="ltr">$1</bdi>');
+            statSemWeek.innerHTML = rawBadge.replace(/(\d+)\s*\/\s*(\d+)/g, '<bdi dir="ltr">$1/$2</bdi>');
         }
         if (statSemWeekHint) {
             const hint = weekInfo.hintText || weekInfo.displayHint || '';
@@ -24977,12 +24978,15 @@ function renderFinalsCalendar() {
         const firstDate = weekDates[0];
         const lastDate = weekDates[weekDates.length - 1];
         if (titleEl) {
+            const shortMonthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
             const firstMName = monthNames[firstDate.getMonth()];
             const lastMName = monthNames[lastDate.getMonth()];
             if (firstMName === lastMName) {
                 titleEl.innerHTML = `<bdi dir="ltr">${firstDate.getDate()} - ${lastDate.getDate()} ${escapeHtml(firstMName)} ${lastDate.getFullYear()}</bdi>`;
             } else {
-                titleEl.innerHTML = `<bdi dir="ltr">${firstDate.getDate()} ${escapeHtml(firstMName)} - ${lastDate.getDate()} ${escapeHtml(lastMName)} ${lastDate.getFullYear()}</bdi>`;
+                const firstMShort = shortMonthNames[firstDate.getMonth()] || firstMName;
+                const lastMShort = shortMonthNames[lastDate.getMonth()] || lastMName;
+                titleEl.innerHTML = `<bdi dir="ltr">${firstDate.getDate()} ${escapeHtml(firstMShort)} - ${lastDate.getDate()} ${escapeHtml(lastMShort)} ${lastDate.getFullYear()}</bdi>`;
             }
         }
 
@@ -25851,11 +25855,11 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.11.19-v3.0.6",
-    version: "3.0.6",
-    build: "20261119_06",
-    date: "2026-11-19 11:38",
-    description: "v3.0.6: תיקון רגרסיות לאחר האופטימיזציה — הסרת contain:layout שכלאה סרגלים צפים (כגון פעולות מרובות במשימות), הסרת content-visibility ודריסת צבע רקע במובייל שהפריעו למצב בהיר וגלילת הגדרות, הרחבת MutationObservers עבור מודאלים (#modal-*) וכפתורי עזרה, טעינה מוקדמת של sentry_logger ו-utils, והגנת רינדור מיידית ללוח השנה ולמסנן מערכת השעות."
+    code: "REV-2026.11.19-v3.0.7",
+    version: "3.0.7",
+    build: "20261119_07",
+    date: "2026-11-19 13:30",
+    description: "v3.0.7: תיקון זיהוי גיליונות שיעורי בית (מניעת זיהוי בונוס/לומדת MATLAB כגיליון 2 ושמירה יציבה של סימוני הגשה ללא חזרה למצב קודם), ייצוב רוחב כותרת לוח השנה לאפס קפיצות במעבר חודש/שבוע/יום, וצמצום רווחים ב-שבוע 4/13 ב-HUD העליון."
 };
 window.APP_VERSION = APP_CURRENT_REVISION.version;
 
@@ -31779,18 +31783,74 @@ function getDynamicCourseHomeworkPolicy(course) {
 function extractHomeworkSheetIndex(rawTitle) {
     if (!rawTitle) return null;
     const title = String(rawTitle).toLowerCase();
-    // 1. Prefer explicit homework/sheet/quiz keyword followed by sheet number (prevents matching "מוצקים 2" or "פיזיקה 2")
-    const explicitMatch = title.match(/(?:תרגיל(?:\s*בית)?|גיליון|גליון|מטלה|שאלון|בוחן|webwork|hw|sheet|quiz|assignment)\s*#?\s*0*(\d+)\b/i);
+    // 1. Prefer explicit homework/sheet/quiz keyword followed by sheet number (prevents matching "מוצקים 2" or "בונוס 2 נקודות")
+    const explicitMatch = title.match(/(?:תרגיל(?:\s*בית)?|גיליון|גליון|מטל[הת](?:\s*(?:בית|תכנות|מעבדה))?|עבודת\s*בית|ש["״׳]?ב|תכנות|שאלון|בוחן|webwork|hw|sheet|quiz|assignment|ex(?:ercise)?)\s*(?:מס['׳]?|מספר|no\.?|#|[-–—:_])*\s*0*(\d+)(?!\d)/i);
     if (explicitMatch) {
         return parseInt(explicitMatch[1], 10);
     }
-    // 2. Strip known course-level ordinal suffixes before falling back to standalone digit match
-    const strippedCourseOrdinals = title.replace(/(?:מוצקים|פיזיקה|פיסיקה|חדו"?א|אלגברה|תרמודינמיקה|זרימה|תכן(?:\s*מכני)?|מערכות\s*תיב"?מ|מתודולוגיות(?:\s*פיתוח(?:\s*הנדסי)?)?|פרויקט(?:\s*גמר(?:\s*הנדסי)?)?)\s*[123]\b/gi, '');
-    const digitMatch = strippedCourseOrdinals.match(/\b0*(\d+)\b/);
+    // 1b. Explicit Hebrew ordinal letter after sheet keyword (e.g. "תרגיל בית א'", "גיליון ב")
+    const explicitHebMatch = title.match(/(?:תרגיל(?:\s*בית)?|גיליון|גליון|מטל[הת](?:\s*(?:בית|תכנות))?)\s*(?:מס['׳]?|מספר|[-–—:])*\s*(יא|יב|[א-י])['״׳]?(?=$|[\s\-–—:),.;/])/i);
+    if (explicitHebMatch) {
+        const hebMap = { 'א': 1, 'ב': 2, 'ג': 3, 'ד': 4, 'ה': 5, 'ו': 6, 'ז': 7, 'ח': 8, 'ט': 9, 'י': 10, 'יא': 11, 'יב': 12 };
+        if (hebMap[explicitHebMatch[1]]) return hebMap[explicitHebMatch[1]];
+    }
+    // 2. Non-sheet bonus/tutorial/survey/miluim tasks without an explicit sheet number must NEVER hijack a sheet slot (e.g. "לומדת MATLAB (בונוס 2 נקודות לציון)")
+    if (/(?:בונוס|לומדת|לומדה|מילואי|סקר|היכרות|משוב|bonus|tutorial|survey)/i.test(title)) {
+        return null;
+    }
+    // 3. Strip parenthetical notes, bonus/points/percentages, years, course codes, and course-level ordinals before fallback digit match
+    const cleaned = title
+        .replace(/\((?:בונוס|הארכה|מתוקן|הגשה|סופי|חובה|רשות|עדכון)[^)]*\)/gi, ' ')
+        .replace(/\[(?:בונוס|הארכה|מתוקן|הגשה|סופי|חובה|רשות|עדכון)[^\]]*\]/gi, ' ')
+        .replace(/בונוס\s*\d+/gi, ' ')
+        .replace(/\d+(?:\.\d+)?\s*(?:נקודות|נק['׳״]?|%|אחוז(?:ים)?)/gi, ' ')
+        .replace(/\b20\d{2}\b/g, ' ')
+        .replace(/\b3010\b/g, ' ')
+        .replace(/\b\d{5,8}\b/g, ' ')
+        .replace(/(?:מוצקים|פיזיקה|פיסיקה|חדו"?א|אלגברה|תרמודינמיקה|זרימה|תכן(?:\s*מכני)?|מערכות\s*תיב"?מ|מתודולוגיות(?:\s*פיתוח(?:\s*הנדסי)?)?|פרויקט(?:\s*גמר(?:\s*הנדסי)?)?)\s*[123]\b/gi, ' ');
+    const digitMatch = cleaned.match(/(?:^|[^\d])0*(\d+)(?!\d)/);
     if (digitMatch) {
-        return parseInt(digitMatch[1], 10);
+        const idx = parseInt(digitMatch[1], 10);
+        if (idx >= 1 && idx <= 20) return idx;
     }
     return null;
+}
+
+function isHomeworkPolicyTask(t) {
+    if (!t || typeof t !== 'object') return false;
+    if (t.type === 'exam' || t.isMiluim === true || t.miluim === true) return false;
+    const title = String(t.title || '');
+    if (/מועד\s*[אבג]|בחינה\s*סופית|מבחן\s*סוף/i.test(title)) return false;
+    const parsedIdx = extractHomeworkSheetIndex(title);
+    // Exclude non-sheet bonus/tutorial/survey tasks unless they explicitly carry a sheet number
+    if (parsedIdx === null && /(?:בונוס|לומדת|לומדה|מילואי|סקר|היכרות|משוב|bonus|tutorial|survey)/i.test(title)) {
+        return false;
+    }
+    return (
+        t.type === 'hw' ||
+        t.type === 'webwork' ||
+        t.type === 'hw_digital' ||
+        t.type === 'hw_written' ||
+        /(?:תרגיל|מטל[הת]|גיליון|גליון|עבודת\s*בית|ש["״׳]?ב|webwork|hw|sheet|assignment)/i.test(title)
+    );
+}
+
+function pickPrimarySheetTask(matchingTasks) {
+    if (!Array.isArray(matchingTasks) || matchingTasks.length === 0) return null;
+    if (matchingTasks.length === 1) return matchingTasks[0];
+    const statusRank = (t) => {
+        if (!t) return 0;
+        if (t.completed === true || t.status === 'done' || t.status === 'completed') return 4;
+        if (t.status === 'submitted' || t.submittedAt) return 3;
+        if (t.status === 'in_progress' || t.status === 'doing' || t.started === true) return 2;
+        return 1;
+    };
+    return [...matchingTasks].sort((a, b) => {
+        const aTs = Number((a && (a.statusUpdatedAt || a.completedAt)) || 0);
+        const bTs = Number((b && (b.statusUpdatedAt || b.completedAt)) || 0);
+        if (bTs !== aTs) return bTs - aTs;
+        return statusRank(b) - statusRank(a);
+    })[0];
 }
 
 function parseTaskGradeValue(raw) {
@@ -31868,7 +31928,7 @@ function getCourseHomeworkStatus(courseCode) {
     if (!policy) return null;
 
     const tasks = Array.isArray(course.tasks) ? course.tasks : [];
-    const hwTasks = tasks.filter(t => t.type === 'hw' || (t.title && /תרגיל|מטלה|גיליון|גליון|hw/i.test(t.title)));
+    const hwTasks = tasks.filter(isHomeworkPolicyTask);
 
     const sheets = [];
     let completedCount = 0;
@@ -31881,17 +31941,7 @@ function getCourseHomeworkStatus(courseCode) {
         const sheetName = (policy.sheetNames && policy.sheetNames[i]) ? policy.sheetNames[i] : `גיליון ${i}`;
         
         // Find tasks matching sheet i
-        const matchingTasks = hwTasks.filter(t => {
-            const parsedIdx = extractHomeworkSheetIndex(t.title);
-            if (parsedIdx !== null) return parsedIdx === i;
-            const title = String(t.title || '').toLowerCase();
-            const hebLetters = ['א', 'ב', 'ג', 'ד', 'ה', 'ו', 'ז', 'ח', 'ט', 'י', 'יא', 'יב'];
-            if (hebLetters[i - 1]) {
-                const hebRegex = new RegExp(`\\b${hebLetters[i - 1]}['״׳]?\\b`, 'i');
-                if (hebRegex.test(title)) return true;
-            }
-            return false;
-        });
+        const matchingTasks = hwTasks.filter(t => extractHomeworkSheetIndex(t.title) === i);
 
         let digitalTask = null;
         let writtenTask = null;
@@ -31908,7 +31958,7 @@ function getCourseHomeworkStatus(courseCode) {
                 return /(הגשת\s*פתרון|פתרון\s*בכתב|סריקה|upload|פתרון\s*תרגיל)/i.test(title);
             }) || null;
         } else {
-            singleTask = matchingTasks[0] || null;
+            singleTask = pickPrimarySheetTask(matchingTasks);
         }
 
         let status = 'locked';
@@ -32410,9 +32460,9 @@ function setHomeworkComponentLifecycle(courseCode, sheetIndex, compType, newStat
     const policy = COURSE_HOMEWORK_POLICIES[cleanCode] || COURSE_HOMEWORK_POLICIES['0' + cleanCode] || getDynamicCourseHomeworkPolicy(course);
     const sheetName = (policy && policy.sheetNames && policy.sheetNames[sheetIndex]) ? policy.sheetNames[sheetIndex] : `גיליון ${sheetIndex}`;
 
-    // Look for matching task
+    // Look for matching homework task (strictly within homework policy tasks)
     let targetTask = null;
-    course.tasks.forEach(t => {
+    course.tasks.filter(isHomeworkPolicyTask).forEach(t => {
         const title = String(t.title || '').toLowerCase();
         const matchesIndex = (extractHomeworkSheetIndex(t.title) === sheetIndex);
         if (!matchesIndex) return;
@@ -32431,6 +32481,8 @@ function setHomeworkComponentLifecycle(courseCode, sheetIndex, compType, newStat
             id: `${cleanCode}_hw_${sheetIndex}_${isWritten ? 'written' : 'dig'}`,
             title: isWritten ? `הגשת פתרון תרגיל בית ${sheetIndex}` : `HW ${sheetIndex} - ${sheetName}`,
             type: 'hw',
+            source: 'manual',
+            isCustom: true,
             xp: 50,
             completed: (newStatus === 'done' || newStatus === 'submitted'),
             status: newStatus,
@@ -32485,8 +32537,9 @@ function setHomeworkSheetLifecycle(courseCode, sheetIndex, newStatus) {
     const policy = COURSE_HOMEWORK_POLICIES[cleanCode] || COURSE_HOMEWORK_POLICIES['0' + cleanCode] || getDynamicCourseHomeworkPolicy(course);
     const sheetName = (policy && policy.sheetNames && policy.sheetNames[sheetIndex]) ? policy.sheetNames[sheetIndex] : `גיליון ${sheetIndex}`;
 
-    const hwTasks = course.tasks.filter(t => t.type === 'hw' || (t.title && /תרגיל|מטלה|גיליון|גליון|hw/i.test(t.title)));
-    let targetTask = hwTasks.find(t => extractHomeworkSheetIndex(t.title) === sheetIndex);
+    const hwTasks = course.tasks.filter(isHomeworkPolicyTask);
+    const matchingSheetTasks = hwTasks.filter(t => extractHomeworkSheetIndex(t.title) === sheetIndex);
+    let targetTask = pickPrimarySheetTask(matchingSheetTasks);
     const nowTs = Date.now();
 
     if (!targetTask) {
@@ -32494,6 +32547,8 @@ function setHomeworkSheetLifecycle(courseCode, sheetIndex, newStatus) {
             id: `${cleanCode}_hw_${sheetIndex}`,
             title: `תרגיל בית ${sheetIndex}: ${sheetName}`,
             type: 'hw',
+            source: 'manual',
+            isCustom: true,
             xp: 50,
             completed: (newStatus === 'done' || newStatus === 'submitted'),
             status: newStatus,
@@ -32502,22 +32557,24 @@ function setHomeworkSheetLifecycle(courseCode, sheetIndex, newStatus) {
         };
         course.tasks.push(targetTask);
     } else {
-        targetTask.status = newStatus;
-        targetTask.completed = (newStatus === 'done' || newStatus === 'submitted');
-        targetTask.statusUpdatedAt = nowTs;
-        if (targetTask.completed) {
-            targetTask.completedAt = nowTs;
-        } else {
-            delete targetTask.completedAt;
-        }
-        if (newStatus === 'in_progress') {
-            targetTask.started = true;
-            if (!targetTask.progress) targetTask.progress = 25;
-        } else if (newStatus === 'open' || newStatus === 'not_started') {
-            targetTask.started = false;
-            targetTask.progress = 0;
-            targetTask.completed = false;
-        }
+        matchingSheetTasks.forEach(tObj => {
+            tObj.status = newStatus;
+            tObj.completed = (newStatus === 'done' || newStatus === 'submitted');
+            tObj.statusUpdatedAt = nowTs;
+            if (tObj.completed) {
+                tObj.completedAt = nowTs;
+            } else {
+                delete tObj.completedAt;
+            }
+            if (newStatus === 'in_progress') {
+                tObj.started = true;
+                if (!tObj.progress) tObj.progress = 25;
+            } else if (newStatus === 'open' || newStatus === 'not_started') {
+                tObj.started = false;
+                tObj.progress = 0;
+                tObj.completed = false;
+            }
+        });
     }
 
     if (window.MoodleSync) {
@@ -32548,9 +32605,9 @@ function toggleHomeworkSheetComponent(courseCode, sheetIndex, compType) {
     const policy = COURSE_HOMEWORK_POLICIES[cleanCode] || COURSE_HOMEWORK_POLICIES['0' + cleanCode] || getDynamicCourseHomeworkPolicy(course);
     const sheetName = (policy && policy.sheetNames && policy.sheetNames[sheetIndex]) ? policy.sheetNames[sheetIndex] : `גיליון ${sheetIndex}`;
 
-    // Look for matching task
+    // Look for matching homework task (strictly within homework policy tasks)
     let targetTask = null;
-    course.tasks.forEach(t => {
+    course.tasks.filter(isHomeworkPolicyTask).forEach(t => {
         const title = String(t.title || '').toLowerCase();
         const matchesIndex = (extractHomeworkSheetIndex(t.title) === sheetIndex);
         if (!matchesIndex) return;
@@ -32565,10 +32622,13 @@ function toggleHomeworkSheetComponent(courseCode, sheetIndex, compType) {
     const nowTs = Date.now();
     if (!targetTask) {
         const isWritten = (compType === 'written');
+        const isSingle = (compType === 'single');
         targetTask = {
-            id: `${cleanCode}_hw_${sheetIndex}_${isWritten ? 'written' : 'dig'}`,
-            title: isWritten ? `הגשת פתרון תרגיל בית ${sheetIndex}` : `HW ${sheetIndex} - ${sheetName}`,
+            id: isSingle ? `${cleanCode}_hw_${sheetIndex}` : `${cleanCode}_hw_${sheetIndex}_${isWritten ? 'written' : 'dig'}`,
+            title: isWritten ? `הגשת פתרון תרגיל בית ${sheetIndex}` : (isSingle ? `תרגיל בית ${sheetIndex}: ${sheetName}` : `HW ${sheetIndex} - ${sheetName}`),
             type: 'hw',
+            source: 'manual',
+            isCustom: true,
             xp: 50,
             completed: true,
             status: 'done',
@@ -32652,12 +32712,20 @@ function toggleHomeworkSheetStatus(courseCode, sheetIndex) {
             toggleHomeworkSheetComponent(courseCode, sheetIndex, 'written');
         }
     } else {
-        if (sheet.singleTask) {
+        const matchingSheetTasks = (Array.isArray(course.tasks) ? course.tasks : []).filter(t => isHomeworkPolicyTask(t) && extractHomeworkSheetIndex(t.title) === sheetIndex);
+        if (matchingSheetTasks.length > 0) {
+            matchingSheetTasks.forEach(tObj => {
+                tObj.completed = nextCompleted;
+                tObj.status = nextCompleted ? 'done' : 'open';
+                syncSheetTaskRegistry(tObj);
+            });
+        } else if (sheet.singleTask) {
             sheet.singleTask.completed = nextCompleted;
             sheet.singleTask.status = nextCompleted ? 'done' : 'open';
             syncSheetTaskRegistry(sheet.singleTask);
         } else if (nextCompleted) {
             toggleHomeworkSheetComponent(courseCode, sheetIndex, 'single');
+            return;
         }
     }
 
@@ -32713,7 +32781,7 @@ function setHomeworkSheetGrade(courseCode, sheetIndex, compType, rawGrade) {
     const nowTs = Date.now();
 
     let targetTask = null;
-    const hwTasks = course.tasks.filter(t => t.type === 'hw' || (t.title && /תרגיל|מטלה|גיליון|גליון|hw/i.test(t.title)));
+    const hwTasks = course.tasks.filter(isHomeworkPolicyTask);
     if (compType === 'written' || compType === 'digital') {
         hwTasks.forEach(t => {
             if (extractHomeworkSheetIndex(t.title) !== sheetIndex) return;
@@ -32725,7 +32793,7 @@ function setHomeworkSheetGrade(courseCode, sheetIndex, compType, rawGrade) {
             }
         });
     } else {
-        targetTask = hwTasks.find(t => extractHomeworkSheetIndex(t.title) === sheetIndex) || null;
+        targetTask = pickPrimarySheetTask(hwTasks.filter(t => extractHomeworkSheetIndex(t.title) === sheetIndex));
     }
 
     if (!targetTask) {
@@ -32736,6 +32804,8 @@ function setHomeworkSheetGrade(courseCode, sheetIndex, compType, rawGrade) {
             id: isDual ? `${cleanCode}_hw_${sheetIndex}_${isWritten ? 'written' : 'dig'}` : `${cleanCode}_hw_${sheetIndex}`,
             title: isWritten ? `הגשת פתרון תרגיל בית ${sheetIndex}` : (isDual ? `HW ${sheetIndex} - ${sheetName}` : `תרגיל בית ${sheetIndex}: ${sheetName}`),
             type: 'hw',
+            source: 'manual',
+            isCustom: true,
             xp: 50,
             completed: true,
             status: 'done',

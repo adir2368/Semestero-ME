@@ -20677,3 +20677,42 @@ bdi[dir="ltr"] {
         max-width: 100%;
     }
 }
+
+/* HUD Semester Week compact typography (eliminates wide gaps around '/' while keeping JetBrains Mono KPI digits) */
+#stat-semester-week {
+    display: inline-flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 4px;
+    letter-spacing: -0.02em;
+    white-space: nowrap;
+}
+
+#stat-semester-week bdi {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.04em;
+}
+
+/* Zero-jump Calendar toolbar on Desktop: fixed-width date title prevents buttons shifting between Month/Week/Workweek/Day */
+@media (min-width: 769px) {
+    .cal-paging-bar {
+        flex-shrink: 0 !important;
+    }
+
+    .cal-paging-bar .cal-current-month {
+        display: inline-block !important;
+        width: 248px !important;
+        min-width: 248px !important;
+        max-width: 248px !important;
+        text-align: center !important;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .cal-view-mode-toggle {
+        flex-shrink: 0 !important;
+    }
+}

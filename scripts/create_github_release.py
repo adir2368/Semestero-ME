@@ -17,9 +17,9 @@ ZIP_PATH = os.path.join(ROOT, "Semestero-ME-Windows-x64.zip")
 
 with open(os.path.join(ROOT, "package.json"), "r", encoding="utf-8") as f:
     pkg = json.load(f)
-VERSION = pkg.get("version", "3.0.6")
+VERSION = pkg.get("version", "3.0.7")
 TAG = f"v{VERSION}"
-NAME = f"Semestero ME v{VERSION} - Post-Optimization Stability, Fixed Overlays, Light Mode & Modal Observer Fixes"
+NAME = f"Semestero ME v{VERSION} - Homework Sheet Parsing Fix (034056), Zero-Jump Calendar Bar & Compact HUD Week"
 
 def get_github_token():
     try:
@@ -99,19 +99,18 @@ def main():
 
     body_notes = f"""# Semestero ME {TAG} Release Notes
 
-### 🛠️ 1. תיקון רגרסיות פונקציונליות לאחר האופטימיזציה (`styles.css`, `modal_help.js`, `ui_enhancements.js`, `app.js`, `index.html`, `sw.js`)
-- **שחרור שכבות צפות (`position: fixed`) ו-Stacking Context**: הסרת `contain: layout style` מ-5 סביבות העבודה שגרמה ללכידת סרגל הפעולות המרובות במשימות (`#tasks-bulk-actions-bar`) וחלוניות צפות באמצע המסך.
-- **שיקום מצב בהיר, נגישות וכרטיסי הגדרות**: הסרת `content-visibility: auto` מ-`.settings-card` והסרת דריסת הצבע הכהה הקשיחה במובייל (`<= 768px`), למניעת חיתוך תפריטים ושבירת Light Mode / High Contrast.
-- **הרחבת `MutationObserver` למודאלים וכפתורי עזרה (`?`)**: תמיכה מלאה בכל המודאלים (`#modal-*` כגון `modal-attendance-hub`, `modal-timetable-generator` וגם `#*-modal`) ורינדורים דינמיים של כותרות, תוך שמירה על Debounce למניעת עומס.
-- **הקשחת טעינה מוקדמת ורינדור**: טעינה סינכרונית מוקדמת של `sentry_logger.js` ו-`utils.js`, הגנת רינדור מיידית ללוח השנה ולמסלול המבחנים במעבר מהיר, סנכרון מסנן מערכת השעות לפני רינדור הגריד, ו-`ignoreSearch: true` במטמון האייקונים של Service Worker.
+### 🎯 1. תיקון מדויק למעקב שיעורי הבית (`הטובים מ-N`) ו-`034056` (`app.js`)
+- **חיסול "גיליון 2 מדומה" ממשימות בונוס/לומדה**: תיקון `extractHomeworkSheetIndex()` ו-`isHomeworkPolicyTask()` כך שמשימות בונוס/לומדה ללא מספר גיליון מפורש (כגון `לומדת MATLAB (בונוס 2 נקודות לציון)`) לא יתפסו את `2` מתוך `בונוס 2 נקודות` כגיליון 2 אדום.
+- **זיהוי מורחב ושמירה יציבה ללא חזרה לאחור**: תמיכה מלאה גם ב-`מטלת תכנות 1`, `מטלת בית 1`, `HW1_...` ואותיות עבריות (`גיליון א׳`), עדכון כל הכפילויות של אותו גיליון בעת סימון הגשה, סימון משימות ידניות ב-`source: 'manual'`/`isCustom: true` לשימור בסנכרון ענן, ורענון מיידי של רצועת שיעורי הבית בכל שינוי משימה.
 
-### ⚡ 2. שימור מלא של רווחי האופטימיזציה מ-`v3.0.5`
-- שמירת כל החיסכון בנפח (`cheesefork_database.js` `-737KB`, `favicon.svg` `-370KB`, חבילת APK `5.87MB`, והתקנת SW ראשונית `-4.09MB`), גופנים אסינכרוניים ומניעת שמירות ורינדורים כפולים.
+### 📅 2. אפס קפיצות בסרגל לוח השנה וצמצום רווחים ב-HUD (`styles.css`, `app.js`, `index.html`)
+- **ייצוב מוחלט של סרגל לוח השנה**: קביעת רוחב קבוע (`248px`) לכותרת התאריך `#cal-current-month-title` בדסקטופ וקיצור חודשים במעבר חוצה-חודשים — **`0px` קפיצה** של כפתורי `חודש` / `שבוע` / `שבוע עבודה` / `יום` / `+ אירוע חדש` בעת החלפת תצוגה.
+- **ליטוש מדד `שבוע 4/13` ב-HUD העליון**: הסרת הרווחים הרחבים סביב `/` (`4/13` במקום `4 / 13`) וטיפוגרפיה מהודקת (`Rubik` + `JetBrains Mono`).
 
 ### 📦 3. קובצי הפצה ועדכון:
-- `Semestero-ME-Tablet-Clean.apk` (`com.technion.semestero.tablet`, `versionCode 124`, `versionName {VERSION}`, `v1+v2+v3` Signed)
-- `Semestero-ME.apk` (`com.technion.semestero`, `versionCode 124`, `versionName {VERSION}`, `v1+v2+v3` Signed, `targetSdk 34`)
-- `Semestero-ME-Watch.apk` (`versionCode 124`, `versionName {VERSION}`, `v1+v2+v3` Signed)
+- `Semestero-ME-Tablet-Clean.apk` (`com.technion.semestero.tablet`, `versionCode 125`, `versionName {VERSION}`, `v1+v2+v3` Signed)
+- `Semestero-ME.apk` (`com.technion.semestero`, `versionCode 125`, `versionName {VERSION}`, `v1+v2+v3` Signed, `targetSdk 34`)
+- `Semestero-ME-Watch.apk` (`versionCode 125`, `versionName {VERSION}`, `v1+v2+v3` Signed)
 - `Semestero-ME-Windows-x64.zip` (Electron Desktop Client {VERSION})
 """
 
