@@ -1,7 +1,7 @@
 # Graph Report - academic-skill-tree  (2026-11-19)
 
 ## Corpus Check
-- 756 files · ~945,460 words
+- 756 files · ~945,433 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
@@ -789,7 +789,7 @@ Nodes (4): content, fs, path, targetFile
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `Stage 4: Full-Degree Timetable Studio, Moodle Local-TZ Sync, Homework Matcher & Watch Companion (`F-10`, `F-11`, `F-12`, `F-16`, `G-05`)` connect `android.appwidget.AppWidgetManager` to `app.js`?**
-  _High betweenness centrality (0.150) - this node is a cross-community bridge._
+  _High betweenness centrality (0.160) - this node is a cross-community bridge._
 - **What connects `ADR-0075`, `ADR-0075`, `RFC-5545` to the rest of the system?**
   _10 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `WearCarouselAdapter` be split into smaller, more focused modules?**
