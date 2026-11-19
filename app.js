@@ -27887,25 +27887,23 @@ window.forceAppUpdate = async function() {
 
 window.getFormattedChangelogHTML = function() {
     return `<div style="display: flex; flex-direction: column; gap: 10px;">
-        <div style="background: rgba(139, 92, 246, 0.12); border: 1px solid rgba(168, 85, 247, 0.4); border-radius: 10px; padding: 12px;">
-            <div style="font-weight: 700; color: #c084fc; display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
-                <span>🔝</span> <span>גרסה 2.6.2: כפתור חזרה למעלה סגול חצי-שקוף במיקום ימני אופטימלי</span>
+        <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 10px; padding: 12px;">
+            <div style="font-weight: 700; color: #34d399; display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                <span>🗂️</span> <span>מערכת שעות: כרטיסיות מפורטות + נוכחות נגישה (<bdi dir="ltr">v3.0.2</bdi>)</span>
             </div>
             <ul style="margin: 0; padding-right: 20px; font-size: 0.82rem; color: #cbd5e1; line-height: 1.55;">
-                <li><strong>מיקום ימני תחתון וסגנון סגול חצי-שקוף:</strong> הכפתור ממוקם בצד ימין למטה ומעוצב בזכוכית סגולה שקופה (Purple Glass) עם אפקט טשטוש ואפס הסתרה של טקסטים או כפתורים.</li>
-                <li><strong>מנגנון גלילה קפדני למסך המרכזי:</strong> הכפתור מופיע אך ורק בעת גלילה במסך המרכזי (הגדרות, משימות, מערכת שעות ומודאלים) ומתעלם לחלוטין מגלילות קטנות פנימיות (כגון כרטיסיות סמסטר בתכנון תואר או רשימות קורסים).</li>
-                <li><strong>מרווח תחתון מוגדל (140px):</strong> מאפשר גלילה חופשית עד סוף הדף כך שכל כרטיס וטקסט נשארים גלויים לחלוטין מעל הכפתור.</li>
+                <li>כפתור <code>🗂️ תצוגת כרטיסיות מפורטת</code> מחליף בלחיצה בין תצוגת הכרטיסיות המלאה (כל פרטי הקורס, חדר, מרצה ונוכחות) לבין לו״ז השעות.</li>
+                <li>סימון הנוכחות (<code>✓ הייתי</code> / <code>✗ החסרתי</code>) זמין ומוצמד לתחתית הכרטיס גם בקורסים של שעה אחת בתצוגת הלו״ז.</li>
+                <li>הסרת גרירת יצירה/הזזה מיותרת ממערכת השעות (גרירה ושינוי אורך זמינים כרגיל בלוח השנה), ומתכנן התואר במובייל מציג הצצה לסמסטר הבא (<bdi dir="ltr">82%</bdi>).</li>
             </ul>
         </div>
-        <div style="background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.4); border-radius: 10px; padding: 12px;">
-            <div style="font-weight: 700; color: #34d399; display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
-                <span>🔝</span> <span>גרסה 2.6: כפתור חזרה למעלה, שחזור סמל הפקולטה ועידון HUD מלא</span>
+        <div style="background: rgba(2, 132, 199, 0.1); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 10px; padding: 12px;">
+            <div style="font-weight: 700; color: #38bdf8; display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                <span>🗓️</span> <span>יומן Google Calendar אינטראקטיבי ואקדמיה (<bdi dir="ltr">v3.0.1</bdi>)</span>
             </div>
             <ul style="margin: 0; padding-right: 20px; font-size: 0.82rem; color: #cbd5e1; line-height: 1.55;">
-                <li>כפתור צף אינטליגנטי "חזרה למעלה" (Back to Top) פעיל ומגיב לגלילה בכל מסכי המערכת (הגדרות, תכנון תואר, מערכת שעות ומודאלים).</li>
-                <li>שחזור סמל הפקולטה (הכובע/מבחנה וגלגל שיניים) בסרגל ה-HUD העליון.</li>
-                <li>הרחבת מד אחוז השלמת התואר (0.0% הושלמו) לרוחב מלא זהה למד הנק"ז למראה הרמוני ומדויק.</li>
-                <li>התאמת כפתור ההורדה לסגנון שאר כפתורי הזכוכית ב-HUD עם חץ ירוק אלגנטי.</li>
+                <li>גרירה והזזת אירועים אישיים ביומן, ספקטרום 20 צבעים, חזרות/תזכורות Custom וקיפול שורת <code>כל היום</code> ריקה.</li>
+                <li>אינדקס דרייב לסמסטרים 5–8 ובחירה, סינון מבחני עבר לקורסים פעילים ומסלול <code>🔄 חזרה על קורס / שיפור ציון</code>.</li>
             </ul>
         </div>
 

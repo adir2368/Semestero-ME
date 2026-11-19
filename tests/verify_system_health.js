@@ -1794,6 +1794,10 @@ async function run() {
                     }
                 }
 
+                const changelogCleanNoLegacy26 = typeof window.getFormattedChangelogHTML === 'function'
+                    && !window.getFormattedChangelogHTML().includes('2.6.2')
+                    && !window.getFormattedChangelogHTML().includes('גרסה 2.6:');
+
                 if (typeof setActiveMainTab === 'function') setActiveMainTab('curriculum');
                 return {
                     semWeekText,
@@ -1843,7 +1847,8 @@ async function run() {
                     emptyAlldayCollapsed,
                     pemFilteredActiveOnly,
                     activeRetakeHidden,
-                    completedRetakeVisible
+                    completedRetakeVisible,
+                    changelogCleanNoLegacy26
                 };
             })()`);
 
@@ -1861,7 +1866,7 @@ async function run() {
             assert(res.hasDayModalEnhancements && res.dayModalSwatches === 20 && res.remDefaultNone, 'Enhanced Day Modal with 20-color spectrum and default none reminder must work: ' + JSON.stringify(res));
             assert(res.hasTimetableTimegrid && res.calWeekBound && res.ttNotInteractiveBound && res.oneHrAttVisible && res.cardsModeActive && res.revertedToTimegrid && res.singleDayDefaultGrid && res.hiddenColsInSingleDay >= 1 && res.allWeekGridExpanded && res.phys2FilteredOut && res.yogaHealed09 && res.breakBannerCount === 0 && res.hasSyncCornerBtn, 'Timetable v3.0.2 single-day default, no-drag-create, 1h attendance, cards view toggle, all-week toggle, 114052 filter, Yoga 09:00 & time-grid must work: ' + JSON.stringify(res));
             assert(res.mandatoryFilteredOutSem5 && res.hasTtgCourseSearch, 'Mandatory shields and Timetable Generator must be student-personalized: ' + JSON.stringify(res));
-            assert(res.sem5DriveOk && res.elecDriveOk && res.hasCalPagingBar && res.emptyAlldayCollapsed && res.pemFilteredActiveOnly && res.activeRetakeHidden && res.completedRetakeVisible, 'v3.0.1 Drive Sem5/Electives, paging bar, collapsed empty allday row, active past-exams filter & post-Moed B retake must pass: ' + JSON.stringify(res));
+            assert(res.sem5DriveOk && res.elecDriveOk && res.hasCalPagingBar && res.emptyAlldayCollapsed && res.pemFilteredActiveOnly && res.activeRetakeHidden && res.completedRetakeVisible && res.changelogCleanNoLegacy26, 'v3.0.1/v3.0.2 Drive Sem5/Electives, paging bar, collapsed empty allday row, active past-exams filter, post-Moed B retake & clean changelog must pass: ' + JSON.stringify(res));
         });
 
         await test('Test 33: Mobile Viewport Degree Planner Semester Peek UX (390px)', async () => {
