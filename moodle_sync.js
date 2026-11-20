@@ -671,14 +671,37 @@
                 return String(task.moodleEventId).trim();
             }
             if (task.moodleUid) {
-                const m = String(task.moodleUid).match(/^(\d+)/);
-                if (m) return m[1];
+                const uidStr = String(task.moodleUid).trim();
+                // Live Moodle ICS UIDs look like "26381@moodle26.technion.ac.il"; ignore synthetic seed UIDs like "00340053_hw3"
+                if (uidStr.includes('@')) {
+                    const m = uidStr.match(/^(\d+)/);
+                    if (m) return m[1];
+                }
             }
             if (task.moodleUrl) {
-                const m = String(task.moodleUrl).match(/[?&]id=(\d+)/);
-                if (m) return m[1];
+                const urlStr = String(task.moodleUrl).trim();
+                // Never treat a generic course page URL (/course/view.php?id=116) as an assignment ID!
+                if (!/\/course\/view\.php/i.test(urlStr)) {
+                    const m = urlStr.match(/[?&]id=(\d+)/);
+                    if (m) return m[1];
+                }
             }
             return null;
+        },
+
+        isLiveMoodleTask(task) {
+            if (!task) return false;
+            if (task.moodleEventId && /^\d+$/.test(String(task.moodleEventId).trim())) return true;
+            if (task.moodleUid && /@moodle/i.test(String(task.moodleUid))) return true;
+            if (task.id && /^task_moodle_\d+/i.test(String(task.id))) return true;
+            return false;
+        },
+
+        isPreloadedSeedTask(task) {
+            if (!task) return false;
+            if (this.isLiveMoodleTask(task)) return false;
+            if (task.source === 'manual' || (task.id && String(task.id).startsWith('task-'))) return false;
+            return !!(task.id && /^\d{6,8}_(hw|h|ex|lab|quiz)/i.test(String(task.id)));
         },
 
         detectTaskType(title) {
@@ -705,9 +728,13 @@
             const mId2 = this.extractMoodleId(t2);
             if (mId1 && mId2 && mId1 === mId2) return true;
 
-            // Check exact Moodle URLs
-            if (t1.moodleUrl && t2.moodleUrl && t1.moodleUrl.trim().toLowerCase() === t2.moodleUrl.trim().toLowerCase()) {
-                return true;
+            // Check exact Moodle activity URLs (never match generic course homepages /course/view.php)
+            if (t1.moodleUrl && t2.moodleUrl) {
+                const u1 = t1.moodleUrl.trim().toLowerCase();
+                const u2 = t2.moodleUrl.trim().toLowerCase();
+                if (u1 === u2 && !/\/course\/view\.php/i.test(u1)) {
+                    return true;
+                }
             }
 
             // Check Exam Moed match within same course
@@ -726,15 +753,29 @@
             // Check Canonical Sequence / Category Token (e.g. hw_1, lab_2, quiz_1, exam_a)
             const cToken1 = this.getCanonicalTaskToken(title1, courseName);
             const cToken2 = this.getCanonicalTaskToken(title2, courseName);
-            if (cToken1 && cToken2 && cToken1 === cToken2) {
-                return true;
+            if (cToken1 && cToken2) {
+                if (cToken1 === cToken2) return true;
+                // Merge generic hw_N with hw_written_N (e.g. "HW 3 - Rotation Transformation" vs "HW 3 - Rotation Transformation (הגשת פתרון תרגיל בית 3)"),
+                // while strictly preserving dual-component hw_digital_N vs hw_N / hw_written_N separation!
+                const m1 = cToken1.match(/^(hw|hw_written)_(\d+)$/);
+                const m2 = cToken2.match(/^(hw|hw_written)_(\d+)$/);
+                if (m1 && m2 && m1[2] === m2[2]) {
+                    return true;
+                }
             }
 
-            // Check Normalized Titles
+            // Check Normalized Titles & stripped-parenthetical base titles
             const norm1 = this.normalizeTaskTitle(title1, courseName);
             const norm2 = this.normalizeTaskTitle(title2, courseName);
             if (norm1 && norm2 && norm1 === norm2) {
                 return true;
+            }
+            const base1 = title1.replace(/\([^)]*\)/g, '').replace(/\s+/g, ' ').trim().toLowerCase();
+            const base2 = title2.replace(/\([^)]*\)/g, '').replace(/\s+/g, ' ').trim().toLowerCase();
+            if (base1.length >= 6 && base1 === base2) {
+                const d1 = /(אלקטרוני|שאלון|דיגיטלי|מקוון|לומדה|scorm|webwork)/i.test(title1);
+                const d2 = /(אלקטרוני|שאלון|דיגיטלי|מקוון|לומדה|scorm|webwork)/i.test(title2);
+                if (d1 === d2) return true;
             }
 
             return false;
@@ -757,18 +798,40 @@
                 chosenTitle = t2;
             }
 
-            // Date resolution: prefer non-empty date, or later date if both exist (extension/postponement)
+            // Date resolution:
+            // 1. Explicit manual date wins over seed/Moodle
+            // 2. Live Moodle ICS date ALWAYS wins over stale preloaded seed dates (e.g. 034053_hw3)
+            // 3. Otherwise prefer non-empty date or later extension date
             let chosenDate = primary.dueDate || secondary.dueDate || '';
             let chosenTimestamp = primary.dueTimestamp || secondary.dueTimestamp || 0;
             if (primary.dueDate && secondary.dueDate && primary.dueDate !== secondary.dueDate) {
-                const d1 = Date.parse(primary.dueDate) || 0;
-                const d2 = Date.parse(secondary.dueDate) || 0;
-                if (d2 > d1) {
-                    chosenDate = secondary.dueDate;
-                    chosenTimestamp = secondary.dueTimestamp || d2;
-                } else {
+                const live1 = this.isLiveMoodleTask(primary);
+                const live2 = this.isLiveMoodleTask(secondary);
+                const seed1 = this.isPreloadedSeedTask(primary);
+                const seed2 = this.isPreloadedSeedTask(secondary);
+
+                if (isManual1 && !isManual2) {
                     chosenDate = primary.dueDate;
-                    chosenTimestamp = primary.dueTimestamp || d1;
+                    chosenTimestamp = primary.dueTimestamp || Date.parse(primary.dueDate) || 0;
+                } else if (isManual2 && !isManual1) {
+                    chosenDate = secondary.dueDate;
+                    chosenTimestamp = secondary.dueTimestamp || Date.parse(secondary.dueDate) || 0;
+                } else if (live1 && seed2) {
+                    chosenDate = primary.dueDate;
+                    chosenTimestamp = primary.dueTimestamp || Date.parse(primary.dueDate) || 0;
+                } else if (live2 && seed1) {
+                    chosenDate = secondary.dueDate;
+                    chosenTimestamp = secondary.dueTimestamp || Date.parse(secondary.dueDate) || 0;
+                } else {
+                    const d1 = Date.parse(primary.dueDate) || 0;
+                    const d2 = Date.parse(secondary.dueDate) || 0;
+                    if (d2 > d1) {
+                        chosenDate = secondary.dueDate;
+                        chosenTimestamp = secondary.dueTimestamp || d2;
+                    } else {
+                        chosenDate = primary.dueDate;
+                        chosenTimestamp = primary.dueTimestamp || d1;
+                    }
                 }
             }
 

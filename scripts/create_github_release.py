@@ -17,9 +17,9 @@ ZIP_PATH = os.path.join(ROOT, "Semestero-ME-Windows-x64.zip")
 
 with open(os.path.join(ROOT, "package.json"), "r", encoding="utf-8") as f:
     pkg = json.load(f)
-VERSION = pkg.get("version", "3.1.1")
+VERSION = pkg.get("version", "3.1.2")
 TAG = f"v{VERSION}"
-NAME = f"Semestero ME v{VERSION} - Galaxy Watch 8 Tasks Screen Visual Craft & Zero-Clip Round Layout"
+NAME = f"Semestero ME v{VERSION} - Eliminate Duplicate Tasks & Live Midnight Countdown Dates on Watch"
 
 def get_github_token():
     try:
@@ -99,14 +99,15 @@ def main():
 
     body_notes = f"""# Semestero ME {TAG} Release Notes
 
-### ⌚ 1. שדרוג ויזואלי מלא למסך המשימות האינטראקטיבי בשעון Galaxy Watch 8 (`page_tasks.xml`, `item_task.xml`, `WearCarouselAdapter.java`)
-- **אפס חיתוך מול טבעת המסגרת העגולה**: הצרת באנר המבחן העליון (`14dp` שוליים פנימיים), ריווח תחתון (`24dp`) והדרגת דהייה אנכית (`requiresFadingEdge`) מעל נקודות הניווט.
-- **כרטיסי משימות עשירים דו-שורתיים**: הפרדת שם הקורס מהכותרת (ללא `[מוצקים 2]` שקוטע את שם המטלה), כותרות ב-2 שורות קריאות (`HW 3 - Rotation Transformation`, `תרגיל בית 4 - חוק גאוס`), תגית יעד צבעונית לפי דחיפות (`היום!`, `מחר`, `בעוד X י׳`) ופס צבע אנכי בצד ימין.
+### 🎯 1. חיסול כפילויות משימות ותיקון תאריכים שגויים/קפואים (`moodle_sync.js`, `app.js`, `wear/MainActivity.java`, `SemesteroTasksTileService.java`)
+- **איחוד כפילויות `HW 3 - Rotation Transformation` ושמירת הפרדת דיגיטלי/בכתב**: איחוד אוטומטי של `hw_N` עם `hw_written_N` ושל כותרות זהות ללא סוגריים (תוך שמירה על הפרדת `hw_digital_N`), והרצת `deduplicateCourseTasks()` גם ב-`getUpcomingPriorityTasks()` + הגנת דדופליקציה כפולה בשעון.
+- **עדיפות מוחלטת לתאריך Moodle חי ותיקון באג `/course/view.php`**: תיקון `extractMoodleId()` כך שכתובת דף קורס (`/course/view.php?id=116`) לא תזוהה כמזהה מטלה, ועדיפות מוחלטת לתאריך Moodle ICS אמיתי על פני תאריכי seed מיושנים ב-`mergeTaskPair()`.
+- **חישוב ימים חי בזמן אמת בשעון (אפס סטייה אחרי חצות)**: העברת תאריך ISO (`dueDate`) בכל משימה וחישוב דינמי של `בעוד X ימים` ושל הספירה לאחור למבחן (`01.02.2027`) ישירות בשעון מול תאריך היום בכל יום מחדש.
 
 ### 📦 2. קובצי הפצה ועדכון:
-- `Semestero-ME-Tablet-Clean.apk` (`com.technion.semestero.tablet`, `versionCode 129`, `versionName {VERSION}`, `v1+v2+v3` Signed)
-- `Semestero-ME.apk` (`com.technion.semestero`, `versionCode 129`, `versionName {VERSION}`, `v1+v2+v3` Signed, `targetSdk 34`)
-- `Semestero-ME-Watch.apk` (`versionCode 129`, `versionName {VERSION}`, `v1+v2+v3` Signed)
+- `Semestero-ME-Tablet-Clean.apk` (`com.technion.semestero.tablet`, `versionCode 130`, `versionName {VERSION}`, `v1+v2+v3` Signed)
+- `Semestero-ME.apk` (`com.technion.semestero`, `versionCode 130`, `versionName {VERSION}`, `v1+v2+v3` Signed, `targetSdk 34`)
+- `Semestero-ME-Watch.apk` (`versionCode 130`, `versionName {VERSION}`, `v1+v2+v3` Signed)
 - `Semestero-ME-Windows-x64.zip` (Electron Desktop Client {VERSION})
 """
 

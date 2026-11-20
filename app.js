@@ -25872,11 +25872,11 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.11.20-v3.1.1",
-    version: "3.1.1",
-    build: "20261120_02",
-    date: "2026-11-20 12:40",
-    description: "v3.1.1: שדרוג ויזואלי מלא למסך המשימות האינטראקטיבי בשעון Galaxy Watch 8 (עמוד 2): ביטול חיתוך כרטיסים בטבעת ההיקפית, כותרות דו-שורתיות נקיות ללא קידומת [קורס], תגיות תאריך צבעוניות לפי דחיפות, פס צבע אנכי בצד ימין, והדרגת גלילה רכה מעל נקודות הניווט."
+    code: "REV-2026.11.20-v3.1.2",
+    version: "3.1.2",
+    build: "20261120_03",
+    date: "2026-11-20 12:50",
+    description: "v3.1.2: חיסול כפילויות משימות ותאריכים שגויים/קפואים בשעון ובמודל — איחוד hw/hw_written (כגון HW 3 - Rotation Transformation) עם עדיפות מוחלטת לתאריך Moodle חי על פני תאריך Seed ישן, תיקון זיהוי URL של דף קורס (/course/view.php), וחישוב ימים חי בזמן אמת בשעון מול תאריך היום."
 };
 window.APP_VERSION = APP_CURRENT_REVISION.version;
 
@@ -29421,6 +29421,12 @@ function getUpcomingPriorityTasks(limit = 15) {
         if (!isCurrentSemCourse || hasPassingGrade) return;
         if (!isWinterSemesterStarted() && (cSem || 1) > Number(gameState.currentActiveSemester || 2)) return;
 
+        // Keep 1:1 deduplication parity with renderNotionTasksTable so duplicate Moodle/seed tasks never leak to Widgets or Watch
+        if (window.MoodleSync && typeof window.MoodleSync.deduplicateCourseTasks === 'function') {
+            window.MoodleSync.deduplicateCourseTasks(course);
+        }
+
+        const seenInCourse = new Set();
         (course.tasks || []).forEach(task => {
             if (!task) return;
             const isDone = task.completed || task.status === 'done' || task.status === 'submitted';
@@ -29431,7 +29437,14 @@ function getUpcomingPriorityTasks(limit = 15) {
                 tTitle.includes('מבחן') || tTitle.includes('בחינה') || tTitle.includes('מועד א') || tTitle.includes('מועד ב') || tTitle.includes('בוחן אמצע');
             if (isExamOrMidterm) return; // Open priority tasks exclude final/midterm exams
 
+            const baseKey = String(task.title || '').replace(/\([^)]*\)/g, '').replace(/\s+/g, ' ').trim().toLowerCase();
+            const isDig = /(אלקטרוני|שאלון|דיגיטלי|מקוון|לומדה|scorm|webwork)/i.test(task.title || '');
+            const dedupKey = `${baseKey}|${isDig ? 'dig' : 'std'}`;
+            if (baseKey.length >= 4 && seenInCourse.has(dedupKey)) return;
+            if (baseKey.length >= 4) seenInCourse.add(dedupKey);
+
             let diffDays = 999;
+            let dueDateIso = '';
             let timingText = 'ללא תאריך יעד';
             let timingCode = 'none';
             let urgencyRank = 5;
@@ -29454,7 +29467,8 @@ function getUpcomingPriorityTasks(limit = 15) {
                 }
                 if (due && !isNaN(due.getTime())) {
                     due.setHours(0, 0, 0, 0);
-                    diffDays = Math.ceil((due - today) / (1000 * 60 * 60 * 24));
+                    dueDateIso = `${due.getFullYear()}-${String(due.getMonth() + 1).padStart(2, '0')}-${String(due.getDate()).padStart(2, '0')}`;
+                    diffDays = Math.round((due - today) / (1000 * 60 * 60 * 24));
 
                     if (diffDays < 0) {
                         urgencyRank = 1;
@@ -29493,6 +29507,7 @@ function getUpcomingPriorityTasks(limit = 15) {
                 type: task.type,
                 xp: task.xp || 50,
                 dueDate: task.dueDate,
+                dueDateIso,
                 dueDateDisplay: formatDateToDisplay(task.dueDate),
                 diffDays,
                 urgencyRank,
@@ -29741,6 +29756,7 @@ function syncNativeAndroidWidgets(classData, tasksData) {
             id: t.id || "",
             course: t.courseShortName || t.courseName || "",
             title: t.title || "",
+            dueDate: t.dueDateIso || "",
             due: t.timingText || "להגשה בקרוב",
             dueFormatted: t.timingText || "להגשה בקרוב",
             type: t.type || "hw",

@@ -491,11 +491,16 @@ public class MainActivity extends Activity implements MessageClient.OnMessageRec
             });
         } catch (Exception ignored) {}
 
-        // Screen 2: Tasks & Exams
+        // Screen 2: Tasks & Exams (recalculate live days against today's date so countdowns never go stale overnight)
         String examDays = prefs.getString("exam_days", "");
         String examTitle = prefs.getString("exam_title", "");
         String examSub = prefs.getString("exam_sub", "");
-        if (examDays != null && !examDays.trim().isEmpty() && !examDays.equals("--") && !isCorruptedText(examDays)) {
+        Integer liveExamDays = computeLiveDaysDiff(examSub);
+        if (liveExamDays != null && liveExamDays >= 0) {
+            adapter.examBannerTitle = (liveExamDays == 0)
+                ? "📝 בחינה היום!"
+                : (liveExamDays == 1 ? "📝 בחינה מחר!" : ("📝 בחינה קרובה בעוד " + liveExamDays + " ימים"));
+        } else if (examDays != null && !examDays.trim().isEmpty() && !examDays.equals("--") && !isCorruptedText(examDays)) {
             if (examDays.matches("^\\d+$")) {
                 adapter.examBannerTitle = "📝 בחינה קרובה בעוד " + examDays + " ימים";
             } else {
@@ -512,6 +517,9 @@ public class MainActivity extends Activity implements MessageClient.OnMessageRec
         }
 
         List<WearCarouselAdapter.TaskItem> tasks = new ArrayList<>();
+        java.util.Set<String> seenTaskKeys = new java.util.HashSet<>();
+        long lastSyncTs = prefs.getLong("last_sync_timestamp", 0L);
+        int daysSinceSync = computeDaysElapsedSince(lastSyncTs);
         String allTasksJson = prefs.getString("all_tasks_json", "[]");
         try {
             JSONArray arr = new JSONArray(allTasksJson);
@@ -532,10 +540,29 @@ public class MainActivity extends Activity implements MessageClient.OnMessageRec
                     }
                 }
                 String shortCourse = shortenCourseForWatch(course);
+                String dedupKey = buildTaskDedupKey(shortCourse, title);
+                if (!dedupKey.isEmpty() && seenTaskKeys.contains(dedupKey)) {
+                    continue;
+                }
+                if (!dedupKey.isEmpty()) seenTaskKeys.add(dedupKey);
+
+                String dueDateIso = obj.optString("dueDate", "").trim();
                 String rawDue = obj.optString("dueFormatted", obj.optString("due", "בקרוב")).trim();
                 if (isCorruptedText(rawDue)) rawDue = "בקרוב";
-                String compactDue = formatCompactDueForWatch(rawDue);
-                int urgency = resolveUrgencyForWatch(rawDue);
+
+                String compactDue;
+                int urgency;
+                Integer liveDays = computeLiveDaysDiff(dueDateIso);
+                if (liveDays == null && daysSinceSync > 0) {
+                    liveDays = adjustRelativeDueDays(rawDue, daysSinceSync);
+                }
+                if (liveDays != null) {
+                    compactDue = formatDaysDiffLabel(liveDays);
+                    urgency = (liveDays <= 0) ? 2 : (liveDays <= 3 ? 1 : 0);
+                } else {
+                    compactDue = formatCompactDueForWatch(rawDue);
+                    urgency = resolveUrgencyForWatch(rawDue);
+                }
                 boolean done = prefs.getBoolean("wear_task_" + (i + 1) + "_done", obj.optBoolean("completed", false));
                 tasks.add(new WearCarouselAdapter.TaskItem(title, shortCourse, compactDue, done, urgency));
             }
@@ -564,6 +591,92 @@ public class MainActivity extends Activity implements MessageClient.OnMessageRec
         adapter.tasksList = tasks;
 
         adapter.notifyDataSetChanged();
+    }
+
+    public static String buildTaskDedupKey(String shortCourse, String title) {
+        if (title == null || title.trim().isEmpty()) return "";
+        String base = title.replaceAll("\\([^)]*\\)", "").replaceAll("\\s+", " ").trim().toLowerCase(Locale.ROOT);
+        if (base.length() < 4) return "";
+        boolean isDig = title.contains("אלקטרוני") || title.contains("שאלון") || title.contains("דיגיטלי")
+            || title.contains("מקוון") || title.contains("לומדה") || base.contains("webwork") || base.contains("scorm");
+        return (shortCourse != null ? shortCourse : "") + "|" + base + "|" + (isDig ? "dig" : "std");
+    }
+
+    public static Integer computeLiveDaysDiff(String textWithDate) {
+        if (textWithDate == null || textWithDate.trim().isEmpty()) return null;
+        int year = -1, month = -1, day = -1;
+        java.util.regex.Matcher ymd = java.util.regex.Pattern.compile("(\\d{4})-(\\d{2})-(\\d{2})").matcher(textWithDate);
+        if (ymd.find()) {
+            year = Integer.parseInt(ymd.group(1));
+            month = Integer.parseInt(ymd.group(2));
+            day = Integer.parseInt(ymd.group(3));
+        } else {
+            java.util.regex.Matcher dmy = java.util.regex.Pattern.compile("(\\d{1,2})[./-](\\d{1,2})[./-](\\d{2,4})").matcher(textWithDate);
+            if (dmy.find()) {
+                day = Integer.parseInt(dmy.group(1));
+                month = Integer.parseInt(dmy.group(2));
+                int yr = Integer.parseInt(dmy.group(3));
+                year = (yr < 100) ? (2000 + yr) : yr;
+            }
+        }
+        if (year < 2020 || month < 1 || month > 12 || day < 1 || day > 31) return null;
+        Calendar today = Calendar.getInstance();
+        today.set(Calendar.HOUR_OF_DAY, 0);
+        today.set(Calendar.MINUTE, 0);
+        today.set(Calendar.SECOND, 0);
+        today.set(Calendar.MILLISECOND, 0);
+
+        Calendar target = Calendar.getInstance();
+        target.set(Calendar.YEAR, year);
+        target.set(Calendar.MONTH, month - 1);
+        target.set(Calendar.DAY_OF_MONTH, day);
+        target.set(Calendar.HOUR_OF_DAY, 0);
+        target.set(Calendar.MINUTE, 0);
+        target.set(Calendar.SECOND, 0);
+        target.set(Calendar.MILLISECOND, 0);
+
+        long diffMs = target.getTimeInMillis() - today.getTimeInMillis();
+        return (int) Math.round(diffMs / 86400000.0);
+    }
+
+    public static int computeDaysElapsedSince(long timestampMs) {
+        if (timestampMs <= 0L) return 0;
+        Calendar today = Calendar.getInstance();
+        today.set(Calendar.HOUR_OF_DAY, 0);
+        today.set(Calendar.MINUTE, 0);
+        today.set(Calendar.SECOND, 0);
+        today.set(Calendar.MILLISECOND, 0);
+
+        Calendar then = Calendar.getInstance();
+        then.setTimeInMillis(timestampMs);
+        then.set(Calendar.HOUR_OF_DAY, 0);
+        then.set(Calendar.MINUTE, 0);
+        then.set(Calendar.SECOND, 0);
+        then.set(Calendar.MILLISECOND, 0);
+
+        int days = (int) Math.round((today.getTimeInMillis() - then.getTimeInMillis()) / 86400000.0);
+        return Math.max(0, days);
+    }
+
+    public static Integer adjustRelativeDueDays(String rawDue, int daysElapsed) {
+        if (rawDue == null || rawDue.isEmpty() || daysElapsed <= 0) return null;
+        if (rawDue.contains("היום")) return -daysElapsed;
+        if (rawDue.contains("מחר")) return 1 - daysElapsed;
+        java.util.regex.Matcher m = java.util.regex.Pattern.compile("(\\d+)").matcher(rawDue);
+        if (rawDue.contains("בעוד") && m.find()) {
+            return Integer.parseInt(m.group(1)) - daysElapsed;
+        }
+        if (rawDue.contains("באיחור") && m.find()) {
+            return -(Integer.parseInt(m.group(1)) + daysElapsed);
+        }
+        return null;
+    }
+
+    public static String formatDaysDiffLabel(int daysDiff) {
+        if (daysDiff < 0) return "באיחור " + Math.abs(daysDiff) + " י׳";
+        if (daysDiff == 0) return "היום!";
+        if (daysDiff == 1) return "מחר";
+        return "בעוד " + daysDiff + " י׳";
     }
 
     private static int resolveUrgencyForWatch(String dueText) {

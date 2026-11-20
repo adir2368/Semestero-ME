@@ -596,7 +596,20 @@ public class SemesteroTasksTileService extends TileService {
 
         String headline;
         String subline;
-        if (examDays != null && !examDays.trim().isEmpty() && !examDays.equals("--") && !isCorrupted(examDays)) {
+        Integer liveExamDays = MainActivity.computeLiveDaysDiff(examSub);
+        if (liveExamDays != null && liveExamDays >= 0) {
+            headline = (liveExamDays == 0)
+                ? "בחינה היום!"
+                : (liveExamDays == 1 ? "בחינה מחר!" : ("בחינה קרובה בעוד " + liveExamDays + " ימים"));
+            String shortEx = shortenCourseName((examTitle != null && !isCorrupted(examTitle)) ? examTitle : "");
+            if (!shortEx.isEmpty() && examSub != null && !examSub.trim().isEmpty() && !isCorrupted(examSub)) {
+                subline = shortEx + " • " + examSub.trim();
+            } else if (!shortEx.isEmpty()) {
+                subline = shortEx;
+            } else {
+                subline = "סמסטר חורף תשפ״ז";
+            }
+        } else if (examDays != null && !examDays.trim().isEmpty() && !examDays.equals("--") && !isCorrupted(examDays)) {
             headline = examDays.trim().matches("^\\d+$")
                 ? ("בחינה קרובה בעוד " + examDays.trim() + " ימים")
                 : examDays.trim();
@@ -669,6 +682,8 @@ public class SemesteroTasksTileService extends TileService {
 
     private List<TileTask> loadOpenTasks(SharedPreferences prefs) {
         List<TileTask> result = new ArrayList<>();
+        java.util.Set<String> seenKeys = new java.util.HashSet<>();
+        int daysSinceSync = MainActivity.computeDaysElapsedSince(prefs.getLong("last_sync_timestamp", 0L));
         boolean parsedJson = false;
         String allTasks = prefs.getString("all_tasks_json", "[]");
 
@@ -685,6 +700,7 @@ public class SemesteroTasksTileService extends TileService {
 
                         String rawCourse = obj.optString("course", "").trim();
                         String rawTitle = obj.optString("title", "").trim();
+                        String dueDateIso = obj.optString("dueDate", "").trim();
                         String rawDue = obj.optString("dueFormatted", obj.optString("due", "")).trim();
                         if (rawTitle.isEmpty() || isCorrupted(rawTitle)) continue;
                         if (isCorrupted(rawCourse)) rawCourse = "";
@@ -702,8 +718,23 @@ public class SemesteroTasksTileService extends TileService {
                         }
 
                         String shortCourse = shortenCourseName(rawCourse);
-                        String compactDue = formatCompactDue(rawDue);
-                        int urgency = resolveUrgency(rawDue);
+                        String dedupKey = MainActivity.buildTaskDedupKey(shortCourse, rawTitle);
+                        if (!dedupKey.isEmpty() && seenKeys.contains(dedupKey)) continue;
+                        if (!dedupKey.isEmpty()) seenKeys.add(dedupKey);
+
+                        String compactDue;
+                        int urgency;
+                        Integer liveDays = MainActivity.computeLiveDaysDiff(dueDateIso);
+                        if (liveDays == null && daysSinceSync > 0) {
+                            liveDays = MainActivity.adjustRelativeDueDays(rawDue, daysSinceSync);
+                        }
+                        if (liveDays != null) {
+                            compactDue = MainActivity.formatDaysDiffLabel(liveDays);
+                            urgency = (liveDays <= 0) ? URGENCY_CRITICAL : (liveDays <= 3 ? URGENCY_SOON : URGENCY_NORMAL);
+                        } else {
+                            compactDue = formatCompactDue(rawDue);
+                            urgency = resolveUrgency(rawDue);
+                        }
                         result.add(new TileTask(shortCourse, rawTitle, compactDue, urgency));
                     }
                 }
