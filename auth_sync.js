@@ -2858,13 +2858,13 @@
                                     <label style="display: block; font-size: 0.82rem; color: #f8fafc; font-weight: 600; margin-bottom: 4px;">סיסמה חדשה:</label>
                                     <input type="password" id="reset-pass-input" class="form-input" style="width: 100%; padding: 8px 12px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff; font-size: 0.9rem;" placeholder="הזן סיסמה חדשה (לפחות 4 תווים)" required minlength="4">
                                 </div>
-                                <button type="submit" class="btn btn-primary btn-block" style="width: 100%; padding: 10px; font-weight: 700; font-size: 0.95rem; margin-bottom: 10px;">
+                                <button type="submit" class="btn btn-primary btn-block" style="margin-bottom: 10px;">
                                     🔄 אמת פרטים ועדכן סיסמה
                                 </button>
                                 <div style="text-align: center;">
-                                    <a href="javascript:void(0)" onclick="AuthSync.renderAuthModal('login')" style="color: #94a3b8; font-size: 0.82rem;">
+                                    <button type="button" class="btn btn-ghost btn-sm" onclick="AuthSync.renderAuthModal('login')">
                                         ← חזרה למסך התחברות
-                                    </a>
+                                    </button>
                                 </div>
                             </form>
                         ` : (!isRegister ? `
@@ -2877,25 +2877,18 @@
                                     <label style="display: block; font-size: 0.82rem; color: #f8fafc; font-weight: 600; margin-bottom: 4px;">סיסמה:</label>
                                     <input type="password" id="auth-password-input" class="form-input" style="width: 100%; padding: 8px 12px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff; font-size: 0.9rem;" placeholder="הזן סיסמה" required>
                                 </div>
-                                <button type="submit" class="btn btn-primary btn-block" style="width: 100%; padding: 10px; font-weight: 700; font-size: 0.95rem; margin-bottom: 8px;">
-                                    🚀 התחבר עכשיו
+                                <button type="submit" class="btn btn-primary btn-block" style="margin-bottom: 10px;">
+                                    🚀 התחבר לחשבון
                                 </button>
-                                <div style="text-align: center; margin-top: 10px;">
-                                    <a href="javascript:void(0)" onclick="AuthSync.renderAuthModal('reset_password')" style="color: #38bdf8; font-size: 0.82rem; text-decoration: underline; cursor: pointer;">
-                                        שכחת סיסמה? / אפס סיסמה
-                                    </a>
-                                </div>
-                                <div style="margin-top: 14px; text-align: center; padding-top: 12px; border-top: 1px dashed rgba(255,255,255,0.12);">
-                                    <div style="font-size: 0.84rem; color: #94a3b8; margin-bottom: 8px;">
-                                        עדיין אין לך חשבון ב-Semestero ME?
-                                    </div>
-                                    <button type="button" class="btn btn-outline" id="btn-switch-to-register" onclick="AuthSync.closeAuthModal(); AuthSync.openOnboardingWizard();" style="width: 100%; border-color: #38bdf8; color: #38bdf8; font-weight: 700; padding: 9px; border-radius: 6px; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer;">
-                                        <span>✨</span> <span>הרשמה מהירה (סטודנט חדש) ←</span>
+                                <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 12px; padding-top: 12px; border-top: 1px dashed rgba(255,255,255,0.12);">
+                                    <button type="button" class="btn btn-secondary btn-block auth-secondary-cta" id="btn-switch-to-register" onclick="AuthSync.closeAuthModal(); AuthSync.openOnboardingWizard();" style="border-color: rgba(56, 189, 248, 0.45); color: #7dd3fc;">
+                                        <span>✨</span> <span>צור חשבון חדש (סטודנט חדש) ←</span>
                                     </button>
-                                </div>
-                                <div style="text-align: center; margin-top: 12px;">
-                                    <button type="button" onclick="AuthSync.closeAuthModal(); sessionStorage.setItem('ast_auth_prompt_dismissed', 'true');" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12); color: #cbd5e1; font-size: 0.82rem; cursor: pointer; padding: 7px 14px; border-radius: 6px; width: 100%; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.15s ease;">
+                                    <button type="button" class="btn btn-ghost btn-block auth-ghost-cta" onclick="AuthSync.closeAuthModal(); sessionStorage.setItem('ast_auth_prompt_dismissed', 'true');">
                                         <span>👀</span> <span>נסה את המערכת כאורח (ללא התחברות) ←</span>
+                                    </button>
+                                    <button type="button" class="btn btn-ghost btn-sm" onclick="AuthSync.renderAuthModal('reset_password')" style="color: #38bdf8;">
+                                        שכחת סיסמה? / אפס סיסמה
                                     </button>
                                 </div>
                             </form>
@@ -2930,17 +2923,15 @@
                                     <label style="display: block; font-size: 0.82rem; color: #f8fafc; font-weight: 600; margin-bottom: 4px;">כתובת אימייל (כל אימייל אישי או טכניוני):</label>
                                     <input type="email" id="reg-email-input" class="form-input" style="width: 100%; padding: 7px 10px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff; font-size: 0.82rem;" placeholder="your.name@gmail.com (או כל אימייל)" required>
                                 </div>
-                                <button type="submit" class="btn btn-primary btn-block" style="width: 100%; padding: 10px; font-weight: 700; font-size: 0.95rem;">
+                                <button type="submit" class="btn btn-primary btn-block">
                                     ✨ צור חשבון והתחל בסיור
                                 </button>
-                                <div style="text-align: center; margin-top: 12px;">
-                                    <a href="javascript:void(0)" onclick="AuthSync.renderAuthModal('login')" style="color: #38bdf8; font-size: 0.82rem; cursor: pointer; text-decoration: underline;">
-                                        כבר יש לך חשבון קיים? לחץ כאן להתחברות ←
-                                    </a>
-                                </div>
-                                <div style="text-align: center; margin-top: 8px;">
-                                    <button type="button" onclick="AuthSync.closeAuthModal(); sessionStorage.setItem('ast_auth_prompt_dismissed', 'true');" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12); color: #cbd5e1; font-size: 0.82rem; cursor: pointer; padding: 7px 14px; border-radius: 6px; width: 100%; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.15s ease;">
+                                <div style="display: flex; flex-direction: column; gap: 6px; margin-top: 10px;">
+                                    <button type="button" class="btn btn-ghost btn-block auth-ghost-cta" onclick="AuthSync.closeAuthModal(); sessionStorage.setItem('ast_auth_prompt_dismissed', 'true');">
                                         <span>👀</span> <span>נסה את המערכת כאורח (ללא התחברות) ←</span>
+                                    </button>
+                                    <button type="button" class="btn btn-ghost btn-sm" onclick="AuthSync.renderAuthModal('login')" style="color: #38bdf8;">
+                                        כבר יש לך חשבון קיים? לחץ כאן להתחברות ←
                                     </button>
                                 </div>
                             </form>

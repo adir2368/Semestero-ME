@@ -38,15 +38,43 @@
         return str;
     }
 
+    function setButtonLoading(target, isLoading, loadingText) {
+        if (typeof document === 'undefined' || !target) return;
+        const btn = typeof target === 'string' ? document.getElementById(target) : target;
+        if (!btn) return;
+        if (isLoading) {
+            if (btn.dataset && btn.dataset.origHtml === undefined) {
+                btn.dataset.origHtml = btn.innerHTML;
+            }
+            btn.classList.add('is-loading');
+            btn.setAttribute('aria-busy', 'true');
+            btn.disabled = true;
+            if (loadingText) {
+                btn.textContent = loadingText;
+            }
+        } else {
+            btn.classList.remove('is-loading');
+            btn.removeAttribute('aria-busy');
+            btn.disabled = false;
+            if (btn.dataset && btn.dataset.origHtml !== undefined) {
+                btn.innerHTML = btn.dataset.origHtml;
+                delete btn.dataset.origHtml;
+            }
+        }
+    }
+
     if (root) {
-        root.__semesteroUtils = { escapeHtml, normalizeTechnionCourseCode };
+        root.__semesteroUtils = { escapeHtml, normalizeTechnionCourseCode, setButtonLoading };
         if (typeof root.escapeHtml !== 'function') root.escapeHtml = escapeHtml;
         if (typeof root.normalizeTechnionCourseCode !== 'function') {
             root.normalizeTechnionCourseCode = normalizeTechnionCourseCode;
         }
+        if (typeof root.setButtonLoading !== 'function') {
+            root.setButtonLoading = setButtonLoading;
+        }
     }
 
     if (typeof module !== 'undefined' && module.exports) {
-        module.exports = { escapeHtml, normalizeTechnionCourseCode };
+        module.exports = { escapeHtml, normalizeTechnionCourseCode, setButtonLoading };
     }
 })(typeof window !== 'undefined' ? window : (typeof globalThis !== 'undefined' ? globalThis : null));

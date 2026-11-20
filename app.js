@@ -23259,11 +23259,11 @@ function openCalendarSyncModal() {
             };
         } else {
             triggerBtn.onclick = () => {
-                triggerBtn.disabled = true;
-                triggerBtn.innerText = "🔄 מסנכרן...";
+                if (typeof window.setButtonLoading === 'function') window.setButtonLoading(triggerBtn, true, 'מסנכרן לענן...');
+                else { triggerBtn.disabled = true; triggerBtn.innerText = '🔄 מסנכרן...'; }
                 syncScheduleToCloudGist(true).finally(() => {
-                    triggerBtn.disabled = false;
-                    triggerBtn.innerText = "🔄 סנכרן עכשיו לענן";
+                    if (typeof window.setButtonLoading === 'function') window.setButtonLoading(triggerBtn, false);
+                    else { triggerBtn.disabled = false; triggerBtn.innerText = '🔄 סנכרן עכשיו לענן'; }
                 });
             };
         }
@@ -26093,11 +26093,11 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.11.20-v3.1.9",
-    version: "3.1.9",
-    build: "20261120_10",
-    date: "2026-11-20 23:48",
-    description: "v3.1.9: ניקוי שורות שיעורים ישנות ממטריצת הנוכחות (כגון שרידי 034056 חמישי 12:30 לאחר מעבר קבוצה), מניעת הופעת קבוצות/קורסים שאינם רשומים או שהוסרו בכל הקורסים העתידיים, וסנכרון קבוצות 1:1 מול CheeseFork."
+    code: "REV-2026.11.21-v3.1.10",
+    version: "3.1.10",
+    build: "20261121_01",
+    date: "2026-11-21 00:40",
+    description: "v3.1.10: שדרוג מערכת הכפתורים לפי 4 כללי UI/UX (היררכיה, תוויות פעולה ברורות, אזורי לחיצה 48px, ומצבי Hover / Pressed 96% / Loading Spinner / Disabled)."
 };
 window.APP_VERSION = APP_CURRENT_REVISION.version;
 
@@ -27922,8 +27922,8 @@ window.checkRemoteAppVersion = async function(isManualCheck = false) {
     const checkBtn = document.getElementById("btn-check-version-updates");
 
     if (checkBtn) {
-        checkBtn.disabled = true;
-        checkBtn.innerText = "🔄 בודק מול GitHub...";
+        if (typeof window.setButtonLoading === 'function') window.setButtonLoading(checkBtn, true, 'בודק מול GitHub...');
+        else { checkBtn.disabled = true; checkBtn.innerText = "🔄 בודק מול GitHub..."; }
     }
     if (footerBadgeEl && isManualCheck) {
         footerBadgeEl.innerText = `v${currentVer} ⏳`;
@@ -28091,8 +28091,8 @@ window.checkRemoteAppVersion = async function(isManualCheck = false) {
         }
     } finally {
         if (checkBtn) {
-            checkBtn.disabled = false;
-            checkBtn.innerText = "🔄 בדוק עדכונים עכשיו";
+            if (typeof window.setButtonLoading === 'function') window.setButtonLoading(checkBtn, false);
+            else { checkBtn.disabled = false; checkBtn.innerText = "🔄 בדוק עדכונים עכשיו"; }
         }
     }
 };
@@ -28100,8 +28100,8 @@ window.checkRemoteAppVersion = async function(isManualCheck = false) {
 window.forceAppUpdate = async function() {
     const btn = document.getElementById("btn-force-refresh-app");
     if (btn) {
-        btn.disabled = true;
-        btn.innerHTML = `<span>🔄</span> <span>מרענן מטמון ומעדכן גרסה...</span>`;
+        if (typeof window.setButtonLoading === 'function') window.setButtonLoading(btn, true, 'מרענן מטמון ומעדכן גרסה...');
+        else { btn.disabled = true; btn.innerHTML = `<span>🔄</span> <span>מרענן מטמון ומעדכן גרסה...</span>`; }
     }
 
     // Immediately close update modal
