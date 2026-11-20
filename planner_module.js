@@ -17,7 +17,9 @@
     const PLANNER_ATUDA_KEY = 'ast_planner_atuda_tironut';
     let isEnglishExemption = false;
     let englishLevel = 'none'; // 'exempt_all' | 'exempt_a' | 'none'
-    let selectedCategory = 'ALL'; // 'ALL' | 'A' | 'B' | 'C' | 'D' | 'E' | 'UNASSIGNED'
+    let selectedCategory = 'ALL'; // 'ALL' | 'MANDATORY' | 'A' | 'B' | 'C' | 'D' | 'E' | 'SPORTS' | 'MALAG'
+    let filterSummerOnly = false;
+    let filterUnassignedOnly = false;
     let searchQuery = '';
     const CATALOG_WINDOW_PAGE_SIZE = 24;
     let catalogVisibleCount = CATALOG_WINDOW_PAGE_SIZE;
@@ -3314,14 +3316,73 @@
             return matchName || matchCode;
         };
 
-        if (selectedCategory === 'UNASSIGNED') {
+        // Sync filter pill UI state cleanly (base category + combinable modifiers)
+        const filterContainer = document.getElementById('planner-elective-filters');
+        if (filterContainer) {
+            filterContainer.querySelectorAll('.filter-pill').forEach(p => {
+                const mod = p.getAttribute('data-filter-modifier');
+                const cat = p.getAttribute('data-category');
+                const isActive = mod === 'SUMMER'
+                    ? filterSummerOnly
+                    : (mod === 'UNASSIGNED' ? filterUnassignedOnly : cat === selectedCategory);
+                p.classList.toggle('active', isActive);
+                p.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+            });
+        }
+
+        const mandatoryCodeSet = new Set();
+        allMandatoryCourses.forEach(mc => {
+            getNormalizedCodes(mc.code, mc.altCode).forEach(k => mandatoryCodeSet.add(k));
+        });
+
+        const doesCourseMatchCategory = (course, cat) => {
+            if (!course || !cat || cat === 'ALL') return true;
+            const keys = getNormalizedCodes(course.code, course.altCode);
+            const allMap = (global.PLANNER_CATALOG && global.PLANNER_CATALOG.ALL_COURSES_MAP) || {};
+            const catLookup = keys.map(k => allMap[k]).find(Boolean) || null;
+            const effList = course.list || (catLookup && catLookup.list) || '';
+            const effType = course.type || (catLookup && catLookup.type) || '';
+            const codeStr = String(course.code || '').replace(/^0+/, '');
+            const nameStr = String(course.name || '');
+
+            if (cat === 'MANDATORY') {
+                return effType === 'mandatory' || keys.some(k => mandatoryCodeSet.has(k));
+            }
+            if (cat === 'SPORTS') {
+                return effList === 'SPORTS' || effType === 'sports' || codeStr.startsWith('394') || nameStr.includes('ספורט') || nameStr.includes('חינוך גופני');
+            }
+            if (cat === 'MALAG') {
+                return (effList === 'MALAG' && effType !== 'free') || effType === 'malag' || effType === 'humanities' || codeStr.startsWith('324') || nameStr.includes('מל"ג') || nameStr.includes('מלג');
+            }
+            if (cat === 'E') {
+                return effList === 'E' || effType === 'free' || course.isTechnionWide;
+            }
+            return effList === cat;
+        };
+
+        if (filterUnassignedOnly) {
             (unassignedCourses || []).forEach(course => {
                 const keys = getNormalizedCodes(course.code, course.altCode);
                 if (keys.some(k => placedCodes.has(k))) return;
                 if (isCourseCompleted(course.code, course.altCode)) return;
                 if (!matchesSearch(course)) return;
+                if (!doesCourseMatchCategory(course, selectedCategory)) return;
                 coursesToShow.push({ ...course, isUnassignedItem: true });
             });
+
+            if (selectedCategory === 'MANDATORY') {
+                missingMandatoryCourses.forEach(course => {
+                    if (!matchesSearch(course)) return;
+                    const keys = getNormalizedCodes(course.code, course.altCode);
+                    if (coursesToShow.some(item => getNormalizedCodes(item.code, item.altCode).some(k => keys.includes(k)))) return;
+                    coursesToShow.push({
+                        ...course,
+                        isMandatoryCatalogItem: true,
+                        isPlaced: false,
+                        placedSem: null
+                    });
+                });
+            }
         } else if (selectedCategory === 'MANDATORY') {
             allMandatoryCourses.forEach(course => {
                 const keys = getNormalizedCodes(course.code, course.altCode);
@@ -3338,24 +3399,6 @@
                     isPlaced: isPlaced,
                     placedSem: placedSem
                 });
-            });
-        } else if (selectedCategory === 'SUMMER') {
-            const allCandidates = [];
-            (unassignedCourses || []).forEach(c => allCandidates.push({ ...c, isUnassignedItem: true }));
-            ['A', 'B', 'C', 'D', 'E', 'SPORTS', 'MALAG'].forEach(cat => {
-                (global.PLANNER_CATALOG.ELECTIVE_CATALOG[cat] || []).forEach(c => allCandidates.push(c));
-            });
-            allCandidates.forEach(course => {
-                const keys = getNormalizedCodes(course.code, course.altCode);
-                if (keys.some(k => placedCodes.has(k))) return;
-                if (isCourseCompleted(course.code, course.altCode)) return;
-                if (!matchesSearch(course)) return;
-                const isSummerAvailable = global.PLANNER_CATALOG && global.PLANNER_CATALOG.isCourseOfferedInSummer
-                    ? global.PLANNER_CATALOG.isCourseOfferedInSummer(course.code, course).offered
-                    : false;
-                if (isSummerAvailable) {
-                    coursesToShow.push(course);
-                }
             });
         } else {
             if (selectedCategory === 'ALL') {
@@ -3479,24 +3522,42 @@
             </div>
         ` : '';
 
+        // Optional Summer Modifier Filter (combinable with any base category / Unassigned toggle)
+        const filteredBySummer = filterSummerOnly
+            ? coursesToShow.filter(c => (
+                global.PLANNER_CATALOG && typeof global.PLANNER_CATALOG.isCourseOfferedInSummer === 'function'
+                    ? global.PLANNER_CATALOG.isCourseOfferedInSummer(c.code, c).offered
+                    : false
+            ))
+            : coursesToShow;
+
         const filteredByCluster = (showClusterBar && activeClusterFilter !== 'ALL')
-            ? coursesToShow.filter(c => {
+            ? filteredBySummer.filter(c => {
                 const catLookup = (global.PLANNER_CATALOG && global.PLANNER_CATALOG.ALL_COURSES_MAP)
                     ? (global.PLANNER_CATALOG.ALL_COURSES_MAP[c.code] || (c.altCode && global.PLANNER_CATALOG.ALL_COURSES_MAP[c.altCode]))
                     : null;
                 const cl = c.cluster || (catLookup && catLookup.cluster) || '';
                 return cl === activeClusterFilter;
             })
-            : coursesToShow;
+            : filteredBySummer;
 
         if (filteredByCluster.length === 0) {
-            const emptyMsg = selectedCategory === 'UNASSIGNED' 
-                ? 'אין כרגע קורסים שלא שובצו. גרור קורסים מכל סמסטר לכאן כדי להסיר אותם מהתכנון.' 
-                : (selectedCategory === 'MANDATORY'
-                    ? 'לא נמצאו קורסי חובה מתאימים לחיפוש.'
-                    : (selectedCategory === 'SUMMER' 
-                        ? 'לא נמצאו קורסים המוצעים בסמסטר קיץ התואמים לחיפוש.' 
-                        : 'לא נמצאו קורסי בחירה מתאימים לסינון.'));
+            let emptyMsg = 'לא נמצאו קורסי בחירה מתאימים לסינון.';
+            if (filterUnassignedOnly && filterSummerOnly) {
+                emptyMsg = 'לא נמצאו קורסים בקטגוריה זו שלא שובצו ומוצעים בסמסטר קיץ.';
+            } else if (filterUnassignedOnly && selectedCategory === 'MANDATORY') {
+                emptyMsg = 'כל קורסי החובה של המסלול כבר שובצו או הושלמו (או אינם תואמים לחיפוש).';
+            } else if (filterUnassignedOnly) {
+                emptyMsg = selectedCategory === 'ALL'
+                    ? 'אין כרגע קורסים שלא שובצו. גרור קורסים מכל סמסטר לכאן כדי להסיר אותם מהתכנון.'
+                    : 'אין כרגע קורסים בקטגוריה זו ברשימת הקורסים שלא שובצו. גרור קורסים מכל סמסטר לכאן כדי להסיר אותם מהתכנון.';
+            } else if (filterSummerOnly) {
+                emptyMsg = selectedCategory === 'MANDATORY'
+                    ? 'לא נמצאו קורסי חובה המוצעים בסמסטר קיץ התואמים לחיפוש.'
+                    : 'לא נמצאו קורסים המוצעים בסמסטר קיץ התואמים לסינון.';
+            } else if (selectedCategory === 'MANDATORY') {
+                emptyMsg = 'לא נמצאו קורסי חובה מתאימים לחיפוש.';
+            }
             poolContainer.innerHTML = clusterFilterBarHtml + `<div style="font-size: 0.76rem; color: #94a3b8; text-align: center; padding: 16px;">${emptyMsg}</div>`;
         } else {
             const totalCount = filteredByCluster.length;
@@ -3845,13 +3906,18 @@
                 return;
             }
 
-            // Filter Pills
+            // Filter Pills (Primary base category + combinable Summer/Unassigned modifiers)
             const pill = e.target.closest('.planner-elective-filters .filter-pill');
             if (pill) {
-                const filterPills = document.querySelectorAll('.planner-elective-filters .filter-pill');
-                filterPills.forEach(p => p.classList.remove('active'));
-                pill.classList.add('active');
-                selectedCategory = pill.getAttribute('data-category');
+                const modifier = pill.getAttribute('data-filter-modifier');
+                const categoryAttr = pill.getAttribute('data-category');
+                if (modifier === 'SUMMER' || categoryAttr === 'SUMMER') {
+                    filterSummerOnly = !filterSummerOnly;
+                } else if (modifier === 'UNASSIGNED' || categoryAttr === 'UNASSIGNED') {
+                    filterUnassignedOnly = !filterUnassignedOnly;
+                } else {
+                    selectedCategory = categoryAttr || 'ALL';
+                }
                 catalogVisibleCount = CATALOG_WINDOW_PAGE_SIZE;
                 renderAddElectivesSection(getActivePlan(), buildCourseSemesterMap(getActivePlan()));
                 return;
@@ -5112,7 +5178,8 @@
         resolveCourseObject: resolveCourseObject,
         renderAddElectivesSection: renderAddElectivesSection,
         setSearchQuery: (q) => { searchQuery = q; },
-        getSearchQuery: () => searchQuery,        adoptPlanFromState: function(plan, unassigned) {
+        getSearchQuery: () => searchQuery,
+        getFilterState: () => ({ category: selectedCategory, summerOnly: filterSummerOnly, unassignedOnly: filterUnassignedOnly }),        adoptPlanFromState: function(plan, unassigned) {
             const isAdir = isAdirAuthenticated();
             if (Array.isArray(plan) && plan.length > 0 && (isAdir || !isAdirPlanAuthentic(plan))) {
                 customPlan = JSON.parse(JSON.stringify(plan));

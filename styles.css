@@ -20981,3 +20981,37 @@ a.btn:focus-visible {
         font-size: 0.76rem;
     }
 }
+
+/* Combinable Modifier Filter Pills (Summer / Unassigned in Degree Planner) */
+.planner-filter-divider {
+    width: 1px;
+    height: 22px;
+    align-self: center;
+    background: rgba(255, 255, 255, 0.14);
+    margin: 0 2px;
+}
+
+.planner-elective-filters .filter-modifier-pill {
+    border-style: dashed;
+}
+
+.planner-elective-filters .filter-modifier-pill.active::before {
+    content: "✓ ";
+    font-weight: 900;
+}
+
+.planner-elective-filters .filter-modifier-pill[data-filter-modifier="SUMMER"].active {
+    background: linear-gradient(135deg, rgba(14, 165, 233, 0.34), rgba(250, 204, 21, 0.18)) !important;
+    border-style: solid !important;
+    border-color: #38bdf8 !important;
+    color: #f0f9ff !important;
+    box-shadow: 0 0 10px rgba(56, 189, 248, 0.42);
+}
+
+.planner-elective-filters .filter-modifier-pill[data-filter-modifier="UNASSIGNED"].active {
+    background: rgba(217, 119, 6, 0.36) !important;
+    border-style: solid !important;
+    border-color: #fbbf24 !important;
+    color: #fef3c7 !important;
+    box-shadow: 0 0 10px rgba(245, 158, 11, 0.42);
+}

@@ -26093,11 +26093,11 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.11.21-v3.1.11",
-    version: "3.1.11",
-    build: "20261121_02",
-    date: "2026-11-21 00:55",
-    description: "v3.1.11: תיקון כפתורי סינון אשכולות ההתמחות במתכנן התואר (Delegated Cluster Filter Clicks + רנדר מיידי + עיצוב Hover/Active רספונסיבי)."
+    code: "REV-2026.11.21-v3.1.12",
+    version: "3.1.12",
+    build: "20261121_03",
+    date: "2026-11-21 01:08",
+    description: "v3.1.12: כפתורי הסינון זמינים בקיץ ושלא שובצו ניתנים כעת לסימון משולב יחד עם כל קטגוריה (למשל קורס חובה שזמין בקיץ או קורס חישובי שלא שובץ)."
 };
 window.APP_VERSION = APP_CURRENT_REVISION.version;
 

@@ -17,9 +17,9 @@ ZIP_PATH = os.path.join(ROOT, "Semestero-ME-Windows-x64.zip")
 
 with open(os.path.join(ROOT, "package.json"), "r", encoding="utf-8") as f:
     pkg = json.load(f)
-VERSION = pkg.get("version", "3.1.11")
+VERSION = pkg.get("version", "3.1.12")
 TAG = f"v{VERSION}"
-NAME = f"Semestero ME v{VERSION} - Planner Specialization Cluster Filter Fix & UX Polish"
+NAME = f"Semestero ME v{VERSION} - Combinable Summer & Unassigned Planner Filters"
 
 def get_github_token():
     try:
@@ -99,14 +99,14 @@ def main():
 
     body_notes = f"""# Semestero ME {TAG} Release Notes
 
-### 🔬 1. תיקון כפתורי סינון אשכולות ההתמחות במתכנן התואר (`planner_module.js`, `styles.css`)
-- **תיקון קריסת לחיצה על אשכולות ההתמחות**: הוסר ה-`onclick` הישן שקרא ל-`window.DegreePlanner.render()` (שלא היה קיים וזרק `TypeError` בעת לחיצה), והוחלף בהאזנה מאוחדת (`bindDelegatedPlannerEvents`) ב-`.planner-cluster-pill` עם רענון מיידי של מאגר קורסי הבחירה ואיפוס עימוד הרשימה (`CATALOG_WINDOW_PAGE_SIZE`).
-- **תמיכת API אחורה + חוויית לחיצה מוקשחת**: נוסף כינוי `DegreePlanner.render` ל-`renderDegreePlanner`, לצד `.planner-cluster-filter-bar` ו-`.planner-cluster-pill` עם תגובות Hover, Pressed (`scale(0.96)`), Focus-Visible ומרווחי מגע מותאמים לנייד.
+### 🧩 1. סינון משולב במתכנן התואר — `☀️ זמינים בקיץ` ו-`📦 שלא שובצו` (`planner_module.js`, `index.html`, `styles.css`)
+- **סימון בנוסף לקטגוריה ראשית**: כפתורי `☀️ זמינים בקיץ` ו-`📦 שלא שובצו` פועלים כעת כמתגי סינון משולבים (`filterSummerOnly` / `filterUnassignedOnly` עם `data-filter-modifier` ו-`aria-pressed`) הניתנים להפעלה במקביל לכל קטגוריה ראשית (`הכל`, `📕 קורסי חובה`, `א׳ חישובי`, `ב׳`, `ג׳`, `ד׳`, `ה׳`, `ספורט`, `מל״ג`), כולל הצלבת שני המתגים יחד ועם אשכולות ההתמחות.
+- **לדוגמה**: ניתן כעת להציג **קורסי חובה שזמינים בקיץ**, **קורסי א׳ (חישובי) שלא שובצו**, או **קורסי חובה שלא שובצו וזמינים בקיץ**, עם הדגשה ויזואלית נפרדת (`✓` + צבעי קיץ/אמבר) מנותקת מבחירת הקטגוריה.
 
 ### 📦 2. קובצי הפצה ועדכון:
-- `Semestero-ME-Tablet-Clean.apk` (`com.technion.semestero.tablet`, `versionCode 139`, `versionName {VERSION}`, `v1+v2+v3` Signed)
-- `Semestero-ME.apk` (`com.technion.semestero`, `versionCode 139`, `versionName {VERSION}`, `v1+v2+v3` Signed, `targetSdk 34`)
-- `Semestero-ME-Watch.apk` (`versionCode 139`, `versionName {VERSION}`, `v1+v2+v3` Signed)
+- `Semestero-ME-Tablet-Clean.apk` (`com.technion.semestero.tablet`, `versionCode 140`, `versionName {VERSION}`, `v1+v2+v3` Signed)
+- `Semestero-ME.apk` (`com.technion.semestero`, `versionCode 140`, `versionName {VERSION}`, `v1+v2+v3` Signed, `targetSdk 34`)
+- `Semestero-ME-Watch.apk` (`versionCode 140`, `versionName {VERSION}`, `v1+v2+v3` Signed)
 - `Semestero-ME-Windows-x64.zip` (Electron Desktop Client {VERSION})
 """
 
