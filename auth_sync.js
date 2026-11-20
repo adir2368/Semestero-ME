@@ -673,6 +673,49 @@
                 if (state.courses['34056']) delete state.courses['34056'];
                 state.migrationsApplied.reset_034056_hw_v318 = true;
             }
+            if (!state.migrationsApplied.prune_stale_034056_thu1230_v319) {
+                const staleSig = '034056|4|12:30';
+                const is034056Code = (raw) => {
+                    const digits = String(raw || '').replace(/\D/g, '').replace(/^0+/, '');
+                    return digits === '34056' || digits === '340056';
+                };
+                if (state.timetable && Array.isArray(state.timetable.days)) {
+                    state.timetable.days.forEach(d => {
+                        if (d && Number(d.dayIndex) === 4 && Array.isArray(d.classes)) {
+                            d.classes = d.classes.filter(c => !(c && is034056Code(c.courseId || c.courseCode) && String(c.startTime || '').trim() === '12:30'));
+                            d.isFree = d.classes.length === 0;
+                        }
+                    });
+                }
+                const c56Sched = state.courses && (state.courses['034056'] || state.courses['00340056']);
+                if (c56Sched) {
+                    c56Sched.schedule = [
+                        { day: 'שלישי', room: 'אולמן 501', type: 'תרגול', group: 11, hours: '14:30 - 16:30', lecturer: 'מר גיא ארבר' },
+                        { day: 'רביעי', room: 'הנדסה כימית 1', type: 'הרצאה', group: 10, hours: '14:30 - 17:30', lecturer: 'ד"ר דניאל הקסנר' }
+                    ];
+                }
+                if (state.attendance && typeof state.attendance === 'object') {
+                    if (state.attendance.records && typeof state.attendance.records === 'object') {
+                        Object.keys(state.attendance.records).forEach(k => {
+                            const r = state.attendance.records[k];
+                            if (r && !String(r.slotKey || k || '').startsWith('manual_') &&
+                                is034056Code(r.courseId) && Number(r.dayIndex) === 4 && String(r.startTime || '').trim() === '12:30') {
+                                delete state.attendance.records[k];
+                            }
+                        });
+                    }
+                    if (Array.isArray(state.attendance.catchupQueue)) {
+                        state.attendance.catchupQueue = state.attendance.catchupQueue.filter(ci =>
+                            !(ci && !String(ci.slotKey || '').startsWith('manual_') && is034056Code(ci.courseId) && Number(ci.dayIndex) === 4 && String(ci.startTime || '').trim() === '12:30')
+                        );
+                    }
+                    if (!Array.isArray(state.attendance.prunedSlotPrefixes)) state.attendance.prunedSlotPrefixes = [];
+                    if (!state.attendance.prunedSlotPrefixes.includes(staleSig)) {
+                        state.attendance.prunedSlotPrefixes.push(staleSig);
+                    }
+                }
+                state.migrationsApplied.prune_stale_034056_thu1230_v319 = true;
+            }
         }
         return state;
     }

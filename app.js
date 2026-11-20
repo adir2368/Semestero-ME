@@ -4006,16 +4006,16 @@ const PRELOADED_USER_STATE = (typeof window !== 'undefined' && window.PRELOADED_
       "faculty": "הפקולטה להנדסת מכונות",
       "schedule": [
         {
-          "day": "שני",
-          "room": "",
+          "day": "שלישי",
+          "room": "אולמן 501",
           "type": "תרגול",
-          "group": 14,
+          "group": 11,
           "hours": "14:30 - 16:30",
-          "lecturer": ""
+          "lecturer": "מר גיא ארבר"
         },
         {
           "day": "רביעי",
-          "room": "",
+          "room": "הנדסה כימית 1",
           "type": "הרצאה",
           "group": 10,
           "hours": "14:30 - 17:30",
@@ -5438,16 +5438,16 @@ const PRELOADED_USER_STATE = (typeof window !== 'undefined' && window.PRELOADED_
             "faculty": "הפקולטה להנדסת מכונות",
             "schedule": [
               {
-                "day": "שני",
-                "room": "",
+                "day": "שלישי",
+                "room": "אולמן 501",
                 "type": "תרגול",
-                "group": 14,
+                "group": 11,
                 "hours": "14:30 - 16:30",
-                "lecturer": ""
+                "lecturer": "מר גיא ארבר"
               },
               {
                 "day": "רביעי",
-                "room": "",
+                "room": "הנדסה כימית 1",
                 "type": "הרצאה",
                 "group": 10,
                 "hours": "14:30 - 17:30",
@@ -9825,6 +9825,54 @@ function _loadSavedStateImpl() {
                     matlabTask.completed = true;
                     matlabTask.status = 'done';
                 }
+            }
+            if (!gameState.migrationsApplied.prune_stale_034056_thu1230_v319) {
+                const is034056Code = (raw) => {
+                    const digits = String(raw || '').replace(/\D/g, '').replace(/^0+/, '');
+                    return digits === '34056' || digits === '340056';
+                };
+                if (gameState.timetable && Array.isArray(gameState.timetable.days)) {
+                    gameState.timetable.days.forEach(d => {
+                        if (d && Number(d.dayIndex) === 4 && Array.isArray(d.classes)) {
+                            d.classes = d.classes.filter(cls => !(cls && is034056Code(cls.courseId || cls.courseCode) && String(cls.startTime || '').trim() === '12:30'));
+                            d.isFree = d.classes.length === 0;
+                        }
+                    });
+                }
+                if (gameState.courses && gameState.courses['034056']) {
+                    gameState.courses['034056'].schedule = [
+                        { day: 'שלישי', room: 'אולמן 501', type: 'תרגול', group: 11, hours: '14:30 - 16:30', lecturer: 'מר גיא ארבר' },
+                        { day: 'רביעי', room: 'הנדסה כימית 1', type: 'הרצאה', group: 10, hours: '14:30 - 17:30', lecturer: 'ד"ר דניאל הקסנר' }
+                    ];
+                }
+                if (window.AttendanceHub && typeof window.AttendanceHub.pruneOrphanedRecordsAgainstSchedule === 'function') {
+                    window.AttendanceHub.pruneOrphanedRecordsAgainstSchedule(gameState.timetable, {
+                        removeSpecificSlot: { courseId: '034056', dayIndex: 4, startTime: '12:30' },
+                        clearReaddedFromPruned: false,
+                        skipSave: true
+                    });
+                }
+                if (gameState.attendance && typeof gameState.attendance === 'object') {
+                    if (gameState.attendance.records && typeof gameState.attendance.records === 'object') {
+                        Object.keys(gameState.attendance.records).forEach(k => {
+                            const r = gameState.attendance.records[k];
+                            if (r && !String(r.slotKey || k || '').startsWith('manual_') &&
+                                is034056Code(r.courseId) && Number(r.dayIndex) === 4 && String(r.startTime || '').trim() === '12:30') {
+                                delete gameState.attendance.records[k];
+                            }
+                        });
+                    }
+                    if (Array.isArray(gameState.attendance.catchupQueue)) {
+                        gameState.attendance.catchupQueue = gameState.attendance.catchupQueue.filter(ci =>
+                            !(ci && !String(ci.slotKey || '').startsWith('manual_') && is034056Code(ci.courseId) && Number(ci.dayIndex) === 4 && String(ci.startTime || '').trim() === '12:30')
+                        );
+                    }
+                    if (!Array.isArray(gameState.attendance.prunedSlotPrefixes)) gameState.attendance.prunedSlotPrefixes = [];
+                    if (!gameState.attendance.prunedSlotPrefixes.includes('034056|4|12:30')) {
+                        gameState.attendance.prunedSlotPrefixes.push('034056|4|12:30');
+                    }
+                }
+                gameState.migrationsApplied.prune_stale_034056_thu1230_v319 = true;
             }
             if (gameState.courses['034053']) {
                 const c = gameState.courses['034053'];
@@ -16081,9 +16129,11 @@ window.syncLiveCheeseForkData = async function(customUrl = null, isManual = fals
         let syncedExamsCount = 0;
         let totalClassesCount = 0;
         const seenClassSignatures = new Set();
+        const syncedCourseSchedules = {};
 
         rawCourseCodes.forEach(rawCode => {
             const cleanCode = cleanTechnionCourseCode(rawCode);
+            syncedCourseSchedules[cleanCode] = [];
             const groupKey = `${semester}_${rawCode}`;
             const metaKey = `${semester}_metadata_${rawCode}`;
 
@@ -16208,6 +16258,15 @@ window.syncLiveCheeseForkData = async function(customUrl = null, isManual = fals
                                         duration: durMeta.text,
                                         cardClass: cardClass
                                     });
+                                    syncedCourseSchedules[cleanCode].push({
+                                        day: dayNames[dayIdx] || itemDay,
+                                        room: itemRoom || '',
+                                        building: itemBuilding || '',
+                                        type: itemType,
+                                        group: displayGroup || '',
+                                        hours: `${startTime} - ${endTime}`,
+                                        lecturer: itemLecturer || ''
+                                    });
                                     totalClassesCount++;
                                 }
                             }
@@ -16229,6 +16288,7 @@ window.syncLiveCheeseForkData = async function(customUrl = null, isManual = fals
                     status: 'active',
                     prerequisites: [],
                     type: cleanCode.startsWith('394') || cleanCode.startsWith('0394') ? 'sport' : 'elective',
+                    schedule: syncedCourseSchedules[cleanCode] || [],
                     tasks: []
                 };
                 course = gameState.courses[cleanCode];
@@ -16237,6 +16297,9 @@ window.syncLiveCheeseForkData = async function(customUrl = null, isManual = fals
                 if (course.status !== 'mastered') {
                     course.status = 'active';
                     activatedCoursesCount++;
+                }
+                if (Array.isArray(syncedCourseSchedules[cleanCode]) && syncedCourseSchedules[cleanCode].length > 0) {
+                    course.schedule = syncedCourseSchedules[cleanCode];
                 }
                 if (courseName && (!course.name || course.name.startsWith('קורס בחירה'))) {
                     course.name = courseName;
@@ -16327,6 +16390,13 @@ window.syncLiveCheeseForkData = async function(customUrl = null, isManual = fals
         if (typeof CHEESEFORK_SEMESTER_SCHEDULE !== 'undefined') {
             CHEESEFORK_SEMESTER_SCHEDULE.days = newTimetable.days;
             CHEESEFORK_SEMESTER_SCHEDULE.freeDays = freeDayIndices;
+        }
+        if (window.AttendanceHub && typeof window.AttendanceHub.pruneOrphanedRecordsAgainstSchedule === 'function') {
+            window.AttendanceHub.pruneOrphanedRecordsAgainstSchedule(newTimetable, {
+                pruneReplacedCourseSlots: true,
+                syncedCourseCodes: rawCourseCodes.map(c => cleanTechnionCourseCode(c)),
+                skipSave: true
+            });
         }
 
         // 6. Save State and Sync Timestamp
@@ -16425,6 +16495,13 @@ function deleteCourse(code) {
     }
     if (clean && !gameState.removedCourses.includes(clean)) {
         gameState.removedCourses.push(clean);
+    }
+
+    if (window.AttendanceHub && typeof window.AttendanceHub.pruneOrphanedRecordsAgainstSchedule === 'function') {
+        window.AttendanceHub.pruneOrphanedRecordsAgainstSchedule(gameState.timetable, {
+            removeCourseCode: code,
+            skipSave: true
+        });
     }
 
     // Also remove from Degree Planner
@@ -23693,10 +23770,30 @@ function deleteClassFromSchedule(dayIdx, classIdx) {
     day.classes.splice(classIdx, 1);
     if (day.classes.length === 0) day.isFree = true;
 
+    const slotCourseId = targetClass.courseId || targetClass.courseCode || '';
+    const slotSigNorm = (window.AttendanceHub && typeof window.AttendanceHub.getSlotSignature === 'function')
+        ? window.AttendanceHub.getSlotSignature(slotCourseId, day.dayIndex, targetClass.startTime)
+        : '';
+    if (slotSigNorm) {
+        if (!Array.isArray(gameState.dismissedScheduleSlots)) gameState.dismissedScheduleSlots = [];
+        if (!gameState.dismissedScheduleSlots.includes(slotSigNorm)) {
+            gameState.dismissedScheduleSlots.push(slotSigNorm);
+        }
+    }
+    if (window.AttendanceHub && typeof window.AttendanceHub.pruneOrphanedRecordsAgainstSchedule === 'function') {
+        window.AttendanceHub.pruneOrphanedRecordsAgainstSchedule(tt, {
+            removeSpecificSlot: { courseId: slotCourseId, dayIndex: day.dayIndex, startTime: targetClass.startTime },
+            skipSave: true
+        });
+    }
+
     if (typeof saveState === 'function') saveState();
     if (typeof renderTimetableGrid === 'function') renderTimetableGrid();
     if (typeof renderTodayTimetableBanner === 'function') renderTodayTimetableBanner();
     renderGcalManagerClassList();
+    if (window.AttendanceHub && typeof window.AttendanceHub.refreshUI === 'function') {
+        window.AttendanceHub.refreshUI();
+    }
 
     if (typeof showToastNotification === 'function') {
         showToastNotification(`🗑️ השיעור נמחק מהמערכת בהצלחה`, 'info');
@@ -23735,8 +23832,12 @@ function addNewCustomClassPrompt() {
         startTime: cStart,
         endTime: cEnd,
         duration: '',
-        cardClass: 'timetable-card-default'
+        cardClass: 'timetable-card-default',
+        isCustom: true
     });
+    if (window.AttendanceHub && typeof window.AttendanceHub.unpruneSlotSignature === 'function') {
+        window.AttendanceHub.unpruneSlotSignature(cCode, dayIdx, cStart);
+    }
 
     // Sort classes by startTime
     day.classes.sort((a, b) => (a.startTime || '').localeCompare(b.startTime || ''));
@@ -25992,11 +26093,11 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.11.20-v3.1.8",
-    version: "3.1.8",
-    build: "20261120_09",
-    date: "2026-11-20 17:38",
-    description: "v3.1.8: איפוס ובנייה מחדש של קורס 034056 (מבוא לחישוב מדעי והנדסי) לניקוי מוחלט של מטלת השווא באדום (גיליון 2) מקומית ובענן, סנכרון מחיקת גיליונות לענן, וכפתור 🔄 איפוס קורס יזום במודאל."
+    code: "REV-2026.11.20-v3.1.9",
+    version: "3.1.9",
+    build: "20261120_10",
+    date: "2026-11-20 23:48",
+    description: "v3.1.9: ניקוי שורות שיעורים ישנות ממטריצת הנוכחות (כגון שרידי 034056 חמישי 12:30 לאחר מעבר קבוצה), מניעת הופעת קבוצות/קורסים שאינם רשומים או שהוסרו בכל הקורסים העתידיים, וסנכרון קבוצות 1:1 מול CheeseFork."
 };
 window.APP_VERSION = APP_CURRENT_REVISION.version;
 
@@ -28377,15 +28478,48 @@ function getActiveTimetableSchedule() {
     const filterUnenrolledScheduleClasses = (rawSchedule) => {
         if (!rawSchedule || !Array.isArray(rawSchedule.days)) return rawSchedule;
         const gsCourses = (curState && curState.courses) || {};
-        const phys2 = gsCourses['114052'] || gsCourses['01140052'];
-        const shouldHidePhys2 = !!(phys2 && phys2.status !== 'active');
+        const removedList = (curState && Array.isArray(curState.removedCourses)) ? curState.removedCourses : [];
+        const dismissedSlots = (curState && Array.isArray(curState.dismissedScheduleSlots)) ? curState.dismissedScheduleSlots : [];
+        const normalizeCode = (raw) => {
+            if (window.__semesteroUtils && typeof window.__semesteroUtils.normalizeTechnionCourseCode === 'function') {
+                return window.__semesteroUtils.normalizeTechnionCourseCode(raw, { preserve03SevenDigit: true });
+            }
+            const d = String(raw || '').replace(/\D/g, '');
+            if (!d) return String(raw || '').trim();
+            if (d.length === 8) return d.startsWith('03') ? d.substring(1) : (d.substring(1, 4) + d.substring(5));
+            return d.length === 5 ? ('0' + d) : d;
+        };
         let mutated = false;
         const filteredDays = rawSchedule.days.map(day => {
             if (!day || !Array.isArray(day.classes)) return day;
             const keptClasses = day.classes.filter(cls => {
                 if (!cls) return false;
-                const cClean = String(cls.courseId || cls.courseCode || '').replace(/\D/g, '').replace(/^0+/, '');
-                if (shouldHidePhys2 && (cClean === '114052' || cClean === '114075')) {
+                const rawCid = String(cls.courseId || cls.courseCode || '').trim();
+                const normCode = normalizeCode(rawCid);
+                const cClean = normCode.replace(/^0+/, '');
+                const isRemoved = removedList.some(rc => {
+                    const rNorm = normalizeCode(rc);
+                    return rNorm === normCode || String(rc || '').replace(/\D/g, '').replace(/^0+/, '') === cClean;
+                });
+                if (isRemoved) {
+                    mutated = true;
+                    return false;
+                }
+                const slotSig = `${normCode}|${Number(day.dayIndex)}|${String(cls.startTime || '').trim()}`;
+                if (dismissedSlots.includes(slotSig)) {
+                    mutated = true;
+                    return false;
+                }
+                const courseObj = gsCourses[rawCid] || gsCourses[normCode] || gsCourses[cClean] || gsCourses['0' + cClean] || gsCourses['00' + cClean] || null;
+                if (courseObj) {
+                    if (courseObj.status === 'mastered' || courseObj.status === 'dropped' || courseObj.status === 'exempt') {
+                        mutated = true;
+                        return false;
+                    }
+                }
+                // Preserve historical Physics 2 / 114075 alias filter when 114052 is unenrolled
+                const phys2 = gsCourses['114052'] || gsCourses['01140052'];
+                if (phys2 && phys2.status !== 'active' && (cClean === '114052' || cClean === '114075')) {
                     mutated = true;
                     return false;
                 }
@@ -28413,6 +28547,9 @@ function getActiveTimetableSchedule() {
         return filterUnenrolledScheduleClasses(curState ? curState.timetable : CHEESEFORK_SEMESTER_SCHEDULE);
     }
     return null;
+}
+if (typeof window !== 'undefined') {
+    window.getActiveTimetableSchedule = getActiveTimetableSchedule;
 }
 
 // ==============================================================================
@@ -28665,12 +28802,15 @@ window.renderTimetableWeekNavigator = renderTimetableWeekNavigator;
 
 function getCoursesForTimetableOfficeHours(schedule) {
     if (typeof gameState === 'undefined' || !gameState || !gameState.courses) return [];
+    const normFn = (typeof normalizeTechnionCourseCode === 'function')
+        ? normalizeTechnionCourseCode
+        : (typeof window !== 'undefined' && window.__semesteroUtils && window.__semesteroUtils.normalizeTechnionCourseCode);
     const timetableIds = new Set();
     if (schedule && Array.isArray(schedule.days)) {
         schedule.days.forEach(d => {
             (d.classes || []).forEach(c => {
                 if (c && c.courseId) {
-                    const norm = normalizeTechnionCourseCode ? normalizeTechnionCourseCode(c.courseId) : String(c.courseId);
+                    const norm = normFn ? normFn(c.courseId) : String(c.courseId);
                     timetableIds.add(String(c.courseId));
                     if (norm) timetableIds.add(norm);
                 }
@@ -28679,7 +28819,7 @@ function getCoursesForTimetableOfficeHours(schedule) {
     }
     return getDeduplicatedCoursesList(gameState.courses).filter(course => {
         if (!course || course.status === 'mastered') return false;
-        const normCode = normalizeTechnionCourseCode ? normalizeTechnionCourseCode(course.code) : String(course.code);
+        const normCode = normFn ? normFn(course.code) : String(course.code);
         const inTimetable = timetableIds.has(String(course.code)) || (normCode && timetableIds.has(normCode));
         const hasCustomOh = !!(course._officeHoursInitialized && Array.isArray(course.officeHours) && course.officeHours.length > 0);
         return course.status === 'active' || inTimetable || hasCustomOh || course.status === 'available';

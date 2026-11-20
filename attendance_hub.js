@@ -89,8 +89,176 @@
         records: {},
         catchupQueue: [],
         quotas: {},
+        prunedSlotPrefixes: [],
         activeTab: 'catchup',
         selectedWeek: null,
+
+        normalizeCourseCode: function(raw) {
+            const str = String(raw || '').trim();
+            if (!str) return '';
+            const digits = str.replace(/\D/g, '');
+            if (!digits) return str;
+            if (digits.length === 8 && digits.startsWith('0')) {
+                if (digits.startsWith('0394')) return digits;
+                return digits.substring(1, 4) + digits.substring(5);
+            }
+            if (digits.length === 7 && digits.startsWith('394')) return '0' + digits;
+            if (digits.length === 5) return '0' + digits;
+            return digits;
+        },
+
+        getSlotSignature: function(courseId, dayIndex, startTime) {
+            const normCode = this.normalizeCourseCode(courseId);
+            if (!normCode || dayIndex === undefined || dayIndex === null || isNaN(Number(dayIndex))) return '';
+            return `${normCode}|${Number(dayIndex)}|${String(startTime || '').trim()}`;
+        },
+
+        isScheduleClassEnrolled: function(courseId, dayIndex, startTime, isCustom) {
+            const normCode = this.normalizeCourseCode(courseId);
+            if (!normCode) return false;
+            const rawCode = String(courseId || '').trim();
+            const stripped = normCode.replace(/^0+/, '');
+            const gs = (typeof window !== 'undefined' && window.gameState) ? window.gameState : null;
+            if (!gs) return true;
+
+            if (Array.isArray(gs.removedCourses)) {
+                const isRemoved = gs.removedCourses.some(rc => {
+                    const rNorm = this.normalizeCourseCode(rc);
+                    const rStrip = String(rc || '').replace(/^0+/, '');
+                    return rNorm === normCode || rStrip === stripped || String(rc || '').trim() === rawCode;
+                });
+                if (isRemoved) return false;
+            }
+
+            const sig = this.getSlotSignature(normCode, dayIndex, startTime);
+            if (sig && Array.isArray(gs.dismissedScheduleSlots) && gs.dismissedScheduleSlots.includes(sig)) {
+                return false;
+            }
+
+            const courses = gs.courses || {};
+            const courseObj = courses[rawCode] || courses[normCode] || courses[stripped] || courses['0' + stripped] || courses['00' + stripped] || null;
+            if (courseObj) {
+                if (courseObj.status === 'mastered' || courseObj.status === 'dropped' || courseObj.status === 'exempt') {
+                    return false;
+                }
+            }
+            const phys2 = courses['114052'] || courses['01140052'];
+            if (phys2 && phys2.status !== 'active' && (stripped === '114052' || stripped === '114075')) {
+                return false;
+            }
+            return true;
+        },
+
+        isSlotPruned: function(courseId, dayIndex, startTime, remotePrunedList) {
+            const sig = this.getSlotSignature(courseId, dayIndex, startTime);
+            if (!sig) return false;
+            const gs = (typeof window !== 'undefined' && window.gameState) ? window.gameState : null;
+            const dismissed = (gs && Array.isArray(gs.dismissedScheduleSlots)) ? gs.dismissedScheduleSlots : [];
+            const localPruned = Array.isArray(this.prunedSlotPrefixes) ? this.prunedSlotPrefixes : [];
+            const extraPruned = Array.isArray(remotePrunedList) ? remotePrunedList : [];
+            return localPruned.includes(sig) || dismissed.includes(sig) || extraPruned.includes(sig);
+        },
+
+        unpruneSlotSignature: function(courseId, dayIndex, startTime) {
+            const sig = this.getSlotSignature(courseId, dayIndex, startTime);
+            if (!sig) return;
+            if (Array.isArray(this.prunedSlotPrefixes)) {
+                this.prunedSlotPrefixes = this.prunedSlotPrefixes.filter(s => s !== sig);
+            }
+            const gs = (typeof window !== 'undefined' && window.gameState) ? window.gameState : null;
+            if (gs && Array.isArray(gs.dismissedScheduleSlots)) {
+                gs.dismissedScheduleSlots = gs.dismissedScheduleSlots.filter(s => s !== sig);
+            }
+        },
+
+        pruneOrphanedRecordsAgainstSchedule: function(schedule, options = {}) {
+            const opts = options || {};
+            const activeSigs = new Set();
+            const syncedCourseSet = new Set();
+
+            if (Array.isArray(opts.syncedCourseCodes)) {
+                opts.syncedCourseCodes.forEach(c => {
+                    const norm = this.normalizeCourseCode(c);
+                    if (norm) syncedCourseSet.add(norm);
+                });
+            }
+
+            if (schedule && Array.isArray(schedule.days)) {
+                schedule.days.forEach(day => {
+                    if (!day || !Array.isArray(day.classes)) return;
+                    day.classes.forEach(cls => {
+                        if (!cls) return;
+                        const norm = this.normalizeCourseCode(cls.courseId || cls.courseCode);
+                        if (!norm) return;
+                        syncedCourseSet.add(norm);
+                        const sig = this.getSlotSignature(norm, day.dayIndex, cls.startTime);
+                        if (sig) {
+                            activeSigs.add(sig);
+                            if (opts.clearReaddedFromPruned !== false) {
+                                this.unpruneSlotSignature(norm, day.dayIndex, cls.startTime);
+                            }
+                        }
+                    });
+                });
+            }
+
+            if (!Array.isArray(this.prunedSlotPrefixes)) this.prunedSlotPrefixes = [];
+            const removedSigs = new Set();
+            const targetSpecificSig = opts.removeSpecificSlot
+                ? this.getSlotSignature(opts.removeSpecificSlot.courseId, opts.removeSpecificSlot.dayIndex, opts.removeSpecificSlot.startTime)
+                : '';
+            const targetCourseNorm = opts.removeCourseCode ? this.normalizeCourseCode(opts.removeCourseCode) : '';
+
+            const shouldPruneEntry = (entry) => {
+                if (!entry || String(entry.slotKey || '').startsWith('manual_')) return false;
+                const norm = this.normalizeCourseCode(entry.courseId);
+                if (!norm) return false;
+                if (targetCourseNorm && norm === targetCourseNorm) return true;
+                const sig = this.getSlotSignature(norm, entry.dayIndex, entry.startTime);
+                if (!sig) return false;
+                if (targetSpecificSig && sig === targetSpecificSig) {
+                    removedSigs.add(sig);
+                    return true;
+                }
+                if (opts.pruneReplacedCourseSlots && syncedCourseSet.has(norm) && !activeSigs.has(sig)) {
+                    removedSigs.add(sig);
+                    return true;
+                }
+                if (!this.isScheduleClassEnrolled(norm, entry.dayIndex, entry.startTime, false)) {
+                    removedSigs.add(sig);
+                    return true;
+                }
+                return false;
+            };
+
+            let changed = false;
+            Object.keys(this.records || {}).forEach(k => {
+                const rec = this.records[k];
+                if (shouldPruneEntry(rec)) {
+                    delete this.records[k];
+                    changed = true;
+                }
+            });
+
+            if (Array.isArray(this.catchupQueue) && this.catchupQueue.length > 0) {
+                const beforeLen = this.catchupQueue.length;
+                this.catchupQueue = this.catchupQueue.filter(item => !shouldPruneEntry(item));
+                if (this.catchupQueue.length !== beforeLen) changed = true;
+            }
+
+            removedSigs.forEach(sig => {
+                if (!this.prunedSlotPrefixes.includes(sig)) {
+                    this.prunedSlotPrefixes.push(sig);
+                    changed = true;
+                }
+            });
+
+            if (changed && !opts.skipSave) {
+                this.save();
+                this.refreshUI();
+            }
+            return changed;
+        },
 
         init: function() {
             try {
@@ -102,6 +270,10 @@
 
                 const storedQuotas = localStorage.getItem(STORAGE_KEY_QUOTAS);
                 this.quotas = storedQuotas ? JSON.parse(storedQuotas) : JSON.parse(JSON.stringify(DEFAULT_MANDATORY_QUOTAS));
+                const gs = (typeof window !== 'undefined' && window.gameState) ? window.gameState : null;
+                if (gs && gs.attendance && Array.isArray(gs.attendance.prunedSlotPrefixes)) {
+                    this.prunedSlotPrefixes = Array.from(new Set(gs.attendance.prunedSlotPrefixes));
+                }
             } catch (err) {
                 console.warn('[AttendanceHub] Storage load error:', err);
                 this.records = {};
@@ -130,6 +302,7 @@
                         records: this.records,
                         catchupQueue: this.catchupQueue,
                         quotas: this.quotas,
+                        prunedSlotPrefixes: Array.isArray(this.prunedSlotPrefixes) ? this.prunedSlotPrefixes : [],
                         updatedAt: Date.now()
                     };
                     if (typeof window.saveState === 'function') {
@@ -147,10 +320,40 @@
         loadFromGameState: function(remoteAttendance) {
             if (!remoteAttendance || typeof remoteAttendance !== 'object') return;
             let modified = false;
+            const remotePruned = Array.isArray(remoteAttendance.prunedSlotPrefixes) ? remoteAttendance.prunedSlotPrefixes : [];
+            if (remotePruned.length > 0) {
+                if (!Array.isArray(this.prunedSlotPrefixes)) this.prunedSlotPrefixes = [];
+                remotePruned.forEach(sig => {
+                    if (sig && !this.prunedSlotPrefixes.includes(sig)) {
+                        this.prunedSlotPrefixes.push(sig);
+                        modified = true;
+                    }
+                });
+            }
+
+            // Apply pruned tombstones locally too so stale entries aren't re-uploaded
+            if (Array.isArray(this.prunedSlotPrefixes) && this.prunedSlotPrefixes.length > 0) {
+                Object.keys(this.records).forEach(k => {
+                    const rec = this.records[k];
+                    if (rec && !String(rec.slotKey || '').startsWith('manual_') && this.isSlotPruned(rec.courseId, rec.dayIndex, rec.startTime)) {
+                        delete this.records[k];
+                        modified = true;
+                    }
+                });
+                const prevLen = this.catchupQueue.length;
+                this.catchupQueue = this.catchupQueue.filter(ci => !ci || String(ci.slotKey || '').startsWith('manual_') || !this.isSlotPruned(ci.courseId, ci.dayIndex, ci.startTime));
+                if (this.catchupQueue.length !== prevLen) modified = true;
+            }
 
             if (remoteAttendance.records && typeof remoteAttendance.records === 'object') {
                 Object.keys(remoteAttendance.records).forEach(key => {
                     const rRec = remoteAttendance.records[key];
+                    if (!rRec) return;
+                    if (!String(rRec.slotKey || key || '').startsWith('manual_') &&
+                        (this.isSlotPruned(rRec.courseId, rRec.dayIndex, rRec.startTime, remotePruned) ||
+                         !this.isScheduleClassEnrolled(rRec.courseId, rRec.dayIndex, rRec.startTime, false))) {
+                        return;
+                    }
                     const lRec = this.records[key];
                     if (!lRec) {
                         this.records[key] = rRec;
@@ -167,6 +370,12 @@
 
             if (Array.isArray(remoteAttendance.catchupQueue)) {
                 remoteAttendance.catchupQueue.forEach(rItem => {
+                    if (!rItem) return;
+                    if (!String(rItem.slotKey || '').startsWith('manual_') &&
+                        (this.isSlotPruned(rItem.courseId, rItem.dayIndex, rItem.startTime, remotePruned) ||
+                         !this.isScheduleClassEnrolled(rItem.courseId, rItem.dayIndex, rItem.startTime, false))) {
+                        return;
+                    }
                     const idx = this.catchupQueue.findIndex(ci => ci.slotKey === rItem.slotKey || ci.id === rItem.id);
                     if (idx === -1) {
                         this.catchupQueue.push(rItem);
@@ -399,15 +608,19 @@
             const key = this.makeSlotKey(courseId, dayIndex, startTime, canonicalDate, targetWeek);
             if (this.records[key]) return this.records[key];
 
-            // Same-week resilience fallback: only match a record belonging to the SAME semester week (never reset/leak across weeks)
+            // Same-week resilience fallback: match by normalized course code + day + startTime within the SAME semester week
             if (!dateStr) {
+                const normCourse = this.normalizeCourseCode(courseId);
                 const prefix = `${String(courseId).trim()}_d${dayIndex}_${(startTime || '00:00').replace(':', '')}_`;
                 const matchedKey = Object.keys(this.records).find(k => {
-                    if (!k.startsWith(prefix)) return false;
                     const rec = this.records[k];
-                    if (!rec) return false;
+                    if (!rec || String(rec.slotKey || k || '').startsWith('manual_')) return false;
                     const recWeek = rec.week ? Number(rec.week) : this.getAcademicWeekForDateStr(rec.date);
-                    return recWeek === targetWeek;
+                    if (recWeek !== targetWeek) return false;
+                    if (k.startsWith(prefix)) return true;
+                    return this.normalizeCourseCode(rec.courseId) === normCourse &&
+                           Number(rec.dayIndex) === Number(dayIndex) &&
+                           String(rec.startTime || '').trim() === String(startTime || '').trim();
                 });
                 if (matchedKey) return this.records[matchedKey];
             }
@@ -584,7 +797,12 @@
 
         getCourseStats: function(courseId) {
             const cleanCode = String(courseId).replace(/\D/g, '');
-            const all = Object.values(this.records).filter(r => String(r.courseId).replace(/\D/g, '') === cleanCode);
+            const normCode = this.normalizeCourseCode(courseId);
+            const all = Object.values(this.records).filter(r => {
+                if (!r) return false;
+                const rNorm = this.normalizeCourseCode(r.courseId);
+                return rNorm === normCode || String(r.courseId).replace(/\D/g, '') === cleanCode;
+            });
             const attended = all.filter(r => r.status === 'attended').length;
             const missed = all.filter(r => r.status === 'missed').length;
             const total = attended + missed;
@@ -641,8 +859,11 @@
             const targetWeek = Number(weekNum || this.getSelectedWeek());
             let schedule = scheduleOverride || null;
             if (!schedule) {
-                if (typeof getActiveTimetableSchedule === 'function') {
-                    schedule = getActiveTimetableSchedule();
+                const getSchedFn = (typeof getActiveTimetableSchedule === 'function')
+                    ? getActiveTimetableSchedule
+                    : ((typeof window !== 'undefined' && typeof window.getActiveTimetableSchedule === 'function') ? window.getActiveTimetableSchedule : null);
+                if (getSchedFn) {
+                    schedule = getSchedFn();
                 } else if (typeof window !== 'undefined' && window.gameState && window.gameState.timetable) {
                     schedule = window.gameState.timetable;
                 } else if (typeof CHEESEFORK_SEMESTER_SCHEDULE !== 'undefined') {
@@ -659,6 +880,7 @@
                 schedule.days.forEach(day => {
                     if (!day || !Array.isArray(day.classes)) return;
                     day.classes.forEach(c => {
+                        if (!c || !this.isScheduleClassEnrolled(c.courseId, day.dayIndex, c.startTime, c.isCustom)) return;
                         totalSlots++;
                         const rec = this.getRecord(c.courseId, day.dayIndex, c.startTime, null, targetWeek);
                         const isPerp = (typeof window.isCoursePerpetualDitch === 'function') && window.isCoursePerpetualDitch(c.courseId, c.type);
@@ -674,6 +896,7 @@
             if (totalSlots === 0) {
                 Object.values(this.records).forEach(r => {
                     if (!r) return;
+                    if (!String(r.slotKey || '').startsWith('manual_') && !this.isScheduleClassEnrolled(r.courseId, r.dayIndex, r.startTime, false)) return;
                     const recWeek = r.week ? Number(r.week) : this.getAcademicWeekForDateStr(r.date);
                     if (recWeek !== targetWeek) return;
                     totalSlots++;
@@ -690,8 +913,11 @@
         getSemesterAnalytics: function(scheduleOverride) {
             let schedule = scheduleOverride || null;
             if (!schedule) {
-                if (typeof getActiveTimetableSchedule === 'function') {
-                    schedule = getActiveTimetableSchedule();
+                const getSchedFn = (typeof getActiveTimetableSchedule === 'function')
+                    ? getActiveTimetableSchedule
+                    : ((typeof window !== 'undefined' && typeof window.getActiveTimetableSchedule === 'function') ? window.getActiveTimetableSchedule : null);
+                if (getSchedFn) {
+                    schedule = getSchedFn();
                 } else if (typeof window !== 'undefined' && window.gameState && window.gameState.timetable) {
                     schedule = window.gameState.timetable;
                 } else if (typeof CHEESEFORK_SEMESTER_SCHEDULE !== 'undefined') {
@@ -706,12 +932,14 @@
                 schedule.days.forEach(day => {
                     if (!day || !Array.isArray(day.classes)) return;
                     day.classes.forEach(c => {
-                        const cleanCode = String(c.courseId || '').trim();
-                        const sKey = `${cleanCode}|${day.dayIndex}|${c.startTime || ''}`;
+                        if (!c) return;
+                        if (!this.isScheduleClassEnrolled(c.courseId, day.dayIndex, c.startTime, c.isCustom)) return;
+                        const normCode = this.normalizeCourseCode(c.courseId) || String(c.courseId || '').trim();
+                        const sKey = `${normCode}|${day.dayIndex}|${c.startTime || ''}`;
                         if (!slotMap.has(sKey)) {
                             slotMap.set(sKey, {
-                                courseId: cleanCode,
-                                courseName: c.courseName || cleanCode,
+                                courseId: normCode,
+                                courseName: c.courseName || normCode,
                                 type: c.type || 'שיעור',
                                 dayIndex: Number(day.dayIndex),
                                 dayName: day.name || dayNames[Number(day.dayIndex)] || '',
@@ -723,26 +951,6 @@
                     });
                 });
             }
-
-            // Include recurring non-manual records that might belong to courses not currently in schedule
-            Object.values(this.records).forEach(r => {
-                if (!r || !r.courseId || String(r.slotKey || '').startsWith('manual_')) return;
-                if (r.dayIndex === undefined || r.dayIndex === null || isNaN(Number(r.dayIndex))) return;
-                const cleanCode = String(r.courseId).trim();
-                const sKey = `${cleanCode}|${Number(r.dayIndex)}|${r.startTime || ''}`;
-                if (!slotMap.has(sKey)) {
-                    slotMap.set(sKey, {
-                        courseId: cleanCode,
-                        courseName: r.courseName || cleanCode,
-                        type: r.type || 'שיעור',
-                        dayIndex: Number(r.dayIndex),
-                        dayName: dayNames[Number(r.dayIndex)] || '',
-                        startTime: r.startTime || '',
-                        endTime: r.endTime || '',
-                        room: r.room || ''
-                    });
-                }
-            });
 
             const weeks = {};
             for (let w = 1; w <= 13; w++) {
@@ -839,9 +1047,10 @@
                 matrixRows.push(row);
             });
 
-            // Include manual quickAdd records in totals
+            // Include manual quickAdd records in totals for enrolled courses only
             Object.values(this.records).forEach(r => {
                 if (!r || !String(r.slotKey || '').startsWith('manual_')) return;
+                if (r.courseId && !this.isScheduleClassEnrolled(r.courseId, r.dayIndex, r.startTime, true)) return;
                 const w = Math.max(1, Math.min(13, Number(r.week || this.getAcademicWeekForDateStr(r.date))));
                 const cStats = ensureCourse(r.courseId, r.courseName);
                 if (r.status === 'attended') {
