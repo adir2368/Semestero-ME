@@ -20925,3 +20925,59 @@ a.btn:focus-visible {
         animation: none;
     }
 }
+
+/* Specialization Cluster Filter Bar & Pills (Planner Catalog) */
+.planner-cluster-filter-bar {
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+    padding: 4px 2px 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    position: relative;
+    z-index: 2;
+}
+
+.planner-cluster-pill {
+    font-size: 0.72rem;
+    padding: 5px 10px;
+    min-height: 28px;
+    border-radius: 999px;
+    cursor: pointer;
+    font-weight: 700;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: rgba(255, 255, 255, 0.04);
+    color: #94a3b8;
+    user-select: none;
+    transition: transform 0.12s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.planner-cluster-pill:hover {
+    color: #f8fafc;
+    border-color: rgba(168, 85, 247, 0.55);
+    background: rgba(168, 85, 247, 0.14);
+}
+
+.planner-cluster-pill:active {
+    transform: scale(0.96);
+}
+
+.planner-cluster-pill:focus-visible {
+    outline: 2px solid #c084fc;
+    outline-offset: 2px;
+}
+
+.planner-cluster-pill.active {
+    border-color: #a855f7;
+    background: rgba(168, 85, 247, 0.25);
+    color: #f3e8ff;
+    box-shadow: 0 0 10px rgba(168, 85, 247, 0.3);
+}
+
+@media (max-width: 768px), (pointer: coarse) {
+    .planner-cluster-pill {
+        min-height: 36px;
+        padding: 6px 12px;
+        font-size: 0.76rem;
+    }
+}

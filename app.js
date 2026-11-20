@@ -26093,11 +26093,11 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.11.21-v3.1.10",
-    version: "3.1.10",
-    build: "20261121_01",
-    date: "2026-11-21 00:40",
-    description: "v3.1.10: שדרוג מערכת הכפתורים לפי 4 כללי UI/UX (היררכיה, תוויות פעולה ברורות, אזורי לחיצה 48px, ומצבי Hover / Pressed 96% / Loading Spinner / Disabled)."
+    code: "REV-2026.11.21-v3.1.11",
+    version: "3.1.11",
+    build: "20261121_02",
+    date: "2026-11-21 00:55",
+    description: "v3.1.11: תיקון כפתורי סינון אשכולות ההתמחות במתכנן התואר (Delegated Cluster Filter Clicks + רנדר מיידי + עיצוב Hover/Active רספונסיבי)."
 };
 window.APP_VERSION = APP_CURRENT_REVISION.version;
 

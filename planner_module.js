@@ -3468,12 +3468,14 @@
             { id: 'מכטרוניקה ואופטיקה', label: '🔬 מכטרוניקה ואופטיקה' }
         ];
         const clusterFilterBarHtml = showClusterBar ? `
-            <div style="display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 8px; padding: 4px 2px; border-bottom: 1px solid rgba(255,255,255,0.06);">
-                ${clusterOptions.map(cl => `
-                    <button type="button" onclick="window._plannerClusterFilter='${cl.id}'; window.DegreePlanner.render();" style="font-size: 0.68rem; padding: 3px 8px; border-radius: 999px; cursor: pointer; font-weight: 700; border: 1px solid ${activeClusterFilter === cl.id ? '#a855f7' : 'rgba(255,255,255,0.12)'}; background: ${activeClusterFilter === cl.id ? 'rgba(168,85,247,0.25)' : 'rgba(255,255,255,0.04)'}; color: ${activeClusterFilter === cl.id ? '#f3e8ff' : '#94a3b8'};">
+            <div class="planner-cluster-filter-bar" role="group" aria-label="סינון לפי אשכול התמחות">
+                ${clusterOptions.map(cl => {
+                    const isActive = activeClusterFilter === cl.id;
+                    return `
+                    <button type="button" class="planner-cluster-pill${isActive ? ' active' : ''}" data-cluster="${escapeHtml(cl.id)}" aria-pressed="${isActive ? 'true' : 'false'}">
                         ${cl.label}
-                    </button>
-                `).join('')}
+                    </button>`;
+                }).join('')}
             </div>
         ` : '';
 
@@ -3850,6 +3852,17 @@
                 filterPills.forEach(p => p.classList.remove('active'));
                 pill.classList.add('active');
                 selectedCategory = pill.getAttribute('data-category');
+                catalogVisibleCount = CATALOG_WINDOW_PAGE_SIZE;
+                renderAddElectivesSection(getActivePlan(), buildCourseSemesterMap(getActivePlan()));
+                return;
+            }
+
+            // Specialization Cluster Filter Pills
+            const clusterPill = e.target.closest('.planner-cluster-pill');
+            if (clusterPill) {
+                e.preventDefault();
+                e.stopPropagation();
+                global._plannerClusterFilter = clusterPill.getAttribute('data-cluster') || 'ALL';
                 catalogVisibleCount = CATALOG_WINDOW_PAGE_SIZE;
                 renderAddElectivesSection(getActivePlan(), buildCourseSemesterMap(getActivePlan()));
                 return;
@@ -5087,6 +5100,7 @@
         saveCustomPlan: saveCustomPlan,
         openSportClubSelectorModal: openSportClubSelectorModal,
         init: initPlannerState,
+        render: renderDegreePlanner,
         renderDegreePlanner: renderDegreePlanner,
         evaluateDegreeRules: evaluateDegreeRules,
         getCustomPlan: () => customPlan,

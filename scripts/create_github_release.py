@@ -17,9 +17,9 @@ ZIP_PATH = os.path.join(ROOT, "Semestero-ME-Windows-x64.zip")
 
 with open(os.path.join(ROOT, "package.json"), "r", encoding="utf-8") as f:
     pkg = json.load(f)
-VERSION = pkg.get("version", "3.1.10")
+VERSION = pkg.get("version", "3.1.11")
 TAG = f"v{VERSION}"
-NAME = f"Semestero ME v{VERSION} - 4-Rule Button Design System (Hierarchy, Labels, 48px & States)"
+NAME = f"Semestero ME v{VERSION} - Planner Specialization Cluster Filter Fix & UX Polish"
 
 def get_github_token():
     try:
@@ -99,14 +99,14 @@ def main():
 
     body_notes = f"""# Semestero ME {TAG} Release Notes
 
-### 🧹 1. איפוס ובנייה מחדש של קורס `034056` — מבוא לחישוב מדעי והנדסי (`app.js`, `auth_sync.js`)
-- **ניקוי הרמטי מקומי + ענן (Supabase CRDT)**: בהפעלה ובסנכרון ענן מופעלת מיגרציה חד-פעמית (`reset_034056_hw_v318`) שמאפסת ובונה מחדש את משימות הקורס `034056` — מסירה לחלוטין את מטלת השווא האדומה (`תרגיל בית 2: גיליון 2` / `1 לא התחילו 🔴`) ורושמת אותה ב-`deletedTaskIds` כדי שלא תשוחזר מהענן, תוך שמירת `לומדת MATLAB`, `שאלון מילואים`, מועדי המבחנים (`11.02` / `10.03`) ומערכת השעות.
-- **כפתור `🔄 אפס מעקב קורס` + סנכרון מלא**: נוסף כפתור יזום במודאל מעקב שיעורי הבית (`resetCourseHomeworkProgress`) לאיפוס ובנייה מחדש של משימות מעקב לכל קורס, ותוקן `resetHomeworkSheetToLocked` כך שירשום גם את המחיקה ב-`deletedTaskIds` לענן.
+### 🔬 1. תיקון כפתורי סינון אשכולות ההתמחות במתכנן התואר (`planner_module.js`, `styles.css`)
+- **תיקון קריסת לחיצה על אשכולות ההתמחות**: הוסר ה-`onclick` הישן שקרא ל-`window.DegreePlanner.render()` (שלא היה קיים וזרק `TypeError` בעת לחיצה), והוחלף בהאזנה מאוחדת (`bindDelegatedPlannerEvents`) ב-`.planner-cluster-pill` עם רענון מיידי של מאגר קורסי הבחירה ואיפוס עימוד הרשימה (`CATALOG_WINDOW_PAGE_SIZE`).
+- **תמיכת API אחורה + חוויית לחיצה מוקשחת**: נוסף כינוי `DegreePlanner.render` ל-`renderDegreePlanner`, לצד `.planner-cluster-filter-bar` ו-`.planner-cluster-pill` עם תגובות Hover, Pressed (`scale(0.96)`), Focus-Visible ומרווחי מגע מותאמים לנייד.
 
 ### 📦 2. קובצי הפצה ועדכון:
-- `Semestero-ME-Tablet-Clean.apk` (`com.technion.semestero.tablet`, `versionCode 136`, `versionName {VERSION}`, `v1+v2+v3` Signed)
-- `Semestero-ME.apk` (`com.technion.semestero`, `versionCode 136`, `versionName {VERSION}`, `v1+v2+v3` Signed, `targetSdk 34`)
-- `Semestero-ME-Watch.apk` (`versionCode 136`, `versionName {VERSION}`, `v1+v2+v3` Signed)
+- `Semestero-ME-Tablet-Clean.apk` (`com.technion.semestero.tablet`, `versionCode 139`, `versionName {VERSION}`, `v1+v2+v3` Signed)
+- `Semestero-ME.apk` (`com.technion.semestero`, `versionCode 139`, `versionName {VERSION}`, `v1+v2+v3` Signed, `targetSdk 34`)
+- `Semestero-ME-Watch.apk` (`versionCode 139`, `versionName {VERSION}`, `v1+v2+v3` Signed)
 - `Semestero-ME-Windows-x64.zip` (Electron Desktop Client {VERSION})
 """
 
