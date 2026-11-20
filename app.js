@@ -18440,8 +18440,8 @@ function renderNotionTasksTable() {
         
         const moodleUrl = resolveDirectMoodleTaskUrl(c.code, t);
         const moodleLinkHtml = moodleUrl ? `
-            <a href="${moodleUrl}" target="_blank" rel="noopener noreferrer" class="notion-moodle-link-btn" title="מעבר ישיר לדף המטלה או דף הקורס במודל (ללא לוח שנה)" onclick="event.stopPropagation(); if (window.openExternalUrlOrBrowser) { window.openExternalUrlOrBrowser('${moodleUrl}'); event.preventDefault(); }">
-                <span>🎓 הגשה במודל ↗</span>
+            <a href="${moodleUrl}" target="_blank" rel="noopener noreferrer" class="notion-moodle-link-btn" title="מעבר ישיר למודל (ללא לוח שנה)" onclick="event.stopPropagation(); if (window.openExternalUrlOrBrowser) { window.openExternalUrlOrBrowser('${moodleUrl}'); event.preventDefault(); }">
+                <span>🎓 מודל ↗</span>
             </a>
         ` : '';
 
@@ -25950,11 +25950,11 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.11.20-v3.1.5",
-    version: "3.1.5",
-    build: "20261120_06",
-    date: "2026-11-20 14:15",
-    description: "v3.1.5: החלפת כפתורי הניווט בלוח השנה כך שימין (▶) מתקדם קדימה בזמן ושמאל (◀) חוזר אחורה בזמן."
+    code: "REV-2026.11.20-v3.1.6",
+    version: "3.1.6",
+    build: "20261120_07",
+    date: "2026-11-20 16:40",
+    description: "v3.1.6: תיקון תצוגת כרטיסיות הגיליונות (הסרת כפילות \"גיליון X גיליון X\", מניעת שבירת שורות של כפתור \"סמן כהוגש\", הוספת שחזור ל\"טרם נפתח\", וקישור מודל ישיר) והחלפת התווית \"הגשה במודל\" ב-\"מודל\"."
 };
 window.APP_VERSION = APP_CURRENT_REVISION.version;
 
@@ -32381,6 +32381,28 @@ function renderNotionHomeworkPolicyStrip() {
     `;
 }
 
+// Helper to format clean non-redundant sheet task titles (avoids "תרגיל בית 2: גיליון 2")
+function buildSheetTaskTitle(sheetIndex, sheetName, mode = 'single') {
+    const defaultLabel = `גיליון ${sheetIndex}`;
+    const trimmed = String(sheetName || '').trim();
+    const hasTopic = !!(trimmed && trimmed !== defaultLabel);
+    if (mode === 'written') return `הגשת פתרון תרגיל בית ${sheetIndex}`;
+    if (mode === 'digital') return hasTopic ? `שאלון HW ${sheetIndex} - ${trimmed}` : `שאלון HW ${sheetIndex}`;
+    return hasTopic ? `תרגיל בית ${sheetIndex}: ${trimmed}` : `תרגיל בית ${sheetIndex}`;
+}
+
+function formatSheetTaskDisplayTitle(sheetIndex, sheetName, rawTitle) {
+    const defaultLabel = `גיליון ${sheetIndex}`;
+    const raw = String(rawTitle || '').trim();
+    if (raw) {
+        const cleaned = raw.replace(new RegExp(`\\s*[:\\-–—]\\s*גיליון\\s*0*${sheetIndex}\\s*$`), '').trim();
+        return cleaned || raw;
+    }
+    const nameStr = String(sheetName || '').trim();
+    if (nameStr && nameStr !== defaultLabel) return nameStr;
+    return 'טרם נפתחה מטלה במודל';
+}
+
 // 2. Micro View: Render Course Modal Homework Submission Section
 function renderCourseModalHomeworkPolicy(course) {
     const container = document.getElementById("modal-hw-policy-section");
@@ -32430,6 +32452,9 @@ function renderCourseModalHomeworkPolicy(course) {
             statusBadgeLabel = 'טרם נפתח 🔒';
         }
 
+        const defaultSheetLabel = `גיליון ${sheet.index}`;
+        const hasDistinctTopic = !!(sheet.name && String(sheet.name).trim() !== defaultSheetLabel);
+
         let componentsHtml = "";
         if (sheet.isDual) {
             // Part A: Digital Online Quiz
@@ -32438,8 +32463,9 @@ function renderCourseModalHomeworkPolicy(course) {
             const digSub = sheet.isDigitalSubmitted;
             const digBtnClass = digDone ? 'active' : (digSub ? 'submitted' : '');
             const digBtnText = digDone ? 'הסתיים 🟢' : (digSub ? 'הוגש 🔵' : 'סמן כהוגש');
-            const digLink = (sheet.digitalTask && sheet.digitalTask.moodleUrl)
-                ? `<a href="javascript:void(0)" onclick="if (window.openExternalUrlOrBrowser) window.openExternalUrlOrBrowser('${sheet.digitalTask.moodleUrl}', '_blank');" class="hw-link-btn" title="פתח שאלון במודל">מודל ↗</a>`
+            const digRawUrl = sheet.digitalTask && (sheet.digitalTask.moodleUrl || (typeof resolveDirectMoodleTaskUrl === 'function' ? resolveDirectMoodleTaskUrl(course.code, sheet.digitalTask) : ''));
+            const digLink = digRawUrl
+                ? `<a href="javascript:void(0)" onclick="if (window.openExternalUrlOrBrowser) window.openExternalUrlOrBrowser('${digRawUrl}', '_blank');" class="hw-link-btn" title="פתח שאלון במודל">מודל ↗</a>`
                 : '';
 
             // Part B: Written Solution Upload
@@ -32448,8 +32474,9 @@ function renderCourseModalHomeworkPolicy(course) {
             const writSub = sheet.isWrittenSubmitted;
             const writBtnClass = writDone ? 'active' : (writSub ? 'submitted' : '');
             const writBtnText = writDone ? 'הסתיים 🟢' : (writSub ? 'הוגש 🔵' : 'סמן כהוגש');
-            const writLink = (sheet.writtenTask && sheet.writtenTask.moodleUrl)
-                ? `<a href="javascript:void(0)" onclick="if (window.openExternalUrlOrBrowser) window.openExternalUrlOrBrowser('${sheet.writtenTask.moodleUrl}', '_blank');" class="hw-link-btn" title="פתח הגשת פתרון במודל">מודל ↗</a>`
+            const writRawUrl = sheet.writtenTask && (sheet.writtenTask.moodleUrl || (typeof resolveDirectMoodleTaskUrl === 'function' ? resolveDirectMoodleTaskUrl(course.code, sheet.writtenTask) : ''));
+            const writLink = writRawUrl
+                ? `<a href="javascript:void(0)" onclick="if (window.openExternalUrlOrBrowser) window.openExternalUrlOrBrowser('${writRawUrl}', '_blank');" class="hw-link-btn" title="פתח במודל">מודל ↗</a>`
                 : '';
 
             componentsHtml = `
@@ -32457,7 +32484,7 @@ function renderCourseModalHomeworkPolicy(course) {
                     <div class="hw-component-row">
                         <span class="hw-component-label">
                             <span>📝</span>
-                            <span title="${sheet.digitalTask ? sheet.digitalTask.title : 'שאלון דיגיטלי'}">${sheet.digitalTask ? sheet.digitalTask.title : 'שאלון מקוון / דיגיטלי'}</span>
+                            <span title="${sheet.digitalTask ? sheet.digitalTask.title : 'שאלון דיגיטלי'}">${sheet.digitalTask ? formatSheetTaskDisplayTitle(sheet.index, sheet.name, sheet.digitalTask.title) : 'שאלון מקוון / דיגיטלי'}</span>
                         </span>
                         <div class="hw-component-actions">
                             <input type="number" class="hw-grade-input ${getTaskGradeTierClass(sheet.digitalGrade)}" min="0" max="100" step="0.5" value="${sheet.digitalGrade !== null ? sheet.digitalGrade : ''}" placeholder="ציון" title="ציון שאלון דיגיטלי (0-100)" aria-label="ציון שאלון גיליון ${sheet.index}" onchange="if (window.setHomeworkSheetGrade) window.setHomeworkSheetGrade('${course.code}', ${sheet.index}, 'digital', this.value);">
@@ -32473,7 +32500,7 @@ function renderCourseModalHomeworkPolicy(course) {
                     <div class="hw-component-row">
                         <span class="hw-component-label">
                             <span>📄</span>
-                            <span title="${sheet.writtenTask ? sheet.writtenTask.title : 'הגשת פתרון בכתב'}">${sheet.writtenTask ? sheet.writtenTask.title : 'הגשת פתרון בכתב (סריקה)'}</span>
+                            <span title="${sheet.writtenTask ? sheet.writtenTask.title : 'הגשת פתרון בכתב'}">${sheet.writtenTask ? formatSheetTaskDisplayTitle(sheet.index, sheet.name, sheet.writtenTask.title) : 'הגשת פתרון בכתב (סריקה)'}</span>
                         </span>
                         <div class="hw-component-actions">
                             <input type="number" class="hw-grade-input ${getTaskGradeTierClass(sheet.writtenGrade)}" min="0" max="100" step="0.5" value="${sheet.writtenGrade !== null ? sheet.writtenGrade : ''}" placeholder="ציון" title="ציון פתרון בכתב (0-100)" aria-label="ציון פתרון גיליון ${sheet.index}" onchange="if (window.setHomeworkSheetGrade) window.setHomeworkSheetGrade('${course.code}', ${sheet.index}, 'written', this.value);">
@@ -32495,16 +32522,19 @@ function renderCourseModalHomeworkPolicy(course) {
             const sSub = sheet.status === 'submitted';
             const sBtnClass = sDone ? 'active' : (sSub ? 'submitted' : '');
             const sBtnText = sDone ? 'הסתיים 🟢' : (sSub ? 'הוגש 🔵' : 'סמן כהוגש');
-            const sLink = (sheet.singleTask && sheet.singleTask.moodleUrl)
-                ? `<a href="javascript:void(0)" onclick="if (window.openExternalUrlOrBrowser) window.openExternalUrlOrBrowser('${sheet.singleTask.moodleUrl}', '_blank');" class="hw-link-btn" title="פתח מטלה במודל">מודל ↗</a>`
+            const sRawUrl = sheet.singleTask && (sheet.singleTask.moodleUrl || (typeof resolveDirectMoodleTaskUrl === 'function' ? resolveDirectMoodleTaskUrl(course.code, sheet.singleTask) : ''));
+            const sLink = sRawUrl
+                ? `<a href="javascript:void(0)" onclick="if (window.openExternalUrlOrBrowser) window.openExternalUrlOrBrowser('${sRawUrl}', '_blank');" class="hw-link-btn" title="פתח במודל">מודל ↗</a>`
                 : '';
+            const singleDisplayTitle = formatSheetTaskDisplayTitle(sheet.index, sheet.name, sheet.singleTask ? sheet.singleTask.title : '');
+            const singleTooltip = sheet.singleTask ? singleDisplayTitle : (hasDistinctTopic ? sheet.name : 'טרם נפתחה מטלה במודל');
 
             componentsHtml = `
                 <div class="hw-components-container">
                     <div class="hw-component-row">
                         <span class="hw-component-label">
                             <span>📜</span>
-                            <span title="${sheet.singleTask ? sheet.singleTask.title : sheet.name}">${sheet.singleTask ? sheet.singleTask.title : sheet.name}</span>
+                            <span title="${escapeHtml(singleTooltip)}" ${!sheet.singleTask ? 'style="color:#64748b;"' : ''}>${escapeHtml(singleDisplayTitle)}</span>
                         </span>
                         <div class="hw-component-actions">
                             <input type="number" class="hw-grade-input ${getTaskGradeTierClass(sheet.grade)}" min="0" max="100" step="0.5" value="${sheet.grade !== null ? sheet.grade : ''}" placeholder="ציון" title="ציון גיליון ${sheet.index} (0-100)" aria-label="ציון גיליון ${sheet.index}" onchange="if (window.setHomeworkSheetGrade) window.setHomeworkSheetGrade('${course.code}', ${sheet.index}, 'single', this.value);">
@@ -32525,17 +32555,34 @@ function renderCourseModalHomeworkPolicy(course) {
             ? `<span class="hw-sheet-grade-badge ${getTaskGradeTierClass(sheet.grade)}" title="${hwStatus.gradedCount > hwStatus.bestN && !sheet.isInBestN ? 'לא נכלל במכסת ' + hwStatus.bestN + ' הטובים ביותר' : 'נכלל בממוצע הטובים ביותר'}">💯 ${sheet.grade}</span>`
             : '';
 
+        const sheetTopicHtml = hasDistinctTopic
+            ? `<span class="hw-sheet-topic" title="${escapeHtml(sheet.name)}">${escapeHtml(sheet.name)}</span>`
+            : '';
+
+        const canLockReset = !!(
+            sheet.status === 'open' &&
+            sheet.grade === null &&
+            ((sheet.singleTask && sheet.singleTask.source === 'manual' && !sheet.singleTask.moodleUid && !sheet.singleTask.dueDate && !(sheet.singleTask.comments && sheet.singleTask.comments.length)) ||
+             (sheet.isDual && ((sheet.digitalTask && sheet.digitalTask.source === 'manual' && !sheet.digitalTask.moodleUid && !sheet.digitalTask.dueDate) || (sheet.writtenTask && sheet.writtenTask.source === 'manual' && !sheet.writtenTask.moodleUid && !sheet.writtenTask.dueDate))))
+        );
+        const resetLockBtnHtml = canLockReset
+            ? `<button type="button" class="hw-sheet-reset-lock-btn" onclick="if (window.resetHomeworkSheetToLocked) window.resetHomeworkSheetToLocked('${course.code}', ${sheet.index});" title="החזר לסטטוס טרם נפתח 🔒">✕</button>`
+            : '';
+
         sheetsGridHtml += `
             <div class="hw-sheet-card ${cardClass}">
                 <div class="hw-sheet-card-top">
-                    <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+                    <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap; min-width: 0;">
                         <span class="hw-sheet-index">גיליון ${sheet.index}</span>
-                        <span class="hw-sheet-topic" title="${sheet.name}">${sheet.name}</span>
+                        ${sheetTopicHtml}
                         ${sheetGradePill}
                     </div>
-                    <span class="hw-sheet-status-badge ${sheet.status}">
-                        ${statusBadgeLabel}
-                    </span>
+                    <div style="display: flex; align-items: center; gap: 4px; flex-shrink: 0;">
+                        ${resetLockBtnHtml}
+                        <span class="hw-sheet-status-badge ${sheet.status}">
+                            ${statusBadgeLabel}
+                        </span>
+                    </div>
                 </div>
                 ${componentsHtml}
             </div>
@@ -32634,7 +32681,7 @@ function setHomeworkComponentLifecycle(courseCode, sheetIndex, compType, newStat
         const isWritten = (compType === 'written');
         targetTask = {
             id: `${cleanCode}_hw_${sheetIndex}_${isWritten ? 'written' : 'dig'}`,
-            title: isWritten ? `הגשת פתרון תרגיל בית ${sheetIndex}` : `HW ${sheetIndex} - ${sheetName}`,
+            title: buildSheetTaskTitle(sheetIndex, sheetName, isWritten ? 'written' : 'digital'),
             type: 'hw',
             source: 'manual',
             isCustom: true,
@@ -32700,7 +32747,7 @@ function setHomeworkSheetLifecycle(courseCode, sheetIndex, newStatus) {
     if (!targetTask) {
         targetTask = {
             id: `${cleanCode}_hw_${sheetIndex}`,
-            title: `תרגיל בית ${sheetIndex}: ${sheetName}`,
+            title: buildSheetTaskTitle(sheetIndex, sheetName, 'single'),
             type: 'hw',
             source: 'manual',
             isCustom: true,
@@ -32780,7 +32827,7 @@ function toggleHomeworkSheetComponent(courseCode, sheetIndex, compType) {
         const isSingle = (compType === 'single');
         targetTask = {
             id: isSingle ? `${cleanCode}_hw_${sheetIndex}` : `${cleanCode}_hw_${sheetIndex}_${isWritten ? 'written' : 'dig'}`,
-            title: isWritten ? `הגשת פתרון תרגיל בית ${sheetIndex}` : (isSingle ? `תרגיל בית ${sheetIndex}: ${sheetName}` : `HW ${sheetIndex} - ${sheetName}`),
+            title: buildSheetTaskTitle(sheetIndex, sheetName, isWritten ? 'written' : (isSingle ? 'single' : 'digital')),
             type: 'hw',
             source: 'manual',
             isCustom: true,
@@ -32957,7 +33004,7 @@ function setHomeworkSheetGrade(courseCode, sheetIndex, compType, rawGrade) {
         const isWritten = compType === 'written';
         targetTask = {
             id: isDual ? `${cleanCode}_hw_${sheetIndex}_${isWritten ? 'written' : 'dig'}` : `${cleanCode}_hw_${sheetIndex}`,
-            title: isWritten ? `הגשת פתרון תרגיל בית ${sheetIndex}` : (isDual ? `HW ${sheetIndex} - ${sheetName}` : `תרגיל בית ${sheetIndex}: ${sheetName}`),
+            title: buildSheetTaskTitle(sheetIndex, sheetName, isWritten ? 'written' : (isDual ? 'digital' : 'single')),
             type: 'hw',
             source: 'manual',
             isCustom: true,
@@ -32988,11 +33035,38 @@ function setHomeworkSheetGrade(courseCode, sheetIndex, compType, rawGrade) {
     if (typeof saveState === 'function') saveState();
     renderCourseModalHomeworkPolicy(course);
     if (typeof renderModalTaskList === 'function') renderModalTaskList(course);
-    renderNotionHomeworkPolicyStrip();
+    if (typeof renderNotionHomeworkPolicyStrip === 'function') renderNotionHomeworkPolicyStrip();
     if (typeof renderNotionTasksTable === 'function') renderNotionTasksTable();
     return parsed;
 }
 
+// Reverts an empty auto-created manual sheet placeholder back to "טרם נפתח 🔒"
+function resetHomeworkSheetToLocked(courseCode, sheetIndex) {
+    if (!courseCode || !window.gameState || !window.gameState.courses) return false;
+    const cleanCode = (typeof cleanTechnionCourseCode === 'function') ? cleanTechnionCourseCode(courseCode) : String(courseCode).replace(/^0+/, '');
+    const course = window.gameState.courses[cleanCode] || window.gameState.courses['0' + cleanCode] || window.gameState.courses[courseCode];
+    if (!course || !Array.isArray(course.tasks)) return false;
+
+    const idx = Number(sheetIndex);
+    const beforeLen = course.tasks.length;
+    course.tasks = course.tasks.filter(t => {
+        if (!t || !isHomeworkPolicyTask(t)) return true;
+        if (extractHomeworkSheetIndex(t.title) !== idx) return true;
+        const isSafeAutoPlaceholder = (t.source === 'manual' && !t.moodleUid && !t.dueDate && (t.grade === undefined || t.grade === null || t.grade === '') && !(Array.isArray(t.comments) && t.comments.length > 0));
+        return !isSafeAutoPlaceholder;
+    });
+
+    if (course.tasks.length === beforeLen) return false;
+
+    if (typeof saveState === 'function') saveState();
+    renderCourseModalHomeworkPolicy(course);
+    if (typeof renderModalTaskList === 'function') renderModalTaskList(course);
+    renderNotionHomeworkPolicyStrip();
+    if (typeof renderNotionTasksTable === 'function') renderNotionTasksTable();
+    return true;
+}
+
+window.resetHomeworkSheetToLocked = resetHomeworkSheetToLocked;
 window.parseTaskGradeValue = parseTaskGradeValue;
 window.getTaskGradeTierClass = getTaskGradeTierClass;
 window.updateTaskGrade = updateTaskGrade;

@@ -723,6 +723,17 @@
                 return title1 === title2 && t1.id === t2.id;
             }
 
+            // Never merge explicit dual-component digital quiz (_dig) with written solution (_written / הגשת פתרון)
+            const id1 = String(t1.id || '');
+            const id2 = String(t2.id || '');
+            const isDig1 = /_dig$/i.test(id1) || /(שאלון|דיגיטלי|מקוון)/i.test(title1);
+            const isDig2 = /_dig$/i.test(id2) || /(שאלון|דיגיטלי|מקוון)/i.test(title2);
+            const isWrit1 = /_written$/i.test(id1) || /(הגשת\s*פתרון|פתרון\s*בכתב|סריקה)/i.test(title1);
+            const isWrit2 = /_written$/i.test(id2) || /(הגשת\s*פתרון|פתרון\s*בכתב|סריקה)/i.test(title2);
+            if ((isDig1 && !isWrit1 && isWrit2 && !isDig2) || (isDig2 && !isWrit2 && isWrit1 && !isDig1)) {
+                return false;
+            }
+
             // Check Moodle IDs (numeric event ID or assignment ID)
             const mId1 = this.extractMoodleId(t1);
             const mId2 = this.extractMoodleId(t2);
