@@ -580,6 +580,7 @@
         remoteState.completedTaskRegistry = mergedCompleted;
         remoteState.dismissedTaskRegistry = mergedDismissed;
         remoteState.deletedTaskIds = mergedDeleted;
+        remoteState.migrationsApplied = Object.assign({}, safeLocal.migrationsApplied || {}, remoteState.migrationsApplied || {});
         const localFilterTs = Number(safeLocal.taskFilterPreferences && safeLocal.taskFilterPreferences.updatedAt) || 0;
         const remoteFilterTs = Number(remoteState.taskFilterPreferences && remoteState.taskFilterPreferences.updatedAt) || 0;
         if (localFilterTs > remoteFilterTs && safeLocal.taskFilterPreferences) {
@@ -641,6 +642,36 @@
                         });
                     }
                 });
+            }
+            if (!state.migrationsApplied) state.migrationsApplied = {};
+            if (!state.migrationsApplied.reset_034056_hw_v318 && state.courses && state.courses['034056']) {
+                if (!Array.isArray(state.deletedTaskIds)) state.deletedTaskIds = [];
+                ['034056_h1', '034056_p1', '034056_hw_1', '034056_hw_2', '034056_hw_3', '034056_hw_4', '034056_hw_5', '034056_hw_6'].forEach(pid => {
+                    if (!state.deletedTaskIds.includes(pid)) state.deletedTaskIds.push(pid);
+                });
+                const c56 = state.courses['034056'];
+                if (Array.isArray(c56.tasks)) {
+                    c56.tasks = c56.tasks.filter(t => {
+                        if (!t) return false;
+                        const tTitle = String(t.title || '');
+                        const keep = (t.type === 'exam' || /מועד\s*[אבג]|מבחן|בחינה|matlab|מטלאב|מילואי/i.test(tTitle) || !!t.isMiluim);
+                        if (!keep) {
+                            if (t.id && !state.deletedTaskIds.includes(String(t.id))) state.deletedTaskIds.push(String(t.id));
+                            if (t.moodleUid && !state.deletedTaskIds.includes(String(t.moodleUid))) state.deletedTaskIds.push(String(t.moodleUid));
+                            if (t.moodleEventId && !state.deletedTaskIds.includes(String(t.moodleEventId))) state.deletedTaskIds.push(String(t.moodleEventId));
+                        }
+                        return keep;
+                    });
+                }
+                c56.code = '034056';
+                c56.name = 'מבוא לחישוב מדעי והנדסי';
+                c56.credits = 4;
+                c56.semester = 3;
+                c56.moedA = '2027-02-11';
+                c56.moedB = '2027-03-10';
+                if (state.courses['00340056']) delete state.courses['00340056'];
+                if (state.courses['34056']) delete state.courses['34056'];
+                state.migrationsApplied.reset_034056_hw_v318 = true;
             }
         }
         return state;

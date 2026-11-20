@@ -17,9 +17,9 @@ ZIP_PATH = os.path.join(ROOT, "Semestero-ME-Windows-x64.zip")
 
 with open(os.path.join(ROOT, "package.json"), "r", encoding="utf-8") as f:
     pkg = json.load(f)
-VERSION = pkg.get("version", "3.1.7")
+VERSION = pkg.get("version", "3.1.8")
 TAG = f"v{VERSION}"
-NAME = f"Semestero ME v{VERSION} - Uncrushed 2-Row HW Sheet Cards, Broadened Lock Reset & Clean Moodle Labels"
+NAME = f"Semestero ME v{VERSION} - Clean Rebuild of Course 034056 & Cross-Device HW Reset Sync"
 
 def get_github_token():
     try:
@@ -99,17 +99,14 @@ def main():
 
     body_notes = f"""# Semestero ME {TAG} Release Notes
 
-### 🎯 1. פריסה דו-שורתית נקייה לכרטיסיות הגיליונות (`styles.css`, `app.js`)
-- **אפס חיתוך כותרות ואפס שבירת שורות**: שורת המרכיב (`.hw-component-row`) עברה לפריסה דו-שורתית מרווחת — כותרת המשימה מוצגת לרוחב המלא ללא חיתוך לאות בודדת, ושורת הכפתורים (`[ציון]`, `[מודל ↗]`, `[🟡 התחל]`, `[סמן כהוגש]`) יושבת מיושרת בשורה אחת נקייה.
-- **שחזור קל ל-`טרם נפתח 🔒`**: הורחב זיהוי כפתור ה-`✕` כך שגם גיליונות ריקים שנפתחו בגרסאות קודמות ניתנים להחזרה בקליק אחד לסטטוס נעול.
+### 🧹 1. איפוס ובנייה מחדש של קורס `034056` — מבוא לחישוב מדעי והנדסי (`app.js`, `auth_sync.js`)
+- **ניקוי הרמטי מקומי + ענן (Supabase CRDT)**: בהפעלה ובסנכרון ענן מופעלת מיגרציה חד-פעמית (`reset_034056_hw_v318`) שמאפסת ובונה מחדש את משימות הקורס `034056` — מסירה לחלוטין את מטלת השווא האדומה (`תרגיל בית 2: גיליון 2` / `1 לא התחילו 🔴`) ורושמת אותה ב-`deletedTaskIds` כדי שלא תשוחזר מהענן, תוך שמירת `לומדת MATLAB`, `שאלון מילואים`, מועדי המבחנים (`11.02` / `10.03`) ומערכת השעות.
+- **כפתור `🔄 אפס מעקב קורס` + סנכרון מלא**: נוסף כפתור יזום במודאל מעקב שיעורי הבית (`resetCourseHomeworkProgress`) לאיפוס ובנייה מחדש של משימות מעקב לכל קורס, ותוקן `resetHomeworkSheetToLocked` כך שירשום גם את המחיקה ב-`deletedTaskIds` לענן.
 
-### 🎓 2. קיצור תווית מודל (`app.js`, `index.html`, `widgets.html`)
-- **החלפה מלאה של `"הגשה במודל"` ב-`"מודל"`** בטבלת המשימות, בחלון הצד (`Side Peek`) ובתצוגת הווידג'טים.
-
-### 📦 3. קובצי הפצה ועדכון:
-- `Semestero-ME-Tablet-Clean.apk` (`com.technion.semestero.tablet`, `versionCode 135`, `versionName {VERSION}`, `v1+v2+v3` Signed)
-- `Semestero-ME.apk` (`com.technion.semestero`, `versionCode 135`, `versionName {VERSION}`, `v1+v2+v3` Signed, `targetSdk 34`)
-- `Semestero-ME-Watch.apk` (`versionCode 135`, `versionName {VERSION}`, `v1+v2+v3` Signed)
+### 📦 2. קובצי הפצה ועדכון:
+- `Semestero-ME-Tablet-Clean.apk` (`com.technion.semestero.tablet`, `versionCode 136`, `versionName {VERSION}`, `v1+v2+v3` Signed)
+- `Semestero-ME.apk` (`com.technion.semestero`, `versionCode 136`, `versionName {VERSION}`, `v1+v2+v3` Signed, `targetSdk 34`)
+- `Semestero-ME-Watch.apk` (`versionCode 136`, `versionName {VERSION}`, `v1+v2+v3` Signed)
 - `Semestero-ME-Windows-x64.zip` (Electron Desktop Client {VERSION})
 """
 

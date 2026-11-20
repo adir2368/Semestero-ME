@@ -9755,11 +9755,53 @@ function _loadSavedStateImpl() {
             if (gameState.courses['034056']) {
                 const c = gameState.courses['034056'];
                 if (!c.tasks) c.tasks = [];
+
+                // One-time clean rebuild of Course 034056 (purges phantom HW sheet 2 / stale tasks across local & cloud CRDT)
+                if (!gameState.migrationsApplied) gameState.migrationsApplied = {};
+                if (!gameState.migrationsApplied.reset_034056_hw_v318) {
+                    if (!Array.isArray(gameState.deletedTaskIds)) gameState.deletedTaskIds = [];
+                    const knownPhantomIds = ['034056_h1', '034056_p1', '034056_hw_1', '034056_hw_2', '034056_hw_3', '034056_hw_4', '034056_hw_5', '034056_hw_6'];
+                    knownPhantomIds.forEach(pid => {
+                        if (!gameState.deletedTaskIds.includes(pid)) gameState.deletedTaskIds.push(pid);
+                    });
+
+                    const rebuiltTasks = [];
+                    c.tasks.forEach(t => {
+                        if (!t) return;
+                        const tTitle = String(t.title || '');
+                        const isExam = (t.type === 'exam' || /מועד\s*[אבג]|מבחן|בחינה/i.test(tTitle));
+                        const isMatlab = (t.id === 'task_moodle_43952' || t.id === '034056_matlab_bonus' || t.id === '034056_matlab' || /matlab|מטלאב/i.test(tTitle));
+                        const isMiluim = !!(t.isMiluim || t.miluim || /מילואי/i.test(tTitle));
+                        const isCompleted = !!(t.completed === true || t.status === 'done' || t.status === 'completed');
+                        const isPhantomHw = /^034056_(h\d+|hw_\d+|p1)$/i.test(String(t.id || '')) || /^תרגיל בית \d+\s*:\s*(?:גיליון|גליון)/i.test(tTitle.trim());
+
+                        if (isExam || isMatlab || isMiluim || (isCompleted && !isPhantomHw)) {
+                            rebuiltTasks.push(t);
+                        } else {
+                            if (t.id && !gameState.deletedTaskIds.includes(String(t.id))) gameState.deletedTaskIds.push(String(t.id));
+                            if (t.moodleUid && !gameState.deletedTaskIds.includes(String(t.moodleUid))) gameState.deletedTaskIds.push(String(t.moodleUid));
+                            if (t.moodleEventId && !gameState.deletedTaskIds.includes(String(t.moodleEventId))) gameState.deletedTaskIds.push(String(t.moodleEventId));
+                        }
+                    });
+                    c.tasks = rebuiltTasks;
+                    c.code = '034056';
+                    c.name = 'מבוא לחישוב מדעי והנדסי';
+                    c.credits = 4;
+                    c.semester = 3;
+                    if (c.status !== 'active') c.status = 'active';
+                    c.moedA = '2027-02-11';
+                    c.moedB = '2027-03-10';
+                    if (gameState.courses['00340056']) delete gameState.courses['00340056'];
+                    if (gameState.courses['34056']) delete gameState.courses['34056'];
+                    gameState.migrationsApplied.reset_034056_hw_v318 = true;
+                }
+
                 let exA = c.tasks.find(t => t.id === '034056_ex' || t.title.includes('מועד א'));
                 if (exA) { exA.dueDate = '2027-02-11'; exA.title = "חישוב מדעי והנדסי - מועד א'"; }
+                else { c.tasks.push({ id: '034056_ex', title: "חישוב מדעי והנדסי - מועד א'", type: 'exam', xp: 550, completed: false, status: 'not_started', dueDate: '2027-02-11' }); }
                 let exB = c.tasks.find(t => t.id === '034056_ex_b' || t.title.includes("מועד ב"));
                 if (exB) { exB.dueDate = '2027-03-10'; exB.title = "חישוב מדעי והנדסי - מועד ב'"; }
-                else { c.tasks.push({ id: '034056_ex_b', title: "חישוב מדעי והנדסי - מועד ב'", type: 'exam', xp: 500, completed: false, status: 'not_started', dueDate: '2027-03-10' }); }
+                else { c.tasks.push({ id: '034056_ex_b', title: "חישוב מדעי והנדסי - מועד ב'", type: 'exam', xp: 550, completed: false, status: 'not_started', dueDate: '2027-03-10' }); }
 
                 // Active Moodle 26 Homework: לומדת MATLAB (2 bonus points)
                 let matlabTask = c.tasks.find(t => t.id === 'task_moodle_43952' || t.id === '034056_matlab_bonus' || t.id === '034056_matlab' || (t.title && (t.title.includes('MATLAB') || t.title.includes('מטלאב'))));
@@ -25950,11 +25992,11 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.11.20-v3.1.7",
-    version: "3.1.7",
-    build: "20261120_08",
-    date: "2026-11-20 17:25",
-    description: "v3.1.7: פריסה דו-שורתית נקייה לכרטיסיות הגיליונות (ללא חיתוך אות בודדת), הרחבת כפתור השחזור ל\"טרם נפתח 🔒\" גם לגיליונות ישנים, והשלמת קיצור \"מודל\" בכל המסכים."
+    code: "REV-2026.11.20-v3.1.8",
+    version: "3.1.8",
+    build: "20261120_09",
+    date: "2026-11-20 17:38",
+    description: "v3.1.8: איפוס ובנייה מחדש של קורס 034056 (מבוא לחישוב מדעי והנדסי) לניקוי מוחלט של מטלת השווא באדום (גיליון 2) מקומית ובענן, סנכרון מחיקת גיליונות לענן, וכפתור 🔄 איפוס קורס יזום במודאל."
 };
 window.APP_VERSION = APP_CURRENT_REVISION.version;
 
@@ -32608,11 +32650,16 @@ function renderCourseModalHomeworkPolicy(course) {
                         משקל: ${hwStatus.policy.weightLabel} &bull; ${statusMsg}
                     </div>
                 </div>
-                ${driveUrl ? `
-                    <button type="button" class="btn btn-xs btn-outline" onclick="if (window.openExternalUrlOrBrowser) window.openExternalUrlOrBrowser('${driveUrl}', '_blank');" style="border-color: rgba(56, 189, 248, 0.4); color: #38bdf8; display: inline-flex; align-items: center; gap: 5px;">
-                        📁 רפרנסים לקורס בדרייב ↗
+                <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                    ${driveUrl ? `
+                        <button type="button" class="btn btn-xs btn-outline" onclick="if (window.openExternalUrlOrBrowser) window.openExternalUrlOrBrowser('${driveUrl}', '_blank');" style="border-color: rgba(56, 189, 248, 0.4); color: #38bdf8; display: inline-flex; align-items: center; gap: 5px;">
+                            📁 רפרנסים לקורס בדרייב ↗
+                        </button>
+                    ` : ''}
+                    <button type="button" class="btn btn-xs btn-outline" onclick="if (window.resetCourseHomeworkProgress) window.resetCourseHomeworkProgress('${course.code}');" title="אפס את משימות שיעורי הבית של הקורס ובנה מחדש" style="border-color: rgba(248, 113, 113, 0.4); color: #fca5a5; display: inline-flex; align-items: center; gap: 5px;">
+                        🔄 אפס מעקב קורס
                     </button>
-                ` : ''}
+                </div>
             </div>
 
             <!-- Stats Strip (Red: Not Started, Yellow: In Progress, Blue: Submitted, Green: Finished) -->
@@ -33048,7 +33095,7 @@ function setHomeworkSheetGrade(courseCode, sheetIndex, compType, rawGrade) {
     return parsed;
 }
 
-// Reverts an empty auto-created manual sheet placeholder back to "טרם נפתח 🔒"
+// Reverts an empty auto-created manual sheet placeholder back to "טרם נפתח 🔒" (and prevents cloud resurrection)
 function resetHomeworkSheetToLocked(courseCode, sheetIndex) {
     if (!courseCode || !window.gameState || !window.gameState.courses) return false;
     const cleanCode = (typeof cleanTechnionCourseCode === 'function') ? cleanTechnionCourseCode(courseCode) : String(courseCode).replace(/^0+/, '');
@@ -33057,6 +33104,7 @@ function resetHomeworkSheetToLocked(courseCode, sheetIndex) {
 
     const idx = Number(sheetIndex);
     const beforeLen = course.tasks.length;
+    if (!Array.isArray(window.gameState.deletedTaskIds)) window.gameState.deletedTaskIds = [];
     course.tasks = course.tasks.filter(t => {
         if (!t || !isHomeworkPolicyTask(t)) return true;
         if (extractHomeworkSheetIndex(t.title) !== idx) return true;
@@ -33067,6 +33115,9 @@ function resetHomeworkSheetToLocked(courseCode, sheetIndex) {
             !(Array.isArray(t.comments) && t.comments.length > 0) &&
             (t.source === 'manual' || !t.source || /_hw_\d+/i.test(String(t.id || '')))
         );
+        if (isSafeAutoPlaceholder && t.id && !window.gameState.deletedTaskIds.includes(String(t.id))) {
+            window.gameState.deletedTaskIds.push(String(t.id));
+        }
         return !isSafeAutoPlaceholder;
     });
 
@@ -33080,7 +33131,62 @@ function resetHomeworkSheetToLocked(courseCode, sheetIndex) {
     return true;
 }
 
+// Resets and cleanly rebuilds all homework sheet tasks for a course (preserving exams & completed non-HW work)
+function resetCourseHomeworkProgress(courseCode, opts = {}) {
+    if (!courseCode || !window.gameState || !window.gameState.courses) return false;
+    const cleanCode = (typeof cleanTechnionCourseCode === 'function') ? cleanTechnionCourseCode(courseCode) : String(courseCode).replace(/^0+/, '');
+    const course = window.gameState.courses[courseCode] || window.gameState.courses['0' + cleanCode] || window.gameState.courses[cleanCode];
+    if (!course) return false;
+
+    if (!opts.skipConfirm && typeof window !== 'undefined' && typeof window.confirm === 'function') {
+        const ok = window.confirm(`לאפס ולבנות מחדש את מעקב שיעורי הבית של "${course.name || courseCode}"?\n(מועדי הבחינות והקורס יישמרו)`);
+        if (!ok) return false;
+    }
+
+    if (!Array.isArray(window.gameState.deletedTaskIds)) window.gameState.deletedTaskIds = [];
+    const oldTasks = Array.isArray(course.tasks) ? course.tasks : [];
+    const preserved = [];
+    let removedCount = 0;
+
+    oldTasks.forEach(t => {
+        if (!t) return;
+        const title = String(t.title || '');
+        const isExam = (t.type === 'exam' || /מועד\s*[אבג]|מבחן|בחינה/i.test(title));
+        const isBonusNonSheet = /matlab|מטלאב|בונוס|מילואי/i.test(title) || !!t.isMiluim;
+        if (isExam || (isBonusNonSheet && (t.completed === true || t.status === 'done'))) {
+            preserved.push(t);
+        } else if (isHomeworkPolicyTask(t) || /^תרגיל|^גיליון|^hw/i.test(title.trim())) {
+            removedCount++;
+            if (t.id && !window.gameState.deletedTaskIds.includes(String(t.id))) {
+                window.gameState.deletedTaskIds.push(String(t.id));
+            }
+            if (t.moodleUid && !window.gameState.deletedTaskIds.includes(String(t.moodleUid))) {
+                window.gameState.deletedTaskIds.push(String(t.moodleUid));
+            }
+            if (t.moodleEventId && !window.gameState.deletedTaskIds.includes(String(t.moodleEventId))) {
+                window.gameState.deletedTaskIds.push(String(t.moodleEventId));
+            }
+        } else {
+            preserved.push(t);
+        }
+    });
+
+    course.tasks = preserved;
+    if (typeof saveState === 'function') saveState();
+    renderCourseModalHomeworkPolicy(course);
+    if (typeof renderModalTaskList === 'function') renderModalTaskList(course);
+    renderNotionHomeworkPolicyStrip();
+    if (typeof renderNotionTasksTable === 'function') renderNotionTasksTable();
+    if (typeof renderUI === 'function') renderUI();
+
+    if (typeof showToastNotification === 'function') {
+        showToastNotification(`🔄 מעקב "${course.name || courseCode}" אופס ונבנה מחדש (${removedCount} מטלות נוקו)`, 'info');
+    }
+    return true;
+}
+
 window.resetHomeworkSheetToLocked = resetHomeworkSheetToLocked;
+window.resetCourseHomeworkProgress = resetCourseHomeworkProgress;
 window.parseTaskGradeValue = parseTaskGradeValue;
 window.getTaskGradeTierClass = getTaskGradeTierClass;
 window.updateTaskGrade = updateTaskGrade;
