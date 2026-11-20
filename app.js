@@ -25872,11 +25872,11 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.11.20-v3.1.2",
-    version: "3.1.2",
-    build: "20261120_03",
-    date: "2026-11-20 12:50",
-    description: "v3.1.2: חיסול כפילויות משימות ותאריכים שגויים/קפואים בשעון ובמודל — איחוד hw/hw_written (כגון HW 3 - Rotation Transformation) עם עדיפות מוחלטת לתאריך Moodle חי על פני תאריך Seed ישן, תיקון זיהוי URL של דף קורס (/course/view.php), וחישוב ימים חי בזמן אמת בשעון מול תאריך היום."
+    code: "REV-2026.11.20-v3.1.3",
+    version: "3.1.3",
+    build: "20261120_04",
+    date: "2026-11-20 13:45",
+    description: "v3.1.3: משיכת ענן אוטומטית מ-Supabase בחזרה מהרקע (visibilitychange/focus/onResume) ובבקשת סנכרון מהשעון — משימות שהושלמו במחשב או בטלפון יורדות מיידית מהשעון Galaxy Watch 8 ומווידג׳טים באנדרואיד."
 };
 window.APP_VERSION = APP_CURRENT_REVISION.version;
 

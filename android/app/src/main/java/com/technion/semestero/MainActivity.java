@@ -46,10 +46,19 @@ public class MainActivity extends BridgeActivity {
         if (instance != null && instance.getBridge() != null && instance.getBridge().getWebView() != null) {
             instance.runOnUiThread(() -> {
                 try {
-                    instance.getBridge().getWebView().evaluateJavascript(
-                        "if (typeof syncNativeAndroidWidgets === 'function') syncNativeAndroidWidgets();",
-                        null
-                    );
+                    String js = "(function(){ " +
+                        "if (typeof syncNativeAndroidWidgets === 'function') syncNativeAndroidWidgets(); " +
+                        "if (window.AuthSync && typeof window.AuthSync.pullLatestStateFromCloud === 'function' && window.AuthSync.isLoggedIn && window.AuthSync.isLoggedIn()) { " +
+                        "  var now = Date.now(); " +
+                        "  if (!window._lastWearCloudPullAt || (now - window._lastWearCloudPullAt) >= 8000) { " +
+                        "    window._lastWearCloudPullAt = now; " +
+                        "    Promise.resolve(window.AuthSync.pullLatestStateFromCloud(false)).then(function(){ " +
+                        "      if (typeof syncNativeAndroidWidgets === 'function') syncNativeAndroidWidgets(); " +
+                        "    }).catch(function(){}); " +
+                        "  } " +
+                        "} " +
+                        "})();";
+                    instance.getBridge().getWebView().evaluateJavascript(js, null);
                 } catch (Exception ignored) {}
             });
         }

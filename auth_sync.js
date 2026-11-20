@@ -3010,10 +3010,36 @@
                         this.setupRealtimeSubscription();
                         this.pullLatestStateFromCloud(true);
                     }
+                    this.setupResumeCloudPull();
                     return;
                 } catch (e) {
                     console.warn('[AuthSync] Supabase client init error:', e);
                 }
+            }
+        },
+
+        // Automatically re-pull from Supabase Cloud when app/tab returns from background (Android WebView suspends WebSockets)
+        setupResumeCloudPull() {
+            if (typeof window === 'undefined' || window._authSyncResumeHooked) return;
+            window._authSyncResumeHooked = true;
+            const triggerResumePull = () => {
+                if (!supabaseClient || !this.isLoggedIn()) return;
+                const now = Date.now();
+                if (window._lastAuthResumePullAt && (now - window._lastAuthResumePullAt) < 12000) return;
+                window._lastAuthResumePullAt = now;
+                this.pullLatestStateFromCloud(false).then(() => {
+                    if (typeof window.syncNativeAndroidWidgets === 'function') {
+                        window.syncNativeAndroidWidgets();
+                    }
+                }).catch(() => {});
+            };
+            if (typeof document !== 'undefined' && document.addEventListener) {
+                document.addEventListener('visibilitychange', () => {
+                    if (!document.hidden) triggerResumePull();
+                });
+            }
+            if (window.addEventListener) {
+                window.addEventListener('focus', triggerResumePull);
             }
         },
 
