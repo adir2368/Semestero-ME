@@ -25950,11 +25950,11 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.11.20-v3.1.6",
-    version: "3.1.6",
-    build: "20261120_07",
-    date: "2026-11-20 16:40",
-    description: "v3.1.6: תיקון תצוגת כרטיסיות הגיליונות (הסרת כפילות \"גיליון X גיליון X\", מניעת שבירת שורות של כפתור \"סמן כהוגש\", הוספת שחזור ל\"טרם נפתח\", וקישור מודל ישיר) והחלפת התווית \"הגשה במודל\" ב-\"מודל\"."
+    code: "REV-2026.11.20-v3.1.7",
+    version: "3.1.7",
+    build: "20261120_08",
+    date: "2026-11-20 17:25",
+    description: "v3.1.7: פריסה דו-שורתית נקייה לכרטיסיות הגיליונות (ללא חיתוך אות בודדת), הרחבת כפתור השחזור ל\"טרם נפתח 🔒\" גם לגיליונות ישנים, והשלמת קיצור \"מודל\" בכל המסכים."
 };
 window.APP_VERSION = APP_CURRENT_REVISION.version;
 
@@ -32395,7 +32395,7 @@ function formatSheetTaskDisplayTitle(sheetIndex, sheetName, rawTitle) {
     const defaultLabel = `גיליון ${sheetIndex}`;
     const raw = String(rawTitle || '').trim();
     if (raw) {
-        const cleaned = raw.replace(new RegExp(`\\s*[:\\-–—]\\s*גיליון\\s*0*${sheetIndex}\\s*$`), '').trim();
+        const cleaned = raw.replace(new RegExp(`\\s*[:\\-–—]\\s*(?:גיליון|גליון)(?:\\s*בית)?\\s*0*${sheetIndex}\\s*$`), '').trim();
         return cleaned || raw;
     }
     const nameStr = String(sheetName || '').trim();
@@ -32559,11 +32559,19 @@ function renderCourseModalHomeworkPolicy(course) {
             ? `<span class="hw-sheet-topic" title="${escapeHtml(sheet.name)}">${escapeHtml(sheet.name)}</span>`
             : '';
 
+        const isResettablePlaceholder = (t) => !!(
+            t &&
+            !t.moodleUid &&
+            !t.moodleEventId &&
+            (t.grade === undefined || t.grade === null || t.grade === '') &&
+            !(Array.isArray(t.comments) && t.comments.length > 0) &&
+            (t.source === 'manual' || !t.source || /_hw_\d+/i.test(String(t.id || '')))
+        );
         const canLockReset = !!(
             sheet.status === 'open' &&
             sheet.grade === null &&
-            ((sheet.singleTask && sheet.singleTask.source === 'manual' && !sheet.singleTask.moodleUid && !sheet.singleTask.dueDate && !(sheet.singleTask.comments && sheet.singleTask.comments.length)) ||
-             (sheet.isDual && ((sheet.digitalTask && sheet.digitalTask.source === 'manual' && !sheet.digitalTask.moodleUid && !sheet.digitalTask.dueDate) || (sheet.writtenTask && sheet.writtenTask.source === 'manual' && !sheet.writtenTask.moodleUid && !sheet.writtenTask.dueDate))))
+            (isResettablePlaceholder(sheet.singleTask) ||
+             (sheet.isDual && (isResettablePlaceholder(sheet.digitalTask) || isResettablePlaceholder(sheet.writtenTask))))
         );
         const resetLockBtnHtml = canLockReset
             ? `<button type="button" class="hw-sheet-reset-lock-btn" onclick="if (window.resetHomeworkSheetToLocked) window.resetHomeworkSheetToLocked('${course.code}', ${sheet.index});" title="החזר לסטטוס טרם נפתח 🔒">✕</button>`
@@ -33052,7 +33060,13 @@ function resetHomeworkSheetToLocked(courseCode, sheetIndex) {
     course.tasks = course.tasks.filter(t => {
         if (!t || !isHomeworkPolicyTask(t)) return true;
         if (extractHomeworkSheetIndex(t.title) !== idx) return true;
-        const isSafeAutoPlaceholder = (t.source === 'manual' && !t.moodleUid && !t.dueDate && (t.grade === undefined || t.grade === null || t.grade === '') && !(Array.isArray(t.comments) && t.comments.length > 0));
+        const isSafeAutoPlaceholder = (
+            !t.moodleUid &&
+            !t.moodleEventId &&
+            (t.grade === undefined || t.grade === null || t.grade === '') &&
+            !(Array.isArray(t.comments) && t.comments.length > 0) &&
+            (t.source === 'manual' || !t.source || /_hw_\d+/i.test(String(t.id || '')))
+        );
         return !isSafeAutoPlaceholder;
     });
 

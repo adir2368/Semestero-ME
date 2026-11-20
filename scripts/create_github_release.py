@@ -17,9 +17,9 @@ ZIP_PATH = os.path.join(ROOT, "Semestero-ME-Windows-x64.zip")
 
 with open(os.path.join(ROOT, "package.json"), "r", encoding="utf-8") as f:
     pkg = json.load(f)
-VERSION = pkg.get("version", "3.1.6")
+VERSION = pkg.get("version", "3.1.7")
 TAG = f"v{VERSION}"
-NAME = f"Semestero ME v{VERSION} - Homework Policy Sheet Grid Polish & Clean Moodle Label"
+NAME = f"Semestero ME v{VERSION} - Uncrushed 2-Row HW Sheet Cards, Broadened Lock Reset & Clean Moodle Labels"
 
 def get_github_token():
     try:
@@ -99,17 +99,17 @@ def main():
 
     body_notes = f"""# Semestero ME {TAG} Release Notes
 
-### 🎯 1. תיקון כרטיסיות מעקב הגיליונות (`app.js`, `styles.css`)
-- **הסרת כפילויות בכותרות הגיליונות**: גיליונות ללא נושא ייעודי מציגים כעת כותרת נקייה (`גיליון 2` בלבד במקום `גיליון 2 גיליון 2`, ו-`תרגיל בית 2` במקום `תרגיל בית 2: גיליון 2`), וגיליונות שטרם נפתחו מציגים `טרם נפתחה מטלה במודל`.
-- **יישור כפתור `סמן כהוגש` בשורה אחת**: הוספת `white-space: nowrap` ו-`flex-shrink: 0` לכפתורי הפעולה וקיצור תיבת הציון (`44px`) כדי למנוע גלישת טקסט לשתי שורות, בתוספת כפתור `✕` להחזרת גיליון ריק שנוצר בטעות לסטטוס `טרם נפתח 🔒`.
+### 🎯 1. פריסה דו-שורתית נקייה לכרטיסיות הגיליונות (`styles.css`, `app.js`)
+- **אפס חיתוך כותרות ואפס שבירת שורות**: שורת המרכיב (`.hw-component-row`) עברה לפריסה דו-שורתית מרווחת — כותרת המשימה מוצגת לרוחב המלא ללא חיתוך לאות בודדת, ושורת הכפתורים (`[ציון]`, `[מודל ↗]`, `[🟡 התחל]`, `[סמן כהוגש]`) יושבת מיושרת בשורה אחת נקייה.
+- **שחזור קל ל-`טרם נפתח 🔒`**: הורחב זיהוי כפתור ה-`✕` כך שגם גיליונות ריקים שנפתחו בגרסאות קודמות ניתנים להחזרה בקליק אחד לסטטוס נעול.
 
-### 🎓 2. קיצור תווית מודל (`app.js`, `index.html`)
-- **החלפת `"הגשה במודל"` ב-`"מודל"`** בטבלת המשימות ובחלון הצד (`Side Peek`).
+### 🎓 2. קיצור תווית מודל (`app.js`, `index.html`, `widgets.html`)
+- **החלפה מלאה של `"הגשה במודל"` ב-`"מודל"`** בטבלת המשימות, בחלון הצד (`Side Peek`) ובתצוגת הווידג'טים.
 
 ### 📦 3. קובצי הפצה ועדכון:
-- `Semestero-ME-Tablet-Clean.apk` (`com.technion.semestero.tablet`, `versionCode 134`, `versionName {VERSION}`, `v1+v2+v3` Signed)
-- `Semestero-ME.apk` (`com.technion.semestero`, `versionCode 134`, `versionName {VERSION}`, `v1+v2+v3` Signed, `targetSdk 34`)
-- `Semestero-ME-Watch.apk` (`versionCode 134`, `versionName {VERSION}`, `v1+v2+v3` Signed)
+- `Semestero-ME-Tablet-Clean.apk` (`com.technion.semestero.tablet`, `versionCode 135`, `versionName {VERSION}`, `v1+v2+v3` Signed)
+- `Semestero-ME.apk` (`com.technion.semestero`, `versionCode 135`, `versionName {VERSION}`, `v1+v2+v3` Signed, `targetSdk 34`)
+- `Semestero-ME-Watch.apk` (`versionCode 135`, `versionName {VERSION}`, `v1+v2+v3` Signed)
 - `Semestero-ME-Windows-x64.zip` (Electron Desktop Client {VERSION})
 """
 

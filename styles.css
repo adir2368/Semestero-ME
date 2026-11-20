@@ -16579,25 +16579,23 @@ tr.is-task-pinned {
 
 .hw-component-row {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    flex-direction: column;
+    align-items: stretch;
     gap: 6px;
-    padding: 4px 8px;
-    background: rgba(0, 0, 0, 0.2);
+    padding: 7px 9px;
+    background: rgba(0, 0, 0, 0.22);
     border-radius: 6px;
-    font-size: 0.74rem;
+    font-size: 0.75rem;
 }
 
 .hw-component-label {
     display: flex;
     align-items: center;
     gap: 5px;
-    color: #cbd5e1;
-    flex: 1 1 auto;
+    width: 100%;
+    color: #e2e8f0;
     min-width: 0;
     overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
 }
 
 .hw-component-label > span:last-child {
@@ -16605,14 +16603,16 @@ tr.is-task-pinned {
     text-overflow: ellipsis;
     white-space: nowrap;
     min-width: 0;
+    flex: 1 1 auto;
 }
 
 .hw-component-actions {
     display: flex;
     align-items: center;
-    gap: 4px;
-    flex-shrink: 0;
-    flex-wrap: nowrap;
+    justify-content: flex-start;
+    gap: 5px;
+    width: 100%;
+    flex-wrap: wrap;
 }
 
 .btn-hw-toggle {
@@ -16677,12 +16677,16 @@ tr.is-task-pinned {
 
 .hw-link-btn {
     color: #38bdf8;
+    background: rgba(14, 165, 233, 0.12);
+    border: 1px solid rgba(56, 189, 248, 0.3);
     text-decoration: none;
     font-size: 0.70rem;
-    padding: 2px 4px;
+    font-weight: 600;
+    padding: 2px 7px;
     border-radius: 4px;
     white-space: nowrap;
     flex-shrink: 0;
+    margin-right: auto;
 }
 
 .hw-sheet-reset-lock-btn {
