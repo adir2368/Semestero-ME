@@ -2234,10 +2234,14 @@
 
         const splits = getPlannedMoedBSplits();
         const examCourses = [];
+        const seenExamCourseRoots = new Set();
 
         (semObj.courses || []).forEach((c, idx) => {
             if (c.type === 'sports' || c.list === 'SPORTS' || Number(c.credits) === 0) return;
             const cKeys = getNormalizedCodes(c.code, c.altCode);
+            const canonicalRoot = (cKeys[0] || String(c.code || '')).replace(/^0+/, '');
+            if (canonicalRoot && seenExamCourseRoots.has(canonicalRoot)) return;
+            if (canonicalRoot) seenExamCourseRoots.add(canonicalRoot);
             let moedAStr = c.moedA || c.examDateA || '';
             let moedBStr = c.moedB || c.examDateB || '';
 

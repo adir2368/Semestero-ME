@@ -213,36 +213,13 @@ public class MainActivity extends Activity implements MessageClient.OnMessageRec
 
     @Override
     public void onTaskToggled(int taskIndex) {
-        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-        boolean currentDone = prefs.getBoolean("wear_task_" + taskIndex + "_done", false);
-        boolean newDone = !currentDone;
-        prefs.edit().putBoolean("wear_task_" + taskIndex + "_done", newDone).apply();
-
-        if (vibrator != null) {
-            vibrator.vibrate(newDone ? 45 : 20);
-        }
-
-        String taskId = prefs.getString("wear_task_" + taskIndex + "_id", "");
-        if (taskId == null || taskId.trim().isEmpty()) {
-            try {
-                JSONArray arr = new JSONArray(prefs.getString("all_tasks_json", "[]"));
-                if (taskIndex >= 1 && taskIndex <= arr.length()) {
-                    taskId = arr.getJSONObject(taskIndex - 1).optString("id", "");
-                }
-            } catch (Exception ignored) {}
-        }
-        if (taskId == null || taskId.trim().isEmpty()) {
-            taskId = "task_" + taskIndex;
-        }
-        notifyPhoneTaskStatus(taskId, taskIndex, newDone);
-
+        // Watch tasks are intentionally read-only to prevent accidental wrist completions;
+        // completions are managed on Phone / PC and synced automatically to the watch & complication.
         try {
             androidx.wear.watchface.complications.datasource.ComplicationDataSourceUpdateRequester
                 .create(this, new android.content.ComponentName(this, SemesteroTasksComplicationService.class))
                 .requestUpdateAll();
         } catch (Exception ignored) {}
-        WearScheduleHelper.requestComplicationAndTileRefresh(this);
-        updateUIFromPrefsAndSchedule();
     }
 
     @Override
@@ -563,8 +540,10 @@ public class MainActivity extends Activity implements MessageClient.OnMessageRec
                     compactDue = formatCompactDueForWatch(rawDue);
                     urgency = resolveUrgencyForWatch(rawDue);
                 }
-                boolean done = prefs.getBoolean("wear_task_" + (i + 1) + "_done", obj.optBoolean("completed", false));
-                tasks.add(new WearCarouselAdapter.TaskItem(title, shortCourse, compactDue, done, urgency));
+                if (obj.optBoolean("completed", false)) {
+                    continue;
+                }
+                tasks.add(new WearCarouselAdapter.TaskItem(title, shortCourse, compactDue, false, urgency));
             }
         } catch (Exception ignored) {}
 

@@ -19228,82 +19228,160 @@ function setupNotionWorkspaceSubviews() {
     renderExamGapRunway();
 }
 
-// Retrieves all active degree courses with upcoming exam dates (filters out past/completed exams)
+// Retrieves all active degree courses with upcoming exam dates (filters out past/completed exams & deduplicates across tasks + pastExamsBank)
 function getDegreeExamDates(filterPast = true) {
     const exams = [];
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
+    const normalizeExamCourseRoot = (code) => {
+        let raw = String(code || '').trim();
+        if (/^\d{8}$/.test(raw) && raw.startsWith('0') && !raw.startsWith('0394')) {
+            raw = raw.slice(1, 4) + raw.slice(5);
+        }
+        return raw.replace(/^0+/, '') || raw;
+    };
+
+    const parseExamDateLocal = (rawDate) => {
+        if (!rawDate) return null;
+        if (rawDate instanceof Date) {
+            if (isNaN(rawDate.getTime())) return null;
+            const d = new Date(rawDate.getFullYear(), rawDate.getMonth(), rawDate.getDate(), 0, 0, 0, 0);
+            const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+            return { date: d, isoDate: iso };
+        }
+        const s = String(rawDate).trim();
+        let m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+        if (m) {
+            const d = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]), 0, 0, 0, 0);
+            if (!isNaN(d.getTime())) {
+                const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+                return { date: d, isoDate: iso };
+            }
+        }
+        m = s.match(/^(\d{1,2})[./-](\d{1,2})[./-](\d{4})$/);
+        if (m) {
+            const d = new Date(Number(m[3]), Number(m[2]) - 1, Number(m[1]), 0, 0, 0, 0);
+            if (!isNaN(d.getTime())) {
+                const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+                return { date: d, isoDate: iso };
+            }
+        }
+        const fallback = new Date(s);
+        if (isNaN(fallback.getTime())) return null;
+        const d = new Date(fallback.getFullYear(), fallback.getMonth(), fallback.getDate(), 0, 0, 0, 0);
+        const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        return { date: d, isoDate: iso };
+    };
+
     const isAdir = (window.AuthSync && typeof window.AuthSync.isAdirActive === 'function') ? window.AuthSync.isAdirActive() : false;
+    const dedupCourses = typeof getDeduplicatedCoursesList === 'function'
+        ? getDeduplicatedCoursesList(gameState.courses || {})
+        : Object.values(gameState.courses || {});
 
-    // 1. Check pastExamsBank (only for Adir Moshe or active courses)
-    if (gameState.pastExamsBank && isAdir) {
-        Object.keys(gameState.pastExamsBank).forEach(cCode => {
-            const course = gameState.courses ? gameState.courses[cCode] : null;
-            // Ignore if course is completed or locked
-            if (course && (course.status === 'mastered' || course.status === 'completed' || course.status === 'locked')) {
-                return;
-            }
-            const bank = gameState.pastExamsBank[cCode];
-            if (bank && bank.examDate) {
-                const examDate = new Date(bank.examDate);
-                const examDay = new Date(examDate);
-                examDay.setHours(0, 0, 0, 0);
+    const allCoursesByRoot = new Map();
+    dedupCourses.forEach(c => {
+        if (!c) return;
+        const root = normalizeExamCourseRoot(c.altCode || c.code);
+        if (root && !allCoursesByRoot.has(root)) {
+            allCoursesByRoot.set(root, c);
+        }
+    });
 
-                // Exclude past exams if filterPast is true
-                if (filterPast && examDay < today) {
-                    return;
-                }
+    const seenTaskIds = new Set();
+    const seenCourseMoed = new Set();
+    const seenCourseDate = new Set();
+    const completedCourseMoed = new Set();
 
-                const name = course ? course.name : (bank.name || cCode);
-                exams.push({
-                    courseCode: cCode,
-                    courseName: name,
-                    dateStr: bank.examDate,
-                    date: examDate
-                });
-            }
-        });
-    }
+    // 1. Primary source: active deduplicated course exam tasks (carries Moed A/B & completion state)
+    dedupCourses.forEach(course => {
+        if (!course || course.status !== 'active') return;
+        if (!Array.isArray(course.tasks)) return;
 
-    // 2. Check course tasks - ONLY include courses that are currently active!
-    Object.values(gameState.courses || {}).forEach(course => {
-        // Strict isolation: only courses that the student is actively studying right now
-        if (course.status !== 'active') return;
-        if (!course.tasks) return;
-        
+        const root = normalizeExamCourseRoot(course.altCode || course.code);
+
         course.tasks.forEach(examTask => {
-            if (examTask.type !== 'exam' || !examTask.dueDate) return;
-            const examDate = new Date(examTask.dueDate);
-            const examDay = new Date(examDate);
-            examDay.setHours(0, 0, 0, 0);
+            if (!examTask || examTask.type !== 'exam' || !examTask.dueDate) return;
+            const parsed = parseExamDateLocal(examTask.dueDate);
+            if (!parsed) return;
 
-            const isDone = examTask.completed || examTask.status === 'completed' || examTask.status === 'done';
+            const titleStr = String(examTask.title || '');
+            const isMoedB = titleStr.includes("מועד ב") || titleStr.toLowerCase().includes("moed b");
+            const moed = isMoedB ? 'B' : 'A';
+            const moedLabel = isMoedB ? "מועד ב'" : "מועד א'";
+            const isDone = !!(examTask.completed || examTask.status === 'completed' || examTask.status === 'done');
+
+            if (isDone) {
+                completedCourseMoed.add(`${root}|${moed}`);
+            }
 
             // Exclude past or already completed exams if filterPast is true
-            if (filterPast && (examDay < today || isDone)) {
+            if (filterPast && (parsed.date < today || isDone)) {
                 return;
             }
 
-            const isMoedB = examTask.title.includes("מועד ב") || examTask.title.toLowerCase().includes("moed b");
-            const moedLabel = isMoedB ? "מועד ב'" : "מועד א'";
-
-            // Avoid duplicate entries for same task ID
-            if (!exams.some(e => e.taskId === examTask.id || (e.courseCode === course.code && e.moed === (isMoedB ? 'B' : 'A')))) {
-                exams.push({
-                    taskId: examTask.id,
-                    courseCode: course.code,
-                    courseName: `${course.name} (${moedLabel})`,
-                    baseName: course.name,
-                    moed: isMoedB ? 'B' : 'A',
-                    dateStr: examTask.dueDate,
-                    date: examDate
-                });
+            const courseMoedKey = `${root}|${moed}`;
+            const courseDateKey = `${root}|${parsed.isoDate}`;
+            if ((examTask.id && seenTaskIds.has(examTask.id)) || seenCourseMoed.has(courseMoedKey) || seenCourseDate.has(courseDateKey)) {
+                return;
             }
+
+            if (examTask.id) seenTaskIds.add(examTask.id);
+            seenCourseMoed.add(courseMoedKey);
+            seenCourseDate.add(courseDateKey);
+
+            exams.push({
+                taskId: examTask.id,
+                courseCode: course.code,
+                courseRoot: root,
+                courseName: `${course.name} (${moedLabel})`,
+                baseName: course.name,
+                moed,
+                dateStr: parsed.isoDate,
+                date: parsed.date
+            });
         });
     });
 
-    const validExams = exams.filter(e => !isNaN(e.date.getTime()));
+    // 2. Fallback: pastExamsBank (only for active courses that did not already emit a Moed A exam task)
+    if (gameState.pastExamsBank && isAdir) {
+        Object.keys(gameState.pastExamsBank).forEach(cCode => {
+            const root = normalizeExamCourseRoot(cCode);
+            const course = (gameState.courses && gameState.courses[cCode]) || allCoursesByRoot.get(root) || null;
+            // Ignore completed, locked, or non-active courses
+            if (course && course.status !== 'active') {
+                return;
+            }
+            const bank = gameState.pastExamsBank[cCode];
+            if (!bank || !bank.examDate) return;
+
+            const parsed = parseExamDateLocal(bank.examDate);
+            if (!parsed) return;
+            if (filterPast && parsed.date < today) return;
+
+            const courseMoedKey = `${root}|A`;
+            const courseDateKey = `${root}|${parsed.isoDate}`;
+            if (completedCourseMoed.has(courseMoedKey) || seenCourseMoed.has(courseMoedKey) || seenCourseDate.has(courseDateKey)) {
+                return;
+            }
+
+            seenCourseMoed.add(courseMoedKey);
+            seenCourseDate.add(courseDateKey);
+
+            const baseName = course ? course.name : String(bank.name || cCode).replace(/\s*\(\d{6,8}\)\s*$/, '').trim();
+            exams.push({
+                courseCode: course ? course.code : cCode,
+                courseRoot: root,
+                courseName: `${baseName} (מועד א')`,
+                baseName,
+                moed: 'A',
+                dateStr: parsed.isoDate,
+                date: parsed.date
+            });
+        });
+    }
+
+    const validExams = exams.filter(e => e.date && !isNaN(e.date.getTime()));
     validExams.sort((a, b) => a.date - b.date);
     return validExams;
 }
@@ -25872,11 +25950,11 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.11.20-v3.1.3",
-    version: "3.1.3",
-    build: "20261120_04",
-    date: "2026-11-20 13:45",
-    description: "v3.1.3: משיכת ענן אוטומטית מ-Supabase בחזרה מהרקע (visibilitychange/focus/onResume) ובבקשת סנכרון מהשעון — משימות שהושלמו במחשב או בטלפון יורדות מיידית מהשעון Galaxy Watch 8 ומווידג׳טים באנדרואיד."
+    code: "REV-2026.11.20-v3.1.4",
+    version: "3.1.4",
+    build: "20261120_05",
+    date: "2026-11-20 13:55",
+    description: "v3.1.4: מצב צפייה בלבד למשימות בשעון Galaxy Watch 8 (ללא סימון השלמה בטעות בנגיעה), תיקון כיוון חיצי הניווט ב-RTL בלוח השנה ובמחולל המערכת, ותיקון כפילות מבחנים בציר מרווחי המבחנים שגרמה להתנגשויות שגויות של 0 ימים."
 };
 window.APP_VERSION = APP_CURRENT_REVISION.version;
 
@@ -29673,11 +29751,28 @@ function syncNativeAndroidWidgets(classData, tasksData) {
 
         if (typeof gameState !== 'undefined' && gameState) {
             const allExams = [];
+            const seenWidgetExams = new Set();
+            const pushUniqueWidgetExam = (courseRoot, title, dueDate, isMoedB) => {
+                if (!dueDate) return;
+                const iso = (typeof parseDateToIso === 'function') ? parseDateToIso(dueDate) : dueDate;
+                if (!iso) return;
+                const moedKey = `${courseRoot}|${isMoedB ? 'B' : 'A'}`;
+                const dateKey = `${courseRoot}|${iso}`;
+                if (seenWidgetExams.has(moedKey) || seenWidgetExams.has(dateKey)) return;
+                seenWidgetExams.add(moedKey);
+                seenWidgetExams.add(dateKey);
+                allExams.push({ title, dueDate: iso, isMoedB });
+            };
 
-            // 1. Check ONLY actively enrolled semester courses in gameState.courses (never leak un-enrolled catalog exams)
-            Object.values(gameState.courses || {}).forEach(c => {
+            const dedupWidgetCourses = typeof getDeduplicatedCoursesList === 'function'
+                ? getDeduplicatedCoursesList(gameState.courses || {})
+                : Object.values(gameState.courses || {});
+
+            // 1. Check ONLY actively enrolled deduplicated semester courses in gameState.courses (never leak un-enrolled catalog exams)
+            dedupWidgetCourses.forEach(c => {
                 const code = c.code || '';
                 const cleanCode = code.replace(/^0+/, '');
+                const courseRoot = (String(c.altCode || code).trim().replace(/^0+/, '')) || cleanCode || code;
                 
                 const cfEntry = (typeof CHEESEFORK_EXAM_DATES !== 'undefined') ? (CHEESEFORK_EXAM_DATES[code] || CHEESEFORK_EXAM_DATES[cleanCode]) : null;
                 const dateA = (c.moedA && isCurrentOrUpcomingDate(c.moedA)) ? c.moedA : (cfEntry?.moedA);
@@ -29686,30 +29781,18 @@ function syncNativeAndroidWidgets(classData, tasksData) {
                 const isCompleted = (typeof isCourseCompleted === 'function' && isCourseCompleted(code, c.altCode)) || c.status === 'completed';
                 if (c.status === 'active' && !isCompleted) {
                     if (dateA && (typeof isCurrentOrUpcomingDate !== 'function' || isCurrentOrUpcomingDate(dateA))) {
-                        allExams.push({
-                            title: c.name || cfEntry?.name || code,
-                            dueDate: (typeof parseDateToIso === 'function') ? parseDateToIso(dateA) : dateA,
-                            isMoedB: false
-                        });
+                        pushUniqueWidgetExam(courseRoot, c.name || cfEntry?.name || code, dateA, false);
                     }
                     if (dateB && (typeof isCurrentOrUpcomingDate !== 'function' || isCurrentOrUpcomingDate(dateB))) {
-                        allExams.push({
-                            title: c.name || cfEntry?.name || code,
-                            dueDate: (typeof parseDateToIso === 'function') ? parseDateToIso(dateB) : dateB,
-                            isMoedB: true
-                        });
+                        pushUniqueWidgetExam(courseRoot, c.name || cfEntry?.name || code, dateB, true);
                     }
                 }
 
                 // Check custom exam tasks on active courses
                 if (c.status === 'active') {
                     (c.tasks || []).forEach(t => {
-                        if (t.type === 'exam' && t.dueDate && (typeof isCurrentOrUpcomingDate !== 'function' || isCurrentOrUpcomingDate(t.dueDate))) {
-                            allExams.push({
-                                title: c.name || t.title,
-                                dueDate: (typeof parseDateToIso === 'function') ? parseDateToIso(t.dueDate) : t.dueDate,
-                                isMoedB: (t.title || '').includes("מועד ב")
-                            });
+                        if (t.type === 'exam' && t.dueDate && !t.completed && t.status !== 'done' && (typeof isCurrentOrUpcomingDate !== 'function' || isCurrentOrUpcomingDate(t.dueDate))) {
+                            pushUniqueWidgetExam(courseRoot, c.name || t.title, t.dueDate, (t.title || '').includes("מועד ב"));
                         }
                     });
                 }

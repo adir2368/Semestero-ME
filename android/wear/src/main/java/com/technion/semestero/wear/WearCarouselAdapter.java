@@ -281,7 +281,6 @@ public class WearCarouselAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         if (tasksList != null && !tasksList.isEmpty()) {
             float density = context.getResources().getDisplayMetrics().density;
             for (int i = 0; i < tasksList.size(); i++) {
-                final int taskIndex = i + 1;
                 TaskItem t = tasksList.get(i);
 
                 View item = inflater.inflate(R.layout.item_task, h.container, false);
@@ -289,10 +288,12 @@ public class WearCarouselAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                 TextView tvDue = item.findViewById(R.id.tv_task_due);
                 TextView tvCourse = item.findViewById(R.id.tv_task_course);
                 View urgencyBar = item.findViewById(R.id.view_task_urgency_bar);
-                View chkBg = item.findViewById(R.id.view_task_chk_bg);
-                TextView tvChkIcon = item.findViewById(R.id.tv_task_chk_icon);
 
                 tvTitle.setText(t.title);
+                tvTitle.setPaintFlags(tvTitle.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
+                tvTitle.setTextColor(context.getColor(R.color.text_primary));
+                item.setAlpha(1.0f);
+
                 if (tvCourse != null) {
                     if (t.course != null && !t.course.isEmpty()) {
                         tvCourse.setText(t.course);
@@ -305,11 +306,7 @@ public class WearCarouselAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                 int barColor;
                 int dueBgColor;
                 int dueFgColor;
-                if (t.isDone) {
-                    barColor = 0xFF10B981;
-                    dueBgColor = 0x2610B981;
-                    dueFgColor = 0xFF6EE7B7;
-                } else if (t.urgency >= 2) {
+                if (t.urgency >= 2) {
                     barColor = 0xFFEF4444;
                     dueBgColor = 0x33EF4444;
                     dueFgColor = 0xFFFCA5A5;
@@ -340,32 +337,12 @@ public class WearCarouselAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                     urgencyBar.setBackground(barBg);
                 }
 
-                if (t.isDone) {
-                    tvTitle.setPaintFlags(tvTitle.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
-                    tvTitle.setTextColor(context.getColor(R.color.text_secondary));
-                    chkBg.setBackgroundResource(R.drawable.chk_circle_done);
-                    tvChkIcon.setVisibility(View.VISIBLE);
-                    item.setAlpha(0.6f);
-                } else {
-                    tvTitle.setPaintFlags(tvTitle.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
-                    tvTitle.setTextColor(context.getColor(R.color.text_primary));
-                    chkBg.setBackgroundResource(R.drawable.chk_circle_idle);
-                    tvChkIcon.setVisibility(View.GONE);
-                    item.setAlpha(1.0f);
-                }
-
+                // Read-only on wrist (prevents accidental completions): tapping shows full details cleanly
                 item.setOnClickListener(v -> {
-                    if (actionListener != null) {
-                        actionListener.onTaskToggled(taskIndex);
-                    }
-                });
-
-                item.setOnLongClickListener(v -> {
                     String toastMsg = (t.course != null && !t.course.isEmpty())
                         ? ("[" + t.course + "] " + t.title + "\n" + t.due)
                         : (t.title + "\n" + t.due);
-                    Toast.makeText(context, toastMsg, Toast.LENGTH_LONG).show();
-                    return true;
+                    Toast.makeText(context, toastMsg, Toast.LENGTH_SHORT).show();
                 });
 
                 h.container.addView(item);
@@ -377,8 +354,6 @@ public class WearCarouselAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             TextView tvDue = emptyItem.findViewById(R.id.tv_task_due);
             TextView tvCourse = emptyItem.findViewById(R.id.tv_task_course);
             View urgencyBar = emptyItem.findViewById(R.id.view_task_urgency_bar);
-            View chkBg = emptyItem.findViewById(R.id.view_task_chk_bg);
-            TextView tvChkIcon = emptyItem.findViewById(R.id.tv_task_chk_icon);
 
             if (tvCourse != null) tvCourse.setVisibility(View.GONE);
             if (hasSyncedWithPhone) {
@@ -397,8 +372,6 @@ public class WearCarouselAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                     barBg.setCornerRadius(2f * density);
                     urgencyBar.setBackground(barBg);
                 }
-                if (chkBg != null) chkBg.setBackgroundResource(R.drawable.chk_circle_done);
-                if (tvChkIcon != null) tvChkIcon.setVisibility(View.VISIBLE);
             } else {
                 tvTitle.setText("ממתין לסנכרון משימות 🔄");
                 if (tvDue != null) {
@@ -415,8 +388,6 @@ public class WearCarouselAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                     barBg.setCornerRadius(2f * density);
                     urgencyBar.setBackground(barBg);
                 }
-                if (chkBg != null) chkBg.setBackgroundResource(R.drawable.chk_circle_idle);
-                if (tvChkIcon != null) tvChkIcon.setVisibility(View.GONE);
             }
             emptyItem.setOnClickListener(v -> {
                 if (actionListener != null) {

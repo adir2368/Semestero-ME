@@ -17,9 +17,9 @@ ZIP_PATH = os.path.join(ROOT, "Semestero-ME-Windows-x64.zip")
 
 with open(os.path.join(ROOT, "package.json"), "r", encoding="utf-8") as f:
     pkg = json.load(f)
-VERSION = pkg.get("version", "3.1.3")
+VERSION = pkg.get("version", "3.1.4")
 TAG = f"v{VERSION}"
-NAME = f"Semestero ME v{VERSION} - Automatic Resume Cloud Pull & Instant Watch Completion Sync"
+NAME = f"Semestero ME v{VERSION} - Read-Only Watch Tasks, RTL Calendar Arrows & Zero-Duplicate Exam Gap Runway"
 
 def get_github_token():
     try:
@@ -99,14 +99,21 @@ def main():
 
     body_notes = f"""# Semestero ME {TAG} Release Notes
 
-### ☁️ 1. משיכת ענן אוטומטית בחזרה מהרקע וסנכרון מיידי של משימות שהושלמו לשעון (`auth_sync.js`, `android/app/.../MainActivity.java`)
-- **משיכה אוטומטית מ-Supabase ב-`visibilitychange` ו-`focus`**: באנדרואיד חיבור ה-WebSocket מושעה ברקע; כעת בכל פתיחה מחדש או חזרה לאפליקציה, `AuthSync.setupResumeCloudPull()` מושך מיידית משימות שהושלמו במחשב/ווב ודוחף את הרשימה המעודכנת לשעון.
-- **משיכת ענן בלחיצת `↻` מהשעון (`requestWidgetRefreshFromWear`)**: בקשת סנכרון מהשעון או `onResume()` בטלפון מפעילים כעת משיכה מ-Supabase ואחריה `syncNativeAndroidWidgets()`, כך שמשימות שסומנו כהושלמו יורדות מיידית מהשעון ומווידג׳טים.
+### ⌚ 1. מצב צפייה בלבד למשימות בשעון Galaxy Watch 8 (`item_task.xml`, `WearCarouselAdapter.java`, `wear/MainActivity.java`)
+- **אפס סימוני השלמה בטעות על פרק כף היד**: הוסר עיגול הסימון (`checkbox`) וביטול פעולת ההשלמה בנגיעה בשעון — סימון משימות כהושלמו מתבצע כעת רק מהטלפון או מהמחשב ומסתנכרן אוטומטית לשעון.
+- **כרטיסים רחבים ונקיים יותר**: הסרת עיגול הסימון פינתה רוחב נוסף לכותרות הדו-שורתיות, והקשה על כרטיס מציגה כעת את הפרטים המלאים של המשימה בקריאות מלאה.
 
-### 📦 2. קובצי הפצה ועדכון:
-- `Semestero-ME-Tablet-Clean.apk` (`com.technion.semestero.tablet`, `versionCode 131`, `versionName {VERSION}`, `v1+v2+v3` Signed)
-- `Semestero-ME.apk` (`com.technion.semestero`, `versionCode 131`, `versionName {VERSION}`, `v1+v2+v3` Signed, `targetSdk 34`)
-- `Semestero-ME-Watch.apk` (`versionCode 131`, `versionName {VERSION}`, `v1+v2+v3` Signed)
+### 📅 2. תיקון כיוון חיצי הניווט ב-RTL (`index.html`)
+- **החלפת החיצים ההפוכים בלוח השנה ובמחולל המערכת**: כפתור הקודם בצד ימין פונה כעת ימינה (`▶`) וכפתור הבא בצד שמאל פונה שמאלה (`◀`) בהתאמה מלאה לממשק עברית (`RTL`).
+
+### 📊 3. חיסול כפילות המבחנים בציר מרווחי המבחנים (`app.js`, `planner_module.js`)
+- **תיקון התנגשויות שגויות של `0 ימים`**: בפונקציה `getDegreeExamDates()` מבחני סמסטר 3 נמשכו פעמיים — פעם אחת מ-`pastExamsBank` (ללא תיוג `moed`) ופעם שנייה מתוך משימות המבחן של הקורס (`moed: 'A'`), מה שגרם לכל בחינה להתנגש עם עצמה בציר מרווחי המבחנים (`📊 מרווחי ימים בין המבחנים`).
+- **דה-דופליקציה קנונית מלאה**: הציר מאחד כעת בין משימות הבחינה הפעילות, `pastExamsBank` וקודי קורס בני 6/8 ספרות לפי מפתח קנוני `(courseRoot, moed)` ו-`(courseRoot, isoDate)` עם המרת תאריכים מקומית נקייה.
+
+### 📦 4. קובצי הפצה ועדכון:
+- `Semestero-ME-Tablet-Clean.apk` (`com.technion.semestero.tablet`, `versionCode 132`, `versionName {VERSION}`, `v1+v2+v3` Signed)
+- `Semestero-ME.apk` (`com.technion.semestero`, `versionCode 132`, `versionName {VERSION}`, `v1+v2+v3` Signed, `targetSdk 34`)
+- `Semestero-ME-Watch.apk` (`versionCode 132`, `versionName {VERSION}`, `v1+v2+v3` Signed)
 - `Semestero-ME-Windows-x64.zip` (Electron Desktop Client {VERSION})
 """
 
