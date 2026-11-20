@@ -2,6 +2,7 @@ package com.technion.semestero.wear;
 
 import android.content.Context;
 import android.graphics.Paint;
+import android.graphics.drawable.GradientDrawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -52,13 +53,21 @@ public class WearCarouselAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
     public static class TaskItem {
         public String title;
+        public String course;
         public String due;
         public boolean isDone;
+        public int urgency; // 0 = upcoming (cyan), 1 = soon <=3d (amber), 2 = overdue/today (red)
 
         public TaskItem(String title, String due, boolean isDone) {
+            this(title, "", due, isDone, 0);
+        }
+
+        public TaskItem(String title, String course, String due, boolean isDone, int urgency) {
             this.title = title;
+            this.course = course != null ? course : "";
             this.due = due;
             this.isDone = isDone;
+            this.urgency = urgency;
         }
     }
 
@@ -270,6 +279,7 @@ public class WearCarouselAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         h.container.removeAllViews();
 
         if (tasksList != null && !tasksList.isEmpty()) {
+            float density = context.getResources().getDisplayMetrics().density;
             for (int i = 0; i < tasksList.size(); i++) {
                 final int taskIndex = i + 1;
                 TaskItem t = tasksList.get(i);
@@ -277,12 +287,57 @@ public class WearCarouselAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                 View item = inflater.inflate(R.layout.item_task, h.container, false);
                 TextView tvTitle = item.findViewById(R.id.tv_task_title);
                 TextView tvDue = item.findViewById(R.id.tv_task_due);
+                TextView tvCourse = item.findViewById(R.id.tv_task_course);
+                View urgencyBar = item.findViewById(R.id.view_task_urgency_bar);
                 View chkBg = item.findViewById(R.id.view_task_chk_bg);
                 TextView tvChkIcon = item.findViewById(R.id.tv_task_chk_icon);
 
                 tvTitle.setText(t.title);
+                if (tvCourse != null) {
+                    if (t.course != null && !t.course.isEmpty()) {
+                        tvCourse.setText(t.course);
+                        tvCourse.setVisibility(View.VISIBLE);
+                    } else {
+                        tvCourse.setVisibility(View.GONE);
+                    }
+                }
+
+                int barColor;
+                int dueBgColor;
+                int dueFgColor;
+                if (t.isDone) {
+                    barColor = 0xFF10B981;
+                    dueBgColor = 0x2610B981;
+                    dueFgColor = 0xFF6EE7B7;
+                } else if (t.urgency >= 2) {
+                    barColor = 0xFFEF4444;
+                    dueBgColor = 0x33EF4444;
+                    dueFgColor = 0xFFFCA5A5;
+                } else if (t.urgency == 1) {
+                    barColor = 0xFFF59E0B;
+                    dueBgColor = 0x30F59E0B;
+                    dueFgColor = 0xFFFCD34D;
+                } else {
+                    barColor = 0xFF38BDF8;
+                    dueBgColor = 0x2838BDF8;
+                    dueFgColor = 0xFF7DD3FC;
+                }
+
                 if (tvDue != null) {
-                    tvDue.setText((t.due != null && !t.due.isEmpty()) ? t.due : "⏳ להגשה בקרוב");
+                    String dueDisplay = (t.due != null && !t.due.isEmpty()) ? t.due : "בקרוב";
+                    tvDue.setText(dueDisplay);
+                    tvDue.setTextColor(dueFgColor);
+                    GradientDrawable duePill = new GradientDrawable();
+                    duePill.setColor(dueBgColor);
+                    duePill.setCornerRadius(6f * density);
+                    tvDue.setBackground(duePill);
+                }
+
+                if (urgencyBar != null) {
+                    GradientDrawable barBg = new GradientDrawable();
+                    barBg.setColor(barColor);
+                    barBg.setCornerRadius(2f * density);
+                    urgencyBar.setBackground(barBg);
                 }
 
                 if (t.isDone) {
@@ -306,27 +361,60 @@ public class WearCarouselAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                 });
 
                 item.setOnLongClickListener(v -> {
-                    Toast.makeText(context, t.title + "\n" + t.due, Toast.LENGTH_LONG).show();
+                    String toastMsg = (t.course != null && !t.course.isEmpty())
+                        ? ("[" + t.course + "] " + t.title + "\n" + t.due)
+                        : (t.title + "\n" + t.due);
+                    Toast.makeText(context, toastMsg, Toast.LENGTH_LONG).show();
                     return true;
                 });
 
                 h.container.addView(item);
             }
         } else {
+            float density = context.getResources().getDisplayMetrics().density;
             View emptyItem = inflater.inflate(R.layout.item_task, h.container, false);
             TextView tvTitle = emptyItem.findViewById(R.id.tv_task_title);
             TextView tvDue = emptyItem.findViewById(R.id.tv_task_due);
+            TextView tvCourse = emptyItem.findViewById(R.id.tv_task_course);
+            View urgencyBar = emptyItem.findViewById(R.id.view_task_urgency_bar);
             View chkBg = emptyItem.findViewById(R.id.view_task_chk_bg);
             TextView tvChkIcon = emptyItem.findViewById(R.id.tv_task_chk_icon);
 
+            if (tvCourse != null) tvCourse.setVisibility(View.GONE);
             if (hasSyncedWithPhone) {
                 tvTitle.setText("אין משימות פתוחות כרגע 🎉");
-                if (tvDue != null) tvDue.setText("סונכרן מהטלפון • הקש לסנכרון מחדש");
+                if (tvDue != null) {
+                    tvDue.setText("הקש לסנכרון מחדש");
+                    tvDue.setTextColor(0xFF6EE7B7);
+                    GradientDrawable pill = new GradientDrawable();
+                    pill.setColor(0x2610B981);
+                    pill.setCornerRadius(6f * density);
+                    tvDue.setBackground(pill);
+                }
+                if (urgencyBar != null) {
+                    GradientDrawable barBg = new GradientDrawable();
+                    barBg.setColor(0xFF10B981);
+                    barBg.setCornerRadius(2f * density);
+                    urgencyBar.setBackground(barBg);
+                }
                 if (chkBg != null) chkBg.setBackgroundResource(R.drawable.chk_circle_done);
                 if (tvChkIcon != null) tvChkIcon.setVisibility(View.VISIBLE);
             } else {
                 tvTitle.setText("ממתין לסנכרון משימות 🔄");
-                if (tvDue != null) tvDue.setText("פתח את סמסטרו בטלפון • הקש לסנכרון");
+                if (tvDue != null) {
+                    tvDue.setText("פתח סמסטרו בטלפון • הקש לסנכרון");
+                    tvDue.setTextColor(0xFF7DD3FC);
+                    GradientDrawable pill = new GradientDrawable();
+                    pill.setColor(0x2838BDF8);
+                    pill.setCornerRadius(6f * density);
+                    tvDue.setBackground(pill);
+                }
+                if (urgencyBar != null) {
+                    GradientDrawable barBg = new GradientDrawable();
+                    barBg.setColor(0xFF38BDF8);
+                    barBg.setCornerRadius(2f * density);
+                    urgencyBar.setBackground(barBg);
+                }
                 if (chkBg != null) chkBg.setBackgroundResource(R.drawable.chk_circle_idle);
                 if (tvChkIcon != null) tvChkIcon.setVisibility(View.GONE);
             }

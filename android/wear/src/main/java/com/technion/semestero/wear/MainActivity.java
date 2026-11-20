@@ -517,16 +517,27 @@ public class MainActivity extends Activity implements MessageClient.OnMessageRec
             JSONArray arr = new JSONArray(allTasksJson);
             for (int i = 0; i < arr.length(); i++) {
                 JSONObject obj = arr.getJSONObject(i);
-                String course = obj.optString("course", "");
-                String title = obj.optString("title", "");
+                String course = obj.optString("course", "").trim();
+                String title = obj.optString("title", "").trim();
                 if (title.isEmpty() || isCorruptedText(title)) {
                     continue;
                 }
-                String fullTitle = (!course.isEmpty() && !title.startsWith("[")) ? ("[" + course + "] " + title) : title;
-                String due = obj.optString("dueFormatted", obj.optString("due", "להגשה בקרוב"));
-                if (isCorruptedText(due)) due = "להגשה בקרוב";
+                if (isCorruptedText(course)) course = "";
+                // Strip redundant [Course] prefix so full task title is readable across 2 lines
+                if (title.startsWith("[")) {
+                    int closeIdx = title.indexOf(']');
+                    if (closeIdx > 1 && closeIdx < title.length() - 1) {
+                        if (course.isEmpty()) course = title.substring(1, closeIdx).trim();
+                        title = title.substring(closeIdx + 1).trim();
+                    }
+                }
+                String shortCourse = shortenCourseForWatch(course);
+                String rawDue = obj.optString("dueFormatted", obj.optString("due", "בקרוב")).trim();
+                if (isCorruptedText(rawDue)) rawDue = "בקרוב";
+                String compactDue = formatCompactDueForWatch(rawDue);
+                int urgency = resolveUrgencyForWatch(rawDue);
                 boolean done = prefs.getBoolean("wear_task_" + (i + 1) + "_done", obj.optBoolean("completed", false));
-                tasks.add(new WearCarouselAdapter.TaskItem(fullTitle, "⏳ " + due, done));
+                tasks.add(new WearCarouselAdapter.TaskItem(title, shortCourse, compactDue, done, urgency));
             }
         } catch (Exception ignored) {}
 
@@ -535,7 +546,16 @@ public class MainActivity extends Activity implements MessageClient.OnMessageRec
                 String t = prefs.getString("task_" + i, "");
                 if (t != null && !t.trim().isEmpty() && !isCorruptedText(t) && !t.contains("אין משימות")) {
                     boolean done = prefs.getBoolean("wear_task_" + i + "_done", prefs.getBoolean("task_" + i + "_done", false));
-                    tasks.add(new WearCarouselAdapter.TaskItem(t, "⏳ מודל טכניון", done));
+                    String cleaned = t.replace("📌", "").replace("⚡", "").trim();
+                    String course = "";
+                    if (cleaned.startsWith("[")) {
+                        int closeIdx = cleaned.indexOf(']');
+                        if (closeIdx > 1 && closeIdx < cleaned.length() - 1) {
+                            course = shortenCourseForWatch(cleaned.substring(1, closeIdx).trim());
+                            cleaned = cleaned.substring(closeIdx + 1).trim();
+                        }
+                    }
+                    tasks.add(new WearCarouselAdapter.TaskItem(cleaned, course, "מודל טכניון", done, 0));
                 }
             }
         }
@@ -544,6 +564,50 @@ public class MainActivity extends Activity implements MessageClient.OnMessageRec
         adapter.tasksList = tasks;
 
         adapter.notifyDataSetChanged();
+    }
+
+    private static int resolveUrgencyForWatch(String dueText) {
+        if (dueText == null || dueText.isEmpty()) return 0;
+        if (dueText.contains("באיחור") || dueText.contains("היום")) return 2;
+        if (dueText.contains("מחר")) return 1;
+        java.util.regex.Matcher m = java.util.regex.Pattern.compile("(\\d+)").matcher(dueText);
+        if (dueText.contains("בעוד") && m.find()) {
+            try {
+                int days = Integer.parseInt(m.group(1));
+                if (days <= 0) return 2;
+                if (days <= 3) return 1;
+            } catch (Exception ignored) {}
+        }
+        return 0;
+    }
+
+    private static String formatCompactDueForWatch(String dueText) {
+        if (dueText == null || dueText.trim().isEmpty()) return "בקרוב";
+        String d = dueText.trim();
+        if (d.contains("להגשה היום") || d.contains("היום")) return "היום!";
+        if (d.contains("להגשה מחר") || d.contains("מחר")) return "מחר";
+        if (d.contains("באיחור")) {
+            java.util.regex.Matcher m = java.util.regex.Pattern.compile("(\\d+)").matcher(d);
+            return m.find() ? ("באיחור " + m.group(1) + " י׳") : "באיחור!";
+        }
+        if (d.contains("בעוד")) {
+            java.util.regex.Matcher m = java.util.regex.Pattern.compile("(\\d+)").matcher(d);
+            if (m.find()) return "בעוד " + m.group(1) + " י׳";
+        }
+        if (d.contains("ללא תאריך")) return "פתוחה";
+        return d;
+    }
+
+    private static String shortenCourseForWatch(String course) {
+        if (course == null || course.trim().isEmpty()) return "";
+        String c = course.trim();
+        if (c.contains("משוואות דיפרנציאליות חלקיות") || c.contains("104228")) return "מד״ח מ׳";
+        if (c.contains("מוצקים 2") || c.contains("034053")) return "מוצקים 2מ׳";
+        if (c.contains("חישוב מדעי") || c.contains("חישוב הנדסי") || c.contains("034056")) return "חישוב הנדסי";
+        if (c.contains("תרמודינמיקה 1") || c.contains("034035")) return "תרמו 1";
+        if (c.contains("פיסיקה 2") || c.contains("114052")) return "פיסיקה 2";
+        if (c.contains("יוגה") || c.contains("חינוך גופני") || c.contains("03940805")) return "יוגה";
+        return c.length() > 14 ? c.substring(0, 13) + "…" : c;
     }
 
     public static boolean isCorruptedText(String s) {

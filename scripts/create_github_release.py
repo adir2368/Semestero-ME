@@ -17,9 +17,9 @@ ZIP_PATH = os.path.join(ROOT, "Semestero-ME-Windows-x64.zip")
 
 with open(os.path.join(ROOT, "package.json"), "r", encoding="utf-8") as f:
     pkg = json.load(f)
-VERSION = pkg.get("version", "3.1.0")
+VERSION = pkg.get("version", "3.1.1")
 TAG = f"v{VERSION}"
-NAME = f"Semestero ME v{VERSION} - Galaxy Watch 8 Tasks Glance Tile Visual Overhaul"
+NAME = f"Semestero ME v{VERSION} - Galaxy Watch 8 Tasks Screen Visual Craft & Zero-Clip Round Layout"
 
 def get_github_token():
     try:
@@ -99,16 +99,14 @@ def main():
 
     body_notes = f"""# Semestero ME {TAG} Release Notes
 
-### ⌚ 1. עיצוב חדש לחלוטין לווידג׳ט המשימות וההגשות בשעון Galaxy Watch 8 (`SemesteroTasksTileService.java`)
-- **עיצוב AMOLED עגול בסגנון Samsung One UI Watch**: הוספת טבעת היקפית מעגלית (`ArcLine`) הצבועה לפי רמת הדחיפות של המשימה הקרובה ביותר (אדום = באיחור/היום, כתום = מחר/עד 3 ימים, תכלת = בהמשך, ירוק = הכל הושלם).
-- **2 כרטיסי משימות עשירים וקריאים**: כל כרטיס מציג כותרת נקייה (ללא קידומת `[קורס]` מיותרת), תגית תאריך יעד צבעונית (`היום!`, `מחר`, `באיחור X י׳`, `בעוד X י׳`), שם קורס מקוצר ופס צבע אנכי בצד ימין.
-- **כרטיס ספירה לאחור למבחן הקרוב**: כאשר יש 0–1 משימות פתוחות, מוצג אוטומטית כרטיס `בחינה קרובה בעוד X ימים` עם שם הקורס והמועד.
-- **פתיחה ישירה ללשונית המשימות + סנכרון בנגיעה**: הקשה על כל כרטיס או על כפתור `עוד +N משימות` פותחת את אפליקציית השעון ישירות למסך 2 (`משימות`), ולצדו כפתור סנכרון עגול (`↻`) המבצע משיכת נתונים מיידית מהטלפון מתוך הווידג׳ט.
+### ⌚ 1. שדרוג ויזואלי מלא למסך המשימות האינטראקטיבי בשעון Galaxy Watch 8 (`page_tasks.xml`, `item_task.xml`, `WearCarouselAdapter.java`)
+- **אפס חיתוך מול טבעת המסגרת העגולה**: הצרת באנר המבחן העליון (`14dp` שוליים פנימיים), ריווח תחתון (`24dp`) והדרגת דהייה אנכית (`requiresFadingEdge`) מעל נקודות הניווט.
+- **כרטיסי משימות עשירים דו-שורתיים**: הפרדת שם הקורס מהכותרת (ללא `[מוצקים 2]` שקוטע את שם המטלה), כותרות ב-2 שורות קריאות (`HW 3 - Rotation Transformation`, `תרגיל בית 4 - חוק גאוס`), תגית יעד צבעונית לפי דחיפות (`היום!`, `מחר`, `בעוד X י׳`) ופס צבע אנכי בצד ימין.
 
 ### 📦 2. קובצי הפצה ועדכון:
-- `Semestero-ME-Tablet-Clean.apk` (`com.technion.semestero.tablet`, `versionCode 128`, `versionName {VERSION}`, `v1+v2+v3` Signed)
-- `Semestero-ME.apk` (`com.technion.semestero`, `versionCode 128`, `versionName {VERSION}`, `v1+v2+v3` Signed, `targetSdk 34`)
-- `Semestero-ME-Watch.apk` (`versionCode 128`, `versionName {VERSION}`, `v1+v2+v3` Signed)
+- `Semestero-ME-Tablet-Clean.apk` (`com.technion.semestero.tablet`, `versionCode 129`, `versionName {VERSION}`, `v1+v2+v3` Signed)
+- `Semestero-ME.apk` (`com.technion.semestero`, `versionCode 129`, `versionName {VERSION}`, `v1+v2+v3` Signed, `targetSdk 34`)
+- `Semestero-ME-Watch.apk` (`versionCode 129`, `versionName {VERSION}`, `v1+v2+v3` Signed)
 - `Semestero-ME-Windows-x64.zip` (Electron Desktop Client {VERSION})
 """
 
