@@ -17,9 +17,9 @@ ZIP_PATH = os.path.join(ROOT, "Semestero-ME-Windows-x64.zip")
 
 with open(os.path.join(ROOT, "package.json"), "r", encoding="utf-8") as f:
     pkg = json.load(f)
-VERSION = pkg.get("version", "3.1.12")
+VERSION = pkg.get("version", "3.1.13")
 TAG = f"v{VERSION}"
-NAME = f"Semestero ME v{VERSION} - Combinable Summer & Unassigned Planner Filters"
+NAME = f"Semestero ME v{VERSION} - Persistent 034056 HW Tracking, Combinable English Courses Filter & README Sync"
 
 def get_github_token():
     try:
@@ -99,15 +99,15 @@ def main():
 
     body_notes = f"""# Semestero ME {TAG} Release Notes
 
-### 🧩 1. סינון משולב במתכנן התואר — `☀️ זמינים בקיץ` ו-`📦 שלא שובצו` (`planner_module.js`, `index.html`, `styles.css`)
-- **סימון בנוסף לקטגוריה ראשית**: כפתורי `☀️ זמינים בקיץ` ו-`📦 שלא שובצו` פועלים כעת כמתגי סינון משולבים (`filterSummerOnly` / `filterUnassignedOnly` עם `data-filter-modifier` ו-`aria-pressed`) הניתנים להפעלה במקביל לכל קטגוריה ראשית (`הכל`, `📕 קורסי חובה`, `א׳ חישובי`, `ב׳`, `ג׳`, `ד׳`, `ה׳`, `ספורט`, `מל״ג`), כולל הצלבת שני המתגים יחד ועם אשכולות ההתמחות.
-- **לדוגמה**: ניתן כעת להציג **קורסי חובה שזמינים בקיץ**, **קורסי א׳ (חישובי) שלא שובצו**, או **קורסי חובה שלא שובצו וזמינים בקיץ**, עם הדגשה ויזואלית נפרדת (`✓` + צבעי קיץ/אמבר) מנותקת מבחירת הקטגוריה.
+### 🔧 1. תיקון שמירת סימוני שיעורי בית בקורס `034056` ("מבוא לחישוב מדעי והנדסי") (`app.js`, `auth_sync.js`, `moodle_sync.js`)
+- **פתרון שורש האיפוס והמחיקה המיידית**: מיגרציית `reset_034056_hw_v318` בעבר הוסיפה את מזהי הגיליונות `034056_hw_1..6` לרשימת המחיקות `deletedTaskIds`, וגרמה לכך שכל סימון גיליון ב-`034056` נמחק מיד בריענון/סנכרון.
+- **שחרור ואי-מחיקה בעתיד (`unblock_034056_hw_sheets_v3113`)**: נוקתה רשימת `deletedTaskIds` ו-`dismissedTaskRegistry` עבור `034056_hw_1..6` מקומית ובסנכרון הענן, ונוספה `reviveSheetTaskFromTombstones` + מעקב חותמות זמן (`revivedTaskTimestamps` vs `deletedTaskTimestamps`) ב-CRDT כך שכל סימון חדש ב-`034056` ובכל קורס נשמר לצמיתות גם מול ענן Supabase.
 
-### 📦 2. קובצי הפצה ועדכון:
-- `Semestero-ME-Tablet-Clean.apk` (`com.technion.semestero.tablet`, `versionCode 140`, `versionName {VERSION}`, `v1+v2+v3` Signed)
-- `Semestero-ME.apk` (`com.technion.semestero`, `versionCode 140`, `versionName {VERSION}`, `v1+v2+v3` Signed, `targetSdk 34`)
-- `Semestero-ME-Watch.apk` (`versionCode 140`, `versionName {VERSION}`, `v1+v2+v3` Signed)
-- `Semestero-ME-Windows-x64.zip` (Electron Desktop Client {VERSION})
+### 🇬🇧 2. סינון משולב לקורסים וקבוצות לימוד באנגלית במתכנן התואר (`planner_catalog.js`, `planner_module.js`, `index.html`, `styles.css`)
+- **מתג סינון `🇬🇧 באנגלית`**: ניתן לסימון לבד או בשילוב עם כל קטגוריה (`הכל`, `קורסי חובה`, `מל״ג`, `א׳–ה׳`) ועם `☀️ זמינים בקיץ` / `📦 שלא שובצו`, ומציג קורסי תואר ראשון הנלמדים באנגלית או בעלי קבוצות לימוד בינלאומיות/באנגלית (`getCourseEnglishInfo`).
+
+### 📦 3. סנכרון README + קובצי הפצה (`v{VERSION}`, `versionCode 141`):
+- עודכן תג הגרסה ב-`README.md` מ-`2.8.8` ל-`{VERSION}` ופורסמו כל 4 קובצי ההתקנה החתומים.
 """
 
     req_tag = urllib.request.Request(f"https://api.github.com/repos/{REPO}/releases/tags/{TAG}", headers=headers)

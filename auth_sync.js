@@ -326,26 +326,44 @@
     }
 
     // Check whether a task is marked deleted or dismissed in deletedTaskIds / dismissedTaskRegistry
-    function isTaskDeletedOrDismissedForSync(courseCode, task, deletedSet, dismissedRegistry) {
+    function isTaskDeletedOrDismissedForSync(courseCode, task, deletedSet, dismissedRegistry, deletedTimestamps, revivedTimestamps) {
         if (!task) return true;
-        if (task.id && String(task.id) === '114052_ww1') return true;
+        if (task.id && (String(task.id) === '114052_ww1' || String(task.id) === '104228_ww1' || String(task.id) === '034056_p1')) return true;
+        const tid = task.id ? String(task.id) : '';
+        const revTs = Math.max(
+            Number((revivedTimestamps && tid && revivedTimestamps[tid]) || 0),
+            Number(task.source === 'manual' ? (task.statusUpdatedAt || 0) : 0)
+        ) || 0;
         if (deletedSet && deletedSet.size > 0) {
-            if (task.id && deletedSet.has(String(task.id))) return true;
-            if (task.moodleUid && deletedSet.has(String(task.moodleUid))) return true;
-            if (task.moodleEventId && deletedSet.has(String(task.moodleEventId))) return true;
+            const isDeletedById = (val) => {
+                if (!val) return false;
+                const s = String(val);
+                if (!deletedSet.has(s)) return false;
+                if (task.source === 'manual' && revTs > Number((deletedTimestamps && deletedTimestamps[s]) || 0)) return false;
+                return true;
+            };
+            if (isDeletedById(task.id)) return true;
+            if (isDeletedById(task.moodleUid)) return true;
+            if (isDeletedById(task.moodleEventId)) return true;
             if (typeof window !== 'undefined' && window.MoodleSync && typeof window.MoodleSync.extractMoodleId === 'function') {
                 const mId = window.MoodleSync.extractMoodleId(task);
-                if (mId && deletedSet.has(String(mId))) return true;
+                if (isDeletedById(mId)) return true;
             }
         }
         if (dismissedRegistry && typeof dismissedRegistry === 'object') {
-            if (task.id && dismissedRegistry['task_id:' + String(task.id)]) return true;
-            if (task.moodleUid && dismissedRegistry['moodle_uid:' + String(task.moodleUid)]) return true;
-            if (task.moodleEventId && dismissedRegistry['moodle_event:' + String(task.moodleEventId)]) return true;
+            const checkReg = (k) => {
+                const entry = dismissedRegistry[k];
+                if (!entry) return false;
+                if (task.source === 'manual' && revTs > Number(entry.dismissedAt || 0)) return false;
+                return true;
+            };
+            if (task.id && checkReg('task_id:' + String(task.id))) return true;
+            if (task.moodleUid && checkReg('moodle_uid:' + String(task.moodleUid))) return true;
+            if (task.moodleEventId && checkReg('moodle_event:' + String(task.moodleEventId))) return true;
             if (typeof window !== 'undefined' && window.MoodleSync && typeof window.MoodleSync.getTaskCompletionKeys === 'function') {
                 const keys = window.MoodleSync.getTaskCompletionKeys(courseCode, task);
                 for (let i = 0; i < keys.length; i++) {
-                    if (dismissedRegistry[keys[i]]) return true;
+                    if (checkReg(keys[i])) return true;
                 }
             }
         }
@@ -381,7 +399,7 @@
     // Bidirectional CRDT task status & dismissal merge (ADR-093):
     // Respects newer statusUpdatedAt timestamps when changing between not_started, in_progress, submitted, and done;
     // deduplicates seed vs Moodle tasks via areTasksDuplicates; and strips deleted/dismissed tasks across devices.
-    function mergeCoursesPreservingTaskCompletion(localCourses = {}, remoteCourses = {}, completedRegistry = {}, dismissedRegistry = {}, deletedTaskIds = []) {
+    function mergeCoursesPreservingTaskCompletion(localCourses = {}, remoteCourses = {}, completedRegistry = {}, dismissedRegistry = {}, deletedTaskIds = [], deletedTimestamps = {}, revivedTimestamps = {}) {
         if (!localCourses || typeof localCourses !== 'object') return remoteCourses || {};
         if (!remoteCourses || typeof remoteCourses !== 'object') return localCourses || {};
 
@@ -392,7 +410,7 @@
         Object.keys(merged).forEach(code => {
             const rCourse = merged[code];
             if (rCourse && Array.isArray(rCourse.tasks)) {
-                rCourse.tasks = rCourse.tasks.filter(rt => !isTaskDeletedOrDismissedForSync(rCourse.code || code, rt, deletedSet, dismissedRegistry));
+                rCourse.tasks = rCourse.tasks.filter(rt => !isTaskDeletedOrDismissedForSync(rCourse.code || code, rt, deletedSet, dismissedRegistry, deletedTimestamps, revivedTimestamps));
             }
         });
 
@@ -402,7 +420,7 @@
             if (!merged[code]) {
                 const clonedCourse = JSON.parse(JSON.stringify(lCourse));
                 if (Array.isArray(clonedCourse.tasks)) {
-                    clonedCourse.tasks = clonedCourse.tasks.filter(lt => !isTaskDeletedOrDismissedForSync(clonedCourse.code || code, lt, deletedSet, dismissedRegistry));
+                    clonedCourse.tasks = clonedCourse.tasks.filter(lt => !isTaskDeletedOrDismissedForSync(clonedCourse.code || code, lt, deletedSet, dismissedRegistry, deletedTimestamps, revivedTimestamps));
                 }
                 merged[code] = clonedCourse;
                 return;
@@ -417,14 +435,14 @@
             if (!Array.isArray(lCourse.tasks)) return;
             if (!Array.isArray(rCourse.tasks)) {
                 rCourse.tasks = lCourse.tasks
-                    .filter(lt => !isTaskDeletedOrDismissedForSync(rCourse.code || code, lt, deletedSet, dismissedRegistry))
+                    .filter(lt => !isTaskDeletedOrDismissedForSync(rCourse.code || code, lt, deletedSet, dismissedRegistry, deletedTimestamps, revivedTimestamps))
                     .map(lt => JSON.parse(JSON.stringify(lt)));
                 return;
             }
 
             const courseName = rCourse.name || lCourse.name || '';
             const courseCode = rCourse.code || code;
-            const liveLocalTasks = lCourse.tasks.filter(lt => !isTaskDeletedOrDismissedForSync(courseCode, lt, deletedSet, dismissedRegistry));
+            const liveLocalTasks = lCourse.tasks.filter(lt => !isTaskDeletedOrDismissedForSync(courseCode, lt, deletedSet, dismissedRegistry, deletedTimestamps, revivedTimestamps));
 
             // Reconcile matching tasks between remote and local using statusUpdatedAt first
             rCourse.tasks.forEach(rt => {
@@ -560,26 +578,66 @@
         });
     }
 
+    function mergeTombstoneTimestamps(localState, remoteState, mergedDeleted) {
+        const maxMap = (a, b, target) => {
+            Object.keys(a || {}).forEach(k => { target[k] = Math.max(Number(target[k] || 0), Number(a[k] || 0)); });
+            Object.keys(b || {}).forEach(k => { target[k] = Math.max(Number(target[k] || 0), Number(b[k] || 0)); });
+        };
+        const delTs = {};
+        const revTs = {};
+        maxMap(localState && localState.deletedTaskTimestamps, remoteState && remoteState.deletedTaskTimestamps, delTs);
+        maxMap(localState && localState.revivedTaskTimestamps, remoteState && remoteState.revivedTaskTimestamps, revTs);
+
+        // Include live manual task statusUpdatedAt timestamps in revTs so newly marked sheets survive cloud merges
+        [localState && localState.courses, remoteState && remoteState.courses].forEach(cMap => {
+            if (!cMap || typeof cMap !== 'object') return;
+            Object.values(cMap).forEach(c => {
+                (c && Array.isArray(c.tasks) ? c.tasks : []).forEach(t => {
+                    if (t && t.id && t.source === 'manual' && t.statusUpdatedAt) {
+                        revTs[String(t.id)] = Math.max(Number(revTs[String(t.id)] || 0), Number(t.statusUpdatedAt));
+                    }
+                });
+            });
+        });
+
+        const legacyPoisoned034056Rx = /^(?:0?0?34056|34056)_hw_\d+(?:_(?:dig|written))?$/i;
+        const cleanedDeleted = (mergedDeleted || []).filter(id => {
+            const s = String(id);
+            const d = Number(delTs[s] || 0);
+            const r = Number(revTs[s] || 0);
+            if (legacyPoisoned034056Rx.test(s) && d === 0) return false;
+            if (r > d) return false;
+            return true;
+        });
+        return { deletedTaskIds: cleanedDeleted, deletedTaskTimestamps: delTs, revivedTaskTimestamps: revTs };
+    }
+
     function applyMergedSyncMetadata(localState, remoteState) {
         const safeLocal = localState || {};
         const mergedCompleted = Object.assign({}, safeLocal.completedTaskRegistry || {}, remoteState.completedTaskRegistry || {});
         const mergedDismissed = Object.assign({}, safeLocal.dismissedTaskRegistry || {}, remoteState.dismissedTaskRegistry || {});
-        const mergedDeleted = Array.from(new Set([
+        const rawDeleted = Array.from(new Set([
             ...(Array.isArray(safeLocal.deletedTaskIds) ? safeLocal.deletedTaskIds : []),
             ...(Array.isArray(remoteState.deletedTaskIds) ? remoteState.deletedTaskIds : [])
         ]));
+        const tombstoneMeta = mergeTombstoneTimestamps(safeLocal, remoteState, rawDeleted);
+        const mergedDeleted = tombstoneMeta.deletedTaskIds;
 
         remoteState.courses = mergeCoursesPreservingTaskCompletion(
             safeLocal.courses || {},
             remoteState.courses || {},
             mergedCompleted,
             mergedDismissed,
-            mergedDeleted
+            mergedDeleted,
+            tombstoneMeta.deletedTaskTimestamps,
+            tombstoneMeta.revivedTaskTimestamps
         );
         reconcileCompletedRegistryWithMergedCourses(remoteState.courses, mergedCompleted);
         remoteState.completedTaskRegistry = mergedCompleted;
         remoteState.dismissedTaskRegistry = mergedDismissed;
         remoteState.deletedTaskIds = mergedDeleted;
+        remoteState.deletedTaskTimestamps = tombstoneMeta.deletedTaskTimestamps;
+        remoteState.revivedTaskTimestamps = tombstoneMeta.revivedTaskTimestamps;
         remoteState.migrationsApplied = Object.assign({}, safeLocal.migrationsApplied || {}, remoteState.migrationsApplied || {});
         const localFilterTs = Number(safeLocal.taskFilterPreferences && safeLocal.taskFilterPreferences.updatedAt) || 0;
         const remoteFilterTs = Number(remoteState.taskFilterPreferences && remoteState.taskFilterPreferences.updatedAt) || 0;
@@ -646,7 +704,7 @@
             if (!state.migrationsApplied) state.migrationsApplied = {};
             if (!state.migrationsApplied.reset_034056_hw_v318 && state.courses && state.courses['034056']) {
                 if (!Array.isArray(state.deletedTaskIds)) state.deletedTaskIds = [];
-                ['034056_h1', '034056_p1', '034056_hw_1', '034056_hw_2', '034056_hw_3', '034056_hw_4', '034056_hw_5', '034056_hw_6'].forEach(pid => {
+                ['034056_h1', '034056_p1'].forEach(pid => {
                     if (!state.deletedTaskIds.includes(pid)) state.deletedTaskIds.push(pid);
                 });
                 const c56 = state.courses['034056'];
@@ -654,9 +712,8 @@
                     c56.tasks = c56.tasks.filter(t => {
                         if (!t) return false;
                         const tTitle = String(t.title || '');
-                        const keep = (t.type === 'exam' || /מועד\s*[אבג]|מבחן|בחינה|matlab|מטלאב|מילואי/i.test(tTitle) || !!t.isMiluim);
+                        const keep = (t.type === 'exam' || /מועד\s*[אבג]|מבחן|בחינה|matlab|מטלאב|מילואי/i.test(tTitle) || !!t.isMiluim || t.source === 'manual');
                         if (!keep) {
-                            if (t.id && !state.deletedTaskIds.includes(String(t.id))) state.deletedTaskIds.push(String(t.id));
                             if (t.moodleUid && !state.deletedTaskIds.includes(String(t.moodleUid))) state.deletedTaskIds.push(String(t.moodleUid));
                             if (t.moodleEventId && !state.deletedTaskIds.includes(String(t.moodleEventId))) state.deletedTaskIds.push(String(t.moodleEventId));
                         }
@@ -672,6 +729,21 @@
                 if (state.courses['00340056']) delete state.courses['00340056'];
                 if (state.courses['34056']) delete state.courses['34056'];
                 state.migrationsApplied.reset_034056_hw_v318 = true;
+            }
+            if (!state.migrationsApplied.unblock_034056_hw_sheets_v3113) {
+                const sheetIdRx = /^(?:0?0?34056|34056)_hw_\d+(?:_(?:dig|written))?$/i;
+                if (Array.isArray(state.deletedTaskIds)) {
+                    const delTsMap = state.deletedTaskTimestamps || {};
+                    state.deletedTaskIds = state.deletedTaskIds.filter(id => !(sheetIdRx.test(String(id || '')) && !delTsMap[String(id)]));
+                }
+                if (state.dismissedTaskRegistry && typeof state.dismissedTaskRegistry === 'object') {
+                    Object.keys(state.dismissedTaskRegistry).forEach(k => {
+                        if (/0?0?34056_hw_\d+|34056_hw_\d+/i.test(k)) {
+                            delete state.dismissedTaskRegistry[k];
+                        }
+                    });
+                }
+                state.migrationsApplied.unblock_034056_hw_sheets_v3113 = true;
             }
             if (!state.migrationsApplied.prune_stale_034056_thu1230_v319) {
                 const staleSig = '034056|4|12:30';
@@ -3289,16 +3361,22 @@
                     let finalState = remoteState;
                     if (!force && localLastMod > 0 && remoteLastMod < localLastMod && localState) {
                         const localBased = JSON.parse(JSON.stringify(localState));
+                        const rawDel = Array.from(new Set([...(localBased.deletedTaskIds || []), ...(remoteState.deletedTaskIds || [])]));
+                        const tsMeta = mergeTombstoneTimestamps(localBased, remoteState, rawDel);
                         localBased.courses = mergeCoursesPreservingTaskCompletion(
                             localBased.courses || {},
                             remoteState.courses || {},
                             Object.assign({}, remoteState.completedTaskRegistry || {}, localBased.completedTaskRegistry || {}),
                             Object.assign({}, remoteState.dismissedTaskRegistry || {}, localBased.dismissedTaskRegistry || {}),
-                            Array.from(new Set([...(localBased.deletedTaskIds || []), ...(remoteState.deletedTaskIds || [])]))
+                            tsMeta.deletedTaskIds,
+                            tsMeta.deletedTaskTimestamps,
+                            tsMeta.revivedTaskTimestamps
                         );
                         localBased.completedTaskRegistry = Object.assign({}, remoteState.completedTaskRegistry || {}, localBased.completedTaskRegistry || {});
                         localBased.dismissedTaskRegistry = Object.assign({}, remoteState.dismissedTaskRegistry || {}, localBased.dismissedTaskRegistry || {});
-                        localBased.deletedTaskIds = Array.from(new Set([...(remoteState.deletedTaskIds || []), ...(localBased.deletedTaskIds || [])]));
+                        localBased.deletedTaskIds = tsMeta.deletedTaskIds;
+                        localBased.deletedTaskTimestamps = tsMeta.deletedTaskTimestamps;
+                        localBased.revivedTaskTimestamps = tsMeta.revivedTaskTimestamps;
                         reconcileCompletedRegistryWithMergedCourses(localBased.courses, localBased.completedTaskRegistry);
                         finalState = localBased;
                     } else {

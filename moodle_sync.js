@@ -600,22 +600,57 @@
             });
         },
 
+        unmarkTaskDismissedInRegistry(courseCode, task) {
+            if (!task || !window.gameState) return;
+            if (window.gameState.dismissedTaskRegistry) {
+                const keys = this.getTaskCompletionKeys(courseCode, task);
+                keys.forEach(k => {
+                    delete window.gameState.dismissedTaskRegistry[k];
+                });
+                if (task.id) delete window.gameState.dismissedTaskRegistry['task_id:' + String(task.id)];
+                if (task.moodleUid) delete window.gameState.dismissedTaskRegistry['moodle_uid:' + String(task.moodleUid)];
+                if (task.moodleEventId) delete window.gameState.dismissedTaskRegistry['moodle_event:' + String(task.moodleEventId)];
+            }
+            if (Array.isArray(window.gameState.deletedTaskIds)) {
+                const dropSet = new Set([task.id, task.moodleUid, task.moodleEventId].filter(Boolean).map(String));
+                if (dropSet.size > 0) {
+                    window.gameState.deletedTaskIds = window.gameState.deletedTaskIds.filter(id => !dropSet.has(String(id)));
+                }
+            }
+        },
+
         isTaskDismissedInRegistry(courseCode, task) {
             if (!task || !window.gameState) return false;
 
-            // 1. Direct check against persistent deletedTaskIds
+            const revivedTs = Number(
+                (window.gameState.revivedTaskTimestamps && task.id && window.gameState.revivedTaskTimestamps[String(task.id)]) ||
+                (task.source === 'manual' ? (task.statusUpdatedAt || 0) : 0)
+            ) || 0;
+            const deletedTsMap = window.gameState.deletedTaskTimestamps || {};
+
+            // 1. Direct check against persistent deletedTaskIds (respecting newer manual revivals)
             if (Array.isArray(window.gameState.deletedTaskIds)) {
-                if (task.id && window.gameState.deletedTaskIds.includes(task.id)) return true;
+                const checkId = (val) => {
+                    if (!val) return false;
+                    const s = String(val);
+                    if (!window.gameState.deletedTaskIds.includes(s)) return false;
+                    if (task.source === 'manual' && revivedTs > Number(deletedTsMap[s] || 0)) return false;
+                    return true;
+                };
+                if (checkId(task.id)) return true;
                 const mId = this.extractMoodleId(task);
-                if (mId && window.gameState.deletedTaskIds.includes(String(mId))) return true;
-                if (task.moodleUid && window.gameState.deletedTaskIds.includes(String(task.moodleUid))) return true;
+                if (checkId(mId)) return true;
+                if (checkId(task.moodleUid)) return true;
             }
 
-            // 2. Check dismissed registry keys
+            // 2. Check dismissed registry keys (respecting newer manual statusUpdatedAt / revival)
             if (window.gameState.dismissedTaskRegistry) {
                 const keys = this.getTaskCompletionKeys(courseCode, task);
                 for (let i = 0; i < keys.length; i++) {
-                    if (window.gameState.dismissedTaskRegistry[keys[i]]) {
+                    const entry = window.gameState.dismissedTaskRegistry[keys[i]];
+                    if (entry) {
+                        const disTs = Number(entry.dismissedAt || 0);
+                        if (task.source === 'manual' && revivedTs > disTs) continue;
                         return true;
                     }
                 }

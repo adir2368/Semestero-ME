@@ -9756,12 +9756,12 @@ function _loadSavedStateImpl() {
                 const c = gameState.courses['034056'];
                 if (!c.tasks) c.tasks = [];
 
-                // One-time clean rebuild of Course 034056 (purges phantom HW sheet 2 / stale tasks across local & cloud CRDT)
+                // One-time clean rebuild of Course 034056 (purges legacy seed HW/project tasks across local & cloud CRDT without poisoning future manual sheet marks)
                 if (!gameState.migrationsApplied) gameState.migrationsApplied = {};
                 if (!gameState.migrationsApplied.reset_034056_hw_v318) {
                     if (!Array.isArray(gameState.deletedTaskIds)) gameState.deletedTaskIds = [];
-                    const knownPhantomIds = ['034056_h1', '034056_p1', '034056_hw_1', '034056_hw_2', '034056_hw_3', '034056_hw_4', '034056_hw_5', '034056_hw_6'];
-                    knownPhantomIds.forEach(pid => {
+                    const knownLegacySeedIds = ['034056_h1', '034056_p1'];
+                    knownLegacySeedIds.forEach(pid => {
                         if (!gameState.deletedTaskIds.includes(pid)) gameState.deletedTaskIds.push(pid);
                     });
 
@@ -9775,10 +9775,9 @@ function _loadSavedStateImpl() {
                         const isCompleted = !!(t.completed === true || t.status === 'done' || t.status === 'completed');
                         const isPhantomHw = /^034056_(h\d+|hw_\d+|p1)$/i.test(String(t.id || '')) || /^תרגיל בית \d+\s*:\s*(?:גיליון|גליון)/i.test(tTitle.trim());
 
-                        if (isExam || isMatlab || isMiluim || (isCompleted && !isPhantomHw)) {
+                        if (isExam || isMatlab || isMiluim || (isCompleted && !isPhantomHw) || t.source === 'manual') {
                             rebuiltTasks.push(t);
                         } else {
-                            if (t.id && !gameState.deletedTaskIds.includes(String(t.id))) gameState.deletedTaskIds.push(String(t.id));
                             if (t.moodleUid && !gameState.deletedTaskIds.includes(String(t.moodleUid))) gameState.deletedTaskIds.push(String(t.moodleUid));
                             if (t.moodleEventId && !gameState.deletedTaskIds.includes(String(t.moodleEventId))) gameState.deletedTaskIds.push(String(t.moodleEventId));
                         }
@@ -9794,6 +9793,23 @@ function _loadSavedStateImpl() {
                     if (gameState.courses['00340056']) delete gameState.courses['00340056'];
                     if (gameState.courses['34056']) delete gameState.courses['34056'];
                     gameState.migrationsApplied.reset_034056_hw_v318 = true;
+                }
+
+                // Unblock reusable manual HW sheet IDs (034056_hw_1..6) poisoned by v3.1.8 so marked sheets persist permanently
+                if (!gameState.migrationsApplied.unblock_034056_hw_sheets_v3113) {
+                    const sheetIdRx = /^(?:0?0?34056|34056)_hw_\d+(?:_(?:dig|written))?$/i;
+                    if (Array.isArray(gameState.deletedTaskIds)) {
+                        const delTsMap = gameState.deletedTaskTimestamps || {};
+                        gameState.deletedTaskIds = gameState.deletedTaskIds.filter(id => !(sheetIdRx.test(String(id || '')) && !delTsMap[String(id)]));
+                    }
+                    if (gameState.dismissedTaskRegistry && typeof gameState.dismissedTaskRegistry === 'object') {
+                        Object.keys(gameState.dismissedTaskRegistry).forEach(k => {
+                            if (/0?0?34056_hw_\d+|34056_hw_\d+/i.test(k)) {
+                                delete gameState.dismissedTaskRegistry[k];
+                            }
+                        });
+                    }
+                    gameState.migrationsApplied.unblock_034056_hw_sheets_v3113 = true;
                 }
 
                 let exA = c.tasks.find(t => t.id === '034056_ex' || t.title.includes('מועד א'));
@@ -10642,10 +10658,20 @@ function recalculateCourseStates() {
     const RETIRED_SEED_TASK_IDS = new Set(['114052_ww1', '104228_ww1', '034056_p1']);
     uniqueCourses.forEach(course => {
         if (Array.isArray(course.tasks)) {
+            const delTsMap = gameState.deletedTaskTimestamps || {};
+            const revTsMap = gameState.revivedTaskTimestamps || {};
             course.tasks = course.tasks.filter(t => {
                 if (!t) return false;
                 if (t.id && RETIRED_SEED_TASK_IDS.has(String(t.id))) return false;
-                if (t.id && deletedIdsSet.has(String(t.id))) return false;
+                const tid = t.id ? String(t.id) : '';
+                const manualRevTs = t.source === 'manual' ? Math.max(Number(revTsMap[tid] || 0), Number(t.statusUpdatedAt || 0)) : 0;
+                if (tid && deletedIdsSet.has(tid)) {
+                    if (manualRevTs > Number(delTsMap[tid] || 0)) {
+                        gameState.deletedTaskIds = (gameState.deletedTaskIds || []).filter(id => String(id) !== tid);
+                    } else {
+                        return false;
+                    }
+                }
                 if (t.moodleUid && deletedIdsSet.has(String(t.moodleUid))) return false;
                 if (t.moodleEventId && deletedIdsSet.has(String(t.moodleEventId))) return false;
                 if (window.MoodleSync && typeof window.MoodleSync.isTaskDismissedInRegistry === 'function' && window.MoodleSync.isTaskDismissedInRegistry(course.code, t)) {
@@ -26093,11 +26119,11 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.11.21-v3.1.12",
-    version: "3.1.12",
-    build: "20261121_03",
-    date: "2026-11-21 01:08",
-    description: "v3.1.12: כפתורי הסינון זמינים בקיץ ושלא שובצו ניתנים כעת לסימון משולב יחד עם כל קטגוריה (למשל קורס חובה שזמין בקיץ או קורס חישובי שלא שובץ)."
+    code: "REV-2026.11.22-v3.1.13",
+    version: "3.1.13",
+    build: "20261122_01",
+    date: "2026-11-22 17:00",
+    description: "v3.1.13: תיקון איפוס הגיליונות בקורס 034056 (שמירה רציפה בענן ובמכשיר של גיליונות ידניים), הוספת פילטר משולב לקורסים באנגלית במערכת, ועדכון גרסת הגיטהאב."
 };
 window.APP_VERSION = APP_CURRENT_REVISION.version;
 
@@ -32845,6 +32871,25 @@ function renderCourseModalHomeworkPolicy(course) {
     `;
 }
 
+// Clear any prior deletion/dismissal tombstones when user actively marks/creates/grades a sheet task
+function reviveSheetTaskFromTombstones(courseCode, task, nowTs) {
+    if (!task || !window.gameState) return;
+    const ts = Number(nowTs) || Date.now();
+    const idsToClear = [task.id, task.moodleUid, task.moodleEventId].filter(Boolean).map(String);
+    if (idsToClear.length > 0 && Array.isArray(window.gameState.deletedTaskIds)) {
+        const dropSet = new Set(idsToClear);
+        window.gameState.deletedTaskIds = window.gameState.deletedTaskIds.filter(id => !dropSet.has(String(id)));
+    }
+    if (!window.gameState.revivedTaskTimestamps) window.gameState.revivedTaskTimestamps = {};
+    idsToClear.forEach(id => {
+        window.gameState.revivedTaskTimestamps[id] = ts;
+        if (window.gameState.deletedTaskTimestamps) delete window.gameState.deletedTaskTimestamps[id];
+    });
+    if (window.MoodleSync && typeof window.MoodleSync.unmarkTaskDismissedInRegistry === 'function') {
+        window.MoodleSync.unmarkTaskDismissedInRegistry(courseCode, task);
+    }
+}
+
 // Set Lifecycle Status for Individual Component (Digital Quiz vs Written Solution)
 function setHomeworkComponentLifecycle(courseCode, sheetIndex, compType, newStatus) {
     if (!courseCode || !window.gameState || !window.gameState.courses) return;
@@ -32913,6 +32958,7 @@ function setHomeworkComponentLifecycle(courseCode, sheetIndex, compType, newStat
             window.MoodleSync.unmarkTaskCompletedInRegistry(course.code, targetTask);
         }
     }
+    reviveSheetTaskFromTombstones(course.code, targetTask, nowTs);
 
     if (typeof saveState === 'function') saveState();
 
@@ -32981,6 +33027,7 @@ function setHomeworkSheetLifecycle(courseCode, sheetIndex, newStatus) {
             window.MoodleSync.unmarkTaskCompletedInRegistry(course.code, targetTask);
         }
     }
+    reviveSheetTaskFromTombstones(course.code, targetTask, nowTs);
 
     if (typeof saveState === 'function') saveState();
 
@@ -33053,6 +33100,7 @@ function toggleHomeworkSheetComponent(courseCode, sheetIndex, compType) {
             window.MoodleSync.unmarkTaskCompletedInRegistry(course.code, targetTask);
         }
     }
+    reviveSheetTaskFromTombstones(course.code, targetTask, nowTs);
 
     if (typeof saveState === 'function') saveState();
 
@@ -33091,6 +33139,7 @@ function toggleHomeworkSheetStatus(courseCode, sheetIndex) {
                 window.MoodleSync.unmarkTaskCompletedInRegistry(course.code, tObj);
             }
         }
+        reviveSheetTaskFromTombstones(course.code, tObj, nowTs);
     };
 
     if (sheet.isDual) {
@@ -33226,6 +33275,7 @@ function setHomeworkSheetGrade(courseCode, sheetIndex, compType, rawGrade) {
     if (window.MoodleSync && parsed !== null && typeof window.MoodleSync.markTaskCompletedInRegistry === 'function') {
         window.MoodleSync.markTaskCompletedInRegistry(course.code, targetTask);
     }
+    reviveSheetTaskFromTombstones(course.code, targetTask, nowTs);
 
     if (typeof saveState === 'function') saveState();
     renderCourseModalHomeworkPolicy(course);
@@ -33244,7 +33294,9 @@ function resetHomeworkSheetToLocked(courseCode, sheetIndex) {
 
     const idx = Number(sheetIndex);
     const beforeLen = course.tasks.length;
+    const delNow = Date.now();
     if (!Array.isArray(window.gameState.deletedTaskIds)) window.gameState.deletedTaskIds = [];
+    if (!window.gameState.deletedTaskTimestamps) window.gameState.deletedTaskTimestamps = {};
     course.tasks = course.tasks.filter(t => {
         if (!t || !isHomeworkPolicyTask(t)) return true;
         if (extractHomeworkSheetIndex(t.title) !== idx) return true;
@@ -33255,8 +33307,11 @@ function resetHomeworkSheetToLocked(courseCode, sheetIndex) {
             !(Array.isArray(t.comments) && t.comments.length > 0) &&
             (t.source === 'manual' || !t.source || /_hw_\d+/i.test(String(t.id || '')))
         );
-        if (isSafeAutoPlaceholder && t.id && !window.gameState.deletedTaskIds.includes(String(t.id))) {
-            window.gameState.deletedTaskIds.push(String(t.id));
+        if (isSafeAutoPlaceholder && t.id) {
+            const sid = String(t.id);
+            if (!window.gameState.deletedTaskIds.includes(sid)) window.gameState.deletedTaskIds.push(sid);
+            window.gameState.deletedTaskTimestamps[sid] = delNow;
+            if (window.gameState.revivedTaskTimestamps) delete window.gameState.revivedTaskTimestamps[sid];
         }
         return !isSafeAutoPlaceholder;
     });
@@ -33283,7 +33338,9 @@ function resetCourseHomeworkProgress(courseCode, opts = {}) {
         if (!ok) return false;
     }
 
+    const delNow = Date.now();
     if (!Array.isArray(window.gameState.deletedTaskIds)) window.gameState.deletedTaskIds = [];
+    if (!window.gameState.deletedTaskTimestamps) window.gameState.deletedTaskTimestamps = {};
     const oldTasks = Array.isArray(course.tasks) ? course.tasks : [];
     const preserved = [];
     let removedCount = 0;
@@ -33297,15 +33354,12 @@ function resetCourseHomeworkProgress(courseCode, opts = {}) {
             preserved.push(t);
         } else if (isHomeworkPolicyTask(t) || /^תרגיל|^גיליון|^hw/i.test(title.trim())) {
             removedCount++;
-            if (t.id && !window.gameState.deletedTaskIds.includes(String(t.id))) {
-                window.gameState.deletedTaskIds.push(String(t.id));
-            }
-            if (t.moodleUid && !window.gameState.deletedTaskIds.includes(String(t.moodleUid))) {
-                window.gameState.deletedTaskIds.push(String(t.moodleUid));
-            }
-            if (t.moodleEventId && !window.gameState.deletedTaskIds.includes(String(t.moodleEventId))) {
-                window.gameState.deletedTaskIds.push(String(t.moodleEventId));
-            }
+            [t.id, t.moodleUid, t.moodleEventId].filter(Boolean).forEach(rawId => {
+                const sid = String(rawId);
+                if (!window.gameState.deletedTaskIds.includes(sid)) window.gameState.deletedTaskIds.push(sid);
+                window.gameState.deletedTaskTimestamps[sid] = delNow;
+                if (window.gameState.revivedTaskTimestamps) delete window.gameState.revivedTaskTimestamps[sid];
+            });
         } else {
             preserved.push(t);
         }

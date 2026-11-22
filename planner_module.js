@@ -20,6 +20,7 @@
     let selectedCategory = 'ALL'; // 'ALL' | 'MANDATORY' | 'A' | 'B' | 'C' | 'D' | 'E' | 'SPORTS' | 'MALAG'
     let filterSummerOnly = false;
     let filterUnassignedOnly = false;
+    let filterEnglishOnly = false;
     let searchQuery = '';
     const CATALOG_WINDOW_PAGE_SIZE = 24;
     let catalogVisibleCount = CATALOG_WINDOW_PAGE_SIZE;
@@ -3324,7 +3325,9 @@
                 const cat = p.getAttribute('data-category');
                 const isActive = mod === 'SUMMER'
                     ? filterSummerOnly
-                    : (mod === 'UNASSIGNED' ? filterUnassignedOnly : cat === selectedCategory);
+                    : (mod === 'UNASSIGNED'
+                        ? filterUnassignedOnly
+                        : (mod === 'ENGLISH' ? filterEnglishOnly : cat === selectedCategory));
                 p.classList.toggle('active', isActive);
                 p.setAttribute('aria-pressed', isActive ? 'true' : 'false');
             });
@@ -3434,8 +3437,9 @@
                 });
             });
 
-            // 3b. Search Technion-wide course catalog (CHEESEFORK_DB - 2,784 Technion courses) when a search query is active
-            if ((normQ.length >= 2 || cleanDigitsQ.length >= 2) && (selectedCategory === 'ALL' || selectedCategory === 'E' || selectedCategory === 'MALAG' || selectedCategory === 'SPORTS')) {
+            // 3b. Search Technion-wide course catalog (CHEESEFORK_DB - 2,784 Technion courses) when searching OR when English modifier is active
+            const hasSearchQuery = (normQ.length >= 2 || cleanDigitsQ.length >= 2);
+            if ((hasSearchQuery || filterEnglishOnly) && (selectedCategory === 'ALL' || selectedCategory === 'E' || selectedCategory === 'MALAG' || (hasSearchQuery && selectedCategory === 'SPORTS'))) {
                 const technionDb = (typeof window !== 'undefined' && Array.isArray(window.CHEESEFORK_DB))
                     ? window.CHEESEFORK_DB
                     : ((typeof cheeseForkList !== 'undefined' && Array.isArray(cheeseForkList)) ? cheeseForkList : []);
@@ -3465,20 +3469,31 @@
                         if (selectedCategory === 'MALAG' && detectedType !== 'humanities') return;
                         if (selectedCategory === 'E' && detectedType !== 'elective') return;
 
-                        // Check search match
-                        const normName = (c.name || '').replace(/["'״׳`]/g, '').toLowerCase();
-                        const matchName = normName.includes(normQ) || (c.name || '').toLowerCase().includes(q);
+                        // Check English eligibility early when browsing by English modifier without search text
+                        const engInfo = (global.PLANNER_CATALOG && typeof global.PLANNER_CATALOG.getCourseEnglishInfo === 'function')
+                            ? global.PLANNER_CATALOG.getCourseEnglishInfo(cCode, c)
+                            : { eligible: false };
+                        if (filterEnglishOnly && !engInfo.eligible) return;
 
-                        let matchCode = (cCode || '').includes(q) || (cAlt && cAlt.includes(q));
-                        if (!matchCode && cleanDigitsQ && cleanDigitsQ.length >= 2) {
-                            const cDigits = (cCode || '').replace(/\D/g, '');
-                            const aDigits = (cAlt || '').replace(/\D/g, '');
-                            matchCode = cDigits.includes(cleanDigitsQ) || aDigits.includes(cleanDigitsQ) ||
-                                        cDigits.replace(/^0+/, '').includes(cleanDigitsQ.replace(/^0+/, '')) ||
-                                        aDigits.replace(/^0+/, '').includes(cleanDigitsQ.replace(/^0+/, ''));
+                        let matches = false;
+                        if (hasSearchQuery) {
+                            const normName = (c.name || '').replace(/["'״׳`]/g, '').toLowerCase();
+                            const matchName = normName.includes(normQ) || (c.name || '').toLowerCase().includes(q);
+
+                            let matchCode = (cCode || '').includes(q) || (cAlt && cAlt.includes(q));
+                            if (!matchCode && cleanDigitsQ && cleanDigitsQ.length >= 2) {
+                                const cDigits = (cCode || '').replace(/\D/g, '');
+                                const aDigits = (cAlt || '').replace(/\D/g, '');
+                                matchCode = cDigits.includes(cleanDigitsQ) || aDigits.includes(cleanDigitsQ) ||
+                                            cDigits.replace(/^0+/, '').includes(cleanDigitsQ.replace(/^0+/, '')) ||
+                                            aDigits.replace(/^0+/, '').includes(cleanDigitsQ.replace(/^0+/, ''));
+                            }
+                            matches = matchName || matchCode;
+                        } else if (filterEnglishOnly) {
+                            matches = engInfo.eligible;
                         }
 
-                        if (matchName || matchCode) {
+                        if (matches) {
                             const creds = typeof c.credits === 'number' ? c.credits : (parseFloat(c.credits) || 3.0);
                             const assignedList = detectedType === 'sports' ? 'SPORTS' : (detectedType === 'humanities' ? 'MALAG' : 'E');
                             coursesToShow.push({
@@ -3488,10 +3503,13 @@
                                 credits: creds,
                                 faculty: c.faculty || '',
                                 syllabus: c.syllabus || '',
+                                schedule: c.schedule,
+                                framework: c.framework || '',
                                 prereqs: c.parsedPrereqs || (typeof c.prereqs === 'string' ? (c.prereqs.match(/\d{6,8}/g) || []) : (c.prerequisites || [])),
                                 type: detectedType,
                                 list: assignedList,
-                                isTechnionWide: true
+                                isTechnionWide: true,
+                                _engBadgeLabel: engInfo.eligible ? engInfo.badgeLabel : ''
                             });
                         }
                     });
@@ -3522,7 +3540,7 @@
             </div>
         ` : '';
 
-        // Optional Summer Modifier Filter (combinable with any base category / Unassigned toggle)
+        // Optional Summer Modifier Filter (combinable with any base category / Unassigned / English toggle)
         const filteredBySummer = filterSummerOnly
             ? coursesToShow.filter(c => (
                 global.PLANNER_CATALOG && typeof global.PLANNER_CATALOG.isCourseOfferedInSummer === 'function'
@@ -3531,19 +3549,35 @@
             ))
             : coursesToShow;
 
-        const filteredByCluster = (showClusterBar && activeClusterFilter !== 'ALL')
+        // Optional English-Instruction / English-Group Modifier Filter
+        const filteredByEnglish = filterEnglishOnly
             ? filteredBySummer.filter(c => {
+                if (global.PLANNER_CATALOG && typeof global.PLANNER_CATALOG.getCourseEnglishInfo === 'function') {
+                    return global.PLANNER_CATALOG.getCourseEnglishInfo(c.code, c).eligible;
+                }
+                return !!(c.taughtInEnglish || c.isEnglish);
+            })
+            : filteredBySummer;
+
+        const filteredByCluster = (showClusterBar && activeClusterFilter !== 'ALL')
+            ? filteredByEnglish.filter(c => {
                 const catLookup = (global.PLANNER_CATALOG && global.PLANNER_CATALOG.ALL_COURSES_MAP)
                     ? (global.PLANNER_CATALOG.ALL_COURSES_MAP[c.code] || (c.altCode && global.PLANNER_CATALOG.ALL_COURSES_MAP[c.altCode]))
                     : null;
                 const cl = c.cluster || (catLookup && catLookup.cluster) || '';
                 return cl === activeClusterFilter;
             })
-            : filteredBySummer;
+            : filteredByEnglish;
 
         if (filteredByCluster.length === 0) {
             let emptyMsg = 'לא נמצאו קורסי בחירה מתאימים לסינון.';
-            if (filterUnassignedOnly && filterSummerOnly) {
+            if (filterEnglishOnly && filterUnassignedOnly) {
+                emptyMsg = 'לא נמצאו קורסים בקטגוריה זו המלומדים באנגלית ושלא שובצו.';
+            } else if (filterEnglishOnly && filterSummerOnly) {
+                emptyMsg = 'לא נמצאו קורסים בקטגוריה זו המלומדים באנגלית ומוצעים בסמסטר קיץ.';
+            } else if (filterEnglishOnly) {
+                emptyMsg = 'לא נמצאו קורסים המלומדים באנגלית או בעלי קבוצת לימוד באנגלית בקטגוריה זו.';
+            } else if (filterUnassignedOnly && filterSummerOnly) {
                 emptyMsg = 'לא נמצאו קורסים בקטגוריה זו שלא שובצו ומוצעים בסמסטר קיץ.';
             } else if (filterUnassignedOnly && selectedCategory === 'MANDATORY') {
                 emptyMsg = 'כל קורסי החובה של המסלול כבר שובצו או הושלמו (או אינם תואמים לחיפוש).';
@@ -3597,6 +3631,14 @@
                     ? `<span style="font-size: 0.65rem; background: rgba(245, 158, 11, 0.18); color: #fcd34d; border: 1px solid rgba(245, 158, 11, 0.4); padding: 1px 6px; border-radius: 4px; font-weight: 700;" title="פותח ${bInfo.transitiveUnlockCount} קורסי המשך בתואר">🔥 פותח ${bInfo.transitiveUnlockCount}</span>`
                     : '';
 
+                const engInfo = (global.PLANNER_CATALOG && typeof global.PLANNER_CATALOG.getCourseEnglishInfo === 'function')
+                    ? global.PLANNER_CATALOG.getCourseEnglishInfo(course.code, course)
+                    : null;
+                const engBadgeText = course._engBadgeLabel || (engInfo && engInfo.eligible ? engInfo.badgeLabel : '');
+                const englishPillHtml = engBadgeText
+                    ? `<span style="font-size: 0.65rem; background: rgba(139, 92, 246, 0.18); color: #ddd6fe; border: 1px solid rgba(167, 139, 250, 0.45); padding: 1px 6px; border-radius: 4px; font-weight: 700;">${escapeHtml(engBadgeText)}</span>`
+                    : '';
+
                 const actionButton = isMandatoryItem && !course.isPlaced
                     ? `<button type="button" class="btn-restore-mandatory" data-code="${escapeHtml(course.code)}" data-sem="${course.suggestedSemester || 1}" title="הוסף קורס זה לסמסטר בתכנון">➕ הוסף</button>`
                     : `<button type="button" class="btn-add-to-plan" data-code="${escapeHtml(course.code)}" title="${isMandatoryItem && course.isPlaced ? 'העבר לסמסטר אחר' : 'הוסף קורס זה לסמסטר'}">${isMandatoryItem && course.isPlaced ? '⇄' : '+'}</button>`;
@@ -3609,6 +3651,7 @@
                                 <span class="course-card-tag ${tagClass}">${tagLabel}</span>
                                 ${clusterPillHtml}
                                 ${bottleneckPillHtml}
+                                ${englishPillHtml}
                                 <span>${escapeHtml(course.code)}</span>
                                 <span>• ${course.credits} נק״ז</span>
                                 ${course.faculty ? `<span style="color: #94a3b8; font-size: 0.68rem; margin-right: 4px;" title="${escapeHtml(course.faculty)}">• ${escapeHtml(course.faculty.replace('הפקולטה ל', '').replace('המחלקה ל', ''))}</span>` : ''}
@@ -3906,7 +3949,7 @@
                 return;
             }
 
-            // Filter Pills (Primary base category + combinable Summer/Unassigned modifiers)
+            // Filter Pills (Primary base category + combinable Summer/Unassigned/English modifiers)
             const pill = e.target.closest('.planner-elective-filters .filter-pill');
             if (pill) {
                 const modifier = pill.getAttribute('data-filter-modifier');
@@ -3915,6 +3958,8 @@
                     filterSummerOnly = !filterSummerOnly;
                 } else if (modifier === 'UNASSIGNED' || categoryAttr === 'UNASSIGNED') {
                     filterUnassignedOnly = !filterUnassignedOnly;
+                } else if (modifier === 'ENGLISH' || categoryAttr === 'ENGLISH') {
+                    filterEnglishOnly = !filterEnglishOnly;
                 } else {
                     selectedCategory = categoryAttr || 'ALL';
                 }
@@ -5179,7 +5224,7 @@
         renderAddElectivesSection: renderAddElectivesSection,
         setSearchQuery: (q) => { searchQuery = q; },
         getSearchQuery: () => searchQuery,
-        getFilterState: () => ({ category: selectedCategory, summerOnly: filterSummerOnly, unassignedOnly: filterUnassignedOnly }),        adoptPlanFromState: function(plan, unassigned) {
+        getFilterState: () => ({ category: selectedCategory, summerOnly: filterSummerOnly, unassignedOnly: filterUnassignedOnly, englishOnly: filterEnglishOnly }),        adoptPlanFromState: function(plan, unassigned) {
             const isAdir = isAdirAuthenticated();
             if (Array.isArray(plan) && plan.length > 0 && (isAdir || !isAdirPlanAuthentic(plan))) {
                 customPlan = JSON.parse(JSON.stringify(plan));

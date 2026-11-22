@@ -21015,3 +21015,11 @@ a.btn:focus-visible {
     color: #fef3c7 !important;
     box-shadow: 0 0 10px rgba(245, 158, 11, 0.42);
 }
+
+.planner-elective-filters .filter-modifier-pill[data-filter-modifier="ENGLISH"].active {
+    background: rgba(124, 58, 237, 0.36) !important;
+    border-style: solid !important;
+    border-color: #a78bfa !important;
+    color: #ede9fe !important;
+    box-shadow: 0 0 10px rgba(167, 139, 250, 0.44);
+}

@@ -1257,6 +1257,111 @@
         return { hasConflict: false };
     }
 
+    // ==========================================================================
+    // English Instruction & English Study Group Detection (קורסים / קבוצות באנגלית)
+    // ==========================================================================
+    const EXPLICIT_ENGLISH_TAUGHT_COURSES = {
+        '03240879': '🇬🇧 נלמד באנגלית',
+        '324879':   '🇬🇧 נלמד באנגלית',
+        '03240881': '🇬🇧 נלמד באנגלית',
+        '324881':   '🇬🇧 נלמד באנגלית',
+        '03240385': '🇬🇧 נלמד באנגלית',
+        '324385':   '🇬🇧 נלמד באנגלית',
+        '03240685': '🇬🇧 נלמד באנגלית',
+        '324685':   '🇬🇧 נלמד באנגלית'
+    };
+
+    const ENGLISH_LANGUAGE_COURSES = new Set(['03240032', '324032', '03240033', '324033']);
+
+    const ENGLISH_STUDY_GROUP_COURSES = {
+        '00340010': '🇬🇧 קבוצה באנגלית (בינ״ל)',
+        '034010':   '🇬🇧 קבוצה באנגלית (בינ״ל)',
+        '00880794': '🇬🇧 קבוצה באנגלית (קב׳ 50)',
+        '088794':   '🇬🇧 קבוצה באנגלית (קב׳ 50)',
+        '01040012': '🇬🇧 קבוצה באנגלית (קב׳ 51–63)',
+        '104012':   '🇬🇧 קבוצה באנגלית (קב׳ 51–63)',
+        '01040031': '🇬🇧 קבוצה באנגלית (קב׳ 51–62)',
+        '104031':   '🇬🇧 קבוצה באנגלית (קב׳ 51–62)',
+        '03350003': '🇬🇧 קבוצה באנגלית (קב׳ 50)',
+        '335003':   '🇬🇧 קבוצה באנגלית (קב׳ 50)'
+    };
+
+    function getCourseEnglishInfo(courseCode, courseObj) {
+        const rawCode = String(courseCode || (courseObj && courseObj.code) || '').trim();
+        const altCode = String((courseObj && courseObj.altCode) || '').trim();
+        const keys = [...new Set([...getCourseKeys(rawCode), ...getCourseKeys(altCode)])];
+        const framework = String((courseObj && courseObj.framework) || '').trim();
+        const name = String((courseObj && courseObj.name) || '').trim();
+
+        // User-tagged or explicitly flagged English content course always qualifies
+        if (courseObj && (courseObj.taughtInEnglish === true || courseObj.isEnglish === true)) {
+            return { eligible: true, mode: 'full', badgeLabel: '🇬🇧 נלמד באנגלית' };
+        }
+        if (typeof global !== 'undefined' && global.gameState && global.gameState.englishContentCourses) {
+            if (keys.some(k => !!global.gameState.englishContentCourses[k])) {
+                return { eligible: true, mode: 'full', badgeLabel: '🇬🇧 נלמד באנגלית' };
+            }
+        }
+
+        // Exclude non-eligible cohorts: grad-only courses, grad English writing (0328), Hebrew for Intl School, Sports, NYC 610xxx
+        const isSport = keys.some(k => k.startsWith('0394') || k.startsWith('394')) || (courseObj && (courseObj.type === 'sports' || courseObj.list === 'SPORTS'));
+        const isGradWriting = keys.some(k => k.startsWith('0328') || k.startsWith('328'));
+        const isHebrewForIntl = keys.some(k => k === '03240069' || k === '324069' || k === '03240070' || k === '324070') || /עברית לביה["״']?ס הבינלאומי/i.test(name);
+        const isJacobsNyc = keys.some(k => k.startsWith('0610') || k.startsWith('610') || k.startsWith('0618') || k.startsWith('618'));
+        if (isSport || isGradWriting || isHebrewForIntl || isJacobsNyc) {
+            return { eligible: false, mode: null, badgeLabel: '' };
+        }
+        if (framework === 'תארים מתקדמים') {
+            return { eligible: false, mode: null, badgeLabel: '' };
+        }
+
+        for (const k of keys) {
+            if (EXPLICIT_ENGLISH_TAUGHT_COURSES[k]) {
+                return { eligible: true, mode: 'full', badgeLabel: EXPLICIT_ENGLISH_TAUGHT_COURSES[k] };
+            }
+        }
+        for (const k of keys) {
+            if (ENGLISH_LANGUAGE_COURSES.has(k)) {
+                return { eligible: true, mode: 'language', badgeLabel: '🇬🇧 קורס שפה באנגלית' };
+            }
+        }
+        for (const k of keys) {
+            if (ENGLISH_STUDY_GROUP_COURSES[k]) {
+                return { eligible: true, mode: 'group', badgeLabel: ENGLISH_STUDY_GROUP_COURSES[k] };
+            }
+            if (COURSE_TERM_OFFERINGS[k] && Array.isArray(COURSE_TERM_OFFERINGS[k].terms) && COURSE_TERM_OFFERINGS[k].terms.includes('winter_intl')) {
+                return { eligible: true, mode: 'group', badgeLabel: '🇬🇧 קבוצה באנגלית (בינ״ל)' };
+            }
+        }
+
+        // Dynamic CHEESEFORK_DB fallback inspection (syllabus English delivery or 50-69 international group)
+        let dbEntry = courseObj;
+        if ((!dbEntry || (!dbEntry.syllabus && !Array.isArray(dbEntry.schedule))) && typeof global !== 'undefined' && Array.isArray(global.CHEESEFORK_DB)) {
+            dbEntry = global.CHEESEFORK_DB.find(d => keys.includes(d.rawNum) || keys.includes(d.code6)) || dbEntry;
+        }
+        if (dbEntry) {
+            const dbFramework = String(dbEntry.framework || framework || '').trim();
+            if (dbFramework === 'תארים מתקדמים') {
+                return { eligible: false, mode: null, badgeLabel: '' };
+            }
+            const rawSyl = String(dbEntry.syllabus || '')
+                .replace(/לא\s+פורסם\s+בקובץ\s+המקצועות\s+באנגלית[^.]*\.?/gi, ' ')
+                .replace(/מפורסם\s+בקובץ\s+המקצועות\s+באנגלית[^.]*\.?/gi, ' ');
+            const fullTxt = `${rawSyl} ${dbEntry.name || name}`;
+            if (/(?:קורס\s+זה\s+|הקורס\s+)?(?:יי?נתן|נלמד|מועבר|מועברת|ילמד|ילמדו)\s+(?:בשפה\s+ה)?אנגלית|שפת\s+ההוראה[:\s]*אנגלית|taught\s+in\s+english|delivered\s+in\s+english/i.test(fullTxt)) {
+                return { eligible: true, mode: 'full', badgeLabel: '🇬🇧 נלמד באנגלית' };
+            }
+            if (Array.isArray(dbEntry.schedule)) {
+                const intlNums = [...new Set(dbEntry.schedule.map(s => Number(s.group)).filter(n => !isNaN(n) && n >= 50 && n <= 69))];
+                if (intlNums.length > 0) {
+                    return { eligible: true, mode: 'group', badgeLabel: `🇬🇧 קבוצה באנגלית (קב׳ ${intlNums.slice(0, 2).join(',')})` };
+                }
+            }
+        }
+
+        return { eligible: false, mode: null, badgeLabel: '' };
+    }
+
     global.PLANNER_CATALOG = {
         DEGREE_RULES: DEGREE_RULES,
         SUGGESTED_MANDATORY_SYLLABUS: SUGGESTED_MANDATORY_SYLLABUS,
@@ -1273,6 +1378,7 @@
         BOTTLENECK_MAP: BOTTLENECK_MAP,
         getBottleneckInfo: getBottleneckInfo,
         isCourseOfferedInSummer: isCourseOfferedInSummer,
+        getCourseEnglishInfo: getCourseEnglishInfo,
         checkMeetingConflict: checkMeetingConflict,
         isCourseOfferedInSemester: isCourseOfferedInSemester
     };
