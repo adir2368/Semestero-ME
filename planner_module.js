@@ -873,7 +873,8 @@
             });
         }
 
-        // 3. Synchronize courses from gameState into their exact semester
+        // 3. Enforce faculty curriculum elective lists & synchronize courses from gameState into their exact semester
+        reconcileFacultyCourseLists(customPlan, unassignedCourses);
         syncCompletedCoursesFromGameState();
         ensureEssentialCoursesInPlan(customPlan);
 
@@ -1739,24 +1740,45 @@
             .replace(/'/g, '&#39;');
     }
 
-    function cycleCourseElectiveList(code) {
-        const plan = getActivePlan();
-        for (const sem of plan) {
-            const c = (sem.courses || []).find(item => item.code === code || item.altCode === code);
-            if (c) {
-                const listOrder = ['A', 'B', 'C', 'D', 'E'];
-                const curList = (c.list || 'B').toUpperCase();
-                const curIdx = listOrder.indexOf(curList);
-                const nextList = listOrder[(curIdx + 1) % listOrder.length];
-                c.list = nextList;
-                saveCustomPlan(true);
-                renderDegreePlanner();
-                const listNames = { 'A': "רשימה א'", 'B': "רשימה ב'", 'C': "רשימה ג'", 'D': "רשימה ד'", 'E': "בחירה חופשית" };
-                if (typeof showPlannerToast === 'function') {
-                    showPlannerToast(`שיוך הרשימה שונה ל: ${listNames[nextList] || nextList} (עודכן בחישוב התואר)`);
-                }
-                return;
+    // Enforce official Technion ME faculty curriculum elective lists (A/B/C/D/E/SPORTS/MALAG/mandatory)
+    function reconcileFacultyCourseLists(plan, unassigned = null) {
+        if (!global.PLANNER_CATALOG || !global.PLANNER_CATALOG.ALL_COURSES_MAP) return;
+        const catalogMap = global.PLANNER_CATALOG.ALL_COURSES_MAP;
+        const resolveCatMeta = (c) => {
+            if (!c || !c.code) return null;
+            const keys = getNormalizedCodes(c.code, c.altCode);
+            for (let i = 0; i < keys.length; i++) {
+                if (catalogMap[keys[i]]) return catalogMap[keys[i]];
             }
+            return null;
+        };
+        const fixList = (c) => {
+            if (!c || !c.code) return;
+            const keys = getNormalizedCodes(c.code, c.altCode);
+            const catMeta = resolveCatMeta(c);
+            const isCreativeIntro = keys.includes('00350026') || keys.includes('035026') || keys.includes('35026');
+            if (catMeta && !c.isTechnionWide) {
+                if (isCreativeIntro) {
+                    c.list = (c.name && c.name.includes('רשות')) ? 'E' : 'C';
+                } else if (catMeta.list) {
+                    c.list = catMeta.list;
+                    if (catMeta.type) c.type = catMeta.type;
+                } else if (catMeta.type === 'mandatory' || catMeta.type === 'final_project') {
+                    delete c.list;
+                    c.type = catMeta.type;
+                }
+            } else if (c.isTechnionWide) {
+                const codeStr = String(c.code || '').replace(/^0+/, '');
+                if (c.type === 'sports' || codeStr.startsWith('394')) c.list = 'SPORTS';
+                else if (c.type === 'humanities' || codeStr.startsWith('324')) c.list = 'MALAG';
+                else c.list = 'E';
+            }
+        };
+        if (Array.isArray(plan)) {
+            plan.forEach(sem => (sem && Array.isArray(sem.courses)) && sem.courses.forEach(fixList));
+        }
+        if (Array.isArray(unassigned)) {
+            unassigned.forEach(fixList);
         }
     }
 
@@ -2975,9 +2997,8 @@
                                 ${summerWarningBadge}
                                 ${bottleneckBadgeHtml}
                                 ${clusterBadgeHtml}
-                                <span class="course-card-tag ${tagClass} ${course.list && !completed ? 'tag-interactive-list' : ''}" 
-                                      ${course.list && !completed ? `data-action="cycle-list" data-code="${escapeHtml(course.code)}" title="לחץ לשינוי שיוך רשימת בחירה (א׳ / ב׳ / ג׳ / ד׳ / חופשית)" style="cursor: pointer; user-select: none;"` : ''}>
-                                    ${tagLabel} ${course.list && !completed ? '▾' : ''}
+                                <span class="course-card-tag ${tagClass}">
+                                    ${tagLabel}
                                 </span>
                             </div>
                         </div>
@@ -3886,16 +3907,6 @@
 
         // 5. Global Click Delegation inside Planner
         plannerTab.addEventListener('click', (e) => {
-            // Elective List Cycle (manual list categorization)
-            const cycleTag = e.target.closest('[data-action="cycle-list"]');
-            if (cycleTag) {
-                const code = cycleTag.getAttribute('data-code');
-                if (code) {
-                    cycleCourseElectiveList(code);
-                    return;
-                }
-            }
-
             // Mode buttons
             const modeBtn = e.target.closest('#btn-planner-mode-custom, #btn-planner-mode-suggested');
             if (modeBtn) {
@@ -4103,7 +4114,7 @@
             // Course card click/tap -> Open Course Details Modal (CheeseFork info, reviews, histograms & Technion++ resources)
             const card = e.target.closest('.planner-course-card, .planner-pool-item');
             if (card) {
-                if (e.target.closest('.course-card-whatif-input, .btn-card-remove, .btn-add-to-plan, .btn-course-workload, .btn-select-sport-club, [data-action="cycle-list"]')) return;
+                if (e.target.closest('.course-card-whatif-input, .btn-card-remove, .btn-add-to-plan, .btn-course-workload, .btn-select-sport-club')) return;
 
                 const code = card.getAttribute('data-code');
                 const altCode = card.getAttribute('data-alt-code');
@@ -5237,6 +5248,7 @@
                 if (unassignedCourses) {
                     unassignedCourses = unassignedCourses.filter(c => !isPurgedCourse(c.code, c.altCode));
                 }
+                reconcileFacultyCourseLists(customPlan, unassignedCourses);
                 syncCompletedCoursesFromGameState();
                 saveCustomPlan(true);
                 renderDegreePlanner();
