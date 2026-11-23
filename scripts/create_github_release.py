@@ -17,9 +17,9 @@ ZIP_PATH = os.path.join(ROOT, "Semestero-ME-Windows-x64.zip")
 
 with open(os.path.join(ROOT, "package.json"), "r", encoding="utf-8") as f:
     pkg = json.load(f)
-VERSION = pkg.get("version", "3.1.14")
+VERSION = pkg.get("version", "3.1.15")
 TAG = f"v{VERSION}"
-NAME = f"Semestero ME v{VERSION} - Faculty-Locked Elective List Attribution in Degree Planner"
+NAME = f"Semestero ME v{VERSION} - Cross-Length Prerequisite Matching & Auto-Placement"
 
 def get_github_token():
     try:
@@ -99,11 +99,14 @@ def main():
 
     body_notes = f"""# Semestero ME {TAG} Release Notes
 
-### 🎓 1. נעילת שיוך קבוצות הבחירה לתוכנית הפקולטה (`planner_module.js`)
-- **הסרת בחירת הקבוצה הידנית מכרטיסי מתכנן התואר**: הוסר תג ההחלפה האינטראקטיבי (`▾` / `cycleCourseElectiveList`) מכרטיסי הקורסים בסמסטרים, כך שלא ניתן עוד לשנות ידנית שיוך קורס בין רשימות א׳ / ב׳ / ג׳ / ד׳ / חופשית.
-- **אכיפה וסנכרון לפי תוכנית הפקולטה (`reconcileFacultyCourseLists`)**: בטעינה ובסנכרון ענן, כל קורס מותאם חזרה לרשימה הרשמית שלו מתוך קטלוג הפקולטה להנדסת מכונות בטכניון (`PLANNER_CATALOG`).
+### 🔗 1. תיקון זיהוי קורסי קדם בכל אורכי הקוד (`utils.js`, `planner_catalog.js`, `planner_module.js`, `app.js`)
+- **נרמול מאוחד של קודי הטכניון (`getTechnionCourseCodeVariants`)**: גישור אוטומטי בין קודי `5`, `6`, `7` ו-`8` ספרות (כולל `340053` <-> `034053` <-> `00340053`, `104041` <-> `1040041` <-> `01040041`, `0940202`, `2340268`, והקוד `00350146`), תוך שמירה על מופעים עונתיים ומשפחות שקילות.
+- **פענוח ביטויי `או` (`parseTechnionPrereqExpression`)**: תמיכה מלאה בביטויים לוגיים מקוננים מ-CheeseFork במקום דרישת כולם יחד.
 
-### 📦 2. קובצי הפצה (`v{VERSION}`, `versionCode 142`):
+### 🧩 2. שאלה אינטראקטיבית לשיבוץ קורסי קדם חסרים בסמסטרים קודמים (`planner_module.js`, `app.js`)
+- כאשר חסרים קורסי קדם בשיבוץ קורס במתכנן התואר (או בעץ הקורסים), המערכת אינה חוסמת סתמית — מוצג דיאלוג השואל האם לשבץ/להעביר את הקדמים בסמסטרים קודמים עם בחירת סמסטר יעד ואישור עסקתי מלא.
+
+### 📦 3. קובצי הפצה (`v{VERSION}`, `versionCode 143`):
 - פורסמו כל 4 קובצי ההתקנה החתומים (Android Phone, Tablet, Galaxy Watch, Windows x64).
 """
 

@@ -38,6 +38,67 @@
         return str;
     }
 
+    /**
+     * Expand any 5/6/7/8-digit Technion course code into all equivalent length representations.
+     * Supports 5-digit ('34053'), 6-digit ('034053', '104041'), 7-digit ('0940202', '1040041'),
+     * stripped-8 ('340053'), and standard 8-digit ('00340053', '01040041') forms.
+     */
+    function getTechnionCourseCodeVariants(code, altCode) {
+        const codes = [];
+        const add = (v) => {
+            if (v) codes.push(v);
+        };
+        const process = (val) => {
+            if (!val) return;
+            const str = String(val).trim();
+            if (!str) return;
+            add(str);
+            const clean = str.replace(/[-\s]/g, '');
+            add(clean);
+            add(clean.replace(/^0+/, ''));
+
+            if (/^\d{5,8}$/.test(clean)) {
+                if (clean.length === 8 && clean.startsWith('0')) {
+                    add(clean.slice(1));
+                    if (clean[4] === '0') {
+                        const c6 = clean.slice(1, 4) + clean.slice(5);
+                        add(c6);
+                        add(c6.replace(/^0+/, ''));
+                    }
+                } else if (clean.length === 7) {
+                    const c8 = '0' + clean;
+                    add(c8);
+                    if (c8[4] === '0') {
+                        const c6 = c8.slice(1, 4) + c8.slice(5);
+                        add(c6);
+                        add(c6.replace(/^0+/, ''));
+                    }
+                } else if (clean.length === 6) {
+                    const c8 = '0' + clean.slice(0, 3) + '0' + clean.slice(3);
+                    add(c8);
+                    add(c8.slice(1));
+                    add(c8.replace(/^0+/, ''));
+                    if (!clean.startsWith('0') && clean[2] === '0') {
+                        add('00' + clean);
+                        add('0' + clean);
+                        add('0' + clean.slice(0, 2) + clean.slice(3));
+                        add(clean.slice(0, 2) + clean.slice(3));
+                    }
+                } else if (clean.length === 5) {
+                    const c6 = '0' + clean;
+                    add(c6);
+                    const c8 = '0' + c6.slice(0, 3) + '0' + c6.slice(3);
+                    add(c8);
+                    add(c8.slice(1));
+                    add(c8.replace(/^0+/, ''));
+                }
+            }
+        };
+        process(code);
+        process(altCode);
+        return Array.from(new Set(codes)).filter(Boolean);
+    }
+
     function setButtonLoading(target, isLoading, loadingText) {
         if (typeof document === 'undefined' || !target) return;
         const btn = typeof target === 'string' ? document.getElementById(target) : target;
@@ -64,10 +125,13 @@
     }
 
     if (root) {
-        root.__semesteroUtils = { escapeHtml, normalizeTechnionCourseCode, setButtonLoading };
+        root.__semesteroUtils = { escapeHtml, normalizeTechnionCourseCode, getTechnionCourseCodeVariants, setButtonLoading };
         if (typeof root.escapeHtml !== 'function') root.escapeHtml = escapeHtml;
         if (typeof root.normalizeTechnionCourseCode !== 'function') {
             root.normalizeTechnionCourseCode = normalizeTechnionCourseCode;
+        }
+        if (typeof root.getTechnionCourseCodeVariants !== 'function') {
+            root.getTechnionCourseCodeVariants = getTechnionCourseCodeVariants;
         }
         if (typeof root.setButtonLoading !== 'function') {
             root.setButtonLoading = setButtonLoading;
@@ -75,6 +139,6 @@
     }
 
     if (typeof module !== 'undefined' && module.exports) {
-        module.exports = { escapeHtml, normalizeTechnionCourseCode, setButtonLoading };
+        module.exports = { escapeHtml, normalizeTechnionCourseCode, getTechnionCourseCodeVariants, setButtonLoading };
     }
 })(typeof window !== 'undefined' ? window : (typeof globalThis !== 'undefined' ? globalThis : null));

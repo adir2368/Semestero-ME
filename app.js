@@ -10752,21 +10752,47 @@ function recalculateCourseStates() {
         if (gameState.courses['01250013']) gameState.courses['01250013'].semester = 2;
     }
 
-    // Helper: Check prerequisite satisfaction supporting Physics track alternatives
+    // Helper: Expand a course code across 5/6/7/8-digit variants + prereq equivalency families
+    const expandPrereqVariants = (rawCode) => {
+        const set = new Set(
+            typeof getTechnionCourseCodeVariants === 'function'
+                ? getTechnionCourseCodeVariants(rawCode, null)
+                : [String(rawCode || '').trim()]
+        );
+        const families = (typeof PLANNER_CATALOG !== 'undefined' && Array.isArray(PLANNER_CATALOG.PREREQ_EQUIVALENT_FAMILIES))
+            ? PLANNER_CATALOG.PREREQ_EQUIVALENT_FAMILIES
+            : [
+                ['01140051', '01140071', '01140077', '01140055'],
+                ['01140052', '01140075', '01140078', '01140076']
+            ];
+        families.forEach(family => {
+            if (!Array.isArray(family)) return;
+            const expanded = [];
+            let hit = false;
+            family.forEach(fc => {
+                const vars = typeof getTechnionCourseCodeVariants === 'function' ? getTechnionCourseCodeVariants(fc, null) : [fc];
+                vars.forEach(v => {
+                    expanded.push(v);
+                    if (set.has(v)) hit = true;
+                });
+            });
+            if (hit) expanded.forEach(v => set.add(v));
+        });
+        return Array.from(set).filter(Boolean);
+    };
+
+    // Helper: Check prerequisite satisfaction supporting all code-length formats and Physics/equivalency families
     const isPrereqSatisfied = (preCode) => {
-        const prereq = gameState.courses[preCode];
-        if (prereq && prereq.status === 'mastered') return true;
-
-        const p1FamilyCodes = ['01140051', '114051', '01140071', '114071', '01140077', '114077', '01140055', '114055'];
-        const p2FamilyCodes = ['01140052', '114052', '01140075', '114075', '01140078', '114078', '01140076', '114076'];
-
-        if (p1FamilyCodes.includes(preCode)) {
-            if (p1FamilyCodes.some(c => gameState.courses[c] && gameState.courses[c].status === 'mastered')) return true;
+        const candidates = expandPrereqVariants(preCode);
+        for (let i = 0; i < candidates.length; i++) {
+            const cKey = candidates[i];
+            if (gameState.exemptions && gameState.exemptions[cKey]) return true;
+            const prereq = gameState.courses[cKey];
+            if (prereq) {
+                if (prereq.status === 'mastered' || prereq.isExempt === true || prereq.isBinaryPass === true) return true;
+                if (prereq.grade && Number(prereq.grade) >= 55) return true;
+            }
         }
-        if (p2FamilyCodes.includes(preCode)) {
-            if (p2FamilyCodes.some(c => gameState.courses[c] && gameState.courses[c].status === 'mastered')) return true;
-        }
-
         return false;
     };
 
@@ -12109,6 +12135,88 @@ function toggleForm(id) {
     el.style.display = el.style.display === 'none' ? 'flex' : 'none';
 }
 
+// Resolve a prerequisite input against existing tree courses across all 5/6/7/8-digit variants + catalog/CheeseFork
+function resolveCurriculumPrereqCandidate(pKey) {
+    if (!pKey) return { status: 'missing' };
+    const baseVariants = typeof getTechnionCourseCodeVariants === 'function'
+        ? getTechnionCourseCodeVariants(pKey, null)
+        : [String(pKey).trim()];
+    const pVariants = new Set(baseVariants);
+
+    const families = (typeof PLANNER_CATALOG !== 'undefined' && Array.isArray(PLANNER_CATALOG.PREREQ_EQUIVALENT_FAMILIES))
+        ? PLANNER_CATALOG.PREREQ_EQUIVALENT_FAMILIES
+        : [];
+    families.forEach(family => {
+        if (!Array.isArray(family)) return;
+        const expanded = [];
+        let hit = false;
+        family.forEach(fc => {
+            const vars = typeof getTechnionCourseCodeVariants === 'function' ? getTechnionCourseCodeVariants(fc, null) : [fc];
+            vars.forEach(v => {
+                expanded.push(v);
+                if (pVariants.has(v)) hit = true;
+            });
+        });
+        if (hit) expanded.forEach(v => pVariants.add(v));
+    });
+
+    for (const v of pVariants) {
+        if (gameState && gameState.courses && gameState.courses[v]) {
+            return { status: 'existing', key: v };
+        }
+    }
+
+    for (const [k, c] of Object.entries((gameState && gameState.courses) || {})) {
+        const cVars = typeof getTechnionCourseCodeVariants === 'function'
+            ? getTechnionCourseCodeVariants(k, c && c.altCode)
+            : [k, c && c.altCode].filter(Boolean);
+        if (cVars.some(cv => pVariants.has(cv))) {
+            return { status: 'existing', key: k };
+        }
+    }
+
+    if (typeof PLANNER_CATALOG !== 'undefined' && PLANNER_CATALOG.ALL_COURSES_MAP) {
+        for (const v of baseVariants) {
+            const catItem = PLANNER_CATALOG.ALL_COURSES_MAP[v];
+            if (catItem) {
+                return {
+                    status: 'catalog',
+                    course: {
+                        code: catItem.code || pKey,
+                        altCode: catItem.altCode || '',
+                        name: catItem.name,
+                        credits: Number(catItem.credits) || 3,
+                        type: catItem.type || 'elective',
+                        prereqs: catItem.prereqs || []
+                    }
+                };
+            }
+        }
+    }
+
+    if (typeof findCheeseForkCourse === 'function') {
+        for (const v of baseVariants) {
+            const cf = findCheeseForkCourse(v);
+            if (cf) {
+                return {
+                    status: 'catalog',
+                    course: {
+                        code: cf.code6 || cf.rawNum || pKey,
+                        altCode: cf.rawNum || cf.code6 || '',
+                        name: cf.name,
+                        credits: cf.credits || 3,
+                        type: cf.detectedType || 'elective',
+                        prereqs: []
+                    }
+                };
+            }
+        }
+    }
+
+    return { status: 'missing' };
+}
+window.resolveCurriculumPrereqCandidate = resolveCurriculumPrereqCandidate;
+
 // Handle Add Course Form Submission
 function handleAddCourseSubmit(e) {
     e.preventDefault();
@@ -12128,11 +12236,13 @@ function handleAddCourseSubmit(e) {
     const rawCode = codeInput ? codeInput.value.trim().toLowerCase() : "";
     let code = rawCode.replace(/[-\s]/g, '');
 
-    // Forgiving code formatting: if 5 digits, pad to 6 (e.g. 34028 -> 034028)
+    // Forgiving code formatting: unify 5/7/8-digit Technion/Moodle formats to canonical 6-digit when applicable
     if (/^\d{5}$/.test(code)) {
         code = '0' + code;
-    } else if (/^\d{8}$/.test(code) && code.startsWith('0')) {
-        // 8-digit Moodle format (e.g. 00340028 -> 034028, 01040041 -> 104041)
+    } else if (/^\d{7}$/.test(code)) {
+        const c8 = '0' + code;
+        if (c8[4] === '0') code = c8.slice(1, 4) + c8.slice(5);
+    } else if (/^\d{8}$/.test(code) && code.startsWith('0') && code[4] === '0') {
         code = code.slice(1, 4) + code.slice(5);
     }
 
@@ -12180,46 +12290,19 @@ function handleAddCourseSubmit(e) {
         : (prereqsString ? prereqsString.split(',').map(s => s.trim().toLowerCase().replace(/[-\s]/g, '')).filter(Boolean) : []);
     const prerequisites = [];
     const invalidPrereqs = [];
-
-    const resolvePrereqKey = (pKey) => {
-        if (!pKey) return null;
-        if (gameState.courses[pKey]) return pKey;
-        const stripped = pKey.replace(/^0+/, '');
-        for (const [k, c] of Object.entries(gameState.courses)) {
-            const kClean = k.replace(/[-\s]/g, '');
-            if (kClean === pKey || kClean.replace(/^0+/, '') === stripped) return k;
-            if (c && c.altCode) {
-                const altClean = String(c.altCode).replace(/[-\s]/g, '');
-                if (altClean === pKey || altClean.replace(/^0+/, '') === stripped) return k;
-            }
-        }
-        // If course exists in CheeseFork database, auto-instantiate as course in degree tree!
-        if (typeof findCheeseForkCourse === 'function') {
-            const cf = findCheeseForkCourse(pKey);
-            if (cf) {
-                const cfCode = cf.code6 || cf.rawNum || pKey;
-                if (!gameState.courses[cfCode]) {
-                    gameState.courses[cfCode] = {
-                        code: cfCode,
-                        name: cf.name,
-                        credits: cf.credits || 3,
-                        semester: Math.max(1, semester - 1),
-                        prerequisites: [],
-                        status: 'available',
-                        type: cf.detectedType || 'elective',
-                        tasks: []
-                    };
-                }
-                return cfCode;
-            }
-        }
-        return null;
-    };
+    const missingCatalogPrereqs = [];
+    const seenMissingCodes = new Set();
 
     rawPrereqs.forEach(p => {
-        const matched = resolvePrereqKey(p);
-        if (matched) {
-            prerequisites.push(matched);
+        const res = resolveCurriculumPrereqCandidate(p);
+        if (res.status === 'existing') {
+            if (!prerequisites.includes(res.key)) prerequisites.push(res.key);
+        } else if (res.status === 'catalog' && res.course) {
+            const cKey = res.course.code || p;
+            if (!seenMissingCodes.has(cKey)) {
+                seenMissingCodes.add(cKey);
+                missingCatalogPrereqs.push(res.course);
+            }
         } else {
             invalidPrereqs.push(p);
         }
@@ -12237,7 +12320,7 @@ function handleAddCourseSubmit(e) {
     const isBinaryToggle = document.getElementById("add-course-binary-pass");
     const isBinaryPass = !!(isBinaryToggle && isBinaryToggle.checked);
 
-    // Prerequisite placement check: cannot place course in semester <= any unfinished prerequisite's semester
+    const tooLateExistingPrereqs = [];
     for (const p of prerequisites) {
         if (p === code || (editingCourseCode && p === editingCourseCode)) continue;
         const pCourse = gameState.courses[p];
@@ -12246,22 +12329,67 @@ function handleAddCourseSubmit(e) {
             if (!isCompleted) {
                 const pSem = Number(pCourse.semester || 1);
                 if (pSem >= semester) {
-                    const msg = `לא ניתן לשבץ את הקורס בסמסטר ${semester} לפני קורס הקדם "${pCourse.name}" (${pCourse.code}) המשובץ בסמסטר ${pSem}!`;
-                    if (typeof showToastNotification === 'function') showToastNotification(msg, 'error');
-                    else alert(msg);
-                    return;
+                    tooLateExistingPrereqs.push(pCourse);
                 }
             }
         }
     }
 
+    if (missingCatalogPrereqs.length > 0 || tooLateExistingPrereqs.length > 0) {
+        if (semester <= 1) {
+            const msg = `לא ניתן לשבץ את "${name}" בסמסטר 1 כאשר חסרים קורסי קדם שחייבים להילקח בסמסטר מוקדם יותר.`;
+            if (typeof showToastNotification === 'function') showToastNotification(msg, 'error');
+            else alert(msg);
+            return;
+        }
+        const targetEarlierSem = Math.max(1, Math.floor(semester) - 1);
+        const promptLines = [
+            ...missingCatalogPrereqs.map(c => `➕ ${c.name} (${c.code}) — הוספה לסמסטר ${targetEarlierSem}`),
+            ...tooLateExistingPrereqs.map(c => `↔️ ${c.name} (${c.code}) — העברה מסמסטר ${c.semester} לסמסטר ${targetEarlierSem}`)
+        ];
+        const ok = (typeof window !== 'undefined' && typeof window.confirm === 'function')
+            ? window.confirm(`לשיבוץ הקורס "${name}" בסמסטר ${semester} חסרים/מאוחרים קורסי הקדם הבאים:\n\n${promptLines.join('\n')}\n\nהאם ברצונך לשבץ את הקדמים בסמסטר קודם (סמסטר ${targetEarlierSem})?`)
+            : false;
+        if (!ok) {
+            if (typeof showToastNotification === 'function') showToastNotification('השיבוץ בוטל — הקורסים לא שונו.', 'info');
+            return;
+        }
+        missingCatalogPrereqs.forEach(cfCourse => {
+            const cfCode = cfCourse.code;
+            if (!gameState.courses[cfCode]) {
+                gameState.courses[cfCode] = {
+                    code: cfCode,
+                    altCode: cfCourse.altCode || '',
+                    name: cfCourse.name,
+                    credits: cfCourse.credits || 3,
+                    semester: targetEarlierSem,
+                    prerequisites: cfCourse.prereqs || [],
+                    status: 'available',
+                    type: cfCourse.type || 'elective',
+                    tasks: []
+                };
+            }
+            if (!prerequisites.includes(cfCode)) prerequisites.push(cfCode);
+        });
+        tooLateExistingPrereqs.forEach(pCourse => {
+            pCourse.semester = targetEarlierSem;
+        });
+    }
+
     // Downstream dependent courses check: cannot move prerequisite past courses depending on it
     if (editingCourseCode) {
-        const thisKeys = [editingCourseCode, code, (editingCourseCode || '').replace(/^0+/, ''), (code || '').replace(/^0+/, '')];
+        const thisKeySet = new Set(
+            typeof getTechnionCourseCodeVariants === 'function'
+                ? getTechnionCourseCodeVariants(editingCourseCode, code)
+                : [editingCourseCode, code, (editingCourseCode || '').replace(/^0+/, ''), (code || '').replace(/^0+/, '')]
+        );
         for (const otherCourse of Object.values(gameState.courses || {})) {
             if (!otherCourse || otherCourse.code === editingCourseCode || otherCourse.code === code) continue;
             const otherPrereqs = otherCourse.prerequisites || otherCourse.prereqs || [];
-            const hasDep = otherPrereqs.some(p => thisKeys.includes(p) || thisKeys.includes(p.replace(/^0+/, '')));
+            const hasDep = otherPrereqs.some(p => {
+                const pVars = typeof getTechnionCourseCodeVariants === 'function' ? getTechnionCourseCodeVariants(p, null) : [p, String(p).replace(/^0+/, '')];
+                return pVars.some(v => thisKeySet.has(v));
+            });
             if (hasDep) {
                 const isOtherMastered = otherCourse.status === 'mastered' || (otherCourse.grade && Number(otherCourse.grade) >= 55);
                 if (isOtherMastered) continue;
@@ -26119,11 +26247,11 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.11.23-v3.1.14",
-    version: "3.1.14",
-    build: "20261123_01",
-    date: "2026-11-23 19:22",
-    description: "v3.1.14: ביטול תפריט הבחירה הידני לקבוצות הבחירה (רשימות א׳–ה׳) בכרטיסי הקורס במתכנן התואר — שיוך הקבוצה נקבע אוטומטית ובלעדית לפי תוכנית הלימודים הרשמית של הפקולטה."
+    code: "REV-2026.11.23-v3.1.15",
+    version: "3.1.15",
+    build: "20261123_02",
+    date: "2026-11-23 19:50",
+    description: "v3.1.15: תיקון התאמת קודי קדם בכל האורכים (5/6/7/8 ספרות) ותמיכה בביטויי 'או', ושאלה אוטומטית לשבץ קורסי קדם חסרים בסמסטרים קודמים."
 };
 window.APP_VERSION = APP_CURRENT_REVISION.version;
 

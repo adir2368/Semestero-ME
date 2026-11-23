@@ -464,7 +464,7 @@
         E: [
             { code: "00350141", altCode: "035141", name: "מתקני כוח וחום", credits: 2.5, list: "E", prereqs: ["00340035"] },
             { code: "00350053", altCode: "035053", name: "אנרגיה מתחדשת ובת-קיימא", credits: 3.0, list: "E", prereqs: ["00340035"] },
-            { code: "03501460", altCode: "350146", name: "מבוא למנועי שריפה פנימית", credits: 2.5, list: "E", prereqs: ["00340035"] },
+            { code: "00350146", altCode: "035146", name: "מבוא למנועי שריפה פנימית", credits: 2.5, list: "E", prereqs: ["00340035"] },
             { code: "00340045", altCode: "034045", name: "החלטות כלכליות", credits: 2.5, list: "E", prereqs: [] },
             { code: "00140603", altCode: "014603", name: "כלכלה הנדסית", credits: 2.5, list: "E", prereqs: [] },
             { code: "00350023", altCode: "035023", name: "קרור ונהול תרמי של רכיבים אלק'", credits: 2.5, list: "E", prereqs: ["00340041"] },
@@ -518,8 +518,8 @@
             { code: "00350010", altCode: "035010", name: "קינמטיקה של מכניזמים", credits: 2.5, list: "E", prereqs: ["00340010"] },
             { code: "00350046", altCode: "035046", name: "ניהול פרויקטים", credits: 2.5, list: "E", prereqs: [] },
             { code: "00360045", altCode: "036045", name: "גיאומטריה חישובית ומודלים בתיב\"ם 2", credits: 3.0, list: "E", prereqs: ["00350003"] },
-            { code: "0940202", altCode: "094202", name: "מבוא לניתוח נתונים", credits: 3.5, list: "E", prereqs: ["02340128"] },
-            { code: "2340268", altCode: "234268", name: "מבני נתונים ואלגוריתמים", credits: 3.0, list: "E", prereqs: ["02340128"] },
+            { code: "00940202", altCode: "094202", name: "מבוא לניתוח נתונים", credits: 3.5, list: "E", prereqs: ["02340128"] },
+            { code: "02340268", altCode: "234268", name: "מבני נתונים ואלגוריתמים", credits: 3.0, list: "E", prereqs: ["02340128"] },
             { code: "03240032", altCode: "324032", name: "אנגלית - מתקדמים א'", credits: 0.0, list: "E", prereqs: [] },
             { code: "03240033", altCode: "324033", name: "אנגלית טכנית מתקדמים ב'", credits: 3.0, list: "E", prereqs: [] },
             { code: "00350026", altCode: "035026", name: "מבוא יצירתי להנדסת מכונות (רשות)", credits: 2.5, list: "E", prereqs: [] }
@@ -647,16 +647,50 @@
 
     // Helper: Build course lookup index by code and altCode (including normalized formats)
     const ALL_COURSES_MAP = {};
+    function getCatalogCodeVariants(code, altCode) {
+        if (typeof global !== 'undefined' && typeof global.getTechnionCourseCodeVariants === 'function') {
+            return global.getTechnionCourseCodeVariants(code, altCode);
+        }
+        const out = [];
+        const add = (v) => { if (v) out.push(v); };
+        [code, altCode].forEach(val => {
+            if (!val) return;
+            const clean = String(val).trim().replace(/[-\s]/g, '');
+            add(clean);
+            add(clean.replace(/^0+/, ''));
+            if (/^\d{5,8}$/.test(clean)) {
+                if (clean.length === 8 && clean.startsWith('0')) {
+                    add(clean.slice(1));
+                    if (clean[4] === '0') add(clean.slice(1, 4) + clean.slice(5));
+                } else if (clean.length === 7) {
+                    const c8 = '0' + clean;
+                    add(c8);
+                    if (c8[4] === '0') add(c8.slice(1, 4) + c8.slice(5));
+                } else if (clean.length === 6) {
+                    const c8 = '0' + clean.slice(0, 3) + '0' + clean.slice(3);
+                    add(c8);
+                    add(c8.slice(1));
+                    if (!clean.startsWith('0') && clean[2] === '0') {
+                        add('00' + clean);
+                        add('0' + clean);
+                        add('0' + clean.slice(0, 2) + clean.slice(3));
+                        add(clean.slice(0, 2) + clean.slice(3));
+                    }
+                } else if (clean.length === 5) {
+                    const c6 = '0' + clean;
+                    add(c6);
+                    add('0' + c6.slice(0, 3) + '0' + c6.slice(3));
+                }
+            }
+        });
+        return Array.from(new Set(out)).filter(Boolean);
+    }
+
     function indexCourse(c) {
         if (!c || !c.code) return;
-        ALL_COURSES_MAP[c.code] = c;
-        if (c.altCode) ALL_COURSES_MAP[c.altCode] = c;
-        const norm1 = c.code.replace(/^0+/, '');
-        if (norm1) ALL_COURSES_MAP[norm1] = c;
-        if (c.altCode) {
-            const norm2 = c.altCode.replace(/^0+/, '');
-            if (norm2) ALL_COURSES_MAP[norm2] = c;
-        }
+        getCatalogCodeVariants(c.code, c.altCode).forEach(k => {
+            ALL_COURSES_MAP[k] = c;
+        });
     }
     // Barak (ברקים - תואר מזורז ומצטיינים) Accelerated Layout (7 Semesters)
     const SUGGESTED_BARAK_SYLLABUS = [
@@ -766,6 +800,9 @@
     if (ALL_COURSES_MAP['00340058'] && !ALL_COURSES_MAP['01340058']) {
         ALL_COURSES_MAP['01340058'] = ALL_COURSES_MAP['00340058'];
         ALL_COURSES_MAP['1340058'] = ALL_COURSES_MAP['00340058'];
+    }
+    if (ALL_COURSES_MAP['00350146']) {
+        ALL_COURSES_MAP['03501460'] = ALL_COURSES_MAP['00350146'];
     }
 
     // ==========================================================================
@@ -938,6 +975,22 @@
         '104228':   { winter: '01040228', spring: '01040218', name: "מד\"ח מ'" },
         '104218':   { winter: '01040228', spring: '01040218', name: "מד\"ח מ'" }
     };
+
+    // Technion prerequisite equivalency families (used strictly for prerequisite satisfaction checks)
+    const PREREQ_EQUIVALENT_FAMILIES = [
+        ['01140051', '01140071', '01140077', '01140055'], // פיזיקה 1 (רגיל/מ/פ/ת)
+        ['01140052', '01140075', '01140078', '01140076'], // פיזיקה 2 (רגיל/ממ/פ/ת)
+        ['01040041', '01040042', '01040165', '01040018'], // חדו"א 1מ' (חורף/אביב/ישן)
+        ['01040043', '01040044', '01040166', '01040022'], // חדו"א 2מ' (חורף/אביב/ישן)
+        ['01040065', '01040064', '01040016'],             // אלגברה 1מ' (חורף/אביב/ישן)
+        ['01040131', '01040135'],                         // מד"ר ח'/ת' (עונתי)
+        ['01040228', '01040218'],                         // מד"ח מ' (עונתי)
+        ['00340053', '00340029'],                         // מכניקת מוצקים 2 (מורחב/ישן)
+        ['00340055', '00340013'],                         // תורת הזרימה 1 (מורחב/ישן)
+        ['00340054', '00340015'],                         // תכן מכני 1 (מ'/ישן)
+        ['00340060', '00340022'],                         // מבוא למכטרוניקה והנע חשמלי (חדש/ישן)
+        ['00340061', '00340043']                          // מבוא לגרפיקה ותכנון הנדסי / שרטוט
+    ];
 
     // ==========================================================================
     // Course Term Offerings & Annual Restrictions (חד-שנתי / בינלאומי / קיץ)
@@ -1373,6 +1426,7 @@
         ELECTIVE_CATALOG: ELECTIVE_CATALOG,
         ALL_COURSES_MAP: ALL_COURSES_MAP,
         SEASONAL_COURSE_MAPPINGS: SEASONAL_COURSE_MAPPINGS,
+        PREREQ_EQUIVALENT_FAMILIES: PREREQ_EQUIVALENT_FAMILIES,
         COURSE_TERM_OFFERINGS: COURSE_TERM_OFFERINGS,
         SUMMER_CONFIRMED_COURSES: SUMMER_CONFIRMED_COURSES,
         BOTTLENECK_MAP: BOTTLENECK_MAP,
