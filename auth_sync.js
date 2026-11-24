@@ -714,8 +714,7 @@
                         const tTitle = String(t.title || '');
                         const keep = (t.type === 'exam' || /מועד\s*[אבג]|מבחן|בחינה|matlab|מטלאב|מילואי/i.test(tTitle) || !!t.isMiluim || t.source === 'manual');
                         if (!keep) {
-                            if (t.moodleUid && !state.deletedTaskIds.includes(String(t.moodleUid))) state.deletedTaskIds.push(String(t.moodleUid));
-                            if (t.moodleEventId && !state.deletedTaskIds.includes(String(t.moodleEventId))) state.deletedTaskIds.push(String(t.moodleEventId));
+                            // Do not blacklist numeric Moodle event IDs during seed cleanup
                         }
                         return keep;
                     });
@@ -744,6 +743,68 @@
                     });
                 }
                 state.migrationsApplied.unblock_034056_hw_sheets_v3113 = true;
+            }
+            if (!state.migrationsApplied.restore_034056_sheets_and_pde_electronic_v3116) {
+                const unblockIds034056 = new Set(['30390', '30390@moodle26.technion.ac.il', 'task_moodle_30390', '034056_h1']);
+                if (Array.isArray(state.deletedTaskIds)) {
+                    state.deletedTaskIds = state.deletedTaskIds.filter(did => {
+                        const s = String(did || '').trim();
+                        return !unblockIds034056.has(s) && !/^034056_hw_\d+$/i.test(s);
+                    });
+                }
+                if (state.dismissedTaskRegistry && typeof state.dismissedTaskRegistry === 'object') {
+                    Object.keys(state.dismissedTaskRegistry).forEach(k => {
+                        const entry = state.dismissedTaskRegistry[k];
+                        const tid = entry && entry.taskId ? String(entry.taskId) : '';
+                        const cCode = entry && entry.courseCode ? String(entry.courseCode).replace(/^0+/, '') : '';
+                        if (
+                            unblockIds034056.has(k) ||
+                            unblockIds034056.has(tid) ||
+                            k.includes('30390') ||
+                            /^034056_hw_\d+$/i.test(tid) ||
+                            (cCode === '34056' && /^task_id:034056_hw_\d+$/i.test(k))
+                        ) {
+                            delete state.dismissedTaskRegistry[k];
+                        }
+                    });
+                }
+                const c034056 = state.courses && (state.courses['034056'] || state.courses['34056'] || state.courses['00340056']);
+                if (c034056 && c034056.status === 'active') {
+                    if (!Array.isArray(c034056.tasks)) c034056.tasks = [];
+                    const hasSheet2 = c034056.tasks.some(t => t && (
+                        String(t.moodleEventId || '') === '30390' ||
+                        String(t.moodleUid || '').startsWith('30390@') ||
+                        String(t.id || '') === 'task_moodle_30390' ||
+                        String(t.id || '') === '034056_hw_2' ||
+                        /גיליון\s*שיעורי\s*בית\s*2/i.test(String(t.title || ''))
+                    ));
+                    if (!hasSheet2) {
+                        c034056.tasks.push({
+                            id: 'task_moodle_30390',
+                            moodleUid: '30390@moodle26.technion.ac.il',
+                            moodleEventId: '30390',
+                            title: 'גיליון שיעורי בית 2',
+                            type: 'hw',
+                            xp: 50,
+                            dueDate: '2026-12-06 23:59',
+                            dueTimestamp: 1796594340000,
+                            status: 'not_started',
+                            completed: false,
+                            source: 'moodle'
+                        });
+                    }
+                }
+                const c104228 = state.courses && (state.courses['104228'] || state.courses['01040228']);
+                if (c104228 && Array.isArray(c104228.tasks)) {
+                    c104228.tasks = c104228.tasks.filter(t => {
+                        if (!t) return false;
+                        const isManual = t.source === 'manual' || (t.id && String(t.id).startsWith('task-'));
+                        if (isManual) return true;
+                        const title = String(t.title || '');
+                        return !(!/(אלקטרוני|בוחן|מועד|מבחן)/i.test(title) && /(גיליון\s*בית|גיליון\s*שיעורי\s*בית|הגשת\s*גיליון)/i.test(title));
+                    });
+                }
+                state.migrationsApplied.restore_034056_sheets_and_pde_electronic_v3116 = true;
             }
             if (!state.migrationsApplied.prune_stale_034056_thu1230_v319) {
                 const staleSig = '034056|4|12:30';
@@ -867,6 +928,11 @@
                     if (typeof window !== 'undefined' && window.MoodleSync && window.MoodleSync.config) {
                         window.MoodleSync.config.url = userMoodle;
                         if (typeof window.MoodleSync.saveConfig === 'function') window.MoodleSync.saveConfig();
+                        if (userMoodle && typeof window.MoodleSync.triggerThrottledAutoSync === 'function') {
+                            setTimeout(() => {
+                                window.MoodleSync.triggerThrottledAutoSync('auth_ready');
+                            }, 250);
+                        }
                     }
                 } else {
                     localStorage.removeItem('ast_moodle_calendar_url');

@@ -66,17 +66,36 @@
             }
         },
 
-        triggerThrottledAutoSync(reason = 'auto') {
-            if (!this.config.url || this.config.autoSync === false) return;
+        triggerThrottledAutoSync(reason = 'auto', force = false) {
+            if (!this.config.url) this.loadConfig();
+            if (!this.config.url || this.config.autoSync === false) return Promise.resolve(null);
+            if (this._activeSyncPromise && this._activeSyncUrl === this.config.url) {
+                return this._activeSyncPromise;
+            }
             const now = Date.now();
             const last = this.config.lastSyncTimestamp ? new Date(this.config.lastSyncTimestamp).getTime() : 0;
-            // Throttle to once every 10 minutes for passive background triggers
-            if (now - last < 10 * 60 * 1000) return;
+            const bypassThrottle = Boolean(
+                force ||
+                reason === 'startup' ||
+                reason === 'auth_ready' ||
+                reason === 'app_init' ||
+                this.config.lastSyncCount === 0
+            );
+            // Throttle to once every 2 minutes for passive background triggers
+            if (!bypassThrottle && now - last < 2 * 60 * 1000) return Promise.resolve(null);
 
-            console.log(`[MoodleSync] Triggering background auto-sync (reason: ${reason})...`);
-            this.sync({ isSilent: true }).catch(err => {
+            console.log(`[MoodleSync] Triggering background auto-sync (reason: ${reason}, bypass: ${bypassThrottle})...`);
+            this._activeSyncUrl = this.config.url;
+            const p = Promise.resolve(this.sync({ isSilent: true })).catch(err => {
                 console.log(`[MoodleSync] Background auto-sync quiet catch (${reason}):`, err.message);
+                return null;
+            }).finally(() => {
+                if (this._activeSyncPromise === p) {
+                    this._activeSyncPromise = null;
+                }
             });
+            this._activeSyncPromise = p;
+            return p;
         },
 
         getStorageKey() {
@@ -115,19 +134,45 @@
             try {
                 const storageKey = this.getStorageKey();
                 const isGuest = storageKey.endsWith('_guest');
+                const activeUserId = storageKey.replace(/^atlas_me_moodle_sync_/, '');
                 const raw = localStorage.getItem(storageKey);
+                let parsedUrlMissing = false;
                 if (raw) {
                     const parsed = JSON.parse(raw);
                     this.config = Object.assign(this.config, parsed);
-                } else if (!isGuest && window.gameState && window.gameState.moodleCalendarUrl) {
-                    this.config.url = window.gameState.moodleCalendarUrl;
+                    parsedUrlMissing = !(parsed && typeof parsed.url === 'string' && parsed.url.trim().length > 0);
                 } else {
                     this.config.url = '';
                 }
 
-                // Sanitize URL if present; never fall back to any hardcoded personal feed
+                // Recover URL when config was saved empty before AuthSync/gameState initialized
+                if (!this.config.url) {
+                    const isAdirUser = !isGuest && (
+                        (typeof window.AuthSync !== 'undefined' && typeof window.AuthSync.isAdirActive === 'function' && window.AuthSync.isAdirActive()) ||
+                        (typeof window.PRELOADED_USER_STATE !== 'undefined' && window.PRELOADED_USER_STATE &&
+                            window.gameState && window.gameState.ownerEmail &&
+                            window.gameState.ownerEmail === window.PRELOADED_USER_STATE.ownerEmail)
+                    );
+                    const candidates = [
+                        window.gameState && window.gameState.moodleCalendarUrl,
+                        localStorage.getItem(`ast_moodle_calendar_url_${activeUserId}`),
+                        (!isGuest ? localStorage.getItem('ast_moodle_calendar_url') : ''),
+                        (isAdirUser && typeof window.PRELOADED_USER_STATE !== 'undefined' && window.PRELOADED_USER_STATE)
+                            ? window.PRELOADED_USER_STATE.moodleCalendarUrl
+                            : ''
+                    ];
+                    const recoveredUrl = candidates.find(u => typeof u === 'string' && u.trim().length > 0);
+                    if (recoveredUrl) {
+                        this.config.url = recoveredUrl;
+                    }
+                }
+
+                // Sanitize URL if present; never fall back to any hardcoded personal feed for guests/other users
                 if (this.config.url) {
                     this.config.url = this.sanitizeUrl(this.config.url);
+                    if (this.config.url && (!raw || parsedUrlMissing)) {
+                        this.saveConfig();
+                    }
                 } else {
                     this.config.url = '';
                 }
@@ -374,6 +419,31 @@
                 }
             }
 
+            // Method 1.5: Same-origin local dev server proxy (/api/moodle-ics)
+            if (typeof window !== 'undefined' && window.location && /^https?:$/i.test(window.location.protocol)) {
+                const host = window.location.hostname || '';
+                const isLocalServer = host === 'localhost' || host === '127.0.0.1' || host === '::1' || /^(10\.|192\.168\.|100\.|172\.(1[6-9]|2\d|3[01])\.)/.test(host);
+                if (isLocalServer) {
+                    try {
+                        const localProxyUrl = `/api/moodle-ics?url=${encodeURIComponent(cleanUrl)}`;
+                        console.log('[MoodleSync] Attempting local dev server proxy:', localProxyUrl);
+                        const fetchFn = (typeof window.fetchWithTimeoutAndDedup === 'function') ? window.fetchWithTimeoutAndDedup : fetch;
+                        const resp = await fetchFn(localProxyUrl, {
+                            headers: { 'Accept': 'text/calendar, text/plain, */*' }
+                        }, 10000);
+                        if (resp && resp.ok) {
+                            const text = await resp.text();
+                            if (text && text.includes('BEGIN:VCALENDAR')) {
+                                console.log('[MoodleSync] Local dev server proxy fetch successful.');
+                                return text;
+                            }
+                        }
+                    } catch (e) {
+                        console.warn('[MoodleSync] Local dev server proxy failed:', e.message);
+                    }
+                }
+            }
+
             // Method 2: Direct Fetch (works in Electron without bridge if webSecurity is false, or in browser if allowed)
             try {
                 console.log('[MoodleSync] Attempting direct fetch with timeout & dedup:', cleanUrl);
@@ -405,12 +475,23 @@
          * e.g. "יש להגיש את 'ערעורים - מועד ב''" -> "ערעורים - מועד ב'"
          */
         cleanTaskSummary(rawSummary) {
-            let clean = (rawSummary || '').trim();
+            let clean = (rawSummary || '').trim()
+                .replace(/\\,/g, ',')
+                .replace(/\\;/g, ';')
+                .replace(/\\n/gi, ' ')
+                .replace(/\\\\/g, '\\')
+                .replace(/&amp;/g, '&')
+                .replace(/&quot;/g, '"')
+                .replace(/&#0*39;|&apos;/g, "'")
+                .replace(/&lt;/g, '<')
+                .replace(/&gt;/g, '>')
+                .replace(/\s+/g, ' ')
+                .trim();
             const prefixMatch = clean.match(/^יש להגיש את\s+['"״](.+?)['"״]$/);
             if (prefixMatch) {
                 return prefixMatch[1].trim();
             }
-            clean = clean.replace(/^(יש להגיש את|תאריך הגשה:?|מועד הגשה:?)\s*/i, '').trim();
+            clean = clean.replace(/^(יש להגיש את|תאריך הגשה:?|מועד הגשה:?|תאריך סגירה:?)\s*/i, '').trim();
             return clean;
         },
 
@@ -769,6 +850,12 @@
                 return false;
             }
 
+            // If both tasks carry distinct explicit Moodle calendar event IDs, keep them separate
+            // (e.g. 034053 dual deliverables on Sheet 4: quiz 29212 vs written upload 12818)
+            const ev1 = t1.moodleEventId ? String(t1.moodleEventId).trim() : ((t1.moodleUid && /^(\d+)@/.test(String(t1.moodleUid))) ? String(t1.moodleUid).match(/^(\d+)@/)[1] : null);
+            const ev2 = t2.moodleEventId ? String(t2.moodleEventId).trim() : ((t2.moodleUid && /^(\d+)@/.test(String(t2.moodleUid))) ? String(t2.moodleUid).match(/^(\d+)@/)[1] : null);
+            if (ev1 && ev2 && ev1 !== ev2) return false;
+
             // Check Moodle IDs (numeric event ID or assignment ID)
             const mId1 = this.extractMoodleId(t1);
             const mId2 = this.extractMoodleId(t2);
@@ -935,6 +1022,15 @@
             return merged;
         },
 
+        isOptionalPdeWrittenSheet(courseCode, title) {
+            const normCode = String(courseCode || '').replace(/^0+/, '');
+            if (normCode !== '104228' && normCode !== '1040228') return false;
+            const t = String(title || '').trim();
+            if (!t) return false;
+            if (/(אלקטרוני|מועד|מבחן|בחינה|exam|מילואי|בוחן)/i.test(t)) return false;
+            return /(גיליון\s*בית|גיליון\s*שיעורי\s*בית|הגשת\s*גיליון)/i.test(t);
+        },
+
         deduplicateCourseTasks(course) {
             if (!course || !Array.isArray(course.tasks) || course.tasks.length === 0) {
                 return { tasks: course ? (course.tasks || []) : [], removedCount: 0 };
@@ -947,12 +1043,13 @@
                 const candidate = course.tasks[i];
                 if (!candidate) continue;
 
-                // Purge non-task items (Zoom links, virtual sessions, opening notices)
+                // Purge non-task items (Zoom links, virtual sessions, opening notices, and optional 104228 written sheets)
                 const isManual = candidate.source === 'manual' || (candidate.id && String(candidate.id).startsWith('task-'));
                 if (!isManual) {
                     const isNonTask = (
                         /(זום|zoom)/i.test(candidate.title || '') ||
                         (candidate.moodleUrl && /(זום|zoom)/i.test(candidate.moodleUrl)) ||
+                        this.isOptionalPdeWrittenSheet(course.code, candidate.title) ||
                         (candidate.title && (
                             candidate.title.startsWith('נפתח ב') ||
                             candidate.title.startsWith('נפתח:') ||
@@ -995,7 +1092,7 @@
             let affectedCourses = 0;
 
             Object.values(window.gameState.courses).forEach(course => {
-                if (course && Array.isArray(course.tasks) && course.tasks.length > 1) {
+                if (course && Array.isArray(course.tasks) && course.tasks.length > 0) {
                     const res = this.deduplicateCourseTasks(course);
                     if (res.removedCount > 0) {
                         totalRemoved += res.removedCount;
@@ -1280,6 +1377,11 @@
 
                 if (!Array.isArray(targetCourse.tasks)) {
                     targetCourse.tasks = [];
+                }
+
+                // Skip optional written homework sheets for PDE (104228) — only electronic exercises are mandatory
+                if (this.isOptionalPdeWrittenSheet(targetCourse.code, cleanTitle)) {
+                    continue;
                 }
 
                 // Extract URL if available (prioritize direct activity links over calendar redirects)

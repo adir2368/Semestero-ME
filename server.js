@@ -29,8 +29,69 @@ function getLocalIp() {
     return 'localhost';
 }
 
-const server = http.createServer((req, res) => {
+const server = http.createServer(async (req, res) => {
     let reqPath = decodeURIComponent(req.url.split('?')[0]);
+
+    // Local CORS-free proxy for Technion Moodle ICS calendar feeds
+    if (reqPath === '/api/moodle-ics') {
+        if (req.method === 'OPTIONS') {
+            res.writeHead(204, {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'GET, OPTIONS',
+                'Access-Control-Allow-Headers': 'Content-Type, Accept'
+            });
+            res.end();
+            return;
+        }
+        try {
+            const parsedReqUrl = new URL(req.url, 'http://localhost');
+            const targetUrl = (parsedReqUrl.searchParams.get('url') || '').trim();
+            if (!targetUrl) {
+                res.writeHead(400, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+                res.end(JSON.stringify({ error: 'Missing url parameter' }));
+                return;
+            }
+            if (!/^https:\/\/moodle\d*\.technion\.ac\.il\/calendar\/export_execute\.php/i.test(targetUrl)) {
+                res.writeHead(403, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+                res.end(JSON.stringify({ error: 'Only Technion Moodle ICS URLs are allowed' }));
+                return;
+            }
+            const controller = new AbortController();
+            const timer = setTimeout(() => controller.abort(), 12000);
+            try {
+                const upstream = await fetch(targetUrl, {
+                    signal: controller.signal,
+                    headers: {
+                        'Accept': 'text/calendar, text/plain, */*',
+                        'User-Agent': 'Semestero-MoodleSync/3.1.16'
+                    }
+                });
+                const text = await upstream.text();
+                if (!upstream.ok || !text.includes('BEGIN:VCALENDAR')) {
+                    res.writeHead(upstream.ok ? 502 : upstream.status, {
+                        'Content-Type': 'application/json',
+                        'Access-Control-Allow-Origin': '*'
+                    });
+                    res.end(JSON.stringify({ error: `Upstream returned HTTP ${upstream.status}` }));
+                    return;
+                }
+                res.writeHead(200, {
+                    'Content-Type': 'text/calendar; charset=utf-8',
+                    'Access-Control-Allow-Origin': '*',
+                    'Cache-Control': 'no-store'
+                });
+                res.end(text);
+                return;
+            } finally {
+                clearTimeout(timer);
+            }
+        } catch (err) {
+            res.writeHead(502, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+            res.end(JSON.stringify({ error: err?.message || 'Proxy fetch failed' }));
+            return;
+        }
+    }
+
     if (reqPath === '/' || reqPath === '') reqPath = '/index.html';
 
     const filePath = path.join(BASE_DIR, reqPath);

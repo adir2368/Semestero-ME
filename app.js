@@ -2757,6 +2757,15 @@ document.addEventListener("DOMContentLoaded", () => {
     renderUI();
     setupDailyTimetable();
     setupMobileNotifications();
+    if (window.MoodleSync && typeof window.MoodleSync.loadConfig === 'function') {
+        window.MoodleSync.loadConfig();
+        if (typeof window.MoodleSync.triggerThrottledAutoSync === 'function') {
+            setTimeout(() => {
+                window.MoodleSync.loadConfig();
+                window.MoodleSync.triggerThrottledAutoSync('app_init', true);
+            }, 350);
+        }
+    }
     if (typeof syncNativeAndroidWidgets === 'function') {
         setTimeout(syncNativeAndroidWidgets, 500);
         if (window.SemesteroWidgetBridge) {
@@ -9778,8 +9787,8 @@ function _loadSavedStateImpl() {
                         if (isExam || isMatlab || isMiluim || (isCompleted && !isPhantomHw) || t.source === 'manual') {
                             rebuiltTasks.push(t);
                         } else {
-                            if (t.moodleUid && !gameState.deletedTaskIds.includes(String(t.moodleUid))) gameState.deletedTaskIds.push(String(t.moodleUid));
-                            if (t.moodleEventId && !gameState.deletedTaskIds.includes(String(t.moodleEventId))) gameState.deletedTaskIds.push(String(t.moodleEventId));
+                            // Never blacklist numeric Moodle event IDs (e.g. 30390) during a seed cleanup
+                            // so live Moodle sync can freely re-import newly published sheets.
                         }
                     });
                     c.tasks = rebuiltTasks;
@@ -10051,6 +10060,71 @@ function _loadSavedStateImpl() {
                     }
                 });
             }
+        }
+
+        // Universal v3.1.16 migration: unblock 034056 sheet 2 (30390) & manual sheet IDs, seed active 034056 sheet 2 if missing, and prune optional 104228 written sheets
+        if (!gameState.migrationsApplied) gameState.migrationsApplied = {};
+        if (!gameState.migrationsApplied.restore_034056_sheets_and_pde_electronic_v3116) {
+            const unblockIds034056 = new Set(['30390', '30390@moodle26.technion.ac.il', 'task_moodle_30390', '034056_h1']);
+            if (Array.isArray(gameState.deletedTaskIds)) {
+                gameState.deletedTaskIds = gameState.deletedTaskIds.filter(did => {
+                    const s = String(did || '').trim();
+                    return !unblockIds034056.has(s) && !/^034056_hw_\d+$/i.test(s);
+                });
+            }
+            if (gameState.dismissedTaskRegistry && typeof gameState.dismissedTaskRegistry === 'object') {
+                Object.keys(gameState.dismissedTaskRegistry).forEach(k => {
+                    const entry = gameState.dismissedTaskRegistry[k];
+                    const tid = entry && entry.taskId ? String(entry.taskId) : '';
+                    const cCode = entry && entry.courseCode ? String(entry.courseCode).replace(/^0+/, '') : '';
+                    if (
+                        unblockIds034056.has(k) ||
+                        unblockIds034056.has(tid) ||
+                        k.includes('30390') ||
+                        /^034056_hw_\d+$/i.test(tid) ||
+                        (cCode === '34056' && /^task_id:034056_hw_\d+$/i.test(k))
+                    ) {
+                        delete gameState.dismissedTaskRegistry[k];
+                    }
+                });
+            }
+            const c034056 = gameState.courses && (gameState.courses['034056'] || gameState.courses['34056'] || gameState.courses['00340056']);
+            if (c034056 && c034056.status === 'active') {
+                if (!Array.isArray(c034056.tasks)) c034056.tasks = [];
+                const hasSheet2 = c034056.tasks.some(t => t && (
+                    String(t.moodleEventId || '') === '30390' ||
+                    String(t.moodleUid || '').startsWith('30390@') ||
+                    String(t.id || '') === 'task_moodle_30390' ||
+                    String(t.id || '') === '034056_hw_2' ||
+                    extractHomeworkSheetIndex(t.title) === 2
+                ));
+                if (!hasSheet2) {
+                    c034056.tasks.push({
+                        id: 'task_moodle_30390',
+                        moodleUid: '30390@moodle26.technion.ac.il',
+                        moodleEventId: '30390',
+                        title: 'גיליון שיעורי בית 2',
+                        type: 'hw',
+                        xp: 50,
+                        dueDate: '2026-12-06 23:59',
+                        dueTimestamp: 1796594340000,
+                        status: 'not_started',
+                        completed: false,
+                        source: 'moodle'
+                    });
+                }
+            }
+            const c104228 = gameState.courses && (gameState.courses['104228'] || gameState.courses['01040228']);
+            if (c104228 && Array.isArray(c104228.tasks)) {
+                c104228.tasks = c104228.tasks.filter(t => {
+                    if (!t) return false;
+                    const isManual = t.source === 'manual' || (t.id && String(t.id).startsWith('task-'));
+                    if (isManual) return true;
+                    const title = String(t.title || '');
+                    return !(!/(אלקטרוני|בוחן|מועד|מבחן)/i.test(title) && /(גיליון\s*בית|גיליון\s*שיעורי\s*בית|הגשת\s*גיליון)/i.test(title));
+                });
+            }
+            gameState.migrationsApplied.restore_034056_sheets_and_pde_electronic_v3116 = true;
         }
     
         // Ensure official Technion Mechanical Engineering prerequisites are synchronized
@@ -26247,11 +26321,11 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.11.23-v3.1.15",
-    version: "3.1.15",
-    build: "20261123_02",
-    date: "2026-11-23 19:50",
-    description: "v3.1.15: תיקון התאמת קודי קדם בכל האורכים (5/6/7/8 ספרות) ותמיכה בביטויי 'או', ושאלה אוטומטית לשבץ קורסי קדם חסרים בסמסטרים קודמים."
+    code: "REV-2026.11.24-v3.1.16",
+    version: "3.1.16",
+    build: "20261124_01",
+    date: "2026-11-24 17:15",
+    description: "v3.1.16: תיקון סנכרון אוטומטי ממודל (שחזור כתובת יומן בהפעלה ופרוקסי מקומי ללא CORS), סינון משימות מד\"ח (104228) לתרגילים אלקטרוניים בלבד, ושחזור גיליונות 034056 החסומים."
 };
 window.APP_VERSION = APP_CURRENT_REVISION.version;
 
@@ -32214,7 +32288,7 @@ const COURSE_HOMEWORK_POLICIES = {
         bestN: 10,
         isDualComponent: false,
         policyLabel: 'הטובים מ-12: 10',
-        weightLabel: '10% מגן תרגילים'
+        weightLabel: '10% מגן תרגילים אלקטרוניים'
     },
     // 114052 - Physics 2 (פיסיקה 2)
     '114052': {
@@ -32275,12 +32349,12 @@ function extractHomeworkSheetIndex(rawTitle) {
     if (!rawTitle) return null;
     const title = String(rawTitle).toLowerCase();
     // 1. Prefer explicit homework/sheet/quiz keyword followed by sheet number (prevents matching "מוצקים 2" or "בונוס 2 נקודות")
-    const explicitMatch = title.match(/(?:תרגיל(?:\s*בית)?|גיליון|גליון|מטל[הת](?:\s*(?:בית|תכנות|מעבדה))?|עבודת\s*בית|ש["״׳]?ב|תכנות|שאלון|בוחן|webwork|hw|sheet|quiz|assignment|ex(?:ercise)?)\s*(?:מס['׳]?|מספר|no\.?|#|[-–—:_])*\s*0*(\d+)(?!\d)/i);
+    const explicitMatch = title.match(/(?:תרגיל(?:\s*(?:בית|אלקטרוני))?|(?:גיליון|גליון)(?:\s*(?:שיעורי\s*בית|בית|ש["״׳]?ב|עבודה))?|מטל[הת](?:\s*(?:בית|תכנות|מעבדה))?|עבודת\s*בית|ש["״׳]?ב|תכנות|שאלון|בוחן|webwork|hw|sheet|quiz|assignment|ex(?:ercise)?|הגשה)\s*(?:מס['׳]?|מספר|no\.?|#|[-–—:_])*\s*0*(\d+)(?!\d)/i);
     if (explicitMatch) {
         return parseInt(explicitMatch[1], 10);
     }
     // 1b. Explicit Hebrew ordinal letter after sheet keyword (e.g. "תרגיל בית א'", "גיליון ב")
-    const explicitHebMatch = title.match(/(?:תרגיל(?:\s*בית)?|גיליון|גליון|מטל[הת](?:\s*(?:בית|תכנות))?)\s*(?:מס['׳]?|מספר|[-–—:])*\s*(יא|יב|[א-י])['״׳]?(?=$|[\s\-–—:),.;/])/i);
+    const explicitHebMatch = title.match(/(?:תרגיל(?:\s*בית)?|(?:גיליון|גליון)(?:\s*(?:שיעורי\s*בית|בית|ש["״׳]?ב|עבודה))?|מטל[הת](?:\s*(?:בית|תכנות))?)\s*(?:מס['׳]?|מספר|[-–—:])*\s*(יא|יב|[א-י])['״׳]?(?=$|[\s\-–—:),.;/])/i);
     if (explicitHebMatch) {
         const hebMap = { 'א': 1, 'ב': 2, 'ג': 3, 'ד': 4, 'ה': 5, 'ו': 6, 'ז': 7, 'ח': 8, 'ט': 9, 'י': 10, 'יא': 11, 'יב': 12 };
         if (hebMap[explicitHebMatch[1]]) return hebMap[explicitHebMatch[1]];
@@ -32322,7 +32396,7 @@ function isHomeworkPolicyTask(t) {
         t.type === 'webwork' ||
         t.type === 'hw_digital' ||
         t.type === 'hw_written' ||
-        /(?:תרגיל|מטל[הת]|גיליון|גליון|עבודת\s*בית|ש["״׳]?ב|webwork|hw|sheet|assignment)/i.test(title)
+        /(?:תרגיל|מטל[הת]|גיליון|גליון|עבודת\s*בית|ש["״׳]?ב|הגשה|webwork|hw|sheet|assignment)/i.test(title)
     );
 }
 
@@ -32419,7 +32493,18 @@ function getCourseHomeworkStatus(courseCode) {
     if (!policy) return null;
 
     const tasks = Array.isArray(course.tasks) ? course.tasks : [];
-    const hwTasks = tasks.filter(isHomeworkPolicyTask);
+    const isPdeCourse = cleanCode === '104228' || cleanCode === '1040228';
+    const hwTasks = tasks.filter(t => {
+        if (!isHomeworkPolicyTask(t)) return false;
+        if (isPdeCourse) {
+            const isManual = t.source === 'manual' || (t.id && String(t.id).startsWith('task-'));
+            const title = String(t.title || '');
+            if (!isManual && !/(אלקטרוני|בוחן|מועד|מבחן)/i.test(title) && /(גיליון\s*בית|גיליון\s*שיעורי\s*בית|הגשת\s*גיליון)/i.test(title)) {
+                return false;
+            }
+        }
+        return true;
+    });
 
     const sheets = [];
     let completedCount = 0;
