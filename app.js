@@ -10080,6 +10080,17 @@ function _loadSavedStateImpl() {
                             }
                         });
                     }
+                    if (gameState.timetable && Array.isArray(gameState.timetable.days)) {
+                        gameState.timetable.days.forEach(day => {
+                            if (!day || !Array.isArray(day.classes)) return;
+                            day.classes.forEach(cls => {
+                                if (cls && (String(cls.courseId) === '03940805' || String(cls.courseId) === '3940805')) {
+                                    if (cls.courseName !== 'חינוך גופני - יוגה') { cls.courseName = 'חינוך גופני - יוגה'; changed = true; }
+                                    if (cls.room !== 'מרכז הספורט') { cls.room = 'מרכז הספורט'; changed = true; }
+                                }
+                            });
+                        });
+                    }
                     return changed;
                 };
             }
@@ -26921,11 +26932,11 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.11.26-v3.2.4",
-    version: "3.2.4",
+    code: "REV-2026.11.26-v3.2.5",
+    version: "3.2.5",
     build: "20261126_04",
     date: "2026-11-26 18:40",
-    description: "v3.2.4: שימור סמסטר 3 פעיל בסנכרון ענן בזמן אמת, תיקון סידור שכבות ההתראות ודיאגרמת הנק״ז, חיבור הווידג׳טים והשעון לנתוני המשתמש החיים וליטוש מלא של מצב בהיר, גיליון הציונים והנוכחות."
+    description: "v3.2.5: שימור סמסטר 3 פעיל בסנכרון ענן בזמן אמת, תיקון סידור שכבות ההתראות ודיאגרמת הנק״ז, חיבור הווידג׳טים והשעון לנתוני המשתמש החיים וליטוש מלא של מצב בהיר, גיליון הציונים והנוכחות."
 };
 window.APP_VERSION = APP_CURRENT_REVISION.version;
 window.APP_CURRENT_REVISION = APP_CURRENT_REVISION;

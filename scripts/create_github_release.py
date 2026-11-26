@@ -17,9 +17,9 @@ ZIP_PATH = os.path.join(ROOT, "Semestero-ME-Windows-x64.zip")
 
 with open(os.path.join(ROOT, "package.json"), "r", encoding="utf-8") as f:
     pkg = json.load(f)
-VERSION = pkg.get("version", "3.2.4")
+VERSION = pkg.get("version", "3.2.5")
 TAG = f"v{VERSION}"
-NAME = f"Semestero ME v{VERSION} - Live Cloud Sem 3 Sync, Widgets BiDi, Grade Sheet Light Polish & Watch Parity"
+NAME = f"Semestero ME v{VERSION} - Live Cloud Sem 3 Sync, Attendance Yoga Parity, Widgets BiDi & Watch Sync"
 
 def get_github_token():
     try:
@@ -107,12 +107,12 @@ def main():
 ### 📱 2. Native Android, Galaxy Watch 8, Electron & iOS Wave (Pass 7 + v3.2.1 Hotfix)
 - **Android Bridge & Widgets**: Hardened JS bridge quoting (`JSONObject.quote`), restricted `fetchMoodleIcs` & external/download intents to Technion Moodle / `http(s)` / `mailto`, fixed widget deep-link routing (`calendar`/`curriculum`/`tasks`) with intent consumption, added widget task two-way sync, clamped class carousel index, fixed `isCoursePerpetualDitch` call, and added 7-arg → 6-arg `updateScheduleWidget` fallback for older phone APKs.
 - **Galaxy Watch 8 (`Wear OS`)**: Prevented Complication short-hour `substring(0, 5)` crash, preserved empty synced weekdays, dynamically resolved weekend next-class previews, restored all 3 Monday/Wednesday Physics 2 (`114052`) sessions in `WearScheduleHelper`, auto-healed mojibake `gpa_badge` & empty weekly schedule hours when synced, aligned Tasks Complication deduplication, and neutralized guest GPA defaults.
-- **Electron & iOS Parity**: Added `will-navigate` navigation guard in `main.js`, included `watch_companion.js` & `widgets.html` offline assets, and synced iOS Capacitor URL/version metadata (`{VERSION}` / build `149`).
+- **Electron & iOS Parity**: Added `will-navigate` navigation guard in `main.js`, included `watch_companion.js` & `widgets.html` offline assets, and synced iOS Capacitor URL/version metadata (`{VERSION}` / build `150`).
 
-### ✨ 3. `v3.2.4` Post-Audit Polish & Live Companion Fixes
-- Fixed `PanoptoTracker.openModal(opts)` `ReferenceError`, normalized `3940805`/`03940805` (`חינוך גופני - יוגה`) across Flowchart, Planner, Grade Sheet & Attendance, added Light Mode contrast rules for Grade Sheet CSV & What-If buttons (`accessibility.css`), pinned `#task-side-peek` actions footer, and enforced `dir="ltr"` across `widgets.html` S/M/L cards.
+### ✨ 3. `v3.2.4`–`v3.2.5` Post-Audit Polish & Live Companion Fixes
+- Fixed `PanoptoTracker.openModal(opts)` `ReferenceError`, normalized `3940805`/`03940805` (`חינוך גופני - יוגה` / `מרכז הספורט`) across Flowchart, Planner, Timetable, Grade Sheet & Attendance, added Light Mode contrast rules for Grade Sheet CSV & What-If buttons (`accessibility.css`), pinned `#task-side-peek` actions footer, and enforced `dir="ltr"` across `widgets.html` S/M/L cards.
 
-### 📦 4. קובצי הפצה (`v{VERSION}`, `versionCode 149`):
+### 📦 4. קובצי הפצה (`v{VERSION}`, `versionCode 150`):
 - פורסמו כל 4 קובצי ההתקנה החתומים (Android Phone, Tablet Clean, Galaxy Watch 8, Windows x64).
 """
 

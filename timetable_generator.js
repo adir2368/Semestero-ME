@@ -364,10 +364,10 @@
                             groupId: '24',
                             sportName: 'יוגה',
                             lecturer: 'שלומית בן-איש',
-                            room: 'חינוך גופני - אתלטיקה קלה',
+                            room: 'מרכז הספורט',
                             isAnchor: true,
                             meetings: [
-                                { dayIndex: 4, dayName: 'חמישי', startTime: '07:30', endTime: '09:00', duration: 'שעה וחצי', room: 'חינוך גופני - אתלטיקה קלה' }
+                                { dayIndex: 4, dayName: 'חמישי', startTime: '07:30', endTime: '09:00', duration: 'שעה וחצי', room: 'מרכז הספורט' }
                             ]
                         },
                         {
