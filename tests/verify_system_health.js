@@ -5,7 +5,28 @@ const path = require('path');
 const os = require('os');
 const fs = require('fs');
 
-const CHROME_PATH = "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
+function resolveChromePath() {
+    if (process.env.CHROME_PATH && fs.existsSync(process.env.CHROME_PATH)) return process.env.CHROME_PATH;
+    const candidates = process.platform === 'win32'
+        ? [
+            'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
+            'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
+            process.env.LOCALAPPDATA ? path.join(process.env.LOCALAPPDATA, 'Google\\Chrome\\Application\\chrome.exe') : ''
+        ]
+        : [
+            '/usr/bin/google-chrome',
+            '/usr/bin/google-chrome-stable',
+            '/usr/bin/chromium',
+            '/usr/bin/chromium-browser',
+            '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
+        ];
+    for (const c of candidates) {
+        if (c && fs.existsSync(c)) return c;
+    }
+    return process.platform === 'win32' ? 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe' : 'google-chrome';
+}
+
+const CHROME_PATH = resolveChromePath();
 const PORT = 9700 + Math.floor(Math.random() * 200);
 const PROFILE_DIR = path.join(os.tmpdir(), `chrome_qa_health_${Date.now()}`);
 const SERVER_PORT = 8080;
@@ -33,7 +54,8 @@ function getJson(url) {
 
 function isServerListening(port) {
     return new Promise(resolve => {
-        const req = http.get(`http://127.0.0.1:${port}/`, () => {
+        const req = http.get(`http://127.0.0.1:${port}/`, (res) => {
+            res.resume();
             resolve(true);
         });
         req.on('error', () => resolve(false));
@@ -121,6 +143,8 @@ async function run() {
         '--no-first-run',
         '--no-default-browser-check',
         '--headless=new',
+        '--no-sandbox',
+        '--disable-dev-shm-usage',
         '--disable-gpu',
         '--window-size=1440,900',
         TARGET_URL

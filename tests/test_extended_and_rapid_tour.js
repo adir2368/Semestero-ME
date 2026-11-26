@@ -8,7 +8,30 @@ const { spawn } = require('child_process');
 const path = require('path');
 const os = require('os');
 
-const CHROME_PATH = "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
+const fs = require('fs');
+
+function resolveChromePath() {
+    if (process.env.CHROME_PATH && fs.existsSync(process.env.CHROME_PATH)) return process.env.CHROME_PATH;
+    const candidates = process.platform === 'win32'
+        ? [
+            'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
+            'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
+            process.env.LOCALAPPDATA ? path.join(process.env.LOCALAPPDATA, 'Google\\Chrome\\Application\\chrome.exe') : ''
+        ]
+        : [
+            '/usr/bin/google-chrome',
+            '/usr/bin/google-chrome-stable',
+            '/usr/bin/chromium',
+            '/usr/bin/chromium-browser',
+            '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
+        ];
+    for (const c of candidates) {
+        if (c && fs.existsSync(c)) return c;
+    }
+    return process.platform === 'win32' ? 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe' : 'google-chrome';
+}
+
+const CHROME_PATH = resolveChromePath();
 const PORT = 9880 + Math.floor(Math.random() * 100);
 const PROFILE_DIR = path.join(os.tmpdir(), `chrome_extended_tour_${Date.now()}`);
 const SERVER_PORT = 8080;
@@ -16,6 +39,20 @@ const APP_URL = `http://127.0.0.1:${SERVER_PORT}/?qa_extended_tour=${Date.now()}
 
 function delay(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function isServerListening(port) {
+    return new Promise(resolve => {
+        const req = http.get(`http://127.0.0.1:${port}/`, (res) => {
+            res.resume();
+            resolve(true);
+        });
+        req.on('error', () => resolve(false));
+        req.setTimeout(1000, () => {
+            req.abort();
+            resolve(false);
+        });
+    });
 }
 
 function getJson(url) {
@@ -88,13 +125,19 @@ async function runExtendedTourSuite() {
     console.log('🌟 QA: EXTENDED POWERHOUSE TOUR & RAPID TOUR AUTONOMY VERIFICATION');
     console.log('========================================================================\n');
 
-    const server = spawn('node', ['server.js'], { stdio: 'inherit' });
-    await delay(1500);
+    let server = null;
+    const alreadyListening = await isServerListening(SERVER_PORT);
+    if (!alreadyListening) {
+        server = spawn('node', ['server.js'], { stdio: 'inherit' });
+        await delay(1500);
+    }
 
     const chrome = spawn(CHROME_PATH, [
         `--remote-debugging-port=${PORT}`,
         `--user-data-dir=${PROFILE_DIR}`,
         '--headless=new',
+        '--no-sandbox',
+        '--disable-dev-shm-usage',
         '--disable-gpu',
         '--no-first-run',
         '--window-size=1280,850',

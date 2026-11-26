@@ -4,7 +4,9 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 
-const CHROME_PATH = "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
+const CHROME_PATH = process.env.CHROME_PATH || (process.platform === 'win32'
+    ? "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"
+    : "/usr/bin/google-chrome");
 const PORT = 9345;
 const PROFILE_DIR = path.join(os.tmpdir(), `chrome_deep_audit_${Date.now()}`);
 const TARGET_URL = `http://localhost:8080/?deep_audit=${Date.now()}`;

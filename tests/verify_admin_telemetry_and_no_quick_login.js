@@ -5,11 +5,13 @@ const path = require('path');
 const os = require('os');
 const assert = require('assert');
 
-const CHROME_PATH = "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
+const CHROME_PATH = process.env.CHROME_PATH || (process.platform === 'win32'
+    ? "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"
+    : "/usr/bin/google-chrome");
 const PORT = 9400 + Math.floor(Math.random() * 500);
 const PROFILE_DIR = path.join(os.tmpdir(), `chrome_qa_telemetry_${Date.now()}`);
 const TARGET_URL = `http://localhost:8080/?qa=${Date.now()}`;
-const ARTIFACT_DIR = "C:/Users/user/.gemini/antigravity/brain/aa7d2a33-2de8-4eeb-b8bd-18c8fdd69b14";
+const ARTIFACT_DIR = process.platform === 'win32' ? "C:/Users/user/.gemini/antigravity/brain/aa7d2a33-2de8-4eeb-b8bd-18c8fdd69b14" : os.tmpdir();
 
 function delay(ms) {
     return new Promise(res => setTimeout(res, ms));
