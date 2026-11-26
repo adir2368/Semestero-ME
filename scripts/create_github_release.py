@@ -17,9 +17,9 @@ ZIP_PATH = os.path.join(ROOT, "Semestero-ME-Windows-x64.zip")
 
 with open(os.path.join(ROOT, "package.json"), "r", encoding="utf-8") as f:
     pkg = json.load(f)
-VERSION = pkg.get("version", "3.2.0")
+VERSION = pkg.get("version", "3.2.1")
 TAG = f"v{VERSION}"
-NAME = f"Semestero ME v{VERSION} - Full Ecosystem Hardening, Light Mode & Native Stack Wave"
+NAME = f"Semestero ME v{VERSION} - Full Ecosystem Hardening, Watch Physics 2 Schedule & Bridge Parity"
 
 def get_github_token():
     try:
@@ -104,12 +104,12 @@ def main():
 - **Curriculum, Planner & Tasks**: Unified prerequisite/Moodle normalization, fixed Degree Planner cluster & physics track isolation, stabilized Best-N HW tracking, and replaced blocking native `confirm`/`prompt` alerts with accessible custom dialogs.
 - **Calendar, Timetable & Light Mode**: Fixed RTL calendar paging, Day view hour axis, Exam Gap Runway conflict stacking, PNG Timetable export, and introduced full **Light Mode (`מצב בהיר`)** + enhanced **High Contrast** & `?` Modal Help across all dialogs.
 
-### 📱 2. Native Android, Galaxy Watch 8, Electron & iOS Wave (Pass 7)
-- **Android Bridge & Widgets**: Hardened JS bridge quoting (`JSONObject.quote`), restricted `fetchMoodleIcs` & external/download intents to Technion Moodle / `http(s)` / `mailto`, fixed widget deep-link routing (`calendar`/`curriculum`/`tasks`) with intent consumption, added widget task two-way sync, and clamped class carousel index.
-- **Galaxy Watch 8 (`Wear OS`)**: Prevented Complication short-hour `substring(0, 5)` crash, preserved empty synced weekdays, dynamically resolved weekend next-class previews, aligned Tasks Complication deduplication, and neutralized guest GPA defaults.
-- **Electron & iOS Parity**: Added `will-navigate` navigation guard in `main.js`, included `watch_companion.js` & `widgets.html` offline assets, and synced iOS Capacitor URL/version metadata (`{VERSION}` / build `145`).
+### 📱 2. Native Android, Galaxy Watch 8, Electron & iOS Wave (Pass 7 + v3.2.1 Hotfix)
+- **Android Bridge & Widgets**: Hardened JS bridge quoting (`JSONObject.quote`), restricted `fetchMoodleIcs` & external/download intents to Technion Moodle / `http(s)` / `mailto`, fixed widget deep-link routing (`calendar`/`curriculum`/`tasks`) with intent consumption, added widget task two-way sync, clamped class carousel index, fixed `isCoursePerpetualDitch` call, and added 7-arg → 6-arg `updateScheduleWidget` fallback for older phone APKs.
+- **Galaxy Watch 8 (`Wear OS`)**: Prevented Complication short-hour `substring(0, 5)` crash, preserved empty synced weekdays, dynamically resolved weekend next-class previews, restored all 3 Monday/Wednesday Physics 2 (`114052`) sessions in `WearScheduleHelper`, auto-healed mojibake `gpa_badge` & empty weekly schedule hours when synced, aligned Tasks Complication deduplication, and neutralized guest GPA defaults.
+- **Electron & iOS Parity**: Added `will-navigate` navigation guard in `main.js`, included `watch_companion.js` & `widgets.html` offline assets, and synced iOS Capacitor URL/version metadata (`{VERSION}` / build `146`).
 
-### 📦 3. קובצי הפצה (`v{VERSION}`, `versionCode 145`):
+### 📦 3. קובצי הפצה (`v{VERSION}`, `versionCode 146`):
 - פורסמו כל 4 קובצי ההתקנה החתומים (Android Phone, Tablet Clean, Galaxy Watch 8, Windows x64).
 """
 

@@ -71,7 +71,7 @@ const server = http.createServer(async (req, res) => {
                     signal: controller.signal,
                     headers: {
                         'Accept': 'text/calendar, text/plain, */*',
-                        'User-Agent': 'Semestero-MoodleSync/3.2.0'
+                        'User-Agent': 'Semestero-MoodleSync/3.2.1'
                     }
                 });
                 const text = await upstream.text();

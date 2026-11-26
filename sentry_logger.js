@@ -79,7 +79,7 @@
         else if (isElectron) platform = 'electron-desktop';
 
         return {
-            version: (global.APP_CURRENT_REVISION && global.APP_CURRENT_REVISION.version) || global.APP_VERSION || '3.2.0',
+            version: (global.APP_CURRENT_REVISION && global.APP_CURRENT_REVISION.version) || global.APP_VERSION || '3.2.1',
             platform: platform,
             activeTab: activeTab,
             online: navigator.onLine !== undefined ? navigator.onLine : true,

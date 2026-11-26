@@ -26804,11 +26804,11 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.11.26-v3.2.0",
-    version: "3.2.0",
-    build: "20261126_01",
-    date: "2026-11-26 13:00",
-    description: "v3.2.0: שדרוג והקשחת המערכת מקצה לקצה (Pass 0-7) — מצב בהיר, ניגודיות משופרת, עזרה (?) בכל חלון, אבטחת גשר האנדרואיד והווידג׳טים, תיקוני שעון Galaxy Watch 8 ו-Electron."
+    code: "REV-2026.11.26-v3.2.1",
+    version: "3.2.1",
+    build: "20261126_02",
+    date: "2026-11-26 13:30",
+    description: "v3.2.1: השלמת 3 מפגשי פיסיקה 2 בשעון Galaxy Watch 8 (שני/רביעי), שיקום אוטומטי של תווית הממוצע ושעות השבוע בשעון, וגיבוי גשר ווידג׳טים 6-פרמטרי."
 };
 window.APP_VERSION = APP_CURRENT_REVISION.version;
 window.APP_CURRENT_REVISION = APP_CURRENT_REVISION;
@@ -31040,8 +31040,8 @@ function syncNativeAndroidWidgets(classData, tasksData) {
                     const classes = (dayObj && !dayObj.isFree && Array.isArray(dayObj.classes)) ? dayObj.classes.map(c => {
                         const [sh, sm] = (c.startTime || '08:30').split(':').map(Number);
                         const [eh, em] = (c.endTime || '10:30').split(':').map(Number);
-                        const isDitched = (typeof window.isSlotPerpetuallyDitched === 'function')
-                            ? Boolean(window.isSlotPerpetuallyDitched(c.courseId, c.type, dIdx, c.startTime))
+                        const isDitched = (typeof window.isCoursePerpetualDitch === 'function')
+                            ? Boolean(window.isCoursePerpetualDitch(c.courseId, c.type))
                             : Boolean(c.isDitched);
                         return {
                             courseId: c.courseId || '',
@@ -31061,15 +31061,26 @@ function syncNativeAndroidWidgets(classData, tasksData) {
                 }
             }
 
-            window.SemesteroWidgetBridge.updateScheduleWidget(
-                weeklySummary,
-                dayStrings[0] || "אין שיעורים מתוזמנים",
-                dayStrings[1] || "אין שיעורים מתוזמנים",
-                dayStrings[2] || "אין שיעורים מתוזמנים",
-                dayStrings[3] || "אין שיעורים מתוזמנים",
-                dayStrings[4] || "אין שיעורים מתוזמנים",
-                JSON.stringify(fullTimetableDays)
-            );
+            try {
+                window.SemesteroWidgetBridge.updateScheduleWidget(
+                    weeklySummary,
+                    dayStrings[0] || "אין שיעורים מתוזמנים",
+                    dayStrings[1] || "אין שיעורים מתוזמנים",
+                    dayStrings[2] || "אין שיעורים מתוזמנים",
+                    dayStrings[3] || "אין שיעורים מתוזמנים",
+                    dayStrings[4] || "אין שיעורים מתוזמנים",
+                    JSON.stringify(fullTimetableDays)
+                );
+            } catch (_schedBridgeErr) {
+                window.SemesteroWidgetBridge.updateScheduleWidget(
+                    weeklySummary,
+                    dayStrings[0] || "אין שיעורים מתוזמנים",
+                    dayStrings[1] || "אין שיעורים מתוזמנים",
+                    dayStrings[2] || "אין שיעורים מתוזמנים",
+                    dayStrings[3] || "אין שיעורים מתוזמנים",
+                    dayStrings[4] || "אין שיעורים מתוזמנים"
+                );
+            }
         }
 
         // 5. Update Finals Runway & GPA Target Widget (clean neutral academic tracking badge)

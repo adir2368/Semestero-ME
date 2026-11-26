@@ -109,4 +109,13 @@ test('P7-12 & Hard-Ban: watch_companion.js guards querySelectorAll and Watch 8 a
     assert(!wearMain.includes('uiautomator') && !phoneMain.includes('uiautomator'), 'No uiautomator usage allowed');
 });
 
-console.log(`\n🎉 ALL ${passed}/12 PASS 7 NATIVE HARDENING CHECKS PASSED (version=${pkg.version})!`);
+test('P7-14 (v3.2.1): Wear Physics 2 Mon/Wed schedule, GPA/hours self-heal & app.js 6-arg widget fallback', () => {
+    assert(wearHelper.includes('טאוב - מדמ\\"ח 1') && wearHelper.includes('פיזיקה 1') && wearHelper.includes('שרמן - חינוך למדע וטכנולוגיה 107'),
+        'WearScheduleHelper must include Monday & Wednesday Physics 2 sessions');
+    assert(wearMain.includes('הצטיינות דיקן') && wearMain.includes('ש״ס השבוע'),
+        'Wear MainActivity must self-heal mojibake gpa_badge and missing sched_total_hours when synced');
+    assert(!appJs.includes('isSlotPerpetuallyDitched'), 'app.js must call isCoursePerpetualDitch, not undefined isSlotPerpetuallyDitched');
+    assert(appJs.includes('catch (_schedBridgeErr)'), 'app.js must fall back to 6-arg updateScheduleWidget for older phone APKs');
+});
+
+console.log(`\n🎉 ALL ${passed}/13 PASS 7 NATIVE HARDENING CHECKS PASSED (version=${pkg.version})!`);

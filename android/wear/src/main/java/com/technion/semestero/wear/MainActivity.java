@@ -441,21 +441,48 @@ public class MainActivity extends Activity implements MessageClient.OnMessageRec
             gpaCurrent = "--";
         }
         String gpaBadge = prefs.getString("gpa_badge", "סמסטרו ME");
-        if (gpaBadge == null || gpaBadge.trim().isEmpty() || isCorruptedText(gpaBadge)) {
+        if (gpaBadge == null || gpaBadge.trim().isEmpty() || gpaBadge.equals("סמסטרו ME") || isCorruptedText(gpaBadge)) {
             gpaBadge = "סמסטרו ME";
+            try {
+                double gpaVal = Double.parseDouble(gpaCurrent.trim());
+                if (gpaVal > 0.0) {
+                    gpaBadge = (gpaVal >= 91.0) ? "👑 הצטיינות נשיא" : (gpaVal >= 85.0 ? "🎖️ הצטיינות דיקן" : "📈 במעקב אקדמי");
+                }
+            } catch (Exception ignored) {}
         }
         adapter.gpaSummaryText = gpaCurrent.equals("--")
             ? "🎓 ממוצע: -- • סמסטרו ME"
             : ("🎓 ממוצע: " + gpaCurrent + " • " + gpaBadge);
 
         String schedHours = prefs.getString("sched_total_hours", "");
+        long lastSyncMs = prefs.getLong("last_sync_timestamp", 0L);
         if (schedHours != null && !schedHours.trim().isEmpty() && !schedHours.startsWith("0") && !isCorruptedText(schedHours)) {
             adapter.schedSummaryText = "📅 " + schedHours;
+        } else if (lastSyncMs > 0L) {
+            int totalMinutes = 0;
+            java.util.Set<String> uniqueCourses = new java.util.HashSet<>();
+            for (int dow = Calendar.SUNDAY; dow <= Calendar.THURSDAY; dow++) {
+                List<WearScheduleHelper.CourseSlot> slots = WearScheduleHelper.getScheduleForDay(this, dow);
+                for (WearScheduleHelper.CourseSlot cs : slots) {
+                    if (cs.isDitched) continue;
+                    totalMinutes += Math.max(0, cs.endMin - cs.startMin);
+                    if (!cs.title.trim().isEmpty()) {
+                        uniqueCourses.add(cs.title.trim());
+                    }
+                }
+            }
+            if (!uniqueCourses.isEmpty() && totalMinutes > 0) {
+                String hoursFormatted = (totalMinutes % 60 == 0)
+                    ? String.valueOf(totalMinutes / 60)
+                    : String.format(Locale.US, "%.1f", totalMinutes / 60.0);
+                adapter.schedSummaryText = "📅 " + uniqueCourses.size() + " קורסים • " + hoursFormatted + " ש״ס השבוע";
+            } else {
+                adapter.schedSummaryText = "📅 ממתין לסנכרון מערכת";
+            }
         } else {
             adapter.schedSummaryText = "📅 ממתין לסנכרון מערכת";
         }
 
-        long lastSyncMs = prefs.getLong("last_sync_timestamp", 0L);
         if (lastSyncMs > 0) {
             SimpleDateFormat sdf = new SimpleDateFormat("dd/MM HH:mm", Locale.getDefault());
             adapter.syncLastTime = "סנכרון אחרון: " + sdf.format(new Date(lastSyncMs));

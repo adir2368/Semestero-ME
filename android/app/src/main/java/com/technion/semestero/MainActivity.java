@@ -455,7 +455,7 @@ public class MainActivity extends BridgeActivity {
                 conn.setConnectTimeout(15000);
                 conn.setReadTimeout(20000);
                 conn.setRequestProperty("Accept", "text/calendar, text/plain, */*");
-                conn.setRequestProperty("User-Agent", "SemesteroME-Android/3.2.0");
+                conn.setRequestProperty("User-Agent", "SemesteroME-Android/3.2.1");
                 conn.setInstanceFollowRedirects(true);
                 int code = conn.getResponseCode();
                 if (code >= 200 && code < 300) {
