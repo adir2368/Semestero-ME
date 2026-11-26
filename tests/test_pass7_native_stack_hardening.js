@@ -116,6 +116,12 @@ test('P7-14 (v3.2.1): Wear Physics 2 Mon/Wed schedule, GPA/hours self-heal & app
         'Wear MainActivity must self-heal mojibake gpa_badge and missing sched_total_hours when synced');
     assert(!appJs.includes('isSlotPerpetuallyDitched'), 'app.js must call isCoursePerpetualDitch, not undefined isSlotPerpetuallyDitched');
     assert(appJs.includes('catch (_schedBridgeErr)'), 'app.js must fall back to 6-arg updateScheduleWidget for older phone APKs');
+    const phoneManifest = fs.readFileSync(path.join(__dirname, '..', 'android', 'app', 'src', 'main', 'AndroidManifest.xml'), 'utf8');
+    const tabletManifest = fs.readFileSync(path.join(__dirname, '..', 'android', 'app', 'src', 'tablet', 'AndroidManifest.xml'), 'utf8');
+    assert(phoneManifest.includes('android.permission.SCHEDULE_EXACT_ALARM') && !phoneManifest.includes('tools:node="remove"'),
+        'Phone AndroidManifest must declare SCHEDULE_EXACT_ALARM without tools:node="remove"');
+    assert(tabletManifest.includes('android.permission.SCHEDULE_EXACT_ALARM') && tabletManifest.includes('tools:node="remove"'),
+        'Tablet AndroidManifest overlay must keep SCHEDULE_EXACT_ALARM tools:node="remove"');
 });
 
 console.log(`\n🎉 ALL ${passed}/13 PASS 7 NATIVE HARDENING CHECKS PASSED (version=${pkg.version})!`);

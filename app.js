@@ -26924,11 +26924,11 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.11.26-v3.2.6",
-    version: "3.2.6",
+    code: "REV-2026.11.26-v3.2.7",
+    version: "3.2.7",
     build: "20261126_04",
     date: "2026-11-26 18:40",
-    description: "v3.2.6: שימור סמסטר 3 פעיל בסנכרון ענן בזמן אמת, תיקון סידור שכבות ההתראות ודיאגרמת הנק״ז, חיבור הווידג׳טים והשעון לנתוני המשתמש החיים וליטוש מלא של מצב בהיר, גיליון הציונים והנוכחות."
+    description: "v3.2.7: שימור סמסטר 3 פעיל בסנכרון ענן בזמן אמת, תיקון סידור שכבות ההתראות ודיאגרמת הנק״ז, חיבור הווידג׳טים והשעון לנתוני המשתמש החיים וליטוש מלא של מצב בהיר, גיליון הציונים והנוכחות."
 };
 window.APP_VERSION = APP_CURRENT_REVISION.version;
 window.APP_CURRENT_REVISION = APP_CURRENT_REVISION;
@@ -32042,25 +32042,35 @@ function scheduleTodayClassTimeouts() {
                     const alarmBody = c.lecturer ? `${alarmLine1}\n👨‍🏫 ${c.lecturer}` : alarmLine1;
                     const alarmLargeBody = `${alarmBody}\n\n📅 הקש לצפייה במערכת השעות השבועית המלאה`;
 
+                    const classNotifPayload = {
+                        id: notifId,
+                        title: alarmTitle,
+                        body: alarmBody,
+                        largeBody: alarmLargeBody,
+                        summaryText: 'סמסטרו ME • תזכורת שיעור',
+                        inboxList: [alarmLine1, c.lecturer ? `👨‍🏫 מרצה/מתרגל: ${c.lecturer}` : '📅 הקש לפתיחת מערכת שעות'],
+                        actionTypeId: 'TIMETABLE_ACTIONS',
+                        channelId: 'semestero_alerts',
+                        schedule: {
+                            at: new Date(reminderTimeMs),
+                            allowWhileIdle: true
+                        },
+                        smallIcon: 'ic_stat_notification',
+                        iconColor: '#38bdf8',
+                        extra: { tab: 'timetable' }
+                    };
                     window.Capacitor.Plugins.LocalNotifications.schedule({
-                        notifications: [{
-                            id: notifId,
-                            title: alarmTitle,
-                            body: alarmBody,
-                            largeBody: alarmLargeBody,
-                            summaryText: 'סמסטרו ME • תזכורת שיעור',
-                            inboxList: [alarmLine1, c.lecturer ? `👨‍🏫 מרצה/מתרגל: ${c.lecturer}` : '📅 הקש לפתיחת מערכת שעות'],
-                            actionTypeId: 'TIMETABLE_ACTIONS',
-                            channelId: 'semestero_alerts',
-                            schedule: {
-                                at: new Date(reminderTimeMs),
-                                allowWhileIdle: true
-                            },
-                            smallIcon: 'ic_stat_notification',
-                            iconColor: '#38bdf8',
-                            extra: { tab: 'timetable' }
-                        }]
-                    }).catch(e => console.warn('[Notifications] Error scheduling native alarm:', e));
+                        notifications: [classNotifPayload]
+                    }).catch(e => {
+                        console.warn('[Notifications] Exact alarm rejected, retrying inexact class reminder:', e);
+                        const fallbackPayload = {
+                            ...classNotifPayload,
+                            schedule: { at: new Date(reminderTimeMs) }
+                        };
+                        return window.Capacitor.Plugins.LocalNotifications.schedule({
+                            notifications: [fallbackPayload]
+                        }).catch(err2 => console.warn('[Notifications] Error scheduling native alarm:', err2));
+                    });
                 });
             }
         }
@@ -32240,23 +32250,33 @@ function scheduleDaily730MorningBriefing() {
     if (isCapacitorPlatform() && window.Capacitor?.Plugins?.LocalNotifications) {
         ensureCapacitorNotificationChannel().then(() => {
             const briefing = generateMorning730BriefingData();
+            const briefingPayload = {
+                id: 73000,
+                title: briefing.title,
+                body: briefing.body,
+                largeBody: briefing.body,
+                summaryText: 'סמסטרו ME • תוכנית בוקר',
+                channelId: 'semestero_alerts',
+                schedule: {
+                    on: { hour: 7, minute: 30 },
+                    allowWhileIdle: true
+                },
+                smallIcon: 'ic_stat_notification',
+                iconColor: '#38bdf8',
+                extra: { tab: briefing.isFinals ? 'calendar' : 'timetable' }
+            };
             window.Capacitor.Plugins.LocalNotifications.schedule({
-                notifications: [{
-                    id: 73000,
-                    title: briefing.title,
-                    body: briefing.body,
-                    largeBody: briefing.body,
-                    summaryText: 'סמסטרו ME • תוכנית בוקר',
-                    channelId: 'semestero_alerts',
-                    schedule: {
-                        on: { hour: 7, minute: 30 },
-                        allowWhileIdle: true
-                    },
-                    smallIcon: 'ic_stat_notification',
-                    iconColor: '#38bdf8',
-                    extra: { tab: briefing.isFinals ? 'calendar' : 'timetable' }
-                }]
-            }).catch(e => console.warn('[Notifications] Error scheduling 7:30 morning briefing:', e));
+                notifications: [briefingPayload]
+            }).catch(e => {
+                console.warn('[Notifications] Exact 7:30 alarm rejected, retrying inexact schedule:', e);
+                const fallbackBriefing = {
+                    ...briefingPayload,
+                    schedule: { on: { hour: 7, minute: 30 } }
+                };
+                return window.Capacitor.Plugins.LocalNotifications.schedule({
+                    notifications: [fallbackBriefing]
+                }).catch(err2 => console.warn('[Notifications] Error scheduling 7:30 morning briefing:', err2));
+            });
         });
     }
 
