@@ -3902,7 +3902,7 @@ const PRELOADED_USER_STATE = (typeof window !== 'undefined' && window.PRELOADED_
           "completed": false
         }
       ],
-      "status": "available",
+      "status": "active",
       "credits": 5,
       "faculty": "הפקולטה להנדסת מכונות",
       "schedule": [
@@ -5334,7 +5334,7 @@ const PRELOADED_USER_STATE = (typeof window !== 'undefined' && window.PRELOADED_
                 "completed": false
               }
             ],
-            "status": "available",
+            "status": "active",
             "credits": 5,
             "faculty": "הפקולטה להנדסת מכונות",
             "schedule": [
@@ -9780,9 +9780,15 @@ function _loadSavedStateImpl() {
         // Personal Winter 2026/2027 (Semester 3) exam dates & CheeseFork schedules for Adir Moshe only
         const isAdirAccount = (window.AuthSync && typeof window.AuthSync.isAdirActive === 'function' && window.AuthSync.isAdirActive());
         if (isAdirAccount) {
+            const ensureSem3Active = (courseObj) => {
+                if (courseObj && !courseObj.grade && (!courseObj.status || courseObj.status === 'available' || courseObj.status === 'locked')) {
+                    courseObj.status = 'active';
+                }
+            };
             if (gameState.courses['114052']) {
                 const c = gameState.courses['114052'];
                 if (!c.tasks) c.tasks = [];
+                ensureSem3Active(c);
                 let exA = c.tasks.find(t => t.id === '114052_ex' || t.title.includes('מועד א'));
                 if (exA) { exA.dueDate = '2027-02-01'; exA.title = "פיסיקה 2 - מועד א'"; }
                 let exB = c.tasks.find(t => t.id === '114052_ex_b' || t.title.includes("מועד ב"));
@@ -9792,6 +9798,7 @@ function _loadSavedStateImpl() {
             if (gameState.courses['034035']) {
                 const c = gameState.courses['034035'];
                 if (!c.tasks) c.tasks = [];
+                ensureSem3Active(c);
                 let exA = c.tasks.find(t => t.id === '034035_ex' || t.title.includes('מועד א'));
                 if (exA) { exA.dueDate = '2027-02-07'; exA.title = "תרמודינמיקה 1 - מועד א'"; }
                 let exB = c.tasks.find(t => t.id === '034035_ex_b' || t.title.includes("מועד ב"));
@@ -9833,7 +9840,7 @@ function _loadSavedStateImpl() {
                     c.name = 'מבוא לחישוב מדעי והנדסי';
                     c.credits = 4;
                     c.semester = 3;
-                    if (c.status !== 'active') c.status = 'active';
+                    ensureSem3Active(c);
                     c.moedA = '2027-02-11';
                     c.moedB = '2027-03-10';
                     if (gameState.courses['00340056']) delete gameState.courses['00340056'];
@@ -9939,6 +9946,7 @@ function _loadSavedStateImpl() {
             if (gameState.courses['034053']) {
                 const c = gameState.courses['034053'];
                 if (!c.tasks) c.tasks = [];
+                ensureSem3Active(c);
                 let exA = c.tasks.find(t => t.id === '034053_ex' || t.title.includes('מועד א'));
                 if (exA) { exA.dueDate = '2027-02-18'; exA.title = "מוצקים 2 - מועד א'"; }
                 let exB = c.tasks.find(t => t.id === '034053_ex_b' || t.title.includes("מועד ב"));
@@ -9948,7 +9956,7 @@ function _loadSavedStateImpl() {
             if (gameState.courses['104228']) {
                 const c = gameState.courses['104228'];
                 if (!c.tasks) c.tasks = [];
-                if (c.status !== 'active') c.status = 'active';
+                ensureSem3Active(c);
                 let exA = c.tasks.find(t => t.id === '104228_ex' || t.title.includes('מועד א'));
                 if (exA) { exA.dueDate = '2027-02-24'; exA.title = "מד\"ח - מועד א'"; }
                 let exB = c.tasks.find(t => t.id === '104228_ex_b' || t.title.includes("מועד ב"));
@@ -26804,11 +26812,11 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.11.26-v3.2.1",
-    version: "3.2.1",
-    build: "20261126_02",
-    date: "2026-11-26 13:30",
-    description: "v3.2.1: השלמת 3 מפגשי פיסיקה 2 בשעון Galaxy Watch 8 (שני/רביעי), שיקום אוטומטי של תווית הממוצע ושעות השבוע בשעון, וגיבוי גשר ווידג׳טים 6-פרמטרי."
+    code: "REV-2026.11.26-v3.2.2",
+    version: "3.2.2",
+    build: "20261126_03",
+    date: "2026-11-26 16:10",
+    description: "v3.2.2: הפעלת 034053 (מוצקים 2), ליטוש ניגודיות מצב בהיר (Light Mode) מלאה בכל המודאלים והטבלאות, תיקון פרסור תאריכי מועדי א/ב במנתח הצפיפות ואיזון כרטיס GPA בווידג׳טים."
 };
 window.APP_VERSION = APP_CURRENT_REVISION.version;
 window.APP_CURRENT_REVISION = APP_CURRENT_REVISION;

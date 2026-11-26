@@ -285,15 +285,20 @@ body.a11y-light-mode {
 }
 
 body.a11y-light-mode .hud-container,
+body.a11y-light-mode .hud-header,
+body.a11y-light-mode .hud-nav-tabs,
+body.a11y-light-mode .nav-tabs-left,
 body.a11y-light-mode .top-nav,
 body.a11y-light-mode .mobile-bottom-nav,
 body.a11y-light-mode .app-footer,
+body.a11y-light-mode .app-global-footer,
 body.a11y-light-mode .settings-header-banner,
 body.a11y-light-mode .settings-card,
 body.a11y-light-mode .settings-control-box,
 body.a11y-light-mode .revision-item,
 body.a11y-light-mode .course-card,
 body.a11y-light-mode .modal-content,
+body.a11y-light-mode .modal-card,
 body.a11y-light-mode .a11y-modal-card,
 body.a11y-light-mode .privacy-modal-card,
 body.a11y-light-mode .privacy-section-block,
@@ -302,7 +307,17 @@ body.a11y-light-mode .bug-report-card-btn,
 body.a11y-light-mode .faq-card,
 body.a11y-light-mode .shortcut-card,
 body.a11y-light-mode .tutorial-hub-card,
-body.a11y-light-mode .sem-dialog-card {
+body.a11y-light-mode .sem-dialog-card,
+body.a11y-light-mode .notion-tasks-container,
+body.a11y-light-mode .exam-gap-runway-card,
+body.a11y-light-mode .finals-calendar-card,
+body.a11y-light-mode .planner-rules-card,
+body.a11y-light-mode .planner-ready-section,
+body.a11y-light-mode .modal-cheesefork-section,
+body.a11y-light-mode .modal-peer-consensus-box,
+body.a11y-light-mode .modal-help-banner,
+body.a11y-light-mode .timetable-header-card,
+body.a11y-light-mode .timetable-sync-bar {
     background: #ffffff !important;
     background-image: none !important;
     color: #0f172a !important;
@@ -310,11 +325,42 @@ body.a11y-light-mode .sem-dialog-card {
     box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08) !important;
 }
 
+body.a11y-light-mode .hud-nav-tabs,
+body.a11y-light-mode .nav-tabs-left,
+body.a11y-light-mode .hud-header::before,
+body.a11y-light-mode .nav-tabs-left::before {
+    background: #e2e8f0 !important;
+    background-image: none !important;
+    border-color: #cbd5e1 !important;
+}
+
+body.a11y-light-mode .hud-nav-tabs .nav-tabs-left .nav-tab,
+body.a11y-light-mode .hud-nav-tabs .nav-tabs-left .nav-tab-btn,
+body.a11y-light-mode .nav-tab {
+    background: #f8fafc !important;
+    color: #334155 !important;
+    border-color: #cbd5e1 !important;
+}
+
+body.a11y-light-mode .hud-nav-tabs .nav-tabs-left .nav-tab.active,
+body.a11y-light-mode .hud-nav-tabs .nav-tabs-left .nav-tab-btn.active,
+body.a11y-light-mode .nav-tab.active {
+    background: #0284c7 !important;
+    color: #ffffff !important;
+    border-color: #0369a1 !important;
+}
+
+body.a11y-light-mode .hud-nav-tabs .nav-tabs-left .nav-tab.active *,
+body.a11y-light-mode .nav-tab.active * {
+    color: #ffffff !important;
+}
+
 body.a11y-light-mode .modal-header,
 body.a11y-light-mode .a11y-header,
 body.a11y-light-mode .privacy-modal-header,
 body.a11y-light-mode .notif-drawer-header,
-body.a11y-light-mode .modal-footer {
+body.a11y-light-mode .modal-footer,
+body.a11y-light-mode .notion-tasks-table th {
     background: #f8fafc !important;
     color: #0f172a !important;
     border-color: #cbd5e1 !important;
@@ -324,34 +370,109 @@ body.a11y-light-mode h1,
 body.a11y-light-mode h2,
 body.a11y-light-mode h3,
 body.a11y-light-mode .settings-card-title,
+body.a11y-light-mode .bug-report-card-btn .btn-title,
 body.a11y-light-mode .revision-item-title,
 body.a11y-light-mode .notif-drawer-title,
 body.a11y-light-mode .a11y-header h2,
 body.a11y-light-mode .privacy-modal-header h2,
-body.a11y-light-mode .sem-dialog-title {
+body.a11y-light-mode .sem-dialog-title,
+body.a11y-light-mode .finals-calendar-title,
+body.a11y-light-mode .modal-help-title,
+body.a11y-light-mode .modal-help-item-text strong,
+body.a11y-light-mode .modal-cheesefork-title {
     color: #0f172a !important;
 }
 
+body.a11y-light-mode .bug-report-card-btn .btn-desc,
+body.a11y-light-mode .modal-help-purpose,
+body.a11y-light-mode .modal-help-item-text span,
+body.a11y-light-mode .planner-rule-row,
+body.a11y-light-mode .planner-rules-note,
 body.a11y-light-mode .hud-stat-label,
 body.a11y-light-mode .revision-item-meta,
 body.a11y-light-mode .a11y-statement-box,
+body.a11y-light-mode .a11y-statement-box *,
 body.a11y-light-mode .notif-drawer-subtitle,
 body.a11y-light-mode .sem-dialog-msg,
 body.a11y-light-mode [style*="color: #cbd5e1"],
+body.a11y-light-mode [style*="color:#cbd5e1"],
 body.a11y-light-mode [style*="color: #94a3b8"],
+body.a11y-light-mode [style*="color:#94a3b8"],
 body.a11y-light-mode [style*="color: #f8fafc"],
+body.a11y-light-mode [style*="color:#f8fafc"],
+body.a11y-light-mode [style*="color: #f1f5f9"],
+body.a11y-light-mode [style*="color:#f1f5f9"],
+body.a11y-light-mode [style*="color: #eef0f5"],
+body.a11y-light-mode [style*="color:#eef0f5"],
+body.a11y-light-mode [style*="color: #a3a9b8"],
+body.a11y-light-mode [style*="color:#a3a9b8"],
+body.a11y-light-mode [style*="color: #e9d5ff"],
+body.a11y-light-mode [style*="color:#e9d5ff"],
 body.a11y-light-mode [style*="color: #ffffff"],
-body.a11y-light-mode [style*="color: #fff"] {
+body.a11y-light-mode [style*="color:#ffffff"],
+body.a11y-light-mode [style*="color: #fff"],
+body.a11y-light-mode [style*="color:#fff"] {
     color: #1e293b !important;
 }
 
+body.a11y-light-mode .a11y-statement-box,
+body.a11y-light-mode .modal-help-item,
+body.a11y-light-mode .planner-rule-row,
+body.a11y-light-mode .modal-schedule-item,
+body.a11y-light-mode .modal-perpetual-ditch-card,
+body.a11y-light-mode .perpetual-mode-pill,
 body.a11y-light-mode [style*="background: #0f172a"],
+body.a11y-light-mode [style*="background:#0f172a"],
 body.a11y-light-mode [style*="background: #0b1120"],
+body.a11y-light-mode [style*="background:#0b1120"],
 body.a11y-light-mode [style*="background: #0b1329"],
+body.a11y-light-mode [style*="background:#0b1329"],
 body.a11y-light-mode [style*="background: rgba(15, 23, 42"],
-body.a11y-light-mode [style*="background: rgba(30, 41, 59"] {
+body.a11y-light-mode [style*="background:rgba(15,23,42"],
+body.a11y-light-mode [style*="background: rgba(26, 30, 40"],
+body.a11y-light-mode [style*="background: rgba(30, 41, 59"],
+body.a11y-light-mode [style*="background:rgba(30,41,59"],
+body.a11y-light-mode [style*="background: rgba(0, 0, 0"],
+body.a11y-light-mode [style*="background:rgba(0,0,0"],
+body.a11y-light-mode [style*="background: rgba(0,0,0"] {
     background: #f8fafc !important;
     border-color: #cbd5e1 !important;
+}
+
+body.a11y-light-mode .perpetual-mode-pill {
+    background: #e2e8f0 !important;
+    color: #0f172a !important;
+    border-color: #94a3b8 !important;
+}
+
+body.a11y-light-mode .perpetual-mode-pill.active {
+    background: #0284c7 !important;
+    color: #ffffff !important;
+    border-color: #0369a1 !important;
+}
+
+body.a11y-light-mode .notion-tasks-table tbody tr:hover {
+    background: #f1f5f9 !important;
+}
+
+body.a11y-light-mode .notion-course-tag.has-course-accent,
+body.a11y-light-mode .cal-event-pill.has-course-accent {
+    background: color-mix(in srgb, var(--course-accent, #38bdf8) 16%, #ffffff) !important;
+    color: #0f172a !important;
+    border-color: color-mix(in srgb, var(--course-accent, #38bdf8) 45%, #cbd5e1) !important;
+}
+
+body.a11y-light-mode .notion-open-peek-btn {
+    background: #e2e8f0 !important;
+    border-color: #94a3b8 !important;
+    color: #0f172a !important;
+    opacity: 1 !important;
+}
+
+body.a11y-light-mode .notion-open-peek-btn:hover {
+    background: #cbd5e1 !important;
+    color: #0f172a !important;
+    border-color: #0284c7 !important;
 }
 
 body.a11y-light-mode .btn-outline,
@@ -359,10 +480,61 @@ body.a11y-light-mode .btn-ghost,
 body.a11y-light-mode .btn-secondary,
 body.a11y-light-mode .a11y-btn,
 body.a11y-light-mode .top-tab-btn,
-body.a11y-light-mode .mobile-nav-item {
+body.a11y-light-mode .mobile-nav-item,
+body.a11y-light-mode .btn-close-help-banner {
     color: #0f172a !important;
     background: #e2e8f0 !important;
     border-color: #94a3b8 !important;
+}
+
+body.a11y-light-mode .modal-help-tip {
+    background: #fef3c7 !important;
+    border-color: #f59e0b !important;
+    color: #78350f !important;
+}
+
+body.a11y-light-mode #btn-settings-open-analytics,
+body.a11y-light-mode #btn-settings-open-site-analytics {
+    color: #0369a1 !important;
+    border-color: #0284c7 !important;
+}
+
+/* v3.2.2 Polish: Calendar Runway/Month Header, Planner Banner, Timetable Generator & Webhook Inputs */
+body.a11y-light-mode .planner-header-banner,
+body.a11y-light-mode .sync-cal-box,
+body.a11y-light-mode .planner-stat-pill {
+    background: #ffffff !important;
+    background-image: none !important;
+    color: #0f172a !important;
+    border-color: #cbd5e1 !important;
+}
+
+body.a11y-light-mode .btn-planner-mode {
+    background: #e2e8f0 !important;
+    color: #334155 !important;
+    border-color: #94a3b8 !important;
+}
+
+body.a11y-light-mode .btn-planner-mode.active {
+    background: #0284c7 !important;
+    color: #ffffff !important;
+    border-color: #0369a1 !important;
+}
+
+body.a11y-light-mode .cal-current-month,
+body.a11y-light-mode .cal-current-month bdi,
+body.a11y-light-mode .runway-title,
+body.a11y-light-mode .runway-subtitle,
+body.a11y-light-mode .setting-label,
+body.a11y-light-mode .setting-label span,
+body.a11y-light-mode .setting-label bdi {
+    color: #0f172a !important;
+}
+
+body.a11y-light-mode .btn-generator-action {
+    background: #f3e8ff !important;
+    color: #6b21a8 !important;
+    border-color: #a855f7 !important;
 }
 
 body.a11y-light-mode .btn-primary,
@@ -380,26 +552,39 @@ body.a11y-light-mode .top-tab-btn.active [style*="color"] {
     color: #ffffff !important;
 }
 
-body.a11y-light-mode input,
-body.a11y-light-mode select,
-body.a11y-light-mode textarea {
+html.a11y-light-mode body.a11y-light-mode input,
+html.a11y-light-mode body.a11y-light-mode select,
+html.a11y-light-mode body.a11y-light-mode textarea,
+html.a11y-light-mode body.a11y-light-mode #input-apps-script-webhook,
+html.a11y-light-mode body.a11y-light-mode .setting-cal-input,
+html.a11y-light-mode body.a11y-light-mode .settings-card input[type="text"],
+html.a11y-light-mode body.a11y-light-mode .settings-card input[type="number"],
+html.a11y-light-mode body.a11y-light-mode .settings-card .modal-input {
     background: #ffffff !important;
     color: #0f172a !important;
     border: 1px solid #94a3b8 !important;
 }
 
-body.a11y-light-mode footer {
+html.a11y-light-mode body.a11y-light-mode footer,
+html.a11y-light-mode body.a11y-light-mode .app-global-footer {
     background: #e2e8f0 !important;
     border-top: 1px solid #cbd5e1 !important;
+    box-shadow: 0 -2px 8px rgba(15, 23, 42, 0.08) !important;
     color: #0f172a !important;
 }
 
-body.a11y-light-mode footer *,
-body.a11y-light-mode footer strong,
-body.a11y-light-mode footer span,
-body.a11y-light-mode .app-version-badge,
+html.a11y-light-mode body.a11y-light-mode footer *,
+html.a11y-light-mode body.a11y-light-mode footer strong,
+html.a11y-light-mode body.a11y-light-mode footer span,
+html.a11y-light-mode body.a11y-light-mode .app-global-footer .footer-linkedin-btn,
+html.a11y-light-mode body.a11y-light-mode .app-version-badge,
 body.a11y-light-mode .a11y-btn span {
     color: #0f172a !important;
+}
+
+html.a11y-light-mode body.a11y-light-mode .app-global-footer .footer-linkedin-btn {
+    color: #0369a1 !important;
+    opacity: 1 !important;
 }
 
 body.a11y-light-mode .a11y-btn.active span {

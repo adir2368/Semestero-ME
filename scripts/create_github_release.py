@@ -17,9 +17,9 @@ ZIP_PATH = os.path.join(ROOT, "Semestero-ME-Windows-x64.zip")
 
 with open(os.path.join(ROOT, "package.json"), "r", encoding="utf-8") as f:
     pkg = json.load(f)
-VERSION = pkg.get("version", "3.2.1")
+VERSION = pkg.get("version", "3.2.2")
 TAG = f"v{VERSION}"
-NAME = f"Semestero ME v{VERSION} - Full Ecosystem Hardening, Watch Physics 2 Schedule & Bridge Parity"
+NAME = f"Semestero ME v{VERSION} - Solids 2 Active, Full Light Mode Contrast Polish & Planner Date Fix"
 
 def get_github_token():
     try:
@@ -109,7 +109,7 @@ def main():
 - **Galaxy Watch 8 (`Wear OS`)**: Prevented Complication short-hour `substring(0, 5)` crash, preserved empty synced weekdays, dynamically resolved weekend next-class previews, restored all 3 Monday/Wednesday Physics 2 (`114052`) sessions in `WearScheduleHelper`, auto-healed mojibake `gpa_badge` & empty weekly schedule hours when synced, aligned Tasks Complication deduplication, and neutralized guest GPA defaults.
 - **Electron & iOS Parity**: Added `will-navigate` navigation guard in `main.js`, included `watch_companion.js` & `widgets.html` offline assets, and synced iOS Capacitor URL/version metadata (`{VERSION}` / build `146`).
 
-### 📦 3. קובצי הפצה (`v{VERSION}`, `versionCode 146`):
+### 📦 3. קובצי הפצה (`v{VERSION}`, `versionCode 147`):
 - פורסמו כל 4 קובצי ההתקנה החתומים (Android Phone, Tablet Clean, Galaxy Watch 8, Windows x64).
 """
 

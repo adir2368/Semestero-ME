@@ -1067,7 +1067,7 @@
           "completed": false
         }
       ],
-      "status": "available",
+      "status": "active",
       "credits": 5,
       "faculty": "הפקולטה להנדסת מכונות",
       "schedule": [
@@ -2519,7 +2519,7 @@
                 "completed": false
               }
             ],
-            "status": "available",
+            "status": "active",
             "credits": 5,
             "faculty": "הפקולטה להנדסת מכונות",
             "schedule": [

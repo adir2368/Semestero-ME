@@ -2694,12 +2694,12 @@
     // --------------------------------------------------------------------------
     const DEFAULT_TECH_EXAM_DATES = {
         // Semester 3 (Winter 2026/2027)
-        '00340053': { moedA: '2027-02-09', moedB: '2027-03-11' }, '034053': { moedA: '2027-02-09', moedB: '2027-03-11' },
-        '00340056': { moedA: '2027-02-14', moedB: '2027-03-16' }, '034056': { moedA: '2027-02-14', moedB: '2027-03-16' },
-        '00340035': { moedA: '2027-02-18', moedB: '2027-03-21' }, '034035': { moedA: '2027-02-18', moedB: '2027-03-21' },
-        '01040228': { moedA: '2027-02-21', moedB: '2027-03-24' }, '104228': { moedA: '2027-02-21', moedB: '2027-03-24' },
-        '01140052': { moedA: '2027-02-23', moedB: '2027-03-28' }, '114052': { moedA: '2027-02-23', moedB: '2027-03-28' },
-        '01140075': { moedA: '2027-02-23', moedB: '2027-03-28' }, '114075': { moedA: '2027-02-23', moedB: '2027-03-28' },
+        '01140052': { moedA: '2027-02-01', moedB: '2027-03-02' }, '114052': { moedA: '2027-02-01', moedB: '2027-03-02' },
+        '01140075': { moedA: '2027-02-01', moedB: '2027-03-02' }, '114075': { moedA: '2027-02-01', moedB: '2027-03-02' },
+        '00340035': { moedA: '2027-02-07', moedB: '2027-03-05' }, '034035': { moedA: '2027-02-07', moedB: '2027-03-05' },
+        '00340056': { moedA: '2027-02-11', moedB: '2027-03-10' }, '034056': { moedA: '2027-02-11', moedB: '2027-03-10' },
+        '00340053': { moedA: '2027-02-18', moedB: '2027-03-18' }, '034053': { moedA: '2027-02-18', moedB: '2027-03-18' },
+        '01040228': { moedA: '2027-02-24', moedB: '2027-03-26' }, '104228': { moedA: '2027-02-24', moedB: '2027-03-26' },
         '00340043': { moedA: '2027-02-26', moedB: '2027-03-30' }, '034043': { moedA: '2027-02-26', moedB: '2027-03-30' },
         // Semester 4 (Spring 2027)
         '00340010': { moedA: '2027-07-04', moedB: '2027-08-05' }, '034010': { moedA: '2027-07-04', moedB: '2027-08-05' },
@@ -2717,13 +2717,13 @@
     function parseExamDateObj(dateStr) {
         if (!dateStr) return null;
         const s = String(dateStr).trim();
-        // Match YYYY-MM-DD
-        const isoMatch = s.match(/(\d{4})-(\d{1,2})-(\d{1,2})/);
+        // Match YYYY-MM-DD (or YYYY/MM/DD)
+        const isoMatch = s.match(/^(\d{4})[\/.\-](\d{1,2})[\/.\-](\d{1,2})/);
         if (isoMatch) {
             return new Date(Number(isoMatch[1]), Number(isoMatch[2]) - 1, Number(isoMatch[3]), 9, 0, 0);
         }
-        // Match DD/MM/YYYY or DD.MM.YYYY
-        const ilMatch = s.match(/(\d{1,2})[\/.](\d{1,2})[\/.](\d{2,4})/);
+        // Match DD/MM/YYYY, DD.MM.YYYY, or DD-MM-YYYY (Technion SAP / CheeseFork format)
+        const ilMatch = s.match(/^(\d{1,2})[\/.\-](\d{1,2})[\/.\-](\d{2,4})/);
         if (ilMatch) {
             let yr = Number(ilMatch[3]);
             if (yr < 100) yr += 2000;

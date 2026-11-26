@@ -1610,10 +1610,10 @@
                         ${pending.length > 0 ? `
                         <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px;">
                             <span style="font-size: 0.74rem; background: rgba(56, 189, 248, 0.14); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.35); padding: 2px 8px; border-radius: 6px; font-weight: 700;">
-                                ⚡ זמן צפייה משוער ב-1.5x: ~${hours15x} שעות
+                                ⚡ זמן צפייה משוער ב-<bdi dir="ltr">1.5x</bdi>: <bdi dir="ltr">~${hours15x}</bdi> שעות
                             </span>
                             <span style="font-size: 0.74rem; background: rgba(255, 255, 255, 0.06); color: #94a3b8; border: 1px solid rgba(255, 255, 255, 0.12); padding: 2px 8px; border-radius: 6px;">
-                                ⏱️ במהירות רגילה (1.0x): ~${hours1x} שעות
+                                ⏱️ במהירות רגילה (<bdi dir="ltr">1.0x</bdi>): <bdi dir="ltr">~${hours1x}</bdi> שעות
                             </span>
                         </div>
                         ` : ''}
