@@ -10091,6 +10091,10 @@ function _loadSavedStateImpl() {
                             });
                         });
                     }
+                    if (window.MoodleSync && typeof window.MoodleSync.deduplicateCourseTasks === 'function' && gameState.courses['034053']) {
+                        const dedupRes = window.MoodleSync.deduplicateCourseTasks(gameState.courses['034053']);
+                        if (dedupRes && dedupRes.removedCount > 0) changed = true;
+                    }
                     return changed;
                 };
             }
@@ -19056,19 +19060,7 @@ function renderNotionTasksTable() {
         const isPinned = !!t.pinned;
         const isMiluim = !!(t.isMiluim || t.miluim);
         const miluimBadgeHtml = isMiluim ? `<span class="miluim-task-badge">🪖 מילואים</span>` : '';
-        const cleanCourseForDual = String(c.code || '').replace(/^0+/, '');
-        const taskTitleStr = String(t.title || '');
-        const isDualHw034053 = cleanCourseForDual === '34053' && t.type !== 'exam' && (/\bhw\s*\d+/i.test(taskTitleStr) || /הגשת\s*פתרון|פתרון\s*תרגיל/i.test(taskTitleStr));
-        let hwModeBadgeHtml = '';
-        if (isDualHw034053) {
-            const hasQuizPart = /\bhw\s*\d+/i.test(taskTitleStr);
-            const hasWrittenPart = /הגשת\s*פתרון|פתרון\s*תרגיל/i.test(taskTitleStr);
-            if (hasQuizPart && !hasWrittenPart) {
-                hwModeBadgeHtml = `<span style="font-size:0.64rem;font-weight:700;padding:1px 6px;border-radius:4px;background:rgba(56,189,248,0.14);color:#7dd3fc;border:1px solid rgba(56,189,248,0.32);white-space:nowrap;">שאלון מקוון</span>`;
-            } else if (hasWrittenPart && !hasQuizPart) {
-                hwModeBadgeHtml = `<span style="font-size:0.64rem;font-weight:700;padding:1px 6px;border-radius:4px;background:rgba(168,85,247,0.16);color:#e9d5ff;border:1px solid rgba(168,85,247,0.35);white-space:nowrap;">הגשה בכתב</span>`;
-            }
-        }
+        const hwModeBadgeHtml = '';
         const pinBtnHtml = `
             <button type="button" class="notion-pin-task-btn ${isPinned ? 'is-pinned' : ''}" title="${isPinned ? 'בטל נעיצה' : 'נעץ משימה בראש הרשימה'}" data-action="toggle-pin">📌</button>
         `;
@@ -26932,11 +26924,11 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.11.26-v3.2.5",
-    version: "3.2.5",
+    code: "REV-2026.11.26-v3.2.6",
+    version: "3.2.6",
     build: "20261126_04",
     date: "2026-11-26 18:40",
-    description: "v3.2.5: שימור סמסטר 3 פעיל בסנכרון ענן בזמן אמת, תיקון סידור שכבות ההתראות ודיאגרמת הנק״ז, חיבור הווידג׳טים והשעון לנתוני המשתמש החיים וליטוש מלא של מצב בהיר, גיליון הציונים והנוכחות."
+    description: "v3.2.6: שימור סמסטר 3 פעיל בסנכרון ענן בזמן אמת, תיקון סידור שכבות ההתראות ודיאגרמת הנק״ז, חיבור הווידג׳טים והשעון לנתוני המשתמש החיים וליטוש מלא של מצב בהיר, גיליון הציונים והנוכחות."
 };
 window.APP_VERSION = APP_CURRENT_REVISION.version;
 window.APP_CURRENT_REVISION = APP_CURRENT_REVISION;
@@ -33183,9 +33175,9 @@ const COURSE_HOMEWORK_POLICIES = {
         name: 'מוצקים 2',
         totalSheets: 12,
         bestN: 10,
-        isDualComponent: true,
+        isDualComponent: false,
         policyLabel: 'הטובים מ-12: 10',
-        weightLabel: '10% מגן / חובה',
+        weightLabel: '10% מגן / חובה (מאוחד: שאלון + בכתב)',
         sheetNames: {
             1: 'מאמצים ושיווי משקל (Stress Tensor)',
             2: 'מאמצים ראשיים ומוהר (Principal Stresses)',

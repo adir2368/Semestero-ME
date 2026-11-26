@@ -371,7 +371,13 @@ async function run() {
                 }
                 const modalHw = document.getElementById('modal-hw-policy-section');
                 const sheetCards = modalHw ? modalHw.querySelectorAll('.hw-sheet-card') : [];
-                const dualRows = modalHw ? modalHw.querySelectorAll('.hw-component-row') : [];
+                const compRows = modalHw ? modalHw.querySelectorAll('.hw-component-row') : [];
+                const solidsMerged = window.MoodleSync ? window.MoodleSync.areTasksDuplicates(
+                    { id: 'task_moodle_29212', title: 'HW 4 - Strain & Displacements 1', dueDate: '2026-12-06 23:59', moodleUid: '29212@moodle26.technion.ac.il', moodleEventId: '29212' },
+                    { id: 'task_moodle_12818', title: 'הגשת פתרון תרגיל בית 4', dueDate: '2026-12-07 23:59', moodleUid: '12818@moodle26.technion.ac.il', moodleEventId: '12818' },
+                    'מכניקת מוצקים 2מ',
+                    '034053'
+                ) : false;
 
                 return {
                     hasStrip: !!strip,
@@ -379,7 +385,7 @@ async function run() {
                     hasSolidsCapsule: !!solidsCapsule,
                     hasModalHw: !!modalHw && modalHw.style.display !== 'none',
                     sheetCardsCount: sheetCards.length,
-                    hasDualComponents: dualRows.length >= 24
+                    isUnifiedSingle: compRows.length === 12 && solidsMerged
                 };
             })()`);
             assert(result.hasStrip, 'notion-hw-policy-strip element missing');
@@ -387,7 +393,7 @@ async function run() {
             assert(result.hasSolidsCapsule, 'Solid Mechanics 2 capsule missing');
             assert(result.hasModalHw, 'modal-hw-policy-section missing in course modal');
             assert.strictEqual(result.sheetCardsCount, 12, 'Must render exactly 12 sheets for 034053');
-            assert(result.hasDualComponents, 'Must render dual components for 034053');
+            assert(result.isUnifiedSingle, 'Must render unified single homework task cards for 034053');
         });
 
         // Test 13: Degree Planner Mobile Ergonomics & Visual Collapse

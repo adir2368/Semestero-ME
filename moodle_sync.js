@@ -602,6 +602,12 @@
             return t;
         },
 
+        isUnifiedSolidsCourse(courseName, courseCode) {
+            const normCode = String(courseCode || '').replace(/^0+/, '');
+            if (normCode === '34053' || normCode === '340053') return true;
+            return /(מוצקים\s*2|solid\s*mechanics\s*2|034053)/i.test(String(courseName || ''));
+        },
+
         isMiluimTask(task) {
             if (!task) return false;
             if (task.isMiluim === true || task.miluim === true) return true;
@@ -614,7 +620,17 @@
             if (!task) return keys;
             const mId = this.extractMoodleId(task);
             if (mId) keys.push(`moodle_event:${mId}`);
+            if (Array.isArray(task.mergedMoodleEventIds)) {
+                task.mergedMoodleEventIds.forEach(evId => {
+                    if (evId) keys.push(`moodle_event:${evId}`);
+                });
+            }
             if (task.moodleUid) keys.push(`moodle_uid:${task.moodleUid}`);
+            if (Array.isArray(task.mergedMoodleUids)) {
+                task.mergedMoodleUids.forEach(uid => {
+                    if (uid) keys.push(`moodle_uid:${uid}`);
+                });
+            }
             if (task.moodleUrl) keys.push(`moodle_url:${task.moodleUrl.trim().toLowerCase()}`);
             if (task.id) keys.push(`task_id:${task.id}`);
             
@@ -628,6 +644,13 @@
                     if (strippedCode && strippedCode !== rawCode) {
                         keys.push(`canonical:${strippedCode}:${cToken}`);
                     }
+                    if (this.isUnifiedSolidsCourse('', rawCode)) {
+                        const m = cToken.match(/^(hw|hw_digital|hw_written)_(\d+)$/);
+                        if (m) {
+                            keys.push(`canonical:034053:hw_${m[2]}`);
+                            keys.push(`canonical:34053:hw_${m[2]}`);
+                        }
+                    }
                 }
                 const norm = this.normalizeTaskTitle(title, rawCode);
                 if (norm && rawCode) {
@@ -640,7 +663,7 @@
                     keys.push(`miluim_norm:${norm}`);
                 }
             }
-            return keys;
+            return [...new Set(keys)];
         },
 
         markTaskCompletedInRegistry(courseCode, task) {
@@ -775,8 +798,8 @@
             for (let i = 0; i < course.tasks.length; i++) {
                 const existing = course.tasks[i];
                 if (!existing || existing.id === manualTask.id) continue;
-                if (this.areTasksDuplicates(existing, manualTask, course.name)) {
-                    course.tasks[i] = this.mergeTaskPair(existing, manualTask);
+                if (this.areTasksDuplicates(existing, manualTask, course.name, course.code)) {
+                    course.tasks[i] = this.mergeTaskPair(existing, manualTask, course.name, course.code);
                     course.tasks[i].source = 'manual';
                     if (manualTask.title) course.tasks[i].title = manualTask.title;
                     if (manualTask.dueDate) {
@@ -841,7 +864,7 @@
             return 'hw';
         },
 
-        areTasksDuplicates(t1, t2, courseName) {
+        areTasksDuplicates(t1, t2, courseName, courseCode) {
             if (!t1 || !t2) return false;
             if (t1.id && t2.id && t1.id === t2.id) return true;
 
@@ -852,21 +875,43 @@
                 return title1 === title2 && t1.id === t2.id;
             }
 
-            // Never merge explicit dual-component digital quiz (_dig) with written solution (_written / הגשת פתרון)
             const id1 = String(t1.id || '');
             const id2 = String(t2.id || '');
+            const ev1 = t1.moodleEventId ? String(t1.moodleEventId).trim() : ((t1.moodleUid && /^(\d+)@/.test(String(t1.moodleUid))) ? String(t1.moodleUid).match(/^(\d+)@/)[1] : null);
+            const ev2 = t2.moodleEventId ? String(t2.moodleEventId).trim() : ((t2.moodleUid && /^(\d+)@/.test(String(t2.moodleUid))) ? String(t2.moodleUid).match(/^(\d+)@/)[1] : null);
+
+            if ((t1.moodleUid && Array.isArray(t2.mergedMoodleUids) && t2.mergedMoodleUids.includes(t1.moodleUid)) ||
+                (t2.moodleUid && Array.isArray(t1.mergedMoodleUids) && t1.mergedMoodleUids.includes(t2.moodleUid))) {
+                return true;
+            }
+            if ((ev1 && Array.isArray(t2.mergedMoodleEventIds) && t2.mergedMoodleEventIds.includes(ev1)) ||
+                (ev2 && Array.isArray(t1.mergedMoodleEventIds) && t1.mergedMoodleEventIds.includes(ev2))) {
+                return true;
+            }
+
+            const isSolids2 = this.isUnifiedSolidsCourse(courseName, courseCode) || /034053|34053/.test(id1) || /034053|34053/.test(id2);
+            const cToken1 = this.getCanonicalTaskToken(title1, courseName);
+            const cToken2 = this.getCanonicalTaskToken(title2, courseName);
+
+            // Solids 2 (034053): unify electronic quiz & written solution upload for the same sheet into ONE task
+            if (isSolids2 && cToken1 && cToken2) {
+                const s1 = cToken1.match(/^(hw|hw_digital|hw_written)_(\d+)$/);
+                const s2 = cToken2.match(/^(hw|hw_digital|hw_written)_(\d+)$/);
+                if (s1 && s2 && s1[2] === s2[2]) {
+                    return true;
+                }
+            }
+
+            // Never merge explicit dual-component digital quiz (_dig) with written solution (_written / הגשת פתרון) for other courses
             const isDig1 = /_dig$/i.test(id1) || /(שאלון|דיגיטלי|מקוון)/i.test(title1);
             const isDig2 = /_dig$/i.test(id2) || /(שאלון|דיגיטלי|מקוון)/i.test(title2);
             const isWrit1 = /_written$/i.test(id1) || /(הגשת\s*פתרון|פתרון\s*בכתב|סריקה)/i.test(title1);
             const isWrit2 = /_written$/i.test(id2) || /(הגשת\s*פתרון|פתרון\s*בכתב|סריקה)/i.test(title2);
-            if ((isDig1 && !isWrit1 && isWrit2 && !isDig2) || (isDig2 && !isWrit2 && isWrit1 && !isDig1)) {
+            if (!isSolids2 && ((isDig1 && !isWrit1 && isWrit2 && !isDig2) || (isDig2 && !isWrit2 && isWrit1 && !isDig1))) {
                 return false;
             }
 
-            // If both tasks carry distinct explicit Moodle calendar event IDs, keep them separate
-            // (e.g. 034053 dual deliverables on Sheet 4: quiz 29212 vs written upload 12818)
-            const ev1 = t1.moodleEventId ? String(t1.moodleEventId).trim() : ((t1.moodleUid && /^(\d+)@/.test(String(t1.moodleUid))) ? String(t1.moodleUid).match(/^(\d+)@/)[1] : null);
-            const ev2 = t2.moodleEventId ? String(t2.moodleEventId).trim() : ((t2.moodleUid && /^(\d+)@/.test(String(t2.moodleUid))) ? String(t2.moodleUid).match(/^(\d+)@/)[1] : null);
+            // If both tasks carry distinct explicit Moodle calendar event IDs, keep them separate unless unified above
             if (ev1 && ev2 && ev1 !== ev2) return false;
 
             // Check Moodle IDs (numeric event ID or assignment ID)
@@ -897,12 +942,10 @@
             }
 
             // Check Canonical Sequence / Category Token (e.g. hw_1, lab_2, quiz_1, exam_a)
-            const cToken1 = this.getCanonicalTaskToken(title1, courseName);
-            const cToken2 = this.getCanonicalTaskToken(title2, courseName);
             if (cToken1 && cToken2) {
                 if (cToken1 === cToken2) return true;
                 // Merge generic hw_N with hw_written_N (e.g. "HW 3 - Rotation Transformation" vs "HW 3 - Rotation Transformation (הגשת פתרון תרגיל בית 3)"),
-                // while strictly preserving dual-component hw_digital_N vs hw_N / hw_written_N separation!
+                // while strictly preserving dual-component hw_digital_N vs hw_N / hw_written_N separation for non-unified courses!
                 const m1 = cToken1.match(/^(hw|hw_written)_(\d+)$/);
                 const m2 = cToken2.match(/^(hw|hw_written)_(\d+)$/);
                 if (m1 && m2 && m1[2] === m2[2]) {
@@ -927,16 +970,25 @@
             return false;
         },
 
-        mergeTaskPair(primary, secondary) {
+        mergeTaskPair(primary, secondary, courseName, courseCode) {
             // Keep most detailed/up-to-date title, strictly prioritizing explicit manual task titles
             const t1 = primary.title || '';
             const t2 = secondary.title || '';
+            const isSolids2 = this.isUnifiedSolidsCourse(courseName, courseCode) ||
+                              /034053|34053/.test(String(primary.id || '')) ||
+                              /034053|34053/.test(String(secondary.id || ''));
             let chosenTitle = t1;
             const isManual1 = primary.source === 'manual' || (primary.id && String(primary.id).startsWith('task-'));
             const isManual2 = secondary.source === 'manual' || (secondary.id && String(secondary.id).startsWith('task-'));
+            const isGenericSub1 = /^(שאלון\s*hw|הגשת\s*פתרון|פתרון\s*בכתב)/i.test(t1.trim());
+            const isGenericSub2 = /^(שאלון\s*hw|הגשת\s*פתרון|פתרון\s*בכתב)/i.test(t2.trim());
             if (isManual2 && !isManual1) {
                 chosenTitle = t2;
             } else if (isManual1 && !isManual2) {
+                chosenTitle = t1;
+            } else if (isSolids2 && !isGenericSub2 && isGenericSub1) {
+                chosenTitle = t2;
+            } else if (isSolids2 && !isGenericSub1 && isGenericSub2) {
                 chosenTitle = t1;
             } else if (t2.length > t1.length && !t1.includes('בונוס') && !t1.includes('(העתק)')) {
                 chosenTitle = t2;
@@ -947,7 +999,8 @@
             // Date resolution:
             // 1. Explicit manual date wins over seed/Moodle
             // 2. Live Moodle ICS date ALWAYS wins over stale preloaded seed dates (e.g. 034053_hw3)
-            // 3. Otherwise prefer non-empty date or later extension date
+            // 3. For unified Solids 2 (034053) deliverables, prefer the EARLIER valid live deadline so neither part is missed
+            // 4. Otherwise prefer non-empty date or later extension date
             let chosenDate = primary.dueDate || secondary.dueDate || '';
             let chosenTimestamp = primary.dueTimestamp || secondary.dueTimestamp || 0;
             if (primary.dueDate && secondary.dueDate && primary.dueDate !== secondary.dueDate) {
@@ -971,7 +1024,15 @@
                 } else {
                     const d1 = Date.parse(primary.dueDate) || 0;
                     const d2 = Date.parse(secondary.dueDate) || 0;
-                    if (d2 > d1) {
+                    if (isSolids2 && d1 > 0 && d2 > 0) {
+                        if (d1 <= d2) {
+                            chosenDate = primary.dueDate;
+                            chosenTimestamp = primary.dueTimestamp || d1;
+                        } else {
+                            chosenDate = secondary.dueDate;
+                            chosenTimestamp = secondary.dueTimestamp || d2;
+                        }
+                    } else if (d2 > d1) {
                         chosenDate = secondary.dueDate;
                         chosenTimestamp = secondary.dueTimestamp || d2;
                     } else {
@@ -1032,6 +1093,21 @@
                 });
             }
 
+            const mergedUids = [...new Set([
+                ...(Array.isArray(primary.mergedMoodleUids) ? primary.mergedMoodleUids : []),
+                ...(Array.isArray(secondary.mergedMoodleUids) ? secondary.mergedMoodleUids : []),
+                primary.moodleUid,
+                secondary.moodleUid
+            ].filter(Boolean))];
+            const mergedEventIds = [...new Set([
+                ...(Array.isArray(primary.mergedMoodleEventIds) ? primary.mergedMoodleEventIds : []),
+                ...(Array.isArray(secondary.mergedMoodleEventIds) ? secondary.mergedMoodleEventIds : []),
+                primary.moodleEventId,
+                secondary.moodleEventId,
+                this.extractMoodleId(primary),
+                this.extractMoodleId(secondary)
+            ].filter(Boolean).map(String))];
+
             const merged = {
                 id: primary.id || secondary.id,
                 title: chosenTitle,
@@ -1047,6 +1123,8 @@
                 ...(maxGradeTime > 0 ? { gradeUpdatedAt: maxGradeTime } : {}),
                 moodleEventId: primary.moodleEventId || secondary.moodleEventId || this.extractMoodleId(secondary) || this.extractMoodleId(primary),
                 moodleUid: primary.moodleUid || secondary.moodleUid,
+                ...(mergedUids.length > 1 ? { mergedMoodleUids: mergedUids } : {}),
+                ...(mergedEventIds.length > 1 ? { mergedMoodleEventIds: mergedEventIds } : {}),
                 moodleUrl: primary.moodleUrl || secondary.moodleUrl,
                 source: (primary.source === 'manual' || secondary.source === 'manual') ? 'manual' : (primary.source || secondary.source || (this.extractMoodleId(primary) ? 'moodle' : undefined)),
                 isMiluim: !!(primary.isMiluim || primary.miluim || secondary.isMiluim || secondary.miluim || this.isMiluimTask(primary) || this.isMiluimTask(secondary)),
@@ -1108,14 +1186,14 @@
 
                 let mergedIndex = -1;
                 for (let j = 0; j < deduped.length; j++) {
-                    if (this.areTasksDuplicates(deduped[j], candidate, course.name)) {
+                    if (this.areTasksDuplicates(deduped[j], candidate, course.name, course.code)) {
                         mergedIndex = j;
                         break;
                     }
                 }
 
                 if (mergedIndex >= 0) {
-                    deduped[mergedIndex] = this.mergeTaskPair(deduped[mergedIndex], candidate);
+                    deduped[mergedIndex] = this.mergeTaskPair(deduped[mergedIndex], candidate, course.name, course.code);
                     removedCount++;
                 } else {
                     deduped.push(candidate);
@@ -1462,13 +1540,14 @@
                 // Find ALL existing tasks matching this incoming Moodle event (handling duplicates & title edits)
                 const matchingIndices = [];
                 for (let j = 0; j < targetCourse.tasks.length; j++) {
-                    if (this.areTasksDuplicates(targetCourse.tasks[j], incomingMock, targetCourse.name)) {
+                    if (this.areTasksDuplicates(targetCourse.tasks[j], incomingMock, targetCourse.name, targetCourse.code)) {
                         matchingIndices.push(j);
                     }
                 }
 
                 if (matchingIndices.length > 0) {
                     const primary = targetCourse.tasks[matchingIndices[0]];
+                    const isUnifiedSolids = this.isUnifiedSolidsCourse(targetCourse.name, targetCourse.code);
                     let modified = false;
 
                     // Preserve completion across Moodle/manual sources UNLESS user explicitly reset status after last completion
@@ -1483,17 +1562,34 @@
                         this.markTaskCompletedInRegistry(targetCourse.code, primary);
                     }
 
-                    // Update due date if changed or postponed by lecturer
-                    if (primary.dueDate !== formattedDate || primary.dueTimestamp !== dueDateObj.getTime()) {
-                        primary.dueDate = formattedDate;
-                        primary.dueTimestamp = dueDateObj.getTime();
-                        modified = true;
-                    }
+                    // Link both Moodle deliverables into mergedMoodleUids / mergedMoodleEventIds when unified (e.g. 034053)
+                    if (isUnifiedSolids && ((primary.moodleUid && primary.moodleUid !== uid) || (primary.moodleEventId && String(primary.moodleEventId) !== String(eventId)))) {
+                        primary.mergedMoodleUids = [...new Set([...(primary.mergedMoodleUids || []), primary.moodleUid, uid].filter(Boolean))];
+                        primary.mergedMoodleEventIds = [...new Set([...(primary.mergedMoodleEventIds || []), primary.moodleEventId, eventId].filter(Boolean).map(String))];
+                        const incomingTs = dueDateObj.getTime();
+                        const primaryTs = primary.dueTimestamp || (primary.dueDate ? Date.parse(primary.dueDate) : 0) || 0;
+                        if (!primary.dueDate || (incomingTs > 0 && (primaryTs === 0 || incomingTs < primaryTs))) {
+                            primary.dueDate = formattedDate;
+                            primary.dueTimestamp = incomingTs;
+                            modified = true;
+                        }
+                        if (cleanTitle && /^(שאלון\s*hw|הגשת\s*פתרון|פתרון\s*בכתב)/i.test(String(primary.title || '').trim()) && !/^(שאלון\s*hw|הגשת\s*פתרון|פתרון\s*בכתב)/i.test(cleanTitle)) {
+                            primary.title = cleanTitle;
+                            modified = true;
+                        }
+                    } else {
+                        // Update due date if changed or postponed by lecturer
+                        if (primary.dueDate !== formattedDate || primary.dueTimestamp !== dueDateObj.getTime()) {
+                            primary.dueDate = formattedDate;
+                            primary.dueTimestamp = dueDateObj.getTime();
+                            modified = true;
+                        }
 
-                    // Update title if changed or clarified by lecturer
-                    if (primary.title !== cleanTitle && cleanTitle) {
-                        primary.title = cleanTitle;
-                        modified = true;
+                        // Update title if changed or clarified by lecturer
+                        if (primary.title !== cleanTitle && cleanTitle) {
+                            primary.title = cleanTitle;
+                            modified = true;
+                        }
                     }
 
                     if (moodleUrl && primary.moodleUrl !== moodleUrl) {
@@ -1501,8 +1597,8 @@
                         modified = true;
                     }
 
-                    primary.moodleUid = uid;
-                    primary.moodleEventId = eventId;
+                    if (!primary.moodleUid) primary.moodleUid = uid;
+                    if (!primary.moodleEventId) primary.moodleEventId = eventId;
                     primary.source = 'moodle';
                     if (this.isMiluimTask(primary) || this.isMiluimTask(incomingMock)) {
                         primary.isMiluim = true;
