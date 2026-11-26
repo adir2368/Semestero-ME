@@ -789,3 +789,15 @@ html.a11y-light-mode body.a11y-light-mode .reminder-chip.upcoming .reminder-urge
     color: #0369a1 !important;
     border-color: #7dd3fc !important;
 }
+
+html.a11y-light-mode body.a11y-light-mode .grade-sheet-tool-btn:not(.primary):not(.analytics-back-btn) {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    border-color: #cbd5e1 !important;
+}
+
+html.a11y-light-mode body.a11y-light-mode .grade-sheet-tool-btn.toggle-sim {
+    background: #f3e8ff !important;
+    color: #581c87 !important;
+    border-color: #c084fc !important;
+}

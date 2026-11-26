@@ -10031,13 +10031,13 @@ function _loadSavedStateImpl() {
                     const isAdirNow = (window.AuthSync && typeof window.AuthSync.isAdirActive === 'function' && window.AuthSync.isAdirActive());
                     if (!isAdirNow || typeof gameState === 'undefined' || !gameState || !gameState.courses) return false;
                     let changed = false;
-                    ['114052', '034035', '034056', '034053', '104228', '03940805'].forEach(code => {
+                    ['114052', '034035', '034056', '034053', '104228', '03940805', '3940805'].forEach(code => {
                         const c = gameState.courses[code];
                         if (c && !c.grade && (!c.status || c.status === 'available' || c.status === 'locked')) {
                             c.status = 'active';
                             changed = true;
                         }
-                        if (c && code === '03940805' && c.name !== 'חינוך גופני - יוגה') {
+                        if (c && (code === '03940805' || code === '3940805') && c.name !== 'חינוך גופני - יוגה') {
                             c.name = 'חינוך גופני - יוגה';
                             c.type = 'sports';
                             changed = true;
@@ -10047,7 +10047,7 @@ function _loadSavedStateImpl() {
                         gameState.degreePlan.forEach(sem => {
                             if (!sem || !Array.isArray(sem.courses)) return;
                             sem.courses.forEach(item => {
-                                if (item && item.code === '03940805') {
+                                if (item && (item.code === '03940805' || item.code === '3940805')) {
                                     if (item.name !== 'חינוך גופני - יוגה') {
                                         item.name = 'חינוך גופני - יוגה';
                                         changed = true;
@@ -10074,7 +10074,7 @@ function _loadSavedStateImpl() {
                     }
                     if (gameState.attendance && Array.isArray(gameState.attendance.records)) {
                         gameState.attendance.records.forEach(rec => {
-                            if (rec && String(rec.courseId) === '03940805') {
+                            if (rec && (String(rec.courseId) === '03940805' || String(rec.courseId) === '3940805')) {
                                 if (rec.courseName !== 'חינוך גופני - יוגה') { rec.courseName = 'חינוך גופני - יוגה'; changed = true; }
                                 if (rec.room !== 'מרכז הספורט') { rec.room = 'מרכז הספורט'; changed = true; }
                             }
@@ -21294,7 +21294,7 @@ window.PanoptoTracker = {
         };
     },
 
-    openModal() {
+    openModal(opts = {}) {
         if (!(opts && opts.standalone === true) && window.AttendanceHub && typeof window.AttendanceHub.openModal === 'function') {
             window.AttendanceHub.openModal('catchup');
             return;
@@ -26921,11 +26921,11 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.11.26-v3.2.3",
-    version: "3.2.3",
+    code: "REV-2026.11.26-v3.2.4",
+    version: "3.2.4",
     build: "20261126_04",
     date: "2026-11-26 18:40",
-    description: "v3.2.3: שימור סמסטר 3 פעיל בסנכרון ענן בזמן אמת, תיקון סידור שכבות ההתראות ודיאגרמת הנק״ז, חיבור הווידג׳טים והשעון לנתוני המשתמש החיים וליטוש מלא של מצב בהיר, גיליון הציונים והנוכחות."
+    description: "v3.2.4: שימור סמסטר 3 פעיל בסנכרון ענן בזמן אמת, תיקון סידור שכבות ההתראות ודיאגרמת הנק״ז, חיבור הווידג׳טים והשעון לנתוני המשתמש החיים וליטוש מלא של מצב בהיר, גיליון הציונים והנוכחות."
 };
 window.APP_VERSION = APP_CURRENT_REVISION.version;
 window.APP_CURRENT_REVISION = APP_CURRENT_REVISION;

@@ -11,7 +11,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
-    <link rel="manifest" href="manifest.json?v=3.2.3">
+    <link rel="manifest" href="manifest.json?v=3.2.4">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;500;600;700;800;900&family=Rubik:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -894,7 +894,7 @@
     <!-- Top Navigation Bar -->
     <header class="tecme-navbar">
         <a href="index.html" class="tecme-brand-wrap" title="חזרה לאפליקציה הראשית">
-            <img src="icon-192.png?v=3.2.3" alt="Semestero ME Logo" class="tecme-brand-logo">
+            <img src="icon-192.png?v=3.2.4" alt="Semestero ME Logo" class="tecme-brand-logo">
             <div class="tecme-brand-title">
                 <h1>Semestero Widgets</h1>
                 <span>recommended · vibrant</span>
@@ -1745,7 +1745,7 @@
                     return `
                         <div class="tecme-task-row ${isDone ? 'is-done' : ''}" data-task-id="${safeId}">
                             <div class="tecme-task-left">
-                                <span class="tecme-task-pill ${escHtml(t.pillClass || 'normal')}">${escHtml(t.pill)}</span>
+                                <span class="tecme-task-pill ${escHtml(t.pillClass || 'normal')}" dir="ltr">${escHtml(t.pill)}</span>
                                 <div class="tecme-task-content">
                                     <span class="tecme-task-name">${escHtml(t.name)}</span>
                                     <span class="tecme-task-course">${escHtml(t.course || t.details)}</span>
@@ -1761,12 +1761,12 @@
                 upNextMEl.innerHTML = `
                     <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px;">
                         <span style="font-size: 0.82rem; font-weight: 800; color: #fff;">${currentPhase === 'finals' ? 'בחינות קרובות' : 'מטלות קרובות'}</span>
-                        <span style="font-size: 0.74rem; color: var(--text-muted); font-weight: 600;">${currentPhase === 'finals' ? 'Finals · day 4' : '3 more this week'}</span>
+                        <span dir="ltr" style="font-size: 0.74rem; color: var(--text-muted); font-weight: 600;">${currentPhase === 'finals' ? 'Finals · day 4' : '3 more this week'}</span>
                     </div>
                     <div class="tecme-checklist" style="margin: 6px 0;">
                         ${itemsHtml}
                     </div>
-                    <div class="tecme-s-footer" style="padding-top: 4px;">${escHtml(data.termWeek)}</div>
+                    <div class="tecme-s-footer" dir="ltr" style="padding-top: 4px;">${escHtml(data.termWeek)}</div>
                 `;
                 upNextMEl.querySelectorAll('.tecme-task-row[data-task-id]').forEach(row => {
                     row.addEventListener('click', (e) => toggleTask(row.getAttribute('data-task-id'), e));
@@ -1810,7 +1810,7 @@
                     return `
                         <div class="tecme-task-row ${isDone ? 'is-done' : ''}" data-task-id="${safeId}">
                             <div class="tecme-task-left">
-                                <span class="tecme-task-pill ${escHtml(t.pillClass || 'normal')}">${escHtml(t.pill)}</span>
+                                <span class="tecme-task-pill ${escHtml(t.pillClass || 'normal')}" dir="ltr">${escHtml(t.pill)}</span>
                                 <div class="tecme-task-content">
                                     <span class="tecme-task-name">${escHtml(t.name)}</span>
                                     <span class="tecme-task-course">${escHtml(t.course || t.details)}</span>
@@ -1829,21 +1829,21 @@
                 upNextLEl.innerHTML = `
                     <div>
                         <div class="tecme-m-header">
-                            <div class="tecme-m-title">${escHtml(headerTitle)}</div>
-                            <div class="tecme-sem-badge">${escHtml(data.semesterName)}</div>
+                            <div class="tecme-m-title" dir="ltr">${escHtml(headerTitle)}</div>
+                            <div class="tecme-sem-badge" dir="ltr">${escHtml(data.semesterName)}</div>
                         </div>
-                        <div class="tecme-m-sub">${escHtml(headerSub)}</div>
+                        <div class="tecme-m-sub" dir="ltr">${escHtml(headerSub)}</div>
 
                         <div class="tecme-checklist">
                             ${fullListHtml}
                         </div>
 
-                        <div class="tecme-l-more">1 more in Semestero ME</div>
+                        <div class="tecme-l-more" dir="ltr">1 more in Semestero ME</div>
                     </div>
 
-                    <div class="tecme-l-footer-bar">
-                        <span>🗓️ Next test: <strong class="test-title">${escHtml(data.nextExam.courseName)} · Moed A</strong></span>
-                        <span>in ${escHtml(data.nextExam.daysLeft)} days</span>
+                    <div class="tecme-l-footer-bar" dir="ltr">
+                        <span dir="ltr">🗓️ Next test: <strong class="test-title"><bdi dir="rtl">${escHtml(data.nextExam.courseName)}</bdi> · Moed A</strong></span>
+                        <span dir="ltr">in ${escHtml(data.nextExam.daysLeft)} days</span>
                     </div>
                 `;
                 upNextLEl.querySelectorAll('.tecme-task-row[data-task-id]').forEach(row => {
