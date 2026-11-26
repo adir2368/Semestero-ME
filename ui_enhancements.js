@@ -2438,16 +2438,34 @@
                 }
             });
 
+            if (typeof ResizeObserver !== 'undefined') {
+                containers.forEach((container) => {
+                    if (container._uiMotionResizeObserver) return;
+                    const ro = new ResizeObserver(() => {
+                        this.syncSlidingPill(container, false);
+                    });
+                    ro.observe(container);
+                    container.querySelectorAll('.nav-tab').forEach((tab) => ro.observe(tab));
+                    container._uiMotionResizeObserver = ro;
+                });
+            }
+
             if (!window._uiMotionResizeBound) {
                 window._uiMotionResizeBound = true;
                 let resizeRaf = null;
+                let resizeSettleTimer = null;
                 const onResize = () => {
-                    if (resizeRaf) return;
-                    const sched = typeof requestAnimationFrame === 'function' ? requestAnimationFrame : (cb) => setTimeout(cb, 16);
-                    resizeRaf = sched(() => {
-                        resizeRaf = null;
+                    if (!resizeRaf) {
+                        const sched = typeof requestAnimationFrame === 'function' ? requestAnimationFrame : (cb) => setTimeout(cb, 16);
+                        resizeRaf = sched(() => {
+                            resizeRaf = null;
+                            document.querySelectorAll('.nav-tabs-left').forEach((c) => this.syncSlidingPill(c, false));
+                        });
+                    }
+                    if (resizeSettleTimer) clearTimeout(resizeSettleTimer);
+                    resizeSettleTimer = setTimeout(() => {
                         document.querySelectorAll('.nav-tabs-left').forEach((c) => this.syncSlidingPill(c, false));
-                    });
+                    }, 120);
                 };
                 window.addEventListener('resize', onResize);
                 if (document.fonts && document.fonts.ready && typeof document.fonts.ready.then === 'function') {

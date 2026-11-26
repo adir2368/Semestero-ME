@@ -2154,6 +2154,9 @@
 
         // Force UI re-render across all application modules
         refreshAllAppViews() {
+            if (typeof window !== 'undefined' && typeof window.normalizeAdirActiveSemesterState === 'function') {
+                window.normalizeAdirActiveSemesterState();
+            }
             if (typeof window !== 'undefined' && typeof window.restoreNotionFilterPreferences === 'function') {
                 window.restoreNotionFilterPreferences(true);
             }
@@ -2168,8 +2171,12 @@
                 if (typeof renderTodayTimetableBanner === 'function') renderTodayTimetableBanner();
                 if (typeof updateNotificationBadge === 'function') updateNotificationBadge();
             }
-            if (typeof DegreePlanner !== 'undefined' && DegreePlanner.renderDegreePlanner) {
-                DegreePlanner.renderDegreePlanner();
+            if (typeof DegreePlanner !== 'undefined') {
+                if (typeof DegreePlanner.initPlannerState === 'function') DegreePlanner.initPlannerState();
+                if (typeof DegreePlanner.renderDegreePlanner === 'function') DegreePlanner.renderDegreePlanner();
+            }
+            if (typeof window !== 'undefined' && window.AttendanceHub && typeof window.AttendanceHub.loadFromGameState === 'function') {
+                window.AttendanceHub.loadFromGameState();
             }
         },
 

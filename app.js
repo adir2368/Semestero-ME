@@ -4380,7 +4380,7 @@ const PRELOADED_USER_STATE = (typeof window !== 'undefined' && window.PRELOADED_
     },
     "03940805": {
       "code": "03940805",
-      "name": "חינוך גופני - אתלטיקה קלה / יוגה",
+      "name": "חינוך גופני - יוגה",
       "type": "sports",
       "moedA": null,
       "moedB": null,
@@ -5812,7 +5812,7 @@ const PRELOADED_USER_STATE = (typeof window !== 'undefined' && window.PRELOADED_
           },
           "03940805": {
             "code": "03940805",
-            "name": "חינוך גופני - אתלטיקה קלה / יוגה",
+            "name": "חינוך גופני - יוגה",
             "type": "sports",
             "moedA": null,
             "moedB": null,
@@ -8870,10 +8870,10 @@ const CHEESEFORK_SEMESTER_SCHEDULE = {
             classes: [
                 {
                     courseId: "03940805",
-                    courseName: "חינוך גופני - אתלטיקה קלה",
+                    courseName: "חינוך גופני - יוגה",
                     type: "יוגה 24",
                     lecturer: "שלומית בן-איש",
-                    room: "חינוך גופני - אתלטיקה קלה",
+                    room: "מרכז הספורט",
                     startTime: "07:30",
                     endTime: "09:00",
                     duration: "שעה וחצי",
@@ -8960,8 +8960,8 @@ const AUTHENTIC_TIMETABLE_METADATA = {
     '340056_3_14:30':   { room: 'הנדסה כימית 1', lecturer: 'ד\"ר דניאל הקסנר' },
 
     // Thursday (חמישי - dayIndex 4)
-    '03940805_4_07:30': { room: 'חינוך גופני - אתלטיקה קלה', lecturer: 'שלומית בן-איש' },
-    '3940805_4_07:30':  { room: 'חינוך גופני - אתלטיקה קלה', lecturer: 'שלומית בן-איש' },
+    '03940805_4_07:30': { room: 'מרכז הספורט', lecturer: 'שלומית בן-איש' },
+    '3940805_4_07:30':  { room: 'מרכז הספורט', lecturer: 'שלומית בן-איש' },
     '104228_4_10:30':   { room: 'הנדסה כימית 1', lecturer: 'ד\"ר רועי בר און' },
     '01040228_4_10:30': { room: 'הנדסה כימית 1', lecturer: 'ד\"ר רועי בר און' },
     '0104228_4_10:30':  { room: 'הנדסה כימית 1', lecturer: 'ד\"ר רועי בר און' },
@@ -10000,7 +10000,8 @@ function _loadSavedStateImpl() {
             }
             if (gameState.courses['03940805']) {
                 const c = gameState.courses['03940805'];
-                c.name = 'חינוך גופני - אתלטיקה קלה / יוגה';
+                ensureSem3Active(c);
+                c.name = 'חינוך גופני - יוגה';
                 c.type = 'sports';
                 // Sports courses have no assignments, but do have a final exam
                 if (c.tasks) {
@@ -10023,6 +10024,64 @@ function _loadSavedStateImpl() {
             // 035044 CAD course was removed from curriculum and no longer exists - purge it
             if (gameState.courses && gameState.courses['035044']) {
                 delete gameState.courses['035044'];
+            }
+
+            if (typeof window !== 'undefined') {
+                window.normalizeAdirActiveSemesterState = function() {
+                    const isAdirNow = (window.AuthSync && typeof window.AuthSync.isAdirActive === 'function' && window.AuthSync.isAdirActive());
+                    if (!isAdirNow || typeof gameState === 'undefined' || !gameState || !gameState.courses) return false;
+                    let changed = false;
+                    ['114052', '034035', '034056', '034053', '104228', '03940805'].forEach(code => {
+                        const c = gameState.courses[code];
+                        if (c && !c.grade && (!c.status || c.status === 'available' || c.status === 'locked')) {
+                            c.status = 'active';
+                            changed = true;
+                        }
+                        if (c && code === '03940805' && c.name !== 'חינוך גופני - יוגה') {
+                            c.name = 'חינוך גופני - יוגה';
+                            c.type = 'sports';
+                            changed = true;
+                        }
+                    });
+                    if (Array.isArray(gameState.degreePlan)) {
+                        gameState.degreePlan.forEach(sem => {
+                            if (!sem || !Array.isArray(sem.courses)) return;
+                            sem.courses.forEach(item => {
+                                if (item && item.code === '03940805') {
+                                    if (item.name !== 'חינוך גופני - יוגה') {
+                                        item.name = 'חינוך גופני - יוגה';
+                                        changed = true;
+                                    }
+                                    if (item.type !== 'sports') { item.type = 'sports'; changed = true; }
+                                    if (item.list !== 'SPORTS') { item.list = 'SPORTS'; changed = true; }
+                                    if (!item.selectedClub) {
+                                        item.selectedClub = 'יוגה 24';
+                                        item.selectedClubId = 'yoga_24';
+                                        item.scheduleSlot = {
+                                            id: 'yoga_24',
+                                            day: 'חמישי',
+                                            time: '07:30 - 09:00',
+                                            dayIndex: 4,
+                                            startTime: '07:30',
+                                            endTime: '09:00',
+                                            room: 'מרכז הספורט'
+                                        };
+                                        changed = true;
+                                    }
+                                }
+                            });
+                        });
+                    }
+                    if (gameState.attendance && Array.isArray(gameState.attendance.records)) {
+                        gameState.attendance.records.forEach(rec => {
+                            if (rec && String(rec.courseId) === '03940805') {
+                                if (rec.courseName !== 'חינוך גופני - יוגה') { rec.courseName = 'חינוך גופני - יוגה'; changed = true; }
+                                if (rec.room !== 'מרכז הספורט') { rec.room = 'מרכז הספורט'; changed = true; }
+                            }
+                        });
+                    }
+                    return changed;
+                };
             }
 
             // Synchronize pastExamsBank for Semester 3
@@ -15519,13 +15578,49 @@ function openCourseDetails(code) {
         const isPerpetual = ditchMode !== 'none';
         const resUrls = (typeof getCourseResourceUrls === 'function') ? getCourseResourceUrls(course.code) : { panoptoUrl: '#', pangeaUrl: '#' };
 
-        const hasSchedule = !isMasteredCourse && Array.isArray(course.schedule) && course.schedule.length > 0;
         const hasSyllabus = Boolean(course.syllabus);
 
         let scheduleItemsHtml = "";
-        if (hasSchedule) {
-            scheduleItemsHtml = course.schedule.map(s => {
-                const roomInfo = (s.building || s.room) ? `• ${s.building ? s.building : ''}${(s.building && s.room) ? ' ' : ''}${s.room ? ('חדר ' + s.room) : ''}` : '';
+        const activeSched = (!isMasteredCourse && typeof getActiveTimetableSchedule === 'function') ? getActiveTimetableSchedule() : null;
+        const activeMatchedSlots = [];
+        if (activeSched && Array.isArray(activeSched.days)) {
+            const hebDays = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'];
+            activeSched.days.forEach(d => {
+                if (!d || !Array.isArray(d.classes)) return;
+                d.classes.forEach(cls => {
+                    if (!cls) return;
+                    const clsClean = String(cls.courseId || cls.courseCode || '').replace(/\D/g, '').replace(/^0+/, '');
+                    if (clsClean && clsClean === cleanCode) {
+                        activeMatchedSlots.push({
+                            day: hebDays[Number(d.dayIndex)] || d.name || '',
+                            hours: `${cls.startTime || ''} - ${cls.endTime || ''}`.trim(),
+                            type: String(cls.type || 'שיעור').replace(/\s*\d+.*$/, '').trim() || (cls.type || 'שיעור'),
+                            group: (String(cls.type || '').match(/(\d+)/) || [])[1] || cls.group || '',
+                            room: cls.room || '',
+                            lecturer: cls.lecturer || ''
+                        });
+                    }
+                });
+            });
+        }
+        const effectiveScheduleList = (!isMasteredCourse && Array.isArray(course.schedule) && course.schedule.length > 0)
+            ? course.schedule.map((s, idx) => {
+                const copy = Object.assign({}, s);
+                const match = activeMatchedSlots.find(m => m.day === copy.day && m.hours === copy.hours) || activeMatchedSlots[idx] || null;
+                if (match) {
+                    if (!copy.room && !copy.building && match.room) copy.room = match.room;
+                    if (!copy.lecturer && match.lecturer) copy.lecturer = match.lecturer;
+                    if (!copy.group && match.group) copy.group = match.group;
+                }
+                return copy;
+            })
+            : activeMatchedSlots;
+        const hasEffectiveSchedule = !isMasteredCourse && effectiveScheduleList.length > 0;
+        if (hasEffectiveSchedule) {
+            scheduleItemsHtml = effectiveScheduleList.map(s => {
+                const rawRoom = String(s.room || '').trim();
+                const roomLabel = (rawRoom && rawRoom !== 'חדר לא הוגדר') ? rawRoom : '';
+                const roomInfo = (s.building || roomLabel) ? `• ${s.building ? s.building : ''}${(s.building && roomLabel) ? ' ' : ''}${roomLabel}` : '';
                 const isSlotPerpetual = (typeof isCoursePerpetualDitch === 'function') && isCoursePerpetualDitch(course.code, s.type);
                 return `
                 <div class="modal-schedule-item ${isSlotPerpetual ? 'is-perpetual-slot' : ''}">
@@ -15618,7 +15713,7 @@ function openCourseDetails(code) {
         let scheduleStatusNotice = "";
         if (isMasteredCourse) {
             scheduleStatusNotice = `<div style="font-size: 0.78rem; color: #94a3b8; padding: 4px 0 8px;">הקורס הושלם בסמסטר קודם. לביקורות סטודנטים, דירוגי הוראה והיסטוגרמות ציונים ב-CheeseFork לחץ על הכפתור למעלה.</div>`;
-        } else if (!hasSchedule) {
+        } else if (!hasEffectiveSchedule) {
             scheduleStatusNotice = `<div style="font-size: 0.78rem; color: #94a3b8; padding: 4px 0 8px;">לוח שעות רשמי טרם פורסם לקורס זה בסמסטר חורף תשפ״ז. לעיון בסילבוס, ביקורות סטודנטים עדכניות והיסטוגרמות ציונים לחץ על הכפתור למעלה.</div>`;
         }
 
@@ -15787,7 +15882,7 @@ function openCourseDetails(code) {
                 ${bottleneckBannerHtml}
                 ${perpetualDitchBoxHtml}
                 ${magenShieldCardHtml}
-                ${hasSchedule ? `<div class="modal-cheesefork-grid">${scheduleItemsHtml}</div>` : scheduleStatusNotice}
+                ${hasEffectiveSchedule ? `<div class="modal-cheesefork-grid">${scheduleItemsHtml}</div>` : scheduleStatusNotice}
                 ${examsHtml}
                 ${buildCourseOfficeHoursCardHtml(course)}
                 ${moodleSyllabusHtml}
@@ -18950,6 +19045,19 @@ function renderNotionTasksTable() {
         const isPinned = !!t.pinned;
         const isMiluim = !!(t.isMiluim || t.miluim);
         const miluimBadgeHtml = isMiluim ? `<span class="miluim-task-badge">🪖 מילואים</span>` : '';
+        const cleanCourseForDual = String(c.code || '').replace(/^0+/, '');
+        const taskTitleStr = String(t.title || '');
+        const isDualHw034053 = cleanCourseForDual === '34053' && t.type !== 'exam' && (/\bhw\s*\d+/i.test(taskTitleStr) || /הגשת\s*פתרון|פתרון\s*תרגיל/i.test(taskTitleStr));
+        let hwModeBadgeHtml = '';
+        if (isDualHw034053) {
+            const hasQuizPart = /\bhw\s*\d+/i.test(taskTitleStr);
+            const hasWrittenPart = /הגשת\s*פתרון|פתרון\s*תרגיל/i.test(taskTitleStr);
+            if (hasQuizPart && !hasWrittenPart) {
+                hwModeBadgeHtml = `<span style="font-size:0.64rem;font-weight:700;padding:1px 6px;border-radius:4px;background:rgba(56,189,248,0.14);color:#7dd3fc;border:1px solid rgba(56,189,248,0.32);white-space:nowrap;">שאלון מקוון</span>`;
+            } else if (hasWrittenPart && !hasQuizPart) {
+                hwModeBadgeHtml = `<span style="font-size:0.64rem;font-weight:700;padding:1px 6px;border-radius:4px;background:rgba(168,85,247,0.16);color:#e9d5ff;border:1px solid rgba(168,85,247,0.35);white-space:nowrap;">הגשה בכתב</span>`;
+            }
+        }
         const pinBtnHtml = `
             <button type="button" class="notion-pin-task-btn ${isPinned ? 'is-pinned' : ''}" title="${isPinned ? 'בטל נעיצה' : 'נעץ משימה בראש הרשימה'}" data-action="toggle-pin">📌</button>
         `;
@@ -19020,6 +19128,7 @@ function renderNotionTasksTable() {
                             ${pinBtnHtml}
                             <span class="notion-course-tag">
                                 ${taskBadgeHtml}
+                                ${hwModeBadgeHtml}
                                 ${miluimBadgeHtml}
                                 <span class="notion-title-editable" contenteditable="true" spellcheck="false" title="לחץ לעריכת שם המשימה">${escapeHtml(t.title || '')}</span>
                             </span>
@@ -26812,11 +26921,11 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.11.26-v3.2.2",
-    version: "3.2.2",
-    build: "20261126_03",
-    date: "2026-11-26 16:10",
-    description: "v3.2.2: הפעלת 034053 (מוצקים 2), ליטוש ניגודיות מצב בהיר (Light Mode) מלאה בכל המודאלים והטבלאות, תיקון פרסור תאריכי מועדי א/ב במנתח הצפיפות ואיזון כרטיס GPA בווידג׳טים."
+    code: "REV-2026.11.26-v3.2.3",
+    version: "3.2.3",
+    build: "20261126_04",
+    date: "2026-11-26 18:40",
+    description: "v3.2.3: שימור סמסטר 3 פעיל בסנכרון ענן בזמן אמת, תיקון סידור שכבות ההתראות ודיאגרמת הנק״ז, חיבור הווידג׳טים והשעון לנתוני המשתמש החיים וליטוש מלא של מצב בהיר, גיליון הציונים והנוכחות."
 };
 window.APP_VERSION = APP_CURRENT_REVISION.version;
 window.APP_CURRENT_REVISION = APP_CURRENT_REVISION;
@@ -28155,7 +28264,7 @@ window.renderAnalyticsCharts = function() {
     let activeCredits = 0;
     activeCourses.forEach(c => activeCredits += (Number(c.credits) || 0));
 
-    const remainingCredits = Math.max(0, totalDegreeCredits - earnedCredits);
+    const remainingCredits = Math.max(0, totalDegreeCredits - earnedCredits - activeCredits);
     const cumulativeGpa = gradedCredits > 0 ? (weightedSum / gradedCredits) : (gameState.gpa || 0);
 
     // 1. Update KPI Summary Cards
@@ -29857,9 +29966,9 @@ function renderTimetableGrid() {
                         <a href="${escapeHtml(resUrls.pangeaUrl)}" data-tt-action="open-pangea" data-pangea-url="${escapeHtml(resUrls.pangeaUrl)}" data-course-name="${escapeHtml(c.courseName || '')}" target="_blank" rel="noopener noreferrer" class="btn-attendance-action btn-perpetual-pangea">📖 פנגיאה</a>
                     </div>
                 ` : `
-                    <div class="attendance-card-actions">
+                <div class="attendance-card-actions">
                         <button type="button" class="btn-attendance-action ${attStatus === 'attended' ? 'is-attended' : ''}" onclick="window.handleTimetableAttendance(this, ${day.dayIndex}, ${origIdx}, 'attended')" title="סמן נוכחות (שבוע ${selectedWeek})">${attStatus === 'attended' ? '✓ נוכחתי' : '✓ הייתי'}</button>
-                        <button type="button" class="btn-attendance-action ${attStatus === 'missed' ? 'is-missed' : ''}" onclick="window.handleTimetableAttendance(this, ${day.dayIndex}, ${origIdx}, 'missed')" title="סמן הוחסר (שבוע ${selectedWeek})">${attStatus === 'missed' ? '✗ הוחסר' : '✗ החסרתי'}</button>
+                        <button type="button" class="btn-attendance-action ${attStatus === 'missed' ? 'is-missed' : ''}" onclick="window.handleTimetableAttendance(this, ${day.dayIndex}, ${origIdx}, 'missed')" title="סמן הוחסר (שבוע ${selectedWeek})">${attStatus === 'missed' ? '✗ החסרתי' : '✗ החסרתי'}</button>
                     </div>
                 `}
             `;
@@ -33327,13 +33436,21 @@ function getCourseHomeworkStatus(courseCode) {
         if (policy.isDualComponent) {
             digitalTask = matchingTasks.find(t => {
                 const title = String(t.title || '').toLowerCase();
-                return /(שאלון|דיגיטלי|מקוון|quiz|hw\s*\d+|stress|tensor|principle)/i.test(title) && !/(הגשת\s*פתרון|פתרון\s*בכתב|סריקה)/i.test(title);
+                return /(שאלון|דיגיטלי|מקוון|quiz|hw\s*\d+|stress|tensor|principle|strain|rotation)/i.test(title) && !/(הגשת\s*פתרון|פתרון\s*בכתב|סריקה)/i.test(title);
             }) || matchingTasks.find(t => !/(הגשת\s*פתרון|פתרון\s*בכתב|סריקה)/i.test(t.title || '')) || null;
 
             writtenTask = matchingTasks.find(t => {
                 const title = String(t.title || '').toLowerCase();
                 return /(הגשת\s*פתרון|פתרון\s*בכתב|סריקה|upload|פתרון\s*תרגיל)/i.test(title);
             }) || null;
+
+            // Merged single Moodle item covering both HW sheet & written solution upload (e.g. "HW 1 - Stress Tensor (הגשת פתרון תרגיל בית 1)")
+            if (!digitalTask && writtenTask && matchingTasks.length === 1) {
+                const combinedTitle = String(writtenTask.title || '');
+                if (/\bhw\s*\d+/i.test(combinedTitle) && /(הגשת\s*פתרון|פתרון\s*תרגיל)/i.test(combinedTitle)) {
+                    digitalTask = writtenTask;
+                }
+            }
         } else {
             singleTask = pickPrimarySheetTask(matchingTasks);
         }
@@ -33543,6 +33660,9 @@ function renderNotionHomeworkPolicyStrip() {
         if (hwStatus.bestNAverage !== null) {
             metaExtra += ` &bull; <strong style="color: #38bdf8;" title="ממוצע ${Math.min(hwStatus.bestN, hwStatus.gradedCount)} הגיליונות הגבוהים ביותר (ממוצע גולמי ${hwStatus.rawAverage})">ממוצע ש״ב: ${hwStatus.bestNAverage}</strong>`;
         }
+        if (hwStatus.submittedCount > 0) {
+            metaExtra += ` &bull; <strong style="color: #60a5fa;">${hwStatus.submittedCount} הוגשו 🔵</strong>`;
+        }
         if (hwStatus.inProgressCount > 0) {
             metaExtra += ` &bull; <strong style="color: #eab308;">${hwStatus.inProgressCount} בתהליך 🟡</strong>`;
         }
@@ -33709,7 +33829,7 @@ function renderCourseModalHomeworkPolicy(course) {
             const digBtnText = digDone ? 'הסתיים 🟢' : (digSub ? 'הוגש 🔵' : 'סמן כהוגש');
             const digRawUrl = sheet.digitalTask && (sheet.digitalTask.moodleUrl || (typeof resolveDirectMoodleTaskUrl === 'function' ? resolveDirectMoodleTaskUrl(course.code, sheet.digitalTask) : ''));
             const digLink = digRawUrl
-                ? `<a href="javascript:void(0)" onclick="if (window.openExternalUrlOrBrowser) window.openExternalUrlOrBrowser('${digRawUrl}', '_blank');" class="hw-link-btn" title="פתח שאלון במודל">מודל ↗</a>`
+                ? `<a href="#" role="button" onclick="event.preventDefault(); if (window.openExternalUrlOrBrowser) window.openExternalUrlOrBrowser('${digRawUrl}', '_blank');" class="hw-link-btn" title="פתח שאלון במודל">מודל ↗</a>`
                 : '';
 
             // Part B: Written Solution Upload
@@ -33720,7 +33840,7 @@ function renderCourseModalHomeworkPolicy(course) {
             const writBtnText = writDone ? 'הסתיים 🟢' : (writSub ? 'הוגש 🔵' : 'סמן כהוגש');
             const writRawUrl = sheet.writtenTask && (sheet.writtenTask.moodleUrl || (typeof resolveDirectMoodleTaskUrl === 'function' ? resolveDirectMoodleTaskUrl(course.code, sheet.writtenTask) : ''));
             const writLink = writRawUrl
-                ? `<a href="javascript:void(0)" onclick="if (window.openExternalUrlOrBrowser) window.openExternalUrlOrBrowser('${writRawUrl}', '_blank');" class="hw-link-btn" title="פתח במודל">מודל ↗</a>`
+                ? `<a href="#" role="button" onclick="event.preventDefault(); if (window.openExternalUrlOrBrowser) window.openExternalUrlOrBrowser('${writRawUrl}', '_blank');" class="hw-link-btn" title="פתח במודל">מודל ↗</a>`
                 : '';
 
             componentsHtml = `
@@ -33768,7 +33888,7 @@ function renderCourseModalHomeworkPolicy(course) {
             const sBtnText = sDone ? 'הסתיים 🟢' : (sSub ? 'הוגש 🔵' : 'סמן כהוגש');
             const sRawUrl = sheet.singleTask && (sheet.singleTask.moodleUrl || (typeof resolveDirectMoodleTaskUrl === 'function' ? resolveDirectMoodleTaskUrl(course.code, sheet.singleTask) : ''));
             const sLink = sRawUrl
-                ? `<a href="javascript:void(0)" onclick="if (window.openExternalUrlOrBrowser) window.openExternalUrlOrBrowser('${sRawUrl}', '_blank');" class="hw-link-btn" title="פתח במודל">מודל ↗</a>`
+                ? `<a href="#" role="button" onclick="event.preventDefault(); if (window.openExternalUrlOrBrowser) window.openExternalUrlOrBrowser('${sRawUrl}', '_blank');" class="hw-link-btn" title="פתח במודל">מודל ↗</a>`
                 : '';
             const singleDisplayTitle = formatSheetTaskDisplayTitle(sheet.index, sheet.name, sheet.singleTask ? sheet.singleTask.title : '');
             const singleTooltip = sheet.singleTask ? singleDisplayTitle : (hasDistinctTopic ? sheet.name : 'טרם נפתחה מטלה במודל');

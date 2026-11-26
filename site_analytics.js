@@ -280,7 +280,7 @@
                 };
                 const [telRes, usersRes] = await Promise.all([
                     fetch(`${SUPABASE_URL}/rest/v1/user_states?user_id=eq.${TELEMETRY_USER_ID}&select=user_id,state_json`, { headers }),
-                    fetch(`${SUPABASE_URL}/rest/v1/user_states?user_id=not.like.__*&select=user_id,user_name,user_email,updated_at`, { headers })
+                    fetch(`${SUPABASE_URL}/rest/v1/user_states?user_id=neq.${TELEMETRY_USER_ID}&select=user_id,user_name,user_email,updated_at`, { headers })
                 ]);
 
                 if (telRes.ok) {
@@ -295,7 +295,10 @@
                 }
 
                 if (usersRes.ok) {
-                    const studentRows = await usersRes.json();
+                    const rawRows = await usersRes.json();
+                    const studentRows = Array.isArray(rawRows)
+                        ? rawRows.filter(r => r && r.user_id && !String(r.user_id).startsWith('__'))
+                        : [];
                     this.stats.registeredUsersCount = studentRows.length;
                     this.stats.registeredUsers = studentRows.map(r => ({
                         id: r.user_id,
@@ -385,7 +388,9 @@
                     `;
                 }).join('');
             } else {
-                usersListHtml = '<div style="text-align: center; padding: 20px; color: #64748b;">טוען רשימת משתמשים...</div>';
+                usersListHtml = this.stats.isLoading
+                    ? '<div style="text-align: center; padding: 20px; color: #64748b;">טוען רשימת משתמשים...</div>'
+                    : '<div style="text-align: center; padding: 20px; color: #64748b;">לא נמצאו משתמשים רשומים בענן.</div>';
             }
 
             container.innerHTML = `

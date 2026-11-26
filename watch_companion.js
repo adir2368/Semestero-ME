@@ -61,7 +61,7 @@
             { title: "מבוא לחישוב מדעי והנדסי", time: "14:30 - 17:30", startMin: 870, endMin: 1050, room: "הנדסה כימית 1", lecturer: "ד\"ר דניאל הקסנר", type: "הרצאה 10" }
         ],
         4: [ // יום חמישי
-            { title: "חינוך גופני - אתלטיקה קלה", time: "07:30 - 08:30", startMin: 450, endMin: 510, room: "חינוך גופני - אתלטיקה קלה", lecturer: "שלומית בן-איש", type: "יוגה 24" },
+            { title: "חינוך גופני - יוגה", time: "07:30 - 09:00", startMin: 450, endMin: 540, room: "מרכז הספורט", lecturer: "שלומית בן-איש", type: "יוגה 24" },
             { title: "משוואות דיפרנציאליות חלקיות מ'", time: "10:30 - 12:30", startMin: 630, endMin: 750, room: "הנדסה כימית 1", lecturer: "ד\"ר רועי בר און", type: "הרצאה 20" },
             { title: "מכניקת מוצקים 2מ'", time: "12:30 - 14:30", startMin: 750, endMin: 870, room: "אולמן 205", lecturer: "מר יובל בר-רצון", type: "תרגול 21" }
         ],
@@ -179,8 +179,39 @@
     resetIdleTimer();
 
     // 4. Data Extraction & Real-Time Schedule Resolution
+    function getAuthenticatedWatchState() {
+        const openerState = (window.opener && window.opener.gameState && window.opener.gameState.courses) ? window.opener.gameState : null;
+        if (openerState) return { state: openerState, isAuth: true };
+        if (window.gameState && window.gameState.courses) return { state: window.gameState, isAuth: true };
+
+        let uid = 'guest';
+        let hasProof = false;
+        try {
+            uid = (localStorage.getItem('ast_logged_in_user') || 'guest').trim();
+            hasProof = !!localStorage.getItem('ast_auth_verified_v3');
+        } catch (e) {}
+
+        const isAuth = Boolean(uid && uid !== 'guest' && hasProof);
+        if (isAuth) {
+            try {
+                const primaryKey = uid === 'adir_moshe' ? 'academic_skill_tree_save' : ('ast_user_state_' + uid);
+                const raw = localStorage.getItem(primaryKey) || localStorage.getItem('ast_user_state_' + uid);
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    if (parsed && typeof parsed === 'object') return { state: parsed, isAuth: true };
+                }
+            } catch (e) {}
+            if (uid === 'adir_moshe' && window.PRELOADED_USER_STATE && window.PRELOADED_USER_STATE.courses) {
+                return { state: window.PRELOADED_USER_STATE, isAuth: true };
+            }
+        }
+        return { state: (window.PRELOADED_USER_STATE || {}), isAuth: false };
+    }
+
     function loadWatchData() {
-        const state = (window.opener && window.opener.gameState) || window.gameState || window.PRELOADED_USER_STATE || {};
+        const resolved = getAuthenticatedWatchState();
+        const state = resolved.state || {};
+        const isAuthenticatedUser = resolved.isAuth;
 
         // Day and Date Evaluation
         const now = new Date();
@@ -231,12 +262,20 @@
                     dynamicSched[dIdx] = (d.classes || []).map(c => {
                         const [sh, sm] = (c.startTime || '08:30').split(':').map(Number);
                         const [eh, em] = (c.endTime || '10:30').split(':').map(Number);
+                        let rawTitle = c.courseName || c.title || c.courseId || '';
+                        if (String(c.courseId || '').replace(/^0+/, '') === '3940805' && /יוגה/i.test(String(c.type || ''))) {
+                            rawTitle = 'חינוך גופני - יוגה';
+                        }
+                        let rawRoom = (c.room || '').trim();
+                        if (!rawRoom || rawRoom === rawTitle || rawRoom.includes('חינוך גופני') || rawRoom.includes('אתלטיקה')) {
+                            rawRoom = (String(c.courseId || '').replace(/^0+/, '') === '3940805') ? 'מרכז הספורט' : 'טאוב';
+                        }
                         return {
-                            title: c.courseName || c.title || c.courseId,
+                            title: rawTitle,
                             time: `${c.startTime} - ${c.endTime}`,
                             startMin: sh * 60 + (sm || 0),
                             endMin: eh * 60 + (em || 0),
-                            room: c.room || 'טאוב',
+                            room: rawRoom,
                             lecturer: c.lecturer || 'סמסטרו ME',
                             type: c.type || 'הרצאה'
                         };
@@ -394,17 +433,19 @@
         let nearestExamInfo = null;
         if (state && state.courses && typeof state.courses === 'object') {
             const nowMs = Date.now();
-            Object.values(state.courses).forEach(c => {
-                if (!c || !Array.isArray(c.tasks)) return;
+            const activeExamCourses = Object.values(state.courses).filter(c => c && (c.status === 'active' || !isAuthenticatedUser));
+            activeExamCourses.forEach(c => {
+                if (!c || c.status === 'mastered' || !Array.isArray(c.tasks)) return;
                 c.tasks.forEach(t => {
-                    if (t && t.type === 'exam' && !t.completed && t.dueDate) {
-                        const dMs = new Date(t.dueDate).getTime();
+                    if (t && t.type === 'exam' && !t.completed && t.status !== 'done' && t.dueDate) {
+                        const isoStr = String(t.dueDate).trim().split(' ')[0];
+                        const dMs = new Date(isoStr + (isoStr.length === 10 ? 'T09:00:00' : '')).getTime();
                         if (!isNaN(dMs) && dMs >= nowMs) {
                             const daysLeft = Math.max(0, Math.ceil((dMs - nowMs) / (1000 * 60 * 60 * 24)));
                             if (!nearestExamInfo || daysLeft < nearestExamInfo.daysLeft) {
                                 nearestExamInfo = {
                                     daysLeft: daysLeft,
-                                    title: t.title || 'מבחן סוף',
+                                    title: t.title || 'מועד א׳',
                                     courseLabel: `${c.code} - ${c.name || ''}`
                                 };
                             }
@@ -427,38 +468,55 @@
         const tasksList = document.getElementById('w-tasks-list');
         if (tasksList) {
             let activeTasks = [];
-            try {
-                const synced = localStorage.getItem('ast_synced_tasks_json');
-                if (synced) {
-                    const parsed = JSON.parse(synced);
-                    if (Array.isArray(parsed) && parsed.length > 0) activeTasks = parsed;
-                }
-            } catch(e) {}
-
-            if (activeTasks.length === 0 && state && state.courses && typeof state.courses === 'object') {
+            if (state && state.courses && typeof state.courses === 'object') {
+                const seenCourseCodes = new Set();
+                const liveCourseTasks = [];
                 Object.values(state.courses).forEach(c => {
-                    if (!c || (c.status !== 'active' && c.status !== 'available') || !Array.isArray(c.tasks)) return;
+                    if (!c || (c.status !== 'active' && (isAuthenticatedUser || c.status !== 'available')) || !Array.isArray(c.tasks)) return;
+                    const cKey = String(c.code || '').replace(/^0+/, '');
+                    if (seenCourseCodes.has(cKey)) return;
+                    seenCourseCodes.add(cKey);
                     c.tasks.forEach(t => {
-                        if (t && !t.completed && t.type !== 'exam') {
-                            activeTasks.push({
-                                id: t.id || `${c.code}_${activeTasks.length}`,
+                        const isDone = Boolean(t && (t.completed === true || t.status === 'done' || t.status === 'completed'));
+                        if (t && !isDone && t.type !== 'exam') {
+                            liveCourseTasks.push({
+                                id: t.id || `${c.code}_${liveCourseTasks.length}`,
                                 courseCode: c.code,
+                                dueTime: t.dueDate ? (Date.parse(t.dueDate) || Infinity) : Infinity,
                                 title: `[${c.name || c.code}] ${t.title}`,
-                                done: Boolean(t.completed)
+                                done: false
                             });
                         }
                     });
                 });
+                liveCourseTasks.sort((a, b) => a.dueTime - b.dueTime);
+                activeTasks = liveCourseTasks;
+            }
+
+            if (activeTasks.length === 0 && !isAuthenticatedUser) {
+                try {
+                    const synced = localStorage.getItem('ast_synced_tasks_json');
+                    if (synced) {
+                        const parsed = JSON.parse(synced);
+                        if (Array.isArray(parsed) && parsed.length > 0) activeTasks = parsed;
+                    }
+                } catch(e) {}
             }
 
             if (activeTasks.length === 0) {
-                activeTasks = [
-                    { id: "104228_h1", title: "[מדח מ׳] תרגיל בית 1: משוואות דיפרנציאליות", done: false },
-                    { id: "104228_ww1", title: "[מדח מ׳] WebWork 1: מד״ח מ׳", done: false },
-                    { id: "114052_h1", title: "[פיסיקה 2] תרגיל בית 1: אלקטרוסטטיקה וחוק קולון", done: false },
-                    { id: "034053_h1", title: "[מוצקים 2] תרגיל בית 1: פיתול ומאמצים מורכבים", done: false },
-                    { id: "034056_h1", title: "[חישוב הנדסי] תרגיל בית 1: אנליזה נומרית ב-MATLAB", done: false }
-                ];
+                if (isAuthenticatedUser) {
+                    activeTasks = [
+                        { id: "all_clear", title: "🎉 כל המטלות הפתוחות הושלמו!", done: true }
+                    ];
+                } else {
+                    activeTasks = [
+                        { id: "104228_h1", title: "[מדח מ׳] תרגיל בית 1: משוואות דיפרנציאליות", done: false },
+                        { id: "104228_ww1", title: "[מדח מ׳] WebWork 1: מד״ח מ׳", done: false },
+                        { id: "114052_h1", title: "[פיסיקה 2] תרגיל בית 1: אלקטרוסטטיקה וחוק קולון", done: false },
+                        { id: "034053_h1", title: "[מוצקים 2] תרגיל בית 1: פיתול ומאמצים מורכבים", done: false },
+                        { id: "034056_h1", title: "[חישוב הנדסי] תרגיל בית 1: אנליזה נומרית ב-MATLAB", done: false }
+                    ];
+                }
             }
 
             let tasksHtml = '';
@@ -492,7 +550,22 @@
 
         const gpaNumVal = (state && state.gpa !== undefined && Number(state.gpa) > 0) ? Number(state.gpa) : 86.04;
         const gpa = gpaNumVal.toFixed(2);
-        const totalCr = (state && state.totalCredits !== undefined) ? Number(state.totalCredits) : 38.5;
+        let computedCredits = null;
+        if (state && state.courses && typeof state.courses === 'object') {
+            const seenCr = new Set();
+            let sumCr = 0;
+            Object.values(state.courses).forEach(c => {
+                if (!c || c.status !== 'mastered') return;
+                const k = String(c.code || '').replace(/^0+/, '');
+                if (seenCr.has(k)) return;
+                seenCr.add(k);
+                sumCr += Number(c.credits) || 0;
+            });
+            if (sumCr > 0) computedCredits = sumCr;
+        }
+        const totalCr = (state && (state.totalCredits ?? state.credits) !== undefined && Number(state.totalCredits ?? state.credits) > 0)
+            ? Number(state.totalCredits ?? state.credits)
+            : (computedCredits !== null ? computedCredits : 38.5);
         const targetCr = (state && state.userSettings && state.userSettings.isReservist) ? 155.5 : 157.5;
         if (gpaValEl) gpaValEl.innerText = gpa;
         if (creditsEl) creditsEl.innerText = `${totalCr.toFixed(1)} / ${targetCr.toFixed(1)} נק״ז`;

@@ -274,7 +274,7 @@
           "completed": false
         }
       ],
-      "status": "available",
+      "status": "active",
       "credits": 3,
       "faculty": "הפקולטה למתמטיקה",
       "schedule": [
@@ -443,7 +443,7 @@
           "completed": false
         }
       ],
-      "status": "available",
+      "status": "active",
       "credits": 3.5,
       "faculty": "הפקולטה לפיסיקה",
       "schedule": [
@@ -840,7 +840,7 @@
           "completed": false
         }
       ],
-      "status": "available",
+      "status": "active",
       "credits": 4,
       "faculty": "הפקולטה להנדסת מכונות",
       "schedule": [
@@ -1232,7 +1232,7 @@
           "completed": false
         }
       ],
-      "status": "available",
+      "status": "active",
       "credits": 4,
       "faculty": "הפקולטה להנדסת מכונות",
       "schedule": [
@@ -1574,7 +1574,7 @@
     },
     "03940805": {
       "code": "03940805",
-      "name": "חינוך גופני - אתלטיקה קלה / יוגה",
+      "name": "חינוך גופני - יוגה",
       "type": "sports",
       "moedA": null,
       "moedB": null,
@@ -1589,7 +1589,7 @@
           "completed": false
         }
       ],
-      "status": "available",
+      "status": "active",
       "credits": 1,
       "faculty": "היחידה ללימודי ספורט",
       "schedule": [
@@ -1878,7 +1878,7 @@
                 "completed": false
               }
             ],
-            "status": "available",
+            "status": "active",
             "credits": 3,
             "faculty": "הפקולטה למתמטיקה",
             "schedule": [
@@ -1994,7 +1994,7 @@
                 "completed": false
               }
             ],
-            "status": "available",
+            "status": "active",
             "credits": 3.5,
             "faculty": "הפקולטה לפיסיקה",
             "schedule": [
@@ -2363,7 +2363,7 @@
                 "completed": false
               }
             ],
-            "status": "available",
+            "status": "active",
             "credits": 4,
             "faculty": "הפקולטה להנדסת מכונות",
             "schedule": [
@@ -2655,7 +2655,7 @@
                 "completed": false
               }
             ],
-            "status": "available",
+            "status": "active",
             "credits": 4,
             "faculty": "הפקולטה להנדסת מכונות",
             "schedule": [
@@ -2988,7 +2988,7 @@
           },
           "03940805": {
             "code": "03940805",
-            "name": "חינוך גופני - אתלטיקה קלה / יוגה",
+            "name": "חינוך גופני - יוגה",
             "type": "sports",
             "moedA": null,
             "moedB": null,
@@ -3003,7 +3003,7 @@
                 "completed": false
               }
             ],
-            "status": "available",
+            "status": "active",
             "credits": 1,
             "faculty": "היחידה ללימודי ספורט",
             "schedule": [
@@ -4371,11 +4371,23 @@
         },
         {
           "code": "03940805",
-          "name": "חינוך גופני - אתלטיקה קלה",
-          "type": "sport",
+          "name": "חינוך גופני - יוגה",
+          "type": "sports",
+          "list": "SPORTS",
           "altCode": "3940805",
           "credits": 1.0,
-          "prereqs": []
+          "prereqs": [],
+          "selectedClub": "יוגה 24",
+          "selectedClubId": "yoga_24",
+          "scheduleSlot": {
+            "id": "yoga_24",
+            "day": "חמישי",
+            "time": "07:30 - 09:00",
+            "dayIndex": 4,
+            "startTime": "07:30",
+            "endTime": "09:00",
+            "room": "מרכז הספורט"
+          }
         }
       ],
       "semester": 3,

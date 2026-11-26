@@ -537,8 +537,9 @@
                 ]
             },
             {
-                code: "03940805", altCode: "394805", name: "חינוך גופני - אתלטיקה קלה / יוגה", credits: 1.0, type: "sports", list: "SPORTS", prereqs: [],
+                code: "03940805", altCode: "394805", name: "חינוך גופני - יוגה", credits: 1.0, type: "sports", list: "SPORTS", prereqs: [],
                 clubs: [
+                    { id: "yoga_24", name: "יוגה 24", day: "חמישי", time: "07:30 - 09:00", dayIndex: 4, startTime: "07:30", endTime: "09:00", room: "מרכז הספורט", note: "חובת נוכחות" },
                     { id: "yoga_vinyasa", name: "יוגה ויניאסה", day: "שני", time: "08:30 - 10:00", dayIndex: 1, startTime: "08:30", endTime: "10:00", room: "סטודיו דשא", note: "חובת נוכחות" },
                     { id: "yoga_hatha", name: "האטה יוגה", day: "שלישי", time: "12:30 - 14:00", dayIndex: 2, startTime: "12:30", endTime: "14:00", room: "אולם קנדה", note: "חובת נוכחות" },
                     { id: "yoga_ashtanga", name: "אשטנגה יוגה", day: "רביעי", time: "16:30 - 18:00", dayIndex: 3, startTime: "16:30", endTime: "18:00", room: "סטודיו מרכזי", note: "חובת נוכחות" },

@@ -590,3 +590,202 @@ html.a11y-light-mode body.a11y-light-mode .app-global-footer .footer-linkedin-bt
 body.a11y-light-mode .a11y-btn.active span {
     color: #ffffff !important;
 }
+
+/* v3.2.3 High #6: Light Mode Authenticated Modals, Tables, Homework Strip & Analytics Overrides */
+html.a11y-light-mode body.a11y-light-mode #auth-modal .modal-content,
+html.a11y-light-mode body.a11y-light-mode #auth-modal [style*="background: rgba(15, 23, 42"],
+html.a11y-light-mode body.a11y-light-mode #auth-modal [style*="background: rgba(30, 41, 59"] {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    border-color: #cbd5e1 !important;
+}
+
+html.a11y-light-mode body.a11y-light-mode #auth-modal [style*="color: #e2e8f0"],
+html.a11y-light-mode body.a11y-light-mode #auth-modal [style*="color: #f8fafc"],
+html.a11y-light-mode body.a11y-light-mode #auth-modal [style*="color: #f1f5f9"],
+html.a11y-light-mode body.a11y-light-mode #auth-modal [style*="color: #cbd5e1"],
+html.a11y-light-mode body.a11y-light-mode #auth-modal [style*="color: #94a3b8"] {
+    color: #1e293b !important;
+}
+
+html.a11y-light-mode body.a11y-light-mode .grade-sheet-modal,
+html.a11y-light-mode body.a11y-light-mode #modal-grade-sheet .modal-content,
+html.a11y-light-mode body.a11y-light-mode .grade-sheet-document,
+html.a11y-light-mode body.a11y-light-mode .grade-sheet-doc-header,
+html.a11y-light-mode body.a11y-light-mode .grade-sheet-header,
+html.a11y-light-mode body.a11y-light-mode .grade-sheet-date-box,
+html.a11y-light-mode body.a11y-light-mode .grade-sheet-student-info-bar,
+html.a11y-light-mode body.a11y-light-mode .grade-sheet-student-bar,
+html.a11y-light-mode body.a11y-light-mode .gs-kpi-card,
+html.a11y-light-mode body.a11y-light-mode .grade-sheet-sem-block,
+html.a11y-light-mode body.a11y-light-mode .grade-sheet-sem-header,
+html.a11y-light-mode body.a11y-light-mode #grade-sheet-sim-panel {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    border-color: #cbd5e1 !important;
+}
+
+html.a11y-light-mode body.a11y-light-mode .grade-sheet-header *,
+html.a11y-light-mode body.a11y-light-mode .grade-sheet-doc-header *,
+html.a11y-light-mode body.a11y-light-mode .grade-sheet-header-text h1,
+html.a11y-light-mode body.a11y-light-mode .grade-sheet-header-text h2,
+html.a11y-light-mode body.a11y-light-mode .grade-sheet-header-text h3,
+html.a11y-light-mode body.a11y-light-mode .grade-sheet-date-box *,
+html.a11y-light-mode body.a11y-light-mode .grade-sheet-student-info-bar *,
+html.a11y-light-mode body.a11y-light-mode .grade-sheet-sem-header *,
+html.a11y-light-mode body.a11y-light-mode .grade-sheet-table th,
+html.a11y-light-mode body.a11y-light-mode .grade-sheet-table td,
+html.a11y-light-mode body.a11y-light-mode .gs-kpi-card * {
+    color: #0f172a !important;
+}
+
+html.a11y-light-mode body.a11y-light-mode .grade-sheet-table th {
+    background: #f1f5f9 !important;
+}
+
+html.a11y-light-mode body.a11y-light-mode .analytics-modal-content,
+html.a11y-light-mode body.a11y-light-mode .analytics-header-banner,
+html.a11y-light-mode body.a11y-light-mode .analytics-kpi-card,
+html.a11y-light-mode body.a11y-light-mode .analytics-panel,
+html.a11y-light-mode body.a11y-light-mode .analytics-chart-box,
+html.a11y-light-mode body.a11y-light-mode .site-analytics-modal-content,
+html.a11y-light-mode body.a11y-light-mode #site-analytics-modal .modal-content,
+html.a11y-light-mode body.a11y-light-mode #site-analytics-content [style*="background: rgba(15, 23, 42"],
+html.a11y-light-mode body.a11y-light-mode #site-analytics-content [style*="background: rgba(2, 6, 23"] {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    border-color: #cbd5e1 !important;
+}
+
+html.a11y-light-mode body.a11y-light-mode .analytics-header-banner *,
+html.a11y-light-mode body.a11y-light-mode .analytics-kpi-label,
+html.a11y-light-mode body.a11y-light-mode .analytics-kpi-sub,
+html.a11y-light-mode body.a11y-light-mode .analytics-kpi-value,
+html.a11y-light-mode body.a11y-light-mode .analytics-panel-header h3,
+html.a11y-light-mode body.a11y-light-mode .analytics-panel-tag,
+html.a11y-light-mode body.a11y-light-mode .donut-legend-row,
+html.a11y-light-mode body.a11y-light-mode .donut-center-label,
+html.a11y-light-mode body.a11y-light-mode #legend-credits-remaining,
+html.a11y-light-mode body.a11y-light-mode #site-analytics-content [style*="color: #f1f5f9"],
+html.a11y-light-mode body.a11y-light-mode #site-analytics-content [style*="color: #f8fafc"],
+html.a11y-light-mode body.a11y-light-mode #site-analytics-content [style*="color: #94a3b8"] {
+    color: #0f172a !important;
+}
+
+html.a11y-light-mode body.a11y-light-mode .hud-workspace,
+html.a11y-light-mode body.a11y-light-mode .app-shell,
+html.a11y-light-mode body.a11y-light-mode #settings-workspace,
+html.a11y-light-mode body.a11y-light-mode .settings-container {
+    background: #f1f5f9 !important;
+}
+
+html.a11y-light-mode body.a11y-light-mode .reminder-chip,
+html.a11y-light-mode body.a11y-light-mode .reminder-chip.upcoming,
+html.a11y-light-mode body.a11y-light-mode .reminder-chip.no-date {
+    background: #f8fafc !important;
+    color: #0f172a !important;
+    border-color: #94a3b8 !important;
+}
+
+html.a11y-light-mode body.a11y-light-mode .reminder-chip * {
+    color: #0f172a !important;
+}
+
+html.a11y-light-mode body.a11y-light-mode .btn-primary .moodle-badge-live {
+    background: #0f172a !important;
+    color: #ffffff !important;
+    border-color: #ffffff !important;
+}
+
+html.a11y-light-mode body.a11y-light-mode #analytics-donut-svg circle:first-child {
+    stroke: #e2e8f0 !important;
+}
+
+html.a11y-light-mode body.a11y-light-mode #notion-hw-policy-strip,
+html.a11y-light-mode body.a11y-light-mode .course-hw-capsule,
+html.a11y-light-mode body.a11y-light-mode .modal-hw-box,
+html.a11y-light-mode body.a11y-light-mode .hw-sheet-card,
+html.a11y-light-mode body.a11y-light-mode .hw-strip-hint,
+html.a11y-light-mode body.a11y-light-mode .hw-collapsed-summary,
+html.a11y-light-mode body.a11y-light-mode #task-side-peek,
+html.a11y-light-mode body.a11y-light-mode #task-side-peek .peek-content,
+html.a11y-light-mode body.a11y-light-mode .notif-drawer-panel,
+html.a11y-light-mode body.a11y-light-mode .notif-drawer-header,
+html.a11y-light-mode body.a11y-light-mode .tasks-reminders-banner {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    border-color: #cbd5e1 !important;
+}
+
+html.a11y-light-mode body.a11y-light-mode .hw-strip-hint {
+    background: #f1f5f9 !important;
+    color: #0f172a !important;
+}
+
+html.a11y-light-mode body.a11y-light-mode .course-hw-capsule *,
+html.a11y-light-mode body.a11y-light-mode #notion-hw-policy-strip .hw-strip-title,
+html.a11y-light-mode body.a11y-light-mode #task-side-peek .peek-property-label,
+html.a11y-light-mode body.a11y-light-mode #task-side-peek .peek-property-value,
+html.a11y-light-mode body.a11y-light-mode .notif-drawer-title,
+html.a11y-light-mode body.a11y-light-mode .tasks-reminders-banner * {
+    color: #0f172a !important;
+}
+
+html.a11y-light-mode body.a11y-light-mode .timetable-sync-status,
+html.a11y-light-mode body.a11y-light-mode #timetable-sync-status,
+html.a11y-light-mode body.a11y-light-mode .fc-semester-badge-rect,
+html.a11y-light-mode body.a11y-light-mode .fc-sem-year,
+html.a11y-light-mode body.a11y-light-mode .fc-sem-term,
+html.a11y-light-mode body.a11y-light-mode #tab-calendar .cal-miluim-banner,
+html.a11y-light-mode body.a11y-light-mode .fse-card,
+html.a11y-light-mode body.a11y-light-mode .planner-sidebar-card {
+    color: #0f172a !important;
+}
+
+html.a11y-light-mode body.a11y-light-mode #tab-calendar [style*="color: #6ee7b7"],
+html.a11y-light-mode body.a11y-light-mode #tab-calendar [style*="color: #34d399"] {
+    color: #047857 !important;
+}
+
+/* v3.2.3 Light Mode Polish: Analytics Border-Beam KPI, Grade Sheet & Tasks Controls */
+html.a11y-light-mode body.a11y-light-mode .border-beam-card,
+html.a11y-light-mode body.a11y-light-mode .border-beam-box,
+html.a11y-light-mode body.a11y-light-mode .analytics-kpi-card,
+html.a11y-light-mode body.a11y-light-mode .gs-kpi-box,
+html.a11y-light-mode body.a11y-light-mode .grade-sheet-modal-content,
+html.a11y-light-mode body.a11y-light-mode .grade-sheet-doc-footer,
+html.a11y-light-mode body.a11y-light-mode #task-side-peek .peek-actions-bar {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    border-color: #cbd5e1 !important;
+}
+
+html.a11y-light-mode body.a11y-light-mode .border-beam-card::after,
+html.a11y-light-mode body.a11y-light-mode .border-beam-box::after {
+    background: #ffffff !important;
+}
+
+html.a11y-light-mode body.a11y-light-mode .grade-sheet-toolbar,
+html.a11y-light-mode body.a11y-light-mode .grade-sheet-scrollable-wrap,
+html.a11y-light-mode body.a11y-light-mode .analytics-tabs-bar,
+html.a11y-light-mode body.a11y-light-mode .analytics-cat-track,
+html.a11y-light-mode body.a11y-light-mode #btn-toggle-hw-collapse {
+    background: #f1f5f9 !important;
+    color: #0f172a !important;
+    border-color: #cbd5e1 !important;
+}
+
+html.a11y-light-mode body.a11y-light-mode .gs-kpi-box *,
+html.a11y-light-mode body.a11y-light-mode .analytics-kpi-card .kpi-label,
+html.a11y-light-mode body.a11y-light-mode .analytics-kpi-card .kpi-sub,
+html.a11y-light-mode body.a11y-light-mode .grade-sheet-doc-footer *,
+html.a11y-light-mode body.a11y-light-mode .grade-sheet-notes *,
+html.a11y-light-mode body.a11y-light-mode .grade-sheet-stamp-box * {
+    color: #0f172a !important;
+}
+
+html.a11y-light-mode body.a11y-light-mode .reminder-chip.upcoming .reminder-urgency-badge {
+    background: #e0f2fe !important;
+    color: #0369a1 !important;
+    border-color: #7dd3fc !important;
+}

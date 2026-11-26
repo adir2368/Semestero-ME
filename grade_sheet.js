@@ -76,6 +76,9 @@
                         this.studentInfo = Object.assign(this.studentInfo, parsed);
                     }
                 }
+                if (!this.studentInfo.currentTerm || /תשפ["״]?ד/.test(String(this.studentInfo.currentTerm))) {
+                    this.studentInfo.currentTerm = 'חורף תשפ"ז (סמסטר 3)';
+                }
             } catch (e) {
                 console.warn('[GradeSheet] Error reading stored student info:', e);
             }
@@ -176,8 +179,14 @@
                 uniqueRaw.push(c);
             });
 
+            const activeSemNum = (window.gameState && window.gameState.currentActiveSemester) ? Number(window.gameState.currentActiveSemester) : 3;
             const list = uniqueRaw.filter(c => {
                 if (c.status === 'exempt') return false;
+                const semNum = c.semester ? Number(c.semester) : 0;
+                const hasNumericOrBinaryGrade = (c.isBinaryPass === true || c.grade === 'עובר' || c.grade === 'PASS' || (c.grade !== undefined && c.grade !== null && c.grade !== '' && !isNaN(Number(c.grade))));
+                if (c.status !== 'mastered' && !hasNumericOrBinaryGrade && (semNum === 0 || semNum < activeSemNum)) {
+                    return false;
+                }
                 // Exclude mutually exclusive alternatives if one is mastered
                 const chosenP1 = window.gameState && window.gameState.userSettings && window.gameState.userSettings.physicsVariants && window.gameState.userSettings.physicsVariants.physics1;
                 if (['114071', '104016', '104166', '01140071'].includes(c.code) && !c.grade && c.status !== 'mastered' && chosenP1 !== '01140071' && chosenP1 !== '114071') return false;
@@ -394,10 +403,12 @@
             // Populate student fields
             const nameEl = document.getElementById('grade-sheet-student-name');
             const idEl = document.getElementById('grade-sheet-student-id');
+            const termEl = document.getElementById('grade-sheet-current-term');
             const defaultName = isExplicitAdirSession() ? 'אדיר משה' : 'סטודנט להנדסת מכונות';
             const defaultId = isExplicitAdirSession() ? '318942516' : '—';
             if (nameEl) nameEl.innerText = this.studentInfo.name || defaultName;
             if (idEl) idEl.innerText = this.studentInfo.id || defaultId;
+            if (termEl) termEl.innerText = this.studentInfo.currentTerm || 'חורף תשפ"ז (סמסטר 3)';
 
             this.render();
 

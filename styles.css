@@ -2811,12 +2811,13 @@ body:has(#academic-faq-modal.active) {
 }
 
 .fc-node-group.active .fc-node-rect {
-    stroke: #38bdf8;
-    fill: #132438;
+    stroke: #f59e0b;
+    fill: #2d1e0a;
 }
 
 .fc-node-group.available .fc-node-rect {
-    stroke: #0284c7;
+    stroke: #38bdf8;
+    fill: #0f253a;
     stroke-dasharray: 4 3;
 }
 
@@ -2870,8 +2871,8 @@ body:has(#academic-faq-modal.active) {
     text-anchor: middle;
 }
 .fc-node-group.mastered .fc-node-badge { fill: #34d399; }
-.fc-node-group.active .fc-node-badge { fill: #38bdf8; }
-.fc-node-group.available .fc-node-badge { fill: #7dd3fc; }
+.fc-node-group.active .fc-node-badge { fill: #fbbf24; }
+.fc-node-group.available .fc-node-badge { fill: #38bdf8; }
 .fc-node-group.locked .fc-node-badge { fill: #64748b; }
 
 /* Flowchart Directed Beams / Arrows */
@@ -7861,14 +7862,14 @@ html.is-iphone .app-global-footer {
 .notif-drawer-overlay {
     position: fixed;
     inset: 0;
-    z-index: 10050;
+    z-index: 200050 !important;
     background: rgba(5, 9, 18, 0.88);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     display: flex;
     justify-content: center;
     align-items: flex-start;
-    padding: 16px;
+    padding: max(20px, env(safe-area-inset-top)) 16px 16px 16px;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior-y: contain;
@@ -12888,8 +12889,14 @@ html.is-iphone .app-global-footer {
 }
 
 .fc-node-group.active .fc-node-rect {
-    fill: #0c4a6e !important;
+    fill: #3b250b !important;
+    stroke: #f59e0b !important;
+}
+
+.fc-node-group.available .fc-node-rect {
+    fill: #0c2d48 !important;
     stroke: #38bdf8 !important;
+    stroke-dasharray: 4 3 !important;
 }
 
 .fc-node-group.locked .fc-node-rect {
@@ -18420,13 +18427,13 @@ textarea:focus {
     font-family: var(--font-mono);
     font-variant-numeric: tabular-nums;
     font-size: 0.68rem;
-    font-weight: 500;
+    font-weight: 700;
     letter-spacing: 0.04em;
     padding: 2px 6px;
     border-radius: 4px;
-    background: rgba(56, 189, 248, 0.1);
-    border: 1px solid rgba(56, 189, 248, 0.25);
-    color: var(--color-available);
+    background: rgba(15, 23, 42, 0.85);
+    border: 1px solid rgba(125, 211, 252, 0.55);
+    color: #e0f2fe;
     box-shadow: none;
 }
 
@@ -22131,5 +22138,27 @@ body[data-active-tab="tasks"] .btn-back-to-top {
     #btn-back-to-top,
     .back-to-top-btn {
         bottom: 84px !important;
+    }
+}
+
+
+/* v3.2.3 Low #15: Sticky Side-Peek Footer Actions & Mobile <=480px Time-Grid Edge Inset */
+#task-side-peek .peek-actions-bar {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+    background: var(--bg-panel, #0f172a);
+    padding: 12px 24px max(14px, env(safe-area-inset-bottom, 14px));
+    border-top: 1px solid rgba(148, 163, 184, 0.2);
+    z-index: 4;
+}
+
+@media (max-width: 480px) {
+    .timetable-grid.timetable-timegrid .cal-timegrid-scroll-x {
+        padding-inline: 4px;
+    }
+    .timetable-grid.timetable-timegrid .cal-timegrid-event.timetable-card {
+        inset-inline-start: 4px;
+        inset-inline-end: 4px;
     }
 }

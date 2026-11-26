@@ -2508,7 +2508,7 @@
             { id: 'degreeTotal', name: 'סה״כ נק״ז לתואר', score: `<bdi dir="ltr">${totalDegreeCredits.toFixed(1)} / ${requiredDegreeCredits.toFixed(1)}</bdi> נק״ז`, isMet: ruleDegreeTotal_met, hint: `מינימום 157.5 נק״ז (${isReservistDeduction ? '155.5 למשרתי מילואים' : '155.5 למילואים'}${isAtudaTironut ? ' • כולל 2 נק״ז טירונות עתודאים' : ''})` },
             { id: 'totalElectives', name: 'נקודות בחירה פקולטיות', score: `<bdi dir="ltr">${totalElectiveCredits.toFixed(1)} / ${requiredElectiveCredits.toFixed(1)}</bdi> נק״ז`, isMet: ruleTotalElectives_met, hint: 'לפחות 32.5 נק״ז מרשימות הבחירה' },
             { id: 'creditsBCD', name: 'סל רשימות ב׳+ג׳+ד׳', score: `<bdi dir="ltr">${creditsBCD.toFixed(1)} / 14.0</bdi> נק״ז`, isMet: ruleBCD_met, hint: 'חובת עומק והתמחות הנדסית' },
-            { id: 'facultyLists', name: 'חלוקת רשימות (א׳, ב׳, ג׳, ד׳)', score: `א׳: <bdi dir="ltr">${countA}/1</bdi> • ב׳: <bdi dir="ltr">${countB}/2</bdi> • ג׳: <bdi dir="ltr">${countC}/2</bdi> • ד׳: <bdi dir="ltr">${countD}/1</bdi>`, isMet: ruleFacultyLists_met, hint: '1 חישובי, 2 ליבה, 2 יישומי, 1 סמינר' },
+            { id: 'facultyLists', name: 'חלוקת רשימות (א׳, ב׳, ג׳, ד׳)', score: `א׳: <bdi dir="ltr">${countA}/1</bdi> • ב׳: <bdi dir="ltr">${countB}/2</bdi> • ג׳: <bdi dir="ltr">${countC}/2</bdi> • ד׳: <bdi dir="ltr">${countD}/1</bdi>`, isMet: ruleFacultyLists_met, hint: '1 חישובי (א׳), 2 ליבה (ב׳), 2 יישומי (ג׳), 1 מדעיים כלליים/סמינר (ד׳)' },
             { id: 'englishContent', name: 'קורסים באנגלית (תוכן/מל״ג)', score: `<bdi dir="ltr">${countEnglishContent} / 2</bdi>`, isMet: ruleEnglishContent_met, hint: 'חובת הטכניון: 2 קורסים הנלמדים באנגלית' },
             { id: 'malag', name: 'קורסי מל״ג / מדעי הרוח', score: `<bdi dir="ltr">${creditsMalag.toFixed(1)} / 6.0</bdi> נק״ז`, isMet: ruleMalag_met, hint: 'בין 6.0 ל-10.0 נק״ז מל״ג (מילואים מקנה 2 נק״ז)' },
             { id: 'sport', name: 'חינוך גופני (ספורט)', score: `<bdi dir="ltr">${countSport} / 2</bdi> קורסים`, isMet: ruleSport_met, hint: '2 קורסי ספורט בינאריים ללא ציון מספרי' },
@@ -6698,6 +6698,7 @@
     global.updatePlannerCollapsedPills = updatePlannerCollapsedPills;
     global.setPlannerMobileView = setPlannerMobileView;
     if (global.DegreePlanner) {
+        global.DegreePlanner.initPlannerState = initPlannerState;
         global.DegreePlanner.togglePlannerHeaderCollapse = togglePlannerHeaderCollapse;
         global.DegreePlanner.updatePlannerCollapsedPills = updatePlannerCollapsedPills;
         global.DegreePlanner.setPlannerMobileView = setPlannerMobileView;

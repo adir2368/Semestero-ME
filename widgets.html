@@ -11,7 +11,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
-    <link rel="manifest" href="manifest.json?v=3.2.2">
+    <link rel="manifest" href="manifest.json?v=3.2.3">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;500;600;700;800;900&family=Rubik:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -894,7 +894,7 @@
     <!-- Top Navigation Bar -->
     <header class="tecme-navbar">
         <a href="index.html" class="tecme-brand-wrap" title="חזרה לאפליקציה הראשית">
-            <img src="icon-192.png?v=3.2.2" alt="Semestero ME Logo" class="tecme-brand-logo">
+            <img src="icon-192.png?v=3.2.3" alt="Semestero ME Logo" class="tecme-brand-logo">
             <div class="tecme-brand-title">
                 <h1>Semestero Widgets</h1>
                 <span>recommended · vibrant</span>
@@ -1143,11 +1143,11 @@
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                                 <div>
                                     <span style="font-size: 0.72rem; color: #94a3b8;">ממוצע מצטבר קיים:</span>
-                                    <div style="font-size: 1.4rem; font-weight: 900; color: #fff;">85.9 <span style="font-size: 0.76rem; color: #34d399; font-weight: 700;">+2.1 ליעד</span></div>
+                                    <div id="proposed-runway-gpa" style="font-size: 1.4rem; font-weight: 900; color: #fff;">85.9 <span style="font-size: 0.76rem; color: #34d399; font-weight: 700;">+2.1 ליעד</span></div>
                                 </div>
                                 <div style="text-align: left;">
-                                    <span style="font-size: 0.72rem; color: #94a3b8;">מועד א' מוצקים 2:</span>
-                                    <div style="font-size: 1.4rem; font-weight: 900; color: #38bdf8;">115 <span style="font-size: 0.76rem; color: #94a3b8;">ימים</span></div>
+                                    <span id="proposed-runway-exam-label" style="font-size: 0.72rem; color: #94a3b8;">מועד א' מוצקים 2:</span>
+                                    <div id="proposed-runway-exam-days" style="font-size: 1.4rem; font-weight: 900; color: #38bdf8;">115 <span style="font-size: 0.76rem; color: #94a3b8;">ימים</span></div>
                                 </div>
                             </div>
                             <div style="height: 6px; background: rgba(255, 255, 255, 0.1); border-radius: 6px; overflow: hidden; margin-top: 6px;">
@@ -1396,29 +1396,161 @@
         let currentSize = 'all';   // 'all' | 's' | 'm' | 'l'
         let completedTaskIds = new Set(JSON.parse(localStorage.getItem('tecme_completed_tasks') || '[]'));
 
-        // Real Courses & Technion ME Dataset (Matching user's mockup & state)
+        // Real Courses & Technion ME Dataset (Dynamic from live authenticated state when signed in)
         function getTecMeData() {
             let savedState = null;
+            let isAuth = false;
             try {
-                const uid = localStorage.getItem('ast_logged_in_user') || 'guest'; const hasProof = !!localStorage.getItem('ast_auth_verified_v3'); const raw = localStorage.getItem((uid === 'adir_moshe' && hasProof) ? 'academic_skill_tree_save' : ('ast_user_state_' + uid));
-                if (raw) savedState = JSON.parse(raw);
+                const uid = (localStorage.getItem('ast_logged_in_user') || 'guest').trim();
+                const hasProof = !!localStorage.getItem('ast_auth_verified_v3');
+                isAuth = Boolean(uid && uid !== 'guest' && hasProof);
+                if (isAuth) {
+                    const key = (uid === 'adir_moshe') ? 'academic_skill_tree_save' : ('ast_user_state_' + uid);
+                    const raw = localStorage.getItem(key) || localStorage.getItem('ast_user_state_' + uid);
+                    if (raw) savedState = JSON.parse(raw);
+                }
             } catch (e) {}
+
+            if (isAuth && savedState && savedState.courses && typeof savedState.courses === 'object') {
+                const semNum = Number(savedState.currentActiveSemester || 3);
+                const semMap = { 1: 'SEMESTER 1 (WINTER)', 2: 'SEMESTER 2 (SPRING)', 3: 'SEMESTER 3 (WINTER)', 4: 'SEMESTER 4 (SPRING)' };
+                const semName = semMap[semNum] || `SEMESTER ${semNum}`;
+
+                // Winter 2026/27 semester start ~ Oct 25, 2026 (13 weeks)
+                const now = new Date();
+                const termStart = new Date('2026-10-25T00:00:00');
+                const diffWeeks = Math.floor((now.getTime() - termStart.getTime()) / (7 * 24 * 60 * 60 * 1000)) + 1;
+                const weekNum = Math.max(1, Math.min(13, diffWeeks));
+                const weeksToFinals = Math.max(1, 14 - weekNum);
+                const timelinePctNum = Math.min(68, Math.max(8, Math.round((weekNum / 13) * 65)));
+
+                // Compute overall & most recent completed semester GPA from mastered numeric courses
+                let totalQp = 0, totalGrCr = 0;
+                const semStats = {};
+                const seenCourses = new Set();
+                const uniqueCourses = [];
+                Object.values(savedState.courses).forEach(c => {
+                    if (!c || !c.code) return;
+                    const clean = String(c.code).replace(/^0+/, '');
+                    if (seenCourses.has(clean)) return;
+                    seenCourses.add(clean);
+                    uniqueCourses.push(c);
+                    if (c.status === 'mastered' && !c.isBinaryPass && c.grade !== undefined && c.grade !== null && c.grade !== '' && !isNaN(Number(c.grade))) {
+                        const g = Number(c.grade);
+                        const cr = Number(c.credits) || 0;
+                        if (cr > 0 && g >= 55) {
+                            totalQp += g * cr;
+                            totalGrCr += cr;
+                            const s = Number(c.semester || 1);
+                            if (!semStats[s]) semStats[s] = { qp: 0, cr: 0 };
+                            semStats[s].qp += g * cr;
+                            semStats[s].cr += cr;
+                        }
+                    }
+                });
+                const overallGpaNum = totalGrCr > 0 ? (totalQp / totalGrCr) : Number(savedState.gpa || 0);
+                const latestSemKeys = Object.keys(semStats).map(Number).filter(s => semStats[s].cr > 0).sort((a, b) => b - a);
+                const recentSemGpaNum = latestSemKeys.length > 0 ? (semStats[latestSemKeys[0]].qp / semStats[latestSemKeys[0]].cr) : overallGpaNum;
+
+                // Extract active tasks & exams
+                const nowMs = Date.now();
+                const todayStartMs = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+                const liveTasks = [];
+                const liveExams = [];
+
+                uniqueCourses.filter(c => c.status === 'active').forEach(c => {
+                    (c.tasks || []).forEach(t => {
+                        if (!t) return;
+                        const isDone = Boolean(t.completed === true || t.status === 'done' || t.status === 'completed');
+                        if (isDone) return;
+                        const isoPart = t.dueDate ? String(t.dueDate).trim().split(' ')[0] : '';
+                        const dueMs = isoPart ? new Date(isoPart + 'T23:59:59').getTime() : NaN;
+                        const dayDiff = !isNaN(dueMs) ? Math.ceil((new Date(isoPart + 'T00:00:00').getTime() - todayStartMs) / 86400000) : 999;
+
+                        if (t.type === 'exam') {
+                            if (!isNaN(dueMs) && dueMs >= todayStartMs) {
+                                const dObj = new Date(isoPart + 'T09:00:00');
+                                const fmtDate = `${String(dObj.getDate()).padStart(2, '0')}/${String(dObj.getMonth() + 1).padStart(2, '0')}/${dObj.getFullYear()}`;
+                                liveExams.push({
+                                    id: t.id || `${c.code}_ex`,
+                                    daysLeft: Math.max(0, dayDiff),
+                                    pill: `${Math.max(0, dayDiff)} days left`,
+                                    courseName: c.name || c.code,
+                                    name: c.name || c.code,
+                                    dateStr: `${String(t.title || '').includes('ב') ? 'Moed B' : 'Moed A'} · ${fmtDate}`,
+                                    details: `${String(t.title || '').includes('ב') ? 'Moed B' : 'Moed A'} · ${fmtDate}`,
+                                    dueMs: dueMs
+                                });
+                            }
+                        } else {
+                            let pill = 'Open', pillClass = 'normal', isMissed = false;
+                            if (dayDiff < 0) {
+                                pill = 'Missed'; pillClass = 'missed'; isMissed = true;
+                            } else if (dayDiff === 0) {
+                                pill = 'Today'; pillClass = 'today';
+                            } else if (dayDiff === 1) {
+                                pill = '1 day left';
+                            } else if (dayDiff < 365) {
+                                pill = `${dayDiff} days left`;
+                            }
+                            liveTasks.push({
+                                id: t.id || `${c.code}_${liveTasks.length}`,
+                                pill,
+                                pillClass,
+                                name: t.title || 'משימה',
+                                course: c.name || c.code,
+                                isMissed,
+                                dueMs: isNaN(dueMs) ? Infinity : dueMs
+                            });
+                        }
+                    });
+                });
+
+                liveTasks.sort((a, b) => a.dueMs - b.dueMs);
+                liveExams.sort((a, b) => a.dueMs - b.dueMs);
+
+                const firstExam = liveExams[0] || {
+                    daysLeft: 0,
+                    courseName: 'אין מבחנים קרובים',
+                    dateStr: 'All exams completed'
+                };
+
+                return {
+                    semesterName: semName,
+                    termWeek: `Week ${weekNum} of 13`,
+                    termSub: `Finals start in ${weeksToFinals} weeks`,
+                    timelinePct: `${timelinePctNum}%`,
+                    finalsSub: liveExams.length > 0 ? `${liveExams.length} exam sittings scheduled` : 'No pending sittings',
+                    breakSub: 'Between semesters',
+                    semesterGpa: recentSemGpaNum > 0 ? recentSemGpaNum.toFixed(2) : '0.00',
+                    overallGpa: overallGpaNum > 0 ? overallGpaNum.toFixed(2) : '0.00',
+                    nextExam: {
+                        daysLeft: firstExam.daysLeft,
+                        courseName: firstExam.courseName,
+                        dateStr: firstExam.dateStr,
+                        remainingCount: Math.max(0, liveExams.length - 1)
+                    },
+                    tasks: liveTasks,
+                    finalsExams: liveExams
+                };
+            }
 
             return {
                 semesterName: 'SEMESTER C',
                 termWeek: 'Week 3 of 13',
                 termSub: 'Finals start in 10 weeks',
+                timelinePct: '24%',
                 finalsSub: 'The last sitting is in 6 weeks',
                 breakSub: 'SEMESTER C starts in 18 days',
-                semesterGpa: (savedState && (savedState.recentSemesterGpa || savedState.gpa)) ? Number(savedState.recentSemesterGpa || savedState.gpa).toFixed(1) : '0.0',
-                overallGpa: (savedState && (savedState.overallGpa || savedState.gpa)) ? Number(savedState.overallGpa || savedState.gpa).toFixed(1) : '0.0',
+                semesterGpa: '0.0',
+                overallGpa: '0.0',
                 nextExam: {
                     daysLeft: 115,
                     courseName: 'מכניקת מוצקים 1',
                     dateStr: 'Moed A · Tue 2 Feb · 09:00',
                     remainingCount: 9
                 },
-                // Term Tasks
+                // Term Tasks (Guest preview sample)
                 tasks: [
                     { id: 't1', pill: 'Missed', pillClass: 'missed', name: 'תרגיל בית 2', course: 'סטטיקה', isMissed: true },
                     { id: 't2', pill: 'Today', pillClass: 'today', name: 'תרגיל בית 3', course: 'פיזיקה 2מ' },
@@ -1464,48 +1596,76 @@
         function renderAllWidgets() {
             const data = getTecMeData();
 
+            const summaryGpaEl = document.getElementById('stat-overall-gpa-s');
+            if (summaryGpaEl) summaryGpaEl.textContent = data.overallGpa;
+
+            const runwayGpaEl = document.getElementById('proposed-runway-gpa');
+            if (runwayGpaEl) {
+                const overallNum = Number(data.overallGpa || 0);
+                const delta = (88.0 - overallNum);
+                const deltaStr = delta >= 0 ? `+${delta.toFixed(2)} ליעד` : `מעל היעד (${delta.toFixed(2)})`;
+                runwayGpaEl.innerHTML = `${escHtml(data.overallGpa)} <span style="font-size: 0.76rem; color: #34d399; font-weight: 700;">${escHtml(deltaStr)}</span>`;
+            }
+            const runwayExamLabelEl = document.getElementById('proposed-runway-exam-label');
+            if (runwayExamLabelEl && data.nextExam) {
+                runwayExamLabelEl.textContent = `מועד א' ${data.nextExam.courseName || 'קרוב'}:`;
+            }
+            const runwayExamDaysEl = document.getElementById('proposed-runway-exam-days');
+            if (runwayExamDaysEl && data.nextExam) {
+                runwayExamDaysEl.innerHTML = `${escHtml(data.nextExam.daysLeft ?? 0)} <span style="font-size: 0.76rem; color: #94a3b8;">ימים</span>`;
+            }
+
             // 1. Up Next S
             const upNextSEl = document.getElementById('widget-upnext-s');
             if (currentPhase === 'term') {
+                const topTask = data.tasks && data.tasks[0] ? data.tasks[0] : null;
+                const missedCount = (data.tasks || []).filter(t => t.isMissed).length;
+                const otherCount = Math.max(0, (data.tasks || []).length - 1);
+                const topTag = topTask ? String(topTask.pill || 'OPEN').toUpperCase() : 'CAUGHT UP';
+                const topTagClass = topTask && topTask.pillClass === 'missed' ? 'missed' : 'today';
+                const topMain = topTask ? `${topTask.name} · ${topTask.course}` : 'אין מטלות פתוחות';
+                const topSub = missedCount > 0 ? `⚠️ ${missedCount} missed` : (topTask ? `📅 ${topTask.course}` : '✓ All tasks done');
+                const subDirAttr = (missedCount > 0 || !topTask) ? ' dir="ltr"' : '';
                 upNextSEl.innerHTML = `
-                    <div class="tecme-s-tag today">TODAY</div>
+                    <div class="tecme-s-tag ${escHtml(topTagClass)}" dir="ltr">${escHtml(topTag)}</div>
                     <div>
-                        <div class="tecme-s-main">תרגיל בית 3 פיזיקה 2מ</div>
-                        <div class="tecme-s-sub">⚠️ 1 missed</div>
+                        <div class="tecme-s-main">${escHtml(topMain)}</div>
+                        <div class="tecme-s-sub"${subDirAttr}>${escHtml(topSub)}</div>
                     </div>
-                    <div class="tecme-s-footer">3 more this week</div>
+                    <div class="tecme-s-footer" dir="ltr">${otherCount > 0 ? `${otherCount} more open` : escHtml(data.termWeek)}</div>
                 `;
             } else if (currentPhase === 'finals') {
+                const firstExam = data.nextExam || {};
                 upNextSEl.innerHTML = `
-                    <div class="tecme-s-tag" style="color: var(--accent-cyan);">IN 2 DAYS</div>
+                    <div class="tecme-s-tag" dir="ltr" style="color: var(--accent-cyan);">IN ${escHtml(firstExam.daysLeft ?? 0)} DAYS</div>
                     <div>
-                        <div class="tecme-s-main">מכניקת מוצקים 1</div>
-                        <div class="tecme-s-sub" style="color: var(--text-secondary);">Moed A · 09:00</div>
+                        <div class="tecme-s-main">${escHtml(firstExam.courseName || 'אין בחינות')}</div>
+                        <div class="tecme-s-sub" dir="ltr" style="color: var(--text-secondary);">${escHtml(firstExam.dateStr || '')}</div>
                     </div>
-                    <div class="tecme-s-footer">then 9 more sittings</div>
+                    <div class="tecme-s-footer" dir="ltr">then ${escHtml(firstExam.remainingCount ?? 0)} more sittings</div>
                 `;
             } else {
                 upNextSEl.innerHTML = `
-                    <div class="tecme-s-tag" style="color: var(--accent-green);">WED 28 OCT</div>
+                    <div class="tecme-s-tag" dir="ltr" style="color: var(--accent-green);">ACADEMIC BREAK</div>
                     <div>
-                        <div class="tecme-s-main" style="font-size: 1.05rem;">SEMESTER C starts in 18 days</div>
-                        <div class="tecme-s-sub" style="color: var(--accent-green);">Nothing due ✓</div>
+                        <div class="tecme-s-main" dir="ltr" style="font-size: 1.05rem;">${escHtml(data.breakSub)}</div>
+                        <div class="tecme-s-sub" dir="ltr" style="color: var(--accent-green);">Nothing due ✓</div>
                     </div>
-                    <div class="tecme-s-footer">Academic break</div>
+                    <div class="tecme-s-footer" dir="ltr">Academic break</div>
                 `;
             }
 
             // 2. Next Exam S
             const examSEl = document.getElementById('widget-exam-s');
-            const examDays = currentPhase === 'finals' ? '2' : '115';
+            const examDays = String(data.nextExam ? data.nextExam.daysLeft : 0);
             examSEl.innerHTML = `
                 <div>
                     <div class="tecme-exam-num-row">
-                        <span class="tecme-exam-huge-num">${examDays}</span>
+                        <span class="tecme-exam-huge-num">${escHtml(examDays)}</span>
                         <span class="tecme-exam-unit">days</span>
                     </div>
-                    <div class="tecme-exam-course">${data.nextExam.courseName}</div>
-                    <div class="tecme-exam-details">${data.nextExam.dateStr}</div>
+                    <div class="tecme-exam-course">${escHtml(data.nextExam.courseName)}</div>
+                    <div class="tecme-exam-details" dir="ltr">${escHtml(data.nextExam.dateStr)}</div>
                     <div class="tecme-exam-dashes">
                         <div class="tecme-dash active"></div>
                         <div class="tecme-dash active"></div>
@@ -1513,14 +1673,14 @@
                         <div class="tecme-dash"></div>
                     </div>
                 </div>
-                <div class="tecme-s-footer">then ${data.nextExam.remainingCount} more</div>
+                <div class="tecme-s-footer" dir="ltr">then ${escHtml(data.nextExam.remainingCount)} more</div>
             `;
 
             // 3. Semester M
             const semMEl = document.getElementById('widget-semester-m');
             let semMTitle = data.termWeek;
             let semMSub = data.termSub;
-            let timelinePct = '24%';
+            let timelinePct = data.timelinePct || '24%';
             let activeTerm = 'active', activeFinals = '', activeBreak = '';
 
             if (currentPhase === 'finals') {
@@ -1683,7 +1843,7 @@
 
                     <div class="tecme-l-footer-bar">
                         <span>🗓️ Next test: <strong class="test-title">${escHtml(data.nextExam.courseName)} · Moed A</strong></span>
-                        <span>in ${currentPhase === 'finals' ? '2' : '115'} days</span>
+                        <span>in ${escHtml(data.nextExam.daysLeft)} days</span>
                     </div>
                 `;
                 upNextLEl.querySelectorAll('.tecme-task-row[data-task-id]').forEach(row => {

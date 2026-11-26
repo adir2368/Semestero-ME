@@ -282,6 +282,14 @@
             }
 
             this.selectedWeek = Math.max(1, Math.min(13, this.getCurrentAcademicWeek()));
+            if (typeof this.pruneOrphanedRecordsAgainstSchedule === 'function') {
+                const curSched = (typeof window !== 'undefined' && typeof window.getActiveTimetableSchedule === 'function')
+                    ? window.getActiveTimetableSchedule()
+                    : ((typeof window !== 'undefined' && window.gameState && window.gameState.timetable) ? window.gameState.timetable : null);
+                if (curSched) {
+                    this.pruneOrphanedRecordsAgainstSchedule(curSched, { clearReaddedFromPruned: false, skipSave: true });
+                }
+            }
             this.updateBadgeCounts();
         },
 
@@ -399,6 +407,29 @@
                     localStorage.setItem(STORAGE_KEY_CATCHUP, JSON.stringify(this.catchupQueue));
                     localStorage.setItem(STORAGE_KEY_QUOTAS, JSON.stringify(this.quotas));
                 } catch (e) {}
+            }
+            if (typeof this.pruneOrphanedRecordsAgainstSchedule === 'function') {
+                const curSched = (typeof window !== 'undefined' && typeof window.getActiveTimetableSchedule === 'function')
+                    ? window.getActiveTimetableSchedule()
+                    : ((typeof window !== 'undefined' && window.gameState && window.gameState.timetable) ? window.gameState.timetable : null);
+                if (curSched) {
+                    const prunedNow = this.pruneOrphanedRecordsAgainstSchedule(curSched, { clearReaddedFromPruned: false, skipSave: true });
+                    if (prunedNow) modified = true;
+                }
+                Object.keys(this.records || {}).forEach(k => {
+                    const rec = this.records[k];
+                    if (rec && String(rec.courseId || '').replace(/^0+/, '') === '3940805') {
+                        if (rec.courseName !== 'חינוך גופני - יוגה') { rec.courseName = 'חינוך גופני - יוגה'; modified = true; }
+                        if (!rec.room || rec.room.includes('אתלטיקה') || rec.room.includes('חינוך גופני')) { rec.room = 'מרכז הספורט'; modified = true; }
+                    }
+                });
+            }
+            if (modified) {
+                try {
+                    localStorage.setItem(STORAGE_KEY_RECORDS, JSON.stringify(this.records));
+                    localStorage.setItem(STORAGE_KEY_CATCHUP, JSON.stringify(this.catchupQueue));
+                    localStorage.setItem(STORAGE_KEY_QUOTAS, JSON.stringify(this.quotas));
+                } catch (e) {}
                 this.updateBadgeCounts();
                 this.refreshUI();
             }
@@ -439,7 +470,7 @@
                 targetSlotType = 'tutorial';
             } else if (lowerType.includes('הרצאה') || lowerType.includes('lecture')) {
                 targetSlotType = 'lecture';
-            } else if (lowerType.includes('אימון') || lowerType.includes('ספורט') || lowerType.includes('sports')) {
+            } else if (lowerType.includes('אימון') || lowerType.includes('ספורט') || lowerType.includes('sports') || lowerType.includes('יוגה') || lowerType.includes('yoga') || lowerType.includes('אתלטיקה')) {
                 targetSlotType = 'sports';
             }
 
@@ -846,6 +877,9 @@
                 return window.classifySessionDitchCategory(type);
             }
             const lower = String(type || '').toLowerCase();
+            if (lower.includes('יוגה') || lower.includes('yoga') || lower.includes('אימון') || lower.includes('ספורט') || lower.includes('sports') || lower.includes('אתלטיקה')) {
+                return 'sports';
+            }
             if (lower.includes('תרגול') || lower.includes('מעבדה') || lower.includes('tutorial') || lower.includes('recitation') || lower.includes('lab')) {
                 return 'tutorial';
             }
@@ -992,6 +1026,8 @@
                         lectureMissed: 0,
                         tutorialAttended: 0,
                         tutorialMissed: 0,
+                        sportsAttended: 0,
+                        sportsMissed: 0,
                         perpetualDitchMode: mode
                     });
                 }
@@ -1028,6 +1064,7 @@
                         totalAttended++;
                         if (cat === 'lecture') { lectureAttended++; cStats.lectureAttended++; }
                         else if (cat === 'tutorial') { tutorialAttended++; cStats.tutorialAttended++; }
+                        else { cStats.sportsAttended++; }
                     } else if (rec && rec.status === 'missed') {
                         row.weeks[w] = 'missed';
                         row.missed++;
@@ -1036,6 +1073,7 @@
                         totalMissed++;
                         if (cat === 'lecture') { lectureMissed++; cStats.lectureMissed++; }
                         else if (cat === 'tutorial') { tutorialMissed++; cStats.tutorialMissed++; }
+                        else { cStats.sportsMissed++; }
                     } else if (isSlotPerp) {
                         row.weeks[w] = 'perpetual';
                         weeks[w].perpetual++;
@@ -1433,7 +1471,9 @@
                             <div style="height: 100%; width: ${pctVal}%; background: ${pctVal >= 80 ? '#10b981' : '#f59e0b'};"></div>
                         </div>
                         <div style="display: flex; justify-content: space-between; font-size: 0.72rem; color: #94a3b8; flex-wrap: wrap; gap: 6px;">
-                            <span>הרצאות: ${c.lectureAttended}/${c.lectureAttended + c.lectureMissed} • תרגולים: ${c.tutorialAttended}/${c.tutorialAttended + c.tutorialMissed}</span>
+                            <span>${(String(c.courseId).replace(/^0+/, '') === '3940805' || (c.sportsAttended + c.sportsMissed > 0 && c.lectureAttended + c.lectureMissed === 0 && c.tutorialAttended + c.tutorialMissed === 0))
+                                ? `אימונים ומפגשים: ${c.attended}/${c.marked}`
+                                : `הרצאות: ${c.lectureAttended}/${c.lectureAttended + c.lectureMissed} • תרגולים: ${c.tutorialAttended}/${c.tutorialAttended + c.tutorialMissed}`}</span>
                             <span style="color: ${c.perpetualDitchMode !== 'none' ? '#c084fc' : '#64748b'}; font-weight: 700;">${modeLabels[c.perpetualDitchMode] || modeLabels.none}</span>
                         </div>
                     </div>
@@ -1584,10 +1624,10 @@
             const pending = this.catchupQueue.filter(i => i.status !== 'completed');
             const completed = this.catchupQueue.filter(i => i.status === 'completed');
 
-            const totalMinutes1x = pending.reduce((sum, item) => {
-                const isTut = item.type && (item.type.includes('תרגול') || item.type.includes('מעבדה'));
+            const totalMinutes1x = Math.max(0, pending.reduce((sum, item) => {
+                const isTut = item && item.type && (item.type.includes('תרגול') || item.type.includes('מעבדה'));
                 return sum + (isTut ? 55 : 100);
-            }, 0);
+            }, 0));
             const hours1x = (totalMinutes1x / 60).toFixed(1);
             const hours15x = (totalMinutes1x / 90).toFixed(1);
 
@@ -1610,10 +1650,10 @@
                         ${pending.length > 0 ? `
                         <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px;">
                             <span style="font-size: 0.74rem; background: rgba(56, 189, 248, 0.14); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.35); padding: 2px 8px; border-radius: 6px; font-weight: 700;">
-                                ⚡ זמן צפייה משוער ב-<bdi dir="ltr">1.5x</bdi>: <bdi dir="ltr">~${hours15x}</bdi> שעות
+                                ⚡ זמן צפייה משוער ב-<bdi dir="ltr">1.5x</bdi>: <bdi dir="ltr">${hours15x}</bdi> שעות
                             </span>
                             <span style="font-size: 0.74rem; background: rgba(255, 255, 255, 0.06); color: #94a3b8; border: 1px solid rgba(255, 255, 255, 0.12); padding: 2px 8px; border-radius: 6px;">
-                                ⏱️ במהירות רגילה (<bdi dir="ltr">1.0x</bdi>): <bdi dir="ltr">~${hours1x}</bdi> שעות
+                                ⏱️ במהירות רגילה (<bdi dir="ltr">1.0x</bdi>): <bdi dir="ltr">${hours1x}</bdi> שעות
                             </span>
                         </div>
                         ` : ''}
