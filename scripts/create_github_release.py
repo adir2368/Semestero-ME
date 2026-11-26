@@ -110,7 +110,7 @@ def main():
 - **Electron & iOS Parity**: Added `will-navigate` navigation guard in `main.js`, included `watch_companion.js` & `widgets.html` offline assets, and synced iOS Capacitor URL/version metadata (`{VERSION}` / build `149`).
 
 ### ✨ 3. `v3.2.4` Post-Audit Polish & Live Companion Fixes
-- Fixed `PanoptoTracker.openModal(opts = {})` `ReferenceError`, normalized `3940805`/`03940805` (`חינוך גופני - יוגה`) across Flowchart, Planner, Grade Sheet & Attendance, added Light Mode contrast rules for Grade Sheet CSV & What-If buttons (`accessibility.css`), pinned `#task-side-peek` actions footer, and enforced `dir="ltr"` across `widgets.html` S/M/L cards.
+- Fixed `PanoptoTracker.openModal(opts)` `ReferenceError`, normalized `3940805`/`03940805` (`חינוך גופני - יוגה`) across Flowchart, Planner, Grade Sheet & Attendance, added Light Mode contrast rules for Grade Sheet CSV & What-If buttons (`accessibility.css`), pinned `#task-side-peek` actions footer, and enforced `dir="ltr"` across `widgets.html` S/M/L cards.
 
 ### 📦 4. קובצי הפצה (`v{VERSION}`, `versionCode 149`):
 - פורסמו כל 4 קובצי ההתקנה החתומים (Android Phone, Tablet Clean, Galaxy Watch 8, Windows x64).
