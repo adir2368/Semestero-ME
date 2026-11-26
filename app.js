@@ -26924,11 +26924,11 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.11.26-v3.2.7",
-    version: "3.2.7",
+    code: "REV-2026.11.26-v3.2.8",
+    version: "3.2.8",
     build: "20261126_04",
     date: "2026-11-26 18:40",
-    description: "v3.2.7: שימור סמסטר 3 פעיל בסנכרון ענן בזמן אמת, תיקון סידור שכבות ההתראות ודיאגרמת הנק״ז, חיבור הווידג׳טים והשעון לנתוני המשתמש החיים וליטוש מלא של מצב בהיר, גיליון הציונים והנוכחות."
+    description: "v3.2.8: תמיכה היברידית מלאה בסביבת ענן מרוחקת (Linux Cloud VM + Windows), סנכרון דו-כיווני לכספת Obsidian SecondBrain ב-GitHub, אוטומציית Graphify ואימות E2E חוצה-פלטפורמות."
 };
 window.APP_VERSION = APP_CURRENT_REVISION.version;
 window.APP_CURRENT_REVISION = APP_CURRENT_REVISION;

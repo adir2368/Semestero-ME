@@ -1,7 +1,7 @@
 import os
 from PIL import Image, ImageDraw
 
-ROOT_DIR = r"C:\Users\user\.gemini\antigravity\scratch\academic-skill-tree"
+ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SOURCE_ICON = os.path.join(ROOT_DIR, "icon-512.png")
 RES_DIR = os.path.join(ROOT_DIR, "android", "app", "src", "main", "res")
 

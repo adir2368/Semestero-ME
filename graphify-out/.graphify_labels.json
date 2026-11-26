@@ -19,7 +19,6 @@
   "23": "saveState",
   "24": "wear/MainActivity.java",
   "25": "WearCarouselAdapter",
-  "26": "qa_verify_planner_interactive_restore_and_collapse.js",
   "27": "moodle_sync.js",
   "28": "verify_guest_isolation_full.js",
   "29": "package.json",
@@ -62,7 +61,6 @@
   "78": "check_prereqs.js",
   "79": "qa_verify_watch_browser.js",
   "80": "verify_classification_exams.test.js",
-  "81": "qa_verify_planner_mandatory.js",
   "83": "verify_all_connections_and_sync_guards.js",
   "84": "verify_integrations_hub_cdp.js",
   "85": "verify_unconnected_sync_guards.js",
@@ -71,7 +69,6 @@
   "90": "qa_verify_physics_variant.js",
   "91": "test_onboarding_auth_flow.js",
   "92": "test_technion_catalog_planner_e2e.js",
-  "93": "generate_verified_prereqs.js",
   "95": "verify_pre_anchor_and_clean_ui.js",
   "96": "test_pass6_settings_global_hardening.js",
   "98": "verify_tasks_refresh_and_dedup.js",
@@ -167,6 +164,5 @@
   "316": "test_pass0_shared_core_hardening.js",
   "318": "test_pass3_tasks_moodle_hardening.js",
   "320": "ref_vm",
-  "322": "build_mobile_dist.js",
-  "323": "SemesteroNextClassWidget"
+  "322": "build_mobile_dist.js"
 }

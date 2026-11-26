@@ -24,7 +24,7 @@ async function main() {
     await new Promise(r => setTimeout(r, 1500));
 
     // 2. Launch headless Chrome with CDP
-    const chromePath = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
+    const chromePath = process.env.CHROME_PATH || (process.platform === "win32" ? "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe" : "/usr/bin/google-chrome");
     const chromeProcess = spawn(chromePath, [
         `--remote-debugging-port=${CDP_PORT}`,
         '--headless=new',

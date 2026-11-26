@@ -9,7 +9,7 @@ const path = require('path');
 const { spawn } = require('child_process');
 const assert = require('assert');
 
-const ARTIFACTS_DIR = 'C:\\Users\\user\\.gemini\\antigravity\\brain\\aa7d2a33-2de8-4eeb-b8bd-18c8fdd69b14';
+const ARTIFACTS_DIR = process.platform === "win32" ? "C:/Users/user/.gemini/antigravity/brain/aa7d2a33-2de8-4eeb-b8bd-18c8fdd69b14" : require("os").tmpdir();
 const PORT = 9889;
 const SERVER_PORT = 8080;
 const TARGET_URL = `http://127.0.0.1:${SERVER_PORT}/watch.html`;
@@ -29,7 +29,11 @@ function findChrome() {
     const paths = [
         'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
         'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
-        process.env.LOCALAPPDATA + '\\Google\\Chrome\\Application\\chrome.exe'
+        process.env.LOCALAPPDATA ? process.env.LOCALAPPDATA + "\\Google\\Chrome\\Application\\chrome.exe" : "",
+        "/usr/bin/google-chrome",
+        "/usr/bin/google-chrome-stable",
+        "/usr/bin/chromium",
+        "/usr/bin/chromium-browser"
     ];
     for (const p of paths) {
         if (p && fs.existsSync(p)) return p;

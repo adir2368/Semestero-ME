@@ -16,8 +16,8 @@ const { spawn } = require('child_process');
 const assert = require('assert');
 
 const ROOT = path.join(__dirname, '..');
-const CHROME_PATH = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
-const ARTIFACT_DIR = path.resolve('C:\\Users\\user\\.gemini\\antigravity\\brain\\aa7d2a33-2de8-4eeb-b8bd-18c8fdd69b14');
+const CHROME_PATH = process.env.CHROME_PATH || (process.platform === "win32" ? "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe" : "/usr/bin/google-chrome");
+const ARTIFACT_DIR = process.platform === "win32" ? "C:/Users/user/.gemini/antigravity/brain/aa7d2a33-2de8-4eeb-b8bd-18c8fdd69b14" : require("os").tmpdir();
 const PORT = 9750 + Math.floor(Math.random() * 200);
 const APP_URL = 'http://localhost:8080';
 

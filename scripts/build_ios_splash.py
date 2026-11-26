@@ -1,7 +1,7 @@
 import os
 from PIL import Image
 
-ROOT = r"C:\Users\user\.gemini\antigravity\scratch\academic-skill-tree"
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 icon_path = os.path.join(ROOT, "icon.png")
 splash_dir = os.path.join(ROOT, "ios", "App", "App", "Assets.xcassets", "Splash.imageset")
 

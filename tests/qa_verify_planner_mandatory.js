@@ -9,7 +9,7 @@ const path = require('path');
 const { spawn } = require('child_process');
 const assert = require('assert');
 
-const ARTIFACTS_DIR = 'C:\\Users\\user\\.gemini\\antigravity\\brain\\aa7d2a33-2de8-4eeb-b8bd-18c8fdd69b14';
+const ARTIFACTS_DIR = process.platform === "win32" ? "C:/Users/user/.gemini/antigravity/brain/aa7d2a33-2de8-4eeb-b8bd-18c8fdd69b14" : require("os").tmpdir();
 const PORT = 9892;
 const SERVER_PORT = 8080;
 const TARGET_URL = `http://127.0.0.1:${SERVER_PORT}/?qa_test=1`;

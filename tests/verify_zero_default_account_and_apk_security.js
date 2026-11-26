@@ -6,12 +6,12 @@ const os = require('os');
 const fs = require('fs');
 
 const ROOT = path.resolve(__dirname, '..');
-const CHROME_PATH = "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
+const CHROME_PATH = process.env.CHROME_PATH || (process.platform === "win32" ? "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe" : "/usr/bin/google-chrome");
 const PORT = 9500 + Math.floor(Math.random() * 350);
 const PROFILE_DIR = path.join(os.tmpdir(), `chrome_qa_zero_default_${Date.now()}`);
 const SERVER_PORT = 8080;
 const BASE_URL = `http://127.0.0.1:${SERVER_PORT}`;
-const ARTIFACT_DIR = "C:/Users/user/.gemini/antigravity/brain/aa7d2a33-2de8-4eeb-b8bd-18c8fdd69b14";
+const ARTIFACT_DIR = process.platform === "win32" ? "C:/Users/user/.gemini/antigravity/brain/aa7d2a33-2de8-4eeb-b8bd-18c8fdd69b14" : require("os").tmpdir();
 
 function delay(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));

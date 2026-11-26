@@ -9,11 +9,11 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 
-const CHROME_PATH = "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
+const CHROME_PATH = process.env.CHROME_PATH || (process.platform === "win32" ? "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe" : "/usr/bin/google-chrome");
 const PORT = 9333;
 const PROFILE_DIR = path.join(os.tmpdir(), `chrome_isolated_qa_${Date.now()}`);
 const TARGET_URL = `https://adir2368.github.io/Semestero-ME/?qa=${Date.now()}`;
-const ARTIFACT_DIR = "C:/Users/user/.gemini/antigravity/brain/aa7d2a33-2de8-4eeb-b8bd-18c8fdd69b14";
+const ARTIFACT_DIR = process.platform === "win32" ? "C:/Users/user/.gemini/antigravity/brain/aa7d2a33-2de8-4eeb-b8bd-18c8fdd69b14" : require("os").tmpdir();
 
 function delay(ms) {
     return new Promise(res => setTimeout(res, ms));

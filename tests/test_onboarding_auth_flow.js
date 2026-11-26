@@ -5,7 +5,7 @@ const path = require('path');
 const os = require('os');
 const fs = require('fs');
 
-const CHROME_PATH = "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
+const CHROME_PATH = process.env.CHROME_PATH || (process.platform === "win32" ? "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe" : "/usr/bin/google-chrome");
 const PORT = 9700 + Math.floor(Math.random() * 200);
 const PROFILE_DIR = path.join(os.tmpdir(), `chrome_qa_auth_${Date.now()}`);
 const SERVER_PORT = 8080;

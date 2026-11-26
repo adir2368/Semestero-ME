@@ -40,12 +40,13 @@ with zipfile.ZipFile(OUT_ZIP, 'w', zipfile.ZIP_DEFLATED) as zipf:
 
 print(f"Zip created successfully! Size: {os.path.getsize(OUT_ZIP) / (1024*1024):.2f} MB")
 
-# Close running instances on local computer if open, so file locks do not block updates
-try:
-    import subprocess
-    subprocess.run(["powershell", "-Command", "Stop-Process -Name 'Semestero ME', 'electron' -Force -ErrorAction SilentlyContinue"], capture_output=True)
-except Exception:
-    pass
+# Close running instances on local Windows computer if open, so file locks do not block updates
+if os.name == 'nt':
+    try:
+        import subprocess
+        subprocess.run(["powershell", "-Command", "Stop-Process -Name 'Semestero ME', 'electron' -Force -ErrorAction SilentlyContinue"], capture_output=True)
+    except Exception:
+        pass
 
 try:
     shutil.copy2(EXE_SRC, EXE_DST)
