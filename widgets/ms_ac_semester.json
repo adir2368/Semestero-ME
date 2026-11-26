@@ -2,6 +2,7 @@
   "type": "AdaptiveCard",
   "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
   "version": "1.5",
+  "rtl": true,
   "body": [
     {
       "type": "Container",
@@ -54,7 +55,7 @@
                 },
                 {
                   "type": "TextBlock",
-                  "text": "${earnedCredits} / 157.5",
+                  "text": "${earnedCredits} / ${targetCredits}",
                   "weight": "Bolder",
                   "size": "Medium"
                 }
@@ -69,7 +70,7 @@
     {
       "type": "Action.OpenUrl",
       "title": "פתח סמסטרו",
-      "url": "https://adir2368.github.io/Semestero-ME/widgets.html?w=semester"
+      "url": "https://semestero.me/Semestero-ME/widgets.html?w=semester"
     }
   ]
 }

@@ -15,6 +15,29 @@ function delay(ms) {
     return new Promise(res => setTimeout(res, ms));
 }
 
+function isServerListening(port = 8080) {
+    return new Promise((resolve) => {
+        const req = http.get(`http://127.0.0.1:${port}/package.json`, (res) => {
+            res.resume();
+            resolve(res.statusCode >= 200 && res.statusCode < 500);
+        });
+        req.on('error', () => resolve(false));
+        req.setTimeout(1000, () => { req.destroy(); resolve(false); });
+    });
+}
+
+async function ensureLocalServer8080() {
+    if (await isServerListening(8080)) return null;
+    const rootDir = path.resolve(__dirname, '..');
+    const proc = spawn('node', ['server.js'], { cwd: rootDir, stdio: 'ignore' });
+    for (let i = 0; i < 20; i++) {
+        await delay(250);
+        if (await isServerListening(8080)) return proc;
+    }
+    proc.kill();
+    throw new Error('Failed to start local server.js on port 8080');
+}
+
 function getJson(url) {
     return new Promise((resolve, reject) => {
         http.get(url, (res) => {
@@ -91,6 +114,7 @@ async function run() {
     console.log('🛡️ QA SUITE: COMPREHENSIVE CONNECTION AUDIT & UNCONNECTED SYNC GUARDS');
     console.log('========================================================================\n');
 
+    const serverProc = await ensureLocalServer8080();
     console.log(`[Launch] Starting headless Chrome on port ${PORT}...`);
     const chrome = spawn(CHROME_PATH, [
         `--remote-debugging-port=${PORT}`,
@@ -121,7 +145,14 @@ async function run() {
 
     const cdp = new CDPClient(wsUrl);
     await cdp.connect();
-    await delay(2500);
+    await cdp.send('Page.enable');
+    await cdp.send('Runtime.enable');
+    for (let i = 0; i < 20; i++) {
+        const href = await cdp.eval('window.location.href').catch(() => '');
+        if (String(href).startsWith('http://')) break;
+        await delay(250);
+    }
+    await delay(1800);
 
     try {
         // Initialize clean state: unconnected guest
@@ -449,6 +480,7 @@ async function run() {
     } finally {
         cdp.close();
         chrome.kill();
+        if (serverProc) { try { serverProc.kill(); } catch (e) {} }
         await delay(1000);
         try {
             fs.rmSync(PROFILE_DIR, { recursive: true, force: true });

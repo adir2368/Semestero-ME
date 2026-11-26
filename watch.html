@@ -30,8 +30,9 @@
 
         /* Physical Smartwatch Circular Chassis */
         .watch-container {
-            width: 100vw;
-            height: 100vh;
+            width: min(92vw, 92dvh, 450px);
+            height: min(92vw, 92dvh, 450px);
+            aspect-ratio: 1 / 1;
             max-width: 450px;
             max-height: 450px;
             background: #000000;
@@ -561,6 +562,6 @@
     </div>
 
     <!-- Watch Companion Controller -->
-    <script src="watch_companion.js?v=2.8.8"></script>
+    <script src="watch_companion.js?v=3.2.0"></script>
 </body>
 </html>

@@ -8,6 +8,15 @@
 (function (global) {
     'use strict';
 
+    function escHtml(str) {
+        return String(str ?? '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
     // Master Course Groups Catalog (Technion Semester 3 - Winter 2026/2027 תשפ״ז)
     const TECH_COURSE_GROUPS_CATALOG = {
         '034056': {
@@ -1614,7 +1623,12 @@
             this.populateCourseAdder();
             this.computeAndRender();
             modal.style.display = 'flex';
+            const bodyEl = modal.querySelector('.modal-body');
+            if (bodyEl) bodyEl.scrollTop = 0;
             this.bindEventsOnce();
+            if (global.ModalHelp && typeof global.ModalHelp.injectHelpButtons === 'function') {
+                global.ModalHelp.injectHelpButtons();
+            }
         },
 
         populateCourseAdder: function (searchText = '') {
@@ -1626,7 +1640,7 @@
 
             if (datalist) {
                 datalist.innerHTML = allCourses
-                    .map(c => `<option value="${c.code}">${c.name} (${c.code})</option>`)
+                    .map(c => `<option value="${escHtml(c.code)}">${escHtml(c.name)} (${escHtml(c.code)})</option>`)
                     .join('');
             }
             if (select) {
@@ -1635,7 +1649,7 @@
                     : allCourses;
                 const optsHtml = filtered.map(c => {
                     const already = selectedClean.has(c.cleanCode);
-                    return `<option value="${c.code}">${already ? '✓ ' : ''}${c.name} (${c.code}) • ${c.credits} נק״ז</option>`;
+                    return `<option value="${escHtml(c.code)}">${already ? '✓ ' : ''}${escHtml(c.name)} (${escHtml(c.code)}) • ${escHtml(c.credits)} נק״ז</option>`;
                 }).join('');
                 select.innerHTML = `<option value="">-- בחר קורס להוספה (${filtered.length}) --</option>${optsHtml}`;
             }
@@ -1751,8 +1765,8 @@
                 html += `
                     <span class="ttg-anchor-chip is-user-anchor" style="background: rgba(56, 189, 248, 0.16); border: 1px solid rgba(56, 189, 248, 0.45); color: #38bdf8; font-size: 0.74rem; font-weight: 700; padding: 3px 10px; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px;">
                         <span>⚓</span>
-                        <span>${a.courseName || a.courseCode}: ${roleLabel} קב' ${a.groupId} (${a.lecturer})</span>
-                        <button type="button" class="ttg-btn-unanchor" data-key="${k}" title="הסר עוגן זה וחזור לחישוב גמיש" style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); color: #f87171; border-radius: 4px; font-size: 0.72rem; cursor: pointer; padding: 1px 6px; line-height: 1.2; margin-right: 2px;">
+                        <span>${escHtml(a.courseName || a.courseCode)}: ${escHtml(roleLabel)} קב' ${escHtml(a.groupId)} (${escHtml(a.lecturer)})</span>
+                        <button type="button" class="ttg-btn-unanchor" data-key="${escHtml(k)}" title="הסר עוגן זה וחזור לחישוב גמיש" style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); color: #f87171; border-radius: 4px; font-size: 0.72rem; cursor: pointer; padding: 1px 6px; line-height: 1.2; margin-right: 2px;">
                             ✕
                         </button>
                     </span>
@@ -1817,18 +1831,18 @@
                 let anchorChipBadge = '';
                 const sysAnchor = SYSTEM_ANCHORS[`${c.code}_sport`];
                 if (sysAnchor && !(this.disabledSystemAnchors && this.disabledSystemAnchors[sysAnchor.slotKey])) {
-                    anchorChipBadge = `<span style="background: rgba(245, 158, 11, 0.22); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.45); padding: 1px 6px; border-radius: 4px; font-weight: 800; font-size: 0.68rem;" title="${c.anchorNote || 'עוגן במערכת'}">⚓ עוגן (חמישי 07:30)</span>`;
+                    anchorChipBadge = `<span style="background: rgba(245, 158, 11, 0.22); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.45); padding: 1px 6px; border-radius: 4px; font-weight: 800; font-size: 0.68rem;" title="${escHtml(c.anchorNote || 'עוגן במערכת')}">⚓ עוגן (חמישי 07:30)</span>`;
                 } else if (courseAnchors.length > 0) {
-                    const aNames = courseAnchors.map(a => a.lecturer).join(', ');
+                    const aNames = courseAnchors.map(a => escHtml(a.lecturer)).join(', ');
                     anchorChipBadge = `<span style="background: rgba(56, 189, 248, 0.22); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.45); padding: 1px 6px; border-radius: 4px; font-weight: 800; font-size: 0.68rem;" title="מרצה מעוגן: ${aNames}">⚓ ${aNames}</span>`;
                 }
 
                 html += `
                     <label class="ttg-course-chip ${isChecked ? 'is-checked' : ''}" style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 6px; font-size: 0.76rem; background: ${isChecked ? 'rgba(56, 189, 248, 0.15)' : 'rgba(255, 255, 255, 0.04)'}; border: 1px solid ${isChecked ? '#38bdf8' : 'rgba(255, 255, 255, 0.1)'}; color: ${isChecked ? '#fff' : '#94a3b8'}; cursor: pointer; user-select: none;">
-                        <input type="checkbox" class="ttg-course-cb" value="${c.code}" ${isChecked ? 'checked' : ''} style="accent-color: #38bdf8;">
-                        <span>${c.name} (${c.code})</span>
+                        <input type="checkbox" class="ttg-course-cb" value="${escHtml(c.code)}" ${isChecked ? 'checked' : ''} style="accent-color: #38bdf8;">
+                        <span>${escHtml(c.name)} (${escHtml(c.code)})</span>
                         ${anchorChipBadge}
-                        <span style="opacity: 0.7; font-size: 0.70rem;">• ${c.credits || 0} נק״ז</span>
+                        <span style="opacity: 0.7; font-size: 0.70rem;">• ${escHtml(c.credits || 0)} נק״ז</span>
                     </label>
                 `;
             });
@@ -1884,9 +1898,9 @@
                         <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255, 255, 255, 0.06); padding-bottom: 6px;">
                             <div style="font-weight: 800; font-size: 0.84rem; color: #f1f5f9; display: flex; align-items: center; gap: 6px;">
                                 <span class="timetable-course-dot" style="width: 8px; height: 8px; border-radius: 50%; background: #38bdf8; display: inline-block;"></span>
-                                <span>${item.name}</span>
+                                <span>${escHtml(item.name)}</span>
                             </div>
-                            <span style="font-size: 0.70rem; color: #94a3b8;">${item.code}</span>
+                            <span style="font-size: 0.70rem; color: #94a3b8;">${escHtml(item.code)}</span>
                         </div>
                 `;
 
@@ -1894,7 +1908,7 @@
                     html += `
                         <div style="background: rgba(245, 158, 11, 0.12); border: 1px solid rgba(245, 158, 11, 0.35); border-radius: 6px; padding: 8px 10px; font-size: 0.76rem; color: #fbbf24; display: flex; align-items: center; justify-content: space-between; gap: 6px;">
                             <span>🔒 <strong>עוגן:</strong> קבוצה 05 • שלומית בן-איש (חמישי 07:30)</span>
-                            <button type="button" class="btn btn-xs" onclick="window.TimetableGenerator.studio.toggleAnchor('03940805','sport','24','שלומית בן-איש','${item.name}')" style="background:rgba(255,255,255,0.08);color:#fde68a;border:none;border-radius:4px;padding:2px 6px;cursor:pointer;">שחרר</button>
+                            <button type="button" class="btn btn-xs ttg-btn-release-yoga" data-course="03940805" data-slottype="sport" data-group="24" data-lecturer="שלומית בן-איש" data-coursename="${escHtml(item.name)}" style="background:rgba(255,255,255,0.08);color:#fde68a;border:none;border-radius:4px;padding:2px 6px;cursor:pointer;">שחרר</button>
                         </div>
                     `;
                 } else if (item.slots && item.slots.length > 0) {
@@ -1907,17 +1921,17 @@
                             <div style="display: flex; flex-direction: column; gap: 4px;">
                                 <div style="display: flex; justify-content: space-between; align-items: center;">
                                     <span style="font-size: 0.72rem; font-weight: 700; color: #94a3b8;">
-                                        ${slot.slotName} (${slot.slotType === 'lecture' ? 'מרצה' : 'מתרגל'}):
+                                        ${escHtml(slot.slotName)} (${slot.slotType === 'lecture' ? 'מרצה' : 'מתרגל'}):
                                     </span>
-                                    ${currentAnchor ? `<span style="font-size: 0.68rem; color: #38bdf8; font-weight: 800;">⚓ נעול (קב' ${currentAnchor.groupId})</span>` : `<span style="font-size: 0.68rem; color: #64748b;">גמיש</span>`}
+                                    ${currentAnchor ? `<span style="font-size: 0.68rem; color: #38bdf8; font-weight: 800;">⚓ נעול (קב' ${escHtml(currentAnchor.groupId)})</span>` : `<span style="font-size: 0.68rem; color: #64748b;">גמיש</span>`}
                                 </div>
-                                <select class="ttg-pre-anchor-select" data-course="${item.code}" data-slottype="${slot.slotType}" style="width: 100%; background: #0f172a; border: 1px solid ${currentAnchor ? '#38bdf8' : 'rgba(255, 255, 255, 0.15)'}; color: ${currentAnchor ? '#f8fafc' : '#cbd5e1'}; font-size: 0.76rem; padding: 6px 8px; border-radius: 6px; outline: none; cursor: pointer;">
+                                <select class="ttg-pre-anchor-select" data-course="${escHtml(item.code)}" data-slottype="${escHtml(slot.slotType)}" style="width: 100%; background: #0f172a; border: 1px solid ${currentAnchor ? '#38bdf8' : 'rgba(255, 255, 255, 0.15)'}; color: ${currentAnchor ? '#f8fafc' : '#cbd5e1'}; font-size: 0.76rem; padding: 6px 8px; border-radius: 6px; outline: none; cursor: pointer;">
                                     <option value="">🎲 גמיש (האלגוריתם יבחר את הטוב ביותר)</option>
                                     ${slot.options.map(opt => {
                                         const isOptSelected = currentAnchor && String(currentAnchor.groupId) === String(opt.groupId);
-                                        const meetingSummary = opt.meetings.map(m => `${m.dayName} ${m.startTime}`).join(', ');
-                                        const roomSummary = (opt.room && opt.room !== 'כיתת טכניון') ? ` • 📍 ${opt.room}` : '';
-                                        return `<option value="${opt.groupId}" ${isOptSelected ? 'selected' : ''}>⚓ קב' ${opt.groupId}: ${opt.lecturer} (${meetingSummary}${roomSummary})</option>`;
+                                        const meetingSummary = opt.meetings.map(m => `${escHtml(m.dayName)} ${escHtml(m.startTime)}`).join(', ');
+                                        const roomSummary = (opt.room && opt.room !== 'כיתת טכניון') ? ` • 📍 ${escHtml(opt.room)}` : '';
+                                        return `<option value="${escHtml(opt.groupId)}" ${isOptSelected ? 'selected' : ''}>⚓ קב' ${escHtml(opt.groupId)}: ${escHtml(opt.lecturer)} (${meetingSummary}${roomSummary})</option>`;
                                     }).join('')}
                                 </select>
                             </div>
@@ -1929,6 +1943,18 @@
             });
 
             grid.innerHTML = html;
+
+            grid.querySelectorAll('.ttg-btn-release-yoga').forEach(btn => {
+                btn.onclick = () => {
+                    this.toggleAnchor(
+                        btn.dataset.course,
+                        btn.dataset.slottype,
+                        btn.dataset.group,
+                        btn.dataset.lecturer,
+                        btn.dataset.coursename
+                    );
+                };
+            });
 
             if (badge) {
                 badge.innerText = `${totalLocked} ${totalLocked === 1 ? 'עוגן פעיל' : 'עוגנים פעילים'}${isYogaSelected ? ' (כולל יוגה)' : ''}`;
@@ -2078,7 +2104,7 @@
                     const shortName = a.courseName ? a.courseName.split(' ')[0] : a.courseCode;
                     anchorsBadgeList += `
                         <span style="background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.45); padding: 3px 8px; border-radius: 6px; font-size: 0.74rem; font-weight: 700;">
-                            ⚓ עוגן: ${shortName} (${a.lecturer})
+                            ⚓ עוגן: ${escHtml(shortName)} (${escHtml(a.lecturer)})
                         </span>
                     `;
                 });
@@ -2209,11 +2235,11 @@
                                 cardAnchorAction = `
                                     <div style="margin-top: 6px;">
                                         <button type="button" class="ttg-btn-toggle-anchor ${isAnchored ? 'is-anchored' : ''}"
-                                            data-course="${c.courseId}"
-                                            data-slottype="${slotType}"
-                                            data-group="${c.group}"
-                                            data-lecturer="${c.lecturer || ''}"
-                                            data-coursename="${c.courseName}"
+                                            data-course="${escHtml(c.courseId)}"
+                                            data-slottype="${escHtml(slotType)}"
+                                            data-group="${escHtml(c.group)}"
+                                            data-lecturer="${escHtml(c.lecturer || '')}"
+                                            data-coursename="${escHtml(c.courseName)}"
                                             title="${isAnchored ? 'לחץ להסרת עוגן זה וחזרה לחישוב גמיש' : 'קבע מרצה וקבוצה זו כעוגן בלתי משתנה בכל הקומבינציות'}"
                                             style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 5px; padding: 4px 8px; border-radius: 5px; font-size: 0.72rem; font-weight: 700; cursor: pointer; transition: all 0.2s ease; border: 1px solid ${isAnchored ? '#38bdf8' : 'rgba(255, 255, 255, 0.14)'}; background: ${isAnchored ? 'rgba(56, 189, 248, 0.2)' : 'rgba(255, 255, 255, 0.05)'}; color: ${isAnchored ? '#38bdf8' : '#cbd5e1'};">
                                             <span>⚓</span>
@@ -2224,30 +2250,30 @@
                             }
 
                             classesHtml += `
-                                <div class="timetable-card ${c.cardClass}" style="margin-bottom: 8px;">
+                                <div class="timetable-card ${escHtml(c.cardClass)}" style="margin-bottom: 8px;">
                                     <!-- שורה 1: סוג/קבוצה ושעה -->
                                     <div class="timetable-card-top">
                                         <div style="display: flex; align-items: center; gap: 4px; flex-wrap: wrap;">
-                                            <span class="timetable-tag" style="background: rgba(255, 255, 255, 0.08); padding: 2px 6px; border-radius: 4px; font-weight: 700;">${c.type}</span>
+                                            <span class="timetable-tag" style="background: rgba(255, 255, 255, 0.08); padding: 2px 6px; border-radius: 4px; font-weight: 700;">${escHtml(c.type)}</span>
                                             ${anchorBadgeHtml}
                                         </div>
-                                        <span class="timetable-card-time">⏰ <span class="ui-time-ltr" dir="ltr">${c.startTime} - ${c.endTime}</span></span>
+                                        <span class="timetable-card-time">⏰ <span class="ui-time-ltr" dir="ltr">${escHtml(c.startTime)} - ${escHtml(c.endTime)}</span></span>
                                     </div>
                                     <!-- שורה 2: חדר או מיקום (רק אם קיים) -->
                                     ${(c.room && c.room.trim() && c.room !== 'כיתת טכניון') ? `
                                         <div class="timetable-card-room-bar" style="margin: 4px 0; font-size: 0.82rem; color: #38bdf8; font-weight: 700; display: flex; align-items: center; gap: 5px;">
-                                            <span>📍</span> <span>${c.room}</span>
+                                            <span>📍</span> <span>${escHtml(c.room)}</span>
                                         </div>
                                     ` : ''}
                                     <!-- שורה 3: מרצה או מתרגל -->
                                     ${c.lecturer ? `
                                         <div class="ttg-card-instructor" style="margin-top: 4px; margin-bottom: 4px; padding: 4px 8px; border-radius: 6px; background: ${instructorBg}; border: 1px solid ${instructorBorder}; display: flex; align-items: center; justify-content: space-between; font-size: 0.76rem;">
-                                            <span style="color: ${instructorColor}; font-weight: 700;">${instructorLabel}</span>
-                                            <span style="color: #ffffff; font-weight: 800;">${c.lecturer}</span>
+                                            <span style="color: ${instructorColor}; font-weight: 700;">${escHtml(instructorLabel)}</span>
+                                            <span style="color: #ffffff; font-weight: 800;">${escHtml(c.lecturer)}</span>
                                         </div>
                                     ` : ''}
                                     <!-- שורה 4: שם הקורס -->
-                                    <div class="timetable-card-name" style="font-size: 0.88rem; font-weight: 800; color: #f8fafc; margin-top: 2px;">${c.courseName}</div>
+                                    <div class="timetable-card-name" style="font-size: 0.88rem; font-weight: 800; color: #f8fafc; margin-top: 2px;">${escHtml(c.courseName)}</div>
                                     ${cardAnchorAction}
                                 </div>
                             `;
@@ -2324,11 +2350,11 @@
                         ? `<span style="font-size: 0.68rem; background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.35); padding: 1px 6px; border-radius: 4px; font-weight: 700;">🔒 עוגן קבוע</span>`
                         : `
                             <button type="button" class="ttg-breakdown-anchor-btn ${isAnchored ? 'is-anchored' : ''}"
-                                data-course="${s.courseCode}"
-                                data-slottype="${s.slotType}"
-                                data-group="${s.option.groupId}"
-                                data-lecturer="${s.option.lecturer || 'סגל'}"
-                                data-coursename="${s.courseName}"
+                                data-course="${escHtml(s.courseCode)}"
+                                data-slottype="${escHtml(s.slotType)}"
+                                data-group="${escHtml(s.option.groupId)}"
+                                data-lecturer="${escHtml(s.option.lecturer || 'סגל')}"
+                                data-coursename="${escHtml(s.courseName)}"
                                 title="${isAnchored ? 'בטל עגינה של מרצה זה' : 'עגן מרצה זה בכל המערכות'}"
                                 style="background: ${isAnchored ? 'rgba(56, 189, 248, 0.25)' : 'rgba(255, 255, 255, 0.08)'}; border: 1px solid ${isAnchored ? '#38bdf8' : 'rgba(255, 255, 255, 0.15)'}; color: ${isAnchored ? '#38bdf8' : '#cbd5e1'}; font-size: 0.68rem; font-weight: 700; padding: 1px 7px; border-radius: 4px; cursor: pointer;">
                                 <span>⚓</span> ${isAnchored ? 'מעוגן ✕' : 'עגן'}
@@ -2337,9 +2363,9 @@
 
                     return `
                         <span style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.12); padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; display: inline-flex; align-items: center; gap: 6px;">
-                            <strong>${s.courseName}:</strong> ${s.slotName} קב' ${s.option.groupId}
+                            <strong>${escHtml(s.courseName)}:</strong> ${escHtml(s.slotName)} קב' ${escHtml(s.option.groupId)}
                             <span style="color: ${color}; font-weight: 800; background: rgba(0,0,0,0.25); padding: 1px 6px; border-radius: 4px;">
-                                ${roleLabel}: ${s.option.lecturer || 'סגל'}
+                                ${escHtml(roleLabel)}: ${escHtml(s.option.lecturer || 'סגל')}
                             </span>
                             ${anchorPillBtn}
                         </span>
@@ -2349,7 +2375,7 @@
                 const allActiveAnchors = [];
                 if (isYogaSelected) allActiveAnchors.push('יוגה (חמישי 07:30 • שלומית בן-איש)');
                 Object.values(this.userAnchors || {}).forEach(a => {
-                    allActiveAnchors.push(`${a.courseName} (${a.lecturer}, קב' ${a.groupId})`);
+                    allActiveAnchors.push(escHtml(`${a.courseName} (${a.lecturer}, קב' ${a.groupId})`));
                 });
 
                 const anchorsCalloutHtml = allActiveAnchors.length > 0 ? `
@@ -2455,7 +2481,7 @@
             } else if (typeof global.showToastNotification === 'function') {
                 global.showToastNotification(toastMsg, 'success');
             } else {
-                alert(toastMsg);
+                console.warn('[TimetableGenerator]', toastMsg);
             }
         },
 
@@ -2566,8 +2592,8 @@
                         const msg = '⚠️ אינך מחובר ל-CheeseFork! לא הוגדר קישור מערכת שעות אישי לסנכרון.';
                         if (typeof showToastNotification === 'function') {
                             showToastNotification(msg, 'warning');
-                        } else if (typeof alert === 'function') {
-                            alert(msg);
+                        } else {
+                            console.warn('[TimetableGenerator]', msg);
                         }
                         if (typeof window.openConnectModal === 'function') {
                             window.openConnectModal('cheesefork');

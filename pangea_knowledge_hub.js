@@ -6647,7 +6647,7 @@
             const input = document.getElementById('pangea-global-search-input');
             if (!modal) return;
             document.body.appendChild(modal);
-            modal.style.zIndex = '2000010';
+            modal.style.zIndex = '1999990';
             modal.style.display = 'flex';
             document.body.style.overflow = 'hidden';
             if (typeof window.pushMobileBackHistory === 'function') {

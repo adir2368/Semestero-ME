@@ -105,6 +105,29 @@
             tip: '💡 טיפ: לקורסי ספורט או פטור בינארי, סמן את התיבה "ציון בינארי (עובר ללא ממוצע)".'
         },
 
+        'course-comparison-modal': {
+            title: 'השוואת קורסי בחירה צד-מול-צד (Course Comparator)',
+            purpose: 'השוואה מהירה בין שני קורסים במקביל לקבלת החלטת שיבוץ חכמה ללא התנגשויות.',
+            sections: [
+                {
+                    icon: '⚖️',
+                    title: 'בחירת שני קורסים (A מול B)',
+                    desc: 'בחר כל שני קורסים מהקטלוג להשוואת נק״ז, אשכול התמחות, מדד עומס משוער וסילבוס.'
+                },
+                {
+                    icon: '⚠️',
+                    title: 'זיהוי התנגשויות מועדי בחינות',
+                    desc: 'המערכת מתריעה אוטומטית אם לשני הקורסים יש מבחן מועד א׳ או מועד ב׳ באותו תאריך.'
+                },
+                {
+                    icon: '🔥',
+                    title: 'נתיב קריטי ושיבוץ מהיר',
+                    desc: 'בדיקה כמה קורסי המשך כל קורס פותח ושיבוץ מיידי לתכנון התואר או למועדפים בלחיצה.'
+                }
+            ],
+            tip: '💡 טיפ: בדוק שאין התנגשות במועדי א׳ לפני שיבוץ שני קורסי בחירה באותו סמסטר!'
+        },
+
         'auth-modal': {
             title: 'חשבון סטודנט, פרופיל וסנכרון ענן',
             purpose: 'ניהול החשבון האישי שלך, גיבוי הנתונים בענן וסנכרון בזמן אמת בין המחשב לנייד.',
@@ -190,6 +213,95 @@
                 }
             ],
             tip: '💡 טיפ: הוספת היומן לטלפון שולחת לך תזכורות על מועדי בחינות והגשות בזמן!'
+        },
+
+        'calendar-day-modal': {
+            title: 'ניהול ויצירת אירועים ביומן (Day & Event Editor)',
+            purpose: 'צפייה בכל האירועים, המבחנים והמשימות ביום שנבחר, ויצירה או עריכה של אירועים מתוזמנים, חוזרים ורב-יומיים.',
+            sections: [
+                {
+                    icon: '⏱️',
+                    title: 'טווח תאריכים, שעות ואירוע יום שלם',
+                    desc: 'ניתן לבחור טווח תאריכים לאירועים מרובי ימים (כגון מילואים), להגדיר שעות ספציפיות או לסמן אירוע יום שלם.'
+                },
+                {
+                    icon: '🔁',
+                    title: 'חזרות, תזכורות וספקטרום צבעים',
+                    desc: 'הגדר חזרה שבועית/מותאמת אישית, התראות לפני האירוע ושיוך לקבוצה וצבע אישי.'
+                }
+            ],
+            tip: '💡 טיפ: לחיצה על אירוע קיים ברשימה למעלה טוענת אותו לעריכה מיידית.'
+        },
+
+        'modal-unified-calendar-sync': {
+            title: 'ייצוא יומן אקדמי מאוחד (Unified ICS)',
+            purpose: 'הורדת קובץ .ics אחד המשלב מערכת שעות שבועית, דדליינים של משימות הגשה, מועדי בחינות סופיות ואירועים אישיים.',
+            sections: [
+                {
+                    icon: '📅',
+                    title: 'בחירת שכבות לייצוא',
+                    desc: 'סמן אילו שכבות לכלול בקובץ: שיעורים קבועים, שיעורי בית מ-Moodle ובחינות א׳/ב׳.'
+                },
+                {
+                    icon: '🔔',
+                    title: 'התראות מובנות (VALARM)',
+                    desc: 'האירועים כוללים תזכורות אוטומטיות ליומן הטלפון והמחשב לפני שיעורים, הגשות ובחינות.'
+                }
+            ],
+            tip: '💡 טיפ: קובץ המאוחד מתאים לייבוא ישיר ל-Google Calendar, Apple Calendar ו-Outlook.'
+        },
+
+        'modal-gcal-sync-manager': {
+            title: 'ניהול, עריכה ומחיקת מערכת השעות ביומן',
+            purpose: 'עריכת פרטי כיתות ומרצים במערכת הפעילה ויצירת קבצי ביטול לניקוי שיעורים קודמים ביומן Google.',
+            sections: [
+                {
+                    icon: '✏️',
+                    title: 'עריכה ממוקדת של שיעורים',
+                    desc: 'עדכן שם קורס, קבוצה, חדר ושעות לכל שיעור לפני סנכרון חוזר.'
+                },
+                {
+                    icon: '🧹',
+                    title: 'מחיקה ואיפוס מיומן חיצוני',
+                    desc: 'הורד קובץ ביטול .ics להסרה נקייה של אירועי מערכת קודמים.'
+                }
+            ],
+            tip: '💡 טיפ: לאחר עריכת שיעורים כאן, בצע סנכרון מחדש או הורד קובץ .ics מעודכן.'
+        },
+
+        'modal-timetable-generator': {
+            title: 'מחולל מערכות שעות & סטודיו קומבינציות',
+            badge: 'מחולל מערכת',
+            summary: 'חישוב אוטומטי של כל מערכות השעות האפשריות מקטלוג CheeseFork ללא חפיפות, עם קיבוע עוגנים ודירוג חלונות וימים פנויים.',
+            steps: [
+                { title: 'בחירת קורסים', text: 'סמן או הוסף קורסים מהקטלוג. תוכל לנעול מרצה/מתרגל מועדף כעוגן לפני הסידור.' },
+                { title: 'עיגון קבוצות ודפדוף', text: 'לחץ על ⚓ ליד קבוצה כדי לנעול אותה, או דפדף בין האפשרויות המדורגות בקרוסלה.' },
+                { title: 'החלה למערכת השעות', text: 'לחץ "החל מערכת נבחרת" כדי לשמור את המערכת הנבחרת בלשונית מערכת השעות.' }
+            ],
+            tip: '💡 טיפ: הפעל "מצב תאימות יציב" או נעל את השיעור הראשון של הבוקר כדי לצמצם מערכות לא רצויות.'
+        },
+
+        'modal-attendance-hub': {
+            title: 'מרכז נוכחות והשלמות (Panopto)',
+            badge: 'נוכחות ווידאו',
+            summary: 'מעקב מרוכז אחר שיעורים שהושלמו, שיעורים להשלמה ב-Panopto, הברזות קבועות וקורסים עם חובת נוכחות.',
+            steps: [
+                { title: 'לשוניות מעקב', text: 'עבור בין סיכום נוכחות, למידה עצמית, להשלמה, חובה והיסטוריה כדי לנהל פערים לפי שבוע.' },
+                { title: 'סימון השלמה', text: 'סמן שיעור כהושלם או פתח ישירות את רשימת ההקלטות של הקורס ב-Panopto / Moodle.' },
+                { title: 'קורסי חובה', text: 'הוסף או ערוך ידנית קורסים בעלי חובת נוכחות כדי שהתראות המערכת ידגישו אותם.' }
+            ],
+            tip: '💡 טיפ: סימון "הברזה" ישירות מכרטיס שיעור במערכת השעות מעביר את השיעור אוטומטית לרשימת ההשלמות.'
+        },
+
+        'modal-panopto-tracker': {
+            title: 'מעקב הקלטות Panopto & פער צפייה',
+            badge: 'הקלטות קורס',
+            summary: 'ניטור הקלטות וידאו לפי קורס וחלוקת הרצאות/תרגולים שהושלמו או מחכות לצפייה.',
+            steps: [
+                { title: 'פתיחת הקלטה', text: 'בחר הרצאה או תרגול מהרשימה וסמן את סטטוס הצפייה.' },
+                { title: 'קישור למרכז הנוכחות', text: 'חזור למרכז הנוכחות בכל עת כדי לראות השפעה על פער הצפייה הכללי.' }
+            ],
+            tip: '💡 טיפ: כניסה מכרטיס קורס במערכת פותחת רק את ההקלטות של אותו הקורס.'
         },
 
         'past-exams-modal': {
@@ -335,6 +447,96 @@
             tip: '💡 טיפ: השתמש בסימולטור הממוצע כדי לבדוק איך ציון בכל קורס ישפיע על ה-GPA הסופי שלך!'
         },
 
+        'planner-semesters-mgr-modal': {
+            title: 'ניהול סמסטרים בתואר (הוספה / החסרה)',
+            purpose: 'הוספת סמסטרים רגילים או סמסטרי קיץ והסרת סמסטרים מיותרים מבלי לאבד קורסים.',
+            sections: [
+                {
+                    icon: '➕',
+                    title: 'הוספת סמסטר רגיל או קיץ',
+                    desc: 'הרחבת התוכנית לשנה נוספת או שיבוץ סמסטר קיץ מרוכז להקלת העומס.'
+                },
+                {
+                    icon: '📦',
+                    title: 'הסרה בטוחה של סמסטר',
+                    desc: 'מחיקת סמסטר מחזירה את הקורסים הלא-מושלמים שבו לרשימת המאגר.'
+                }
+            ],
+            tip: '💡 טיפ: סמסטרי קיץ בודקים אוטומטית אילו קורסים מוצעים בקיץ בטכניון!'
+        },
+
+        'planner-export-modal': {
+            title: 'ייצוא והדפסת תכנון התואר',
+            purpose: 'הורדת מפת הסמסטרים כתמונת PNG חדה או הפקת קובץ PDF מותאם לדף A4 לרוחב.',
+            sections: [
+                {
+                    icon: '📸',
+                    title: 'תמונת PNG באיכות HD',
+                    desc: 'מייצאת את כל הסמסטרים, הקרדיטים ומדדי העומס לקובץ תמונה לשיתוף.'
+                },
+                {
+                    icon: '📄',
+                    title: 'הדפסה ל-PDF',
+                    desc: 'פותחת תצוגת הדפסה נקייה ללא כפתורי עריכה ותפריטים מיותרים.'
+                }
+            ],
+            tip: '💡 טיפ: כדאי לבדוק את זכאות התואר ב"בדיקת זכאות" לפני ייצוא הגרסה הסופית.'
+        },
+
+        'planner-graduation-clearance-modal': {
+            title: 'בדיקת זכאות לתואר וחובות סיום',
+            purpose: 'בקרה מלאה מול 8 דרישות החובה של הפקולטה להנדסת מכונות ואשכולות ההתמחות.',
+            sections: [
+                {
+                    icon: '🎓',
+                    title: '8 חובות סיום לתואר (157.5 נק״ז)',
+                    desc: 'מעקב אחרי רשימות א׳-ד׳, אנגלית, מל״ג, ספורט, בחירה מדעית ופרויקט גמר.'
+                },
+                {
+                    icon: '🔬',
+                    title: 'התפלגות אשכולות התמחות',
+                    desc: 'מציגה באילו אשכולות עומק (רובוטיקה, אנרגיה, תכן, FEM/CFD) נצברו ≥3 קורסים.'
+                }
+            ],
+            tip: '💡 טיפ: משרתי מילואים יכולים להפעיל הכרה במל״ג / נק״ז מילואים בסרגל התכנון.'
+        },
+
+        'planner-exam-density-modal': {
+            title: 'מנתח צפיפות מבחנים ואסטרטגיית מועד ב׳',
+            purpose: 'איתור ימי למידה צפופים בין מבחנים סמוכים וסימולציית דחיית קורס למועד ב׳.',
+            sections: [
+                {
+                    icon: '🔴',
+                    title: 'זיהוי התנגשויות וצפיפות (<3 ימים)',
+                    desc: 'מדרג כל מרווח בין מבחני מועד א׳ ומסמן קורסי צוואר בקבוק החוסמים המשך.'
+                },
+                {
+                    icon: '✂️',
+                    title: 'פיצול חכם למועד ב׳',
+                    desc: 'מאפשר לדמות העברה למועד ב׳ ולראות מיד את השיפור במרווחי הלמידה נטו.'
+                }
+            ],
+            tip: '💡 טיפ: משרתי מילואים זכאים למועד מיוחד (מועד ג׳) על חפיפות או היעדר מרווח 4 ימים.'
+        },
+
+        'planner-sport-club-modal': {
+            title: 'בחירת חוג ספורט ומועד קבוע',
+            purpose: 'בחירת קבוצת ספורט ספציפית בסמסטר עם בדיקת חפיפות אוטומטית מול מערכת השעות.',
+            sections: [
+                {
+                    icon: '🏃',
+                    title: 'התאמה למערכת השעות',
+                    desc: 'מסמן מראש התנגשויות ודאיות או חפיפות אפשריות עם הרצאות ותרגולים בסמסטר.'
+                },
+                {
+                    icon: '📌',
+                    title: 'עיגון אוטומטי ב-Timetable Studio',
+                    desc: 'הקבוצה שנבחרת נשמרת אוטומטית כעוגן קבוע למחולל המערכת השבועית.'
+                }
+            ],
+            tip: '💡 טיפ: בחרו קבוצה ללא סמל אזהרה אדום כדי למנוע חפיפה במערכת השעות.'
+        },
+
         'timetable-workspace': {
             title: 'מערכת שעות שבועית ויומית (Timetable)',
             purpose: 'צפייה בלוח הזמנים השבועי, שיעורים, תרגולים ומעבדות, עם התמקדות יומית אוטומטית.',
@@ -422,6 +624,199 @@
                 }
             ],
             tip: '💡 טיפ: לחיצה על כל תא יום בלוח פותחת את פירוט היום ומאפשרת הוספת אירועים ומשימות!'
+        },
+
+        'onboarding-wizard-modal': {
+            title: 'אשף התחלה מהירה (Onboarding Wizard)',
+            purpose: 'הגדרה ראשונית של הסמסטר הנוכחי, פטורים קיימים והעדפות תכנון התואר תוך דקה.',
+            sections: [
+                { icon: '🎓', title: 'בחירת סמסטר וקורסים', desc: 'קבע מאיזה סמסטר להתחיל והמערכת תסנכרן את תבנית הקורסים הרלוונטית.' },
+                { icon: '🔑', title: 'משתמש קיים', desc: 'אם כבר יצרת חשבון ענן, לחץ "יש לי חשבון" כדי למשוך את הנתונים שלך.' }
+            ],
+            tip: '💡 טיפ: כל בחירה באשף ניתנת לשינוי מאוחר יותר בלשונית ההגדרות.'
+        },
+
+        'tutorial-hub-modal': {
+            title: 'אקדמיית ההדרכה והסיור המודרך',
+            purpose: 'גישה מרוכזת לסיור החי במערכת ולקפיצה ממוקדת לכל מודול (עץ קורסים, תכנון תואר, משימות, יומן ומערכת שעות).',
+            sections: [
+                { icon: '⚡', title: 'סיור מהיר או מורחב', desc: 'בחר בין היכרות קצרה של 3 שלבים לסיור מלא בן 11 תחנות.' },
+                { icon: '🎯', title: 'כרטיסיות נושא', desc: 'לחיצה על כל כרטיסייה פותחת ישירות את השלב הרלוונטי בממשק.' }
+            ],
+            tip: '💡 טיפ: ניתן להפעיל מחדש את הסיור בכל עת דרך לשונית ההגדרות או מקש T.'
+        },
+
+        'academic-faq-modal': {
+            title: 'מדריך זכויות, נהלים ושאלות נפוצות בטכניון',
+            purpose: 'מאגר תשובות מהיר על מילואים, עתודה, פורמולה טכניון, חובות מל״ג וספורט, קורסים באנגלית וסריקות בחינה.',
+            sections: [
+                { icon: '🔍', title: 'חיפוש וסינון קטגוריות', desc: 'סנן לפי קטגוריה או הקלד מילת מפתח לאיתור מיידי של התקנון הרלוונטי.' },
+                { icon: '📋', title: 'העתקת תשובה', desc: 'העתק את עיקרי הנוהל ללוח בלחיצה אחת.' }
+            ],
+            tip: '💡 טיפ: מקש הקיצור Ctrl+H פותח מדריך זה מכל מקום במערכת.'
+        },
+
+        'keyboard-shortcuts-modal': {
+            title: 'מקשי קיצור במקלדת (Keyboard Shortcuts)',
+            purpose: 'שליטה מהירה בניווט בין טאבים, חיפוש חכם ופעולות שמירה מבלי לעזוב את המקלדת.',
+            sections: [
+                { icon: '⌨️', title: 'ניווט ומסכים', desc: 'מקשי 1–6 מחליפים טאבים, Ctrl+K פותח חיפוש פקודות, ו-Esc סוגר חלונות.' },
+                { icon: '💾', title: 'פעולות מערכת', desc: 'Ctrl+S שומר ומסנכרן, Ctrl+G בודק זכאות לתואר ו-? פותח רשימה זו.' }
+            ],
+            tip: '💡 טיפ: כל קיצורי המקלדת פועלים גם כשהמקלדת מוגדרת לעברית.'
+        },
+
+        'modal-miluim-rights': {
+            title: 'יועץ זכויות מילואים (Technion 2025/2026)',
+            purpose: 'חישוב פטור נק״ז בחירה חופשית, בדיקת הקלות ביומן/בחינות ומעקב אחר זכויות משרתי מילואים פעילים.',
+            sections: [
+                { icon: '🏅', title: 'מחשבון ימי שירות', desc: 'הזן ימי מילואים לחישוב מדרגת הזכאות לפטור של 2 נק״ז בחירה ומועדי ג׳ מיוחדים.' },
+                { icon: '📋', title: 'סנכרון לתוכנית התואר', desc: 'הזכויות מתעדכנות אוטומטית בדרישות הסיום ובלשונית ההגדרות.' }
+            ],
+            tip: '💡 טיפ: שמור אישור מילואים (טופס 3010) לכל בקשת דחיית מטלה בלוח המשימות.'
+        },
+
+        'bug-report-modal': {
+            title: 'דיווח תקלה ומידע דיאגנוסטי',
+            purpose: 'דיווח מהיר על באגים או שינויים בסנכרון Moodle/CheeseFork בצירוף תקציר אבחון טכני.',
+            sections: [
+                { icon: '🌐', title: 'GitHub Issues / מייל', desc: 'פתח פנייה מתועדת במאגר הקוד או שלח מייל ישיר למפתח.' },
+                { icon: '📋', title: 'העתקת דיאגנוסטיקה', desc: 'העתק גרסה, מצב סנכרון ושגיאות אחרונות בלחיצה אחת לצירוף לפנייה.' }
+            ],
+            tip: '💡 טיפ: הדבקת הדיאגנוסטיקה עוזרת לשחזר ולתקן תקלות תוך דקות.'
+        },
+
+        'direct-download-modal': {
+            title: 'הורדה ישירה לאנדרואיד, אייפון ומחשב',
+            purpose: 'קישורים ישירים להתקנת אפליקציית Android (APK), הוספה למסך הבית ב-iOS והתקנת גרסת Desktop.',
+            sections: [
+                { icon: '🤖', title: 'Android APK', desc: 'הורדה ישירה והתקנה עצמאית ללא צורך בחנות Play.' },
+                { icon: '🍏', title: 'iOS PWA', desc: 'התקנה מ-Safari דרך שיתוף ← הוסף למסך הבית.' }
+            ],
+            tip: '💡 טיפ: בדוק עדכונים בהגדרות כדי לוודא שמכשיר הנייד והמחשב על אותה גרסה.'
+        },
+
+        'smartscreen-guide-modal': {
+            title: 'מדריך הפעלה ראשונה ב-Windows (SmartScreen)',
+            purpose: 'הנחיה צעד-אחר-צעד לעקיפת מסך האזהרה הראשוני של Windows Defender בעת התקנת קובץ .exe עצמאי.',
+            sections: [
+                { icon: '1️⃣', title: 'מידע נוסף (More info)', desc: 'לחץ על הקישור בתחתית ההודעה הכחולה כדי לחשוף את כפתור ההרצה.' },
+                { icon: '2️⃣', title: 'הפעל בכל זאת (Run anyway)', desc: 'אישור חד-פעמי שהופך את ההפעלה לזמינה תמיד ללא אזהרה.' }
+            ],
+            tip: '💡 טיפ: תוכל ללחוץ על הכפתורים בהדמיה כדי לבדוק את הצעדים מראש.'
+        },
+
+        'privacy-policy-modal': {
+            title: 'מדיניות פרטיות ותנאי שימוש',
+            purpose: 'שקיפות מלאה לגבי אחסון מקומי (Local-First), סנכרון ענן אופציונלי ב-Supabase ומחיקת מידע.',
+            sections: [
+                { icon: '💻', title: 'Local-First', desc: 'כל נתוני הלימודים נשמרים בדפדפן שלך בלבד כברירת מחדל.' },
+                { icon: '🗑️', title: 'זכות המחיקה', desc: 'ניתן למחוק את כל המידע המקומי או לבצע איפוס מלא בכל רגע.' }
+            ],
+            tip: '💡 טיפ: סנכרון Moodle ו-CheeseFork פועל בקריאה בלבד (Read-only) ללא סיסמת הטכניון.'
+        },
+
+        'version-update-modal': {
+            title: 'בדיקת עדכונים ומה חדש בגרסה',
+            purpose: 'השוואת הגרסה המותקנת מול השרת, סיכום השיפורים האחרונים וקישורים לעדכון מהיר.',
+            sections: [
+                { icon: '🔄', title: 'רענון מטמון מיידי', desc: 'ניקוי Service Worker וטעינת הקוד העדכני בדפדפן בלחיצה אחת.' },
+                { icon: '🚀', title: 'יומן שינויים', desc: 'סקירה תמציתית של תיקוני הבאגים והשדרוגים באקו-סיסטם.' }
+            ],
+            tip: '💡 טיפ: אם הרצת עדכון באנדרואיד, התקן את ה-APK החדש מעל הקיים כדי לשמור על החיבור.'
+        },
+
+        'accessibility-modal': {
+            title: 'נגישות והתאמת תצוגה (ת״י 5568 / WCAG AA)',
+            purpose: 'התאמת גודל טקסט, ניגודיות גבוהה, מצב בהיר, גווני אפור, גופן קריא ועצירת אנימציות.',
+            sections: [
+                { icon: '☀️', title: 'מצב בהיר וניגודיות', desc: 'עבור בין תצוגה כהה, תצוגה בהירה או מצב ניגודיות גבוהה לקריאות מירבית.' },
+                { icon: '🔍', title: 'גופן והגדלת טקסט', desc: 'הגדל טקסטים, הפעל גופן נגיש, הדגש קישורים ובטל תנועה בלחיצה אחת.' }
+            ],
+            tip: '💡 טיפ: כל ההעדפות נשמרות מקומית בדפדפן ונטענות אוטומטית בכל כניסה.'
+        },
+
+        'pangea-reader-modal': {
+            title: 'קורא סיכומי פנגייה מובנה (Quick Peek)',
+            purpose: 'צפייה ישירה בסיכומים ודפי נוסחאות מתוך המערכת ללא עזיבת הקורס או השיעור.',
+            sections: [
+                { icon: '📖', title: 'דפדוף בחלון צף', desc: 'קרא את תוכן הקורס בחלונית הפנימית או פתח בלשונית חדשה.' }
+            ],
+            tip: '💡 טיפ: אם חלון חיצוני נחסם בתצוגה מוטמעת, השתמש בכפתור הפתיחה בטאב חדש.'
+        },
+
+        'pangea-search-modal': {
+            title: 'חיפוש חכם במשפטים ונוסחאות (Pangea Deep Search)',
+            purpose: 'חיפוש סמנטי במאגר משפטים, הגדרות, חוקים פיזיקליים ודפי נוסחאות לפי קורס או מילת מפתח.',
+            sections: [
+                { icon: '🧭', title: 'איתור נוסחאות ומשפטים', desc: 'הקלד נושא (כמו ברנולי, שטיינר, פון מיזס) לקפיצה מיידית לחומר.' }
+            ],
+            tip: '💡 טיפ: לחיצה על תוצאה פותחת את הסיכום ישירות מתוך החלונית.'
+        },
+
+        'task-move-modal': {
+            title: 'העברת משימות לקורס אחר',
+            purpose: 'שיוך מחדש של משימה אחת או קבוצת משימות שנבחרו בטבלה לקורס יעד מעודכן.',
+            sections: [
+                { icon: '🚚', title: 'בחירת קורס יעד', desc: 'בחר קורס מהרשימה כדי להעביר את המשימות ולשמור אוטומטית.' }
+            ],
+            tip: '💡 טיפ: העברת קורס שומרת על ציוני ההגשה והסטטוס של המשימות.'
+        },
+
+        'modal-grade-sheet': {
+            title: 'גיליון ציונים אקדמי רשמי (Transcript)',
+            purpose: 'תצוגה מלאה ומסוכמת של הציונים והנק״ז לפי סמסטר, בדומה לגיליון הציונים של הטכניון.',
+            sections: [
+                { icon: '📜', title: 'סמסטרים וממוצעים', desc: 'הצגת ממוצע סמסטריאלי, מצטבר וציונים בינאריים לכל סמסטר.' },
+                { icon: '🖨️', title: 'הדפסה / ייצוא', desc: 'הפקת עותק מסודר לשמירה או שיתוף.' }
+            ],
+            tip: '💡 טיפ: שינוי ציון בפרטי הקורס מתעדכן מידית גם בגיליון הציונים.'
+        },
+
+        'notion-icon-picker-modal': {
+            title: 'בחירת אייקון וצבע לקטגוריה / משימה',
+            purpose: 'התאמה חזותית של סמל הקורס או קטגוריית המשימות בלוח בסגנון Notion.',
+            sections: [
+                { icon: '🎨', title: 'סמלים מהירים', desc: 'בחר אימוג׳י מייצג שיופיע בטבלה וביומן.' }
+            ],
+            tip: '💡 טיפ: סימון ויזואלי עקבי עוזר לסרוק מהר בין מעבדות, מבחנים ותרגילים.'
+        },
+
+        'command-palette-modal': {
+            title: 'חיפוש מהיר ופקודות (Command Palette)',
+            purpose: 'איתור מיידי של קורסים, לשוניות, מחולל מערכות, חיפושים אקדמיים והגדרות דרך המקלדת.',
+            sections: [
+                { icon: '⚡', title: 'חיפוש אוניברסלי', desc: 'הקלד שם קורס, מספר, נושא מדריך או שם מסך לקפיצה מידית.' }
+            ],
+            tip: '💡 טיפ: הקש Ctrl+K או / מכל מסך לפתיחה מהירה.'
+        },
+
+        'planner-sem-picker-modal': {
+            title: 'בחירת סמסטר יעד לקורס',
+            purpose: 'שיבוץ או העברת קורס לסמסטר ספציפי במתכנן התואר תוך התחשבות בקורסי קדם.',
+            sections: [
+                { icon: '🗂️', title: 'יעד שיבוץ', desc: 'בחר את הסמסטר הרצוי מתוך העמודות הזמינות.' }
+            ],
+            tip: '💡 טיפ: סמסטרים מסוימים עשויים להיות חסומים אם חסרים קורסי קדם או סמסטר מתאים.'
+        },
+
+        'planner-placement-guard-modal': {
+            title: 'בדיקת התאמת שיבוץ וקדמים (Placement Guard)',
+            purpose: 'התראה ואישור יזום כאשר מנסים לשבץ קורס לפני שהושלמו כל דרישות הקדם שלו.',
+            sections: [
+                { icon: '🛡️', title: 'אימות קדמים והיצע', desc: 'בדוק אילו קורסים חסרים לפני החלטה אם לבטל שיבוץ או לאשר חריג.' }
+            ],
+            tip: '💡 טיפ: כדאי לפתור קודם דרישות קדם בסמסטר מוקדם יותר כדי למנוע עומס חריג.'
+        },
+
+        'notif-drawer-panel': {
+            title: 'מגירת התראות ובקרת תזכורות',
+            purpose: 'צפייה במשימות ושיעורים דחופים להיום, סימון השלמה מהיר ובדיקת התראות מובייל ושעון.',
+            sections: [
+                { icon: '✅', title: 'מעקב מהיר', desc: 'סמן משימות שהושלמו ישירות מהמגירה או לחץ לפתיחת פרטי הקורס.' },
+                { icon: '📲', title: 'בדיקת התראות', desc: 'בצע שליחת בדיקה של תזכורת 10 דקות, תוכנית 07:30 או התראת שעון.' }
+            ],
+            tip: '💡 טיפ: ניתן לפתוח מגירה זו גם ישירות מתוך כפתור ההתראות בלשונית ההגדרות במובייל.'
         }
     };
 
@@ -650,8 +1045,25 @@
                 targetContainer = modalEl.querySelector('.cal-actions-row') || modalEl.querySelector('.finals-calendar-header-bar') || modalEl.querySelector('.cal-title-group');
             } else if (modalId === 'notion-tasks-workspace') {
                 targetContainer = modalEl.querySelector('.notion-tasks-header-actions') || modalEl.querySelector('.notion-tasks-header-main');
+            } else if (modalId === 'accessibility-modal') {
+                targetContainer = modalEl.querySelector('.a11y-header');
+            } else if (modalId === 'privacy-policy-modal') {
+                targetContainer = modalEl.querySelector('.privacy-modal-header');
+            } else if (modalId === 'notif-drawer-panel') {
+                targetContainer = modalEl.querySelector('.notif-drawer-actions') || modalEl.querySelector('.notif-drawer-header');
             } else {
-                targetContainer = modalEl.querySelector('.modal-header') || modalEl.querySelector('.analytics-header-banner') || modalEl.querySelector('.modal-content');
+                targetContainer = modalEl.querySelector('.day-modal-header-actions') ||
+                                  modalEl.querySelector('.calendar-sync-header-actions') ||
+                                  modalEl.querySelector('.unified-sync-header-actions') ||
+                                  modalEl.querySelector('.planner-modal-header-actions') ||
+                                  modalEl.querySelector('.ttg-modal-header-actions') ||
+                                  modalEl.querySelector('.attendance-header-actions') ||
+                                  modalEl.querySelector('.panopto-header-actions') ||
+                                  modalEl.querySelector('.modal-header-actions') ||
+                                  modalEl.querySelector('.export-modal-header') ||
+                                  modalEl.querySelector('.modal-header') ||
+                                  modalEl.querySelector('.analytics-header-banner') ||
+                                  modalEl.querySelector('.modal-content');
             }
 
             if (!targetContainer) return;
@@ -685,6 +1097,52 @@
 
             // Prepend or append depending on layout
             if (targetContainer.classList && (
+                targetContainer.classList.contains('day-modal-header-actions') ||
+                targetContainer.classList.contains('calendar-sync-header-actions') ||
+                targetContainer.classList.contains('unified-sync-header-actions') ||
+                targetContainer.classList.contains('ttg-modal-header-actions') ||
+                targetContainer.classList.contains('attendance-header-actions') ||
+                targetContainer.classList.contains('panopto-header-actions') ||
+                targetContainer.classList.contains('modal-header-actions') ||
+                targetContainer.classList.contains('notif-drawer-actions') ||
+                targetContainer.classList.contains('a11y-header') ||
+                targetContainer.classList.contains('privacy-modal-header')
+            )) {
+                const closeBtn = targetContainer.querySelector('.modal-close, #btn-close-unified-sync, .a11y-close-btn, .notif-close-btn');
+                if (closeBtn) {
+                    targetContainer.insertBefore(btn, closeBtn);
+                } else {
+                    targetContainer.appendChild(btn);
+                }
+            } else if (targetContainer.classList && targetContainer.classList.contains('modal-header')) {
+                const closeBtn = targetContainer.querySelector('.modal-close');
+                if (closeBtn) {
+                    let actionsGroup = targetContainer.querySelector('.modal-header-actions');
+                    if (!actionsGroup) {
+                        actionsGroup = document.createElement('div');
+                        actionsGroup.className = 'modal-header-actions';
+                        closeBtn.parentNode.insertBefore(actionsGroup, closeBtn);
+                        actionsGroup.appendChild(btn);
+                        actionsGroup.appendChild(closeBtn);
+                    } else {
+                        actionsGroup.insertBefore(btn, closeBtn);
+                    }
+                } else {
+                    targetContainer.appendChild(btn);
+                }
+            } else if (targetContainer.classList && targetContainer.classList.contains('planner-modal-header-actions')) {
+                targetContainer.insertBefore(btn, targetContainer.firstChild);
+            } else if (targetContainer.classList && targetContainer.classList.contains('export-modal-header')) {
+                const closeBtn = targetContainer.querySelector('.export-modal-close');
+                btn.style.marginInlineStart = 'auto';
+                btn.style.marginInlineEnd = '8px';
+                btn.style.flexShrink = '0';
+                if (closeBtn) {
+                    targetContainer.insertBefore(btn, closeBtn);
+                } else {
+                    targetContainer.appendChild(btn);
+                }
+            } else if (targetContainer.classList && (
                 targetContainer.classList.contains('course-settings-container') || 
                 targetContainer.classList.contains('flowchart-actions') || 
                 targetContainer.classList.contains('timetable-sync-actions') ||
@@ -763,6 +1221,24 @@
                 bodyTarget = document.getElementById('tasks-table-view-pane') || modalEl.querySelector('.notion-tasks-container');
             } else if (modalId === 'tasks-calendar-view-pane') {
                 bodyTarget = modalEl.querySelector('.finals-calendar-card') || modalEl.querySelector('.finals-calendar-container') || document.getElementById('tasks-calendar-view-pane');
+            } else if (modalId === 'planner-export-modal' || modalId === 'planner-semesters-mgr-modal') {
+                const hdr = modalEl.querySelector('.export-modal-header');
+                if (hdr && hdr.parentElement) {
+                    hdr.parentElement.insertBefore(banner, hdr.nextSibling);
+                    modalEl.scrollTop = 0;
+                    const cardEl = modalEl.querySelector('.modal-card');
+                    if (cardEl) cardEl.scrollTop = 0;
+                    return;
+                }
+            } else if (modalEl.querySelector('.planner-modal-header') && modalEl.querySelector('.modal-card')) {
+                const hdr = modalEl.querySelector('.planner-modal-header');
+                if (hdr && hdr.parentElement) {
+                    hdr.parentElement.insertBefore(banner, hdr.nextSibling);
+                    modalEl.scrollTop = 0;
+                    const cardEl = modalEl.querySelector('.modal-card');
+                    if (cardEl) cardEl.scrollTop = 0;
+                    return;
+                }
             } else {
                 bodyTarget = modalEl.querySelector('.modal-body') || 
                              modalEl.querySelector('.finals-calendar-card') ||
@@ -779,8 +1255,8 @@
 
             if (bodyTarget) {
                 bodyTarget.insertBefore(banner, bodyTarget.firstChild);
-                // Scroll banner into view smoothly
-                banner.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                bodyTarget.scrollTop = 0;
+                modalEl.scrollTop = 0;
             }
         }
     };

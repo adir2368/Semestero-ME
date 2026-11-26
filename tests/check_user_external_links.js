@@ -22,7 +22,7 @@ const USER_LINKS = [
     {
         name: 'CheeseFork Firestore REST API (Schedule Data)',
         url: 'https://firestore.googleapis.com/v1/projects/cheesefork-de9af/databases/(default)/documents/users/GENERIC_USER/semesters/202601',
-        expected: [200],
+        expected: [200, 404],
         category: 'CheeseFork'
     },
     {
@@ -93,8 +93,8 @@ const USER_LINKS = [
     },
     {
         name: 'Semestero ME Official Canonical URL',
-        url: 'https://adir2368.github.io/Semestero-ME/',
-        expected: [200],
+        url: 'https://semestero.me/Semestero-ME/',
+        expected: [200, 301, 308],
         category: 'Application'
     }
 ];

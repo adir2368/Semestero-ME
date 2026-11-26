@@ -28,6 +28,28 @@ function delay(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+function isServerListening(port = 8080) {
+    return new Promise((resolve) => {
+        const req = http.get(`http://127.0.0.1:${port}/package.json`, (res) => {
+            res.resume();
+            resolve(res.statusCode >= 200 && res.statusCode < 500);
+        });
+        req.on('error', () => resolve(false));
+        req.setTimeout(1000, () => { req.destroy(); resolve(false); });
+    });
+}
+
+async function ensureLocalServer8080() {
+    if (await isServerListening(8080)) return null;
+    const proc = spawn('node', ['server.js'], { cwd: ROOT, stdio: 'ignore' });
+    for (let i = 0; i < 20; i++) {
+        await delay(250);
+        if (await isServerListening(8080)) return proc;
+    }
+    proc.kill();
+    throw new Error('Failed to start local server.js on port 8080');
+}
+
 function getJson(url) {
     return new Promise((resolve, reject) => {
         http.get(url, (res) => {
@@ -119,6 +141,7 @@ async function runTourQaSuite() {
     console.log('✓ PASS: All static code assertions passed.\n');
 
     // 2. Launch Chrome
+    const serverProc = await ensureLocalServer8080();
     console.log(`[Test 2] Launching Chrome on dynamic port ${PORT}...`);
     const profileDir = path.join(require('os').tmpdir(), 'chrome-tour-qa-' + Date.now());
     const chromeProc = spawn(CHROME_PATH, [
@@ -159,6 +182,12 @@ async function runTourQaSuite() {
         await cdp.connect();
         await cdp.send('Page.enable');
         await cdp.send('Runtime.enable');
+        for (let i = 0; i < 25; i++) {
+            const href = await cdp.eval('window.location.href').catch(() => '');
+            if (String(href).startsWith('http://')) break;
+            if (i === 5) await cdp.send('Page.navigate', { url: APP_URL }).catch(() => {});
+            await delay(250);
+        }
 
         await cdp.eval(`sessionStorage.setItem('sw_last_controller_reload', String(Date.now()));`);
         await delay(2500);
@@ -423,6 +452,7 @@ async function runTourQaSuite() {
         if (chromeAlive) {
             chromeProc.kill('SIGKILL');
         }
+        if (serverProc) { try { serverProc.kill(); } catch (e) {} }
     }
 }
 

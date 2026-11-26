@@ -5870,7 +5870,7 @@
       "courseCode": "104043"
     }
   ],
-  "moodleCalendarUrl": "https://moodle26.technion.ac.il/calendar/export_execute.php?userid=39495&authtoken=47ff4e9841a2293be4696691eeeafe5127137f5c&preset_what=all&preset_time=custom",
+  "moodleCalendarUrl": "",
   "semesterGuardMode": "locked",
   "customCalendarEvents": [],
   "degreePlanUnassigned": [],

@@ -8,7 +8,30 @@ const CHROME_PATH = "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"
 const PORT = 9345;
 const PROFILE_DIR = path.join(os.tmpdir(), `chrome_deep_audit_${Date.now()}`);
 const TARGET_URL = `http://localhost:8080/?deep_audit=${Date.now()}`;
-const ARTIFACT_DIR = "C:/Users/user/.gemini/antigravity/brain/aa7d2a33-2de8-4eeb-b8bd-18c8fdd69b14";
+const ARTIFACT_DIR = os.tmpdir();
+
+async function ensureLocalServer8080() {
+    const isUp = await new Promise((resolve) => {
+        const req = http.get('http://localhost:8080/', (res) => { res.resume(); resolve(true); });
+        req.on('error', () => resolve(false));
+        req.setTimeout(1000, () => { req.destroy(); resolve(false); });
+    });
+    if (isUp) return null;
+    const serverProc = spawn(process.execPath, [path.join(__dirname, '..', 'server.js')], {
+        cwd: path.join(__dirname, '..'),
+        stdio: 'ignore'
+    });
+    for (let i = 0; i < 30; i++) {
+        await delay(250);
+        const ok = await new Promise((resolve) => {
+            const req = http.get('http://localhost:8080/', (res) => { res.resume(); resolve(true); });
+            req.on('error', () => resolve(false));
+            req.setTimeout(500, () => { req.destroy(); resolve(false); });
+        });
+        if (ok) return serverProc;
+    }
+    throw new Error('Timed out waiting for localhost:8080 server');
+}
 
 function delay(ms) {
     return new Promise(res => setTimeout(res, ms));
@@ -96,6 +119,7 @@ class CDPClient {
 
 async function runAudit() {
     console.log('🚀 Starting Deep Ecosystem & UX Investigation on http://localhost:8080/ ...');
+    const serverProc = await ensureLocalServer8080();
 
     const chrome = spawn(CHROME_PATH, [
         `--remote-debugging-port=${PORT}`,
@@ -110,12 +134,25 @@ async function runAudit() {
     await delay(1500);
 
     try {
-        const tabs = await getJson(`http://127.0.0.1:${PORT}/json`);
-        const page = tabs.find(t => t.type === 'page');
+        let page = null;
+        for (let i = 0; i < 20; i++) {
+            try {
+                const tabs = await getJson(`http://127.0.0.1:${PORT}/json`);
+                page = tabs.find(t => t.type === 'page' && t.url && t.url.startsWith('http://'));
+                if (page) break;
+            } catch (_) {}
+            await delay(300);
+        }
+        if (!page) throw new Error('Timed out waiting for DevTools page on http://localhost:8080');
         const cdp = new CDPClient(page.webSocketDebuggerUrl);
         await cdp.connect();
         await cdp.send('Runtime.enable');
-        await delay(2000);
+        for (let i = 0; i < 25; i++) {
+            const href = await cdp.eval('window.location.href').catch(() => '');
+            if (typeof href === 'string' && href.startsWith('http://localhost:8080')) break;
+            await delay(300);
+        }
+        await delay(1500);
 
         // 1. Setup Adir profile
         await cdp.eval(`
@@ -279,10 +316,12 @@ async function runAudit() {
 
         if (cdp.ws) cdp.ws.close();
         chrome.kill();
+        if (serverProc) serverProc.kill();
         process.exit(0);
     } catch (err) {
         console.error('AUDIT ERROR:', err);
         chrome.kill();
+        if (serverProc) serverProc.kill();
         process.exit(1);
     }
 }

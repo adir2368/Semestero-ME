@@ -99,6 +99,7 @@ public class SemesteroTasksComplicationService extends ComplicationDataSourceSer
         boolean calculatedFromJson = false;
 
         String allTasksJson = prefs.getString("all_tasks_json", "");
+        java.util.Set<String> seenKeys = new java.util.HashSet<>();
         if (allTasksJson != null && !allTasksJson.trim().isEmpty() && !allTasksJson.trim().equals("[]")) {
             try {
                 JSONArray arr = new JSONArray(allTasksJson);
@@ -111,6 +112,21 @@ public class SemesteroTasksComplicationService extends ComplicationDataSourceSer
                         if (i < 15 && prefs.getBoolean("wear_task_" + (i + 1) + "_done", false)) {
                             isDone = true;
                         }
+                        String rawCourse = obj.optString("course", "").trim();
+                        String rawTitle = obj.optString("title", "").trim();
+                        if (rawTitle.isEmpty() || MainActivity.isCorruptedText(rawTitle)) continue;
+                        if (MainActivity.isCorruptedText(rawCourse)) rawCourse = "";
+                        if (rawTitle.startsWith("[")) {
+                            int closeIdx = rawTitle.indexOf(']');
+                            if (closeIdx > 1 && closeIdx < rawTitle.length() - 1) {
+                                if (rawCourse.isEmpty()) rawCourse = rawTitle.substring(1, closeIdx).trim();
+                                rawTitle = rawTitle.substring(closeIdx + 1).trim();
+                            }
+                        }
+                        String shortCourse = MainActivity.shortenCourseForWatch(rawCourse);
+                        String dedupKey = MainActivity.buildTaskDedupKey(shortCourse, rawTitle);
+                        if (!dedupKey.isEmpty() && seenKeys.contains(dedupKey)) continue;
+                        if (!dedupKey.isEmpty()) seenKeys.add(dedupKey);
                         if (!isDone) {
                             count++;
                         }

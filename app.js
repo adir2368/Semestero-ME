@@ -1493,80 +1493,106 @@ function getCourseAccentColor(courseCode) {
 }
 window.getCourseAccentColor = getCourseAccentColor;
 
+function normalizeIconCourseKey(courseCode) {
+    if (!courseCode) return '';
+    const raw = String(courseCode).trim();
+    if (COURSE_NOTION_ICONS[raw]) return raw;
+    const cleaned = (typeof cleanTechnionCourseCode === 'function') ? cleanTechnionCourseCode(raw) : raw;
+    if (COURSE_NOTION_ICONS[cleaned]) return cleaned;
+    const noLeadingZero = raw.replace(/^0+/, '');
+    if (noLeadingZero.length === 5) {
+        const padded6 = '0' + noLeadingZero;
+        if (COURSE_NOTION_ICONS[padded6]) return padded6;
+        return padded6;
+    }
+    return cleaned || raw;
+}
+
 function getCourseNotionIconHtml(courseCode) {
     if (!courseCode) return `<span class="notion-course-icon">📘</span>`;
+    const canonCode = normalizeIconCourseKey(courseCode);
+    const safeCourseAttr = escapeHtml(courseCode);
     
     // 1. Check custom user icon in gameState
-    if (window.gameState && gameState.courseCustomIcons && gameState.courseCustomIcons[courseCode]) {
-        const custom = gameState.courseCustomIcons[courseCode];
+    const custom = (window.gameState && gameState.courseCustomIcons)
+        ? (gameState.courseCustomIcons[courseCode] || gameState.courseCustomIcons[canonCode])
+        : null;
+    if (custom) {
         const iconDef = NOTION_ICON_LIBRARY[custom.iconKey];
         if (iconDef) {
-            return `<span class="notion-course-icon" data-course-code="${courseCode}" title="לחץ לשינוי סמל וצבע הקורס" style="color: ${custom.color};"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="${custom.color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${iconDef.svg}</svg></span>`;
+            return `<span class="notion-course-icon" data-course-code="${safeCourseAttr}" title="לחץ לשינוי סמל וצבע הקורס" style="color: ${escapeHtml(custom.color)};"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="${escapeHtml(custom.color)}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${iconDef.svg}</svg></span>`;
         }
     }
     
     // 2. Predefined default in COURSE_NOTION_ICONS
-    const defaultDef = COURSE_NOTION_ICONS[courseCode];
+    const defaultDef = COURSE_NOTION_ICONS[courseCode] || COURSE_NOTION_ICONS[canonCode];
     if (defaultDef) {
-        return `<span class="notion-course-icon" data-course-code="${courseCode}" title="לחץ לשינוי סמל וצבע הקורס" style="color: ${defaultDef.color};">${defaultDef.svg}</span>`;
+        return `<span class="notion-course-icon" data-course-code="${safeCourseAttr}" title="לחץ לשינוי סמל וצבע הקורס" style="color: ${defaultDef.color};">${defaultDef.svg}</span>`;
     }
     
     // 3. Fallback generic academic book
-    return `<span class="notion-course-icon" data-course-code="${courseCode}" title="לחץ לשינוי סמל וצבע הקורס" style="color: #3b82f6;"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#3b82f6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></span>`;
+    return `<span class="notion-course-icon" data-course-code="${safeCourseAttr}" title="לחץ לשינוי סמל וצבע הקורס" style="color: #3b82f6;"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#3b82f6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></span>`;
 }
 
 // Find default icon key for existing course
 function getDefaultCourseIconKey(courseCode) {
-    if (courseCode === '104131') return 'sigma';
-    if (['104043', '104041', '104013'].includes(courseCode)) return 'curve';
-    if (['104166', '104016', '104065'].includes(courseCode)) return 'matrix';
-    if (courseCode === '104228' || courseCode === '104136') return 'nabla';
-    if (courseCode === '114052') return 'lightning';
-    if (courseCode === '114051') return 'orbit';
-    if (courseCode === '114032') return 'laser';
-    if (courseCode === '125001' || courseCode === '125013') return 'flask';
-    if (courseCode === '314533' || courseCode === '314534') return 'lattice';
-    if (['034028', '034053', '034015'].includes(courseCode)) return 'bridge';
-    if (courseCode === '034061') return 'dual-gears';
-    if (courseCode === '034056' || courseCode === '034042') return 'calc-scientific';
-    if (courseCode === '034035') return 'flame';
-    if (courseCode === '034010') return 'dynamics';
-    if (courseCode === '034055') return 'streamlines';
-    if (courseCode === '034032') return 'waveform';
-    if (courseCode === '034041') return 'heat-radiation';
-    if (courseCode === '034040') return 'control-loop';
-    if (courseCode === '034054') return 'caliper';
-    if (courseCode === '034058') return 'bell-curve';
-    if (courseCode === '034051') return 'harmonic-wave';
-    if (courseCode === '034060') return 'mechatronics';
-    if (courseCode === '034057') return 'test-probe';
-    if (courseCode === '03940805' || courseCode === '3940805') return 'lotus';
-    if (courseCode === '234128') return 'code';
-    if (['034371', '034379', '034382', '034380', '034383'].includes(courseCode)) return 'trophy';
+    const canonCode = normalizeIconCourseKey(courseCode);
+    const k = COURSE_NOTION_ICONS[courseCode] ? courseCode : (canonCode || courseCode);
+    if (k === '104131') return 'sigma';
+    if (['104043', '104041', '104013'].includes(k)) return 'curve';
+    if (['104166', '104016', '104065'].includes(k)) return 'matrix';
+    if (k === '104228' || k === '104136') return 'nabla';
+    if (k === '114052' || k === '114075') return 'lightning';
+    if (k === '114051' || k === '114071') return 'orbit';
+    if (k === '114032') return 'laser';
+    if (k === '125001' || k === '125013') return 'flask';
+    if (k === '314533' || k === '314534') return 'lattice';
+    if (['034028', '034053', '034015'].includes(k)) return 'bridge';
+    if (k === '034061') return 'dual-gears';
+    if (k === '034056' || k === '034042') return 'calc-scientific';
+    if (k === '034035') return 'flame';
+    if (k === '034010') return 'dynamics';
+    if (k === '034055') return 'streamlines';
+    if (k === '034032') return 'waveform';
+    if (k === '034041') return 'heat-radiation';
+    if (k === '034040') return 'control-loop';
+    if (k === '034054') return 'caliper';
+    if (k === '034058') return 'bell-curve';
+    if (k === '034051') return 'harmonic-wave';
+    if (k === '034060') return 'mechatronics';
+    if (k === '034057') return 'test-probe';
+    if (k === '03940805' || k === '3940805') return 'lotus';
+    if (k === '234128') return 'code';
+    if (['034371', '034379', '034382', '034380', '034383'].includes(k)) return 'trophy';
     return 'book';
 }
 
 function openCourseIconPicker(courseCode) {
     if (!courseCode) return;
+    const canonCode = normalizeIconCourseKey(courseCode);
     activeIconPickerCourseCode = courseCode;
     activeIconPickerCategory = 'all';
     activeIconPickerSearch = '';
     
     // Determine active icon key and color
-    if (window.gameState && gameState.courseCustomIcons && gameState.courseCustomIcons[courseCode]) {
-        activeIconPickerKey = gameState.courseCustomIcons[courseCode].iconKey || getDefaultCourseIconKey(courseCode);
-        activeIconPickerColor = gameState.courseCustomIcons[courseCode].color || '#3b82f6';
-    } else if (COURSE_NOTION_ICONS[courseCode]) {
+    const existingCustom = (window.gameState && gameState.courseCustomIcons)
+        ? (gameState.courseCustomIcons[courseCode] || gameState.courseCustomIcons[canonCode])
+        : null;
+    const defaultIconDef = COURSE_NOTION_ICONS[courseCode] || COURSE_NOTION_ICONS[canonCode];
+    if (existingCustom) {
+        activeIconPickerKey = existingCustom.iconKey || getDefaultCourseIconKey(courseCode);
+        activeIconPickerColor = existingCustom.color || '#3b82f6';
+    } else if (defaultIconDef) {
         activeIconPickerKey = getDefaultCourseIconKey(courseCode);
-        activeIconPickerColor = COURSE_NOTION_ICONS[courseCode].color || '#3b82f6';
+        activeIconPickerColor = defaultIconDef.color || '#3b82f6';
     } else {
         activeIconPickerKey = 'book';
         activeIconPickerColor = '#3b82f6';
     }
     
     // Set course name / title
-    const courseObj = (window.gameState && gameState.courses && gameState.courses[courseCode]) || null;
-    const courseName = courseObj ? courseObj.name : (HEBREW_COURSE_NAMES[courseCode] || courseCode);
+    const courseObj = (window.gameState && gameState.courses && (gameState.courses[courseCode] || gameState.courses[canonCode])) || null;
+    const courseName = courseObj ? courseObj.name : (HEBREW_COURSE_NAMES[courseCode] || HEBREW_COURSE_NAMES[canonCode] || courseCode);
     const titleEl = document.getElementById('icon-picker-course-title');
     if (titleEl) {
         titleEl.innerText = `${courseName} (${courseCode})`;
@@ -1594,6 +1620,7 @@ function openCourseIconPicker(courseCode) {
     
     const modal = document.getElementById('notion-icon-picker-modal');
     if (modal) {
+        modal.classList.add('active');
         modal.style.display = 'flex';
     }
 }
@@ -1601,6 +1628,7 @@ function openCourseIconPicker(courseCode) {
 function closeCourseIconPicker() {
     const modal = document.getElementById('notion-icon-picker-modal');
     if (modal) {
+        modal.classList.remove('active');
         modal.style.display = 'none';
     }
     activeIconPickerCourseCode = null;
@@ -1634,7 +1662,7 @@ function renderIconPickerGrid() {
     });
     
     if (matchingKeys.length === 0) {
-        gridContainer.innerHTML = `<div class="icon-picker-empty">לא נמצאו סמלים תואמים לחיפוש "${query}"</div>`;
+        gridContainer.innerHTML = `<div class="icon-picker-empty">לא נמצאו סמלים תואמים לחיפוש "${escapeHtml(query)}"</div>`;
         return;
     }
     
@@ -1678,10 +1706,17 @@ function saveCourseIcon() {
         gameState.courseCustomIcons = {};
     }
     
+    const canonCode = normalizeIconCourseKey(activeIconPickerCourseCode);
     gameState.courseCustomIcons[activeIconPickerCourseCode] = {
         iconKey: activeIconPickerKey,
         color: activeIconPickerColor
     };
+    if (canonCode && canonCode !== activeIconPickerCourseCode) {
+        gameState.courseCustomIcons[canonCode] = {
+            iconKey: activeIconPickerKey,
+            color: activeIconPickerColor
+        };
+    }
     
     saveState();
     
@@ -1704,8 +1739,10 @@ function saveCourseIcon() {
 
 function resetCourseIcon() {
     if (!activeIconPickerCourseCode || !window.gameState) return;
-    if (gameState.courseCustomIcons && gameState.courseCustomIcons[activeIconPickerCourseCode]) {
+    const canonCode = normalizeIconCourseKey(activeIconPickerCourseCode);
+    if (gameState.courseCustomIcons && (gameState.courseCustomIcons[activeIconPickerCourseCode] || (canonCode && gameState.courseCustomIcons[canonCode]))) {
         delete gameState.courseCustomIcons[activeIconPickerCourseCode];
+        if (canonCode) delete gameState.courseCustomIcons[canonCode];
         saveState();
         if (typeof renderNotionTasksTable === 'function') {
             renderNotionTasksTable();
@@ -1823,7 +1860,7 @@ function setupNotionIconPickerEvents() {
     
     // 7. Click delegation for course icons & course tags across workspace
     document.addEventListener('click', (e) => {
-        const trigger = e.target.closest('.notion-course-icon') || e.target.closest('.notion-course-tag');
+        const trigger = e.target.closest('.notion-course-icon') || e.target.closest('.notion-course-tag[data-course-code]');
         if (trigger) {
             // Avoid triggering when user clicks contenteditable, input, button, or task badge
             if (e.target.tagName === 'INPUT' || 
@@ -11163,8 +11200,14 @@ function getCourseCheeseforkExamDates(code) {
     if (!code || typeof CHEESEFORK_EXAM_DATES === 'undefined') return null;
     const str = String(code).trim();
     const clean = str.replace(/^0+/, '');
+    const legacy6 = (/^\d{8}$/.test(str) && str.startsWith('0') && !str.startsWith('0394'))
+        ? (str.slice(1, 4) + str.slice(5))
+        : '';
+    const legacyClean = legacy6 ? legacy6.replace(/^0+/, '') : '';
     const entry = CHEESEFORK_EXAM_DATES[str] ||
                   CHEESEFORK_EXAM_DATES[clean] ||
+                  (legacy6 && CHEESEFORK_EXAM_DATES[legacy6]) ||
+                  (legacyClean && CHEESEFORK_EXAM_DATES[legacyClean]) ||
                   CHEESEFORK_EXAM_DATES['0' + clean] ||
                   CHEESEFORK_EXAM_DATES['00' + clean];
     if (entry && (isCurrentOrUpcomingDate(entry.moedA) || isCurrentOrUpcomingDate(entry.moedB))) {
@@ -11325,59 +11368,102 @@ async function ensureCheeseForkDatabase() {
     return _cheeseForkLoadPromise;
 }
 
+function adaptPlannerCatalogCourseForLookup(c) {
+    if (!c || !(c.code || c.altCode)) return null;
+    const rawCode = String(c.code || c.altCode).trim();
+    const code6 = String(c.altCode || (rawCode.length === 8 && rawCode.startsWith('0') && !rawCode.startsWith('0394') ? rawCode.slice(1, 4) + rawCode.slice(5) : rawCode)).trim();
+    return {
+        code6: code6,
+        rawNum: rawCode,
+        name: c.name || `קורס (${code6})`,
+        credits: Number(c.credits) || 3,
+        detectedType: (c.type === 'mandatory' || c.type === 'core') ? 'core' : (c.type || 'elective'),
+        parsedPrereqs: Array.isArray(c.prereqs) ? c.prereqs : [],
+        moedA: c.moedA || '',
+        moedB: c.moedB || '',
+        faculty: c.faculty || 'הנדסת מכונות'
+    };
+}
+
+function findPlannerCatalogCourseFallback(query) {
+    const map = (typeof window !== 'undefined' && window.PLANNER_CATALOG && window.PLANNER_CATALOG.ALL_COURSES_MAP)
+        ? window.PLANNER_CATALOG.ALL_COURSES_MAP
+        : null;
+    if (!map) return null;
+    const q = String(query || '').trim().toLowerCase();
+    if (!q) return null;
+    const cleanDigits = q.replace(/\D/g, '');
+    const variants = (typeof window !== 'undefined' && typeof window.getTechnionCourseCodeVariants === 'function')
+        ? window.getTechnionCourseCodeVariants(q)
+        : [q, cleanDigits, cleanDigits.replace(/^0+/, ''), cleanDigits ? cleanDigits.padStart(6, '0') : ''].filter(Boolean);
+
+    for (const v of variants) {
+        if (map[v]) return adaptPlannerCatalogCourseForLookup(map[v]);
+    }
+    const normQ = q.replace(/["'״׳`]/g, '').trim();
+    const allCourses = Object.values(map);
+    const byVariantOrName = allCourses.find(c => {
+        if (!c) return false;
+        const cVars = [c.code, c.altCode, c.code ? String(c.code).replace(/^0+/, '') : ''].filter(Boolean);
+        if (variants.some(v => cVars.includes(v))) return true;
+        const cName = String(c.name || '').toLowerCase().replace(/["'״׳`]/g, '').trim();
+        return normQ && cName === normQ;
+    });
+    return adaptPlannerCatalogCourseForLookup(byVariantOrName);
+}
+
 function findCheeseForkCourse(query) {
     initCheeseForkDatabase();
-    if (!cheeseForkMap || cheeseForkMap.size === 0) return null;
-
     const q = String(query || '').trim().toLowerCase();
     if (!q) return null;
 
-    // 1. Direct Map match
-    if (cheeseForkMap.has(q)) return cheeseForkMap.get(q);
+    if (cheeseForkMap && cheeseForkMap.size > 0) {
+        // 1. Direct Map match
+        if (cheeseForkMap.has(q)) return cheeseForkMap.get(q);
 
-    const cleanDigits = q.replace(/\D/g, '');
-    if (cleanDigits) {
-        if (cheeseForkMap.has(cleanDigits)) return cheeseForkMap.get(cleanDigits);
-        const stripped = cleanDigits.replace(/^0+/, '');
-        if (stripped && cheeseForkMap.has(stripped)) return cheeseForkMap.get(stripped);
+        const cleanDigits = q.replace(/\D/g, '');
+        if (cleanDigits) {
+            if (cheeseForkMap.has(cleanDigits)) return cheeseForkMap.get(cleanDigits);
+            const stripped = cleanDigits.replace(/^0+/, '');
+            if (stripped && cheeseForkMap.has(stripped)) return cheeseForkMap.get(stripped);
 
-        if (cleanDigits.length <= 6) {
-            const pad6 = cleanDigits.padStart(6, '0');
-            if (cheeseForkMap.has(pad6)) return cheeseForkMap.get(pad6);
-            const pad8 = '0' + pad6.slice(0, 3) + '0' + pad6.slice(3);
-            if (cheeseForkMap.has(pad8)) return cheeseForkMap.get(pad8);
-        } else {
-            const pad8 = cleanDigits.padStart(8, '0');
-            if (cheeseForkMap.has(pad8)) return cheeseForkMap.get(pad8);
-            if (pad8.length === 8 && pad8.startsWith('0')) {
-                const c6 = pad8.slice(1, 4) + pad8.slice(5);
-                if (cheeseForkMap.has(c6)) return cheeseForkMap.get(c6);
+            if (cleanDigits.length <= 6) {
+                const pad6 = cleanDigits.padStart(6, '0');
+                if (cheeseForkMap.has(pad6)) return cheeseForkMap.get(pad6);
+                const pad8 = '0' + pad6.slice(0, 3) + '0' + pad6.slice(3);
+                if (cheeseForkMap.has(pad8)) return cheeseForkMap.get(pad8);
+            } else {
+                const pad8 = cleanDigits.padStart(8, '0');
+                if (cheeseForkMap.has(pad8)) return cheeseForkMap.get(pad8);
+                if (pad8.length === 8 && pad8.startsWith('0')) {
+                    const c6 = pad8.slice(1, 4) + pad8.slice(5);
+                    if (cheeseForkMap.has(c6)) return cheeseForkMap.get(c6);
+                }
             }
+        }
+
+        // 2. Exact or normalized name match (ignoring Hebrew quotes & hyphens)
+        const normQ = q.replace(/["'״׳`]/g, '').trim();
+        const byName = (cheeseForkList || []).find(c => {
+            const cLower = c.name.toLowerCase();
+            if (cLower === q) return true;
+            const cNorm = cLower.replace(/["'״׳`]/g, '').trim();
+            return cNorm === normQ;
+        });
+        if (byName) return byName;
+
+        // 3. Substring match for codes with length >= 5
+        if (cleanDigits.length >= 5) {
+            const byCodeSub = (cheeseForkList || []).find(c => c.rawNum.includes(cleanDigits) || c.code6.includes(cleanDigits));
+            if (byCodeSub) return byCodeSub;
         }
     }
 
-    // 2. Exact or normalized name match (ignoring Hebrew quotes & hyphens)
-    const normQ = q.replace(/["'״׳`]/g, '').trim();
-    const byName = (cheeseForkList || []).find(c => {
-        const cLower = c.name.toLowerCase();
-        if (cLower === q) return true;
-        const cNorm = cLower.replace(/["'״׳`]/g, '').trim();
-        return cNorm === normQ;
-    });
-    if (byName) return byName;
-
-    // 3. Substring match for codes with length >= 5
-    if (cleanDigits.length >= 5) {
-        const byCodeSub = (cheeseForkList || []).find(c => c.rawNum.includes(cleanDigits) || c.code6.includes(cleanDigits));
-        if (byCodeSub) return byCodeSub;
-    }
-
-    return null;
+    return findPlannerCatalogCourseFallback(query);
 }
 
 function searchCheeseForkCourses(query, maxResults = 8) {
     initCheeseForkDatabase();
-    if (!cheeseForkList) return [];
 
     const q = String(query || '').trim().toLowerCase();
     if (!q || q.length < 2) return [];
@@ -11387,8 +11473,9 @@ function searchCheeseForkCourses(query, maxResults = 8) {
     const isDigitSearch = cleanDigits.length >= 2 && cleanDigits.length === cleanNoDash.length;
     const normQ = q.replace(/["'״׳`]/g, '').trim();
     const results = [];
+    const seenCodes = new Set();
 
-    for (const c of cheeseForkList) {
+    for (const c of (cheeseForkList || [])) {
         let matched = false;
         if (isDigitSearch) {
             matched = c.code6.includes(cleanDigits) || c.rawNum.includes(cleanDigits) ||
@@ -11404,7 +11491,28 @@ function searchCheeseForkCourses(query, maxResults = 8) {
 
         if (matched) {
             results.push(c);
+            seenCodes.add(String(c.code6 || c.rawNum).replace(/^0+/, ''));
             if (results.length >= maxResults) break;
+        }
+    }
+
+    if (results.length < maxResults && typeof window !== 'undefined' && window.PLANNER_CATALOG && window.PLANNER_CATALOG.ALL_COURSES_MAP) {
+        const allCatalog = Object.values(window.PLANNER_CATALOG.ALL_COURSES_MAP);
+        for (const c of allCatalog) {
+            if (!c || !(c.code || c.altCode)) continue;
+            const adapted = adaptPlannerCatalogCourseForLookup(c);
+            if (!adapted) continue;
+            const canon = adapted.code6.replace(/^0+/, '');
+            if (seenCodes.has(canon)) continue;
+            const normCName = (adapted.name || '').toLowerCase().replace(/["'״׳`]/g, '').trim();
+            const matched = isDigitSearch
+                ? (adapted.code6.includes(cleanDigits) || adapted.rawNum.includes(cleanDigits) || canon.includes(cleanDigits.replace(/^0+/, '')))
+                : (normCName.includes(normQ) || adapted.name.toLowerCase().includes(q) || adapted.code6.includes(q));
+            if (matched) {
+                seenCodes.add(canon);
+                results.push(adapted);
+                if (results.length >= maxResults) break;
+            }
         }
     }
     return results;
@@ -12069,8 +12177,16 @@ function setupEventListeners() {
     const formCourse = document.getElementById("form-course");
     if (formCourse) formCourse.addEventListener("submit", handleAddCourseSubmit);
 
-    document.getElementById("btn-load-me").addEventListener("click", () => {
-        if (confirm("טעינת תואר בהנדסת מכונות תדרוס את השינויים הנוכחיים שלך. האם להמשיך?")) {
+    document.getElementById("btn-load-me").addEventListener("click", async () => {
+        const confirmed = (window.SemesteroDialog && typeof window.SemesteroDialog.confirm === 'function')
+            ? await window.SemesteroDialog.confirm({
+                title: "טעינת תבנית הנדסת מכונות",
+                message: "טעינת תואר בהנדסת מכונות תדרוס את השינויים הנוכחיים שלך. האם להמשיך?",
+                confirmText: "טען תואר",
+                danger: true
+            })
+            : true;
+        if (confirmed) {
             gameState = JSON.parse(JSON.stringify(INITIAL_STATE));
             gameState.characterClass = "סטודנט להנדסת מכונות";
             gameState.courses = JSON.parse(JSON.stringify(SAMPLE_ME_DEGREE));
@@ -12109,17 +12225,25 @@ function setupEventListeners() {
                 saveState();
                 renderUI();
                 document.getElementById("import-modal").classList.remove("active");
-                alert("הנתונים יובאו בהצלחה!");
+                showToastNotification("הנתונים יובאו בהצלחה!", "success");
             } else {
-                alert("פורמט שמירה לא תקין. הקובץ חייב להכיל מבנה קורסים.");
+                showToastNotification("פורמט שמירה לא תקין. הקובץ חייב להכיל מבנה קורסים.", "warning");
             }
         } catch (e) {
-            alert("שגיאה בפענוח JSON. ודא שהעתקת את כל הקוד בשלמותו.");
+            showToastNotification("שגיאה בפענוח JSON. ודא שהעתקת את כל הקוד בשלמותו.", "error");
         }
     });
 
-    document.getElementById("btn-reset").addEventListener("click", () => {
-        if (confirm("האם אתה בטוח שברצונך לאפס את כל התקדמות התואר? פעולה זו תמחק הכל!")) {
+    document.getElementById("btn-reset").addEventListener("click", async () => {
+        const confirmed = (window.SemesteroDialog && typeof window.SemesteroDialog.confirm === 'function')
+            ? await window.SemesteroDialog.confirm({
+                title: "איפוס התקדמות התואר",
+                message: "האם אתה בטוח שברצונך לאפס את כל התקדמות התואר? פעולה זו תמחק הכל!",
+                confirmText: "אפס הכל",
+                danger: true
+            })
+            : true;
+        if (confirmed) {
             gameState = JSON.parse(JSON.stringify(INITIAL_STATE));
             recalculateCourseStates();
             saveState();
@@ -13424,25 +13548,38 @@ function renderTechnionPlusQuickBar(course) {
     const driveUrl = FACULTY_DRIVE_WEB_URL;
 
     groupEl.innerHTML = `
-        <a href="${moodleUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-xs technion-link-btn" style="background: rgba(2, 132, 199, 0.22); border: 1px solid #0284c7; color: #38bdf8; text-decoration: none; padding: 4px 10px; border-radius: 6px; font-size: 0.76rem; font-weight: 700; display: inline-flex; align-items: center; gap: 5px;" title="מעבר ישיר לקורס במודל תשפ״ז (Moodle 26)">
+        <a href="${escapeHtml(moodleUrl)}" target="_blank" rel="noopener noreferrer" class="btn btn-xs technion-link-btn" style="background: rgba(2, 132, 199, 0.22); border: 1px solid #0284c7; color: #38bdf8; text-decoration: none; padding: 4px 10px; border-radius: 6px; font-size: 0.76rem; font-weight: 700; display: inline-flex; align-items: center; gap: 5px;" title="מעבר ישיר לקורס במודל תשפ״ז (Moodle 26)">
             <img src="moodle_icon.svg" alt="Moodle" loading="lazy" decoding="async" class="technion-btn-brand-icon" style="width: 15px; height: 15px; object-fit: contain; vertical-align: -2px; flex-shrink: 0;"> מודל 26 ↗
         </a>
-        <a href="${panoptoUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-xs technion-link-btn" style="background: rgba(244, 63, 94, 0.18); border: 1px solid #f43f5e; color: #fb7185; text-decoration: none; padding: 4px 10px; border-radius: 6px; font-size: 0.76rem; font-weight: 700; display: inline-flex; align-items: center; gap: 5px;" title="חיפוש הקלטות הקורס בפנופטו הטכניון">
+        <a href="${escapeHtml(panoptoUrl)}" target="_blank" rel="noopener noreferrer" class="btn btn-xs technion-link-btn" style="background: rgba(244, 63, 94, 0.18); border: 1px solid #f43f5e; color: #fb7185; text-decoration: none; padding: 4px 10px; border-radius: 6px; font-size: 0.76rem; font-weight: 700; display: inline-flex; align-items: center; gap: 5px;" title="חיפוש הקלטות הקורס בפנופטו הטכניון">
             <img src="panopto_icon.svg" alt="Panopto" loading="lazy" decoding="async" class="technion-btn-brand-icon" style="width: 15px; height: 15px; object-fit: contain; vertical-align: -2px; flex-shrink: 0;"> פנופטו ↗
         </a>
-        <a href="${cfUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-xs technion-link-btn" style="background: rgba(245, 158, 11, 0.18); border: 1px solid #f59e0b; color: #fbbf24; text-decoration: none; padding: 4px 10px; border-radius: 6px; font-size: 0.76rem; font-weight: 700; display: inline-flex; align-items: center; gap: 5px;" title="דף הקורס ומערכת שעות ב-CheeseFork">
+        <a href="${escapeHtml(cfUrl)}" target="_blank" rel="noopener noreferrer" class="btn btn-xs technion-link-btn" style="background: rgba(245, 158, 11, 0.18); border: 1px solid #f59e0b; color: #fbbf24; text-decoration: none; padding: 4px 10px; border-radius: 6px; font-size: 0.76rem; font-weight: 700; display: inline-flex; align-items: center; gap: 5px;" title="דף הקורס ומערכת שעות ב-CheeseFork">
             <img src="cheesefork_icon.webp" alt="CheeseFork" loading="lazy" decoding="async" class="technion-btn-brand-icon" style="width: 15px; height: 15px; object-fit: contain; vertical-align: -2px; border-radius: 2px; flex-shrink: 0;"> צ'יזפורק ↗
         </a>
-        <a href="${pangeaUrl}" onclick="event.preventDefault(); if (window.PangeaHub) window.PangeaHub.openQuickPeek('${pangeaUrl}', '${escapeHtml(course.name)} - סיכומי פנגייה', '${pangeaUrl}'); else window.open('${pangeaUrl}', '_blank');" target="_blank" rel="noopener noreferrer" class="btn btn-xs technion-link-btn" style="background: rgba(14, 165, 233, 0.18); border: 1px solid #0284c7; color: #38bdf8; text-decoration: none; padding: 4px 10px; border-radius: 6px; font-size: 0.76rem; font-weight: 700; display: inline-flex; align-items: center; gap: 5px;" title="צפייה מהירה בסיכומי הקורס ודפי נוסחאות בפנגייה (Ido Fang Bentov)">
+        <a href="${escapeHtml(pangeaUrl)}" data-tplus-pangea="${escapeHtml(pangeaUrl)}" data-course-name="${escapeHtml(course.name || '')}" target="_blank" rel="noopener noreferrer" class="btn btn-xs technion-link-btn btn-tplus-pangea" style="background: rgba(14, 165, 233, 0.18); border: 1px solid #0284c7; color: #38bdf8; text-decoration: none; padding: 4px 10px; border-radius: 6px; font-size: 0.76rem; font-weight: 700; display: inline-flex; align-items: center; gap: 5px;" title="צפייה מהירה בסיכומי הקורס ודפי נוסחאות בפנגייה (Ido Fang Bentov)">
             <img src="pangea_icon.png" alt="Fangia" loading="lazy" decoding="async" class="technion-btn-brand-icon pangea-btn-icon" style="width: 15px; height: 15px; object-fit: contain; vertical-align: -2px; border-radius: 2px; flex-shrink: 0;"> פנגייה ↗
         </a>
-        <a href="${driveUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-xs technion-link-btn" style="background: rgba(168, 85, 247, 0.18); border: 1px solid #a855f7; color: #c084fc; text-decoration: none; padding: 4px 10px; border-radius: 6px; font-size: 0.76rem; font-weight: 700; display: inline-flex; align-items: center; gap: 5px;" title="מעבר ישיר לדרייב הפקולטה להנדסת מכונות (אס״ט) - פתרונות שיעורי בית ישנים, רפרנסים ומבחני עבר">
+        <a href="${escapeHtml(driveUrl)}" target="_blank" rel="noopener noreferrer" class="btn btn-xs technion-link-btn" style="background: rgba(168, 85, 247, 0.18); border: 1px solid #a855f7; color: #c084fc; text-decoration: none; padding: 4px 10px; border-radius: 6px; font-size: 0.76rem; font-weight: 700; display: inline-flex; align-items: center; gap: 5px;" title="מעבר ישיר לדרייב הפקולטה להנדסת מכונות (אס״ט) - פתרונות שיעורי בית ישנים, רפרנסים ומבחני עבר">
             <img src="drive_icon.svg" alt="Google Drive" loading="lazy" decoding="async" class="technion-btn-brand-icon" style="width: 15px; height: 15px; object-fit: contain; vertical-align: -2px; flex-shrink: 0;"> דרייב הפקולטה ↗
         </a>
         <a href="https://grades.technion.ac.il/" target="_blank" rel="noopener noreferrer" class="btn btn-xs technion-link-btn" style="background: rgba(147, 51, 234, 0.22); border: 1px solid #9333ea; color: #d8b4fe; text-decoration: none; padding: 4px 10px; border-radius: 6px; font-size: 0.76rem; font-weight: 700; display: inline-flex; align-items: center; gap: 5px;" title="פורטל הציונים, סריקות מחברות בחינה וערעורים באס״ט ובטכניון (grades.technion.ac.il)">
             <img src="asat_icon.webp" alt="ASAT" loading="lazy" decoding="async" class="technion-btn-brand-icon" style="width: 15px; height: 15px; object-fit: contain; vertical-align: -2px; border-radius: 2px; flex-shrink: 0;"> ציונים וסריקות ↗
         </a>
     `;
+    const pangeaBtn = groupEl.querySelector('.btn-tplus-pangea');
+    if (pangeaBtn) {
+        pangeaBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const targetUrl = pangeaBtn.getAttribute('data-tplus-pangea') || pangeaUrl;
+            const cName = pangeaBtn.getAttribute('data-course-name') || '';
+            if (window.PangeaHub && typeof window.PangeaHub.openQuickPeek === 'function') {
+                window.PangeaHub.openQuickPeek(targetUrl, `${cName} - סיכומי פנגייה`, targetUrl);
+            } else {
+                window.open(targetUrl, '_blank', 'noopener,noreferrer');
+            }
+        });
+    }
 }
 
 function escapeHtml(str) {
@@ -15877,7 +16014,7 @@ function renderModalTaskList(course) {
         row.innerHTML = `
             <div class="quest-main">
                 <span class="quest-icon" title="${task.type === 'exam' ? 'מבחן סוף' : (task.type === 'project' ? 'מיקרו-בוס' : 'משימה')}">${icon}</span>
-                <span class="quest-title" title="${task.title}">${task.title}</span>
+                <span class="quest-title" title="${escapeHtml(task.title)}">${escapeHtml(task.title)}</span>
             </div>
             
             <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
@@ -16928,7 +17065,8 @@ function showToastNotification(msg, type = 'info') {
 
     const textSpan = document.createElement('span');
     textSpan.className = 'ast-toast-text';
-    textSpan.textContent = rawMsg;
+    const cleanedDisplayMsg = rawMsg.replace(/^(?:⚠️\s*|❌\s*|✅\s*|✓\s*|ℹ️\s*)+/, '');
+    textSpan.textContent = cleanedDisplayMsg || rawMsg;
 
     const progressBar = document.createElement('div');
     progressBar.className = 'ast-toast-progress';
@@ -16968,12 +17106,15 @@ function getActiveOpenTasksList(coursesCollection, options = {}) {
     const deletedIdsSet = new Set(Array.isArray(gameState && gameState.deletedTaskIds) ? gameState.deletedTaskIds.map(String) : []);
     const RETIRED_SEED_TASK_IDS = new Set(['114052_ww1', '104228_ww1', '034056_p1']);
 
+    const coursesArr = (coursesCollection || []).filter(Boolean);
+    const hasExplicitActive = coursesArr.some(c => c.status === 'active');
+
     const tasksByCategory = {};
-    (coursesCollection || []).forEach(course => {
-        if (!course) return;
+    coursesArr.forEach(course => {
         const isBinary = (course.isBinaryPass === true || course.grade === 'עובר' || course.grade === 'PASS');
         const hasPassingGrade = isBinary || (course.grade !== undefined && course.grade !== null && course.grade !== '' && !isNaN(Number(course.grade)) && Number(course.grade) >= 55);
-        if (course.status !== 'active' || hasPassingGrade || !Array.isArray(course.tasks)) return;
+        const isEligibleGuestCourse = !hasExplicitActive && ((course.semester || 1) === curActiveSem) && course.status !== 'mastered';
+        if ((course.status !== 'active' && !isEligibleGuestCourse) || hasPassingGrade || !Array.isArray(course.tasks)) return;
 
         const sem = course.semester || 1;
         if (!winterStarted && sem > curActiveSem) return;
@@ -17117,9 +17258,9 @@ function renderTasksReminderBanner() {
 
         chip.innerHTML = `
             <span class="reminder-quick-check" title="לחץ לסימון כהושלם">✓</span>
-            <span class="reminder-urgency-badge">${item.urgencyText}</span>
-            <span class="reminder-course-tag">[${shortName}]</span>
-            <span class="reminder-task-title">${item.task.title}</span>
+            <span class="reminder-urgency-badge">${escapeHtml(item.urgencyText)}</span>
+            <span class="reminder-course-tag">[${escapeHtml(shortName)}]</span>
+            <span class="reminder-task-title">${escapeHtml(item.task.title || '')}</span>
         `;
 
         const checkBtn = chip.querySelector(".reminder-quick-check");
@@ -17275,6 +17416,8 @@ window.switchTab = function(tabNameOrNumber) {
     window._tabHistoryStack = window._tabHistoryStack || [];
 
     function setActiveMainTab(activeTabId, isNavBack = false) {
+        if (activeTabId === 'runway') activeTabId = 'calendar';
+        else if (activeTabId === 'flowchart') activeTabId = 'curriculum';
         window.setActiveMainTab = setActiveMainTab;
         if (!isNavBack && window.currentActiveTab && window.currentActiveTab !== activeTabId) {
             window._tabHistoryStack.push(window.currentActiveTab);
@@ -17501,11 +17644,39 @@ window.switchTab = function(tabNameOrNumber) {
                 const task = course ? (course.tasks || []).find(t => t.id === taskId) : null;
                 if (task) {
                     task.pinned = !task.pinned;
+                    task.pinnedUpdatedAt = Date.now();
                     if (typeof saveState === 'function') saveState();
                     renderNotionTasksTable();
                     if (typeof showHudToast === 'function') {
                         showHudToast(task.pinned ? '📌 המשימה ננעצה בראש הרשימה' : 'המשימה שוחררה מנעיצה', 'info');
                     }
+                }
+                return;
+            }
+
+            // 0.5 Delegated Pangea / Moodle / Drive links (prevents inline onclick quote injection)
+            const pangeaBtn = e.target.closest(".notion-pangea-link-btn");
+            if (pangeaBtn) {
+                e.stopPropagation();
+                e.preventDefault();
+                const pUrl = pangeaBtn.dataset.pangeaUrl || pangeaBtn.getAttribute("href");
+                const pTitle = pangeaBtn.dataset.pangeaTitle || "פנגייה";
+                if (pUrl) {
+                    if (window.PangeaHub && typeof window.PangeaHub.openQuickPeek === 'function') {
+                        window.PangeaHub.openQuickPeek(pUrl, pTitle, pUrl);
+                    } else {
+                        window.open(pUrl, '_blank', 'noopener,noreferrer');
+                    }
+                }
+                return;
+            }
+            const extBtn = e.target.closest(".notion-moodle-link-btn, .notion-drive-link-btn");
+            if (extBtn) {
+                e.stopPropagation();
+                const extUrl = extBtn.dataset.externalUrl || extBtn.getAttribute("href");
+                if (extUrl && window.openExternalUrlOrBrowser) {
+                    window.openExternalUrlOrBrowser(extUrl);
+                    e.preventDefault();
                 }
                 return;
             }
@@ -17572,7 +17743,9 @@ window.switchTab = function(tabNameOrNumber) {
                 const course = resolveCourseForTask(courseCode);
                 const task = course ? (course.tasks || []).find(t => t.id === taskId) : null;
                 if (task) {
-                    task.dueDate = e.target.value;
+                    const timeMatch = String(task.dueDate || '').match(/\s+(\d{1,2}:\d{2})$/);
+                    task.dueDate = e.target.value ? (timeMatch ? `${e.target.value} ${timeMatch[1]}` : e.target.value) : '';
+                    task.dueDateUpdatedAt = Date.now();
                     autoUpdateTaskStatusesByDueDate();
                     notifyStateChanged({ tab: 'tasks' });
                 }
@@ -18286,8 +18459,8 @@ function openMoveTasksModal(singleCourseCode = null, singleTaskId = null) {
         btn.className = "task-move-course-btn";
         btn.innerHTML = `
             <span style="font-size: 1.1rem;">📘</span>
-            <span style="font-weight: 700; color: #38bdf8;">[${c.code}]</span>
-            <span style="flex: 1; text-align: right;">${c.name}</span>
+            <span style="font-weight: 700; color: #38bdf8;">[${escapeHtml(c.code)}]</span>
+            <span style="flex: 1; text-align: right;">${escapeHtml(c.name)}</span>
         `;
         btn.onclick = () => {
             executeMoveTasksToCourse(c.code);
@@ -18786,32 +18959,38 @@ function renderNotionTasksTable() {
         else displayLabel = (typeof STATUS_LABELS !== 'undefined' && STATUS_LABELS[statusClass]) || statusClass || 'not started';
         
         const moodleUrl = resolveDirectMoodleTaskUrl(c.code, t);
+        const safeMoodleUrl = moodleUrl ? escapeHtml(moodleUrl) : '';
         const moodleLinkHtml = moodleUrl ? `
-            <a href="${moodleUrl}" target="_blank" rel="noopener noreferrer" class="notion-moodle-link-btn" title="מעבר ישיר למודל (ללא לוח שנה)" onclick="event.stopPropagation(); if (window.openExternalUrlOrBrowser) { window.openExternalUrlOrBrowser('${moodleUrl}'); event.preventDefault(); }">
+            <a href="${safeMoodleUrl}" data-external-url="${safeMoodleUrl}" target="_blank" rel="noopener noreferrer" class="notion-moodle-link-btn" title="מעבר ישיר למודל (ללא לוח שנה)">
                 <span>🎓 מודל ↗</span>
             </a>
         ` : '';
 
         const pangeaUrl = getPangeaTaskUrl(c.code, t);
+        const safePangeaUrl = pangeaUrl ? escapeHtml(pangeaUrl) : '';
+        const safePangeaTitle = escapeHtml(`${t.title || 'משימה'} - פנגייה`);
         const resolvedHw = (window.PangeaHub && t) ? window.PangeaHub.resolveTaskHomework(c.code, t.title || t.name) : null;
         const isHwMatch = resolvedHw && resolvedHw.isExactMatch;
         const pangeaLabel = isHwMatch ? '📝 פתרון בפנגייה ↗' : 'פנגייה ↗';
         const pangeaLinkHtml = pangeaUrl ? `
-            <a href="${pangeaUrl}" target="_blank" rel="noopener noreferrer" class="notion-pangea-link-btn ${isHwMatch ? 'pangea-hw-matched-btn' : ''}" title="${isHwMatch ? 'צפייה ישירה בפתרון תרגיל הבית בפנגייה' : 'מעבר ישיר לסיכומי הקורס וחומרי לימוד בפנגייה'}" onclick="event.stopPropagation(); event.preventDefault(); if (window.PangeaHub) window.PangeaHub.openQuickPeek('${pangeaUrl}', '${escapeHtml(t.title || 'משימה')} - פנגייה', '${pangeaUrl}'); else window.open('${pangeaUrl}', '_blank');">
+            <a href="${safePangeaUrl}" data-pangea-url="${safePangeaUrl}" data-pangea-title="${safePangeaTitle}" target="_blank" rel="noopener noreferrer" class="notion-pangea-link-btn ${isHwMatch ? 'pangea-hw-matched-btn' : ''}" title="${isHwMatch ? 'צפייה ישירה בפתרון תרגיל הבית בפנגייה' : 'מעבר ישיר לסיכומי הקורס וחומרי לימוד בפנגייה'}">
                 <img src="pangea_icon.png" alt="Pangea" class="pangea-btn-icon" style="width: 14px; height: 14px; object-fit: contain; vertical-align: -2px; border-radius: 2px;">
                 <span>${pangeaLabel}</span>
             </a>
         ` : '';
 
         const facultyDriveUrl = (typeof getFacultyDriveCourseUrl === 'function') ? getFacultyDriveCourseUrl(c.code, t) : FACULTY_DRIVE_WEB_URL;
+        const safeFacultyDriveUrl = facultyDriveUrl ? escapeHtml(facultyDriveUrl) : '';
         const facultyDriveLinkHtml = facultyDriveUrl ? `
-            <a href="${facultyDriveUrl}" target="_blank" rel="noopener noreferrer" class="notion-drive-link-btn" title="מעבר ישיר לתיקיית רפרנסים ופתרונות בדרייב הפקולטה להנדסת מכונות (אס״ט)" onclick="event.stopPropagation(); if (window.openExternalUrlOrBrowser) { window.openExternalUrlOrBrowser('${facultyDriveUrl}'); event.preventDefault(); }">
+            <a href="${safeFacultyDriveUrl}" data-external-url="${safeFacultyDriveUrl}" target="_blank" rel="noopener noreferrer" class="notion-drive-link-btn" title="מעבר ישיר לתיקיית רפרנסים ופתרונות בדרייב הפקולטה להנדסת מכונות (אס״ט)">
                 <span>📁 דרייב ↗</span>
             </a>
         ` : '';
 
         const courseAccent = getCourseAccentColor(c.code);
         const taskCustomColor = (t.color && /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(t.color)) ? t.color : courseAccent;
+        const safeCourseCodeAttr = escapeHtml(c.code);
+        const safeTaskIdAttr = escapeHtml(t.id);
 
         const taskGradeVal = (t.grade !== undefined && t.grade !== null && t.grade !== '' && !isNaN(Number(t.grade))) ? t.grade : '';
         const taskGradeTier = (typeof getTaskGradeTierClass === 'function') ? getTaskGradeTierClass(t.grade) : '';
@@ -18820,13 +18999,13 @@ function renderNotionTasksTable() {
                     <span class="time-remaining ${timeInfo.className}">הושלם</span>
                     <span style="color: #64748b; font-size: 0.78rem;">|</span>
                     <span class="completed-inline-grade-label">ציון:</span>
-                    <input type="number" class="notion-inline-grade-input ${taskGradeTier}" min="0" max="100" step="0.5" value="${taskGradeVal}" placeholder="--" title="${t.type === 'exam' ? 'ציון מבחן (0-100)' : 'ציון ש״ב / מטלה (0-100)'}" aria-label="ציון משימה">
+                    <input type="number" class="notion-inline-grade-input ${taskGradeTier}" min="0" max="100" step="0.5" value="${escapeHtml(taskGradeVal)}" placeholder="--" title="${t.type === 'exam' ? 'ציון מבחן (0-100)' : 'ציון ש״ב / מטלה (0-100)'}" aria-label="ציון משימה">
                </div>`
-            : `<span class="time-remaining ${timeInfo.className}">${timeInfo.text}</span>`;
+            : `<span class="time-remaining ${timeInfo.className}">${escapeHtml(timeInfo.text)}</span>`;
         const isSelected = window.selectedTasksMap && window.selectedTasksMap.has(`${c.code}:::${t.id}`);
         rowsHtml += `
-            <tr data-course-code="${c.code}" data-task-id="${t.id}" style="--course-accent: ${taskCustomColor};" class="${isPinned ? 'is-task-pinned' : ''} ${isSelected ? 'is-row-selected' : ''} has-course-accent">
-                <td class="notion-table-select-cell"><input type="checkbox" class="notion-row-checkbox" data-course-code="${c.code}" data-task-id="${t.id}" title="בחר משימה לפעולות מרובות" ${isSelected ? 'checked' : ''}></td>
+            <tr data-course-code="${safeCourseCodeAttr}" data-task-id="${safeTaskIdAttr}" style="--course-accent: ${taskCustomColor};" class="${isPinned ? 'is-task-pinned' : ''} ${isSelected ? 'is-row-selected' : ''} has-course-accent">
+                <td class="notion-table-select-cell"><input type="checkbox" class="notion-row-checkbox" data-course-code="${safeCourseCodeAttr}" data-task-id="${safeTaskIdAttr}" title="בחר משימה לפעולות מרובות" ${isSelected ? 'checked' : ''}></td>
                 <td>
                     <div class="notion-title-cell">
                         <div class="notion-title-main">
@@ -18834,7 +19013,7 @@ function renderNotionTasksTable() {
                             <span class="notion-course-tag">
                                 ${taskBadgeHtml}
                                 ${miluimBadgeHtml}
-                                <span class="notion-title-editable" contenteditable="true" spellcheck="false" title="לחץ לעריכת שם המשימה">${t.title}</span>
+                                <span class="notion-title-editable" contenteditable="true" spellcheck="false" title="לחץ לעריכת שם המשימה">${escapeHtml(t.title || '')}</span>
                             </span>
                         </div>
                         <div class="notion-title-actions">
@@ -18846,16 +19025,16 @@ function renderNotionTasksTable() {
                     </div>
                 </td>
                 <td>
-                    <span class="notion-course-tag has-course-accent" data-course-code="${c.code}" style="--course-accent: ${courseAccent}; cursor: pointer;" title="לחץ לשינוי סמל וצבע הקורס">
+                    <span class="notion-course-tag has-course-accent" data-course-code="${safeCourseCodeAttr}" style="--course-accent: ${courseAccent}; cursor: pointer;" title="לחץ לשינוי סמל וצבע הקורס">
                         <span class="course-color-dot" style="background: ${courseAccent};"></span>
                         ${getCachedIcon(c.code)}
-                        <span>${c.name}</span>
+                        <span>${escapeHtml(c.name || '')}</span>
                     </span>
                 </td>
                 <td class="notion-table-date-cell">
                     <div class="notion-date-display-wrap" title="לחץ לעריכת תאריך הגשה">
-                        <span class="notion-date-formatted">${formatDateToDisplay(t.dueDate) || 'ללא תאריך'}</span>
-                        <input type="date" class="notion-inline-date-input" value="${toIsoDateOnly(t.dueDate)}" aria-label="עריכת תאריך הגשה">
+                        <span class="notion-date-formatted">${escapeHtml(formatDateToDisplay(t.dueDate) || 'ללא תאריך')}</span>
+                        <input type="date" class="notion-inline-date-input" value="${escapeHtml(toIsoDateOnly(t.dueDate))}" aria-label="עריכת תאריך הגשה">
                     </div>
                 </td>
                 <td>${timeOrCompletedGradeHtml}</td>
@@ -18867,6 +19046,16 @@ function renderNotionTasksTable() {
     });
     tableBody.innerHTML = rowsHtml;
     if (typeof updateTasksBulkToolbar === 'function') updateTasksBulkToolbar();
+    if (typeof getActiveOpenTasksList === 'function' && typeof gameState !== 'undefined' && gameState) {
+        const syncedOpen = getActiveOpenTasksList(Object.values(gameState.courses || {}));
+        gameState.openTasks = syncedOpen.length;
+        const openTasksEl = document.getElementById("stat-open-tasks");
+        if (openTasksEl) openTasksEl.innerText = gameState.openTasks;
+        if (!window._insideRenderRemindersBanner && typeof renderTasksReminderBanner === 'function') {
+            window._insideRenderRemindersBanner = true;
+            try { renderTasksReminderBanner(); } finally { window._insideRenderRemindersBanner = false; }
+        }
+    }
 }
 
 // Global Notion Status Dropdown Menu Component
@@ -18925,19 +19114,7 @@ function showNotionStatusDropdown(event, courseCode, taskId, currentStatus) {
     
     const pill = event.currentTarget;
     const rect = pill.getBoundingClientRect();
-    
-    // Calculate viewport-relative coordinates (fixed positioning)
-    const dropdownHeight = 220;
-    let top = rect.bottom + 4;
-    if (top + dropdownHeight > window.innerHeight) {
-        top = Math.max(10, rect.top - dropdownHeight - 4);
-    }
-    let left = Math.max(10, Math.min(window.innerWidth - 200, rect.left));
-    
-    globalNotionDropdown.style.top = `${top}px`;
-    globalNotionDropdown.style.left = `${left}px`;
-    globalNotionDropdown.style.display = "flex";
-    
+
     const options = [
         { id: "not_started", label: "טרם התחיל (Not started)", group: "To-do", pillClass: "not_started" },
         { id: "in_progress", label: "בתהליך (In progress)", group: "In progress", pillClass: "in_progress" },
@@ -18971,6 +19148,23 @@ function showNotionStatusDropdown(event, courseCode, taskId, currentStatus) {
     `;
     
     globalNotionDropdown.innerHTML = html;
+    globalNotionDropdown.style.visibility = "hidden";
+    globalNotionDropdown.style.display = "flex";
+
+    // Calculate viewport-relative coordinates without crossing top navbar or clipping bottom edge
+    const menuH = globalNotionDropdown.offsetHeight || 225;
+    const menuW = globalNotionDropdown.offsetWidth || 224;
+    const navEl = document.querySelector('.hud-nav-tabs');
+    const navBottom = navEl ? Math.ceil(navEl.getBoundingClientRect().bottom) : 164;
+    const navFloor = Math.max(104, navBottom + 4);
+    let top = rect.bottom + 4;
+    if (top + menuH > window.innerHeight - 8) {
+        top = Math.max(navFloor, rect.top - menuH - 4);
+    }
+    const left = Math.max(10, Math.min(window.innerWidth - menuW - 10, rect.left));
+    globalNotionDropdown.style.top = `${top}px`;
+    globalNotionDropdown.style.left = `${left}px`;
+    globalNotionDropdown.style.visibility = "visible";
     
     // Bind status option clicks
     const items = globalNotionDropdown.querySelectorAll(".notion-dropdown-item");
@@ -19149,7 +19343,11 @@ function openTaskSidePeek(courseCode, taskId) {
     document.getElementById("peek-task-title").value = task.title;
     document.getElementById("peek-property-course").innerText = `${course.name} (${course.code.toUpperCase()})`;
     
+    const isMiluimTask = !!(task.isMiluim || task.miluim || task.type === 'miluim' || /מילואי|3010|צווים|צו\s*8|שירות\s*מילואי/i.test(task.title || ''));
+    const isGeneralTask = (task.type === 'task' || task.type === 'general');
     let typeLabel = "📝 שיעורי בית / גיליון";
+    if (isMiluimTask) typeLabel = "🪖 משימת מילואים / התאמה";
+    else if (isGeneralTask) typeLabel = "📋 משימה כללית";
     if (task.type === 'project') typeLabel = "🚀 עבודה / פרויקט";
     if (task.type === 'exam') typeLabel = "🎓 מבחן";
     if (task.type === 'lab') typeLabel = "🧪 מעבדה";
@@ -19158,7 +19356,7 @@ function openTaskSidePeek(courseCode, taskId) {
     
     const peekXpEl = document.getElementById("peek-property-xp");
     if (peekXpEl) peekXpEl.innerText = "";
-    document.getElementById("peek-property-date").value = task.dueDate || "";
+    document.getElementById("peek-property-date").value = toIsoDateOnly(task.dueDate);
     
     const statusSelect = document.getElementById("peek-property-status");
     statusSelect.innerHTML = "";
@@ -19196,7 +19394,9 @@ function openTaskSidePeek(courseCode, taskId) {
     
     const dateInput = document.getElementById("peek-property-date");
     dateInput.onchange = (e) => {
-        task.dueDate = e.target.value;
+        const timeMatch = String(task.dueDate || '').match(/\s+(\d{1,2}:\d{2})$/);
+        task.dueDate = e.target.value ? (timeMatch ? `${e.target.value} ${timeMatch[1]}` : e.target.value) : '';
+        task.dueDateUpdatedAt = Date.now();
         autoUpdateTaskStatusesByDueDate();
         renderNotionTasksTable();
         renderUI();
@@ -19258,8 +19458,13 @@ function openTaskSidePeek(courseCode, taskId) {
     const gradeHint = document.getElementById("peek-property-grade-hint");
     const gradeInput = document.getElementById("peek-property-grade");
     if (gradeRow && gradeInput) {
-        gradeRow.style.display = "grid";
-        gradeInput.value = (task.grade !== undefined && task.grade !== null && task.grade !== '' && !isNaN(Number(task.grade))) ? task.grade : "";
+        const hasSavedGrade = (task.grade !== undefined && task.grade !== null && task.grade !== '' && !isNaN(Number(task.grade)));
+        if ((isMiluimTask || isGeneralTask) && task.type !== 'exam' && !hasSavedGrade) {
+            gradeRow.style.display = "none";
+        } else {
+            gradeRow.style.display = "grid";
+        }
+        gradeInput.value = hasSavedGrade ? task.grade : "";
 
         if (task.type === 'exam') {
             if (gradeLabel) gradeLabel.innerText = "📝 ציון מבחן סוף (Exam Grade)";
@@ -19373,9 +19578,9 @@ function openTaskSidePeek(courseCode, taskId) {
                 renderUI();
             };
         } else {
-            if (gradeLabel) gradeLabel.innerText = "💯 ציון ש״ב / מטלה (0–100)";
+            if (gradeLabel) gradeLabel.innerText = "💯 ציון ש״ב / מטלה (\u20660–100\u2069)";
             if (gradeHint) gradeHint.innerText = "הזנת ציון מסמנת כהסתיים ומעדכנת אוטומטית את ממוצע ההגשות (\"הטובים מ-N\")";
-            gradeInput.placeholder = "הזן ציון (0–100)...";
+            gradeInput.placeholder = "הזן ציון (\u20660–100\u2069)...";
 
             gradeInput.onchange = (e) => {
                 if (typeof window.updateTaskGrade === 'function') {
@@ -19395,6 +19600,7 @@ function openTaskSidePeek(courseCode, taskId) {
         pinToggle.checked = !!task.pinned;
         pinToggle.onchange = (e) => {
             task.pinned = e.target.checked;
+            task.pinnedUpdatedAt = Date.now();
             renderNotionTasksTable();
             saveState();
         };
@@ -19418,15 +19624,20 @@ function openTaskSidePeek(courseCode, taskId) {
     const peekResetColorBtn = document.getElementById("btn-peek-reset-color");
     const currentAccentColor = (typeof getCourseAccentColor === 'function') ? getCourseAccentColor(courseCode) : '#38bdf8';
     const initialPeekColor = (task.color && /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(task.color)) ? task.color : currentAccentColor;
+    const applyTaskColor = (hex) => {
+        if (hex) {
+            task.color = hex;
+        } else {
+            delete task.color;
+        }
+        task.colorUpdatedAt = Date.now();
+        if (peekColorInput) peekColorInput.value = hex || currentAccentColor;
+        saveState();
+        renderNotionTasksTable();
+        if (typeof renderFinalsCalendar === 'function') renderFinalsCalendar();
+    };
     if (peekColorInput) {
         peekColorInput.value = initialPeekColor;
-        const applyTaskColor = (hex) => {
-            task.color = hex;
-            peekColorInput.value = hex;
-            saveState();
-            renderNotionTasksTable();
-            if (typeof renderFinalsCalendar === 'function') renderFinalsCalendar();
-        };
         peekColorInput.onchange = (e) => applyTaskColor(e.target.value);
         if (peekColorSpectrum && typeof renderSpectrumColorPalette === 'function') {
             renderSpectrumColorPalette(peekColorSpectrum, peekColorInput, initialPeekColor, applyTaskColor);
@@ -19435,10 +19646,11 @@ function openTaskSidePeek(courseCode, taskId) {
     if (peekResetColorBtn) {
         peekResetColorBtn.onclick = () => {
             delete task.color;
+            task.colorUpdatedAt = Date.now();
             const fallback = (typeof getCourseAccentColor === 'function') ? getCourseAccentColor(courseCode) : '#38bdf8';
             if (peekColorInput) peekColorInput.value = fallback;
             if (peekColorSpectrum && typeof renderSpectrumColorPalette === 'function') {
-                renderSpectrumColorPalette(peekColorSpectrum, peekColorInput, fallback);
+                renderSpectrumColorPalette(peekColorSpectrum, peekColorInput, fallback, applyTaskColor);
             }
             saveState();
             renderNotionTasksTable();
@@ -19460,21 +19672,13 @@ function openTaskSidePeek(courseCode, taskId) {
             }
             if (gameState.courses && gameState.courses[courseCode]) gameState.courses[courseCode].color = chosen;
             delete task.color;
+            task.colorUpdatedAt = Date.now();
             saveState();
             renderNotionTasksTable();
             if (typeof renderFinalsCalendar === 'function') renderFinalsCalendar();
             if (typeof renderTimetableGrid === 'function') renderTimetableGrid();
             if (typeof renderFlowchartTree === 'function') renderFlowchartTree();
             if (typeof showToastNotification === 'function') showToastNotification('🎨 צבע הקורס עודכן בכל המערכת!', 'success');
-        };
-    }
-    if (peekResetColorBtn) {
-        peekResetColorBtn.onclick = () => {
-            delete task.color;
-            if (peekColorInput) peekColorInput.value = (typeof getCourseAccentColor === 'function') ? getCourseAccentColor(courseCode) : '#38bdf8';
-            saveState();
-            renderNotionTasksTable();
-            if (typeof renderFinalsCalendar === 'function') renderFinalsCalendar();
         };
     }
 
@@ -19524,9 +19728,9 @@ function renderPeekComments(task) {
         item.innerHTML = `
             <div class="peek-comment-header">
                 <span style="font-weight: bold; color: var(--accent-blue);">👤 סטודנט</span>
-                <span>${dateStr}</span>
+                <span>${escapeHtml(dateStr)}</span>
             </div>
-            <div class="peek-comment-text">${c.text}</div>
+            <div class="peek-comment-text">${escapeHtml(c.text || '')}</div>
         `;
         list.appendChild(item);
     });
@@ -19728,6 +19932,63 @@ function getDegreeExamDates(filterPast = true) {
         });
     }
 
+    // 3. Fallback: official Technion / CheeseFork exam dates & course metadata for active courses without explicit exam dueDate
+    if (typeof initCheeseForkDatabase === 'function') {
+        initCheeseForkDatabase();
+    }
+    dedupCourses.forEach(course => {
+        if (!course || course.status !== 'active') return;
+        const root = normalizeExamCourseRoot(course.altCode || course.code);
+        const cfStatic = (typeof getCourseCheeseforkExamDates === 'function')
+            ? (getCourseCheeseforkExamDates(course.code) || (course.altCode ? getCourseCheeseforkExamDates(course.altCode) : null) || getCourseCheeseforkExamDates(root))
+            : null;
+        const cfDb = (typeof findCheeseForkCourse === 'function')
+            ? (findCheeseForkCourse(course.code) || (course.altCode ? findCheeseForkCourse(course.altCode) : null) || findCheeseForkCourse(root))
+            : null;
+
+        ['A', 'B'].forEach(moed => {
+            let rawDate = '';
+            const directCandidate = moed === 'A'
+                ? (course.moedA || course.examDateA || course.examDate)
+                : (course.moedB || course.examDateB);
+            if (directCandidate && (typeof isCurrentOrUpcomingDate !== 'function' || isCurrentOrUpcomingDate(String(directCandidate)))) {
+                rawDate = String(directCandidate);
+            } else if (cfStatic && (moed === 'A' ? cfStatic.moedA : cfStatic.moedB)) {
+                rawDate = moed === 'A' ? cfStatic.moedA : cfStatic.moedB;
+            } else if (cfDb && (moed === 'A' ? cfDb.moedA : cfDb.moedB)) {
+                const dbCand = moed === 'A' ? cfDb.moedA : cfDb.moedB;
+                if (typeof isCurrentOrUpcomingDate !== 'function' || isCurrentOrUpcomingDate(String(dbCand))) {
+                    rawDate = String(dbCand);
+                }
+            }
+            if (!rawDate) return;
+
+            const parsed = parseExamDateLocal(rawDate);
+            if (!parsed) return;
+            if (filterPast && parsed.date < today) return;
+
+            const courseMoedKey = `${root}|${moed}`;
+            const courseDateKey = `${root}|${parsed.isoDate}`;
+            if (completedCourseMoed.has(courseMoedKey) || seenCourseMoed.has(courseMoedKey) || seenCourseDate.has(courseDateKey)) {
+                return;
+            }
+
+            seenCourseMoed.add(courseMoedKey);
+            seenCourseDate.add(courseDateKey);
+
+            const moedLabel = moed === 'B' ? "מועד ב'" : "מועד א'";
+            exams.push({
+                courseCode: course.code,
+                courseRoot: root,
+                courseName: `${course.name} (${moedLabel})`,
+                baseName: course.name,
+                moed,
+                dateStr: parsed.isoDate,
+                date: parsed.date
+            });
+        });
+    });
+
     const validExams = exams.filter(e => e.date && !isNaN(e.date.getTime()));
     validExams.sort((a, b) => a.date - b.date);
     return validExams;
@@ -19742,6 +20003,13 @@ function getHebrewDayOfWeek(d) {
 function renderExamGapRunway() {
     const track = document.getElementById("exam-gap-runway-track");
     if (!track) return;
+
+    if (!window.CHEESEFORK_DB && typeof ensureCheeseForkDatabase === 'function' && !window.__runwayCfWarmRequested) {
+        window.__runwayCfWarmRequested = true;
+        ensureCheeseForkDatabase().then((ok) => {
+            if (ok && document.getElementById("exam-gap-runway-track")) renderExamGapRunway();
+        }).catch(() => {});
+    }
 
     // Filter out exams that have already passed
     const exams = getDegreeExamDates(true);
@@ -19785,14 +20053,15 @@ function renderExamGapRunway() {
     const msUntilFirst = firstExamDay - today;
     const daysUntilFirst = Math.max(0, Math.round(msUntilFirst / (1000 * 60 * 60 * 24)));
     const firstExamFormatted = `${String(firstExam.date.getDate()).padStart(2, '0')}.${String(firstExam.date.getMonth() + 1).padStart(2, '0')}.${firstExam.date.getFullYear()}`;
+    const firstExamNameEsc = escapeHtml(firstExam.courseName || '');
 
     if (subtitleEl) {
         if (daysUntilFirst === 0) {
-            subtitleEl.innerHTML = `🎯 <strong>היום:</strong> בחינה ב-${firstExam.courseName}! בהצלחה!`;
+            subtitleEl.innerHTML = `🎯 <strong>היום:</strong> בחינה ב-${firstExamNameEsc}! בהצלחה!`;
         } else if (daysUntilFirst === 1) {
-            subtitleEl.innerHTML = `🎯 <strong>מחר:</strong> בחינה ב-${firstExam.courseName}!`;
+            subtitleEl.innerHTML = `🎯 <strong>מחר:</strong> בחינה ב-${firstExamNameEsc}!`;
         } else {
-            subtitleEl.innerHTML = `🎯 <strong>המבחן הבא:</strong> ${firstExam.courseName} בעוד <strong>${daysUntilFirst} ימים</strong> (${firstExamFormatted})`;
+            subtitleEl.innerHTML = `🎯 <strong>המבחן הבא:</strong> ${firstExamNameEsc} בעוד <strong>${daysUntilFirst} ימים</strong> (${firstExamFormatted})`;
         }
     }
 
@@ -19810,7 +20079,7 @@ function renderExamGapRunway() {
                     <div>
                         <strong style="color: #f87171;">התנגשות מועדי בחינות באותו יום!</strong>
                         <div style="font-size: 0.78rem; opacity: 0.95;">
-                            ${clashPairs.map(p => `<span>${p.c1} ו-${p.c2} נקבעו לאותו יום (${p.date})</span>`).join(' • ')} — מומלץ להעביר את אחד הקורסים למועד ב'.
+                            ${clashPairs.map(p => `<span>${escapeHtml(p.c1)} ו-${escapeHtml(p.c2)} נקבעו לאותו יום (${escapeHtml(p.date)})</span>`).join(' • ')} — מומלץ להעביר את אחד הקורסים למועד ב'.
                         </div>
                     </div>
                 </div>
@@ -19823,9 +20092,9 @@ function renderExamGapRunway() {
                 <div style="display: flex; align-items: center; gap: 8px;">
                     <span style="font-size: 1.25rem;">⚠️</span>
                     <div>
-                        <strong style="color: #fbbf24;">צפיפות בחינות קריטית (<48 שעות)</strong>
+                        <strong style="color: #fbbf24;">צפיפות בחינות קריטית (&lt;48 שעות)</strong>
                         <div style="font-size: 0.78rem; opacity: 0.95;">
-                            ${squeezePairs.map(p => `<span>מרווח של יום אחד בלבד בין ${p.c1} ל-${p.c2}</span>`).join(' • ')} — שקול מרווח למידה או חלוקת מועדים.
+                            ${squeezePairs.map(p => `<span>מרווח של יום אחד בלבד בין ${escapeHtml(p.c1)} ל-${escapeHtml(p.c2)}</span>`).join(' • ')} — שקול מרווח למידה או חלוקת מועדים.
                         </div>
                     </div>
                 </div>
@@ -19855,7 +20124,7 @@ function renderExamGapRunway() {
             <!-- Connector from Today to First Upcoming Exam -->
             <div class="runway-connector countdown-to-next">
                 <div class="runway-line"></div>
-                <div class="runway-badge" title="נותרו עוד ${daysUntilFirst} ימים עד למבחן הבא (${firstExam.courseName})">
+                <div class="runway-badge" title="נותרו עוד ${daysUntilFirst} ימים עד למבחן הבא (${firstExamNameEsc})">
                     <span class="runway-days">${countdownLabel}</span>
                 </div>
                 <div class="runway-line"></div>
@@ -19871,11 +20140,13 @@ function renderExamGapRunway() {
         const badgeText = isFirst ? `🎯 המבחן הבא` : `📝 ${exam.moed === 'B' ? "מועד ב'" : "מועד א'"}`;
         const badgeClass = isFirst ? `runway-node-badge next-up` : `runway-node-badge`;
         const nodeClass = isFirst ? `runway-exam-node is-next-exam` : `runway-exam-node`;
+        const examCodeEsc = escapeHtml(exam.courseCode || '');
+        const examNameEsc = escapeHtml(exam.courseName || '');
 
         html += `
-            <div class="${nodeClass}" data-course-code="${exam.courseCode}" title="לחץ לפתיחת פרטי ${exam.courseName}">
+            <div class="${nodeClass}" data-course-code="${examCodeEsc}" title="לחץ לפתיחת פרטי ${examNameEsc}">
                 <div class="${badgeClass}">${badgeText}</div>
-                <div class="runway-node-title">${exam.courseName}</div>
+                <div class="runway-node-title">${examNameEsc}</div>
                 <div class="runway-node-date">${dayFormatted}</div>
                 <div class="runway-node-day">${hebrewDay}</div>
             </div>
@@ -20164,8 +20435,12 @@ function openAddCustomTaskModal(prefilledDate = "", defaultCategory = "personal"
         activeCourses.forEach(c => {
             const opt = document.createElement("option");
             opt.value = c.code;
-            const shortName = COURSE_SHORT_NAMES[c.code] || c.name;
-            opt.innerText = `${shortName} - ${c.name} (${c.code.toUpperCase()})`;
+            const rawShort = COURSE_SHORT_NAMES[c.code] || '';
+            const normCmp = s => String(s || '').replace(/["״'׳\s-]/g, '').toLowerCase();
+            const hasDistinctShort = !!(rawShort && normCmp(rawShort) !== normCmp(c.name));
+            opt.innerText = hasDistinctShort
+                ? `${rawShort} — ${c.name} (${c.code.toUpperCase()})`
+                : `${c.name} (${c.code.toUpperCase()})`;
             if (currentFilterVal === c.code) opt.selected = true;
             courseSelect.appendChild(opt);
         });
@@ -20903,7 +21178,7 @@ window.PanoptoTracker = {
     },
 
     openModal() {
-        if (window.AttendanceHub && typeof window.AttendanceHub.openModal === 'function') {
+        if (!(opts && opts.standalone === true) && window.AttendanceHub && typeof window.AttendanceHub.openModal === 'function') {
             window.AttendanceHub.openModal('catchup');
             return;
         }
@@ -20917,18 +21192,22 @@ window.PanoptoTracker = {
         document.body.appendChild(modal);
 
         modal.innerHTML = `
-            <div class="modal-card" style="background: #0f172a; border: 1px solid #f43f5e; border-radius: 16px; padding: 24px; width: 100%; max-width: 680px; max-height: 90vh; overflow-y: auto; direction: rtl; box-shadow: 0 15px 40px rgba(0,0,0,0.85);">
-                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 12px;">
+            <div class="modal-card modal-content" style="background: #0f172a; border: 1px solid #f43f5e; border-radius: 16px; padding: 0; width: 100%; max-width: 680px; max-height: calc(100dvh - 32px); display: flex; flex-direction: column; overflow: hidden; direction: rtl; box-shadow: 0 15px 40px rgba(0,0,0,0.85);">
+                <div class="modal-header" style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid rgba(255,255,255,0.08); padding: 16px 20px 12px; gap: 10px; flex-shrink: 0;">
                     <div>
-                        <h2 style="margin: 0; font-size: 1.25rem; font-weight: 800; color: #f8fafc; display: flex; align-items: center; gap: 8px;">
+                        <h2 style="margin: 0; font-size: 1.2rem; font-weight: 800; color: #f8fafc; display: flex; align-items: center; gap: 8px;">
                             <span>📹</span>
                             <span>מעקב הרצאות פנופטו וחישוב קצב סגירת פערים</span>
                         </h2>
                         <span style="font-size: 0.76rem; color: #94a3b8;">צפייה בהקלטות, מעקב הרצאות ותרגולים, ומחשבון עומס לקראת בחינות</span>
                     </div>
-                    <button type="button" class="btn-close-panopto-modal" aria-label="סגור חלון" style="background: transparent; border: none; font-size: 1.4rem; color: #94a3b8; cursor: pointer; padding: 4px;">✕</button>
+                    <div class="panopto-header-actions" style="display: flex; align-items: center; gap: 6px; flex-shrink: 0;">
+                        <button type="button" class="modal-close btn-close-panopto-modal" aria-label="סגור חלון" style="position: static; width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color: #cbd5e1; cursor: pointer; font-size: 1.2rem; line-height: 1;">✕</button>
+                    </div>
                 </div>
-                <div id="panopto-tracker-modal-body"></div>
+                <div class="modal-body" style="padding: 16px 20px; overflow-y: auto; flex: 1 1 auto; min-height: 0;">
+                    <div id="panopto-tracker-modal-body"></div>
+                </div>
             </div>
         `;
 
@@ -20937,6 +21216,10 @@ window.PanoptoTracker = {
         modal.addEventListener("click", (e) => {
             if (e.target === modal) closeModal();
         });
+
+        if (window.ModalHelp && typeof window.ModalHelp.injectHelpButtons === 'function') {
+            window.ModalHelp.injectHelpButtons();
+        }
 
         this.renderModalBody();
     },
@@ -20958,7 +21241,7 @@ window.PanoptoTracker = {
                     <div style="font-size: 0.8rem; color: #cbd5e1; line-height: 1.4;">
                         צפית ב-<strong>${pacing.totalWatched}</strong> מתוך <strong>${pacing.totalVideos}</strong> סרטונים מוקלטים בכלל הקורסים הפעילים.
                         <div style="margin-top: 4px; color: #fecdd3;">
-                            🏃 קצב מומלץ לסגירת הפער לפני <strong>${pacing.deadlineLabel}</strong> (בעוד ${pacing.daysUntilDeadline} ימים):
+                            🏃 קצב מומלץ לסגירת הפער לפני <strong>${escapeHtml(pacing.deadlineLabel)}</strong> (בעוד ${pacing.daysUntilDeadline} ימים):
                             <strong style="font-size: 0.95rem; color: #fff; background: #e11d48; padding: 2px 7px; border-radius: 4px; margin: 0 4px;">${pacing.requiredDailyPace} סרטונים ליום</strong>
                         </div>
                     </div>
@@ -20981,18 +21264,20 @@ window.PanoptoTracker = {
                 const pct = hasLectures ? Math.round((c.watchedCount / c.totalCount) * 100) : 0;
                 const lecs = c.lectures.filter(l => l.type === 'lecture');
                 const tuts = c.lectures.filter(l => l.type === 'tutorial');
+                const cCodeEsc = escapeHtml(c.code || '');
+                const cNameEsc = escapeHtml(c.name || '');
 
                 html += `
                     <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 14px;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                             <div>
-                                <strong style="font-size: 0.95rem; color: #f8fafc;">${c.name} (${c.code})</strong>
+                                <strong style="font-size: 0.95rem; color: #f8fafc;">${cNameEsc} (${cCodeEsc})</strong>
                                 <span style="font-size: 0.75rem; color: #94a3b8; margin-right: 8px;">
                                     ${hasLectures ? `הושלמו ${c.watchedCount}/${c.totalCount} (${pct}%)` : 'טרם הוגדרו הרצאות'}
                                 </span>
                             </div>
                             ${!hasLectures ? `
-                                <button type="button" class="btn btn-sm btn-outline btn-gen-panopto" data-code="${c.code}" style="font-size: 0.72rem; padding: 4px 10px; color: #f43f5e; border-color: #f43f5e; border-radius: 6px; cursor: pointer;">
+                                <button type="button" class="btn btn-sm btn-outline btn-gen-panopto" data-code="${cCodeEsc}" style="font-size: 0.72rem; padding: 4px 10px; color: #f43f5e; border-color: #f43f5e; border-radius: 6px; cursor: pointer;">
                                     ⚡ צור רשימת הרצאות (13+13)
                                 </button>
                             ` : `
@@ -21012,8 +21297,8 @@ window.PanoptoTracker = {
                                 <div style="font-size: 0.72rem; font-weight: 700; color: #94a3b8; margin-bottom: 4px;">הרצאות (Lectures):</div>
                                 <div style="display: flex; flex-wrap: wrap; gap: 4px;">
                                     ${lecs.map(l => `
-                                        <button type="button" class="btn-toggle-panopto-item ${l.watched ? 'is-watched' : ''}" data-code="${c.code}" data-id="${l.id}" title="${l.title} (לחץ לסימון נצפה/לא נצפה)" style="font-size: 0.70rem; padding: 3px 8px; border-radius: 4px; border: 1px solid ${l.watched ? '#10b981' : 'rgba(255,255,255,0.15)'}; background: ${l.watched ? 'rgba(16, 185, 129, 0.2)' : 'rgba(255,255,255,0.03)'}; color: ${l.watched ? '#6ee7b7' : '#cbd5e1'}; cursor: pointer;">
-                                            ${l.watched ? '✓ ' : ''}${l.title}
+                                        <button type="button" class="btn-toggle-panopto-item ${l.watched ? 'is-watched' : ''}" data-code="${cCodeEsc}" data-id="${escapeHtml(l.id)}" title="${escapeHtml(l.title)} (לחץ לסימון נצפה/לא נצפה)" style="font-size: 0.70rem; padding: 3px 8px; border-radius: 4px; border: 1px solid ${l.watched ? '#10b981' : 'rgba(255,255,255,0.15)'}; background: ${l.watched ? 'rgba(16, 185, 129, 0.2)' : 'rgba(255,255,255,0.03)'}; color: ${l.watched ? '#6ee7b7' : '#cbd5e1'}; cursor: pointer;">
+                                            ${l.watched ? '✓ ' : ''}${escapeHtml(l.title)}
                                         </button>
                                     `).join('')}
                                 </div>
@@ -21024,8 +21309,8 @@ window.PanoptoTracker = {
                                 <div style="font-size: 0.72rem; font-weight: 700; color: #94a3b8; margin-bottom: 4px;">תרגולים (Tutorials):</div>
                                 <div style="display: flex; flex-wrap: wrap; gap: 4px;">
                                     ${tuts.map(t => `
-                                        <button type="button" class="btn-toggle-panopto-item ${t.watched ? 'is-watched' : ''}" data-code="${c.code}" data-id="${t.id}" title="${t.title} (לחץ לסימון נצפה/לא נצפה)" style="font-size: 0.70rem; padding: 3px 8px; border-radius: 4px; border: 1px solid ${t.watched ? '#38bdf8' : 'rgba(255,255,255,0.15)'}; background: ${t.watched ? 'rgba(56, 189, 248, 0.2)' : 'rgba(255,255,255,0.03)'}; color: ${t.watched ? '#7dd3fc' : '#cbd5e1'}; cursor: pointer;">
-                                            ${t.watched ? '✓ ' : ''}${t.title}
+                                        <button type="button" class="btn-toggle-panopto-item ${t.watched ? 'is-watched' : ''}" data-code="${cCodeEsc}" data-id="${escapeHtml(t.id)}" title="${escapeHtml(t.title)} (לחץ לסימון נצפה/לא נצפה)" style="font-size: 0.70rem; padding: 3px 8px; border-radius: 4px; border: 1px solid ${t.watched ? '#38bdf8' : 'rgba(255,255,255,0.15)'}; background: ${t.watched ? 'rgba(56, 189, 248, 0.2)' : 'rgba(255,255,255,0.03)'}; color: ${t.watched ? '#7dd3fc' : '#cbd5e1'}; cursor: pointer;">
+                                            ${t.watched ? '✓ ' : ''}${escapeHtml(t.title)}
                                         </button>
                                     `).join('')}
                                 </div>
@@ -21604,14 +21889,27 @@ function setupFlowchartViewMode() {
 }
 
 function initFlowchartZoom() {
-    // User directive: Default zoom on opening is comfortable 80% (0.80) rather than cramped 13% fit
-    setFlowchartZoom(0.80);
+    const scrollWrap = document.getElementById("flowchart-scroll-wrapper");
+    let targetZoom = 0.80;
+    if (!isMobileView() && scrollWrap && scrollWrap.clientWidth > 0) {
+        const baseW = window.FLOWCHART_TOTAL_WIDTH || BASE_FLOWCHART_WIDTH;
+        const effectiveBaseW = baseW * FLOWCHART_ZOOM_MULTIPLIER;
+        if (effectiveBaseW > 0) {
+            const fitZoom = (scrollWrap.clientWidth - 20) / effectiveBaseW;
+            if (fitZoom < 0.80) {
+                targetZoom = Math.max(0.65, fitZoom);
+            }
+        }
+    }
+    setFlowchartZoom(targetZoom);
     isFlowchartFitWidth = false;
     const toggleFitBtn = document.getElementById("btn-fc-toggle-fit");
     if (toggleFitBtn) toggleFitBtn.classList.remove("active");
-    const scrollWrap = document.getElementById("flowchart-scroll-wrapper");
     if (scrollWrap) {
-        scrollWrap.scrollTop = 0;
+        requestAnimationFrame(() => {
+            scrollWrap.scrollTop = 0;
+            scrollWrap.scrollLeft = 0;
+        });
     }
 }
 
@@ -22726,6 +23024,22 @@ function setupFinalsMode() {
         btnViewDay.addEventListener("click", () => window.setCalendarViewMode('day'));
     }
 
+    // Re-render calendar cleanly when crossing Desktop <-> Mobile header breakpoint
+    if (!window.__calResizeBound) {
+        window.__calResizeBound = true;
+        let lastCalMobileState = window.innerWidth <= 768;
+        let calResizeTimer = null;
+        window.addEventListener("resize", () => {
+            const isNowMobile = window.innerWidth <= 768;
+            if (isNowMobile === lastCalMobileState) return;
+            clearTimeout(calResizeTimer);
+            calResizeTimer = setTimeout(() => {
+                lastCalMobileState = window.innerWidth <= 768;
+                if (typeof renderFinalsCalendar === 'function') renderFinalsCalendar();
+            }, 120);
+        });
+    }
+
     const addCalEventBtn = document.getElementById("btn-add-cal-event");
     if (addCalEventBtn) {
         addCalEventBtn.addEventListener("click", () => {
@@ -22763,7 +23077,9 @@ function setupFinalsMode() {
             saveState();
             renderFinalsCalendar();
             modal.style.display = "none";
-            alert("השיבוצים עודכנו בהצלחה בלוח השנה של האפליקציה!");
+            if (typeof showToastNotification === 'function') {
+                showToastNotification("השיבוצים עודכנו בהצלחה בלוח השנה של האפליקציה!", "success");
+            }
         });
     }
 
@@ -23408,6 +23724,12 @@ function openCalendarSyncModal() {
     const modal = document.getElementById("calendar-sync-modal");
     if (!modal) return;
     modal.style.display = "flex";
+    modal.scrollTop = 0;
+    const bodyEl = modal.querySelector(".modal-body");
+    if (bodyEl) bodyEl.scrollTop = 0;
+    if (window.ModalHelp && typeof window.ModalHelp.injectHelpButtons === 'function') {
+        window.ModalHelp.injectHelpButtons();
+    }
 
     const copyBtn = document.getElementById("btn-copy-webcal-url");
     const input = document.getElementById("sync-webcal-url-input");
@@ -23454,9 +23776,9 @@ function openCalendarSyncModal() {
         copyBtn.onclick = () => {
             if (!input.value) {
                 if (typeof showToastNotification === 'function') {
-                    showToastNotification("⚠️ אינך מחובר לסנכרון ענן. התחבר לחשבונך כדי לקבל קישור יומן אישי.", 'warning');
+                    showToastNotification("אינך מחובר לסנכרון ענן. התחבר לחשבונך כדי לקבל קישור יומן אישי.", 'warning');
                 } else {
-                    alert("⚠️ אינך מחובר לסנכרון ענן. התחבר לחשבונך כדי לקבל קישור יומן אישי.");
+                    console.warn("אינך מחובר לסנכרון ענן. התחבר לחשבונך כדי לקבל קישור יומן אישי.");
                 }
                 return;
             }
@@ -23481,7 +23803,7 @@ function openCalendarSyncModal() {
         triggerBtn.style.display = "inline-flex";
         if (!isConnected) {
             triggerBtn.onclick = () => {
-                showToastNotification("⚠️ אינך מחובר לסנכרון ענן (Google Calendar). התחבר לחשבונך תחילה.", "warning");
+                showToastNotification("אינך מחובר לסנכרון ענן (Google Calendar). התחבר לחשבונך תחילה.", "warning");
                 const indicator = document.getElementById("sync-status-indicator");
                 if (indicator) indicator.innerText = "⚪ אינו מחובר לסנכרון ענן";
             };
@@ -23495,6 +23817,26 @@ function openCalendarSyncModal() {
                 });
             };
         }
+    }
+
+    const unifiedBtn = document.getElementById("btn-open-unified-ics-from-cal");
+    if (unifiedBtn) {
+        unifiedBtn.onclick = () => {
+            modal.style.display = "none";
+            if (window.CalendarSyncEngine && typeof window.CalendarSyncEngine.openCalendarSyncModal === 'function') {
+                window.CalendarSyncEngine.openCalendarSyncModal();
+            }
+        };
+    }
+
+    const gcalMgrBtn = document.getElementById("btn-open-gcal-mgr-from-cal");
+    if (gcalMgrBtn) {
+        gcalMgrBtn.onclick = () => {
+            modal.style.display = "none";
+            if (typeof openGoogleCalendarManagerModal === 'function') {
+                openGoogleCalendarManagerModal();
+            }
+        };
     }
 
     const manualBtn = document.getElementById("btn-manual-download-ics");
@@ -23518,7 +23860,9 @@ function exportScheduleToICS() {
         const schedule = gameState.pastExamSchedule || [];
 
         if (schedule.length === 0) {
-            alert("אין מבחנים לתרגול עם תאריך משובץ לייצוא!");
+            if (typeof showToastNotification === 'function') {
+                showToastNotification("אין מבחנים לתרגול עם תאריך משובץ לייצוא!", "warning");
+            }
             return;
         }
 
@@ -23552,64 +23896,151 @@ function exportScheduleToICS() {
 
         icsContent.push("END:VCALENDAR");
         downloadICSFile(icsContent.join("\r\n"), "Past_Exams_Marathon_Schedule.ics");
-        alert("קובץ Past_Exams_Marathon_Schedule.ics הורד בהצלחה!\nניתן לפתוח אותו או לייבא ישירות ל-Google Calendar / Google Tasks.");
+        if (typeof showToastNotification === 'function') {
+            showToastNotification("קובץ Past_Exams_Marathon_Schedule.ics הורד בהצלחה!", "success");
+        }
     } else {
-        // Normal Semester Mode: Export All Tasks & Homework to Google Calendar with Automatic VALARM Reminders!
+        // Normal Semester Mode: Export All Tasks, Homework & Personal Calendar Events with VALARM Reminders
+        const escapeIcsField = (val) => String(val || '')
+            .replace(/\\/g, '\\\\')
+            .replace(/;/g, '\\;')
+            .replace(/,/g, '\\,')
+            .replace(/\r?\n/g, '\\n');
+
         let icsContent = [
             "BEGIN:VCALENDAR",
             "VERSION:2.0",
             "PRODID:-//Academic Skill Tree//Course Tasks Scheduler//HE",
             "CALSCALE:GREGORIAN",
             "METHOD:PUBLISH",
-            "X-WR-CALNAME:משימות ושיעורי בית - סמסטר אקדמי",
+            "X-WR-CALNAME:משימות, שיעורי בית ואירועים - Semestero ME",
             "X-WR-TIMEZONE:Asia/Jerusalem"
         ];
 
         let taskCount = 0;
-        Object.values(gameState.courses).forEach(course => {
-            if (course.status !== 'active') return;
-            (course.tasks || []).forEach(task => {
-                if (!task.dueDate) return;
-                taskCount++;
-                const cleanDate = task.dueDate.replace(/-/g, "");
-                const uid = `task-${course.code}-${task.id}-${cleanDate}@academicskilltree.local`;
-                const shortCourse = COURSE_SHORT_NAMES[course.code] || course.name;
-                const isDone = task.completed || task.status === 'done' || task.status === 'submitted';
-                
-                icsContent.push(
-                    "BEGIN:VEVENT",
-                    `UID:${uid}`,
-                    `DTSTAMP:${cleanDate}T080000Z`,
-                    `DTSTART;VALUE=DATE:${cleanDate}`,
-                    `DTEND;VALUE=DATE:${cleanDate}`,
-                    `SUMMARY:📝 [${shortCourse}] ${task.title}`,
-                    `DESCRIPTION:משימה בקורס ${course.name} (${course.code}).\\nסטטוס: ${isDone ? 'הושלם' : 'פתוח'}.`,
-                    `CATEGORIES:${shortCourse},Tasks,משימות`,
-                    `STATUS:${isDone ? 'COMPLETED' : 'CONFIRMED'}`,
-                    "BEGIN:VALARM",
-                    "ACTION:DISPLAY",
-                    `DESCRIPTION:תזכורת: ${task.title} ב-${shortCourse} להגשה מחר!`,
-                    "TRIGGER:-P1D",
-                    "END:VALARM",
-                    "BEGIN:VALARM",
-                    "ACTION:DISPLAY",
-                    `DESCRIPTION:תזכורת דחופה: ${task.title} ב-${shortCourse} להגשה היום!`,
-                    "TRIGGER:-PT3H",
-                    "END:VALARM",
-                    "END:VEVENT"
-                );
-            });
+        let customCount = 0;
+        const seenTaskIds = new Set();
+
+        const appendTaskVEvent = (courseLabel, courseCode, task) => {
+            if (!task || !task.dueDate) return;
+            if (task.id && seenTaskIds.has(task.id)) return;
+            if (task.id) seenTaskIds.add(task.id);
+            const rawDue = String(task.dueDate).trim();
+            const dueDateOnly = rawDue.split(/[T\s]/)[0];
+            const cleanDate = dueDateOnly.replace(/-/g, "");
+            if (!/^\d{8}$/.test(cleanDate)) return;
+
+            taskCount++;
+            const uid = `task-${courseCode || 'gen'}-${task.id || taskCount}-${cleanDate}@academicskilltree.local`;
+            const isDone = task.completed || task.status === 'done' || task.status === 'submitted';
+
+            icsContent.push(
+                "BEGIN:VEVENT",
+                `UID:${uid}`,
+                `DTSTAMP:${cleanDate}T080000Z`,
+                `DTSTART;VALUE=DATE:${cleanDate}`,
+                `DTEND;VALUE=DATE:${cleanDate}`,
+                `SUMMARY:📝 [${escapeIcsField(courseLabel)}] ${escapeIcsField(task.title || 'משימה')}`,
+                `DESCRIPTION:${escapeIcsField(`משימה בקורס ${courseLabel}${courseCode ? ' (' + courseCode + ')' : ''}.\nסטטוס: ${isDone ? 'הושלם' : 'פתוח'}.`)}`,
+                `CATEGORIES:${escapeIcsField(courseLabel)},Tasks,משימות`,
+                `STATUS:${isDone ? 'COMPLETED' : 'CONFIRMED'}`,
+                "BEGIN:VALARM",
+                "ACTION:DISPLAY",
+                `DESCRIPTION:${escapeIcsField(`תזכורת: ${task.title || 'משימה'} ב-${courseLabel} להגשה מחר!`)}`,
+                "TRIGGER:-P1D",
+                "END:VALARM",
+                "BEGIN:VALARM",
+                "ACTION:DISPLAY",
+                `DESCRIPTION:${escapeIcsField(`תזכורת דחופה: ${task.title || 'משימה'} ב-${courseLabel} להגשה היום!`)}`,
+                "TRIGGER:-PT3H",
+                "END:VALARM",
+                "END:VEVENT"
+            );
+        };
+
+        Object.values(gameState.courses || {}).forEach(course => {
+            if (!course || course.status !== 'active') return;
+            const shortCourse = (typeof COURSE_SHORT_NAMES !== 'undefined' && COURSE_SHORT_NAMES[course.code]) || course.name;
+            (course.tasks || []).forEach(task => appendTaskVEvent(shortCourse, course.code, task));
         });
 
-        if (taskCount === 0) {
-            alert("שים לב: אין כרגע משימות עם תאריך יעד משובץ לייצוא ליומן.\nניתן לקבוע תאריך הגשה למשימות דרך עמוד המשימה (Side Peek) או בלחיצה על ➕ בלוח השנה.");
+        (gameState.tasks || []).forEach(task => appendTaskVEvent(task.course || task.courseCode || 'כללי', task.courseCode || '', task));
+
+        (gameState.customCalendarEvents || []).forEach(ev => {
+            if (!ev || !ev.date || !ev.title) return;
+            const cleanStart = String(ev.date).split(/[T\s]/)[0].replace(/-/g, "");
+            if (!/^\d{8}$/.test(cleanStart)) return;
+            const endRaw = (ev.endDate && ev.endDate >= ev.date) ? ev.endDate : ev.date;
+            const cleanEnd = String(endRaw).split(/[T\s]/)[0].replace(/-/g, "");
+            customCount++;
+
+            const uid = `custom-${ev.id || customCount}-${cleanStart}@academicskilltree.local`;
+            const evLines = [
+                "BEGIN:VEVENT",
+                `UID:${uid}`,
+                `DTSTAMP:${cleanStart}T080000Z`
+            ];
+
+            if (ev.isAllDay) {
+                const endObj = new Date(Number(cleanEnd.slice(0, 4)), Number(cleanEnd.slice(4, 6)) - 1, Number(cleanEnd.slice(6, 8)));
+                endObj.setDate(endObj.getDate() + 1);
+                const exclEnd = `${endObj.getFullYear()}${String(endObj.getMonth() + 1).padStart(2, '0')}${String(endObj.getDate()).padStart(2, '0')}`;
+                evLines.push(`DTSTART;VALUE=DATE:${cleanStart}`, `DTEND;VALUE=DATE:${exclEnd}`);
+            } else {
+                const sHHMM = (ev.startTime || '10:00').replace(':', '').padStart(4, '0');
+                const eHHMM = (ev.endTime || '11:30').replace(':', '').padStart(4, '0');
+                evLines.push(
+                    `DTSTART;TZID=Asia/Jerusalem:${cleanStart}T${sHHMM}00`,
+                    `DTEND;TZID=Asia/Jerusalem:${cleanEnd}T${eHHMM}00`
+                );
+            }
+
+            const rec = String(ev.recurrence || 'none').toLowerCase();
+            if (rec === 'daily') evLines.push('RRULE:FREQ=DAILY;COUNT=90');
+            else if (rec === 'weekly') evLines.push('RRULE:FREQ=WEEKLY;COUNT=20');
+            else if (rec === 'biweekly') evLines.push('RRULE:FREQ=WEEKLY;INTERVAL=2;COUNT=12');
+            else if (rec === 'monthly') evLines.push('RRULE:FREQ=MONTHLY;COUNT=12');
+            else if (rec === 'yearly') evLines.push('RRULE:FREQ=YEARLY;COUNT=5');
+            else if (rec === 'custom') {
+                const iv = Math.max(1, parseInt(ev.recurrenceInterval || 1, 10));
+                const unitMap = { days: 'DAILY', weeks: 'WEEKLY', months: 'MONTHLY', years: 'YEARLY' };
+                const freq = unitMap[ev.recurrenceUnit] || 'WEEKLY';
+                evLines.push(`RRULE:FREQ=${freq};INTERVAL=${iv};COUNT=24`);
+            }
+
+            evLines.push(
+                `SUMMARY:${ev.icon || '🔵'} ${escapeIcsField(ev.title)}`,
+                `DESCRIPTION:${escapeIcsField(ev.description || 'אירוע אישי מ-Semestero ME')}`,
+                `CATEGORIES:${escapeIcsField(ev.category || 'Personal')}`,
+                'STATUS:CONFIRMED'
+            );
+
+            const remMin = (ev.reminderMinutes !== undefined && ev.reminderMinutes !== null && ev.reminderMinutes !== '') ? Number(ev.reminderMinutes) : null;
+            if (remMin !== null && !isNaN(remMin) && remMin >= 0) {
+                evLines.push(
+                    'BEGIN:VALARM',
+                    'ACTION:DISPLAY',
+                    `DESCRIPTION:${escapeIcsField(`תזכורת: ${ev.title}`)}`,
+                    `TRIGGER:-PT${Math.round(remMin)}M`,
+                    'END:VALARM'
+                );
+            }
+            evLines.push('END:VEVENT');
+            icsContent.push(...evLines);
+        });
+
+        if (taskCount + customCount === 0) {
+            if (typeof showToastNotification === 'function') {
+                showToastNotification("אין כרגע משימות או אירועים עם תאריך יעד משובץ לייצוא ליומן.", "warning");
+            }
             return;
         }
 
         icsContent.push("END:VCALENDAR");
         downloadICSFile(icsContent.join("\r\n"), "Semester_Tasks_Homework_Schedule.ics");
-        showToastNotification(`📅 הורד קובץ Semester_Tasks_Homework_Schedule.ics עם ${taskCount} משימות ותזכורות אוטומטיות!`, 'success');
-        alert(`סנכרון הושלם!\nהורד קובץ Semester_Tasks_Homework_Schedule.ics עם ${taskCount} משימות ושיעורי בית.\nהקובץ כולל תזכורות אוטומטיות (VALARM) יום לפני ובבוקר ההגשה ב-Google Calendar / Apple Calendar.`);
+        if (typeof showToastNotification === 'function') {
+            showToastNotification(`📅 הורד קובץ Semester_Tasks_Homework_Schedule.ics (${taskCount} משימות, ${customCount} אירועי יומן)!`, 'success');
+        }
     }
 }
 
@@ -23879,18 +24310,26 @@ function renderGcalManagerClassList() {
         d.classes.forEach((c, classIdx) => {
             totalClasses++;
             const roomClean = (c.room && c.room.trim() && c.room !== 'כיתת טכניון') ? c.room : '';
+            const dayLblEsc = escapeHtml(dayNames[d.dayIndex] || d.name || '');
+            const sTimeEsc = escapeHtml(c.startTime || '');
+            const eTimeEsc = escapeHtml(c.endTime || '');
+            const typeEsc = escapeHtml(c.type || '');
+            const nameEsc = escapeHtml(c.courseName || '');
+            const codeEsc = escapeHtml(c.courseId || '');
+            const roomEsc = escapeHtml(roomClean);
+            const lectEsc = escapeHtml(c.lecturer || '');
             html += `
                 <div class="gcal-class-edit-row" id="gcal-row-${dayIdx}-${classIdx}">
                     <div class="gcal-class-edit-main">
                         <div class="gcal-class-edit-header">
-                            <span class="day-badge">יום ${dayNames[d.dayIndex] || d.name}</span>
-                            <span class="time-badge">⏰ ${c.startTime} - ${c.endTime}</span>
-                            <span class="type-badge">${c.type}</span>
+                            <span class="day-badge">יום ${dayLblEsc}</span>
+                            <span class="time-badge">⏰ ${sTimeEsc} - ${eTimeEsc}</span>
+                            <span class="type-badge">${typeEsc}</span>
                         </div>
-                        <div class="gcal-class-edit-title">${c.courseName} <span class="code-dim">(${c.courseId})</span></div>
+                        <div class="gcal-class-edit-title">${nameEsc} <span class="code-dim">(${codeEsc})</span></div>
                         <div class="gcal-class-edit-details">
-                            ${roomClean ? `<span class="room-chip">📍 <strong>${roomClean}</strong></span>` : '<span class="room-chip dim">📍 ללא מיקום</span>'}
-                            ${c.lecturer ? `<span class="lecturer-chip">👨‍🏫 <strong>${c.lecturer}</strong></span>` : ''}
+                            ${roomClean ? `<span class="room-chip">📍 <strong>${roomEsc}</strong></span>` : '<span class="room-chip dim">📍 ללא מיקום</span>'}
+                            ${c.lecturer ? `<span class="lecturer-chip">👨‍🏫 <strong>${lectEsc}</strong></span>` : ''}
                         </div>
                     </div>
                     <div class="gcal-class-edit-actions">
@@ -23906,27 +24345,27 @@ function renderGcalManagerClassList() {
                         <div class="gcal-form-grid">
                             <div class="gcal-form-field">
                                 <label>שם הקורס:</label>
-                                <input type="text" id="edit-cname-${dayIdx}-${classIdx}" value="${(c.courseName || '').replace(/"/g, '&quot;')}">
+                                <input type="text" id="edit-cname-${dayIdx}-${classIdx}" value="${nameEsc}">
                             </div>
                             <div class="gcal-form-field">
                                 <label>סוג וקבוצה (למשל הרצאה 10):</label>
-                                <input type="text" id="edit-type-${dayIdx}-${classIdx}" value="${(c.type || '').replace(/"/g, '&quot;')}">
+                                <input type="text" id="edit-type-${dayIdx}-${classIdx}" value="${typeEsc}">
                             </div>
                             <div class="gcal-form-field">
                                 <label>חדר או מיקום (בניין ומספר חדר):</label>
-                                <input type="text" id="edit-room-${dayIdx}-${classIdx}" value="${roomClean.replace(/"/g, '&quot;')}" placeholder="למשל: הנדסה כימית 1, אולמן 506">
+                                <input type="text" id="edit-room-${dayIdx}-${classIdx}" value="${roomEsc}" placeholder="למשל: הנדסה כימית 1, אולמן 506">
                             </div>
                             <div class="gcal-form-field">
                                 <label>מרצה או מתרגל:</label>
-                                <input type="text" id="edit-lecturer-${dayIdx}-${classIdx}" value="${(c.lecturer || '').replace(/"/g, '&quot;')}" placeholder="שם המרצה/מתרגל">
+                                <input type="text" id="edit-lecturer-${dayIdx}-${classIdx}" value="${lectEsc}" placeholder="שם המרצה/מתרגל">
                             </div>
                             <div class="gcal-form-field">
                                 <label>שעת התחלה (HH:MM):</label>
-                                <input type="text" id="edit-start-${dayIdx}-${classIdx}" value="${c.startTime || '08:30'}">
+                                <input type="text" id="edit-start-${dayIdx}-${classIdx}" value="${escapeHtml(c.startTime || '08:30')}">
                             </div>
                             <div class="gcal-form-field">
                                 <label>שעת סיום (HH:MM):</label>
-                                <input type="text" id="edit-end-${dayIdx}-${classIdx}" value="${c.endTime || '10:30'}">
+                                <input type="text" id="edit-end-${dayIdx}-${classIdx}" value="${escapeHtml(c.endTime || '10:30')}">
                             </div>
                         </div>
                         <div class="gcal-form-actions-bar">
@@ -24837,6 +25276,25 @@ function bindTimeGridInteractiveHandlers(rootEl) {
     if (!innerEl || innerEl.dataset.tgInteractiveBound) return;
     innerEl.dataset.tgInteractiveBound = 'true';
 
+    innerEl.addEventListener('click', (e) => {
+        if (!e.target || typeof e.target.closest !== 'function') return;
+        if (e.target.closest('.cal-event-resize-handle')) return;
+        const actionEl = e.target.closest('[data-tg-action]');
+        if (!actionEl || !innerEl.contains(actionEl)) return;
+        const act = actionEl.dataset.tgAction;
+        if (act === 'open-course') {
+            const code = actionEl.dataset.courseCode;
+            if (code && typeof openCourseDetails === 'function') openCourseDetails(code);
+        } else if (act === 'edit-personal') {
+            if (window.__suppressTimeGridClick) return;
+            const dStr = actionEl.dataset.date;
+            const pId = actionEl.dataset.peId || '';
+            if (dStr && typeof openCalendarDayModal === 'function') {
+                openCalendarDayModal(dStr, pId ? { editEventId: pId } : {});
+            }
+        }
+    });
+
     const startHour = Number(innerEl.dataset.startHour || 8);
     const endHour = Number(innerEl.dataset.endHour || 20);
     const hourHeight = Number(innerEl.dataset.hourHeight || 56);
@@ -25073,6 +25531,19 @@ function renderFinalsCalendar() {
     const titleEl = document.getElementById("cal-current-month-title");
     if (!grid) return;
 
+    const viewBtnMap = {
+        month: document.getElementById("btn-view-month"),
+        week: document.getElementById("btn-view-week"),
+        workweek: document.getElementById("btn-view-workweek"),
+        day: document.getElementById("btn-view-day")
+    };
+    Object.entries(viewBtnMap).forEach(([modeKey, btnEl]) => {
+        if (!btnEl) return;
+        const isActive = (currentCalendarViewMode === modeKey);
+        btnEl.classList.toggle("active", isActive);
+        btnEl.setAttribute("aria-pressed", isActive ? "true" : "false");
+    });
+
     grid.innerHTML = "";
 
     const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
@@ -25303,7 +25774,7 @@ function renderFinalsCalendar() {
                             accentColor: accent,
                             extraClasses: 'cal-timegrid-class',
                             tooltip: `${cName} (${cls.type || 'שיעור'}) • ${timeTxt}${cls.room ? ' • ' + cls.room : ''}`,
-                            onclickAttr: `if(typeof openCourseDetails==='function') openCourseDetails('${escapeHtml(cCode)}')`,
+                            attrs: `data-tg-action="open-course" data-course-code="${escapeHtml(cCode)}"`,
                             innerHtml: `
                                 <div class="cal-timegrid-event-title">${escapeHtml(cName)}</div>
                                 <div class="cal-timegrid-event-meta">${escapeHtml(cls.type || '')}${cls.room ? ' • 📍 ' + escapeHtml(cls.room) : ''}</div>
@@ -25328,7 +25799,7 @@ function renderFinalsCalendar() {
                                 title: `🕐 קבלה: ${oh.staffName || course.name}`,
                                 timeText: `${oh.startTime}${oh.endTime ? ' - ' + oh.endTime : ''}`,
                                 accentColor: '#f59e0b',
-                                onclickAttr: `if(typeof openCourseDetails==='function') openCourseDetails('${escapeHtml(course.code)}')`
+                                attrs: `data-tg-action="open-course" data-course-code="${escapeHtml(course.code)}"`
                             });
                         }
                     }
@@ -25353,8 +25824,7 @@ function renderFinalsCalendar() {
                     timeText: `${it.startTime || ''}${it.endTime ? ' - ' + it.endTime : ''}`,
                     accentColor: it.color || '#38bdf8',
                     extraClasses: 'cal-timegrid-personal',
-                    attrs: `data-pe-id="${escapeHtml(it.id || '')}" data-date="${escapeHtml(dateStr)}" data-start-min="${sMin}" data-end-min="${eMin}"`,
-                    onclickAttr: `if(window.__suppressTimeGridClick) return; if(typeof openCalendarDayModal==='function') openCalendarDayModal('${escapeHtml(dateStr)}', { editEventId: '${escapeHtml(it.id || '')}' })`
+                    attrs: `data-tg-action="edit-personal" data-pe-id="${escapeHtml(it.id || '')}" data-date="${escapeHtml(dateStr)}" data-start-min="${sMin}" data-end-min="${eMin}"`
                 });
             }
         });
@@ -25383,7 +25853,7 @@ function renderFinalsCalendar() {
         const dayTitleName = hebrewFullDays[dObj.getDay()] || "";
         const monthHe = hebrewMonthsFull[dMonth] || monthNames[dMonth];
         if (titleEl) {
-            titleEl.innerHTML = `${escapeHtml(dayTitleName)}, <bdi dir="ltr">${dDay} ${escapeHtml(monthNames[dMonth])} ${dYear}</bdi>`;
+            titleEl.innerHTML = `${escapeHtml(dayTitleName)}, <bdi dir="ltr">${dDay}</bdi> ב${escapeHtml(monthHe)} <bdi dir="ltr">${dYear}</bdi>`;
         }
 
         const dayCard = document.createElement("div");
@@ -25569,8 +26039,8 @@ function createCalendarDayCell(dateStr, dayNum, isToday, itemsByDate, isOtherMon
         ${weekMobileHeaderHtml}
         <div class="cal-day-num">
             <span class="cal-day-number-label ${isToday ? 'is-today-num' : ''}">${dayNum}</span>
+            <button type="button" class="btn-add-day-item" data-date="${escapeHtml(dateStr)}" title="הוסף אירוע ליום זה">+</button>
         </div>
-        <button type="button" class="btn-add-day-item" data-date="${dateStr}" title="הוסף אירוע ליום זה">+</button>
         <div class="cal-events-list" style="display: flex; flex-direction: column; gap: 4px;">
     `;
 
@@ -25602,7 +26072,7 @@ function createCalendarDayCell(dateStr, dayNum, isToday, itemsByDate, isOtherMon
             const passedClass = item.isPassed ? "passed" : "";
             const itemAccent = (item.color && /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(item.color)) ? item.color : getCourseAccentColor(item.courseCode);
             cellHtml += `
-                <div class="cal-event-pill exam-event is-academic-task ${passedClass} has-course-accent" style="--course-accent: ${itemAccent}; --ev-accent: ${itemAccent};" data-course-code="${item.courseCode}" data-task-id="${item.taskId || ''}" title="מבחן: ${escapeHtml(item.courseName || '')} (${item.courseCode}) | ${escapeHtml(item.rawTitle || item.title)} - לחץ לפתיחת פרטי משימה">
+                <div class="cal-event-pill exam-event is-academic-task ${passedClass} has-course-accent" style="--course-accent: ${escapeHtml(itemAccent)}; --ev-accent: ${escapeHtml(itemAccent)};" data-course-code="${escapeHtml(item.courseCode || '')}" data-task-id="${escapeHtml(item.taskId || '')}" title="מבחן: ${escapeHtml(item.courseName || '')} (${escapeHtml(item.courseCode || '')}) | ${escapeHtml(item.rawTitle || item.title)} - לחץ לפתיחת פרטי משימה">
                     <span class="cal-pill-title-text" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: block;">${escapeHtml(item.title)}</span>
                 </div>
             `;
@@ -25611,7 +26081,7 @@ function createCalendarDayCell(dateStr, dayNum, isToday, itemsByDate, isOtherMon
             const itemAccent = (item.color && /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(item.color)) ? item.color : getCourseAccentColor(item.courseCode);
             const hasCustomColorAttr = item.color ? 'data-custom-color="1"' : '';
             cellHtml += `
-                <div class="cal-event-pill task-event is-academic-task ${item.typeClass} ${doneClass} has-course-accent" ${hasCustomColorAttr} style="--course-accent: ${itemAccent}; --ev-accent: ${itemAccent};" data-course-code="${item.courseCode}" data-task-id="${item.taskId}" title="משימה (${escapeHtml(item.courseName)}): לחץ לצפייה בעמוד המשימה">
+                <div class="cal-event-pill task-event is-academic-task ${escapeHtml(item.typeClass || '')} ${doneClass} has-course-accent" ${hasCustomColorAttr} style="--course-accent: ${escapeHtml(itemAccent)}; --ev-accent: ${escapeHtml(itemAccent)};" data-course-code="${escapeHtml(item.courseCode || '')}" data-task-id="${escapeHtml(item.taskId || '')}" title="משימה (${escapeHtml(item.courseName)}): לחץ לצפייה בעמוד המשימה">
                     <span class="cal-pill-title-text" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${escapeHtml(item.displayTitle)}</span>
                 </div>
             `;
@@ -25631,19 +26101,20 @@ function createCalendarDayCell(dateStr, dayNum, isToday, itemsByDate, isOtherMon
             } else if (item.time && !/יום שלם/.test(item.time)) {
                 timeBadge = `<span class="cal-event-time-badge ui-time-ltr" dir="ltr">${escapeHtml(item.time)}</span>`;
             }
+            const peIdEsc = escapeHtml(item.id || '');
             cellHtml += `
-                <div class="cal-event-pill personal-event ${miluimCls} ${doneClass}" style="--ev-accent: ${evAccent}; cursor: pointer;" data-pe-id="${item.id || ''}" title="${escapeHtml((item.time ? item.time + ' - ' : '') + item.title)}">
-                    <span class="cal-personal-check" data-pe-id="${item.id || ''}" title="סמן כהושלם/לא הושלם">${checkIcon}</span>
+                <div class="cal-event-pill personal-event ${miluimCls} ${doneClass}" style="--ev-accent: ${escapeHtml(evAccent)}; cursor: pointer;" data-pe-id="${peIdEsc}" title="${escapeHtml((item.time ? item.time + ' - ' : '') + item.title)}">
+                    <span class="cal-personal-check" data-pe-id="${peIdEsc}" title="סמן כהושלם/לא הושלם">${checkIcon}</span>
                     ${timeBadge}
-                    <span class="cal-pill-title-text" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1;">${evIcon} ${escapeHtml(item.title)}${spanTag}${recTag}</span>
-                    <button type="button" class="btn-del-cal-event" data-pe-id="${item.id || ''}" title="מחק אירוע מלוח השנה">✕</button>
+                    <span class="cal-pill-title-text" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1;">${escapeHtml(evIcon)} ${escapeHtml(item.title)}${escapeHtml(spanTag)}${recTag}</span>
+                    <button type="button" class="btn-del-cal-event" data-pe-id="${peIdEsc}" title="מחק אירוע מלוח השנה">✕</button>
                 </div>
             `;
         } else {
             const completedClass = item.completed ? "completed" : "";
             const checkIcon = item.completed ? "☑" : "⚪";
             cellHtml += `
-                <div class="cal-event-pill past-exam ${completedClass}" data-pe-id="${item.id}" title="מבחן לתרגול (לחץ לסימון ביצוע)">
+                <div class="cal-event-pill past-exam ${completedClass}" data-pe-id="${escapeHtml(item.id || '')}" title="מבחן לתרגול (לחץ לסימון ביצוע)">
                     <span class="cal-event-cb">${checkIcon}</span>
                     <span class="cal-pill-title-text">${escapeHtml(item.title)}</span>
                 </div>
@@ -25952,6 +26423,11 @@ function openCalendarDayModal(dateStr, opts = {}) {
 
     modal.style.display = "flex";
     modal.classList.add("active");
+    const dayBodyEl = modal.querySelector(".day-modal-body");
+    if (dayBodyEl) dayBodyEl.scrollTop = 0;
+    if (window.ModalHelp && typeof window.ModalHelp.injectHelpButtons === 'function') {
+        window.ModalHelp.injectHelpButtons();
+    }
 }
 
 function closeCalendarDayModal() {
@@ -25988,7 +26464,7 @@ function renderDayModalEventsList(dateStr) {
         if (item.isAllDay) {
             timeHtml = `<span class="day-modal-event-time-tag" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; border-color: rgba(245, 158, 11, 0.4);">יום שלם</span>`;
         } else if (item.startTime && item.endTime) {
-            timeHtml = `<span class="day-modal-event-time-tag ui-time-ltr" dir="ltr">${item.startTime} - ${item.endTime}</span>`;
+            timeHtml = `<span class="day-modal-event-time-tag ui-time-ltr" dir="ltr">${escapeHtml(item.startTime)} - ${escapeHtml(item.endTime)}</span>`;
         } else if (item.time || item.dueTime) {
             timeHtml = `<span class="day-modal-event-time-tag ui-time-ltr" dir="ltr">${escapeHtml(item.time || item.dueTime)}</span>`;
         } else {
@@ -25999,7 +26475,7 @@ function renderDayModalEventsList(dateStr) {
             itemRow.style.setProperty('--course-accent', modalAccent);
             itemRow.classList.add('has-course-accent');
         }
-        let delBtnHtml = item.isPersonalEvent ? `<button type="button" class="btn-del-modal-event" data-pe-id="${item.id}" title="מחק אירוע זה">🗑️</button>` : '';
+        let delBtnHtml = item.isPersonalEvent ? `<button type="button" class="btn-del-modal-event" data-pe-id="${escapeHtml(item.id || '')}" title="מחק אירוע זה">🗑️</button>` : '';
 
         let badgeIcon = "📌";
         let label = item.title;
@@ -26020,8 +26496,8 @@ function renderDayModalEventsList(dateStr) {
         itemRow.innerHTML = `
             <div style="display: flex; align-items: center; gap: 8px; flex: 1; overflow: hidden;">
                 ${timeHtml}
-                <span style="font-size: 0.95rem;">${badgeIcon}</span>
-                <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500;">${label}</span>
+                <span style="font-size: 0.95rem;">${escapeHtml(badgeIcon)}</span>
+                <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500;">${escapeHtml(label)}</span>
             </div>
             ${delBtnHtml}
         `;
@@ -26210,6 +26686,11 @@ function initCalendarDayModal() {
         closeBtn.addEventListener("click", closeCalendarDayModal);
     }
 
+    const closeFooterBtn = document.getElementById("btn-close-day-modal-footer");
+    if (closeFooterBtn) {
+        closeFooterBtn.addEventListener("click", closeCalendarDayModal);
+    }
+
     if (modal) {
         modal.addEventListener("click", (e) => {
             if (e.target === modal) closeCalendarDayModal();
@@ -26232,7 +26713,9 @@ function initCalendarDayModal() {
             const icon = (selectedOpt && selectedOpt.dataset && selectedOpt.dataset.customIcon) ? selectedOpt.dataset.customIcon : (rawCat.startsWith('custom:') ? '🏷️' : rawCat);
 
             if (!title) {
-                alert("נא להזין כותרת לאירוע!");
+                if (typeof showToastNotification === 'function') {
+                    showToastNotification("נא להזין כותרת לאירוע!", "warning");
+                }
                 if (titleInput) titleInput.focus();
                 return;
             }
@@ -26321,13 +26804,14 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.11.24-v3.1.16",
-    version: "3.1.16",
-    build: "20261124_01",
-    date: "2026-11-24 17:15",
-    description: "v3.1.16: תיקון סנכרון אוטומטי ממודל (שחזור כתובת יומן בהפעלה ופרוקסי מקומי ללא CORS), סינון משימות מד\"ח (104228) לתרגילים אלקטרוניים בלבד, ושחזור גיליונות 034056 החסומים."
+    code: "REV-2026.11.26-v3.2.0",
+    version: "3.2.0",
+    build: "20261126_01",
+    date: "2026-11-26 13:00",
+    description: "v3.2.0: שדרוג והקשחת המערכת מקצה לקצה (Pass 0-7) — מצב בהיר, ניגודיות משופרת, עזרה (?) בכל חלון, אבטחת גשר האנדרואיד והווידג׳טים, תיקוני שעון Galaxy Watch 8 ו-Electron."
 };
 window.APP_VERSION = APP_CURRENT_REVISION.version;
+window.APP_CURRENT_REVISION = APP_CURRENT_REVISION;
 
 function syncApplicationVersionDOM() {
     const ver = APP_CURRENT_REVISION.version;
@@ -26529,31 +27013,37 @@ function renderSettingsPage() {
                 year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit'
             });
 
+            const safeRevId = escapeHtml(rev.id);
+            const safeRevName = escapeHtml(rev.name);
+            const safeRevGpa = escapeHtml(rev.gpa || '86.26');
+            const safeRevCredits = escapeHtml(rev.credits || '40.5');
+            const safeRevNote = rev.note ? ('📝 ' + escapeHtml(rev.note)) : 'ללא הערה';
+
             itemDiv.innerHTML = `
                 <div class="revision-item-info" style="flex: 1;">
                     <div class="revision-item-title-row">
-                        <span class="revision-item-title" id="rev-title-${rev.id}">${rev.name}</span>
+                        <span class="revision-item-title" id="rev-title-${safeRevId}">${safeRevName}</span>
                         <span class="revision-tag ${isLatest ? 'current' : 'snapshot'}">
                             ${isLatest ? 'רוויזיה פעילה (נוכחית)' : 'רוויזיית גיבוי'}
                         </span>
                     </div>
                     <div class="revision-item-meta">
-                        📅 נוצר: ${dateFormatted} | ממוצע: ${rev.gpa || '86.26'} | נק״ז: ${rev.credits || '40.5'}
-                        <div id="rev-note-${rev.id}" style="color: #cbd5e1; margin-top: 3px;">${rev.note ? '📝 ' + rev.note : 'ללא הערה'}</div>
+                        📅 נוצר: ${escapeHtml(dateFormatted)} | ממוצע: ${safeRevGpa} | נק״ז: ${safeRevCredits}
+                        <div id="rev-note-${safeRevId}" style="color: #cbd5e1; margin-top: 3px;">${safeRevNote}</div>
                     </div>
                 </div>
                 <div class="revision-item-actions">
-                    <button type="button" class="btn btn-outline btn-xs btn-edit-rev" data-id="${rev.id}" title="ערוך שם והערה עבור רוויזיה זו">
+                    <button type="button" class="btn btn-outline btn-xs btn-edit-rev" data-id="${safeRevId}" title="ערוך שם והערה עבור רוויזיה זו">
                         ✏️ ערוך
                     </button>
-                    <button type="button" class="btn btn-outline btn-xs btn-restore-rev" data-id="${rev.id}" title="שחזר רוויזיה זו כמצב הפעיל של המערכת">
+                    <button type="button" class="btn btn-outline btn-xs btn-restore-rev" data-id="${safeRevId}" title="שחזר רוויזיה זו כמצב הפעיל של המערכת">
                         🔄 שחזר
                     </button>
-                    <button type="button" class="btn btn-outline btn-xs btn-export-rev" data-id="${rev.id}" title="הורד קובץ JSON של רוויזיה זו">
+                    <button type="button" class="btn btn-outline btn-xs btn-export-rev" data-id="${safeRevId}" title="הורד קובץ JSON של רוויזיה זו">
                         📤 הורד JSON
                     </button>
-                    ${!rev.id.startsWith('rev-baseline') ? `
-                    <button type="button" class="btn btn-outline btn-xs btn-delete-rev" data-id="${rev.id}" style="color: #ef4444; border-color: #ef4444;" title="מחק רוויזיה">
+                    ${!String(rev.id || '').startsWith('rev-baseline') ? `
+                    <button type="button" class="btn btn-outline btn-xs btn-delete-rev" data-id="${safeRevId}" style="color: #ef4444; border-color: #ef4444;" title="מחק רוויזיה">
                         🗑️
                     </button>` : ''}
                 </div>
@@ -26599,19 +27089,26 @@ function renderSettingsPage() {
     renderPhoneAndNotificationPreferences();
 }
 
-// Edit Revision Details (Inline)
-function editRevisionDetails(rId) {
+// Edit Revision Details (Non-blocking modal)
+async function editRevisionDetails(rId) {
     const rev = (gameState.revisions || []).find(r => r.id === rId);
     if (!rev) return;
 
-    const newName = prompt("ערוך שם רוויזיה:", rev.name);
-    if (newName === null) return;
+    let res = null;
+    if (window.SemesteroDialog && typeof window.SemesteroDialog.prompt === 'function') {
+        res = await window.SemesteroDialog.prompt({
+            title: "עריכת פרטי רוויזיה",
+            confirmText: "שמור שינויים",
+            fields: [
+                { key: "name", label: "שם רוויזיה:", defaultValue: rev.name || "" },
+                { key: "note", label: "הערה / תיאור:", defaultValue: rev.note || "" }
+            ]
+        });
+    }
+    if (!res) return;
 
-    const newNote = prompt("ערוך הערת רוויזיה:", rev.note || "");
-    if (newNote === null) return;
-
-    rev.name = newName.trim() || rev.name;
-    rev.note = newNote.trim();
+    rev.name = (res.name || "").trim() || rev.name;
+    rev.note = (res.note || "").trim();
 
     saveState();
     renderSettingsPage();
@@ -26984,18 +27481,29 @@ function saveAllSettings() {
 // Bind Global Settings Page Buttons
 
 // Create a new snapshot revision
-function createNewRevisionSnapshot() {
-    const revName = prompt("הזן שם עבור הרוויזיה החדשה:", `רוויזיה ${new Date().toLocaleDateString('he-IL')}`);
-    if (!revName) return;
-
-    const note = prompt("הערה / תיאור לרוויזיה (אופציונלי):", "גיבוי נקודת שחזור");
+async function createNewRevisionSnapshot() {
+    let revName = `רוויזיה ${new Date().toLocaleDateString('he-IL')}`;
+    let note = "גיבוי נקודת שחזור";
+    if (window.SemesteroDialog && typeof window.SemesteroDialog.prompt === 'function') {
+        const res = await window.SemesteroDialog.prompt({
+            title: "יצירת רוויזיה חדשה",
+            confirmText: "צור רוויזיה",
+            fields: [
+                { key: "name", label: "שם הרוויזיה החדשה:", defaultValue: revName },
+                { key: "note", label: "הערה / תיאור (אופציונלי):", defaultValue: note }
+            ]
+        });
+        if (!res || !String(res.name || '').trim()) return;
+        revName = String(res.name).trim();
+        note = String(res.note || '').trim();
+    }
 
     ensureBaselineRevisions();
     const newRev = {
         id: `rev-${Date.now()}`,
-        name: revName.trim(),
+        name: revName,
         timestamp: new Date().toISOString(),
-        note: note ? note.trim() : "",
+        note: note,
         gpa: gameState.gpa ? parseFloat(gameState.gpa.toFixed(2)) : 86.26,
         completedCourses: gameState.completedCourses || 11,
         credits: gameState.credits || 40.5,
@@ -27009,17 +27517,22 @@ function createNewRevisionSnapshot() {
 }
 
 // Restore a revision by ID
-function restoreRevisionById(rId) {
+async function restoreRevisionById(rId) {
     ensureBaselineRevisions();
     const target = gameState.revisions.find(r => r.id === rId);
     if (!target) {
-        alert("רוויזיה לא נמצאה!");
+        showToastNotification("רוויזיה לא נמצאה!", "warning");
         return;
     }
 
-    if (!confirm(`האם אתה בטוח שברצונך לשחזר את הרוויזיה: "${target.name}"?\nהמצב הנוכחי יוחלף ברוויזיה זו.`)) {
-        return;
-    }
+    const confirmed = (window.SemesteroDialog && typeof window.SemesteroDialog.confirm === 'function')
+        ? await window.SemesteroDialog.confirm({
+            title: "שחזור רוויזיה",
+            message: `האם אתה בטוח שברצונך לשחזר את הרוויזיה: "${target.name}"?\nהמצב הנוכחי יוחלף ברוויזיה זו.`,
+            confirmText: "שחזר כעת"
+        })
+        : true;
+    if (!confirmed) return;
 
     if (target.stateSnapshot) {
         const savedRevs = JSON.parse(JSON.stringify(gameState.revisions));
@@ -27028,7 +27541,7 @@ function restoreRevisionById(rId) {
         notifyStateChanged({ tab: 'settings' });
         showToastNotification(`רוויזיה "${target.name}" שוחזרה בהצלחה!`, 'success');
     } else {
-        alert("רוויזיה זו היא נקודת ייחוס היסטורית (Baseline).");
+        showToastNotification("רוויזיה זו היא נקודת ייחוס היסטורית (Baseline).", "info");
     }
 }
 
@@ -27047,8 +27560,16 @@ function exportRevisionById(rId) {
 }
 
 // Delete revision
-function deleteRevisionById(rId) {
-    if (!confirm("האם למחוק רוויזיה זו?")) return;
+async function deleteRevisionById(rId) {
+    const confirmed = (window.SemesteroDialog && typeof window.SemesteroDialog.confirm === 'function')
+        ? await window.SemesteroDialog.confirm({
+            title: "מחיקת רוויזיה",
+            message: "האם למחוק רוויזיה זו?",
+            confirmText: "מחק",
+            danger: true
+        })
+        : true;
+    if (!confirmed) return;
     gameState.revisions = (gameState.revisions || []).filter(r => r.id !== rId);
     saveState();
     renderSettingsPage();
@@ -27172,6 +27693,23 @@ function validateAndSanitizeImportedRevision(rawText, fileMeta = {}) {
         }
     }
 
+    if (sanitized.revisions !== undefined) {
+        if (!Array.isArray(sanitized.revisions)) {
+            delete sanitized.revisions;
+        } else {
+            sanitized.revisions = sanitized.revisions
+                .filter(rev => rev && typeof rev === "object" && !Array.isArray(rev))
+                .map((rev, idx) => ({
+                    ...rev,
+                    id: sanitizeImportedCourseText(rev.id || `rev-imp-${idx}`),
+                    name: sanitizeImportedCourseText(rev.name || `רוויזיה ${idx + 1}`),
+                    note: rev.note ? sanitizeImportedCourseText(rev.note) : "",
+                    gpa: Number.isFinite(Number(rev.gpa)) ? Math.min(100, Math.max(0, Number(rev.gpa))) : undefined,
+                    credits: Number.isFinite(Number(rev.credits)) ? Math.min(300, Math.max(0, Number(rev.credits))) : undefined
+                }));
+        }
+    }
+
     return sanitized;
 }
 
@@ -27226,23 +27764,30 @@ function setupSettingsPageButtons() {
             const file = e.target.files[0];
             if (!file) return;
             if (!/\.json$/i.test(String(file.name || ""))) {
-                alert("סוג קובץ לא תקין — ניתן לייבא קבצי JSON בלבד.");
+                showToastNotification("סוג קובץ לא תקין — ניתן לייבא קבצי JSON בלבד.", "warning");
                 fileInput.value = "";
                 return;
             }
             if (typeof file.size === "number" && file.size > 5 * 1024 * 1024) {
-                alert("קובץ הייבוא גדול מדי (המגבלה היא 5MB).");
+                showToastNotification("קובץ הייבוא גדול מדי (המגבלה היא 5MB).", "warning");
                 fileInput.value = "";
                 return;
             }
             const reader = new FileReader();
-            reader.onload = (event) => {
+            reader.onload = async (event) => {
                 try {
                     const imported = validateAndSanitizeImportedRevision(event.target.result, {
                         name: file.name,
                         size: file.size
                     });
-                    if (confirm(`האם לייבא רוויזיה מקובץ "${file.name}"?`)) {
+                    const confirmed = (window.SemesteroDialog && typeof window.SemesteroDialog.confirm === 'function')
+                        ? await window.SemesteroDialog.confirm({
+                            title: "ייבוא רוויזיה מקובץ",
+                            message: `האם לייבא רוויזיה מקובץ "${file.name}"?`,
+                            confirmText: "ייבא רוויזיה"
+                        })
+                        : true;
+                    if (confirmed) {
                         const revs = gameState.revisions || [];
                         gameState = imported;
                         gameState.revisions = revs;
@@ -27253,7 +27798,7 @@ function setupSettingsPageButtons() {
                         showToastNotification("רוויזיה יובאה בהצלחה!", "success");
                     }
                 } catch (err) {
-                    alert(err && err.message ? err.message : "שגיאה בפענוח קובץ ה-JSON.");
+                    showToastNotification(err && err.message ? err.message : "שגיאה בפענוח קובץ ה-JSON.", "error");
                 } finally {
                     fileInput.value = "";
                 }
@@ -27278,7 +27823,7 @@ async function triggerManualCalendarPull() {
         if (typeof showToastNotification === 'function') {
             showToastNotification(msg, 'warning');
         } else {
-            alert(msg);
+            console.warn('[CalendarPull]', msg);
         }
         const statusDiv = document.getElementById("webhook-save-status");
         if (statusDiv) {
@@ -27792,9 +28337,11 @@ function renderGpaTrajectorySvg(semesterData, cumulativeGpa) {
             `;
         });
     } else {
+        const emptyCenterX = Math.round((isMobile ? 56 : 64) + (width - (isMobile ? 72 : 84)) / 2);
         svgHtml += `
-            <text x="${width / 2}" y="${height / 2}" text-anchor="middle" fill="#64748b" font-size="${isMobile ? 12 : 14}" font-weight="600" font-family="'Rubik', sans-serif">
-                אין עדיין ציונים מעודכנים בסמסטרים. הזן ציונים בקורסים לצפייה בגרף!
+            <text x="${emptyCenterX}" y="${Math.round(height / 2) - 8}" text-anchor="middle" fill="#64748b" font-size="${isMobile ? 11.5 : 14}" font-weight="600" font-family="'Rubik', sans-serif">
+                <tspan x="${emptyCenterX}" dy="0">אין עדיין ציונים מעודכנים בסמסטרים.</tspan>
+                <tspan x="${emptyCenterX}" dy="${isMobile ? 18 : 20}">הזן ציונים בקורסים לצפייה בגרף!</tspan>
             </text>
         `;
     }
@@ -27950,11 +28497,11 @@ function renderGradeDistributionHistogram(completedCourses) {
     if (!container) return;
 
     const buckets = [
-        { label: "90-100", title: "מצטיינים", color: "#10b981", count: 0 },
-        { label: "80-89", title: "טוב מאוד", color: "#38bdf8", count: 0 },
-        { label: "70-79", title: "טוב", color: "#6366f1", count: 0 },
-        { label: "60-69", title: "כמעט טוב", color: "#f59e0b", count: 0 },
-        { label: "55-59", title: "עובר", color: "#f43f5e", count: 0 }
+        { label: "90-100", title: "מצטיינים", color: "#10b981", count: 0, courses: [] },
+        { label: "80-89", title: "טוב מאוד", color: "#38bdf8", count: 0, courses: [] },
+        { label: "70-79", title: "טוב", color: "#6366f1", count: 0, courses: [] },
+        { label: "60-69", title: "כמעט טוב", color: "#f59e0b", count: 0, courses: [] },
+        { label: "55-59", title: "עובר", color: "#f43f5e", count: 0, courses: [] }
     ];
 
     let totalGraded = 0;
@@ -27963,11 +28510,17 @@ function renderGradeDistributionHistogram(completedCourses) {
         if (!isBinary && c.grade !== undefined && c.grade !== null && c.grade !== '' && !isNaN(Number(c.grade)) && Number(c.grade) >= 55) {
             const g = Number(c.grade);
             totalGraded++;
-            if (g >= 90) buckets[0].count++;
-            else if (g >= 80) buckets[1].count++;
-            else if (g >= 70) buckets[2].count++;
-            else if (g >= 60) buckets[3].count++;
-            else if (g >= 55) buckets[4].count++;
+            let targetIdx = 4;
+            if (g >= 90) targetIdx = 0;
+            else if (g >= 80) targetIdx = 1;
+            else if (g >= 70) targetIdx = 2;
+            else if (g >= 60) targetIdx = 3;
+            buckets[targetIdx].count++;
+            buckets[targetIdx].courses.push({
+                name: c.name || c.code || '',
+                code: c.altCode || c.code || '',
+                grade: g
+            });
         }
     });
 
@@ -27976,10 +28529,10 @@ function renderGradeDistributionHistogram(completedCourses) {
     const maxCount = Math.max(1, ...buckets.map(b => b.count));
     let html = '';
 
-    buckets.forEach(b => {
+    buckets.forEach((b, bIdx) => {
         const heightPct = Math.max(8, (b.count / maxCount) * 100);
         html += `
-            <div class="histogram-col" title="${b.label} (${b.title}): ${b.count} קורסים">
+            <div class="histogram-col" data-bucket-idx="${bIdx}" tabindex="0" role="button" aria-label="טווח ציונים ${b.label}: ${b.count} קורסים" title="${b.label} (${b.title}): ${b.count} קורסים — לחץ לפירוט" style="cursor: pointer;">
                 <span class="histogram-count">${b.count}</span>
                 <div class="histogram-bar" style="height: ${heightPct}%; background-color: ${b.color};"></div>
                 <span class="histogram-label"><bdi dir="ltr">${b.label}</bdi></span>
@@ -27988,6 +28541,50 @@ function renderGradeDistributionHistogram(completedCourses) {
     });
 
     container.innerHTML = html;
+
+    let detailBox = document.getElementById("analytics-histogram-detail");
+    if (!detailBox && container.parentElement) {
+        detailBox = document.createElement("div");
+        detailBox.id = "analytics-histogram-detail";
+        detailBox.className = "analytics-histogram-detail";
+        container.parentElement.appendChild(detailBox);
+    }
+    if (detailBox) {
+        detailBox.innerHTML = '<span style="color: #94a3b8;">💡 לחץ על עמודת ציון כדי לצפות בקורסים בטווח זה.</span>';
+    }
+
+    const escName = (s) => (typeof escapeHtml === 'function' ? escapeHtml(s) : String(s || '').replace(/</g, '&lt;').replace(/>/g, '&gt;'));
+    const selectBucket = (colEl) => {
+        const idx = parseInt(colEl.getAttribute('data-bucket-idx'), 10);
+        const bucket = buckets[idx];
+        if (!bucket || !detailBox) return;
+        const wasActive = colEl.classList.contains('active-bucket');
+        container.querySelectorAll('.histogram-col').forEach(el => el.classList.remove('active-bucket'));
+        if (wasActive) {
+            detailBox.innerHTML = '<span style="color: #94a3b8;">💡 לחץ על עמודת ציון כדי לצפות בקורסים בטווח זה.</span>';
+            return;
+        }
+        colEl.classList.add('active-bucket');
+        if (bucket.courses.length === 0) {
+            detailBox.innerHTML = `<strong style="color: ${bucket.color};"><bdi dir="ltr">${bucket.label}</bdi> (${bucket.title}):</strong> <span style="color: #94a3b8;">אין קורסים בטווח ציונים זה עדיין.</span>`;
+        } else {
+            const listHtml = bucket.courses
+                .sort((a, b) => b.grade - a.grade)
+                .map(c => `<span style="display:inline-block; background:rgba(56,189,248,0.12); border:1px solid rgba(56,189,248,0.28); border-radius:6px; padding:2px 8px; margin:3px 4px 0 0;">${escName(c.name)} <strong style="color:${bucket.color};">(<bdi dir="ltr">${c.grade}</bdi>)</strong></span>`)
+                .join('');
+            detailBox.innerHTML = `<div style="margin-bottom: 4px;"><strong style="color: ${bucket.color};"><bdi dir="ltr">${bucket.label}</bdi> (${bucket.title}) — ${bucket.courses.length} קורסים:</strong></div><div>${listHtml}</div>`;
+        }
+    };
+
+    container.querySelectorAll('.histogram-col').forEach(col => {
+        col.addEventListener('click', () => selectBucket(col));
+        col.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                selectBucket(col);
+            }
+        });
+    });
 }
 
 // ==============================================================================
@@ -28035,51 +28632,7 @@ async function fetchLatestRemoteVersion() {
         console.warn('[VersionCheck] Origin package.json error:', e);
     }
 
-    // Priority 2: GitHub Contents API for package.json on main
-    try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 4000);
-        const resp = await fetch(`https://api.github.com/repos/adir2368/Semestero-ME/contents/package.json?ref=main&_nc=${Date.now()}`, {
-            cache: 'no-store',
-            headers: { 'Accept': 'application/vnd.github.v3.raw' },
-            signal: controller.signal
-        });
-        clearTimeout(timeoutId);
-        if (resp.ok) {
-            const pkg = await resp.json();
-            if (pkg && pkg.version) {
-                const ver = pkg.version.trim();
-                candidates.push({ version: ver, notes: pkg.description || '', source: 'github_contents' });
-            }
-        }
-    } catch (e) {
-        console.warn('[VersionCheck] GitHub Contents API error:', e);
-    }
-
-    // Priority 3: GitHub Releases API
-    try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 3500);
-        const resp = await fetch(`https://api.github.com/repos/adir2368/Semestero-ME/releases/latest?_nc=${Date.now()}`, {
-            cache: 'no-store',
-            headers: { 'Accept': 'application/vnd.github.v3+json' },
-            signal: controller.signal
-        });
-        clearTimeout(timeoutId);
-        if (resp.ok) {
-            const data = await resp.json();
-            if (data && data.tag_name) {
-                const tagMatch = data.tag_name.match(/(\d+\.\d+\.\d+)/);
-                if (tagMatch) {
-                    candidates.push({ version: tagMatch[1], notes: data.name || data.body || '', source: 'github_releases' });
-                }
-            }
-        }
-    } catch (e) {
-        console.warn('[VersionCheck] GitHub Releases error:', e);
-    }
-
-    // Priority 4: raw.githubusercontent.com fallback for package.json
+    // Priority 2: raw.githubusercontent.com (avoids unauthenticated api.github.com 403 rate limits)
     try {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 4000);
@@ -28096,7 +28649,52 @@ async function fetchLatestRemoteVersion() {
             }
         }
     } catch (e) {
-        console.warn('[VersionCheck] GitHub Raw fallback error:', e);
+        console.warn('[VersionCheck] GitHub Raw error:', e);
+    }
+
+    // Priority 3: GitHub Contents & Releases APIs (only on manual check or if earlier checks found nothing)
+    if (isManualCheck || candidates.length === 0) {
+        try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 4000);
+            const resp = await fetch(`https://api.github.com/repos/adir2368/Semestero-ME/contents/package.json?ref=main&_nc=${Date.now()}`, {
+                cache: 'no-store',
+                headers: { 'Accept': 'application/vnd.github.v3.raw' },
+                signal: controller.signal
+            });
+            clearTimeout(timeoutId);
+            if (resp.ok) {
+                const pkg = await resp.json();
+                if (pkg && pkg.version) {
+                    const ver = pkg.version.trim();
+                    candidates.push({ version: ver, notes: pkg.description || '', source: 'github_contents' });
+                }
+            }
+        } catch (e) {
+            console.warn('[VersionCheck] GitHub Contents API error:', e);
+        }
+
+        try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 3500);
+            const resp = await fetch(`https://api.github.com/repos/adir2368/Semestero-ME/releases/latest?_nc=${Date.now()}`, {
+                cache: 'no-store',
+                headers: { 'Accept': 'application/vnd.github.v3+json' },
+                signal: controller.signal
+            });
+            clearTimeout(timeoutId);
+            if (resp.ok) {
+                const data = await resp.json();
+                if (data && data.tag_name) {
+                    const tagMatch = data.tag_name.match(/(\d+\.\d+\.\d+)/);
+                    if (tagMatch) {
+                        candidates.push({ version: tagMatch[1], notes: data.name || data.body || '', source: 'github_releases' });
+                    }
+                }
+            }
+        } catch (e) {
+            console.warn('[VersionCheck] GitHub Releases error:', e);
+        }
     }
 
     if (candidates.length === 0) return null;
@@ -28546,7 +29144,7 @@ window.copySystemDiagnostics = async function() {
         if (typeof showToastNotification === 'function') {
             showToastNotification("📋 נתוני הדיאגנוסטיקה הועתקו ללוח בהצלחה!", "success");
         } else {
-            alert("נתוני הדיאגנוסטיקה הועתקו ללוח בהצלחה!");
+            console.log("נתוני הדיאגנוסטיקה הועתקו ללוח בהצלחה!");
         }
     } catch (err) {
         const ta = document.createElement("textarea");
@@ -28558,25 +29156,58 @@ window.copySystemDiagnostics = async function() {
         if (typeof showToastNotification === 'function') {
             showToastNotification("📋 נתוני הדיאגנוסטיקה הועתקו ללוח!", "success");
         } else {
-            alert("נתוני הדיאגנוסטיקה הועתקו ללוח!");
+            console.log("נתוני הדיאגנוסטיקה הועתקו ללוח!");
         }
     }
 };
 
+window.confirmAndWipeLocalData = async function() {
+    const confirmed = (window.SemesteroDialog && typeof window.SemesteroDialog.confirm === 'function')
+        ? await window.SemesteroDialog.confirm({
+            title: "מחיקת נתונים מקומיים",
+            message: "האם אתה בטוח שברצונך לאפס ולמחוק את כל נתוני המערכת השמורים במכשיר זה?",
+            confirmText: "מחק והפעל מחדש",
+            danger: true
+        })
+        : true;
+    if (!confirmed) return;
+    try { localStorage.clear(); } catch (e) {}
+    location.reload();
+};
+
 window.performFactoryReset = async function() {
-    const msg = "⚠️ אזהרה קריטית: איפוס קשיח מלא (Factory Reset)\n\n" +
-                "פעולה זו תמחק לצמיתות את כל המידע השמור במכשיר זה:\n" +
+    const msg = "פעולה זו תמחק לצמיתות את כל המידע השמור במכשיר זה:\n" +
                 "• כל ההגדרות, תוכנית התואר, הציונים והמשימות ב-localStorage\n" +
                 "• כל קובצי המטמון השמורים (Service Worker Caches)\n" +
                 "• כל נתוני המודל וה-CheeseFork המקומיים\n\n" +
-                "פעולה זו תחזיר את האפליקציה למצב התקנה ראשוני ונקי לחלוטין.\n" +
-                "האם ברצונך להמשיך באיפוס?";
+                "פעולה זו תחזיר את האפליקציה למצב התקנה ראשוני ונקי לחלוטין.";
 
-    if (!confirm(msg)) return;
+    let confirmed = true;
+    if (window.SemesteroDialog && typeof window.SemesteroDialog.confirm === 'function') {
+        confirmed = await window.SemesteroDialog.confirm({
+            title: "⚠️ איפוס קשיח מלא (Factory Reset)",
+            message: msg,
+            confirmText: "המשך לאיפוס",
+            danger: true
+        });
+    }
+    if (!confirmed) return;
 
-    const confirmPrompt = prompt("לאישור סופי, הקלד 'איפוס' (או 'reset') ולחץ אישור:");
-    if (!confirmPrompt || (confirmPrompt.trim() !== 'איפוס' && confirmPrompt.trim().toLowerCase() !== 'reset')) {
-        alert("האיפוס בוטל.");
+    let promptRes = { phrase: 'reset' };
+    if (window.SemesteroDialog && typeof window.SemesteroDialog.prompt === 'function') {
+        promptRes = await window.SemesteroDialog.prompt({
+            title: "אישור סופי לאיפוס מלא",
+            message: "לאישור סופי, הקלד 'איפוס' (או 'reset') ולחץ איפוס:",
+            confirmText: "בצע איפוס מלא",
+            danger: true,
+            fields: [{ key: "phrase", label: "מילת אישור:", defaultValue: "", placeholder: "איפוס / reset" }]
+        });
+    }
+    const typed = promptRes && promptRes.phrase ? String(promptRes.phrase).trim() : '';
+    if (typed !== 'איפוס' && typed.toLowerCase() !== 'reset') {
+        if (typeof showToastNotification === 'function') {
+            showToastNotification("האיפוס בוטל — מילת האישור לא הוקלדה.", "info");
+        }
         return;
     }
 
@@ -28597,7 +29228,9 @@ window.performFactoryReset = async function() {
             await Promise.all(regs.map(r => r.unregister()));
         }
 
-        alert("✅ המערכת אופסה במלואה בהצלחה. האפליקציה תיטען כעת מחדש במצב נקי.");
+        if (typeof showToastNotification === 'function') {
+            showToastNotification("✅ המערכת אופסה במלואה בהצלחה. טוען מחדש...", "success");
+        }
         window.location.reload(true);
     } catch (e) {
         console.error("Error during factory reset:", e);
@@ -29167,8 +29800,8 @@ function renderTimetableGrid() {
         dayAlldayPersonal.forEach(ev => {
             const evAccent = ev.resolvedColor || resolveEventAccentColor(ev);
             alldayHtml += `
-                <div class="cal-event-pill personal-event ${ev.isMiluim ? 'cal-cat-miluim' : 'cal-cat-custom'}" style="--ev-accent: ${evAccent}; cursor: pointer;" onclick="if(typeof openCalendarDayModal==='function') openCalendarDayModal('${escapeHtml(dStr)}')" title="${escapeHtml(ev.title)}">
-                    <span class="cal-pill-title-text">${ev.icon || '🔵'} ${escapeHtml(ev.title)}</span>
+                <div class="cal-event-pill personal-event ${ev.isMiluim ? 'cal-cat-miluim' : 'cal-cat-custom'}" data-tt-action="edit-personal" data-date="${escapeHtml(dStr)}" data-pe-id="${escapeHtml(ev.id || '')}" style="--ev-accent: ${escapeHtml(evAccent)}; cursor: pointer;" title="${escapeHtml(ev.title)}">
+                    <span class="cal-pill-title-text">${escapeHtml(ev.icon || '🔵')} ${escapeHtml(ev.title)}</span>
                 </div>
             `;
         });
@@ -29202,21 +29835,21 @@ function renderTimetableGrid() {
 
             const innerHtml = `
                 <div class="timetable-card-top">
-                    <span class="timetable-tag">${c.type}</span>
+                    <span class="timetable-tag">${escapeHtml(c.type || '')}</span>
                     ${isPerpetual ? `<span class="timetable-perpetual-badge" title="למידה עצמית">🚀</span>` : ''}
-                    <span class="timetable-duration-pill ${durMeta.pillClass}">⏱️ ${durMeta.text}</span>
+                    <span class="timetable-duration-pill ${durMeta.pillClass}">⏱️ ${escapeHtml(durMeta.text)}</span>
                 </div>
-                <div class="timetable-card-title">${escapeHtml(c.courseName)} <span class="course-code-dim">(${c.courseId})</span></div>
-                <div class="timetable-card-time">⏰ <span class="ui-time-ltr" dir="ltr">${c.startTime} - ${c.endTime}</span></div>
+                <div class="timetable-card-title">${escapeHtml(c.courseName)} <span class="course-code-dim">(${escapeHtml(c.courseId)})</span></div>
+                <div class="timetable-card-time">⏰ <span class="ui-time-ltr" dir="ltr">${escapeHtml(c.startTime || '')} - ${escapeHtml(c.endTime || '')}</span></div>
                 ${(c.room && c.room.trim() && c.room !== 'כיתת טכניון') ? `<div class="timetable-card-room-bar"><span class="room-icon">📍</span><span class="room-text">${escapeHtml(c.room)}</span></div>` : ''}
                 ${c.lecturer ? `<div class="timetable-lecturer ${instructorClass}"><span>${instructorIcon} ${instructorRole}:</span> <strong>${escapeHtml(c.lecturer)}</strong></div>` : ''}
                 ${isPerpetual ? `
-                    <div class="attendance-card-actions is-perpetual-actions" onclick="event.stopPropagation()">
-                        <a href="${resUrls.panoptoUrl}" target="_blank" rel="noopener noreferrer" class="btn-attendance-action btn-perpetual-panopto">📺 פנאופטו</a>
-                        <a href="${resUrls.pangeaUrl}" onclick="event.preventDefault(); if (window.PangeaHub) window.PangeaHub.openQuickPeek('${resUrls.pangeaUrl}', '${(c.courseName || '').replace(/'/g, "\\'")} - סיכומי פנגייה', '${resUrls.pangeaUrl}'); else window.open('${resUrls.pangeaUrl}', '_blank');" target="_blank" rel="noopener noreferrer" class="btn-attendance-action btn-perpetual-pangea">📖 פנגיאה</a>
+                    <div class="attendance-card-actions is-perpetual-actions">
+                        <a href="${escapeHtml(resUrls.panoptoUrl)}" target="_blank" rel="noopener noreferrer" class="btn-attendance-action btn-perpetual-panopto">📺 פנאופטו</a>
+                        <a href="${escapeHtml(resUrls.pangeaUrl)}" data-tt-action="open-pangea" data-pangea-url="${escapeHtml(resUrls.pangeaUrl)}" data-course-name="${escapeHtml(c.courseName || '')}" target="_blank" rel="noopener noreferrer" class="btn-attendance-action btn-perpetual-pangea">📖 פנגיאה</a>
                     </div>
                 ` : `
-                    <div class="attendance-card-actions" onclick="event.stopPropagation()">
+                    <div class="attendance-card-actions">
                         <button type="button" class="btn-attendance-action ${attStatus === 'attended' ? 'is-attended' : ''}" onclick="window.handleTimetableAttendance(this, ${day.dayIndex}, ${origIdx}, 'attended')" title="סמן נוכחות (שבוע ${selectedWeek})">${attStatus === 'attended' ? '✓ נוכחתי' : '✓ הייתי'}</button>
                         <button type="button" class="btn-attendance-action ${attStatus === 'missed' ? 'is-missed' : ''}" onclick="window.handleTimetableAttendance(this, ${day.dayIndex}, ${origIdx}, 'missed')" title="סמן הוחסר (שבוע ${selectedWeek})">${attStatus === 'missed' ? '✗ הוחסר' : '✗ החסרתי'}</button>
                     </div>
@@ -29230,7 +29863,7 @@ function renderTimetableGrid() {
                 timeText: `${c.startTime} - ${c.endTime}`,
                 accentColor: ttCardAccent,
                 extraClasses: `timetable-card ${c.cardClass || ''} ${durMeta.blockClass} ${attBorderClass} ${perpetualClass} has-course-accent`,
-                onclickAttr: `if (typeof openCourseDetails === 'function') openCourseDetails('${c.courseId}')`,
+                attrs: `data-tt-action="open-course" data-course-code="${escapeHtml(c.courseId || '')}"`,
                 innerHtml: innerHtml
             });
         });
@@ -29247,7 +29880,7 @@ function renderTimetableGrid() {
                 timeText: `${oh.startTime}${oh.endTime ? ' - ' + oh.endTime : ''}`,
                 accentColor: '#f59e0b',
                 extraClasses: 'timetable-office-hour-card',
-                onclickAttr: `if (typeof openCourseDetails === 'function') openCourseDetails('${escapeHtml(oh.courseCode)}')`,
+                attrs: `data-tt-action="open-course" data-course-code="${escapeHtml(oh.courseCode || '')}"`,
                 innerHtml: `
                     <div class="oh-card-top">
                         <span class="oh-badge">🕐 קבלה • ${escapeHtml(oh.role || 'מרצה')}</span>
@@ -29272,8 +29905,7 @@ function renderTimetableGrid() {
                 timeText: `${ev.startTime || ''}${ev.endTime ? ' - ' + ev.endTime : ''}`,
                 accentColor: evAccent,
                 extraClasses: `cal-timegrid-personal ${ev.icon === '🪖' ? 'cal-cat-miluim' : ''}`,
-                attrs: `data-pe-id="${escapeHtml(ev.id || '')}" data-date="${escapeHtml(dStr)}" data-start-min="${sMin}" data-end-min="${eMin}"`,
-                onclickAttr: `if(window.__suppressTimeGridClick) return; if(typeof openCalendarDayModal==='function') openCalendarDayModal('${escapeHtml(dStr)}', { editEventId: '${escapeHtml(ev.id || '')}' })`
+                attrs: `data-tt-action="edit-personal" data-pe-id="${escapeHtml(ev.id || '')}" data-date="${escapeHtml(dStr)}" data-start-min="${sMin}" data-end-min="${eMin}"`
             });
         });
 
@@ -29303,7 +29935,7 @@ function renderTimetableGrid() {
                     ${ev.timeText ? `<div class="timetable-card-time">⏰ <span class="ui-time-ltr" dir="ltr">${escapeHtml(ev.timeText)}</span></div>` : ''}
                 `;
                 return `
-                    <div class="${ev.extraClasses || 'timetable-card'}" ${ev.attrs || ''} style="--ev-accent: ${ev.accentColor || '#38bdf8'}; --course-accent: ${ev.accentColor || '#38bdf8'};" onclick="${ev.onclickAttr || ''}">
+                    <div class="${ev.extraClasses || 'timetable-card'}" ${ev.attrs || ''} style="--ev-accent: ${escapeHtml(ev.accentColor || '#38bdf8')}; --course-accent: ${escapeHtml(ev.accentColor || '#38bdf8')};">
                         ${body}
                     </div>
                 `;
@@ -29337,9 +29969,44 @@ function renderTimetableGrid() {
             alldayLabel: 'כל היום'
         });
     }
+    if (!container.dataset.ttDelegatedBound) {
+        container.dataset.ttDelegatedBound = 'true';
+        container.addEventListener('click', (e) => {
+            if (!e.target || typeof e.target.closest !== 'function') return;
+            const pangeaBtn = e.target.closest('[data-tt-action="open-pangea"]');
+            if (pangeaBtn && container.contains(pangeaBtn)) {
+                e.preventDefault();
+                e.stopPropagation();
+                const url = pangeaBtn.dataset.pangeaUrl || pangeaBtn.getAttribute('href') || '';
+                const cName = pangeaBtn.dataset.courseName || '';
+                if (url) {
+                    if (window.PangeaHub) window.PangeaHub.openQuickPeek(url, `${cName} - סיכומי פנגייה`, url);
+                    else window.open(url, '_blank');
+                }
+                return;
+            }
+            if (e.target.closest('.attendance-card-actions button, .btn-perpetual-panopto')) return;
+            const actionEl = e.target.closest('[data-tt-action]');
+            if (!actionEl || !container.contains(actionEl)) return;
+            const act = actionEl.dataset.ttAction;
+            if (act === 'open-course') {
+                const code = actionEl.dataset.courseCode;
+                if (code && typeof openCourseDetails === 'function') openCourseDetails(code);
+            } else if (act === 'edit-personal') {
+                if (window.__suppressTimeGridClick) return;
+                const dStr = actionEl.dataset.date;
+                const pId = actionEl.dataset.peId || '';
+                if (dStr && typeof openCalendarDayModal === 'function') {
+                    openCalendarDayModal(dStr, pId ? { editEventId: pId } : {});
+                }
+            }
+        });
+    }
     document.querySelectorAll('#timetable-day-selector .day-tab-pill[data-day]').forEach(pill => {
         const pDay = pill.getAttribute('data-day');
-        pill.classList.toggle('active', pDay === currentMobileDayFilter);
+        const isAct = (pDay === currentMobileDayFilter);
+        pill.classList.toggle('active', isAct);
+        pill.setAttribute('aria-pressed', isAct ? 'true' : 'false');
     });
     if (typeof renderTimetableOfficeHoursPanel === 'function') {
         renderTimetableOfficeHoursPanel();
@@ -29374,8 +30041,8 @@ function renderTimetableOfficeHoursPanel() {
         return `
             <div class="oh-course-box has-course-accent" style="--course-accent: ${ohBoxAccent};">
                 <div class="oh-course-box-header">
-                    <span style="cursor: pointer; display: inline-flex; align-items: center; gap: 6px;" onclick="if(typeof openCourseDetails==='function') openCourseDetails('${escapeHtml(c.code)}')"><span class="course-color-dot" style="background: ${ohBoxAccent};"></span>📚 ${escapeHtml(c.name)} <span style="color: #94a3b8; font-size: 0.74rem;">(${escapeHtml(c.code)})</span></span>
-                    <button type="button" class="btn-quick-course-oh" data-course-code="${escapeHtml(c.code)}" style="background: rgba(245, 158, 11, 0.14); border: 1px solid rgba(245, 158, 11, 0.35); color: #fde68a; border-radius: 6px; padding: 2px 7px; font-size: 0.72rem; cursor: pointer;">+ הוסף</button>
+                    <span class="oh-course-open-trigger" data-course-code="${escapeHtml(c.code)}" style="cursor: pointer; display: inline-flex; align-items: center; gap: 6px; min-width: 0;"><span class="course-color-dot" style="background: ${escapeHtml(ohBoxAccent)}; flex-shrink: 0;"></span><span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">📚 ${escapeHtml(c.name)} <span style="color: #94a3b8; font-size: 0.74rem;">(${escapeHtml(c.code)})</span></span></span>
+                    <button type="button" class="btn-quick-course-oh" data-course-code="${escapeHtml(c.code)}" style="background: rgba(245, 158, 11, 0.14); border: 1px solid rgba(245, 158, 11, 0.35); color: #fde68a; border-radius: 6px; padding: 2px 7px; font-size: 0.72rem; cursor: pointer; white-space: nowrap; flex-shrink: 0;">+ הוסף</button>
                 </div>
                 ${rowsHtml}
             </div>
@@ -29422,6 +30089,12 @@ function renderTimetableOfficeHoursPanel() {
             formEl.style.display = formEl.style.display === 'none' ? 'grid' : 'none';
         };
     }
+    panel.querySelectorAll('.oh-course-open-trigger').forEach(el => {
+        el.addEventListener('click', () => {
+            const code = el.getAttribute('data-course-code');
+            if (code && typeof openCourseDetails === 'function') openCourseDetails(code);
+        });
+    });
     panel.querySelectorAll('.btn-quick-course-oh').forEach(b => {
         b.onclick = () => {
             if (formEl) formEl.style.display = 'grid';
@@ -29545,18 +30218,18 @@ function renderTodayTimetableBanner() {
             const durMeta = getClassDurationMetadata(c.startTime, c.endTime);
             const todayAccent = getCourseAccentColor(c.courseId);
             bodyHtml += `
-                <div class="${itemClass} has-course-accent" style="--course-accent: ${todayAccent};" onclick="openCourseDetails('${c.courseId}')">
+                <div class="${itemClass} has-course-accent" data-course-code="${escapeHtml(c.courseId || '')}" style="--course-accent: ${escapeHtml(todayAccent)}; cursor: pointer;">
                     <div class="today-class-top">
-                        <span class="today-class-time">⏰ <span class="ui-time-ltr" dir="ltr">${c.startTime} - ${c.endTime}</span> (${durMeta.text})</span>
+                        <span class="today-class-time">⏰ <span class="ui-time-ltr" dir="ltr">${escapeHtml(c.startTime || '')} - ${escapeHtml(c.endTime || '')}</span> (${escapeHtml(durMeta.text)})</span>
                         ${isPerpetual 
                             ? `<span class="today-class-status perpetual" title="בלמידה עצמית (הברזה נצחית)">🚀 למידה עצמית</span>` 
-                            : `<span class="today-class-status ${status.code}">${status.text}</span>`
+                            : `<span class="today-class-status ${escapeHtml(status.code)}">${escapeHtml(status.text)}</span>`
                         }
                     </div>
-                    <div class="today-class-name">${c.courseName} (${c.courseId})</div>
+                    <div class="today-class-name">${escapeHtml(c.courseName || '')} (${escapeHtml(c.courseId || '')})</div>
                     <div class="today-class-sub">
-                        <span>${c.type}</span>
-                        ${c.lecturer ? `<span>${c.lecturer}</span>` : ''}
+                        <span>${escapeHtml(c.type || '')}</span>
+                        ${c.lecturer ? `<span>${escapeHtml(c.lecturer)}</span>` : ''}
                     </div>
                 </div>
             `;
@@ -29565,6 +30238,12 @@ function renderTodayTimetableBanner() {
     }
 
     banner.innerHTML = headerHtml + bodyHtml;
+    banner.querySelectorAll('.today-class-item[data-course-code]').forEach(el => {
+        el.addEventListener('click', () => {
+            const code = el.getAttribute('data-course-code');
+            if (code && typeof openCourseDetails === 'function') openCourseDetails(code);
+        });
+    });
 }
 
 function updateDailyTimetableFocus() {
@@ -29684,7 +30363,9 @@ function applyTimetableMobileFilter(filter, skipRender = false) {
     // Update active state on day pills
     document.querySelectorAll('#timetable-day-selector .day-tab-pill[data-day]').forEach(pill => {
         const pDay = pill.getAttribute('data-day');
-        pill.classList.toggle('active', pDay === currentMobileDayFilter);
+        const isAct = (pDay === currentMobileDayFilter);
+        pill.classList.toggle('active', isAct);
+        pill.setAttribute('aria-pressed', isAct ? 'true' : 'false');
     });
 
     if (!skipRender && typeof renderTimetableGrid === 'function' && grid) {
@@ -29703,6 +30384,7 @@ function setupDailyTimetable() {
         pill.addEventListener('click', () => {
             const day = pill.getAttribute('data-day');
             if (!day) return;
+            pill.blur();
             applyTimetableMobileFilter(day);
         });
     });
@@ -29717,7 +30399,7 @@ function setupDailyTimetable() {
                 if (typeof showToastNotification === 'function') {
                     showToastNotification(msg, 'warning');
                 } else {
-                    alert(msg);
+                    console.warn(msg);
                 }
                 if (typeof window.openConnectModal === 'function') {
                     window.openConnectModal('cheesefork');
@@ -30696,20 +31378,30 @@ function renderInAppNotificationHub() {
             let html = '';
             priorityTasks.tasks.forEach(task => {
                 const isOverdue = task.diffDays < 0;
+                const safeCode = escapeHtml(task.courseCode);
+                const safeId = escapeHtml(task.id);
                 html += `
                     <div class="notif-task-item ${isOverdue ? 'is-overdue' : ''}">
-                        <input type="checkbox" class="notif-task-checkbox" data-course-code="${task.courseCode}" data-task-id="${task.id}" title="סמן כהושלם">
-                        <div class="notif-task-info" onclick="if (typeof openCourseDetails === 'function') openCourseDetails('${task.courseCode}'); closeNotificationDrawer();">
-                            <div class="notif-task-title">${task.title}</div>
+                        <input type="checkbox" class="notif-task-checkbox" data-course-code="${safeCode}" data-task-id="${safeId}" title="סמן כהושלם">
+                        <div class="notif-task-info" data-course-code="${safeCode}">
+                            <div class="notif-task-title">${escapeHtml(task.title)}</div>
                             <div class="notif-task-sub">
-                                <span class="notif-task-course-tag">[${task.courseShortName}]</span>
-                                <span class="notif-task-timing-badge ${task.timingCode}">${task.timingText}</span>
+                                <span class="notif-task-course-tag">[${escapeHtml(task.courseShortName)}]</span>
+                                <span class="notif-task-timing-badge ${escapeHtml(task.timingCode)}">${escapeHtml(task.timingText)}</span>
                             </div>
                         </div>
                     </div>
                 `;
             });
             listTasks.innerHTML = html;
+
+            listTasks.querySelectorAll('.notif-task-info[data-course-code]').forEach(infoEl => {
+                infoEl.addEventListener('click', () => {
+                    const code = infoEl.getAttribute('data-course-code');
+                    if (code && typeof openCourseDetails === 'function') openCourseDetails(code);
+                    if (typeof closeNotificationDrawer === 'function') closeNotificationDrawer();
+                });
+            });
 
             // Bind checkbox listeners
             listTasks.querySelectorAll('.notif-task-checkbox').forEach(chk => {
@@ -32099,92 +32791,177 @@ window.exportSvgToPng = exportSvgToPng;
 
 function exportTimetableToCanvasPNG() {
     try {
+        const schedule = (typeof getActiveTimetableSchedule === 'function')
+            ? getActiveTimetableSchedule()
+            : ((typeof gameState !== 'undefined' && gameState && gameState.timetable) || null);
+        const daysList = (schedule && Array.isArray(schedule.days)) ? schedule.days : [];
+        const classesByDay = new Map();
+        let totalClasses = 0;
+        let minStartMin = 8 * 60;
+        let maxEndMin = 19 * 60;
+
+        daysList.forEach(d => {
+            if (!d || typeof d.dayIndex !== 'number') return;
+            const list = Array.isArray(d.classes) ? d.classes : [];
+            if (d.dayIndex >= 0 && d.dayIndex <= 4 && list.length > 0) {
+                classesByDay.set(d.dayIndex, list);
+                list.forEach(c => {
+                    totalClasses++;
+                    const sM = (typeof parseTimeToMinutes === 'function') ? parseTimeToMinutes(c.startTime) : null;
+                    const eM = (typeof parseTimeToMinutes === 'function') ? parseTimeToMinutes(c.endTime) : null;
+                    if (sM !== null && sM < minStartMin) minStartMin = Math.floor(sM / 60) * 60;
+                    if (eM !== null && eM > maxEndMin) maxEndMin = Math.ceil(eM / 60) * 60;
+                });
+            }
+        });
+
+        if (totalClasses === 0) {
+            if (typeof showToastNotification === 'function') {
+                showToastNotification('אין שיעורים במערכת השעות הפעילה לייצוא כתמונה 📅', 'warning');
+            }
+            return false;
+        }
+
+        const startHour = Math.min(8, Math.floor(minStartMin / 60));
+        const endHour = Math.max(19, Math.ceil(maxEndMin / 60));
+        const hourCount = Math.max(8, endHour - startHour);
+        const hourPx = 68;
+        const headerH = 74;
+        const dayHeaderH = 44;
+        const topPad = headerH + dayHeaderH + 14;
+        const axisW = 74;
+        const rightMargin = 28;
+        const leftMargin = 28;
+        const gap = 14;
+        const canvasW = 1680;
+        const usableW = canvasW - rightMargin - leftMargin - axisW - (gap * 5);
+        const colW = Math.floor(usableW / 5);
+        const gridH = hourCount * hourPx;
+        const canvasH = topPad + gridH + 34;
+
         const canvas = document.createElement('canvas');
-        canvas.width = 1600;
-        canvas.height = 960;
+        canvas.width = canvasW;
+        canvas.height = canvasH;
         const ctx = canvas.getContext('2d');
 
         // Background
         ctx.fillStyle = '#0b0f19';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillRect(0, 0, canvasW, canvasH);
 
         // Header Gradient Banner
-        const grad = ctx.createLinearGradient(0, 0, canvas.width, 0);
+        const grad = ctx.createLinearGradient(0, 0, canvasW, 0);
         grad.addColorStop(0, '#0284c7');
         grad.addColorStop(1, '#1e3a8a');
         ctx.fillStyle = grad;
-        ctx.fillRect(0, 0, canvas.width, 70);
+        ctx.fillRect(0, 0, canvasW, headerH);
+
+        const headerTitleEl = document.getElementById('timetable-header-title');
+        const exportTitle = (headerTitleEl && headerTitleEl.textContent && headerTitleEl.textContent.trim())
+            ? headerTitleEl.textContent.trim()
+            : '🕒 מערכת שעות שבועית — Semestero ME';
 
         ctx.fillStyle = '#ffffff';
-        ctx.font = 'bold 24px Arial, sans-serif';
+        ctx.font = 'bold 24px Rubik, Arial, sans-serif';
         ctx.textAlign = 'right';
-        ctx.fillText('🕒 מערכת שעות שבועית | סמסטר ג׳ - הפקולטה להנדסת מכונות הטכניון', 1560, 45);
+        ctx.fillText(exportTitle, canvasW - 36, 46);
 
-        ctx.font = '15px Arial, sans-serif';
+        ctx.font = '15px Rubik, Arial, sans-serif';
         ctx.textAlign = 'left';
-        ctx.fillText(new Date().toLocaleDateString('he-IL'), 40, 45);
+        ctx.fillText(new Date().toLocaleDateString('he-IL'), 36, 46);
 
-        // 5 Days (Sun to Thu)
+        // RTL axis on right + horizontal hour lines
+        const axisX = canvasW - rightMargin - axisW;
+        ctx.strokeStyle = 'rgba(148, 163, 184, 0.16)';
+        ctx.lineWidth = 1;
+        for (let h = 0; h <= hourCount; h++) {
+            const y = topPad + h * hourPx;
+            ctx.beginPath();
+            ctx.moveTo(leftMargin, y);
+            ctx.lineTo(axisX, y);
+            ctx.stroke();
+
+            const hrStr = `${String(startHour + h).padStart(2, '0')}:00`;
+            ctx.fillStyle = '#94a3b8';
+            ctx.font = 'bold 13px monospace';
+            ctx.textAlign = 'center';
+            ctx.fillText(hrStr, axisX + axisW / 2, y + 5);
+        }
+
+        const trimFit = (text, maxW) => {
+            let s = String(text || '');
+            if (ctx.measureText(s).width <= maxW) return s;
+            while (s.length > 2 && ctx.measureText(s + '…').width > maxW) {
+                s = s.slice(0, -1);
+            }
+            return s + '…';
+        };
+
+        // 5 RTL Days (0=Sun on right -> 4=Thu on left)
         const days = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי'];
-        const colW = 280;
-        const gap = 20;
-        const startX = 50;
-        const startY = 100;
-
         days.forEach((dayName, dIdx) => {
-            const x = startX + dIdx * (colW + gap);
+            const x = axisX - gap - (dIdx + 1) * colW - dIdx * gap;
+
             // Day Header Pill
             ctx.fillStyle = '#1e293b';
-            ctx.fillRect(x, startY, colW, 40);
+            ctx.fillRect(x, headerH + 14, colW, dayHeaderH - 4);
             ctx.fillStyle = '#38bdf8';
-            ctx.font = 'bold 16px Arial, sans-serif';
+            ctx.font = 'bold 16px Rubik, Arial, sans-serif';
             ctx.textAlign = 'center';
-            ctx.fillText(`יום ${dayName}`, x + colW / 2, startY + 26);
+            ctx.fillText(`יום ${dayName}`, x + colW / 2, headerH + 41);
 
-            // Day Column Box
-            ctx.fillStyle = '#111827';
-            ctx.strokeStyle = '#334155';
+            // Day Column Backdrop
+            ctx.fillStyle = 'rgba(17, 24, 39, 0.72)';
+            ctx.strokeStyle = '#1e293b';
             ctx.lineWidth = 1;
-            ctx.fillRect(x, startY + 45, colW, 760);
-            ctx.strokeRect(x, startY + 45, colW, 760);
-        });
+            ctx.fillRect(x, topPad, colW, gridH);
+            ctx.strokeRect(x, topPad, colW, gridH);
 
-        // Current schedule courses
-        const schedule = (window.gameState && window.gameState.currentSemesterSchedule) || (typeof SEMESTER_3_SCHEDULE !== 'undefined' ? SEMESTER_3_SCHEDULE : []);
-        if (Array.isArray(schedule)) {
-            schedule.forEach(item => {
-                const dIdx = typeof item.day === 'number' ? item.day : -1;
-                if (dIdx >= 0 && dIdx <= 4) {
-                    const x = startX + dIdx * (colW + gap) + 10;
-                    const startHour = parseInt((item.time || item.start || '08:00').split(':')[0]) || 8;
-                    const startMin = parseInt((item.time || item.start || '08:00').split(':')[1]) || 0;
-                    const endHour = parseInt((item.endTime || item.end || '10:00').split(':')[0]) || (startHour + 2);
-                    const endMin = parseInt((item.endTime || item.end || '10:00').split(':')[1]) || 0;
+            const dayClasses = classesByDay.get(dIdx) || [];
+            dayClasses.forEach(c => {
+                const sMin = (typeof parseTimeToMinutes === 'function') ? parseTimeToMinutes(c.startTime) : null;
+                const eMin = ((typeof parseTimeToMinutes === 'function') ? parseTimeToMinutes(c.endTime) : null) || (sMin !== null ? sMin + 60 : null);
+                if (sMin === null) return;
 
-                    const topOffset = (startHour - 8 + startMin / 60) * 58;
-                    const durationH = Math.max(1, (endHour - startHour + (endMin - startMin) / 60));
-                    const itemHeight = Math.max(48, durationH * 58 - 6);
-                    const y = startY + 55 + topOffset;
+                const cardY = topPad + ((sMin - startHour * 60) / 60) * hourPx + 2;
+                const cardH = Math.max(52, ((eMin - sMin) / 60) * hourPx - 4);
+                const cardX = x + 6;
+                const cardW = colW - 12;
+                const accent = (typeof getCourseAccentColor === 'function') ? getCourseAccentColor(c.courseId) : '#38bdf8';
 
-                    if (y + itemHeight <= startY + 800) {
-                        ctx.fillStyle = item.type === 'lecture' ? 'rgba(2, 132, 199, 0.3)' : (item.type === 'tutorial' ? 'rgba(16, 185, 129, 0.3)' : 'rgba(245, 158, 11, 0.3)');
-                        ctx.strokeStyle = item.type === 'lecture' ? '#38bdf8' : (item.type === 'tutorial' ? '#10b981' : '#f59e0b');
-                        ctx.lineWidth = 1.5;
-                        ctx.fillRect(x, y, colW - 20, itemHeight);
-                        ctx.strokeRect(x, y, colW - 20, itemHeight);
+                ctx.fillStyle = 'rgba(15, 23, 42, 0.94)';
+                ctx.fillRect(cardX, cardY, cardW, cardH);
+                ctx.strokeStyle = accent;
+                ctx.lineWidth = 1.5;
+                ctx.strokeRect(cardX, cardY, cardW, cardH);
+                // RTL right accent stripe
+                ctx.fillStyle = accent;
+                ctx.fillRect(cardX + cardW - 5, cardY, 5, cardH);
 
-                        ctx.fillStyle = '#ffffff';
-                        ctx.font = 'bold 13px Arial, sans-serif';
-                        ctx.textAlign = 'right';
-                        ctx.fillText(item.courseName || item.course || item.title || '', x + colW - 30, y + 20);
+                const padR = cardX + cardW - 14;
+                const maxTxtW = cardW - 22;
 
-                        ctx.fillStyle = '#94a3b8';
-                        ctx.font = '11px Arial, sans-serif';
-                        ctx.fillText(`${item.time || ''} | ${item.room || item.type || ''}`, x + colW - 30, y + 36);
+                ctx.fillStyle = '#f8fafc';
+                ctx.font = 'bold 14px Rubik, Arial, sans-serif';
+                ctx.textAlign = 'right';
+                ctx.fillText(trimFit(c.courseName || c.courseId || 'שיעור', maxTxtW), padR, cardY + 20);
+
+                ctx.fillStyle = '#38bdf8';
+                ctx.font = '600 12px Rubik, Arial, sans-serif';
+                ctx.fillText(trimFit(`${c.type || 'שיעור'} • ${c.startTime || ''}–${c.endTime || ''}`, maxTxtW), padR, cardY + 38);
+
+                if (cardH >= 60) {
+                    const cleanRoom = (c.room && c.room.trim() && c.room !== 'כיתת טכניון') ? c.room.trim() : '';
+                    const subParts = [];
+                    if (cleanRoom) subParts.push(`📍 ${cleanRoom}`);
+                    if (c.lecturer) subParts.push(c.lecturer);
+                    if (subParts.length > 0) {
+                        ctx.fillStyle = '#cbd5e1';
+                        ctx.font = '11px Rubik, Arial, sans-serif';
+                        ctx.fillText(trimFit(subParts.join(' • '), maxTxtW), padR, cardY + 55);
                     }
                 }
             });
-        }
+        });
 
         const png = canvas.toDataURL('image/png');
         const dl = document.createElement('a');
@@ -32195,10 +32972,15 @@ function exportTimetableToCanvasPNG() {
         document.body.removeChild(dl);
 
         if (typeof showToastNotification === 'function') {
-            showToastNotification('מערכת השעות הורדה כתמונה בהצלחה! 📸', 'success');
+            showToastNotification(`מערכת השעות הורדה כתמונה בהצלחה (${totalClasses} שיעורים)! 📸`, 'success');
         }
+        return true;
     } catch (err) {
         console.error('[Export Timetable PNG] Failed to export timetable:', err);
+        if (typeof showToastNotification === 'function') {
+            showToastNotification('שגיאה בייצוא מערכת השעות כתמונה', 'error');
+        }
+        return false;
     }
 }
 window.exportTimetableToCanvasPNG = exportTimetableToCanvasPNG;
@@ -32710,11 +33492,14 @@ function renderNotionHomeworkPolicyStrip() {
             else if (sheet.status === 'in_progress') statusLabel = 'בתהליך עבודה ✏️ (צהוב)';
             else if (sheet.status === 'open') statusLabel = 'לא התחיל (פתוח להגשה) 🔴 (אדום)';
 
-            dotsHtml += `<div class="hw-dot ${statusClass}" title="גיליון ${sheet.index} - ${sheet.name}: ${statusLabel}"></div>`;
+            dotsHtml += `<div class="hw-dot ${statusClass}" title="גיליון ${sheet.index} - ${escapeHtml(sheet.name)}: ${statusLabel}"></div>`;
         });
 
         const ratioBadgeClass = hwStatus.isMet ? 'met' : 'progress';
         const ratioBadgeText = hwStatus.isMet ? `${hwStatus.completedCount}/${hwStatus.bestN} ✓` : `${hwStatus.completedCount}/${hwStatus.bestN}`;
+        const safeDisplayName = escapeHtml(displayName || course.code);
+        const safeCourseCodeAttr = escapeHtml(course.code);
+        const safePolicyLabel = escapeHtml(hwStatus.policy.policyLabel || '');
 
         let chipDetails = "";
         if (hwStatus.bestNAverage !== null) {
@@ -32728,8 +33513,8 @@ function renderNotionHomeworkPolicyStrip() {
         }
 
         miniChipsHtml += `
-            <span class="hw-mini-chip ${hwStatus.isMet ? 'met' : ''}" onclick="if (window.openCourseHomeworkDetail) window.openCourseHomeworkDetail('${course.code}');" title="${displayName} (${course.code}) - ${hwStatus.policy.policyLabel}: ${ratioBadgeText}">
-                <span>${displayName}:</span>
+            <span class="hw-mini-chip ${hwStatus.isMet ? 'met' : ''}" data-course-code="${safeCourseCodeAttr}" title="${safeDisplayName} (${safeCourseCodeAttr}) - ${safePolicyLabel}: ${ratioBadgeText}">
+                <span>${safeDisplayName}:</span>
                 <strong>${hwStatus.completedCount}/${hwStatus.bestN}</strong>
                 ${chipDetails}
             </span>
@@ -32750,19 +33535,19 @@ function renderNotionHomeworkPolicyStrip() {
 
         const hwAccent = getCourseAccentColor(course.code);
         capsulesHtml += `
-            <div class="course-hw-capsule has-course-accent" style="--course-accent: ${hwAccent};" onclick="if (window.openCourseHomeworkDetail) window.openCourseHomeworkDetail('${course.code}');" title="לחץ לפירוט הגיליונות ומעקב ההגשות">
+            <div class="course-hw-capsule has-course-accent" data-course-code="${safeCourseCodeAttr}" style="--course-accent: ${hwAccent};" title="לחץ לפירוט הגיליונות ומעקב ההגשות">
                 <div class="capsule-top">
                     <div class="capsule-course-info">
-                        <span class="capsule-course-icon" style="display: inline-flex; align-items: center;">${iconHtml}</span>
-                        <span class="capsule-course-name">${displayName}</span>
-                        <span class="capsule-course-code">${course.code}</span>
+                        <span class="capsule-course-icon" data-course-code="${safeCourseCodeAttr}" style="display: inline-flex; align-items: center;">${iconHtml}</span>
+                        <span class="capsule-course-name">${safeDisplayName}</span>
+                        <span class="capsule-course-code">${safeCourseCodeAttr}</span>
                     </div>
                     <span class="capsule-ratio-badge ${ratioBadgeClass}">
                         ${ratioBadgeText}
                     </span>
                 </div>
                 <div class="capsule-meta-row">
-                    <span class="capsule-policy-label">🎯 ${hwStatus.policy.policyLabel}</span>
+                    <span class="capsule-policy-label">🎯 ${safePolicyLabel}</span>
                     <span style="font-size: 0.70rem; color: #94a3b8;">
                         ${hwStatus.remaining > 0 ? `נותרו עוד ${hwStatus.remaining}` : 'היעד הובטח!'}
                         ${metaExtra}
@@ -32786,7 +33571,7 @@ function renderNotionHomeworkPolicyStrip() {
                 <div class="hw-strip-hint">
                     💡 מקרא צבעים: 🔴 לא התחיל | 🟡 בתהליך | 🟢 בוצע (הסתיים) | 🔵 הוגש | 🔒 טרם נפתח
                 </div>
-                <button type="button" class="btn-toggle-hw-collapse" onclick="if(window.toggleHomeworkPolicyStripCollapse) window.toggleHomeworkPolicyStripCollapse(event);" title="מזער / הרחב מעקב הגשת שיעורי בית לצמצום ויזואלי">
+                <button type="button" id="btn-toggle-hw-collapse" class="btn-toggle-hw-collapse" aria-expanded="${!isCollapsed}" title="מזער / הרחב מעקב הגשת שיעורי בית לצמצום ויזואלי">
                     <span id="hw-collapse-icon">${isCollapsed ? '▼' : '▲'}</span>
                     <span id="hw-collapse-text">${isCollapsed ? 'הרחב' : 'מזער'}</span>
                 </button>
@@ -32800,6 +33585,25 @@ function renderNotionHomeworkPolicyStrip() {
             ${capsulesHtml}
         </div>
     `;
+
+    const hwCollapseBtn = document.getElementById("btn-toggle-hw-collapse");
+    if (hwCollapseBtn) {
+        hwCollapseBtn.addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            toggleHomeworkPolicyStripCollapse(e);
+        });
+    }
+    if (!stripContainer.dataset.hwStripDelegated) {
+        stripContainer.dataset.hwStripDelegated = "true";
+        stripContainer.addEventListener("click", (e) => {
+            if (e.target.closest("#btn-toggle-hw-collapse") || e.target.closest(".notion-course-icon")) return;
+            const targetCard = e.target.closest(".hw-mini-chip[data-course-code], .course-hw-capsule[data-course-code]");
+            if (targetCard && targetCard.dataset.courseCode && typeof openCourseHomeworkDetail === 'function') {
+                openCourseHomeworkDetail(targetCard.dataset.courseCode);
+            }
+        });
+    }
 }
 
 // Helper to format clean non-redundant sheet task titles (avoids "תרגיל בית 2: גיליון 2")
@@ -32905,7 +33709,7 @@ function renderCourseModalHomeworkPolicy(course) {
                     <div class="hw-component-row">
                         <span class="hw-component-label">
                             <span>📝</span>
-                            <span title="${sheet.digitalTask ? sheet.digitalTask.title : 'שאלון דיגיטלי'}">${sheet.digitalTask ? formatSheetTaskDisplayTitle(sheet.index, sheet.name, sheet.digitalTask.title) : 'שאלון מקוון / דיגיטלי'}</span>
+                            <span title="${escapeHtml(sheet.digitalTask ? sheet.digitalTask.title : 'שאלון דיגיטלי')}">${escapeHtml(sheet.digitalTask ? formatSheetTaskDisplayTitle(sheet.index, sheet.name, sheet.digitalTask.title) : 'שאלון מקוון / דיגיטלי')}</span>
                         </span>
                         <div class="hw-component-actions">
                             <input type="number" class="hw-grade-input ${getTaskGradeTierClass(sheet.digitalGrade)}" min="0" max="100" step="0.5" value="${sheet.digitalGrade !== null ? sheet.digitalGrade : ''}" placeholder="ציון" title="ציון שאלון דיגיטלי (0-100)" aria-label="ציון שאלון גיליון ${sheet.index}" onchange="if (window.setHomeworkSheetGrade) window.setHomeworkSheetGrade('${course.code}', ${sheet.index}, 'digital', this.value);">
@@ -32921,7 +33725,7 @@ function renderCourseModalHomeworkPolicy(course) {
                     <div class="hw-component-row">
                         <span class="hw-component-label">
                             <span>📄</span>
-                            <span title="${sheet.writtenTask ? sheet.writtenTask.title : 'הגשת פתרון בכתב'}">${sheet.writtenTask ? formatSheetTaskDisplayTitle(sheet.index, sheet.name, sheet.writtenTask.title) : 'הגשת פתרון בכתב (סריקה)'}</span>
+                            <span title="${escapeHtml(sheet.writtenTask ? sheet.writtenTask.title : 'הגשת פתרון בכתב')}">${escapeHtml(sheet.writtenTask ? formatSheetTaskDisplayTitle(sheet.index, sheet.name, sheet.writtenTask.title) : 'הגשת פתרון בכתב (סריקה)')}</span>
                         </span>
                         <div class="hw-component-actions">
                             <input type="number" class="hw-grade-input ${getTaskGradeTierClass(sheet.writtenGrade)}" min="0" max="100" step="0.5" value="${sheet.writtenGrade !== null ? sheet.writtenGrade : ''}" placeholder="ציון" title="ציון פתרון בכתב (0-100)" aria-label="ציון פתרון גיליון ${sheet.index}" onchange="if (window.setHomeworkSheetGrade) window.setHomeworkSheetGrade('${course.code}', ${sheet.index}, 'written', this.value);">
@@ -33422,8 +34226,10 @@ function toggleHomeworkPolicyStripCollapse(e) {
     } catch (err) {}
     const icon = document.getElementById("hw-collapse-icon");
     const text = document.getElementById("hw-collapse-text");
+    const btn = document.getElementById("btn-toggle-hw-collapse");
     if (icon) icon.innerText = isCollapsed ? "▼" : "▲";
     if (text) text.innerText = isCollapsed ? "הרחב" : "מזער";
+    if (btn) btn.setAttribute("aria-expanded", isCollapsed ? "false" : "true");
 }
 
 function setHomeworkSheetGrade(courseCode, sheetIndex, compType, rawGrade) {

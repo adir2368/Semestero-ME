@@ -17,7 +17,7 @@ const wearGradle = fs.readFileSync(path.join(ROOT, 'android', 'wear', 'build.gra
 const appGradle = fs.readFileSync(path.join(ROOT, 'android', 'app', 'build.gradle'), 'utf8');
 
 assert(wearGradle.includes('applicationId "com.technion.semestero"'), 'Wear app applicationId must be com.technion.semestero');
-assert(appGradle.includes('applicationId "com.technion.semestero"'), 'Phone app applicationId must be com.technion.semestero');
+assert(appGradle.includes('"com.technion.semestero"'), 'Phone app applicationId must support com.technion.semestero');
 console.log('  ✓ Test 1 passed: Both phone and watch share applicationId "com.technion.semestero".');
 
 // 2. Phone WearSyncManager & PhoneWearListenerService
@@ -38,27 +38,29 @@ const appManifest = fs.readFileSync(path.join(ROOT, 'android', 'app', 'src', 'ma
 assert(appManifest.includes('PhoneWearListenerService'), 'AndroidManifest.xml must register PhoneWearListenerService');
 console.log('  ✓ Test 2 passed: Phone sync layer and listener service verified.');
 
-// 3. Watch Day Detection & UI Header Elements
-console.log('▶ Test 3: Verifying Watch Day Detection & Layout Header...');
+// 3. Watch Day Detection & ViewPager2 Carousel Elements
+console.log('▶ Test 3: Verifying Watch Day Detection & Carousel Layout Header...');
 const wearActivityXml = fs.readFileSync(path.join(ROOT, 'android', 'wear', 'src', 'main', 'res', 'layout', 'activity_main.xml'), 'utf8');
-assert(wearActivityXml.includes('tv_current_day'), 'Wear layout must contain tv_current_day TextView');
-assert(wearActivityXml.includes('tv_sync_status'), 'Wear layout must contain tv_sync_status TextView');
+assert(wearActivityXml.includes('wear_view_pager'), 'Wear layout must contain wear_view_pager ViewPager2');
+const wearRadarXml = fs.readFileSync(path.join(ROOT, 'android', 'wear', 'src', 'main', 'res', 'layout', 'page_radar.xml'), 'utf8');
+assert(wearRadarXml.includes('radar_day_chip'), 'Wear radar layout must contain radar_day_chip TextView');
+const wearSyncXml = fs.readFileSync(path.join(ROOT, 'android', 'wear', 'src', 'main', 'res', 'layout', 'page_sync.xml'), 'utf8');
+assert(wearSyncXml.includes('tv_phone_status_text'), 'Wear sync layout must contain tv_phone_status_text TextView');
 
 const wearActivitySrc = fs.readFileSync(path.join(ROOT, 'android', 'wear', 'src', 'main', 'java', 'com', 'technion', 'semestero', 'wear', 'MainActivity.java'), 'utf8');
-assert(wearActivitySrc.includes('tv_current_day'), 'MainActivity must bind tv_current_day');
-assert(wearActivitySrc.includes('tv_sync_status'), 'MainActivity must bind tv_sync_status');
+const wearScheduleHelperSrc = fs.readFileSync(path.join(ROOT, 'android', 'wear', 'src', 'main', 'java', 'com', 'technion', 'semestero', 'wear', 'WearScheduleHelper.java'), 'utf8');
 assert(wearActivitySrc.includes('requestSyncFromPhone'), 'MainActivity must implement requestSyncFromPhone()');
 assert(wearActivitySrc.includes('updateUIFromPrefsAndSchedule'), 'MainActivity must implement updateUIFromPrefsAndSchedule()');
-assert(wearActivitySrc.includes('יום ראשון'), 'MainActivity must support Hebrew day calculation');
-assert(wearActivitySrc.includes('משוואות דיפרנציאליות חלקיות'), 'MainActivity must resolve Sunday PDE class');
-console.log('  ✓ Test 3 passed: Watch Day Detection engine and UI header verified.');
+assert(wearScheduleHelperSrc.includes('HEBREW_DAYS'), 'WearScheduleHelper must define HEBREW_DAYS');
+assert(wearScheduleHelperSrc.includes('יום ראשון'), 'WearScheduleHelper must support Hebrew day calculation');
+assert(wearScheduleHelperSrc.includes('משוואות דיפרנציאליות חלקיות'), 'WearScheduleHelper must resolve Sunday PDE class');
+console.log('  ✓ Test 3 passed: Watch Day Detection engine and ViewPager2 header verified.');
 
 // 4. Wear OS Tile Service Hebrew Day Detection
 console.log('▶ Test 4: Verifying Wear OS Tile Service Day Detection...');
 const tileServiceSrc = fs.readFileSync(path.join(ROOT, 'android', 'wear', 'src', 'main', 'java', 'com', 'technion', 'semestero', 'wear', 'SemesteroClassTileService.java'), 'utf8');
 assert(tileServiceSrc.includes('dayHeader'), 'TileService must calculate and display dayHeader');
-assert(tileServiceSrc.includes('HEBREW_DAYS'), 'TileService must contain HEBREW_DAYS array');
-assert(tileServiceSrc.includes('משוואות דיפרנציאליות חלקיות'), 'TileService must resolve Sunday PDE class fallback');
+assert(tileServiceSrc.includes('WearScheduleHelper.resolve'), 'TileService must delegate schedule resolution to WearScheduleHelper');
 console.log('  ✓ Test 4 passed: Wear OS Tile Service Day Detection verified.');
 
 // 5. Watch Companion Web Controller Day Detection (`watch_companion.js` & `watch.html`)

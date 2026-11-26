@@ -79,8 +79,8 @@ public class WearSyncManager {
 
             // 4. GPA & Academic Standing
             SharedPreferences gpaPrefs = context.getSharedPreferences(SemesteroFinalsGpaWidget.PREFS_NAME, Context.MODE_PRIVATE);
-            json.put("gpa_current", gpaPrefs.getString("gpa_current", "86.04"));
-            json.put("gpa_badge", gpaPrefs.getString("gpa_badge", "🎖️ הצטיינות דיקן"));
+            json.put("gpa_current", gpaPrefs.getString("gpa_current", "--"));
+            json.put("gpa_badge", gpaPrefs.getString("gpa_badge", "סמסטרו ME"));
 
             // 5. Weekly Schedule Summary
             SharedPreferences schedPrefs = context.getSharedPreferences(SemesteroScheduleWidget.PREFS_NAME, Context.MODE_PRIVATE);

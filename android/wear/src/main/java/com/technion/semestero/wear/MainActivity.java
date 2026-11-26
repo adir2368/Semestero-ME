@@ -199,6 +199,9 @@ public class MainActivity extends Activity implements MessageClient.OnMessageRec
         int todayDow = Calendar.getInstance().get(Calendar.DAY_OF_WEEK);
         if (delta == 0) {
             inspectedDayOfWeek = -1;
+        } else if (inspectedDayOfWeek == -1 && todayDow > Calendar.THURSDAY) {
+            // On Friday/Saturday, +1 starts cleanly at Sunday and -1 starts at Thursday
+            inspectedDayOfWeek = (delta > 0) ? Calendar.SUNDAY : Calendar.THURSDAY;
         } else {
             int base = (inspectedDayOfWeek >= 1 && inspectedDayOfWeek <= 7) ? inspectedDayOfWeek : todayDow;
             if (base > Calendar.THURSDAY) base = Calendar.SUNDAY;
@@ -433,21 +436,23 @@ public class MainActivity extends Activity implements MessageClient.OnMessageRec
         }
 
         // Screen 3: Academic Status & Sync Timestamp
-        String gpaCurrent = prefs.getString("gpa_current", "86.04");
+        String gpaCurrent = prefs.getString("gpa_current", "--");
         if (gpaCurrent == null || gpaCurrent.trim().isEmpty() || gpaCurrent.equals("0.0") || isCorruptedText(gpaCurrent)) {
-            gpaCurrent = "86.04";
+            gpaCurrent = "--";
         }
-        String gpaBadge = prefs.getString("gpa_badge", "🎖️ הצטיינות דיקן");
+        String gpaBadge = prefs.getString("gpa_badge", "סמסטרו ME");
         if (gpaBadge == null || gpaBadge.trim().isEmpty() || isCorruptedText(gpaBadge)) {
-            gpaBadge = "🎖️ הצטיינות דיקן";
+            gpaBadge = "סמסטרו ME";
         }
-        adapter.gpaSummaryText = "🎓 ממוצע: " + gpaCurrent + " • " + gpaBadge;
+        adapter.gpaSummaryText = gpaCurrent.equals("--")
+            ? "🎓 ממוצע: -- • סמסטרו ME"
+            : ("🎓 ממוצע: " + gpaCurrent + " • " + gpaBadge);
 
         String schedHours = prefs.getString("sched_total_hours", "");
         if (schedHours != null && !schedHours.trim().isEmpty() && !schedHours.startsWith("0") && !isCorruptedText(schedHours)) {
             adapter.schedSummaryText = "📅 " + schedHours;
         } else {
-            adapter.schedSummaryText = "📅 5 קורסים • 16 ש״ס השבוע";
+            adapter.schedSummaryText = "📅 ממתין לסנכרון מערכת";
         }
 
         long lastSyncMs = prefs.getLong("last_sync_timestamp", 0L);
@@ -690,7 +695,7 @@ public class MainActivity extends Activity implements MessageClient.OnMessageRec
         return d;
     }
 
-    private static String shortenCourseForWatch(String course) {
+    public static String shortenCourseForWatch(String course) {
         if (course == null || course.trim().isEmpty()) return "";
         String c = course.trim();
         if (c.contains("משוואות דיפרנציאליות חלקיות") || c.contains("104228")) return "מד״ח מ׳";

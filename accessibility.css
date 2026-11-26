@@ -241,3 +241,167 @@ body.a11y-stop-animations * {
         height: 42px;
     }
 }
+
+
+/* === Pass 6 High Contrast Coverage & Light Mode (P6-8) === */
+body.a11y-high-contrast .settings-card,
+body.a11y-high-contrast .settings-control-box,
+body.a11y-high-contrast .settings-header-banner,
+body.a11y-high-contrast .a11y-modal-card,
+body.a11y-high-contrast .privacy-modal-card,
+body.a11y-high-contrast .notif-drawer-panel,
+body.a11y-high-contrast .bug-report-card-btn,
+body.a11y-high-contrast .revision-item,
+body.a11y-high-contrast .sem-dialog-card {
+    background: #000000 !important;
+    border-color: #ffff00 !important;
+    color: #ffffff !important;
+}
+
+body.a11y-high-contrast input,
+body.a11y-high-contrast select,
+body.a11y-high-contrast textarea {
+    background: #000000 !important;
+    color: #ffffff !important;
+    border-color: #ffff00 !important;
+}
+
+/* Light Mode Theme (IS 5568 / WCAG AA Compliant) */
+html.a11y-light-mode {
+    color-scheme: light !important;
+    --bg-deep: #f8fafc;
+    --bg-dark: #f1f5f9;
+    --bg-card: #ffffff;
+    --bg-panel: #ffffff;
+    --text-light: #0f172a;
+    --text-muted: #475569;
+    --border-color: #cbd5e1;
+}
+
+body.a11y-light-mode {
+    background: #f1f5f9 !important;
+    background-image: none !important;
+    color: #0f172a !important;
+}
+
+body.a11y-light-mode .hud-container,
+body.a11y-light-mode .top-nav,
+body.a11y-light-mode .mobile-bottom-nav,
+body.a11y-light-mode .app-footer,
+body.a11y-light-mode .settings-header-banner,
+body.a11y-light-mode .settings-card,
+body.a11y-light-mode .settings-control-box,
+body.a11y-light-mode .revision-item,
+body.a11y-light-mode .course-card,
+body.a11y-light-mode .modal-content,
+body.a11y-light-mode .a11y-modal-card,
+body.a11y-light-mode .privacy-modal-card,
+body.a11y-light-mode .privacy-section-block,
+body.a11y-light-mode .notif-drawer-panel,
+body.a11y-light-mode .bug-report-card-btn,
+body.a11y-light-mode .faq-card,
+body.a11y-light-mode .shortcut-card,
+body.a11y-light-mode .tutorial-hub-card,
+body.a11y-light-mode .sem-dialog-card {
+    background: #ffffff !important;
+    background-image: none !important;
+    color: #0f172a !important;
+    border-color: #cbd5e1 !important;
+    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08) !important;
+}
+
+body.a11y-light-mode .modal-header,
+body.a11y-light-mode .a11y-header,
+body.a11y-light-mode .privacy-modal-header,
+body.a11y-light-mode .notif-drawer-header,
+body.a11y-light-mode .modal-footer {
+    background: #f8fafc !important;
+    color: #0f172a !important;
+    border-color: #cbd5e1 !important;
+}
+
+body.a11y-light-mode h1,
+body.a11y-light-mode h2,
+body.a11y-light-mode h3,
+body.a11y-light-mode .settings-card-title,
+body.a11y-light-mode .revision-item-title,
+body.a11y-light-mode .notif-drawer-title,
+body.a11y-light-mode .a11y-header h2,
+body.a11y-light-mode .privacy-modal-header h2,
+body.a11y-light-mode .sem-dialog-title {
+    color: #0f172a !important;
+}
+
+body.a11y-light-mode .hud-stat-label,
+body.a11y-light-mode .revision-item-meta,
+body.a11y-light-mode .a11y-statement-box,
+body.a11y-light-mode .notif-drawer-subtitle,
+body.a11y-light-mode .sem-dialog-msg,
+body.a11y-light-mode [style*="color: #cbd5e1"],
+body.a11y-light-mode [style*="color: #94a3b8"],
+body.a11y-light-mode [style*="color: #f8fafc"],
+body.a11y-light-mode [style*="color: #ffffff"],
+body.a11y-light-mode [style*="color: #fff"] {
+    color: #1e293b !important;
+}
+
+body.a11y-light-mode [style*="background: #0f172a"],
+body.a11y-light-mode [style*="background: #0b1120"],
+body.a11y-light-mode [style*="background: #0b1329"],
+body.a11y-light-mode [style*="background: rgba(15, 23, 42"],
+body.a11y-light-mode [style*="background: rgba(30, 41, 59"] {
+    background: #f8fafc !important;
+    border-color: #cbd5e1 !important;
+}
+
+body.a11y-light-mode .btn-outline,
+body.a11y-light-mode .btn-ghost,
+body.a11y-light-mode .btn-secondary,
+body.a11y-light-mode .a11y-btn,
+body.a11y-light-mode .top-tab-btn,
+body.a11y-light-mode .mobile-nav-item {
+    color: #0f172a !important;
+    background: #e2e8f0 !important;
+    border-color: #94a3b8 !important;
+}
+
+body.a11y-light-mode .btn-primary,
+body.a11y-light-mode .top-tab-btn.active,
+body.a11y-light-mode .mobile-nav-item.active,
+body.a11y-light-mode .a11y-btn.active {
+    background: #0284c7 !important;
+    color: #ffffff !important;
+    border-color: #0369a1 !important;
+}
+
+body.a11y-light-mode .btn-primary [style*="color"],
+body.a11y-light-mode .a11y-btn.active [style*="color"],
+body.a11y-light-mode .top-tab-btn.active [style*="color"] {
+    color: #ffffff !important;
+}
+
+body.a11y-light-mode input,
+body.a11y-light-mode select,
+body.a11y-light-mode textarea {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    border: 1px solid #94a3b8 !important;
+}
+
+body.a11y-light-mode footer {
+    background: #e2e8f0 !important;
+    border-top: 1px solid #cbd5e1 !important;
+    color: #0f172a !important;
+}
+
+body.a11y-light-mode footer *,
+body.a11y-light-mode footer strong,
+body.a11y-light-mode footer span,
+body.a11y-light-mode .app-version-badge,
+body.a11y-light-mode .a11y-btn span {
+    color: #0f172a !important;
+}
+
+body.a11y-light-mode .a11y-btn.active span {
+    color: #ffffff !important;
+}

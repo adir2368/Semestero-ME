@@ -95,8 +95,8 @@ public class WearCarouselAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
     public String syncStatusText = "טלפון מחובר";
     public String syncLastTime = "סונכרן: מעודכן";
-    public String gpaSummaryText = "🎓 ממוצע: 86.04 • 🎖️ הצטיינות דיקן";
-    public String schedSummaryText = "📅 5 קורסים • 16 ש״ס השבוע";
+    public String gpaSummaryText = "🎓 ממוצע: -- • סמסטרו ME";
+    public String schedSummaryText = "📅 ממתין לסנכרון מערכת";
     public boolean isSyncing = false;
     public ScrollView syncScrollView;
 

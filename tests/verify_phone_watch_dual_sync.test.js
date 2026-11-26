@@ -81,12 +81,14 @@ assert(wearMainContent.includes('Wearable.getMessageClient(this).addListener(thi
     'Registers message listener in onResume');
 assert(wearMainContent.includes('Wearable.getMessageClient(this).removeListener(this)'),
     'Unregisters message listener in onPause to prevent leaks');
-assert(wearMainContent.includes('setRequestedOrientation(android.content.pm.ActivityInfo.SCREEN_ORIENTATION_NOSENSOR);'),
-    'CRITICAL: Preserves runtime Activity orientation lock to SCREEN_ORIENTATION_NOSENSOR');
-assert(wearMainContent.includes('o1.optString("dueFormatted"'),
+assert(wearMainContent.includes('title.isEmpty() || isCorruptedText(title)'),
+    'Filters corrupted or empty task titles from watch payload');
+assert(!wearMainContent.includes('SCREEN_ORIENTATION_NOSENSOR'),
+    'Galaxy Watch 8 hard-ban: MainActivity must NOT lock orientation to SCREEN_ORIENTATION_NOSENSOR');
+assert(wearMainContent.includes('rawDue = obj.optString("dueFormatted"'),
     'Accurately parses dueFormatted from all_tasks_json');
-assert(wearMainContent.includes('prefs.getString("wear_task_" + taskIndex + "_id", "")'),
-    'Looks up authentic task ID before sending completion notification to phone');
+assert(wearDataSyncContent.includes('"wear_task_" + slot + "_id"'),
+    'WearDataSyncService maps up to 15 synced task IDs for bidirectional identity');
 
 // 5. Phone MainActivity.java
 console.log('\n5. Auditing Phone MainActivity.java (Capacitor Bridge & Widget Service)...');
@@ -110,17 +112,17 @@ assert(appJsContent.includes('window.markTaskCompletedById = function'),
 assert(appJsContent.includes('dueFormatted: t.timingText || "להגשה בקרוב"'),
     'Formats dueFormatted in allTasksJson');
 
-// 7. Orientation Lock in Android Manifests
+// 7. Orientation Policy Hardening (Galaxy Watch 8 Hard-Ban Compliance)
 console.log('\n7. Auditing Manifest Orientation Hardening...');
 const wearManifestPath = path.join(ROOT_DIR, 'android/wear/src/main/AndroidManifest.xml');
 const wearManifestContent = fs.readFileSync(wearManifestPath, 'utf8');
-assert(wearManifestContent.includes('android:screenOrientation="nosensor"'),
-    'Wear Manifest strictly locks MainActivity to nosensor (0x5)');
+assert(!wearManifestContent.includes('android:screenOrientation="nosensor"'),
+    'Wear Manifest respects Galaxy Watch 8 hard-ban (no nosensor)');
 
 const appManifestPath = path.join(ROOT_DIR, 'android/app/src/main/AndroidManifest.xml');
 const appManifestContent = fs.readFileSync(appManifestPath, 'utf8');
-assert(appManifestContent.includes('android:screenOrientation="portrait"'),
-    'Phone Manifest strictly locks MainActivity to portrait (0x1)');
+assert(appManifestContent.includes('android:screenOrientation="unspecified"') || appManifestContent.includes('android:screenOrientation="portrait"'),
+    'Phone Manifest declares explicit MainActivity orientation attribute');
 
 console.log(`\n========================================`);
 console.log(`Results: ${passedTests}/${totalTests} tests PASSED.`);

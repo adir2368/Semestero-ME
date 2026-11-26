@@ -1197,43 +1197,45 @@
 
             const hasTabBack = this._tabHistory && this._tabHistory.length > 0;
             modal.innerHTML = `
-                <div class="modal-card" style="background: #0f172a; border: 1px solid #10b981; border-radius: 16px; padding: 20px; width: 100%; max-width: 860px; max-height: 90vh; overflow-y: auto; direction: rtl; box-shadow: 0 15px 40px rgba(0,0,0,0.85);">
-                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 12px; gap: 10px;">
-                        <div>
-                            <h2 style="margin: 0; font-size: 1.2rem; font-weight: 800; color: #f8fafc; display: flex; align-items: center; gap: 8px;">
+                <div class="modal-card modal-content" style="background: #0f172a; border: 1px solid #10b981; border-radius: 16px; padding: 0; width: 100%; max-width: 860px; max-height: calc(100dvh - 32px); display: flex; flex-direction: column; overflow: hidden; direction: rtl; box-shadow: 0 15px 40px rgba(0,0,0,0.85); box-sizing: border-box;">
+                    <div class="modal-header attendance-modal-header" style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; border-bottom: 1px solid rgba(255,255,255,0.08); padding: 14px 18px 10px; gap: 10px; flex-shrink: 0; background: #0f172a;">
+                        <div style="flex: 1 1 200px; min-width: 0;">
+                            <h2 style="margin: 0; font-size: 1.15rem; font-weight: 800; color: #f8fafc; display: flex; align-items: center; gap: 8px;">
                                 <span>📋</span>
                                 <span>מרכז נוכחות, מעקב שבועי והשלמות שיעורים</span>
                             </h2>
-                            <span style="font-size: 0.76rem; color: #94a3b8;">מעקב נוכחות לפי 13 שבועות הסמסטר, סטטיסטיקות, השלמות פנאופטו ופנגייה</span>
+                            <span style="font-size: 0.76rem; color: #94a3b8; display: block; margin-top: 2px;">מעקב נוכחות לפי 13 שבועות הסמסטר, סטטיסטיקות, השלמות פנאופטו ופנגייה</span>
                         </div>
-                        <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
-                            <button type="button" onclick="window.AttendanceHub.goBack()" class="btn-back-attendance-modal" aria-label="חזרה" style="background: rgba(16, 185, 129, 0.14); border: 1px solid rgba(16, 185, 129, 0.45); color: #6ee7b7; border-radius: 8px; font-size: 0.8rem; font-weight: 700; cursor: pointer; padding: 5px 10px;">${hasTabBack ? '→ חזרה ללשונית הקודמת' : '→ חזרה'}</button>
-                            <button type="button" class="btn-close-attendance-modal" aria-label="סגור חלון" style="background: transparent; border: none; font-size: 1.4rem; color: #94a3b8; cursor: pointer; padding: 4px;">✕</button>
+                        <div class="attendance-header-actions" style="display: flex; align-items: center; gap: 6px; flex-shrink: 0;">
+                            <button type="button" onclick="window.AttendanceHub.goBack()" class="btn-back-attendance-modal" aria-label="חזרה" title="${hasTabBack ? 'חזרה ללשונית הקודמת' : 'חזרה'}" style="background: rgba(16, 185, 129, 0.14); border: 1px solid rgba(16, 185, 129, 0.45); color: #6ee7b7; border-radius: 8px; font-size: 0.78rem; font-weight: 700; cursor: pointer; padding: 5px 10px; white-space: nowrap;">→ חזרה</button>
+                            <button type="button" class="modal-close btn-close-attendance-modal" aria-label="סגור חלון" style="position: static; width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color: #cbd5e1; cursor: pointer; font-size: 1.25rem; line-height: 1;">✕</button>
                         </div>
                     </div>
 
-                    <div class="timetable-week-navigator" id="attendance-hub-week-navigator" style="margin-bottom: 14px;"></div>
+                    <div class="modal-body attendance-modal-scroll" style="padding: 12px 18px 18px; overflow-y: auto; overflow-x: hidden; flex: 1 1 auto; min-height: 0; box-sizing: border-box;">
+                        <div class="timetable-week-navigator" id="attendance-hub-week-navigator" style="margin-bottom: 14px;"></div>
 
-                    <!-- Segmented Tab Switcher -->
-                    <div style="display: flex; gap: 6px; margin-bottom: 16px; background: rgba(255,255,255,0.04); padding: 4px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.08); flex-wrap: wrap;">
-                        <button type="button" class="attendance-tab-btn ${this.activeTab === 'catchup' ? 'active' : ''}" onclick="window.AttendanceHub.switchTab('catchup')" style="flex: 1; min-width: 125px; padding: 8px 8px; border: none; border-radius: 8px; font-weight: 700; font-size: 0.78rem; cursor: pointer; background: ${this.activeTab === 'catchup' ? '#10b981' : 'transparent'}; color: ${this.activeTab === 'catchup' ? '#fff' : '#94a3b8'}; transition: all 0.15s ease;">
-                            📹 תור השלמות (${this.catchupQueue.filter(i => i.status !== 'completed').length})
-                        </button>
-                        <button type="button" class="attendance-tab-btn ${this.activeTab === 'stats' ? 'active' : ''}" onclick="window.AttendanceHub.switchTab('stats')" style="flex: 1; min-width: 145px; padding: 8px 8px; border: none; border-radius: 8px; font-weight: 700; font-size: 0.78rem; cursor: pointer; background: ${this.activeTab === 'stats' ? '#0284c7' : 'transparent'}; color: ${this.activeTab === 'stats' ? '#fff' : '#94a3b8'}; transition: all 0.15s ease;">
-                            📊 סטטיסטיקות ומעקב שבועי
-                        </button>
-                        <button type="button" class="attendance-tab-btn ${this.activeTab === 'selfstudy' ? 'active' : ''}" onclick="window.AttendanceHub.switchTab('selfstudy')" style="flex: 1; min-width: 125px; padding: 8px 8px; border: none; border-radius: 8px; font-weight: 700; font-size: 0.78rem; cursor: pointer; background: ${this.activeTab === 'selfstudy' ? '#a855f7' : 'transparent'}; color: ${this.activeTab === 'selfstudy' ? '#fff' : '#94a3b8'}; transition: all 0.15s ease;">
-                            🚀 למידה עצמית (${this.getSelfStudyCount()})
-                        </button>
-                        <button type="button" class="attendance-tab-btn ${this.activeTab === 'mandatory' ? 'active' : ''}" onclick="window.AttendanceHub.switchTab('mandatory')" style="flex: 1; min-width: 115px; padding: 8px 8px; border: none; border-radius: 8px; font-weight: 700; font-size: 0.78rem; cursor: pointer; background: ${this.activeTab === 'mandatory' ? '#10b981' : 'transparent'}; color: ${this.activeTab === 'mandatory' ? '#fff' : '#94a3b8'}; transition: all 0.15s ease;">
-                            🛡️ חובה
-                        </button>
-                        <button type="button" class="attendance-tab-btn ${this.activeTab === 'history' ? 'active' : ''}" onclick="window.AttendanceHub.switchTab('history')" style="flex: 1; min-width: 110px; padding: 8px 8px; border: none; border-radius: 8px; font-weight: 700; font-size: 0.78rem; cursor: pointer; background: ${this.activeTab === 'history' ? '#10b981' : 'transparent'}; color: ${this.activeTab === 'history' ? '#fff' : '#94a3b8'}; transition: all 0.15s ease;">
-                            📅 יומן (${Object.keys(this.records).length})
-                        </button>
+                        <!-- Segmented Tab Switcher -->
+                        <div class="attendance-tabs-switcher" style="display: flex; gap: 6px; margin-bottom: 16px; background: rgba(255,255,255,0.04); padding: 4px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.08); flex-wrap: wrap;">
+                            <button type="button" data-att-tab="catchup" class="attendance-tab-btn ${this.activeTab === 'catchup' ? 'active' : ''}" onclick="window.AttendanceHub.switchTab('catchup')" style="flex: 1; min-width: 125px; padding: 8px 8px; border: none; border-radius: 8px; font-weight: 700; font-size: 0.78rem; cursor: pointer; background: ${this.activeTab === 'catchup' ? '#10b981' : 'transparent'}; color: ${this.activeTab === 'catchup' ? '#fff' : '#94a3b8'}; transition: all 0.15s ease;">
+                                📹 תור השלמות (${this.catchupQueue.filter(i => i.status !== 'completed').length})
+                            </button>
+                            <button type="button" data-att-tab="stats" class="attendance-tab-btn ${this.activeTab === 'stats' ? 'active' : ''}" onclick="window.AttendanceHub.switchTab('stats')" style="flex: 1; min-width: 145px; padding: 8px 8px; border: none; border-radius: 8px; font-weight: 700; font-size: 0.78rem; cursor: pointer; background: ${this.activeTab === 'stats' ? '#0284c7' : 'transparent'}; color: ${this.activeTab === 'stats' ? '#fff' : '#94a3b8'}; transition: all 0.15s ease;">
+                                📊 סטטיסטיקות ומעקב שבועי
+                            </button>
+                            <button type="button" data-att-tab="selfstudy" class="attendance-tab-btn ${this.activeTab === 'selfstudy' ? 'active' : ''}" onclick="window.AttendanceHub.switchTab('selfstudy')" style="flex: 1; min-width: 125px; padding: 8px 8px; border: none; border-radius: 8px; font-weight: 700; font-size: 0.78rem; cursor: pointer; background: ${this.activeTab === 'selfstudy' ? '#a855f7' : 'transparent'}; color: ${this.activeTab === 'selfstudy' ? '#fff' : '#94a3b8'}; transition: all 0.15s ease;">
+                                🚀 למידה עצמית (${this.getSelfStudyCount()})
+                            </button>
+                            <button type="button" data-att-tab="mandatory" class="attendance-tab-btn ${this.activeTab === 'mandatory' ? 'active' : ''}" onclick="window.AttendanceHub.switchTab('mandatory')" style="flex: 1; min-width: 115px; padding: 8px 8px; border: none; border-radius: 8px; font-weight: 700; font-size: 0.78rem; cursor: pointer; background: ${this.activeTab === 'mandatory' ? '#10b981' : 'transparent'}; color: ${this.activeTab === 'mandatory' ? '#fff' : '#94a3b8'}; transition: all 0.15s ease;">
+                                🛡️ חובה
+                            </button>
+                            <button type="button" data-att-tab="history" class="attendance-tab-btn ${this.activeTab === 'history' ? 'active' : ''}" onclick="window.AttendanceHub.switchTab('history')" style="flex: 1; min-width: 110px; padding: 8px 8px; border: none; border-radius: 8px; font-weight: 700; font-size: 0.78rem; cursor: pointer; background: ${this.activeTab === 'history' ? '#10b981' : 'transparent'}; color: ${this.activeTab === 'history' ? '#fff' : '#94a3b8'}; transition: all 0.15s ease;">
+                                📅 יומן (${Object.keys(this.records).length})
+                            </button>
+                        </div>
+
+                        <div id="attendance-hub-modal-body"></div>
                     </div>
-
-                    <div id="attendance-hub-modal-body"></div>
                 </div>
             `;
 
@@ -1242,6 +1244,10 @@
             modal.addEventListener('click', (e) => {
                 if (e.target === modal) closeModal();
             });
+
+            if (window.ModalHelp && typeof window.ModalHelp.injectHelpButtons === 'function') {
+                window.ModalHelp.injectHelpButtons();
+            }
 
             this.renderModalBody();
         },
@@ -1263,6 +1269,8 @@
                     window.pushMobileBackHistory('attendance-tab');
                 }
             }
+            this._manualCatchupFormOpen = false;
+            this._confirmClearHistory = false;
             this.activeTab = tabName;
             this._fromSwitchTab = true;
             this.openModal(tabName);
@@ -1272,6 +1280,15 @@
         renderModalBody: function() {
             if (typeof window.renderTimetableWeekNavigator === 'function') {
                 window.renderTimetableWeekNavigator();
+            }
+            const modalEl = document.getElementById('modal-attendance-hub');
+            if (modalEl) {
+                const catchupBtn = modalEl.querySelector('.attendance-tab-btn[data-att-tab="catchup"]');
+                const selfBtn = modalEl.querySelector('.attendance-tab-btn[data-att-tab="selfstudy"]');
+                const histBtn = modalEl.querySelector('.attendance-tab-btn[data-att-tab="history"]');
+                if (catchupBtn) catchupBtn.textContent = `📹 תור השלמות (${this.catchupQueue.filter(i => i.status !== 'completed').length})`;
+                if (selfBtn) selfBtn.textContent = `🚀 למידה עצמית (${this.getSelfStudyCount()})`;
+                if (histBtn) histBtn.textContent = `📅 יומן (${Object.keys(this.records).length})`;
             }
             const bodyEl = document.getElementById('attendance-hub-modal-body');
             if (!bodyEl) return;
@@ -1405,8 +1422,8 @@
                     <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.09); border-radius: 10px; padding: 12px;">
                         <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 6px;">
                             <div>
-                                <strong style="color: #f8fafc; font-size: 0.88rem;">${c.courseName}</strong>
-                                <span style="font-size: 0.7rem; color: #94a3b8; font-family: monospace;">(${c.courseId})</span>
+                                <strong style="color: #f8fafc; font-size: 0.88rem;">${escHtml(c.courseName)}</strong>
+                                <span style="font-size: 0.7rem; color: #94a3b8; font-family: monospace;">(${escHtml(c.courseId)})</span>
                             </div>
                             <span style="font-size: 0.75rem; font-weight: 800; color: ${c.pct === null ? '#94a3b8' : (c.pct >= 80 ? '#34d399' : '#f59e0b')};">
                                 ${c.pct === null ? 'טרם סומן' : `${c.pct}% (${c.attended}/${c.marked})`}
@@ -1497,7 +1514,7 @@
                         <span style="font-size: 1.2rem;">🚀</span>
                         <strong style="color: #e9d5ff; font-size: 0.92rem;">מצב למידה עצמית (הברזה נצחית - Perpetual Ditch Mode):</strong>
                     </div>
-                    ניתן להגדיר למידה עצמית לקורס המלא, **להרצאות בלבד** (הגעה פרונטלית לתרגולים), או **לתרגולים בלבד** (הגעה פרונטלית להרצאות).
+                    ניתן להגדיר למידה עצמית לקורס המלא, <strong>להרצאות בלבד</strong> (הגעה פרונטלית לתרגולים), או <strong>לתרגולים בלבד</strong> (הגעה פרונטלית להרצאות).
                 </div>
                 <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 12px;">
             `;
@@ -1528,8 +1545,8 @@
                         <div style="background: ${bgColor}; border: 1px solid ${borderColor}; border-radius: 12px; padding: 14px; position: relative; transition: all 0.2s ease;">
                             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; gap: 6px;">
                                 <div>
-                                    <strong style="font-size: 0.95rem; color: #f8fafc;">${c.name}</strong>
-                                    <span style="font-size: 0.72rem; color: #94a3b8; font-family: monospace; display: block; margin-top: 2px;">(${c.code}) • סמסטר ${c.semester || 3}</span>
+                                    <strong style="font-size: 0.95rem; color: #f8fafc;">${escHtml(c.name)}</strong>
+                                    <span style="font-size: 0.72rem; color: #94a3b8; font-family: monospace; display: block; margin-top: 2px;">(${escHtml(c.code)}) • סמסטר ${c.semester || 3}</span>
                                 </div>
                                 <span style="font-size: 0.7rem; font-weight: 700; padding: 2px 8px; border-radius: 4px; background: ${isSelfStudy ? '#a855f7' : 'rgba(255,255,255,0.1)'}; color: ${isSelfStudy ? '#fff' : '#94a3b8'};">
                                     ${modeBadgeMap[ditchMode] || modeBadgeMap.none}
@@ -1549,10 +1566,10 @@
                             </div>
 
                             <div class="perpetual-mode-bar" style="border-top: 1px dashed rgba(255,255,255,0.08); padding-top: 8px;">
-                                <button type="button" class="perpetual-mode-pill mode-none ${ditchMode === 'none' ? 'active' : ''}" onclick="window.setCoursePerpetualDitchMode('${c.code}', 'none'); window.AttendanceHub.renderModalBody();">🏛️ פרונטלי</button>
-                                <button type="button" class="perpetual-mode-pill mode-lecture ${ditchMode === 'lecture' ? 'active' : ''}" onclick="window.setCoursePerpetualDitchMode('${c.code}', 'lecture'); window.AttendanceHub.renderModalBody();">👨‍🏫 הרצאות בלבד</button>
-                                <button type="button" class="perpetual-mode-pill mode-tutorial ${ditchMode === 'tutorial' ? 'active' : ''}" onclick="window.setCoursePerpetualDitchMode('${c.code}', 'tutorial'); window.AttendanceHub.renderModalBody();">🧑‍🏫 תרגולים בלבד</button>
-                                <button type="button" class="perpetual-mode-pill mode-all ${ditchMode === 'all' ? 'active' : ''}" onclick="window.setCoursePerpetualDitchMode('${c.code}', 'all'); window.AttendanceHub.renderModalBody();">🚀 כל הקורס</button>
+                                <button type="button" class="perpetual-mode-pill mode-none ${ditchMode === 'none' ? 'active' : ''}" onclick="window.setCoursePerpetualDitchMode(decodeURIComponent('${encArg(c.code)}'), 'none'); window.AttendanceHub.renderModalBody();">🏛️ פרונטלי</button>
+                                <button type="button" class="perpetual-mode-pill mode-lecture ${ditchMode === 'lecture' ? 'active' : ''}" onclick="window.setCoursePerpetualDitchMode(decodeURIComponent('${encArg(c.code)}'), 'lecture'); window.AttendanceHub.renderModalBody();">👨‍🏫 הרצאות בלבד</button>
+                                <button type="button" class="perpetual-mode-pill mode-tutorial ${ditchMode === 'tutorial' ? 'active' : ''}" onclick="window.setCoursePerpetualDitchMode(decodeURIComponent('${encArg(c.code)}'), 'tutorial'); window.AttendanceHub.renderModalBody();">🧑‍🏫 תרגולים בלבד</button>
+                                <button type="button" class="perpetual-mode-pill mode-all ${ditchMode === 'all' ? 'active' : ''}" onclick="window.setCoursePerpetualDitchMode(decodeURIComponent('${encArg(c.code)}'), 'all'); window.AttendanceHub.renderModalBody();">🚀 כל הקורס</button>
                             </div>
                         </div>
                     `;
@@ -1574,9 +1591,15 @@
             const hours1x = (totalMinutes1x / 60).toFixed(1);
             const hours15x = (totalMinutes1x / 90).toFixed(1);
 
+            const curStateCatch = (window.getGlobalGameState ? window.getGlobalGameState() : window.gameState) || {};
+            const activeCourseOpts = Object.values(curStateCatch.courses || {})
+                .filter(c => c && (c.status === 'active' || Number(c.semester) === 3))
+                .map(c => `<option value="${escHtml(c.code + ' ' + c.name)}">${escHtml(c.name)} (${escHtml(c.code)})</option>`)
+                .join('');
+
             let html = `
                 <!-- Catch-Up Summary Banner -->
-                <div style="background: rgba(244, 63, 94, 0.08); border: 1px solid rgba(244, 63, 94, 0.35); border-radius: 12px; padding: 14px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
+                <div style="background: rgba(244, 63, 94, 0.08); border: 1px solid rgba(244, 63, 94, 0.35); border-radius: 12px; padding: 14px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
                     <div>
                         <div style="font-size: 1rem; font-weight: 800; color: #fb7185; margin-bottom: 2px;">
                             ${pending.length === 0 ? '✨ אין שיעורים הממתינים להשלמה!' : `נותרו ${pending.length} שיעורים להשלמה`}
@@ -1595,10 +1618,22 @@
                         </div>
                         ` : ''}
                     </div>
-                    <button type="button" class="btn btn-sm btn-outline" onclick="window.AttendanceHub.promptManualCatchup()" style="font-size: 0.78rem; padding: 6px 12px; color: #38bdf8; border-color: rgba(56, 189, 248, 0.4); border-radius: 8px;">
+                    <button type="button" id="btn-att-open-manual-catchup" class="btn btn-sm btn-outline" onclick="window.AttendanceHub.promptManualCatchup()" style="font-size: 0.78rem; padding: 6px 12px; color: #38bdf8; border-color: rgba(56, 189, 248, 0.4); border-radius: 8px;">
                         ➕ הוסף השלמה ידנית
                     </button>
                 </div>
+
+                ${this._manualCatchupFormOpen ? `
+                <div id="att-manual-catchup-form" style="background: rgba(56, 189, 248, 0.07); border: 1px solid rgba(56, 189, 248, 0.35); border-radius: 10px; padding: 12px; margin-bottom: 14px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center;">
+                    <datalist id="att-manual-courses-datalist">${activeCourseOpts}</datalist>
+                    <input type="text" id="att-manual-course-input" list="att-manual-courses-datalist" placeholder="קורס או מספר קורס (למשל: 034010 דינמיקה)..." aria-label="קורס להשלמה ידנית" style="flex: 1 1 200px; min-width: 0; padding: 7px 10px; font-size: 0.8rem; background: #0b0f19; border: 1px solid #334155; color: #f8fafc; border-radius: 8px;">
+                    <input type="text" id="att-manual-topic-input" placeholder="נושא / פרק להשלמה (למשל: הרצאה 4)..." aria-label="נושא להשלמה" style="flex: 1 1 200px; min-width: 0; padding: 7px 10px; font-size: 0.8rem; background: #0b0f19; border: 1px solid #334155; color: #f8fafc; border-radius: 8px;">
+                    <div style="display: flex; gap: 6px; align-items: center;">
+                        <button type="button" id="btn-att-save-manual-catchup" class="btn btn-xs btn-primary" style="padding: 7px 12px; font-weight: 700;">✓ הוסף לתור</button>
+                        <button type="button" id="btn-att-cancel-manual-catchup" class="btn btn-xs btn-outline" style="padding: 7px 10px; color: #94a3b8; border-color: rgba(148,163,184,0.35);">ביטול</button>
+                    </div>
+                </div>
+                ` : ''}
 
                 <!-- Active Pending Catchups -->
                 <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;">
@@ -1617,21 +1652,22 @@
             } else {
                 pending.forEach(item => {
                     const isWatching = item.status === 'watching';
+                    const idArg = encArg(item.id);
                     html += `
                         <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid ${isWatching ? '#38bdf8' : 'rgba(244, 63, 94, 0.3)'}; border-radius: 12px; padding: 14px; transition: all 0.2s ease;">
                             <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; flex-wrap: wrap; margin-bottom: 8px;">
                                 <div>
-                                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 2px;">
-                                        <span style="font-weight: 800; color: #f8fafc; font-size: 0.95rem;">${item.courseName}</span>
-                                        <span style="font-size: 0.72rem; color: #94a3b8; font-family: monospace;">(${item.courseId})</span>
-                                        <span style="font-size: 0.7rem; background: rgba(255,255,255,0.08); padding: 2px 6px; border-radius: 4px; color: #cbd5e1;">${item.type}</span>
+                                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 2px; flex-wrap: wrap;">
+                                        <span style="font-weight: 800; color: #f8fafc; font-size: 0.95rem;">${escHtml(item.courseName)}</span>
+                                        <span style="font-size: 0.72rem; color: #94a3b8; font-family: monospace;">(${escHtml(item.courseId)})</span>
+                                        <span style="font-size: 0.7rem; background: rgba(255,255,255,0.08); padding: 2px 6px; border-radius: 4px; color: #cbd5e1;">${escHtml(item.type)}</span>
                                         ${item.isMiluim ? `<span style="font-size: 0.7rem; background: rgba(16, 185, 129, 0.2); color: #6ee7b7; padding: 2px 6px; border-radius: 4px; font-weight: 700;">🇮🇱 מילואים</span>` : ''}
                                     </div>
                                     <div style="font-size: 0.78rem; color: #38bdf8; font-weight: 600;">
-                                        📌 ${item.topic}
+                                        📌 ${escHtml(item.topic)}
                                     </div>
                                     <div style="font-size: 0.72rem; color: #64748b; margin-top: 2px;">
-                                        תאריך השיעור: ${item.date} • שעה: ${item.startTime || '—'}
+                                        תאריך השיעור: ${escHtml(item.date)} • שעה: ${escHtml(item.startTime || '—')}
                                     </div>
                                 </div>
 
@@ -1647,10 +1683,10 @@
                                     <a href="${item.moodleUrl || 'https://moodle26.technion.ac.il/my/'}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline" style="font-size: 0.74rem; padding: 4px 10px; color: #38bdf8; border-color: rgba(56, 189, 248, 0.4); border-radius: 6px; text-decoration: none;" title="מעבר ישיר לדף הקורס במודל 26">
                                         🎓 מודל 26 ↗
                                     </a>
-                                    <button type="button" class="btn btn-sm ${isWatching ? 'btn-primary' : 'btn-outline'}" onclick="window.AttendanceHub.setCatchupStatus('${item.id}', '${isWatching ? 'pending' : 'watching'}')" style="font-size: 0.74rem; padding: 4px 8px; border-radius: 6px;">
+                                    <button type="button" class="btn btn-sm ${isWatching ? 'btn-primary' : 'btn-outline'}" onclick="window.AttendanceHub.setCatchupStatus(decodeURIComponent('${idArg}'), '${isWatching ? 'pending' : 'watching'}')" style="font-size: 0.74rem; padding: 4px 8px; border-radius: 6px;">
                                         ${isWatching ? 'בצפייה כעת 📺' : 'סמן בצפייה'}
                                     </button>
-                                    <button type="button" class="btn btn-sm" onclick="window.AttendanceHub.setCatchupStatus('${item.id}', 'completed')" style="font-size: 0.74rem; padding: 4px 10px; background: rgba(16, 185, 129, 0.2); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.4); border-radius: 6px; font-weight: 700; cursor: pointer;">
+                                    <button type="button" class="btn btn-sm" onclick="window.AttendanceHub.setCatchupStatus(decodeURIComponent('${idArg}'), 'completed')" style="font-size: 0.74rem; padding: 4px 10px; background: rgba(16, 185, 129, 0.2); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.4); border-radius: 6px; font-weight: 700; cursor: pointer;">
                                         ✓ סמן שהושלם
                                     </button>
                                 </div>
@@ -1672,9 +1708,9 @@
                                             ${recs.map(rec => `
                                                 <div class="catchup-parallel-item">
                                                     <div class="catchup-parallel-item-info">
-                                                        <span class="catchup-parallel-time">${rec.dayName} ${rec.startTime}–${rec.endTime}</span>
-                                                        <span class="catchup-parallel-group">${rec.slotName} קבוצה ${rec.groupId}${rec.lecturer ? (' • ' + rec.lecturer) : ''}</span>
-                                                        <span class="catchup-parallel-room">📍 ${rec.room}</span>
+                                                        <span class="catchup-parallel-time">${escHtml(rec.dayName)} ${escHtml(rec.startTime)}–${escHtml(rec.endTime)}</span>
+                                                        <span class="catchup-parallel-group">${escHtml(rec.slotName)} קבוצה ${escHtml(rec.groupId)}${rec.lecturer ? (' • ' + escHtml(rec.lecturer)) : ''}</span>
+                                                        <span class="catchup-parallel-room">📍 ${escHtml(rec.room)}</span>
                                                     </div>
                                                     <span class="catchup-parallel-chip-free">פנוי במערכת</span>
                                                 </div>
@@ -1698,21 +1734,45 @@
                             ✓ שיעורים שהושלמו (${completed.length}):
                         </div>
                         <div style="display: flex; flex-direction: column; gap: 6px;">
-                            ${completed.map(item => `
+                            ${completed.map(item => {
+                                const cidArg = encArg(item.id);
+                                return `
                                 <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.02); padding: 8px 12px; border-radius: 8px; font-size: 0.78rem; color: #94a3b8;">
-                                    <span>✓ <strong>${item.courseName}</strong>: ${item.topic} (${item.date})</span>
+                                    <span>✓ <strong>${escHtml(item.courseName)}</strong>: ${escHtml(item.topic)} (${escHtml(item.date)})</span>
                                     <div style="display: flex; gap: 6px;">
-                                        <button type="button" onclick="window.AttendanceHub.setCatchupStatus('${item.id}', 'pending')" style="background: none; border: none; color: #cbd5e1; cursor: pointer; text-decoration: underline; font-size: 0.72rem;">החזר לתור</button>
-                                        <button type="button" onclick="window.AttendanceHub.deleteCatchup('${item.id}')" style="background: none; border: none; color: #ef4444; cursor: pointer; font-size: 0.72rem;">מחק</button>
+                                        <button type="button" onclick="window.AttendanceHub.setCatchupStatus(decodeURIComponent('${cidArg}'), 'pending')" style="background: none; border: none; color: #cbd5e1; cursor: pointer; text-decoration: underline; font-size: 0.72rem;">החזר לתור</button>
+                                        <button type="button" onclick="window.AttendanceHub.deleteCatchup(decodeURIComponent('${cidArg}'))" style="background: none; border: none; color: #ef4444; cursor: pointer; font-size: 0.72rem;">מחק</button>
                                     </div>
                                 </div>
-                            `).join('')}
+                            `; }).join('')}
                         </div>
                     </div>
                 `;
             }
 
             bodyEl.innerHTML = html;
+
+            const saveManBtn = bodyEl.querySelector('#btn-att-save-manual-catchup');
+            const cancelManBtn = bodyEl.querySelector('#btn-att-cancel-manual-catchup');
+            if (saveManBtn) {
+                saveManBtn.addEventListener('click', () => {
+                    const cInp = bodyEl.querySelector('#att-manual-course-input');
+                    const tInp = bodyEl.querySelector('#att-manual-topic-input');
+                    const cVal = cInp ? cInp.value.trim() : '';
+                    if (!cVal) {
+                        if (typeof showToastNotification === 'function') showToastNotification('נא להזין שם או מספר קורס', 'warning');
+                        if (cInp) cInp.focus();
+                        return;
+                    }
+                    this.submitManualCatchup(cVal, tInp ? tInp.value.trim() : '');
+                });
+            }
+            if (cancelManBtn) {
+                cancelManBtn.addEventListener('click', () => {
+                    this._manualCatchupFormOpen = false;
+                    this.renderModalBody();
+                });
+            }
         },
 
         addCustomMandatoryCourse: function(courseCode) {
@@ -1736,7 +1796,10 @@
                 };
             }
             if (typeof global.saveState === 'function') global.saveState();
-            this.renderModalContent();
+            this.renderModalBody();
+            if (typeof showToastNotification === 'function') {
+                showToastNotification('🛡️ הקורס נוסף למעקב נוכחות חובה!', 'success');
+            }
         },
 
         renderMandatoryTab: function(bodyEl) {
@@ -1786,7 +1849,7 @@
                     ${addableActiveCourses.length > 0 ? `
                         <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
                             <select id="att-add-mandatory-select" style="background: rgba(15,23,42,0.9); border: 1px solid rgba(56,189,248,0.4); color: #f8fafc; border-radius: 6px; padding: 4px 8px; font-size: 0.78rem;">
-                                ${addableActiveCourses.map(c => `<option value="${c.code}">${c.name} (${c.code})</option>`).join('')}
+                                ${addableActiveCourses.map(c => `<option value="${escHtml(c.code)}">${escHtml(c.name)} (${escHtml(c.code)})</option>`).join('')}
                             </select>
                             <button type="button" id="btn-att-add-mandatory" class="btn btn-xs btn-outline" style="border-color: rgba(16,185,129,0.5); color: #34d399; padding: 4px 10px; border-radius: 6px; cursor: pointer;">+ הוסף למעקב חובה</button>
                         </div>
@@ -1812,12 +1875,12 @@
                     const bgColor = isDanger ? 'rgba(239, 68, 68, 0.08)' : (isWarning ? 'rgba(245, 158, 11, 0.08)' : 'rgba(255,255,255,0.03)');
 
                     html += `
-                        <div class="att-mandatory-card" data-course-code="${code}" style="background: ${bgColor}; border: 1px solid ${borderColor}; border-radius: 12px; padding: 14px; position: relative; overflow: hidden;">
+                        <div class="att-mandatory-card" data-course-code="${escHtml(code)}" style="background: ${bgColor}; border: 1px solid ${borderColor}; border-radius: 12px; padding: 14px; position: relative; overflow: hidden;">
                             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
                                 <div>
-                                    <span style="font-size: 1.2rem; margin-left: 6px;">${quota.icon || '📚'}</span>
-                                    <strong style="font-size: 0.95rem; color: #f8fafc;">${quota.name}</strong>
-                                    <span style="font-size: 0.72rem; color: #94a3b8; font-family: monospace; display: block; margin-top: 2px;">(${code}) • ${quota.category}</span>
+                                    <span style="font-size: 1.2rem; margin-left: 6px;">${escHtml(quota.icon || '📚')}</span>
+                                    <strong style="font-size: 0.95rem; color: #f8fafc;">${escHtml(quota.name)}</strong>
+                                    <span style="font-size: 0.72rem; color: #94a3b8; font-family: monospace; display: block; margin-top: 2px;">(${escHtml(code)}) • ${escHtml(quota.category)}</span>
                                 </div>
                                 <span style="font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px; background: ${isDanger ? '#ef4444' : (isWarning ? '#f59e0b' : '#10b981')}; color: #fff;">
                                     ${isDanger ? '⚠️ סכנת פסילת קורס!' : (isWarning ? '⚠️ התראה: גבולי' : 'תקין ✓')}
@@ -1834,7 +1897,7 @@
                             </div>
 
                             <div style="font-size: 0.74rem; color: #94a3b8; line-height: 1.4;">
-                                ${quota.rulesNote}
+                                ${escHtml(quota.rulesNote)}
                             </div>
 
                             <div style="margin-top: 10px; border-top: 1px dashed rgba(255,255,255,0.08); padding-top: 8px; display: flex; justify-content: space-between; align-items: center;">
@@ -1865,11 +1928,19 @@
             const recordsList = Object.values(this.records).sort((a, b) => b.timestamp - a.timestamp);
 
             let html = `
-                <div style="margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
+                <div style="margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
                     <span style="font-size: 0.85rem; font-weight: 700; color: #f1f5f9;">יומן שיעורים מלא (${recordsList.length} רשומות):</span>
-                    <button type="button" class="btn btn-sm btn-outline" onclick="window.AttendanceHub.clearAllHistory()" style="font-size: 0.72rem; color: #ef4444; border-color: rgba(239, 68, 68, 0.4);">
-                        🗑️ איפוס היסטוריה
-                    </button>
+                    <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+                        ${this._confirmClearHistory ? `
+                            <span style="font-size: 0.76rem; color: #fca5a5; font-weight: 700;">לאפס את כל ההיסטוריה?</span>
+                            <button type="button" id="btn-att-confirm-clear-yes" class="btn btn-xs" style="background: #ef4444; color: #fff; font-weight: 700; border: none; border-radius: 6px; padding: 4px 10px; cursor: pointer;">✓ כן, אפס הכל</button>
+                            <button type="button" id="btn-att-confirm-clear-no" class="btn btn-xs btn-outline" style="color: #94a3b8; border-color: rgba(148,163,184,0.35); border-radius: 6px; padding: 4px 8px; cursor: pointer;">ביטול</button>
+                        ` : `
+                            <button type="button" id="btn-att-clear-history" class="btn btn-sm btn-outline" onclick="window.AttendanceHub.clearAllHistory()" style="font-size: 0.72rem; color: #ef4444; border-color: rgba(239, 68, 68, 0.4);">
+                                🗑️ איפוס היסטוריה
+                            </button>
+                        `}
+                    </div>
                 </div>
             `;
 
@@ -1885,9 +1956,9 @@
                         ${recordsList.map(r => `
                             <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.03); padding: 8px 12px; border-radius: 8px; font-size: 0.8rem; border-right: 3px solid ${r.status === 'attended' ? '#10b981' : '#ef4444'};">
                                 <div>
-                                    <strong style="color: #f8fafc;">${r.courseName}</strong>
-                                    <span style="font-size: 0.72rem; color: #94a3b8; margin-right: 6px;">(${r.type} • ${r.startTime || '—'})</span>
-                                    <span style="font-size: 0.7rem; color: #64748b; display: block;">תאריך: ${r.date}</span>
+                                    <strong style="color: #f8fafc;">${escHtml(r.courseName)}</strong>
+                                    <span style="font-size: 0.72rem; color: #94a3b8; margin-right: 6px;">(${escHtml(r.type)} • ${escHtml(r.startTime || '—')})</span>
+                                    <span style="font-size: 0.7rem; color: #64748b; display: block;">תאריך: ${escHtml(r.date)}</span>
                                 </div>
                                 <div style="display: flex; align-items: center; gap: 8px;">
                                     <span style="font-size: 0.75rem; font-weight: 700; color: ${r.status === 'attended' ? '#34d399' : '#f87171'};">
@@ -1902,6 +1973,14 @@
             }
 
             bodyEl.innerHTML = html;
+
+            const yesBtn = bodyEl.querySelector('#btn-att-confirm-clear-yes');
+            const noBtn = bodyEl.querySelector('#btn-att-confirm-clear-no');
+            if (yesBtn) yesBtn.addEventListener('click', () => this.confirmClearAllHistory());
+            if (noBtn) noBtn.addEventListener('click', () => {
+                this._confirmClearHistory = false;
+                this.renderModalBody();
+            });
         },
 
         quickAddSession: function(code, name) {
@@ -1929,19 +2008,43 @@
             this.renderModalBody();
         },
 
-        clearAllHistory: function() {
-            if (confirm('האם אתה בטוח שברצונך לאפס את כל היסטוריית הנוכחות?')) {
-                this.records = {};
-                this.catchupQueue = [];
-                this.save();
-                this.renderModalBody();
+        clearAllHistory: function(forceImmediate = false) {
+            if (forceImmediate === true) {
+                this.confirmClearAllHistory();
+                return;
+            }
+            this._confirmClearHistory = true;
+            this.renderModalBody();
+        },
+
+        confirmClearAllHistory: function() {
+            this.records = {};
+            this.catchupQueue = [];
+            this._confirmClearHistory = false;
+            this.save();
+            this.renderModalBody();
+            if (typeof showToastNotification === 'function') {
+                showToastNotification('🗑️ היסטוריית הנוכחות ותור ההשלמות אופסו.', 'info');
             }
         },
 
-        promptManualCatchup: function() {
-            const course = prompt('הזן שם קורס או מספר קורס (למשל: 034010 דינמיקה):');
+        promptManualCatchup: function(courseArg, topicArg) {
+            if (typeof courseArg === 'string' && courseArg.trim()) {
+                this.submitManualCatchup(courseArg.trim(), topicArg ? String(topicArg).trim() : '');
+                return;
+            }
+            this._manualCatchupFormOpen = !this._manualCatchupFormOpen;
+            this.renderModalBody();
+            if (this._manualCatchupFormOpen) {
+                const inp = document.getElementById('att-manual-course-input');
+                if (inp) inp.focus();
+            }
+        },
+
+        submitManualCatchup: function(courseVal, topicVal) {
+            const course = String(courseVal || '').trim();
             if (!course) return;
-            const topic = prompt('הזן נושא או פרק להשלמה (למשל: הרצאה 4 - תנע זוויתי):') || 'השלמת שיעור';
+            const topic = String(topicVal || '').trim() || 'השלמת שיעור';
             
             const cleanCode = course.replace(/\D/g, '') || '000000';
             const moodleMap = (typeof MOODLE26_COURSE_MAP !== 'undefined') ? MOODLE26_COURSE_MAP : {};
@@ -1969,6 +2072,7 @@
                 createdAt: Date.now()
             };
 
+            this._manualCatchupFormOpen = false;
             this.catchupQueue.unshift(newItem);
             this.save();
             this.renderModalBody();

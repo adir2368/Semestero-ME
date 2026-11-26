@@ -10,6 +10,29 @@
 (function(window) {
     'use strict';
 
+    function escExamHtml(str) {
+        if (typeof window !== 'undefined' && window.__semesteroUtils && typeof window.__semesteroUtils.escapeHtml === 'function') {
+            return window.__semesteroUtils.escapeHtml(str);
+        }
+        return String(str ?? '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
+    function escExamJsSingleQuotedInAttr(str) {
+        return String(str ?? '')
+            .replace(/\\/g, '\\\\')
+            .replace(/'/g, "\\'")
+            .replace(/\r?\n/g, ' ')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
+    }
+
     const ExamReadinessHub = {
         /**
          * Resolves or initializes the exam prep model for a course
@@ -327,26 +350,30 @@
             `;
 
             prep.exams.slice(0, 16).forEach(exam => {
+                const safeCodeArg = escExamJsSingleQuotedInAttr(cleanCode);
+                const safeExamIdArg = escExamJsSingleQuotedInAttr(exam.id);
                 let statusBadge = '';
                 if (exam.status === 'mastered') {
-                    statusBadge = `<button type="button" onclick="window.ExamReadinessHub.cycleStatus('${cleanCode}', '${exam.id}')" style="background: rgba(16, 185, 129, 0.2); border: 1px solid #10b981; color: #34d399; font-weight: 700; border-radius: 6px; padding: 3px 8px; cursor: pointer; font-size: 0.74rem;">✅ פתור ונשלט</button>`;
+                    statusBadge = `<button type="button" onclick="window.ExamReadinessHub.cycleStatus('${safeCodeArg}', '${safeExamIdArg}')" style="background: rgba(16, 185, 129, 0.2); border: 1px solid #10b981; color: #34d399; font-weight: 700; border-radius: 6px; padding: 3px 8px; cursor: pointer; font-size: 0.74rem;">✅ פתור ונשלט</button>`;
                 } else if (exam.status === 'attempted') {
-                    statusBadge = `<button type="button" onclick="window.ExamReadinessHub.cycleStatus('${cleanCode}', '${exam.id}')" style="background: rgba(245, 158, 11, 0.2); border: 1px solid #f59e0b; color: #fbbf24; font-weight: 700; border-radius: 6px; padding: 3px 8px; cursor: pointer; font-size: 0.74rem;">⏳ נוסה בתרגול</button>`;
+                    statusBadge = `<button type="button" onclick="window.ExamReadinessHub.cycleStatus('${safeCodeArg}', '${safeExamIdArg}')" style="background: rgba(245, 158, 11, 0.2); border: 1px solid #f59e0b; color: #fbbf24; font-weight: 700; border-radius: 6px; padding: 3px 8px; cursor: pointer; font-size: 0.74rem;">⏳ נוסה בתרגול</button>`;
                 } else {
-                    statusBadge = `<button type="button" onclick="window.ExamReadinessHub.cycleStatus('${cleanCode}', '${exam.id}')" style="background: rgba(148, 163, 184, 0.1); border: 1px solid rgba(148, 163, 184, 0.3); color: #94a3b8; font-weight: 600; border-radius: 6px; padding: 3px 8px; cursor: pointer; font-size: 0.74rem;">⬜ טרם נפתר</button>`;
+                    statusBadge = `<button type="button" onclick="window.ExamReadinessHub.cycleStatus('${safeCodeArg}', '${safeExamIdArg}')" style="background: rgba(148, 163, 184, 0.1); border: 1px solid rgba(148, 163, 184, 0.3); color: #94a3b8; font-weight: 600; border-radius: 6px; padding: 3px 8px; cursor: pointer; font-size: 0.74rem;">⬜ טרם נפתר</button>`;
                 }
 
                 let scoreCell = '';
                 if (exam.score !== null) {
-                    scoreCell = `<button type="button" onclick="window.ExamReadinessHub.setScore('${cleanCode}', '${exam.id}')" style="background: none; border: 1px dashed rgba(56, 189, 248, 0.4); color: #38bdf8; font-weight: 700; border-radius: 4px; padding: 2px 6px; cursor: pointer; font-size: 0.74rem;" title="לחץ לעריכת ציון">${exam.score}</button>`;
+                    scoreCell = `<button type="button" onclick="window.ExamReadinessHub.setScore('${safeCodeArg}', '${safeExamIdArg}')" style="background: none; border: 1px dashed rgba(56, 189, 248, 0.4); color: #38bdf8; font-weight: 700; border-radius: 4px; padding: 2px 6px; cursor: pointer; font-size: 0.74rem;" title="לחץ לעריכת ציון">${escExamHtml(exam.score)}</button>`;
                 } else {
-                    scoreCell = `<button type="button" onclick="window.ExamReadinessHub.setScore('${cleanCode}', '${exam.id}')" style="background: none; border: none; color: #64748b; cursor: pointer; font-size: 0.74rem;" title="הזן ציון">+ ציון</button>`;
+                    scoreCell = `<button type="button" onclick="window.ExamReadinessHub.setScore('${safeCodeArg}', '${safeExamIdArg}')" style="background: none; border: none; color: #64748b; cursor: pointer; font-size: 0.74rem;" title="הזן ציון">+ ציון</button>`;
                 }
 
                 let solutionLinks = '';
                 if (exam.pangeaUrl) {
+                    const safePangeaUrl = escExamJsSingleQuotedInAttr(exam.pangeaUrl);
+                    const safePangeaTitle = escExamJsSingleQuotedInAttr(`${exam.name} - פתרון פנגייה`);
                     solutionLinks += `
-                        <button type="button" onclick="if(window.PangeaHub) window.PangeaHub.openQuickPeek('${exam.pangeaUrl}', '${exam.name} - פתרון פנגייה', '${exam.pangeaUrl}');" style="background: rgba(14, 165, 233, 0.15); border: 1px solid #0284c7; color: #38bdf8; border-radius: 4px; padding: 2px 6px; font-size: 0.7rem; font-weight: 700; cursor: pointer; margin-left: 4px;" title="פתרון מלא ומודרך בפנגייה">
+                        <button type="button" onclick="if(window.PangeaHub) window.PangeaHub.openQuickPeek('${safePangeaUrl}', '${safePangeaTitle}', '${safePangeaUrl}');" style="background: rgba(14, 165, 233, 0.15); border: 1px solid #0284c7; color: #38bdf8; border-radius: 4px; padding: 2px 6px; font-size: 0.7rem; font-weight: 700; cursor: pointer; margin-left: 4px;" title="פתרון מלא ומודרך בפנגייה">
                             📖 פנגייה
                         </button>
                     `;
@@ -354,7 +381,7 @@
 
                 html += `
                     <tr style="border-bottom: 1px solid rgba(255,255,255,0.04); color: #e2e8f0;">
-                        <td style="padding: 7px 12px; font-weight: 600;">${exam.name}</td>
+                        <td style="padding: 7px 12px; font-weight: 600;">${escExamHtml(exam.name)}</td>
                         <td style="padding: 7px 10px; text-align: center;">${statusBadge}</td>
                         <td style="padding: 7px 10px; text-align: center;">${scoreCell}</td>
                         <td style="padding: 7px 12px; text-align: left;">

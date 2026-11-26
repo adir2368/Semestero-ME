@@ -998,7 +998,7 @@
         {
           "id": "task_moodle_26381_1794472563222",
           "moodleUid": "26381@moodle26.technion.ac.il",
-          "title": "HW 2 - Principle Stresses (הגשת פתרון תרגיל בית 2)",
+          "title": "HW 2 - Principal Stresses (הגשת פתרון תרגיל בית 2)",
           "type": "hw",
           "xp": 60,
           "dueDate": "2026-11-19 23:59",
@@ -5884,7 +5884,7 @@
       "courseCode": "104043"
     }
   ],
-  "moodleCalendarUrl": "https://moodle26.technion.ac.il/calendar/export_execute.php?userid=39495&authtoken=47ff4e9841a2293be4696691eeeafe5127137f5c&preset_what=all&preset_time=custom",
+  "moodleCalendarUrl": "",
   "semesterGuardMode": "locked",
   "customCalendarEvents": [],
   "degreePlanUnassigned": [],

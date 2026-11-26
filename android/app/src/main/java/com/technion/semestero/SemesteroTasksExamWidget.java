@@ -68,7 +68,27 @@ public class SemesteroTasksExamWidget extends AppWidgetProvider {
             }
         }
 
+        if (!taskId.isEmpty()) {
+            try {
+                String existingJson = prefs.getString("all_tasks_json", "[]");
+                org.json.JSONArray arr = new org.json.JSONArray(existingJson);
+                boolean updatedJson = false;
+                for (int i = 0; i < arr.length(); i++) {
+                    org.json.JSONObject obj = arr.getJSONObject(i);
+                    if (taskId.equals(obj.optString("id", ""))) {
+                        obj.put("completed", newDone);
+                        updatedJson = true;
+                    }
+                }
+                if (updatedJson) {
+                    prefs.edit().putString("all_tasks_json", arr.toString()).apply();
+                }
+            } catch (Exception ignored) {}
+            MainActivity.triggerTasksSyncFromWear(taskId, newDone);
+        }
+
         pushUpdate(context);
+        WearSyncManager.syncAllToWatch(context);
     }
 
     @Override

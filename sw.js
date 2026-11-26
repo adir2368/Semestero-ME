@@ -1,5 +1,5 @@
-// Service Worker for Academic Skill Tree (Semestero ME) - v3.1.16
-const CACHE_NAME = 'semestero-me-v3.1.16';
+// Service Worker for Academic Skill Tree (Semestero ME) - v3.2.0
+const CACHE_NAME = 'semestero-me-v3.2.0';
 
 const STATIC_ASSETS = [
     './',
@@ -56,7 +56,9 @@ const STATIC_ASSETS = [
     './moodle_icon.svg',
     './notification-badge.png',
     './notification-badge-96.png',
-    './watch.html'
+    './watch.html',
+    './watch_companion.js',
+    './widgets.html'
 ];
 
 // Install: Cache core application assets and activate immediately
@@ -87,10 +89,13 @@ self.addEventListener('activate', (event) => {
 
 // Fetch: Network-first for application code (HTML, JS, CSS) to ensure instant updates; Cache-first for images
 self.addEventListener('fetch', (event) => {
+    if (event.request.method !== 'GET') {
+        return;
+    }
     const url = new URL(event.request.url);
 
-    // Never intercept or cache external APIs (Supabase, Google, Technion, etc.)
-    if (url.origin !== self.location.origin || url.hostname.includes('supabase.co') || url.hostname.includes('google.com') || url.hostname.includes('technion.ac.il') || url.protocol.startsWith('chrome-extension')) {
+    // Never intercept or cache external APIs (Supabase, Google, Technion, etc.) or local proxy routes
+    if (url.origin !== self.location.origin || url.pathname.startsWith('/api/') || url.hostname.includes('supabase.co') || url.hostname.includes('google.com') || url.hostname.includes('technion.ac.il') || url.protocol.startsWith('chrome-extension')) {
         return;
     }
 

@@ -63,8 +63,11 @@ public class SemesteroComplicationService extends ComplicationDataSourceService 
             String trimmed = res.timeText.trim();
             if (trimmed.contains(" - ")) {
                 timeStart = trimmed.split(" - ")[0].trim();
-            } else if (trimmed.matches("^\\d{1,2}:\\d{2}.*")) {
-                timeStart = trimmed.substring(0, 5).trim();
+            } else {
+                Matcher tm = Pattern.compile("^(\\d{1,2}:\\d{2})").matcher(trimmed);
+                if (tm.find()) {
+                    timeStart = tm.group(1);
+                }
             }
         }
 

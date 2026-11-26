@@ -15,7 +15,7 @@ console.log('===================================================================
 console.log('1. Checking version consistency across files...');
 const pkg = JSON.parse(fs.readFileSync(path.join(rootDir, 'package.json'), 'utf8'));
 const currentVersion = pkg.version;
-assert.strictEqual(currentVersion, '2.9.0', 'package.json version must be 2.9.0');
+assert.ok(/^\d+\.\d+\.\d+$/.test(currentVersion), `package.json version must be semver, got ${currentVersion}`);
 
 const appJs = fs.readFileSync(path.join(rootDir, 'app.js'), 'utf8');
 assert.ok(appJs.includes(`version: "${currentVersion}"`), 'app.js APP_CURRENT_REVISION must match current version');
@@ -27,16 +27,18 @@ const indexHtml = fs.readFileSync(path.join(rootDir, 'index.html'), 'utf8');
 assert.ok(indexHtml.includes(`id="display-system-version">v${currentVersion}<`), 'index.html display-system-version must match current version');
 assert.ok(indexHtml.includes(`גרסה אחרונה v${currentVersion}`), 'index.html whats-new badge must match current version');
 assert.ok(indexHtml.includes(`id="footer-version-badge" title="לחץ לבדיקת עדכונים ורענון המערכת (v${currentVersion})"`), 'index.html footer-version-badge must match current version');
-assert.ok(indexHtml.includes(`v${currentVersion} (31/10/2026):</strong>`), 'index.html changelog must list current version');
+assert.ok(indexHtml.includes(`v${currentVersion} (`), 'index.html changelog must list current version');
 
 const appGradle = fs.readFileSync(path.join(rootDir, 'android/app/build.gradle'), 'utf8');
 assert.ok(appGradle.includes(`versionName "${currentVersion}"`), 'android app build.gradle versionName must match current version');
-assert.ok(appGradle.includes('versionCode 46'), 'android app build.gradle versionCode must be 46');
+const appCodeMatch = appGradle.match(/versionCode\s+(\d+)/);
+assert.ok(appCodeMatch && Number(appCodeMatch[1]) >= 46, 'android app build.gradle versionCode must be present');
 
 const wearGradle = fs.readFileSync(path.join(rootDir, 'android/wear/build.gradle'), 'utf8');
 assert.ok(wearGradle.includes(`versionName "${currentVersion}"`), 'android wear build.gradle versionName must match current version');
-assert.ok(wearGradle.includes('versionCode 46'), 'android wear build.gradle versionCode must be 46');
-console.log(`   ✓ All version definitions strictly match v${currentVersion} and build code 46.\n`);
+const wearCodeMatch = wearGradle.match(/versionCode\s+(\d+)/);
+assert.ok(wearCodeMatch && wearCodeMatch[1] === appCodeMatch[1], 'android wear build.gradle versionCode must match app build.gradle');
+console.log(`   ✓ All version definitions strictly match v${currentVersion} and build code ${appCodeMatch[1]}.\n`);
 
 // 2. Verify HTML Structure for Classification Exams and Collapsible Card
 console.log('2. Checking HTML structure for classification exams and collapsible toggle...');

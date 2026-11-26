@@ -7,6 +7,7 @@
     let currentPrefs = {
         largeText: false,
         highContrast: false,
+        lightMode: false,
         grayscale: false,
         highlightLinks: false,
         readableFont: false,
@@ -39,6 +40,7 @@
 
         toggleClass('a11y-large-text', !!currentPrefs.largeText);
         toggleClass('a11y-high-contrast', !!currentPrefs.highContrast);
+        toggleClass('a11y-light-mode', !!currentPrefs.lightMode);
         toggleClass('a11y-grayscale', !!currentPrefs.grayscale);
         toggleClass('a11y-highlight-links', !!currentPrefs.highlightLinks);
         toggleClass('a11y-readable-font', !!currentPrefs.readableFont);
@@ -52,6 +54,7 @@
         const mapping = {
             'a11y-btn-large-text': currentPrefs.largeText,
             'a11y-btn-contrast': currentPrefs.highContrast,
+            'a11y-btn-light-mode': currentPrefs.lightMode,
             'a11y-btn-grayscale': currentPrefs.grayscale,
             'a11y-btn-links': currentPrefs.highlightLinks,
             'a11y-btn-font': currentPrefs.readableFont,
@@ -75,6 +78,7 @@
 
         if (triggerBtn && modal) {
             triggerBtn.addEventListener('click', () => {
+                modal.style.display = 'flex';
                 modal.classList.add('active');
                 modal.setAttribute('aria-hidden', 'false');
             });
@@ -83,6 +87,7 @@
         if (closeBtn && modal) {
             closeBtn.addEventListener('click', () => {
                 modal.classList.remove('active');
+                modal.style.display = 'none';
                 modal.setAttribute('aria-hidden', 'true');
             });
         }
@@ -91,6 +96,7 @@
             modal.addEventListener('click', (e) => {
                 if (e.target === modal) {
                     modal.classList.remove('active');
+                    modal.style.display = 'none';
                     modal.setAttribute('aria-hidden', 'true');
                 }
             });
@@ -101,7 +107,10 @@
             const el = document.getElementById(id);
             if (el) {
                 el.addEventListener('click', () => {
-                    currentPrefs[key] = !currentPrefs[key];
+                    const nextVal = !currentPrefs[key];
+                    currentPrefs[key] = nextVal;
+                    if (key === 'lightMode' && nextVal) currentPrefs.highContrast = false;
+                    if (key === 'highContrast' && nextVal) currentPrefs.lightMode = false;
                     savePrefs();
                     applyA11yClasses();
                 });
@@ -110,6 +119,7 @@
 
         bindToggle('a11y-btn-large-text', 'largeText');
         bindToggle('a11y-btn-contrast', 'highContrast');
+        bindToggle('a11y-btn-light-mode', 'lightMode');
         bindToggle('a11y-btn-grayscale', 'grayscale');
         bindToggle('a11y-btn-links', 'highlightLinks');
         bindToggle('a11y-btn-font', 'readableFont');
@@ -120,6 +130,7 @@
                 currentPrefs = {
                     largeText: false,
                     highContrast: false,
+                    lightMode: false,
                     grayscale: false,
                     highlightLinks: false,
                     readableFont: false,
@@ -146,6 +157,7 @@
     window.openAccessibilityModal = function() {
         const modal = document.getElementById('accessibility-modal');
         if (modal) {
+            modal.style.display = 'flex';
             modal.classList.add('active');
             modal.setAttribute('aria-hidden', 'false');
         }
@@ -154,6 +166,7 @@
         const modal = document.getElementById('accessibility-modal');
         if (modal) {
             modal.classList.remove('active');
+            modal.style.display = 'none';
             modal.setAttribute('aria-hidden', 'true');
         }
     };

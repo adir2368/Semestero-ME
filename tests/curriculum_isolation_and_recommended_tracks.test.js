@@ -68,7 +68,7 @@ const s2_phys1 = sem2_2026.courses.find(c => c.code === '01140051' || c.altCode 
 assert(s2_phys1, 'Default Catalog Semester 2 MUST contain Physics 1');
 const s2_chemLab = sem2_2026.courses.find(c => c.code === '01250013' || c.altCode === '125013');
 assert(!s2_chemLab, 'Default Catalog Semester 2 must NOT contain Chemistry Lab (belongs in Sem 4)');
-assert.strictEqual(sem2_2026.targetCredits, 20.5, 'Semester 2 target credits must be 20.5');
+assert.strictEqual(sem2_2026.targetCredits, 21.0, 'Semester 2 target credits must be 21.0');
 
 // Sem 2 Solids 1 prereqs must only be Calc 1 and Linear Algebra
 const s2_solids = sem2_2026.courses.find(c => c.code === '00340028' || c.altCode === '034028');

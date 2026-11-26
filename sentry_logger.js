@@ -59,8 +59,15 @@
     function getAppContext() {
         let activeTab = 'unknown';
         try {
-            if (global.curState && global.curState.activeWorkspace) {
+            if (global.gameState && (global.gameState.activeTab || global.gameState.activeWorkspace)) {
+                activeTab = global.gameState.activeTab || global.gameState.activeWorkspace;
+            } else if (global.curState && global.curState.activeWorkspace) {
                 activeTab = global.curState.activeWorkspace;
+            } else if (typeof document !== 'undefined' && typeof document.querySelector === 'function') {
+                const activeBtn = document.querySelector('.nav-tab.active');
+                if (activeBtn && activeBtn.id) {
+                    activeTab = activeBtn.id.replace(/^tab-/, '');
+                }
             }
         } catch (e) {}
 
@@ -72,7 +79,7 @@
         else if (isElectron) platform = 'electron-desktop';
 
         return {
-            version: (global.APP_CURRENT_REVISION && global.APP_CURRENT_REVISION.version) || '2.10.31',
+            version: (global.APP_CURRENT_REVISION && global.APP_CURRENT_REVISION.version) || global.APP_VERSION || '3.2.0',
             platform: platform,
             activeTab: activeTab,
             online: navigator.onLine !== undefined ? navigator.onLine : true,

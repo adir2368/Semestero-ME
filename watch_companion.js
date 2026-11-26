@@ -12,6 +12,15 @@
 (function(window) {
     'use strict';
 
+    function escHtml(str) {
+        return String(str ?? '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
     const TOTAL_SCREENS = 4;
     let currentScreen = 0;
     let idleTimer = null;
@@ -368,10 +377,10 @@
                     timelineHtml += `
                         <div class="timeline-item ${isActive ? 'active' : ''}">
                             <div class="timeline-item-title">
-                                <div>${c.title}</div>
-                                <div class="timeline-item-room">📍 ${c.room}</div>
+                                <div>${escHtml(c.title)}</div>
+                                <div class="timeline-item-room">📍 ${escHtml(c.room)}</div>
                             </div>
-                            <div class="timeline-item-time">${c.time}</div>
+                            <div class="timeline-item-time">${escHtml(c.time)}</div>
                         </div>
                     `;
                 });
@@ -454,14 +463,25 @@
 
             let tasksHtml = '';
             activeTasks.slice(0, 5).forEach(t => {
+                const safeId = escHtml(t.id);
                 tasksHtml += `
-                    <div class="watch-task-item ${t.done ? 'completed' : ''}" id="task-item-${t.id}" onclick="window.toggleWatchTask('${t.id}')">
-                        <div class="watch-task-title">${t.title}</div>
-                        <div class="watch-task-chk" id="task-chk-${t.id}">${t.done ? '✓' : ''}</div>
+                    <div class="watch-task-item ${t.done ? 'completed' : ''}" id="task-item-${safeId}" data-task-id="${safeId}">
+                        <div class="watch-task-title">${escHtml(t.title)}</div>
+                        <div class="watch-task-chk" id="task-chk-${safeId}">${t.done ? '✓' : ''}</div>
                     </div>
                 `;
             });
             tasksList.innerHTML = tasksHtml;
+            if (typeof tasksList.querySelectorAll === 'function') {
+                tasksList.querySelectorAll('.watch-task-item[data-task-id]').forEach(el => {
+                    el.addEventListener('click', () => {
+                        const id = el.getAttribute('data-task-id');
+                        if (id && typeof window.toggleWatchTask === 'function') {
+                            window.toggleWatchTask(id);
+                        }
+                    });
+                });
+            }
         }
 
         // D. Academic Stats (Dynamic from live state)
@@ -519,7 +539,7 @@
                     }
                 }
             }
-            const stateKey = getStorageKey();
+            const stateKey = (typeof window.getStorageKey === 'function') ? window.getStorageKey() : 'academic_skill_tree_save';
             const rawState = localStorage.getItem(stateKey);
             if (rawState) {
                 const parsedState = JSON.parse(rawState);

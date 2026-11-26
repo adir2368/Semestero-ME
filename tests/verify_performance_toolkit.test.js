@@ -40,16 +40,17 @@ assert(analyticsContent.includes('startTrace'), 'Missing User Timing trace in si
 console.log('✅ 4. Core Web Vitals RUM & User Timing (18/31 & 30/31) Verified');
 
 // 5. Check Fonts & Lazy Loading in index.html
+const pkgVer = require(path.join(projectRoot, 'package.json')).version;
 const htmlContent = fs.readFileSync(path.join(projectRoot, 'index.html'), 'utf8');
 assert(htmlContent.includes('rel="preconnect" href="https://fonts.googleapis.com"'), 'Missing preconnect for fonts.googleapis.com');
 assert(htmlContent.includes('display=swap'), 'Missing display=swap for Google Fonts');
 assert(htmlContent.includes('loading="lazy" decoding="async"'), 'Missing lazy & async decoding for images');
-assert(htmlContent.includes('v2.9.1'), 'Missing v2.9.1 version in index.html');
-console.log('✅ 5. Font Preconnect & Image Lazy Loading (15/31 & 29/31) Verified');
+assert(htmlContent.includes(`v${pkgVer}`), `Missing v${pkgVer} version in index.html`);
+console.log(`✅ 5. Font Preconnect & Image Lazy Loading (15/31 & 29/31) Verified (v${pkgVer})`);
 
 // 6. Check Service Worker Cache Version
 const swContent = fs.readFileSync(path.join(projectRoot, 'sw.js'), 'utf8');
-assert(swContent.includes('semestero-me-v2.9.1'), 'Missing semestero-me-v2.9.1 in sw.js');
-console.log('✅ 6. PWA Service Worker Cache v2.9.1 (27/31) Verified');
+assert(swContent.includes(`semestero-me-v${pkgVer}`), `Missing semestero-me-v${pkgVer} in sw.js`);
+console.log(`✅ 6. PWA Service Worker Cache v${pkgVer} (27/31) Verified`);
 
 console.log('\n🎉 ALL 6 APP-PERFORMANCE TOOLKIT VERIFICATION TESTS PASSED (100%)!');

@@ -1419,11 +1419,53 @@
     // Alias for backwards compatibility
     const syncCompletedCoursesFromGameState = syncAllCoursesFromGameState;
 
+    function restoreGameStateSemestersForSyllabus(targetSyllabus) {
+        if (!global.gameState || !global.gameState.courses || !Array.isArray(targetSyllabus)) return;
+        const syllabusKeyToSem = new Map();
+        targetSyllabus.forEach(sem => {
+            if (!sem || !Array.isArray(sem.courses)) return;
+            sem.courses.forEach(sc => {
+                if (!sc) return;
+                unremoveCourseFromGameState(sc.code, sc.altCode);
+                getNormalizedCodes(sc.code, sc.altCode).forEach(k => syllabusKeyToSem.set(k, sem.semester));
+                if (Array.isArray(sc.variants)) {
+                    sc.variants.forEach(v => {
+                        unremoveCourseFromGameState(v.code, v.altCode);
+                        getNormalizedCodes(v.code, v.altCode).forEach(k => syllabusKeyToSem.set(k, sem.semester));
+                    });
+                }
+            });
+        });
+
+        Object.values(global.gameState.courses).forEach(entry => {
+            if (!entry || !entry.code) return;
+            const hasNumeric = (entry.grade !== undefined && entry.grade !== null && entry.grade !== '' && !isNaN(Number(entry.grade)) && Number(entry.grade) >= 55);
+            const isBinary = (entry.status === 'mastered') && (entry.isBinaryPass === true || entry.grade === 'עובר' || entry.grade === 'PASS');
+            const isDone = (entry.status === 'mastered') || hasNumeric || isBinary;
+            if (isDone) return;
+
+            const eKeys = getNormalizedCodes(entry.code, entry.altCode);
+            let targetSem = null;
+            for (let i = 0; i < eKeys.length; i++) {
+                if (syllabusKeyToSem.has(eKeys[i])) {
+                    targetSem = syllabusKeyToSem.get(eKeys[i]);
+                    break;
+                }
+            }
+            if (targetSem !== null) {
+                entry.semester = targetSem;
+            } else {
+                entry.semester = 0;
+            }
+        });
+    }
+
     function resetPlanToSuggested() {
         if (!global.PLANNER_CATALOG) return;
         const targetSyllabus = getSuggestedCatalogForTrack(selectedTrack);
         customPlan = JSON.parse(JSON.stringify(targetSyllabus));
         unassignedCourses = [];
+        restoreGameStateSemestersForSyllabus(targetSyllabus);
         syncAllCoursesFromGameState();
         saveCustomPlan(true);
     }
@@ -2125,8 +2167,10 @@
         return violations;
     }
 
-    function highlightMissingPrerequisites(missingCodes, reasonMsg, targetSemester) {
-        showPlannerToast(reasonMsg, true);
+    function highlightMissingPrerequisites(missingCodes, reasonMsg, targetSemester, suppressToast = false) {
+        if (!suppressToast && reasonMsg) {
+            showPlannerToast(reasonMsg, true);
+        }
 
         // Shake the target semester column to provide immediate visceral feedback
         if (targetSemester) {
@@ -2177,7 +2221,7 @@
         toast.innerHTML = `
             <span style="font-size: 1.35rem; line-height: 1;">${isError ? '⛔' : 'ℹ️'}</span>
             <div style="display: flex; flex-direction: column; gap: 2px;">
-                <strong style="font-size: 0.90rem; color: ${isError ? '#f87171' : '#38bdf8'};">${isError ? 'חסימת דרישות קדם' : 'הודעת מערכת'}</strong>
+                <strong style="font-size: 0.90rem; color: ${isError ? '#f87171' : '#38bdf8'};">${isError ? 'התראת שיבוץ בתכנון' : 'הודעת מערכת'}</strong>
                 <span style="font-size: 0.80rem; color: #f1f5f9; line-height: 1.35;">${escapeHtml(message)}</span>
             </div>
         `;
@@ -2534,7 +2578,7 @@
 
         modal.innerHTML = `
             <div class="modal-card" style="background: #0f172a; border: 1px solid ${statusColor}; border-radius: 16px; padding: 24px; width: 100%; max-width: 620px; max-height: 90vh; overflow-y: auto; direction: rtl; box-shadow: 0 15px 40px rgba(0,0,0,0.8);">
-                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 12px;">
+                <div class="planner-modal-header" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 12px; gap: 10px;">
                     <div>
                         <h2 style="margin: 0; font-size: 1.25rem; font-weight: 800; color: #f8fafc; display: flex; align-items: center; gap: 8px;">
                             <span>🎓</span>
@@ -2542,7 +2586,9 @@
                         </h2>
                         <span style="font-size: 0.76rem; color: #94a3b8;">הפקולטה להנדסת מכונות • הטכניון מכון טכנולוגי לישראל</span>
                     </div>
-                    <button type="button" class="btn-close-clearance-modal" aria-label="סגור חלון" style="background: transparent; border: none; font-size: 1.4rem; color: #94a3b8; cursor: pointer; padding: 4px;">✕</button>
+                    <div class="planner-modal-header-actions" style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
+                        <button type="button" class="btn-close-clearance-modal" aria-label="סגור חלון" style="background: transparent; border: none; font-size: 1.4rem; color: #94a3b8; cursor: pointer; padding: 4px;">✕</button>
+                    </div>
                 </div>
 
                 <!-- Clearance Gauge Card -->
@@ -2563,15 +2609,15 @@
                 <!-- 8-Point Clearance Checklist -->
                 <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 18px;">
                     ${rulesEval.clearanceRules.map(r => `
-                        <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border-radius: 8px; background: ${r.isMet ? 'rgba(16, 185, 129, 0.08)' : 'rgba(255,255,255,0.02)'}; border: 1px solid ${r.isMet ? 'rgba(16, 185, 129, 0.3)' : 'rgba(255,255,255,0.06)'};">
-                            <div style="flex: 1;">
+                        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; padding: 10px 14px; border-radius: 8px; background: ${r.isMet ? 'rgba(16, 185, 129, 0.08)' : 'rgba(255,255,255,0.02)'}; border: 1px solid ${r.isMet ? 'rgba(16, 185, 129, 0.3)' : 'rgba(255,255,255,0.06)'};">
+                            <div style="flex: 1 1 180px; min-width: 0;">
                                 <div style="display: flex; align-items: center; gap: 8px;">
                                     <span style="font-size: 0.95rem;">${r.isMet ? '✅' : '⏳'}</span>
                                     <strong style="font-size: 0.88rem; color: ${r.isMet ? '#f8fafc' : '#cbd5e1'};">${r.name}</strong>
                                 </div>
-                                <div style="font-size: 0.72rem; color: #94a3b8; margin-top: 2px; padding-right: 22px;">${r.hint}</div>
+                                <div style="font-size: 0.72rem; color: #94a3b8; margin-top: 2px; padding-right: 22px; line-height: 1.35;">${r.hint}</div>
                             </div>
-                            <div style="font-size: 0.84rem; font-weight: 700; color: ${r.isMet ? '#34d399' : '#38bdf8'}; direction: ltr; white-space: nowrap;">
+                            <div style="font-size: 0.82rem; font-weight: 700; color: ${r.isMet ? '#34d399' : '#38bdf8'}; direction: rtl; text-align: left; ${r.id === 'facultyLists' ? 'white-space: normal; line-height: 1.35;' : 'white-space: nowrap; flex-shrink: 0;'}">
                                 ${r.score}
                             </div>
                         </div>
@@ -2633,7 +2679,9 @@
         `;
 
         document.body.appendChild(modal);
-
+        if (global.ModalHelp && typeof global.ModalHelp.setupTriggerForModal === 'function') {
+            global.ModalHelp.setupTriggerForModal('planner-graduation-clearance-modal');
+        }
         const closeModal = () => modal.remove();
         modal.querySelectorAll('.btn-close-clearance-modal').forEach(b => b.addEventListener('click', closeModal));
         modal.addEventListener('click', (e) => {
@@ -2898,7 +2946,7 @@
 
         modal.innerHTML = `
             <div class="modal-card" style="background:#0f172a; border:1px solid #f59e0b; border-radius:16px; padding:24px; width:100%; max-width:720px; max-height:90vh; overflow-y:auto; direction:rtl; box-shadow:0 15px 40px rgba(0,0,0,0.85);">
-                <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:14px; border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:12px; gap:10px; flex-wrap:wrap;">
+                <div class="planner-modal-header" style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:14px; border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:12px; gap:10px; flex-wrap:wrap;">
                     <div>
                         <h2 style="margin:0; font-size:1.22rem; font-weight:800; color:#f8fafc; display:flex; align-items:center; gap:8px;">
                             <span>📅</span>
@@ -2906,7 +2954,7 @@
                         </h2>
                         <span style="font-size:0.76rem; color:#94a3b8;">חישוב ימי למידה נטו בין בחינות עוקבות, איתור התנגשויות (&lt;3 ימים), וסימולציית פיצול יזום למועד ב׳</span>
                     </div>
-                    <div style="display:flex; align-items:center; gap:8px;">
+                    <div class="planner-modal-header-actions" style="display:flex; align-items:center; gap:8px; flex-shrink:0;">
                         <select id="exam-density-sem-select" aria-label="בחר סמסטר לניתוח מבחנים" style="background:#1e293b; color:#f8fafc; border:1px solid rgba(255,255,255,0.15); border-radius:8px; padding:5px 10px; font-size:0.8rem; font-weight:700;">
                             ${semOptionsHtml}
                         </select>
@@ -2959,7 +3007,9 @@
         `;
 
         document.body.appendChild(modal);
-
+        if (global.ModalHelp && typeof global.ModalHelp.setupTriggerForModal === 'function') {
+            global.ModalHelp.setupTriggerForModal('planner-exam-density-modal');
+        }
         const closeModal = () => modal.remove();
         modal.querySelectorAll('.btn-close-exam-density').forEach(b => b.addEventListener('click', closeModal));
         modal.addEventListener('click', (e) => {
@@ -3068,7 +3118,7 @@
 
         modal.innerHTML = `
             <div class="modal-card" style="background: #0f172a; border: 1px solid #22c55e; border-radius: 16px; padding: 24px; width: 100%; max-width: 620px; max-height: 90vh; overflow-y: auto; direction: rtl; box-shadow: 0 15px 40px rgba(0,0,0,0.8);">
-                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 12px; margin-bottom: 16px;">
+                <div class="planner-modal-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 12px; margin-bottom: 16px;">
                     <div>
                         <div style="font-size: 1.15rem; font-weight: 800; color: #4ade80; display: flex; align-items: center; gap: 8px;">
                             🏃 בחירת חוג ומועד - ${escapeHtml(catCourse.name || courseInSem.name)}
@@ -3077,7 +3127,9 @@
                             קוד קורס: ${escapeHtml(courseCode)} • סמסטר מתוכנן: ${semNum}
                         </div>
                     </div>
-                    <button type="button" id="btn-close-sport-modal" style="background: none; border: none; font-size: 1.4rem; color: #94a3b8; cursor: pointer; padding: 4px 8px;">✕</button>
+                    <div class="planner-modal-header-actions" style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
+                        <button type="button" id="btn-close-sport-modal" style="background: none; border: none; font-size: 1.4rem; color: #94a3b8; cursor: pointer; padding: 4px 8px;">✕</button>
+                    </div>
                 </div>
 
                 <div style="background: rgba(34, 197, 94, 0.08); border: 1px solid rgba(34, 197, 94, 0.25); border-radius: 8px; padding: 10px 12px; margin-bottom: 16px; font-size: 0.8rem; color: #bbf7d0; line-height: 1.4;">
@@ -3101,7 +3153,9 @@
         `;
 
         document.body.appendChild(modal);
-
+        if (global.ModalHelp && typeof global.ModalHelp.setupTriggerForModal === 'function') {
+            global.ModalHelp.setupTriggerForModal('planner-sport-club-modal');
+        }
         const closeModal = () => modal.remove();
         const closeBtn1 = modal.querySelector('#btn-close-sport-modal');
         if (closeBtn1) closeBtn1.onclick = closeModal;
@@ -3534,6 +3588,9 @@
                                     </span>
                                 ` : ''}
                                 ${canRemove ? `
+                                    <button type="button" class="btn-card-move" data-code="${escapeHtml(course.code)}" data-semester="${semNum}" title="העבר קורס לסמסטר אחר או הסר">
+                                        ⇄
+                                    </button>
                                     <button type="button" class="btn-card-remove" data-code="${escapeHtml(course.code)}" data-semester="${semNum}" title="הסר קורס זה מהתכנון והעבר לרשימת הקורסים שלא שובצו">
                                         ✕
                                     </button>
@@ -3693,9 +3750,14 @@
 
         // 1c. Identify missing mandatory courses (not placed and not completed)
         const missingMandatoryCourses = allMandatoryCourses.filter(c => {
-            const mKeys = getNormalizedCodes(c.code, c.altCode);
+            const rawKeys = [...getNormalizedCodes(c.code, c.altCode)];
+            if (Array.isArray(c.variants)) {
+                c.variants.forEach(v => rawKeys.push(...getNormalizedCodes(v.code, v.altCode)));
+            }
+            const mKeys = Array.from(new Set(rawKeys));
             const isPlaced = mKeys.some(k => placedCodes.has(k));
-            const isCompleted = isCourseCompleted(c.code, c.altCode);
+            const isCompleted = isCourseCompleted(c.code, c.altCode) ||
+                (Array.isArray(c.variants) && c.variants.some(v => isCourseCompleted(v.code, v.altCode)));
             return !isPlaced && !isCompleted;
         });
 
@@ -4472,6 +4534,16 @@
                 return;
             }
 
+            // Move Course Action Sheet Click (⇄ button)
+            const moveBtn = e.target.closest('.btn-card-move');
+            if (moveBtn) {
+                e.stopPropagation();
+                const code = moveBtn.getAttribute('data-code');
+                const semNum = parseFloat(moveBtn.getAttribute('data-semester'));
+                openCourseActionSheet(code, semNum);
+                return;
+            }
+
             // Remove Course Click (✕ button)
             const removeBtn = e.target.closest('.btn-card-remove');
             if (removeBtn) {
@@ -4588,7 +4660,7 @@
             // Course card click/tap -> Open Course Details Modal (CheeseFork info, reviews, histograms & Technion++ resources)
             const card = e.target.closest('.planner-course-card, .planner-pool-item');
             if (card) {
-                if (e.target.closest('.course-card-whatif-input, .btn-card-remove, .btn-add-to-plan, .btn-course-workload, .btn-select-sport-club')) return;
+                if (e.target.closest('.course-card-whatif-input, .btn-card-move, .btn-card-remove, .btn-add-to-plan, .btn-course-workload, .btn-select-sport-club')) return;
 
                 const code = card.getAttribute('data-code');
                 const altCode = card.getAttribute('data-alt-code');
@@ -4996,6 +5068,9 @@
         const overlay = document.getElementById('planner-export-modal-overlay');
         if (!overlay) return;
         overlay.classList.add('active');
+        if (global.ModalHelp && typeof global.ModalHelp.setupTriggerForModal === 'function') {
+            global.ModalHelp.setupTriggerForModal('planner-export-modal');
+        }
 
         if (!overlay._isBound) {
             overlay._isBound = true;
@@ -5437,7 +5512,8 @@
                     : (isStrictBlocked
                         ? `❌ חסימת שיבוץ: לא ניתן לשבץ את הקורס בסמסטר זה!`
                         : `התראת שיבוץ עבור "${courseObj.name}" בסמסטר ${targetSemester}`),
-                targetSemester
+                targetSemester,
+                true
             );
 
             const applyAutoPrereqPlacement = (chosenSemByCode = {}) => {
@@ -5591,7 +5667,7 @@
 
         saveCustomPlan();
         renderDegreePlanner();
-        showPlannerToast(`הקורס "${removedCourse.name}" הוסר מהתכנון והועבר לרשימת הקורסים שלא שובצו.`);
+        showPlannerToast(`הקורס "${removedCourse.name}" הוסר מהתכנון והועבר לרשימת הקורסים שלא שובצו.`, false);
     }
 
     // --------------------------------------------------------------------------
@@ -5621,7 +5697,11 @@
             semObj = customPlan[0];
         }
 
-        const mKeys = new Set(getNormalizedCodes(course.code, course.altCode));
+        const rawMKeys = [...getNormalizedCodes(course.code, course.altCode)];
+        if (Array.isArray(course.variants)) {
+            course.variants.forEach(v => rawMKeys.push(...getNormalizedCodes(v.code, v.altCode)));
+        }
+        const mKeys = new Set(rawMKeys);
         const alreadyPlaced = (semObj.courses || []).some(c => {
             const cKeys = getNormalizedCodes(c.code, c.altCode);
             return cKeys.some(k => mKeys.has(k));
@@ -5634,7 +5714,9 @@
                 name: course.name,
                 credits: course.credits,
                 type: 'mandatory',
-                prereqs: course.prereqs || []
+                prereqs: course.prereqs || [],
+                ...(course.variantGroupId ? { variantGroupId: course.variantGroupId } : {}),
+                ...(Array.isArray(course.variants) ? { variants: course.variants } : {})
             });
         }
 
@@ -5647,7 +5729,7 @@
         syncCourseToGameState(course, semObj.semester);
         saveCustomPlan(true);
         renderDegreePlanner();
-        showPlannerToast(`✓ הקורס "${course.name}" שוחזר בהצלחה לסמסטר ${semObj.semester}!`);
+        showPlannerToast(`✓ הקורס "${course.name}" שוחזר בהצלחה לסמסטר ${semObj.semester}!`, false);
     }
 
     function restoreAllMissingMandatoryCourses() {
@@ -5666,9 +5748,15 @@
             if (!semObj) return;
 
             (sem.courses || []).forEach(course => {
-                const mKeys = getNormalizedCodes(course.code, course.altCode);
-                if (mKeys.some(k => placedCodes.has(k))) return;
-                if (isCourseCompleted(course.code, course.altCode)) return;
+                const rawKeys = [...getNormalizedCodes(course.code, course.altCode)];
+                if (Array.isArray(course.variants)) {
+                    course.variants.forEach(v => rawKeys.push(...getNormalizedCodes(v.code, v.altCode)));
+                }
+                const mKeys = new Set(rawKeys);
+                if (Array.from(mKeys).some(k => placedCodes.has(k))) return;
+                const anyVariantCompleted = isCourseCompleted(course.code, course.altCode) ||
+                    (Array.isArray(course.variants) && course.variants.some(v => isCourseCompleted(v.code, v.altCode)));
+                if (anyVariantCompleted) return;
 
                 semObj.courses.push({
                     code: course.code,
@@ -5676,7 +5764,9 @@
                     name: course.name,
                     credits: course.credits,
                     type: 'mandatory',
-                    prereqs: course.prereqs || []
+                    prereqs: course.prereqs || [],
+                    ...(course.variantGroupId ? { variantGroupId: course.variantGroupId } : {}),
+                    ...(Array.isArray(course.variants) ? { variants: course.variants } : {})
                 });
 
                 mKeys.forEach(k => placedCodes.add(k));
@@ -5695,9 +5785,9 @@
         if (count > 0) {
             saveCustomPlan(true);
             renderDegreePlanner();
-            showPlannerToast(`✓ שוחזרו בהצלחה ${count} קורסי חובה לסמסטרים המומלצים!`);
+            showPlannerToast(`✓ שוחזרו בהצלחה ${count} קורסי חובה לסמסטרים המומלצים!`, false);
         } else {
-            showPlannerToast('כל קורסי החובה כבר משובצים בתוכנית.');
+            showPlannerToast('כל קורסי החובה כבר משובצים בתוכנית.', false);
         }
     }
 
@@ -5721,7 +5811,7 @@
         const modal = document.createElement('div');
         modal.id = 'planner-sem-picker-modal';
         modal.className = 'modal-backdrop active';
-        modal.style.zIndex = '999999';
+        modal.style.cssText = 'position: fixed; inset: 0; background: rgba(10, 15, 29, 0.88); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 100060; padding: 16px; direction: rtl;';
 
         const semButtons = customPlan.map(s => {
             const semNum = s.semester;
@@ -5844,6 +5934,8 @@
         getCustomPlan: () => customPlan,
         getUnassignedCourses: () => unassignedCourses,
         resetPlanToSuggested: resetPlanToSuggested,
+        restoreAllMissingMandatoryCourses: restoreAllMissingMandatoryCourses,
+        restoreMandatoryCourse: restoreMandatoryCourse,
         checkPrerequisites: checkPrerequisites,
         isCourseCompleted: isCourseCompleted,
         getCourseGrade: getCourseGrade,
@@ -5889,8 +5981,10 @@
                 selectedTrack = 'year_2026';
             }
             const targetSyllabus = getSuggestedCatalogForTrack(selectedTrack);
-            customPlan = JSON.parse(JSON.stringify(targetSyllabus || global.PLANNER_CATALOG.SUGGESTED_MANDATORY_SYLLABUS));
+            const resolvedSyllabus = targetSyllabus || global.PLANNER_CATALOG.SUGGESTED_MANDATORY_SYLLABUS;
+            customPlan = JSON.parse(JSON.stringify(resolvedSyllabus));
             unassignedCourses = [];
+            restoreGameStateSemestersForSyllabus(resolvedSyllabus);
             syncCompletedCoursesFromGameState();
             saveCustomPlan(true);
             renderDegreePlanner();
@@ -6107,7 +6201,7 @@
             modal = document.createElement('div');
             modal.id = 'planner-placement-guard-modal';
             modal.className = 'modal-backdrop';
-            modal.style.cssText = 'position: fixed; inset: 0; background: rgba(10, 15, 29, 0.85); backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; z-index: 10000;';
+            modal.style.cssText = 'position: fixed; inset: 0; background: rgba(10, 15, 29, 0.85); backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; z-index: 100060; padding: 16px; direction: rtl;';
             document.body.appendChild(modal);
         }
 
@@ -6405,6 +6499,9 @@
         const overlay = document.getElementById('planner-semesters-mgr-modal-overlay');
         if (!overlay) return;
         overlay.classList.add('active');
+        if (global.ModalHelp && typeof global.ModalHelp.setupTriggerForModal === 'function') {
+            global.ModalHelp.setupTriggerForModal('planner-semesters-mgr-modal');
+        }
 
         const plan = getActivePlan();
         let maxReg = 0;

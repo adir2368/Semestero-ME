@@ -11,7 +11,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
-    <link rel="manifest" href="manifest.json?v=2.5.0">
+    <link rel="manifest" href="manifest.json?v=3.2.0">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;500;600;700;800;900&family=Rubik:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -894,7 +894,7 @@
     <!-- Top Navigation Bar -->
     <header class="tecme-navbar">
         <a href="index.html" class="tecme-brand-wrap" title="חזרה לאפליקציה הראשית">
-            <img src="icon-192.png?v=2.4.0" alt="Semestero ME Logo" class="tecme-brand-logo">
+            <img src="icon-192.png?v=3.2.0" alt="Semestero ME Logo" class="tecme-brand-logo">
             <div class="tecme-brand-title">
                 <h1>Semestero Widgets</h1>
                 <span>recommended · vibrant</span>
@@ -1344,9 +1344,9 @@
     <!-- Instructions Modal for Android Phone Home Screen -->
     <div class="tecme-modal-backdrop" id="modal-install-guide">
         <div class="tecme-modal-card">
-            <div class="tecme-modal-header">
-                <h3>איך לשים את הוויג'ט במסך הבית של הטלפון?</h3>
-                <button type="button" class="tecme-modal-close" onclick="closeInstallGuide()">&times;</button>
+            <div class="tecme-modal-header" style="gap: 12px; align-items: flex-start;">
+                <h3 style="flex: 1; min-width: 0; margin: 0;">איך לשים את הוויג'ט במסך הבית של הטלפון?</h3>
+                <button type="button" class="tecme-modal-close" style="flex-shrink: 0; margin: 0;" onclick="closeInstallGuide()">&times;</button>
             </div>
             
             <div class="tecme-step-item" style="border: 1px solid rgba(56, 189, 248, 0.4); background: rgba(56, 189, 248, 0.08); border-radius: 14px; padding: 12px;">
@@ -1374,7 +1374,7 @@
                 <div class="tecme-step-text">
                     <strong>למשתמשי דפדפן Web / PWA (חלופה):</strong><br>
                     אם אתה גולש דרך הדפדפן ורוצה וויג'ט אינטרנטי, ניתן להשתמש ב-Web Widget ולהדביק את הקישור:<br>
-                    <code style="display: block; background: #1c1e24; padding: 6px 10px; border-radius: 8px; margin-top: 6px; font-size: 0.76rem; color: #38bdf8; word-break: break-all; direction: ltr;" id="code-widget-url">https://adir2368.github.io/Semestero-ME/widgets.html?view=l</code>
+                    <code style="display: block; background: #1c1e24; padding: 6px 10px; border-radius: 8px; margin-top: 6px; font-size: 0.76rem; color: #38bdf8; word-break: break-all; direction: ltr;" id="code-widget-url">https://semestero.me/Semestero-ME/widgets.html?view=l</code>
                 </div>
             </div>
 
@@ -1436,6 +1436,15 @@
                     { id: 'f5', pill: '18 days left', name: 'סטטיקה', details: 'Moed A · Thu 18 Feb · 09:00' }
                 ]
             };
+        }
+
+        function escHtml(str) {
+            return String(str ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
         }
 
         // Toggle task completion
@@ -1572,13 +1581,14 @@
                 const displayTasks = (currentPhase === 'finals') ? data.finalsExams.slice(0, 3) : data.tasks.slice(0, 3);
                 const itemsHtml = displayTasks.map(t => {
                     const isDone = completedTaskIds.has(t.id);
+                    const safeId = escHtml(t.id);
                     return `
-                        <div class="tecme-task-row ${isDone ? 'is-done' : ''}" onclick="toggleTask('${t.id}', event)">
+                        <div class="tecme-task-row ${isDone ? 'is-done' : ''}" data-task-id="${safeId}">
                             <div class="tecme-task-left">
-                                <span class="tecme-task-pill ${t.pillClass || 'normal'}">${t.pill}</span>
+                                <span class="tecme-task-pill ${escHtml(t.pillClass || 'normal')}">${escHtml(t.pill)}</span>
                                 <div class="tecme-task-content">
-                                    <span class="tecme-task-name">${t.name}</span>
-                                    <span class="tecme-task-course">${t.course || t.details}</span>
+                                    <span class="tecme-task-name">${escHtml(t.name)}</span>
+                                    <span class="tecme-task-course">${escHtml(t.course || t.details)}</span>
                                 </div>
                             </div>
                             <button type="button" class="tecme-circle-btn ${t.isMissed && !isDone ? 'exclamation' : ''}" aria-label="Toggle task">
@@ -1596,8 +1606,11 @@
                     <div class="tecme-checklist" style="margin: 6px 0;">
                         ${itemsHtml}
                     </div>
-                    <div class="tecme-s-footer" style="padding-top: 4px;">${data.termWeek}</div>
+                    <div class="tecme-s-footer" style="padding-top: 4px;">${escHtml(data.termWeek)}</div>
                 `;
+                upNextMEl.querySelectorAll('.tecme-task-row[data-task-id]').forEach(row => {
+                    row.addEventListener('click', (e) => toggleTask(row.getAttribute('data-task-id'), e));
+                });
             }
 
             // 5. Up Next L (Flagship)
@@ -1633,13 +1646,14 @@
                 const listSource = (currentPhase === 'finals') ? data.finalsExams : data.tasks;
                 const fullListHtml = listSource.map(t => {
                     const isDone = completedTaskIds.has(t.id);
+                    const safeId = escHtml(t.id);
                     return `
-                        <div class="tecme-task-row ${isDone ? 'is-done' : ''}" onclick="toggleTask('${t.id}', event)">
+                        <div class="tecme-task-row ${isDone ? 'is-done' : ''}" data-task-id="${safeId}">
                             <div class="tecme-task-left">
-                                <span class="tecme-task-pill ${t.pillClass || 'normal'}">${t.pill}</span>
+                                <span class="tecme-task-pill ${escHtml(t.pillClass || 'normal')}">${escHtml(t.pill)}</span>
                                 <div class="tecme-task-content">
-                                    <span class="tecme-task-name">${t.name}</span>
-                                    <span class="tecme-task-course">${t.course || t.details}</span>
+                                    <span class="tecme-task-name">${escHtml(t.name)}</span>
+                                    <span class="tecme-task-course">${escHtml(t.course || t.details)}</span>
                                 </div>
                             </div>
                             <button type="button" class="tecme-circle-btn ${t.isMissed && !isDone ? 'exclamation' : ''}" aria-label="Toggle task">
@@ -1655,10 +1669,10 @@
                 upNextLEl.innerHTML = `
                     <div>
                         <div class="tecme-m-header">
-                            <div class="tecme-m-title">${headerTitle}</div>
-                            <div class="tecme-sem-badge">${data.semesterName}</div>
+                            <div class="tecme-m-title">${escHtml(headerTitle)}</div>
+                            <div class="tecme-sem-badge">${escHtml(data.semesterName)}</div>
                         </div>
-                        <div class="tecme-m-sub">${headerSub}</div>
+                        <div class="tecme-m-sub">${escHtml(headerSub)}</div>
 
                         <div class="tecme-checklist">
                             ${fullListHtml}
@@ -1668,33 +1682,36 @@
                     </div>
 
                     <div class="tecme-l-footer-bar">
-                        <span>🗓️ Next test: <strong class="test-title">${data.nextExam.courseName} · Moed A</strong></span>
+                        <span>🗓️ Next test: <strong class="test-title">${escHtml(data.nextExam.courseName)} · Moed A</strong></span>
                         <span>in ${currentPhase === 'finals' ? '2' : '115'} days</span>
                     </div>
                 `;
+                upNextLEl.querySelectorAll('.tecme-task-row[data-task-id]').forEach(row => {
+                    row.addEventListener('click', (e) => toggleTask(row.getAttribute('data-task-id'), e));
+                });
             }
         }
 
-        // Handle URL parameters for standalone widget mode (e.g. from Web Widget app)
+        // Handle URL parameters for standalone widget mode (e.g. from Web Widget app / Adaptive Cards)
         function initParams() {
             const urlParams = new URLSearchParams(window.location.search);
-            const viewParam = urlParams.get('view') || urlParams.get('widget') || urlParams.get('size');
-            
-            if (viewParam) {
+            const rawParam = (urlParams.get('w') || urlParams.get('view') || urlParams.get('widget') || urlParams.get('size') || '').trim().toLowerCase();
+
+            if (rawParam) {
                 document.body.classList.add('is-standalone-widget');
                 const sections = document.querySelectorAll('.tecme-section-wrap');
                 sections.forEach(sec => sec.style.display = 'none');
 
-                if (viewParam.includes('s') || viewParam === 'exam' || viewParam === 'upnext_s') {
-                    const sec = document.querySelector('[data-section-size="s"]');
-                    if (sec) sec.style.display = 'block';
-                } else if (viewParam.includes('m') || viewParam === 'semester') {
-                    const sec = document.querySelector('[data-section-size="m"]');
-                    if (sec) sec.style.display = 'block';
-                } else {
-                    const sec = document.querySelector('[data-section-size="l"]');
-                    if (sec) sec.style.display = 'block';
+                let targetSize = 'l';
+                if (['s', 'small', 'exam', 'upnext_s'].includes(rawParam)) {
+                    targetSize = 's';
+                } else if (['m', 'medium', 'semester', 'upnext_m'].includes(rawParam)) {
+                    targetSize = 'm';
+                } else if (['l', 'large', 'tasks', 'upnext_l'].includes(rawParam)) {
+                    targetSize = 'l';
                 }
+                const sec = document.querySelector(`[data-section-size="${targetSize}"]`);
+                if (sec) sec.style.display = 'block';
             }
         }
 
@@ -1736,10 +1753,24 @@
         document.getElementById('btn-open-install-guide').addEventListener('click', openInstallGuide);
         document.getElementById('btn-dock-home').addEventListener('click', openInstallGuide);
 
+        function showWidgetToast(message) {
+            let toast = document.getElementById('tecme-widget-toast');
+            if (!toast) {
+                toast = document.createElement('div');
+                toast.id = 'tecme-widget-toast';
+                toast.style.cssText = 'position: fixed; bottom: 82px; left: 50%; transform: translateX(-50%); background: rgba(15, 23, 42, 0.96); color: #f8fafc; border: 1px solid rgba(56, 189, 248, 0.5); padding: 10px 16px; border-radius: 10px; font-size: 0.84rem; font-weight: 600; z-index: 99999; box-shadow: 0 10px 25px rgba(0,0,0,0.5); max-width: calc(100vw - 24px); text-align: center; direction: rtl;';
+                document.body.appendChild(toast);
+            }
+            toast.textContent = message;
+            toast.style.display = 'block';
+            clearTimeout(toast._hideTimer);
+            toast._hideTimer = setTimeout(() => { toast.style.display = 'none'; }, 3500);
+        }
+
         function copyWidgetDirectUrl() {
             const url = `${window.location.origin}${window.location.pathname}?view=l`;
             navigator.clipboard.writeText(url).then(() => {
-                alert(`הקישור לוויג'ט הועתק ללוח! הדבק אותו באפליקציית Web Widget או בדפדפן.`);
+                showWidgetToast('הקישור לוויג\'ט הועתק ללוח! הדבק אותו באפליקציית Web Widget או בדפדפן.');
             });
         }
 
@@ -1748,10 +1779,10 @@
             if (isAdir) {
                 const icsUrl = localStorage.getItem('academic_skill_tree_github_raw_url') || '';
                 navigator.clipboard.writeText(icsUrl).then(() => {
-                    alert(`כתובת יומן הבחינות והמטלות (Webcal) הועתקה! הוסף אותה ב-Google Calendar או Samsung Calendar.`);
+                    showWidgetToast('כתובת יומן הבחינות והמטלות (Webcal) הועתקה! הוסף אותה ב-Google Calendar או Samsung Calendar.');
                 });
             } else {
-                alert(`סנכרון יומן אישי מופעל עבור חשבונות מחוברים בלבד. באפשרותך לייצא קובץ יומן באפליקציה הראשית.`);
+                showWidgetToast('סנכרון יומן אישי מופעל עבור חשבונות מחוברים בלבד. באפשרותך לייצא קובץ יומן באפליקציה הראשית.');
             }
         }
 

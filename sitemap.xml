@@ -6,7 +6,7 @@
   <!-- 1. Primary Entry Point: Semestero ME Academic Web Application -->
   <url>
     <loc>https://semestero.me/Semestero-ME/</loc>
-    <lastmod>2026-11-10</lastmod>
+    <lastmod>2026-11-25</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
     <image:image>
@@ -24,9 +24,23 @@
   <!-- 2. Static Bilingual Academic & Technion Tools Comparison Guide (GEO) -->
   <url>
     <loc>https://semestero.me/Semestero-ME/guide.html</loc>
-    <lastmod>2026-11-10</lastmod>
+    <lastmod>2026-11-25</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.95</priority>
+  </url>
+
+  <url>
+    <loc>https://semestero.me/Semestero-ME/watch.html</loc>
+    <lastmod>2026-11-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://semestero.me/Semestero-ME/widgets.html</loc>
+    <lastmod>2026-11-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
   </url>
 
   <!-- 3. Core Workspace Deep-Links -->

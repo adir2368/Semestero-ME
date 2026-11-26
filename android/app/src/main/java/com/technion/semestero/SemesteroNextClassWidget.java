@@ -60,14 +60,16 @@ public class SemesteroNextClassWidget extends AppWidgetProvider {
         String details = prefs.getString("class_details", "פתח את האפליקציה לסנכרון מערכת");
         String lecturer = prefs.getString("class_lecturer", "סמסטרו ME • הנדסת מכונות");
         String status = prefs.getString("class_status", "חופשי");
-        int totalClasses = prefs.getInt("all_classes_count", 1);
-        int currentIndex = prefs.getInt("class_index", 0);
+        int totalClasses = Math.max(1, prefs.getInt("all_classes_count", 1));
+        int currentIndex = Math.max(0, Math.min(prefs.getInt("class_index", 0), totalClasses - 1));
 
         String classesJson = prefs.getString("all_classes_json", "");
         if (!classesJson.isEmpty() && totalClasses > 1) {
             try {
                 JSONArray arr = new JSONArray(classesJson);
-                if (currentIndex >= 0 && currentIndex < arr.length()) {
+                if (arr.length() > 0) {
+                    currentIndex = Math.max(0, Math.min(currentIndex, arr.length() - 1));
+                    totalClasses = arr.length();
                     JSONObject c = arr.getJSONObject(currentIndex);
                     title = c.optString("title", title);
                     time = c.optString("time", time);

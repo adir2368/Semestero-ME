@@ -421,15 +421,17 @@
                 modal.className = 'modal-backdrop-custom';
                 modal.style.cssText = 'display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); backdrop-filter:blur(8px); z-index:100050; align-items:center; justify-content:center; padding:16px; direction:rtl;';
                 modal.innerHTML = `
-                    <div style="background:#0f172a; border:1px solid rgba(56,189,248,0.3); border-radius:16px; width:100%; max-width:480px; box-shadow:0 25px 50px -12px rgba(0,0,0,0.7); overflow:hidden; display:flex; flex-direction:column;">
-                        <div style="padding:16px 20px; border-bottom:1px solid rgba(255,255,255,0.08); display:flex; align-items:center; justify-content:space-between; background:rgba(15,23,42,0.9);">
+                    <div class="modal-content" style="background:#0f172a; border:1px solid rgba(56,189,248,0.3); border-radius:16px; width:100%; max-width:480px; max-height:calc(100dvh - 32px); box-shadow:0 25px 50px -12px rgba(0,0,0,0.7); overflow:hidden; display:flex; flex-direction:column; box-sizing:border-box;">
+                        <div class="modal-header" style="padding:14px 18px; border-bottom:1px solid rgba(255,255,255,0.08); display:flex; align-items:center; justify-content:space-between; background:rgba(15,23,42,0.95); flex-shrink:0;">
                             <div style="display:flex; align-items:center; gap:10px;">
                                 <span style="font-size:1.4rem;">📅</span>
                                 <h3 style="margin:0; font-size:1.05rem; font-weight:800; color:#f8fafc;">סנכרון לוח שנה לטלפון ולמחשב</h3>
                             </div>
-                            <button type="button" onclick="document.getElementById('modal-unified-calendar-sync').style.display='none'" style="background:none; border:none; color:#94a3b8; font-size:1.3rem; cursor:pointer; padding:4px;">✕</button>
+                            <div class="unified-sync-header-actions" style="display:flex; align-items:center; gap:6px;">
+                                <button type="button" id="btn-close-unified-sync" class="modal-close" aria-label="סגור חלון ייצוא מאוחד" onclick="document.getElementById('modal-unified-calendar-sync').style.display='none'" style="position:static; background:none; border:none; color:#94a3b8; font-size:1.3rem; cursor:pointer; padding:4px;">✕</button>
+                            </div>
                         </div>
-                        <div style="padding:20px; font-size:0.88rem; color:#cbd5e1; line-height:1.5; display:flex; flex-direction:column; gap:14px;">
+                        <div class="modal-body" style="padding:18px; font-size:0.88rem; color:#cbd5e1; line-height:1.5; display:flex; flex-direction:column; gap:14px; overflow-y:auto; flex:1 1 auto; min-height:0;">
                             <p style="margin:0; color:#94a3b8; font-size:0.84rem;">
                                 הורד קובץ יומן סטנדרטי (ICS) התואם ל-Google Calendar, ל-Samsung Calendar, ל-Apple Calendar ול-Outlook.
                             </p>
@@ -461,7 +463,7 @@
                                 <span><strong>טיפ:</strong> לאחר ההורדה, פתח את הקובץ ישירות בטלפון והקש "הוסף הכל ליומן", או ייבא אותו בלחיצה אחת ב-Google Calendar במחשב.</span>
                             </div>
                         </div>
-                        <div style="padding:14px 20px; border-top:1px solid rgba(255,255,255,0.08); background:rgba(15,23,42,0.9); display:flex; align-items:center; justify-content:space-between; gap:12px;">
+                        <div class="modal-footer" style="padding:12px 18px; border-top:1px solid rgba(255,255,255,0.08); background:rgba(15,23,42,0.95); display:flex; align-items:center; justify-content:space-between; gap:12px; flex-shrink:0;">
                             <button type="button" onclick="document.getElementById('modal-unified-calendar-sync').style.display='none'" class="btn btn-sm btn-outline" style="border-color:rgba(255,255,255,0.2); color:#94a3b8; border-radius:8px; padding:6px 14px;">ביטול</button>
                             <button type="button" id="btn-do-download-ics" style="background:linear-gradient(135deg,#0284c7,#0369a1); border:none; color:#fff; font-weight:700; font-size:0.86rem; border-radius:8px; padding:8px 18px; cursor:pointer; display:flex; align-items:center; gap:8px; box-shadow:0 4px 12px rgba(2,132,199,0.35);">
                                 <span>📥</span>
@@ -471,6 +473,9 @@
                     </div>
                 `;
                 document.body.appendChild(modal);
+                if (window.ModalHelp && typeof window.ModalHelp.injectHelpButtons === 'function') {
+                    window.ModalHelp.injectHelpButtons();
+                }
 
                 document.getElementById('btn-do-download-ics').addEventListener('click', function() {
                     const includeTimetable = document.getElementById('cal-opt-classes').checked;

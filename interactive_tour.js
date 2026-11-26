@@ -155,6 +155,7 @@
                 onClick: () => {
                     const btn = document.getElementById('btn-open-miluim-advisor');
                     if (btn) btn.click();
+                    else if (window.MiluimRightsAdvisor && typeof window.MiluimRightsAdvisor.openModal === 'function') window.MiluimRightsAdvisor.openModal();
                     else if (window.openMiluimModal) window.openMiluimModal();
                 }
             },
@@ -1519,7 +1520,7 @@
 
         checkAndShowTipForTab(tabKey) {
             if (InteractiveTour && InteractiveTour.active) return;
-            if (document.querySelector('.modal.active, .modal-backdrop.active, #tour-welcome-prompt')) return;
+            if (document.querySelector('.modal.active, .modal-backdrop.active, .modal-overlay.active, .a11y-modal-overlay.active, .privacy-modal-overlay.active, #tour-welcome-prompt')) return;
 
             const tip = this.TIPS.find(t => t.tab === tabKey && !localStorage.getItem('ast_tip_seen_' + t.id));
             if (!tip) return;
@@ -1640,6 +1641,9 @@
         }
         modal.style.display = 'flex';
         modal.classList.add('active');
+        if (window.ModalHelp && typeof window.ModalHelp.setupTriggerForModal === 'function') {
+            window.ModalHelp.setupTriggerForModal('tutorial-hub-modal');
+        }
     };
 
     window.closeTutorialHubModal = function() {

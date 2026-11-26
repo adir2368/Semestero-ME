@@ -16,6 +16,18 @@
 (function(window, document) {
     'use strict';
 
+    function escHtml(str) {
+        if (window.__semesteroUtils && typeof window.__semesteroUtils.escapeHtml === 'function') {
+            return window.__semesteroUtils.escapeHtml(str);
+        }
+        return String(str ?? '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
     // =========================================================================
     // 1. Storage & State Management
     // =========================================================================
@@ -173,13 +185,29 @@
                 return;
             }
 
+            // Never overlap active Tasks popovers, bulk bar, side peek, or status menu
+            if (activeTab === 'tasks' && !activeModal) {
+                const statusMenuOpen = document.getElementById('notion-status-dropdown-menu');
+                const hasBlockingTasksOverlay = !!(
+                    document.querySelector('.notion-filter-popover.show') ||
+                    document.querySelector('.tasks-bulk-actions-bar.active') ||
+                    document.querySelector('#task-side-peek.active') ||
+                    (statusMenuOpen && statusMenuOpen.style.display === 'flex')
+                );
+                if (hasBlockingTasksOverlay) {
+                    btn.classList.remove('visible');
+                    return;
+                }
+            }
+
             const container = getActiveMainScrollContainer();
             let isScrolled = false;
+            const threshold = activeTab === 'tasks' ? 320 : 220;
 
             if (container) {
-                // Must be scrolled down at least 220px in the MAIN SCREEN viewport
+                // Must be scrolled down past threshold in the MAIN SCREEN viewport
                 const scrollTop = container.scrollTop || 0;
-                if (scrollTop > 220) {
+                if (scrollTop > threshold) {
                     isScrolled = true;
                 }
             }
@@ -189,7 +217,7 @@
                 const winScroll = window.scrollY || 
                                   (document.documentElement ? document.documentElement.scrollTop : 0) || 
                                   (document.body ? document.body.scrollTop : 0);
-                if (winScroll > 220) {
+                if (winScroll > threshold) {
                     isScrolled = true;
                 }
             }
@@ -362,20 +390,73 @@
                     <span>🕒</span> <span>נצפו לאחרונה:</span>
                 </span>
                 ${list.map(c => `
-                    <button type="button" class="recent-course-chip" onclick="if(window.openCourseDetailsModal) window.openCourseDetailsModal('${c.code}'); else if(window.openCourseComparisonModal) window.openCourseComparisonModal('${c.code}');" title="${c.name} (${c.credits} נק״ז)">
-                        <span style="font-weight: 800; color: #38bdf8;">${c.code}</span>
-                        <span style="max-width: 110px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${c.name}</span>
+                    <button type="button" class="recent-course-chip" data-recent-code="${escUiHtml(c.code)}" title="${escUiHtml(c.name)} (${escUiHtml(c.credits)} נק״ז)">
+                        <span style="font-weight: 800; color: #38bdf8;">${escUiHtml(c.code)}</span>
+                        <span style="max-width: 110px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${escUiHtml(c.name)}</span>
                     </button>
                 `).join('')}
             `;
+            container.querySelectorAll('.recent-course-chip[data-recent-code]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    openAnyCourseModal(btn.dataset.recentCode);
+                });
+            });
         }
     };
     window.RecentlyViewed = RecentlyViewed;
+
+    function escUiHtml(str) {
+        if (typeof window !== 'undefined' && window.__semesteroUtils && typeof window.__semesteroUtils.escapeHtml === 'function') {
+            return window.__semesteroUtils.escapeHtml(str);
+        }
+        return String(str ?? '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
+    function getCourseCodeVariantsSafe(code, altCode) {
+        if (typeof window !== 'undefined' && window.__semesteroUtils && typeof window.__semesteroUtils.getTechnionCourseCodeVariants === 'function') {
+            return window.__semesteroUtils.getTechnionCourseCodeVariants(code, altCode);
+        }
+        const vals = [];
+        [code, altCode].forEach(v => {
+            if (!v) return;
+            const s = String(v).trim();
+            if (s) {
+                vals.push(s);
+                vals.push(s.replace(/^0+/, ''));
+            }
+        });
+        return Array.from(new Set(vals));
+    }
+
+    function openAnyCourseModal(rawCode) {
+        if (!rawCode) return;
+        const variants = getCourseCodeVariantsSafe(rawCode);
+        if (window.gameState && window.gameState.courses && typeof window.openCourseDetails === 'function') {
+            const matchedKey = variants.find(v => window.gameState.courses[v]);
+            if (matchedKey) {
+                window.openCourseDetails(matchedKey);
+                return;
+            }
+        }
+        if (typeof window.openCourseDetails === 'function') {
+            window.openCourseDetails(rawCode);
+        } else if (window.DegreePlanner && typeof window.DegreePlanner.openCourseDetailModal === 'function') {
+            window.DegreePlanner.openCourseDetailModal(rawCode);
+        } else if (typeof window.openCourseComparisonModal === 'function') {
+            window.openCourseComparisonModal(rawCode);
+        }
+    }
 
     // =========================================================================
     // 6. Global Command Palette & Smart Search (Ctrl+K / ⌘K)
     // =========================================================================
     let allSearchableIndex = [];
+    let currentRenderedMatches = [];
 
     function buildSearchIndex() {
         const items = [];
@@ -416,58 +497,46 @@
         }
         actions.forEach(a => items.push({ ...a, type: 'action', group: a.group || 'פעולות מערכת' }));
 
-        // 3. Courses from catalog & CheeseFork
+        // 3. Courses from active gameState, CheeseFork & Planner catalog
         const courseMap = new Map();
+        const addCourseEntry = (code, altCode, name, credits, faculty) => {
+            if (!code || !name) return;
+            const variants = getCourseCodeVariantsSafe(code, altCode);
+            const canonicalKey = variants.find(v => /^\d{6}$/.test(v)) || String(code);
+            if (courseMap.has(canonicalKey)) return;
+            courseMap.set(canonicalKey, {
+                id: `course-${canonicalKey}`,
+                code: canonicalKey,
+                codeVariants: variants,
+                title: `${canonicalKey} - ${name}`,
+                name: name,
+                credits: credits,
+                faculty: faculty || 'טכניון',
+                icon: '📚',
+                type: 'course',
+                group: 'קורסים אקדמיים',
+                action: () => {
+                    RecentlyViewed.track({ code: canonicalKey, name: name, credits: credits });
+                    openAnyCourseModal(canonicalKey);
+                }
+            });
+        };
+
+        if (window.gameState && window.gameState.courses) {
+            Object.values(window.gameState.courses).forEach(c => {
+                if (c && c.code) addCourseEntry(c.code, c.altCode, c.name, c.credits, c.faculty || 'מכונות');
+            });
+        }
         if (window.CHEESEFORK_DB && Array.isArray(window.CHEESEFORK_DB)) {
             window.CHEESEFORK_DB.forEach(c => {
-                const code = c.rawNum || c.code6 || c.code;
-                if (code && !courseMap.has(code)) {
-                    courseMap.set(code, {
-                        id: `course-${code}`,
-                        code: code,
-                        title: `${code} - ${c.name}`,
-                        name: c.name,
-                        credits: c.credits,
-                        faculty: c.faculty || 'טכניון',
-                        icon: '📚',
-                        type: 'course',
-                        group: 'קורסים אקדמיים',
-                        action: () => {
-                            RecentlyViewed.track({ code, name: c.name, credits: c.credits });
-                            if (window.DegreePlanner && window.DegreePlanner.openCourseDetailModal) {
-                                window.DegreePlanner.openCourseDetailModal(code);
-                            } else if (window.openCourseComparisonModal) {
-                                window.openCourseComparisonModal(code);
-                            }
-                        }
-                    });
-                }
+                addCourseEntry(c.code6 || c.rawNum || c.code, c.rawNum || c.code, c.name, c.credits, c.faculty || 'טכניון');
             });
         }
         if (window.PLANNER_CATALOG) {
             Object.values(window.PLANNER_CATALOG).forEach(list => {
                 if (Array.isArray(list)) {
                     list.forEach(c => {
-                        const code = c.code || c.altCode;
-                        if (code && !courseMap.has(code)) {
-                            courseMap.set(code, {
-                                id: `course-${code}`,
-                                code: code,
-                                title: `${code} - ${c.name}`,
-                                name: c.name,
-                                credits: c.credits,
-                                faculty: c.faculty || 'מכונות',
-                                icon: '📚',
-                                type: 'course',
-                                group: 'קורסים אקדמיים',
-                                action: () => {
-                                    RecentlyViewed.track({ code, name: c.name, credits: c.credits });
-                                    if (window.DegreePlanner && window.DegreePlanner.openCourseDetailModal) {
-                                        window.DegreePlanner.openCourseDetailModal(code);
-                                    }
-                                }
-                            });
-                        }
+                        addCourseEntry(c.code || c.altCode, c.altCode, c.name, c.credits, c.faculty || 'מכונות');
                     });
                 }
             });
@@ -504,6 +573,9 @@
         }
         modal.style.display = 'flex';
         modal.classList.add('active');
+        if (window.ModalHelp && typeof window.ModalHelp.setupTriggerForModal === 'function') {
+            window.ModalHelp.setupTriggerForModal('command-palette-modal');
+        }
         const input = document.getElementById('command-palette-input');
         if (input) {
             input.value = '';
@@ -590,7 +662,8 @@
         const container = document.getElementById('command-palette-results');
         if (!container) return;
 
-        const q = (query || '').trim().toLowerCase();
+        const rawQuery = String(query || '').trim();
+        const q = rawQuery.toLowerCase();
         let matches = [];
 
         if (!q) {
@@ -600,17 +673,38 @@
             const qNorm = q.replace(/^0+/, '');
             matches = allSearchableIndex.filter(item => {
                 const titleMatch = (item.title || '').toLowerCase().includes(q);
-                const codeMatch = item.code ? String(item.code).toLowerCase().includes(q) || String(item.code).replace(/^0+/, '').includes(qNorm) : false;
-                return titleMatch || codeMatch;
-            }).slice(0, 30);
+                const variantMatch = Array.isArray(item.codeVariants)
+                    ? item.codeVariants.some(v => v.toLowerCase().includes(q) || (qNorm && v.replace(/^0+/, '').includes(qNorm)))
+                    : (item.code ? String(item.code).toLowerCase().includes(q) || (qNorm && String(item.code).replace(/^0+/, '').includes(qNorm)) : false);
+                return titleMatch || variantMatch;
+            }).slice(0, 24);
+
+            // Include Pangea Knowledge Hub concepts and summaries
+            if (q.length >= 2 && window.PangeaHub && typeof window.PangeaHub.search === 'function') {
+                try {
+                    const pangeaHits = window.PangeaHub.search(rawQuery) || [];
+                    pangeaHits.slice(0, 8).forEach((r, idx) => {
+                        matches.push({
+                            id: `pangea-${idx}-${r.url || r.title}`,
+                            title: `${r.title}${r.courseTitle ? ' (' + r.courseTitle + ')' : ''}`,
+                            icon: r.type === 'concept' ? '💡' : '📖',
+                            type: 'pangea',
+                            group: 'סיכומי פנגייה ומושגים',
+                            action: () => window.PangeaHub.openQuickPeek(r.url, r.title, r.url)
+                        });
+                    });
+                } catch (e) {}
+            }
         }
+
+        currentRenderedMatches = matches;
 
         if (matches.length === 0) {
             container.innerHTML = `
                 <div class="command-palette-empty">
                     <span style="font-size: 1.8rem; margin-bottom: 6px;">🔍</span>
-                    <div>לא נמצאו תוצאות התואמות ל-"<strong>${query}</strong>"</div>
-                    <div style="font-size: 0.78rem; color: #64748b; margin-top: 4px;">נסה לחפש לפי קוד קורס (למשל: 114051), שם נושא או פעולה</div>
+                    <div>לא נמצאו תוצאות התואמות ל-"<strong>${escUiHtml(rawQuery)}</strong>"</div>
+                    <div style="font-size: 0.78rem; color: #64748b; margin-top: 4px;">נסה לחפש לפי קוד קורס (למשל: 034053), מושג בפנגייה או פעולה</div>
                 </div>
             `;
             return;
@@ -618,6 +712,7 @@
 
         // Group matches
         const groups = {};
+        const orderedMatches = [];
         matches.forEach(item => {
             const grp = item.group || 'תוצאות';
             if (!groups[grp]) groups[grp] = [];
@@ -628,16 +723,17 @@
         let globalIdx = 0;
 
         Object.keys(groups).forEach(grpName => {
-            html += `<div class="command-palette-group-title">${grpName}</div>`;
+            html += `<div class="command-palette-group-title">${escUiHtml(grpName)}</div>`;
             groups[grpName].forEach(item => {
+                orderedMatches.push(item);
                 const isSelected = globalIdx === activeSelectedIndex ? 'selected' : '';
-                const shortcutHtml = item.shortcut ? `<kbd class="command-palette-shortcut">${item.shortcut}</kbd>` : '';
-                const creditsHtml = item.credits ? `<span class="command-palette-credits">${item.credits} נק״ז</span>` : '';
+                const shortcutHtml = item.shortcut ? `<kbd class="command-palette-shortcut">${escUiHtml(item.shortcut)}</kbd>` : '';
+                const creditsHtml = item.credits ? `<span class="command-palette-credits">${escUiHtml(item.credits)} נק״ז</span>` : '';
                 html += `
-                    <div class="command-palette-item ${isSelected}" data-index="${globalIdx}" onclick="window.closeCommandPalette(); (${item.action.toString()})();">
+                    <div class="command-palette-item ${isSelected}" data-index="${globalIdx}">
                         <div class="command-palette-item-left">
-                            <span class="command-palette-item-icon">${item.icon}</span>
-                            <span class="command-palette-item-title">${item.title}</span>
+                            <span class="command-palette-item-icon">${escUiHtml(item.icon)}</span>
+                            <span class="command-palette-item-title">${escUiHtml(item.title)}</span>
                         </div>
                         <div class="command-palette-item-right">
                             ${creditsHtml}
@@ -649,10 +745,19 @@
             });
         });
 
+        currentRenderedMatches = orderedMatches;
         container.innerHTML = html;
 
-        // Hover handling
+        // Click + Hover handling (safe closure binding without inline stringified functions)
         container.querySelectorAll('.command-palette-item').forEach(el => {
+            el.addEventListener('click', () => {
+                const idx = parseInt(el.dataset.index, 10);
+                const chosen = currentRenderedMatches[idx];
+                window.closeCommandPalette();
+                if (chosen && typeof chosen.action === 'function') {
+                    chosen.action();
+                }
+            });
             el.addEventListener('mouseenter', () => {
                 activeSelectedIndex = parseInt(el.dataset.index, 10);
                 updateItemSelection(container.querySelectorAll('.command-palette-item'));
@@ -959,6 +1064,9 @@
         }
         modal.style.display = 'flex';
         modal.classList.add('active');
+        if (window.ModalHelp && typeof window.ModalHelp.setupTriggerForModal === 'function') {
+            window.ModalHelp.setupTriggerForModal('course-comparison-modal');
+        }
 
         // Populate course selects
         populateCourseCompareOptions();
@@ -1023,6 +1131,9 @@
             if (e.target === div) window.closeCourseComparisonModal();
         });
         document.body.appendChild(div);
+        if (window.ModalHelp && typeof window.ModalHelp.setupTriggerForModal === 'function') {
+            window.ModalHelp.setupTriggerForModal('course-comparison-modal');
+        }
     }
 
     function resolveRichCourseData(code) {
@@ -1062,8 +1173,8 @@
             const dispCode = (c && (c.altCode || c.code)) || raw;
             const dispName = c && c.name ? c.name : '';
             return dispName
-                ? `<span style="display:inline-block; background:rgba(56,189,248,0.12); border:1px solid rgba(56,189,248,0.3); border-radius:5px; padding:2px 7px; margin:2px; font-size:0.78rem;">${dispName} <small style="opacity:0.75; font-family:monospace;">(${dispCode})</small></span>`
-                : `<span style="font-family:monospace;">${raw}</span>`;
+                ? `<span style="display:inline-block; background:rgba(56,189,248,0.12); border:1px solid rgba(56,189,248,0.3); border-radius:5px; padding:2px 7px; margin:2px; font-size:0.78rem;">${escUiHtml(dispName)} <small style="opacity:0.75; font-family:monospace;">(${escUiHtml(dispCode)})</small></span>`
+                : `<span style="font-family:monospace;">${escUiHtml(raw)}</span>`;
         }).join(' ');
     }
 
@@ -1115,7 +1226,7 @@
 
         const prev1 = sel1.value;
         const prev2 = sel2.value;
-        const optionsHtml = courses.map(c => `<option value="${c.code}">${c.displayCode} - ${c.name} (${c.credits} נק״ז)</option>`).join('');
+        const optionsHtml = courses.map(c => `<option value="${escUiHtml(c.code)}">${escUiHtml(c.displayCode)} - ${escUiHtml(c.name)} (${escUiHtml(c.credits)} נק״ז)</option>`).join('');
         sel1.innerHTML = optionsHtml;
         sel2.innerHTML = optionsHtml;
 
@@ -1170,10 +1281,12 @@
             if (c.list === 'ENERGY') return 'אשכול אנרגיה';
             if (c.list === 'MALAG' || c.type === 'humanities') return 'מל״ג / בחירה חופשית';
             if (c.list === 'SPORTS' || c.type === 'sports') return 'חינוך גופני (ספורט)';
-            if (c.type === 'mandatory') return 'קורס חובה פקולטי';
+            if (c.type === 'mandatory' || c.type === 'core') return 'קורס חובה פקולטי';
+            if (c.type === 'elective') return 'קורס בחירה פקולטי';
+            if (c.type === 'general') return 'בחירה חופשית / כללי';
             if (c.type === 'science_fund') return 'מדעי יסוד הנדסיים';
             if (c.type === 'final_project') return 'פרויקט גמר הנדסי (שנה ד׳)';
-            return c.type || 'קורס בחירה';
+            return escUiHtml(c.type || 'קורס בחירה');
         };
 
         const formatBottleneckCell = (c) => {
@@ -1184,7 +1297,7 @@
                 return `<span style="color:#94a3b8;">קורס קצה (אינו חוסם קורסי המשך)</span>`;
             }
             const badgeColor = bInfo.severity === 'critical' ? '#ef4444' : (bInfo.severity === 'high' ? '#f59e0b' : '#38bdf8');
-            const namesPreview = bInfo.directDependents.slice(0, 3).map(d => d.name).join(', ');
+            const namesPreview = bInfo.directDependents.slice(0, 3).map(d => escUiHtml(d.name)).join(', ');
             return `
                 <div style="font-weight:800; color:${badgeColor};">
                     🔥 פותח ${bInfo.transitiveUnlockCount} קורסי המשך (${bInfo.directUnlockCount} ישירים)
@@ -1193,8 +1306,8 @@
             `;
         };
 
-        const safeName1 = String(c1.name || '').replace(/'/g, "\\'");
-        const safeName2 = String(c2.name || '').replace(/'/g, "\\'");
+        const safeName1 = String(c1.name || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+        const safeName2 = String(c2.name || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
 
         container.innerHTML = `
             <table class="comparison-table">
@@ -1202,20 +1315,20 @@
                     <tr>
                         <th style="width: 24%;">מאפיין השוואה</th>
                         <th style="width: 38%; color: #38bdf8;">
-                            <div style="font-size: 1.05rem; font-weight: 800;">${c1.name}</div>
-                            <div style="font-size: 0.8rem; color: #94a3b8; font-family: monospace;">${c1.altCode || c1.code}</div>
+                            <div style="font-size: 1.05rem; font-weight: 800;">${escUiHtml(c1.name)}</div>
+                            <div style="font-size: 0.8rem; color: #94a3b8; font-family: monospace;">${escUiHtml(c1.altCode || c1.code)}</div>
                         </th>
                         <th style="width: 38%; color: #34d399;">
-                            <div style="font-size: 1.05rem; font-weight: 800;">${c2.name}</div>
-                            <div style="font-size: 0.8rem; color: #94a3b8; font-family: monospace;">${c2.altCode || c2.code}</div>
+                            <div style="font-size: 1.05rem; font-weight: 800;">${escUiHtml(c2.name)}</div>
+                            <div style="font-size: 0.8rem; color: #94a3b8; font-family: monospace;">${escUiHtml(c2.altCode || c2.code)}</div>
                         </th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
                         <td class="compare-label">נקודות זכות (נק״ז)</td>
-                        <td class="compare-val highlight-num">${c1.credits || 0} נק״ז</td>
-                        <td class="compare-val highlight-num">${c2.credits || 0} נק״ז</td>
+                        <td class="compare-val highlight-num">${escUiHtml(c1.credits || 0)} נק״ז</td>
+                        <td class="compare-val highlight-num">${escUiHtml(c2.credits || 0)} נק״ז</td>
                     </tr>
                     <tr>
                         <td class="compare-label">סיווג פקולטי</td>
@@ -1224,8 +1337,8 @@
                     </tr>
                     <tr>
                         <td class="compare-label">אשכול התמחות</td>
-                        <td class="compare-val"><span style="background:rgba(168,85,247,0.15); color:#d8b4fe; border:1px solid rgba(168,85,247,0.35); padding:2px 8px; border-radius:999px; font-size:0.78rem; font-weight:700;">${c1.cluster || 'ליבה / כללי'}</span></td>
-                        <td class="compare-val"><span style="background:rgba(168,85,247,0.15); color:#d8b4fe; border:1px solid rgba(168,85,247,0.35); padding:2px 8px; border-radius:999px; font-size:0.78rem; font-weight:700;">${c2.cluster || 'ליבה / כללי'}</span></td>
+                        <td class="compare-val"><span style="background:rgba(168,85,247,0.15); color:#d8b4fe; border:1px solid rgba(168,85,247,0.35); padding:2px 8px; border-radius:999px; font-size:0.78rem; font-weight:700;">${escUiHtml(c1.cluster || 'ליבה / כללי')}</span></td>
+                        <td class="compare-val"><span style="background:rgba(168,85,247,0.15); color:#d8b4fe; border:1px solid rgba(168,85,247,0.35); padding:2px 8px; border-radius:999px; font-size:0.78rem; font-weight:700;">${escUiHtml(c2.cluster || 'ליבה / כללי')}</span></td>
                     </tr>
                     <tr>
                         <td class="compare-label">מדד עומס משוער</td>
@@ -1249,24 +1362,24 @@
                     </tr>
                     <tr>
                         <td class="compare-label">מועד א׳</td>
-                        <td class="compare-val ${isMoedAConflict ? 'conflict-date' : ''}">${c1.moedA || 'לפי לוח בחינות סמסטריאלי'}</td>
+                        <td class="compare-val ${isMoedAConflict ? 'conflict-date' : ''}">${escUiHtml(c1.moedA || 'לפי לוח בחינות סמסטריאלי')}</td>
                         <td class="compare-val ${isMoedAConflict ? 'conflict-date' : ''}">
-                            ${c2.moedA || 'לפי לוח בחינות סמסטריאלי'}
+                            ${escUiHtml(c2.moedA || 'לפי לוח בחינות סמסטריאלי')}
                             ${isMoedAConflict ? '<div class="conflict-pill">⚠️ התנגשות מועד א׳!</div>' : ''}
                         </td>
                     </tr>
                     <tr>
                         <td class="compare-label">מועד ב׳</td>
-                        <td class="compare-val ${isMoedBConflict ? 'conflict-date' : ''}">${c1.moedB || 'לפי לוח בחינות סמסטריאלי'}</td>
+                        <td class="compare-val ${isMoedBConflict ? 'conflict-date' : ''}">${escUiHtml(c1.moedB || 'לפי לוח בחינות סמסטריאלי')}</td>
                         <td class="compare-val ${isMoedBConflict ? 'conflict-date' : ''}">
-                            ${c2.moedB || 'לפי לוח בחינות סמסטריאלי'}
+                            ${escUiHtml(c2.moedB || 'לפי לוח בחינות סמסטריאלי')}
                             ${isMoedBConflict ? '<div class="conflict-pill">⚠️ התנגשות מועד ב׳!</div>' : ''}
                         </td>
                     </tr>
                     <tr>
                         <td class="compare-label">תקציר וסילבוס</td>
-                        <td class="compare-val syllabus-text">${c1.syllabus}</td>
-                        <td class="compare-val syllabus-text">${c2.syllabus}</td>
+                        <td class="compare-val syllabus-text">${escUiHtml(c1.syllabus)}</td>
+                        <td class="compare-val syllabus-text">${escUiHtml(c2.syllabus)}</td>
                     </tr>
                     <tr>
                         <td class="compare-label">פעולות מהירות</td>
@@ -1349,6 +1462,9 @@
         }
         modal.style.display = 'flex';
         modal.classList.add('active');
+        if (window.ModalHelp && typeof window.ModalHelp.setupTriggerForModal === 'function') {
+            window.ModalHelp.setupTriggerForModal('academic-faq-modal');
+        }
         const input = document.getElementById('faq-search-input');
         if (input) {
             input.value = '';
@@ -1435,19 +1551,30 @@
             <details class="faq-card" ${idx === 0 ? 'open' : ''}>
                 <summary class="faq-summary">
                     <span class="faq-title">
-                        <span class="faq-badge">${item.category}</span>
-                        <span>${item.title}</span>
+                        <span class="faq-badge">${escHtml(item.category)}</span>
+                        <span>${escHtml(item.title)}</span>
                     </span>
                     <span class="faq-chevron">▼</span>
                 </summary>
                 <div class="faq-content">
-                    ${item.content.replace(/\n/g, '<br>')}
+                    ${escHtml(item.content).replace(/\n/g, '<br>')}
                     <div style="margin-top: 8px; text-align: left;">
-                        <button type="button" class="btn btn-xs btn-outline" onclick="window.copyToClipboard('${item.title}: ${item.content.replace(/'/g, "\\'")}', 'תשובת המדריך הועתקה ללוח!')">📋 העתק תשובה</button>
+                        <button type="button" class="btn btn-xs btn-outline btn-faq-copy" data-faq-idx="${idx}">📋 העתק תשובה</button>
                     </div>
                 </div>
             </details>
         `).join('');
+
+        container.querySelectorAll('.btn-faq-copy').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const idx = parseInt(btn.getAttribute('data-faq-idx'), 10);
+                const item = filtered[idx];
+                if (item && typeof window.copyToClipboard === 'function') {
+                    window.copyToClipboard(`${item.title}: ${item.content}`, 'תשובת המדריך הועתקה ללוח!');
+                }
+            });
+        });
     };
 
     // =========================================================================
@@ -1461,6 +1588,97 @@
         }
         modal.style.display = 'flex';
         modal.classList.add('active');
+        if (window.ModalHelp && typeof window.ModalHelp.setupTriggerForModal === 'function') {
+            window.ModalHelp.setupTriggerForModal('keyboard-shortcuts-modal');
+        }
+    };
+
+    // =========================================================================
+    // 10b. Non-Blocking RTL Confirmation & Prompt Dialog (Replaces confirm/prompt)
+    // =========================================================================
+    window.SemesteroDialog = {
+        _open(options) {
+            return new Promise((resolve) => {
+                const existing = document.getElementById('semestero-nonblocking-dialog');
+                if (existing) existing.remove();
+
+                const overlay = document.createElement('div');
+                overlay.id = 'semestero-nonblocking-dialog';
+                overlay.className = 'modal-overlay active sem-dialog-overlay';
+                overlay.style.cssText = 'display: flex; z-index: 100200;';
+                overlay.setAttribute('role', 'dialog');
+                overlay.setAttribute('aria-modal', 'true');
+
+                const fields = Array.isArray(options.fields) ? options.fields : [];
+                const fieldsHtml = fields.map((f, idx) => `
+                    <div class="sem-dialog-field">
+                        <label class="sem-dialog-label" for="sem-dlg-input-${idx}">${escHtml(f.label || '')}</label>
+                        <input type="${escHtml(f.type || 'text')}" id="sem-dlg-input-${idx}" class="sem-dialog-input" data-key="${escHtml(f.key)}" value="${escHtml(f.defaultValue ?? '')}" placeholder="${escHtml(f.placeholder || '')}">
+                    </div>
+                `).join('');
+
+                overlay.innerHTML = `
+                    <div class="modal-content small sem-dialog-card" dir="rtl">
+                        <div class="modal-header sem-dialog-header">
+                            <h3 class="sem-dialog-title">${escHtml(options.title || 'אישור פעולה')}</h3>
+                            <button type="button" class="modal-close sem-dialog-close" aria-label="סגור">&times;</button>
+                        </div>
+                        <div class="modal-body sem-dialog-body">
+                            ${options.message ? `<p class="sem-dialog-msg">${escHtml(options.message).replace(/\n/g, '<br>')}</p>` : ''}
+                            ${fieldsHtml}
+                        </div>
+                        <div class="modal-footer sem-dialog-footer">
+                            <button type="button" class="btn btn-sm btn-ghost sem-dialog-cancel">${escHtml(options.cancelText || 'ביטול')}</button>
+                            <button type="button" class="btn btn-sm ${options.danger ? 'btn-danger' : 'btn-primary'} sem-dialog-ok">${escHtml(options.confirmText || 'אישור')}</button>
+                        </div>
+                    </div>
+                `;
+
+                const finish = (val) => {
+                    document.removeEventListener('keydown', onKey);
+                    overlay.remove();
+                    resolve(val);
+                };
+
+                const submit = () => {
+                    if (options.mode === 'prompt') {
+                        const res = {};
+                        overlay.querySelectorAll('.sem-dialog-input').forEach(inp => {
+                            res[inp.getAttribute('data-key')] = inp.value;
+                        });
+                        finish(res);
+                    } else {
+                        finish(true);
+                    }
+                };
+
+                const cancel = () => finish(options.mode === 'prompt' ? null : false);
+
+                const onKey = (e) => {
+                    if (e.key === 'Escape') { e.preventDefault(); cancel(); }
+                    else if (e.key === 'Enter' && (fields.length <= 1 || e.target.classList.contains('sem-dialog-ok'))) {
+                        e.preventDefault();
+                        submit();
+                    }
+                };
+
+                overlay.querySelector('.sem-dialog-close').onclick = cancel;
+                overlay.querySelector('.sem-dialog-cancel').onclick = cancel;
+                overlay.querySelector('.sem-dialog-ok').onclick = submit;
+                overlay.addEventListener('click', (e) => { if (e.target === overlay) cancel(); });
+                document.addEventListener('keydown', onKey);
+                document.body.appendChild(overlay);
+
+                const firstInput = overlay.querySelector('.sem-dialog-input') || overlay.querySelector('.sem-dialog-ok');
+                if (firstInput) setTimeout(() => firstInput.focus(), 20);
+            });
+        },
+        confirm(options) {
+            return this._open({ ...options, mode: 'confirm' });
+        },
+        prompt(options) {
+            return this._open({ ...options, mode: 'prompt' });
+        }
     };
 
     window.closeKeyboardShortcutsModal = function() {
@@ -1981,10 +2199,10 @@
 
             // Subtle directional enter class on newly active workspace
             const wsMap = {
-                curriculum: 'curriculum-workspace',
+                curriculum: 'curriculum-tree-workspace',
                 planner: 'planner-workspace',
-                tasks: 'tasks-workspace',
-                calendar: 'tasks-workspace',
+                tasks: 'notion-tasks-workspace',
+                calendar: 'tasks-calendar-view-pane',
                 timetable: 'timetable-workspace',
                 settings: 'settings-workspace'
             };

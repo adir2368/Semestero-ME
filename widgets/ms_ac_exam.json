@@ -2,6 +2,7 @@
   "type": "AdaptiveCard",
   "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
   "version": "1.5",
+  "rtl": true,
   "body": [
     {
       "type": "Container",
@@ -64,7 +65,7 @@
     {
       "type": "Action.OpenUrl",
       "title": "פתח ב-Semestero",
-      "url": "https://adir2368.github.io/Semestero-ME/widgets.html?w=exam"
+      "url": "https://semestero.me/Semestero-ME/widgets.html?w=exam"
     }
   ]
 }

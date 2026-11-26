@@ -17,7 +17,11 @@ const appJs = fs.readFileSync(appJsPath, 'utf8');
 assert.ok(appJs.includes('curMin < (startMin + 15)'), 'app.js getRemainingClassesToday must use curMin < (startMin + 15)');
 assert.ok(appJs.includes('currentHour >= 17'), 'app.js syncNativeAndroidWidgets must check currentHour >= 17 for evening');
 assert.ok(appJs.includes('allTasksJson'), 'app.js must pass allTasksJson to updateTasksWidget');
-assert.ok(appJs.includes("status === 'available' && (course.semester === (gameState.currentActiveSemester || 3)"), 'app.js getUpcomingPriorityTasks must include active and available semester 3 courses');
+assert.ok(
+    appJs.includes("const isCurrentSemCourse = (course.status === 'active')") &&
+    appJs.includes("course.status === 'available'"),
+    'app.js getUpcomingPriorityTasks must include active and available current-semester courses'
+);
 console.log('  ✓ Test 1 passed: app.js rules verified.');
 
 // 2. Watch Companion (watch_companion.js) verification

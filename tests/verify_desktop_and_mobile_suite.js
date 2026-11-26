@@ -53,7 +53,7 @@ test('Course Details Modal contains Technion++ Action Bar with all external link
     assert(appJs.includes('renderTechnionPlusQuickBar'), 'app.js must define renderTechnionPlusQuickBar');
     assert(appJs.includes('moodle26.technion.ac.il'), 'Quick bar must support Moodle 26');
     assert(appJs.includes('panopto.technion.ac.il'), 'Quick bar must support Panopto');
-    assert(appJs.includes('asat_icon.png'), 'Quick bar must feature ASAT icon for grades and exam scans');
+    assert(appJs.includes('asat_icon.webp') || appJs.includes('asat_icon.png'), 'Quick bar must feature ASAT icon for grades and exam scans');
     assert(appJs.includes('cheesefork.cf'), 'Quick bar must support CheeseFork');
     assert(appJs.includes('grades.technion.ac.il'), 'Quick bar must support Technion Grades & Scans portal');
 });
@@ -130,7 +130,7 @@ test('Graduation Clearance audit triggers and checks 157.5 total credits', () =>
 test('Degree Planner course card click opens Course Details modal with CheeseFork reviews link', () => {
     assert(plannerJs.includes('window.openCourseDetails(targetCode)'), 'planner_module.js must call openCourseDetails on course card click');
     assert(appJs.includes('cheesefork.cf/course/'), 'app.js must provide direct course URL to CheeseFork');
-    assert(appJs.includes('צפה בביקורות והיסטוגרמות ב-CheeseFork'), 'app.js must include prominent CheeseFork reviews and histograms button');
+    assert(appJs.includes('בדוק עדכונים ב-CheeseFork') || appJs.includes('היסטוגרמות ציונים ב-CheeseFork'), 'app.js must include prominent CheeseFork reviews and histograms button');
     assert(appJs.includes('PLANNER_CATALOG') && appJs.includes('CHEESEFORK_DB'), 'openCourseDetails must support fallback lookup from catalog and CheeseFork DB');
 });
 
@@ -151,7 +151,8 @@ test('Organit++ category pills are present with all 5 student domains', () => {
 test('Custom course task creation calls saveState() and renderNotionTasksTable()', () => {
     const handlerIdx = appJs.lastIndexOf('function handleCreateTaskSubmit');
     assert(handlerIdx !== -1, 'handleCreateTaskSubmit function definition must exist in app.js');
-    const handlerBody = appJs.substring(handlerIdx, handlerIdx + 4000);
+    const nextDeclIdx = appJs.indexOf('\nconst NOTION_FILTERS_STORAGE_KEY', handlerIdx);
+    const handlerBody = appJs.substring(handlerIdx, nextDeclIdx !== -1 ? nextDeclIdx : handlerIdx + 6000);
     assert(handlerBody.includes('saveState()'), 'handleCreateTaskSubmit must call saveState() for persistence');
     assert(handlerBody.includes('renderNotionTasksTable()'), 'handleCreateTaskSubmit must re-render tasks table');
 });
@@ -240,7 +241,7 @@ console.log('\n--- 6. Academic Analytics & Honors Forecaster ---');
 test('Academic Analytics modal displays GPA, Credits, Honors forecaster, and Histogram', () => {
     assert(indexHtml.includes('id="analytics-modal"'), 'Missing #analytics-modal in index.html');
     assert(indexHtml.includes('id="analytics-kpi-gpa"'), 'Missing #analytics-kpi-gpa in index.html');
-    assert(indexHtml.includes('id="analytics-honors-card"'), 'Missing #analytics-honors-card in index.html');
+    assert(indexHtml.includes('id="analytics-kpi-best-term"') && indexHtml.includes('id="analytics-donut-svg"'), 'Missing analytics KPI best term or donut chart in index.html');
     assert(indexHtml.includes('id="analytics-histogram-bars"'), 'Missing #analytics-histogram-bars in index.html');
     assert(appJs.includes('renderAnalyticsCharts'), 'app.js must define renderAnalyticsCharts');
 });

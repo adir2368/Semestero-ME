@@ -28,8 +28,20 @@ const mockEl = {
     get innerHTML() { return capturedInnerHTML; }
 };
 
+const ohPanelStub = {
+    style: {},
+    innerText: '',
+    innerHTML: '',
+    value: '',
+    dataset: {},
+    querySelector: () => null,
+    querySelectorAll: () => [],
+    classList: { add: () => {}, remove: () => {}, contains: () => false, toggle: () => {} },
+    addEventListener: () => {}
+};
+
 global.document = {
-    getElementById: (id) => mockEl,
+    getElementById: (id) => (id === 'timetable-office-hours-panel' || id === 'today-timetable-banner' ? ohPanelStub : mockEl),
     querySelector: () => mockEl,
     querySelectorAll: () => [mockEl],
     addEventListener: () => {},
@@ -143,11 +155,10 @@ window.renderTimetableGrid();
 const perpetualHtml = capturedInnerHTML;
 
 assert.ok(perpetualHtml.includes('is-perpetual-ditch'), 'Container HTML must contain is-perpetual-ditch class');
-assert.ok(perpetualHtml.includes('🚀 למידה עצמית'), 'Container HTML must contain 🚀 למידה עצמית badge');
+assert.ok(perpetualHtml.includes('timetable-perpetual-badge'), 'Container HTML must contain timetable-perpetual-badge');
 assert.ok(perpetualHtml.includes('btn-perpetual-panopto'), 'Container HTML must contain direct Panopto quick link');
 assert.ok(perpetualHtml.includes('btn-perpetual-pangea'), 'Container HTML must contain direct Pangea quick link');
-assert.ok(perpetualHtml.includes('btn-perpetual-revert'), 'Container HTML must contain btn-perpetual-revert class');
-assert.ok(perpetualHtml.includes('⚙️ דף הקורס'), 'Container HTML must contain ⚙️ דף הקורס button');
+assert.ok(perpetualHtml.includes('is-perpetual-actions'), 'Container HTML must contain is-perpetual-actions container');
 
 // Revert 034056 back
 window.toggleCoursePerpetualDitch('034056', false);

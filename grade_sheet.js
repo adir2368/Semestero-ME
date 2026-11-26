@@ -14,6 +14,38 @@
 
     const DEGREE_TOTAL_CREDITS = 157.5;
 
+    function escGsHtml(str) {
+        if (typeof window !== 'undefined' && window.__semesteroUtils && typeof window.__semesteroUtils.escapeHtml === 'function') {
+            return window.__semesteroUtils.escapeHtml(str);
+        }
+        return String(str ?? '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
+    function isAdirSessionOrIsolatedTest() {
+        if (window.AuthSync && typeof window.AuthSync.isAdirActive === 'function') {
+            return !!window.AuthSync.isAdirActive();
+        }
+        return !window.AuthSync;
+    }
+
+    function isExplicitAdirSession() {
+        return !!(window.AuthSync && typeof window.AuthSync.isAdirActive === 'function' && window.AuthSync.isAdirActive());
+    }
+
+    function getStudentInfoStorageKey() {
+        if (window.AuthSync && typeof window.AuthSync.getActiveUser === 'function') {
+            const u = window.AuthSync.getActiveUser();
+            const uid = (u && u.id) ? String(u.id).trim() : 'guest';
+            return 'ast_grade_sheet_student_info_' + uid;
+        }
+        return 'ast_grade_sheet_student_info';
+    }
+
     const GradeSheet = {
         isOpen: false,
         returnTarget: null,
@@ -25,7 +57,7 @@
             id: '',
             faculty: 'הפקולטה להנדסת מכונות',
             program: '034 - בוגר למדעים (B.Sc.) בהנדסת מכונות',
-            currentTerm: 'אביב תשפ"ד (סמסטר 3)'
+            currentTerm: 'חורף תשפ"ז (סמסטר 3)'
         },
 
         init() {
@@ -34,8 +66,10 @@
         },
 
         loadStoredStudentInfo() {
+            this.studentInfo.name = '';
+            this.studentInfo.id = '';
             try {
-                const stored = localStorage.getItem('ast_grade_sheet_student_info');
+                const stored = localStorage.getItem(getStudentInfoStorageKey());
                 if (stored) {
                     const parsed = JSON.parse(stored);
                     if (parsed && typeof parsed === 'object') {
@@ -48,7 +82,12 @@
 
             // Fallback to active user identity
             if (!this.studentInfo.name) {
-                if (window.AuthSync && typeof window.AuthSync.getCurrentUser === 'function') {
+                if (window.AuthSync && typeof window.AuthSync.getActiveUser === 'function') {
+                    const u = window.AuthSync.getActiveUser();
+                    if (u && u.id && u.id !== 'guest' && u.name) {
+                        this.studentInfo.name = u.name;
+                    }
+                } else if (window.AuthSync && typeof window.AuthSync.getCurrentUser === 'function') {
                     const u = window.AuthSync.getCurrentUser();
                     if (u && u.name) this.studentInfo.name = u.name;
                 }
@@ -56,8 +95,7 @@
                     this.studentInfo.name = window.gameState.userProfile.name;
                 }
                 if (!this.studentInfo.name) {
-                    const isAdir = window.AuthSync && typeof window.AuthSync.isAdirActive === 'function' && window.AuthSync.isAdirActive();
-                    this.studentInfo.name = isAdir ? 'אדיר משה' : 'סטודנט להנדסת מכונות';
+                    this.studentInfo.name = isExplicitAdirSession() ? 'אדיר משה' : 'סטודנט להנדסת מכונות';
                 }
             }
 
@@ -65,7 +103,7 @@
                 if (window.gameState && window.gameState.userProfile && window.gameState.userProfile.studentId) {
                     this.studentInfo.id = window.gameState.userProfile.studentId;
                 } else {
-                    this.studentInfo.id = '318942516';
+                    this.studentInfo.id = isExplicitAdirSession() ? '318942516' : '—';
                 }
             }
         },
@@ -81,7 +119,7 @@
             }
 
             try {
-                localStorage.setItem('ast_grade_sheet_student_info', JSON.stringify(this.studentInfo));
+                localStorage.setItem(getStudentInfoStorageKey(), JSON.stringify(this.studentInfo));
                 if (window.gameState && !window.gameState.userProfile) window.gameState.userProfile = {};
                 if (window.gameState) {
                     window.gameState.userProfile.name = this.studentInfo.name;
@@ -112,7 +150,7 @@
             if (window.gameState && window.gameState.courses) {
                 return window.gameState.courses;
             }
-            if (window.PRELOADED_USER_STATE && window.PRELOADED_USER_STATE.courses) {
+            if (isAdirSessionOrIsolatedTest() && window.PRELOADED_USER_STATE && window.PRELOADED_USER_STATE.courses) {
                 return window.PRELOADED_USER_STATE.courses;
             }
             return {};
@@ -356,8 +394,10 @@
             // Populate student fields
             const nameEl = document.getElementById('grade-sheet-student-name');
             const idEl = document.getElementById('grade-sheet-student-id');
-            if (nameEl) nameEl.innerText = this.studentInfo.name || 'אדיר משה';
-            if (idEl) idEl.innerText = this.studentInfo.id || '318942516';
+            const defaultName = isExplicitAdirSession() ? 'אדיר משה' : 'סטודנט להנדסת מכונות';
+            const defaultId = isExplicitAdirSession() ? '318942516' : '—';
+            if (nameEl) nameEl.innerText = this.studentInfo.name || defaultName;
+            if (idEl) idEl.innerText = this.studentInfo.id || defaultId;
 
             this.render();
 
@@ -570,11 +610,11 @@
                 const displayGpa = this.isSimActive && sem.simGpa !== null ? sem.simGpa : sem.gpa;
 
                 html += `
-                    <div class="grade-sheet-sem-block" id="gs-sem-block-${sem.semester}">
+                    <div class="grade-sheet-sem-block" id="gs-sem-block-${escGsHtml(sem.semester)}">
                         <div class="grade-sheet-sem-header">
                             <div class="sem-header-title">
                                 <span class="sem-icon">📅</span>
-                                <h4><bdi dir="rtl">${sem.name}</bdi></h4>
+                                <h4><bdi dir="rtl">${escGsHtml(sem.name)}</bdi></h4>
                             </div>
                             <div class="sem-header-stats">
                                 <span>נק״ז: <strong>${sem.earnedCredits.toFixed(1)}</strong></span>
@@ -634,16 +674,17 @@
                             qpCellContent = '<span style="color: #64748b;">-</span>';
                         } else if (this.isSimActive) {
                             const currentSimVal = this.simGrades[c.code] !== undefined ? this.simGrades[c.code] : '';
+                            const safeCodeAttr = escGsHtml(c.code);
                             gradeCellContent = `
                                 <div class="sim-input-wrapper">
                                     <input type="number" 
                                            class="sim-grade-input no-print" 
                                            min="0" max="100" 
                                            placeholder="הזן" 
-                                           value="${currentSimVal}"
-                                           oninput="window.handleGradeSheetSimInput('${c.code}', this.value)"
+                                           value="${escGsHtml(currentSimVal)}"
+                                           oninput="window.handleGradeSheetSimInput('${safeCodeAttr}', this.value)"
                                            title="הזן ציון תרחיש">
-                                    <span class="sim-print-val">${currentSimVal || '-'}</span>
+                                    <span class="sim-print-val">${escGsHtml(currentSimVal) || '-'}</span>
                                 </div>
                             `;
                             qpCellContent = c.simGrade !== null 
@@ -657,8 +698,8 @@
 
                     html += `
                         <tr class="${c.isMastered ? 'row-mastered' : 'row-pending'}">
-                            <td class="cell-code"><bdi dir="ltr">${c.code}</bdi></td>
-                            <td class="cell-name">${c.name}</td>
+                            <td class="cell-code"><bdi dir="ltr">${escGsHtml(c.code)}</bdi></td>
+                            <td class="cell-name">${escGsHtml(c.name)}</td>
                             <td class="cell-cr" style="text-align: center;">${c.credits.toFixed(1)}</td>
                             <td class="cell-type" style="text-align: center;">${c.isBinary ? 'בינארי' : 'מספרי'}</td>
                             <td class="cell-grade" style="text-align: center;">${gradeCellContent}</td>
@@ -678,7 +719,7 @@
                                 </tbody>
                                 <tfoot>
                                     <tr class="table-subtotal-row">
-                                        <td colspan="2"><strong>סיכום ${sem.name}</strong></td>
+                                        <td colspan="2"><strong>סיכום ${escGsHtml(sem.name)}</strong></td>
                                         <td style="text-align: center;"><strong>${semTotalCr.toFixed(1)}</strong></td>
                                         <td style="text-align: center;"><small>${subGradedCr.toFixed(1)} לציון</small></td>
                                         <td style="text-align: center;">${subGpa !== null ? `<strong>${subGpa.toFixed(2)}</strong>` : '-'}</td>
@@ -723,7 +764,9 @@
             // Transcript Header Metadata
             lines.push(`גיליון ציונים אישי ומעקב ממוצע (אינו מסמך רשמי של הטכניון)`);
             lines.push(`הפקולטה להנדסת מכונות (תוכנית 034)`);
-            lines.push(`שם הסטודנט,${this.studentInfo.name || 'אדיר משה'},מספר ת.ז/סטודנט,${this.studentInfo.id || '318942516'}`);
+            const csvName = this.studentInfo.name || (isExplicitAdirSession() ? 'אדיר משה' : 'סטודנט להנדסת מכונות');
+            const csvId = this.studentInfo.id || (isExplicitAdirSession() ? '318942516' : '—');
+            lines.push(`שם הסטודנט,${csvName},מספר ת.ז/סטודנט,${csvId}`);
             lines.push(`תאריך הפקה,${new Date().toLocaleDateString('he-IL')},מעמד אקדמי,${data.cumulativeStanding}`);
             lines.push(`ממוצע מצטבר,${data.cumulativeGpa.toFixed(2)},נק״ז שנצברו לתואר,${data.totalEarnedCredits.toFixed(1)} / ${data.totalDegreeCredits}`);
             lines.push(`סך נק״ז לציון,${data.totalGradedCredits.toFixed(1)},סך נקודות איכות,${data.totalQualityPoints.toFixed(1)}`);

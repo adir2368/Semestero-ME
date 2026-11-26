@@ -1,8 +1,11 @@
 import os
+import json
 import zipfile
 import shutil
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+with open(os.path.join(ROOT, "package.json"), "r", encoding="utf-8") as pkg_f:
+    PKG_VERSION = json.load(pkg_f).get("version", "3.2.0")
 SRC_DIR = os.path.join(ROOT, "dist", "Semestero ME-win32-x64")
 if not os.path.exists(os.path.join(SRC_DIR, "Semestero ME.exe")):
     SRC_DIR = os.path.join(ROOT, "dist_build", "Semestero ME-win32-x64")
@@ -48,7 +51,9 @@ try:
     shutil.copy2(EXE_SRC, EXE_DST)
     print(f"Updated root Semestero-ME.exe successfully ({os.path.getsize(EXE_DST)} bytes)")
 except Exception as e:
-    print(f"Note: Could not overwrite root Semestero-ME.exe directly ({e}). Copying to Semestero-ME-v264.exe...")
-    alt_dst = os.path.join(ROOT, "Semestero-ME-v264.exe")
+    ver_clean = PKG_VERSION.replace(".", "")
+    alt_name = f"Semestero-ME-v{ver_clean}.exe"
+    print(f"Note: Could not overwrite root Semestero-ME.exe directly ({e}). Copying to {alt_name}...")
+    alt_dst = os.path.join(ROOT, alt_name)
     shutil.copy2(EXE_SRC, alt_dst)
     print(f"Created {alt_dst} successfully!")

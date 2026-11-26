@@ -17,9 +17,9 @@ ZIP_PATH = os.path.join(ROOT, "Semestero-ME-Windows-x64.zip")
 
 with open(os.path.join(ROOT, "package.json"), "r", encoding="utf-8") as f:
     pkg = json.load(f)
-VERSION = pkg.get("version", "3.1.16")
+VERSION = pkg.get("version", "3.2.0")
 TAG = f"v{VERSION}"
-NAME = f"Semestero ME v{VERSION} - Live Moodle Auto-Sync, PDE Electronic Tasks & 034056 Fix"
+NAME = f"Semestero ME v{VERSION} - Full Ecosystem Hardening, Light Mode & Native Stack Wave"
 
 def get_github_token():
     try:
@@ -99,19 +99,18 @@ def main():
 
     body_notes = f"""# Semestero ME {TAG} Release Notes
 
-### 🔄 1. תיקון סנכרון אוטומטי ממודל (`moodle_sync.js`, `auth_sync.js`, `app.js`, `server.js`)
-- **טעינת כתובת ושחזור אוטומטי באתחול**: פתרון מרוץ הטעינה בין `moodle_sync.js` ל-`AuthSync` ו-`gameState` (הכתובת משוחזרת כעת אוטומטית מ-`gameState.moodleCalendarUrl`, אחסון משויך או מצב מאומת), הפעלת סנכרון שקט עם השלמת ההתחברות ובאתחול המערכת, וצמצום מנגנון המניעה הפסיבי.
-- **פרוקסי מקומי נטול CORS בשרת ה-Web (`server.js`)**: נוסף נתיב `/api/moodle-ics` למשיכת הזנות iCal ממודל הטכניון ללא חסימות דפדפן.
+### 🛡️ 1. Full Ecosystem Security, Sync & State Hardening (Passes 0–6)
+- **Shared Core & Privacy**: Hardened `auth_sync.js` CRDT merges, sanitized imported state/DOM rendering (`escHtml`, safe delegation), scrubbed all residual credentials from guest defaults, and eliminated GitHub API 403 rate-limit warnings by checking `raw.githubusercontent.com` first.
+- **Curriculum, Planner & Tasks**: Unified prerequisite/Moodle normalization, fixed Degree Planner cluster & physics track isolation, stabilized Best-N HW tracking, and replaced blocking native `confirm`/`prompt` alerts with accessible custom dialogs.
+- **Calendar, Timetable & Light Mode**: Fixed RTL calendar paging, Day view hour axis, Exam Gap Runway conflict stacking, PNG Timetable export, and introduced full **Light Mode (`מצב בהיר`)** + enhanced **High Contrast** & `?` Modal Help across all dialogs.
 
-### 🧮 2. מיקוד מד"ח מ' (`104228`) בתרגילים אלקטרוניים ושיפור זיהוי כפילויות
-- גיליונות הבית הכתובים הלא-מחייבים (`הגשת גיליון בית 1/2/3`) אינם מיובאים או נספרים במעקב שיעורי הבית של `104228` — רק התרגילים האלקטרוניים (`104228` מגן תרגילים אלקטרוניים).
-- שמירה על הפרדת רכיבים כפולים בעלי מזהי אירוע מודל שונים (כגון בוחן מקוון והגשת פתרון בכתב ב-`034053`) ופענוח ברירות-מחדל של תווים מ-iCal (`\\,`, `&amp;`).
+### 📱 2. Native Android, Galaxy Watch 8, Electron & iOS Wave (Pass 7)
+- **Android Bridge & Widgets**: Hardened JS bridge quoting (`JSONObject.quote`), restricted `fetchMoodleIcs` & external/download intents to Technion Moodle / `http(s)` / `mailto`, fixed widget deep-link routing (`calendar`/`curriculum`/`tasks`) with intent consumption, added widget task two-way sync, and clamped class carousel index.
+- **Galaxy Watch 8 (`Wear OS`)**: Prevented Complication short-hour `substring(0, 5)` crash, preserved empty synced weekdays, dynamically resolved weekend next-class previews, aligned Tasks Complication deduplication, and neutralized guest GPA defaults.
+- **Electron & iOS Parity**: Added `will-navigate` navigation guard in `main.js`, included `watch_companion.js` & `widgets.html` offline assets, and synced iOS Capacitor URL/version metadata (`{VERSION}` / build `145`).
 
-### 📊 3. שחזור גיליונות `034056` ("מבוא לחישוב מדעי והנדסי") ועדכון משימות
-- שחרור חסימה שנשארה ממיגרציה קודמת עבור מזהה `30390` ומעקב הגיליונות של `034056`, הוספת `"גיליון שיעורי בית 2"`, ותיקון פענוח ביטויי `"גיליון שיעורי בית N"` ו-`"הגשה N"`.
-
-### 📦 4. קובצי הפצה (`v{VERSION}`, `versionCode 144`):
-- פורסמו כל 4 קובצי ההתקנה החתומים (Android Phone, Tablet, Galaxy Watch, Windows x64).
+### 📦 3. קובצי הפצה (`v{VERSION}`, `versionCode 145`):
+- פורסמו כל 4 קובצי ההתקנה החתומים (Android Phone, Tablet Clean, Galaxy Watch 8, Windows x64).
 """
 
     req_tag = urllib.request.Request(f"https://api.github.com/repos/{REPO}/releases/tags/{TAG}", headers=headers)

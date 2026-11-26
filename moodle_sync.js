@@ -32,10 +32,20 @@
             
             // Background auto-sync on app launch if URL is configured
             if (this.config.url && this.config.autoSync !== false) {
-                setTimeout(() => {
+                const startupTimer = setTimeout(() => {
                     this.triggerThrottledAutoSync('startup');
                 }, 2500);
+                if (startupTimer && typeof startupTimer.unref === 'function') startupTimer.unref();
             }
+        },
+
+        escapeHtml(str) {
+            return String(str == null ? '' : str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
         },
 
         setupAutoSyncListeners() {
@@ -60,9 +70,12 @@
 
             // 15-minute background interval
             if (typeof setInterval === 'function') {
-                setInterval(() => {
+                const autoSyncTimer = setInterval(() => {
                     this.triggerThrottledAutoSync('interval');
                 }, 15 * 60 * 1000);
+                if (autoSyncTimer && typeof autoSyncTimer.unref === 'function') {
+                    autoSyncTimer.unref();
+                }
             }
         },
 
@@ -991,6 +1004,34 @@
                 resolvedStatus = isDone ? ((primary.status === 'submitted' || secondary.status === 'submitted') ? 'submitted' : 'done') : (primary.status !== 'not_started' ? primary.status : (secondary.status || 'not_started'));
             }
 
+            const pPinTime = Number(primary.pinnedUpdatedAt || 0);
+            const sPinTime = Number(secondary.pinnedUpdatedAt || 0);
+            const resolvedPinned = (pPinTime > 0 || sPinTime > 0)
+                ? (pPinTime >= sPinTime ? !!primary.pinned : !!secondary.pinned)
+                : !!(primary.pinned || secondary.pinned);
+            const maxPinTime = Math.max(pPinTime, sPinTime);
+
+            const pColorTime = Number(primary.colorUpdatedAt || 0);
+            const sColorTime = Number(secondary.colorUpdatedAt || 0);
+            const resolvedColor = (pColorTime > 0 || sColorTime > 0)
+                ? (pColorTime >= sColorTime ? (primary.color || null) : (secondary.color || null))
+                : (primary.color || secondary.color || null);
+            const maxColorTime = Math.max(pColorTime, sColorTime);
+
+            const maxGradeTime = Math.max(Number(primary.gradeUpdatedAt || 0), Number(secondary.gradeUpdatedAt || 0));
+
+            let dedupComments;
+            if (Array.isArray(primary.comments) || Array.isArray(secondary.comments)) {
+                const seenComments = new Set();
+                dedupComments = [...(primary.comments || []), ...(secondary.comments || [])].filter(c => {
+                    if (!c) return false;
+                    const key = (typeof c === 'object') ? `${c.date || ''}|${c.text || ''}` : String(c);
+                    if (seenComments.has(key)) return false;
+                    seenComments.add(key);
+                    return true;
+                });
+            }
+
             const merged = {
                 id: primary.id || secondary.id,
                 title: chosenTitle,
@@ -1003,16 +1044,18 @@
                 ...(newestStatusTs > 0 ? { statusUpdatedAt: newestStatusTs } : {}),
                 ...(resolvedCompletedAt ? { completedAt: resolvedCompletedAt } : {}),
                 grade: (primary.grade !== undefined && primary.grade !== null) ? primary.grade : secondary.grade,
+                ...(maxGradeTime > 0 ? { gradeUpdatedAt: maxGradeTime } : {}),
                 moodleEventId: primary.moodleEventId || secondary.moodleEventId || this.extractMoodleId(secondary) || this.extractMoodleId(primary),
                 moodleUid: primary.moodleUid || secondary.moodleUid,
                 moodleUrl: primary.moodleUrl || secondary.moodleUrl,
                 source: (primary.source === 'manual' || secondary.source === 'manual') ? 'manual' : (primary.source || secondary.source || (this.extractMoodleId(primary) ? 'moodle' : undefined)),
                 isMiluim: !!(primary.isMiluim || primary.miluim || secondary.isMiluim || secondary.miluim || this.isMiluimTask(primary) || this.isMiluimTask(secondary)),
-                pinned: !!(primary.pinned || secondary.pinned),
+                pinned: resolvedPinned,
+                ...(maxPinTime > 0 ? { pinnedUpdatedAt: maxPinTime } : {}),
+                ...(resolvedColor ? { color: resolvedColor } : {}),
+                ...(maxColorTime > 0 ? { colorUpdatedAt: maxColorTime } : {}),
                 notes: primary.notes || secondary.notes || undefined,
-                comments: (Array.isArray(primary.comments) || Array.isArray(secondary.comments))
-                    ? Array.from(new Set([...(primary.comments || []), ...(secondary.comments || [])]))
-                    : undefined
+                comments: dedupComments
             };
 
             if (isDone) {
@@ -1182,7 +1225,7 @@
                     `;
                     this.setStatus(downloadHtml, 'error');
                 } else {
-                    const errMsg = err.message || 'שגיאת התחברות';
+                    const errMsg = this.escapeHtml(err.message || 'שגיאת התחברות');
                     this.setStatus(`שגיאה בסנכרון: ${errMsg}. <span style="cursor:pointer;text-decoration:underline;" id="btn-moodle-retry-mock">לחץ להדמיה (Mock)</span>`, 'error');
                     
                     setTimeout(() => {
@@ -1205,7 +1248,7 @@
          */
         importFromFile(file) {
             if (!file) return;
-            this.setStatus(`טוען קובץ ${file.name}...`, 'working');
+            this.setStatus(`טוען קובץ ${this.escapeHtml(file.name)}...`, 'working');
             const reader = new FileReader();
             reader.onload = (e) => {
                 try {
@@ -1567,39 +1610,49 @@
             this.setStatus('מריץ סימולציית סנכרון ממודל הטכניון...', 'working');
             
             setTimeout(() => {
+                const toIcsDate = (daysAhead) => {
+                    const d = new Date(Date.now() + daysAhead * 86400000);
+                    return `${d.getUTCFullYear()}${String(d.getUTCMonth() + 1).padStart(2, '0')}${String(d.getUTCDate()).padStart(2, '0')}T215900Z`;
+                };
+                const d1 = toIcsDate(3);
+                const d2 = toIcsDate(6);
+                const d3 = toIcsDate(9);
                 const sampleIcs = `BEGIN:VCALENDAR
 VERSION:2.0
 PRODID:-//Moodle Technion//NONSGML//HE
 BEGIN:VEVENT
-UID:987101@moodle25.technion.ac.il
-SUMMARY:תרגיל בית 3 - מאמצים ראשיים ועיגול מור
-CATEGORIES:00340028.201
-DTSTART:20261112T215900Z
-DTEND:20261112T215900Z
+UID:987101@moodle26.technion.ac.il
+SUMMARY:תרגיל בית 4 - מאמצים משולבים וקריטריוני כשל
+CATEGORIES:00340053.201
+DTSTART:${d1}
+DTEND:${d1}
 DESCRIPTION:הגשה במודל עד שעה 23:59
 END:VEVENT
 BEGIN:VEVENT
-UID:987102@moodle25.technion.ac.il
-SUMMARY:מטלה 4 - אינטגרלים כפולים ומשוואות דיפרנציאליות
-CATEGORIES:01040043.201
-DTSTART:20261118T215900Z
-DTEND:20261118T215900Z
-DESCRIPTION:תרגיל שבועי בחדו"א 2מ
+UID:987102@moodle26.technion.ac.il
+SUMMARY:תרגיל בית 2 - פוטנציאל חשמלי וקיבול
+CATEGORIES:01140052.201
+DTSTART:${d2}
+DTEND:${d2}
+DESCRIPTION:תרגיל שבועי בפיסיקה 2
 END:VEVENT
 BEGIN:VEVENT
-UID:987103@moodle25.technion.ac.il
-SUMMARY:דוח מעבדה 1 - חוק אוהם וגלוונומטר
-CATEGORIES:01140054.201
-DTSTART:20261125T215900Z
-DTEND:20261125T215900Z
-DESCRIPTION:הגשת דוח מסכם במעבדת פיזיקה
+UID:987103@moodle26.technion.ac.il
+SUMMARY:תרגיל בית 2 - החוק הראשון של התרמודינמיקה
+CATEGORIES:00340035.201
+DTSTART:${d3}
+DTEND:${d3}
+DESCRIPTION:הגשת תרגיל בית בתרמודינמיקה 1
 END:VEVENT
 END:VCALENDAR`;
 
                 const result = this.parseAndApplyIcs(sampleIcs);
+                if (typeof global.renderNotionTasksTable === 'function') global.renderNotionTasksTable();
+                if (typeof global.renderNotionHomeworkPolicyStrip === 'function') global.renderNotionHomeworkPolicyStrip();
+                if (typeof global.renderTasksReminderBanner === 'function') global.renderTasksReminderBanner();
                 this.setStatus(`⚡ סימולציה הושלמה! נוצרו ${result.newCount} מטלות מודל אותנטיות.`, 'success');
                 if (typeof showHudToast === 'function') {
-                    showHudToast(`סימולציית מודל: נוספו ${result.newCount} מטלות בעץ הקורסים 🎯`, 'success');
+                    showHudToast(`סימולציית מודל: נוספו ${result.newCount} מטלות בסמסטר הפעיל 🎯`, 'success');
                 }
             }, 800);
         }

@@ -59,6 +59,7 @@ const FILES_TO_COPY = [
     'notification-badge.png',
     'widgets.html',
     'watch.html',
+    'watch_companion.js',
     'shortcut-semester-192.png',
     'shortcut-schedule-192.png',
     'shortcut-tasks-192.png',
@@ -87,5 +88,18 @@ FILES_TO_COPY.forEach(file => {
         console.warn(`[Build Mobile] Optional file missing: ${file}`);
     }
 });
+
+// Copy Windows/web Adaptive Card widget manifests referenced by widgets.html
+const widgetsSrcDir = path.join(ROOT, 'widgets');
+const widgetsDestDir = path.join(WWW, 'widgets');
+if (fs.existsSync(widgetsSrcDir)) {
+    fs.mkdirSync(widgetsDestDir, { recursive: true });
+    fs.readdirSync(widgetsSrcDir).forEach(entry => {
+        if (entry.endsWith('.json')) {
+            fs.copyFileSync(path.join(widgetsSrcDir, entry), path.join(widgetsDestDir, entry));
+            copiedCount++;
+        }
+    });
+}
 
 console.log(`✅ Successfully prepared mobile bundle in /www with ${copiedCount} files.`);

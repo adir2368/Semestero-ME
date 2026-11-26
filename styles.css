@@ -17210,7 +17210,7 @@ tr.is-task-pinned {
 .pangea-search-overlay {
     position: fixed;
     inset: 0;
-    z-index: 2000010 !important;
+    z-index: 1999990 !important;
     background: rgba(10, 15, 29, 0.94);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
@@ -21022,4 +21022,1114 @@ a.btn:focus-visible {
     border-color: #a78bfa !important;
     color: #ede9fe !important;
     box-shadow: 0 0 10px rgba(167, 139, 250, 0.44);
+}
+
+
+/* ==============================================================================
+   Pass 1 Curriculum & Modal Layout Hardening
+   ============================================================================== */
+#auth-modal .modal-content {
+    max-height: 92vh;
+    overflow-y: auto;
+}
+
+.analytics-header-banner {
+    padding: 20px 24px 20px 64px;
+}
+
+.grade-sheet-sem-block {
+    min-width: 0;
+    max-width: 100%;
+}
+
+.grade-sheet-table-wrapper {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 768px) {
+    .analytics-kpi-value {
+        font-size: clamp(1.02rem, 4.2vw, 1.28rem) !important;
+        direction: ltr;
+        unicode-bidi: isolate;
+        max-width: 100%;
+        overflow-wrap: anywhere;
+    }
+}
+
+@media (max-width: 640px) {
+    .grade-sheet-scrollable-wrap {
+        padding: 12px;
+    }
+    .grade-sheet-document {
+        padding: 14px 12px;
+    }
+    .grade-sheet-table {
+        font-size: 0.78rem;
+        min-width: 480px;
+    }
+    .grade-sheet-table th,
+    .grade-sheet-table td {
+        padding: 8px 8px;
+        white-space: nowrap;
+    }
+    .grade-sheet-table td.cell-name {
+        white-space: normal;
+        min-width: 120px;
+    }
+}
+
+/* ==============================================================================
+   Pass 1b Sub-Modal Alignment, Pangea Mobile Header & Interactive Histogram
+   ============================================================================== */
+#add-course-modal .modal-header,
+#course-comparison-modal .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    padding-left: 60px;
+}
+
+.pangea-reader-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.pangea-reader-action-btn {
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+@media (max-width: 480px) {
+    .pangea-reader-title {
+        max-width: 34vw;
+    }
+    .pangea-reader-action-btn {
+        font-size: 0.68rem;
+        padding: 4px 7px;
+    }
+}
+
+.histogram-col.active-bucket .histogram-bar {
+    outline: 2px solid #f8fafc;
+    box-shadow: 0 0 14px rgba(56, 189, 248, 0.55);
+}
+
+.analytics-histogram-detail {
+    margin-top: 12px;
+    padding: 10px 14px;
+    background: rgba(15, 23, 42, 0.78);
+    border: 1px solid rgba(56, 189, 248, 0.3);
+    border-radius: 10px;
+    font-size: 0.82rem;
+    color: #e2e8f0;
+    line-height: 1.5;
+}
+
+/* === Pass 2 Degree Planner Hardening (v3.1.16 wave) === */
+.modal-backdrop.active {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(10, 15, 29, 0.85);
+    backdrop-filter: blur(6px);
+    padding: 16px;
+    z-index: 100055 !important;
+}
+
+.planner-course-card .course-card-actions {
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.btn-card-move {
+    background: rgba(56, 189, 248, 0.12);
+    border: 1px solid rgba(56, 189, 248, 0.3);
+    color: #38bdf8;
+    cursor: pointer;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 1px 5px;
+    border-radius: 4px;
+    line-height: 1.2;
+    transition: all 0.15s ease;
+}
+
+.btn-card-move:hover {
+    background: rgba(56, 189, 248, 0.25);
+    border-color: #38bdf8;
+    color: #f8fafc;
+}
+
+.workload-popover-overlay {
+    z-index: 100060 !important;
+}
+
+.planner-action-sheet-overlay.active {
+    z-index: 100060 !important;
+}
+
+#modal-course-code {
+    display: inline-flex !important;
+    align-items: center;
+    text-box: normal !important;
+    line-height: 1.3 !important;
+    padding: 2px 8px;
+    text-decoration: none !important;
+}
+
+@media print {
+    .btn-card-move {
+        display: none !important;
+    }
+}
+
+@media (min-width: 769px) {
+    .planner-semester-col {
+        flex: 0 0 280px;
+        min-width: 265px;
+    }
+}
+
+@media (max-width: 768px) {
+    html,
+    body,
+    #planner-workspace {
+        max-width: 100vw;
+        overflow-x: clip;
+    }
+
+    #planner-workspace {
+        padding-bottom: 104px !important;
+    }
+
+    .planner-sidebar {
+        padding-bottom: 104px !important;
+    }
+
+    .planner-wrapper[data-mobile-view="both"] .planner-board-area {
+        min-height: 430px;
+        max-height: none;
+    }
+
+    .planner-mode-switch .btn-planner-mode {
+        font-size: 0.73rem;
+        padding: 6px 8px;
+        white-space: normal;
+        line-height: 1.25;
+        text-align: center;
+    }
+}
+
+
+/* === Pass 2 Visual Audit Follow-up (P2-7 & P2-8) === */
+#modal-course-code {
+    display: inline-flex !important;
+    align-items: center;
+    font-family: 'Rubik', system-ui, -apple-system, sans-serif !important;
+    font-variant-numeric: tabular-nums !important;
+    font-size: 0.82rem !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.04em !important;
+    color: #e2e8f0 !important;
+    text-box: normal !important;
+    line-height: 1.35 !important;
+    padding: 2px 8px !important;
+    text-decoration: none !important;
+}
+
+.planner-export-modal,
+.planner-semesters-mgr-modal {
+    max-height: calc(100vh - 32px) !important;
+    max-height: calc(100dvh - 32px) !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain;
+}
+
+
+/* === Pass 3 Tasks, Moodle & Side Peek Hardening (v3.1.16 wave) === */
+#modal-add-custom-task {
+    z-index: 100060 !important;
+    padding: 16px;
+}
+
+#modal-add-custom-task .modal-content {
+    display: flex !important;
+    flex-direction: column !important;
+    max-height: calc(100dvh - 32px) !important;
+    overflow: hidden !important;
+    padding: 0 !important;
+}
+
+#modal-add-custom-task .modal-header {
+    position: relative;
+    padding: 18px 22px 12px 88px !important;
+    flex-shrink: 0;
+}
+
+#modal-add-custom-task-close {
+    top: 14px !important;
+    left: 14px !important;
+    z-index: 3;
+}
+
+#modal-add-custom-task .modal-header > .btn-modal-help {
+    position: absolute;
+    top: 17px;
+    left: 52px;
+    margin: 0 !important;
+    z-index: 3;
+}
+
+#modal-add-custom-task .modal-body {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto !important;
+    padding: 14px 22px !important;
+}
+
+#modal-add-custom-task .modal-footer {
+    flex-shrink: 0;
+    margin-top: 0 !important;
+    padding: 12px 22px 16px !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    background: var(--bg-dark);
+}
+
+#notion-hw-policy-strip,
+#tasks-reminders-banner {
+    scroll-margin-top: 168px;
+}
+
+.notion-hw-policy-strip.collapsed .hw-strip-hint,
+.notion-hw-policy-strip.collapsed .hw-capsules-grid {
+    display: none !important;
+}
+
+.notion-hw-policy-strip.collapsed .hw-collapsed-summary {
+    display: flex !important;
+}
+
+.course-hw-capsule .capsule-meta-row {
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+#task-side-peek {
+    z-index: 100060 !important;
+}
+
+#peek-overlay {
+    z-index: 100055 !important;
+}
+
+#task-side-peek .peek-header {
+    padding-left: 48px !important;
+}
+
+#notion-icon-picker-modal {
+    z-index: 100060 !important;
+}
+
+.notion-color-palette {
+    padding-bottom: 6px;
+}
+
+.notion-filter-popover {
+    max-height: min(340px, calc(100dvh - 210px)) !important;
+    overflow: hidden !important;
+}
+
+.notion-filter-popover-body {
+    max-height: min(245px, calc(100dvh - 295px)) !important;
+    overflow-y: auto !important;
+}
+
+.notion-status-dropdown-menu {
+    min-width: 224px !important;
+    width: max-content !important;
+    max-width: min(270px, calc(100vw - 20px)) !important;
+}
+
+.notion-status-dropdown-menu .notion-status-pill {
+    white-space: nowrap !important;
+}
+
+.task-context-menu {
+    z-index: 200010 !important;
+}
+
+@media (min-width: 769px) {
+    .tasks-bulk-actions-bar .bulk-actions-buttons {
+        flex-wrap: nowrap !important;
+    }
+}
+
+body:has(.tasks-bulk-actions-bar.active) #tasks-table-view-pane {
+    padding-bottom: 92px !important;
+}
+
+#moodle-sync-modal {
+    z-index: 100060 !important;
+    padding: 16px;
+}
+
+#moodle-sync-modal .modal-content {
+    max-height: calc(100dvh - 32px) !important;
+    overflow-y: auto !important;
+    padding: 16px 20px !important;
+}
+
+#moodle-sync-modal .modal-header {
+    position: relative;
+    padding: 4px 4px 10px 84px !important;
+    margin-bottom: 10px !important;
+}
+
+#moodle-sync-modal .modal-header > .btn-modal-help {
+    position: absolute;
+    top: 4px;
+    left: 44px;
+    margin: 0 !important;
+}
+
+#moodle-sync-modal .modal-body {
+    padding: 0 !important;
+    gap: 10px !important;
+}
+
+#modal-moodle-calendar-url {
+    direction: ltr;
+    text-align: left;
+    text-overflow: ellipsis;
+}
+
+#modal-hw-policy-section .hw-component-label,
+#modal-hw-policy-section .hw-sheet-title,
+#modal-hw-policy-section .hw-sheet-topic {
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+    word-break: break-word;
+}
+
+@media (max-width: 768px), (hover: none), (pointer: coarse) {
+    .notion-open-peek-btn {
+        opacity: 1 !important;
+        background: rgba(56, 189, 248, 0.14) !important;
+        border-color: rgba(56, 189, 248, 0.38) !important;
+        color: #e0f2fe !important;
+    }
+}
+
+@media (max-width: 768px) {
+    #modal-add-custom-task {
+        padding: 12px 12px calc(88px + env(safe-area-inset-bottom, 0px)) 12px !important;
+    }
+
+    #modal-add-custom-task .modal-content {
+        max-height: calc(100dvh - 104px) !important;
+    }
+
+    #moodle-sync-modal {
+        padding: 12px 12px calc(88px + env(safe-area-inset-bottom, 0px)) 12px !important;
+    }
+
+    #moodle-sync-modal .modal-content {
+        max-height: calc(100dvh - 104px) !important;
+    }
+
+    #notion-icon-picker-modal {
+        padding: 12px 12px calc(88px + env(safe-area-inset-bottom, 0px)) 12px !important;
+    }
+
+    .notion-icon-picker-card {
+        max-height: calc(100dvh - 104px) !important;
+    }
+
+    #task-side-peek {
+        padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px)) !important;
+    }
+}
+
+body[data-active-tab="tasks"] .btn-back-to-top {
+    left: 22px !important;
+    right: auto !important;
+}
+
+#moodle-sync-modal-close {
+    z-index: 4 !important;
+    top: 14px !important;
+    left: 14px !important;
+}
+
+/* === Pass 4 Calendar & Unified Sync Hardening (v3.1.16 wave) === */
+
+/* P4-2: Exam Gap Runway vertical stacking so conflict banners never crush the horizontal nodes track */
+#exam-gap-runway-track.runway-track {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 8px !important;
+    overflow-x: visible !important;
+}
+#exam-gap-runway-track .runway-conflict-banner {
+    width: 100% !important;
+    box-sizing: border-box !important;
+    flex-wrap: wrap !important;
+    margin: 6px 0 4px 0 !important;
+}
+#exam-gap-runway-track .runway-track-nodes-row {
+    display: flex !important;
+    align-items: center !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    overflow-x: auto !important;
+    gap: 0 !important;
+    padding: 8px 4px 10px 4px !important;
+    -webkit-overflow-scrolling: touch !important;
+}
+#exam-gap-runway-track .runway-connector {
+    flex: 1 0 auto !important;
+    min-width: max-content !important;
+}
+#exam-gap-runway-track .runway-badge {
+    white-space: nowrap !important;
+    min-width: max-content !important;
+    flex-shrink: 0 !important;
+}
+
+/* P4-4: Bounded & scrollable Calendar Sync modal on desktop webview and mobile */
+#calendar-sync-modal {
+    padding: 16px !important;
+    box-sizing: border-box !important;
+}
+#calendar-sync-modal .modal-content {
+    max-height: calc(100dvh - 32px) !important;
+    width: 95% !important;
+    max-width: 580px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+    padding: 16px !important;
+    box-sizing: border-box !important;
+}
+#calendar-sync-modal .modal-header {
+    flex-shrink: 0 !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+}
+#calendar-sync-modal .modal-header > div:first-child {
+    flex-wrap: wrap !important;
+    width: 100% !important;
+    min-width: 0 !important;
+}
+#calendar-sync-modal .calendar-sync-header-actions {
+    flex-wrap: wrap !important;
+    max-width: 100% !important;
+    justify-content: flex-end !important;
+}
+#calendar-sync-modal #calendar-sync-status-badge {
+    white-space: normal !important;
+    max-width: 100% !important;
+    text-align: right !important;
+}
+#calendar-sync-modal .modal-body {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+}
+#calendar-sync-modal #sync-webcal-url-input {
+    min-width: 0 !important;
+}
+#calendar-sync-modal .modal-footer {
+    flex-shrink: 0 !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+    margin-top: 10px !important;
+    padding-top: 10px !important;
+}
+#modal-gcal-sync-manager .modal-content {
+    max-height: calc(100dvh - 32px) !important;
+}
+#modal-gcal-sync-manager .modal-close {
+    z-index: 4 !important;
+}
+
+/* P4-5: Calendar action row clean multi-line wrap with zero clipping of Legend or ? help button */
+.cal-actions-row {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    gap: 6px !important;
+}
+.cal-actions-row .btn-modal-help {
+    flex: 0 0 30px !important;
+    width: 30px !important;
+    height: 30px !important;
+    min-width: 30px !important;
+    margin: 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+/* P4-6: Calendar Day Modal sticky header + scrollable body + sticky bottom footer */
+#calendar-day-modal {
+    padding: 16px !important;
+    box-sizing: border-box !important;
+}
+#calendar-day-modal .modal-content {
+    padding: 0 !important;
+    max-height: calc(100dvh - 32px) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+    box-sizing: border-box !important;
+}
+#calendar-day-modal .day-modal-header {
+    padding: 14px 18px 10px !important;
+    flex-shrink: 0 !important;
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 4 !important;
+}
+#calendar-day-modal .day-modal-body {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    overflow-y: auto !important;
+    padding: 12px 18px !important;
+    -webkit-overflow-scrolling: touch !important;
+}
+#calendar-day-modal .day-modal-footer {
+    flex-shrink: 0 !important;
+    position: sticky !important;
+    bottom: 0 !important;
+    z-index: 4 !important;
+}
+#calendar-day-modal .day-modal-date-field,
+#calendar-day-modal .day-modal-date-field input[type="date"] {
+    min-width: 0 !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+/* P4-7: Month view cell header houses the + button inline so 3+ event pills never collide */
+.cal-day-cell > .cal-day-num {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 4px !important;
+    margin-bottom: 3px !important;
+}
+.cal-day-cell > .cal-day-num > .btn-add-day-item {
+    position: static !important;
+    width: 18px !important;
+    height: 18px !important;
+    min-width: 18px !important;
+    flex-shrink: 0 !important;
+    margin-inline-start: auto !important;
+}
+
+/* P4-8: Sticky RTL hour gutter and top header clearance in Calendar Time-Grid */
+.cal-timegrid-scroll-x {
+    max-height: 680px !important;
+    overflow-y: auto !important;
+    overflow-x: auto !important;
+}
+.cal-timegrid-scroll-y {
+    max-height: none !important;
+    overflow: visible !important;
+}
+.cal-timegrid-day-head {
+    padding: 10px 6px 8px !important;
+}
+.cal-timegrid-corner,
+.cal-timegrid-allday-label,
+.cal-timegrid-axis {
+    position: sticky !important;
+    right: 0 !important;
+    background: #0f172a !important;
+}
+.cal-timegrid-corner {
+    z-index: 8 !important;
+}
+.cal-timegrid-allday-label {
+    z-index: 6 !important;
+}
+.cal-timegrid-axis {
+    z-index: 5 !important;
+}
+.cal-timegrid-hour-label:first-child {
+    transform: translateY(2px) !important;
+}
+
+@media (max-width: 768px) {
+    .cal-actions-row {
+        flex-wrap: wrap !important;
+        overflow-x: visible !important;
+        justify-content: flex-start !important;
+        gap: 6px !important;
+    }
+    .cal-actions-row .btn {
+        flex: 1 1 auto !important;
+        min-width: fit-content !important;
+        padding: 5px 8px !important;
+        font-size: 0.72rem !important;
+        white-space: nowrap !important;
+    }
+    .cal-actions-row .btn-modal-help {
+        flex: 0 0 28px !important;
+        width: 28px !important;
+        height: 28px !important;
+        min-width: 28px !important;
+    }
+    #calendar-sync-modal {
+        padding: 10px 10px 84px 10px !important;
+    }
+    #calendar-sync-modal .modal-content {
+        width: 100% !important;
+        max-height: calc(100dvh - 104px) !important;
+        padding: 12px !important;
+    }
+    #calendar-sync-modal .modal-footer > div {
+        flex-wrap: wrap !important;
+        width: 100% !important;
+        justify-content: space-between !important;
+    }
+    #calendar-day-modal {
+        padding: 10px 10px 84px 10px !important;
+    }
+    #calendar-day-modal .modal-content {
+        width: 100% !important;
+        max-width: 100% !important;
+        max-height: calc(100dvh - 104px) !important;
+        padding: 0 !important;
+    }
+    #calendar-day-modal .day-modal-header {
+        padding: 12px 14px 8px !important;
+    }
+    #calendar-day-modal .day-modal-body {
+        padding: 10px 14px !important;
+    }
+    #calendar-day-modal .day-modal-footer {
+        padding: 10px 14px !important;
+    }
+    #modal-gcal-sync-manager {
+        padding: 10px 10px 84px 10px !important;
+    }
+    #modal-gcal-sync-manager .modal-content {
+        max-height: calc(100dvh - 104px) !important;
+    }
+}
+
+@media (max-width: 480px) {
+    #calendar-day-modal .day-modal-date-field {
+        flex: 1 1 100% !important;
+    }
+}
+
+
+/* === Pass 5 Timetable, Attendance & Studio Hardening (v3.1.16 wave) === */
+
+/* P5-6: Bounded viewport-safe modals with sticky headers/footers and inner scroll */
+#modal-timetable-generator .ttg-modal-content {
+    display: flex !important;
+    flex-direction: column !important;
+    max-height: calc(100dvh - 32px) !important;
+    overflow: hidden !important;
+    padding: 0 !important;
+}
+
+#modal-timetable-generator .ttg-modal-content > .modal-header {
+    flex-shrink: 0 !important;
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: inherit;
+    padding: 16px 20px 12px 20px !important;
+}
+
+#modal-timetable-generator .ttg-modal-content > .modal-body {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain;
+    padding: 14px 20px !important;
+}
+
+#modal-timetable-generator .ttg-modal-content > .modal-footer {
+    flex-shrink: 0 !important;
+    position: sticky;
+    bottom: 0;
+    z-index: 20;
+    background: inherit;
+    padding: 12px 20px 16px 20px !important;
+}
+
+.ttg-modal-header-actions,
+.attendance-header-actions,
+.panopto-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+    flex-wrap: wrap;
+}
+
+.ttg-mobile-day-tabs {
+    flex-shrink: 0 !important;
+    min-height: 38px !important;
+}
+
+#modal-attendance-hub .modal-card,
+#modal-panopto-tracker .modal-content {
+    display: flex !important;
+    flex-direction: column !important;
+    max-height: calc(100dvh - 32px) !important;
+    overflow: hidden !important;
+}
+
+#modal-attendance-hub .attendance-modal-header,
+#modal-panopto-tracker .modal-header {
+    flex-shrink: 0 !important;
+}
+
+#modal-attendance-hub .attendance-modal-scroll,
+#modal-panopto-tracker .modal-body {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain;
+}
+
+#attendance-hub-week-navigator .week-pills-rail {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 6px !important;
+    overflow-x: visible !important;
+    mask-image: none !important;
+    -webkit-mask-image: none !important;
+    padding-inline: 0 !important;
+}
+
+/* P5-5, P5-7, P5-8: Timetable action spacing, timegrid scroll hygiene, OH header & buttons */
+.timetable-sync-actions {
+    gap: 8px !important;
+    row-gap: 8px !important;
+}
+
+.timetable-grid.timetable-timegrid .cal-timegrid-scroll-x {
+    max-height: none !important;
+    overflow-y: visible !important;
+}
+
+.btn-attendance-action {
+    white-space: nowrap !important;
+}
+
+.oh-course-box-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.btn-quick-course-oh {
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+}
+
+#tt-oh-course {
+    min-width: 0 !important;
+    max-width: 100% !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.att-inline-form-card {
+    background: rgba(15, 23, 42, 0.72);
+    border: 1px solid rgba(56, 189, 248, 0.35);
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.att-inline-form-grid {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.att-inline-form-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+}
+
+.att-confirm-clear-box {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    background: rgba(239, 68, 68, 0.12);
+    border: 1px solid rgba(239, 68, 68, 0.35);
+    border-radius: 8px;
+    padding: 8px 12px;
+}
+
+@media (hover: none), (max-width: 768px) {
+    .day-tab-pill[data-day]:not(.active) {
+        background: rgba(255, 255, 255, 0.05) !important;
+        border-color: rgba(255, 255, 255, 0.12) !important;
+        color: #cbd5e1 !important;
+        box-shadow: none !important;
+    }
+}
+
+@media (max-width: 768px) {
+    #modal-timetable-generator .ttg-modal-content,
+    #modal-attendance-hub .modal-card,
+    #modal-panopto-tracker .modal-content {
+        max-height: calc(100dvh - 96px) !important;
+        width: calc(100% - 16px) !important;
+        max-width: calc(100% - 16px) !important;
+    }
+
+    #modal-timetable-generator .ttg-modal-content > .modal-header {
+        padding: 12px 14px 10px 14px !important;
+    }
+
+    #modal-timetable-generator .ttg-modal-content > .modal-body {
+        padding: 12px 14px !important;
+    }
+
+    #modal-timetable-generator .ttg-modal-content > .modal-footer {
+        padding: 10px 14px 12px 14px !important;
+    }
+
+    .timetable-grid.timetable-timegrid .cal-timegrid-inner.cols-5 {
+        min-width: 760px !important;
+    }
+
+    .perpetual-mode-bar {
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 8px !important;
+    }
+
+    .perpetual-mode-bar .timetable-perpetual-badge {
+        grid-column: 1 / -1;
+    }
+}
+
+
+/* === Pass 6 Global Modals, Non-Blocking Dialog, Header Actions & Mobile Bounds (v3.1.16 wave) === */
+
+.modal-header:has(> .modal-header-actions),
+.modal-header:has(> .modal-close) {
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: space-between !important;
+    align-items: flex-start !important;
+    gap: 10px !important;
+}
+
+.modal-header:has(> .modal-header-actions) > h2,
+.modal-header:has(> .modal-header-actions) > h3,
+.modal-header:has(> .modal-close) > h2,
+.modal-header:has(> .modal-close) > h3,
+.modal-header:has(> .modal-header-actions) > div:first-child {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.modal-header-actions,
+.a11y-header,
+.privacy-modal-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.a11y-header h2,
+.privacy-modal-header h2 {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.modal-header > .modal-close,
+.modal-header-actions .modal-close,
+.a11y-header .a11y-close-btn,
+.privacy-modal-header .a11y-close-btn {
+    position: static !important;
+    flex-shrink: 0 !important;
+    margin: 0 !important;
+}
+
+/* Global Modal Bounds: Desktop calc(100dvh - 32px) */
+#auth-modal .modal-content,
+#onboarding-wizard-modal .modal-content,
+#tutorial-hub-modal .modal-content,
+#academic-faq-modal .modal-content,
+#keyboard-shortcuts-modal .modal-content,
+#modal-miluim-rights .modal-content,
+#bug-report-modal .modal-content,
+#import-modal .modal-content,
+#direct-download-modal .modal-content,
+#smartscreen-guide-modal .modal-content,
+#privacy-policy-modal .privacy-modal-card,
+#version-update-modal .modal-content,
+#site-analytics-modal .modal-content,
+#analytics-modal .modal-content,
+#past-exams-modal .modal-content,
+#accessibility-modal .a11y-modal-card,
+#task-move-modal .modal-content {
+    display: flex !important;
+    flex-direction: column !important;
+    max-height: calc(100dvh - 32px) !important;
+    overflow: hidden !important;
+}
+
+#auth-modal .modal-body,
+#onboarding-wizard-modal .modal-body,
+#tutorial-hub-modal .modal-body,
+#academic-faq-modal .modal-body,
+#keyboard-shortcuts-modal .modal-body,
+#modal-miluim-rights .modal-body,
+#bug-report-modal .modal-body,
+#import-modal .modal-body,
+#direct-download-modal .modal-body,
+#smartscreen-guide-modal .modal-body,
+#privacy-policy-modal .privacy-modal-body,
+#version-update-modal .modal-body,
+#site-analytics-modal #site-analytics-content,
+#accessibility-modal .a11y-body {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain;
+}
+
+/* Non-Blocking SemesteroDialog Styles */
+.sem-dialog-card {
+    max-width: 440px !important;
+    width: calc(100% - 24px) !important;
+    padding: 0 !important;
+    border-radius: 14px !important;
+    background: #0f172a;
+    border: 1px solid rgba(56, 189, 248, 0.35);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.75);
+    overflow: hidden;
+}
+
+.sem-dialog-header {
+    padding: 14px 18px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+}
+
+.sem-dialog-title {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: #f8fafc;
+}
+
+.sem-dialog-body {
+    padding: 16px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.sem-dialog-msg {
+    margin: 0;
+    font-size: 0.88rem;
+    line-height: 1.55;
+    color: #cbd5e1;
+}
+
+.sem-dialog-field {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.sem-dialog-label {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #94a3b8;
+}
+
+.sem-dialog-input {
+    width: 100%;
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 1px solid rgba(148, 163, 184, 0.3);
+    background: #0b1120;
+    color: #f8fafc;
+    font-family: inherit;
+    font-size: 0.86rem;
+}
+
+.sem-dialog-footer {
+    padding: 12px 18px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+@media (max-width: 768px) {
+    #auth-modal .modal-content,
+    #onboarding-wizard-modal .modal-content,
+    #tutorial-hub-modal .modal-content,
+    #academic-faq-modal .modal-content,
+    #keyboard-shortcuts-modal .modal-content,
+    #modal-miluim-rights .modal-content,
+    #bug-report-modal .modal-content,
+    #import-modal .modal-content,
+    #direct-download-modal .modal-content,
+    #smartscreen-guide-modal .modal-content,
+    #privacy-policy-modal .privacy-modal-card,
+    #version-update-modal .modal-content,
+    #site-analytics-modal .modal-content,
+    #analytics-modal .modal-content,
+    #past-exams-modal .modal-content,
+    #accessibility-modal .a11y-modal-card,
+    #task-move-modal .modal-content {
+        max-height: calc(100dvh - 96px) !important;
+        width: calc(100% - 16px) !important;
+        max-width: calc(100% - 16px) !important;
+    }
+
+    #btn-back-to-top,
+    .back-to-top-btn {
+        bottom: 84px !important;
+    }
 }

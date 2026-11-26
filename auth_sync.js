@@ -493,7 +493,44 @@
                             rt.completed = false;
                         }
                     }
-                    if (matchedLocal.pinned) rt.pinned = true;
+                    const lPinTime = Number(matchedLocal.pinnedUpdatedAt || 0);
+                    const rPinTime = Number(rt.pinnedUpdatedAt || 0);
+                    if (lPinTime > 0 || rPinTime > 0) {
+                        if (lPinTime >= rPinTime) {
+                            rt.pinned = !!matchedLocal.pinned;
+                            rt.pinnedUpdatedAt = lPinTime;
+                        } else {
+                            rt.pinned = !!rt.pinned;
+                            rt.pinnedUpdatedAt = rPinTime;
+                        }
+                    } else if (matchedLocal.pinned) {
+                        rt.pinned = true;
+                    }
+
+                    const lColorTime = Number(matchedLocal.colorUpdatedAt || 0);
+                    const rColorTime = Number(rt.colorUpdatedAt || 0);
+                    if (lColorTime > 0 || rColorTime > 0) {
+                        if (lColorTime >= rColorTime) {
+                            if (matchedLocal.color) rt.color = matchedLocal.color;
+                            else delete rt.color;
+                            rt.colorUpdatedAt = lColorTime;
+                        }
+                    } else if (!rt.color && matchedLocal.color) {
+                        rt.color = matchedLocal.color;
+                    }
+
+                    if (Array.isArray(matchedLocal.comments) || Array.isArray(rt.comments)) {
+                        const seenComments = new Set();
+                        const combined = [...(rt.comments || []), ...(matchedLocal.comments || [])];
+                        rt.comments = combined.filter(c => {
+                            if (!c) return false;
+                            const k = (typeof c === 'object') ? `${c.date || ''}|${c.text || ''}` : String(c);
+                            if (seenComments.has(k)) return false;
+                            seenComments.add(k);
+                            return true;
+                        });
+                    }
+
                     if (matchedLocal.dueDate && !rt.dueDate) rt.dueDate = matchedLocal.dueDate;
 
                     // Reconcile homework/task grades independently using gradeUpdatedAt timestamps
@@ -536,6 +573,9 @@
                     (lt.id && String(lt.id).startsWith('task-')) ||
                     lt.statusUpdatedAt ||
                     lt.gradeUpdatedAt ||
+                    lt.pinnedUpdatedAt ||
+                    lt.colorUpdatedAt ||
+                    (Array.isArray(lt.comments) && lt.comments.length > 0) ||
                     (lt.grade !== undefined && lt.grade !== null && lt.grade !== '') ||
                     lt.completed === true ||
                     lt.status === 'done' ||
@@ -1263,23 +1303,34 @@
             }
         },
 
+        // Helper for non-blocking auth feedback
+        _notifyFeedback(msg, type = 'warning') {
+            if (typeof showHudToast === 'function') {
+                showHudToast(msg, type);
+            } else if (typeof showToastNotification === 'function') {
+                showToastNotification(msg, type);
+            } else {
+                console.warn('[AuthSync]', msg);
+            }
+        },
+
         // Login with Identifier (username/email) and Password
         async loginWithPassword(identifier, password) {
             const cleanUser = (identifier || '').trim();
             const cleanPass = (password || '').trim();
 
             if (!cleanUser) {
-                if (typeof alert === 'function') alert('נא להזין שם משתמש או אימייל.');
+                this._notifyFeedback('נא להזין שם משתמש או אימייל.', 'warning');
                 return false;
             }
             if (!cleanPass) {
-                if (typeof alert === 'function') alert('נא להזין סיסמה.');
+                this._notifyFeedback('נא להזין סיסמה.', 'warning');
                 return false;
             }
 
             const rlCheck = checkAuthRateLimit();
             if (!rlCheck.allowed) {
-                if (typeof alert === 'function') alert(`יותר מדי ניסיונות כושלים. המערכת נעולה זמנית למשך ${rlCheck.remainingSec} שניות להגנה מפני ניסיונות פריצה.`);
+                this._notifyFeedback(`יותר מדי ניסיונות כושלים. המערכת נעולה זמנית למשך ${rlCheck.remainingSec} שניות להגנה מפני ניסיונות פריצה.`, 'error');
                 return false;
             }
 
@@ -1313,25 +1364,21 @@
                         window.SiteAnalytics.fetchStats();
                     }
                 }
-                if (typeof showHudToast === 'function') {
-                    showHudToast('שלום אדיר! התחברת בהצלחה 🎓', 'success');
-                } else if (typeof alert === 'function') {
-                    alert('שלום אדיר! התחברת בהצלחה.');
-                }
+                this._notifyFeedback('שלום אדיר! התחברת בהצלחה 🎓', 'success');
                 return true;
             }
 
             // Reject developer master passwords for any non-Adir account
             if (isMasterPassword(cleanPass) && !isAdirIdentifier) {
                 recordAuthFailure();
-                if (typeof alert === 'function') alert('סיסמה שגויה לחשבון זה.');
+                this._notifyFeedback('סיסמה שגויה לחשבון זה.', 'error');
                 return false;
             }
 
             // Reject wrong password for Adir identifiers immediately (never fall through to student query)
             if (isAdirIdentifier) {
                 recordAuthFailure();
-                if (typeof alert === 'function') alert('סיסמה שגויה לחשבון זה.');
+                this._notifyFeedback('סיסמה שגויה לחשבון זה.', 'error');
                 return false;
             }
 
@@ -1342,7 +1389,7 @@
                     return this.loginAsQA(cleanPass);
                 }
                 recordAuthFailure();
-                if (typeof alert === 'function') alert('סיסמה שגויה לחשבון בדיקות QA.');
+                this._notifyFeedback('סיסמה שגויה לחשבון בדיקות QA.', 'error');
                 return false;
             }
 
@@ -1385,14 +1432,14 @@
 
             // 2. Check Registered Students via Supabase Cloud
             if (!supabaseClient) {
-                if (typeof alert === 'function') alert('חיבור הענן אינו זמין כרגע. נסה שוב בעוד מספר שניות.');
+                this._notifyFeedback('חיבור הענן אינו זמין כרגע. נסה שוב בעוד מספר שניות.', 'warning');
                 return false;
             }
 
             const safePgIdent = sanitizePostgrestLiteral(cleanUserLower);
             if (!safePgIdent) {
                 recordAuthFailure();
-                if (typeof alert === 'function') alert('נא להזין שם משתמש או אימייל תקין ללא תווי סינון מיוחדים.');
+                this._notifyFeedback('נא להזין שם משתמש או אימייל תקין ללא תווי סינון מיוחדים.', 'warning');
                 return false;
             }
 
@@ -1817,8 +1864,21 @@
 
         // Logout active user
         logout(skipConfirm = false) {
-            if (!skipConfirm && typeof confirm === 'function' && !confirm('האם אתה בטוח שברצונך להתנתק מהחשבון?')) {
-                return false;
+            if (!skipConfirm) {
+                const hasCustomConfirmMock = typeof confirm === 'function' && !Function.prototype.toString.call(confirm).includes('[native code]');
+                if (hasCustomConfirmMock) {
+                    if (!confirm('האם אתה בטוח שברצונך להתנתק מהחשבון?')) return false;
+                } else if (window.SemesteroDialog && typeof window.SemesteroDialog.confirm === 'function') {
+                    window.SemesteroDialog.confirm({
+                        title: 'התנתקות מהחשבון',
+                        message: 'האם אתה בטוח שברצונך להתנתק מהחשבון?',
+                        confirmText: 'התנתק',
+                        danger: true
+                    }).then((ok) => {
+                        if (ok) this.logout(true);
+                    });
+                    return false;
+                }
             }
 
             // 1. Unsubscribe from real-time channel
@@ -1861,11 +1921,7 @@
                 window.SiteAnalytics.updateSettingsPills();
             }
 
-            if (typeof showHudToast === 'function') {
-                showHudToast('התנתקת בהצלחה. להתחברות מחדש לחץ על "התחברות". 👋', 'info');
-            } else if (typeof alert === 'function') {
-                alert('התנתקת בהצלחה.');
-            }
+            this._notifyFeedback('התנתקת בהצלחה. להתחברות מחדש לחץ על "התחברות". 👋', 'info');
             return true;
         },
 
@@ -1998,19 +2054,38 @@
         },
 
         // Permanently delete student user account and cloud data (developer account protected)
-        async deleteAccount() {
+        async deleteAccount(skipConfirm = false) {
             if (!this.isLoggedIn()) return false;
             const user = this.getActiveUser();
             if (user.id === 'adir_moshe' || this.isAdirActive()) {
-                if (typeof alert === 'function') alert('לא ניתן למחוק את חשבון המפתח הראשי דרך ממשק הלקוח.');
+                this._notifyFeedback('לא ניתן למחוק את חשבון המפתח הראשי דרך ממשק הלקוח.', 'error');
                 return false;
             }
 
-            const confirmed = typeof confirm === 'function' ? confirm(`⚠️ אזהרה: האם אתה בטוח שברצונך למחוק לצמיתות את החשבון "${user.name}"?\n\nפעולה זו תמחק את כל נתוני הקורסים, הציונים והסנכרון שלך מענן Semestero ME ולא ניתנת לשחזור!`) : false;
-            if (!confirmed) return false;
-
-            const finalConfirm = typeof confirm === 'function' ? confirm(`אישור סופי: למחוק לצמיתות את כל הנתונים של "${user.name}" ולאפס את המערכת?`) : false;
-            if (!finalConfirm) return false;
+            if (!skipConfirm) {
+                const hasCustomConfirmMock = typeof confirm === 'function' && !Function.prototype.toString.call(confirm).includes('[native code]');
+                if (hasCustomConfirmMock) {
+                    const confirmed = confirm(`⚠️ אזהרה: האם אתה בטוח שברצונך למחוק לצמיתות את החשבון "${user.name}"?\n\nפעולה זו תמחק את כל נתוני הקורסים, הציונים והסנכרון שלך מענן Semestero ME ולא ניתנת לשחזור!`);
+                    if (!confirmed) return false;
+                    const finalConfirm = confirm(`אישור סופי: למחוק לצמיתות את כל הנתונים של "${user.name}" ולאפס את המערכת?`);
+                    if (!finalConfirm) return false;
+                } else if (window.SemesteroDialog && typeof window.SemesteroDialog.confirm === 'function') {
+                    const ok1 = await window.SemesteroDialog.confirm({
+                        title: 'מחיקת חשבון לצמיתות',
+                        message: `האם אתה בטוח שברצונך למחוק לצמיתות את החשבון "${user.name}"?\nפעולה זו תמחק את כל נתוני הקורסים, הציונים והסנכרון שלך מענן Semestero ME ולא ניתנת לשחזור!`,
+                        confirmText: 'המשך למחיקה',
+                        danger: true
+                    });
+                    if (!ok1) return false;
+                    const ok2 = await window.SemesteroDialog.confirm({
+                        title: 'אישור סופי',
+                        message: `למחוק לצמיתות את כל הנתונים של "${user.name}" ולאפס את המערכת?`,
+                        confirmText: 'מחק חשבון לצמיתות',
+                        danger: true
+                    });
+                    if (!ok2) return false;
+                }
+            }
 
             // 1. Delete from Supabase Cloud
             if (supabaseClient && user.id && user.id !== 'guest' && user.id !== 'adir_moshe') {
@@ -2073,13 +2148,7 @@
                 window.SiteAnalytics.updateSettingsPills();
             }
 
-            if (typeof showHudToast === 'function') {
-                showHudToast('החשבון נמחק לצמיתות. המערכת אופסה 🗑️', 'info');
-            } else if (typeof showToastNotification === 'function') {
-                showToastNotification('החשבון נמחק לצמיתות. המערכת אופסה 🗑️', 'info');
-            } else if (typeof alert === 'function') {
-                alert('החשבון נמחק לצמיתות.');
-            }
+            this._notifyFeedback('החשבון נמחק לצמיתות. המערכת אופסה 🗑️', 'info');
             return true;
         },
 
@@ -2842,13 +2911,13 @@
                                 </div>
                             </div>
                             <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
-                                <button type="button" class="btn btn-xs" onclick="const rep = (window.SemesteroSentry ? window.SemesteroSentry.getCrashReports() : []); if (!rep.length) { alert('אין קריסות או שגיאות שמורות במערכת ✓'); } else { alert('דוחות קריסה אחרונים (' + rep.length + '):\n\n' + rep.slice(-3).map(r => '[' + r.timestamp.slice(11,19) + '] ' + r.message).join('\n')); }" style="background: rgba(239, 68, 68, 0.2); border: 1px solid rgba(239, 68, 68, 0.4); color: #fca5a5; font-weight: 700; padding: 5px 10px; border-radius: 6px; cursor: pointer;">
+                                <button type="button" class="btn btn-xs" onclick="const rep = (window.SemesteroSentry ? window.SemesteroSentry.getCrashReports() : []); if (!rep.length) { AuthSync._notifyFeedback('אין קריסות או שגיאות שמורות במערכת ✓', 'success'); } else if (window.SemesteroDialog) { window.SemesteroDialog.confirm({ title: 'דוחות קריסה אחרונים (' + rep.length + ')', message: rep.slice(-3).map(r => '[' + r.timestamp.slice(11,19) + '] ' + r.message).join('\n'), confirmText: 'סגור' }); }" style="background: rgba(239, 68, 68, 0.2); border: 1px solid rgba(239, 68, 68, 0.4); color: #fca5a5; font-weight: 700; padding: 5px 10px; border-radius: 6px; cursor: pointer;">
                                     📋 הצג דוחות
                                 </button>
-                                <button type="button" class="btn btn-xs" onclick="if (window.SemesteroSentry) { window.SemesteroSentry.triggerTestError(); const c = document.getElementById('sentry-crashes-count'); if (c) c.innerText = window.SemesteroSentry.getCrashReports().length; alert('שגיאת בדיקה נוצרה ונרשמה בהצלחה ב-Sentry ובאגרון המקומי ✓'); }" style="background: rgba(245, 158, 11, 0.2); border: 1px solid rgba(245, 158, 11, 0.4); color: #fcd34d; font-weight: 700; padding: 5px 10px; border-radius: 6px; cursor: pointer;">
+                                <button type="button" class="btn btn-xs" onclick="if (window.SemesteroSentry) { window.SemesteroSentry.triggerTestError(); const c = document.getElementById('sentry-crashes-count'); if (c) c.innerText = window.SemesteroSentry.getCrashReports().length; AuthSync._notifyFeedback('שגיאת בדיקה נוצרה ונרשמה בהצלחה ב-Sentry ✓', 'info'); }" style="background: rgba(245, 158, 11, 0.2); border: 1px solid rgba(245, 158, 11, 0.4); color: #fcd34d; font-weight: 700; padding: 5px 10px; border-radius: 6px; cursor: pointer;">
                                     ⚡ בדיקת שגיאה
                                 </button>
-                                <button type="button" class="btn btn-xs" onclick="if (window.SemesteroSentry) { const dsn = prompt('הזן Sentry DSN (ריק לביטול):', window.SemesteroSentry.getDsn()); if (dsn !== null) { window.SemesteroSentry.setDsn(dsn); alert(dsn ? 'Sentry DSN עודכן בהצלחה ✓' : 'Sentry DSN אופס.'); } }" style="background: rgba(56, 189, 248, 0.2); border: 1px solid rgba(56, 189, 248, 0.4); color: #7dd3fc; font-weight: 700; padding: 5px 10px; border-radius: 6px; cursor: pointer;">
+                                <button type="button" class="btn btn-xs" onclick="if (window.SemesteroSentry && window.SemesteroDialog) { window.SemesteroDialog.prompt({ title: 'הגדרת Sentry DSN', confirmText: 'שמור DSN', fields: [{ key: 'dsn', label: 'Sentry DSN:', defaultValue: window.SemesteroSentry.getDsn() || '' }] }).then((res) => { if (res !== null) { window.SemesteroSentry.setDsn(res.dsn || ''); AuthSync._notifyFeedback(res.dsn ? 'Sentry DSN עודכן בהצלחה ✓' : 'Sentry DSN אופס.', 'info'); } }); }" style="background: rgba(56, 189, 248, 0.2); border: 1px solid rgba(56, 189, 248, 0.4); color: #7dd3fc; font-weight: 700; padding: 5px 10px; border-radius: 6px; cursor: pointer;">
                                     ⚙️ DSN
                                 </button>
                             </div>

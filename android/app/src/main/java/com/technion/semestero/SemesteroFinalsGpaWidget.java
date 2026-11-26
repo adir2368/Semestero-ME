@@ -43,11 +43,11 @@ public class SemesteroFinalsGpaWidget extends AppWidgetProvider {
             flags |= PendingIntent.FLAG_IMMUTABLE;
         }
 
-        // Tap root to open Runway / Analytics tab
+        // Tap root to open Calendar / Exam Runway tab
         Intent intent = new Intent(context, MainActivity.class);
         intent.setAction(Intent.ACTION_VIEW);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        intent.putExtra("target_tab", "runway");
+        intent.putExtra("target_tab", "calendar");
         PendingIntent pendingIntent = PendingIntent.getActivity(context, 501, intent, flags);
         views.setOnClickPendingIntent(R.id.widget_finals_gpa_root, pendingIntent);
 

@@ -107,8 +107,8 @@ window.recalculateCourseStates();
 
 assert(!window.gameState.courses['114071'], 'recalculateCourseStates must purge 114071 when 114051 is active/mastered');
 assert(!window.gameState.courses['114075'], 'recalculateCourseStates must purge 114075 when 114052 is active/mastered');
-assert.strictEqual(window.gameState.courses['125013'].semester, 2, 'recalculateCourseStates must lock 125013 to semester 2');
-console.log('  ✓ Test 3 passed: State recalculation purges variants and locks Chem Lab.');
+assert.strictEqual(window.gameState.courses['125013'].semester, 4, 'recalculateCourseStates must preserve student custom semester placement for 125013 (ADR-133)');
+console.log('  ✓ Test 3 passed: State recalculation purges variants and preserves custom Chem Lab placement.');
 
 // ------------------------------------------------------------------------------
 // TEST 4: Flowchart Course Collection ignores variants and locks Chem Lab to Sem 2

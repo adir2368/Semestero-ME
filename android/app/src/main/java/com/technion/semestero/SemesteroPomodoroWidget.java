@@ -87,11 +87,11 @@ public class SemesteroPomodoroWidget extends AppWidgetProvider {
             flags |= PendingIntent.FLAG_IMMUTABLE;
         }
 
-        // Tap root to open Runway / Timer in app
+        // Tap root to open Tasks & Focus Mode in app
         Intent intent = new Intent(context, MainActivity.class);
         intent.setAction(Intent.ACTION_VIEW);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        intent.putExtra("target_tab", "runway");
+        intent.putExtra("target_tab", "tasks");
         intent.putExtra("pomodoro_active", true);
         PendingIntent pendingIntent = PendingIntent.getActivity(context, 601, intent, flags);
         views.setOnClickPendingIntent(R.id.widget_pomodoro_root, pendingIntent);

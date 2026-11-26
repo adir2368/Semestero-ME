@@ -113,8 +113,8 @@ assert.strictEqual(sem1.earnedCredits, 19.5, 'Semester 1 earned credits should b
 assert.strictEqual(sem1.gradedCredits, 19.5, 'Semester 1 graded credits should be 19.5');
 assert.strictEqual(sem1.qualityPoints, 1741, 'Semester 1 quality points should be 1741 (84*5 + 87*5 + 100*2.5 + 96*3 + 87*4)');
 assert.strictEqual(Number(sem1.gpa.toFixed(2)), 89.28, 'Semester 1 GPA should be 89.28');
-assert(sem1.honors, 'Semester 1 should qualify for honors');
-assert.strictEqual(sem1.honors.type, 'dean', 'Semester 1 should have Dean Honors (GPA >= 84 and cr >= 18)');
+assert.strictEqual(data.isAcademicStandingValid, true, 'Academic standing should be valid (GPA >= 65 and success ratio >= 66%)');
+assert(data.cumulativeStanding.includes('תקין'), 'Cumulative standing should indicate תקין');
 
 // Check Semester 2
 const sem2 = data.semesters.find(s => s.semester === 2);
@@ -130,7 +130,7 @@ assert.strictEqual(data.totalEarnedCredits, 38.5, 'Total earned credits should b
 assert.strictEqual(data.totalGradedCredits, 38.5, 'Total graded credits should be 38.5');
 assert.strictEqual(data.totalQualityPoints, 3312.5, 'Total quality points should be 3312.5');
 assert.strictEqual(Number(data.cumulativeGpa.toFixed(2)), 86.04, 'Cumulative GPA should be 86.04');
-assert.strictEqual(data.cumulativeStanding, 'הצטיינות (Cum Laude) 🎖️', 'Standing should be Cum Laude (GPA >= 84)');
+assert(data.cumulativeStanding.includes('תקין'), 'Standing should reflect Technion academic standing (תקין)');
 console.log('  ✓ Test 1 passed: Exact match with Technion grading standards (38.5 cr, 3312.5 QP, 86.04 GPA).');
 
 // TEST 2: Binary Pass / Exempt Isolation
@@ -200,7 +200,7 @@ GS.exportCSV();
 assert(exportedBlob, 'CSV Blob should be created');
 const csvText = exportedBlob.parts.join('');
 assert(csvText.startsWith('\uFEFF'), 'CSV must start with UTF-8 BOM for Hebrew Excel compatibility');
-assert(csvText.includes('גיליון ציונים אקדמי רשמי - הטכניון מכון טכנולוגי לישראל'), 'CSV must contain Technion header');
+assert(csvText.includes('גיליון ציונים אישי ומעקב ממוצע (אינו מסמך רשמי של הטכניון)'), 'CSV must contain unofficial Technion transcript header');
 assert(csvText.includes('104041'), 'CSV must contain Calculus 1M1 code');
 assert(csvText.includes('3312.5'), 'CSV must contain total Quality Points');
 assert(csvText.includes('86.04'), 'CSV must contain cumulative GPA');

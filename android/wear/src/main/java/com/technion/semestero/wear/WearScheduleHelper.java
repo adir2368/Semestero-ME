@@ -93,6 +93,15 @@ public class WearScheduleHelper {
                 if (fullJson != null && !fullJson.trim().isEmpty() && !fullJson.equals("[]") && !MainActivity.isCorruptedText(fullJson)) {
                     int targetDayIndex = dayOfWeek - 1; // 0=Sunday .. 6=Saturday
                     JSONArray daysArr = new JSONArray(fullJson);
+                    boolean hasAnySyncedClassAcrossWeek = false;
+                    for (int i = 0; i < daysArr.length(); i++) {
+                        JSONObject dObj = daysArr.getJSONObject(i);
+                        JSONArray cArr = dObj.optJSONArray("classes");
+                        if (cArr != null && cArr.length() > 0) {
+                            hasAnySyncedClassAcrossWeek = true;
+                            break;
+                        }
+                    }
                     for (int i = 0; i < daysArr.length(); i++) {
                         JSONObject dayObj = daysArr.getJSONObject(i);
                         if (dayObj.optInt("dayIndex", -1) == targetDayIndex) {
@@ -119,7 +128,7 @@ public class WearScheduleHelper {
                                     }
                                 }
                             }
-                            if (!syncedSlots.isEmpty() || targetDayIndex >= 5) {
+                            if (!syncedSlots.isEmpty() || targetDayIndex >= 5 || hasAnySyncedClassAcrossWeek) {
                                 return syncedSlots;
                             }
                         }
@@ -427,7 +436,20 @@ public class WearScheduleHelper {
             }
             res.timeText = "יום חופשי";
             res.roomText = "אין שיעורים פרונטליים";
-            res.lecturerText = "השיעור הבא ביום ראשון ב-11:30 (אולמן 506)";
+            String weekendNext = "אין שיעורים מתוזמנים לשבוע הקרוב";
+            for (int offset = 1; offset <= 6; offset++) {
+                int checkDay = (dayOfWeek - 1 + offset) % 7 + 1;
+                List<CourseSlot> candList = getScheduleForDay(context, checkDay);
+                CourseSlot picked = pickFirstPreferredSlot(candList);
+                if (picked != null) {
+                    String nextStart = picked.time.contains(" - ") ? picked.time.split(" - ")[0].trim() : picked.time;
+                    String nextRoom = formatRoom(picked.room);
+                    weekendNext = "השיעור הבא ב" + HEBREW_DAYS[checkDay] + " ב-" + nextStart
+                        + (!nextRoom.isEmpty() ? " (" + nextRoom + ")" : "");
+                    break;
+                }
+            }
+            res.lecturerText = weekendNext;
             return res;
         }
 
@@ -440,8 +462,9 @@ public class WearScheduleHelper {
         for (int offset = 1; offset <= 6; offset++) {
             int checkDay = (dayOfWeek - 1 + offset) % 7 + 1;
             List<CourseSlot> nextList = getScheduleForDay(context, checkDay);
-            if (!nextList.isEmpty()) {
-                nextDaySlot = nextList.get(0);
+            CourseSlot picked = pickFirstPreferredSlot(nextList);
+            if (picked != null) {
+                nextDaySlot = picked;
                 nextDayName = HEBREW_DAYS[checkDay];
                 isDirectTomorrow = (offset == 1);
                 break;
@@ -550,6 +573,14 @@ public class WearScheduleHelper {
                 .create(context, new ComponentName(context, SemesteroTasksComplicationService.class))
                 .requestUpdateAll();
         } catch (Exception ignored) {}
+    }
+
+    private static CourseSlot pickFirstPreferredSlot(List<CourseSlot> slots) {
+        if (slots == null || slots.isEmpty()) return null;
+        for (CourseSlot cs : slots) {
+            if (!cs.isDitched) return cs;
+        }
+        return slots.get(0);
     }
 
     public static String formatRoom(String room) {

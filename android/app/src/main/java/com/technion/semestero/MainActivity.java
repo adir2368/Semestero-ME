@@ -11,23 +11,31 @@ import com.getcapacitor.BridgeActivity;
 public class MainActivity extends BridgeActivity {
     private static MainActivity instance;
     private long lastRootBackPressMs = 0L;
+    private boolean webViewConfigured = false;
 
     public static MainActivity getInstance() {
         return instance;
     }
 
+    public static boolean isAllowedExternalUrl(String url) {
+        if (url == null) return false;
+        String trimmed = url.trim().toLowerCase(java.util.Locale.ROOT);
+        return trimmed.startsWith("https://") || trimmed.startsWith("http://") || trimmed.startsWith("mailto:");
+    }
+
     public static void triggerTasksSyncFromWear(String taskId, boolean isDone) {
         if (instance != null && instance.getBridge() != null && instance.getBridge().getWebView() != null) {
+            final String quotedTaskId = org.json.JSONObject.quote(taskId != null ? taskId : "");
             instance.runOnUiThread(() -> {
                 try {
                     String js = "(function() { " +
                         "if (typeof window.markTaskCompletedById === 'function') { " +
-                        "  window.markTaskCompletedById('" + taskId + "', " + isDone + "); " +
+                        "  window.markTaskCompletedById(" + quotedTaskId + ", " + isDone + "); " +
                         "} else if (typeof gameState !== 'undefined') { " +
                         "  var modified = false; " +
                         "  Object.values(gameState.courses || {}).forEach(function(c) { " +
                         "    (c.tasks || []).forEach(function(t) { " +
-                        "      if (t.id === '" + taskId + "') { t.completed = " + isDone + "; t.status = " + (isDone ? "'done'" : "'todo'") + "; modified = true; } " +
+                        "      if (t.id === " + quotedTaskId + ") { t.completed = " + isDone + "; t.status = " + (isDone ? "'done'" : "'todo'") + "; modified = true; } " +
                         "    }); " +
                         "  }); " +
                         "  if (modified) { " +
@@ -151,8 +159,21 @@ public class MainActivity extends BridgeActivity {
             String tab = intent.getStringExtra("target_tab");
             String filter = intent.getStringExtra("filter");
             boolean pomodoroActive = intent.getBooleanExtra("pomodoro_active", false);
-            String tabId = "timetable".equals(tab) ? "timetable" : ("tasks".equals(tab) ? "tasks" : ("runway".equals(tab) ? "runway" : ("flowchart".equals(tab) ? "flowchart" : null)));
+            String tabId = null;
+            if ("timetable".equals(tab)) tabId = "timetable";
+            else if ("tasks".equals(tab)) tabId = "tasks";
+            else if ("calendar".equals(tab) || "runway".equals(tab)) tabId = "calendar";
+            else if ("curriculum".equals(tab) || "flowchart".equals(tab)) tabId = "curriculum";
+            else if ("planner".equals(tab)) tabId = "planner";
+            else if ("settings".equals(tab)) tabId = "settings";
 
+            // Consume extras immediately so background onStart() does not replay stale widget jumps
+            intent.removeExtra("widget_action");
+            intent.removeExtra("target_tab");
+            intent.removeExtra("filter");
+            intent.removeExtra("pomodoro_active");
+
+            final String resolvedTabId = tabId;
             if (getBridge() != null && getBridge().getWebView() != null) {
                 getBridge().getWebView().postDelayed(() -> {
                     if ("add_task".equals(action)) {
@@ -167,12 +188,12 @@ public class MainActivity extends BridgeActivity {
                         );
                     } else if (pomodoroActive) {
                         getBridge().getWebView().evaluateJavascript(
-                            "if (typeof window.setActiveMainTab === 'function') { window.setActiveMainTab('runway'); }",
+                            "if (typeof window.setActiveMainTab === 'function') { window.setActiveMainTab('tasks'); }",
                             null
                         );
-                    } else if (tabId != null) {
+                    } else if (resolvedTabId != null) {
                         getBridge().getWebView().evaluateJavascript(
-                            "if (typeof window.setActiveMainTab === 'function') { window.setActiveMainTab('" + tabId + "'); }",
+                            "if (typeof window.setActiveMainTab === 'function') { window.setActiveMainTab('" + resolvedTabId + "'); }",
                             null
                         );
                     }
@@ -187,12 +208,18 @@ public class MainActivity extends BridgeActivity {
             WebSettings settings = webView.getSettings();
             settings.setTextZoom(100);
             webView.setBackgroundColor(android.graphics.Color.parseColor("#020617"));
+            if (webViewConfigured) return;
+            webViewConfigured = true;
             webView.addJavascriptInterface(new SemesteroWidgetBridge(this), "SemesteroWidgetBridge");
 
             webView.setDownloadListener((url, userAgent, contentDisposition, mimetype, contentLength) -> {
+                if (!isAllowedExternalUrl(url)) {
+                    android.util.Log.w("SemesteroWebView", "Blocked non-http/mailto download URL");
+                    return;
+                }
                 try {
                     android.content.Intent intent = new android.content.Intent(android.content.Intent.ACTION_VIEW);
-                    intent.setData(android.net.Uri.parse(url));
+                    intent.setData(android.net.Uri.parse(url.trim()));
                     intent.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK);
                     startActivity(intent);
                 } catch (Exception e) {
@@ -211,7 +238,10 @@ public class MainActivity extends BridgeActivity {
 
         @JavascriptInterface
         public void openExternalUrl(String url) {
-            if (url == null || url.trim().isEmpty()) return;
+            if (!isAllowedExternalUrl(url)) {
+                android.util.Log.w("SemesteroBridge", "Blocked external URL with disallowed scheme");
+                return;
+            }
             try {
                 android.content.Intent intent = new android.content.Intent(android.content.Intent.ACTION_VIEW);
                 intent.setData(android.net.Uri.parse(url.trim()));
@@ -235,13 +265,16 @@ public class MainActivity extends BridgeActivity {
         @JavascriptInterface
         public void updateClassWidget(String title, String time, String details, String lecturer, String status, int totalClasses, String classesJson) {
             SharedPreferences prefs = context.getSharedPreferences(SemesteroNextClassWidget.PREFS_NAME, Context.MODE_PRIVATE);
+            int safeTotal = Math.max(1, totalClasses);
+            int clampedIndex = Math.max(0, Math.min(prefs.getInt("class_index", 0), safeTotal - 1));
             prefs.edit()
                 .putString("class_title", title)
                 .putString("class_time", time)
                 .putString("class_details", details)
                 .putString("class_lecturer", lecturer)
                 .putString("class_status", status)
-                .putInt("all_classes_count", Math.max(1, totalClasses))
+                .putInt("all_classes_count", safeTotal)
+                .putInt("class_index", clampedIndex)
                 .putString("all_classes_json", classesJson != null ? classesJson : "")
                 .apply();
 
@@ -385,6 +418,7 @@ public class MainActivity extends BridgeActivity {
             SharedPreferences prefs = context.getSharedPreferences(SemesteroNextClassWidget.PREFS_NAME, Context.MODE_PRIVATE);
             prefs.edit().clear().apply();
             refreshAllWidgets();
+            WearSyncManager.syncAllToWatch(context);
         }
 
         @JavascriptInterface
@@ -408,16 +442,20 @@ public class MainActivity extends BridgeActivity {
 
         @JavascriptInterface
         public String fetchMoodleIcs(String targetUrl) {
+            String trimmedUrl = targetUrl != null ? targetUrl.trim() : "";
+            if (!trimmedUrl.matches("(?i)^https://moodle\\d*\\.technion\\.ac\\.il/calendar/export_execute\\.php.*")) {
+                return "ERROR: Only Technion Moodle ICS URLs are allowed";
+            }
             java.net.HttpURLConnection conn = null;
             java.io.BufferedReader reader = null;
             try {
-                java.net.URL url = new java.net.URL(targetUrl);
+                java.net.URL url = new java.net.URL(trimmedUrl);
                 conn = (java.net.HttpURLConnection) url.openConnection();
                 conn.setRequestMethod("GET");
                 conn.setConnectTimeout(15000);
                 conn.setReadTimeout(20000);
                 conn.setRequestProperty("Accept", "text/calendar, text/plain, */*");
-                conn.setRequestProperty("User-Agent", "SemesteroME-Android/2.8.8");
+                conn.setRequestProperty("User-Agent", "SemesteroME-Android/3.2.0");
                 conn.setInstanceFollowRedirects(true);
                 int code = conn.getResponseCode();
                 if (code >= 200 && code < 300) {

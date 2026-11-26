@@ -5,6 +5,7 @@ const os = require('os');
 
 const PORT = 8080;
 const BASE_DIR = __dirname;
+const RESOLVED_BASE_DIR = path.resolve(BASE_DIR);
 
 const MIME_TYPES = {
     '.html': 'text/html; charset=UTF-8',
@@ -30,7 +31,14 @@ function getLocalIp() {
 }
 
 const server = http.createServer(async (req, res) => {
-    let reqPath = decodeURIComponent(req.url.split('?')[0]);
+    let reqPath;
+    try {
+        reqPath = decodeURIComponent(req.url.split('?')[0]);
+    } catch (err) {
+        res.writeHead(400, { 'Content-Type': 'text/plain; charset=UTF-8' });
+        res.end('400 Bad Request');
+        return;
+    }
 
     // Local CORS-free proxy for Technion Moodle ICS calendar feeds
     if (reqPath === '/api/moodle-ics') {
@@ -63,7 +71,7 @@ const server = http.createServer(async (req, res) => {
                     signal: controller.signal,
                     headers: {
                         'Accept': 'text/calendar, text/plain, */*',
-                        'User-Agent': 'Semestero-MoodleSync/3.1.16'
+                        'User-Agent': 'Semestero-MoodleSync/3.2.0'
                     }
                 });
                 const text = await upstream.text();
@@ -93,8 +101,24 @@ const server = http.createServer(async (req, res) => {
     }
 
     if (reqPath === '/' || reqPath === '') reqPath = '/index.html';
-
-    const filePath = path.join(BASE_DIR, reqPath);
+    if (reqPath.includes('\0')) {
+        res.writeHead(400, { 'Content-Type': 'text/plain; charset=UTF-8' });
+        res.end('400 Bad Request');
+        return;
+    }
+    const relTarget = reqPath.replace(/^[/\\]+/, '');
+    const segments = relTarget.split(/[/\\]+/).filter(Boolean);
+    if (segments.some(seg => seg === '..' || seg === '.git' || seg.startsWith('.env'))) {
+        res.writeHead(403, { 'Content-Type': 'text/plain; charset=UTF-8' });
+        res.end('403 Forbidden');
+        return;
+    }
+    const filePath = path.resolve(RESOLVED_BASE_DIR, relTarget);
+    if (filePath !== RESOLVED_BASE_DIR && !filePath.startsWith(RESOLVED_BASE_DIR + path.sep)) {
+        res.writeHead(403, { 'Content-Type': 'text/plain; charset=UTF-8' });
+        res.end('403 Forbidden');
+        return;
+    }
 
     fs.stat(filePath, (err, stats) => {
         if (err || !stats.isFile()) {

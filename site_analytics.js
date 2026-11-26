@@ -14,6 +14,18 @@
     const PENDING_OFFLINE_KEY = 'ast_telemetry_pending_offline';
     const SESSION_TRACKED_KEY = 'ast_telemetry_session_recorded';
 
+    function escapeAnalyticsHtml(str) {
+        if (typeof window !== 'undefined' && window.__semesteroUtils && typeof window.__semesteroUtils.escapeHtml === 'function') {
+            return window.__semesteroUtils.escapeHtml(str);
+        }
+        return String(str ?? '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
     const SiteAnalytics = {
         stats: {
             registeredUsersCount: 0,
@@ -58,7 +70,6 @@
             }
         },
 
-        
         // ==========================================================================
         // App-Performance Toolkit (30/31): Core Web Vitals Real-User Monitoring (RUM)
         // ==========================================================================
@@ -125,7 +136,6 @@
             } catch (e) {}
         },
 
-        
         // App-Performance Toolkit (18/31): User Timing Marks & Measures Trace
         startTrace(name) {
             if (typeof performance !== 'undefined' && performance.mark) {
@@ -175,17 +185,24 @@
                     localStorage.setItem(LOCAL_GUEST_KEY, this.stats.localGuestVisits.toString());
                 }
 
-                // Send cloud telemetry ping
-                this.pingCloudTelemetry(isGuest);
+                // Only authenticated sessions send cloud telemetry pings (Guest isolation)
+                if (!isGuest) {
+                    this.pingCloudTelemetry(false);
+                }
             }
         },
 
         async pingCloudTelemetry(isGuest) {
+            const isAuthenticated = !!(window.AuthSync && typeof window.AuthSync.isLoggedIn === 'function' && window.AuthSync.isLoggedIn());
+            const activeUser = (isAuthenticated && typeof window.AuthSync.getActiveUser === 'function') ? window.AuthSync.getActiveUser() : null;
+            if (isGuest || !isAuthenticated || !activeUser || !activeUser.id || activeUser.id === 'guest') {
+                return;
+            }
             try {
                 const pendingOffline = parseInt(localStorage.getItem(PENDING_OFFLINE_KEY) || '0', 10);
 
-                // Fetch current telemetry row
-                const res = await fetch(`${SUPABASE_URL}/rest/v1/user_states?user_id=eq.${TELEMETRY_USER_ID}`, {
+                // Fetch current telemetry row with explicit column projection
+                const res = await fetch(`${SUPABASE_URL}/rest/v1/user_states?user_id=eq.${TELEMETRY_USER_ID}&select=user_id,state_json`, {
                     headers: {
                         'apikey': SUPABASE_KEY,
                         'Authorization': `Bearer ${SUPABASE_KEY}`
@@ -250,37 +267,41 @@
         },
 
         async fetchStats() {
+            const isAdir = !!(window.AuthSync && typeof window.AuthSync.isAdirActive === 'function' && window.AuthSync.isAdirActive());
+            if (!isAdir) {
+                this.stats.isLoading = false;
+                return this.stats;
+            }
             this.stats.isLoading = true;
             try {
-                const res = await fetch(`${SUPABASE_URL}/rest/v1/user_states?select=*`, {
-                    headers: {
-                        'apikey': SUPABASE_KEY,
-                        'Authorization': `Bearer ${SUPABASE_KEY}`
-                    }
-                });
+                const headers = {
+                    'apikey': SUPABASE_KEY,
+                    'Authorization': `Bearer ${SUPABASE_KEY}`
+                };
+                const [telRes, usersRes] = await Promise.all([
+                    fetch(`${SUPABASE_URL}/rest/v1/user_states?user_id=eq.${TELEMETRY_USER_ID}&select=user_id,state_json`, { headers }),
+                    fetch(`${SUPABASE_URL}/rest/v1/user_states?user_id=not.like.__*&select=user_id,user_name,user_email,updated_at`, { headers })
+                ]);
 
-                if (res.ok) {
-                    const rows = await res.json();
-
-                    // 1. Telemetry row
-                    const telRow = rows.find(r => r.user_id === TELEMETRY_USER_ID);
+                if (telRes.ok) {
+                    const telRows = await telRes.json();
+                    const telRow = telRows && telRows[0];
                     if (telRow && telRow.state_json) {
                         this.stats.cloudTotalVisits = telRow.state_json.total_visits || 0;
                         this.stats.cloudOfflineVisits = telRow.state_json.offline_visits || 0;
                         this.stats.cloudGuestVisits = telRow.state_json.guest_visits || 0;
                         this.stats.lastUpdated = telRow.state_json.last_updated;
                     }
+                }
 
-                    // 2. Real registered student users (exclude telemetry & system rows)
-                    const studentRows = rows.filter(r => r.user_id && !r.user_id.startsWith('__'));
+                if (usersRes.ok) {
+                    const studentRows = await usersRes.json();
                     this.stats.registeredUsersCount = studentRows.length;
                     this.stats.registeredUsers = studentRows.map(r => ({
                         id: r.user_id,
                         name: r.user_name || (r.user_id === 'adir_moshe' ? 'אדיר משה' : 'סטודנט'),
                         email: r.user_email || '',
-                        updatedAt: r.updated_at || '',
-                        gpa: (r.state_json && r.state_json.gpa) || (r.user_id === 'adir_moshe' ? '88.5' : null),
-                        credits: (r.state_json && r.state_json.credits) || (r.user_id === 'adir_moshe' ? '39.5' : null)
+                        updatedAt: r.updated_at || ''
                     }));
 
                     // Sort: most recently active first
@@ -301,10 +322,10 @@
             const guestEl = document.getElementById('stat-pill-guest-count');
             const totalEl = document.getElementById('stat-pill-total-count');
 
-            const usersCount = this.stats.registeredUsersCount || 12;
-            const offlineCount = this.stats.cloudOfflineVisits || 18;
-            const guestCount = this.stats.cloudGuestVisits || 142;
-            const totalCount = this.stats.cloudTotalVisits || 254;
+            const usersCount = Number(this.stats.registeredUsersCount ?? 0);
+            const offlineCount = Number(this.stats.cloudOfflineVisits ?? 0);
+            const guestCount = Number(this.stats.cloudGuestVisits ?? 0);
+            const totalCount = Number(this.stats.cloudTotalVisits ?? 0);
 
             if (usersEl) usersEl.innerText = usersCount;
             if (offlineEl) offlineEl.innerText = offlineCount;
@@ -328,10 +349,10 @@
                 ? '<span style="background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid #10b981; padding: 3px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: bold;">🟢 מחובר לענן בזמן אמת</span>'
                 : '<span style="background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid #ef4444; padding: 3px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: bold;">🔴 במצב אופליין (ללא חיבור)</span>';
 
-            const usersCount = this.stats.registeredUsersCount || 12;
-            const offlineCount = this.stats.cloudOfflineVisits || 18;
-            const guestCount = this.stats.cloudGuestVisits || 142;
-            const totalCount = this.stats.cloudTotalVisits || 254;
+            const usersCount = Number(this.stats.registeredUsersCount ?? 0);
+            const offlineCount = Number(this.stats.cloudOfflineVisits ?? 0);
+            const guestCount = Number(this.stats.cloudGuestVisits ?? 0);
+            const totalCount = Number(this.stats.cloudTotalVisits ?? 0);
 
             let usersListHtml = '';
             if (this.stats.registeredUsers && this.stats.registeredUsers.length > 0) {
@@ -346,10 +367,10 @@
                         <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 8px; margin-bottom: 8px;">
                             <div>
                                 <div style="font-weight: 700; color: #f8fafc; font-size: 0.9rem; display: flex; align-items: center;">
-                                    ${badge} <span>${u.name}</span>
+                                    ${badge} <span>${escapeAnalyticsHtml(u.name)}</span>
                                 </div>
                                 <div style="font-size: 0.74rem; color: #94a3b8; font-family: monospace; margin-top: 2px;">
-                                    ID: ${u.id} ${u.email ? '• ' + u.email : ''}
+                                    ID: ${escapeAnalyticsHtml(u.id)} ${u.email ? '• ' + escapeAnalyticsHtml(u.email) : ''}
                                 </div>
                             </div>
                             <div style="text-align: left;">
@@ -357,7 +378,7 @@
                                     פעילות אחרונה
                                 </div>
                                 <div style="font-size: 0.7rem; color: #64748b;">
-                                    ${dateFormatted}
+                                    ${escapeAnalyticsHtml(dateFormatted)}
                                 </div>
                             </div>
                         </div>
@@ -493,7 +514,7 @@
                 if (typeof showToastNotification === 'function') {
                     showToastNotification('⛔ גישה חסומה - נתוני משתמשים וכניסות מוגבלים לחשבון מנהל המערכת (אדיר משה) בלבד', 'error');
                 } else {
-                    alert('⛔ גישה חסומה - נתוני משתמשים וכניסות מוגבלים לחשבון מנהל המערכת (אדיר משה) בלבד');
+                    console.warn('⛔ גישה חסומה - נתוני משתמשים וכניסות מוגבלים לחשבון מנהל המערכת (אדיר משה) בלבד');
                 }
                 return;
             }

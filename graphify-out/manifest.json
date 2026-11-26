@@ -42,9 +42,9 @@
     "semantic_hash": "87586c4ac3e3bed38e19f4f864536155"
   },
   "app.js": {
-    "mtime": 1795533944.932035,
-    "seen": 1795534399.0280187,
-    "ast_hash": "239308f1fc9f0b924aa0bb15457000aa",
+    "mtime": 1795557630.3995578,
+    "seen": 1795557810.6096838,
+    "ast_hash": "a2df70645693acfba6f522de66ae4b3f",
     "semantic_hash": ""
   },
   "auth_sync.js": {
@@ -84,10 +84,10 @@
     "semantic_hash": "bf264a668133da6593ad8c765822ee74"
   },
   "main.js": {
-    "mtime": 1794006123.9075263,
-    "seen": 1795065622.4873629,
-    "ast_hash": "c4bddcc94d2f684409c994ca0f4888d0",
-    "semantic_hash": "c4bddcc94d2f684409c994ca0f4888d0"
+    "mtime": 1795557629.0784729,
+    "seen": 1795557810.6097116,
+    "ast_hash": "262fa335e9846403e10e54104afca7a9",
+    "semantic_hash": ""
   },
   "manifest.json": {
     "mtime": 1795077982.6366508,
@@ -138,21 +138,21 @@
     "semantic_hash": "bfa6675c3fa845067771987c41ff8991"
   },
   "server.js": {
-    "mtime": 1795532755.6091895,
-    "seen": 1795534399.0305505,
-    "ast_hash": "caad1b8d486bd5e10ee3e9a87024d323",
+    "mtime": 1795557641.6805575,
+    "seen": 1795557810.6103296,
+    "ast_hash": "d31ab554f0212df14ee3d6c03b9e14c0",
     "semantic_hash": ""
   },
   "site_analytics.js": {
-    "mtime": 1793552525.769308,
-    "seen": 1795065622.488032,
-    "ast_hash": "af4b581f64d696a30a50498c0832e6f3",
-    "semantic_hash": "af4b581f64d696a30a50498c0832e6f3"
+    "mtime": 1795557777.4894915,
+    "seen": 1795557810.6103308,
+    "ast_hash": "946f6cef680894b70aa117a99e9304b9",
+    "semantic_hash": ""
   },
   "sw.js": {
-    "mtime": 1795533292.0146432,
-    "seen": 1795534399.0305548,
-    "ast_hash": "7a6eb94832281c2889654d2f05b5f474",
+    "mtime": 1795557633.1426632,
+    "seen": 1795557810.610332,
+    "ast_hash": "ad77132e45021c3072afe4748bb28b32",
     "semantic_hash": ""
   },
   "technion_academic_calendar.js": {
@@ -4218,10 +4218,10 @@
     "semantic_hash": "d57cb7d1bb93fa1fd2213fb347ab76b7"
   },
   "sentry_logger.js": {
-    "mtime": 1794348557.0204043,
-    "seen": 1795065622.4880292,
-    "ast_hash": "666b4ae8c87043fc3226a601ed9d22b0",
-    "semantic_hash": "666b4ae8c87043fc3226a601ed9d22b0"
+    "mtime": 1795557631.8035307,
+    "seen": 1795557810.6103284,
+    "ast_hash": "265b2edc3707e7a908ac5fdb49185741",
+    "semantic_hash": ""
   },
   "tests/test_attendance_and_perpetual_ditch.test.js": {
     "mtime": 1795212054.5288172,
@@ -4533,6 +4533,12 @@
     "mtime": 1795455906.274626,
     "seen": 1795457006.2080858,
     "ast_hash": "f7d49bb8e1a25b9a7d8902cdcf38f2c4",
+    "semantic_hash": ""
+  },
+  "tests/test_pass0_shared_core_hardening.js": {
+    "mtime": 1795557673.8645432,
+    "seen": 1795557810.610369,
+    "ast_hash": "d197c9c0436b68430fb9255b8fc5d489",
     "semantic_hash": ""
   }
 }
