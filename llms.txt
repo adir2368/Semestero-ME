@@ -57,11 +57,11 @@ Technion GPA is calculated strictly as the credit-weighted mean of numerically g
 - **Mechanical Engineering Physics Variants**: Semestero supports seamless switching between official Technion Physics 1 alternatives (`114051` Physics 1 / `114071` Physics 1M / `114077` Physics 1T) and Physics 2 alternatives (`114052` Physics 2 / `114075` Physics 2M / `114078` Physics 2T), dynamically updating prerequisites and credit totals.
 
 ### האם הנתונים והציונים נשמרים בצורה פרטית ומאובטחת? (Privacy & Multi-Tenant Security)
-Yes. Semestero ME (`v3.2.10`) operates Local-First in an isolated Guest workspace by default with zero tracking, zero ads, and zero Technion SSO password collection. Optional cloud backup across phone and laptop uses salted SHA-256 authentication and strict per-student storage isolation.
+Yes. Semestero ME (`v3.2.11`) operates Local-First in an isolated Guest workspace by default with zero tracking, zero ads, and zero Technion SSO password collection. Optional cloud backup across phone and laptop uses salted SHA-256 authentication and strict per-student storage isolation.
 
 ---
 
 ## Metadata
 - **Creator**: Adir Moshe — Faculty of Mechanical Engineering, Technion – Israel Institute of Technology
-- **Current Release**: `v3.2.10` (2026)
+- **Current Release**: `v3.2.11` (2026)
 - **License**: MIT Open Source

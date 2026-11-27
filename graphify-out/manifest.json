@@ -42,9 +42,9 @@
     "semantic_hash": ""
   },
   "app.js": {
-    "mtime": 1795767653.4568772,
-    "seen": 1795767713.6533978,
-    "ast_hash": "0a5a751dff626a2674234de6d0ed2370",
+    "mtime": 1795768174.3961256,
+    "seen": 1795768248.8799703,
+    "ast_hash": "0c79bb5df5a4d54583e4fb712826f15a",
     "semantic_hash": ""
   },
   "auth_sync.js": {
@@ -108,9 +108,9 @@
     "semantic_hash": ""
   },
   "package.json": {
-    "mtime": 1795767653.428875,
-    "seen": 1795767713.6534824,
-    "ast_hash": "5a4b9b01c94a3fe195b4f7c077faa8b6",
+    "mtime": 1795768174.3641229,
+    "seen": 1795768248.8800447,
+    "ast_hash": "a745a38f0353cc6134308b5751f3dcba",
     "semantic_hash": ""
   },
   "planner_catalog.js": {
@@ -144,15 +144,15 @@
     "semantic_hash": ""
   },
   "site_analytics.js": {
-    "mtime": 1795730286.4581168,
-    "seen": 1795732005.0647914,
-    "ast_hash": "2016fb6d30b37374f4f33fffa464f998",
+    "mtime": 1795767971.3752766,
+    "seen": 1795768248.8816674,
+    "ast_hash": "be3266a95af1b14e8fd397ea8b990592",
     "semantic_hash": ""
   },
   "sw.js": {
-    "mtime": 1795767653.4848797,
-    "seen": 1795767713.6551538,
-    "ast_hash": "33c056e0f4274e7f549bb449ba2c121e",
+    "mtime": 1795768174.4081266,
+    "seen": 1795768248.8816702,
+    "ast_hash": "35103b213e653f6d4e7c2c40674c4e5a",
     "semantic_hash": ""
   },
   "technion_academic_calendar.js": {
@@ -216,9 +216,9 @@
     "semantic_hash": ""
   },
   "404.html": {
-    "mtime": 1795767653.48888,
-    "seen": 1795767713.6554513,
-    "ast_hash": "f65d02ba7ea05f08a338ce01471936b4",
+    "mtime": 1795768174.4121268,
+    "seen": 1795768248.8819587,
+    "ast_hash": "c9ca8bb5b5589ef6f1036ecb528eedc6",
     "semantic_hash": ""
   },
   "PRIVACY_POLICY.md": {
@@ -252,15 +252,15 @@
     "semantic_hash": "51a0b67ff788f08df753e749f2709d03"
   },
   "index.html": {
-    "mtime": 1795767653.4768791,
-    "seen": 1795767713.6555338,
-    "ast_hash": "52760e71093c900ee26d895dd06a123b",
+    "mtime": 1795768174.4081266,
+    "seen": 1795768248.8819883,
+    "ast_hash": "147be9e289b10e7a01637c5ab73bb60b",
     "semantic_hash": ""
   },
   "llms.txt": {
-    "mtime": 1795767653.500881,
-    "seen": 1795767713.6555426,
-    "ast_hash": "e4d30dc25ce252f3554a42fd93fd385c",
+    "mtime": 1795768174.4161272,
+    "seen": 1795768248.8819945,
+    "ast_hash": "049b1b8322cff3af6f10f0a64963d881",
     "semantic_hash": ""
   },
   "robots.txt": {
@@ -438,14 +438,14 @@
     "semantic_hash": "34b8918ec47dc271dfed290a89fdd8c2"
   },
   "android/app/build.gradle": {
-    "mtime": 1795767653.4848797,
-    "seen": 1795767713.6533008,
-    "ast_hash": "85d6cfabc7574cc206f80460c9bbd745",
+    "mtime": 1795768174.4081266,
+    "seen": 1795768248.8798697,
+    "ast_hash": "4ed3567f5d43ca6f26a81e7defca77be",
     "semantic_hash": ""
   },
   "android/app/capacitor.build.gradle": {
-    "mtime": 1795767655.8570766,
-    "seen": 1795767713.6533055,
+    "mtime": 1795768175.698225,
+    "seen": 1795768248.8798738,
     "ast_hash": "40ff4eb78cc563ba8310aef14d1256c5",
     "semantic_hash": "40ff4eb78cc563ba8310aef14d1256c5"
   },
@@ -522,8 +522,8 @@
     "semantic_hash": "b541d35dbbf4138bb977250332c2cfda"
   },
   "android/capacitor.settings.gradle": {
-    "mtime": 1795767655.8570766,
-    "seen": 1795767713.6533508,
+    "mtime": 1795768175.698225,
+    "seen": 1795768248.8799217,
     "ast_hash": "d70c5b5a81b7362527e6d71aea3bd487",
     "semantic_hash": "d70c5b5a81b7362527e6d71aea3bd487"
   },
@@ -546,9 +546,9 @@
     "semantic_hash": "fde8cf63613bc54f7504f7624b286336"
   },
   "android/wear/build.gradle": {
-    "mtime": 1795767653.4848797,
-    "seen": 1795767713.6533635,
-    "ast_hash": "380b1193e85883f20aebf6ae189b73e2",
+    "mtime": 1795768174.4081266,
+    "seen": 1795768248.8799336,
+    "ast_hash": "96f6f986e466be8a6f5a06c47954d42e",
     "semantic_hash": ""
   },
   "android/wear/src/main/java/com/technion/semestero/wear/MainActivity.java": {
@@ -1542,9 +1542,9 @@
     "semantic_hash": "f20b5a4971d0de14ce841d5aa17f366d"
   },
   "scripts/create_github_release.py": {
-    "mtime": 1795730286.4501164,
-    "seen": 1795732005.0646665,
-    "ast_hash": "8e0e828343896fc737e36fa5d32841ac",
+    "mtime": 1795767971.3752766,
+    "seen": 1795768248.881561,
+    "ast_hash": "107df090be612990a226b977e42a8aee",
     "semantic_hash": ""
   },
   "scripts/deep_audit_ecosystem.js": {
@@ -1956,9 +1956,9 @@
     "semantic_hash": "4468ab6c8531753f1ee2bf85bab21416"
   },
   "guide.html": {
-    "mtime": 1795767653.4928803,
-    "seen": 1795767713.6554806,
-    "ast_hash": "c1b6c55c044d086ec64965da96d3e020",
+    "mtime": 1795768174.4121268,
+    "seen": 1795768248.8819854,
+    "ast_hash": "78b5a88eb366693f910e56c1e7fce488",
     "semantic_hash": ""
   },
   "ios/App/CapApp-SPM/README.md": {
@@ -1968,15 +1968,15 @@
     "semantic_hash": "d256f6b5922d4249607779141357d565"
   },
   "watch.html": {
-    "mtime": 1795767653.4928803,
-    "seen": 1795767713.6555486,
-    "ast_hash": "ef34149ed7a6fd22d8282b641b743683",
+    "mtime": 1795768174.4121268,
+    "seen": 1795768248.8820007,
+    "ast_hash": "b19d519972c7dd8ffe5eb359f89270ff",
     "semantic_hash": ""
   },
   "widgets.html": {
-    "mtime": 1795767653.4968808,
-    "seen": 1795767713.6555517,
-    "ast_hash": "4379cf35719e6af58a070ea3df584aa6",
+    "mtime": 1795768174.4121268,
+    "seen": 1795768248.8820038,
+    "ast_hash": "5cded9d312b51a2ce03378b46a9ef6cd",
     "semantic_hash": ""
   },
   "android/app/src/main/res/drawable-hdpi/ic_stat_notification.png": {
@@ -4242,9 +4242,9 @@
     "semantic_hash": "faa1263ea43f26f15295a6a0e6a53223"
   },
   "tests/test_ui_motion_prompts_suite.js": {
-    "mtime": 1795767576.6344943,
-    "seen": 1795767713.6552806,
-    "ast_hash": "042b0eb3af44463f737d7ecf2dacf40f",
+    "mtime": 1795768105.8624384,
+    "seen": 1795768248.881792,
+    "ast_hash": "ed5ced98f66f7ae297fac3995985196b",
     "semantic_hash": ""
   },
   "tests/test_vibe_security_hardening.js": {
@@ -4536,9 +4536,9 @@
     "semantic_hash": ""
   },
   "tests/test_pass0_shared_core_hardening.js": {
-    "mtime": 1795730286.4701173,
-    "seen": 1795732005.0648756,
-    "ast_hash": "d197c9c0436b68430fb9255b8fc5d489",
+    "mtime": 1795767971.3752766,
+    "seen": 1795768248.8817585,
+    "ast_hash": "f8626ea2e8c2cb248afdedd195f614e1",
     "semantic_hash": ""
   },
   "tests/test_pass1_curriculum_hardening.js": {
