@@ -1,17 +1,17 @@
 # Graph Report - Semestero-ME  (2026-11-27)
 
 ## Corpus Check
-- 644 files · ~806,450 words
+- 644 files · ~807,847 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 89 file(s) not represented in the graph (top: .xml 63, (none) 6, .bat 6)
 
 ## Summary
-- 3642 nodes · 6550 edges · 321 communities (152 shown, 169 thin omitted)
+- 3650 nodes · 6567 edges · 324 communities (155 shown, 169 thin omitted)
 - Extraction: 97% EXTRACTED · 3% INFERRED · 0% AMBIGUOUS · INFERRED: 197 edges (avg confidence: 0.86)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `8cb5863b`
+- Built from commit: `5e87e723`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -38,11 +38,12 @@
 - test_pass1_curriculum_hardening.js
 - MainActivity
 - saveState
+- wear/MainActivity.java
 - WearCarouselAdapter
-- qa_verify_planner_interactive_restore_and_collapse.js
+- verify_spotlight_guided_tour.js
 - moodle_sync.js
 - verify_guest_isolation_full.js
-- package.json
+- scripts
 - ui_enhancements.js
 - urllib_request
 - _backup_widgets/widgets/ms_ac_exam.json
@@ -70,7 +71,7 @@
 - test_notifications_and_wear_tasks_complication.js
 - test_filter_logic.js
 - new_features_validation_test.js
-- cheesefork_precision_sync.test.js
+- SemesteroWidgetBridge
 - verify_class_radar_15m_and_authentic_tasks.test.js
 - verify_grade_sheet_transcript.test.js
 - curriculum_isolation_and_recommended_tracks.test.js
@@ -79,33 +80,38 @@
 - verify_zero_default_account_and_apk_security.js
 - SemesteroTasksTileService
 - handleAddCourseSubmit
+- qa_verify_planner_interactive_restore_and_collapse.js
 - verify_v2413_gear_badge.js
 - verify_phone_watch_dual_sync.test.js
 - MainActivity
+- package.json
 - grade_sheet.js
 - test_vibe_security_hardening.js
 - verify_planner_mandatory_restore.test.js
 - verify_system_health.js
 - sync_from_google_calendars.py
 - update_v26_styles_and_hud.js
-- check_prereqs.js
+- dependencies
 - qa_verify_watch_browser.js
 - verify_classification_exams.test.js
-- verify_spotlight_guided_tour.js
+- electron
+- generate_verified_prereqs.js
 - verify_all_connections_and_sync_guards.js
 - verify_integrations_hub_cdp.js
 - verify_unconnected_sync_guards.js
+- main.js
 - dfs
 - audit_codebase_integrity.js
 - browser_cdp_qa_audit.js
 - qa_verify_physics_variant.js
 - test_onboarding_auth_flow.js
 - test_technion_catalog_planner_e2e.js
+- test_pangea_deep_concept_search.js
 - verify_local_miluim_and_moodle.js
 - verify_pre_anchor_and_clean_ui.js
 - test_pass6_settings_global_hardening.js
 - verify_tasks_refresh_and_dedup.js
-- WearDataSyncService.java
+- test_workload_e2e.js
 - bump_version_2_10_25.js
 - bump_version_2_10_27.js
 - bump_version_2_10_28.js
@@ -183,13 +189,11 @@
 - Package.swift
 - CapApp-SPM/README.md
 - sw.js
-- patch_notifications.js
 - test_pass5_timetable_hardening.js
 - ref_assert
 - test_pass0_shared_core_hardening.js
 - test_pass3_tasks_moodle_hardening.js
 - ref_vm
-- build_mobile_dist.js
 
 ## God Nodes (most connected - your core abstractions)
 1. `saveState()` - 66 edges
@@ -218,7 +222,7 @@
 ## Import Cycles
 - None detected.
 
-## Communities (321 total, 169 thin omitted)
+## Communities (324 total, 169 thin omitted)
 
 ### Community 0 - "deep_audit_ecosystem.js"
 Cohesion: 0.18
@@ -234,19 +238,19 @@ Nodes (22): buildSheetTaskTitle(), cleanTechnionCourseCode(), extractHomeworkShe
 
 ### Community 5 - "ref_child_process"
 Cohesion: 0.15
-Nodes (9): fs, http, MIME_TYPES, path, server, { spawn }, { execSync }, fs (+1 more)
+Nodes (10): fs, http, MIME_TYPES, path, server, { spawn }, fetch(), fs (+2 more)
 
 ### Community 7 - "planner_module.js"
-Cohesion: 0.08
-Nodes (86): analyzeSemesterExamDensity(), applyEnglishLevelState(), bindDelegatedPlannerEvents(), runAutoScrollStep(), stopEdgeAutoScroll(), triggerEdgeAutoScroll(), buildCourseSemesterMap(), calculateCourseWorkload() (+78 more)
+Cohesion: 0.07
+Nodes (95): analyzeSemesterExamDensity(), applyEnglishLevelState(), bindDelegatedPlannerEvents(), runAutoScrollStep(), stopEdgeAutoScroll(), triggerEdgeAutoScroll(), buildCourseSemesterMap(), calculateCourseWorkload() (+87 more)
 
 ### Community 8 - "verify_orientation_lock_security.test.js"
 Cohesion: 0.18
 Nodes (10): appApk, appXml, { execSync }, fs, javaCode, javaHasBannedNoSensor, javaPath, path (+2 more)
 
 ### Community 9 - "auth_sync.js"
-Cohesion: 0.09
-Nodes (78): applyMergedSyncMetadata(), checkAuthRateLimit(), clearAuthFailures(), clearNativeWidgetsIfAvailable(), clearSessionProof(), closeAuthModal(), deleteAccount(), escapeAuthHtml() (+70 more)
+Cohesion: 0.10
+Nodes (76): applyMergedSyncMetadata(), checkAuthRateLimit(), clearAuthFailures(), clearNativeWidgetsIfAvailable(), clearSessionProof(), closeAuthModal(), deleteAccount(), escapeAuthHtml() (+68 more)
 
 ### Community 10 - "fix_modal_zindex.js"
 Cohesion: 0.13
@@ -258,11 +262,11 @@ Nodes (12): assert, CDPClient, delay(), findChrome(), fs, getJson(), http, isSer
 
 ### Community 13 - "ref_path"
 Cohesion: 0.07
-Nodes (22): { app, BrowserWindow, Menu, ipcMain, shell }, createWindow(), path, electron@^29.4.6, { contextBridge, ipcRenderer }, electron, content, fs (+14 more)
+Nodes (21): content, fs, path, targetFile, fs, html, indexPath, path (+13 more)
 
 ### Community 14 - "android.content.Context"
-Cohesion: 0.10
-Nodes (5): SemesteroWidgetBridge, SemesteroNextClassWidget, SemesteroPomodoroWidget, SemesteroTasksExamWidget, WearSyncManager
+Cohesion: 0.13
+Nodes (4): SemesteroNextClassWidget, SemesteroPomodoroWidget, SemesteroTasksExamWidget, WearSyncManager
 
 ### Community 15 - "verify_v2415_miluim_disclaimer.js"
 Cohesion: 0.13
@@ -281,8 +285,8 @@ Cohesion: 0.12
 Nodes (36): calculateTimeRemaining(), clearTasksSelection(), closeTaskSidePeek(), getActiveCourseFilters(), getActiveSemesterFilters(), getActiveStatusFilters(), getActiveTypeFilters(), getPangeaTaskUrl() (+28 more)
 
 ### Community 19 - "ref_fs"
-Cohesion: 0.06
-Nodes (22): fs, userSaved, fs, userSaved, fs, html, indexPath, path (+14 more)
+Cohesion: 0.08
+Nodes (18): fs, userSaved, fs, userSaved, cfContent, fs, matches, courses (+10 more)
 
 ### Community 20 - "fetch_technion_sap_catalog.js"
 Cohesion: 0.06
@@ -293,7 +297,7 @@ Cohesion: 0.07
 Nodes (27): appSrc, assert, compTable, decodedOnclick, dom2, examContainer, examSandbox, examSrc (+19 more)
 
 ### Community 22 - "MainActivity"
-Cohesion: 0.10
+Cohesion: 0.09
 Nodes (4): MainActivity, ViewPager2.OnPageChangeCallback, WearNotificationHelper, WearNotificationReceiver
 
 ### Community 23 - "saveState"
@@ -304,9 +308,9 @@ Nodes (44): addXp(), autoUpdateTaskStatusesByDueDate(), bulkSetTasksStatus(), cl
 Cohesion: 0.11
 Nodes (7): WearCarouselAdapter, OnCarouselActionListener, RadarViewHolder, SyncViewHolder, TaskItem, TasksViewHolder, TimelineViewHolder
 
-### Community 26 - "qa_verify_planner_interactive_restore_and_collapse.js"
-Cohesion: 0.08
-Nodes (23): assert, CDPClient, delay(), findChrome(), fs, getJson(), http, main() (+15 more)
+### Community 26 - "verify_spotlight_guided_tour.js"
+Cohesion: 0.09
+Nodes (23): assert, CDPClient, delay(), findChrome(), fs, getJson(), http, isServerListening() (+15 more)
 
 ### Community 27 - "moodle_sync.js"
 Cohesion: 0.14
@@ -316,13 +320,13 @@ Nodes (41): areTasksDuplicates(), bindUI(), cleanTaskSummary(), closeModal(), de
 Cohesion: 0.20
 Nodes (12): assert, CDPClient, delay(), ensureLocalServer8080(), fs, getJson(), http, isServerListening() (+4 more)
 
-### Community 29 - "package.json"
-Cohesion: 0.06
-Nodes (37): author, dependencies, @capacitor/android@^8.5.3, @capacitor/cli@^8.5.3, @capacitor/core@^8.5.3, @capacitor/ios@^8.5.3, @capacitor/local-notifications@^8.3.1, description (+29 more)
+### Community 29 - "scripts"
+Cohesion: 0.13
+Nodes (15): scripts, audit, build:all, build:apk, build:ios, build:mobile, graph:update, open:android (+7 more)
 
 ### Community 30 - "ui_enhancements.js"
-Cohesion: 0.09
-Nodes (38): applyFontScale(), attachModalScrollProgress(), buildSearchIndex(), createCommandPaletteModal(), escHtml(), escUiHtml(), formatCourseCodeList(), getAll() (+30 more)
+Cohesion: 0.08
+Nodes (45): animateSharedOriginExpand(), applyFontScale(), attachEdgeRubberBand(), attachModalScrollProgress(), buildSearchIndex(), captureOriginElement(), createCommandPaletteModal(), crossfadeIcon() (+37 more)
 
 ### Community 31 - "urllib_request"
 Cohesion: 0.08
@@ -334,7 +338,7 @@ Nodes (5): actions, body, $schema, type, version
 
 ### Community 33 - "qa_verify_watch_day_sync_browser.js"
 Cohesion: 0.15
-Nodes (11): fetchJson(), fs, http, main(), path, SCREENSHOT_PATH, { spawn }, fetch() (+3 more)
+Nodes (10): { execSync }, fs, path, fetchJson(), fs, http, main(), path (+2 more)
 
 ### Community 34 - "scripts/bump_version.js"
 Cohesion: 0.10
@@ -349,8 +353,8 @@ Cohesion: 0.33
 Nodes (5): actions, body, $schema, type, version
 
 ### Community 37 - "timetable_generator_test.js"
-Cohesion: 0.07
-Nodes (42): 1. Execution Architecture & Stage Topology, 2. Detailed Surgical Implementation Plan, 3. Ready-to-Use Downstream Prompts, 4.1 Dynamic CheeseFork Group Ingestion & Unified Pre-Anchor Keys (`F-10`, `G-05`), 4.2 Fix Moodle ICS 8-Digit Code Lookup & Local Israel Timezone Formatting (`F-11`), 4.3 Refine Homework Sheet Index Matcher (`app.js`), 4.4 Unify October 28, 2026 Semester Start Date & Live Watch Companion Binding (`F-12`, `F-16`), Activation Prompt (+34 more)
+Cohesion: 0.09
+Nodes (35): 4.1 Dynamic CheeseFork Group Ingestion & Unified Pre-Anchor Keys (`F-10`, `G-05`), 4.2 Fix Moodle ICS 8-Digit Code Lookup & Local Israel Timezone Formatting (`F-11`), 4.3 Refine Homework Sheet Index Matcher (`app.js`), 4.4 Unify October 28, 2026 Semester Start Date & Live Watch Companion Binding (`F-12`, `F-16`), Stage 4: Full-Degree Timetable Studio, Moodle Local-TZ Sync, Homework Matcher & Watch Companion (`F-10`, `F-11`, `F-12`, `F-16`, `G-05`), assert, coreCourses, customAnchored (+27 more)
 
 ### Community 38 - "getActiveTimetableSchedule"
 Cohesion: 0.13
@@ -358,7 +362,7 @@ Nodes (35): checkAndTrigger10MinReminders(), closeNotificationDrawer(), complete
 
 ### Community 39 - "test_ui_motion_prompts_suite.js"
 Cohesion: 0.06
-Nodes (30): appSource, assert, badgeObserver, bellBadge, cssSource, fs, mergeBadge, mockDoc (+22 more)
+Nodes (31): appSource, assert, badgeObserver, bellBadge, cssSource, fs, mergeBadge, mockDoc (+23 more)
 
 ### Community 41 - "verify_homework_submission_states.js"
 Cohesion: 0.19
@@ -420,10 +424,6 @@ Nodes (5): activeStatusFilters, activeTypeFilters, fs, item, normCat
 Cohesion: 0.40
 Nodes (3): assert, fs, path
 
-### Community 58 - "cheesefork_precision_sync.test.js"
-Cohesion: 0.33
-Nodes (4): appCode, assert, fs, mockEl
-
 ### Community 59 - "verify_class_radar_15m_and_authentic_tasks.test.js"
 Cohesion: 0.08
 Nodes (23): appJs, appJsPath, assert, fs, layout, layoutPath, listener, listenerPath (+15 more)
@@ -452,6 +452,10 @@ Nodes (16): assert, CDPClient, collectFilesRecursive(), delay(), fs, getJson(), 
 Cohesion: 0.07
 Nodes (40): adaptPlannerCatalogCourseForLookup(), addPrereqChip(), applyCheeseForkCourse(), completeAllTasks(), ensureCheeseForkDatabase(), fetchWithTimeoutAndDedup(), findCheeseForkCourse(), findCourseObj() (+32 more)
 
+### Community 67 - "qa_verify_planner_interactive_restore_and_collapse.js"
+Cohesion: 0.15
+Nodes (12): assert, CDPClient, delay(), findChrome(), fs, getJson(), http, main() (+4 more)
+
 ### Community 68 - "verify_v2413_gear_badge.js"
 Cohesion: 0.40
 Nodes (5): fetch(), fs, http, path, verify()
@@ -459,6 +463,10 @@ Nodes (5): fetch(), fs, http, path, verify()
 ### Community 69 - "verify_phone_watch_dual_sync.test.js"
 Cohesion: 0.10
 Nodes (19): appJsContent, appJsPath, appManifestContent, appManifestPath, fs, path, phoneListenerContent, phoneListenerPath (+11 more)
+
+### Community 71 - "package.json"
+Cohesion: 0.18
+Nodes (11): author, description, devDependencies, electron-packager@^17.1.2, keywords, license, main, name (+3 more)
 
 ### Community 72 - "grade_sheet.js"
 Cohesion: 0.20
@@ -484,9 +492,9 @@ Nodes (10): build_ics(), load_game_state(), log(), main(), sync_to_gist(), fetch
 Cohesion: 0.11
 Nodes (17): appJs, appJsPath, fs, gradle, gradlePath, indexHtml, indexPath, path (+9 more)
 
-### Community 78 - "check_prereqs.js"
-Cohesion: 0.29
-Nodes (7): cfContent, cfMap, courses, curContent, fs, normalizeRawCode(), parsePrereqCodes()
+### Community 78 - "dependencies"
+Cohesion: 0.18
+Nodes (11): dependencies, @capacitor/android@^8.5.3, @capacitor/cli@^8.5.3, @capacitor/core@^8.5.3, @capacitor/ios@^8.5.3, @capacitor/local-notifications@^8.3.1, @capacitor/android, @capacitor/cli (+3 more)
 
 ### Community 79 - "qa_verify_watch_browser.js"
 Cohesion: 0.16
@@ -496,9 +504,13 @@ Nodes (11): assert, CDPClient, delay(), findChrome(), fs, getJson(), http, isSer
 Cohesion: 0.14
 Nodes (13): appCodeMatch, appGradle, appJs, assert, fs, indexHtml, path, pkg (+5 more)
 
-### Community 82 - "verify_spotlight_guided_tour.js"
-Cohesion: 0.20
-Nodes (12): assert, CDPClient, delay(), ensureLocalServer8080(), fs, getJson(), http, isServerListening() (+4 more)
+### Community 81 - "electron"
+Cohesion: 0.25
+Nodes (6): electron@^29.4.6, { contextBridge, ipcRenderer }, electron, { app, BrowserWindow }, fs, path
+
+### Community 82 - "generate_verified_prereqs.js"
+Cohesion: 0.25
+Nodes (6): cfContent, cfMap, codeEquivalents, curContent, fs, verifiedPrereqs
 
 ### Community 83 - "verify_all_connections_and_sync_guards.js"
 Cohesion: 0.17
@@ -511,6 +523,10 @@ Nodes (11): assert, CDPClient, delay(), fs, getJson(), http, main(), os (+3 more
 ### Community 85 - "verify_unconnected_sync_guards.js"
 Cohesion: 0.18
 Nodes (11): assert, CDPClient, delay(), fs, getJson(), http, os, path (+3 more)
+
+### Community 86 - "main.js"
+Cohesion: 0.40
+Nodes (3): { app, BrowserWindow, Menu, ipcMain, shell }, createWindow(), path
 
 ### Community 88 - "audit_codebase_integrity.js"
 Cohesion: 0.12
@@ -532,6 +548,10 @@ Nodes (12): assert, CDPClient, delay(), fs, getJson(), http, isServerListening()
 Cohesion: 0.12
 Nodes (15): assert, csCourse, elements, fs, italianCourse, localStorageData, mockDocument, mockLocalStorage (+7 more)
 
+### Community 93 - "test_pangea_deep_concept_search.js"
+Cohesion: 0.40
+Nodes (3): assert, sldResults, testCases
+
 ### Community 94 - "verify_local_miluim_and_moodle.js"
 Cohesion: 0.19
 Nodes (10): CDPClient, delay(), fs, getJson(), http, main(), os, path (+2 more)
@@ -547,6 +567,10 @@ Nodes (23): a11yCss, a11yJs, appJs, assert, authJs, fs, guideHtml, helpJs (+15 m
 ### Community 98 - "verify_tasks_refresh_and_dedup.js"
 Cohesion: 0.18
 Nodes (12): assert, CDPClient, delay(), fs, getJson(), http, isServerListening(), os (+4 more)
+
+### Community 100 - "test_workload_e2e.js"
+Cohesion: 0.50
+Nodes (3): { app, BrowserWindow }, fs, path
 
 ### Community 101 - "bump_version_2_10_25.js"
 Cohesion: 0.12
@@ -697,7 +721,7 @@ Cohesion: 0.20
 Nodes (9): 1. מבוא והתחייבות לפרטיות (Introduction), 2. עקרון השמירה המקומית (Local-First Architecture), 3. סנכרון ענן מאובטח (אופציונלי בלבד - Optional Cloud Sync), 4. אינטגרציות אקדמיות (Academic Integrations), 5. אי-שיתוף מידע ומניעת מעקב מסחרי (Zero Data Sharing & No Trackers), 6. זכויות המשתמש, מחיקת נתונים ו"הזכות להישכח" (Your Rights & Data Erasure), 7. אבטחת מידע (Data Security), 8. יצירת קשר ורכז פרטיות (Contact Information) (+1 more)
 
 ### Community 151 - "test_app_purge.js"
-Cohesion: 0.22
+Cohesion: 0.20
 Nodes (8): cleaned, fs, localStorageMock, parsed, path, raw, root, vm
 
 ### Community 152 - "apply_tutorial_and_widgets_update.js"
@@ -717,8 +741,8 @@ Cohesion: 0.22
 Nodes (8): 🌍 English Summary (For Technion Students & Open-Source Contributors), 📥 הורדה וכניסה לכל המכשירים (Direct Access & Downloads), 🛠️ הרצה ופיתוח מקומי (Local Development), 📊 השוואת כלים לסטודנטים בטכניון (Technion Student Tools Comparison), 👨‍💻 יוצר ומפתח המערכת, 📌 כלים מרכזיים במערכת (Key Workspaces), 🤖 מנועי חיפוש ו-AI Discoverability (GEO), סמסטרו ME (Semestero ME) 🎓⚙️
 
 ### Community 158 - "audit_all_prereqs.js"
-Cohesion: 0.25
-Nodes (8): allCodes, cfContent, cfMap, curContent, fs, normalizeRawCode(), parsePrereqCodes(), savedState
+Cohesion: 0.12
+Nodes (15): allCodes, cfContent, cfMap, curContent, fs, normalizeRawCode(), parsePrereqCodes(), savedState (+7 more)
 
 ### Community 159 - "test_modal_error.js"
 Cohesion: 0.22
@@ -800,17 +824,13 @@ Nodes (6): actions, body, rtl, $schema, type, version
 Cohesion: 0.20
 Nodes (9): appJs, assert, fnMatch, fs, mockGameState, mockLocalStorage, path, plannerJs (+1 more)
 
-### Community 313 - "patch_notifications.js"
-Cohesion: 0.29
-Nodes (6): appJs, appJsPath, fs, isCrlf, path, raw
-
 ### Community 314 - "test_pass5_timetable_hardening.js"
 Cohesion: 0.12
 Nodes (14): appJs, assert, attJs, attWithoutComments, fs, helpJs, indexHtml, path (+6 more)
 
 ### Community 315 - "ref_assert"
-Cohesion: 0.15
-Nodes (11): assert, fs, runSimulation(), collectAndFilterTasks(), getTaskNormalizedCategory(), assert, sldResults, testCases (+3 more)
+Cohesion: 0.14
+Nodes (12): assert, fs, runSimulation(), collectAndFilterTasks(), getTaskNormalizedCategory(), appCode, assert, fs (+4 more)
 
 ### Community 316 - "test_pass0_shared_core_hardening.js"
 Cohesion: 0.15
@@ -821,21 +841,19 @@ Cohesion: 0.15
 Nodes (13): appSrc, assert, authSrc, cssSrc, extractFn(), fs, moodleSrc, path (+5 more)
 
 ### Community 320 - "ref_vm"
-Cohesion: 0.24
+Cohesion: 0.28
 Nodes (8): assert, createEl(), createStorageMock(), fs, loadPlannerSandbox(), path, rootDir, vm
-
-### Community 322 - "build_mobile_dist.js"
-Cohesion: 0.25
-Nodes (7): FILES_TO_COPY, fs, path, ROOT, widgetsDestDir, widgetsSrcDir, WWW
 
 ## Knowledge Gaps
 - **10 isolated node(s):** `ADR-0075`, `ADR-0093`, `RFC-5545`, `ADR-0108`, `ADR-0093` (+5 more)
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 1926 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 1927 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
 - **169 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
+- **Why does `Stage 4: Full-Degree Timetable Studio, Moodle Local-TZ Sync, Homework Matcher & Watch Companion (`F-10`, `F-11`, `F-12`, `F-16`, `G-05`)` connect `timetable_generator_test.js` to `planner_module.js`?**
+  _High betweenness centrality (0.179) - this node is a cross-community bridge._
 - **What connects `ADR-0075`, `ADR-0093`, `RFC-5545` to the rest of the system?**
   _10 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `app.js` be split into smaller, more focused modules?**
@@ -847,6 +865,4 @@ _Questions this graph is uniquely positioned to answer:_
 - **Should `os` be split into smaller, more focused modules?**
   _Cohesion score 0.03422619047619048 - nodes in this community are weakly interconnected._
 - **Should `planner_module.js` be split into smaller, more focused modules?**
-  _Cohesion score 0.07715355805243446 - nodes in this community are weakly interconnected._
-- **Should `auth_sync.js` be split into smaller, more focused modules?**
-  _Cohesion score 0.09272151898734177 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.06525252525252526 - nodes in this community are weakly interconnected._

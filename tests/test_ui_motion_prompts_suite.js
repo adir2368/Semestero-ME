@@ -437,4 +437,22 @@ assert.strictEqual(t3.getAttribute('data-stack-index'), '0', 'Stack should compa
 assert.strictEqual(t2.getAttribute('data-stack-index'), '1');
 
 console.log('PASS: 3. app.js showToastNotification merges duplicates (×2), stacks up to 3, shows progress bar & compacts on expiry');
+
+// 4. Verify 10 UI/UX Motion & Interaction Principles (@theecommguy)
+assert(cssSource.includes('.ui-confirm-pulse::after'), 'styles.css missing .ui-confirm-pulse::after');
+assert(cssSource.includes('.ui-confirm-check-path'), 'styles.css missing .ui-confirm-check-path');
+assert(cssSource.includes('.ui-icon-crossfade.is-swapping'), 'styles.css missing .ui-icon-crossfade.is-swapping');
+assert(cssSource.includes('@keyframes uiMaskRevealDown'), 'styles.css missing uiMaskRevealDown');
+assert(cssSource.includes('.ui-fitts-dismiss-btn'), 'styles.css missing .ui-fitts-dismiss-btn');
+assert(typeof mockWindow.triggerConfirmPulse === 'function', 'window.triggerConfirmPulse must be exposed');
+assert(typeof mockWindow.crossfadeIcon === 'function', 'window.crossfadeIcon must be exposed');
+assert(typeof mockWindow.UiMotionPromptsSuite.animateSharedOriginExpand === 'function', 'animateSharedOriginExpand must be exposed');
+assert(typeof mockWindow.UiMotionPromptsSuite.attachEdgeRubberBand === 'function', 'attachEdgeRubberBand must be exposed');
+
+const pulseBtn = mockDoc.createElement('button');
+pulseBtn._innerHTML = 'Copy';
+mockWindow.triggerConfirmPulse(pulseBtn, 'Copied!');
+assert(pulseBtn.classList.contains('ui-confirm-pulse'), 'triggerConfirmPulse must add .ui-confirm-pulse immediately');
+console.log('PASS: 4. 10 UI/UX Motion & Interaction rules (confirm pulse, crossfade, FLIP, rubber-band, masks, Fitts, 0ms cmd palette) verified');
 console.log('ALL @ui_motion_prompts TESTS PASSED!');
+

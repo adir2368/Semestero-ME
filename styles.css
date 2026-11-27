@@ -22162,3 +22162,228 @@ body[data-active-tab="tasks"] .btn-back-to-top {
         inset-inline-end: 4px;
     }
 }
+
+/* ============================================================================
+   UI/UX MOTION & INTERACTION 10-PRINCIPLE SUITE (@theecommguy) — v3.2.10
+   1. Pulse to confirm success (SVG checkmark draw + expanding pulse ring)
+   2. Expand the same element (FLIP shared-origin transform helper)
+   3. Crossfade icons with scale + Gaussian blur
+   4. Rubber-band past the edge (smooth spring-back)
+   5. Reveal with masks (directional clip-path wipe)
+   6. Stage the focus (dim background .hud-container behind active modals/peek)
+   7. Scale animation by frequency of use (0ms high-frequency Command Palette)
+   8. Fitts's Law (44px+ hit targets & thumb-zone dismiss buttons)
+   9. Hick's Law (streamlined menus)
+   10. Doherty Threshold (<400ms optimistic instant feedback)
+   ============================================================================ */
+
+/* Principle 1: Pulse to Confirm Success */
+.ui-confirm-pulse {
+    position: relative !important;
+    overflow: visible !important;
+    border-color: rgba(16, 185, 129, 0.75) !important;
+    color: #34d399 !important;
+}
+
+.ui-confirm-pulse::after {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border-radius: inherit;
+    border: 2px solid rgba(16, 185, 129, 0.85);
+    pointer-events: none;
+    animation: uiConfirmPulseRing 0.56s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes uiConfirmPulseRing {
+    0% { transform: scale(0.98); opacity: 0.9; }
+    100% { transform: scale(1.22); opacity: 0; }
+}
+
+.ui-confirm-check-svg {
+    display: inline-block;
+    width: 15px;
+    height: 15px;
+    vertical-align: -2px;
+    margin-inline-end: 5px;
+    flex-shrink: 0;
+}
+
+.ui-confirm-check-path {
+    stroke: #34d399;
+    stroke-width: 2.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    fill: none;
+    stroke-dasharray: 24;
+    stroke-dashoffset: 24;
+    animation: uiConfirmCheckDraw 0.28s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes uiConfirmCheckDraw {
+    from { stroke-dashoffset: 24; }
+    to { stroke-dashoffset: 0; }
+}
+
+/* Principle 2: Expand the Same Element (Shared Origin FLIP Morph) */
+.ui-shared-origin-animating {
+    will-change: transform, opacity;
+}
+
+/* Principle 3: Crossfade Icons with Scale + Blur */
+.ui-icon-crossfade {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    transition:
+        transform 0.16s cubic-bezier(0.22, 1, 0.36, 1),
+        opacity 0.16s ease,
+        filter 0.16s ease;
+}
+
+.ui-icon-crossfade.is-swapping {
+    transform: scale(0.62);
+    opacity: 0;
+    filter: blur(4px);
+}
+
+/* Principle 4: Rubber-Band Past the Edge */
+.ui-rubberband-target {
+    will-change: transform;
+}
+
+.ui-rubberband-target.is-springing-back {
+    transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1) !important;
+}
+
+/* Principle 5: Reveal with Masks (Directional clip-path wipe) */
+@keyframes uiMaskRevealDown {
+    from {
+        clip-path: inset(0 0 100% 0 round 10px);
+        opacity: 0.45;
+    }
+    to {
+        clip-path: inset(0 0 0 0 round 10px);
+        opacity: 1;
+    }
+}
+
+.task-context-menu {
+    animation: uiMaskRevealDown 0.18s cubic-bezier(0.22, 1, 0.36, 1) !important;
+}
+
+.notion-filter-popover.show,
+.sem-dialog-card {
+    animation: uiMaskRevealDown 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Principle 6: Stage the Focus (Recede background workspace behind active modals & side peek) */
+.hud-container {
+    transition: filter 0.22s ease;
+}
+
+body:has(.modal-overlay.active) > .hud-container,
+body:has(.modal-overlay[style*="display: flex"]) > .hud-container,
+body:has(.modal-overlay[style*="display: block"]) > .hud-container,
+body:has(#peek-overlay.active) > .hud-container {
+    filter: brightness(0.68) saturate(0.75);
+}
+
+.modal-overlay.active,
+.modal-overlay[style*="display: flex"],
+.modal-overlay[style*="display: block"],
+#peek-overlay.active {
+    background: rgba(2, 6, 23, 0.78);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+}
+
+/* Principle 7: Scale Animation by Frequency of Use (0ms Instant High-Frequency UI) */
+#command-palette-modal,
+#command-palette-modal.command-palette-overlay,
+#command-palette-modal .command-palette-container,
+#notion-status-dropdown-menu,
+#course-search-results {
+    animation: none !important;
+    transition-duration: 0ms !important;
+}
+
+/* Principle 8: Fitts's Law (Large 44px+ Hit Targets & Thumb-Zone Dismiss Buttons) */
+.modal-close,
+.a11y-close-btn,
+.export-modal-close {
+    min-width: 44px;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+}
+
+.modal-close:hover,
+.a11y-close-btn:hover,
+.export-modal-close:hover {
+    background: rgba(148, 163, 184, 0.14);
+}
+
+.ui-fitts-dismiss-btn {
+    width: 100%;
+    min-height: 46px !important;
+    font-size: 0.94rem !important;
+    font-weight: 700 !important;
+    border-radius: 10px !important;
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+@media (max-width: 768px) {
+    .sem-dialog-footer {
+        flex-direction: column-reverse;
+    }
+    .sem-dialog-footer .btn {
+        width: 100%;
+        min-height: 46px;
+        justify-content: center;
+    }
+}
+
+/* Reduced Motion & Accessibility Guard */
+@media (prefers-reduced-motion: reduce) {
+    .ui-confirm-pulse::after,
+    .ui-confirm-check-path,
+    .task-context-menu,
+    .notion-filter-popover.show,
+    .sem-dialog-card {
+        animation: none !important;
+    }
+    .ui-confirm-check-path {
+        stroke-dashoffset: 0 !important;
+    }
+    .ui-icon-crossfade,
+    .ui-rubberband-target.is-springing-back,
+    .hud-container {
+        transition: none !important;
+    }
+}
+
+body.a11y-stop-animations .ui-confirm-pulse::after,
+body.a11y-stop-animations .ui-confirm-check-path,
+body.a11y-stop-animations .task-context-menu,
+body.a11y-stop-animations .notion-filter-popover.show,
+body.a11y-stop-animations .sem-dialog-card {
+    animation: none !important;
+}
+
+body.a11y-stop-animations .ui-confirm-check-path {
+    stroke-dashoffset: 0 !important;
+}
+
+body.a11y-stop-animations .ui-icon-crossfade,
+body.a11y-stop-animations .ui-rubberband-target.is-springing-back,
+body.a11y-stop-animations .hud-container {
+    transition: none !important;
+}
+

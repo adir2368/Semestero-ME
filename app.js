@@ -23902,15 +23902,20 @@ function openCalendarSyncModal() {
                 }
                 return;
             }
+            if (typeof window.triggerConfirmPulse === 'function') {
+                window.triggerConfirmPulse(copyBtn, "הועתק!");
+            }
             navigator.clipboard.writeText(input.value).then(() => {
-                copyBtn.innerText = "✓ הועתק!";
+                if (typeof window.triggerConfirmPulse !== 'function') copyBtn.innerText = "✓ הועתק!";
                 if (hint) hint.innerText = "✓ קישור ה-Webcal הועתק ללוח! הדבק אותו באפליקציית היומן במכשיר שלך.";
                 if (typeof showToastNotification === 'function') {
                     showToastNotification("✓ קישור מנוי ליומן הועתק ללוח!", 'success');
                 }
-                setTimeout(() => {
-                    copyBtn.innerText = "📋 העתק קישור מנוי";
-                }, 2500);
+                if (typeof window.triggerConfirmPulse !== 'function') {
+                    setTimeout(() => {
+                        copyBtn.innerText = "📋 העתק קישור מנוי";
+                    }, 2500);
+                }
             }).catch(() => {
                 prompt("העתק את קישור ה-Webcal הבא:", input.value);
             });
@@ -26924,11 +26929,11 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.11.27-v3.2.9",
-    version: "3.2.9",
+    code: "REV-2026.11.27-v3.2.10",
+    version: "3.2.10",
     build: "20261126_04",
     date: "2026-11-26 18:40",
-    description: "v3.2.9: תיקון שגיאת ReferenceError בבדיקת עדכונים מול GitHub (isManualCheck) ושיפור זיהוי גרסה באפליקציית המובייל והדסקטופ."
+    description: "v3.2.10: יישום 10 עקרונות תנועה ואינטראקציה (Pulse לאישור, Crossfade מטושטש, FLIP מהקורס, Rubber-Band, חשיפת מסיכה, Focus Staging, פלטת פקודות 0ms, חוק פיטס והיק ותגובה אופטימית <400ms)."
 };
 window.APP_VERSION = APP_CURRENT_REVISION.version;
 window.APP_CURRENT_REVISION = APP_CURRENT_REVISION;
@@ -29264,6 +29269,10 @@ if (typeof document !== 'undefined') {
 
 window.copySystemDiagnostics = async function() {
     const text = window.getSystemDiagnosticsText();
+    const diagBtn = document.getElementById("btn-copy-diagnostics");
+    if (diagBtn && typeof window.triggerConfirmPulse === 'function') {
+        window.triggerConfirmPulse(diagBtn, "הועתק!");
+    }
     try {
         await navigator.clipboard.writeText(text);
         if (typeof showToastNotification === 'function') {

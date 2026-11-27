@@ -1967,6 +1967,48 @@ async function run() {
             assert(verRes.ok, 'checkRemoteAppVersion(true) must resolve remote version without throwing ReferenceError: ' + JSON.stringify(verRes));
         });
 
+        await test('Test 35: 10 UI/UX Motion & Interaction Principles (Pulse, Crossfade, FLIP, 0ms Palette, Fitts, Hick)', async () => {
+            const motionRes = await cdp.eval(`(async () => {
+                const btn = document.createElement('button');
+                btn.textContent = 'Copy';
+                document.body.appendChild(btn);
+                window.triggerConfirmPulse(btn, 'הועתק!');
+                const hasPulse = btn.classList.contains('ui-confirm-pulse');
+                await new Promise(r => setTimeout(r, 120));
+                const hasSvgCheck = !!btn.querySelector('.ui-confirm-check-svg');
+                btn.remove();
+
+                // Hick's Law & 0ms high-frequency Command Palette
+                window.openCommandPalette();
+                const cmdOverlay = document.getElementById('command-palette-modal');
+                const cmdStyle = cmdOverlay ? getComputedStyle(cmdOverlay) : null;
+                const cmdAnimNone = !!(cmdStyle && cmdStyle.animationName === 'none');
+                const zeroQueryItems = document.querySelectorAll('#command-palette-results .command-palette-item').length;
+                window.closeCommandPalette();
+
+                // Fitts's Law 44px+ hit target on .modal-close
+                const closeEl = document.querySelector('#course-modal .modal-close');
+                const closeStyle = closeEl ? getComputedStyle(closeEl) : null;
+                const fittsCloseOk = !!(closeStyle && parseFloat(closeStyle.minWidth) >= 44 && parseFloat(closeStyle.minHeight) >= 44);
+
+                return {
+                    hasPulse,
+                    hasSvgCheck,
+                    cmdAnimNone,
+                    zeroQueryItems,
+                    fittsCloseOk,
+                    hasFlipApi: typeof window.UiMotionPromptsSuite?.animateSharedOriginExpand === 'function',
+                    hasRubberBandApi: typeof window.UiMotionPromptsSuite?.attachEdgeRubberBand === 'function'
+                };
+            })()`);
+            assert(
+                motionRes.hasPulse && motionRes.hasSvgCheck && motionRes.cmdAnimNone &&
+                motionRes.zeroQueryItems > 0 && motionRes.zeroQueryItems <= 9 &&
+                motionRes.fittsCloseOk && motionRes.hasFlipApi && motionRes.hasRubberBandApi,
+                '10 UI/UX Motion & Interaction rules failed browser check: ' + JSON.stringify(motionRes)
+            );
+        });
+
     } finally {
         console.log(`\n========================================================================`);
         console.log(`SUMMARY: ${passed} passed, ${failed} failed.`);

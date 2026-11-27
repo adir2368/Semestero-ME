@@ -68,9 +68,14 @@
     // =========================================================================
     // 2. Toast & Copy Utilities
     // =========================================================================
-    window.copyToClipboard = async function(text, successMsg) {
+    window.copyToClipboard = async function(text, successMsg, triggerEl) {
         if (!text) return;
         const msg = successMsg || `📋 הועתק ללוח: "${text}"`;
+        const btn = triggerEl || (document.activeElement && document.activeElement.tagName === 'BUTTON' ? document.activeElement : null);
+        // Principle 10 (Doherty Threshold <400ms): immediate optimistic visual confirmation before clipboard promise resolves
+        if (btn && typeof window.triggerConfirmPulse === 'function') {
+            window.triggerConfirmPulse(btn, 'הועתק!');
+        }
         try {
             if (navigator.clipboard && navigator.clipboard.writeText) {
                 await navigator.clipboard.writeText(text);
@@ -667,8 +672,10 @@
         let matches = [];
 
         if (!q) {
-            // Default: Show Navigation and Quick Actions
-            matches = allSearchableIndex.filter(item => item.type === 'nav' || item.type === 'action');
+            // Principle 9 (Hick's Law): Focused initial choices (6 tabs + top 3 primary actions); typing searches full index
+            const navItems = allSearchableIndex.filter(item => item.type === 'nav');
+            const topActions = allSearchableIndex.filter(item => item.type === 'action').slice(0, 3);
+            matches = [...navItems, ...topActions];
         } else {
             const qNorm = q.replace(/^0+/, '');
             matches = allSearchableIndex.filter(item => {
@@ -1511,7 +1518,7 @@
                     <!-- Dynamic FAQ Accordion Cards -->
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary btn-sm" onclick="window.closeFaqModal()">סגור</button>
+                    <button type="button" class="btn btn-primary ui-fitts-dismiss-btn" onclick="window.closeFaqModal()">✓ הבנתי, סגור מדריך</button>
                 </div>
             </div>
         `;
@@ -1751,7 +1758,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary btn-sm" onclick="window.closeKeyboardShortcutsModal()" style="background: #059669; border-color: #10b981;">✓ סגור</button>
+                    <button type="button" class="btn btn-primary ui-fitts-dismiss-btn" onclick="window.closeKeyboardShortcutsModal()" style="background: #059669; border-color: #10b981;">✓ הבנתי, סגור</button>
                 </div>
             </div>
         `;
@@ -2527,9 +2534,249 @@
             }
         },
 
+        // Principle 1 & 3: Pulse to confirm success + SVG checkmark draw + scale-blur icon crossfade
+        triggerConfirmPulse(el, tempLabel) {
+            if (!el) return;
+            const reduced = this.getReducedMotion();
+            if (el._uiConfirmTimer) {
+                clearTimeout(el._uiConfirmTimer);
+                el._uiConfirmTimer = null;
+            }
+            if (tempLabel && typeof el.innerHTML === 'string') {
+                if (!el.dataset.uiOrigHtml) {
+                    el.dataset.uiOrigHtml = el.innerHTML;
+                }
+                const svgCheck = '<svg class="ui-confirm-check-svg" viewBox="0 0 16 16" aria-hidden="true"><path class="ui-confirm-check-path" d="M3 8.5 L6.5 12 L13 4.5"></path></svg>';
+                const nextHtml = `<span class="ui-icon-crossfade">${svgCheck}<span>${escHtml(tempLabel)}</span></span>`;
+                if (!reduced) {
+                    el.classList.add('ui-icon-crossfade', 'is-swapping');
+                    setTimeout(() => {
+                        el.innerHTML = nextHtml;
+                        el.classList.remove('is-swapping');
+                    }, 90);
+                } else {
+                    el.innerHTML = nextHtml;
+                }
+            }
+            if (!reduced) {
+                el.classList.remove('ui-confirm-pulse');
+                void el.offsetWidth;
+                el.classList.add('ui-confirm-pulse');
+            }
+            el._uiConfirmTimer = setTimeout(() => {
+                el.classList.remove('ui-confirm-pulse', 'ui-icon-crossfade', 'is-swapping');
+                if (el.dataset && el.dataset.uiOrigHtml !== undefined) {
+                    const orig = el.dataset.uiOrigHtml;
+                    delete el.dataset.uiOrigHtml;
+                    if (!reduced) {
+                        el.classList.add('ui-icon-crossfade', 'is-swapping');
+                        setTimeout(() => {
+                            el.innerHTML = orig;
+                            el.classList.remove('is-swapping');
+                        }, 90);
+                    } else {
+                        el.innerHTML = orig;
+                    }
+                }
+                el._uiConfirmTimer = null;
+            }, 1800);
+        },
+
+        crossfadeIcon(el, nextHtml, revertAfterMs = 0) {
+            if (!el) return;
+            const reduced = this.getReducedMotion();
+            if (el._uiCrossfadeTimer) clearTimeout(el._uiCrossfadeTimer);
+            const prevHtml = el.dataset && el.dataset.uiCrossfadeOrig !== undefined ? el.dataset.uiCrossfadeOrig : el.innerHTML;
+            if (revertAfterMs > 0 && el.dataset && el.dataset.uiCrossfadeOrig === undefined) {
+                el.dataset.uiCrossfadeOrig = prevHtml;
+            }
+            if (reduced) {
+                el.innerHTML = nextHtml;
+            } else {
+                el.classList.add('ui-icon-crossfade', 'is-swapping');
+                setTimeout(() => {
+                    el.innerHTML = nextHtml;
+                    el.classList.remove('is-swapping');
+                }, 90);
+            }
+            if (revertAfterMs > 0) {
+                el._uiCrossfadeTimer = setTimeout(() => {
+                    const orig = el.dataset ? el.dataset.uiCrossfadeOrig : prevHtml;
+                    if (el.dataset) delete el.dataset.uiCrossfadeOrig;
+                    if (reduced) {
+                        el.innerHTML = orig;
+                    } else {
+                        el.classList.add('ui-icon-crossfade', 'is-swapping');
+                        setTimeout(() => {
+                            el.innerHTML = orig;
+                            el.classList.remove('is-swapping');
+                        }, 90);
+                    }
+                }, revertAfterMs);
+            }
+        },
+
+        // Principle 2: Expand the same element (FLIP Spatial Origin Morph)
+        _lastOriginRect: null,
+        _lastOriginTs: 0,
+
+        captureOriginElement(el) {
+            if (!el || typeof el.getBoundingClientRect !== 'function') return;
+            const rect = el.getBoundingClientRect();
+            if (!rect || rect.width <= 0 || rect.height <= 0) return;
+            this._lastOriginRect = rect;
+            this._lastOriginTs = Date.now();
+        },
+
+        observeOriginClicks(rootDoc = document) {
+            if (!rootDoc || typeof rootDoc.addEventListener !== 'function') return;
+            if (rootDoc._uiMotionOriginBound) return;
+            rootDoc._uiMotionOriginBound = true;
+            rootDoc.addEventListener('click', (e) => {
+                const target = e.target && typeof e.target.closest === 'function'
+                    ? e.target.closest('.course-node, .planner-course-card, .course-card, .notion-task-row, .kanban-card, .cal-event-pill')
+                    : null;
+                if (target) {
+                    this.captureOriginElement(target);
+                }
+            }, { capture: true, passive: true });
+        },
+
+        animateSharedOriginExpand(targetEl, sourceEl) {
+            if (!targetEl || this.getReducedMotion() || typeof targetEl.getBoundingClientRect !== 'function') return;
+            let srcRect = null;
+            if (sourceEl && typeof sourceEl.getBoundingClientRect === 'function') {
+                srcRect = sourceEl.getBoundingClientRect();
+            } else if (this._lastOriginRect && (Date.now() - this._lastOriginTs) < 800) {
+                srcRect = this._lastOriginRect;
+                this._lastOriginRect = null;
+            }
+            if (!srcRect || srcRect.width <= 0 || srcRect.height <= 0) return;
+            const dstRect = targetEl.getBoundingClientRect();
+            if (!dstRect || dstRect.width <= 0 || dstRect.height <= 0) return;
+
+            const dx = (srcRect.left + srcRect.width / 2) - (dstRect.left + dstRect.width / 2);
+            const dy = (srcRect.top + srcRect.height / 2) - (dstRect.top + dstRect.height / 2);
+            const sx = Math.max(0.35, Math.min(1.25, srcRect.width / dstRect.width));
+            const sy = Math.max(0.35, Math.min(1.25, srcRect.height / dstRect.height));
+
+            targetEl.classList.add('ui-shared-origin-animating');
+            targetEl.style.transition = 'none';
+            targetEl.style.transformOrigin = 'center center';
+            targetEl.style.transform = `translate3d(${dx.toFixed(1)}px, ${dy.toFixed(1)}px, 0) scale(${sx.toFixed(3)}, ${sy.toFixed(3)})`;
+            void targetEl.offsetWidth;
+            targetEl.style.transition = 'transform 260ms cubic-bezier(0.22, 1, 0.36, 1)';
+            targetEl.style.transform = 'translate3d(0, 0, 0) scale(1, 1)';
+            if (targetEl._uiFlipTimer) clearTimeout(targetEl._uiFlipTimer);
+            targetEl._uiFlipTimer = setTimeout(() => {
+                targetEl.style.transition = '';
+                targetEl.style.transform = '';
+                targetEl.style.transformOrigin = '';
+                targetEl.classList.remove('ui-shared-origin-animating');
+            }, 280);
+        },
+
+        // Principle 4: Rubber-band past scroll edges (Touch + Wheel overscroll spring-back)
+        attachEdgeRubberBand(el, axis = 'x') {
+            if (!el || typeof el.addEventListener !== 'function') return;
+            if (el.dataset && el.dataset.uiRubberBandBound === '1') return;
+            if (el.dataset) el.dataset.uiRubberBandBound = '1';
+            el.classList.add('ui-rubberband-target');
+
+            let startX = 0;
+            let startY = 0;
+            let pulling = false;
+            let wheelTimer = null;
+            let wheelDeltaAccum = 0;
+
+            const springBack = () => {
+                el.classList.add('is-springing-back');
+                el.style.transform = 'translate3d(0, 0, 0)';
+                if (el._uiRbClearTimer) clearTimeout(el._uiRbClearTimer);
+                el._uiRbClearTimer = setTimeout(() => {
+                    el.classList.remove('is-springing-back');
+                    el.style.transform = '';
+                }, 330);
+            };
+
+            el.addEventListener('touchstart', (e) => {
+                if (this.getReducedMotion() || !e.touches || e.touches.length !== 1) return;
+                startX = e.touches[0].clientX;
+                startY = e.touches[0].clientY;
+                pulling = false;
+                el.classList.remove('is-springing-back');
+            }, { passive: true });
+
+            el.addEventListener('touchmove', (e) => {
+                if (this.getReducedMotion() || !e.touches || e.touches.length !== 1) return;
+                const dx = e.touches[0].clientX - startX;
+                const dy = e.touches[0].clientY - startY;
+                if (axis === 'x') {
+                    const maxLeft = Math.max(0, el.scrollWidth - el.clientWidth);
+                    if (maxLeft <= 2) return;
+                    const atStart = el.scrollLeft <= 1;
+                    const atEnd = el.scrollLeft >= maxLeft - 1;
+                    if ((atStart && dx > 6) || (atEnd && dx < -6)) {
+                        pulling = true;
+                        const clamped = Math.sign(dx) * Math.min(26, Math.abs(dx) * 0.24);
+                        el.style.transform = `translate3d(${clamped.toFixed(1)}px, 0, 0)`;
+                    }
+                } else {
+                    const maxTop = Math.max(0, el.scrollHeight - el.clientHeight);
+                    if (maxTop <= 2) return;
+                    const atTop = el.scrollTop <= 1;
+                    const atBottom = el.scrollTop >= maxTop - 1;
+                    if ((atTop && dy > 6) || (atBottom && dy < -6)) {
+                        pulling = true;
+                        const clamped = Math.sign(dy) * Math.min(24, Math.abs(dy) * 0.22);
+                        el.style.transform = `translate3d(0, ${clamped.toFixed(1)}px, 0)`;
+                    }
+                }
+            }, { passive: true });
+
+            el.addEventListener('touchend', () => {
+                if (pulling) {
+                    pulling = false;
+                    springBack();
+                }
+            }, { passive: true });
+
+            el.addEventListener('wheel', (e) => {
+                if (this.getReducedMotion()) return;
+                if (axis === 'x') {
+                    const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : 0;
+                    if (!delta) return;
+                    const maxLeft = Math.max(0, el.scrollWidth - el.clientWidth);
+                    if (maxLeft <= 2) return;
+                    if ((el.scrollLeft <= 1 && delta < 0) || (el.scrollLeft >= maxLeft - 1 && delta > 0)) {
+                        wheelDeltaAccum = Math.max(-22, Math.min(22, wheelDeltaAccum - delta * 0.16));
+                        el.classList.remove('is-springing-back');
+                        el.style.transform = `translate3d(${wheelDeltaAccum.toFixed(1)}px, 0, 0)`;
+                        if (wheelTimer) clearTimeout(wheelTimer);
+                        wheelTimer = setTimeout(() => {
+                            wheelDeltaAccum = 0;
+                            springBack();
+                        }, 130);
+                    }
+                }
+            }, { passive: true });
+        },
+
+        initEdgeRubberBand(rootDoc = document) {
+            if (!rootDoc || typeof rootDoc.querySelectorAll !== 'function') return;
+            rootDoc.querySelectorAll('#planner-semesters-container, .cal-timegrid-scroll-x').forEach((el) => {
+                this.attachEdgeRubberBand(el, 'x');
+            });
+            rootDoc.querySelectorAll('.modal-body').forEach((el) => {
+                this.attachEdgeRubberBand(el, 'y');
+            });
+        },
+
         init(rootDoc = document) {
             this.observeTabs(rootDoc);
             this.observeBadge(rootDoc);
+            this.observeOriginClicks(rootDoc);
+            this.initEdgeRubberBand(rootDoc);
         }
     };
 
@@ -2538,6 +2785,8 @@
     }
 
     window.UiMotionPromptsSuite = UiMotionPromptsSuite;
+    window.triggerConfirmPulse = (el, tempLabel) => UiMotionPromptsSuite.triggerConfirmPulse(el, tempLabel);
+    window.crossfadeIcon = (el, nextHtml, revertAfterMs) => UiMotionPromptsSuite.crossfadeIcon(el, nextHtml, revertAfterMs);
 
     // 12. Main Initialization on DOM Ready
     // =========================================================================
@@ -2552,10 +2801,11 @@
         RecentlyViewed.renderRecentChips();
         initUiMotionPromptsSuite();
 
-        // Monitor any opening modals to attach reading progress bar if long (covers both #modal-* and #*-modal conventions)
+        // Monitor any opening modals to attach reading progress bar & FLIP shared-origin expand
         let modalObserverRaf = null;
         const isModalContainer = (el) => {
             if (!el || el.nodeType !== 1) return false;
+            if (el.id === 'task-side-peek') return true;
             if (el.classList && (el.classList.contains('modal-overlay') || el.classList.contains('modal-backdrop'))) return true;
             if (el.id && (el.id.endsWith('-modal') || el.id.startsWith('modal-'))) return true;
             return false;
@@ -2567,6 +2817,16 @@
                 if (m.type === 'attributes') {
                     if (isModalContainer(m.target)) {
                         relevant = true;
+                        // Trigger shared-origin FLIP expand on transition from closed -> active
+                        if ((m.target.id === 'course-modal' || m.target.id === 'task-side-peek') && m.target.classList && m.target.classList.contains('active')) {
+                            if (!m.target.dataset.uiFlipActive) {
+                                m.target.dataset.uiFlipActive = '1';
+                                const flipTarget = m.target.id === 'course-modal' ? (m.target.querySelector('.modal-content') || m.target) : m.target;
+                                UiMotionPromptsSuite.animateSharedOriginExpand(flipTarget);
+                            }
+                        } else if (m.target.dataset && m.target.dataset.uiFlipActive && (!m.target.classList || !m.target.classList.contains('active'))) {
+                            delete m.target.dataset.uiFlipActive;
+                        }
                     }
                 } else if (m.addedNodes && m.addedNodes.length) {
                     for (let j = 0; j < m.addedNodes.length; j++) {
@@ -2603,6 +2863,7 @@
                     if (body && progress && !body._hasProgressHandler) {
                         body._hasProgressHandler = true;
                         attachModalScrollProgress(body, progress);
+                        UiMotionPromptsSuite.attachEdgeRubberBand(body, 'y');
                     }
                 });
             });

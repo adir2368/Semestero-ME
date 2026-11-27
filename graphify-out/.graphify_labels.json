@@ -7,7 +7,6 @@
   "8": "verify_orientation_lock_security.test.js",
   "9": "auth_sync.js",
   "10": "fix_modal_zindex.js",
-  "13": "ref_path",
   "15": "verify_v2415_miluim_disclaimer.js",
   "16": "update_download_modal_links.js",
   "17": "notifyStateChanged",
@@ -21,7 +20,6 @@
   "25": "WearCarouselAdapter",
   "27": "moodle_sync.js",
   "28": "verify_guest_isolation_full.js",
-  "29": "package.json",
   "30": "ui_enhancements.js",
   "32": "_backup_widgets/widgets/ms_ac_exam.json",
   "33": "qa_verify_watch_day_sync_browser.js",
@@ -58,7 +56,6 @@
   "75": "verify_system_health.js",
   "76": "sync_from_google_calendars.py",
   "77": "update_v26_styles_and_hud.js",
-  "78": "check_prereqs.js",
   "79": "qa_verify_watch_browser.js",
   "80": "verify_classification_exams.test.js",
   "83": "verify_all_connections_and_sync_guards.js",
@@ -72,7 +69,6 @@
   "95": "verify_pre_anchor_and_clean_ui.js",
   "96": "test_pass6_settings_global_hardening.js",
   "98": "verify_tasks_refresh_and_dedup.js",
-  "100": "WearDataSyncService.java",
   "101": "bump_version_2_10_25.js",
   "102": "bump_version_2_10_27.js",
   "103": "bump_version_2_10_28.js",
@@ -159,10 +155,8 @@
   "231": "cheesefork_database.js",
   "232": "exam_readiness_hub.js",
   "240": "preloaded_user_state.js",
-  "313": "patch_notifications.js",
   "314": "test_pass5_timetable_hardening.js",
   "316": "test_pass0_shared_core_hardening.js",
   "318": "test_pass3_tasks_moodle_hardening.js",
-  "320": "ref_vm",
-  "322": "build_mobile_dist.js"
+  "320": "ref_vm"
 }
