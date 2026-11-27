@@ -57,6 +57,7 @@ function waitForServer(timeoutMs = 5000) {
     const origDocument = global.document;
     const origLocalStorage = global.localStorage;
     const origSessionStorage = global.sessionStorage;
+    const origNavigator = global.navigator;
 
     try {
         global.fetch = async (url, opts) => {
@@ -89,10 +90,51 @@ function waitForServer(timeoutMs = 5000) {
         delete require.cache[require.resolve(analyticsPath)];
         require(analyticsPath);
 
-        await global.SiteAnalytics.pingCloudTelemetry(true);
-        await global.SiteAnalytics.pingCloudTelemetry(false);
         await global.SiteAnalytics.fetchStats();
-        assert.strictEqual(fetchCalls.length, 0, 'Guest / non-admin session must not trigger cloud telemetry or stats fetch');
+        assert.strictEqual(fetchCalls.length, 0, 'Guest / non-admin session must not fetch student stats');
+
+        await global.SiteAnalytics.pingCloudTelemetry(true);
+        assert.strictEqual(fetchCalls.length, 2, 'Guest session should issue GET + POST/PATCH for anonymous counter row only');
+        assert.strictEqual(fetchCalls[0].url.includes('user_id=eq.__ast_site_telemetry__'), true, 'Telemetry GET must target __ast_site_telemetry__ only');
+        assert.strictEqual(fetchCalls.some(c => c.url.includes('neq.__ast_site_telemetry__')), false, 'Guest telemetry must never query student rows');
+        const guestWriteBody = JSON.parse(fetchCalls[1].opts.body);
+        assert.strictEqual(guestWriteBody.user_id, '__ast_site_telemetry__');
+        assert.strictEqual(guestWriteBody.state_json.total_visits, 1, 'Guest online ping must increment total_visits to 1');
+        assert.strictEqual(guestWriteBody.state_json.guest_visits, 1, 'Guest online ping must increment guest_visits to 1');
+        assert.strictEqual(guestWriteBody.state_json.offline_visits, 0, 'Guest online ping must keep offline_visits at 0');
+
+        // Offline guest queue -> reconnect flush
+        fetchCalls.length = 0;
+        global.sessionStorage._d = {};
+        Object.defineProperty(global, 'navigator', { value: { onLine: false }, configurable: true });
+        global.SiteAnalytics.recordSession();
+        assert.strictEqual(fetchCalls.length, 0, 'Offline session must not issue network requests');
+        assert.strictEqual(global.SiteAnalytics.stats.localOfflineVisits, 1, 'Offline session must increment localOfflineVisits');
+        assert.strictEqual(global.localStorage.getItem('ast_telemetry_pending_offline'), '1', 'Offline queue must record pending offline visit');
+        assert.strictEqual(global.localStorage.getItem('ast_telemetry_pending_guest'), '1', 'Offline guest queue must record pending guest visit');
+
+        global.fetch = async (url, opts) => {
+            fetchCalls.push({ url, opts });
+            if (!opts || !opts.method || opts.method === 'GET') {
+                return {
+                    ok: true,
+                    json: async () => [{
+                        user_id: '__ast_site_telemetry__',
+                        state_json: { total_visits: 1, guest_visits: 1, offline_visits: 0 }
+                    }]
+                };
+            }
+            return { ok: true, json: async () => [] };
+        };
+        Object.defineProperty(global, 'navigator', { value: { onLine: true }, configurable: true });
+        await global.SiteAnalytics.syncPendingOfflineVisits();
+        assert.strictEqual(fetchCalls.length, 2, 'Reconnect flush should GET + PATCH anonymous counter row');
+        assert.strictEqual(fetchCalls[1].opts.method, 'PATCH', 'Existing telemetry row should be updated via PATCH');
+        assert.strictEqual(global.SiteAnalytics.stats.cloudTotalVisits, 2, 'Reconnect flush must increment total_visits to 2');
+        assert.strictEqual(global.SiteAnalytics.stats.cloudGuestVisits, 2, 'Reconnect flush must increment guest_visits to 2');
+        assert.strictEqual(global.SiteAnalytics.stats.cloudOfflineVisits, 1, 'Reconnect flush must increment offline_visits to 1');
+        assert.strictEqual(global.localStorage.getItem('ast_telemetry_pending_offline'), '0', 'Pending offline counter must reset after sync');
+        assert.strictEqual(global.localStorage.getItem('ast_telemetry_pending_guest'), '0', 'Pending guest counter must reset after sync');
 
         global.SiteAnalytics.stats.registeredUsers = [{
             id: '<img src=x onerror=alert(1)>',
@@ -197,6 +239,11 @@ function waitForServer(timeoutMs = 5000) {
         global.document = origDocument;
         global.localStorage = origLocalStorage;
         global.sessionStorage = origSessionStorage;
+        if (origNavigator !== undefined) {
+            Object.defineProperty(global, 'navigator', { value: origNavigator, configurable: true });
+        } else {
+            delete global.navigator;
+        }
     }
 })().catch(err => {
     console.error('Pass 0 test failed:', err);

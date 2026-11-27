@@ -449,10 +449,18 @@ assert(typeof mockWindow.crossfadeIcon === 'function', 'window.crossfadeIcon mus
 assert(typeof mockWindow.UiMotionPromptsSuite.animateSharedOriginExpand === 'function', 'animateSharedOriginExpand must be exposed');
 assert(typeof mockWindow.UiMotionPromptsSuite.attachEdgeRubberBand === 'function', 'attachEdgeRubberBand must be exposed');
 
+mockDoc.body.classList.remove('a11y-stop-animations');
 const pulseBtn = mockDoc.createElement('button');
 pulseBtn._innerHTML = 'Copy';
 mockWindow.triggerConfirmPulse(pulseBtn, 'Copied!');
 assert(pulseBtn.classList.contains('ui-confirm-pulse'), 'triggerConfirmPulse must add .ui-confirm-pulse immediately');
+
+mockDoc.body.classList.add('a11y-stop-animations');
+const suppressedBtn = mockDoc.createElement('button');
+mockWindow.triggerConfirmPulse(suppressedBtn, 'Copied!');
+assert(!suppressedBtn.classList.contains('ui-confirm-pulse'), 'a11y-stop-animations should suppress confirm pulse');
+mockDoc.body.classList.remove('a11y-stop-animations');
+
 console.log('PASS: 4. 10 UI/UX Motion & Interaction rules (confirm pulse, crossfade, FLIP, rubber-band, masks, Fitts, 0ms cmd palette) verified');
 console.log('ALL @ui_motion_prompts TESTS PASSED!');
 
