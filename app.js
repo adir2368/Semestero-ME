@@ -26924,11 +26924,11 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.11.26-v3.2.8",
-    version: "3.2.8",
+    code: "REV-2026.11.27-v3.2.9",
+    version: "3.2.9",
     build: "20261126_04",
     date: "2026-11-26 18:40",
-    description: "v3.2.8: תמיכה היברידית מלאה בסביבת ענן מרוחקת (Linux Cloud VM + Windows), סנכרון דו-כיווני לכספת Obsidian SecondBrain ב-GitHub, אוטומציית Graphify ואימות E2E חוצה-פלטפורמות."
+    description: "v3.2.9: תיקון שגיאת ReferenceError בבדיקת עדכונים מול GitHub (isManualCheck) ושיפור זיהוי גרסה באפליקציית המובייל והדסקטופ."
 };
 window.APP_VERSION = APP_CURRENT_REVISION.version;
 window.APP_CURRENT_REVISION = APP_CURRENT_REVISION;
@@ -28729,14 +28729,19 @@ function compareSemver(v1, v2) {
 }
 
 // Zero-Lag Multi-Tier Remote Version Resolver (Bypasses CDN and Proxy Caches)
-async function fetchLatestRemoteVersion() {
+async function fetchLatestRemoteVersion(isManualCheck = false) {
     const candidates = [];
+    const isElectronEnv = Boolean(window.electronAPI || (window.process && window.process.type === 'renderer') || (navigator.userAgent && navigator.userAgent.includes('Electron')));
+    const isLocalBundle = Boolean(window.Capacitor || window.location.protocol === 'capacitor:' || window.location.protocol === 'file:' || isElectronEnv);
 
-    // Priority 1: Direct Origin package.json (Live deployed code on hosting server - zero rate limits)
+    // Priority 1: Direct Origin package.json on hosted web, or hosted semestero.me origin for mobile/desktop bundles
     try {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 3000);
-        const resp = await fetch(`./package.json?_nc=${Date.now()}`, {
+        const timeoutId = setTimeout(() => controller.abort(), 3500);
+        const originPkgUrl = isLocalBundle
+            ? `https://semestero.me/Semestero-ME/package.json?_nc=${Date.now()}`
+            : `./package.json?_nc=${Date.now()}`;
+        const resp = await fetch(originPkgUrl, {
             cache: 'no-store',
             signal: controller.signal
         });
@@ -28745,7 +28750,7 @@ async function fetchLatestRemoteVersion() {
             const pkg = await resp.json();
             if (pkg && pkg.version) {
                 const ver = pkg.version.trim();
-                candidates.push({ version: ver, notes: pkg.description || '', source: 'origin_pkg' });
+                candidates.push({ version: ver, notes: pkg.description || '', source: isLocalBundle ? 'hosted_pages' : 'origin_pkg' });
             }
         }
     } catch (e) {
@@ -28889,7 +28894,7 @@ window.checkRemoteAppVersion = async function(isManualCheck = false) {
     } catch (e) {}
 
     try {
-        const remoteInfo = await fetchLatestRemoteVersion();
+        const remoteInfo = await fetchLatestRemoteVersion(isManualCheck);
         const remoteVer = remoteInfo && remoteInfo.version ? remoteInfo.version.trim() : null;
 
         if (!remoteVer) {

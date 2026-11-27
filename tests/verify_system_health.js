@@ -1946,6 +1946,27 @@ async function run() {
             }
         });
 
+        await test('Test 34: Remote App Version Check Completes Without ReferenceError (isManualCheck)', async () => {
+            const verRes = await cdp.eval(`(async () => {
+                if (typeof window.checkRemoteAppVersion !== 'function') return { ok: false, reason: 'missing' };
+                const badge = document.getElementById('footer-version-badge');
+                await window.checkRemoteAppVersion(true);
+                const badgeText = badge ? badge.innerText : '';
+                const badgeTitle = badge ? badge.title : '';
+                const statusEl = document.getElementById('version-check-status-text');
+                const statusText = statusEl ? statusEl.innerText : '';
+                const modal = document.getElementById('version-update-modal');
+                if (modal) { modal.style.display = 'none'; modal.classList.remove('active'); }
+                return {
+                    ok: !statusText.includes('לא ניתן להתחבר') && !badgeText.includes('🔄') && (badgeText.includes('✓') || badgeText.includes('⬆️')),
+                    badgeText,
+                    badgeTitle,
+                    statusText
+                };
+            })()`);
+            assert(verRes.ok, 'checkRemoteAppVersion(true) must resolve remote version without throwing ReferenceError: ' + JSON.stringify(verRes));
+        });
+
     } finally {
         console.log(`\n========================================================================`);
         console.log(`SUMMARY: ${passed} passed, ${failed} failed.`);
