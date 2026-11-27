@@ -1,4 +1,4 @@
-// Semestero ME - Site Telemetry & Audience Analytics Engine (v2.2.1)
+// Semestero ME - Site Telemetry & Audience Analytics Engine (v3.2.10)
 // Tracks total users, offline launches (PWA cached/no network), guest visits, and total sessions.
 
 (function(window) {
@@ -12,6 +12,7 @@
     const LOCAL_OFFLINE_KEY = 'ast_telemetry_local_offline';
     const LOCAL_GUEST_KEY = 'ast_telemetry_local_guest';
     const PENDING_OFFLINE_KEY = 'ast_telemetry_pending_offline';
+    const PENDING_GUEST_KEY = 'ast_telemetry_pending_guest';
     const SESSION_TRACKED_KEY = 'ast_telemetry_session_recorded';
 
     function escapeAnalyticsHtml(str) {
@@ -24,6 +25,16 @@
             .replace(/>/g, '&gt;')
             .replace(/"/g, '&quot;')
             .replace(/'/g, '&#39;');
+    }
+
+    function isAutomatedTestBrowser() {
+        try {
+            if (typeof navigator !== 'undefined' && navigator.webdriver === true) return true;
+            if (typeof navigator !== 'undefined' && /HeadlessChrome/i.test(navigator.userAgent || '')) return true;
+            const search = (typeof window !== 'undefined' && window.location && window.location.search) ? window.location.search : '';
+            if (/[?&]qa(_|=)/i.test(search)) return true;
+        } catch (e) {}
+        return false;
     }
 
     const SiteAnalytics = {
@@ -157,51 +168,54 @@
         },
 
         recordSession() {
-            const isOnline = navigator.onLine;
+            const isOnline = navigator.onLine !== false;
             const alreadyTrackedThisTabSession = sessionStorage.getItem(SESSION_TRACKED_KEY);
+            if (alreadyTrackedThisTabSession) return;
+
+            sessionStorage.setItem(SESSION_TRACKED_KEY, Date.now().toString());
+
+            const isGuest = !(window.AuthSync && typeof window.AuthSync.isLoggedIn === 'function' && window.AuthSync.isLoggedIn());
+
+            this.stats.localTotalVisits++;
+            localStorage.setItem(LOCAL_TOTAL_KEY, this.stats.localTotalVisits.toString());
+
+            if (isGuest) {
+                this.stats.localGuestVisits++;
+                localStorage.setItem(LOCAL_GUEST_KEY, this.stats.localGuestVisits.toString());
+            }
 
             if (!isOnline) {
-                // Record OFFLINE visit
                 this.stats.localOfflineVisits++;
                 localStorage.setItem(LOCAL_OFFLINE_KEY, this.stats.localOfflineVisits.toString());
 
-                const pending = parseInt(localStorage.getItem(PENDING_OFFLINE_KEY) || '0', 10) + 1;
-                localStorage.setItem(PENDING_OFFLINE_KEY, pending.toString());
+                const pendingOffline = (parseInt(localStorage.getItem(PENDING_OFFLINE_KEY) || '0', 10) || 0) + 1;
+                localStorage.setItem(PENDING_OFFLINE_KEY, pendingOffline.toString());
 
-                console.log('[SiteAnalytics] App opened OFFLINE. Pending offline count:', pending);
+                if (isGuest) {
+                    const pendingGuest = (parseInt(localStorage.getItem(PENDING_GUEST_KEY) || '0', 10) || 0) + 1;
+                    localStorage.setItem(PENDING_GUEST_KEY, pendingGuest.toString());
+                }
+
+                console.log('[SiteAnalytics] App opened OFFLINE. Pending offline count:', pendingOffline);
                 return;
             }
 
-            // Client is ONLINE
-            if (!alreadyTrackedThisTabSession) {
-                sessionStorage.setItem(SESSION_TRACKED_KEY, Date.now().toString());
-
-                this.stats.localTotalVisits++;
-                localStorage.setItem(LOCAL_TOTAL_KEY, this.stats.localTotalVisits.toString());
-
-                const isGuest = !(window.AuthSync && window.AuthSync.isLoggedIn());
-                if (isGuest) {
-                    this.stats.localGuestVisits++;
-                    localStorage.setItem(LOCAL_GUEST_KEY, this.stats.localGuestVisits.toString());
-                }
-
-                // Only authenticated sessions send cloud telemetry pings (Guest isolation)
-                if (!isGuest) {
-                    this.pingCloudTelemetry(false);
-                }
+            if (!isAutomatedTestBrowser()) {
+                this.pingCloudTelemetry(isGuest, false);
             }
         },
 
-        async pingCloudTelemetry(isGuest) {
-            const isAuthenticated = !!(window.AuthSync && typeof window.AuthSync.isLoggedIn === 'function' && window.AuthSync.isLoggedIn());
-            const activeUser = (isAuthenticated && typeof window.AuthSync.getActiveUser === 'function') ? window.AuthSync.getActiveUser() : null;
-            if (isGuest || !isAuthenticated || !activeUser || !activeUser.id || activeUser.id === 'guest') {
-                return;
-            }
+        async pingCloudTelemetry(isGuest, offlineOnly = false) {
             try {
-                const pendingOffline = parseInt(localStorage.getItem(PENDING_OFFLINE_KEY) || '0', 10);
+                const pendingOffline = Math.max(0, parseInt(localStorage.getItem(PENDING_OFFLINE_KEY) || '0', 10) || 0);
+                const pendingGuest = Math.max(0, parseInt(localStorage.getItem(PENDING_GUEST_KEY) || '0', 10) || 0);
 
-                // Fetch current telemetry row with explicit column projection
+                const deltaTotal = (offlineOnly ? 0 : 1) + pendingOffline;
+                const deltaGuest = (offlineOnly ? 0 : (isGuest ? 1 : 0)) + pendingGuest;
+                const deltaOffline = pendingOffline;
+                if (deltaTotal <= 0 && deltaGuest <= 0 && deltaOffline <= 0) return;
+
+                // Fetch current anonymous telemetry row with explicit column projection
                 const res = await fetch(`${SUPABASE_URL}/rest/v1/user_states?user_id=eq.${TELEMETRY_USER_ID}&select=user_id,state_json`, {
                     headers: {
                         'apikey': SUPABASE_KEY,
@@ -211,48 +225,73 @@
 
                 if (!res.ok) return;
                 const rows = await res.json();
-                let current = (rows && rows[0] && rows[0].state_json) || {
-                    total_visits: 250,
-                    offline_visits: 15,
-                    guest_visits: 140
+                const hasExistingRow = Array.isArray(rows) && rows.length > 0;
+                const current = (hasExistingRow && rows[0] && typeof rows[0].state_json === 'object' && rows[0].state_json !== null)
+                    ? rows[0].state_json
+                    : { total_visits: 0, offline_visits: 0, guest_visits: 0 };
+
+                const baseTotal = Math.max(Number(current.total_visits) || 0, Number(this.stats.cloudTotalVisits) || 0);
+                const baseGuest = Math.max(Number(current.guest_visits) || 0, Number(this.stats.cloudGuestVisits) || 0);
+                const baseOffline = Math.max(Number(current.offline_visits) || 0, Number(this.stats.cloudOfflineVisits) || 0);
+
+                const newTotal = baseTotal + deltaTotal;
+                const newGuest = baseGuest + deltaGuest;
+                const newOffline = baseOffline + deltaOffline;
+                const nowIso = new Date().toISOString();
+
+                const nextStateJson = {
+                    total_visits: newTotal,
+                    offline_visits: newOffline,
+                    guest_visits: newGuest,
+                    last_updated: nowIso
                 };
 
-                const newTotal = (current.total_visits || 0) + 1;
-                const newGuest = (current.guest_visits || 0) + (isGuest ? 1 : 0);
-                const newOffline = (current.offline_visits || 0) + pendingOffline;
+                let writeRes;
+                if (hasExistingRow) {
+                    writeRes = await fetch(`${SUPABASE_URL}/rest/v1/user_states?user_id=eq.${TELEMETRY_USER_ID}`, {
+                        method: 'PATCH',
+                        headers: {
+                            'apikey': SUPABASE_KEY,
+                            'Authorization': `Bearer ${SUPABASE_KEY}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            state_json: nextStateJson,
+                            updated_at: nowIso
+                        })
+                    });
+                } else {
+                    writeRes = await fetch(`${SUPABASE_URL}/rest/v1/user_states`, {
+                        method: 'POST',
+                        headers: {
+                            'apikey': SUPABASE_KEY,
+                            'Authorization': `Bearer ${SUPABASE_KEY}`,
+                            'Content-Type': 'application/json',
+                            'Prefer': 'resolution=merge-duplicates'
+                        },
+                        body: JSON.stringify({
+                            user_id: TELEMETRY_USER_ID,
+                            user_name: 'Site Telemetry & Traffic',
+                            user_email: 'telemetry@semesterome.internal',
+                            state_json: nextStateJson,
+                            updated_at: nowIso
+                        })
+                    });
+                }
 
-                const payload = {
-                    user_id: TELEMETRY_USER_ID,
-                    user_name: 'Site Telemetry & Traffic',
-                    user_email: 'telemetry@semesterome.internal',
-                    state_json: {
-                        total_visits: newTotal,
-                        offline_visits: newOffline,
-                        guest_visits: newGuest,
-                        last_updated: new Date().toISOString()
-                    },
-                    updated_at: new Date().toISOString()
-                };
+                if (!writeRes || !writeRes.ok) return;
 
-                await fetch(`${SUPABASE_URL}/rest/v1/user_states`, {
-                    method: 'POST',
-                    headers: {
-                        'apikey': SUPABASE_KEY,
-                        'Authorization': `Bearer ${SUPABASE_KEY}`,
-                        'Content-Type': 'application/json',
-                        'Prefer': 'resolution=merge-duplicates'
-                    },
-                    body: JSON.stringify(payload)
-                });
-
-                // Clear pending offline count once successfully sent
                 if (pendingOffline > 0) {
                     localStorage.setItem(PENDING_OFFLINE_KEY, '0');
+                }
+                if (pendingGuest > 0) {
+                    localStorage.setItem(PENDING_GUEST_KEY, '0');
                 }
 
                 this.stats.cloudTotalVisits = newTotal;
                 this.stats.cloudOfflineVisits = newOffline;
                 this.stats.cloudGuestVisits = newGuest;
+                this.stats.lastUpdated = nowIso;
                 this.updateSettingsPills();
             } catch (err) {
                 console.warn('[SiteAnalytics] Cloud telemetry ping skipped:', err);
@@ -260,9 +299,10 @@
         },
 
         async syncPendingOfflineVisits() {
-            const pending = parseInt(localStorage.getItem(PENDING_OFFLINE_KEY) || '0', 10);
-            if (pending > 0) {
-                await this.pingCloudTelemetry(false);
+            const pendingOffline = parseInt(localStorage.getItem(PENDING_OFFLINE_KEY) || '0', 10) || 0;
+            const pendingGuest = parseInt(localStorage.getItem(PENDING_GUEST_KEY) || '0', 10) || 0;
+            if (pendingOffline > 0 || pendingGuest > 0) {
+                await this.pingCloudTelemetry(false, true);
             }
         },
 

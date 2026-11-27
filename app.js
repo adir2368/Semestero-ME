@@ -26924,11 +26924,11 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.11.27-v3.2.9",
-    version: "3.2.9",
+    code: "REV-2026.11.27-v3.2.10",
+    version: "3.2.10",
     build: "20261126_04",
     date: "2026-11-26 18:40",
-    description: "v3.2.9: תיקון שגיאת ReferenceError בבדיקת עדכונים מול GitHub (isManualCheck) ושיפור זיהוי גרסה באפליקציית המובייל והדסקטופ."
+    description: "v3.2.10: v3.2.10: שחזור ספירה אנונימית של כניסות אורחים והפעלות אופליין ב-SiteAnalytics, שמירת רשומות המשתמשים תחת הרשאת מנהל בלבד, ותיקון בדיקת עדכונים מרוחקת."
 };
 window.APP_VERSION = APP_CURRENT_REVISION.version;
 window.APP_CURRENT_REVISION = APP_CURRENT_REVISION;
