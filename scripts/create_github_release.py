@@ -17,11 +17,14 @@ ZIP_PATH = os.path.join(ROOT, "Semestero-ME-Windows-x64.zip")
 
 with open(os.path.join(ROOT, "package.json"), "r", encoding="utf-8") as f:
     pkg = json.load(f)
-VERSION = pkg.get("version", "3.2.10")
+VERSION = pkg.get("version", "3.2.11")
 TAG = f"v{VERSION}"
-NAME = f"Semestero ME v{VERSION} - Anonymous Guest & Offline Telemetry, Update Check Fix & Exact Alarms"
+NAME = f"Semestero ME v{VERSION}"
 
 def get_github_token():
+    token = os.environ.get("GITHUB_TOKEN") or os.environ.get("GH_TOKEN")
+    if token:
+        return token.strip()
     try:
         p = subprocess.Popen(['git', 'credential', 'fill'], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
         out, _ = p.communicate(input="protocol=https\nhost=github.com\n\n")
@@ -30,8 +33,7 @@ def get_github_token():
             return m.group(1).strip()
     except Exception as e:
         print(f"Error getting git credential: {e}")
-    token = os.environ.get("GITHUB_TOKEN") or os.environ.get("GH_TOKEN")
-    return token
+    return None
 
 def upload_asset(upload_url_template, file_path, content_type, headers):
     if not os.path.exists(file_path):

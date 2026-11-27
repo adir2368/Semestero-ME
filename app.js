@@ -26929,11 +26929,11 @@ function initCalendarDayModal() {
 // ==============================================================================
 
 const APP_CURRENT_REVISION = {
-    code: "REV-2026.11.27-v3.2.11",
-    version: "3.2.11",
+    code: "REV-2026.11.27-v3.2.12",
+    version: "3.2.12",
     build: "20261126_04",
     date: "2026-11-26 18:40",
-    description: "v3.2.11: יישום 10 עקרונות תנועה ואינטראקציה (Pulse לאישור, Crossfade מטושטש, FLIP מהקורס, Rubber-Band, חשיפת מסיכה, Focus Staging, פלטת פקודות 0ms, חוק פיטס והיק ותגובה אופטימית <400ms)."
+    description: "v3.2.12: אוטומציית בנייה והפצה ב-GitHub Actions עבור Windows Electron וכלל קובצי ה-APK, וסקריפט עדכון אוטומטי למחשב."
 };
 window.APP_VERSION = APP_CURRENT_REVISION.version;
 window.APP_CURRENT_REVISION = APP_CURRENT_REVISION;
